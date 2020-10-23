@@ -6,6 +6,8 @@ describe("Test", function() {
     const test = await Test.deploy();
     
     await test.deployed();
-    expect(await test.test()).to.equal("Test");
+    const tx = await test.test();
+    console.log(tx);
+
   });
 });

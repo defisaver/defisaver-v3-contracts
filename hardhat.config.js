@@ -1,11 +1,16 @@
 require('dotenv').config();
 require("@nomiclabs/hardhat-waffle");
+require("@nomiclabs/hardhat-etherscan");
+require("@tenderly/hardhat-tenderly");
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
   networks: {
+    local: {
+			url: 'http://127.0.0.1:8545'
+	  },
     hardhat: {
       forking: {
         url: process.env.ALCHEMY_NODE,
@@ -32,5 +37,9 @@ module.exports = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY
+  },
+  tenderly: {
+    username: process.env.TENDERLY_USERNAME,
+    project: process.env.TENDERLY_PROJECT
   }
 };

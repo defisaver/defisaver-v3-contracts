@@ -4,11 +4,18 @@ const dotenv = require('dotenv').config();
 const { write } = require('./writer');
 
 const getGasPrice = async (exGasPrice) => {
+	let newGasPrice = 0;
+
 	if (exGasPrice.gt("0")) {
 		newGasPrice = exGasPrice.add(exGasPrice.div("8"));
 	} else {
-		const defaultGasPrice = ethers.BigNumber.from(bre.network.config.gasPrice);
-		newGasPrice = defaultGasPrice.gt("0") ? defaultGasPrice : await provider.getGasPrice();
+		if (bre.network.name === 'mainnet') {
+			const defaultGasPrice = ethers.BigNumber.from(bre.network.config.gasPrice);
+			newGasPrice = defaultGasPrice.gt("0") ? defaultGasPrice : await provider.getGasPrice();
+		} else {
+			newGasPrice = 1000000000;
+		}
+		
 	}
 
 	if (exGasPrice.gte(newGasPrice)) {
@@ -43,7 +50,7 @@ const deploy = async (contractName, action, gasPrice, nonce, ...args) => {
 
 	  	console.log(`Gas used: ${tx.gasUsed}`);
 	  	console.log(`${contractName} deployed to:`, contract.address);
-	  	console.log(`Mainnet link: https://etherscan.io/address/${contract.address}`);
+		console.log(`Mainnet link: https://etherscan.io/address/${contract.address}`);
 
 	  	await write(contractName, bre.network.name, contract.address, ...args);
 	  	console.log('-------------------------------------------------------------');
