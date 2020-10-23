@@ -1,0 +1,3 @@
+[submodule "defisaverv2"]
+	path = defisaverv2
+	url = git@github.com:DecenterApps/defisaver-contracts.git
