@@ -1,0 +1,9 @@
+#!/bin/bash
+FILENAME=$2
+if [[ "$2" == *\.js  ]]
+then
+  FILENAME=$2
+else
+  FILENAME="${FILENAME}.js"
+fi
+npx hardhat run --network $1 scripts/${FILENAME}

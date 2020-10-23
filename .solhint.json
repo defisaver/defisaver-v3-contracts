@@ -1,0 +1,16 @@
+{
+  "extends": ["solhint:recommended"],
+  "rules": {
+    "const-name-snakecase": "off",
+    "avoid-throw": "off",
+    "avoid-suicide": "error",
+    "avoid-sha3": "warn",
+    "mark-callable-contracts": "off",
+    "state-visibility": "off",
+    "no-inline-assembly": "off",
+    "avoid-low-level-calls": "off",
+    "compiler-version": ["error", "^0.7.0"],
+    "var-name-mixedcase": "off"
+  },
+  "plugins": ["prettier"]
+}
