@@ -28,13 +28,19 @@ module.exports = {
         gasPrice: 1600000000
     },
   },
-  solidity: "0.7.3",
+  solidity: "0.7.4",
   settings: {
     optimizer: {
       enabled: false,
       runs: 1000
     }
   },
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts"
+},
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY
   },
