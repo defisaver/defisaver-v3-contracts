@@ -76,7 +76,7 @@ abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external payable {}
+    receive() external virtual payable {}
 
     function transferFundsBackToPoolInternal(address _reserve, uint256 _amount) internal {
         address payable core = addressesProvider.getLendingPoolCore();
@@ -90,8 +90,7 @@ abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
         uint256 _amount
     ) internal {
         if (_reserve == EthAddressLib.ethAddress()) {
-            // solhint-disable-line
-            _destination.call{value: _amount}("");
+            _destination.call{value: _amount}(""); // solhint-disable-line
             return;
         }
 

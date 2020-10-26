@@ -41,7 +41,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run compile --force && npm run lint && npm run pretty"
+      "pre-commit": "npm run compile --force && npm run lint"
     }
   }
 }
