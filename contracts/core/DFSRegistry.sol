@@ -90,9 +90,9 @@ contract DFSRegistry is AdminAuth {
         require(entries[_id].exists, "Entry id doesn't exists");
         require(entries[_id].inChange, "Entry not in change process");
         require(
-            (entries[_id].changeStartTime + entries[_id].waitPeriod) > block.timestamp,
+            (entries[_id].changeStartTime + entries[_id].waitPeriod) > block.timestamp, // solhint-disable-line
             "Change not ready yet"
-        ); // solhint-disable-line
+        );
 
         address oldContractAddr = entries[_id].contractAddr;
         entries[_id].contractAddr = pendingAddresses[_id];
