@@ -1,5 +1,5 @@
-const { deployContract } = require("./utils/deployer");
-const { start } = require('./utils/starter');
+const { deployContract } = require("../defisaverv2/deployers/utils/deployer");
+const { start } = require('../defisaverv2/deployers/utils/starter');
 
 async function main() {
      await deployContract("Test");
