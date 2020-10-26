@@ -5,7 +5,6 @@ pragma solidity ^0.7.0;
 import "./DSAuth.sol";
 import "./DSNote.sol";
 
-
 abstract contract DSProxy is DSAuth, DSNote {
     DSProxyCache public cache; // global cache for contracts
 
@@ -30,9 +29,8 @@ abstract contract DSProxy is DSAuth, DSNote {
         returns (bytes32 response);
 
     //set new cache
-    function setCache(address _cacheAddr) public virtual payable returns (bool);
+    function setCache(address _cacheAddr) public payable virtual returns (bool);
 }
-
 
 contract DSProxyCache {
     mapping(bytes32 => address) cache;

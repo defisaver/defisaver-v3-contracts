@@ -5,7 +5,6 @@ pragma solidity ^0.7.0;
 import "../utils/SafeERC20.sol";
 
 contract AdminAuth {
-
     using SafeERC20 for IERC20;
 
     address public owner;
@@ -51,7 +50,7 @@ contract AdminAuth {
     }
 
     /// @notice  withdraw stuck funds
-    function withdrawStuckFunds(address _token, uint _amount) public onlyOwner {
+    function withdrawStuckFunds(address _token, uint256 _amount) public onlyOwner {
         if (_token == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
             payable(owner).transfer(_amount);
         } else {

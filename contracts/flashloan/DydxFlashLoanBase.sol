@@ -17,21 +17,16 @@ contract DydxFlashLoanBase {
     {
         ISoloMargin solo = ISoloMargin(_solo);
 
-        uint numTokenIds = solo.getNumMarkets();
+        uint256 numTokenIds = solo.getNumMarkets();
 
-        for (uint i = 0; i < numTokenIds; i++) {
+        for (uint256 i = 0; i < numTokenIds; i++) {
             if (solo.getMarketTokenAddress(i) == _token) {
                 return i;
             }
         }
-
     }
 
-    function _getRepaymentAmountInternal(uint256 amount)
-        internal
-        pure
-        returns (uint256)
-    {
+    function _getRepaymentAmountInternal(uint256 amount) internal pure returns (uint256) {
         // Needs to be overcollateralize
         // Needs to provide +2 wei to be safe
         return amount.add(2);
@@ -41,11 +36,11 @@ contract DydxFlashLoanBase {
         return Account.Info({owner: address(this), number: 1});
     }
 
-    function _getWithdrawAction(uint marketId, uint256 amount, address contractAddr)
-        internal
-        pure
-        returns (Actions.ActionArgs memory)
-    {
+    function _getWithdrawAction(
+        uint256 marketId,
+        uint256 amount,
+        address contractAddr
+    ) internal pure returns (Actions.ActionArgs memory) {
         return
             Actions.ActionArgs({
                 actionType: Actions.ActionType.Withdraw,
@@ -87,11 +82,11 @@ contract DydxFlashLoanBase {
             });
     }
 
-    function _getDepositAction(uint marketId, uint256 amount, address contractAddr)
-        internal
-        pure
-        returns (Actions.ActionArgs memory)
-    {
+    function _getDepositAction(
+        uint256 marketId,
+        uint256 amount,
+        address contractAddr
+    ) internal pure returns (Actions.ActionArgs memory) {
         return
             Actions.ActionArgs({
                 actionType: Actions.ActionType.Deposit,

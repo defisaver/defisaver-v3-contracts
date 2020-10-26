@@ -26,7 +26,7 @@ contract ProxyPermission {
     /// @param _contractAddr Auth address which will be removed from authority list
     function removePermission(address _contractAddr) public {
         address currAuthority = address(DSAuth(address(this)).authority());
-        
+
         // if there is no authority, that means that contract doesn't have permission
         if (currAuthority == address(0)) {
             return;
@@ -36,7 +36,7 @@ contract ProxyPermission {
         guard.forbid(_contractAddr, address(this), bytes4(keccak256("execute(address,bytes)")));
     }
 
-    function proxyOwner() internal view returns(address) {
+    function proxyOwner() internal view returns (address) {
         return DSAuth(address(this)).owner();
-    } 
+    }
 }

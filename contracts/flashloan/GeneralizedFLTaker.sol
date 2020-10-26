@@ -8,12 +8,12 @@ import "../utils/SafeERC20.sol";
 import "./DydxFlashLoanBase.sol";
 
 contract GeneralizedFLTaker is DydxFlashLoanBase {
-
-    enum LoanType { NO_LOAN, AAVE, DYDX }
+    enum LoanType {NO_LOAN, AAVE, DYDX}
 
     using SafeERC20 for IERC20;
 
-    address public constant AAVE_LENDING_POOL_ADDRESSES = 0x398eC7346DcD622eDc5ae82352F02bE94C62d119;
+    address
+        public constant AAVE_LENDING_POOL_ADDRESSES = 0x398eC7346DcD622eDc5ae82352F02bE94C62d119;
     address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
@@ -21,7 +21,7 @@ contract GeneralizedFLTaker is DydxFlashLoanBase {
     function takeLoan(
         address payable _receiver,
         address _token,
-        uint _amount,
+        uint256 _amount,
         bytes memory _data,
         LoanType _type
     ) public {
@@ -32,12 +32,12 @@ contract GeneralizedFLTaker is DydxFlashLoanBase {
         }
     }
 
-    function dydxFlashLoan(address payable _receiver,
+    function dydxFlashLoan(
+        address payable _receiver,
         address _token,
-        uint _amount,
+        uint256 _amount,
         bytes memory _data
     ) internal {
-
         if (_token == ETH_ADDR) {
             _token = WETH_ADDR;
         }
@@ -55,10 +55,7 @@ contract GeneralizedFLTaker is DydxFlashLoanBase {
         Actions.ActionArgs[] memory operations = new Actions.ActionArgs[](3);
 
         operations[0] = _getWithdrawAction(marketId, _amount, _receiver);
-        operations[1] = _getCallAction(
-            _data,
-            _receiver
-        );
+        operations[1] = _getCallAction(_data, _receiver);
         operations[2] = _getDepositAction(marketId, repayAmount, address(this));
 
         Account.Info[] memory accountInfos = new Account.Info[](1);
@@ -67,5 +64,3 @@ contract GeneralizedFLTaker is DydxFlashLoanBase {
         solo.operate(accountInfos, operations);
     }
 }
-
-

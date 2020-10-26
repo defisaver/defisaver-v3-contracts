@@ -12,8 +12,8 @@ import "./DFSRegistry.sol";
 
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutor is StrategyData {
-
     DFSRegistry public constant registry = DFSRegistry(0x2f111D6611D3a3d559992f39e3F05aC0385dCd5D);
+
     // Subscriptions public constant subscriptions = Subscriptions(0x76a185a4f66C0d09eBfbD916e0AD0f1CDF6B911b);
 
     /// @notice Checks all the triggers and executes actions
@@ -22,7 +22,7 @@ contract StrategyExecutor is StrategyData {
     /// @param _triggerCallData All input data needed to execute triggers
     /// @param _actionsCallData All input data needed to execute actions
     function executeStrategy(
-        uint _strategyId,
+        uint256 _strategyId,
         bytes[] memory _triggerCallData,
         bytes[] memory _actionsCallData
     ) public {
@@ -43,17 +43,26 @@ contract StrategyExecutor is StrategyData {
 
     /// @notice Checks if msg.sender has auth, reverts if not
     /// @param _strategyId Id of the strategy
-    function checkCallerAuth(uint _strategyId) public view {
+    function checkCallerAuth(uint256 _strategyId) public view {
         address botAuthAddr = registry.getAddr(keccak256("BotAuth"));
-        require(BotAuth(botAuthAddr).isApproved(_strategyId, msg.sender), "msg.sender is not approved");
+        require(
+            BotAuth(botAuthAddr).isApproved(_strategyId, msg.sender),
+            "msg.sender is not approved"
+        );
     }
 
     /// @notice Checks if all the triggers are true, reverts if not
     /// @param _strategy Strategy data we have in storage
     /// @param _triggerCallData All input data needed to execute triggers
-    function checkTriggers(Strategy memory _strategy, bytes[] memory _triggerCallData, address _subscriptionsAddr) public {
-        for (uint i = 0; i < _strategy.triggerIds.length; ++i) {
-            Trigger memory trigger = Subscriptions(_subscriptionsAddr).getTrigger(_strategy.triggerIds[i]);
+    function checkTriggers(
+        Strategy memory _strategy,
+        bytes[] memory _triggerCallData,
+        address _subscriptionsAddr
+    ) public {
+        for (uint256 i = 0; i < _strategy.triggerIds.length; ++i) {
+            Trigger memory trigger = Subscriptions(_subscriptionsAddr).getTrigger(
+                _strategy.triggerIds[i]
+            );
             address triggerAddr = registry.getAddr(trigger.id);
 
             bool isTriggered = ITrigger(triggerAddr).isTriggered(_triggerCallData[i], trigger.data);
@@ -74,6 +83,7 @@ contract StrategyExecutor is StrategyData {
                 _strategy.name,
                 _strategy.actionIds,
                 _actionsCallData
-        ));
+            )
+        );
     }
 }

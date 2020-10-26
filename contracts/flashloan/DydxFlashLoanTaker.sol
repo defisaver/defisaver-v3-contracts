@@ -8,10 +8,8 @@ import "../utils/DefisaverLogger.sol";
 import "../utils/SafeERC20.sol";
 import "./DydxFlashLoanBase.sol";
 
-
 /// @title Takes flash loan
 contract DyDxFlashLoanTaker is DydxFlashLoanBase, ProxyPermission {
-
     using SafeERC20 for IERC20;
 
     address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -23,7 +21,11 @@ contract DyDxFlashLoanTaker is DydxFlashLoanBase, ProxyPermission {
     /// @param _receiver Address of funds receiver
     /// @param _ethAmount ETH amount that needs to be pulled from dydx
     /// @param _encodedData Bytes with packed data
-    function takeLoan(address _receiver, uint256 _ethAmount, bytes memory _encodedData) public {
+    function takeLoan(
+        address _receiver,
+        uint256 _ethAmount,
+        bytes memory _encodedData
+    ) public {
         ISoloMargin solo = ISoloMargin(SOLO_MARGIN_ADDRESS);
 
         // Get marketId from token address
@@ -37,10 +39,7 @@ contract DyDxFlashLoanTaker is DydxFlashLoanBase, ProxyPermission {
         Actions.ActionArgs[] memory operations = new Actions.ActionArgs[](3);
 
         operations[0] = _getWithdrawAction(marketId, _ethAmount, _receiver);
-        operations[1] = _getCallAction(
-            _encodedData,
-            _receiver
-        );
+        operations[1] = _getCallAction(_encodedData, _receiver);
         operations[2] = _getDepositAction(marketId, repayAmount, address(this));
 
         Account.Info[] memory accountInfos = new Account.Info[](1);
@@ -50,6 +49,11 @@ contract DyDxFlashLoanTaker is DydxFlashLoanBase, ProxyPermission {
         solo.operate(accountInfos, operations);
         removePermission(_receiver);
 
-        DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, "DyDxFlashLoanTaken", abi.encode(_receiver, _ethAmount, _encodedData));
+        DefisaverLogger(DEFISAVER_LOGGER).Log(
+            address(this),
+            msg.sender,
+            "DyDxFlashLoanTaken",
+            abi.encode(_receiver, _ethAmount, _encodedData)
+        );
     }
 }

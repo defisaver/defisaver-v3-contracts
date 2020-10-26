@@ -13,9 +13,13 @@ abstract contract IWETH {
 
     function transfer(address, uint256) public virtual returns (bool);
 
-    function transferFrom(address, address, uint256) public virtual returns (bool);
+    function transferFrom(
+        address,
+        address,
+        uint256
+    ) public virtual returns (bool);
 
-    function deposit() public virtual payable;
+    function deposit() public payable virtual;
 
     function withdraw(uint256) public virtual;
 }
