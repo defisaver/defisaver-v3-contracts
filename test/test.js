@@ -7,7 +7,6 @@ describe("Test", function() {
     
     await test.deployed();
     const tx = await test.test();
-    console.log(tx);
 
   });
 });
