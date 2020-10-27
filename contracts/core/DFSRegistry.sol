@@ -32,8 +32,14 @@ contract DFSRegistry is AdminAuth {
     /////////////////////////// ADMIN ONLY FUNCTIONS ///////////////////////////
 
     // TODO: REMOVE ONLY FOR TESTING
-    function changeInsant(bytes32 _id, address _contractAddr) public onlyOwner {
-        entries[_id].contractAddr = _contractAddr;
+    function changeInstant(bytes32 _id, address _contractAddr) public onlyOwner {
+        entries[_id] = Entry({
+            contractAddr: _contractAddr,
+            waitPeriod: 0,
+            changeStartTime: 0,
+            inChange: false,
+            exists: true
+        });
     }
 
     /// @notice Adds a new contract to the registry

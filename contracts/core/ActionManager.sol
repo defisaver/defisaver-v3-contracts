@@ -14,7 +14,10 @@ import "./ActionExecutor.sol";
 /// @title Handle FL taking and calls action executor
 contract ActionManager is GeneralizedFLTaker, ProxyPermission {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
-    DFSRegistry public constant registry = DFSRegistry(0x2f111D6611D3a3d559992f39e3F05aC0385dCd5D);
+
+    address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
+
+    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     /// @notice Checks and takes flash loan and calls Action Executor
     /// @param _actionIds All of the actionIds for the strategy

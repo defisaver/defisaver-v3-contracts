@@ -12,7 +12,9 @@ import "./DFSRegistry.sol";
 
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutor is StrategyData {
-    DFSRegistry public constant registry = DFSRegistry(0x2f111D6611D3a3d559992f39e3F05aC0385dCd5D);
+
+    address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
+    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     // Subscriptions public constant subscriptions = Subscriptions(0x76a185a4f66C0d09eBfbD916e0AD0f1CDF6B911b);
 

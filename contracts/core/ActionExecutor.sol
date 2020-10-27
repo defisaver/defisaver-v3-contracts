@@ -16,7 +16,8 @@ contract ActionExecutor is FlashLoanReceiverBase {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
-    DFSRegistry public constant registry = DFSRegistry(0x2f111D6611D3a3d559992f39e3F05aC0385dCd5D);
+    address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
+    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
