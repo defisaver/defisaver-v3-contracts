@@ -43,5 +43,8 @@
     "hooks": {
       "pre-commit": "npm run compile --force && npm run lint"
     }
+  },
+  "dependencies": {
+    "defisaver-tokens": "git+ssh://git@github.com/DecenterApps/defisaver-tokens.git"
   }
 }

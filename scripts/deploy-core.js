@@ -23,11 +23,11 @@ async function main() {
     const actionExecutor = await deployContract("ActionExecutor");
     const actionManager = await deployContract("ActionManager");
 
-    await registry.changeInstant(ethers.utils.keccak256(['StrategyExecutor']), strategyExecutor.address);
-    await registry.changeInstant(ethers.utils.keccak256(['SubscriptionProxy']), subscriptionProxy.address);
-    await registry.changeInstant(ethers.utils.keccak256(['Subscriptions']), subscriptions.address);
-    await registry.changeInstant(ethers.utils.keccak256(['ActionExecutor']), actionExecutor.address);
-    await registry.changeInstant(ethers.utils.keccak256(['ActionManager']), actionManager.address);
+    await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('StrategyExecutor')), strategyExecutor.address);
+    await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('SubscriptionProxy')), subscriptionProxy.address);
+    await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('Subscriptions')), subscriptions.address);
+    await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('ActionExecutor')), actionExecutor.address);
+    await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('ActionManager')), actionManager.address);
 
     // Actions deployment
     const flTaker = await deployContract("FLTaker");
@@ -37,12 +37,12 @@ async function main() {
     const mcdSupply = await deployContract("McdSupply");
     const mcdWithdraw = await deployContract("McdWithdraw");
 
-    await registry.changeInstant(ethers.utils.keccak256(['FLTaker']), flTaker.address);
-    await registry.changeInstant(ethers.utils.keccak256(['DfsSell']), dfsSell.address);
-    await registry.changeInstant(ethers.utils.keccak256(['McdGenerate']), mcdGenerate.address);
-    await registry.changeInstant(ethers.utils.keccak256(['McdPayback']), mcdPayback.address);
-    await registry.changeInstant(ethers.utils.keccak256(['McdSupply']), mcdSupply.address);
-    await registry.changeInstant(ethers.utils.keccak256(['McdWithdraw']), mcdWithdraw.address);
+    await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('FLTaker')), flTaker.address);
+    await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('DfsSell')), dfsSell.address);
+    await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('McdGenerate')), mcdGenerate.address);
+    await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('McdPayback')), mcdPayback.address);
+    await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('McdSupply')), mcdSupply.address);
+    await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('McdWithdraw')), mcdWithdraw.address);
 }
 
 start(main);
