@@ -78,6 +78,7 @@ contract McdGenerate is ActionBase, DSMath, MCDSaverProxyHelper {
         uint8[] memory inputMapping;
 
         (cdpId, amount, inputMapping) = abi.decode(_data, (uint256,uint256,uint8[]));
+        
 
         // mapping return values to new inputs
         if (inputMapping.length > 0 && _returnValues.length > 0) {
