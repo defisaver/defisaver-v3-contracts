@@ -5,7 +5,7 @@ pragma solidity ^0.7.0;
 import "../core/DFSRegistry.sol";
 
 abstract contract ActionBase {
-    address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
+    address public constant REGISTRY_ADDR = 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     DefisaverLogger public constant logger = DefisaverLogger(
