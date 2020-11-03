@@ -3,27 +3,11 @@
 pragma solidity ^0.7.0;
 
 interface IExchangeWrapper {
-    function sell(
-        address _srcAddr,
-        address _destAddr,
-        uint256 _srcAmount
-    ) external payable returns (uint256);
+    function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) external payable returns (uint);
 
-    function buy(
-        address _srcAddr,
-        address _destAddr,
-        uint256 _destAmount
-    ) external payable returns (uint256);
+    function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory _additionalData) external payable returns(uint);
 
-    function getSellRate(
-        address _srcAddr,
-        address _destAddr,
-        uint256 _srcAmount
-    ) external view returns (uint256);
+    function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) external view returns (uint);
 
-    function getBuyRate(
-        address _srcAddr,
-        address _destAddr,
-        uint256 _srcAmount
-    ) external view returns (uint256);
+    function getBuyRate(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) external view returns (uint);
 }

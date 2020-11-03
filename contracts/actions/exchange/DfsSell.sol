@@ -3,10 +3,10 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../exchange/SaverExchangeCore.sol";
+import "../../exchange/DFSExchangeCore.sol";
 import "../ActionBase.sol";
 
-contract DfsSell is ActionBase, SaverExchangeCore {
+contract DFSSell is ActionBase, DFSExchangeCore {
     using SafeERC20 for IERC20;
 
     function executeAction(uint, bytes memory _callData, bytes32[] memory _returnValues) override public payable returns (bytes32) {
