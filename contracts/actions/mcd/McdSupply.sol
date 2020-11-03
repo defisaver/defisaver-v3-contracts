@@ -7,14 +7,14 @@ import "../../interfaces/mcd/IManager.sol";
 import "../../interfaces/mcd//IVat.sol";
 import "../../interfaces/mcd//IJoin.sol";
 import "../../DS/DSMath.sol";
-import "../ActionBase.sol";
 import "../../utils/SafeERC20.sol";
+import "../ActionBase.sol";
+import "./helpers/McdHelper.sol";
 
 
-contract McdSupply is ActionBase, DSMath {
+contract McdSupply is ActionBase, McdHelper {
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
-    address public constant ETH_JOIN_ADDRESS = 0x2F0b23f53734252Bda2277357e97e1517d6B042A;
 
     IManager public constant manager = IManager(MANAGER_ADDRESS);
     IVat public constant vat = IVat(VAT_ADDRESS);
@@ -28,7 +28,7 @@ contract McdSupply is ActionBase, DSMath {
 
         pullTokens(joinAddr, from, amount);
 
-        if (joinAddr == ETH_JOIN_ADDRESS) {
+        if (isEthJoinAddr(joinAddr)) {
             IJoin(joinAddr).gem().deposit{value: amount}();
             convertAmount = toPositiveInt(amount);
         } else {
@@ -83,23 +83,8 @@ contract McdSupply is ActionBase, DSMath {
     }
 
     function pullTokens(address _joinAddr, address _from, uint _amount) internal {
-        if (_from != address(0) && _joinAddr != ETH_JOIN_ADDRESS) {
+        if (_from != address(0) && !isEthJoinAddr(_joinAddr)) {
             IERC20(address(IJoin(_joinAddr).gem())).safeTransferFrom(_from, address(this), _amount);
         }
-    }
-
-
-    /// @notice Converts a uint to int and checks if positive
-    /// @param _x Number to be converted
-    function toPositiveInt(uint _x) internal pure returns (int y) {
-        y = int(_x);
-        require(y >= 0, "int-overflow");
-    }
-
-    /// @notice Converts a number to 18 decimal percision
-    /// @param _joinAddr Join address of the collateral
-    /// @param _amount Number to be converted
-    function convertTo18(address _joinAddr, uint256 _amount) internal view returns (uint256) {
-        return mul(_amount, 10 ** (18 - IJoin(_joinAddr).dec()));
     }
 }

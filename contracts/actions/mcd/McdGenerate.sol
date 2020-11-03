@@ -6,7 +6,6 @@ pragma experimental ABIEncoderV2;
 import "../../core/Subscriptions.sol";
 import "../../core/DFSRegistry.sol";
 
-import "./MCDSaverProxyHelper.sol";
 import "../../interfaces/mcd/IManager.sol";
 import "../../interfaces/mcd/ISpotter.sol";
 import "../../interfaces/mcd/IVat.sol";
@@ -14,8 +13,9 @@ import "../../interfaces/mcd/IDaiJoin.sol";
 import "../../interfaces/mcd/IJug.sol";
 import "../../DS/DSMath.sol";
 import "../ActionBase.sol";
+import "./helpers/McdHelper.sol";
 
-contract McdGenerate is ActionBase, DSMath, MCDSaverProxyHelper {
+contract McdGenerate is ActionBase, McdHelper {
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
     address public constant JUG_ADDRESS = 0x19c0976f590D67707E62397C87829d896Dc0f1F1;

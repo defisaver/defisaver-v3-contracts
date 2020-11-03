@@ -2,14 +2,14 @@
 
 pragma solidity ^0.7.0;
 
-import "../../DS/DSMath.sol";
-import "../../DS/DSProxy.sol";
-import "../../interfaces/mcd/IManager.sol";
-import "../../interfaces/mcd/IJoin.sol";
-import "../../interfaces/mcd/IVat.sol";
+import "../../../DS/DSMath.sol";
+import "../../../DS/DSProxy.sol";
+import "../../../interfaces/mcd/IManager.sol";
+import "../../../interfaces/mcd/IJoin.sol";
+import "../../../interfaces/mcd/IVat.sol";
 
 /// @title Helper methods for MCDSaverProxy
-contract MCDSaverProxyHelper is DSMath {
+contract McdHelper is DSMath {
 
     /// @notice Returns a normalized debt _amount based on the current rate
     /// @param _amount Amount of dai to be normalized

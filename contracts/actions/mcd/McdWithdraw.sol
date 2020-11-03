@@ -8,13 +8,11 @@ import "../../interfaces/mcd/IVat.sol";
 import "../../interfaces/mcd/IJoin.sol";
 import "../../DS/DSMath.sol";
 import "../ActionBase.sol";
+import "./helpers/McdHelper.sol";
 
-contract McdWithdraw is ActionBase, DSMath {
+contract McdWithdraw is ActionBase, McdHelper {
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
-
-    // TODO: remove
-    // address public constant ETH_JOIN_ADDRESS = 0x2F0b23f53734252Bda2277357e97e1517d6B042A;
 
     IManager public constant manager = IManager(MANAGER_ADDRESS);
     IVat public constant vat = IVat(VAT_ADDRESS);
@@ -33,9 +31,9 @@ contract McdWithdraw is ActionBase, DSMath {
 
         IJoin(joinAddr).exit(address(this), amount);
 
-        // if (joinAddr == ETH_JOIN_ADDRESS) {
-        //     Join(joinAddr).gem().withdraw(amount); // Weth -> Eth
-        // }
+        if (isEthJoinAddr(joinAddr)) {
+            IJoin(joinAddr).gem().withdraw(amount); // Weth -> Eth
+        }
 
         logger.Log(address(this), msg.sender, "McdWithdraw", abi.encode(cdpId, amount, joinAddr));
 
@@ -68,13 +66,5 @@ contract McdWithdraw is ActionBase, DSMath {
                 }
             }
         }
-    }
-
-
-    /// @notice Converts a uint to int and checks if positive
-    /// @param _x Number to be converted
-    function toPositiveInt(uint _x) internal pure returns (int y) {
-        y = int(_x);
-        require(y >= 0, "int-overflow");
     }
 }
