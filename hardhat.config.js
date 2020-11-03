@@ -27,7 +27,7 @@ module.exports = {
         url: process.env.INFURA_NODE_KOVAN,
         accounts: [process.env.PRIV_KEY_KOVAN],
         gasPrice: 1600000000
-    },
+    }
   },
   solidity: "0.7.4",
   settings: {
@@ -47,6 +47,7 @@ module.exports = {
   },
   tenderly: {
     username: process.env.TENDERLY_USERNAME,
-    project: process.env.TENDERLY_PROJECT
+    project: process.env.TENDERLY_PROJECT,
+    forkNetwork: "1"
   }
 };

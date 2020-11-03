@@ -68,4 +68,22 @@ describe("Mcd-Open", function() {
         });
     }
 
+    it(`... should fail to open an Maker vault, because of invalid joinAddr`, async () => {
+        const callData = encodeMcdOpenAction(nullAddress);
+
+        const McdOpen = await ethers.getContractFactory("McdOpen");
+        const functionData = McdOpen.interface.encodeFunctionData(
+            "executeAction",
+                [0, callData, []]
+        );
+
+        try {
+            await proxy['execute(address,bytes)'](mcdOpenAddr, functionData);
+            expect(true).to.be.false; 
+        } catch (err) {
+            expect(true).to.be.true; 
+        }
+
+    });
+
 });

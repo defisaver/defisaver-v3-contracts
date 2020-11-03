@@ -36,6 +36,8 @@ const redeploy = async (name) => {
     const c = await deployContract(name);
 
     await registry.changeInstant(ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(name)), c.address);
+
+    // return c.address;
 };
 
 const send = async (tokenAddr, to, amount) => {
