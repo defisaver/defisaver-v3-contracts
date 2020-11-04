@@ -3,6 +3,7 @@ require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
 require("@tenderly/hardhat-tenderly");
 require("@nomiclabs/hardhat-ethers");
+require('hardhat-log-remover');
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
