@@ -64,6 +64,7 @@ contract ActionExecutor is FlashLoanReceiverBase {
         for (; i < _actions.length; ++i) {
             bytes32 id;
 
+            // if execute directly must add action id as first member
             if (_actionIds[i] != 0) {
                 id = sub.getAction(_actionIds[i]).id;
             } else {

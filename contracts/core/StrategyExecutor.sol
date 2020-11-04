@@ -3,6 +3,7 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
+import "../utils/GasBurner.sol";
 import "../interfaces/ITrigger.sol";
 import "../interfaces/IDSProxy.sol";
 import "./StrategyData.sol";
@@ -11,12 +12,10 @@ import "./BotAuth.sol";
 import "./DFSRegistry.sol";
 
 /// @title Main entry point for executing automated strategies
-contract StrategyExecutor is StrategyData {
+contract StrategyExecutor is StrategyData, GasBurner {
 
     address public constant REGISTRY_ADDR = 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
-
-    // Subscriptions public constant subscriptions = Subscriptions(0x76a185a4f66C0d09eBfbD916e0AD0f1CDF6B911b);
 
     /// @notice Checks all the triggers and executes actions
     /// @dev Only auhtorized callers can execute it
@@ -27,7 +26,7 @@ contract StrategyExecutor is StrategyData {
         uint256 _strategyId,
         bytes[] memory _triggerCallData,
         bytes[] memory _actionsCallData
-    ) public {
+    ) public burnGas {
         address subscriptionsAddr = registry.getAddr(keccak256("Subscriptions"));
 
         Strategy memory strategy = Subscriptions(subscriptionsAddr).getStrategy(_strategyId);

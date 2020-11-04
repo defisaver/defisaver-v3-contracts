@@ -44,7 +44,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn run hardhat remove-logs && npm run compile --force && npm run lint"
+      "pre-commit": "yarn run hardhat remove-logs && npm run lint"
     }
   },
   "dependencies": {

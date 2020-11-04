@@ -16,7 +16,7 @@ contract AdminAuth {
     }
 
     constructor() {
-        owner = msg.sender;
+        owner = msg.sender; // TODO: pull owner from registry
     }
 
     /// @notice Admin is set by owner first time, after that admin is super role and has permission to change owner
@@ -50,6 +50,7 @@ contract AdminAuth {
     }
 
     /// @notice  withdraw stuck funds
+    // TODO: don't send only to owner
     function withdrawStuckFunds(address _token, uint256 _amount) public onlyOwner {
         if (_token == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
             payable(owner).transfer(_amount);
