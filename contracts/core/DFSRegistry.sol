@@ -18,12 +18,12 @@ contract DFSRegistry is AdminAuth {
         bool inChange;
         bool exists;
     }
-
+    
     mapping(bytes32 => Entry) public entries;
     mapping(bytes32 => address) public pendingAddresses;
 
     /// @notice Given an contract id returns the registred address
-    /// @dev Id is kecceak256 of the contract name
+    /// @dev Id is keccak256 of the contract name
     /// @param _id Id of contract
     function getAddr(bytes32 _id) public view returns (address) {
         return entries[_id].contractAddr;

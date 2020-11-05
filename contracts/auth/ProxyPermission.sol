@@ -5,6 +5,7 @@ pragma solidity ^0.7.0;
 import "../DS/DSGuard.sol";
 import "../DS/DSAuth.sol";
 
+/// @title ProxyPermission Proxy contract which works with DSProxy to give execute permission
 contract ProxyPermission {
     address public constant FACTORY_ADDRESS = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
 

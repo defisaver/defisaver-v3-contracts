@@ -14,7 +14,7 @@ async function main() {
 
     await changeConstantInFiles(
         "./contracts",
-        ["StrategyExecutor", "ActionManager", "ActionExecutor", "ActionBase"],
+        ["StrategyExecutor", "ActionManager", "ActionExecutor", "ActionBase", "AdminAuth"],
         "REGISTRY_ADDR",
          registry.address
     );

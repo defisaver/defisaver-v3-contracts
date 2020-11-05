@@ -2,8 +2,10 @@
 
 pragma solidity ^0.7.0;
 
+import "../interfaces/IDFSRegistry.sol";
 import "../utils/SafeERC20.sol";
 
+/// @title AdminAuth Handles owner/admin priviligies over smart contracts
 contract AdminAuth {
     using SafeERC20 for IERC20;
 
@@ -15,14 +17,18 @@ contract AdminAuth {
         _;
     }
 
+    modifier onlyAdmin() {
+        require(admin == msg.sender, "msg.sender not admin");
+        _;
+    }
+
     constructor() {
-        owner = msg.sender; // TODO: pull owner from registry
+        owner = msg.sender;
     }
 
     /// @notice Admin is set by owner first time, after that admin is super role and has permission to change owner
     /// @param _admin Address of multisig that becomes admin
-    function setAdminByOwner(address _admin) public {
-        require(msg.sender == owner, "msg.sender not owner");
+    function setAdmin(address _admin) public onlyOwner {
         require(admin == address(0), "admin is already set");
 
         admin = _admin;
@@ -30,32 +36,27 @@ contract AdminAuth {
 
     /// @notice Admin is able to set new admin
     /// @param _admin Address of multisig that becomes new admin
-    function setAdminByAdmin(address _admin) public {
-        require(msg.sender == admin, "msg.sender not admin");
-
+    function changeAdmin(address _admin) public onlyAdmin {
         admin = _admin;
     }
 
     /// @notice Admin is able to change owner
     /// @param _owner Address of new owner
-    function setOwnerByAdmin(address _owner) public {
-        require(msg.sender == admin, "msg.sender not admin");
-
+    function changeOwner(address _owner) public onlyAdmin {
         owner = _owner;
     }
 
-    /// @notice Destroy the contract
-    function kill() public onlyOwner {
-        selfdestruct(payable(owner));
+    /// @notice  withdraw stuck funds
+    function withdrawStuckFunds(address _token, address _receiver, uint256 _amount) public onlyOwner {
+        if (_token == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
+            payable(_receiver).transfer(_amount);
+        } else {
+            IERC20(_token).safeTransfer(_receiver, _amount);
+        }
     }
 
-    /// @notice  withdraw stuck funds
-    // TODO: don't send only to owner
-    function withdrawStuckFunds(address _token, uint256 _amount) public onlyOwner {
-        if (_token == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
-            payable(owner).transfer(_amount);
-        } else {
-            IERC20(_token).safeTransfer(owner, _amount);
-        }
+    /// @notice Destroy the contract
+    function kill() public onlyAdmin {
+        selfdestruct(payable(owner));
     }
 }
