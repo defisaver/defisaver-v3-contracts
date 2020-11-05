@@ -10,11 +10,14 @@ import "./StrategyData.sol";
 import "./Subscriptions.sol";
 import "./BotAuth.sol";
 import "./DFSRegistry.sol";
+import "./ProxyAuth.sol";
 
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutor is StrategyData, GasBurner {
 
-    address public constant REGISTRY_ADDR = 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0;
+    address public constant PROXY_AUTH_ADDR = 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512;
+
+    address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     /// @notice Checks all the triggers and executes actions
@@ -77,7 +80,8 @@ contract StrategyExecutor is StrategyData, GasBurner {
     function callActions(Strategy memory _strategy, bytes[] memory _actionsCallData) internal {
         address actionManagerProxyAddr = registry.getAddr(keccak256("ActionManagerProxy"));
 
-        IDSProxy(_strategy.proxy).execute{value: msg.value}(
+        ProxyAuth(PROXY_AUTH_ADDR).callExecute{value: msg.value}(
+            _strategy.proxy,
             actionManagerProxyAddr,
             abi.encodeWithSignature(
                 "manageActions(string,uint256[],bytes[])",

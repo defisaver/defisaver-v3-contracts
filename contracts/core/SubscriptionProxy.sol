@@ -13,7 +13,7 @@ contract SubscriptionProxy is StrategyData {
 
     function subscribe(
         string memory _name,
-        address _executorAddr,
+        address _proxyAuthAddr,
         address _subAddr,
         Trigger[] memory _triggers,
         Action[] memory _actions
@@ -26,7 +26,7 @@ contract SubscriptionProxy is StrategyData {
             DSAuth(address(this)).setAuthority(DSAuthority(address(guard)));
         }
 
-        guard.permit(_executorAddr, address(this), bytes4(keccak256("execute(address,bytes)")));
+        guard.permit(_proxyAuthAddr, address(this), bytes4(keccak256("execute(address,bytes)")));
 
         Subscriptions(_subAddr).subscribe(_name, _triggers, _actions);
     }

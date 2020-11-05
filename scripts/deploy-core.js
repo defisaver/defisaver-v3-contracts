@@ -7,14 +7,12 @@ const { changeConstantInFiles } = require('./utils/utils');
 
 async function main() {
 
-    const provider = new hre.ethers.providers.Web3Provider(tenderlyRPC);
-    hre.ethers.provider = provider;
-
     const registry = await deployContract("DFSRegistry");
+    const proxyAuth = await deployContract("ProxyAuth");
 
     await changeConstantInFiles(
         "./contracts",
-        ["StrategyExecutor", "ActionManager", "ActionExecutor", "ActionBase", "AdminAuth"],
+        ["StrategyExecutor", "ActionManager", "ActionExecutor", "ActionBase", "ProxyAuth"],
         "REGISTRY_ADDR",
          registry.address
     );
@@ -24,6 +22,13 @@ async function main() {
         ["utils.js"],
         "REGISTRY_ADDR",
          registry.address
+    );
+
+    await changeConstantInFiles(
+        "./contracts",
+        ["StrategyExecutor"],
+        "PROXY_AUTH_ADDR",
+        proxyAuth.address
     );
 
     await run("compile");
@@ -39,8 +44,6 @@ async function main() {
     await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('Subscriptions')), subscriptions.address);
     await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('ActionExecutor')), actionExecutor.address);
     await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('ActionManager')), actionManager.address);
-
-    console.log(tenderlyRPC.getHead());
 
     // // Actions deployment
     // const flTaker = await deployContract("FLTaker");
