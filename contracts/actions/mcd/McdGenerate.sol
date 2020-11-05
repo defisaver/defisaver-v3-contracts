@@ -26,9 +26,10 @@ contract McdGenerate is ActionBase, McdHelper {
     IVat public constant vat = IVat(VAT_ADDRESS);
     ISpotter public constant spotter = ISpotter(SPOTTER_ADDRESS);
 
-    function executeAction(uint, bytes memory _callData, bytes32[] memory _returnValues) override public payable returns (bytes32) {
+    function executeAction(uint _actionId, bytes memory _callData, bytes32[] memory _returnValues) override public payable returns (bytes32) {
         (uint cdpId, uint amount) = parseParamData(_callData, _returnValues);
-        // (cdpId, amount) = parseSubData(_actionId);
+
+        verifySubData(_actionId, cdpId, amount, _returnValues);
 
         bytes32 ilk = manager.ilks(cdpId);
 
@@ -59,13 +60,25 @@ contract McdGenerate is ActionBase, McdHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    function parseSubData(uint _actionId) public view returns (uint cdpId, uint amount) {
+    function verifySubData(uint _actionId, uint _cdpId, uint _amount, bytes32[] memory _returnValues) public view {
         if (_actionId != 0) {
             Subscriptions sub = Subscriptions(registry.getAddr(keccak256("Subscriptions")));
 
             Subscriptions.Action memory action = sub.getAction(_actionId);
-            if (action.id != "") {
-                (cdpId, amount) = abi.decode(action.data, (uint256,uint256));
+
+            if (action.id != "" && action.inputMapping.length != 0) {
+                if (action.inputMapping[0] != 0 && action.inputMapping[1] != 0) {
+                    (uint cdpId, uint amount) = abi.decode(action.data, (uint256,uint256));
+
+                    require(_cdpId == cdpId);
+                    require(_amount == amount);
+                } else if (action.inputMapping[0] != 0) {
+                    (uint cdpId) = abi.decode(action.data, (uint256));
+                    require(_cdpId == cdpId);
+                }  else if (action.inputMapping[1] != 0) {
+                    (uint amount) = abi.decode(action.data, (uint256));
+                    require(_amount == amount);
+                }
             }
         }
 

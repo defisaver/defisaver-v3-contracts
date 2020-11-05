@@ -17,6 +17,8 @@ contract Subscriptions is StrategyData {
     Action[] internal actions;
     Trigger[] internal triggers;
 
+    // TODO: first element should be empty
+
     /// @notice Subscribes a new strategy for a user
     /// @param _triggers Array of trigger data
     /// @param _actions Array of action data
@@ -30,14 +32,22 @@ contract Subscriptions is StrategyData {
 
         // Populate triggers
         for (uint256 i = 0; i < _triggers.length; ++i) {
-            triggers.push(Trigger({id: _triggers[i].id, data: _triggers[i].data}));
+            triggers.push(Trigger({
+                id: _triggers[i].id,
+                data: _triggers[i].data,
+                inputMapping:_triggers[i].inputMapping
+            }));
 
             triggerIds[i] = triggers.length - 1;
         }
 
         // Populate actions
         for (uint256 i = 0; i < _actions.length; ++i) {
-            actions.push(Action({id: _actions[i].id, data: _actions[i].data}));
+            actions.push(Action({
+                id: _actions[i].id,
+                data: _actions[i].data,
+                inputMapping: _actions[i].inputMapping
+            }));
 
             actionsIds[i] = actions.length - 1;
         }
@@ -72,12 +82,20 @@ contract Subscriptions is StrategyData {
 
         // update triggers
         for (uint256 i = 0; i < _triggers.length; ++i) {
-            triggers[s.triggerIds[i]] = Trigger({id: _triggers[i].id, data: _triggers[i].data});
+            triggers[s.triggerIds[i]] = Trigger({
+                id: _triggers[i].id,
+                data: _triggers[i].data,
+                inputMapping:_triggers[i].inputMapping
+            });
         }
 
         // update actions
         for (uint256 i = 0; i < _actions.length; ++i) {
-            actions[s.actionIds[i]] = Action({id: _actions[i].id, data: _actions[i].data});
+            actions[s.actionIds[i]] = Action({
+                id: _actions[i].id,
+                data: _actions[i].data,
+                inputMapping: _actions[i].inputMapping
+            });
         }
 
         logger.Log(address(this), msg.sender, "Update", abi.encode(_subId));

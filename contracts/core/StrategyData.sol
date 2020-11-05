@@ -8,11 +8,13 @@ contract StrategyData {
     struct Trigger {
         bytes32 id;
         bytes data;
+        uint8[] inputMapping;
     }
 
     struct Action {
         bytes32 id;
         bytes data;
+        uint8[] inputMapping;
     }
 
     struct Strategy {
