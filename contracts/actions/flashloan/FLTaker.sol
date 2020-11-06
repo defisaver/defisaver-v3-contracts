@@ -8,16 +8,11 @@ import "../../core/Subscriptions.sol";
 
 contract FLTaker is IFLAction {
 
-    Subscriptions public constant subscriptions = Subscriptions(0x76a185a4f66C0d09eBfbD916e0AD0f1CDF6B911b);
     DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
 
     function executeAction(uint _actionId, bytes memory _callData) override public returns (bytes memory) {
 
         (uint amount, address token, uint8 flType) = parseParamData(_callData);
-
-        // if (_actionId != 0) {
-        //     Subscriptions.Action memory a = subscriptions.getAction(_actionId);
-        // }
 
         logger.Log(address(this), msg.sender, "FLTaker", abi.encode(amount, token, flType));
 

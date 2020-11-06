@@ -27,22 +27,22 @@ contract StrategyExecutor is StrategyData, GasBurner {
     /// @param _actionsCallData All input data needed to execute actions
     function executeStrategy(
         uint256 _strategyId,
-        bytes[] memory _triggerCallData,
-        bytes[] memory _actionsCallData
+        bytes[][] memory _triggerCallData,
+        bytes[][] memory _actionsCallData
     ) public burnGas {
-        address subscriptionsAddr = registry.getAddr(keccak256("Subscriptions"));
+        Subscriptions sub = Subscriptions(registry.getAddr(keccak256("Subscriptions")));
 
-        Strategy memory strategy = Subscriptions(subscriptionsAddr).getStrategy(_strategyId);
+        Strategy memory strategy = sub.getStrategy(_strategyId);
         require(strategy.active, "Strategy is not active");
 
         // check bot auth
         checkCallerAuth(_strategyId);
 
         // check if all the triggers are true
-        checkTriggers(strategy, _triggerCallData, subscriptionsAddr);
+        checkTriggers(_strategyId, strategy, _triggerCallData, sub);
 
         // execute actions
-        callActions(strategy, _actionsCallData);
+        callActions(strategy, _actionsCallData, sub);
     }
 
     /// @notice Checks if msg.sender has auth, reverts if not
@@ -59,17 +59,19 @@ contract StrategyExecutor is StrategyData, GasBurner {
     /// @param _strategy Strategy data we have in storage
     /// @param _triggerCallData All input data needed to execute triggers
     function checkTriggers(
+        uint _strategyId,
         Strategy memory _strategy,
-        bytes[] memory _triggerCallData,
-        address _subscriptionsAddr
+        bytes[][] memory _triggerCallData,
+        Subscriptions _sub
     ) public {
-        for (uint256 i = 0; i < _strategy.triggerIds.length; ++i) {
-            Trigger memory trigger = Subscriptions(_subscriptionsAddr).getTrigger(
-                _strategy.triggerIds[i]
-            );
-            address triggerAddr = registry.getAddr(trigger.id);
 
-            bool isTriggered = ITrigger(triggerAddr).isTriggered(_triggerCallData[i], trigger.data);
+        bytes32[] memory triggerIds = _sub.getTriggerIds(_strategyId);
+
+        for (uint256 i = 0; i < triggerIds.length; ++i) {
+            address triggerAddr = registry.getAddr(triggerIds[i]);
+
+            // TODO: change the 0
+            bool isTriggered = ITrigger(triggerAddr).isTriggered(_triggerCallData[i][0], _strategy.triggerData[i][0]);
             require(isTriggered, "Trigger not activated");
         }
     }
@@ -77,17 +79,21 @@ contract StrategyExecutor is StrategyData, GasBurner {
     /// @notice Execute all the actions in order
     /// @param _strategy Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
-    function callActions(Strategy memory _strategy, bytes[] memory _actionsCallData) internal {
+    function callActions(Strategy memory _strategy, bytes[][] memory _actionsCallData, Subscriptions _sub) internal {
         address actionManagerProxyAddr = registry.getAddr(keccak256("ActionManagerProxy"));
+
+        StrategyTemplate memory template = _sub.getTemplate(_strategy.templateId);
 
         ProxyAuth(PROXY_AUTH_ADDR).callExecute{value: msg.value}(
             _strategy.proxy,
             actionManagerProxyAddr,
             abi.encodeWithSignature(
-                "manageActions(string,uint256[],bytes[])",
-                _strategy.name,
-                _strategy.actionIds,
-                _actionsCallData
+                "manageActions(string,bytes[][],bytes[][],uint8[][],bytes32[])",
+                template.name,
+                _actionsCallData,
+                _strategy.actionData,
+                template.paramMapping,
+                template.actionIds
             )
         );
     }

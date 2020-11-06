@@ -28,6 +28,13 @@ contract ActionExecutor is FlashLoanReceiverBase {
         0x24a42fD28C976A61Df5D00D0599C34c4f90748c8
     );
 
+    struct FlData {
+        address loanTokenAddr;
+        uint256 loanAmount;
+        uint256 feeAmount;
+        FlType flType;
+    }
+
     // solhint-disable-next-line no-empty-blocks
     constructor() FlashLoanReceiverBase(LENDING_POOL_ADDRESS_PROVIDER) {}
 
@@ -35,79 +42,78 @@ contract ActionExecutor is FlashLoanReceiverBase {
 
     /// @notice Executes a series of action through dsproxy
     /// @dev If first action is FL it's skipped
-    /// @param _actions Array of actions (their callData)
-    /// @param _actionIds Array of action ids
+    /// @param _actionsCallData Array of user send data for the actions
+    /// @param _actionSubData Array of subscribed data for the actions
+    /// @param _paramMapping Array of param mappings
+    /// @param _actionIds Array of actions ids, action names
     /// @param _proxy DsProxy address of the user
-    /// @param _loanTokenAddr Token address of the loaned token
-    /// @param _loanAmount Loan amount
-    /// @param _feeAmount Fee Loan amount
-    /// @param _flType Type of Flash loan
     function executeActions(
-        bytes[] memory _actions,
-        uint256[] memory _actionIds,
+        bytes[][] memory _actionsCallData,
+        bytes[][] memory _actionSubData,
+        uint8[][] memory _paramMapping,
+        bytes32[] memory _actionIds,
         address _proxy,
-        address _loanTokenAddr,
-        uint256 _loanAmount,
-        uint256 _feeAmount,
-        FlType _flType
+        FlData memory _flData
     ) public {
-        bytes32[] memory responses = new bytes32[](_actions.length);
+        bytes32[] memory returnValues = new bytes32[](_actionIds.length);
         uint256 i = 0;
 
         // Skip if FL and push first response as amount FL taken
-        if (_flType != FlType.NO_LOAN) {
+        if (_flData.flType != FlType.NO_LOAN) {
             i = 1;
-            responses[0] = bytes32(_loanAmount);
+            returnValues[0] = bytes32(_flData.loanAmount);
         }
 
         Subscriptions sub = Subscriptions(registry.getAddr(keccak256("Subscriptions")));
 
-        for (; i < _actions.length; ++i) {
-            bytes32 id;
-
-            // if execute directly must add action id as first member
-            if (_actionIds[i] != 0) {
-                id = sub.getAction(_actionIds[i]).id;
-            } else {
-                (id, _actions[i]) = abi.decode(_actions[i], (bytes32, bytes));
-            }
-
-            responses[i] = IDSProxy(_proxy).execute{value: address(this).balance}(
-                registry.getAddr(id),
+        for (; i < _actionIds.length; ++i) {
+            returnValues[i] = IDSProxy(_proxy).execute{value: address(this).balance}(
+                registry.getAddr(_actionIds[i]),
                 abi.encodeWithSignature(
-                    "executeAction(uint256,bytes,bytes32[])",
-                    _actionIds[i],
-                    _actions[i],
-                    responses
+                    "executeAction(bytes[],bytes[],uint8[],bytes32[])",
+                    _actionsCallData[i],
+                    _actionSubData[i],
+                    _paramMapping[i],
+                    returnValues
                 )
             );
         }
 
-        if (_flType == FlType.AAVE_LOAN) {
-            transferFundsBackToPoolInternal(_loanTokenAddr, _loanAmount.add(_feeAmount));
+        if (_flData.flType == FlType.AAVE_LOAN) {
+            transferFundsBackToPoolInternal(_flData.loanTokenAddr, _flData.loanAmount.add(_flData.feeAmount));
         }
 
-        if (_flType == FlType.DYDX_LOAN) {
-            dydxPaybackLoan(_proxy, _loanTokenAddr, _loanAmount.add(_feeAmount));
+        if (_flData.flType == FlType.DYDX_LOAN) {
+            dydxPaybackLoan(_proxy, _flData.loanTokenAddr, _flData.loanAmount.add(_flData.feeAmount));
         }
     }
 
     /// @notice Aave entry point, will be called if aave FL is taken
     function executeOperation(
-        address _reserve,
-        uint256 _amount,
+        address,
+        uint256,
         uint256 _fee,
         bytes calldata _params
     ) external override {
-        address proxy;
-        bytes[] memory actions;
-        uint256[] memory actionIds;
+        
+        (
+            bytes[][] memory actionsCallData,
+            bytes[][] memory actionSubData,
+            uint8[][] memory paramMapping,
+            bytes32[] memory actionIds,
+            address proxy,
+            address tokenAddr,
+            uint256 amount
+        ) = abi.decode(_params, (bytes[][], bytes[][], uint8[][], bytes32[], address, address, uint256));
 
-        (actions, actionIds, proxy, _reserve, _amount) = abi.decode(
-            _params,
-            (bytes[], uint256[], address, address, uint256)
-        );
-        executeActions(actions, actionIds, proxy, _reserve, _amount, _fee, FlType.AAVE_LOAN);
+        FlData memory flData = FlData({
+            loanTokenAddr: tokenAddr,
+            loanAmount: amount,
+            feeAmount: _fee,
+            flType: FlType.AAVE_LOAN
+        });
+
+        executeActions(actionsCallData, actionSubData, paramMapping, actionIds, proxy, flData);
     }
 
     /// @notice  DyDx FL entry point, will be called if aave FL is taken
@@ -117,18 +123,27 @@ contract ActionExecutor is FlashLoanReceiverBase {
         bytes memory data
     ) public {
         (
-            bytes[] memory actions,
-            uint256[] memory actionIds,
+            bytes[][] memory actionsCallData,
+            bytes[][] memory actionSubData,
+            uint8[][] memory paramMapping,
+            bytes32[] memory actionIds,
             address proxy,
             address tokenAddr,
             uint256 amount
-        ) = abi.decode(data, (bytes[], uint256[], address, address, uint256));
+        ) = abi.decode(data, (bytes[][], bytes[][], uint8[][], bytes32[], address, address, uint256));
+
+        FlData memory flData = FlData({
+            loanTokenAddr: tokenAddr,
+            loanAmount: amount,
+            feeAmount: 0,
+            flType: FlType.DYDX_LOAN
+        });
 
         if (tokenAddr == WETH_ADDRESS || tokenAddr == ETH_ADDRESS) {
             IWETH(WETH_ADDRESS).withdraw(amount);
         }
 
-        executeActions(actions, actionIds, proxy, tokenAddr, amount, 0, FlType.DYDX_LOAN);
+        executeActions(actionsCallData, actionSubData, paramMapping, actionIds, proxy, flData);
     }
 
     /// @notice Returns the FL amount for DyDx to the DsProxy

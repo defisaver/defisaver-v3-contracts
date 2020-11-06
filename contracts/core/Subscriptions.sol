@@ -14,51 +14,23 @@ contract Subscriptions is StrategyData {
     );
 
     Strategy[] internal strategies;
-    Action[] internal actions;
-    Trigger[] internal triggers;
+    StrategyTemplate[] internal strategyTemplates;
 
     // TODO: first element should be empty
 
-    /// @notice Subscribes a new strategy for a user
-    /// @param _triggers Array of trigger data
-    /// @param _actions Array of action data
     function subscribe(
-        string memory _name,
-        Trigger[] memory _triggers,
-        Action[] memory _actions
+        uint templateId, 
+        bytes[][] memory actionData,
+        bytes[][] memory triggerData
     ) public {
-        uint256[] memory triggerIds = new uint256[](_triggers.length);
-        uint256[] memory actionsIds = new uint256[](_actions.length);
-
-        // Populate triggers
-        for (uint256 i = 0; i < _triggers.length; ++i) {
-            triggers.push(Trigger({
-                id: _triggers[i].id,
-                data: _triggers[i].data,
-                inputMapping:_triggers[i].inputMapping
-            }));
-
-            triggerIds[i] = triggers.length - 1;
-        }
-
-        // Populate actions
-        for (uint256 i = 0; i < _actions.length; ++i) {
-            actions.push(Action({
-                id: _actions[i].id,
-                data: _actions[i].data,
-                inputMapping: _actions[i].inputMapping
-            }));
-
-            actionsIds[i] = actions.length - 1;
-        }
-
+        
         strategies.push(
             Strategy({
-                name: _name,
+                templateId: templateId,
                 proxy: msg.sender,
                 active: true,
-                triggerIds: triggerIds,
-                actionIds: actionsIds
+                actionData: actionData,
+                triggerData: triggerData
             })
         );
 
@@ -67,39 +39,35 @@ contract Subscriptions is StrategyData {
 
     // TODO: what if we have more/less actions then in the original strategy?
 
-    /// @notice Update an existing strategy
-    /// @param _subId Subscription id
-    /// @param _triggers Array of trigger data
-    /// @param _actions Array of action data
-    function update(
-        uint256 _subId,
-        Trigger[] memory _triggers,
-        Action[] memory _actions
-    ) public {
-        Strategy memory s = strategies[_subId];
-        require(s.proxy != address(0), "Strategy does not exist");
-        require(msg.sender == s.proxy, "Proxy not strategy owner");
+    // function update(
+    //     uint256 _subId,
+    //     Trigger[] memory _triggers,
+    //     Action[] memory _actions
+    // ) public {
+    //     Strategy memory s = strategies[_subId];
+    //     require(s.proxy != address(0), "Strategy does not exist");
+    //     require(msg.sender == s.proxy, "Proxy not strategy owner");
 
-        // update triggers
-        for (uint256 i = 0; i < _triggers.length; ++i) {
-            triggers[s.triggerIds[i]] = Trigger({
-                id: _triggers[i].id,
-                data: _triggers[i].data,
-                inputMapping:_triggers[i].inputMapping
-            });
-        }
+    //     // update triggers
+    //     for (uint256 i = 0; i < _triggers.length; ++i) {
+    //         triggers[s.triggerIds[i]] = Trigger({
+    //             id: _triggers[i].id,
+    //             data: _triggers[i].data,
+    //             inputMapping:_triggers[i].inputMapping
+    //         });
+    //     }
 
-        // update actions
-        for (uint256 i = 0; i < _actions.length; ++i) {
-            actions[s.actionIds[i]] = Action({
-                id: _actions[i].id,
-                data: _actions[i].data,
-                inputMapping: _actions[i].inputMapping
-            });
-        }
+    //     // update actions
+    //     for (uint256 i = 0; i < _actions.length; ++i) {
+    //         actions[s.actionIds[i]] = Action({
+    //             id: _actions[i].id,
+    //             data: _actions[i].data,
+    //             inputMapping: _actions[i].inputMapping
+    //         });
+    //     }
 
-        logger.Log(address(this), msg.sender, "Update", abi.encode(_subId));
-    }
+    //     logger.Log(address(this), msg.sender, "Update", abi.encode(_subId));
+    // }
 
     /// @notice Unsubscribe an existing strategy
     /// @param _subId Subscription id
@@ -120,12 +88,28 @@ contract Subscriptions is StrategyData {
 
     ///////////////////// VIEW ONLY FUNCTIONS ////////////////////////////
 
-    function getTrigger(uint256 _triggerId) public view returns (Trigger memory) {
-        return triggers[_triggerId];
+    function getTemplate(uint _templateId) public view returns (StrategyTemplate memory) {
+        return strategyTemplates[_templateId];
     }
 
-    function getAction(uint256 _actionId) public view returns (Action memory) {
-        return actions[_actionId];
+    function getTemplateFromSub(uint _subId) public view returns (StrategyTemplate memory) {
+        uint templateId = strategies[_subId].templateId;
+        return strategyTemplates[templateId];
+    }
+
+    function getReturnInjections(uint _subId) public view returns (uint8[][] memory) {
+        uint templateId = strategies[_subId].templateId;
+        return strategyTemplates[templateId].paramMapping;
+    }
+
+    function getTriggerIds(uint _subId) public view returns (bytes32[] memory) {
+        uint templateId = strategies[_subId].templateId;
+        return strategyTemplates[templateId].triggerIds;
+    }
+
+    function getActionIds(uint _subId) public view returns (bytes32[] memory) {
+        uint templateId = strategies[_subId].templateId;
+        return strategyTemplates[templateId].actionIds;
     }
 
     function getStreategyCount() public view returns (uint256) {

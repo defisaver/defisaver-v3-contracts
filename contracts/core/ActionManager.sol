@@ -19,12 +19,12 @@ contract ActionManager is GeneralizedFLTaker, ProxyPermission {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     /// @notice Checks and takes flash loan and calls Action Executor
-    /// @param _actionIds All of the actionIds for the strategy
-    /// @param _actionsCallData All input data needed to execute actions
     function manageActions(
         string memory _name,
-        uint256[] memory _actionIds,
-        bytes[] memory _actionsCallData
+        bytes[][] memory _actionsCallData,
+        bytes[][] memory _actionSubData,
+        uint8[][] memory _paramMapping,
+        bytes32[] memory _actionIds
     ) public payable {
         (uint256 flAmount, address flToken, uint8 flType) = checkFl(
             _actionIds[0],
@@ -34,6 +34,8 @@ contract ActionManager is GeneralizedFLTaker, ProxyPermission {
         address payable actionExecutorAddr = payable(registry.getAddr(keccak256("ActionExecutor")));
         bytes memory encodedActions = abi.encode(
             _actionsCallData,
+            _actionSubData,
+            _paramMapping,
             _actionIds,
             address(this),
             flToken,
@@ -47,14 +49,20 @@ contract ActionManager is GeneralizedFLTaker, ProxyPermission {
         if (flType != 0) {
             takeLoan(actionExecutorAddr, flToken, flAmount, encodedActions, LoanType(flType));
         } else {
+            ActionExecutor.FlData memory flData = ActionExecutor.FlData({
+                loanTokenAddr: address(0),
+                loanAmount: 0,
+                feeAmount: 0,
+                flType: ActionExecutor.FlType.DYDX_LOAN
+            });
+
             ActionExecutor(actionExecutorAddr).executeActions(
                 _actionsCallData,
+                _actionSubData,
+                _paramMapping,
                 _actionIds,
                 address(this),
-                address(0),
-                0,
-                0,
-                ActionExecutor.FlType(0)
+                flData
             );
         }
 
@@ -66,7 +74,7 @@ contract ActionManager is GeneralizedFLTaker, ProxyPermission {
     /// @notice Checks if the first action is a FL and gets it's data
     /// @param _actionId Id of first action
     /// @param _firstAction First action call data
-    function checkFl(uint256 _actionId, bytes memory _firstAction)
+    function checkFl(bytes32 _actionId, bytes memory _firstAction)
         internal
         returns (
             uint256,
@@ -74,28 +82,19 @@ contract ActionManager is GeneralizedFLTaker, ProxyPermission {
             uint8
         )
     {
-        Subscriptions sub = Subscriptions(registry.getAddr(keccak256("Subscriptions")));
-        bytes32 id;
+        address payable flActionAddr = payable(registry.getAddr(_actionId));
 
-        if (_actionId != 0) {
-            id = sub.getAction(_actionId).id;
-        } else {
-            (id, _firstAction) = abi.decode(_firstAction, (bytes32, bytes));
-        }
+        if (IFLAction(flActionAddr).actionType() == 0) {
+            // bytes memory flData = IFLAction(flActionAddr).executeAction(
+            //     _actionId,
+            //     _firstAction
+            // );
+            // (uint256 flAmount, address loanAddr, uint8 flType) = abi.decode(
+            //     flData,
+            //     (uint256, address, uint8)
+            // );
 
-        address payable actionExecutorAddr = payable(registry.getAddr(id));
-
-        if (IFLAction(actionExecutorAddr).actionType() == 0) {
-            bytes memory flData = IFLAction(actionExecutorAddr).executeAction(
-                _actionId,
-                _firstAction
-            );
-            (uint256 flAmount, address loanAddr, uint8 flType) = abi.decode(
-                flData,
-                (uint256, address, uint8)
-            );
-
-            return (flAmount, loanAddr, flType);
+            // return (flAmount, loanAddr, flType);
         }
 
         return (0, address(0), 0);

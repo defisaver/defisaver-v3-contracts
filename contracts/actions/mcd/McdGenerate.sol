@@ -12,10 +12,10 @@ import "../../interfaces/mcd/IVat.sol";
 import "../../interfaces/mcd/IDaiJoin.sol";
 import "../../interfaces/mcd/IJug.sol";
 import "../../DS/DSMath.sol";
-import "../ActionBase.sol";
+import "../ActionBase2.sol";
 import "./helpers/McdHelper.sol";
 
-contract McdGenerate is ActionBase, McdHelper {
+contract McdGenerate is ActionBase2, McdHelper {
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
     address public constant JUG_ADDRESS = 0x19c0976f590D67707E62397C87829d896Dc0f1F1;
@@ -26,32 +26,19 @@ contract McdGenerate is ActionBase, McdHelper {
     IVat public constant vat = IVat(VAT_ADDRESS);
     ISpotter public constant spotter = ISpotter(SPOTTER_ADDRESS);
 
-    function executeAction(uint _actionId, bytes memory _callData, bytes32[] memory _returnValues) override public payable returns (bytes32) {
-        (uint cdpId, uint amount) = parseParamData(_callData, _returnValues);
+    function executeAction(
+        bytes[] memory _callData,
+        bytes[] memory _subData,
+        uint8[] memory _paramMapping,
+        bytes32[] memory _returnValues
+    ) public payable override returns (bytes32) {
+        uint cdpId = abi.decode(_callData[0], (uint));
+        uint amount = abi.decode(_callData[1], (uint));
 
-        verifySubData(_actionId, cdpId, amount, _returnValues);
+        cdpId = _parseParamUint(cdpId, _paramMapping[0], _subData, _returnValues);
+        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
 
-        bytes32 ilk = manager.ilks(cdpId);
-
-        uint rate = IJug(JUG_ADDRESS).drip(ilk);
-        uint daiVatBalance = vat.dai(manager.urns(cdpId));
-
-        uint maxAmount = getMaxDebt(cdpId, ilk);
-
-        if (amount >= maxAmount) {
-            amount = maxAmount;
-        }
-
-        manager.frob(cdpId, int(0), normalizeDrawAmount(amount, rate, daiVatBalance));
-        manager.move(cdpId, address(this), toRad(amount));
-
-        if (vat.can(address(this), address(DAI_JOIN_ADDRESS)) == 0) {
-            vat.hope(DAI_JOIN_ADDRESS);
-        }
-
-        IDaiJoin(DAI_JOIN_ADDRESS).exit(address(this), amount);
-
-        logger.Log(address(this), msg.sender, "McdGenerate", abi.encode(cdpId, amount));
+        amount = mcdGenerate(cdpId, amount);
 
         return bytes32(amount);
     }
@@ -60,51 +47,30 @@ contract McdGenerate is ActionBase, McdHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    function verifySubData(uint _actionId, uint _cdpId, uint _amount, bytes32[] memory _returnValues) public view {
-        if (_actionId != 0) {
-            Subscriptions sub = Subscriptions(registry.getAddr(keccak256("Subscriptions")));
+    function mcdGenerate(uint _cdpId, uint _amount) internal returns (uint) {
+        bytes32 ilk = manager.ilks(_cdpId);
 
-            Subscriptions.Action memory action = sub.getAction(_actionId);
+        uint rate = IJug(JUG_ADDRESS).drip(ilk);
+        uint daiVatBalance = vat.dai(manager.urns(_cdpId));
 
-            if (action.id != "" && action.inputMapping.length != 0) {
-                if (action.inputMapping[0] != 0 && action.inputMapping[1] != 0) {
-                    (uint cdpId, uint amount) = abi.decode(action.data, (uint256,uint256));
+        uint maxAmount = getMaxDebt(_cdpId, ilk);
 
-                    require(_cdpId == cdpId);
-                    require(_amount == amount);
-                } else if (action.inputMapping[0] != 0) {
-                    (uint cdpId) = abi.decode(action.data, (uint256));
-                    require(_cdpId == cdpId);
-                }  else if (action.inputMapping[1] != 0) {
-                    (uint amount) = abi.decode(action.data, (uint256));
-                    require(_amount == amount);
-                }
-            }
+        if (_amount >= maxAmount) {
+            _amount = maxAmount;
         }
 
-    }
+        manager.frob(_cdpId, int(0), normalizeDrawAmount(_amount, rate, daiVatBalance));
+        manager.move(_cdpId, address(this), toRad(_amount));
 
-    function parseParamData(
-        bytes memory _data,
-        bytes32[] memory _returnValues
-    ) public pure returns (uint cdpId, uint amount) {
-        uint8[] memory inputMapping;
-
-        (cdpId, amount, inputMapping) = abi.decode(_data, (uint256,uint256,uint8[]));
-        
-
-        // mapping return values to new inputs
-        if (inputMapping.length > 0 && _returnValues.length > 0) {
-            for (uint i = 0; i < inputMapping.length; i += 2) {
-                bytes32 returnValue = _returnValues[inputMapping[i + 1]];
-
-                if (inputMapping[i] == 0) {
-                    cdpId = uint(returnValue);
-                } else if (inputMapping[i] == 1) {
-                    amount = uint(returnValue);
-                }
-            }
+        if (vat.can(address(this), address(DAI_JOIN_ADDRESS)) == 0) {
+            vat.hope(DAI_JOIN_ADDRESS);
         }
+
+        IDaiJoin(DAI_JOIN_ADDRESS).exit(address(this), _amount);
+
+        logger.Log(address(this), msg.sender, "McdGenerate", abi.encode(_cdpId, _amount));
+
+        return _amount;
     }
 
     /// @notice Gets the maximum amount of debt available to generate
