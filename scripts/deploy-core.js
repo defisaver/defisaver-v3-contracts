@@ -12,7 +12,7 @@ async function main() {
 
     await changeConstantInFiles(
         "./contracts",
-        ["StrategyExecutor", "ActionManager", "ActionExecutor", "ActionBase", "ProxyAuth"],
+        ["StrategyExecutor", "ActionManager", "ActionExecutor", "ActionBase", "ProxyAuth", "SubscriptionProxy"],
         "REGISTRY_ADDR",
          registry.address
     );

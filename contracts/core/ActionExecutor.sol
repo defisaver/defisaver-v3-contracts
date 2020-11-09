@@ -64,8 +64,6 @@ contract ActionExecutor is FlashLoanReceiverBase {
             returnValues[0] = bytes32(_flData.loanAmount);
         }
 
-        Subscriptions sub = Subscriptions(registry.getAddr(keccak256("Subscriptions")));
-
         for (; i < _actionIds.length; ++i) {
             returnValues[i] = IDSProxy(_proxy).execute{value: address(this).balance}(
                 registry.getAddr(_actionIds[i]),

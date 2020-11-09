@@ -17,23 +17,22 @@ contract McdWithdraw is ActionBase, McdHelper {
     IManager public constant manager = IManager(MANAGER_ADDRESS);
     IVat public constant vat = IVat(VAT_ADDRESS);
 
-    function executeAction(uint, bytes memory _callData, bytes32[] memory _returnValues) override public payable returns (bytes32) {
-        (uint cdpId, uint amount, address joinAddr) = parseParamData(_callData, _returnValues);
+    function executeAction(
+        bytes[] memory _callData,
+        bytes[] memory _subData,
+        uint8[] memory _paramMapping,
+        bytes32[] memory _returnValues
+    ) override public payable returns (bytes32) {
 
-        uint frobAmount = amount;
+        uint cdpId = abi.decode(_callData[0], (uint256));
+        uint amount = abi.decode(_callData[1], (uint256));
+        address joinAddr = abi.decode(_callData[2], (address));
 
-        if (IJoin(joinAddr).dec() != 18) {
-            frobAmount = amount * (10 ** (18 - IJoin(joinAddr).dec()));
-        }
+        cdpId = _parseParamUint(cdpId, _paramMapping[0], _subData, _returnValues);
+        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
+        joinAddr = _parseParamAddr(joinAddr, _paramMapping[2], _subData, _returnValues);
 
-        manager.frob(cdpId, -toPositiveInt(frobAmount), 0);
-        manager.flux(cdpId, address(this), frobAmount);
-
-        IJoin(joinAddr).exit(address(this), amount);
-
-        if (isEthJoinAddr(joinAddr)) {
-            IJoin(joinAddr).gem().withdraw(amount); // Weth -> Eth
-        }
+        amount = mcdWithdraw(cdpId, amount, joinAddr);
 
         logger.Log(address(this), msg.sender, "McdWithdraw", abi.encode(cdpId, amount, joinAddr));
 
@@ -44,27 +43,22 @@ contract McdWithdraw is ActionBase, McdHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    function parseParamData(
-        bytes memory _data,
-        bytes32[] memory _returnValues
-    ) public pure returns (uint cdpId,uint amount, address joinAddr) {
-        uint8[] memory inputMapping;
+    function mcdWithdraw(uint _cdpId, uint _amount, address _joinAddr) internal returns (uint) {
+        uint frobAmount = _amount;
 
-        (cdpId, amount, joinAddr, inputMapping) = abi.decode(_data, (uint256,uint256,address,uint8[]));
-
-        // mapping return values to new inputs
-        if (inputMapping.length > 0 && _returnValues.length > 0) {
-            for (uint i = 0; i < inputMapping.length; i += 2) {
-                bytes32 returnValue = _returnValues[inputMapping[i + 1]];
-
-                if (inputMapping[i] == 0) {
-                    cdpId = uint(returnValue);
-                } else if (inputMapping[i] == 1) {
-                    amount = uint(returnValue);
-                } else if (inputMapping[i] == 2) {
-                    joinAddr = address(bytes20(returnValue));
-                }
-            }
+        if (IJoin(_joinAddr).dec() != 18) {
+            frobAmount = _amount * (10 ** (18 - IJoin(_joinAddr).dec()));
         }
+
+        manager.frob(_cdpId, -toPositiveInt(frobAmount), 0);
+        manager.flux(_cdpId, address(this), frobAmount);
+
+        IJoin(_joinAddr).exit(address(this), _amount);
+
+        if (isEthJoinAddr(_joinAddr)) {
+            IJoin(_joinAddr).gem().withdraw(_amount); // Weth -> Eth
+        }
+
+        return _amount;
     }
 }

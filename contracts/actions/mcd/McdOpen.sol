@@ -5,9 +5,9 @@ pragma experimental ABIEncoderV2;
 
 import "../../interfaces/mcd/IJoin.sol";
 import "../../interfaces/mcd/IManager.sol";
-import "../ActionBase2.sol";
+import "../ActionBase.sol";
 
-contract McdOpen is ActionBase2 {
+contract McdOpen is ActionBase {
 
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     IManager public constant manager = IManager(MANAGER_ADDRESS);

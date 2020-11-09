@@ -12,7 +12,6 @@ import "../../utils/SafeERC20.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
 
-
 contract McdPayback is ActionBase, McdHelper {
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
@@ -25,28 +24,23 @@ contract McdPayback is ActionBase, McdHelper {
     IManager public constant manager = IManager(MANAGER_ADDRESS);
     IVat public constant vat = IVat(VAT_ADDRESS);
 
-    function executeAction(uint, bytes memory _callData, bytes32[] memory _returnValues) override public payable returns (bytes32) {
-        (uint cdpId, uint amount, address from) = parseParamData(_callData, _returnValues);
+    function executeAction(
+        bytes[] memory _callData,
+        bytes[] memory _subData,
+        uint8[] memory _paramMapping,
+        bytes32[] memory _returnValues
+    ) override public payable returns (bytes32) {
+        uint cdpId = abi.decode(_callData[0], (uint256));
+        uint amount = abi.decode(_callData[1], (uint256));
+        address from = abi.decode(_callData[2], (address));
+
+        cdpId = _parseParamUint(cdpId, _paramMapping[0], _subData, _returnValues);
+        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
+        from = _parseParamAddr(from, _paramMapping[2], _subData, _returnValues);
 
         pullTokens(from, amount);
 
-        address urn = manager.urns(cdpId);
-        bytes32 ilk = manager.ilks(cdpId);
-
-        uint wholeDebt = getAllDebt(VAT_ADDRESS, urn, urn, ilk);
-
-        if (amount > wholeDebt) {
-            IERC20(DAI_ADDRESS).transfer(getOwner(manager, cdpId), sub(amount, wholeDebt));
-            amount = wholeDebt;
-        }
-
-        if (IERC20(DAI_ADDRESS).allowance(address(this), DAI_JOIN_ADDRESS) == 0) {
-            IERC20(DAI_ADDRESS).approve(DAI_JOIN_ADDRESS, uint(-1));
-        }
-
-        IDaiJoin(DAI_JOIN_ADDRESS).join(urn, amount);
-
-        manager.frob(cdpId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, ilk));
+        amount = mcdPayback(cdpId, amount);
 
         logger.Log(address(this), msg.sender, "McdPayback", abi.encode(cdpId, amount, from));
 
@@ -57,28 +51,26 @@ contract McdPayback is ActionBase, McdHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    function parseParamData(
-        bytes memory _data,
-        bytes32[] memory _returnValues
-    ) public pure returns (uint cdpId,uint amount, address from) {
-        uint8[] memory inputMapping;
+    function mcdPayback(uint _cdpId, uint _amount) internal returns (uint) {
+        address urn = manager.urns(_cdpId);
+        bytes32 ilk = manager.ilks(_cdpId);
 
-        (cdpId, amount, from, inputMapping) = abi.decode(_data, (uint256,uint256,address,uint8[]));
+        uint wholeDebt = getAllDebt(VAT_ADDRESS, urn, urn, ilk);
 
-        // mapping return values to new inputs
-        if (inputMapping.length > 0 && _returnValues.length > 0) {
-            for (uint i = 0; i < inputMapping.length; i += 2) {
-                bytes32 returnValue = _returnValues[inputMapping[i + 1]];
-
-                if (inputMapping[i] == 0) {
-                    cdpId = uint(returnValue);
-                } else if (inputMapping[i] == 1) {
-                    amount = uint(returnValue);
-                } else if (inputMapping[i] == 2) {
-                    from = address(bytes20(returnValue));
-                }
-            }
+        if (_amount > wholeDebt) {
+            IERC20(DAI_ADDRESS).transfer(getOwner(manager, _cdpId), sub(_amount, wholeDebt));
+            _amount = wholeDebt;
         }
+
+        if (IERC20(DAI_ADDRESS).allowance(address(this), DAI_JOIN_ADDRESS) == 0) {
+            IERC20(DAI_ADDRESS).approve(DAI_JOIN_ADDRESS, uint(-1));
+        }
+
+        IDaiJoin(DAI_JOIN_ADDRESS).join(urn, _amount);
+
+        manager.frob(_cdpId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, ilk));
+
+        return _amount;
     }
 
     function pullTokens(address _from, uint _amount) internal {

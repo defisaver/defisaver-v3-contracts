@@ -28,7 +28,9 @@ contract ActionManager is GeneralizedFLTaker, ProxyPermission {
     ) public payable {
         (uint256 flAmount, address flToken, uint8 flType) = checkFl(
             _actionIds[0],
-            _actionsCallData[0]
+            _actionsCallData[0],
+            _actionSubData[0],
+            _paramMapping[0]
         );
 
         address payable actionExecutorAddr = payable(registry.getAddr(keccak256("ActionExecutor")));
@@ -71,30 +73,27 @@ contract ActionManager is GeneralizedFLTaker, ProxyPermission {
         DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, _name, "");
     }
 
-    /// @notice Checks if the first action is a FL and gets it's data
-    /// @param _actionId Id of first action
-    /// @param _firstAction First action call data
-    function checkFl(bytes32 _actionId, bytes[] memory _firstAction)
-        internal
-        returns (
-            uint256,
-            address,
-            uint8
-        )
+    function checkFl(
+        bytes32 _actionId,
+        bytes[] memory _callData,
+        bytes[] memory _subData,
+        uint8[] memory _paramMapping
+    ) internal returns (uint256, address, uint8)
     {
         address payable flActionAddr = payable(registry.getAddr(_actionId));
 
         if (IFLAction(flActionAddr).actionType() == 0) {
-            // bytes memory flData = IFLAction(flActionAddr).executeAction(
-            //     _actionId,
-            //     _firstAction
-            // );
-            // (uint256 flAmount, address loanAddr, uint8 flType) = abi.decode(
-            //     flData,
-            //     (uint256, address, uint8)
-            // );
+            bytes memory flData = IFLAction(flActionAddr).executeAction(
+                _callData,
+                _subData,
+                _paramMapping
+            );
+            (uint256 flAmount, address loanAddr, uint8 flType) = abi.decode(
+                flData,
+                (uint256, address, uint8)
+            );
 
-            // return (flAmount, loanAddr, flType);
+            return (flAmount, loanAddr, flType);
         }
 
         return (0, address(0), 0);

@@ -9,8 +9,14 @@ import "../ActionBase.sol";
 contract DFSSell is ActionBase, DFSExchangeCore {
     using SafeERC20 for IERC20;
 
-    function executeAction(uint, bytes memory _callData, bytes32[] memory _returnValues) override public payable returns (bytes32) {
-        (ExchangeData memory exchangeData, address from, address to) = parseParamData(_callData, _returnValues);
+    function executeAction(
+        bytes[] memory _callData,
+        bytes[] memory _subData,
+        uint8[] memory _paramMapping,
+        bytes32[] memory _returnValues
+    ) override public payable returns (bytes32) {
+        (ExchangeData memory exchangeData, address from, address to) 
+            = parseParamData(_callData, _subData, _paramMapping, _returnValues);
 
         pullTokens(exchangeData.srcAddr, from, exchangeData.srcAmount);
 
@@ -51,32 +57,23 @@ contract DFSSell is ActionBase, DFSExchangeCore {
     }
 
     function parseParamData(
-        bytes memory _data,
+        bytes[] memory _callData,
+        bytes[] memory _subData,
+        uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public pure returns (ExchangeData memory exchangeData, address from, address to) {
-        uint8[] memory inputMapping;
-        bytes memory exData;
-
-        (exData, from, to, inputMapping) = abi.decode(_data, (bytes,address,address,uint8[]));
+        bytes memory exData = abi.decode(_callData[0], (bytes));
+        from = abi.decode(_callData[1], (address));
+        to = abi.decode(_callData[2], (address));
 
         exchangeData = unpackExchangeData(exData);
 
-        // mapping return values to new inputs
-        if (inputMapping.length > 0 && _returnValues.length > 0) {
-            for (uint i = 0; i < inputMapping.length; i += 2) {
-                bytes32 returnValue = _returnValues[inputMapping[i + 1]];
+        exchangeData.srcAddr = _parseParamAddr(exchangeData.srcAddr, _paramMapping[0], _subData, _returnValues);
+        exchangeData.destAddr = _parseParamAddr(exchangeData.destAddr, _paramMapping[1], _subData, _returnValues);
 
-                if (inputMapping[i] == 0) {
-                    exchangeData.srcAddr = address(bytes20(returnValue));
-                } else if (inputMapping[i] == 1) {
-                    exchangeData.destAddr = address(bytes20(returnValue));
-                } else if (inputMapping[i] == 2) {
-                    exchangeData.srcAmount = uint(returnValue);
-                } else if (inputMapping[i] == 3) {
-                    from = address(bytes20(returnValue));
-                }
-            }
-        }
+        exchangeData.srcAmount = _parseParamUint(exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues);
+        from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
+        to = _parseParamAddr(to, _paramMapping[4], _subData, _returnValues);
     }
 
 }

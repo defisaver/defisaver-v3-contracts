@@ -10,9 +10,17 @@ contract FLTaker is IFLAction {
 
     DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
 
-    function executeAction(uint _actionId, bytes memory _callData) override public returns (bytes memory) {
+    function executeAction(
+        bytes[] memory _callData,
+        bytes[] memory,
+        uint8[] memory
+    ) override public returns (bytes memory) {
 
-        (uint amount, address token, uint8 flType) = parseParamData(_callData);
+        uint amount = abi.decode(_callData[0], (uint));
+        address token = abi.decode(_callData[1], (address));
+        uint8 flType = abi.decode(_callData[2], (uint8));
+
+        // parse sub data?
 
         logger.Log(address(this), msg.sender, "FLTaker", abi.encode(amount, token, flType));
 

@@ -21,70 +21,63 @@ contract McdSupply is ActionBase, McdHelper {
 
     using SafeERC20 for IERC20;
 
-    function executeAction(uint, bytes memory _callData, bytes32[] memory _returnValues) override public payable returns (bytes32) {
-        int convertAmount = 0;
+    function executeAction(
+        bytes[] memory _callData,
+        bytes[] memory _subData,
+        uint8[] memory _paramMapping,
+        bytes32[] memory _returnValues
+    ) override public payable returns (bytes32) {
+        uint cdpId = abi.decode(_callData[0], (uint256));
+        uint amount = abi.decode(_callData[1], (uint256));
+        address joinAddr = abi.decode(_callData[2], (address));
+        address from = abi.decode(_callData[3], (address));
 
-        (uint cdpId, uint amount, address joinAddr, address from) = parseParamData(_callData, _returnValues);
+        cdpId = _parseParamUint(cdpId, _paramMapping[0], _subData, _returnValues);
+        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
+        joinAddr = _parseParamAddr(joinAddr, _paramMapping[2], _subData, _returnValues);
+        from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
 
         pullTokens(joinAddr, from, amount);
 
-        if (isEthJoinAddr(joinAddr)) {
-            IJoin(joinAddr).gem().deposit{value: amount}();
-            convertAmount = toPositiveInt(amount);
-        } else {
-            convertAmount = toPositiveInt(convertTo18(joinAddr, amount));
-        }
-
-        IJoin(joinAddr).gem().approve(joinAddr, amount);
-        IJoin(joinAddr).join(address(this), amount);
-
-        vat.frob(
-            manager.ilks(cdpId),
-            manager.urns(cdpId),
-            address(this),
-            address(this),
-            convertAmount,
-            0
-        );
+        int returnAmount = mcdSupply(cdpId, amount, joinAddr);
 
         logger.Log(address(this), msg.sender, "McdSupply", abi.encode(cdpId, amount, joinAddr, from));
 
-        return bytes32(convertAmount);
+        return bytes32(returnAmount);
     }
 
     function actionType() override public pure returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    function parseParamData(
-        bytes memory _data,
-        bytes32[] memory _returnValues
-    ) public pure returns (uint cdpId,uint amount, address joinAddr, address from) {
-        uint8[] memory inputMapping;
+    function mcdSupply(uint _cdpId, uint _amount, address _joinAddr) internal returns(int) {
+        int convertAmount = 0;
 
-        (cdpId, amount, joinAddr, from, inputMapping) = abi.decode(_data, (uint256,uint256,address,address,uint8[]));
-
-        // mapping return values to new inputs
-        if (inputMapping.length > 0 && _returnValues.length > 0) {
-            for (uint i = 0; i < inputMapping.length; i += 2) {
-                bytes32 returnValue = _returnValues[inputMapping[i + 1]];
-
-                if (inputMapping[i] == 0) {
-                    cdpId = uint(returnValue);
-                } else if (inputMapping[i] == 1) {
-                    amount = uint(returnValue);
-                } else if (inputMapping[i] == 2) {
-                    joinAddr = address(bytes20(returnValue));
-                } else if (inputMapping[i] == 3) {
-                    from = address(bytes20(returnValue));
-                }
-            }
+        if (isEthJoinAddr(_joinAddr)) {
+            IJoin(_joinAddr).gem().deposit{value: _amount}();
+            convertAmount = toPositiveInt(_amount);
+        } else {
+            convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
         }
+
+        IJoin(_joinAddr).gem().approve(_joinAddr, _amount);
+        IJoin(_joinAddr).join(address(this), _amount);
+
+        vat.frob(
+            manager.ilks(_cdpId),
+            manager.urns(_cdpId),
+            address(this),
+            address(this),
+            convertAmount,
+            0
+        );
+
+        return convertAmount;
     }
 
-    function pullTokens(address _joinAddr, address _from, uint _amount) internal {
-        if (_from != address(0) && !isEthJoinAddr(_joinAddr)) {
-            IERC20(address(IJoin(_joinAddr).gem())).safeTransferFrom(_from, address(this), _amount);
+    function pullTokens(address __joinAddr, address _from, uint __amount) internal {
+        if (_from != address(0) && !isEthJoinAddr(__joinAddr)) {
+            IERC20(address(IJoin(__joinAddr).gem())).safeTransferFrom(_from, address(this), __amount);
         }
     }
 }
