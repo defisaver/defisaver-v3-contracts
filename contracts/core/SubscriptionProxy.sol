@@ -3,45 +3,86 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
+import "../auth/ProxyPermission.sol";
 import "../DS/DSGuard.sol";
 import "../DS/DSAuth.sol";
 import "./Subscriptions.sol";
+import "./DFSRegistry.sol";
 
 /// @title Handles auth and calls subscription contract
-contract SubscriptionProxy is StrategyData {
-    address public constant FACTORY_ADDRESS = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
+contract SubscriptionProxy is StrategyData, ProxyPermission {
 
-    function subscribe(
-        address _proxyAuthAddr,
-        address _subAddr,
-        uint templateId, 
-        bytes[][] memory actionData,
-        bytes[][] memory triggerData
+    address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
+    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+
+    bytes32 constant PROXY_AUTH_ID = keccak256("ProxyAuth");
+    bytes32 constant SUBSCRIPTION_ID = keccak256("Subscriptions");
+
+    function createStrategy(
+        uint _templateId,
+        bool _active,
+        bytes[][] memory _actionData,
+        bytes[][] memory _triggerData
     ) public {
-        address currAuthority = address(DSAuth(address(this)).authority());
-        DSGuard guard = DSGuard(currAuthority);
+        address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
+        address subAddr = registry.getAddr(SUBSCRIPTION_ID);
 
-        if (currAuthority == address(0)) {
-            guard = DSGuardFactory(FACTORY_ADDRESS).newGuard();
-            DSAuth(address(this)).setAuthority(DSAuthority(address(guard)));
-        }
+        givePermission(proxyAuthAddr);
 
-        guard.permit(_proxyAuthAddr, address(this), bytes4(keccak256("execute(address,bytes)")));
-
-        Subscriptions(_subAddr).subscribe(templateId, actionData, triggerData);
+        Subscriptions(subAddr).createStrategy(_templateId, _active, _actionData, _triggerData);
     }
 
-    // function update(
-    //     address _subAddr,
-    //     uint256 _subId,
-    //     Trigger[] memory _triggers,
-    //     Action[] memory _actions
-    // ) public {
-    //     Subscriptions(_subAddr).update(_subId, _triggers, _actions);
-    // }
+    function createTemplate(
+        string memory _name,
+        bytes32[] memory _triggerIds,
+        bytes32[] memory _actionIds,
+        uint8[][] memory _paramMapping
+    ) public {
+        address subAddr = registry.getAddr(SUBSCRIPTION_ID);
 
-    // TODO: should we remove permission if no more strategies left?
-    function unsubscribe(address _subAddr, uint256 _subId) public {
-        Subscriptions(_subAddr).unsubscribe(_subId);
+        Subscriptions(subAddr).createTemplate(_name, _triggerIds, _actionIds, _paramMapping);
+    }
+
+    function createTemplateAndStrategy(
+        string memory _name,
+        bytes32[] memory _triggerIds,
+        bytes32[] memory _actionIds,
+        uint8[][] memory _paramMapping,
+        bool _active,
+        bytes[][] memory _actionData,
+        bytes[][] memory _triggerData
+    ) public {
+        address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
+        address subAddr = registry.getAddr(SUBSCRIPTION_ID);
+
+        givePermission(proxyAuthAddr);
+
+        uint templateId = 
+            Subscriptions(subAddr).createTemplate(_name, _triggerIds, _actionIds, _paramMapping);
+
+        Subscriptions(subAddr).createStrategy(templateId, _active, _actionData, _triggerData);
+    }
+
+    function updateStrategy(
+        uint _strategyId,
+        uint _templateId,
+        bool _active,
+        bytes[][] memory _actionData,
+        bytes[][] memory _triggerData
+    ) public {
+        address subAddr = registry.getAddr(SUBSCRIPTION_ID);
+
+        Subscriptions(subAddr).updateStrategy(_strategyId, _templateId, _active, _actionData, _triggerData);
+    }
+
+    function unsubscribeStrategy(uint256 _strategyId) public {
+        address subAddr = registry.getAddr(SUBSCRIPTION_ID);
+
+        Subscriptions(subAddr).removeStrategy(_strategyId);
+
+        if (!Subscriptions(subAddr).userHasStrategies(address(this))) {
+            address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
+            removePermission(proxyAuthAddr);
+        }
     }
 }

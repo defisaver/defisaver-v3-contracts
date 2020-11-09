@@ -65,7 +65,7 @@ contract StrategyExecutor is StrategyData, GasBurner {
         Subscriptions _sub
     ) public {
 
-        bytes32[] memory triggerIds = _sub.getTriggerIds(_strategyId);
+        bytes32[] memory triggerIds = _sub.getTemplateFromStrategy(_strategyId).triggerIds;
 
         for (uint256 i = 0; i < triggerIds.length; ++i) {
             address triggerAddr = registry.getAddr(triggerIds[i]);
@@ -82,7 +82,7 @@ contract StrategyExecutor is StrategyData, GasBurner {
     function callActions(Strategy memory _strategy, bytes[][] memory _actionsCallData, Subscriptions _sub) internal {
         address actionManagerProxyAddr = registry.getAddr(keccak256("ActionManagerProxy"));
 
-        StrategyTemplate memory template = _sub.getTemplate(_strategy.templateId);
+        Template memory template = _sub.getTemplate(_strategy.templateId);
 
         ProxyAuth(PROXY_AUTH_ADDR).callExecute{value: msg.value}(
             _strategy.proxy,

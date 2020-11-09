@@ -1,53 +1,40 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.7.0;
+pragma experimental ABIEncoderV2;
 
 import "../../interfaces/mcd/IJoin.sol";
 import "../../interfaces/mcd/IManager.sol";
-import "../ActionBase.sol";
+import "../ActionBase2.sol";
 
-contract McdOpen is ActionBase {
+contract McdOpen is ActionBase2 {
 
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     IManager public constant manager = IManager(MANAGER_ADDRESS);
 
     function executeAction(
-        uint256,
-        bytes memory _callData,
+        bytes[] memory _callData,
+        bytes[] memory _subData,
+        uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public override payable virtual returns (bytes32) {
-        // parse call data
-        address joinAddr = parseParamData(_callData, _returnValues);
+        address joinAddr = abi.decode(_callData[0], (address));
 
-        bytes32 ilk = IJoin(joinAddr).ilk();
-        uint cdpId = manager.open(ilk, address(this));
+        joinAddr = _parseParamAddr(joinAddr, _paramMapping[0], _subData, _returnValues);
+
+        uint newCdpId = mcdOpen(joinAddr);
+
+        return bytes32(newCdpId);
+    }
+
+    function mcdOpen(address _joinAddr) internal returns (uint cdpId) {
+        bytes32 ilk = IJoin(_joinAddr).ilk();
+        cdpId = manager.open(ilk, address(this));
 
         logger.Log(address(this), msg.sender, "McdOpen", abi.encode(cdpId));
-
-        return bytes32(cdpId);
     }
 
     function actionType() public override pure virtual returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
-    }
-
-    function parseParamData(
-        bytes memory _data,
-        bytes32[] memory _returnValues
-    ) public pure returns (address joinAddr) {
-        uint8[] memory inputMapping;
-
-        (joinAddr, inputMapping) = abi.decode(_data, (address,uint8[]));
-
-        // mapping return values to new inputs
-        if (inputMapping.length > 0 && _returnValues.length > 0) {
-            for (uint i = 0; i < inputMapping.length; i += 2) {
-                bytes32 returnValue = _returnValues[inputMapping[i + 1]];
-
-                if (inputMapping[i] == 0) {
-                    joinAddr = address(bytes20(returnValue));
-                }
-            }
-        }
     }
 }

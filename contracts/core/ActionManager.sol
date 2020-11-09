@@ -74,7 +74,7 @@ contract ActionManager is GeneralizedFLTaker, ProxyPermission {
     /// @notice Checks if the first action is a FL and gets it's data
     /// @param _actionId Id of first action
     /// @param _firstAction First action call data
-    function checkFl(bytes32 _actionId, bytes memory _firstAction)
+    function checkFl(bytes32 _actionId, bytes[] memory _firstAction)
         internal
         returns (
             uint256,
