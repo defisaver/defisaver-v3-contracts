@@ -19,17 +19,11 @@ const {
 const encodeFLAction = (amount, tokenAddr, flType) => {
     const abiCoder = new ethers.utils.AbiCoder();
 
-    const encodeActionParams = abiCoder.encode(
-        ['uint256','address', 'uint8'],
-        [amount, tokenAddr, flType]
-    );
+    const amountEncoded = abiCoder.encode(['uint256'], [amount]);
+    const tokenEncoded = abiCoder.encode(['address'], [tokenAddr]);
+    const flTypeEncoded = abiCoder.encode(['uint8'], [flType]);
 
-    const encodeCallData = abiCoder.encode(
-        ['bytes32', 'bytes'],
-        [ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes('FLTaker')), encodeActionParams]
-    );
-
-    return encodeCallData;
+    return [amountEncoded, tokenEncoded, flTypeEncoded];
 };
 
 const AAVE_FL = 1;
@@ -37,7 +31,7 @@ const DYDX_FL = 2;
 
 describe("FL-Taker", function() {
 
-    let postDeployHead, provider;
+    let postDeployHead, provider, flTakerId;
 
     before(async () => {
         // provider = new hre.ethers.providers.Web3Provider(tenderlyRPC);
@@ -46,8 +40,11 @@ describe("FL-Taker", function() {
         // console.log(tenderlyRPC);
 
         await redeploy("FLTaker");
+        await redeploy("ActionManager");
 
         this.timeout(40000);
+
+        flTakerId = ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes('FLTaker'));
     
         // postDeployHead = tenderlyRPC.getHead();
         // tenderlyRPC.setHead(postDeployHead);
@@ -68,11 +65,11 @@ describe("FL-Taker", function() {
 
         const functionData = ActionManager.interface.encodeFunctionData(
             "manageActions",
-             ["Flashloan", [0], [flCallData]]
+             ["Flashloan", [flCallData], [[]], [[0, 0, 0]], [flTakerId]]
         );
 
         // value needed because of aave fl fee
-        await proxy['execute(address,bytes)'](actionManagerAddr, functionData, {value: ethers.utils.parseEther("0.01")});
+        await proxy['execute(address,bytes)'](actionManagerAddr, functionData, {value: ethers.utils.parseEther("0.01"), gasLimit: 1900000});
     });
 
     // // it('... should get an Dai Aave flash loan', async () => {
@@ -111,10 +108,10 @@ describe("FL-Taker", function() {
 
         const functionData = ActionManager.interface.encodeFunctionData(
             "manageActions",
-             ["Flashloan", [0], [flCallData]]
+            ["Flashloan", [flCallData], [[]], [[0, 0, 0]], [flTakerId]]
         );
 
         // value needed because of 2 wei dydx fee
-        await proxy['execute(address,bytes)'](actionManagerAddr, functionData, {value: 100});
+        await proxy['execute(address,bytes)'](actionManagerAddr, functionData, {value: 100, gasLimit: 2900000});
     });
 });

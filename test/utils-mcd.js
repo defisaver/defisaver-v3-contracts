@@ -19,7 +19,8 @@ const getVaultsForUser = async (user, makerAddresses) => {
     return vaults;
 };
 
+
 module.exports = {
     fetchMakerAddresses,
-    getVaultsForUser,
+    getVaultsForUser
 };

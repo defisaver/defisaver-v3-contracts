@@ -62,11 +62,10 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public pure returns (ExchangeData memory exchangeData, address from, address to) {
-        bytes memory exData = abi.decode(_callData[0], (bytes));
         from = abi.decode(_callData[1], (address));
         to = abi.decode(_callData[2], (address));
 
-        exchangeData = unpackExchangeData(exData);
+        exchangeData = unpackExchangeData(_callData[0]);
 
         exchangeData.srcAddr = _parseParamAddr(exchangeData.srcAddr, _paramMapping[0], _subData, _returnValues);
         exchangeData.destAddr = _parseParamAddr(exchangeData.destAddr, _paramMapping[1], _subData, _returnValues);

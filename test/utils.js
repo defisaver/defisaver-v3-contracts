@@ -12,6 +12,19 @@ const OASIS_WRAPPER = '0x2aD7D86C56b7a09742213e1e649C727cB4991A54';
 
 const MAX_UINT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
+const standardAmounts = {
+    'ETH': '1',
+    'BAT': '1500',
+    'USDC': '200',
+    'WBTC': '0.02',
+    'ZRX': '700',
+    'KNC': '300',
+    'MANA': '2500',
+    'PAXUSD': '200',
+    'COMP': '2',
+    'LRC': '2000',
+    'LINK': '25'
+};
 
 const getAddrFromRegistry = async (name) => {
     const registryInstance = await hre.ethers.getContractFactory("DFSRegistry");
@@ -58,7 +71,11 @@ const send = async (tokenAddr, to, amount) => {
 const approve = async (tokenAddr, to) => {
     const tokenContract = await hre.ethers.getContractAt("IERC20", tokenAddr);
 
-    await tokenContract.approve(to, MAX_UINT);
+    const allowance = await tokenContract.allowance(tokenContract.signer.address, to);
+
+    if (allowance.toString() == '0') {
+        await tokenContract.approve(to, MAX_UINT, {gasLimit: 1000000});
+    }
 };
 
 const balanceOf = async (tokenAddr, addr) => {
@@ -83,6 +100,7 @@ module.exports = {
     send,
     approve,
     balanceOf,
+    standardAmounts,
     nullAddress,
     REGISTRY_ADDR,
     KYBER_WRAPPER,

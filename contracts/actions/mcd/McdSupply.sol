@@ -11,7 +11,6 @@ import "../../utils/SafeERC20.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
 
-
 contract McdSupply is ActionBase, McdHelper {
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
@@ -36,6 +35,8 @@ contract McdSupply is ActionBase, McdHelper {
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
         joinAddr = _parseParamAddr(joinAddr, _paramMapping[2], _subData, _returnValues);
         from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
+
+        address a = address(IJoin(joinAddr).gem());
 
         pullTokens(joinAddr, from, amount);
 
@@ -75,9 +76,9 @@ contract McdSupply is ActionBase, McdHelper {
         return convertAmount;
     }
 
-    function pullTokens(address __joinAddr, address _from, uint __amount) internal {
-        if (_from != address(0) && !isEthJoinAddr(__joinAddr)) {
-            IERC20(address(IJoin(__joinAddr).gem())).safeTransferFrom(_from, address(this), __amount);
+    function pullTokens(address _joinAddr, address _from, uint _amount) internal {
+        if (_from != address(0) && !isEthJoinAddr(_joinAddr)) {
+            IERC20(address(IJoin(_joinAddr).gem())).safeTransferFrom(_from, address(this), _amount);
         }
     }
 }

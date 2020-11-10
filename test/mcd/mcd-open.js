@@ -16,16 +16,9 @@ const {
     getVaultsForUser,
 } = require('../utils-mcd');
 
-const encodeMcdOpenAction = (joinAddr) => {
-    const abiCoder = new ethers.utils.AbiCoder();
-
-    const encodeActionParams = abiCoder.encode(
-        ['address', 'uint8[]'],
-        [joinAddr, []]
-    );
-
-    return encodeActionParams;
-};
+const {
+    openMcd,
+} = require('../actions.js');
 
 describe("Mcd-Open", function() {
 
@@ -45,19 +38,11 @@ describe("Mcd-Open", function() {
     for (let i = 0; i < mcdCollateralAssets.length; ++i) {
         const tokenData = mcdCollateralAssets[i];
 
-        it(`... should open an empty  ${tokenData.ilkLabel} Maker vault`, async () => {
-            const callData = encodeMcdOpenAction(ilkToJoinMap[tokenData.ilk]);
-
+        it(`... should open an empty ${tokenData.ilkLabel} Maker vault`, async () => {
             const vaultsBefore = await getVaultsForUser(proxy.address, makerAddresses);
             const numVaultsForUser = vaultsBefore[0].length;
 
-            const McdOpen = await ethers.getContractFactory("McdOpen");
-            const functionData = McdOpen.interface.encodeFunctionData(
-                "executeAction",
-                 [0, callData, []]
-            );
-    
-            await proxy['execute(address,bytes)'](mcdOpenAddr, functionData);
+            await openMcd(proxy, makerAddresses, ilkToJoinMap[tokenData.ilk]);
 
             const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
             const numVaultsForUserAfter = vaultsAfter[0].length;
@@ -74,7 +59,7 @@ describe("Mcd-Open", function() {
         const McdOpen = await ethers.getContractFactory("McdOpen");
         const functionData = McdOpen.interface.encodeFunctionData(
             "executeAction",
-                [0, callData, []]
+                [[callData], [], [0], []]
         );
 
         try {
@@ -83,7 +68,6 @@ describe("Mcd-Open", function() {
         } catch (err) {
             expect(true).to.be.true; 
         }
-
     });
 
 });
