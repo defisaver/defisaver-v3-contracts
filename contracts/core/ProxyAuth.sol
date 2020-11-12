@@ -12,9 +12,12 @@ contract ProxyAuth is AdminAuth {
     address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
+    bytes32 constant STRATEGY_EXECUTOR_ID = keccak256("StrategyExecutor");
+    string public constant ERR_SENDER_NOT_EXECUTOR = "Sender not executor addr";
+
     modifier onlyExecutor {
-        address executorAddr = registry.getAddr(keccak256("StrategyExecutor"));
-        require(msg.sender == executorAddr, "msg.sender not executor addr");
+        address executorAddr = registry.getAddr(STRATEGY_EXECUTOR_ID);
+        require(msg.sender == executorAddr, ERR_SENDER_NOT_EXECUTOR);
         _;
     }
 

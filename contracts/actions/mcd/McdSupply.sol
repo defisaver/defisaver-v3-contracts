@@ -36,8 +36,6 @@ contract McdSupply is ActionBase, McdHelper {
         joinAddr = _parseParamAddr(joinAddr, _paramMapping[2], _subData, _returnValues);
         from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
 
-        address a = address(IJoin(joinAddr).gem());
-
         pullTokens(joinAddr, from, amount);
 
         int returnAmount = mcdSupply(cdpId, amount, joinAddr);

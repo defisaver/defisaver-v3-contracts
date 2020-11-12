@@ -17,11 +17,11 @@ const standardAmounts = {
     'BAT': '1500',
     'USDC': '200',
     'WBTC': '0.02',
-    'ZRX': '700',
-    'KNC': '300',
-    'MANA': '2500',
+    'ZRX': '1000',
+    'KNC': '400',
+    'MANA': '6000',
     'PAXUSD': '200',
-    'COMP': '2',
+    'COMP': '3',
     'LRC': '2000',
     'LINK': '25'
 };

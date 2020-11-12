@@ -21,10 +21,13 @@ contract McdGenerate is ActionBase, McdHelper {
     address public constant JUG_ADDRESS = 0x19c0976f590D67707E62397C87829d896Dc0f1F1;
     address public constant SPOTTER_ADDRESS = 0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3;
     address public constant DAI_JOIN_ADDRESS = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
+    address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
     IManager public constant manager = IManager(MANAGER_ADDRESS);
     IVat public constant vat = IVat(VAT_ADDRESS);
     ISpotter public constant spotter = ISpotter(SPOTTER_ADDRESS);
+
+    using SafeERC20 for IERC20;
 
     function executeAction(
         bytes[] memory _callData,
@@ -34,11 +37,15 @@ contract McdGenerate is ActionBase, McdHelper {
     ) public payable override returns (bytes32) {
         uint cdpId = abi.decode(_callData[0], (uint));
         uint amount = abi.decode(_callData[1], (uint));
+        address to = abi.decode(_callData[2], (address));
 
         cdpId = _parseParamUint(cdpId, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
+        to = _parseParamAddr(to, _paramMapping[2], _subData, _returnValues);
 
         amount = mcdGenerate(cdpId, amount);
+
+        withdrawDai(to, amount);
 
         return bytes32(amount);
     }
@@ -71,6 +78,12 @@ contract McdGenerate is ActionBase, McdHelper {
         logger.Log(address(this), msg.sender, "McdGenerate", abi.encode(_cdpId, _amount));
 
         return _amount;
+    }
+
+    function withdrawDai(address _to, uint _amount) internal {
+        if (address(this) != _to) {
+            IERC20(DAI_ADDRESS).safeTransfer(_to, _amount);
+        }
     }
 
     /// @notice Gets the maximum amount of debt available to generate

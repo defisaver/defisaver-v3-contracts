@@ -53,20 +53,6 @@ describe("Mcd-Supply", function() {
             const joinAddr = ilkToJoinMap[tokenData.ilk];
             const from = senderAcc.address;
 
-            // buy tokens if needed
-            const tokenBalance = await balanceOf(tokenData.address, senderAcc.address);
-
-            if (tokenBalance.lt(amount)) {
-                await sell(
-                    proxy,
-                    'ETH',
-                    tokenData.symbol,
-                    '2',
-                    senderAcc.address,
-                    senderAcc.address
-                );
-            }
-
            await supplyMcd(proxy, tokenData.symbol, tokenData.address, vaultId, amount, joinAddr, from);
         });
 

@@ -47,7 +47,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
     }
 
     function withdrawTokens(address _token, address _to, uint _amount) internal {
-        if (_to != address(0)) {
+        if (_to != address(0) || _to != address(this)) {
             if (_token != KYBER_ETH_ADDRESS) {
                 IERC20(_token).safeTransfer(_to, _amount);
             } else {

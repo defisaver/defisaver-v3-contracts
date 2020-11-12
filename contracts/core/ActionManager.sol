@@ -18,6 +18,8 @@ contract ActionManager is GeneralizedFLTaker, ProxyPermission {
     address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
+    bytes32 constant ACTION_EXECUTOR_ID = keccak256("ActionExecutor");
+
     /// @notice Checks and takes flash loan and calls Action Executor
     function manageActions(
         string memory _name,
@@ -33,7 +35,7 @@ contract ActionManager is GeneralizedFLTaker, ProxyPermission {
             _paramMapping[0]
         );
 
-        address payable actionExecutorAddr = payable(registry.getAddr(keccak256("ActionExecutor")));
+        address payable actionExecutorAddr = payable(registry.getAddr(ACTION_EXECUTOR_ID));
         bytes memory encodedActions = abi.encode(
             _actionsCallData,
             _actionSubData,

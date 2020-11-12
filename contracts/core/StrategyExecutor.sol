@@ -20,6 +20,14 @@ contract StrategyExecutor is StrategyData, GasBurner {
     address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
+    bytes32 constant BOT_AUTH_ID = keccak256("BotAuth");
+    bytes32 constant SUBSCRIPTION_ID = keccak256("Subscriptions");
+    bytes32 constant ACTION_MANAGER_ID = keccak256("ActionManager");
+
+    string public constant ERR_TRIGGER_NOT_ACTIVE = "Trigger not activated";
+    string public constant ERR_BOT_NOT_APPROVED = "Bot is not approved";
+    string public constant ERR_STARTEGY_NOT_ACTIVE = "Strategy is not active";
+
     /// @notice Checks all the triggers and executes actions
     /// @dev Only auhtorized callers can execute it
     /// @param _strategyId Id of the strategy
@@ -30,10 +38,10 @@ contract StrategyExecutor is StrategyData, GasBurner {
         bytes[][] memory _triggerCallData,
         bytes[][] memory _actionsCallData
     ) public burnGas {
-        Subscriptions sub = Subscriptions(registry.getAddr(keccak256("Subscriptions")));
+        Subscriptions sub = Subscriptions(registry.getAddr(SUBSCRIPTION_ID));
 
         Strategy memory strategy = sub.getStrategy(_strategyId);
-        require(strategy.active, "Strategy is not active");
+        require(strategy.active, ERR_STARTEGY_NOT_ACTIVE);
 
         // check bot auth
         checkCallerAuth(_strategyId);
@@ -48,10 +56,10 @@ contract StrategyExecutor is StrategyData, GasBurner {
     /// @notice Checks if msg.sender has auth, reverts if not
     /// @param _strategyId Id of the strategy
     function checkCallerAuth(uint256 _strategyId) public view {
-        address botAuthAddr = registry.getAddr(keccak256("BotAuth"));
+        address botAuthAddr = registry.getAddr(BOT_AUTH_ID);
         require(
             BotAuth(botAuthAddr).isApproved(_strategyId, msg.sender),
-            "msg.sender is not approved"
+            ERR_BOT_NOT_APPROVED
         );
     }
 
@@ -72,7 +80,7 @@ contract StrategyExecutor is StrategyData, GasBurner {
 
             // TODO: change the 0
             bool isTriggered = ITrigger(triggerAddr).isTriggered(_triggerCallData[i][0], _strategy.triggerData[i][0]);
-            require(isTriggered, "Trigger not activated");
+            require(isTriggered, ERR_TRIGGER_NOT_ACTIVE);
         }
     }
 
@@ -80,7 +88,7 @@ contract StrategyExecutor is StrategyData, GasBurner {
     /// @param _strategy Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
     function callActions(Strategy memory _strategy, bytes[][] memory _actionsCallData, Subscriptions _sub) internal {
-        address actionManagerProxyAddr = registry.getAddr(keccak256("ActionManagerProxy"));
+        address actionManagerProxyAddr = registry.getAddr(ACTION_MANAGER_ID);
 
         Template memory template = _sub.getTemplate(_strategy.templateId);
 
