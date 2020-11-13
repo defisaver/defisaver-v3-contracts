@@ -29,12 +29,12 @@ abstract contract ActionBase {
     }
 
     function isReturnInjection(uint8 _type) internal pure returns (bool) {
-        return _type == 1;
+        return _type >= 1 && _type < 128;
     }
 
     function getReturnIndex(uint8 _type) internal pure returns (uint8) {
-        require(_type >= 2 && _type < 128, "Wrong return index value");
-        return _type - 2;
+        require(_type >= 1 && _type < 128, "Wrong return index value");
+        return _type - 1;
     }
 
     function getSubIndex(uint8 _type) internal pure returns (uint8) {

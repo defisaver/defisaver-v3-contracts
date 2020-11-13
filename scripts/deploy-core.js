@@ -12,7 +12,7 @@ async function main() {
 
     await changeConstantInFiles(
         "./contracts",
-        ["StrategyExecutor", "ActionManager", "ActionExecutor", "ActionBase", "ProxyAuth", "SubscriptionProxy"],
+        ["StrategyExecutor", "TaskManager", "ActionExecutor", "ActionBase", "ProxyAuth", "SubscriptionProxy"],
         "REGISTRY_ADDR",
          registry.address
     );
@@ -37,13 +37,13 @@ async function main() {
     const subscriptionProxy = await deployContract("SubscriptionProxy");
     const subscriptions = await deployContract("Subscriptions");
     const actionExecutor = await deployContract("ActionExecutor");
-    const actionManager = await deployContract("ActionManager");
+    const TaskManager = await deployContract("TaskManager");
 
     await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('StrategyExecutor')), strategyExecutor.address);
     await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('SubscriptionProxy')), subscriptionProxy.address);
     await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('Subscriptions')), subscriptions.address);
     await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('ActionExecutor')), actionExecutor.address);
-    await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('ActionManager')), actionManager.address);
+    await registry.changeInstant(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('TaskManager')), TaskManager.address);
 
     // // Actions deployment
     // const flTaker = await deployContract("FLTaker");

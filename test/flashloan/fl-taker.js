@@ -40,7 +40,7 @@ describe("FL-Taker", function() {
         // console.log(tenderlyRPC);
 
         await redeploy("FLTaker");
-        await redeploy("ActionManager");
+        await redeploy("TaskManager");
 
         this.timeout(40000);
 
@@ -56,35 +56,35 @@ describe("FL-Taker", function() {
 
         const proxy = await getProxy(senderAcc.address);
 
-        const actionManagerAddr = await getAddrFromRegistry('ActionManager');
+        const taskManagerAddr = await getAddrFromRegistry('TaskManager');
 
         const loanAmount = ethers.utils.parseEther("1");
         const flCallData = encodeFLAction(loanAmount, getAssetInfo('ETH').address, AAVE_FL);
 
-        const ActionManager = await ethers.getContractFactory("ActionManager");
+        const TaskManager = await ethers.getContractFactory("TaskManager");
 
-        const functionData = ActionManager.interface.encodeFunctionData(
-            "manageActions",
-             ["Flashloan", [flCallData], [[]], [[0, 0, 0]], [flTakerId]]
+        const functionData = TaskManager.interface.encodeFunctionData(
+            "executeTask",
+             [["Flashloan", [flCallData], [flTakerId], [[0, 0, 0]]]]
         );
 
         // value needed because of aave fl fee
-        await proxy['execute(address,bytes)'](actionManagerAddr, functionData, {value: ethers.utils.parseEther("0.01"), gasLimit: 1900000});
+        await proxy['execute(address,bytes)'](taskManagerAddr, functionData, {value: ethers.utils.parseEther("0.01"), gasLimit: 1900000});
     });
 
     // // it('... should get an Dai Aave flash loan', async () => {
     // //     const senderAcc = (await hre.ethers.getSigners())[0];
     // //     const proxy = await getProxy(senderAcc.address);
 
-    // //     const actionManagerAddr = await getAddrFromRegistry('ActionManager');
+    // //     const taskManagerAddr = await getAddrFromRegistry('TaskManager');
     // //     const actionExecutorAddr = await getAddrFromRegistry('ActionExecutor');
 
     // //     const loanAmount = ethers.utils.parseEther("100");
     // //     const flCallData = encodeFLAction(loanAmount, getAssetInfo('ETH').address, AAVE_FL);
 
-    // //     const ActionManager = await ethers.getContractFactory("ActionManager");
+    // //     const TaskManager = await ethers.getContractFactory("TaskManager");
 
-    // //     const functionData = ActionManager.interface.encodeFunctionData(
+    // //     const functionData = TaskManager.interface.encodeFunctionData(
     // //         "manageActions",
     // //          ["Flashloan", [0], [flCallData]]
     // //     );
@@ -92,26 +92,26 @@ describe("FL-Taker", function() {
     // //     // send dai for fee
     // //     await send(getAssetInfo('DAI').address, actionExecutorAddr, ethers.utils.parseEther("1"));
 
-    // //     await proxy['execute(address,bytes)'](actionManagerAddr, functionData);
+    // //     await proxy['execute(address,bytes)'](taskManagerAddr, functionData);
     // // });
 
     it('... should get an Eth DyDx flash loan', async () => {
         const senderAcc = (await hre.ethers.getSigners())[0];
         const proxy = await getProxy(senderAcc.address);
 
-        const actionManagerAddr = await getAddrFromRegistry('ActionManager');
+        const taskManagerAddr = await getAddrFromRegistry('TaskManager');
 
         const loanAmount = ethers.utils.parseEther("1");
         const flCallData = encodeFLAction(loanAmount, getAssetInfo('ETH').address, DYDX_FL);
 
-        const ActionManager = await ethers.getContractFactory("ActionManager");
+        const TaskManager = await ethers.getContractFactory("TaskManager");
 
-        const functionData = ActionManager.interface.encodeFunctionData(
-            "manageActions",
-            ["Flashloan", [flCallData], [[]], [[0, 0, 0]], [flTakerId]]
+        const functionData = TaskManager.interface.encodeFunctionData(
+            "executeTask",
+            [["Flashloan", [flCallData], [flTakerId], [[0, 0, 0]]]]
         );
 
         // value needed because of 2 wei dydx fee
-        await proxy['execute(address,bytes)'](actionManagerAddr, functionData, {value: 100, gasLimit: 2900000});
+        await proxy['execute(address,bytes)'](taskManagerAddr, functionData, {value: 100, gasLimit: 2900000});
     });
 });

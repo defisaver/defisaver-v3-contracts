@@ -22,7 +22,7 @@ contract StrategyExecutor is StrategyData, GasBurner {
 
     bytes32 constant BOT_AUTH_ID = keccak256("BotAuth");
     bytes32 constant SUBSCRIPTION_ID = keccak256("Subscriptions");
-    bytes32 constant ACTION_MANAGER_ID = keccak256("ActionManager");
+    bytes32 constant TASK_MANAGER_ID = keccak256("TaskManager");
 
     string public constant ERR_TRIGGER_NOT_ACTIVE = "Trigger not activated";
     string public constant ERR_BOT_NOT_APPROVED = "Bot is not approved";
@@ -50,7 +50,7 @@ contract StrategyExecutor is StrategyData, GasBurner {
         checkTriggers(_strategyId, strategy, _triggerCallData, sub);
 
         // execute actions
-        callActions(strategy, _actionsCallData, sub);
+        callActions(_strategyId, strategy, _actionsCallData);
     }
 
     /// @notice Checks if msg.sender has auth, reverts if not
@@ -87,21 +87,16 @@ contract StrategyExecutor is StrategyData, GasBurner {
     /// @notice Execute all the actions in order
     /// @param _strategy Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
-    function callActions(Strategy memory _strategy, bytes[][] memory _actionsCallData, Subscriptions _sub) internal {
-        address actionManagerProxyAddr = registry.getAddr(ACTION_MANAGER_ID);
-
-        Template memory template = _sub.getTemplate(_strategy.templateId);
+    function callActions(uint _strategyId, Strategy memory _strategy, bytes[][] memory _actionsCallData) internal {
+        address actionManagerProxyAddr = registry.getAddr(TASK_MANAGER_ID);
 
         ProxyAuth(PROXY_AUTH_ADDR).callExecute{value: msg.value}(
             _strategy.proxy,
             actionManagerProxyAddr,
             abi.encodeWithSignature(
-                "manageActions(string,bytes[][],bytes[][],uint8[][],bytes32[])",
-                template.name,
-                _actionsCallData,
-                _strategy.actionData,
-                template.paramMapping,
-                template.actionIds
+                "executeStrategyTask(uint256,bytes[][])",
+                _strategyId,
+                _actionsCallData
             )
         );
     }

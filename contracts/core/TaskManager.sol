@@ -12,13 +12,44 @@ import "./Subscriptions.sol";
 import "./ActionExecutor.sol";
 
 /// @title Handle FL taking and calls action executor
-contract ActionManager is GeneralizedFLTaker, ProxyPermission {
+contract TaskManager is StrategyData, GeneralizedFLTaker, ProxyPermission {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
     address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes32 constant ACTION_EXECUTOR_ID = keccak256("ActionExecutor");
+    bytes32 constant SUBSCRIPTION_ID = keccak256("Subscriptions");
+
+    /// @notice Called directly through Dsproxy to execute a task
+    function executeTask(
+        Task memory currTask
+    ) public payable {
+        manageActions(
+            currTask.name,
+            currTask.actionCallData,
+            currTask.actionSubData,
+            currTask.paramMapping,
+            currTask.actionIds
+        ); 
+    }
+
+    function executeStrategyTask(
+        uint _strategyId,
+        bytes[][] memory _actionCallData
+    ) public payable {
+        address subAddr = registry.getAddr(SUBSCRIPTION_ID);
+        Strategy memory strategy = Subscriptions(subAddr).getStrategy(_strategyId);
+        Template memory template = Subscriptions(subAddr).getTemplate(strategy.templateId);
+
+        manageActions(
+            template.name,
+            _actionCallData,
+            strategy.actionData,
+            template.paramMapping,
+            template.actionIds
+        ); 
+    }
 
     /// @notice Checks and takes flash loan and calls Action Executor
     function manageActions(
@@ -27,7 +58,7 @@ contract ActionManager is GeneralizedFLTaker, ProxyPermission {
         bytes[][] memory _actionSubData,
         uint8[][] memory _paramMapping,
         bytes32[] memory _actionIds
-    ) public payable {
+    ) internal {
         (uint256 flAmount, address flToken, uint8 flType) = checkFl(
             _actionIds[0],
             _actionsCallData[0],
@@ -57,7 +88,7 @@ contract ActionManager is GeneralizedFLTaker, ProxyPermission {
                 loanTokenAddr: address(0),
                 loanAmount: 0,
                 feeAmount: 0,
-                flType: ActionExecutor.FlType.DYDX_LOAN
+                flType: ActionExecutor.FlType.NO_LOAN
             });
 
             ActionExecutor(actionExecutorAddr).executeActions(

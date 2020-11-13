@@ -20,7 +20,9 @@ contract DFSSell is ActionBase, DFSExchangeCore {
 
         pullTokens(exchangeData.srcAddr, from, exchangeData.srcAmount);
 
+
         (, uint exchangedAmount) = _sell(exchangeData);
+
 
         withdrawTokens(exchangeData.destAddr, to, exchangedAmount);
 
