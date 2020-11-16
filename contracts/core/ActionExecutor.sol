@@ -65,8 +65,6 @@ contract ActionExecutor is FlashLoanReceiverBase {
         }
 
         for (; i < _actionIds.length; ++i) {
-            address a = registry.getAddr(_actionIds[i]);
-
             returnValues[i] = IDSProxy(_proxy).execute{value: address(this).balance}(
                 registry.getAddr(_actionIds[i]),
                 abi.encodeWithSignature(
