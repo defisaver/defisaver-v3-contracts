@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "../core/DFSRegistry.sol";
 
 abstract contract ActionBase {
-    address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
+    address public constant REGISTRY_ADDR = 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     DefisaverLogger public constant logger = DefisaverLogger(

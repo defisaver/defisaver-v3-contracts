@@ -34,18 +34,14 @@ contract DFSRegistry is AdminAuth {
         return entries[_id].contractAddr;
     }
 
-    /////////////////////////// ADMIN ONLY FUNCTIONS ///////////////////////////
-
-    // TODO: REMOVE ONLY FOR TESTING
-    function changeInstant(bytes32 _id, address _contractAddr) public onlyOwner {
-        entries[_id] = Entry({
-            contractAddr: _contractAddr,
-            waitPeriod: 0,
-            changeStartTime: 0,
-            inChange: false,
-            exists: true
-        });
+    /// @notice Helper function to easily query if id is registred
+    /// @param _id Id of contract
+    function isRegistered(bytes32 _id) public view returns (bool) {
+        return entries[_id].exists;
     }
+
+
+    /////////////////////////// OWNER ONLY FUNCTIONS ///////////////////////////
 
     /// @notice Adds a new contract to the registry
     /// @param _id Id of contract
@@ -101,7 +97,7 @@ contract DFSRegistry is AdminAuth {
         require(entries[_id].exists, ERR_ENTRY_NON_EXISTANT);
         require(entries[_id].inChange, ERR_ENTRY_NOT_IN_CHANGE);
         require(
-            (entries[_id].changeStartTime + entries[_id].waitPeriod) > block.timestamp, // solhint-disable-line
+            block.timestamp >= (entries[_id].changeStartTime + entries[_id].waitPeriod), // solhint-disable-line
             "Change not ready yet"
         );
 

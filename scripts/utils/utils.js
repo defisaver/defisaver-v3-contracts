@@ -25,13 +25,22 @@ async function changeConstantInFiles(dir, filenames, variable, value) {
 async function changeConstantInFile(dir, filename, variable, value) {
 	const filepath = (await getFile(dir, filename))[0]
 
+	const isJsFile = filepath.indexOf(".js") !== -1;
+
 	const data = await fsPromises.readFile(filepath, 'utf8');
 
 	const regexWithSpace = new RegExp(`${variable} =.*`, "g");
 	const regexWithoutSpace = new RegExp(`${variable}=.*`, "g");
 
-	let result = data.replace(regexWithSpace, `${variable} = ${value};`);
-	result = result.replace(regexWithoutSpace, `${variable} = ${value};`);
+	let result = '';
+
+	if (isJsFile) {
+		result = data.replace(regexWithSpace, `${variable} = '${value}';`);
+		result = result.replace(regexWithoutSpace, `${variable} = '${value}';`);
+	} else {
+		result = data.replace(regexWithSpace, `${variable} = ${value};`);
+		result = result.replace(regexWithoutSpace, `${variable} = ${value};`);
+	}
 
   	await fsPromises.writeFile(filepath, result, 'utf8');
 }

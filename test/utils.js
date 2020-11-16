@@ -2,7 +2,7 @@ const hre = require("hardhat");
 
 const { deployContract } = require("../scripts/utils/deployer");
 
-const REGISTRY_ADDR = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+const REGISTRY_ADDR = '0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6';
 
 const nullAddress = "0x0000000000000000000000000000000000000000";
 const WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
@@ -49,15 +49,21 @@ const getProxy = async (acc) => {
     return dsProxy;
 };
 
-const redeploy = async (name) => {
+const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
     const registryInstance = await hre.ethers.getContractFactory("DFSRegistry");
-    const registry = await registryInstance.attach(REGISTRY_ADDR);
+    const registry = await registryInstance.attach(regAddr);
 
     const c = await deployContract(name);
+    const id = ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(name));
 
-    // console.log("Addr: ", c);
+    console.log(regAddr, ' IS reg: ', (await registry.isRegistered(id)));
 
-    await registry.changeInstant(ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(name)), c.address);
+    if (!(await registry.isRegistered(id))) {
+        await registry.addNewContract(id, c.address, 0);
+    } else {
+        await registry.startContractChange(id, c.address);
+        await registry.approveContractChange(id);
+    }
 
     return c;
 };

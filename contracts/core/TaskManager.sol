@@ -15,7 +15,7 @@ import "./ActionExecutor.sol";
 contract TaskManager is StrategyData, GeneralizedFLTaker, ProxyPermission {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
-    address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
+    address public constant REGISTRY_ADDR = 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes32 constant ACTION_EXECUTOR_ID = keccak256("ActionExecutor");
