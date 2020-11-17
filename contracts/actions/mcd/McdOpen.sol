@@ -6,9 +6,9 @@ pragma experimental ABIEncoderV2;
 import "../../interfaces/mcd/IJoin.sol";
 import "../../interfaces/mcd/IManager.sol";
 import "../ActionBase.sol";
+import "../../utils/GasBurner.sol";
 
-contract McdOpen is ActionBase {
-
+contract McdOpen is ActionBase, GasBurner {
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     IManager public constant manager = IManager(MANAGER_ADDRESS);
 
@@ -17,24 +17,34 @@ contract McdOpen is ActionBase {
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public override payable virtual returns (bytes32) {
-        address joinAddr = abi.decode(_callData[0], (address));
+    ) public virtual override payable returns (bytes32) {
+        address joinAddr = parseInputs(_callData);
 
         joinAddr = _parseParamAddr(joinAddr, _paramMapping[0], _subData, _returnValues);
 
-        uint newCdpId = mcdOpen(joinAddr);
+        uint256 newVaultId = _mcdOpen(joinAddr);
 
-        return bytes32(newCdpId);
+        return bytes32(newVaultId);
     }
 
-    function mcdOpen(address _joinAddr) internal returns (uint cdpId) {
+    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+        address joinAddr = parseInputs(_callData);
+
+        _mcdOpen(joinAddr);
+    }
+
+    function _mcdOpen(address _joinAddr) internal returns (uint256 vaultId) {
         bytes32 ilk = IJoin(_joinAddr).ilk();
-        cdpId = manager.open(ilk, address(this));
+        vaultId = manager.open(ilk, address(this));
 
-        logger.Log(address(this), msg.sender, "McdOpen", abi.encode(cdpId));
+        logger.Log(address(this), msg.sender, "McdOpen", abi.encode(vaultId));
     }
 
-    function actionType() public override pure virtual returns (uint8) {
+    function parseInputs(bytes[] memory _callData) internal pure returns (address joinAddr) {
+        joinAddr = abi.decode(_callData[0], (address));
+    }
+
+    function actionType() public virtual override pure returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 }

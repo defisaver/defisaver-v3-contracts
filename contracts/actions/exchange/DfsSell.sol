@@ -5,8 +5,9 @@ pragma experimental ABIEncoderV2;
 
 import "../../exchange/DFSExchangeCore.sol";
 import "../ActionBase.sol";
+import "../../utils/GasBurner.sol";
 
-contract DFSSell is ActionBase, DFSExchangeCore {
+contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
     using SafeERC20 for IERC20;
 
     function executeAction(
@@ -14,41 +15,88 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) override public payable returns (bytes32) {
-        (ExchangeData memory exchangeData, address from, address to) 
-            = parseParamData(_callData, _subData, _paramMapping, _returnValues);
+    ) public override payable returns (bytes32) {
+        (ExchangeData memory exchangeData, address from, address to) = parseInputs(_callData);
 
-        pullTokens(exchangeData.srcAddr, from, exchangeData.srcAmount);
+        exchangeData.srcAddr = _parseParamAddr(
+            exchangeData.srcAddr,
+            _paramMapping[0],
+            _subData,
+            _returnValues
+        );
+        exchangeData.destAddr = _parseParamAddr(
+            exchangeData.destAddr,
+            _paramMapping[1],
+            _subData,
+            _returnValues
+        );
 
+        exchangeData.srcAmount = _parseParamUint(
+            exchangeData.srcAmount,
+            _paramMapping[2],
+            _subData,
+            _returnValues
+        );
+        from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
+        to = _parseParamAddr(to, _paramMapping[4], _subData, _returnValues);
 
-        (, uint exchangedAmount) = _sell(exchangeData);
+        uint256 exchangedAmount = _dfsSell(exchangeData, from, to);
 
+        return bytes32(exchangedAmount);
+    }
 
-        withdrawTokens(exchangeData.destAddr, to, exchangedAmount);
+    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+        (ExchangeData memory exchangeData, address from, address to) = parseInputs(_callData);
 
-        logger.Log(address(this), msg.sender, "DfsSell",
+        _dfsSell(exchangeData, from, to);
+    }
+
+    function actionType() public override pure returns (uint8) {
+        return uint8(ActionType.STANDARD_ACTION);
+    }
+
+    function _dfsSell(
+        ExchangeData memory exchangeData,
+        address _from,
+        address _to
+    ) internal returns (uint256) {
+        pullTokens(exchangeData.srcAddr, _from, exchangeData.srcAmount);
+
+        (, uint256 exchangedAmount) = _sell(exchangeData);
+
+        withdrawTokens(exchangeData.destAddr, _to, exchangedAmount);
+
+        logger.Log(
+            address(this),
+            msg.sender,
+            "DfsSell",
             abi.encode(
                 exchangeData.srcAddr,
                 exchangeData.destAddr,
                 exchangeData.srcAddr,
                 exchangeData.destAddr,
                 exchangedAmount
-        ));
+            )
+        );
 
-        return bytes32(exchangedAmount);
+        return exchangedAmount;
     }
 
-    function actionType() override public pure returns (uint8) {
-        return uint8(ActionType.STANDARD_ACTION);
-    }
-
-    function pullTokens(address _token, address _from, uint _amount) internal {
+    function pullTokens(
+        address _token,
+        address _from,
+        uint256 _amount
+    ) internal {
         if (_from != address(0) && _token != KYBER_ETH_ADDRESS) {
             IERC20(_token).safeTransferFrom(_from, address(this), _amount);
         }
     }
 
-    function withdrawTokens(address _token, address _to, uint _amount) internal {
+    function withdrawTokens(
+        address _token,
+        address _to,
+        uint256 _amount
+    ) internal {
         if (_to != address(0) || _to != address(this)) {
             if (_token != KYBER_ETH_ADDRESS) {
                 IERC20(_token).safeTransfer(_to, _amount);
@@ -58,23 +106,18 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         }
     }
 
-    function parseParamData(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
-        uint8[] memory _paramMapping,
-        bytes32[] memory _returnValues
-    ) public pure returns (ExchangeData memory exchangeData, address from, address to) {
-        from = abi.decode(_callData[1], (address));
-        to = abi.decode(_callData[2], (address));
-
+    function parseInputs(bytes[] memory _callData)
+        public
+        pure
+        returns (
+            ExchangeData memory exchangeData,
+            address from,
+            address to
+        )
+    {
         exchangeData = unpackExchangeData(_callData[0]);
 
-        exchangeData.srcAddr = _parseParamAddr(exchangeData.srcAddr, _paramMapping[0], _subData, _returnValues);
-        exchangeData.destAddr = _parseParamAddr(exchangeData.destAddr, _paramMapping[1], _subData, _returnValues);
-
-        exchangeData.srcAmount = _parseParamUint(exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues);
-        from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[4], _subData, _returnValues);
+        from = abi.decode(_callData[1], (address));
+        to = abi.decode(_callData[2], (address));
     }
-
 }

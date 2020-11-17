@@ -22,7 +22,8 @@ const {
     openMcd,
     supplyMcd,
     sell,
-    encodeMcdSupplyAction
+    encodeMcdSupplyAction,
+    buyGasTokens
 } = require('../actions.js');
 
 const BigNumber = hre.ethers.BigNumber;
@@ -33,12 +34,15 @@ describe("Mcd-Supply", function() {
     let makerAddresses, senderAcc, proxy;
 
     before(async () => {
+        await redeploy('McdSupply');
         makerAddresses = await fetchMakerAddresses();
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
 
         this.timeout(40000);
+
+        // await buyGasTokens(proxy, senderAcc);
     });
 
     for (let i = 0; i < mcdCollateralAssets.length; ++i) {

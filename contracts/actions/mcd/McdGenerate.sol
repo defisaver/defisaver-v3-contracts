@@ -14,8 +14,9 @@ import "../../interfaces/mcd/IJug.sol";
 import "../../DS/DSMath.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
+import "../../utils/GasBurner.sol";
 
-contract McdGenerate is ActionBase, McdHelper {
+contract McdGenerate is ActionBase, McdHelper, GasBurner {
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
     address public constant JUG_ADDRESS = 0x19c0976f590D67707E62397C87829d896Dc0f1F1;
@@ -34,39 +35,45 @@ contract McdGenerate is ActionBase, McdHelper {
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public payable override returns (bytes32) {
-        uint cdpId = abi.decode(_callData[0], (uint));
-        uint amount = abi.decode(_callData[1], (uint));
-        address to = abi.decode(_callData[2], (address));
+    ) public override payable returns (bytes32) {
+        (uint256 cdpId, uint256 amount, address to) = parseInputs(_callData);
 
         cdpId = _parseParamUint(cdpId, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
         to = _parseParamAddr(to, _paramMapping[2], _subData, _returnValues);
 
-        amount = mcdGenerate(cdpId, amount);
-
-        withdrawDai(to, amount);
+        amount = _mcdGenerate(cdpId, amount, to);
 
         return bytes32(amount);
     }
 
-    function actionType() override public pure returns (uint8) {
+    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+        (uint256 cdpId, uint256 amount, address to) = parseInputs(_callData);
+
+        _mcdGenerate(cdpId, amount, to);
+    }
+
+    function actionType() public override pure returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    function mcdGenerate(uint _cdpId, uint _amount) internal returns (uint) {
+    function _mcdGenerate(
+        uint256 _cdpId,
+        uint256 _amount,
+        address _to
+    ) internal returns (uint256) {
         bytes32 ilk = manager.ilks(_cdpId);
 
-        uint rate = IJug(JUG_ADDRESS).drip(ilk);
-        uint daiVatBalance = vat.dai(manager.urns(_cdpId));
+        uint256 rate = IJug(JUG_ADDRESS).drip(ilk);
+        uint256 daiVatBalance = vat.dai(manager.urns(_cdpId));
 
-        uint maxAmount = getMaxDebt(_cdpId, ilk);
+        uint256 maxAmount = getMaxDebt(_cdpId, ilk);
 
         if (_amount >= maxAmount) {
             _amount = maxAmount;
         }
 
-        manager.frob(_cdpId, int(0), normalizeDrawAmount(_amount, rate, daiVatBalance));
+        manager.frob(_cdpId, int256(0), normalizeDrawAmount(_amount, rate, daiVatBalance));
         manager.move(_cdpId, address(this), toRad(_amount));
 
         if (vat.can(address(this), address(DAI_JOIN_ADDRESS)) == 0) {
@@ -75,12 +82,28 @@ contract McdGenerate is ActionBase, McdHelper {
 
         IDaiJoin(DAI_JOIN_ADDRESS).exit(address(this), _amount);
 
+        _withdrawDai(_to, _amount);
+
         logger.Log(address(this), msg.sender, "McdGenerate", abi.encode(_cdpId, _amount));
 
         return _amount;
     }
 
-    function withdrawDai(address _to, uint _amount) internal {
+    function parseInputs(bytes[] memory _callData)
+        internal
+        pure
+        returns (
+            uint256 vaultId,
+            uint256 amount,
+            address to
+        )
+    {
+        vaultId = abi.decode(_callData[0], (uint256));
+        amount = abi.decode(_callData[1], (uint256));
+        to = abi.decode(_callData[2], (address));
+    }
+
+    function _withdrawDai(address _to, uint256 _amount) internal {
         if (address(this) != _to) {
             IERC20(DAI_ADDRESS).safeTransfer(_to, _amount);
         }
@@ -90,22 +113,21 @@ contract McdGenerate is ActionBase, McdHelper {
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
     /// @dev Substracts 10 wei to aviod rounding error later on
-    function getMaxDebt(uint _cdpId, bytes32 _ilk) public view returns (uint) {
-        uint price = getPrice(_ilk);
+    function getMaxDebt(uint256 _cdpId, bytes32 _ilk) public view returns (uint256) {
+        uint256 price = getPrice(_ilk);
 
-        (, uint mat) = spotter.ilks(_ilk);
-        (uint collateral, uint debt) = getCdpInfo(manager, _cdpId, _ilk);
+        (, uint256 mat) = spotter.ilks(_ilk);
+        (uint256 collateral, uint256 debt) = getCdpInfo(manager, _cdpId, _ilk);
 
         return sub(sub(div(mul(collateral, price), mat), debt), 10);
     }
 
     /// @notice Gets a price of the asset
     /// @param _ilk Ilk of the CDP
-    function getPrice(bytes32 _ilk) public view returns (uint) {
-        (, uint mat) = spotter.ilks(_ilk);
-        (,,uint spot,,) = vat.ilks(_ilk);
+    function getPrice(bytes32 _ilk) public view returns (uint256) {
+        (, uint256 mat) = spotter.ilks(_ilk);
+        (, , uint256 spot, , ) = vat.ilks(_ilk);
 
         return rmul(rmul(spot, spotter.par()), mat);
     }
-
 }

@@ -34,9 +34,9 @@ describe("Mcd-Boost", function() {
     let makerAddresses, senderAcc, proxy, mcdOpenAddr;
 
     before(async () => {
-        // await redeploy('McdOpen');
-        // await redeploy('McdGenerate');
-        // await redeploy('McdSupply');
+        await redeploy('McdOpen');
+        await redeploy('McdGenerate');
+        await redeploy('McdSupply');
         await redeploy('DFSSell');
         await redeploy('TaskManager');
         await redeploy('ActionExecutor');

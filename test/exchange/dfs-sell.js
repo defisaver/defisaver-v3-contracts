@@ -37,7 +37,8 @@ describe("Dfs-Sell", function() {
     ];
 
     before(async () => {
-
+        await redeploy('DFSSell');
+        
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
 

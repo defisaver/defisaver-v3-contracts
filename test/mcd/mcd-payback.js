@@ -62,7 +62,7 @@ describe("Mcd-Payback", function() {
 
             const daiBalanceBefore = await balanceOf(makerAddresses["MCD_DAI"], from);
 
-            await paybackMcd(proxy, vaultId, amountDai, from);
+            await paybackMcd(proxy, vaultId, amountDai, from, makerAddresses["MCD_DAI"]);
 
             const daiBalanceAfter = await balanceOf(makerAddresses["MCD_DAI"], from);
 
@@ -75,7 +75,7 @@ describe("Mcd-Payback", function() {
             const from = senderAcc.address;
             const amountDai = ethers.utils.parseUnits('200000', 18);
 
-            await paybackMcd(proxy, vaultId, amountDai, from);
+            await paybackMcd(proxy, vaultId, amountDai, from, makerAddresses["MCD_DAI"]);
 
             // expect(daiBalanceBefore.sub(amountDai)).to.be.eq(daiBalanceAfter);
         });
