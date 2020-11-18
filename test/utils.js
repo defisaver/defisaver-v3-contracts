@@ -14,7 +14,7 @@ const MAX_UINT = '11579208923731619542357098500868790785326998466564056403945758
 
 const standardAmounts = {
     'ETH': '1',
-    'BAT': '1500',
+    'BAT': '1600',
     'USDC': '200',
     'WBTC': '0.02',
     'ZRX': '1000',
@@ -55,8 +55,6 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
 
     const c = await deployContract(name);
     const id = ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(name));
-
-    console.log(regAddr, ' IS reg: ', (await registry.isRegistered(id)));
 
     if (!(await registry.isRegistered(id))) {
         await registry.addNewContract(id, c.address, 0);

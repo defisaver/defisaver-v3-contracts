@@ -104,7 +104,7 @@ contract McdGenerate is ActionBase, McdHelper, GasBurner {
     }
 
     function _withdrawDai(address _to, uint256 _amount) internal {
-        if (address(this) != _to) {
+        if (address(this) != _to && _to != address(0)) {
             IERC20(DAI_ADDRESS).safeTransfer(_to, _amount);
         }
     }

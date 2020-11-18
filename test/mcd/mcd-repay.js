@@ -22,25 +22,25 @@ const {
 
 const {
     openVault,
-    encodeMcdGenerateAction,
+    encodeMcdWithdrawAction,
     encodeDfsSellAction,
-    encodeMcdSupplyAction,
+    encodeMcdPaybackAction,
 } = require('../actions.js');
 
 const TaskBuilder = require('../task.js');
 
 const VAULT_DAI_AMOUNT = '140';
 
-describe("Mcd-Boost", function() {
+describe("Mcd-Repay", function() {
     this.timeout(80000);
 
     let makerAddresses, senderAcc, proxy, mcdOpenAddr, mcdView;
 
     before(async () => {
-        await redeploy('McdSupply');
-        await redeploy('McdGenerate');
+        await redeploy('McdPayback');
+        await redeploy('McdWithdraw');
         await redeploy('DFSSell');
-
+ 
         mcdView = await redeploy('McdView');
 
         makerAddresses = await fetchMakerAddresses();
@@ -54,9 +54,9 @@ describe("Mcd-Boost", function() {
         const joinAddr = ilkToJoinMap[tokenData.ilk];
         let vaultId;
 
-        let boostAmount = '20';
+        let repayAmount = (standardAmounts[tokenData.symbol] / 10).toString();
 
-        it(`... should call a boost ${boostAmount} on a ${tokenData.ilkLabel} vault`, async () => {
+        it(`... should call a repay ${repayAmount} ${tokenData.symbol} on a ${tokenData.ilkLabel} vault`, async () => {
 
             // create a vault
             vaultId = await openVault(
@@ -68,7 +68,7 @@ describe("Mcd-Boost", function() {
                 VAULT_DAI_AMOUNT
             );
 
-            boostAmount = ethers.utils.parseUnits(boostAmount, 18);
+            repayAmount = ethers.utils.parseUnits(repayAmount, tokenData.decimals);
 
             const ratioBefore = await getRatio(mcdView, vaultId);
             const info = await getVaultInfo(mcdView, vaultId, tokenData.ilk);
@@ -81,21 +81,21 @@ describe("Mcd-Boost", function() {
             const dfsSellAddr = await getAddrFromRegistry('DFSSell');
             const dfsSell = await hre.ethers.getContractAt("DFSSell", dfsSellAddr);
 
-            const boostTask = new TaskBuilder('BoostTask');
+            const boostTask = new TaskBuilder('RepayTask');
             boostTask.addAction(
-                'McdGenerate',
-                encodeMcdGenerateAction(vaultId, boostAmount, to),
-                [0, 0, 0]
+                'McdWithdraw',
+                encodeMcdWithdrawAction(vaultId, repayAmount, joinAddr, to),
+                [0, 0, 0, 0]
             );
             boostTask.addAction(
                 'DFSSell',
-                (await encodeDfsSellAction(dfsSell, fromToken, collToken, 0, UNISWAP_WRAPPER, from, to)),
+                (await encodeDfsSellAction(dfsSell, collToken, fromToken, 0, UNISWAP_WRAPPER, from, to)),
                 [0, 0, 1, 0, 0]
             );
             boostTask.addAction(
-                'McdSupply',
-                encodeMcdSupplyAction(vaultId, 0, joinAddr, from),
-                [0, 2, 0, 0]
+                'McdPayback',
+                encodeMcdPaybackAction(vaultId, 0, from),
+                [0, 2, 0]
             );
 
             await boostTask.execute(proxy);
@@ -104,10 +104,11 @@ describe("Mcd-Boost", function() {
             const info2 = await getVaultInfo(mcdView, vaultId, tokenData.ilk);
             console.log(`Ratio before: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${tokenData.symbol}, debt: ${info2.debt.toFixed(2)} Dai)`);
 
-            expect(ratioAfter).to.be.lt(ratioBefore);
-            expect(info2.coll).to.be.gt(info.coll);
-            expect(info2.debt).to.be.gt(info.debt);
+            expect(ratioAfter).to.be.gt(ratioBefore);
+            expect(info2.coll).to.be.lt(info.coll);
+            expect(info2.debt).to.be.lt(info.debt);
         });
+
     }
 
 });

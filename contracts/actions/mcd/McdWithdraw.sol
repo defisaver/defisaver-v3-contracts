@@ -103,7 +103,7 @@ contract McdWithdraw is ActionBase, McdHelper, GasBurner {
         address _to,
         uint256 _amount
     ) internal {
-        if (_to != address(0) || _to != address(this)) {
+        if (_to != address(0) && _to != address(this) && _to != address(this)) {
             if (!isEthJoinAddr(_joinAddr)) {
                 address tokenAddr = address(IJoin(_joinAddr).gem());
                 IERC20(tokenAddr).safeTransfer(_to, _amount);

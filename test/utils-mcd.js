@@ -19,8 +19,33 @@ const getVaultsForUser = async (user, makerAddresses) => {
     return vaults;
 };
 
+const getRatio = async (mcdView, vaultId) => {
+    const ratio = await mcdView.getRatio(vaultId);
+
+    return ratio / 1e16;
+};
+
+const getVaultInfoRaw = async (mcdView, vaultId, ilk) => {
+    const info = await mcdView.getVaultInfo(vaultId, ilk);
+    return {
+        coll: info[0].toString(),
+        debt: info[1].toString()
+    };
+};
+
+const getVaultInfo = async (mcdView, vaultId, ilk) => {
+    const info = await mcdView.getVaultInfo(vaultId, ilk);
+    return {
+        coll: parseFloat(ethers.utils.formatUnits(info[0].toString(), 18).toString()),
+        debt: parseFloat(ethers.utils.formatUnits(info[1].toString(), 18).toString())
+    };
+};
+
 
 module.exports = {
     fetchMakerAddresses,
-    getVaultsForUser
+    getVaultsForUser,
+    getRatio,
+    getVaultInfoRaw,
+    getVaultInfo
 };

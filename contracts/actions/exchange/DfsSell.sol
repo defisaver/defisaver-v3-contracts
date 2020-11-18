@@ -87,7 +87,7 @@ contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
         address _from,
         uint256 _amount
     ) internal {
-        if (_from != address(0) && _token != KYBER_ETH_ADDRESS) {
+        if (_from != address(0) && _token != KYBER_ETH_ADDRESS && _from != address(this)) {
             IERC20(_token).safeTransferFrom(_from, address(this), _amount);
         }
     }

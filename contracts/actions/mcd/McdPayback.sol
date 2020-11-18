@@ -96,7 +96,7 @@ contract McdPayback is ActionBase, McdHelper, GasBurner {
     }
 
     function pullTokens(address _from, uint256 _amount) internal {
-        if (_from != address(0)) {
+        if (_from != address(0) && _from != address(this)) {
             IERC20(DAI_ADDRESS).safeTransferFrom(_from, address(this), _amount);
         }
     }

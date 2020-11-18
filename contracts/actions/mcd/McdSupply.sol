@@ -110,7 +110,7 @@ contract McdSupply is ActionBase, McdHelper, GasBurner {
         address _from,
         uint256 _amount
     ) internal {
-        if (_from != address(0) && !isEthJoinAddr(_joinAddr)) {
+        if (_from != address(0) && !isEthJoinAddr(_joinAddr) && _from != address(this)) {
             IERC20(address(IJoin(_joinAddr).gem())).safeTransferFrom(_from, address(this), _amount);
         }
     }
