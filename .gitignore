@@ -6,6 +6,9 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+.vscode
+bin/*
+
 artifacts
 cache
 .DS_Store
