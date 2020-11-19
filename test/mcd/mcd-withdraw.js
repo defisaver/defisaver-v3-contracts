@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 
-const { getAssetInfo, mcdCollateralAssets, ilkToJoinMap } = require('defisaver-tokens');
+const { getAssetInfo, ilk } = require('defisaver-tokens');
 
 const {
     getAddrFromRegistry,
@@ -36,14 +36,15 @@ describe("Mcd-Withdraw", function() {
         this.timeout(40000);
     });
 
-    for (let i = 0; i < mcdCollateralAssets.length; ++i) {
-        const tokenData = mcdCollateralAssets[i];
-        const joinAddr = ilkToJoinMap[tokenData.ilk];
+    for (let i = 0; i < ilks.length; ++i) {
+        const ilkData = ilks[i];
+        const joinAddr = ilkData.join;
+        const tokenData = getAssetInfo(ilkData.asset);
         let vaultId;
 
         const withdrawAmount = (standardAmounts[tokenData.symbol] / 10).toString();
 
-        it(`... should withdraw ${withdrawAmount} ${tokenData.symbol} from ${tokenData.ilkLabel} vault`, async () => {
+        it(`... should withdraw ${withdrawAmount} ${tokenData.symbol} from ${ilkData.ilkLabel} vault`, async () => {
             this.timeout(40000);
 
             vaultId = await openVault(

@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 
-const { getAssetInfo, mcdCollateralAssets, ilkToJoinMap } = require('defisaver-tokens');
+const { getAssetInfo, ilks } = require('defisaver-tokens');
 
 const {
     getAddrFromRegistry,
@@ -36,16 +36,17 @@ describe("Mcd-Generate", function() {
         this.timeout(40000);
     });
 
-    for (let i = 0; i < mcdCollateralAssets.length; ++i) {
-        const tokenData = mcdCollateralAssets[i];
+    for (let i = 0; i < ilks.length; ++i) {
+        const ilkData = ilks[i];
+        const joinAddr = ilkData.join;
+        const tokenData = getAssetInfo(ilkData.asset);
 
-        it(`... should generate ${DAI_AMOUNT} DAI for ${tokenData.ilkLabel} vault`, async () => {
+        it(`... should generate ${DAI_AMOUNT} DAI for ${ilkData.ilkLabel} vault`, async () => {
             this.timeout(40000);
 
-            const vaultId = await openMcd(proxy, makerAddresses, ilkToJoinMap[tokenData.ilk]);
+            const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
             const collAmount = ethers.utils.parseUnits(standardAmounts[tokenData.symbol], tokenData.decimals);
 
-            const joinAddr = ilkToJoinMap[tokenData.ilk];
             const from = senderAcc.address;
             const to = senderAcc.address;
 

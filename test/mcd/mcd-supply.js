@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 
-const { getAssetInfo, mcdCollateralAssets, ilkToJoinMap } = require('defisaver-tokens');
+const { getAssetInfo, ilks } = require('defisaver-tokens');
 
 const {
     getAddrFromRegistry,
@@ -45,16 +45,17 @@ describe("Mcd-Supply", function() {
         // await buyGasTokens(proxy, senderAcc);
     });
 
-    for (let i = 0; i < mcdCollateralAssets.length; ++i) {
-        const tokenData = mcdCollateralAssets[i];
+    for (let i = 0; i < ilks.length; ++i) {
+        const ilkData = ilks[i];
+        const joinAddr = ilkData.join;
+        const tokenData = getAssetInfo(ilkData.asset);
 
-        it(`... should supply ${standardAmounts[tokenData.symbol]} ${tokenData.symbol} to a ${tokenData.ilkLabel} vault`, async () => {
+        it(`... should supply ${standardAmounts[tokenData.symbol]} ${tokenData.symbol} to a ${ilkData.ilkLabel} vault`, async () => {
             this.timeout(40000);
 
-            const vaultId = await openMcd(proxy, makerAddresses, ilkToJoinMap[tokenData.ilk]);
+            const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
             const amount = BigNumber.from(ethers.utils.parseUnits(standardAmounts[tokenData.symbol], tokenData.decimals));
 
-            const joinAddr = ilkToJoinMap[tokenData.ilk];
             const from = senderAcc.address;
 
            await supplyMcd(proxy, tokenData.symbol, tokenData.address, vaultId, amount, joinAddr, from);

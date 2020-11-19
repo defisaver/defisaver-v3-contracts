@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 
-const { getAssetInfo, mcdCollateralAssets, ilkToJoinMap } = require('defisaver-tokens');
+const { getAssetInfo, ilks } = require('defisaver-tokens');
 
 const {
     getAddrFromRegistry,
@@ -40,12 +40,13 @@ describe("Mcd-Payback", function() {
         this.timeout(40000);
     });
 
-    for (let i = 0; i < mcdCollateralAssets.length; ++i) {
-        const tokenData = mcdCollateralAssets[i];
-        const joinAddr = ilkToJoinMap[tokenData.ilk];
+    for (let i = 0; i < ilks.length; ++i) {
+        const ilkData = ilks[i];
+        const joinAddr = ilkData.join;
+        const tokenData = getAssetInfo(ilkData.asset);
         let vaultId;
 
-        it(`... should payback ${PARTIAL_DAI_AMOUNT} DAI for ${tokenData.ilkLabel} vault`, async () => {
+        it(`... should payback ${PARTIAL_DAI_AMOUNT} DAI for ${ilkData.ilkLabel} vault`, async () => {
             this.timeout(40000);
 
             vaultId = await openVault(
@@ -69,7 +70,7 @@ describe("Mcd-Payback", function() {
             expect(daiBalanceBefore.sub(amountDai)).to.be.eq(daiBalanceAfter);
         });
 
-        it(`... should payback whole debt for ${tokenData.ilkLabel} vault`, async () => {
+        it(`... should payback whole debt for ${ilkData.ilkLabel} vault`, async () => {
             this.timeout(40000);
 
             const from = senderAcc.address;

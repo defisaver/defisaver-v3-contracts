@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 
-const { getAssetInfo, mcdCollateralAssets, ilkToJoinMap } = require('defisaver-tokens');
+const { getAssetInfo, ilks } = require('defisaver-tokens');
 
 const {
     getAddrFromRegistry,
@@ -49,14 +49,15 @@ describe("Mcd-Boost", function() {
         proxy = await getProxy(senderAcc.address);
     });
 
-    for (let i = 0; i < mcdCollateralAssets.length; ++i) {
-        const tokenData = mcdCollateralAssets[i];
-        const joinAddr = ilkToJoinMap[tokenData.ilk];
+    for (let i = 0; i < ilks.length; ++i) {
+        const ilkData = ilks[i];
+        const joinAddr = ilkData.join;
+        const tokenData = getAssetInfo(ilkData.asset);
         let vaultId;
 
         let boostAmount = '20';
 
-        it(`... should call a boost ${boostAmount} on a ${tokenData.ilkLabel} vault`, async () => {
+        it(`... should call a boost ${boostAmount} on a ${ilkData.ilkLabel} vault`, async () => {
 
             // create a vault
             vaultId = await openVault(
@@ -71,7 +72,7 @@ describe("Mcd-Boost", function() {
             boostAmount = ethers.utils.parseUnits(boostAmount, 18);
 
             const ratioBefore = await getRatio(mcdView, vaultId);
-            const info = await getVaultInfo(mcdView, vaultId, tokenData.ilk);
+            const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
             console.log(`Ratio before: ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} ${tokenData.symbol}, debt: ${info.debt.toFixed(2)} Dai)`);
 
             const from = proxy.address;
@@ -101,7 +102,7 @@ describe("Mcd-Boost", function() {
             await boostTask.execute(proxy);
 
             const ratioAfter = await getRatio(mcdView, vaultId);
-            const info2 = await getVaultInfo(mcdView, vaultId, tokenData.ilk);
+            const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
             console.log(`Ratio before: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${tokenData.symbol}, debt: ${info2.debt.toFixed(2)} Dai)`);
 
             expect(ratioAfter).to.be.lt(ratioBefore);
