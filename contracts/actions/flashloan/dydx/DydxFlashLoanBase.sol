@@ -3,7 +3,7 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../interfaces/dydx/ISoloMargin.sol";
+import "../../../interfaces/dydx/ISoloMargin.sol";
 
 contract DydxFlashLoanBase {
     using SafeMath for uint256;

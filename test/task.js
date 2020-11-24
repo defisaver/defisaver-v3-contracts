@@ -18,15 +18,15 @@ class TaskBuilder {
     }
     
     async execute(proxy) {
-        const taskManagerAddr = await getAddrFromRegistry('TaskManager');
+        const taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
 
-        const TaskManager = await ethers.getContractFactory("TaskManager");
-        const functionData = TaskManager.interface.encodeFunctionData(
+        const TaskExecutor = await ethers.getContractFactory("TaskExecutor");
+        const functionData = TaskExecutor.interface.encodeFunctionData(
             "executeTask",
             [[this.name, this.actionCallData, [[], [], []], this.actionIds, this.paramMapping]]
         );
 
-        await proxy['execute(address,bytes)'](taskManagerAddr, functionData, {value: 0, gasLimit: 2900000});
+        await proxy['execute(address,bytes)'](taskExecutorAddr, functionData, {value: 0, gasLimit: 2900000});
     }
 }
 

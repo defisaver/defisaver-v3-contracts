@@ -9,8 +9,9 @@ abstract contract IFLAction {
     function executeAction(
         bytes[] memory,
         bytes[] memory,
-        uint8[] memory
-    ) public virtual returns (bytes memory);
+        uint8[] memory,
+        bytes32[] memory
+    ) public virtual returns (bytes32);
 
     function actionType() public virtual returns (uint8);
 }

@@ -56,6 +56,8 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
     const c = await deployContract(name);
     const id = ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(name));
 
+    console.log(name, c.address);
+
     if (!(await registry.isRegistered(id))) {
         await registry.addNewContract(id, c.address, 0);
     } else {

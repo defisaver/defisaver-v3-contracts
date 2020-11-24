@@ -14,9 +14,9 @@ contract StrategyData {
 
     struct Task {
         string name;
-        bytes[][] actionCallData;
-        bytes[][] actionSubData;
-        bytes32[] actionIds;
+        bytes[][] callData;
+        bytes[][] subData;
+        bytes32[] ids;
         uint8[][] paramMapping;
     }
 

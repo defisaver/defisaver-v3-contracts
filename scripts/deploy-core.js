@@ -15,7 +15,7 @@ async function main() {
 
     await changeConstantInFiles(
         "./contracts",
-        ["StrategyExecutor", "TaskManager", "ActionExecutor", "ActionBase", "ProxyAuth", "SubscriptionProxy"],
+        ["StrategyExecutor", "TaskExecutor", "ActionBase", "ProxyAuth", "SubscriptionProxy"],
         "REGISTRY_ADDR",
          registry.address
     );
@@ -39,8 +39,7 @@ async function main() {
     await redeploy("StrategyExecutor", registry.address);
     await redeploy("SubscriptionProxy", registry.address);
     await redeploy("Subscriptions", registry.address);
-    await redeploy("ActionExecutor", registry.address);
-    await redeploy("TaskManager", registry.address);
+    await redeploy("TaskExecutor", registry.address);
 }
 
 start(main);

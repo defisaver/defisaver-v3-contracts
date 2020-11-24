@@ -22,7 +22,7 @@ contract StrategyExecutor is StrategyData, GasBurner {
 
     bytes32 constant BOT_AUTH_ID = keccak256("BotAuth");
     bytes32 constant SUBSCRIPTION_ID = keccak256("Subscriptions");
-    bytes32 constant TASK_MANAGER_ID = keccak256("TaskManager");
+    bytes32 constant TASK_MANAGER_ID = keccak256("TaskExecutor");
 
     string public constant ERR_TRIGGER_NOT_ACTIVE = "Trigger not activated";
     string public constant ERR_BOT_NOT_APPROVED = "Bot is not approved";
