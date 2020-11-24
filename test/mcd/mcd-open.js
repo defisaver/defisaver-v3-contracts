@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 
-const { getAssetInfo, mcdCollateralAssets, ilkToJoinMap } = require('defisaver-tokens');
+const { getAssetInfo, ilks, } = require('defisaver-tokens');
 
 const {
     getAddrFromRegistry,
@@ -35,14 +35,16 @@ describe("Mcd-Open", function() {
         mcdOpenAddr = await getAddrFromRegistry('McdOpen');
     });
 
-    for (let i = 0; i < mcdCollateralAssets.length; ++i) {
-        const tokenData = mcdCollateralAssets[i];
+    for (let i = 0; i < ilks.length; ++i) {
+        const ilkData = ilks[i];
+        const joinAddr = ilkData.join;
+        const tokenData = getAssetInfo(ilkData.asset);
 
-        it(`... should open an empty ${tokenData.ilkLabel} Maker vault`, async () => {
+        it(`... should open an empty ${ilkData.ilkLabel} Maker vault`, async () => {
             const vaultsBefore = await getVaultsForUser(proxy.address, makerAddresses);
             const numVaultsForUser = vaultsBefore[0].length;
 
-            await openMcd(proxy, makerAddresses, ilkToJoinMap[tokenData.ilk]);
+            await openMcd(proxy, makerAddresses, joinAddr);
 
             const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
             const numVaultsForUserAfter = vaultsAfter[0].length;
@@ -64,9 +66,9 @@ describe("Mcd-Open", function() {
 
         try {
             await proxy['execute(address,bytes)'](mcdOpenAddr, functionData);
-            expect(true).to.be.false; 
+            expect(true).to.be.false;
         } catch (err) {
-            expect(true).to.be.true; 
+            expect(true).to.be.true;
         }
     });
 

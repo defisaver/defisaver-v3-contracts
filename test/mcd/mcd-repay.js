@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 
-const { getAssetInfo, mcdCollateralAssets, ilkToJoinMap } = require('defisaver-tokens');
+const { getAssetInfo, ilks } = require('defisaver-tokens');
 
 const {
     getAddrFromRegistry,
@@ -40,7 +40,7 @@ describe("Mcd-Repay", function() {
         await redeploy('McdPayback');
         await redeploy('McdWithdraw');
         await redeploy('DFSSell');
- 
+
         mcdView = await redeploy('McdView');
 
         makerAddresses = await fetchMakerAddresses();
@@ -49,14 +49,15 @@ describe("Mcd-Repay", function() {
         proxy = await getProxy(senderAcc.address);
     });
 
-    for (let i = 0; i < mcdCollateralAssets.length; ++i) {
-        const tokenData = mcdCollateralAssets[i];
-        const joinAddr = ilkToJoinMap[tokenData.ilk];
+    for (let i = 0; i < ilks.length; ++i) {
+        const ilkData = ilks[i];
+        const joinAddr = ilkData.join;
+        const tokenData = getAssetInfo(ilkData.asset);
         let vaultId;
 
         let repayAmount = (standardAmounts[tokenData.symbol] / 10).toString();
 
-        it(`... should call a repay ${repayAmount} ${tokenData.symbol} on a ${tokenData.ilkLabel} vault`, async () => {
+        it(`... should call a repay ${repayAmount} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
 
             // create a vault
             vaultId = await openVault(
@@ -71,7 +72,7 @@ describe("Mcd-Repay", function() {
             repayAmount = ethers.utils.parseUnits(repayAmount, tokenData.decimals);
 
             const ratioBefore = await getRatio(mcdView, vaultId);
-            const info = await getVaultInfo(mcdView, vaultId, tokenData.ilk);
+            const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
             console.log(`Ratio before: ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} ${tokenData.symbol}, debt: ${info.debt.toFixed(2)} Dai)`);
 
             const from = proxy.address;
@@ -101,7 +102,7 @@ describe("Mcd-Repay", function() {
             await boostTask.execute(proxy);
 
             const ratioAfter = await getRatio(mcdView, vaultId);
-            const info2 = await getVaultInfo(mcdView, vaultId, tokenData.ilk);
+            const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
             console.log(`Ratio before: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${tokenData.symbol}, debt: ${info2.debt.toFixed(2)} Dai)`);
 
             expect(ratioAfter).to.be.gt(ratioBefore);
