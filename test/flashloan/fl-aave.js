@@ -16,15 +16,7 @@ const {
     REGISTRY_ADDR,
 } = require('../utils');
 
-const encodeFLAction = (amount, tokenAddr, flType) => {
-    const abiCoder = new ethers.utils.AbiCoder();
-
-    const amountEncoded = abiCoder.encode(['uint256'], [amount]);
-    const tokenEncoded = abiCoder.encode(['address'], [tokenAddr]);
-    const flTypeEncoded = abiCoder.encode(['uint8'], [flType]);
-
-    return [amountEncoded, tokenEncoded, flTypeEncoded, []];
-};
+const { encodeFLAction } = require('../actions');
 
 const AAVE_FL = 1;
 

@@ -44,10 +44,7 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
         _executeActions(currTask);
     }
 
-    function _executeActionsFromFL(
-        Task memory _currTask,
-        bytes32 _flAmount
-    ) public payable {
+    function _executeActionsFromFL(Task memory _currTask, bytes32 _flAmount) public payable {
         bytes32[] memory returnValues = new bytes32[](_currTask.ids.length);
         returnValues[0] = _flAmount;
 
@@ -72,7 +69,11 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
         DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, _currTask.name, "");
     }
 
-    function _parseFL(Task memory _currTask, address _firstActionAddr, bytes32[] memory _returnValues) internal {
+    function _parseFL(
+        Task memory _currTask,
+        address _firstActionAddr,
+        bytes32[] memory _returnValues
+    ) internal {
         givePermission(_firstActionAddr);
 
         bytes memory actionExecutorData = abi.encode(_currTask, address(this));
@@ -86,7 +87,7 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
 
     function _executeAction(
         Task memory _currTask,
-        uint _index,
+        uint256 _index,
         bytes32[] memory _returnValues
     ) internal returns (bytes32 response) {
         response = IDSProxy(address(this)).execute{value: address(this).balance}(

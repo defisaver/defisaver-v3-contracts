@@ -13,7 +13,7 @@ abstract contract ActionBase {
         0x5c55B921f590a89C1Ebe84dF170E655a82b62126
     );
 
-    enum ActionType {FL_ACTION, STANDARD_ACTION, CUSTOM_ACTION}
+    enum ActionType { FL_ACTION, STANDARD_ACTION, CUSTOM_ACTION }
 
     function executeAction(
         bytes[] memory,
