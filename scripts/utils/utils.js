@@ -2,6 +2,9 @@ const fs = require('fs');
 const { resolve } = require('path');
 const fsPromises = fs.promises;
 
+async function getCurrentDir() {
+	return resolve('./', '');
+}
 
 async function getFile(dir, filename) {
   const dirents = await fsPromises.readdir(dir, { withFileTypes: true });
@@ -29,17 +32,14 @@ async function changeConstantInFile(dir, filename, variable, value) {
 
 	const data = await fsPromises.readFile(filepath, 'utf8');
 
-	const regexWithSpace = new RegExp(`${variable} =.*`, "g");
-	const regexWithoutSpace = new RegExp(`${variable}=.*`, "g");
+	const regex = new RegExp(`${variable}( )*=.*`, "g");
 
 	let result = '';
 
 	if (isJsFile) {
-		result = data.replace(regexWithSpace, `${variable} = '${value}';`);
-		result = result.replace(regexWithoutSpace, `${variable} = '${value}';`);
+		result = data.replace(regex, `${variable} = '${value}';`);
 	} else {
-		result = data.replace(regexWithSpace, `${variable} = ${value};`);
-		result = result.replace(regexWithoutSpace, `${variable} = ${value};`);
+		result = data.replace(regex, `${variable} = ${value};`);
 	}
 
   	await fsPromises.writeFile(filepath, result, 'utf8');
@@ -48,5 +48,6 @@ async function changeConstantInFile(dir, filename, variable, value) {
 module.exports = {
 	getFile,
 	changeConstantInFile,
-	changeConstantInFiles
+	changeConstantInFiles,
+	getCurrentDir
 }
