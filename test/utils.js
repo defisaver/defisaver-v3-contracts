@@ -2,7 +2,7 @@ const hre = require("hardhat");
 
 const { deployContract } = require("../scripts/utils/deployer");
 
-const REGISTRY_ADDR = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+const REGISTRY_ADDR = '0xd26966adCdF4ef5CFcc6d2fFfe0190DF17acB72A';
 
 const nullAddress = "0x0000000000000000000000000000000000000000";
 const WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
@@ -59,6 +59,7 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
     console.log(name, c.address);
 
     if (!(await registry.isRegistered(id))) {
+        console.log(registry.address);
         await registry.addNewContract(id, c.address, 0);
     } else {
         await registry.startContractChange(id, c.address);

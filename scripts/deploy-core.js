@@ -1,5 +1,3 @@
-
-
 const { deployContract } = require("./utils/deployer");
 const { start } = require('./utils/starter');
 

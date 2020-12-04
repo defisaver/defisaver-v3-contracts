@@ -8,3 +8,5 @@ All the contracts related to the Defi Saver ecosystem
 `npm run deploy [network] [deploy-script]` - will deploy to the specified network by calling the script from the `/scripts` folder
 
 `npm run test [network] [test-file]` - will run a test to the specified network by calling the script from the `/test` folder
+
+`npm run verify [network] [contract-name]` - will verify contract based on address and arguments from `/deployments` folder

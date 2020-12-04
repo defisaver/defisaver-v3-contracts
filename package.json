@@ -5,13 +5,13 @@
   "main": "index.js",
   "scripts": {
     "compile": "npx hardhat compile",
-    "deploy": "./run_deploy",
-    "test": "./run_test",
+    "deploy": "cmd/run_deploy",
+    "test": "cmd/run_test",
+    "verify": "cmd/run_verify",
     "lint": "./node_modules/.bin/solhint -f table contracts/**/*.sol",
     "pretty": "./node_modules/.bin/prettier --write contracts/**/*.sol",
     "flatten-all": "sol-merger@3.1.0 \"./contracts/*.sol\" ./build",
-    "flatten": "npx sol-merger@3.1.0",
-    "verify": "node deployers/utils/verifier.js"
+    "flatten": "npx sol-merger@3.1.0"
   },
   "repository": {
     "type": "git",
@@ -25,7 +25,7 @@
   "homepage": "https://github.com/DecenterApps/defisaver-v3-contracts#readme",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
-    "@nomiclabs/hardhat-etherscan": "^2.0.0",
+    "@nomiclabs/hardhat-etherscan": "2.0.2-rc.2",
     "@nomiclabs/hardhat-waffle": "^2.0.0",
     "@tenderly/hardhat-tenderly": "^1.1.0-beta.2",
     "axios": "^0.21.0",
@@ -33,7 +33,7 @@
     "dotenv": "^8.2.0",
     "ethereum-waffle": "^3.1.1",
     "ethers": "^5.0.19",
-    "hardhat": "^2.0.0",
+    "hardhat": "^2.0.4",
     "hardhat-contract-sizer": "^2.0.1",
     "hardhat-gas-reporter": "^1.0.1",
     "hardhat-log-remover": "^2.0.0",
