@@ -143,11 +143,6 @@ const sell = async (proxy, sellToken, buyToken, sellAmount, from, to) => {
 
 const openMcd = async (proxy, makerAddresses, joinAddr) => {
     const mcdOpenAddr = await getAddrFromRegistry('McdOpen');
-
-    if (mcdOpenAddr === nullAddress) {
-        await redeploy('McdOpen');
-    }
-
     const callData = encodeMcdOpenAction(joinAddr);
 
     const McdOpen = await ethers.getContractFactory("McdOpen");
@@ -165,6 +160,8 @@ const openMcd = async (proxy, makerAddresses, joinAddr) => {
 
 const supplyMcd = async (proxy, symbol, tokenAddr, vaultId, amount, joinAddr, from) => {
     const tokenBalance = await balanceOf(tokenAddr, from);
+
+    console.log('supply mcd');
 
     if (tokenBalance.lt(amount)) {
         await sell(
@@ -200,6 +197,9 @@ const supplyMcd = async (proxy, symbol, tokenAddr, vaultId, amount, joinAddr, fr
 
 const generateMcd = async (proxy, vaultId, amount, to) => {
     const mcdGenerateAddr = await getAddrFromRegistry('McdGenerate');
+
+    console.log('generate mcd');
+
 
     const callData = encodeMcdGenerateAction(vaultId, amount, to);
 
@@ -248,6 +248,8 @@ const openVault = async (makerAddresses, proxy, joinAddr, tokenData, collAmount,
 
     const from = proxy.signer.address;
     const to = proxy.signer.address;
+
+    console.log('opened');
 
     const amountDai = ethers.utils.parseUnits(daiAmount, 18);
 

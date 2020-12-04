@@ -13,17 +13,17 @@ const OASIS_WRAPPER = '0x2aD7D86C56b7a09742213e1e649C727cB4991A54';
 const MAX_UINT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
 const standardAmounts = {
-    'ETH': '1',
-    'BAT': '1600',
-    'USDC': '200',
-    'WBTC': '0.02',
-    'ZRX': '1000',
-    'KNC': '400',
-    'MANA': '6000',
-    'PAXUSD': '200',
-    'COMP': '3',
-    'LRC': '2000',
-    'LINK': '25'
+    'ETH': '2',
+    'BAT': '3000',
+    'USDC': '400',
+    'WBTC': '0.04',
+    'ZRX': '2000',
+    'KNC': '800',
+    'MANA': '12000',
+    'PAXUSD': '400',
+    'COMP': '6',
+    'LRC': '4000',
+    'LINK': '45'
 };
 
 const getAddrFromRegistry = async (name) => {
