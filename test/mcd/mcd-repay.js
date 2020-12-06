@@ -1,12 +1,14 @@
 const { expect } = require("chai");
 
 const { getAssetInfo, ilks } = require('defisaver-tokens');
+const dfs = require('defisaver-sdk');
 
 const {
     getAddrFromRegistry,
     getProxy,
     redeploy,
     send,
+    formatExchangeObj,
     nullAddress,
     REGISTRY_ADDR,
     standardAmounts,
@@ -27,14 +29,12 @@ const {
     encodeMcdPaybackAction,
 } = require('../actions.js');
 
-const TaskBuilder = require('../task.js');
-
-const VAULT_DAI_AMOUNT = '140';
+const VAULT_DAI_AMOUNT = '570';
 
 describe("Mcd-Repay", function() {
     this.timeout(80000);
 
-    let makerAddresses, senderAcc, proxy, mcdOpenAddr, mcdView;
+    let makerAddresses, senderAcc, proxy, mcdOpenAddr, mcdView, taskExecutorAddr;
 
     before(async () => {
         await redeploy('McdPayback');
@@ -42,6 +42,7 @@ describe("Mcd-Repay", function() {
         await redeploy('DFSSell');
 
         mcdView = await redeploy('McdView');
+        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
 
         makerAddresses = await fetchMakerAddresses();
 
@@ -49,13 +50,13 @@ describe("Mcd-Repay", function() {
         proxy = await getProxy(senderAcc.address);
     });
 
-    for (let i = 0; i < ilks.length; ++i) {
+    for (let i = 0; i < 1; ++i) {
         const ilkData = ilks[i];
         const joinAddr = ilkData.join;
         const tokenData = getAssetInfo(ilkData.asset);
         let vaultId;
 
-        let repayAmount = (standardAmounts[tokenData.symbol] / 10).toString();
+        let repayAmount = (standardAmounts[tokenData.symbol] / 30).toString();
 
         it(`... should call a repay ${repayAmount} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
 
@@ -79,27 +80,35 @@ describe("Mcd-Repay", function() {
             const to = proxy.address;
             const collToken = tokenData.address;
             const fromToken = makerAddresses["MCD_DAI"];
-            const dfsSellAddr = await getAddrFromRegistry('DFSSell');
-            const dfsSell = await hre.ethers.getContractAt("DFSSell", dfsSellAddr);
+           
+            const mcdWithdrawAction = 
+                new dfs.actions.maker.MakerWithdrawAction(vaultId, repayAmount, joinAddr, to);
 
-            const boostTask = new TaskBuilder('RepayTask');
-            boostTask.addAction(
-                'McdWithdraw',
-                encodeMcdWithdrawAction(vaultId, repayAmount, joinAddr, to),
-                [0, 0, 0, 0]
+            const exchangeObject = formatExchangeObj(
+                collToken,
+                fromToken,
+                '$1',
+                UNISWAP_WRAPPER
             );
-            boostTask.addAction(
-                'DFSSell',
-                (await encodeDfsSellAction(dfsSell, collToken, fromToken, 0, UNISWAP_WRAPPER, from, to)),
-                [0, 0, 1, 0, 0]
-            );
-            boostTask.addAction(
-                'McdPayback',
-                encodeMcdPaybackAction(vaultId, 0, from),
-                [0, 2, 0]
+            
+            const sellAction = new dfs.actions.basic.SellAction(
+                exchangeObject,
+                from,
+                to
             );
 
-            await boostTask.execute(proxy);
+            const mcdPaybackAction = 
+                new dfs.actions.maker.MakerPaybackAction(vaultId, '$2', from);
+
+            const repayRecipe = new dfs.ActionSet("RepayRecipe", [
+                mcdWithdrawAction,
+                sellAction,
+                mcdPaybackAction
+            ]);
+
+            const functionData = repayRecipe.encodeForDsProxyCall();
+
+            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {gasLimit: 3000000});
 
             const ratioAfter = await getRatio(mcdView, vaultId);
             const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
