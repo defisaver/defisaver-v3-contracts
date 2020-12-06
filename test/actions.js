@@ -1,4 +1,5 @@
 const axios = require('axios');
+const dfs = require('defisaver-sdk');
 
 const makerVersion = "1.1.3";
 
@@ -10,93 +11,17 @@ const {
     getAddrFromRegistry,
     nullAddress,
     WETH_ADDRESS,
+    ETH_ADDR,
     UNISWAP_WRAPPER,
     balanceOf,
+    formatExchangeObj,
+    isEth,
 } = require("./utils"); 
 
 const { getVaultsForUser } = require('./utils-mcd');
 
 const { deployContract } = require("../scripts/utils/deployer");
 
-const encodeMcdOpenAction = (joinAddr) => {
-    const abiCoder = new ethers.utils.AbiCoder();
-
-    const encodeActionParams = abiCoder.encode(
-        ['address'],
-        [joinAddr]
-    );
-
-    return [encodeActionParams];
-};
-
-const encodeMcdPaybackAction = (vaultId, amount, from) => {
-    const abiCoder = new ethers.utils.AbiCoder();
-
-    const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId]);
-    const amountEncoded = abiCoder.encode(['uint256'], [amount]);
-    const fromEncoded = abiCoder.encode(['address'], [from]);
-
-    return [vaultIdEncoded, amountEncoded, fromEncoded];
-};
-
-const encodeMcdSupplyAction = (vaultId, amount, joinAddr, from) => {
-    const abiCoder = new ethers.utils.AbiCoder();
-
-    const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId]);
-    const amountEncoded = abiCoder.encode(['uint256'], [amount]);
-    const joinAddrEncoded = abiCoder.encode(['address'], [joinAddr]);
-    const fromEncoded = abiCoder.encode(['address'], [from]);
-
-    return [vaultIdEncoded, amountEncoded, joinAddrEncoded, fromEncoded];
-};
-
-const encodeMcdWithdrawAction = (vaultId, amount, joinAddr, to) => {
-    const abiCoder = new ethers.utils.AbiCoder();
-
-    const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId]);
-    const amountEncoded = abiCoder.encode(['uint256'], [amount]);
-    const joinAddrEncoded = abiCoder.encode(['address'], [joinAddr]);
-    const toEncoded = abiCoder.encode(['address'], [to]);
-
-    return [vaultIdEncoded, amountEncoded, joinAddrEncoded, toEncoded];
-};
-
-const encodeMcdGenerateAction = (vaultId, amount, to) => {
-    const abiCoder = new ethers.utils.AbiCoder();
-
-    const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId]);
-    const amountEncoded = abiCoder.encode(['uint256'], [amount]);
-    const toEncoded = abiCoder.encode(['address'], [to]);
-
-    return [vaultIdEncoded, amountEncoded, toEncoded];
-};
-
-const encodeDfsSellAction = async  (dfsSell, fromToken, toToken, amount, wrapperAddress, from, to) => {
-    const abiCoder = new ethers.utils.AbiCoder();
-
-    let firstPath = fromToken;
-    let secondPath = toToken;
-
-    if (fromToken.toLowerCase() === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") {
-        firstPath = WETH_ADDRESS;
-    }
-
-    if (toToken.toLowerCase() === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") {
-        secondPath = WETH_ADDRESS;
-    }
-
-    const path = abiCoder.encode(['address[]'],[[firstPath, secondPath]]);
-
-    const exchangeData = await dfsSell.packExchangeData([
-        fromToken, toToken, amount.toString(), 0, 0, 0, nullAddress, wrapperAddress, path,
-        [nullAddress, nullAddress, 0, 0, ethers.utils.toUtf8Bytes('')]
-    ]);
-
-    const fromEncoded = abiCoder.encode(['address'], [from]);
-    const toEncoded = abiCoder.encode(['address'], [from]);
-
-    return [exchangeData, fromEncoded, toEncoded];
-};
 
 const encodeFLAction = (amount, tokenAddr, flType) => {
     const abiCoder = new ethers.utils.AbiCoder();
@@ -108,67 +33,58 @@ const encodeFLAction = (amount, tokenAddr, flType) => {
     return [amountEncoded, tokenEncoded, flTypeEncoded, []];
 };
 
-const sell = async (proxy, sellToken, buyToken, sellAmount, from, to) => {
+const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to) => {
     const dfsSellAddr = await getAddrFromRegistry('DFSSell');
-    const dfsSell = await hre.ethers.getContractAt("DFSSell", dfsSellAddr);
 
-    const sellAddr = getAssetInfo(sellToken).address;
-    const buyAddr = getAssetInfo(buyToken).address;
+    const exchangeObject = formatExchangeObj(
+        sellAddr,
+        buyAddr,
+        sellAmount.toString(),
+        wrapper
+    );
+    
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        from,
+        to
+    );
 
-    const amount = sellAmount * 10**getAssetInfo(sellToken).decimals;
+    const functionData = sellAction.encodeForDsProxyCall()[1];
+
     let value = '0';
 
-    if (sellToken.toLowerCase() === 'eth') {
-        value = amount.toString();
+    if (isEth(sellAddr)) {
+        value = sellAmount.toString();
     } else {
         await approve(sellAddr, proxy.address);
     }
 
-    if (sellAddr === nullAddress || buyAddr === nullAddress) {
-        console.log("Can't find tokens address");
-    }
-
-    const callData = await encodeDfsSellAction(
-        dfsSell, sellAddr, buyAddr, amount, UNISWAP_WRAPPER, from, to);
-
-    const DfsSell = await ethers.getContractFactory("DFSSell");
-    const functionData = DfsSell.interface.encodeFunctionData(
-        "executeActionDirect",
-         [callData]
-    );
-
-    await proxy['execute(address,bytes)'](dfsSellAddr, functionData, {value, gasLimit: 2000000});
-
+    await proxy['execute(address,bytes)'](dfsSellAddr, functionData, {value, gasLimit: 3000000});
 };
 
 const openMcd = async (proxy, makerAddresses, joinAddr) => {
     const mcdOpenAddr = await getAddrFromRegistry('McdOpen');
-    const callData = encodeMcdOpenAction(joinAddr);
 
-    const McdOpen = await ethers.getContractFactory("McdOpen");
-    const functionData = McdOpen.interface.encodeFunctionData(
-        "executeActionDirect",
-            [callData]
-    );
+    const openMyVault = new dfs.actions.maker.MakerOpenVaultAction(joinAddr);
+    const functionData = openMyVault.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdOpenAddr, functionData, {gasLimit: 1000000});
+    await proxy['execute(address,bytes)'](mcdOpenAddr, functionData, {gasLimit: 3000000});
 
     const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
 
     return vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
 };
 
-const supplyMcd = async (proxy, symbol, tokenAddr, vaultId, amount, joinAddr, from) => {
+const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
     const tokenBalance = await balanceOf(tokenAddr, from);
-
-    console.log('supply mcd');
 
     if (tokenBalance.lt(amount)) {
         await sell(
             proxy,
-            'ETH',
-            symbol,
-            '2',
+            ETH_ADDR,
+            tokenAddr,
+            ethers.utils.parseUnits('5', 18),
+            UNISWAP_WRAPPER,
             from,
             from
         );
@@ -176,84 +92,59 @@ const supplyMcd = async (proxy, symbol, tokenAddr, vaultId, amount, joinAddr, fr
 
     let mcdSupplyAddr = await getAddrFromRegistry('McdSupply');
 
-    const callData = encodeMcdSupplyAction(vaultId, amount, joinAddr, from);
-
     let value = '0';
-
-    if (symbol.toLowerCase() === 'eth') {
+    if (isEth(tokenAddr)) {
         value = amount.toString();
     } else {
         await approve(tokenAddr, proxy.address);
     }
 
-    const McdSupply = await ethers.getContractFactory("McdSupply");
-    const functionData = McdSupply.interface.encodeFunctionData(
-        "executeActionDirect",
-            [callData]
-    );
+    const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(vaultId, amount, joinAddr, from);
+    const functionData = mcdSupplyAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdSupplyAddr, functionData, {value, gasLimit: 2000000});
+    await proxy['execute(address,bytes)'](mcdSupplyAddr, functionData, {value, gasLimit: 3000000});
+
 };
 
 const generateMcd = async (proxy, vaultId, amount, to) => {
     const mcdGenerateAddr = await getAddrFromRegistry('McdGenerate');
 
-    console.log('generate mcd');
+    const mcdGenerateAction = new dfs.actions.maker.MakerGenerateAction(vaultId, amount, to);
+    const functionData = mcdGenerateAction.encodeForDsProxyCall()[1];
 
-
-    const callData = encodeMcdGenerateAction(vaultId, amount, to);
-
-    const McdGenerate = await ethers.getContractFactory("McdGenerate");
-    const functionData = McdGenerate.interface.encodeFunctionData(
-        "executeActionDirect",
-            [callData]
-    );
-
-    await proxy['execute(address,bytes)'](mcdGenerateAddr, functionData, { gasLimit: 2000000});
+    await proxy['execute(address,bytes)'](mcdGenerateAddr, functionData, {gasLimit: 3000000});
 };
 
 const paybackMcd = async (proxy, vaultId, amount, from, daiAddr) => {
     const mcdPaybackAddr = await getAddrFromRegistry('McdPayback');
 
-    const callData = encodeMcdPaybackAction(vaultId, amount, from);
-
     await approve(daiAddr, proxy.address);
 
-    const McdPayback = await ethers.getContractFactory("McdPayback");
-    const functionData = McdPayback.interface.encodeFunctionData(
-        "executeActionDirect",
-            [callData]
-    );
+    const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(vaultId, amount, from);
+    const functionData = mcdPaybackAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdPaybackAddr, functionData, { gasLimit: 2000000});
+    await proxy['execute(address,bytes)'](mcdPaybackAddr, functionData, {gasLimit: 3000000});
 };
 
 const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to) => {
     const mcdWithdrawAddr = await getAddrFromRegistry('McdWithdraw');
 
-    const callData = encodeMcdWithdrawAction(vaultId, amount, joinAddr, to);
+    const mcdWithdrawAction = new dfs.actions.maker.MakerWithdrawAction(vaultId, amount, joinAddr, to);
+    const functionData = mcdWithdrawAction.encodeForDsProxyCall()[1];
 
-    const McdWithdraw = await ethers.getContractFactory("McdWithdraw");
-    const functionData = McdWithdraw.interface.encodeFunctionData(
-        "executeActionDirect",
-            [callData]
-    );
-
-    await proxy['execute(address,bytes)'](mcdWithdrawAddr, functionData, { gasLimit: 2000000});
+    await proxy['execute(address,bytes)'](mcdWithdrawAddr, functionData, {gasLimit: 3000000});
 };
 
 const openVault = async (makerAddresses, proxy, joinAddr, tokenData, collAmount, daiAmount) => {
     const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
-    const amountColl = ethers.utils.parseUnits(collAmount, tokenData.decimals);
 
     const from = proxy.signer.address;
     const to = proxy.signer.address;
 
-    console.log('opened');
-
     const amountDai = ethers.utils.parseUnits(daiAmount, 18);
+    const amountColl = ethers.utils.parseUnits(collAmount, tokenData.decimals);
 
-    await supplyMcd(proxy, tokenData.symbol, tokenData.address, vaultId, amountColl, joinAddr, from);
+    await supplyMcd(proxy, vaultId, amountColl, tokenData.address, joinAddr, from);
     await generateMcd(proxy, vaultId, amountDai, to);
 
     return vaultId;
@@ -288,12 +179,6 @@ module.exports = {
     paybackMcd,
     withdrawMcd,
     openVault,
-    encodeDfsSellAction,
-    encodeMcdSupplyAction,
-    encodeMcdWithdrawAction,
-    encodeMcdOpenAction,
-    encodeMcdGenerateAction,
-    encodeMcdPaybackAction,
     encodeFLAction,
     buyGasTokens,
 };

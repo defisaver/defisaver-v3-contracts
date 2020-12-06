@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 
-const { getAssetInfo, ilk } = require('defisaver-tokens');
+const { getAssetInfo, ilks } = require('defisaver-tokens');
 
 const {
     getAddrFromRegistry,
@@ -20,9 +20,11 @@ const {
     openVault,
 } = require('../actions.js');
 
-const VAULT_DAI_AMOUNT = '140';
+const VAULT_DAI_AMOUNT = '540';
 
 describe("Mcd-Withdraw", function() {
+    this.timeout(40000);
+
     let makerAddresses, senderAcc, proxy;
 
     before(async () => {
@@ -33,7 +35,6 @@ describe("Mcd-Withdraw", function() {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
 
-        this.timeout(40000);
     });
 
     for (let i = 0; i < ilks.length; ++i) {
@@ -42,10 +43,9 @@ describe("Mcd-Withdraw", function() {
         const tokenData = getAssetInfo(ilkData.asset);
         let vaultId;
 
-        const withdrawAmount = (standardAmounts[tokenData.symbol] / 10).toString();
+        const withdrawAmount = (standardAmounts[tokenData.symbol] / 30).toString();
 
         it(`... should withdraw ${withdrawAmount} ${tokenData.symbol} from ${ilkData.ilkLabel} vault`, async () => {
-            this.timeout(40000);
 
             vaultId = await openVault(
                 makerAddresses,

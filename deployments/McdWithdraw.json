@@ -1,0 +1,259 @@
+{
+	"contractName": "McdWithdraw",
+	"abi": [
+		{
+			"inputs": [],
+			"name": "ETH_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "MANAGER_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "REGISTRY_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "VAT_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "actionType",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "chiToken",
+			"outputs": [
+				{
+					"internalType": "contract IGasToken",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes[]",
+					"name": "_callData",
+					"type": "bytes[]"
+				},
+				{
+					"internalType": "bytes[]",
+					"name": "_subData",
+					"type": "bytes[]"
+				},
+				{
+					"internalType": "uint8[]",
+					"name": "_paramMapping",
+					"type": "uint8[]"
+				},
+				{
+					"internalType": "bytes32[]",
+					"name": "_returnValues",
+					"type": "bytes32[]"
+				}
+			],
+			"name": "executeAction",
+			"outputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"stateMutability": "payable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes[]",
+					"name": "_callData",
+					"type": "bytes[]"
+				}
+			],
+			"name": "executeActionDirect",
+			"outputs": [],
+			"stateMutability": "payable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "gasToken",
+			"outputs": [
+				{
+					"internalType": "contract IGasToken",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "contract IManager",
+					"name": "_manager",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_cdpId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "_ilk",
+					"type": "bytes32"
+				}
+			],
+			"name": "getCdpInfo",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "contract IManager",
+					"name": "_manager",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_cdpId",
+					"type": "uint256"
+				}
+			],
+			"name": "getOwner",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "logger",
+			"outputs": [
+				{
+					"internalType": "contract DefisaverLogger",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "manager",
+			"outputs": [
+				{
+					"internalType": "contract IManager",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "registry",
+			"outputs": [
+				{
+					"internalType": "contract DFSRegistry",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "vat",
+			"outputs": [
+				{
+					"internalType": "contract IVat",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		}
+	],
+	"networks": {
+		"local": {
+			"address": "0x0B32a3F8f5b7E5d315b9E52E640a49A89d89c820",
+			"args": []
+		}
+	}
+}

@@ -1,0 +1,678 @@
+{
+	"contractName": "Subscriptions",
+	"abi": [
+		{
+			"inputs": [],
+			"name": "ERR_EMPTY_STRATEGY",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_SENDER_NOT_OWNER",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_USER_POS_EMPTY",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_templateId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bool",
+					"name": "_active",
+					"type": "bool"
+				},
+				{
+					"internalType": "bytes[][]",
+					"name": "_actionData",
+					"type": "bytes[][]"
+				},
+				{
+					"internalType": "bytes[][]",
+					"name": "_triggerData",
+					"type": "bytes[][]"
+				}
+			],
+			"name": "createStrategy",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "string",
+					"name": "_name",
+					"type": "string"
+				},
+				{
+					"internalType": "bytes32[]",
+					"name": "_triggerIds",
+					"type": "bytes32[]"
+				},
+				{
+					"internalType": "bytes32[]",
+					"name": "_actionIds",
+					"type": "bytes32[]"
+				},
+				{
+					"internalType": "uint8[][]",
+					"name": "_paramMapping",
+					"type": "uint8[][]"
+				}
+			],
+			"name": "createTemplate",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_page",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_perPage",
+					"type": "uint256"
+				}
+			],
+			"name": "getPaginatedStrategies",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "uint256",
+							"name": "templateId",
+							"type": "uint256"
+						},
+						{
+							"internalType": "address",
+							"name": "proxy",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes[][]",
+							"name": "actionData",
+							"type": "bytes[][]"
+						},
+						{
+							"internalType": "bytes[][]",
+							"name": "triggerData",
+							"type": "bytes[][]"
+						},
+						{
+							"internalType": "bool",
+							"name": "active",
+							"type": "bool"
+						},
+						{
+							"internalType": "uint256",
+							"name": "posInUserArr",
+							"type": "uint256"
+						}
+					],
+					"internalType": "struct StrategyData.Strategy[]",
+					"name": "",
+					"type": "tuple[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_page",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_perPage",
+					"type": "uint256"
+				}
+			],
+			"name": "getPaginatedTemplates",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "string",
+							"name": "name",
+							"type": "string"
+						},
+						{
+							"internalType": "bytes32[]",
+							"name": "triggerIds",
+							"type": "bytes32[]"
+						},
+						{
+							"internalType": "bytes32[]",
+							"name": "actionIds",
+							"type": "bytes32[]"
+						},
+						{
+							"internalType": "uint8[][]",
+							"name": "paramMapping",
+							"type": "uint8[][]"
+						}
+					],
+					"internalType": "struct StrategyData.Template[]",
+					"name": "",
+					"type": "tuple[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "getStrategies",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "uint256",
+							"name": "templateId",
+							"type": "uint256"
+						},
+						{
+							"internalType": "address",
+							"name": "proxy",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes[][]",
+							"name": "actionData",
+							"type": "bytes[][]"
+						},
+						{
+							"internalType": "bytes[][]",
+							"name": "triggerData",
+							"type": "bytes[][]"
+						},
+						{
+							"internalType": "bool",
+							"name": "active",
+							"type": "bool"
+						},
+						{
+							"internalType": "uint256",
+							"name": "posInUserArr",
+							"type": "uint256"
+						}
+					],
+					"internalType": "struct StrategyData.Strategy[]",
+					"name": "",
+					"type": "tuple[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_strategyId",
+					"type": "uint256"
+				}
+			],
+			"name": "getStrategy",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "uint256",
+							"name": "templateId",
+							"type": "uint256"
+						},
+						{
+							"internalType": "address",
+							"name": "proxy",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes[][]",
+							"name": "actionData",
+							"type": "bytes[][]"
+						},
+						{
+							"internalType": "bytes[][]",
+							"name": "triggerData",
+							"type": "bytes[][]"
+						},
+						{
+							"internalType": "bool",
+							"name": "active",
+							"type": "bool"
+						},
+						{
+							"internalType": "uint256",
+							"name": "posInUserArr",
+							"type": "uint256"
+						}
+					],
+					"internalType": "struct StrategyData.Strategy",
+					"name": "",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "getStrategyCount",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_templateId",
+					"type": "uint256"
+				}
+			],
+			"name": "getTemplate",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "string",
+							"name": "name",
+							"type": "string"
+						},
+						{
+							"internalType": "bytes32[]",
+							"name": "triggerIds",
+							"type": "bytes32[]"
+						},
+						{
+							"internalType": "bytes32[]",
+							"name": "actionIds",
+							"type": "bytes32[]"
+						},
+						{
+							"internalType": "uint8[][]",
+							"name": "paramMapping",
+							"type": "uint8[][]"
+						}
+					],
+					"internalType": "struct StrategyData.Template",
+					"name": "",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "getTemplateCount",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_strategyId",
+					"type": "uint256"
+				}
+			],
+			"name": "getTemplateFromStrategy",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "string",
+							"name": "name",
+							"type": "string"
+						},
+						{
+							"internalType": "bytes32[]",
+							"name": "triggerIds",
+							"type": "bytes32[]"
+						},
+						{
+							"internalType": "bytes32[]",
+							"name": "actionIds",
+							"type": "bytes32[]"
+						},
+						{
+							"internalType": "uint8[][]",
+							"name": "paramMapping",
+							"type": "uint8[][]"
+						}
+					],
+					"internalType": "struct StrategyData.Template",
+					"name": "",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "getTemplates",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "string",
+							"name": "name",
+							"type": "string"
+						},
+						{
+							"internalType": "bytes32[]",
+							"name": "triggerIds",
+							"type": "bytes32[]"
+						},
+						{
+							"internalType": "bytes32[]",
+							"name": "actionIds",
+							"type": "bytes32[]"
+						},
+						{
+							"internalType": "uint8[][]",
+							"name": "paramMapping",
+							"type": "uint8[][]"
+						}
+					],
+					"internalType": "struct StrategyData.Template[]",
+					"name": "",
+					"type": "tuple[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "getUserStrategies",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "uint256",
+							"name": "templateId",
+							"type": "uint256"
+						},
+						{
+							"internalType": "address",
+							"name": "proxy",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes[][]",
+							"name": "actionData",
+							"type": "bytes[][]"
+						},
+						{
+							"internalType": "bytes[][]",
+							"name": "triggerData",
+							"type": "bytes[][]"
+						},
+						{
+							"internalType": "bool",
+							"name": "active",
+							"type": "bool"
+						},
+						{
+							"internalType": "uint256",
+							"name": "posInUserArr",
+							"type": "uint256"
+						}
+					],
+					"internalType": "struct StrategyData.Strategy[]",
+					"name": "",
+					"type": "tuple[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "logger",
+			"outputs": [
+				{
+					"internalType": "contract DefisaverLogger",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_subId",
+					"type": "uint256"
+				}
+			],
+			"name": "removeStrategy",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "strategies",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "templateId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "address",
+					"name": "proxy",
+					"type": "address"
+				},
+				{
+					"internalType": "bool",
+					"name": "active",
+					"type": "bool"
+				},
+				{
+					"internalType": "uint256",
+					"name": "posInUserArr",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "templates",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "name",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "updateCounter",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_startegyId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_templateId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bool",
+					"name": "_active",
+					"type": "bool"
+				},
+				{
+					"internalType": "bytes[][]",
+					"name": "_actionData",
+					"type": "bytes[][]"
+				},
+				{
+					"internalType": "bytes[][]",
+					"name": "_triggerData",
+					"type": "bytes[][]"
+				}
+			],
+			"name": "updateStrategy",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "userHasStrategies",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "usersPos",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		}
+	],
+	"networks": {
+		"local": {
+			"address": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+			"args": []
+		}
+	}
+}

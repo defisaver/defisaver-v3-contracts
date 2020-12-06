@@ -1,4 +1,5 @@
 const { expect } = require("chai");
+const dfs = require('defisaver-sdk');
 
 const { getAssetInfo, ilks } = require('defisaver-tokens');
 
@@ -20,10 +21,10 @@ const {
     generateMcd,
 } = require('../actions.js');
 
-const DAI_AMOUNT = '100';
+const DAI_AMOUNT = '500';
 
 describe("Mcd-Generate", function() {
-    let makerAddresses, senderAcc, proxy;
+    let makerAddresses, senderAcc, proxy, mcdGenerateAddr;
 
     before(async () => {
         await redeploy('McdGenerate');
@@ -33,10 +34,12 @@ describe("Mcd-Generate", function() {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
 
+        mcdGenerateAddr = await getAddrFromRegistry('McdGenerate');
+
         this.timeout(40000);
     });
 
-    for (let i = 0; i < ilks.length; ++i) {
+    for (let i = 0; i < 1; ++i) {
         const ilkData = ilks[i];
         const joinAddr = ilkData.join;
         const tokenData = getAssetInfo(ilkData.asset);

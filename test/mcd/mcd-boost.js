@@ -111,16 +111,7 @@ describe("Mcd-Boost", function() {
 
             const path = abiCoder.encode(['address[]'],[[firstPath, secondPath]]);
 
-            // address srcAddr;
-            // address destAddr;
-            // uint256 srcAmount;
-            // uint256 destAmount;
-            // uint256 minPrice;
-            // uint256 dfsFeeDivider;
-            // address user;
-            // address wrapper;
-            // bytes wrapperData;
-            // OffchainData offchainData;
+            console.log('wat: ', ethers.utils.toUtf8Bytes(''), typeof ethers.utils.toUtf8Bytes(''));
 
             const mockSet = new dfs.ActionSet("BoostTask", [
                 new dfs.Action(

@@ -1,0 +1,221 @@
+{
+	"contractName": "SubscriptionProxy",
+	"abi": [
+		{
+			"inputs": [],
+			"name": "FACTORY_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "REGISTRY_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_templateId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bool",
+					"name": "_active",
+					"type": "bool"
+				},
+				{
+					"internalType": "bytes[][]",
+					"name": "_actionData",
+					"type": "bytes[][]"
+				},
+				{
+					"internalType": "bytes[][]",
+					"name": "_triggerData",
+					"type": "bytes[][]"
+				}
+			],
+			"name": "createStrategy",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "string",
+					"name": "_name",
+					"type": "string"
+				},
+				{
+					"internalType": "bytes32[]",
+					"name": "_triggerIds",
+					"type": "bytes32[]"
+				},
+				{
+					"internalType": "bytes32[]",
+					"name": "_actionIds",
+					"type": "bytes32[]"
+				},
+				{
+					"internalType": "uint8[][]",
+					"name": "_paramMapping",
+					"type": "uint8[][]"
+				}
+			],
+			"name": "createTemplate",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "string",
+					"name": "_name",
+					"type": "string"
+				},
+				{
+					"internalType": "bytes32[]",
+					"name": "_triggerIds",
+					"type": "bytes32[]"
+				},
+				{
+					"internalType": "bytes32[]",
+					"name": "_actionIds",
+					"type": "bytes32[]"
+				},
+				{
+					"internalType": "uint8[][]",
+					"name": "_paramMapping",
+					"type": "uint8[][]"
+				},
+				{
+					"internalType": "bool",
+					"name": "_active",
+					"type": "bool"
+				},
+				{
+					"internalType": "bytes[][]",
+					"name": "_actionData",
+					"type": "bytes[][]"
+				},
+				{
+					"internalType": "bytes[][]",
+					"name": "_triggerData",
+					"type": "bytes[][]"
+				}
+			],
+			"name": "createTemplateAndStrategy",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_contractAddr",
+					"type": "address"
+				}
+			],
+			"name": "givePermission",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "registry",
+			"outputs": [
+				{
+					"internalType": "contract DFSRegistry",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_contractAddr",
+					"type": "address"
+				}
+			],
+			"name": "removePermission",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_strategyId",
+					"type": "uint256"
+				}
+			],
+			"name": "unsubscribeStrategy",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_strategyId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_templateId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bool",
+					"name": "_active",
+					"type": "bool"
+				},
+				{
+					"internalType": "bytes[][]",
+					"name": "_actionData",
+					"type": "bytes[][]"
+				},
+				{
+					"internalType": "bytes[][]",
+					"name": "_triggerData",
+					"type": "bytes[][]"
+				}
+			],
+			"name": "updateStrategy",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		}
+	],
+	"networks": {
+		"local": {
+			"address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+			"args": []
+		}
+	}
+}

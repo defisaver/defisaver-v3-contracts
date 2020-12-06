@@ -203,8 +203,8 @@
 		}
 	],
 	"networks": {
-		"kovan": {
-			"address": "0xC93bB764Db970da6A1bC5040c680B2Cb449b0e0E",
+		"local": {
+			"address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 			"args": []
 		}
 	}

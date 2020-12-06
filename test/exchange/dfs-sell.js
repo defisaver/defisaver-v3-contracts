@@ -1,6 +1,8 @@
 const { expect } = require("chai");
 
 const { getAssetInfo } = require('defisaver-tokens');
+const dfs = require('defisaver-sdk');
+
 
 const {
     getAddrFromRegistry,
@@ -9,11 +11,13 @@ const {
     send,
     approve,
     balanceOf,
+    formatExchangeObj,
     nullAddress,
     REGISTRY_ADDR,
     UNISWAP_WRAPPER,
     KYBER_WRAPPER,
-    WETH_ADDRESS
+    WETH_ADDRESS,
+    isEth
 } = require('../utils');
 
 const {
@@ -25,9 +29,9 @@ const {
 // TODO: can we make it work with 0x?
 
 describe("Dfs-Sell", function() {
-    let senderAcc, proxy;
+    let senderAcc, proxy, dfsSellAddr;
 
-    const tokens = [
+    const trades = [
         {sellToken: "ETH", buyToken: "DAI", amount: "1"},
         {sellToken: "DAI", buyToken: "WBTC", amount: "200"},
         {sellToken: "ETH", buyToken: "USDC", amount: "1"},
@@ -42,25 +46,23 @@ describe("Dfs-Sell", function() {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
 
+        dfsSellAddr = await getAddrFromRegistry('DFSSell');
+
         this.timeout(40000);
     });
 
-    for (let i = 0; i < tokens.length; ++i) {
-        const token = tokens[i];
+    for (let i = 0; i < trades.length; ++i) {
+        const trade = trades[i];
 
-        it(`... should sell ${token.sellToken} for a ${token.buyToken}`, async () => {
-            const buyAddr = getAssetInfo(token.buyToken).address;
+        it(`... should sell ${trade.sellToken} for a ${trade.buyToken}`, async () => {
+            const sellAddr = getAssetInfo(trade.sellToken).address;
+            const buyAddr = getAssetInfo(trade.buyToken).address;
 
             const buyBalanceBefore = await balanceOf(buyAddr, senderAcc.address);
 
-            await sell(
-                proxy,
-                token.sellToken,
-                token.buyToken,
-                token.amount,
-                senderAcc.address,
-                senderAcc.address
-            );
+            const amount = trade.amount * 10**getAssetInfo(trade.sellToken).decimals;
+
+            await sell(proxy, sellAddr, buyAddr, amount, UNISWAP_WRAPPER, senderAcc.address, senderAcc.address);
            
             const buyBalanceAfter = await balanceOf(buyAddr, senderAcc.address);
 

@@ -30,6 +30,7 @@ const BigNumber = hre.ethers.BigNumber;
 
 
 describe("Mcd-Supply", function() {
+    this.timeout(80000);
 
     let makerAddresses, senderAcc, proxy;
 
@@ -40,8 +41,6 @@ describe("Mcd-Supply", function() {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
 
-        this.timeout(40000);
-
         // await buyGasTokens(proxy, senderAcc);
     });
 
@@ -51,14 +50,13 @@ describe("Mcd-Supply", function() {
         const tokenData = getAssetInfo(ilkData.asset);
 
         it(`... should supply ${standardAmounts[tokenData.symbol]} ${tokenData.symbol} to a ${ilkData.ilkLabel} vault`, async () => {
-            this.timeout(40000);
 
             const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
             const amount = BigNumber.from(ethers.utils.parseUnits(standardAmounts[tokenData.symbol], tokenData.decimals));
 
             const from = senderAcc.address;
 
-           await supplyMcd(proxy, tokenData.symbol, tokenData.address, vaultId, amount, joinAddr, from);
+            await supplyMcd(proxy, vaultId, amount, tokenData.address, joinAddr, from);
         });
 
     }

@@ -16,6 +16,7 @@ const {
 const {
     fetchMakerAddresses,
     getVaultsForUser,
+    getRatio,
 } = require('../utils-mcd');
 
 const {
@@ -24,7 +25,7 @@ const {
 
 describe("Mcd-Open", function() {
 
-    let makerAddresses, senderAcc, proxy, mcdOpenAddr;
+    let makerAddresses, senderAcc, proxy, mcdOpenAddr, mcdView;
 
     before(async () => {
         await redeploy('McdOpen');
@@ -35,6 +36,8 @@ describe("Mcd-Open", function() {
         proxy = await getProxy(senderAcc.address);
 
         mcdOpenAddr = await getAddrFromRegistry('McdOpen');
+        mcdView = await redeploy('McdView');
+
     });
 
     for (let i = 0; i < 1; ++i) {
@@ -43,14 +46,10 @@ describe("Mcd-Open", function() {
         const tokenData = getAssetInfo(ilkData.asset);
 
         it(`... should open an empty ${ilkData.ilkLabel} Maker vault`, async () => {
-
             const vaultsBefore = await getVaultsForUser(proxy.address, makerAddresses);
             const numVaultsForUser = vaultsBefore[0].length;
 
-            const openMyVault = new dfs.actions.maker.MakerOpenVaultAction(joinAddr);
-            const functionData = openMyVault.encodeForDsProxyCall()[1];
-
-            await proxy['execute(address,bytes)'](mcdOpenAddr, functionData, {gasLimit: 1000000});
+            const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
 
             const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
             const numVaultsForUserAfter = vaultsAfter[0].length;
@@ -61,21 +60,13 @@ describe("Mcd-Open", function() {
         });
     }
 
-    it(`... should fail to open an Maker vault, because of invalid joinAddr`, async () => {
-        const openMyVault = new dfs.actions.maker.MakerOpenVaultAction(nullAddress);
-
-        const McdOpen = await ethers.getContractFactory("McdOpen");
-        const functionData = McdOpen.interface.encodeFunctionData(
-            "executeActionDirect",
-            [openMyVault.encodeForCall()]
-        );
-
-        try {
-            await proxy['execute(address,bytes)'](mcdOpenAddr, functionData);
-            expect(true).to.be.false;
-        } catch (err) {
-            expect(true).to.be.true;
-        }
-    });
+    // it(`... should fail to open an Maker vault, because of invalid joinAddr`, async () => {
+    //     try {
+    //         await openMcd(proxy, makerAddresses, nullAddress);
+    //         expect(true).to.be.false;
+    //     } catch (err) {
+    //         expect(true).to.be.true;
+    //     }
+    // });
 
 });

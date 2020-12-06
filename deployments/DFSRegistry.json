@@ -344,8 +344,8 @@
 		}
 	],
 	"networks": {
-		"kovan": {
-			"address": "0xd26966adCdF4ef5CFcc6d2fFfe0190DF17acB72A",
+		"local": {
+			"address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
 			"args": []
 		}
 	}

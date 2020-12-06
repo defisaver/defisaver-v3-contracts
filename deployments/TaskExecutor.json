@@ -1,0 +1,218 @@
+{
+	"contractName": "TaskExecutor",
+	"abi": [
+		{
+			"inputs": [],
+			"name": "DEFISAVER_LOGGER",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "FACTORY_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "REGISTRY_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"components": [
+						{
+							"internalType": "string",
+							"name": "name",
+							"type": "string"
+						},
+						{
+							"internalType": "bytes[][]",
+							"name": "callData",
+							"type": "bytes[][]"
+						},
+						{
+							"internalType": "bytes[][]",
+							"name": "subData",
+							"type": "bytes[][]"
+						},
+						{
+							"internalType": "bytes32[]",
+							"name": "ids",
+							"type": "bytes32[]"
+						},
+						{
+							"internalType": "uint8[][]",
+							"name": "paramMapping",
+							"type": "uint8[][]"
+						}
+					],
+					"internalType": "struct StrategyData.Task",
+					"name": "_currTask",
+					"type": "tuple"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "_flAmount",
+					"type": "bytes32"
+				}
+			],
+			"name": "_executeActionsFromFL",
+			"outputs": [],
+			"stateMutability": "payable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "chiToken",
+			"outputs": [
+				{
+					"internalType": "contract IGasToken",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_strategyId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bytes[][]",
+					"name": "_actionCallData",
+					"type": "bytes[][]"
+				}
+			],
+			"name": "executeStrategyTask",
+			"outputs": [],
+			"stateMutability": "payable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"components": [
+						{
+							"internalType": "string",
+							"name": "name",
+							"type": "string"
+						},
+						{
+							"internalType": "bytes[][]",
+							"name": "callData",
+							"type": "bytes[][]"
+						},
+						{
+							"internalType": "bytes[][]",
+							"name": "subData",
+							"type": "bytes[][]"
+						},
+						{
+							"internalType": "bytes32[]",
+							"name": "ids",
+							"type": "bytes32[]"
+						},
+						{
+							"internalType": "uint8[][]",
+							"name": "paramMapping",
+							"type": "uint8[][]"
+						}
+					],
+					"internalType": "struct StrategyData.Task",
+					"name": "currTask",
+					"type": "tuple"
+				}
+			],
+			"name": "executeTask",
+			"outputs": [],
+			"stateMutability": "payable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "gasToken",
+			"outputs": [
+				{
+					"internalType": "contract IGasToken",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_contractAddr",
+					"type": "address"
+				}
+			],
+			"name": "givePermission",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "registry",
+			"outputs": [
+				{
+					"internalType": "contract DFSRegistry",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_contractAddr",
+					"type": "address"
+				}
+			],
+			"name": "removePermission",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		}
+	],
+	"networks": {
+		"local": {
+			"address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+			"args": []
+		}
+	}
+}
