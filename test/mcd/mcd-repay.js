@@ -24,9 +24,6 @@ const {
 
 const {
     openVault,
-    encodeMcdWithdrawAction,
-    encodeDfsSellAction,
-    encodeMcdPaybackAction,
 } = require('../actions.js');
 
 const VAULT_DAI_AMOUNT = '570';

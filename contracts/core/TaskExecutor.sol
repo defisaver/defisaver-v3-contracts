@@ -10,8 +10,6 @@ import "../core/DFSRegistry.sol";
 import "./Subscriptions.sol";
 import "../utils/GasBurner.sol";
 
-import "hardhat/console.sol";
-
 /// @title Handle FL taking and calls action executor
 contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
@@ -64,7 +62,6 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
             _parseFL(_currTask, firstActionAddr, returnValues);
         } else {
             for (uint256 i = 0; i < _currTask.ids.length; ++i) {
-                console.log(i);
                 returnValues[i] = _executeAction(_currTask, i, returnValues);
             }
         }
@@ -93,7 +90,6 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
         uint256 _index,
         bytes32[] memory _returnValues
     ) internal returns (bytes32 response) {
-        console.log("ODJE %s", registry.getAddr(_currTask.ids[_index]));
         response = IDSProxy(address(this)).execute{value: address(this).balance}(
             registry.getAddr(_currTask.ids[_index]),
             abi.encodeWithSignature(

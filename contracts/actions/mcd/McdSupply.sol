@@ -13,8 +13,6 @@ import "./helpers/McdHelper.sol";
 
 import "../../utils/GasBurner.sol";
 
-import "hardhat/console.sol";
-
 
 contract McdSupply is ActionBase, McdHelper, GasBurner {
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
@@ -31,7 +29,6 @@ contract McdSupply is ActionBase, McdHelper, GasBurner {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public override payable returns (bytes32) {
-        console.log("SUpply");
         (uint256 vaultId, uint256 amount, address joinAddr, address from) = parseInputs(_callData);
 
         vaultId = _parseParamUint(vaultId, _paramMapping[0], _subData, _returnValues);
