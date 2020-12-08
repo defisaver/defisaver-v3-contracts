@@ -60,6 +60,7 @@ contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
         address _from,
         address _to
     ) internal returns (uint256) {
+
         pullTokens(exchangeData.srcAddr, _from, exchangeData.srcAmount);
 
         (, uint256 exchangedAmount) = _sell(exchangeData);

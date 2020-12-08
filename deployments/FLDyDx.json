@@ -1,14 +1,14 @@
 {
-	"contractName": "McdWithdraw",
+	"contractName": "FLDyDx",
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ETH_ADDRESS",
+			"name": "CALLBACK_SELECTOR",
 			"outputs": [
 				{
-					"internalType": "address",
+					"internalType": "bytes4",
 					"name": "",
-					"type": "address"
+					"type": "bytes4"
 				}
 			],
 			"stateMutability": "view",
@@ -16,7 +16,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "MANAGER_ADDRESS",
+			"name": "ETH_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -42,7 +42,20 @@
 		},
 		{
 			"inputs": [],
-			"name": "VAT_ADDRESS",
+			"name": "SOLO_MARGIN_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "WETH_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -67,16 +80,38 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "chiToken",
-			"outputs": [
+			"inputs": [
 				{
-					"internalType": "contract IGasToken",
+					"internalType": "address",
 					"name": "",
 					"type": "address"
+				},
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "owner",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "number",
+							"type": "uint256"
+						}
+					],
+					"internalType": "struct Account.Info",
+					"name": "",
+					"type": "tuple"
+				},
+				{
+					"internalType": "bytes",
+					"name": "_data",
+					"type": "bytes"
 				}
 			],
-			"stateMutability": "view",
+			"name": "callFunction",
+			"outputs": [],
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
@@ -128,77 +163,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "gasToken",
-			"outputs": [
-				{
-					"internalType": "contract IGasToken",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "contract IManager",
-					"name": "_manager",
-					"type": "address"
-				},
-				{
-					"internalType": "uint256",
-					"name": "_cdpId",
-					"type": "uint256"
-				},
-				{
-					"internalType": "bytes32",
-					"name": "_ilk",
-					"type": "bytes32"
-				}
-			],
-			"name": "getCdpInfo",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				},
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "contract IManager",
-					"name": "_manager",
-					"type": "address"
-				},
-				{
-					"internalType": "uint256",
-					"name": "_cdpId",
-					"type": "uint256"
-				}
-			],
-			"name": "getOwner",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "logger",
 			"outputs": [
 				{
@@ -211,16 +175,32 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "manager",
-			"outputs": [
+			"inputs": [
 				{
-					"internalType": "contract IManager",
-					"name": "",
-					"type": "address"
+					"internalType": "bytes",
+					"name": "_data",
+					"type": "bytes"
 				}
 			],
-			"stateMutability": "view",
+			"name": "parseParamData",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "amount",
+					"type": "uint256"
+				},
+				{
+					"internalType": "address",
+					"name": "token",
+					"type": "address"
+				},
+				{
+					"internalType": "uint8",
+					"name": "flType",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "pure",
 			"type": "function"
 		},
 		{
@@ -237,22 +217,13 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "vat",
-			"outputs": [
-				{
-					"internalType": "contract IVat",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"stateMutability": "payable",
+			"type": "receive"
 		}
 	],
 	"networks": {
 		"local": {
-			"address": "0x35128AC8cEFbC7D108dF719cdc7AAabbE151d875",
+			"address": "0x1b8418FE3a74e25Da72570418dffa6A2A6788494",
 			"args": []
 		}
 	}

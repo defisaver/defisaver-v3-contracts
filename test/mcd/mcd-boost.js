@@ -33,19 +33,26 @@ const VAULT_DAI_AMOUNT = '540';
 describe("Mcd-Boost", function() {
     this.timeout(80000);
 
-    let makerAddresses, senderAcc, proxy, mcdOpenAddr, mcdView, taskExecutorAddr;
+    let makerAddresses, senderAcc, proxy, dydxFlAddr, aaveFlAddr, mcdView, taskExecutorAddr;
 
     before(async () => {
         await redeploy('McdSupply');
         await redeploy('TaskExecutor');
         await redeploy('McdGenerate');
-        // await redeploy('FLAave');
+        await redeploy('FLDyDx');
+        await redeploy('FLAave');
+        await redeploy('TaskExecutor');
+        await redeploy('DFSSell');
 
         mcdView = await redeploy('McdView');
 
         makerAddresses = await fetchMakerAddresses();
 
         taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        dydxFlAddr = await getAddrFromRegistry('FLDyDx');
+        aaveFlAddr = await getAddrFromRegistry('FLAave');
+
+        await send(makerAddresses["MCD_DAI"], dydxFlAddr, '200');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -58,70 +65,9 @@ describe("Mcd-Boost", function() {
         const tokenData = getAssetInfo(ilkData.asset);
         let vaultId;
 
-        let boostAmount = '20';
+        let boostAmount = '100';
 
-        // it(`... should call a boost ${boostAmount} on a ${ilkData.ilkLabel} vault`, async () => {
-
-        //     // create a vault
-        //     vaultId = await openVault(
-        //         makerAddresses,
-        //         proxy,
-        //         joinAddr,
-        //         tokenData,
-        //         standardAmounts[tokenData.symbol],
-        //         VAULT_DAI_AMOUNT
-        //     );
-
-        //     boostAmount = ethers.utils.parseUnits(boostAmount, 18);
-
-        //     const ratioBefore = await getRatio(mcdView, vaultId);
-        //     const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
-        //     console.log(`Ratio before:  ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} ${tokenData.symbol}, debt: ${info.debt.toFixed(2)} Dai)`);
-
-        //     const from = proxy.address;
-        //     const to = proxy.address;
-        //     const collToken = tokenData.address;
-        //     const fromToken = makerAddresses["MCD_DAI"];
-
-        //     const mcdGenerateAction = 
-        //         new dfs.actions.maker.MakerGenerateAction(vaultId, boostAmount.toString(), to);
-
-        //     const exchangeObject = formatExchangeObj(
-        //         fromToken,
-        //         collToken,
-        //         '$1',
-        //         UNISWAP_WRAPPER
-        //     );
-            
-        //     const sellAction = new dfs.actions.basic.SellAction(
-        //         exchangeObject,
-        //         from,
-        //         to
-        //     );
-
-        //     const mcdSupplyAction = 
-        //         new dfs.actions.maker.MakerSupplyAction(vaultId, '$2', joinAddr, from);
-
-        //     const boostRecipe = new dfs.ActionSet("BoostRecipe", [
-        //         mcdGenerateAction,
-        //         sellAction,
-        //         mcdSupplyAction
-        //     ]);
-
-        //     const functionData = boostRecipe.encodeForDsProxyCall();
-
-        //     await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {gasLimit: 3000000});
-
-        //     const ratioAfter = await getRatio(mcdView, vaultId);
-        //     const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
-        //     console.log(`Ratio before: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${tokenData.symbol}, debt: ${info2.debt.toFixed(2)} Dai)`);
-
-        //     expect(ratioAfter).to.be.lt(ratioBefore);
-        //     expect(info2.coll).to.be.gt(info.coll);
-        //     expect(info2.debt).to.be.gt(info.debt);
-        // });
-
-        it(`... should call a boost with FL ${boostAmount} on a ${ilkData.ilkLabel} vault`, async () => {
+        it(`... should call a boost ${boostAmount} on a ${ilkData.ilkLabel} vault`, async () => {
 
             // create a vault
             vaultId = await openVault(
@@ -137,7 +83,7 @@ describe("Mcd-Boost", function() {
 
             const ratioBefore = await getRatio(mcdView, vaultId);
             const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
-            console.log(`Ratio before: ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} ${tokenData.symbol}, debt: ${info.debt.toFixed(2)} Dai)`);
+            console.log(`Ratio before:  ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} ${tokenData.symbol}, debt: ${info.debt.toFixed(2)} Dai)`);
 
             const from = proxy.address;
             const to = proxy.address;
@@ -147,15 +93,13 @@ describe("Mcd-Boost", function() {
             const mcdGenerateAction = 
                 new dfs.actions.maker.MakerGenerateAction(vaultId, boostAmount.toString(), to);
 
-            const exchangeObject = formatExchangeObj(
-                fromToken,
-                collToken,
-                '$1',
-                UNISWAP_WRAPPER
-            );
-            
             const sellAction = new dfs.actions.basic.SellAction(
-                exchangeObject,
+                formatExchangeObj(
+                    fromToken,
+                    collToken,
+                    '$1',
+                    UNISWAP_WRAPPER
+                ),
                 from,
                 to
             );
@@ -163,10 +107,73 @@ describe("Mcd-Boost", function() {
             const mcdSupplyAction = 
                 new dfs.actions.maker.MakerSupplyAction(vaultId, '$2', joinAddr, from);
 
-            const boostRecipe = new dfs.ActionSet("FLBoostRecipe", [
+            const boostRecipe = new dfs.ActionSet("BoostRecipe", [
                 mcdGenerateAction,
                 sellAction,
                 mcdSupplyAction
+            ]);
+
+            const functionData = boostRecipe.encodeForDsProxyCall();
+
+            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {gasLimit: 3000000});
+
+            const ratioAfter = await getRatio(mcdView, vaultId);
+            const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
+            console.log(`Ratio before: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${tokenData.symbol}, debt: ${info2.debt.toFixed(2)} Dai)`);
+
+            expect(ratioAfter).to.be.lt(ratioBefore);
+            expect(info2.coll).to.be.gt(info.coll);
+            expect(info2.debt).to.be.gt(info.debt);
+        });
+
+        it(`... should call a boost with FL ${boostAmount} Dai on a ${ilkData.ilkLabel} vault`, async () => {
+
+            // create a vault
+            // vaultId = await openVault(
+            //     makerAddresses,
+            //     proxy,
+            //     joinAddr,
+            //     tokenData,
+            //     standardAmounts[tokenData.symbol],
+            //     VAULT_DAI_AMOUNT
+            // );
+
+            // boostAmount = ethers.utils.parseUnits(boostAmount, 18);
+
+            const ratioBefore = await getRatio(mcdView, vaultId);
+            const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
+            console.log(`Ratio before: ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} ${tokenData.symbol}, debt: ${info.debt.toFixed(2)} Dai)`);
+
+            const from = proxy.address;
+            const to = proxy.address;
+            const collToken = tokenData.address;
+            const fromToken = makerAddresses["MCD_DAI"];
+
+            const dydxFLAction = 
+                new dfs.actions.flashloan.DyDxFlashLoanAction(boostAmount, fromToken);
+            
+            const sellAction = new dfs.actions.basic.SellAction(
+                formatExchangeObj(
+                    fromToken,
+                    collToken,
+                    boostAmount,
+                    UNISWAP_WRAPPER
+                ),
+                from,
+                to
+            );
+
+            const mcdSupplyAction = 
+                new dfs.actions.maker.MakerSupplyAction(vaultId, '$2', joinAddr, from);
+
+            const mcdGenerateAction = 
+                new dfs.actions.maker.MakerGenerateAction(vaultId, '$1', dydxFlAddr);
+
+            const boostRecipe = new dfs.ActionSet("FLBoostRecipe", [
+                dydxFLAction,
+                sellAction,
+                mcdSupplyAction,
+                mcdGenerateAction
             ]);
 
             const functionData = boostRecipe.encodeForDsProxyCall();

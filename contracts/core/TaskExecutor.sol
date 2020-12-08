@@ -90,6 +90,7 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
         uint256 _index,
         bytes32[] memory _returnValues
     ) internal returns (bytes32 response) {
+
         response = IDSProxy(address(this)).execute{value: address(this).balance}(
             registry.getAddr(_currTask.ids[_index]),
             abi.encodeWithSignature(

@@ -1,9 +1,9 @@
 {
-	"contractName": "McdWithdraw",
+	"contractName": "FLAave",
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ETH_ADDRESS",
+			"name": "AAVE_LENDING_POOL_ADDRESSES",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -16,7 +16,20 @@
 		},
 		{
 			"inputs": [],
-			"name": "MANAGER_ADDRESS",
+			"name": "CALLBACK_SELECTOR",
+			"outputs": [
+				{
+					"internalType": "bytes4",
+					"name": "",
+					"type": "bytes4"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ETH_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -42,19 +55,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "VAT_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "actionType",
 			"outputs": [
 				{
@@ -68,10 +68,10 @@
 		},
 		{
 			"inputs": [],
-			"name": "chiToken",
+			"name": "addressesProvider",
 			"outputs": [
 				{
-					"internalType": "contract IGasToken",
+					"internalType": "contract ILendingPoolAddressesProvider",
 					"name": "",
 					"type": "address"
 				}
@@ -127,74 +127,31 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "gasToken",
-			"outputs": [
-				{
-					"internalType": "contract IGasToken",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
 			"inputs": [
-				{
-					"internalType": "contract IManager",
-					"name": "_manager",
-					"type": "address"
-				},
-				{
-					"internalType": "uint256",
-					"name": "_cdpId",
-					"type": "uint256"
-				},
-				{
-					"internalType": "bytes32",
-					"name": "_ilk",
-					"type": "bytes32"
-				}
-			],
-			"name": "getCdpInfo",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				},
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "contract IManager",
-					"name": "_manager",
-					"type": "address"
-				},
-				{
-					"internalType": "uint256",
-					"name": "_cdpId",
-					"type": "uint256"
-				}
-			],
-			"name": "getOwner",
-			"outputs": [
 				{
 					"internalType": "address",
-					"name": "",
+					"name": "_reserve",
 					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_amount",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_fee",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bytes",
+					"name": "_params",
+					"type": "bytes"
 				}
 			],
-			"stateMutability": "view",
+			"name": "executeOperation",
+			"outputs": [],
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
@@ -211,16 +168,32 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "manager",
-			"outputs": [
+			"inputs": [
 				{
-					"internalType": "contract IManager",
-					"name": "",
-					"type": "address"
+					"internalType": "bytes",
+					"name": "_data",
+					"type": "bytes"
 				}
 			],
-			"stateMutability": "view",
+			"name": "parseParamData",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "amount",
+					"type": "uint256"
+				},
+				{
+					"internalType": "address",
+					"name": "token",
+					"type": "address"
+				},
+				{
+					"internalType": "uint8",
+					"name": "flType",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "pure",
 			"type": "function"
 		},
 		{
@@ -237,22 +210,13 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "vat",
-			"outputs": [
-				{
-					"internalType": "contract IVat",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"stateMutability": "payable",
+			"type": "receive"
 		}
 	],
 	"networks": {
 		"local": {
-			"address": "0x35128AC8cEFbC7D108dF719cdc7AAabbE151d875",
+			"address": "0x61cBeA3977645E467AF14C260a55c7974bD6aa0C",
 			"args": []
 		}
 	}

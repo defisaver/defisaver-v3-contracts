@@ -30,17 +30,15 @@ contract FLAave is ActionBase, StrategyData {
     ) public override payable returns (bytes32) {
         uint amount = abi.decode(_callData[0], (uint));
         address token = abi.decode(_callData[1], (address));
-        uint8 flType = abi.decode(_callData[2], (uint8));
 
         amount = _parseParamUint(amount, _paramMapping[0], _subData, _returnValues);
         token = _parseParamAddr(token, _paramMapping[1], _subData, _returnValues);
-        flType = uint8(_parseParamUint(flType, _paramMapping[2], _subData, _returnValues));
 
         address payable receiver = payable(registry.getAddr(keccak256("FLAave")));
 
-        ILendingPool(AAVE_LENDING_POOL_ADDRESSES).flashLoan(receiver, token, amount, _callData[3]);
+        ILendingPool(AAVE_LENDING_POOL_ADDRESSES).flashLoan(receiver, token, amount, _callData[2]);
 
-        logger.Log(address(this), msg.sender, "FLAave", abi.encode(amount, token, flType));
+        logger.Log(address(this), msg.sender, "FLAave", abi.encode(amount, token));
 
         return bytes32(amount);
     }

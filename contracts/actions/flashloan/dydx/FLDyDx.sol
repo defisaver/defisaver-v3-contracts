@@ -19,6 +19,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
     address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
+                                               
 
     function executeAction(
         bytes[] memory _callData,
@@ -28,16 +29,15 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
     ) public override payable returns (bytes32) {
         uint256 amount = abi.decode(_callData[0], (uint256));
         address token = abi.decode(_callData[1], (address));
-        uint8 flType = abi.decode(_callData[2], (uint8));
 
         amount = _parseParamUint(amount, _paramMapping[0], _subData, _returnValues);
         token = _parseParamAddr(token, _paramMapping[1], _subData, _returnValues);
 
-        address payable receiver = payable(registry.getAddr(keccak256("FLAave")));
+        address payable receiver = payable(registry.getAddr(keccak256("FLDyDx")));
 
-        dydxFlashLoan(receiver, token, amount, abi.encode(_callData[3], amount, token));
+        dydxFlashLoan(receiver, token, amount, abi.encode(_callData[2], amount, token));
 
-        logger.Log(address(this), msg.sender, "FLAave", abi.encode(amount, token, flType));
+        logger.Log(address(this), msg.sender, "FLDyDx", abi.encode(amount, token));
 
         return bytes32(amount);
     }
@@ -64,7 +64,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             taskExecutor,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currTask)
+            abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, amount)
         );
 
         // return FL
