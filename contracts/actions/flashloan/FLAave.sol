@@ -74,10 +74,6 @@ contract FLAave is ActionBase, StrategyData {
     // solhint-disable-next-line no-empty-blocks
     function executeActionDirect(bytes[] memory _callData) public override payable {}
 
-    function parseParamData(bytes memory _data) public pure returns (uint amount,address token,uint8 flType) {
-        (amount, token, flType) = abi.decode(_data,(uint256,address,uint8));
-    }
-
     function actionType() override public pure returns (uint8) {
         return uint8(ActionType.FL_ACTION);
     }

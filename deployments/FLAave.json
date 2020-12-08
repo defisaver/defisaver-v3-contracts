@@ -168,35 +168,6 @@
 			"type": "function"
 		},
 		{
-			"inputs": [
-				{
-					"internalType": "bytes",
-					"name": "_data",
-					"type": "bytes"
-				}
-			],
-			"name": "parseParamData",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "amount",
-					"type": "uint256"
-				},
-				{
-					"internalType": "address",
-					"name": "token",
-					"type": "address"
-				},
-				{
-					"internalType": "uint8",
-					"name": "flType",
-					"type": "uint8"
-				}
-			],
-			"stateMutability": "pure",
-			"type": "function"
-		},
-		{
 			"inputs": [],
 			"name": "registry",
 			"outputs": [
@@ -216,7 +187,7 @@
 	],
 	"networks": {
 		"local": {
-			"address": "0x61cBeA3977645E467AF14C260a55c7974bD6aa0C",
+			"address": "0x2625760C4A8e8101801D3a48eE64B2bEA42f1E96",
 			"args": []
 		}
 	}

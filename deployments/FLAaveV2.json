@@ -1,9 +1,48 @@
 {
-	"contractName": "McdSupply",
+	"contractName": "FLAaveV2",
 	"abi": [
 		{
 			"inputs": [],
-			"name": "MANAGER_ADDRESS",
+			"name": "AAVE_LENDING_POOL_ADDRESSES",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "AAVE_REFERRAL_CODE",
+			"outputs": [
+				{
+					"internalType": "uint16",
+					"name": "",
+					"type": "uint16"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "CALLBACK_SELECTOR",
+			"outputs": [
+				{
+					"internalType": "bytes4",
+					"name": "",
+					"type": "bytes4"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ETH_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -29,19 +68,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "VAT_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "actionType",
 			"outputs": [
 				{
@@ -55,10 +81,10 @@
 		},
 		{
 			"inputs": [],
-			"name": "chiToken",
+			"name": "addressesProvider",
 			"outputs": [
 				{
-					"internalType": "contract IGasToken",
+					"internalType": "contract ILendingPoolAddressesProviderV2",
 					"name": "",
 					"type": "address"
 				}
@@ -75,17 +101,17 @@
 				},
 				{
 					"internalType": "bytes[]",
-					"name": "_subData",
+					"name": "",
 					"type": "bytes[]"
 				},
 				{
 					"internalType": "uint8[]",
-					"name": "_paramMapping",
+					"name": "",
 					"type": "uint8[]"
 				},
 				{
 					"internalType": "bytes32[]",
-					"name": "_returnValues",
+					"name": "",
 					"type": "bytes32[]"
 				}
 			],
@@ -114,74 +140,42 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "gasToken",
-			"outputs": [
-				{
-					"internalType": "contract IGasToken",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
 			"inputs": [
 				{
-					"internalType": "contract IManager",
-					"name": "_manager",
-					"type": "address"
+					"internalType": "address[]",
+					"name": "_assets",
+					"type": "address[]"
 				},
 				{
-					"internalType": "uint256",
-					"name": "_cdpId",
-					"type": "uint256"
+					"internalType": "uint256[]",
+					"name": "_amounts",
+					"type": "uint256[]"
 				},
 				{
-					"internalType": "bytes32",
-					"name": "_ilk",
-					"type": "bytes32"
-				}
-			],
-			"name": "getCdpInfo",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
+					"internalType": "uint256[]",
+					"name": "_fees",
+					"type": "uint256[]"
 				},
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "contract IManager",
-					"name": "_manager",
-					"type": "address"
-				},
-				{
-					"internalType": "uint256",
-					"name": "_cdpId",
-					"type": "uint256"
-				}
-			],
-			"name": "getOwner",
-			"outputs": [
 				{
 					"internalType": "address",
 					"name": "",
 					"type": "address"
+				},
+				{
+					"internalType": "bytes",
+					"name": "_params",
+					"type": "bytes"
 				}
 			],
-			"stateMutability": "view",
+			"name": "executeOperation",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
@@ -198,13 +192,56 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "manager",
+			"inputs": [
+				{
+					"internalType": "bytes[]",
+					"name": "_callData",
+					"type": "bytes[]"
+				}
+			],
+			"name": "parseParamData",
 			"outputs": [
 				{
-					"internalType": "contract IManager",
-					"name": "",
-					"type": "address"
+					"components": [
+						{
+							"internalType": "address",
+							"name": "receiver",
+							"type": "address"
+						},
+						{
+							"internalType": "address[]",
+							"name": "tokens",
+							"type": "address[]"
+						},
+						{
+							"internalType": "uint256[]",
+							"name": "amounts",
+							"type": "uint256[]"
+						},
+						{
+							"internalType": "uint256[]",
+							"name": "modes",
+							"type": "uint256[]"
+						},
+						{
+							"internalType": "address",
+							"name": "onBehalfOf",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes",
+							"name": "params",
+							"type": "bytes"
+						},
+						{
+							"internalType": "uint16",
+							"name": "refferalCode",
+							"type": "uint16"
+						}
+					],
+					"internalType": "struct FLAaveV2.FLAaveV2Data",
+					"name": "flData",
+					"type": "tuple"
 				}
 			],
 			"stateMutability": "view",
@@ -224,22 +261,13 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "vat",
-			"outputs": [
-				{
-					"internalType": "contract IVat",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"stateMutability": "payable",
+			"type": "receive"
 		}
 	],
 	"networks": {
 		"local": {
-			"address": "0xf090f16dEc8b6D24082Edd25B1C8D26f2bC86128",
+			"address": "0x139e1D41943ee15dDe4DF876f9d0E7F85e26660A",
 			"args": []
 		}
 	}

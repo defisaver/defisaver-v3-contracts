@@ -33,14 +33,16 @@ const VAULT_DAI_AMOUNT = '540';
 describe("Mcd-Boost", function() {
     this.timeout(80000);
 
-    let makerAddresses, senderAcc, proxy, dydxFlAddr, aaveFlAddr, mcdView, taskExecutorAddr;
+    let makerAddresses, senderAcc, proxy, dydxFlAddr, aaveFlAddr, aaveV2FlAddr, mcdView, taskExecutorAddr;
 
     before(async () => {
+        await redeploy('McdOpen');
         await redeploy('McdSupply');
         await redeploy('TaskExecutor');
         await redeploy('McdGenerate');
         await redeploy('FLDyDx');
         await redeploy('FLAave');
+        await redeploy('FLAaveV2');
         await redeploy('TaskExecutor');
         await redeploy('DFSSell');
 
@@ -51,8 +53,9 @@ describe("Mcd-Boost", function() {
         taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
         dydxFlAddr = await getAddrFromRegistry('FLDyDx');
         aaveFlAddr = await getAddrFromRegistry('FLAave');
+        aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
 
-        await send(makerAddresses["MCD_DAI"], dydxFlAddr, '200');
+        // await send(makerAddresses["MCD_DAI"], dydxFlAddr, '200');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -151,6 +154,9 @@ describe("Mcd-Boost", function() {
 
             const dydxFLAction = 
                 new dfs.actions.flashloan.DyDxFlashLoanAction(boostAmount, fromToken);
+
+            const flAaveV2Action = 
+                new dfs.actions.flashloan.AaveFlashLoanV2Action([boostAmount], [fromToken], [0], nullAddress);
             
             const sellAction = new dfs.actions.basic.SellAction(
                 formatExchangeObj(
@@ -167,10 +173,10 @@ describe("Mcd-Boost", function() {
                 new dfs.actions.maker.MakerSupplyAction(vaultId, '$2', joinAddr, from);
 
             const mcdGenerateAction = 
-                new dfs.actions.maker.MakerGenerateAction(vaultId, '$1', dydxFlAddr);
+                new dfs.actions.maker.MakerGenerateAction(vaultId, '$1', aaveV2FlAddr);
 
             const boostRecipe = new dfs.ActionSet("FLBoostRecipe", [
-                dydxFLAction,
+                flAaveV2Action,
                 sellAction,
                 mcdSupplyAction,
                 mcdGenerateAction

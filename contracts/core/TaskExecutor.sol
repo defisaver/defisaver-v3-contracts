@@ -10,6 +10,7 @@ import "../core/DFSRegistry.sol";
 import "./Subscriptions.sol";
 import "../utils/GasBurner.sol";
 
+
 /// @title Handle FL taking and calls action executor
 contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
@@ -45,8 +46,10 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
     }
 
     function _executeActionsFromFL(Task memory _currTask, bytes32 _flAmount) public payable {
+
         bytes32[] memory returnValues = new bytes32[](_currTask.ids.length);
         returnValues[0] = _flAmount;
+
 
         for (uint256 i = 1; i < _currTask.ids.length; ++i) {
             returnValues[i] = _executeAction(_currTask, i, returnValues);
