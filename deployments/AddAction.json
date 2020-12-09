@@ -1,19 +1,6 @@
 {
-	"contractName": "McdOpen",
+	"contractName": "AddAction",
 	"abi": [
-		{
-			"inputs": [],
-			"name": "MANAGER_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
 		{
 			"inputs": [],
 			"name": "REGISTRY_ADDR",
@@ -38,19 +25,6 @@
 				}
 			],
 			"stateMutability": "pure",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "chiToken",
-			"outputs": [
-				{
-					"internalType": "contract IGasToken",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
 			"type": "function"
 		},
 		{
@@ -102,36 +76,10 @@
 		},
 		{
 			"inputs": [],
-			"name": "gasToken",
-			"outputs": [
-				{
-					"internalType": "contract IGasToken",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "logger",
 			"outputs": [
 				{
 					"internalType": "contract DefisaverLogger",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "manager",
-			"outputs": [
-				{
-					"internalType": "contract IManager",
 					"name": "",
 					"type": "address"
 				}
@@ -155,7 +103,7 @@
 	],
 	"networks": {
 		"local": {
-			"address": "0x3CA5269B5c54d4C807Ca0dF7EeB2CB7a5327E77d",
+			"address": "0xDC0a0B1Cd093d321bD1044B5e0Acb71b525ABb6b",
 			"args": []
 		}
 	}

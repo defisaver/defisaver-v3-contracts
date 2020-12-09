@@ -10,7 +10,6 @@ import "../core/DFSRegistry.sol";
 import "./Subscriptions.sol";
 import "../utils/GasBurner.sol";
 
-
 /// @title Handle FL taking and calls action executor
 contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;

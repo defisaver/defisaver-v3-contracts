@@ -61,6 +61,10 @@ contract McdSupply is ActionBase, McdHelper, GasBurner {
 
         int256 convertAmount = 0;
 
+        if (_amount == uint(-1)) {
+            _amount = getBalance(_joinAddr);
+        }
+
         if (isEthJoinAddr(_joinAddr)) {
             IJoin(_joinAddr).gem().deposit{value: _amount}();
             convertAmount = toPositiveInt(_amount);
@@ -113,6 +117,14 @@ contract McdSupply is ActionBase, McdHelper, GasBurner {
     ) internal {
         if (_from != address(0) && !isEthJoinAddr(_joinAddr) && _from != address(this)) {
             IERC20(address(IJoin(_joinAddr).gem())).safeTransferFrom(_from, address(this), _amount);
+        }
+    }
+
+    function getBalance(address _joinAddr) internal view returns (uint balance) {
+        if (isEthJoinAddr(_joinAddr)) {
+            balance = address(this).balance;
+        } else {
+            balance = IERC20(address(IJoin(_joinAddr).gem())).balanceOf(address(this));
         }
     }
 }

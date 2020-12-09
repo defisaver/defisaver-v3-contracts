@@ -38,6 +38,7 @@ contract McdGenerate is ActionBase, McdHelper, GasBurner {
     ) public override payable returns (bytes32) {
         (uint256 cdpId, uint256 amount, address to) = parseInputs(_callData);
 
+
         cdpId = _parseParamUint(cdpId, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
         to = _parseParamAddr(to, _paramMapping[2], _subData, _returnValues);

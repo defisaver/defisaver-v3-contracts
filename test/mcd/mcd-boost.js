@@ -55,7 +55,7 @@ describe("Mcd-Boost", function() {
         aaveFlAddr = await getAddrFromRegistry('FLAave');
         aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
 
-        // await send(makerAddresses["MCD_DAI"], dydxFlAddr, '200');
+        await send(makerAddresses["MCD_DAI"], dydxFlAddr, '200');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);

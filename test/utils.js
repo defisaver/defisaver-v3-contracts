@@ -157,5 +157,6 @@ module.exports = {
     UNISWAP_WRAPPER,
     OASIS_WRAPPER,
     WETH_ADDRESS,
-    ETH_ADDR
+    ETH_ADDR,
+    MAX_UINT
 };

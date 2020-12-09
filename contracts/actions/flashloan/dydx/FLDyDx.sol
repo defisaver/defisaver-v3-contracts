@@ -12,6 +12,7 @@ import "../../../core/StrategyData.sol";
 
 import "./DydxFlashLoanBase.sol";
 
+
 contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
     using SafeERC20 for IERC20;
 
@@ -20,7 +21,6 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
 
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
                                                
-
     function executeAction(
         bytes[] memory _callData,
         bytes[] memory _subData,
