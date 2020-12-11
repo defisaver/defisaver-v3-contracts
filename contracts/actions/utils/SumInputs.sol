@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 
-contract AddAction is ActionBase {
+contract SumInputs is ActionBase {
 
     function executeAction(
         bytes[] memory _callData,
