@@ -43,6 +43,7 @@ contract McdOpen is ActionBase, GasBurner {
 
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
+    
 
     function _mcdOpen(address _joinAddr) internal returns (uint256 vaultId) {
         bytes32 ilk = IJoin(_joinAddr).ilk();
