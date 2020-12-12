@@ -5,13 +5,15 @@ pragma experimental ABIEncoderV2;
 
 import "../../interfaces/mcd/IJoin.sol";
 import "../../interfaces/mcd/IManager.sol";
-import "../ActionBase.sol";
 import "../../utils/GasBurner.sol";
+import "../ActionBase.sol";
 
+/// @title Open a new Maker vault
 contract McdOpen is ActionBase, GasBurner {
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     IManager public constant manager = IManager(MANAGER_ADDRESS);
 
+    /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
         bytes[] memory _subData,
@@ -27,11 +29,20 @@ contract McdOpen is ActionBase, GasBurner {
         return bytes32(newVaultId);
     }
 
+    /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
         address joinAddr = parseInputs(_callData);
 
         _mcdOpen(joinAddr);
     }
+
+    /// @inheritdoc ActionBase
+    function actionType() public virtual override pure returns (uint8) {
+        return uint8(ActionType.STANDARD_ACTION);
+    }
+
+
+    //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _mcdOpen(address _joinAddr) internal returns (uint256 vaultId) {
         bytes32 ilk = IJoin(_joinAddr).ilk();
@@ -42,9 +53,5 @@ contract McdOpen is ActionBase, GasBurner {
 
     function parseInputs(bytes[] memory _callData) internal pure returns (address joinAddr) {
         joinAddr = abi.decode(_callData[0], (address));
-    }
-
-    function actionType() public virtual override pure returns (uint8) {
-        return uint8(ActionType.STANDARD_ACTION);
     }
 }

@@ -5,26 +5,24 @@ pragma experimental ABIEncoderV2;
 
 import "../../interfaces/mcd/IManager.sol";
 import "../../interfaces/mcd/IVat.sol";
-import "../../interfaces/mcd/IJoin.sol";
 import "../../interfaces/mcd/IDaiJoin.sol";
-import "../../DS/DSMath.sol";
-import "../../utils/SafeERC20.sol";
+import "../../utils/GasBurner.sol";
+import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
-import "../../utils/GasBurner.sol";
 
-contract McdPayback is ActionBase, McdHelper, GasBurner {
+/// @title Payback dai debt for a Maker vault
+contract McdPayback is ActionBase, McdHelper, TokenUtils, GasBurner {
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
     address public constant DAI_JOIN_ADDRESS = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
 
-    using SafeERC20 for IERC20;
-
     IManager public constant manager = IManager(MANAGER_ADDRESS);
     IVat public constant vat = IVat(VAT_ADDRESS);
 
+    /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
         bytes[] memory _subData,
@@ -42,15 +40,20 @@ contract McdPayback is ActionBase, McdHelper, GasBurner {
         return bytes32(amount);
     }
 
+    /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
         (uint256 vaultId, uint256 amount, address from) = parseInputs(_callData);
 
         _mcdPayback(vaultId, amount, from);
     }
 
+    /// @inheritdoc ActionBase
     function actionType() public override pure returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
+
+    //////////////////////////// ACTION LOGIC ////////////////////////////
+
 
     function _mcdPayback(
         uint256 _vaultId,
@@ -62,15 +65,14 @@ contract McdPayback is ActionBase, McdHelper, GasBurner {
 
         uint256 wholeDebt = getAllDebt(VAT_ADDRESS, urn, urn, ilk);
 
+        // can't repay more than the whole debt, extra debt left on proxy
         if (_amount > wholeDebt) {
             _amount = wholeDebt;
         }
 
-        pullTokens(_from, _amount);
+        pullTokens(DAI_ADDRESS, _from, _amount);
 
-        if (IERC20(DAI_ADDRESS).allowance(address(this), DAI_JOIN_ADDRESS) == 0) {
-            IERC20(DAI_ADDRESS).approve(DAI_JOIN_ADDRESS, uint256(-1));
-        }
+        approveToken(DAI_ADDRESS, DAI_JOIN_ADDRESS, uint(-1));
 
         IDaiJoin(DAI_JOIN_ADDRESS).join(urn, _amount);
 
@@ -93,11 +95,5 @@ contract McdPayback is ActionBase, McdHelper, GasBurner {
         vaultId = abi.decode(_callData[0], (uint256));
         amount = abi.decode(_callData[1], (uint256));
         from = abi.decode(_callData[2], (address));
-    }
-
-    function pullTokens(address _from, uint256 _amount) internal {
-        if (_from != address(0) && _from != address(this)) {
-            IERC20(DAI_ADDRESS).safeTransferFrom(_from, address(this), _amount);
-        }
     }
 }

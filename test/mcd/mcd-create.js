@@ -44,7 +44,7 @@ describe("Mcd-Create", function() {
         await redeploy('McdOpen');
         await redeploy('McdSupply');
         await redeploy('TaskExecutor');
-        await redeploy('AddAction');
+        await redeploy('SumInputs');
         await redeploy('McdGenerate');
         await redeploy('FLDyDx');
 
@@ -148,9 +148,6 @@ describe("Mcd-Create", function() {
                 daiAmount,
                 UNISWAP_WRAPPER
             );
-
-            const addAction = new dfs.Action('AddAction', '0x0', ['uint256', 'uint256'], 
-                [collAmount, '$2']);
 
 
             const createVaultRecipe = new dfs.ActionSet("CreateVaultRecipe", [

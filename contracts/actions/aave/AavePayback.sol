@@ -9,8 +9,10 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
+/// @title Payback a token a user borrowed from an Aave market
 contract AavePayback is ActionBase, AaveHelper, TokenUtils, GasBurner {
 
+    /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
         bytes[] memory _subData,
@@ -30,11 +32,20 @@ contract AavePayback is ActionBase, AaveHelper, TokenUtils, GasBurner {
         return bytes32(paybackAmount);
     }
 
+    /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
         (address market, address tokenAddr, uint256 amount, uint rateMode, address from) = parseInputs(_callData);
 
         _payback(market, tokenAddr, amount, rateMode, from);
     }
+
+    /// @inheritdoc ActionBase
+    function actionType() public virtual override pure returns (uint8) {
+        return uint8(ActionType.STANDARD_ACTION);
+    }
+
+    //////////////////////////// ACTION LOGIC ////////////////////////////
+
 
      /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     /// @notice User paybacks tokens to the Aave protocol
@@ -87,9 +98,5 @@ contract AavePayback is ActionBase, AaveHelper, TokenUtils, GasBurner {
         amount = abi.decode(_callData[2], (uint256));
         rateMode = abi.decode(_callData[3], (uint256));
         from = abi.decode(_callData[4], (address));
-    }
-
-    function actionType() public virtual override pure returns (uint8) {
-        return uint8(ActionType.STANDARD_ACTION);
     }
 }

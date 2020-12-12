@@ -1,9 +1,9 @@
 {
-	"contractName": "McdOpen",
+	"contractName": "SendToken",
 	"abi": [
 		{
 			"inputs": [],
-			"name": "MANAGER_ADDRESS",
+			"name": "ETH_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -29,6 +29,19 @@
 		},
 		{
 			"inputs": [],
+			"name": "WETH_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "actionType",
 			"outputs": [
 				{
@@ -38,19 +51,6 @@
 				}
 			],
 			"stateMutability": "pure",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "chiToken",
-			"outputs": [
-				{
-					"internalType": "contract IGasToken",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
 			"type": "function"
 		},
 		{
@@ -102,36 +102,10 @@
 		},
 		{
 			"inputs": [],
-			"name": "gasToken",
-			"outputs": [
-				{
-					"internalType": "contract IGasToken",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "logger",
 			"outputs": [
 				{
 					"internalType": "contract DefisaverLogger",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "manager",
-			"outputs": [
-				{
-					"internalType": "contract IManager",
 					"name": "",
 					"type": "address"
 				}
@@ -155,7 +129,7 @@
 	],
 	"networks": {
 		"local": {
-			"address": "0x086ce0Da44C88Dac96cF0Dc4c5b2237eACca2E71",
+			"address": "0x85f93384BAd10d7751Fcc3bBD8F8710db3190700",
 			"args": []
 		}
 	}

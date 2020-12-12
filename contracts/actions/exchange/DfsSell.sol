@@ -4,12 +4,14 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "../../exchange/DFSExchangeCore.sol";
-import "../ActionBase.sol";
+import "../../utils/TokenUtils.sol";
 import "../../utils/GasBurner.sol";
+import "../ActionBase.sol";
 
-contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
-    using SafeERC20 for IERC20;
+/// @title A exchange sell action through the dfs exchange
+contract DFSSell is ActionBase, DFSExchangeCore, TokenUtils, GasBurner {
 
+    /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
         bytes[] memory _subData,
@@ -45,15 +47,20 @@ contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
         return bytes32(exchangedAmount);
     }
 
+    /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
         (ExchangeData memory exchangeData, address from, address to) = parseInputs(_callData);
 
         _dfsSell(exchangeData, from, to);
     }
 
+    /// @inheritdoc ActionBase
     function actionType() public override pure returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
+
+
+    //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _dfsSell(
         ExchangeData memory exchangeData,
@@ -81,30 +88,6 @@ contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
         );
 
         return exchangedAmount;
-    }
-
-    function pullTokens(
-        address _token,
-        address _from,
-        uint256 _amount
-    ) internal {
-        if (_from != address(0) && _token != KYBER_ETH_ADDRESS && _from != address(this)) {
-            IERC20(_token).safeTransferFrom(_from, address(this), _amount);
-        }
-    }
-
-    function withdrawTokens(
-        address _token,
-        address _to,
-        uint256 _amount
-    ) internal {
-        if (_to != address(0) || _to != address(this)) {
-            if (_token != KYBER_ETH_ADDRESS) {
-                IERC20(_token).safeTransfer(_to, _amount);
-            } else {
-                payable(_to).transfer(_amount);
-            }
-        }
     }
 
     function parseInputs(bytes[] memory _callData)

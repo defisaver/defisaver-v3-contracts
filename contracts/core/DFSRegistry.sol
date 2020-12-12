@@ -12,7 +12,7 @@ contract DFSRegistry is AdminAuth {
     );
 
     string public constant ERR_ENTRY_ALREADY_EXISTS = "Entry id already exists";
-    string public constant ERR_ENTRY_NON_EXISTANT = "Entry id doesn't exists";
+    string public constant ERR_ENTRY_NON_EXISTENT = "Entry id doesn't exists";
     string public constant ERR_ENTRY_NOT_IN_CHANGE = "Entry not in change process";
     string public constant ERR_WAIT_PERIOD_SHORTER = "New wait period must be bigger";
 
@@ -75,7 +75,7 @@ contract DFSRegistry is AdminAuth {
     /// @param _id Id of contract
     /// @param _newContractAddr Address of the new contract
     function startContractChange(bytes32 _id, address _newContractAddr) public onlyOwner {
-        require(entries[_id].exists, ERR_ENTRY_NON_EXISTANT);
+        require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
 
         entries[_id].changeStartTime = block.timestamp; // solhint-disable-line
         entries[_id].inChange = true;
@@ -94,7 +94,7 @@ contract DFSRegistry is AdminAuth {
     /// @dev Can override a change that is currently in progress
     /// @param _id Id of contract
     function approveContractChange(bytes32 _id) public onlyOwner {
-        require(entries[_id].exists, ERR_ENTRY_NON_EXISTANT);
+        require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
         require(entries[_id].inChange, ERR_ENTRY_NOT_IN_CHANGE);
         require(
             block.timestamp >= (entries[_id].changeStartTime + entries[_id].waitPeriod), // solhint-disable-line
@@ -119,7 +119,7 @@ contract DFSRegistry is AdminAuth {
     /// @notice Cancel pending change
     /// @param _id Id of contract
     function cancelContractChange(bytes32 _id) public onlyOwner {
-        require(entries[_id].exists, ERR_ENTRY_NON_EXISTANT);
+        require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
         require(entries[_id].inChange, ERR_ENTRY_NOT_IN_CHANGE);
 
         address oldContractAddr = pendingAddresses[_id];
@@ -140,7 +140,7 @@ contract DFSRegistry is AdminAuth {
     /// @param _id Id of contract
     /// @param _newWaitPeriod New wait time, must be bigger than before
     function changeWaitPeriod(bytes32 _id, uint256 _newWaitPeriod) public onlyOwner {
-        require(entries[_id].exists, ERR_ENTRY_NON_EXISTANT);
+        require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
         require(_newWaitPeriod > entries[_id].waitPeriod, ERR_WAIT_PERIOD_SHORTER);
 
         entries[_id].waitPeriod = _newWaitPeriod;

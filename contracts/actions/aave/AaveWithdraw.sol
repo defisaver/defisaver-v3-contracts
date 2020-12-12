@@ -9,7 +9,10 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
+/// @title Withdraw a token from an Aave market
 contract AaveWithdraw is ActionBase, AaveHelper, TokenUtils, GasBurner {
+
+    /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
         bytes[] memory _subData,
@@ -28,11 +31,21 @@ contract AaveWithdraw is ActionBase, AaveHelper, TokenUtils, GasBurner {
         return bytes32(withdrawAmount);
     }
 
+    /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
         (address market, address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
 
         _withdraw(market, tokenAddr, amount, from);
     }
+
+    /// @inheritdoc ActionBase
+    function actionType() public virtual override pure returns (uint8) {
+        return uint8(ActionType.STANDARD_ACTION);
+    }
+
+
+    //////////////////////////// ACTION LOGIC ////////////////////////////
+
 
     /// @notice User withdraws tokens from the Aave protocol
     /// @param _market address provider for specific market
@@ -75,9 +88,5 @@ contract AaveWithdraw is ActionBase, AaveHelper, TokenUtils, GasBurner {
         tokenAddr = abi.decode(_callData[1], (address));
         amount = abi.decode(_callData[2], (uint256));
         to = abi.decode(_callData[3], (address));
-    }
-
-    function actionType() public virtual override pure returns (uint8) {
-        return uint8(ActionType.STANDARD_ACTION);
     }
 }

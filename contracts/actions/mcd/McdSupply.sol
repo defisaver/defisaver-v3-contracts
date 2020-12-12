@@ -6,23 +6,20 @@ pragma experimental ABIEncoderV2;
 import "../../interfaces/mcd/IManager.sol";
 import "../../interfaces/mcd//IVat.sol";
 import "../../interfaces/mcd//IJoin.sol";
-import "../../DS/DSMath.sol";
-import "../../utils/SafeERC20.sol";
+import "../../utils/TokenUtils.sol";
+import "../../utils/GasBurner.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
 
-import "../../utils/GasBurner.sol";
-
-
-contract McdSupply is ActionBase, McdHelper, GasBurner {
+/// @title Supply collateral to a Maker vault
+contract McdSupply is ActionBase, McdHelper, TokenUtils, GasBurner {
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
 
     IManager public constant manager = IManager(MANAGER_ADDRESS);
     IVat public constant vat = IVat(VAT_ADDRESS);
 
-    using SafeERC20 for IERC20;
-
+    /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
         bytes[] memory _subData,
@@ -36,43 +33,54 @@ contract McdSupply is ActionBase, McdHelper, GasBurner {
         joinAddr = _parseParamAddr(joinAddr, _paramMapping[2], _subData, _returnValues);
         from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
 
-        int256 returnAmount = _mcdSupply(vaultId, amount, joinAddr, from);
+        uint256 returnAmount = _mcdSupply(vaultId, amount, joinAddr, from);
 
         return bytes32(returnAmount);
     }
 
+    /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
         (uint256 vaultId, uint256 amount, address joinAddr, address from) = parseInputs(_callData);
 
         _mcdSupply(vaultId, amount, joinAddr, from);
     }
 
+    /// @inheritdoc ActionBase
     function actionType() public override pure returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
+
+    //////////////////////////// ACTION LOGIC ////////////////////////////
+
+
+    /// @dev Will not work if _joinAddr is Dai or invalid
     function _mcdSupply(
         uint256 _vaultId,
         uint256 _amount,
         address _joinAddr,
         address _from
-    ) internal returns (int256) {
-        _pullTokens(_joinAddr, _from, _amount);
+    ) internal returns (uint256) {
+        address tokenAddr = address(IJoin(_joinAddr).gem());
+
+        pullTokens(tokenAddr, _from, _amount);
+
+        // if amount -1, pull current proxy balance
+        if (_amount == uint(-1)) {
+            _amount = getBalance(tokenAddr, address(this));
+        }
 
         int256 convertAmount = 0;
 
-        if (_amount == uint(-1)) {
-            _amount = getBalance(_joinAddr);
-        }
-
         if (isEthJoinAddr(_joinAddr)) {
-            IJoin(_joinAddr).gem().deposit{value: _amount}();
+            convertAndDepositToWeth(ETH_ADDR, _amount);
             convertAmount = toPositiveInt(_amount);
         } else {
             convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
         }
 
-        IJoin(_joinAddr).gem().approve(_joinAddr, _amount);
+        approveToken(tokenAddr, _joinAddr, uint(-1));
+
         IJoin(_joinAddr).join(address(this), _amount);
 
         vat.frob(
@@ -91,7 +99,7 @@ contract McdSupply is ActionBase, McdHelper, GasBurner {
             abi.encode(_vaultId, _amount, _joinAddr, _from)
         );
 
-        return convertAmount;
+        return _amount;
     }
 
     function parseInputs(bytes[] memory _callData)
@@ -108,23 +116,5 @@ contract McdSupply is ActionBase, McdHelper, GasBurner {
         amount = abi.decode(_callData[1], (uint256));
         joinAddr = abi.decode(_callData[2], (address));
         from = abi.decode(_callData[3], (address));
-    }
-
-    function _pullTokens(
-        address _joinAddr,
-        address _from,
-        uint256 _amount
-    ) internal {
-        if (_from != address(0) && !isEthJoinAddr(_joinAddr) && _from != address(this)) {
-            IERC20(address(IJoin(_joinAddr).gem())).safeTransferFrom(_from, address(this), _amount);
-        }
-    }
-
-    function getBalance(address _joinAddr) internal view returns (uint balance) {
-        if (isEthJoinAddr(_joinAddr)) {
-            balance = address(this).balance;
-        } else {
-            balance = IERC20(address(IJoin(_joinAddr).gem())).balanceOf(address(this));
-        }
     }
 }

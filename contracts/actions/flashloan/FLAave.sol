@@ -9,8 +9,8 @@ import "../../interfaces/ILendingPool.sol";
 import "../../interfaces/aave/ILendingPoolAddressesProvider.sol";
 import "../../core/StrategyData.sol";
 
+/// @title Action that gets and receives a FL from Aave V1
 contract FLAave is ActionBase, StrategyData {
-
     using SafeERC20 for IERC20;
 
     address
@@ -20,62 +20,83 @@ contract FLAave is ActionBase, StrategyData {
 
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
 
-    ILendingPoolAddressesProvider public constant addressesProvider = ILendingPoolAddressesProvider(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8);
+    ILendingPoolAddressesProvider public constant addressesProvider = ILendingPoolAddressesProvider(
+        0x24a42fD28C976A61Df5D00D0599C34c4f90748c8
+    );
 
+    bytes32 constant FL_AAVE_ID = keccak256("FLAave");
+    bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
+
+    /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public override payable returns (bytes32) {
-        uint amount = abi.decode(_callData[0], (uint));
+        uint256 amount = abi.decode(_callData[0], (uint256));
         address token = abi.decode(_callData[1], (address));
 
         amount = _parseParamUint(amount, _paramMapping[0], _subData, _returnValues);
         token = _parseParamAddr(token, _paramMapping[1], _subData, _returnValues);
 
-        address payable receiver = payable(registry.getAddr(keccak256("FLAave")));
+        uint256 flAmount = _flAave(amount, token, _callData[2]);
 
-        ILendingPool(AAVE_LENDING_POOL_ADDRESSES).flashLoan(receiver, token, amount, _callData[2]);
-
-        logger.Log(address(this), msg.sender, "FLAave", abi.encode(amount, token));
-
-        return bytes32(amount);
+        return bytes32(flAmount);
     }
 
+    // solhint-disable-next-line no-empty-blocks
+    function executeActionDirect(bytes[] memory _callData) public override payable {}
+
+    /// @inheritdoc ActionBase
+    function actionType() public override pure returns (uint8) {
+        return uint8(ActionType.FL_ACTION);
+    }
+
+    //////////////////////////// ACTION LOGIC ////////////////////////////
+
+    function _flAave(
+        uint256 _amount,
+        address _tokenAddr,
+        bytes memory _taskData
+    ) internal returns (uint256) {
+        address payable receiver = payable(registry.getAddr(FL_AAVE_ID));
+
+        ILendingPool(AAVE_LENDING_POOL_ADDRESSES).flashLoan(
+            receiver,
+            _tokenAddr,
+            _amount,
+            _taskData
+        );
+
+        logger.Log(address(this), msg.sender, "FLAave", abi.encode(_amount, _tokenAddr));
+
+        return _amount;
+    }
+
+    /// @notice Aave callback function that formats and calls back TaskExecutor
     function executeOperation(
         address _reserve,
         uint256 _amount,
         uint256 _fee,
         bytes calldata _params
     ) external {
-
         (Task memory currTask, address proxy) = abi.decode(_params, (Task, address));
 
         sendTokens(_reserve, proxy, _amount);
 
-        address payable taskExecutor = payable(registry.getAddr(keccak256("TaskExecutor")));
+        address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
 
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             taskExecutor,
-            abi.encodeWithSelector(
-                CALLBACK_SELECTOR,
-                currTask,
-                bytes32(_amount + _fee)
-            ));
+            abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, bytes32(_amount + _fee))
+        );
 
         // return FL
         address payable aaveCore = addressesProvider.getLendingPoolCore();
 
         sendTokens(_reserve, aaveCore, (_amount + _fee));
-    }
-
-    // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes[] memory _callData) public override payable {}
-
-    function actionType() override public pure returns (uint8) {
-        return uint8(ActionType.FL_ACTION);
     }
 
     function sendTokens(
@@ -90,5 +111,6 @@ contract FLAave is ActionBase, StrategyData {
         }
     }
 
-    receive() external virtual payable {}
+    // solhint-disable-next-line no-empty-blocks
+    receive() external payable {}
 }

@@ -92,6 +92,20 @@ contract McdHelper is DSMath {
         return false;
     }
 
+    /// @notice Returns the underlying token address from the joinAddr
+    /// @dev For eth based collateral returns 0xEee... not weth addr
+    /// @param _joinAddr Join address to check
+    function getTokenFromJoin(address _joinAddr) internal view returns (address) {
+        if (isEthJoinAddr(_joinAddr)) return 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
+        // if it's dai_join_addr don't check gem() it will fail, return dai addr
+        if (_joinAddr == 0x9759A6Ac90977b93B58547b4A71c78317f391A28) {
+            return 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+        }
+
+        return address(IJoin(_joinAddr).gem());
+    }
+
     /// @notice Gets CDP info (collateral, debt)
     /// @param _manager Manager contract
     /// @param _cdpId Id of the CDP

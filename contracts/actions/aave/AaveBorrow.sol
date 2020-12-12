@@ -3,13 +3,15 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../interfaces/IWETH.sol";
 import "../../utils/GasBurner.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
+/// @title Borrow a token a from an Aave market
 contract AaveBorrow is ActionBase, AaveHelper, TokenUtils, GasBurner {
+
+    /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
         bytes[] memory _subData,
@@ -35,6 +37,7 @@ contract AaveBorrow is ActionBase, AaveHelper, TokenUtils, GasBurner {
         return bytes32(borrowAmount);
     }
 
+    /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
         (
             address market,
@@ -46,6 +49,14 @@ contract AaveBorrow is ActionBase, AaveHelper, TokenUtils, GasBurner {
 
         _borrow(market, tokenAddr, amount, rateMode, to);
     }
+
+    /// @inheritdoc ActionBase
+    function actionType() public virtual override pure returns (uint8) {
+        return uint8(ActionType.STANDARD_ACTION);
+    }
+
+    //////////////////////////// ACTION LOGIC ////////////////////////////
+
 
     /// @notice User borrows tokens to the Aave protocol
     /// @param _market address provider for specific market
@@ -99,7 +110,4 @@ contract AaveBorrow is ActionBase, AaveHelper, TokenUtils, GasBurner {
         to = abi.decode(_callData[4], (address));
     }
 
-    function actionType() public virtual override pure returns (uint8) {
-        return uint8(ActionType.STANDARD_ACTION);
-    }
 }

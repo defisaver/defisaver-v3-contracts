@@ -3,20 +3,18 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../core/Subscriptions.sol";
-import "../../core/DFSRegistry.sol";
-
 import "../../interfaces/mcd/IManager.sol";
 import "../../interfaces/mcd/ISpotter.sol";
 import "../../interfaces/mcd/IVat.sol";
 import "../../interfaces/mcd/IDaiJoin.sol";
 import "../../interfaces/mcd/IJug.sol";
-import "../../DS/DSMath.sol";
+import "../../utils/TokenUtils.sol";
+import "../../utils/GasBurner.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
-import "../../utils/GasBurner.sol";
 
-contract McdGenerate is ActionBase, McdHelper, GasBurner {
+/// @title Generate dai from a Maker Vault
+contract McdGenerate is ActionBase, McdHelper, TokenUtils, GasBurner {
     address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
     address public constant JUG_ADDRESS = 0x19c0976f590D67707E62397C87829d896Dc0f1F1;
@@ -28,8 +26,7 @@ contract McdGenerate is ActionBase, McdHelper, GasBurner {
     IVat public constant vat = IVat(VAT_ADDRESS);
     ISpotter public constant spotter = ISpotter(SPOTTER_ADDRESS);
 
-    using SafeERC20 for IERC20;
-
+    /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
         bytes[] memory _subData,
@@ -37,7 +34,6 @@ contract McdGenerate is ActionBase, McdHelper, GasBurner {
         bytes32[] memory _returnValues
     ) public override payable returns (bytes32) {
         (uint256 cdpId, uint256 amount, address to) = parseInputs(_callData);
-
 
         cdpId = _parseParamUint(cdpId, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
@@ -48,15 +44,21 @@ contract McdGenerate is ActionBase, McdHelper, GasBurner {
         return bytes32(amount);
     }
 
+    /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
         (uint256 cdpId, uint256 amount, address to) = parseInputs(_callData);
 
         _mcdGenerate(cdpId, amount, to);
     }
 
+    /// @inheritdoc ActionBase
     function actionType() public override pure returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
+
+
+
+    //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _mcdGenerate(
         uint256 _cdpId,
@@ -70,6 +72,7 @@ contract McdGenerate is ActionBase, McdHelper, GasBurner {
 
         uint256 maxAmount = getMaxDebt(_cdpId, ilk);
 
+        // can't generate more than max amount
         if (_amount >= maxAmount) {
             _amount = maxAmount;
         }
@@ -83,7 +86,7 @@ contract McdGenerate is ActionBase, McdHelper, GasBurner {
 
         IDaiJoin(DAI_JOIN_ADDRESS).exit(address(this), _amount);
 
-        _withdrawDai(_to, _amount);
+        withdrawTokens(DAI_ADDRESS, _to, _amount);
 
         logger.Log(address(this), msg.sender, "McdGenerate", abi.encode(_cdpId, _amount));
 
@@ -104,17 +107,11 @@ contract McdGenerate is ActionBase, McdHelper, GasBurner {
         to = abi.decode(_callData[2], (address));
     }
 
-    function _withdrawDai(address _to, uint256 _amount) internal {
-        if (address(this) != _to && _to != address(0)) {
-            IERC20(DAI_ADDRESS).safeTransfer(_to, _amount);
-        }
-    }
-
     /// @notice Gets the maximum amount of debt available to generate
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
     /// @dev Substracts 10 wei to aviod rounding error later on
-    function getMaxDebt(uint256 _cdpId, bytes32 _ilk) public view returns (uint256) {
+    function getMaxDebt(uint256 _cdpId, bytes32 _ilk) internal view returns (uint256) {
         uint256 price = getPrice(_ilk);
 
         (, uint256 mat) = spotter.ilks(_ilk);
@@ -125,7 +122,7 @@ contract McdGenerate is ActionBase, McdHelper, GasBurner {
 
     /// @notice Gets a price of the asset
     /// @param _ilk Ilk of the CDP
-    function getPrice(bytes32 _ilk) public view returns (uint256) {
+    function getPrice(bytes32 _ilk) internal view returns (uint256) {
         (, uint256 mat) = spotter.ilks(_ilk);
         (, , uint256 spot, , ) = vat.ilks(_ilk);
 
