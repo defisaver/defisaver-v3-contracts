@@ -10,7 +10,7 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
 /// @title Withdraw a token from Compound
-contract Compithdraw is ActionBase, TokenUtils, GasBurner {
+contract CompWithdraw is ActionBase, TokenUtils, GasBurner {
 
     /// @inheritdoc ActionBase
     function executeAction(

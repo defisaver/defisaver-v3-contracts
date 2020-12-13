@@ -10,7 +10,7 @@ import "../../utils/GasBurner.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
-/// @title Supplt a token to Compound
+/// @title Supply a token to Compound
 contract CompSupply is ActionBase, TokenUtils, GasBurner {
 
     address public constant COMPTROLLER_ADDR = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
@@ -22,21 +22,21 @@ contract CompSupply is ActionBase, TokenUtils, GasBurner {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public virtual override payable returns (bytes32) {
-        (address tokenAddr, uint256 amount) = parseInputs(_callData);
+        (address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
 
         tokenAddr = _parseParamAddr(tokenAddr, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
 
-        uint256 withdrawAmount = _supply(tokenAddr, amount);
+        uint256 withdrawAmount = _supply(tokenAddr, amount, from);
 
         return bytes32(withdrawAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
-        (address tokenAddr, uint256 amount) = parseInputs(_callData);
+        (address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
 
-        _supply(tokenAddr, amount);
+        _supply(tokenAddr, amount, from);
     }
 
     /// @inheritdoc ActionBase
@@ -48,11 +48,15 @@ contract CompSupply is ActionBase, TokenUtils, GasBurner {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
 
-    // TODO: should allow uint(-1) ?
-    function _supply(address _tokenAddr, uint _amount) internal returns (uint) {
+    function _supply(address _tokenAddr, uint _amount, address _from) internal returns (uint) {
         address cTokenAddr = ICToken(_tokenAddr).underlying();
 
-        pullTokens(_tokenAddr, address(this), _amount);
+        // if amount -1, pull current proxy balance
+        if (_amount == uint(-1)) {
+            _amount = getBalance(_tokenAddr, address(this));
+        }
+
+        pullTokens(_tokenAddr, _from, _amount);
         approveToken(_tokenAddr, cTokenAddr, uint(-1));
 
         if (isAlreadyInMarket(cTokenAddr)) {
@@ -60,7 +64,7 @@ contract CompSupply is ActionBase, TokenUtils, GasBurner {
         }
 
         if (_tokenAddr != ETH_ADDR) {
-            require(ICToken(cTokenAddr).mint(_amount) == 0);
+            require(ICToken(cTokenAddr).mint(_amount) == 0, "Comp supply failed");
         } else {
             ICToken(cTokenAddr).mint{value: msg.value}(); // reverts on fail
         }
@@ -95,10 +99,12 @@ contract CompSupply is ActionBase, TokenUtils, GasBurner {
         pure
         returns (
             address tokenAddr,
-            uint256 amount
+            uint256 amount,
+            address from
         )
     {
         tokenAddr = abi.decode(_callData[0], (address));
         amount = abi.decode(_callData[1], (uint256));
+        from = abi.decode(_callData[2], (address));
     }
 }

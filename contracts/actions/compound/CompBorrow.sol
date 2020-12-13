@@ -10,8 +10,8 @@ import "../../utils/GasBurner.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
-/// @title Borrow a token a from an Compound
-contract CompPBorrow is ActionBase, TokenUtils, GasBurner {
+/// @title Borrow a token from Compound
+contract CompBorrow is ActionBase, TokenUtils, GasBurner {
 
     address public constant COMPTROLLER_ADDR = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
 

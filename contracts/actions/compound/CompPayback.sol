@@ -47,13 +47,12 @@ contract CompPayback is ActionBase, TokenUtils, GasBurner {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-
-    // TODO: should allow uint(-1) ?
     function _payback(address _tokenAddr, uint _amount) internal returns (uint) {
         address cTokenAddr = ICToken(_tokenAddr).underlying();
 
         approveToken(_tokenAddr, cTokenAddr, _amount);
 
+        // if uint(-1) payback whole amount
         if (_amount == uint(-1)) {
             _amount = ICToken(cTokenAddr).borrowBalanceCurrent(address(this));
         }
