@@ -30,12 +30,12 @@ contract Subscriptions is StrategyData {
     /// @notice Creates a new strategy with an existing template
     /// @param _templateId Id of the template used for strategy
     /// @param _active If the strategy is turned on at the start
-    /// @param _actionData Subscription data for actions
+    /// @param _subData Subscription data for actions
     /// @param _triggerData Subscription data for triggers
     function createStrategy(
         uint _templateId,
         bool _active,
-        bytes[][] memory _actionData,
+        bytes[][] memory _subData,
         bytes[][] memory _triggerData
     ) public returns (uint) {
         strategies.push(
@@ -43,7 +43,7 @@ contract Subscriptions is StrategyData {
                 templateId: _templateId,
                 proxy: msg.sender,
                 active: _active,
-                actionData: _actionData,
+                subData: _subData,
                 triggerData: _triggerData,
                 posInUserArr: (usersPos[msg.sender].length - 1)
             })
@@ -92,13 +92,13 @@ contract Subscriptions is StrategyData {
     /// @param _startegyId Id of the strategy to update
     /// @param _templateId Id of the template used for strategy
     /// @param _active If the strategy is turned on at the start
-    /// @param _actionData Subscription data for actions
+    /// @param _subData Subscription data for actions
     /// @param _triggerData Subscription data for triggers
     function updateStrategy(
         uint _startegyId,
         uint _templateId,
         bool _active,
-        bytes[][] memory _actionData,
+        bytes[][] memory _subData,
         bytes[][] memory _triggerData
     ) public {
         Strategy storage s = strategies[_startegyId];
@@ -108,7 +108,7 @@ contract Subscriptions is StrategyData {
 
         s.templateId = _templateId;
         s.active = _active;
-        s.actionData = _actionData;
+        s.subData = _subData;
         s.triggerData = _triggerData;
 
         updateCounter++;
