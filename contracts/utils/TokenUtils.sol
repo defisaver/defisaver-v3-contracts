@@ -12,6 +12,8 @@ contract TokenUtils {
 	address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     function approveToken(address _tokenAddr, address _to, uint _amount) internal {
+        if (_tokenAddr == ETH_ADDR) return;
+        
         if (IERC20(_tokenAddr).allowance(address(this), _to) < _amount) {
             IERC20(_tokenAddr).approve(_to, _amount);
         }

@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 
 import "../interfaces/ILendingPool.sol";
 import "../auth/ProxyPermission.sol";
-import "../interfaces/IFLAction.sol";
+import "../actions/ActionBase.sol";
 import "../core/DFSRegistry.sol";
 import "./Subscriptions.sol";
 import "../utils/GasBurner.sol";
@@ -43,8 +43,8 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
         Task memory currTask = Task({
             name: template.name,
             callData: _actionCallData,
-            subData: strategy.actionData,
-            ids: template.actionIds,
+            subData: strategy.subData,
+            actionIds: template.actionIds,
             paramMapping: template.paramMapping
         });
 
@@ -56,11 +56,11 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
     /// @param _currTask Task to be executed
     /// @param _flAmount Result value from FL action
     function _executeActionsFromFL(Task memory _currTask, bytes32 _flAmount) public payable {
-        bytes32[] memory returnValues = new bytes32[](_currTask.ids.length);
+        bytes32[] memory returnValues = new bytes32[](_currTask.actionIds.length);
         returnValues[0] = _flAmount; // set the flash loan action as first return value
 
         // skipes the first actions as it was the fl action
-        for (uint256 i = 1; i < _currTask.ids.length; ++i) {
+        for (uint256 i = 1; i < _currTask.actionIds.length; ++i) {
             returnValues[i] = _executeAction(_currTask, i, returnValues);
         }
     }
@@ -69,14 +69,14 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
     /// @dev FL action must be first and is parsed separatly, execution will go to _executeActionsFromFL
     /// @param _currTask to be executed
     function _executeActions(Task memory _currTask) internal {
-        address firstActionAddr = registry.getAddr(_currTask.ids[0]);
+        address firstActionAddr = registry.getAddr(_currTask.actionIds[0]);
 
-        bytes32[] memory returnValues = new bytes32[](_currTask.ids.length);
+        bytes32[] memory returnValues = new bytes32[](_currTask.actionIds.length);
 
         if (isFL(firstActionAddr)) {
-            _parseFL(_currTask, firstActionAddr, returnValues);
+            _parseFLAndExecute(_currTask, firstActionAddr, returnValues);
         } else {
-            for (uint256 i = 0; i < _currTask.ids.length; ++i) {
+            for (uint256 i = 0; i < _currTask.actionIds.length; ++i) {
                 returnValues[i] = _executeAction(_currTask, i, returnValues);
             }
         }
@@ -96,7 +96,7 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
     ) internal returns (bytes32 response) {
 
         response = IDSProxy(address(this)).execute{value: address(this).balance}(
-            registry.getAddr(_currTask.ids[_index]),
+            registry.getAddr(_currTask.actionIds[_index]),
             abi.encodeWithSignature(
                 "executeAction(bytes[],bytes[],uint8[],bytes32[])",
                 _currTask.callData[_index],
@@ -112,7 +112,7 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
     /// @param _currTask Task to be executed
     /// @param _flActionAddr Address of the flash loan action 
     /// @param _returnValues An empty array of return values, beacuse it's the first action
-    function _parseFL(
+    function _parseFLAndExecute(
         Task memory _currTask,
         address _flActionAddr,
         bytes32[] memory _returnValues
@@ -131,7 +131,7 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
 
     /// @notice Checks if the specified address is of FL type action
     /// @param _actionAddr Address of the action
-    function isFL(address _actionAddr) internal returns (bool) {
-        return IFLAction(_actionAddr).actionType() == uint8(IFLAction.ActionType.FL_ACTION);
+    function isFL(address _actionAddr) pure internal returns (bool) {
+        return ActionBase(_actionAddr).actionType() == uint8(ActionBase.ActionType.FL_ACTION);
     }
 }
