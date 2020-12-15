@@ -67,19 +67,21 @@ contract AavePayback is ActionBase, AaveHelper, TokenUtils, GasBurner {
 
         approveToken(_tokenAddr, lendingPool, uint(-1));
 
+        uint tokensBefore = getBalance(_tokenAddr, address(this));
+
         ILendingPoolV2(lendingPool).repay(_tokenAddr, _amount, _rateMode, payable(address(this)));
 
-        uint tokensLeft = getBalance(_tokenAddr, address(this));
+        uint tokensAfter = getBalance(_tokenAddr, address(this));
 
         // withraw weth if needed
         if (_tokenAddr == WETH_ADDR) {
-            withdrawWeth(tokensLeft);
+            withdrawWeth(tokensAfter);
             _tokenAddr = ETH_ADDR;
         }
 
-        withdrawTokens(_tokenAddr, msg.sender, tokensLeft);
+        withdrawTokens(_tokenAddr, msg.sender, tokensAfter);
 
-        return _amount; // TODO: might not be correct
+        return tokensBefore - tokensAfter;
     }
 
     function parseInputs(bytes[] memory _callData)

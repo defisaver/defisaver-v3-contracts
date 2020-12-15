@@ -16,14 +16,14 @@ contract StrategyData {
         string name;
         bytes[][] callData;
         bytes[][] subData;
-        bytes32[] ids;
+        bytes32[] actionIds;
         uint8[][] paramMapping;
     }
 
     struct Strategy {
         uint templateId;
         address proxy;
-        bytes[][] actionData;
+        bytes[][] subData;
         bytes[][] triggerData;
         bool active;
 
