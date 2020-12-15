@@ -24,7 +24,8 @@ contract DFSExchange is DFSExchangeCore, AdminAuth, GasBurner {
     /// @dev Takes fee from the _srcAmount before the exchange
     /// @param exData [srcAddr, destAddr, srcAmount, destAmount, minPrice, exchangeType, exchangeAddr, callData, price0x]
     /// @param _user User address who called the exchange
-    function sell(ExchangeData memory exData, address payable _user) public burnGas payable {
+    // solhint-disable-next-line visibility-modifier-order
+    function sell(ExchangeData memory exData, address payable _user) public payable burnGas {
 
         exData.dfsFeeDivider = SERVICE_FEE;
         exData.user = _user;
@@ -43,6 +44,7 @@ contract DFSExchange is DFSExchangeCore, AdminAuth, GasBurner {
     /// @dev Send always more than needed for the swap, extra will be returned
     /// @param exData [srcAddr, destAddr, srcAmount, destAmount, minPrice, exchangeType, exchangeAddr, callData, price0x]
     /// @param _user User address who called the exchange
+    // solhint-disable-next-line visibility-modifier-order
     function buy(ExchangeData memory exData, address payable _user) public payable burnGas {
 
         exData.dfsFeeDivider = SERVICE_FEE;
