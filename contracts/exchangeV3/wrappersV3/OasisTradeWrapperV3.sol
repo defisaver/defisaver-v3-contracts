@@ -109,6 +109,6 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth {
         return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
     }
 
-
+    // solhint-disable-next-line no-empty-blocks
     receive() payable external {}
 }

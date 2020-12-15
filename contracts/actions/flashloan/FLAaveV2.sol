@@ -9,9 +9,10 @@ import "../../interfaces/ILendingPool.sol";
 import "../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../core/StrategyData.sol";
+import "../../utils/TokenUtils.sol";
 
 /// @title Action that gets and receives a FL from Aave V2
-contract FLAaveV2 is ActionBase, StrategyData {
+contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
     using SafeERC20 for IERC20;
 
     address
@@ -96,7 +97,7 @@ contract FLAaveV2 is ActionBase, StrategyData {
         (Task memory currTask, address proxy) = abi.decode(_params, (Task, address));
 
         for (uint256 i = 0; i < _assets.length; ++i) {
-            sendTokens(_assets[i], proxy, _amounts[i]);
+            withdrawTokens(_assets[i], proxy, _amounts[i]);
         }
 
         address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
@@ -128,18 +129,6 @@ contract FLAaveV2 is ActionBase, StrategyData {
         flData.modes = abi.decode(_callData[2], (uint256[]));
         flData.onBehalfOf = abi.decode(_callData[3], (address));
         flData.receiver = payable(registry.getAddr(FL_AAVE_ID));
-    }
-
-    function sendTokens(
-        address _token,
-        address _to,
-        uint256 _amount
-    ) internal {
-        if (_token != ETH_ADDRESS) {
-            IERC20(_token).safeTransfer(_to, _amount);
-        } else {
-            payable(_to).transfer(_amount);
-        }
     }
 
     // solhint-disable-next-line no-empty-blocks

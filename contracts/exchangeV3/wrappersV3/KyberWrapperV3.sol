@@ -132,6 +132,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
         }
     }
 
+    // solhint-disable-next-line no-empty-blocks
     receive() payable external {}
 
     function getDecimals(address _token) internal view returns (uint256) {

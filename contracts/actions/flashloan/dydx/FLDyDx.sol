@@ -9,10 +9,11 @@ import "../../../interfaces/IWETH.sol";
 import "../../../interfaces/aave/ILendingPoolAddressesProvider.sol";
 import "../../../core/StrategyData.sol";
 import "../../ActionBase.sol";
+import "../../../utils/TokenUtils.sol";
 import "./DydxFlashLoanBase.sol";
 
 /// @title Action that gets and receives a FL from DyDx protocol
-contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
+contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, TokenUtils {
     using SafeERC20 for IERC20;
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -68,7 +69,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
             IWETH(WETH_ADDRESS).withdraw(amount);
         }
 
-        sendTokens(tokenAddr, proxy, amount);
+        withdrawTokens(tokenAddr, proxy, amount);
 
         address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
 
@@ -129,18 +130,6 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
             IERC20(WETH_ADDRESS).safeTransfer(_proxy, _amount);
         } else {
             IERC20(_loanTokenAddr).safeTransfer(_proxy, _amount);
-        }
-    }
-
-    function sendTokens(
-        address _token,
-        address _to,
-        uint256 _amount
-    ) internal {
-        if (_token != ETH_ADDRESS) {
-            IERC20(_token).safeTransfer(_to, _amount);
-        } else {
-            payable(_to).transfer(_amount);
         }
     }
 

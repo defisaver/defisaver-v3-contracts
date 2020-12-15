@@ -8,9 +8,10 @@ import "../../core/Subscriptions.sol";
 import "../../interfaces/ILendingPool.sol";
 import "../../interfaces/aave/ILendingPoolAddressesProvider.sol";
 import "../../core/StrategyData.sol";
+import "../../utils/TokenUtils.sol";
 
 /// @title Action that gets and receives a FL from Aave V1
-contract FLAave is ActionBase, StrategyData {
+contract FLAave is ActionBase, StrategyData, TokenUtils {
     using SafeERC20 for IERC20;
 
     address
@@ -83,7 +84,7 @@ contract FLAave is ActionBase, StrategyData {
     ) external {
         (Task memory currTask, address proxy) = abi.decode(_params, (Task, address));
 
-        sendTokens(_reserve, proxy, _amount);
+        withdrawTokens(_reserve, proxy, _amount);
 
         address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
 
@@ -96,19 +97,7 @@ contract FLAave is ActionBase, StrategyData {
         // return FL
         address payable aaveCore = addressesProvider.getLendingPoolCore();
 
-        sendTokens(_reserve, aaveCore, (_amount + _fee));
-    }
-
-    function sendTokens(
-        address _token,
-        address _to,
-        uint256 _amount
-    ) internal {
-        if (_token != ETH_ADDRESS) {
-            IERC20(_token).safeTransfer(_to, _amount);
-        } else {
-            payable(_to).transfer(_amount);
-        }
+        withdrawTokens(_reserve, aaveCore, (_amount + _fee));
     }
 
     // solhint-disable-next-line no-empty-blocks
