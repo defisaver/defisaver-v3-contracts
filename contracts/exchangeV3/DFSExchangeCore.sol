@@ -5,11 +5,12 @@ pragma experimental ABIEncoderV2;
 
 import "../DS/DSMath.sol";
 import "../interfaces/IWETH.sol";
-import "../interfaces/IExchangeWrapper.sol";
+import "../interfaces/exchange/IExchangeV3.sol";
 import "../utils/ZrxAllowlist.sol";
 import "./DFSExchangeData.sol";
 import "./DFSExchangeHelper.sol";
 import "./SaverExchangeRegistry.sol";
+import "../interfaces/exchange/IOffchainWrapper.sol";
 
 contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
 
@@ -18,7 +19,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
     string public constant ERR_SLIPPAGE_HIT = "Slippage hit";
     string public constant ERR_DEST_AMOUNT_MISSING = "Dest amount missing";
     string public constant ERR_WRAPPER_INVALID = "Wrapper invalid";
-    string public constant ERR_OFFCHAIN_DATA_INVALID = "Offchain data invalid";
+    string public constant ERR_NOT_ZEROX_EXCHANGE = "Zerox exchange invalid";
 
     /// @notice Internal method that preforms a sell on 0x/on-chain
     /// @dev Usefull for other DFS contract to integrate for exchanging
@@ -33,7 +34,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         // if selling eth, convert to weth
         if (exData.srcAddr == KYBER_ETH_ADDRESS) {
             exData.srcAddr = ethToWethAddr(exData.srcAddr);
-            IWETH(WETH_ADDRESS).deposit{value: exData.srcAmount}();
+            IWETH(EXCHANGE_WETH_ADDRESS).deposit{value: exData.srcAmount}();
         }
 
         exData.srcAmount -= getFee(exData.srcAmount, exData.user, exData.srcAddr, exData.dfsFeeDivider);
@@ -53,12 +54,16 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             wrapper = exData.wrapper;
         }
 
-        require(getBalance(exData.destAddr) >= wmul(exData.minPrice, exData.srcAmount), ERR_SLIPPAGE_HIT);
+        if (exData.destAddr == EXCHANGE_WETH_ADDRESS) {
+            require(getBalance(KYBER_ETH_ADDRESS) >= wmul(exData.minPrice, exData.srcAmount), ERR_SLIPPAGE_HIT);
+        } else {
+            require(getBalance(exData.destAddr) >= wmul(exData.minPrice, exData.srcAmount), ERR_SLIPPAGE_HIT);
+        }
 
         // if anything is left in weth, pull it to user as eth
-        if (getBalance(WETH_ADDRESS) > 0) {
-            IWETH(WETH_ADDRESS).withdraw(
-                IWETH(WETH_ADDRESS).balanceOf(address(this))
+        if (getBalance(EXCHANGE_WETH_ADDRESS) > 0) {
+            IWETH(EXCHANGE_WETH_ADDRESS).withdraw(
+                IWETH(EXCHANGE_WETH_ADDRESS).balanceOf(address(this))
             );
         }
 
@@ -77,13 +82,13 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
 
         require(exData.destAmount != 0, ERR_DEST_AMOUNT_MISSING);
 
+        exData.srcAmount -= getFee(exData.srcAmount, exData.user, exData.srcAddr, exData.dfsFeeDivider);
+
         // if selling eth, convert to weth
         if (exData.srcAddr == KYBER_ETH_ADDRESS) {
             exData.srcAddr = ethToWethAddr(exData.srcAddr);
-            IWETH(WETH_ADDRESS).deposit{value: exData.srcAmount}();
+            IWETH(EXCHANGE_WETH_ADDRESS).deposit{value: exData.srcAmount}();
         }
-
-        exData.srcAmount -= getFee(exData.srcAmount, exData.user, exData.srcAddr, exData.dfsFeeDivider);
 
         if (exData.offchainData.price > 0) {
             (success, swapedTokens) = takeOrder(exData, ExchangeActionType.BUY);
@@ -99,12 +104,16 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             wrapper = exData.wrapper;
         }
 
-        require(getBalance(exData.destAddr) >= exData.destAmount, ERR_SLIPPAGE_HIT);
+        if (exData.destAddr == EXCHANGE_WETH_ADDRESS) {
+            require(getBalance(KYBER_ETH_ADDRESS) >= exData.destAmount, ERR_SLIPPAGE_HIT);
+        } else {
+            require(getBalance(exData.destAddr) >= exData.destAmount, ERR_SLIPPAGE_HIT);
+        }
 
         // if anything is left in weth, pull it to user as eth
-        if (getBalance(WETH_ADDRESS) > 0) {
-            IWETH(WETH_ADDRESS).withdraw(
-                IWETH(WETH_ADDRESS).balanceOf(address(this))
+        if (getBalance(EXCHANGE_WETH_ADDRESS) > 0) {
+            IWETH(EXCHANGE_WETH_ADDRESS).withdraw(
+                IWETH(EXCHANGE_WETH_ADDRESS).balanceOf(address(this))
             );
         }
 
@@ -117,42 +126,18 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         ExchangeData memory _exData,
         ExchangeActionType _type
     ) private returns (bool success, uint256) {
-
-        if (_exData.srcAddr != KYBER_ETH_ADDRESS) {
-            IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
-        }
-
-        // write in the exact amount we are selling/buing in an order
-        if (_type == ExchangeActionType.SELL) {
-            writeUint256(_exData.offchainData.callData, 36, _exData.srcAmount);
-        } else {
-            writeUint256(_exData.offchainData.callData, 36, _exData.destAmount);
-        }
-
-        uint256 tokensBefore = getBalance(_exData.destAddr);
-
         if (ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.offchainData.exchangeAddr)) {
-            (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(_exData.offchainData.callData);
-        } else {
-            success = false;
+            return (false, 0);
         }
 
-        uint256 tokensSwaped = 0;
-
-        if (success) {
-
-            // convert weth -> eth if needed
-            if (_exData.destAddr == KYBER_ETH_ADDRESS) {
-                IWETH(WETH_ADDRESS).withdraw(
-                    IWETH(WETH_ADDRESS).balanceOf(address(this))
-                );
-            }
-
-            // get the current balance of the swaped tokens
-            tokensSwaped = getBalance(_exData.destAddr) - tokensBefore;
+        if (SaverExchangeRegistry(SAVER_EXCHANGE_REGISTRY).isWrapper(_exData.offchainData.wrapper)) {
+            return (false, 0);
         }
 
-        return (success, tokensSwaped);
+        // send src amount
+        IERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
+
+        return IOffchainWrapper(_exData.offchainData.wrapper).takeOrder{value: _exData.offchainData.protocolFee}(_exData, _type);
     }
 
     /// @notice Calls wraper contract for exchage to preform an on-chain swap
@@ -165,33 +150,12 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         IERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
 
         if (_type == ExchangeActionType.SELL) {
-            swapedTokens = IExchangeWrapper(_exData.wrapper).
+            swapedTokens = IExchangeV3(_exData.wrapper).
                     sell(_exData.srcAddr, _exData.destAddr, _exData.srcAmount, _exData.wrapperData);
         } else {
-            swapedTokens = IExchangeWrapper(_exData.wrapper).
+            swapedTokens = IExchangeV3(_exData.wrapper).
                     buy(_exData.srcAddr, _exData.destAddr, _exData.destAmount, _exData.wrapperData);
         }
-    }
-
-    function writeUint256(bytes memory _b, uint256 _index, uint _input) internal pure {
-        if (_b.length < _index + 32) {
-            revert(ERR_OFFCHAIN_DATA_INVALID);
-        }
-
-        bytes32 input = bytes32(_input);
-
-        _index += 32;
-
-        // Read the bytes32 from array memory
-        assembly {
-            mstore(add(_b, _index), input)
-        }
-    }
-
-    /// @notice Converts Kybers Eth address -> Weth
-    /// @param _src Input address
-    function ethToWethAddr(address _src) internal pure returns (address) {
-        return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
     }
 
     // solhint-disable-next-line no-empty-blocks

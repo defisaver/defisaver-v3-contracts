@@ -29,7 +29,33 @@
 		},
 		{
 			"inputs": [],
+			"name": "ERR_NOT_ZEROX_EXCHANGE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "ERR_OFFCHAIN_DATA_INVALID",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_RETURN_INDEX_VALUE",
 			"outputs": [
 				{
 					"internalType": "string",
@@ -55,12 +81,51 @@
 		},
 		{
 			"inputs": [],
+			"name": "ERR_SUB_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "ERR_WRAPPER_INVALID",
 			"outputs": [
 				{
 					"internalType": "string",
 					"name": "",
 					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ETH_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "EXCHANGE_WETH_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -81,12 +146,51 @@
 		},
 		{
 			"inputs": [],
+			"name": "NO_PARAM_MAPPING",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "REGISTRY_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
 					"name": "",
 					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "RETURN_MAX_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "RETURN_MIN_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
 				}
 			],
 			"stateMutability": "view",
@@ -107,6 +211,32 @@
 		},
 		{
 			"inputs": [],
+			"name": "SUB_MAX_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "SUB_MIN_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "WALLET_ID",
 			"outputs": [
 				{
@@ -120,7 +250,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "WETH_ADDRESS",
+			"name": "WETH_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -296,6 +426,11 @@
 							"components": [
 								{
 									"internalType": "address",
+									"name": "wrapper",
+									"type": "address"
+								},
+								{
+									"internalType": "address",
 									"name": "exchangeAddr",
 									"type": "address"
 								},
@@ -400,6 +535,11 @@
 						},
 						{
 							"components": [
+								{
+									"internalType": "address",
+									"name": "wrapper",
+									"type": "address"
+								},
 								{
 									"internalType": "address",
 									"name": "exchangeAddr",
@@ -523,6 +663,11 @@
 							"components": [
 								{
 									"internalType": "address",
+									"name": "wrapper",
+									"type": "address"
+								},
+								{
+									"internalType": "address",
 									"name": "exchangeAddr",
 									"type": "address"
 								},
@@ -567,7 +712,7 @@
 	],
 	"networks": {
 		"local": {
-			"address": "0x51C65cd0Cdb1A8A8b79dfc2eE965B1bA0bb8fc89",
+			"address": "0x965A01d39A9835d2B7e9e53bDc5C8501B962e8a3",
 			"args": []
 		}
 	}

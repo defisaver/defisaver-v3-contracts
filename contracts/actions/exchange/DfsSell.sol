@@ -3,13 +3,17 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../exchange/DFSExchangeCore.sol";
+import "../../interfaces/IDSProxy.sol";
+import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../utils/TokenUtils.sol";
 import "../../utils/GasBurner.sol";
 import "../ActionBase.sol";
 
 /// @title A exchange sell action through the dfs exchange
 contract DFSSell is ActionBase, DFSExchangeCore, TokenUtils, GasBurner {
+
+    uint internal constant RECIPIE_FEE = 400;
+    uint internal constant DIRECT_FEE = 800;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -42,7 +46,7 @@ contract DFSSell is ActionBase, DFSExchangeCore, TokenUtils, GasBurner {
         from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
         to = _parseParamAddr(to, _paramMapping[4], _subData, _returnValues);
 
-        uint256 exchangedAmount = _dfsSell(exchangeData, from, to);
+        uint256 exchangedAmount = _dfsSell(exchangeData, from, to, RECIPIE_FEE);
 
         return bytes32(exchangedAmount);
     }
@@ -51,7 +55,7 @@ contract DFSSell is ActionBase, DFSExchangeCore, TokenUtils, GasBurner {
     function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
         (ExchangeData memory exchangeData, address from, address to) = parseInputs(_callData);
 
-        _dfsSell(exchangeData, from, to);
+        _dfsSell(exchangeData, from, to, DIRECT_FEE);
     }
 
     /// @inheritdoc ActionBase
@@ -65,10 +69,14 @@ contract DFSSell is ActionBase, DFSExchangeCore, TokenUtils, GasBurner {
     function _dfsSell(
         ExchangeData memory exchangeData,
         address _from,
-        address _to
+        address _to,
+        uint _fee
     ) internal returns (uint256) {
 
         pullTokens(exchangeData.srcAddr, _from, exchangeData.srcAmount);
+
+        exchangeData.user = getUserAddress();
+        exchangeData.dfsFeeDivider = _fee;
 
         (, uint256 exchangedAmount) = _sell(exchangeData);
 
@@ -103,5 +111,12 @@ contract DFSSell is ActionBase, DFSExchangeCore, TokenUtils, GasBurner {
 
         from = abi.decode(_callData[1], (address));
         to = abi.decode(_callData[2], (address));
+    }
+
+    /// @notice Returns the owner of the DSProxy that called the contract
+    function getUserAddress() internal view returns (address) {
+        IDSProxy proxy = IDSProxy(payable(address(this)));
+
+        return proxy.owner();
     }
 }
