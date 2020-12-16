@@ -3,6 +3,58 @@
 	"abi": [
 		{
 			"inputs": [],
+			"name": "ERR_ALREADY_IN_CONTRACT_CHANGE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_ALREADY_IN_WAIT_PERIOD_CHANGE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_CHANGE_NOT_READY",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_EMPTY_PREV_ADDR",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "ERR_ENTRY_ALREADY_EXISTS",
 			"outputs": [
 				{
@@ -16,7 +68,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "ERR_ENTRY_NON_EXISTANT",
+			"name": "ERR_ENTRY_NON_EXISTENT",
 			"outputs": [
 				{
 					"internalType": "string",
@@ -78,10 +130,10 @@
 		},
 		{
 			"inputs": [],
-			"name": "admin",
+			"name": "adminVault",
 			"outputs": [
 				{
-					"internalType": "address",
+					"internalType": "contract AdminVault",
 					"name": "",
 					"type": "address"
 				}
@@ -110,33 +162,7 @@
 					"type": "bytes32"
 				}
 			],
-			"name": "cancelContractChange",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_admin",
-					"type": "address"
-				}
-			],
-			"name": "changeAdmin",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_owner",
-					"type": "address"
-				}
-			],
-			"name": "changeOwner",
+			"name": "approveWaitPeriodChange",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
@@ -147,14 +173,35 @@
 					"internalType": "bytes32",
 					"name": "_id",
 					"type": "bytes32"
-				},
-				{
-					"internalType": "uint256",
-					"name": "_newWaitPeriod",
-					"type": "uint256"
 				}
 			],
-			"name": "changeWaitPeriod",
+			"name": "cancelContractChange",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "_id",
+					"type": "bytes32"
+				}
+			],
+			"name": "cancelWaitPeriodChange",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_newAdminVault",
+					"type": "address"
+				}
+			],
+			"name": "changeAdminVault",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
@@ -186,7 +233,12 @@
 				},
 				{
 					"internalType": "bool",
-					"name": "inChange",
+					"name": "inContractChange",
+					"type": "bool"
+				},
+				{
+					"internalType": "bool",
+					"name": "inWaitPeriodChange",
 					"type": "bool"
 				},
 				{
@@ -257,19 +309,6 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "owner",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
 			"inputs": [
 				{
 					"internalType": "bytes32",
@@ -291,12 +330,50 @@
 		{
 			"inputs": [
 				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"name": "pendingWaitTimes",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"name": "previousAddresses",
+			"outputs": [
+				{
 					"internalType": "address",
-					"name": "_admin",
+					"name": "",
 					"type": "address"
 				}
 			],
-			"name": "setAdmin",
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "_id",
+					"type": "bytes32"
+				}
+			],
+			"name": "revertToPreviousAddress",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
@@ -315,6 +392,24 @@
 				}
 			],
 			"name": "startContractChange",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "_id",
+					"type": "bytes32"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_newWaitPeriod",
+					"type": "uint256"
+				}
+			],
+			"name": "startWaitPeriodChange",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"

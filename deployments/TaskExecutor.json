@@ -61,7 +61,7 @@
 						},
 						{
 							"internalType": "bytes32[]",
-							"name": "ids",
+							"name": "actionIds",
 							"type": "bytes32[]"
 						},
 						{
@@ -137,7 +137,7 @@
 						},
 						{
 							"internalType": "bytes32[]",
-							"name": "ids",
+							"name": "actionIds",
 							"type": "bytes32[]"
 						},
 						{
@@ -147,7 +147,7 @@
 						}
 					],
 					"internalType": "struct StrategyData.Task",
-					"name": "currTask",
+					"name": "_currTask",
 					"type": "tuple"
 				}
 			],
@@ -211,7 +211,7 @@
 	],
 	"networks": {
 		"local": {
-			"address": "0x6E66c9E7259EB988b86E6Aa7B0e213957c93bc6c",
+			"address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
 			"args": []
 		}
 	}

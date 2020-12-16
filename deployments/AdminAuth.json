@@ -1,0 +1,67 @@
+{
+	"contractName": "AdminAuth",
+	"abi": [
+		{
+			"inputs": [],
+			"name": "adminVault",
+			"outputs": [
+				{
+					"internalType": "contract AdminVault",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_newAdminVault",
+					"type": "address"
+				}
+			],
+			"name": "changeAdminVault",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "kill",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_token",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_receiver",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_amount",
+					"type": "uint256"
+				}
+			],
+			"name": "withdrawStuckFunds",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		}
+	],
+	"networks": {
+		"local": {
+			"address": "0x2a810409872AfC346F9B5b26571Fd6eC42EA4849",
+			"args": []
+		}
+	}
+}

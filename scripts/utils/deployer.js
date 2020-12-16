@@ -23,15 +23,19 @@ const getGasPrice = async (exGasPrice) => {
 	return newGasPrice;
 }
 
-const deploy = async (contractName, action, gasPrice, nonce, ...args) => {
+const deploy = async (contractName, signer, action, gasPrice, nonce, ...args) => {
 
 	try {
 		console.log('-------------------------------------------------------------');
 
-		const Contract = await bre.ethers.getContractFactory(contractName);
+		const Contract = await bre.ethers.getContractFactory(contractName, signer);
 		const provider = await bre.ethers.provider;
 
-		const options = {gasPrice, nonce};
+		let options = {gasPrice, nonce};
+
+		if (nonce === -1) {
+			options = { gasPrice };
+		}
 
 		let contract;
 		if (args.length == 0) {
@@ -59,9 +63,9 @@ const deploy = async (contractName, action, gasPrice, nonce, ...args) => {
 	}	
 }
 
-const deployWithResend = (contractName, action, exGasPrice, nonce, ...args) => new Promise((resolve) => {
+const deployWithResend = (contractName, signer, action, exGasPrice, nonce, ...args) => new Promise((resolve) => {
 	getGasPrice(exGasPrice).then((gasPrice) => {
-		let deployPromise = deploy(contractName, action, gasPrice, nonce, ...args);
+		let deployPromise = deploy(contractName, signer, action, gasPrice, nonce, ...args);
 		const timeoutId = setTimeout(() => resolve(deployWithResend(contractName, 'Resending', gasPrice, nonce, ...args)),  parseFloat(process.env.TIMEOUT_MINUTES) * 60 * 1000);
 		
 		deployPromise.then((contract) => {
@@ -79,11 +83,16 @@ const deployContract = async (contractName, ...args) => {
 	const address = await signers[0].getAddress();
 	const nonce = await bre.ethers.provider.getTransactionCount(address);
 
-	return deployWithResend(contractName, 'Deploying', ethers.BigNumber.from("0"), nonce, ...args);
-}
+	return deployWithResend(contractName, signers[0], 'Deploying', ethers.BigNumber.from("0"), nonce, ...args);
+};
+
+const deployAsOwner = async (contractName, signer, ...args) => {
+	return deployWithResend(contractName, signer, 'Deploying', ethers.BigNumber.from("0"), -1, ...args);
+};
 
 module.exports = {
 	deploy,
 	deployWithResend,
-	deployContract
+	deployContract,
+	deployAsOwner
 }

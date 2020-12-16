@@ -1,6 +1,6 @@
 const hre = require("hardhat");
 
-const { deployContract } = require("../scripts/utils/deployer");
+const { deployAsOwner } = require("../scripts/utils/deployer");
 
 const REGISTRY_ADDR = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
@@ -10,6 +10,10 @@ const KYBER_WRAPPER = '0x71C8dc1d6315a48850E88530d18d3a97505d2065';
 const UNISWAP_WRAPPER = '0x6403BD92589F825FfeF6b62177FCe9149947cb9f';
 const OASIS_WRAPPER = '0x2aD7D86C56b7a09742213e1e649C727cB4991A54';
 const ETH_ADDR = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+const DAI_ADDR = '0x6b175474e89094c44da98b954eedeac495271d0f';
+
+const OWNER_ACC = '0x0528A32fda5beDf89Ba9ad67296db83c9452F28C';
+const ADMIN_ACC = '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9';
 
 const MAX_UINT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
@@ -56,21 +60,27 @@ const getProxy = async (acc) => {
 };
 
 const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
-    const registryInstance = await hre.ethers.getContractFactory("DFSRegistry");
+
+    await impersonateAccount(OWNER_ACC);
+
+    const signer = await hre.ethers.provider.getSigner(OWNER_ACC);
+
+    const registryInstance = await hre.ethers.getContractFactory("DFSRegistry", signer);
     const registry = await registryInstance.attach(regAddr);
 
-    const c = await deployContract(name);
+    registry.connect(signer);
+
+    const c = await deployAsOwner(name);
     const id = ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(name));
 
-    console.log(name, c.address);
-
     if (!(await registry.isRegistered(id))) {
-        console.log(registry.address);
         await registry.addNewContract(id, c.address, 0);
     } else {
         await registry.startContractChange(id, c.address);
         await registry.approveContractChange(id);
     }
+
+    await stopImpersonatingAccount(OWNER_ACC);
 
     return c;
 };
@@ -89,6 +99,13 @@ const approve = async (tokenAddr, to) => {
     if (allowance.toString() == '0') {
         await tokenContract.approve(to, MAX_UINT, {gasLimit: 1000000});
     }
+};
+
+const sendEther = async (signer, to, amount) => {
+    const value = ethers.utils.parseUnits(amount, 18);
+    const txObj = await signer.populateTransaction({ to, value, gasLimit: 300000 });
+
+    await signer.sendTransaction(txObj);
 };
 
 const balanceOf = async (tokenAddr, addr) => {
@@ -141,6 +158,21 @@ const isEth = (tokenAddr) => {
     return false;
 };
 
+const impersonateAccount = async (account) => {
+    await hre.network.provider.request({
+        method: "hardhat_impersonateAccount",
+        params: [account]}
+    );
+};
+
+const stopImpersonatingAccount = async (account) => {
+    await hre.network.provider.request({
+        method: "hardhat_stopImpersonatingAccount",
+        params: [account]}
+    );
+};
+
+
 module.exports = {
     getAddrFromRegistry,
     getProxy,
@@ -150,13 +182,19 @@ module.exports = {
     balanceOf,
     formatExchangeObj,
     isEth,
+    sendEther,
+    impersonateAccount,
+    stopImpersonatingAccount,
     standardAmounts,
     nullAddress,
     REGISTRY_ADDR,
+    DAI_ADDR,
     KYBER_WRAPPER,
     UNISWAP_WRAPPER,
     OASIS_WRAPPER,
     WETH_ADDRESS,
     ETH_ADDR,
-    MAX_UINT
+    MAX_UINT,
+    OWNER_ACC,
+    ADMIN_ACC,
 };
