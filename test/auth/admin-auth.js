@@ -1,81 +1,138 @@
 const { expect } = require("chai");
+const { deployContract } = require("../../scripts/utils/deployer.js");
 
-const { deployContract } = require("../../scripts/utils/deployer");
+const {
+    impersonateAccount,
+    stopImpersonatingAccount,
+    sendEther,
+    getAddrFromRegistry,
+    redeploy,
+    balanceOf,
+    getProxy,
+    send,
+    OWNER_ACC,
+    ADMIN_ACC,
+    DAI_ADDR,
+    ETH_ADDR,
+    UNISWAP_WRAPPER,
+} = require('../utils.js');
+
+const {
+    sell,
+} = require('../actions');
+
 
 describe("Admin-Auth", function() {
-    let ownerAcc1, ownerAcc2, adminAcc, adminAuth, adminAuthAddr;
+    let sender, ownerAcc, adminAcc, proxy, adminAuth, newOwner, newAdminAuth;
 
     before(async () => {
 
-        adminAuth = await deployContract('AdminAuth');
+        adminAuth = await redeploy("AdminAuth");
+        await redeploy("DFSSell");
 
-        ownerAcc1 = (await hre.ethers.getSigners())[0];
-        ownerAcc2 = (await hre.ethers.getSigners())[1];
-        adminAcc = (await hre.ethers.getSigners())[2];
-        adminAcc2 = (await hre.ethers.getSigners())[3];
+        adminAcc = await hre.ethers.provider.getSigner(ADMIN_ACC);
+        ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
+
+        sender = (await hre.ethers.getSigners())[0];
+        newOwner = (await hre.ethers.getSigners())[1];
+        newAdminAcc = (await hre.ethers.getSigners())[2];
+
+        proxy = await getProxy(sender.address);
+
+        newAdminAuth = await deployContract('AdminAuth');
+
+        const adminAuthAddr = await getAddrFromRegistry('AdminAuth');
     });
 
-    it(`... should fail to set an admin address if not owner `, async () => {
-        try  {
-            const adminAuthOwner2 = adminAuth.connect(ownerAcc2);
-            await adminAuthOwner2.setAdmin(adminAcc.address);
+    it(`... non admin should fail to change admin vault`, async () => {
+        try  {            
+            await adminAuth.changeAdminVault(sender.address);
+            expect(true).to.be.false; 
+        } catch(err) {
+            expect(err.toString()).to.have.string('msg.sender not admin');
+        }
+    });
 
+    it(`... owner should withdraw 10 Dai from contract`, async () => {
+        const tokenBalance = await balanceOf(DAI_ADDR, sender.address);
+
+        // 10 Dai
+        const amount = ethers.utils.parseUnits('10', 18);
+
+        if (tokenBalance.lt(amount)) {
+            await sell(
+                proxy,
+                ETH_ADDR,
+                DAI_ADDR,
+                ethers.utils.parseUnits('1', 18),
+                UNISWAP_WRAPPER,
+                sender.address,
+                sender.address
+            );
+        }
+
+        const tokenBalanceBefore = await balanceOf(DAI_ADDR, sender.address);
+
+        await send(DAI_ADDR, adminAuth.address, amount);
+
+        await impersonateAccount(OWNER_ACC);
+
+        const adminAuthByOwner = adminAuth.connect(ownerAcc);
+        await adminAuthByOwner.withdrawStuckFunds(DAI_ADDR, sender.address, amount);
+
+        await stopImpersonatingAccount(OWNER_ACC);
+
+        const tokenBalanceAfter = await balanceOf(DAI_ADDR, sender.address);
+
+        expect(tokenBalanceBefore).to.be.eq(tokenBalanceAfter);
+    });
+
+    it(`... non owner should fail to withdraw Dai from contract`, async () => {
+        try  {            
+            await adminAuth.withdrawStuckFunds(DAI_ADDR, sender.address, 0);;
             expect(true).to.be.false; 
         } catch(err) {
             expect(err.toString()).to.have.string('msg.sender not owner');
         }
     });
 
-    it(`... should set an admin address`, async () => {
-        await adminAuth.setAdmin(adminAcc.address);
-
-        const currOwner = await adminAuth.admin();
-
-        expect(currOwner).to.eq(adminAcc.address);
-    });
-
-    it(`... should fail to set an admin address twice`, async () => {
-        try  {
-            await adminAuth.setAdmin(adminAcc.address);
-            expect(true).to.be.false; 
-        } catch(err) {
-            expect(err.toString()).to.have.string('admin is already set');
-        }
-    });
-
-    it(`... should change the owner address`, async () => {
-        const adminAuthByAdmin = adminAuth.connect(adminAcc);
-
-        await adminAuthByAdmin.changeOwner(ownerAcc2.address);
-
-        const currOwner = await adminAuth.owner();
-        expect(currOwner).to.eq(ownerAcc2.address);
-    });
-
-    it(`... should fail to change the owner address if not called by admin`, async () => {
-        try  {
-            await adminAuth.changeOwner(ownerAcc2.address);
+    it(`... non admin should not be able to kill the contract`, async () => {
+        try  {            
+            await adminAuth.kill();
             expect(true).to.be.false; 
         } catch(err) {
             expect(err.toString()).to.have.string('msg.sender not admin');
         }
     });
 
-    it(`... should change the admin address`, async () => {
+    it(`... admin should change the admin valut`, async () => {
+        await impersonateAccount(ADMIN_ACC);
+
         const adminAuthByAdmin = adminAuth.connect(adminAcc);
+        await adminAuthByAdmin.changeAdminVault(newAdminAuth.address);
 
-        await adminAuthByAdmin.changeAdmin(adminAcc2.address);
+        await stopImpersonatingAccount(ADMIN_ACC);
 
-        const currAdmin = await adminAuth.admin();
-        expect(currAdmin).to.eq(adminAcc2.address);
+        const currAdminAddr = await adminAuth.adminVault();
+
+        expect(newAdminAuth.address).to.eq(currAdminAddr);
+
     });
 
-    it(`... should fail to change the admin address if not called by admin`, async () => {
-        try  {
-            await adminAuth.changeAdmin(adminAcc2.address);
-            expect(true).to.be.false; 
-        } catch(err) {
-            expect(err.toString()).to.have.string('msg.sender not admin');
-        }
-    });
+    // it(`... admin should be able to kill the contract`, async () => {
+    //     await impersonateAccount(ADMIN_ACC);
+
+    //     const adminAuthByAdmin = adminAuth.connect(adminAcc);
+    //     await adminAuthByAdmin.kill();
+
+    //     await stopImpersonatingAccount(ADMIN_ACC);
+
+    //     try {
+    //         await adminAuth.adminVault();
+    //         expect(true).to.be.false; 
+    //     } catch (err) {
+    //         expect(true).to.be.true; 
+    //     }
+    // });
+  
 });

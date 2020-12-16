@@ -29,10 +29,10 @@
 		},
 		{
 			"inputs": [],
-			"name": "admin",
+			"name": "adminVault",
 			"outputs": [
 				{
-					"internalType": "address",
+					"internalType": "contract AdminVault",
 					"name": "",
 					"type": "address"
 				}
@@ -67,24 +67,11 @@
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "_admin",
+					"name": "_newAdminVault",
 					"type": "address"
 				}
 			],
-			"name": "changeAdmin",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_owner",
-					"type": "address"
-				}
-			],
-			"name": "changeOwner",
+			"name": "changeAdminVault",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
@@ -98,19 +85,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "owner",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "registry",
 			"outputs": [
 				{
@@ -120,19 +94,6 @@
 				}
 			],
 			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_admin",
-					"type": "address"
-				}
-			],
-			"name": "setAdmin",
-			"outputs": [],
-			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
