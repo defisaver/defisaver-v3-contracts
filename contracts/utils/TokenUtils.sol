@@ -63,4 +63,10 @@ contract TokenUtils {
     function convertToWeth(address _tokenAddr) internal pure returns (address){
         return _tokenAddr == ETH_ADDR ? WETH_ADDR : _tokenAddr;
     }
+
+    function getTokenDecimals(address _token) internal view returns (uint256) {
+        if (_token == ETH_ADDR) return 18;
+
+        return IERC20(_token).decimals();
+    }
 }
