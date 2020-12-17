@@ -1,6 +1,19 @@
 {
-	"contractName": "SendToken",
+	"contractName": "AavePaybackV1",
 	"abi": [
+		{
+			"inputs": [],
+			"name": "AAVE_V1_LENDING_POOL_ADDRESSES",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
 		{
 			"inputs": [],
 			"name": "ERR_RETURN_INDEX_VALUE",
@@ -145,6 +158,19 @@
 			"type": "function"
 		},
 		{
+			"inputs": [],
+			"name": "chiToken",
+			"outputs": [
+				{
+					"internalType": "contract IGasToken",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
 			"inputs": [
 				{
 					"internalType": "bytes[]",
@@ -193,6 +219,19 @@
 		},
 		{
 			"inputs": [],
+			"name": "gasToken",
+			"outputs": [
+				{
+					"internalType": "contract IGasToken",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "logger",
 			"outputs": [
 				{
@@ -220,7 +259,7 @@
 	],
 	"networks": {
 		"local": {
-			"address": "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF",
+			"address": "0x95401dc811bb5740090279Ba06cfA8fcF6113778",
 			"args": []
 		}
 	}

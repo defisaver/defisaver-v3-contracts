@@ -1,6 +1,19 @@
 {
-	"contractName": "SendToken",
+	"contractName": "AaveSupply",
 	"abi": [
+		{
+			"inputs": [],
+			"name": "AAVE_REFERRAL_CODE",
+			"outputs": [
+				{
+					"internalType": "uint16",
+					"name": "",
+					"type": "uint16"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
 		{
 			"inputs": [],
 			"name": "ERR_RETURN_INDEX_VALUE",
@@ -94,6 +107,19 @@
 		},
 		{
 			"inputs": [],
+			"name": "STABLE_ID",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "SUB_MAX_INDEX_VALUE",
 			"outputs": [
 				{
@@ -113,6 +139,19 @@
 					"internalType": "uint8",
 					"name": "",
 					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "VARIABLE_ID",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
 				}
 			],
 			"stateMutability": "view",
@@ -142,6 +181,19 @@
 				}
 			],
 			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "chiToken",
+			"outputs": [
+				{
+					"internalType": "contract IGasToken",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
 			"type": "function"
 		},
 		{
@@ -193,6 +245,43 @@
 		},
 		{
 			"inputs": [],
+			"name": "gasToken",
+			"outputs": [
+				{
+					"internalType": "contract IGasToken",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_market",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_tokenAddr",
+					"type": "address"
+				}
+			],
+			"name": "isTokenUsedAsColl",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "collateralEnabled",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "logger",
 			"outputs": [
 				{
@@ -216,11 +305,57 @@
 			],
 			"stateMutability": "view",
 			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_market",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_tokenAddr",
+					"type": "address"
+				},
+				{
+					"internalType": "bool",
+					"name": "_state",
+					"type": "bool"
+				}
+			],
+			"name": "setCollStateForToken",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_market",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_tokenAddr",
+					"type": "address"
+				},
+				{
+					"internalType": "bool",
+					"name": "_true",
+					"type": "bool"
+				}
+			],
+			"name": "setUserUseReserveAsCollateral",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
 		}
 	],
 	"networks": {
 		"local": {
-			"address": "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF",
+			"address": "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49",
 			"args": []
 		}
 	}

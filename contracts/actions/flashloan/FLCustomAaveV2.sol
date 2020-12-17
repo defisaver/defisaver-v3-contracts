@@ -11,13 +11,14 @@ import "../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../interfaces/aaveV2/IFlashLoanParamsGetter.sol";
 import "../../core/StrategyData.sol";
 import "../../utils/TokenUtils.sol";
+import "hardhat/console.sol";
 
 /// @title Action that gets and receives a FL from Aave V2
-contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
+contract FLCustomAaveV2 is ActionBase, StrategyData, TokenUtils {
     using SafeERC20 for IERC20;
 
     address
-        public constant AAVE_LENDING_POOL_ADDRESSES = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
+        public constant AAVE_LENDING_POOL = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
 
     ILendingPoolAddressesProviderV2
         public constant addressesProvider = ILendingPoolAddressesProviderV2(
@@ -29,7 +30,7 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
 
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
 
-    bytes32 constant FL_AAVE_ID = keccak256("FLAave");
+    bytes32 constant FL_AAVE_ID = keccak256("FLCustomAaveV2");
     bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
 
     struct FLAaveV2Data {
@@ -48,6 +49,7 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
         bytes32[] memory
     ) public override payable returns (bytes32) {
         (address viewerAddress, address onBehalfOf, address receiver, bytes memory flashLoanGetterData) = parseInputs(_callData);
+        
         (address[] memory tokens, uint256[] memory amounts, uint256[] memory modes) = IFlashLoanParamsGetter(viewerAddress).getFlashLoanParams(flashLoanGetterData);
         
         FLAaveV2Data memory flData = FLAaveV2Data({
@@ -58,7 +60,7 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
             onBehalfOf: onBehalfOf
         });
 
-        uint flAmount = _flAaveV2(flData, _callData[4]);
+        uint flAmount = _flAaveV2(flData, _callData[3]);
 
         return bytes32(flAmount);
     }
@@ -74,7 +76,22 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _flAaveV2(FLAaveV2Data memory _flData, bytes memory _params) internal returns (uint) {
-        ILendingPoolV2(AAVE_LENDING_POOL_ADDRESSES).flashLoan(
+
+        console.log(_flData.receiver);
+        console.log(_flData.tokens[0]);
+        console.log(_flData.tokens[1]);
+        console.log(_flData.tokens[2]);
+        console.log(_flData.amounts[0]);
+        console.log(_flData.amounts[1]);
+        console.log(_flData.amounts[2]);
+        console.log(_flData.modes[0]);
+        console.log(_flData.modes[1]);
+        console.log(_flData.modes[2]);
+        console.log(_flData.onBehalfOf);
+        console.logBytes(_params);
+        console.log(AAVE_REFERRAL_CODE);
+
+        ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
             _flData.receiver,
             _flData.tokens,
             _flData.amounts,
@@ -102,8 +119,10 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
         address,
         bytes memory _params
     ) public returns (bool) {
+        console.log(6);
         (Task memory currTask, address proxy) = abi.decode(_params, (Task, address));
 
+        console.log(7);
         for (uint256 i = 0; i < _assets.length; ++i) {
             withdrawTokens(_assets[i], proxy, _amounts[i]);
         }
@@ -119,7 +138,7 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
             IERC20(_assets[i]).approve(
-                address(AAVE_LENDING_POOL_ADDRESSES),
+                address(AAVE_LENDING_POOL),
                 _amounts[i] + _fees[i]
             );
         }

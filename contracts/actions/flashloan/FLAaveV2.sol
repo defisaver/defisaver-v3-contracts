@@ -28,7 +28,7 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
 
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
 
-    bytes32 constant FL_AAVE_ID = keccak256("FLAave");
+    bytes32 constant FL_AAVE_ID = keccak256("FLAaveV2");
     bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
 
     struct FLAaveV2Data {

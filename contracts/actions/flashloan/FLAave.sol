@@ -9,6 +9,7 @@ import "../../interfaces/ILendingPool.sol";
 import "../../interfaces/aave/ILendingPoolAddressesProvider.sol";
 import "../../core/StrategyData.sol";
 import "../../utils/TokenUtils.sol";
+import "hardhat/console.sol";
 
 /// @title Action that gets and receives a FL from Aave V1
 contract FLAave is ActionBase, StrategyData, TokenUtils {
@@ -87,7 +88,6 @@ contract FLAave is ActionBase, StrategyData, TokenUtils {
         withdrawTokens(_reserve, proxy, _amount);
 
         address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
-
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             taskExecutor,
@@ -96,6 +96,11 @@ contract FLAave is ActionBase, StrategyData, TokenUtils {
 
         // return FL
         address payable aaveCore = addressesProvider.getLendingPoolCore();
+
+        console.log(_reserve);
+        console.log(aaveCore);
+        console.log(_amount+_fee);
+        console.log(address(this).balance);
 
         withdrawTokens(_reserve, aaveCore, (_amount + _fee));
     }
