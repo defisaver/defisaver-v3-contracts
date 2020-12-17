@@ -195,6 +195,22 @@ const borrowAave = async (proxy, market, tokenAddr, amount, rateMode, to) => {
     await proxy['execute(address,bytes)'](aaveBorroweAddr, functionData, {gasLimit: 3000000});
 };
 
+const paybackAave = async (proxy, market, tokenAddr, amount, rateMode, from) => {
+    const aavePaybackAddr = await getAddrFromRegistry('AavePayback');
+
+    let value = '0';
+    if (isEth(tokenAddr)) {
+        value = amount;
+    } else {
+        await approve(tokenAddr, proxy.address);
+    }
+
+    const aavePaybackAction = new dfs.actions.aave.AavePaybackAction(market, tokenAddr, amount, rateMode, from);
+    const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
+
+    await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, {value, gasLimit: 4000000});
+};
+
 const generateMcd = async (proxy, vaultId, amount, to) => {
     const mcdGenerateAddr = await getAddrFromRegistry('McdGenerate');
 
@@ -237,6 +253,7 @@ module.exports = {
     supplyAave,
     withdrawAave,
     borrowAave,
+    paybackAave,
 
     encodeFLAction,
     buyGasTokens,

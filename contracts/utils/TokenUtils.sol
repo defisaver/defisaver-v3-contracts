@@ -5,8 +5,6 @@ pragma solidity ^0.7.0;
 import "../interfaces/IWETH.sol";
 import "./SafeERC20.sol";
 
-import "hardhat/console.sol";
-
 contract TokenUtils {
     using SafeERC20 for IERC20;
 
@@ -17,7 +15,6 @@ contract TokenUtils {
         if (_tokenAddr == ETH_ADDR) return;
         
         if (IERC20(_tokenAddr).allowance(address(this), _to) < _amount) {
-            console.log(IERC20(_tokenAddr).allowance(address(this), _to), _amount);
             IERC20(_tokenAddr).safeApprove(_to, _amount);
         }
     }
@@ -33,7 +30,7 @@ contract TokenUtils {
         address _to,
         uint256 _amount
     ) internal {
-        if (_to != address(0) || _to != address(this) && _amount != 0) {
+        if (_to != address(0) && _to != address(this) && _amount != 0) {
             if (_token != ETH_ADDR) {
                 IERC20(_token).safeTransfer(_to, _amount);
             } else {

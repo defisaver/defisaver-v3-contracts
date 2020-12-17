@@ -56,14 +56,16 @@ contract AavePayback is ActionBase, AaveHelper, TokenUtils, GasBurner {
     /// @param _from a
     function _payback(address _market, address _tokenAddr, uint256 _amount, uint256 _rateMode, address _from) internal returns (uint) {
         address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
-        _tokenAddr = convertAndDepositToWeth(_tokenAddr, _amount);
 
         // if the amount sent is -1 to repay all, pull only the msg.sender baalnce
         if (_amount == uint(-1)) {
             _amount = getBalance(_tokenAddr, msg.sender);
         }
 
+
         pullTokens(_tokenAddr, _from, _amount);
+
+        _tokenAddr = convertAndDepositToWeth(_tokenAddr, _amount);
 
         approveToken(_tokenAddr, lendingPool, uint(-1));
 
@@ -79,7 +81,7 @@ contract AavePayback is ActionBase, AaveHelper, TokenUtils, GasBurner {
             _tokenAddr = ETH_ADDR;
         }
 
-        withdrawTokens(_tokenAddr, msg.sender, tokensAfter);
+        withdrawTokens(_tokenAddr, _from, tokensAfter);
 
         return tokensBefore - tokensAfter;
     }

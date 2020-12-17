@@ -24,10 +24,16 @@ const getAaveReserveInfo = async (dataProvider, tokenAddr) => {
     return tokens;
 };
 
+const getAaveReserveData = async (dataProvider, tokenAddr) => {
+    const tokens = await dataProvider.getReserveData(tokenAddr);
+    return tokens;
+};
+
 module.exports = {
     getAaveDataProvider,
     getAaveTokenInfo,
     getAaveReserveInfo,
+    getAaveReserveData,
     aaveV2assetsDefaultMarket,
     STABLE_RATE,
     VARIABLE_RATE,
