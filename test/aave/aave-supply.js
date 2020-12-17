@@ -5,7 +5,10 @@ const { getAssetInfo, ilks, } = require('defisaver-tokens');
 const dfs = require('defisaver-sdk');
 
 const {
-    getAaveDataProvider
+    getAaveDataProvider,
+    getAaveTokenInfo,
+    getAaveReserveInfo,
+    aaveV2assetsDefaultMarket
 } = require('../utils-aave');
 
 const {
@@ -14,10 +17,13 @@ const {
     redeploy,
     send,
     balanceOf,
+    isEth,
+    standardAmounts,
     nullAddress,
     REGISTRY_ADDR,
     ETH_ADDR,
-    AAVE_MARKET
+    AAVE_MARKET,
+    WETH_ADDRESS
 } = require('../utils');
 
 const {
@@ -25,21 +31,19 @@ const {
     getVaultsForUser,
     getRatio,
 } = require('../utils-mcd');
-const { run } = require("hardhat");
 
-setTimeout(async () =>  {
+const {
+    supplyAave,
+} = require('../actions');
 
+describe("Aave-Supply", function () {
+    this.timeout(80000);
 
-    const dataProvider = await getAaveDataProvider();
-
-    tokensInAave = await dataProvider.getAllReservesTokens();
-
-describe("Aave-Supply", async () => {
-
-    let makerAddresses, senderAcc, proxy, aaveSupplyAddr, tokensInAave;
+    let makerAddresses, senderAcc, proxy, aaveSupplyAddr, tokensInAave, dataProvider;
 
     before(async () => {
         await redeploy('AaveSupply');
+        await redeploy('DFSSell');
 
         makerAddresses = await fetchMakerAddresses();
 
@@ -47,38 +51,39 @@ describe("Aave-Supply", async () => {
         proxy = await getProxy(senderAcc.address);
 
         aaveSupplyAddr = getAddrFromRegistry('AaveSupply');
-      
+        dataProvider = await getAaveDataProvider();
+
+        tokensInAave = await dataProvider.getAllReservesTokens();
 
     });
 
-    it(`... should supply a ETH to aave`, async () => {
+    for (let i = 0; i < aaveV2assetsDefaultMarket.length; ++i) {
+        const tokenSymbol = aaveV2assetsDefaultMarket[i];
 
+        it(`... should supply ${standardAmounts[tokenSymbol]} ${tokenSymbol} to Aave`, async () => {
+            const assetInfo = getAssetInfo(tokenSymbol);
 
-    //     const A_ETH_ADDR = '0x030bA81f1c18d280636F32af80b9AAd02Cf0854e';
+            let addr = assetInfo.address;
 
-    //     const amount = ethers.utils.parseUnits('1', 18);
-    //     const value = amount;
+            if (isEth(addr)) {
+                addr = WETH_ADDRESS;
+            }
 
-    //     const balanceBefore = await balanceOf(A_ETH_ADDR, proxy.address);
+            const aaveTokenInfo = await getAaveTokenInfo(dataProvider, addr);
+            const aToken = aaveTokenInfo.aTokenAddress;
 
-    //     const mcdSupplyAction = new dfs.Action(
-    //         "AaveSupply",
-    //         "0x0",
-    //         ["address", "address", "uint256", "address"], 
-    //         [AAVE_MARKET, ETH_ADDR, amount, senderAcc.address]
-    //     );
-    //     const functionData = mcdSupplyAction.encodeForDsProxyCall()[1];
+            const amount = ethers.utils.parseUnits(standardAmounts[assetInfo.symbol], assetInfo.decimals);
+    
+            const balanceBefore = await balanceOf(aToken, proxy.address);
 
-    //    await proxy['execute(address,bytes)'](aaveSupplyAddr, functionData, {value, gasLimit: 3000000});
+            await supplyAave(proxy, AAVE_MARKET, amount, assetInfo.address, senderAcc.address);
+    
+            const balanceAfter = await balanceOf(aToken, proxy.address);
+    
+            expect(balanceAfter).to.be.gt(balanceBefore);
+        
+        });
+    }
 
-    //    const balanceAfter = await balanceOf(A_ETH_ADDR, proxy.address);
-
-    //    expect(balanceAfter).to.be.gt(balanceBefore);
-
-    });
 });
-
-run();
-
-}, 5000);
 

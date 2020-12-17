@@ -15,7 +15,7 @@ contract TokenUtils {
         if (_tokenAddr == ETH_ADDR) return;
         
         if (IERC20(_tokenAddr).allowance(address(this), _to) < _amount) {
-            IERC20(_tokenAddr).approve(_to, _amount);
+            IERC20(_tokenAddr).safeApprove(_to, _amount);
         }
     }
 

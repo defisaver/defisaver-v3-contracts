@@ -65,7 +65,7 @@ contract AaveSupply is ActionBase, AaveHelper, TokenUtils, GasBurner {
         _tokenAddr = convertAndDepositToWeth(_tokenAddr, _amount);
 
         // approve aave pool to pull tokens
-        approveToken(_tokenAddr, lendingPool, _amount);
+        approveToken(_tokenAddr, lendingPool, uint(-1));
 
         // deposit in behalf of the proxy
         ILendingPoolV2(lendingPool).deposit(_tokenAddr, _amount, address(this), AAVE_REFERRAL_CODE);
