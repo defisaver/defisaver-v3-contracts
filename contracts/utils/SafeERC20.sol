@@ -39,6 +39,7 @@ library SafeERC20 {
         address spender,
         uint256 value
     ) internal {
+        _callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, 0));
         _callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, value));
     }
 

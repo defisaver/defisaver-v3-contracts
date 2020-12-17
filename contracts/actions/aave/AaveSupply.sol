@@ -8,6 +8,8 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
+import "hardhat/console.sol";
+
 /// @title Suply a token to an Aave market
 contract AaveSupply is ActionBase, AaveHelper, TokenUtils, GasBurner {
 
@@ -58,14 +60,20 @@ contract AaveSupply is ActionBase, AaveHelper, TokenUtils, GasBurner {
     ) internal returns (uint) {
         address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
 
+        console.log("Before pull");
+
         // pull tokens to proxy so we can supply
         pullTokens(_tokenAddr, _from, _amount);
 
         // if Eth, convert to Weth
         _tokenAddr = convertAndDepositToWeth(_tokenAddr, _amount);
 
+        console.log("aftter convert");
+
         // approve aave pool to pull tokens
         approveToken(_tokenAddr, lendingPool, uint(-1));
+
+        console.log("Before deposit");
 
         // deposit in behalf of the proxy
         ILendingPoolV2(lendingPool).deposit(_tokenAddr, _amount, address(this), AAVE_REFERRAL_CODE);

@@ -165,7 +165,6 @@ const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
         await approve(tokenAddr, proxy.address);
     }
 
-
     const aaveSupplyAction = new dfs.actions.aave.AaveSupplyAction(
         market,
         tokenAddr,
@@ -176,6 +175,24 @@ const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
     const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
 
     await proxy['execute(address,bytes)'](aaveSupplyAddr, functionData, {value, gasLimit: 3000000});
+};
+
+const withdrawAave = async (proxy, market, tokenAddr, amount, to) => {
+    const aaveWithdrawAddr = await getAddrFromRegistry('AaveWithdraw');
+
+    const aaveWithdrawAction = new dfs.actions.aave.AaveWithdrawAction(market, tokenAddr, amount, to);
+    const functionData = aaveWithdrawAction.encodeForDsProxyCall()[1];
+
+    await proxy['execute(address,bytes)'](aaveWithdrawAddr, functionData, {gasLimit: 3000000});
+};
+
+const borrowAave = async (proxy, market, tokenAddr, amount, rateMode, to) => {
+    const aaveBorroweAddr = await getAddrFromRegistry('AaveBorrow');
+
+    const aaveBorrowAction = new dfs.actions.aave.AaveBorrowAction(market,tokenAddr, amount, rateMode, to);
+    const functionData = aaveBorrowAction.encodeForDsProxyCall()[1];
+
+    await proxy['execute(address,bytes)'](aaveBorroweAddr, functionData, {gasLimit: 3000000});
 };
 
 const generateMcd = async (proxy, vaultId, amount, to) => {
@@ -218,7 +235,8 @@ module.exports = {
     openVault,
 
     supplyAave,
-
+    withdrawAave,
+    borrowAave,
 
     encodeFLAction,
     buyGasTokens,

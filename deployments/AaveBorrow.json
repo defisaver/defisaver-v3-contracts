@@ -1,5 +1,5 @@
 {
-	"contractName": "AaveSupply",
+	"contractName": "AaveBorrow",
 	"abi": [
 		{
 			"inputs": [],
@@ -355,7 +355,7 @@
 	],
 	"networks": {
 		"local": {
-			"address": "0x2f8D338360D095a72680A943A22fE6a0d398a0B4",
+			"address": "0xF8b299F87EBb62E0b625eAF440B73Cc6b7717dbd",
 			"args": []
 		}
 	}
