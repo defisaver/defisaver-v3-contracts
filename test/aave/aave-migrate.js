@@ -7,6 +7,8 @@ const { getAssetInfo } = require('defisaver-tokens');
 const { tenderlyRPC } = require('hardhat');
 // const hre = require("hardhat");
 
+const dfs = require('defisaver-sdk');
+
 const {
     getAddrFromRegistry,
     getProxyWithSigner,
@@ -25,60 +27,8 @@ const {
     getAaveDataProvider,
 } = require('../utils-aave');
 
-const encodeCustomFLAction = (viewerAddr, onBehalfOfAddr, userAddr, tokensAddr) => {
-    const abiCoder = new ethers.utils.AbiCoder();
 
-    const viewer = abiCoder.encode(['address'], [viewerAddr]);
-    const onBehalf = abiCoder.encode(['address'], [onBehalfOfAddr]);
-    const flLoanDataBytes = abiCoder.encode(['address','address[]'], [userAddr,tokensAddr]);
-    const flashLoanData = abiCoder.encode(['bytes'], [flLoanDataBytes]);
-
-    return [viewer, onBehalf, flashLoanData, []];
-}
-
-const encodePaybackV1 = (token, amount, from, onBehalf) => {
-    const abiCoder = new ethers.utils.AbiCoder();
-
-    const tokenE = abiCoder.encode(['address'], [token]);
-    const amountE = abiCoder.encode(['uint256'], [amount]);
-    const fromE = abiCoder.encode(['address'], [from]);
-    const onBehalfE = abiCoder.encode(['address'], [onBehalf])
-
-    return [tokenE, amountE, fromE, onBehalfE];
-}
-
-const encodeSendToken = (token, amount, to) => {
-    const abiCoder = new ethers.utils.AbiCoder();
-
-    const tokenE = abiCoder.encode(['address'], [token]);
-    const amountE = abiCoder.encode(['uint256'], [amount]);
-    const toE = abiCoder.encode(['address'], [to]);
-
-    return [tokenE, toE, amountE]; 
-}
-
-const encodeAaveSupply = (market, token, amount, from) => {
-    const abiCoder = new ethers.utils.AbiCoder();
-
-    const marketE = abiCoder.encode(['address'], [market]);
-    const tokenE = abiCoder.encode(['address'], [token]);
-    const amountE = abiCoder.encode(['uint256'], [amount]);
-    const fromE = abiCoder.encode(['address'], [from]);
-
-    return [marketE, tokenE, amountE, fromE]; 
-}
-
-const encodeWithdrawV1 = (token, amount, to) => {
-    const abiCoder = new ethers.utils.AbiCoder();
-
-    const tokenE = abiCoder.encode(['address'], [token]);
-    const amountE = abiCoder.encode(['uint256'], [amount]);
-    const toE = abiCoder.encode(['address'], [to]);
-
-    return [tokenE, amountE, toE];    
-}
-
-describe("FL-Taker", function() {
+describe("AaveMigration", function() {
 
     let postDeployHead, provider, flAaveId, aaveV1View, aaveView, dataProvider;
 
@@ -116,44 +66,42 @@ describe("FL-Taker", function() {
 
         proxy.connect(senderAcc);
 
-        // send to proxy to supply it before paying back debt
-        await sendEther(supplierAcc, proxy.address, "10")
+        // send eth to test acc so it can run transaction
+        await sendEther(supplierAcc, TEST_ACC, "0.5")
 
         const taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
         const tokens = [getAssetInfo('DAI').address, getAssetInfo('MANA').address, getAssetInfo('REN').address];
 
-        const flCallData = encodeCustomFLAction(aaveV1View.address, proxy.address, proxy.address, tokens);
-        const paybackDai = encodePaybackV1(getAssetInfo('DAI').address, MAX_UINT, proxy.address, proxy.address);
-        const paybackMana = encodePaybackV1(getAssetInfo('MANA').address, MAX_UINT, proxy.address, proxy.address);
-        const paybackRen = encodePaybackV1(getAssetInfo('REN').address, MAX_UINT, proxy.address, proxy.address);
-        const withdrawEth = encodeWithdrawV1(getAssetInfo('ETH').address, MAX_UINT, proxy.address);
-        const withdrawDai = encodeWithdrawV1(getAssetInfo('DAI').address, MAX_UINT, proxy.address);
-        const supplyEth = encodeAaveSupply(lendingPoolAddrProvider, getAssetInfo('ETH').address, MAX_UINT, proxy.address);
-        const supplyDai = encodeAaveSupply(lendingPoolAddrProvider, getAssetInfo('DAI').address, MAX_UINT, proxy.address);
+        const abiCoder = new ethers.utils.AbiCoder();
+        const flData = abiCoder.encode(['address','address[]'], [proxy.address,tokens]);
 
-        const callData = [flCallData, paybackDai, paybackMana, paybackRen, withdrawEth, withdrawDai, supplyEth, supplyDai];
-        const actions = [flAaveId, aavePaybackV1Id, aavePaybackV1Id, aavePaybackV1Id, aaveWithdrawV1Id, aaveWithdrawV1Id, aaveSupplyId, aaveSupplyId];
-
-        let subData = [];
-        let paramMapping = [];
-
-        for (let i=0; i<callData.length; i++) {
-            subData.push([]);
-            paramMapping.push([0,0,0,0,0]);
-        }
-        
-
-        const TaskExecutor = await ethers.getContractFactory("TaskExecutor");
-
-        const functionData = TaskExecutor.interface.encodeFunctionData(
-            "executeTask",
-            [
-                ["Migration", callData, subData, actions, paramMapping]
-            ]
+        const flashloan = new dfs.actions.flashloan.AaveCustomFlashLoanV2Action(
+            aaveV1View.address, proxy.address, flData
         );
 
+        const paybackDai = new dfs.actions.aaveV1.AavePaybackActionV1(getAssetInfo('DAI').address, MAX_UINT, proxy.address, proxy.address);
+        const paybackMana = new dfs.actions.aaveV1.AavePaybackActionV1(getAssetInfo('MANA').address, MAX_UINT, proxy.address, proxy.address);
+        const paybackRen = new dfs.actions.aaveV1.AavePaybackActionV1(getAssetInfo('REN').address, MAX_UINT, proxy.address, proxy.address);
+        const withdrawEth = new dfs.actions.aaveV1.AaveWithdrawActionV1(getAssetInfo('ETH').address, MAX_UINT, proxy.address);
+        const withdrawDai = new dfs.actions.aaveV1.AaveWithdrawActionV1(getAssetInfo('DAI').address, MAX_UINT, proxy.address);
+        const supplyEth = new dfs.actions.aave.AaveSupplyAction(lendingPoolAddrProvider, getAssetInfo('ETH').address, MAX_UINT, proxy.address);
+        const supplyDai = new dfs.actions.aave.AaveSupplyAction(lendingPoolAddrProvider, getAssetInfo('DAI').address, MAX_UINT, proxy.address);
+
+        const migrationRecipe = new dfs.ActionSet("MigrationRecipe", [
+            flashloan,
+            paybackDai,
+            paybackMana,
+            paybackRen,
+            withdrawEth,
+            withdrawDai,
+            supplyEth,
+            supplyDai
+        ]);
+        const functionData = migrationRecipe.encodeForDsProxyCall();
+        
+
         // value needed because of aave fl fee
-        await proxy['execute(address,bytes)'](taskExecutorAddr, functionData, {value: ethers.utils.parseEther("0.01"), gasLimit: 6900000});
+        await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {value: ethers.utils.parseEther("0.01"), gasLimit: 6900000});
     });
  
 });
