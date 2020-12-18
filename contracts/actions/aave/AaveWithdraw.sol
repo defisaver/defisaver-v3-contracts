@@ -65,7 +65,7 @@ contract AaveWithdraw is ActionBase, AaveHelper, TokenUtils, GasBurner {
             withdrawWeth(wethBalance);
             _amount = wethBalance;
 
-            msg.sender.transfer(_amount);
+            payable(_to).transfer(_amount);
         } else {
             // if not eth send directly to _to
             ILendingPoolV2(lendingPool).withdraw(_tokenAddr, _amount, _to);

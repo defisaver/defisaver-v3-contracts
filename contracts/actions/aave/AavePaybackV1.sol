@@ -21,22 +21,23 @@ contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public virtual override payable returns (bytes32) {
-        (address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
+        (address tokenAddr, uint256 amount, address from, address onBehalf) = parseInputs(_callData);
 
         tokenAddr = _parseParamAddr(tokenAddr, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
         from = _parseParamAddr(from, _paramMapping[2], _subData, _returnValues);
+        onBehalf = _parseParamAddr(onBehalf, _paramMapping[3], _subData, _returnValues);
 
-        uint256 paybackAmount = _payback(tokenAddr, amount, from);
+        uint256 paybackAmount = _payback(tokenAddr, amount, from, onBehalf);
 
         return bytes32(paybackAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
-        (address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
+        (address tokenAddr, uint256 amount, address from, address onBehalf) = parseInputs(_callData);
 
-        _payback(tokenAddr, amount, from);
+        _payback(tokenAddr, amount, from, onBehalf);
     }
 
     /// @inheritdoc ActionBase
@@ -52,7 +53,8 @@ contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
     /// @param _tokenAddr The address of the token to be paybacked
     /// @param _amount Amount of tokens to be payed back, send uint256(-1) for whole debt
     /// @param _from Address from which we pull token
-    function _payback(address _tokenAddr, uint256 _amount, address _from) internal returns (uint) {
+    /// @param _onBehalf Whose debt should be repayed
+    function _payback(address _tokenAddr, uint256 _amount, address _from, address _onBehalf) internal returns (uint) {
         address lendingPoolCore = ILendingPoolAddressesProvider(AAVE_V1_LENDING_POOL_ADDRESSES).getLendingPoolCore();
         address lendingPool = ILendingPoolAddressesProvider(AAVE_V1_LENDING_POOL_ADDRESSES).getLendingPool();
 
@@ -60,9 +62,9 @@ contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
         uint256 ethAmount = getBalance(ETH_ADDR, address(this));
 
         if (_amount == uint256(-1)) {
-            (,uint256 borrowAmount,,,,,uint256 originationFee,,,) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, address(this));
+            (,uint256 borrowAmount,,,,,uint256 originationFee,,,) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, _onBehalf);
             amount = borrowAmount + originationFee;
-            amount = amount > getBalance(_tokenAddr, msg.sender) ? getBalance(_tokenAddr, msg.sender) : amount;
+            amount = amount > getBalance(_tokenAddr, _from) ? getBalance(_tokenAddr, _from) : amount;
         }
 
         if (_tokenAddr != ETH_ADDR) {
@@ -72,7 +74,7 @@ contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
         }
 
         uint tokensBefore = getBalance(_tokenAddr, address(this));
-        ILendingPool(lendingPool).repay{value: ethAmount}(_tokenAddr, amount, payable(address(this)));
+        ILendingPool(lendingPool).repay{value: ethAmount}(_tokenAddr, amount, payable(_onBehalf));
         uint tokensAfter = getBalance(_tokenAddr, address(this));
 
         withdrawTokens(_tokenAddr, _from, tokensAfter);
@@ -86,11 +88,13 @@ contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
         returns (
             address tokenAddr,
             uint amount,
-            address from
+            address from,
+            address onBehalf
         )
     {
         tokenAddr = abi.decode(_callData[0], (address));
         amount = abi.decode(_callData[1], (uint256));
         from = abi.decode(_callData[2], (address));
+        onBehalf = abi.decode(_callData[3], (address));
     }
 }

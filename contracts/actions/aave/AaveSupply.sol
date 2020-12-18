@@ -57,25 +57,30 @@ contract AaveSupply is ActionBase, AaveHelper, TokenUtils, GasBurner {
         address _from
     ) internal returns (uint) {
         address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
+        uint256 amount = _amount;
+
+        if (_amount == uint256(-1)) {
+            amount = getBalance(_tokenAddr, _tokenAddr == ETH_ADDR ? address(this) : _from);
+        }
 
         // pull tokens to proxy so we can supply
-        pullTokens(_tokenAddr, _from, _amount);
+        pullTokens(_tokenAddr, _from, amount);
 
         // if Eth, convert to Weth
-        _tokenAddr = convertAndDepositToWeth(_tokenAddr, _amount);
+        _tokenAddr = convertAndDepositToWeth(_tokenAddr, amount);
 
         // approve aave pool to pull tokens
         approveToken(_tokenAddr, lendingPool, uint(-1));
 
         // deposit in behalf of the proxy
-        ILendingPoolV2(lendingPool).deposit(_tokenAddr, _amount, address(this), AAVE_REFERRAL_CODE);
+        ILendingPoolV2(lendingPool).deposit(_tokenAddr, amount, address(this), AAVE_REFERRAL_CODE);
 
         // always set as collateral if not already
         if (!isTokenUsedAsColl(_market, _tokenAddr)) {
             setCollStateForToken(_market, _tokenAddr, true);
         }
 
-        return _amount;
+        return amount;
     }
 
     function parseInputs(bytes[] memory _callData)

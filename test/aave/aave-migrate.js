@@ -17,7 +17,13 @@ const {
     MAX_UINT,
     sendEther,
     impersonateAccount,
+    balanceOf,
 } = require('../utils');
+
+const {
+    getAaveTokenInfo,
+    getAaveDataProvider,
+} = require('../utils-aave');
 
 const encodeCustomFLAction = (viewerAddr, onBehalfOfAddr, userAddr, tokensAddr) => {
     const abiCoder = new ethers.utils.AbiCoder();
@@ -30,14 +36,15 @@ const encodeCustomFLAction = (viewerAddr, onBehalfOfAddr, userAddr, tokensAddr) 
     return [viewer, onBehalf, flashLoanData, []];
 }
 
-const encodePaybackV1 = (token, amount, from) => {
+const encodePaybackV1 = (token, amount, from, onBehalf) => {
     const abiCoder = new ethers.utils.AbiCoder();
 
     const tokenE = abiCoder.encode(['address'], [token]);
     const amountE = abiCoder.encode(['uint256'], [amount]);
     const fromE = abiCoder.encode(['address'], [from]);
+    const onBehalfE = abiCoder.encode(['address'], [onBehalf])
 
-    return [tokenE, amountE, fromE];
+    return [tokenE, amountE, fromE, onBehalfE];
 }
 
 const encodeSendToken = (token, amount, to) => {
@@ -61,9 +68,19 @@ const encodeAaveSupply = (market, token, amount, from) => {
     return [marketE, tokenE, amountE, fromE]; 
 }
 
+const encodeWithdrawV1 = (token, amount, to) => {
+    const abiCoder = new ethers.utils.AbiCoder();
+
+    const tokenE = abiCoder.encode(['address'], [token]);
+    const amountE = abiCoder.encode(['uint256'], [amount]);
+    const toE = abiCoder.encode(['address'], [to]);
+
+    return [tokenE, amountE, toE];    
+}
+
 describe("FL-Taker", function() {
 
-    let postDeployHead, provider, flAaveId, aaveV1View;
+    let postDeployHead, provider, flAaveId, aaveV1View, aaveView, dataProvider;
 
     const lendingPoolAddrProvider = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
 
@@ -72,14 +89,18 @@ describe("FL-Taker", function() {
         await redeploy("FLCustomAaveV2");
         aaveV1View = await redeploy("AaveV1FullPositionView");
         await redeploy("AavePaybackV1");
+        await redeploy("AaveWithdrawV1");
         await redeploy("TaskExecutor");
         await redeploy("AaveSupply");
+        aaveView = await redeploy("AaveView");
+        dataProvider = await getAaveDataProvider();
 
         this.timeout(40000);
 
         flAaveId = ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes('FLCustomAaveV2'));
         aaveSupplyId = ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes('AaveSupply'));
         aavePaybackV1Id = ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes('AavePaybackV1'));
+        aaveWithdrawV1Id = ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes('AaveWithdrawV1'));
     })
 
     it('... should get an Eth Aave flash loan', async () => {
@@ -102,13 +123,16 @@ describe("FL-Taker", function() {
         const tokens = [getAssetInfo('DAI').address, getAssetInfo('MANA').address, getAssetInfo('REN').address];
 
         const flCallData = encodeCustomFLAction(aaveV1View.address, proxy.address, proxy.address, tokens);
-        const paybackDai = encodePaybackV1(getAssetInfo('DAI').address, MAX_UINT, proxy.address);
-        const paybackMana = encodePaybackV1(getAssetInfo('MANA').address, MAX_UINT, proxy.address);
-        const paybackRen = encodePaybackV1(getAssetInfo('REN').address, MAX_UINT, proxy.address);
-        const supplyEth = encodeAaveSupply(lendingPoolAddrProvider, getAssetInfo('ETH').address, ethers.utils.parseEther("3"), proxy.address);
+        const paybackDai = encodePaybackV1(getAssetInfo('DAI').address, MAX_UINT, proxy.address, proxy.address);
+        const paybackMana = encodePaybackV1(getAssetInfo('MANA').address, MAX_UINT, proxy.address, proxy.address);
+        const paybackRen = encodePaybackV1(getAssetInfo('REN').address, MAX_UINT, proxy.address, proxy.address);
+        const withdrawEth = encodeWithdrawV1(getAssetInfo('ETH').address, MAX_UINT, proxy.address);
+        const withdrawDai = encodeWithdrawV1(getAssetInfo('DAI').address, MAX_UINT, proxy.address);
+        const supplyEth = encodeAaveSupply(lendingPoolAddrProvider, getAssetInfo('ETH').address, MAX_UINT, proxy.address);
+        const supplyDai = encodeAaveSupply(lendingPoolAddrProvider, getAssetInfo('DAI').address, MAX_UINT, proxy.address);
 
-        const callData = [flCallData, paybackDai, paybackMana, paybackRen, supplyEth];
-        const actions = [flAaveId, aavePaybackV1Id, aavePaybackV1Id, aavePaybackV1Id, aaveSupplyId];
+        const callData = [flCallData, paybackDai, paybackMana, paybackRen, withdrawEth, withdrawDai, supplyEth, supplyDai];
+        const actions = [flAaveId, aavePaybackV1Id, aavePaybackV1Id, aavePaybackV1Id, aaveWithdrawV1Id, aaveWithdrawV1Id, aaveSupplyId, aaveSupplyId];
 
         let subData = [];
         let paramMapping = [];

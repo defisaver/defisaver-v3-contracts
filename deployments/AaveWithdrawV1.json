@@ -1,5 +1,5 @@
 {
-	"contractName": "AavePaybackV1",
+	"contractName": "AaveWithdrawV1",
 	"abi": [
 		{
 			"inputs": [],
@@ -259,7 +259,7 @@
 	],
 	"networks": {
 		"local": {
-			"address": "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43",
+			"address": "0xDC11f7E700A4c898AE5CAddB1082cFfa76512aDD",
 			"args": []
 		}
 	}
