@@ -1,14 +1,14 @@
 {
-	"contractName": "AavePaybackV1",
+	"contractName": "AaveSupply",
 	"abi": [
 		{
 			"inputs": [],
-			"name": "AAVE_V1_LENDING_POOL_ADDRESSES",
+			"name": "AAVE_REFERRAL_CODE",
 			"outputs": [
 				{
-					"internalType": "address",
+					"internalType": "uint16",
 					"name": "",
-					"type": "address"
+					"type": "uint16"
 				}
 			],
 			"stateMutability": "view",
@@ -107,6 +107,19 @@
 		},
 		{
 			"inputs": [],
+			"name": "STABLE_ID",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "SUB_MAX_INDEX_VALUE",
 			"outputs": [
 				{
@@ -126,6 +139,19 @@
 					"internalType": "uint8",
 					"name": "",
 					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "VARIABLE_ID",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
 				}
 			],
 			"stateMutability": "view",
@@ -231,6 +257,30 @@
 			"type": "function"
 		},
 		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_market",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_tokenAddr",
+					"type": "address"
+				}
+			],
+			"name": "isTokenUsedAsColl",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "collateralEnabled",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
 			"inputs": [],
 			"name": "logger",
 			"outputs": [
@@ -255,11 +305,57 @@
 			],
 			"stateMutability": "view",
 			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_market",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_tokenAddr",
+					"type": "address"
+				},
+				{
+					"internalType": "bool",
+					"name": "_state",
+					"type": "bool"
+				}
+			],
+			"name": "setCollStateForToken",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_market",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_tokenAddr",
+					"type": "address"
+				},
+				{
+					"internalType": "bool",
+					"name": "_true",
+					"type": "bool"
+				}
+			],
+			"name": "setUserUseReserveAsCollateral",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
 		}
 	],
 	"networks": {
 		"local": {
-			"address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+			"address": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
 			"args": []
 		}
 	}

@@ -23,9 +23,9 @@ contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
     ) public virtual override payable returns (bytes32) {
         (address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
 
-        tokenAddr = _parseParamAddr(tokenAddr, _paramMapping[1], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[2], _subData, _returnValues);
-        from = _parseParamAddr(from, _paramMapping[4], _subData, _returnValues);
+        tokenAddr = _parseParamAddr(tokenAddr, _paramMapping[0], _subData, _returnValues);
+        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
+        from = _parseParamAddr(from, _paramMapping[2], _subData, _returnValues);
 
         uint256 paybackAmount = _payback(tokenAddr, amount, from);
 
@@ -57,6 +57,7 @@ contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
         address lendingPool = ILendingPoolAddressesProvider(AAVE_V1_LENDING_POOL_ADDRESSES).getLendingPool();
 
         uint256 amount = _amount;
+        uint256 ethAmount = getBalance(ETH_ADDR, address(this));
 
         if (_amount == uint256(-1)) {
             (,uint256 borrowAmount,,,,,uint256 originationFee,,,) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, address(this));
@@ -66,15 +67,16 @@ contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
 
         if (_tokenAddr != ETH_ADDR) {
             pullTokens(_tokenAddr, _from, _amount);
-            approveToken(_tokenAddr, lendingPool, uint(-1));
+            approveToken(_tokenAddr, lendingPoolCore, uint(-1));
+            ethAmount = 0;
         }
 
         uint tokensBefore = getBalance(_tokenAddr, address(this));
-        ILendingPool(lendingPool).repay{value: msg.value}(_tokenAddr, amount, payable(address(this)));
+        ILendingPool(lendingPool).repay{value: ethAmount}(_tokenAddr, amount, payable(address(this)));
         uint tokensAfter = getBalance(_tokenAddr, address(this));
-        
-        withdrawTokens(_tokenAddr, msg.sender, tokensAfter);
 
+        withdrawTokens(_tokenAddr, _from, tokensAfter);
+        
         return tokensBefore - tokensAfter;
     }
 
@@ -87,8 +89,8 @@ contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
             address from
         )
     {
-        tokenAddr = abi.decode(_callData[1], (address));
-        amount = abi.decode(_callData[2], (uint256));
-        from = abi.decode(_callData[3], (address));
+        tokenAddr = abi.decode(_callData[0], (address));
+        amount = abi.decode(_callData[1], (uint256));
+        from = abi.decode(_callData[2], (address));
     }
 }

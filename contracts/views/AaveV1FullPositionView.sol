@@ -15,27 +15,23 @@ contract AaveV1FullPositionView is DSMath, IFlashLoanParamsGetter {
 
     struct UserBorrows {
         address[] borrowAddr;
-        uint256[] collAmounts;
         uint256[] borrowAmounts;
         uint256[] borrowRateModes;
     }
 
-    function getUserBorrows(address _user) public view returns (UserBorrows memory borrowsData) {
+    function getUserBorrows(address _user, address[] memory _borrTokens) public view returns (UserBorrows memory borrowsData) {
         address lendingPoolAddress = ILendingPoolAddressesProvider(AAVE_V1_LENDING_POOL_ADDRESSES).getLendingPool();
 
-        address[] memory reserves = ILendingPool(lendingPoolAddress).getReserves();
-
         borrowsData = UserBorrows({
-            borrowAddr: new address[](reserves.length),
-            collAmounts: new uint[](reserves.length),
-            borrowAmounts: new uint[](reserves.length),
-            borrowRateModes: new uint[](reserves.length)
+            borrowAddr: new address[](_borrTokens.length),
+            borrowAmounts: new uint[](_borrTokens.length),
+            borrowRateModes: new uint[](_borrTokens.length)
         });
 
         uint64 borrowPos = 0;
 
-        for (uint64 i = 0; i < reserves.length; i++) {
-            address reserve = reserves[i];
+        for (uint64 i = 0; i < _borrTokens.length; i++) {
+            address reserve = _borrTokens[i];
 
             (,uint256 borrowBalance,,uint256 borrowRateMode,,,,,,) = ILendingPool(lendingPoolAddress).getUserReserveData(reserve, _user);
 
@@ -53,9 +49,9 @@ contract AaveV1FullPositionView is DSMath, IFlashLoanParamsGetter {
 
 
     function getFlashLoanParams(bytes memory _data) public view override returns (address[] memory tokens, uint256[] memory amount, uint256[] memory modes) {
-        (address account) = abi.decode(_data, (address));
+        (address account, address[] memory borrTokens) = abi.decode(_data, (address,address[]));
 
-        UserBorrows memory borrowsData = getUserBorrows(account);
+        UserBorrows memory borrowsData = getUserBorrows(account, borrTokens);
 
         return (borrowsData.borrowAddr, borrowsData.borrowAmounts, borrowsData.borrowRateModes);
     }

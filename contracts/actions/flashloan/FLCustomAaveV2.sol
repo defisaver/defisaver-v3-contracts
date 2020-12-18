@@ -11,7 +11,6 @@ import "../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../interfaces/aaveV2/IFlashLoanParamsGetter.sol";
 import "../../core/StrategyData.sol";
 import "../../utils/TokenUtils.sol";
-import "hardhat/console.sol";
 
 /// @title Action that gets and receives a FL from Aave V2
 contract FLCustomAaveV2 is ActionBase, StrategyData, TokenUtils {
@@ -76,21 +75,6 @@ contract FLCustomAaveV2 is ActionBase, StrategyData, TokenUtils {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _flAaveV2(FLAaveV2Data memory _flData, bytes memory _params) internal returns (uint) {
-
-        console.log(_flData.receiver);
-        console.log(_flData.tokens[0]);
-        console.log(_flData.tokens[1]);
-        console.log(_flData.tokens[2]);
-        console.log(_flData.amounts[0]);
-        console.log(_flData.amounts[1]);
-        console.log(_flData.amounts[2]);
-        console.log(_flData.modes[0]);
-        console.log(_flData.modes[1]);
-        console.log(_flData.modes[2]);
-        console.log(_flData.onBehalfOf);
-        console.logBytes(_params);
-        console.log(AAVE_REFERRAL_CODE);
-
         ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
             _flData.receiver,
             _flData.tokens,
@@ -119,10 +103,7 @@ contract FLCustomAaveV2 is ActionBase, StrategyData, TokenUtils {
         address,
         bytes memory _params
     ) public returns (bool) {
-        console.log(6);
         (Task memory currTask, address proxy) = abi.decode(_params, (Task, address));
-
-        console.log(7);
         for (uint256 i = 0; i < _assets.length; ++i) {
             withdrawTokens(_assets[i], proxy, _amounts[i]);
         }
