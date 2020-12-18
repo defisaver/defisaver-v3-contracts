@@ -4,12 +4,15 @@ const { expect } = require("chai");
 const { getAssetInfo } = require('defisaver-tokens');
 
 const {
+    impersonateAccount,
+    stopImpersonatingAccount,
     getAddrFromRegistry,
     getProxy,
     redeploy,
     send,
     nullAddress,
     REGISTRY_ADDR,
+    OWNER_ACC
 } = require('../utils');
 
 const { deployContract } = require("../../scripts/utils/deployer");
@@ -19,7 +22,7 @@ const TWO_DAYS = 48 * 60 * 60;
 
 describe("DFS-Registry", function() {
 
-    let proxy, registry, senderAcc, senderAcc2;
+    let proxy, registry, senderAcc, senderAcc2, owner, registryByOwner;
 
     const contractAddr1 = '0x00000000219ab540356cBB839Cbe05303d7705Fa';
     const contractAddr2 = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -37,6 +40,10 @@ describe("DFS-Registry", function() {
         senderAcc2 = (await hre.ethers.getSigners())[1];
         proxy = await getProxy(senderAcc.address);
         registry = await deployContract("DFSRegistry");
+
+        owner = await hre.ethers.provider.getSigner(OWNER_ACC);
+
+        registryByOwner = registry.connect(owner);
     
     });
 
@@ -85,16 +92,21 @@ describe("DFS-Registry", function() {
 
     describe('Testing registry with 0 wait time', async () => {
         it('...should register a new contract with 0 wait time', async () => {
-            await registry.addNewContract(id1, contractAddr1, 0);
+            await impersonateAccount(OWNER_ACC);
+
+            const registryByOwner = registry.connect(owner);
+            await registryByOwner.addNewContract(id1, contractAddr1, 0);
     
             const addr = await registry.getAddr(id1);
             expect(addr).to.be.eq(contractAddr1);
+
         });
     
         it('...should initiate a change for 0 wait time entry', async () => {
-            await registry.startContractChange(id1, contractAddr1);
-    
-            await registry.approveContractChange(id1);
+            const registryByOwner = registry.connect(owner);
+
+            await registryByOwner.startContractChange(id1, contractAddr1);
+            await registryByOwner.approveContractChange(id1);
     
             const addr = await registry.getAddr(id1);
             expect(addr).to.be.eq(contractAddr1);
@@ -103,18 +115,24 @@ describe("DFS-Registry", function() {
        
         it('...should fail to register same id twice', async () => {
             try {
-                await registry.addNewContract(id1, contractAddr2, 0);
+                const registryByOwner = registry.connect(owner);
+                await registryByOwner.addNewContract(id1, contractAddr2, 0);
                 expect(true).to.be.false; 
     
             } catch (err) {
                 expect(err.toString()).to.have.string('Entry id already exists');
             }
+
+            await stopImpersonatingAccount(OWNER_ACC);
+
         });
     });
 
     describe('Testing approval after time has passed', async () => {
         it('...should register a new contract with 3 hours wait time', async () => {
-            await registry.addNewContract(id2, contractAddr2, THREE_HOURS);
+            await impersonateAccount(OWNER_ACC);
+
+            await registryByOwner.addNewContract(id2, contractAddr2, THREE_HOURS);
     
             const addr = await registry.getAddr(id2);
             expect(addr).to.be.eq(contractAddr2);
@@ -122,14 +140,14 @@ describe("DFS-Registry", function() {
 
         it('...should fail to approve it, because not in change process', async () => {
             try {
-                await registry.approveContractChange(id2);
+                await registryByOwner.approveContractChange(id2);
             } catch (err) {
                 expect(err.toString()).to.have.string('Entry not in change process');
             }
         });
     
         it('...should initiate a change and approve after 3 hours', async () => {
-            await registry.startContractChange(id2, contractAddr3);
+            await registryByOwner.startContractChange(id2, contractAddr3);
     
             await hre.network.provider.request({
                 method: "evm_increaseTime",
@@ -137,21 +155,21 @@ describe("DFS-Registry", function() {
                 id: new Date().getTime()
             });
     
-            await registry.approveContractChange(id2);
+            await registryByOwner.approveContractChange(id2);
     
             const addr = await registry.getAddr(id2);
             expect(addr).to.be.eq(contractAddr3);
         });
     
         it('...should register a new contract with 2 days wait time', async () => {
-            await registry.addNewContract(id3, contractAddr3, TWO_DAYS);
+            await registryByOwner.addNewContract(id3, contractAddr3, TWO_DAYS);
     
             const addr = await registry.getAddr(id3);
             expect(addr).to.be.eq(contractAddr3);
         });
     
         it('...should fail to approve change after one day', async () => {
-            await registry.startContractChange(id3, contractAddr2);
+            await registryByOwner.startContractChange(id3, contractAddr2);
     
             await hre.network.provider.request({
                 method: "evm_increaseTime",
@@ -160,7 +178,7 @@ describe("DFS-Registry", function() {
             });
     
             try {
-                await registry.approveContractChange(id3);
+                await registryByOwner.approveContractChange(id3);
                 expect(true).to.be.false; 
     
             } catch (err) {
@@ -169,29 +187,87 @@ describe("DFS-Registry", function() {
         });
     
         it('...should cancel the contract change', async () => {
-            await registry.cancelContractChange(id3);
+            await registryByOwner.cancelContractChange(id3);
     
-            const entry = await registry.entries(id3);
-            expect(entry.inChange).to.be.false;
+            const entry = await registryByOwner.entries(id3);
+            expect(entry.inContractChange).to.be.false;
+
         });
     });
 
     describe('Change vote period', async () => {
-        it('...should change voting period from 2 days to 4 days', async () => {
+        it('...should start a change in voting period and approve after 4 days', async () => {
             const newWaitPeriod = TWO_DAYS + TWO_DAYS;
-            await registry.changeWaitPeriod(id3, newWaitPeriod);
+            await registryByOwner.startWaitPeriodChange(id3, newWaitPeriod);
 
-            const entry = await registry.entries(id3);
-            expect(entry.waitPeriod).to.be.eq(TWO_DAYS + TWO_DAYS);
+            await hre.network.provider.request({
+                method: "evm_increaseTime",
+                params: [newWaitPeriod],
+                id: new Date().getTime()
+            });
+
+            await registryByOwner.approveWaitPeriodChange(id3);
+
+            const entry = await registryByOwner.entries(id3);
+            expect(entry.waitPeriod).to.be.eq(newWaitPeriod);
+
         });
 
-        it('...should fail to decrease change vote period', async () => {
-            const newWaitPeriod = TWO_DAYS;
+        it('...should fail to start a change in contract address, while wait period change', async () => {
             try {
-                await registry.changeWaitPeriod(id3, newWaitPeriod);
+                const newWaitPeriod = TWO_DAYS + TWO_DAYS;
+                await registryByOwner.startWaitPeriodChange(id3, newWaitPeriod);
+
+                await registryByOwner.startContractChange(id3, contractAddr3);
+                expect(true).to.be.false; 
             } catch (err) {
-                expect(err.toString()).to.have.string('New wait period must be bigger');
+                expect(err.toString()).to.have.string("Already in wait period change");
+                await registryByOwner.cancelWaitPeriodChange(id3);
             }
+        });
+
+        it('...should fail to start a wait period change, while in contract change', async () => {
+            try {
+                const newWaitPeriod = TWO_DAYS + TWO_DAYS;
+                await registryByOwner.startContractChange(id3, contractAddr3);
+
+                await registryByOwner.startWaitPeriodChange(id3, newWaitPeriod);
+                expect(true).to.be.false; 
+            } catch (err) {
+                expect(err.toString()).to.have.string("Already in contract change");
+                await registryByOwner.cancelContractChange(id3);
+            }
+        });
+
+        it('...should fail to approve voting period change, because not enought time has passed', async () => {
+            const newWaitPeriod = TWO_DAYS + TWO_DAYS;
+            await registryByOwner.startWaitPeriodChange(id3, newWaitPeriod);
+    
+            await hre.network.provider.request({
+                method: "evm_increaseTime",
+                params: [TWO_DAYS],
+                id: new Date().getTime()
+            });
+    
+            try {
+                await registryByOwner.approveWaitPeriodChange(id3);
+                expect(true).to.be.false; 
+    
+            } catch (err) {
+                expect(err.toString()).to.have.string('Change not ready yet');
+            }
+        });
+
+        it('...should start a new period change and cancel it', async () => {
+            const newWaitPeriod = TWO_DAYS + TWO_DAYS;
+            await registryByOwner.startWaitPeriodChange(id3, newWaitPeriod);
+
+            await registryByOwner.cancelWaitPeriodChange(id3);
+
+            const entry = await registryByOwner.entries(id3);
+            expect(entry.inWaitPeriodChange).to.be.false;
+
+            await stopImpersonatingAccount(OWNER_ACC);
         });
 
     });

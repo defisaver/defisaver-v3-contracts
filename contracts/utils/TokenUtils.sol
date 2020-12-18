@@ -15,7 +15,7 @@ contract TokenUtils {
         if (_tokenAddr == ETH_ADDR) return;
         
         if (IERC20(_tokenAddr).allowance(address(this), _to) < _amount) {
-            IERC20(_tokenAddr).approve(_to, _amount);
+            IERC20(_tokenAddr).safeApprove(_to, _amount);
         }
     }
 
@@ -30,7 +30,7 @@ contract TokenUtils {
         address _to,
         uint256 _amount
     ) internal {
-        if (_to != address(0) || _to != address(this) && _amount != 0) {
+        if (_to != address(0) && _to != address(this) && _amount != 0) {
             if (_token != ETH_ADDR) {
                 IERC20(_token).safeTransfer(_to, _amount);
             } else {
@@ -62,5 +62,11 @@ contract TokenUtils {
 
     function convertToWeth(address _tokenAddr) internal pure returns (address){
         return _tokenAddr == ETH_ADDR ? WETH_ADDR : _tokenAddr;
+    }
+
+    function getTokenDecimals(address _token) internal view returns (uint256) {
+        if (_token == ETH_ADDR) return 18;
+
+        return IERC20(_token).decimals();
     }
 }

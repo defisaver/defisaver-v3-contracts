@@ -12,6 +12,8 @@ const OASIS_WRAPPER = '0x2aD7D86C56b7a09742213e1e649C727cB4991A54';
 const ETH_ADDR = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 const DAI_ADDR = '0x6b175474e89094c44da98b954eedeac495271d0f';
 
+const AAVE_MARKET = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
+
 const OWNER_ACC = '0x0528A32fda5beDf89Ba9ad67296db83c9452F28C';
 const ADMIN_ACC = '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9';
 
@@ -19,8 +21,18 @@ const MAX_UINT = '11579208923731619542357098500868790785326998466564056403945758
 
 const standardAmounts = {
     'ETH': '2',
+    'AAVE': '15',
     'BAT': '4000',
     'USDC': '800',
+    'USDT': '800',
+    'UNI': '400',
+    'SUSD': '800',
+    'BUSD': '800',
+    'SNX': '200',
+    'REN': '4000',
+    'MKR': '2.5',
+    'ENJ': '8000',
+    'DAI': '800',
     'WBTC': '0.06',
     'ZRX': '3000',
     'KNC': '1200',
@@ -205,6 +217,7 @@ module.exports = {
     standardAmounts,
     nullAddress,
     REGISTRY_ADDR,
+    AAVE_MARKET,
     DAI_ADDR,
     KYBER_WRAPPER,
     UNISWAP_WRAPPER,

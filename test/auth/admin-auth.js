@@ -23,7 +23,7 @@ const {
 
 
 describe("Admin-Auth", function() {
-    let sender, ownerAcc, adminAcc, proxy, adminAuth, newOwner, newAdminAuth;
+    let sender, ownerAcc, adminAcc, proxy, adminAuth, newAdminVault;
 
     before(async () => {
 
@@ -34,14 +34,10 @@ describe("Admin-Auth", function() {
         ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
 
         sender = (await hre.ethers.getSigners())[0];
-        newOwner = (await hre.ethers.getSigners())[1];
-        newAdminAcc = (await hre.ethers.getSigners())[2];
 
         proxy = await getProxy(sender.address);
 
-        newAdminAuth = await deployContract('AdminAuth');
-
-        const adminAuthAddr = await getAddrFromRegistry('AdminAuth');
+        newAdminVault = await deployContract('AdminVault');
     });
 
     it(`... non admin should fail to change admin vault`, async () => {
@@ -109,30 +105,30 @@ describe("Admin-Auth", function() {
         await impersonateAccount(ADMIN_ACC);
 
         const adminAuthByAdmin = adminAuth.connect(adminAcc);
-        await adminAuthByAdmin.changeAdminVault(newAdminAuth.address);
+        await adminAuthByAdmin.changeAdminVault(newAdminVault.address);
 
         await stopImpersonatingAccount(ADMIN_ACC);
 
         const currAdminAddr = await adminAuth.adminVault();
 
-        expect(newAdminAuth.address).to.eq(currAdminAddr);
+        expect(newAdminVault.address).to.eq(currAdminAddr);
 
     });
 
-    // it(`... admin should be able to kill the contract`, async () => {
-    //     await impersonateAccount(ADMIN_ACC);
+    it(`... admin should be able to kill the contract`, async () => {
+        await impersonateAccount(ADMIN_ACC);
 
-    //     const adminAuthByAdmin = adminAuth.connect(adminAcc);
-    //     await adminAuthByAdmin.kill();
+        const adminAuthByAdmin = adminAuth.connect(adminAcc);
+        await adminAuthByAdmin.kill();
 
-    //     await stopImpersonatingAccount(ADMIN_ACC);
+        await stopImpersonatingAccount(ADMIN_ACC);
 
-    //     try {
-    //         await adminAuth.adminVault();
-    //         expect(true).to.be.false; 
-    //     } catch (err) {
-    //         expect(true).to.be.true; 
-    //     }
-    // });
+        try {
+            await adminAuth.adminVault();
+            expect(true).to.be.false; 
+        } catch (err) {
+            expect(true).to.be.true; 
+        }
+    });
   
 });

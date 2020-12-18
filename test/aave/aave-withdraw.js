@@ -34,15 +34,16 @@ const {
 
 const {
     supplyAave,
+    withdrawAave,
 } = require('../actions');
 
-describe("Aave-Supply", function () {
+describe("Aave-Withdraw", function () {
     this.timeout(80000);
 
-    let makerAddresses, senderAcc, proxy, aaveSupplyAddr, tokensInAave, dataProvider;
+    let makerAddresses, senderAcc, proxy, tokensInAave, dataProvider;
 
     before(async () => {
-        await redeploy('AaveSupply');
+        await redeploy('AaveWithdraw');
         await redeploy('DFSSell');
 
         makerAddresses = await fetchMakerAddresses();
@@ -50,7 +51,6 @@ describe("Aave-Supply", function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
 
-        aaveSupplyAddr = getAddrFromRegistry('AaveSupply');
         dataProvider = await getAaveDataProvider();
 
         tokensInAave = await dataProvider.getAllReservesTokens();
@@ -60,7 +60,7 @@ describe("Aave-Supply", function () {
     for (let i = 0; i < aaveV2assetsDefaultMarket.length; ++i) {
         const tokenSymbol = aaveV2assetsDefaultMarket[i];
 
-        it(`... should supply ${standardAmounts[tokenSymbol]} ${tokenSymbol} to Aave`, async () => {
+        it(`... should withdraw ${standardAmounts[tokenSymbol]} ${tokenSymbol} from Aave`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
 
             let addr = assetInfo.address;
@@ -74,14 +74,19 @@ describe("Aave-Supply", function () {
 
             const amount = ethers.utils.parseUnits(standardAmounts[assetInfo.symbol], assetInfo.decimals);
     
-            const balanceBefore = await balanceOf(aToken, proxy.address);
+            const aBalanceBefore = await balanceOf(aToken, proxy.address);
 
-            await supplyAave(proxy, AAVE_MARKET, amount, assetInfo.address, senderAcc.address);
+            if (aBalanceBefore.lte(amount)) {
+                await supplyAave(proxy, AAVE_MARKET, amount, assetInfo.address, senderAcc.address);
+            }
+
+            const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
+
+            await withdrawAave(proxy, AAVE_MARKET, assetInfo.address, amount, senderAcc.address);
     
-            const balanceAfter = await balanceOf(aToken, proxy.address);
+            const balanceAfter = await balanceOf(assetInfo.address, senderAcc.address);
     
             expect(balanceAfter).to.be.gt(balanceBefore);
-        
         });
     }
 

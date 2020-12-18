@@ -106,15 +106,6 @@ const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
 
 };
 
-const generateMcd = async (proxy, vaultId, amount, to) => {
-    const mcdGenerateAddr = await getAddrFromRegistry('McdGenerate');
-
-    const mcdGenerateAction = new dfs.actions.maker.MakerGenerateAction(vaultId, amount, to);
-    const functionData = mcdGenerateAction.encodeForDsProxyCall()[1];
-
-    await proxy['execute(address,bytes)'](mcdGenerateAddr, functionData, {gasLimit: 3000000});
-};
-
 const paybackMcd = async (proxy, vaultId, amount, from, daiAddr) => {
     const mcdPaybackAddr = await getAddrFromRegistry('McdPayback');
 
@@ -150,6 +141,85 @@ const openVault = async (makerAddresses, proxy, joinAddr, tokenData, collAmount,
     return vaultId;
 };
 
+const supplyAave = async (proxy, market, amount, tokenAddr, from) => {    
+    const tokenBalance = await balanceOf(tokenAddr, from);
+
+    if (tokenBalance.lt(amount)) {
+        await sell(
+            proxy,
+            ETH_ADDR,
+            tokenAddr,
+            ethers.utils.parseUnits('5', 18),
+            UNISWAP_WRAPPER,
+            from,
+            from
+        );
+    }
+
+    let aaveSupplyAddr = await getAddrFromRegistry('AaveSupply');
+
+    let value = '0';
+    if (isEth(tokenAddr)) {
+        value = amount.toString();
+    } else {
+        await approve(tokenAddr, proxy.address);
+    }
+
+    const aaveSupplyAction = new dfs.actions.aave.AaveSupplyAction(
+        market,
+        tokenAddr,
+        amount,
+        from
+    );
+
+    const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
+
+    await proxy['execute(address,bytes)'](aaveSupplyAddr, functionData, {value, gasLimit: 3000000});
+};
+
+const withdrawAave = async (proxy, market, tokenAddr, amount, to) => {
+    const aaveWithdrawAddr = await getAddrFromRegistry('AaveWithdraw');
+
+    const aaveWithdrawAction = new dfs.actions.aave.AaveWithdrawAction(market, tokenAddr, amount, to);
+    const functionData = aaveWithdrawAction.encodeForDsProxyCall()[1];
+
+    await proxy['execute(address,bytes)'](aaveWithdrawAddr, functionData, {gasLimit: 3000000});
+};
+
+const borrowAave = async (proxy, market, tokenAddr, amount, rateMode, to) => {
+    const aaveBorroweAddr = await getAddrFromRegistry('AaveBorrow');
+
+    const aaveBorrowAction = new dfs.actions.aave.AaveBorrowAction(market,tokenAddr, amount, rateMode, to);
+    const functionData = aaveBorrowAction.encodeForDsProxyCall()[1];
+
+    await proxy['execute(address,bytes)'](aaveBorroweAddr, functionData, {gasLimit: 3000000});
+};
+
+const paybackAave = async (proxy, market, tokenAddr, amount, rateMode, from) => {
+    const aavePaybackAddr = await getAddrFromRegistry('AavePayback');
+
+    let value = '0';
+    if (isEth(tokenAddr)) {
+        value = amount;
+    } else {
+        await approve(tokenAddr, proxy.address);
+    }
+
+    const aavePaybackAction = new dfs.actions.aave.AavePaybackAction(market, tokenAddr, amount, rateMode, from);
+    const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
+
+    await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, {value, gasLimit: 4000000});
+};
+
+const generateMcd = async (proxy, vaultId, amount, to) => {
+    const mcdGenerateAddr = await getAddrFromRegistry('McdGenerate');
+
+    const mcdGenerateAction = new dfs.actions.maker.MakerGenerateAction(vaultId, amount, to);
+    const functionData = mcdGenerateAction.encodeForDsProxyCall()[1];
+
+    await proxy['execute(address,bytes)'](mcdGenerateAddr, functionData, {gasLimit: 3000000});
+};
+
 const buyGasTokens = async (proxy, senderAcc) => {
     const dfsSellAddr = await getAddrFromRegistry('DFSSell');
     const dfsSell = await hre.ethers.getContractAt("DFSSell", dfsSellAddr);
@@ -179,6 +249,12 @@ module.exports = {
     paybackMcd,
     withdrawMcd,
     openVault,
+
+    supplyAave,
+    withdrawAave,
+    borrowAave,
+    paybackAave,
+
     encodeFLAction,
     buyGasTokens,
 };

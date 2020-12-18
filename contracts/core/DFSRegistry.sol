@@ -20,7 +20,6 @@ contract DFSRegistry is AdminAuth {
     string public constant ERR_ALREADY_IN_CONTRACT_CHANGE = "Already in contract change";
     string public constant ERR_ALREADY_IN_WAIT_PERIOD_CHANGE = "Already in wait period change";
 
-
     struct Entry {
         address contractAddr;
         uint256 waitPeriod;
@@ -29,12 +28,12 @@ contract DFSRegistry is AdminAuth {
         bool inWaitPeriodChange;
         bool exists;
     }
-    
+
     mapping(bytes32 => Entry) public entries;
     mapping(bytes32 => address) public previousAddresses;
 
     mapping(bytes32 => address) public pendingAddresses;
-    mapping(bytes32 => uint) public pendingWaitTimes;
+    mapping(bytes32 => uint256) public pendingWaitTimes;
 
     /// @notice Given an contract id returns the registred address
     /// @dev Id is keccak256 of the contract name
@@ -48,7 +47,6 @@ contract DFSRegistry is AdminAuth {
     function isRegistered(bytes32 _id) public view returns (bool) {
         return entries[_id].exists;
     }
-
 
     /////////////////////////// OWNER ONLY FUNCTIONS ///////////////////////////
 
@@ -180,7 +178,12 @@ contract DFSRegistry is AdminAuth {
         entries[_id].changeStartTime = block.timestamp; // solhint-disable-line
         entries[_id].inWaitPeriodChange = true;
 
-        logger.Log(address(this), msg.sender, "StartWaitPeriodChange", abi.encode(_id, _newWaitPeriod));
+        logger.Log(
+            address(this),
+            msg.sender,
+            "StartWaitPeriodChange",
+            abi.encode(_id, _newWaitPeriod)
+        );
     }
 
     /// @notice Changes new wait period, correct time must have passed
@@ -193,9 +196,20 @@ contract DFSRegistry is AdminAuth {
             ERR_CHANGE_NOT_READY
         );
 
-
+        uint256 oldWaitTime = entries[_id].waitPeriod;
         entries[_id].waitPeriod = pendingWaitTimes[_id];
+        
+        entries[_id].inWaitPeriodChange = false;
+        entries[_id].changeStartTime = 0;
 
+        pendingWaitTimes[_id] = 0;
+
+        logger.Log(
+            address(this),
+            msg.sender,
+            "ApproveWaitPeriodChange",
+            abi.encode(_id, oldWaitTime, entries[_id].waitPeriod)
+        );
     }
 
     /// @notice Cancel wait period change
@@ -204,7 +218,7 @@ contract DFSRegistry is AdminAuth {
         require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
         require(entries[_id].inWaitPeriodChange, ERR_ENTRY_NOT_IN_CHANGE);
 
-        uint oldWaitPeriod = pendingWaitTimes[_id];
+        uint256 oldWaitPeriod = pendingWaitTimes[_id];
 
         pendingWaitTimes[_id] = 0;
         entries[_id].inWaitPeriodChange = false;
