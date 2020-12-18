@@ -211,6 +211,40 @@ const paybackAave = async (proxy, market, tokenAddr, amount, rateMode, from) => 
     await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, {value, gasLimit: 4000000});
 };
 
+const supplyComp = async (proxy, tokenAddr, amount, from) => {    
+    const tokenBalance = await balanceOf(tokenAddr, from);
+
+    if (tokenBalance.lt(amount)) {
+        await sell(
+            proxy,
+            ETH_ADDR,
+            tokenAddr,
+            ethers.utils.parseUnits('5', 18),
+            UNISWAP_WRAPPER,
+            from,
+            from
+        );
+    }
+
+    let compSupplyAddr = await getAddrFromRegistry('CompSupply');
+
+    let value = '0';
+    if (tokenAddr.toLowerCase() === getAssetInfo("cETH").address.toLowerCase()) {
+        value = amount.toString();
+    } else {
+        await approve(tokenAddr, proxy.address);
+    }
+
+    const compSupplyAction = new dfs.actions.compound.CompoundSupplyAction(
+        tokenAddr,
+        amount,
+        from);
+
+    const functionData = compSupplyAction.encodeForDsProxyCall()[1];
+
+    await proxy['execute(address,bytes)'](compSupplyAddr, functionData, {value, gasLimit: 3000000});
+};
+
 const generateMcd = async (proxy, vaultId, amount, to) => {
     const mcdGenerateAddr = await getAddrFromRegistry('McdGenerate');
 
@@ -254,6 +288,8 @@ module.exports = {
     withdrawAave,
     borrowAave,
     paybackAave,
+
+    supplyComp,
 
     encodeFLAction,
     buyGasTokens,

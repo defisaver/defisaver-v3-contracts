@@ -29,6 +29,7 @@ const standardAmounts = {
     'SUSD': '800',
     'BUSD': '800',
     'SNX': '200',
+    'REP': '70',
     'REN': '4000',
     'MKR': '2.5',
     'ENJ': '8000',

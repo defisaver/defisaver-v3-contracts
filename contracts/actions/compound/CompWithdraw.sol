@@ -8,9 +8,10 @@ import "../../interfaces/compound/ICToken.sol";
 import "../../utils/GasBurner.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
+import "./helpers/CompHelper.sol";
 
 /// @title Withdraw a token from Compound
-contract CompWithdraw is ActionBase, TokenUtils, GasBurner {
+contract CompWithdraw is ActionBase, CompHelper, TokenUtils, GasBurner {
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -47,28 +48,28 @@ contract CompWithdraw is ActionBase, TokenUtils, GasBurner {
 
     /// @notice Withdraws a underlying token amount from compound
     /// @dev Send uint(-1) to withdraw whole balance
-    /// @param _tokenAddr Address of the token
+    /// @param _cTokenAddr cToken address
     /// @param _amount Amount of tokens to withdraw
     /// @param _to Where to send the tokens to (can be left on proxy)
-    function _withdraw(address _tokenAddr, uint _amount, address _to) internal returns (uint) {
-        address cTokenAddr = ICToken(_tokenAddr).underlying();
+    function _withdraw(address _cTokenAddr, uint _amount, address _to) internal returns (uint) {
+        address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
-        uint tokenBalanceBefore = getBalance(_tokenAddr, address(this));
+        uint tokenBalanceBefore = getBalance(tokenAddr, address(this));
 
         // if _amount uint(-1) that means take out whole balance
         if (_amount == uint(-1)) {
-            _amount = getBalance(cTokenAddr, address(this));
-            require(ICToken(cTokenAddr).redeem(_amount) == 0, "");
+            _amount = getBalance(_cTokenAddr, address(this));
+            require(ICToken(_cTokenAddr).redeem(_amount) == 0, "Comp redeem failed");
         } else {
-            require(ICToken(cTokenAddr).redeemUnderlying(_amount) == 0, "");
+            require(ICToken(_cTokenAddr).redeemUnderlying(_amount) == 0, "Comp redeem failed");
         }
 
-        uint tokenBalanceAfter = getBalance(_tokenAddr, address(this));
+        uint tokenBalanceAfter = getBalance(tokenAddr, address(this));
 
         // used to return the precise amount of tokens returned
         _amount = tokenBalanceAfter - tokenBalanceBefore;
 
-        withdrawTokens(_tokenAddr, _to, _amount);
+        withdrawTokens(tokenAddr, _to, _amount);
 
         return _amount;
     }
