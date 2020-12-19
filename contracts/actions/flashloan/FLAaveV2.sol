@@ -16,7 +16,7 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
     using SafeERC20 for IERC20;
 
     address
-        public constant AAVE_LENDING_POOL_ADDRESSES = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
+        public constant AAVE_LENDING_POOL = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
 
     ILendingPoolAddressesProviderV2
         public constant addressesProvider = ILendingPoolAddressesProviderV2(
@@ -66,7 +66,7 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _flAaveV2(FLAaveV2Data memory _flData, bytes memory _params) internal returns (uint) {
-        ILendingPoolV2(AAVE_LENDING_POOL_ADDRESSES).flashLoan(
+        ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
             _flData.receiver,
             _flData.tokens,
             _flData.amounts,
@@ -110,10 +110,7 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
-            IERC20(_assets[i]).approve(
-                address(AAVE_LENDING_POOL_ADDRESSES),
-                _amounts[i] + _fees[i]
-            );
+            approveToken(_assets[i], address(AAVE_LENDING_POOL), _amounts[i] + _fees[i]);
         }
 
         return true;

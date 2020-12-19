@@ -118,10 +118,7 @@ contract FLCustomAaveV2 is ActionBase, StrategyData, TokenUtils {
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
-            IERC20(_assets[i]).approve(
-                address(AAVE_LENDING_POOL),
-                _amounts[i] + _fees[i]
-            );
+            approveToken(_assets[i], address(AAVE_LENDING_POOL), _amounts[i] + _fees[i]);
         }
 
         return true;
