@@ -1,0 +1,380 @@
+{
+	"contractName": "CompView",
+	"abi": [
+		{
+			"inputs": [],
+			"name": "CETH_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ETH_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "comp",
+			"outputs": [
+				{
+					"internalType": "contract IComptroller",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address[]",
+					"name": "_cTokens",
+					"type": "address[]"
+				}
+			],
+			"name": "getCollFactors",
+			"outputs": [
+				{
+					"internalType": "uint256[]",
+					"name": "collFactors",
+					"type": "uint256[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address[]",
+					"name": "_cTokenAddresses",
+					"type": "address[]"
+				}
+			],
+			"name": "getFullTokensInfo",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "underlyingTokenAddress",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "supplyRate",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "borrowRate",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "exchangeRate",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "marketLiquidity",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "totalSupply",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "totalBorrow",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "collateralFactor",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "price",
+							"type": "uint256"
+						}
+					],
+					"internalType": "struct CompView.TokenInfoFull[]",
+					"name": "tokens",
+					"type": "tuple[]"
+				}
+			],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "getLoanData",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "user",
+							"type": "address"
+						},
+						{
+							"internalType": "uint128",
+							"name": "ratio",
+							"type": "uint128"
+						},
+						{
+							"internalType": "address[]",
+							"name": "collAddr",
+							"type": "address[]"
+						},
+						{
+							"internalType": "address[]",
+							"name": "borrowAddr",
+							"type": "address[]"
+						},
+						{
+							"internalType": "uint256[]",
+							"name": "collAmounts",
+							"type": "uint256[]"
+						},
+						{
+							"internalType": "uint256[]",
+							"name": "borrowAmounts",
+							"type": "uint256[]"
+						}
+					],
+					"internalType": "struct CompView.LoanData",
+					"name": "data",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address[]",
+					"name": "_users",
+					"type": "address[]"
+				}
+			],
+			"name": "getLoanDataArr",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "user",
+							"type": "address"
+						},
+						{
+							"internalType": "uint128",
+							"name": "ratio",
+							"type": "uint128"
+						},
+						{
+							"internalType": "address[]",
+							"name": "collAddr",
+							"type": "address[]"
+						},
+						{
+							"internalType": "address[]",
+							"name": "borrowAddr",
+							"type": "address[]"
+						},
+						{
+							"internalType": "uint256[]",
+							"name": "collAmounts",
+							"type": "uint256[]"
+						},
+						{
+							"internalType": "uint256[]",
+							"name": "borrowAmounts",
+							"type": "uint256[]"
+						}
+					],
+					"internalType": "struct CompView.LoanData[]",
+					"name": "loans",
+					"type": "tuple[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address[]",
+					"name": "_cTokens",
+					"type": "address[]"
+				}
+			],
+			"name": "getPrices",
+			"outputs": [
+				{
+					"internalType": "uint256[]",
+					"name": "prices",
+					"type": "uint256[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "getRatio",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address[]",
+					"name": "_users",
+					"type": "address[]"
+				}
+			],
+			"name": "getRatios",
+			"outputs": [
+				{
+					"internalType": "uint256[]",
+					"name": "ratios",
+					"type": "uint256[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "getSafetyRatio",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				},
+				{
+					"internalType": "address[]",
+					"name": "_cTokens",
+					"type": "address[]"
+				}
+			],
+			"name": "getTokenBalances",
+			"outputs": [
+				{
+					"internalType": "uint256[]",
+					"name": "balances",
+					"type": "uint256[]"
+				},
+				{
+					"internalType": "uint256[]",
+					"name": "borrows",
+					"type": "uint256[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address[]",
+					"name": "_cTokenAddresses",
+					"type": "address[]"
+				}
+			],
+			"name": "getTokensInfo",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "cTokenAddress",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "underlyingTokenAddress",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "collateralFactor",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "price",
+							"type": "uint256"
+						}
+					],
+					"internalType": "struct CompView.TokenInfo[]",
+					"name": "tokens",
+					"type": "tuple[]"
+				}
+			],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		}
+	],
+	"networks": {
+		"local": {}
+	}
+}

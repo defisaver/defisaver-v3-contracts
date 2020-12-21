@@ -1,5 +1,5 @@
 {
-	"contractName": "CompSupply",
+	"contractName": "CompBorrow",
 	"abi": [
 		{
 			"inputs": [],

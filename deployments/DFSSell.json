@@ -711,9 +711,6 @@
 		}
 	],
 	"networks": {
-		"local": {
-			"address": "0x54A8E10751B030aB6a6bC508eD6d0634947774dd",
-			"args": []
-		}
+		"local": {}
 	}
 }

@@ -9,7 +9,7 @@ import "../auth/AdminAuth.sol";
 /// @title ProxyAuth Gets DSProxy auth from users and is callable by the Executor
 contract ProxyAuth is AdminAuth {
 
-    address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
+    address public constant REGISTRY_ADDR = 0xB0e1682D17A96E8551191c089673346dF7e1D467;
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     bytes32 constant STRATEGY_EXECUTOR_ID = keccak256("StrategyExecutor");

@@ -2,20 +2,12 @@ const { expect } = require("chai");
 
 const { getAssetInfo, compoundCollateralAssets } = require('defisaver-tokens');
 
-const dfs = require('defisaver-sdk');
-
 const {
     getAddrFromRegistry,
     getProxy,
     redeploy,
-    send,
     balanceOf,
-    isEth,
     standardAmounts,
-    nullAddress,
-    REGISTRY_ADDR,
-    ETH_ADDR,
-    WETH_ADDRESS
 } = require('../utils');
 
 
@@ -26,7 +18,7 @@ const {
 describe("Comp-Supply", function () {
     this.timeout(80000);
 
-    let senderAcc, proxy, compSupplyAddr, tokensInAave, dataProvider;
+    let senderAcc, proxy;
 
     before(async () => {
         await redeploy('CompSupply');
@@ -34,8 +26,6 @@ describe("Comp-Supply", function () {
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
-
-        compSupplyAddr = getAddrFromRegistry('CompSupply');
     });
 
     for (let i = 0; i < compoundCollateralAssets.length; ++i) {
@@ -51,7 +41,7 @@ describe("Comp-Supply", function () {
     
             const balanceBefore = await balanceOf(cToken, proxy.address);
 
-            await supplyComp(proxy, cToken, amount, senderAcc.address);
+            await supplyComp(proxy, cToken, assetInfo.address, amount, senderAcc.address);
     
             const balanceAfter = await balanceOf(cToken, proxy.address);
     

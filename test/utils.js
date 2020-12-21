@@ -2,7 +2,7 @@ const hre = require("hardhat");
 
 const { deployAsOwner } = require("../scripts/utils/deployer");
 
-const REGISTRY_ADDR = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+const REGISTRY_ADDR = '0xB0e1682D17A96E8551191c089673346dF7e1D467';
 
 const nullAddress = "0x0000000000000000000000000000000000000000";
 const WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";

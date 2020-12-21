@@ -21,21 +21,21 @@ contract CompPayback is ActionBase, CompHelper, TokenUtils, GasBurner {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public virtual override payable returns (bytes32) {
-        (address cTokenAddr, uint256 amount) = parseInputs(_callData);
+        (address cTokenAddr, uint256 amount, address from) = parseInputs(_callData);
 
         cTokenAddr = _parseParamAddr(cTokenAddr, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
 
-        uint256 withdrawAmount = _payback(cTokenAddr, amount);
+        uint256 withdrawAmount = _payback(cTokenAddr, amount, from);
 
         return bytes32(withdrawAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
-        (address tokenAddr, uint256 amount) = parseInputs(_callData);
+        (address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
 
-        _payback(tokenAddr, amount);
+        _payback(tokenAddr, amount, from);
     }
 
     /// @inheritdoc ActionBase
@@ -46,7 +46,7 @@ contract CompPayback is ActionBase, CompHelper, TokenUtils, GasBurner {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _payback(address _cTokenAddr, uint _amount) internal returns (uint) {
+    function _payback(address _cTokenAddr, uint _amount, address _from) internal returns (uint) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
         approveToken(tokenAddr, _cTokenAddr, _amount);
@@ -57,12 +57,11 @@ contract CompPayback is ActionBase, CompHelper, TokenUtils, GasBurner {
         }
 
         if (tokenAddr != ETH_ADDR) {
-            pullTokens(tokenAddr, address(this), _amount);
+            pullTokens(tokenAddr, _from, _amount);
 
             require(ICToken(_cTokenAddr).repayBorrow(_amount) == 0, "Comp Repay fail");
         } else {
             ICToken(_cTokenAddr).repayBorrow{value: _amount}();
-            msg.sender.transfer(address(this).balance); // send back the extra eth
         }
 
         return _amount;
@@ -73,10 +72,13 @@ contract CompPayback is ActionBase, CompHelper, TokenUtils, GasBurner {
         pure
         returns (
             address cTokenAddr,
-            uint256 amount
+            uint256 amount,
+            address from
         )
     {
         cTokenAddr = abi.decode(_callData[0], (address));
         amount = abi.decode(_callData[1], (uint256));
+        from = abi.decode(_callData[2], (address));
+
     }
 }
