@@ -8,8 +8,6 @@ import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../utils/GasBurner.sol";
 import "../ActionBase.sol";
 
-import "hardhat/console.sol";
-
 /// @title A exchange sell action through the dfs exchange
 contract DFSBuy is ActionBase, DFSExchangeCore, GasBurner {
     uint256 internal constant RECIPIE_FEE = 400;
