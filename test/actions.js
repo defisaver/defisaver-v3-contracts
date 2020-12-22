@@ -30,7 +30,7 @@ const encodeFLAction = (amount, tokenAddr, flType) => {
     const tokenEncoded = abiCoder.encode(['address'], [tokenAddr]);
     const flTypeEncoded = abiCoder.encode(['uint8'], [flType]);
 
-    return [amountEncoded, tokenEncoded, flTypeEncoded, []];
+    return [amountEncoded, tokenEncoded, []];
 };
 
 const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to) => {

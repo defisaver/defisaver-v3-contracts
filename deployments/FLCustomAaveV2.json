@@ -1,6 +1,45 @@
 {
-	"contractName": "SendToken",
+	"contractName": "FLCustomAaveV2",
 	"abi": [
+		{
+			"inputs": [],
+			"name": "AAVE_LENDING_POOL",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "AAVE_REFERRAL_CODE",
+			"outputs": [
+				{
+					"internalType": "uint16",
+					"name": "",
+					"type": "uint16"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "CALLBACK_SELECTOR",
+			"outputs": [
+				{
+					"internalType": "bytes4",
+					"name": "",
+					"type": "bytes4"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
 		{
 			"inputs": [],
 			"name": "ERR_RETURN_INDEX_VALUE",
@@ -30,6 +69,19 @@
 		{
 			"inputs": [],
 			"name": "ETH_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ETH_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -145,6 +197,19 @@
 			"type": "function"
 		},
 		{
+			"inputs": [],
+			"name": "addressesProvider",
+			"outputs": [
+				{
+					"internalType": "contract ILendingPoolAddressesProviderV2",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
 			"inputs": [
 				{
 					"internalType": "bytes[]",
@@ -153,17 +218,17 @@
 				},
 				{
 					"internalType": "bytes[]",
-					"name": "_subData",
+					"name": "",
 					"type": "bytes[]"
 				},
 				{
 					"internalType": "uint8[]",
-					"name": "_paramMapping",
+					"name": "",
 					"type": "uint8[]"
 				},
 				{
 					"internalType": "bytes32[]",
-					"name": "_returnValues",
+					"name": "",
 					"type": "bytes32[]"
 				}
 			],
@@ -192,6 +257,45 @@
 			"type": "function"
 		},
 		{
+			"inputs": [
+				{
+					"internalType": "address[]",
+					"name": "_assets",
+					"type": "address[]"
+				},
+				{
+					"internalType": "uint256[]",
+					"name": "_amounts",
+					"type": "uint256[]"
+				},
+				{
+					"internalType": "uint256[]",
+					"name": "_fees",
+					"type": "uint256[]"
+				},
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				},
+				{
+					"internalType": "bytes",
+					"name": "_params",
+					"type": "bytes"
+				}
+			],
+			"name": "executeOperation",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
 			"inputs": [],
 			"name": "logger",
 			"outputs": [
@@ -199,6 +303,40 @@
 					"internalType": "contract DefisaverLogger",
 					"name": "",
 					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes[]",
+					"name": "_callData",
+					"type": "bytes[]"
+				}
+			],
+			"name": "parseInputs",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "viewer",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "onBehalfOf",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "receiver",
+					"type": "address"
+				},
+				{
+					"internalType": "bytes",
+					"name": "flashLoanGetterData",
+					"type": "bytes"
 				}
 			],
 			"stateMutability": "view",
@@ -216,11 +354,15 @@
 			],
 			"stateMutability": "view",
 			"type": "function"
+		},
+		{
+			"stateMutability": "payable",
+			"type": "receive"
 		}
 	],
 	"networks": {
 		"local": {
-			"address": "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF",
+			"address": "0x21dF544947ba3E8b3c32561399E88B52Dc8b2823",
 			"args": []
 		}
 	}

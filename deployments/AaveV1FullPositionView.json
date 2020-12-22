@@ -1,0 +1,94 @@
+{
+	"contractName": "AaveV1FullPositionView",
+	"abi": [
+		{
+			"inputs": [],
+			"name": "AAVE_V1_LENDING_POOL_ADDRESSES",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes",
+					"name": "_data",
+					"type": "bytes"
+				}
+			],
+			"name": "getFlashLoanParams",
+			"outputs": [
+				{
+					"internalType": "address[]",
+					"name": "tokens",
+					"type": "address[]"
+				},
+				{
+					"internalType": "uint256[]",
+					"name": "amount",
+					"type": "uint256[]"
+				},
+				{
+					"internalType": "uint256[]",
+					"name": "modes",
+					"type": "uint256[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				},
+				{
+					"internalType": "address[]",
+					"name": "_borrTokens",
+					"type": "address[]"
+				}
+			],
+			"name": "getUserBorrows",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address[]",
+							"name": "borrowAddr",
+							"type": "address[]"
+						},
+						{
+							"internalType": "uint256[]",
+							"name": "borrowAmounts",
+							"type": "uint256[]"
+						},
+						{
+							"internalType": "uint256[]",
+							"name": "borrowRateModes",
+							"type": "uint256[]"
+						}
+					],
+					"internalType": "struct AaveV1FullPositionView.UserBorrows",
+					"name": "borrowsData",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		}
+	],
+	"networks": {
+		"local": {
+			"address": "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
+			"args": []
+		}
+	}
+}

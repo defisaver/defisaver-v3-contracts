@@ -51,5 +51,8 @@ module.exports = {
     username: process.env.TENDERLY_USERNAME,
     project: process.env.TENDERLY_PROJECT,
     forkNetwork: "1"
+  },
+  mocha: {
+    timeout: 60000
   }
 };

@@ -87,7 +87,6 @@ contract FLAave is ActionBase, StrategyData, TokenUtils {
         withdrawTokens(_reserve, proxy, _amount);
 
         address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
-
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             taskExecutor,
