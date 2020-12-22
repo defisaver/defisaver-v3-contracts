@@ -8,11 +8,12 @@ import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../utils/GasBurner.sol";
 import "../ActionBase.sol";
 
-/// @title A exchange sell action through the dfs exchange
-contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
+import "hardhat/console.sol";
 
-    uint internal constant RECIPIE_FEE = 400;
-    uint internal constant DIRECT_FEE = 800;
+/// @title A exchange sell action through the dfs exchange
+contract DFSBuy is ActionBase, DFSExchangeCore, GasBurner {
+    uint256 internal constant RECIPIE_FEE = 400;
+    uint256 internal constant DIRECT_FEE = 800;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -20,7 +21,7 @@ contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public override payable returns (bytes32) {
+    ) public payable override returns (bytes32) {
         (ExchangeData memory exchangeData, address from, address to) = parseInputs(_callData);
 
         exchangeData.srcAddr = _parseParamAddr(
@@ -36,8 +37,8 @@ contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
             _returnValues
         );
 
-        exchangeData.srcAmount = _parseParamUint(
-            exchangeData.srcAmount,
+        exchangeData.destAmount = _parseParamUint(
+            exchangeData.destAmount,
             _paramMapping[2],
             _subData,
             _returnValues
@@ -45,56 +46,63 @@ contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
         from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
         to = _parseParamAddr(to, _paramMapping[4], _subData, _returnValues);
 
-        uint256 exchangedAmount = _dfsSell(exchangeData, from, to, RECIPIE_FEE);
+        uint256 exchangedAmount = _dfsBuy(exchangeData, from, to, RECIPIE_FEE);
 
         return bytes32(exchangedAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+    function executeActionDirect(bytes[] memory _callData) public payable override burnGas {
         (ExchangeData memory exchangeData, address from, address to) = parseInputs(_callData);
 
-        _dfsSell(exchangeData, from, to, DIRECT_FEE);
+        _dfsBuy(exchangeData, from, to, DIRECT_FEE);
     }
 
     /// @inheritdoc ActionBase
-    function actionType() public override pure returns (uint8) {
+    function actionType() public pure override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _dfsSell(
+    function _dfsBuy(
         ExchangeData memory exchangeData,
         address _from,
         address _to,
-        uint _fee
+        uint256 _fee
     ) internal returns (uint256) {
-
         pullTokens(exchangeData.srcAddr, _from, exchangeData.srcAmount);
+
+        uint256 balanceBefore =
+            getBalance(exchangeData.srcAddr, address(this)) - exchangeData.srcAmount;
 
         exchangeData.user = getUserAddress();
         exchangeData.dfsFeeDivider = _fee;
 
-        (address wrapper, uint256 exchangedAmount) = _sell(exchangeData);
+        (address wrapper, uint256 amountSold) = _buy(exchangeData);
 
-        withdrawTokens(exchangeData.destAddr, _to, exchangedAmount);
+        withdrawTokens(exchangeData.destAddr, _to, exchangeData.destAmount);
+
+        withdrawTokens(
+            exchangeData.srcAddr,
+            _to,
+            getBalance(exchangeData.srcAddr, address(this)) - balanceBefore
+        );
 
         logger.Log(
             address(this),
             msg.sender,
-            "DfsSell",
+            "DfsBuy",
             abi.encode(
                 wrapper,
                 exchangeData.srcAddr,
                 exchangeData.destAddr,
-                exchangeData.srcAmount,
-                exchangedAmount
+                amountSold,
+                exchangeData.destAmount
             )
         );
 
-        return exchangedAmount;
+        return amountSold;
     }
 
     function parseInputs(bytes[] memory _callData)

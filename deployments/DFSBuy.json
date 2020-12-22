@@ -1,5 +1,5 @@
 {
-	"contractName": "DFSSell",
+	"contractName": "DFSBuy",
 	"abi": [
 		{
 			"inputs": [],

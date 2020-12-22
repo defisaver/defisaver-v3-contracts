@@ -62,6 +62,36 @@ const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to) => 
     await proxy['execute(address,bytes)'](dfsSellAddr, functionData, {value, gasLimit: 3000000});
 };
 
+const buy = async (proxy, sellAddr, buyAddr, sellAmount, buyAmount, wrapper, from, to) => {
+    const dfsBuyAddr = await getAddrFromRegistry('DFSBuy');
+
+    const exchangeObject = formatExchangeObj(
+        sellAddr,
+        buyAddr,
+        sellAmount.toString(),
+        wrapper,
+        buyAmount
+    );
+    
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        from,
+        to
+    );
+
+    const functionData = sellAction.encodeForDsProxyCall()[1];
+
+    let value = '0';
+
+    if (isEth(sellAddr)) {
+        value = sellAmount.toString();
+    } else {
+        await approve(sellAddr, proxy.address);
+    }
+
+    await proxy['execute(address,bytes)'](dfsBuyAddr, functionData, {value, gasLimit: 3000000});
+};
+
 const openMcd = async (proxy, makerAddresses, joinAddr) => {
     const mcdOpenAddr = await getAddrFromRegistry('McdOpen');
 
@@ -311,6 +341,8 @@ const buyGasTokens = async (proxy, senderAcc) => {
 
 module.exports = {
     sell,
+    buy,
+    
     openMcd,
     supplyMcd,
     generateMcd,

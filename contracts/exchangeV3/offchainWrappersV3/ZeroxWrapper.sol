@@ -23,8 +23,8 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath 
         ExchangeActionType _type
     ) override public payable returns (bool success, uint256) {
         // check that contract have enough balance for exchange and protocol fee
-        require(getBalance(_exData.srcAddr) >= _exData.srcAmount, ERR_SRC_AMOUNT);
-        require(getBalance(KYBER_ETH_ADDRESS) >= _exData.offchainData.protocolFee, ERR_PROTOCOL_FEE);
+        require(getBalance(_exData.srcAddr, address(this)) >= _exData.srcAmount, ERR_SRC_AMOUNT);
+        require(getBalance(ETH_ADDR, address(this)) >= _exData.offchainData.protocolFee, ERR_PROTOCOL_FEE);
         
         /// @dev 0x always uses max approve in v1, so we approve the exact amount we want to sell
         /// @dev safeApprove is modified to always first set approval to 0, then to exact amount
@@ -34,13 +34,13 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath 
             IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, wdiv(_exData.destAmount, _exData.offchainData.price));
         }
 
-        uint256 tokensBefore = getBalance(_exData.destAddr);
+        uint256 tokensBefore = getBalance(_exData.destAddr, address(this));
         (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(_exData.offchainData.callData);
         uint256 tokensSwaped = 0;
 
         if (success) {
             // get the current balance of the swaped tokens
-            tokensSwaped = getBalance(_exData.destAddr) - tokensBefore;
+            tokensSwaped = getBalance(_exData.destAddr, address(this)) - tokensBefore;
         }
 
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)

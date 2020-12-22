@@ -3,9 +3,7 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../interfaces/IGasToken.sol";
 import "./DFSExchangeCore.sol";
-import "../DS/DSMath.sol";
 import "../utils/DefisaverLogger.sol";
 import "../auth/AdminAuth.sol";
 import "../utils/GasBurner.sol";

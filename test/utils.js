@@ -135,7 +135,7 @@ const balanceOf = async (tokenAddr, addr) => {
     return balance;
 };
 
-const formatExchangeObj = (srcAddr, destAddr, amount, wrapper) => {
+const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0) => {
     const abiCoder = new ethers.utils.AbiCoder();
 
     let firstPath = srcAddr;
@@ -155,7 +155,9 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper) => {
         srcAddr,
         destAddr,
         amount,
-        0, 0, 0,
+        destAmount,
+        0,
+        0,
         nullAddress,
         wrapper,
         path,
