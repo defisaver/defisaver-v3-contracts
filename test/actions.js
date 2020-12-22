@@ -211,6 +211,74 @@ const paybackAave = async (proxy, market, tokenAddr, amount, rateMode, from) => 
     await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, {value, gasLimit: 4000000});
 };
 
+const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {    
+    const tokenBalance = await balanceOf(tokenAddr, from);
+
+    if (tokenBalance.lt(amount)) {
+        await sell(
+            proxy,
+            ETH_ADDR,
+            tokenAddr,
+            ethers.utils.parseUnits('5', 18),
+            UNISWAP_WRAPPER,
+            from,
+            from
+        );
+    }
+
+    let compSupplyAddr = await getAddrFromRegistry('CompSupply');
+
+    let value = '0';
+    if (isEth(tokenAddr)) {
+        value = amount.toString();
+    } else {
+        await approve(tokenAddr, proxy.address);
+    }
+
+    const compSupplyAction = new dfs.actions.compound.CompoundSupplyAction(
+        cTokenAddr,
+        amount,
+        from);
+
+    const functionData = compSupplyAction.encodeForDsProxyCall()[1];
+
+    await proxy['execute(address,bytes)'](compSupplyAddr, functionData, {value, gasLimit: 3000000});
+};
+
+const withdrawComp = async (proxy, cTokenAddr, amount, to) => {
+    const compWithdrawAddr = await getAddrFromRegistry('CompWithdraw');
+
+    const compWithdrawAction = new dfs.actions.compound.CompoundWithdrawAction(cTokenAddr, amount, to);
+    const functionData = compWithdrawAction.encodeForDsProxyCall()[1];
+
+    await proxy['execute(address,bytes)'](compWithdrawAddr, functionData, {gasLimit: 3000000});
+};
+
+const borrowComp = async (proxy, cTokenAddr, amount, to) => {
+    const compBorrowAddr = await getAddrFromRegistry('CompBorrow');
+
+    const compBorrowAction = new dfs.actions.compound.CompoundBorrowAction(cTokenAddr, amount, to);
+    const functionData = compBorrowAction.encodeForDsProxyCall()[1];
+
+    await proxy['execute(address,bytes)'](compBorrowAddr, functionData, {gasLimit: 3000000});
+};
+
+const paybackComp = async (proxy, cTokenAddr, amount, from) => {
+    const compPaybackAddr = await getAddrFromRegistry('CompPayback');
+
+    let value = '0';
+    if (cTokenAddr.toLowerCase() === getAssetInfo("cETH").address.toLowerCase()) {
+        value = amount;
+    } else {
+        await approve(cTokenAddr, proxy.address);
+    }
+
+    const compPaybackAction = new dfs.actions.compound.CompoundPaybackAction(cTokenAddr, amount, from);
+    const functionData = compPaybackAction.encodeForDsProxyCall()[1];
+
+    await proxy['execute(address,bytes)'](compPaybackAddr, functionData, {value, gasLimit: 4000000});
+};
+
 const generateMcd = async (proxy, vaultId, amount, to) => {
     const mcdGenerateAddr = await getAddrFromRegistry('McdGenerate');
 
@@ -254,6 +322,11 @@ module.exports = {
     withdrawAave,
     borrowAave,
     paybackAave,
+
+    supplyComp,
+    withdrawComp,
+    borrowComp,
+    paybackComp,
 
     encodeFLAction,
     buyGasTokens,

@@ -9,11 +9,10 @@ import "../../interfaces/IWETH.sol";
 import "../../utils/GasBurner.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
+import "./helpers/CompHelper.sol";
 
 /// @title Payback a token a user borrowed from Compound
-contract CompPayback is ActionBase, TokenUtils, GasBurner {
-
-    address public constant COMPTROLLER_ADDR = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
+contract CompPayback is ActionBase, CompHelper, TokenUtils, GasBurner {
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -22,21 +21,21 @@ contract CompPayback is ActionBase, TokenUtils, GasBurner {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public virtual override payable returns (bytes32) {
-        (address tokenAddr, uint256 amount) = parseInputs(_callData);
+        (address cTokenAddr, uint256 amount, address from) = parseInputs(_callData);
 
-        tokenAddr = _parseParamAddr(tokenAddr, _paramMapping[0], _subData, _returnValues);
+        cTokenAddr = _parseParamAddr(cTokenAddr, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
 
-        uint256 withdrawAmount = _payback(tokenAddr, amount);
+        uint256 withdrawAmount = _payback(cTokenAddr, amount, from);
 
         return bytes32(withdrawAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
-        (address tokenAddr, uint256 amount) = parseInputs(_callData);
+        (address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
 
-        _payback(tokenAddr, amount);
+        _payback(tokenAddr, amount, from);
     }
 
     /// @inheritdoc ActionBase
@@ -47,46 +46,39 @@ contract CompPayback is ActionBase, TokenUtils, GasBurner {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _payback(address _tokenAddr, uint _amount) internal returns (uint) {
-        address cTokenAddr = ICToken(_tokenAddr).underlying();
+    function _payback(address _cTokenAddr, uint _amount, address _from) internal returns (uint) {
+        address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
-        approveToken(_tokenAddr, cTokenAddr, _amount);
+        approveToken(tokenAddr, _cTokenAddr, _amount);
 
         // if uint(-1) payback whole amount
         if (_amount == uint(-1)) {
-            _amount = ICToken(cTokenAddr).borrowBalanceCurrent(address(this));
+            _amount = ICToken(_cTokenAddr).borrowBalanceCurrent(address(this));
         }
 
-        if (_tokenAddr != ETH_ADDR) {
-            pullTokens(_tokenAddr, address(this), _amount);
+        if (tokenAddr != ETH_ADDR) {
+            pullTokens(tokenAddr, _from, _amount);
 
-            require(ICToken(cTokenAddr).repayBorrow(_amount) == 0);
+            require(ICToken(_cTokenAddr).repayBorrow(_amount) == 0, "Comp Repay fail");
         } else {
-            ICToken(cTokenAddr).repayBorrow{value: _amount}();
-            msg.sender.transfer(address(this).balance); // send back the extra eth
+            ICToken(_cTokenAddr).repayBorrow{value: _amount}();
         }
 
         return _amount;
-    }
-
-    /// @notice Enters the Compound market so it can be deposited/borrowed
-    /// @param _cTokenAddr CToken address of the token
-    function enterMarket(address _cTokenAddr) public {
-        address[] memory markets = new address[](1);
-        markets[0] = _cTokenAddr;
-
-        IComptroller(COMPTROLLER_ADDR).enterMarkets(markets);
     }
 
     function parseInputs(bytes[] memory _callData)
         internal
         pure
         returns (
-            address tokenAddr,
-            uint256 amount
+            address cTokenAddr,
+            uint256 amount,
+            address from
         )
     {
-        tokenAddr = abi.decode(_callData[0], (address));
+        cTokenAddr = abi.decode(_callData[0], (address));
         amount = abi.decode(_callData[1], (uint256));
+        from = abi.decode(_callData[2], (address));
+
     }
 }

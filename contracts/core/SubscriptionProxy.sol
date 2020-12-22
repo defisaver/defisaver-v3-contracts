@@ -12,7 +12,7 @@ import "./DFSRegistry.sol";
 /// @title Handles auth and calls subscription contract
 contract SubscriptionProxy is StrategyData, ProxyPermission {
 
-    address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
+    address public constant REGISTRY_ADDR = 0xB0e1682D17A96E8551191c089673346dF7e1D467;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes32 constant PROXY_AUTH_ID = keccak256("ProxyAuth");

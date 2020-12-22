@@ -2,7 +2,9 @@
 
 pragma solidity ^0.7.0;
 
-abstract contract ICToken {
+import "../IERC20.sol";
+
+abstract contract ICToken is IERC20 {
     function mint(uint256 mintAmount) external virtual returns (uint256);
     function mint() external virtual payable;
 

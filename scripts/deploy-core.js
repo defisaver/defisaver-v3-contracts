@@ -13,27 +13,12 @@ async function main() {
 
     await changeConstantInFiles(
         "./contracts",
-        ["StrategyExecutor", "TaskExecutor", "ActionBase", "ProxyAuth", "SubscriptionProxy"],
-        "REGISTRY_ADDR",
-         registry.address
-    );
-
-    await changeConstantInFiles(
-        "./test",
-        ["utils.js"],
-        "REGISTRY_ADDR",
-         registry.address
-    );
-
-    await changeConstantInFiles(
-        "./contracts",
         ["StrategyExecutor"],
         "PROXY_AUTH_ADDR",
         proxyAuth.address
     );
 
     await run("compile");
-
 
     await redeploy("StrategyExecutor", registry.address);
     await redeploy("SubscriptionProxy", registry.address);
