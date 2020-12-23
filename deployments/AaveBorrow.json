@@ -184,71 +184,6 @@
 			"type": "function"
 		},
 		{
-			"inputs": [
-				{
-					"internalType": "bytes32",
-					"name": "c__0x0e33f198",
-					"type": "bytes32"
-				}
-			],
-			"name": "c_0x0e33f198",
-			"outputs": [],
-			"stateMutability": "pure",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes32",
-					"name": "c__0x89414de4",
-					"type": "bytes32"
-				}
-			],
-			"name": "c_0x89414de4",
-			"outputs": [],
-			"stateMutability": "pure",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes32",
-					"name": "c__0xa065ac91",
-					"type": "bytes32"
-				}
-			],
-			"name": "c_0xa065ac91",
-			"outputs": [],
-			"stateMutability": "pure",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes32",
-					"name": "c__0xb9b62283",
-					"type": "bytes32"
-				}
-			],
-			"name": "c_0xb9b62283",
-			"outputs": [],
-			"stateMutability": "pure",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes32",
-					"name": "c__0xfa1c24cb",
-					"type": "bytes32"
-				}
-			],
-			"name": "c_0xfa1c24cb",
-			"outputs": [],
-			"stateMutability": "pure",
-			"type": "function"
-		},
-		{
 			"inputs": [],
 			"name": "chiToken",
 			"outputs": [
@@ -419,6 +354,6 @@
 		}
 	],
 	"networks": {
-		"hardhat": {}
+		"local": {}
 	}
 }

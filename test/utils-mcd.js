@@ -2,6 +2,8 @@ const axios = require('axios');
 
 const makerVersion = "1.1.3";
 
+const MCD_MANAGER_ADDR = '0x5ef30b9986345249bc32d8928B7ee64DE9435E39';
+
 const fetchMakerAddresses = async (version = makerVersion, params = {}) => {
     const url = `https://changelog.makerdao.com/releases/mainnet/${version}/contracts.json`;
 
@@ -47,5 +49,6 @@ module.exports = {
     getVaultsForUser,
     getRatio,
     getVaultInfoRaw,
-    getVaultInfo
+    getVaultInfo,
+    MCD_MANAGER_ADDR
 };

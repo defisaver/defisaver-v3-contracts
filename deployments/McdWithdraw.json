@@ -3,7 +3,33 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ETH_ADDRESS",
+			"name": "ERR_RETURN_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_SUB_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ETH_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -16,12 +42,12 @@
 		},
 		{
 			"inputs": [],
-			"name": "MANAGER_ADDRESS",
+			"name": "NO_PARAM_MAPPING",
 			"outputs": [
 				{
-					"internalType": "address",
+					"internalType": "uint8",
 					"name": "",
-					"type": "address"
+					"type": "uint8"
 				}
 			],
 			"stateMutability": "view",
@@ -42,7 +68,72 @@
 		},
 		{
 			"inputs": [],
+			"name": "RETURN_MAX_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "RETURN_MIN_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "SUB_MAX_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "SUB_MIN_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "VAT_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "WETH_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -212,19 +303,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "manager",
-			"outputs": [
-				{
-					"internalType": "contract IManager",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "registry",
 			"outputs": [
 				{
@@ -251,9 +329,6 @@
 		}
 	],
 	"networks": {
-		"local": {
-			"address": "0xa571c8B59D51f87d76E55f496A71A27B950d29c8",
-			"args": []
-		}
+		"local": {}
 	}
 }

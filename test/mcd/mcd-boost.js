@@ -22,6 +22,7 @@ const {
     getVaultsForUser,
     getRatio,
     getVaultInfo,
+    MCD_MANAGER_ADDR
 } = require('../utils-mcd');
 
 const {
@@ -94,7 +95,7 @@ describe("Mcd-Boost", function() {
             const fromToken = makerAddresses["MCD_DAI"];
 
             const mcdGenerateAction = 
-                new dfs.actions.maker.MakerGenerateAction(vaultId, boostAmount.toString(), to);
+                new dfs.actions.maker.MakerGenerateAction(vaultId, boostAmount.toString(), to, MCD_MANAGER_ADDR);
 
             const sellAction = new dfs.actions.basic.SellAction(
                 formatExchangeObj(
@@ -108,7 +109,7 @@ describe("Mcd-Boost", function() {
             );
 
             const mcdSupplyAction = 
-                new dfs.actions.maker.MakerSupplyAction(vaultId, '$2', joinAddr, from);
+                new dfs.actions.maker.MakerSupplyAction(vaultId, '$2', joinAddr, from, MCD_MANAGER_ADDR);
 
             const boostRecipe = new dfs.ActionSet("BoostRecipe", [
                 mcdGenerateAction,
@@ -170,10 +171,10 @@ describe("Mcd-Boost", function() {
             );
 
             const mcdSupplyAction = 
-                new dfs.actions.maker.MakerSupplyAction(vaultId, '$2', joinAddr, from);
+                new dfs.actions.maker.MakerSupplyAction(vaultId, '$2', joinAddr, from, MCD_MANAGER_ADDR);
 
             const mcdGenerateAction = 
-                new dfs.actions.maker.MakerGenerateAction(vaultId, '$1', aaveV2FlAddr);
+                new dfs.actions.maker.MakerGenerateAction(vaultId, '$1', aaveV2FlAddr, MCD_MANAGER_ADDR);
 
             const boostRecipe = new dfs.ActionSet("FLBoostRecipe", [
                 flAaveV2Action,

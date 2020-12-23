@@ -39,7 +39,7 @@ describe("Mcd-Generate", function() {
         this.timeout(40000);
     });
 
-    for (let i = 0; i < 1; ++i) {
+    for (let i = 0; i < ilks.length; ++i) {
         const ilkData = ilks[i];
         const joinAddr = ilkData.join;
         const tokenData = getAssetInfo(ilkData.asset);
@@ -57,7 +57,7 @@ describe("Mcd-Generate", function() {
 
             const daiBalanceBefore = await balanceOf(makerAddresses["MCD_DAI"], from);
 
-            await supplyMcd(proxy, tokenData.symbol, tokenData.address, vaultId, collAmount, joinAddr, from);
+            await supplyMcd(proxy, vaultId, collAmount, tokenData.address, joinAddr, from);
             await generateMcd(proxy, vaultId, amountDai, to);
 
             const daiBalanceAfter = await balanceOf(makerAddresses["MCD_DAI"], from);

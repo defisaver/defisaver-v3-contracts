@@ -102,9 +102,9 @@ describe("Mcd-Create", function() {
             console.log(value);
 
             const createVaultRecipe = new dfs.ActionSet("CreateVaultRecipe", [
-                new dfs.actions.maker.MakerOpenVaultAction(joinAddr),
-                new dfs.actions.maker.MakerSupplyAction('$1', collAmount, joinAddr, proxy.address),
-                new dfs.actions.maker.MakerGenerateAction('$1', daiAmount, senderAcc.address)
+                new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR),
+                new dfs.actions.maker.MakerSupplyAction('$1', collAmount, joinAddr, proxy.address, MCD_MANAGER_ADDR),
+                new dfs.actions.maker.MakerGenerateAction('$1', daiAmount, senderAcc.address, MCD_MANAGER_ADDR)
             ]);
 
             const functionData = createVaultRecipe.encodeForDsProxyCall();
@@ -153,9 +153,9 @@ describe("Mcd-Create", function() {
             const createVaultRecipe = new dfs.ActionSet("CreateVaultRecipe", [
                 new dfs.actions.flashloan.DyDxFlashLoanAction(daiAmount, daiAddr),
                 new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
-                new dfs.actions.maker.MakerOpenVaultAction(joinAddr),
-                new dfs.actions.maker.MakerSupplyAction('$3', MAX_UINT, joinAddr, proxy.address),
-                new dfs.actions.maker.MakerGenerateAction('$3', daiAmount, dydxFlAddr)
+                new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR),
+                new dfs.actions.maker.MakerSupplyAction('$3', MAX_UINT, joinAddr, proxy.address, MCD_MANAGER_ADDR),
+                new dfs.actions.maker.MakerGenerateAction('$3', daiAmount, dydxFlAddr, MCD_MANAGER_ADDR)
             ]);
 
             const functionData = createVaultRecipe.encodeForDsProxyCall();

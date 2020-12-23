@@ -19,7 +19,7 @@ contract TokenUtils {
         }
     }
 
-       function pullTokens(address _token, address _from, uint256 _amount) internal {
+    function pullTokens(address _token, address _from, uint256 _amount) internal {
 
         // handle max uint amount
         if (_amount == uint(-1)) {

@@ -1,19 +1,6 @@
 {
-	"contractName": "FLDyDx",
+	"contractName": "PullToken",
 	"abi": [
-		{
-			"inputs": [],
-			"name": "CALLBACK_SELECTOR",
-			"outputs": [
-				{
-					"internalType": "bytes4",
-					"name": "",
-					"type": "bytes4"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
 		{
 			"inputs": [],
 			"name": "ERR_RETURN_INDEX_VALUE",
@@ -43,19 +30,6 @@
 		{
 			"inputs": [],
 			"name": "ETH_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ETH_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -120,19 +94,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "SOLO_MARGIN_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "SUB_MAX_INDEX_VALUE",
 			"outputs": [
 				{
@@ -172,19 +133,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "WETH_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "actionType",
 			"outputs": [
 				{
@@ -194,41 +142,6 @@
 				}
 			],
 			"stateMutability": "pure",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				},
-				{
-					"components": [
-						{
-							"internalType": "address",
-							"name": "owner",
-							"type": "address"
-						},
-						{
-							"internalType": "uint256",
-							"name": "number",
-							"type": "uint256"
-						}
-					],
-					"internalType": "struct Account.Info",
-					"name": "",
-					"type": "tuple"
-				},
-				{
-					"internalType": "bytes",
-					"name": "_data",
-					"type": "bytes"
-				}
-			],
-			"name": "callFunction",
-			"outputs": [],
-			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
@@ -303,10 +216,6 @@
 			],
 			"stateMutability": "view",
 			"type": "function"
-		},
-		{
-			"stateMutability": "payable",
-			"type": "receive"
 		}
 	],
 	"networks": {

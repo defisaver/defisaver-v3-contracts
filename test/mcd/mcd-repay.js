@@ -91,7 +91,7 @@ describe("Mcd-Repay", function() {
             const fromToken = makerAddresses["MCD_DAI"];
            
             const mcdWithdrawAction = 
-                new dfs.actions.maker.MakerWithdrawAction(vaultId, repayAmount, joinAddr, to);
+                new dfs.actions.maker.MakerWithdrawAction(vaultId, repayAmount, joinAddr, to, MCD_MANAGER_ADDR);
             
             const sellAction = new dfs.actions.basic.SellAction(
                 formatExchangeObj(
@@ -105,7 +105,7 @@ describe("Mcd-Repay", function() {
             );
 
             const mcdPaybackAction = 
-                new dfs.actions.maker.MakerPaybackAction(vaultId, '$2', from);
+                new dfs.actions.maker.MakerPaybackAction(vaultId, '$2', from, MCD_MANAGER_ADDR);
 
             const repayRecipe = new dfs.ActionSet("RepayRecipe", [
                 mcdWithdrawAction,

@@ -75,6 +75,8 @@ contract McdHelper is DSMath {
     /// @notice Gets the token address from the Join contract
     /// @param _joinAddr Address of the Join contract
     function getCollateralAddr(address _joinAddr) internal view returns (address) {
+        if (isEthJoinAddr(_joinAddr)) return 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
         return address(IJoin(_joinAddr).gem());
     }
 

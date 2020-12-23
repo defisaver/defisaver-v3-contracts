@@ -60,19 +60,19 @@ contract McdSupply is ActionBase, McdHelper, TokenUtils, GasBurner {
         address _from,
         address _mcdManager
     ) internal returns (uint256) {
-        address tokenAddr = address(IJoin(_joinAddr).gem());
-
-        pullTokens(tokenAddr, _from, _amount);
+        address tokenAddr = getTokenFromJoin(_joinAddr);
 
         // if amount -1, pull current proxy balance
         if (_amount == uint(-1)) {
             _amount = getBalance(tokenAddr, address(this));
         }
 
+        pullTokens(tokenAddr, _from, _amount);
+
         int256 convertAmount = 0;
 
         if (isEthJoinAddr(_joinAddr)) {
-            convertAndDepositToWeth(ETH_ADDR, _amount);
+            tokenAddr = convertAndDepositToWeth(ETH_ADDR, _amount);
             convertAmount = toPositiveInt(_amount);
         } else {
             convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));

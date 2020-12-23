@@ -3,7 +3,7 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "AAVE_LENDING_POOL_ADDRESSES",
+			"name": "AAVE_LENDING_POOL",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -42,6 +42,45 @@
 		},
 		{
 			"inputs": [],
+			"name": "ERR_RETURN_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_SUB_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ETH_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "ETH_ADDRESS",
 			"outputs": [
 				{
@@ -55,7 +94,85 @@
 		},
 		{
 			"inputs": [],
+			"name": "NO_PARAM_MAPPING",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "REGISTRY_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "RETURN_MAX_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "RETURN_MIN_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "SUB_MAX_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "SUB_MIN_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "WETH_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -199,7 +316,7 @@
 					"type": "bytes[]"
 				}
 			],
-			"name": "parseParamData",
+			"name": "parseInputs",
 			"outputs": [
 				{
 					"components": [
@@ -266,9 +383,6 @@
 		}
 	],
 	"networks": {
-		"local": {
-			"address": "0x139e1D41943ee15dDe4DF876f9d0E7F85e26660A",
-			"args": []
-		}
+		"local": {}
 	}
 }
