@@ -21,13 +21,8 @@ contract DFSExchangeHelper is TokenUtils {
         uint srcBalance = getBalance(_srcAddr, address(this));
         uint destBalance = getBalance(_destAddr, address(this));
 
-        if (srcBalance > 0) {
-            IERC20(_srcAddr).safeTransfer(_to, srcBalance);
-        }
-
-        if (destBalance > 0) {
-            IERC20(_destAddr).safeTransfer(_to, destBalance);
-        }
+        withdrawTokens(_srcAddr, _to, srcBalance);
+        withdrawTokens(_destAddr, _to, destBalance);
     }
 
     function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {

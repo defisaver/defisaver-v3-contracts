@@ -26,17 +26,20 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
     address public constant SAVER_EXCHANGE_REGISTRY = 0x25dd3F51e0C3c3Ff164DDC02A8E4D65Bb9cBB12D;
     address public constant ZRX_ALLOWLIST_ADDR = 0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F;
 
-    FeeRecipient public constant feeRecipient = FeeRecipient(0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A);
+    FeeRecipient public constant feeRecipient =
+        FeeRecipient(0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A);
 
     /// @notice Internal method that preforms a sell on 0x/on-chain
     /// @dev Usefull for other DFS contract to integrate for exchanging
     /// @param exData Exchange data struct
     /// @return (address, uint) Address of the wrapper used and destAmount
-    function _sell(ExchangeData memory exData) internal returns (address,uint256) {
+    function _sell(ExchangeData memory exData) internal returns (address, uint256) {
         uint256 amountWithoutFee = exData.srcAmount;
         address wrapper = exData.offchainData.wrapper;
-        uint256 amountBought;
+        address originalSrcAddr = exData.srcAddr;
         bool offChainSwapSuccess;
+
+        uint256 destBalanceBefore = getBalance(convertToEth(exData.destAddr), address(this));
 
         // Takes DFS exchange fee
         exData.srcAmount -= getFee(
@@ -51,28 +54,26 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
 
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
-            (offChainSwapSuccess, amountBought) = offChainSwap(exData, ExchangeActionType.SELL);
+            (offChainSwapSuccess, ) = offChainSwap(exData, ExchangeActionType.SELL);
         }
 
         // fallback to desired wrapper if 0x failed
         if (!offChainSwapSuccess) {
-            amountBought = onChainSwap(exData, ExchangeActionType.SELL);
+            onChainSwap(exData, ExchangeActionType.SELL);
             wrapper = exData.wrapper;
         }
 
         // if anything is left in weth, pull it to user as eth
         withdrawAllWeth();
 
-        address convertedDestAddr = convertToEth(exData.destAddr);
+        uint256 destBalanceAfter = getBalance(convertToEth(exData.destAddr), address(this));
+        uint256 amountBought = sub(destBalanceAfter, destBalanceBefore);
 
         // check slippage
-        require(
-            getBalance(convertedDestAddr, address(this)) >= wmul(exData.minPrice, exData.srcAmount),
-            ERR_SLIPPAGE_HIT
-        );
+        require(amountBought >= wmul(exData.minPrice, exData.srcAmount), ERR_SLIPPAGE_HIT);
 
         // revert back exData changes to keep it consistent
-        exData.srcAddr = convertToEth(exData.srcAddr);
+        exData.srcAddr = originalSrcAddr;
         exData.srcAmount = amountWithoutFee;
 
         return (wrapper, amountBought);
@@ -82,15 +83,16 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
     /// @dev Usefull for other DFS contract to integrate for exchanging
     /// @param exData Exchange data struct
     /// @return (address, uint) Address of the wrapper used and srcAmount
-    function _buy(ExchangeData memory exData) internal returns (address,uint256) {
+    function _buy(ExchangeData memory exData) internal returns (address, uint256) {
         require(exData.destAmount != 0, ERR_DEST_AMOUNT_MISSING);
 
         uint256 amountWithoutFee = exData.srcAmount;
         address wrapper = exData.offchainData.wrapper;
+        address originalSrcAddr = exData.srcAddr;
         uint256 amountSold;
         bool offChainSwapSuccess;
 
-        uint256 destBalanceBefore = getBalance(exData.destAddr, address(this));
+        uint256 destBalanceBefore = getBalance(convertToEth(exData.destAddr), address(this));
 
         // Takes DFS exchange fee
         exData.srcAmount -= getFee(
@@ -117,14 +119,14 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         // if anything is left in weth, pull it to user as eth
         withdrawAllWeth();
 
-        uint destBalanceAfter = getBalance(convertToEth(exData.destAddr), address(this));
-        uint amountBought = sub(destBalanceAfter, destBalanceBefore);
+        uint256 destBalanceAfter = getBalance(convertToEth(exData.destAddr), address(this));
+        uint256 amountBought = sub(destBalanceAfter, destBalanceBefore);
 
         // check slippage
         require(amountBought >= exData.destAmount, ERR_SLIPPAGE_HIT);
 
         // revert back exData changes to keep it consistent
-        exData.srcAddr = convertToEth(exData.srcAddr);
+        exData.srcAddr = originalSrcAddr;
         exData.srcAmount = amountWithoutFee;
 
         return (wrapper, amountSold);
@@ -223,11 +225,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
 
             address walletAddr = feeRecipient.getFeeAddr();
 
-            if (_token == ETH_ADDR) {
-                payable(walletAddr).transfer(feeAmount);
-            } else {
-                IERC20(_token).safeTransfer(walletAddr, feeAmount);
-            }
+            withdrawTokens(_token, walletAddr, feeAmount);
         }
     }
 
