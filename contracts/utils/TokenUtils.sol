@@ -23,7 +23,12 @@ contract TokenUtils {
 
         // handle max uint amount
         if (_amount == uint(-1)) {
-            uint allowance = IERC20(_token).allowance(address(this), _from);
+            uint allowance = uint (-1);
+
+            if (_token == ETH_ADDR) {
+                allowance = IERC20(_token).allowance(address(this), _from);
+            }
+
             uint balance = getBalance(_token, _from);
 
             _amount = (balance > allowance) ? allowance : balance;
