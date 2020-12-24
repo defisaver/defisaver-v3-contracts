@@ -87,7 +87,7 @@ describe("AaveMigration", function() {
         const supplyEth = new dfs.actions.aave.AaveSupplyAction(lendingPoolAddrProvider, getAssetInfo('ETH').address, MAX_UINT, proxy.address);
         const supplyDai = new dfs.actions.aave.AaveSupplyAction(lendingPoolAddrProvider, getAssetInfo('DAI').address, MAX_UINT, proxy.address);
 
-        const migrationRecipe = new dfs.ActionSet("MigrationRecipe", [
+        const migrationRecipe = new dfs.Recipe("MigrationRecipe", [
             flashloan,
             paybackDai,
             paybackMana,

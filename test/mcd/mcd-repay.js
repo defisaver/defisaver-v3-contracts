@@ -107,7 +107,7 @@ describe("Mcd-Repay", function() {
             const mcdPaybackAction = 
                 new dfs.actions.maker.MakerPaybackAction(vaultId, '$2', from, MCD_MANAGER_ADDR);
 
-            const repayRecipe = new dfs.ActionSet("RepayRecipe", [
+            const repayRecipe = new dfs.Recipe("RepayRecipe", [
                 mcdWithdrawAction,
                 sellAction,
                 mcdPaybackAction
@@ -158,7 +158,7 @@ describe("Mcd-Repay", function() {
         //         UNISWAP_WRAPPER
         //     );
 
-        //     const repayRecipe = new dfs.ActionSet("FLRepayRecipe", [
+        //     const repayRecipe = new dfs.Recipe("FLRepayRecipe", [
         //         new dydxFLAction(flAmount, daiToken),
         //         new mcdPaybackAction(vaultId, '$1', proxy.address),
         //         new mcdWithdrawAction(vaultId, repayAmount, joinAddr, proxy.address),

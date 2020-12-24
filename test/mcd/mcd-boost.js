@@ -111,7 +111,7 @@ describe("Mcd-Boost", function() {
             const mcdSupplyAction = 
                 new dfs.actions.maker.MakerSupplyAction(vaultId, '$2', joinAddr, from, MCD_MANAGER_ADDR);
 
-            const boostRecipe = new dfs.ActionSet("BoostRecipe", [
+            const boostRecipe = new dfs.Recipe("BoostRecipe", [
                 mcdGenerateAction,
                 sellAction,
                 mcdSupplyAction
@@ -176,7 +176,7 @@ describe("Mcd-Boost", function() {
             const mcdGenerateAction = 
                 new dfs.actions.maker.MakerGenerateAction(vaultId, '$1', aaveV2FlAddr, MCD_MANAGER_ADDR);
 
-            const boostRecipe = new dfs.ActionSet("FLBoostRecipe", [
+            const boostRecipe = new dfs.Recipe("FLBoostRecipe", [
                 flAaveV2Action,
                 sellAction,
                 mcdSupplyAction,

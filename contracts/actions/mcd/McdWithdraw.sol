@@ -11,8 +11,6 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
 
-import "hardhat/console.sol";
-
 /// @title Withdraws collateral from a Maker vault
 contract McdWithdraw is ActionBase, McdHelper, TokenUtils, GasBurner {
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
@@ -61,7 +59,6 @@ contract McdWithdraw is ActionBase, McdHelper, TokenUtils, GasBurner {
         address _to,
         address _mcdManager
     ) internal returns (uint256) {
-        console.log("MCDWITHDRAW");
 
         // if amount uint(-1) _amount is whole collateral amount
         if (_amount == uint(-1)) {
