@@ -84,8 +84,8 @@ describe("AaveMigration", function() {
         const paybackRen = new dfs.actions.aaveV1.AavePaybackActionV1(getAssetInfo('REN').address, MAX_UINT, proxy.address, proxy.address);
         const withdrawEth = new dfs.actions.aaveV1.AaveWithdrawActionV1(getAssetInfo('ETH').address, MAX_UINT, proxy.address);
         const withdrawDai = new dfs.actions.aaveV1.AaveWithdrawActionV1(getAssetInfo('DAI').address, MAX_UINT, proxy.address);
-        const supplyEth = new dfs.actions.aave.AaveSupplyAction(lendingPoolAddrProvider, getAssetInfo('ETH').address, MAX_UINT, proxy.address);
-        const supplyDai = new dfs.actions.aave.AaveSupplyAction(lendingPoolAddrProvider, getAssetInfo('DAI').address, MAX_UINT, proxy.address);
+        const supplyEth = new dfs.actions.aave.AaveSupplyAction(lendingPoolAddrProvider, getAssetInfo('ETH').address, MAX_UINT, proxy.address, proxy.address);
+        const supplyDai = new dfs.actions.aave.AaveSupplyAction(lendingPoolAddrProvider, getAssetInfo('DAI').address, MAX_UINT, proxy.address, proxy.address);
 
         const migrationRecipe = new dfs.Recipe("MigrationRecipe", [
             flashloan,
