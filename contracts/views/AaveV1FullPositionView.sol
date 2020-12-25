@@ -33,12 +33,12 @@ contract AaveV1FullPositionView is DSMath, IFlashLoanParamsGetter {
         for (uint64 i = 0; i < _borrTokens.length; i++) {
             address reserve = _borrTokens[i];
 
-            (,uint256 borrowBalance,,uint256 borrowRateMode,,,,,,) = ILendingPool(lendingPoolAddress).getUserReserveData(reserve, _user);
+            (,uint256 borrowBalance,,uint256 borrowRateMode,,,uint256 originationFee,,,) = ILendingPool(lendingPoolAddress).getUserReserveData(reserve, _user);
 
             // Sum up debt in Eth
             if (borrowBalance > 0) {
                 borrowsData.borrowAddr[borrowPos] = reserve;
-                borrowsData.borrowAmounts[borrowPos] = borrowBalance;
+                borrowsData.borrowAmounts[borrowPos] = borrowBalance + originationFee;
                 borrowsData.borrowRateModes[borrowPos] = borrowRateMode;
                 borrowPos++;
             }
