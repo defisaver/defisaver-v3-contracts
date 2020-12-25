@@ -15,7 +15,7 @@ import "./ProxyAuth.sol";
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutor is StrategyData, GasBurner {
 
-    address public constant PROXY_AUTH_ADDR = 0xf5059a5D33d5853360D16C683c16e67980206f36;
+    address public constant PROXY_AUTH_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
 
     address public constant REGISTRY_ADDR = 0xB0e1682D17A96E8551191c089673346dF7e1D467;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
