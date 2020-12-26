@@ -20,13 +20,14 @@ const {
     getVaultsForUser,
     getRatio,
     getVaultInfo,
+    MCD_MANAGER_ADDR,
 } = require('../utils-mcd');
 
 const {
     openVault,
 } = require('../actions.js');
 
-const VAULT_DAI_AMOUNT = '570';
+const VAULT_DAI_AMOUNT = '970';
 
 const dydxFLAction = dfs.actions.flashloan.DyDxFlashLoanAction;
 const mcdPaybackAction = dfs.actions.maker.MakerPaybackAction;
@@ -139,7 +140,7 @@ describe("Mcd-Repay", function() {
             );
 
             repayAmount = ethers.utils.parseUnits(repayAmount, tokenData.decimals);
-            const flAmount = ethers.utils.parseUnits('30', 18);
+            const flAmount = ethers.utils.parseUnits('0.1', 18);
 
             const ratioBefore = await getRatio(mcdView, vaultId);
             const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
@@ -148,21 +149,20 @@ describe("Mcd-Repay", function() {
             const from = proxy.address;
             const to = proxy.address;
             const collToken = tokenData.address;
-            const fromToken = makerAddresses["MCD_DAI"];
             const daiToken = makerAddresses["MCD_DAI"];
       
             const exchangeOrder = formatExchangeObj(
                 collToken,
-                fromToken,
-                '$1',
+                daiToken,
+                flAmount,
                 UNISWAP_WRAPPER
             );
 
             const repayRecipe = new dfs.Recipe("FLRepayRecipe", [
-                new dydxFLAction(flAmount, daiToken),
-                new mcdPaybackAction(vaultId, '$1', proxy.address),
-                new mcdWithdrawAction(vaultId, repayAmount, joinAddr, proxy.address),
+                new dydxFLAction(flAmount, collToken),
                 new sellAction(exchangeOrder, proxy.address, dydxFlAddr),
+                new mcdPaybackAction(vaultId, '$2', proxy.address, MCD_MANAGER_ADDR),
+                new mcdWithdrawAction(vaultId, '$1', joinAddr, proxy.address, MCD_MANAGER_ADDR),
             ]);
 
             const functionData = repayRecipe.encodeForDsProxyCall();
