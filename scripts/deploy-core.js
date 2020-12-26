@@ -8,7 +8,6 @@ const { redeploy } = require('../test/utils');
 
 async function main() {
 
-    const registry = await deployContract("DFSRegistry");
     const proxyAuth = await deployContract("ProxyAuth");
 
     await changeConstantInFiles(
@@ -20,10 +19,46 @@ async function main() {
 
     await run("compile");
 
-    await redeploy("StrategyExecutor", registry.address);
-    await redeploy("SubscriptionProxy", registry.address);
-    await redeploy("Subscriptions", registry.address);
-    await redeploy("TaskExecutor", registry.address);
+    await redeploy("StrategyExecutor");
+    await redeploy("SubscriptionProxy");
+    await redeploy("Subscriptions");
+    await redeploy("TaskExecutor");
+
+    // mcd actions
+    await redeploy("McdSupply");
+    await redeploy("McdWithdraw");
+    await redeploy("McdGenerate");
+    await redeploy("McdPayback");
+    await redeploy("McdOpen");
+
+    // aave actions
+    await redeploy("AaveSupply");
+    await redeploy("AaveWithdraw");
+    await redeploy("AaveBorrow");
+    await redeploy("AavePayback");
+    await redeploy("AavePaybackV1");
+    await redeploy("AaveWithdrawV1");
+
+    // comp actions
+    await redeploy("CompSupply");
+    await redeploy("CompWithdraw");
+    await redeploy("CompBorrow");
+    await redeploy("CompPayback");
+
+    // util actions
+    await redeploy("PullToken");
+    await redeploy("SendToken");
+    await redeploy("SumInputs");
+
+    // exchange actions
+    await redeploy("DFSSell");
+    await redeploy("DFSBuy");
+
+    // flashloan actions
+    await redeploy("FLAave");
+    await redeploy("FLDyDx");
+    await redeploy("FLAaveV2");
+    await redeploy("FLCustomAaveV2");
 
 }
 

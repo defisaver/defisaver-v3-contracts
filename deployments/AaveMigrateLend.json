@@ -1,14 +1,27 @@
 {
-	"contractName": "FLDyDx",
+	"contractName": "AaveMigrateLend",
 	"abi": [
 		{
 			"inputs": [],
-			"name": "CALLBACK_SELECTOR",
+			"name": "AAVE_ADDR",
 			"outputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "address",
 					"name": "",
-					"type": "bytes4"
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "AAVE_REFERRAL_CODE",
+			"outputs": [
+				{
+					"internalType": "uint16",
+					"name": "",
+					"type": "uint16"
 				}
 			],
 			"stateMutability": "view",
@@ -55,7 +68,20 @@
 		},
 		{
 			"inputs": [],
-			"name": "ETH_ADDRESS",
+			"name": "LEND_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "LEND_MIGRATOR_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -120,12 +146,12 @@
 		},
 		{
 			"inputs": [],
-			"name": "SOLO_MARGIN_ADDRESS",
+			"name": "STABLE_ID",
 			"outputs": [
 				{
-					"internalType": "address",
+					"internalType": "uint256",
 					"name": "",
-					"type": "address"
+					"type": "uint256"
 				}
 			],
 			"stateMutability": "view",
@@ -159,12 +185,12 @@
 		},
 		{
 			"inputs": [],
-			"name": "WETH_ADDR",
+			"name": "VARIABLE_ID",
 			"outputs": [
 				{
-					"internalType": "address",
+					"internalType": "uint256",
 					"name": "",
-					"type": "address"
+					"type": "uint256"
 				}
 			],
 			"stateMutability": "view",
@@ -172,7 +198,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "WETH_ADDRESS",
+			"name": "WETH_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -197,38 +223,16 @@
 			"type": "function"
 		},
 		{
-			"inputs": [
+			"inputs": [],
+			"name": "chiToken",
+			"outputs": [
 				{
-					"internalType": "address",
+					"internalType": "contract IGasToken",
 					"name": "",
 					"type": "address"
-				},
-				{
-					"components": [
-						{
-							"internalType": "address",
-							"name": "owner",
-							"type": "address"
-						},
-						{
-							"internalType": "uint256",
-							"name": "number",
-							"type": "uint256"
-						}
-					],
-					"internalType": "struct Account.Info",
-					"name": "",
-					"type": "tuple"
-				},
-				{
-					"internalType": "bytes",
-					"name": "_data",
-					"type": "bytes"
 				}
 			],
-			"name": "callFunction",
-			"outputs": [],
-			"stateMutability": "nonpayable",
+			"stateMutability": "view",
 			"type": "function"
 		},
 		{
@@ -280,6 +284,43 @@
 		},
 		{
 			"inputs": [],
+			"name": "gasToken",
+			"outputs": [
+				{
+					"internalType": "contract IGasToken",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_market",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_tokenAddr",
+					"type": "address"
+				}
+			],
+			"name": "isTokenUsedAsColl",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "collateralEnabled",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "logger",
 			"outputs": [
 				{
@@ -305,8 +346,50 @@
 			"type": "function"
 		},
 		{
-			"stateMutability": "payable",
-			"type": "receive"
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_market",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_tokenAddr",
+					"type": "address"
+				},
+				{
+					"internalType": "bool",
+					"name": "_state",
+					"type": "bool"
+				}
+			],
+			"name": "setCollStateForToken",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_market",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_tokenAddr",
+					"type": "address"
+				},
+				{
+					"internalType": "bool",
+					"name": "_true",
+					"type": "bool"
+				}
+			],
+			"name": "setUserUseReserveAsCollateral",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
 		}
 	],
 	"networks": {

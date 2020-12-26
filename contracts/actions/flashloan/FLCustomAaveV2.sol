@@ -8,11 +8,12 @@ import "../../core/Subscriptions.sol";
 import "../../interfaces/ILendingPool.sol";
 import "../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../../interfaces/aaveV2/ILendingPoolV2.sol";
+import "../../interfaces/aaveV2/IFlashLoanParamsGetter.sol";
 import "../../core/StrategyData.sol";
 import "../../utils/TokenUtils.sol";
 
 /// @title Action that gets and receives a FL from Aave V2
-contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
+contract FLCustomAaveV2 is ActionBase, StrategyData, TokenUtils {
     using SafeERC20 for IERC20;
 
     address
@@ -28,7 +29,7 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
 
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
 
-    bytes32 constant FL_AAVE_ID = keccak256("FLAaveV2");
+    bytes32 constant FL_AAVE_ID = keccak256("FLCustomAaveV2");
     bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
 
     struct FLAaveV2Data {
@@ -37,8 +38,6 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
         uint256[] amounts;
         uint256[] modes;
         address onBehalfOf;
-        bytes params;
-        uint16 refferalCode;
     }
 
     /// @inheritdoc ActionBase
@@ -48,9 +47,19 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
         uint8[] memory,
         bytes32[] memory
     ) public override payable returns (bytes32) {
-        FLAaveV2Data memory flData = parseInputs(_callData);
+        (address viewerAddress, address onBehalfOf, address receiver, bytes memory flashLoanGetterData) = parseInputs(_callData);
+        
+        (address[] memory tokens, uint256[] memory amounts, uint256[] memory modes) = IFlashLoanParamsGetter(viewerAddress).getFlashLoanParams(flashLoanGetterData);
+        
+        FLAaveV2Data memory flData = FLAaveV2Data({
+            receiver: receiver,
+            tokens: tokens, 
+            amounts: amounts,
+            modes: modes,
+            onBehalfOf: onBehalfOf
+        });
 
-        uint flAmount = _flAaveV2(flData, _callData[4]);
+        uint flAmount = _flAaveV2(flData, _callData[3]);
 
         return bytes32(flAmount);
     }
@@ -95,7 +104,6 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
         bytes memory _params
     ) public returns (bool) {
         (Task memory currTask, address proxy) = abi.decode(_params, (Task, address));
-
         for (uint256 i = 0; i < _assets.length; ++i) {
             withdrawTokens(_assets[i], proxy, _amounts[i]);
         }
@@ -119,13 +127,12 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
     function parseInputs(bytes[] memory _callData)
         public
         view
-        returns (FLAaveV2Data memory flData)
+        returns (address viewer, address onBehalfOf, address receiver, bytes memory flashLoanGetterData)
     {
-        flData.amounts = abi.decode(_callData[0], (uint256[]));
-        flData.tokens = abi.decode(_callData[1], (address[]));
-        flData.modes = abi.decode(_callData[2], (uint256[]));
-        flData.onBehalfOf = abi.decode(_callData[3], (address));
-        flData.receiver = payable(registry.getAddr(FL_AAVE_ID));
+        viewer = abi.decode(_callData[0], (address));
+        onBehalfOf = abi.decode(_callData[1], (address));
+        flashLoanGetterData = abi.decode(_callData[2], (bytes));
+        receiver = payable(registry.getAddr(FL_AAVE_ID));
     }
 
     // solhint-disable-next-line no-empty-blocks

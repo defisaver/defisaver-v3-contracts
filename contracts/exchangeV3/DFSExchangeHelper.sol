@@ -7,27 +7,20 @@ import "../utils/SafeERC20.sol";
 import "../utils/Discount.sol";
 
 contract DFSExchangeHelper is TokenUtils {
-
     string public constant ERR_OFFCHAIN_DATA_INVALID = "Offchain data invalid";
 
     using SafeERC20 for IERC20;
 
-    function sendLeftover(address _srcAddr, address _destAddr, address payable _to) internal {
-        // send back any leftover ether or tokens
-        if (address(this).balance > 0) {
-            _to.transfer(address(this).balance);
-        }
+    function sendLeftover(
+        address _srcAddr,
+        address _destAddr,
+        address payable _to
+    ) internal {
+        // clean out any eth leftover
+        withdrawTokens(ETH_ADDR, _to, uint256(-1));
 
-        uint srcBalance = getBalance(_srcAddr, address(this));
-        uint destBalance = getBalance(_destAddr, address(this));
-
-        if (srcBalance > 0) {
-            IERC20(_srcAddr).safeTransfer(_to, srcBalance);
-        }
-
-        if (destBalance > 0) {
-            IERC20(_destAddr).safeTransfer(_to, destBalance);
-        }
+        withdrawTokens(_srcAddr, _to, uint256(-1));
+        withdrawTokens(_destAddr, _to, uint256(-1));
     }
 
     function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {
@@ -41,7 +34,11 @@ contract DFSExchangeHelper is TokenUtils {
         return x;
     }
 
-        function writeUint256(bytes memory _b, uint256 _index, uint _input) internal pure {
+    function writeUint256(
+        bytes memory _b,
+        uint256 _index,
+        uint256 _input
+    ) internal pure {
         if (_b.length < _index + 32) {
             revert(ERR_OFFCHAIN_DATA_INVALID);
         }

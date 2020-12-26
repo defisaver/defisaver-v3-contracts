@@ -1,6 +1,32 @@
 {
-	"contractName": "FLDyDx",
+	"contractName": "FLCustomAaveV2",
 	"abi": [
+		{
+			"inputs": [],
+			"name": "AAVE_LENDING_POOL",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "AAVE_REFERRAL_CODE",
+			"outputs": [
+				{
+					"internalType": "uint16",
+					"name": "",
+					"type": "uint16"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
 		{
 			"inputs": [],
 			"name": "CALLBACK_SELECTOR",
@@ -120,19 +146,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "SOLO_MARGIN_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "SUB_MAX_INDEX_VALUE",
 			"outputs": [
 				{
@@ -172,19 +185,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "WETH_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "actionType",
 			"outputs": [
 				{
@@ -197,38 +197,16 @@
 			"type": "function"
 		},
 		{
-			"inputs": [
+			"inputs": [],
+			"name": "addressesProvider",
+			"outputs": [
 				{
-					"internalType": "address",
+					"internalType": "contract ILendingPoolAddressesProviderV2",
 					"name": "",
 					"type": "address"
-				},
-				{
-					"components": [
-						{
-							"internalType": "address",
-							"name": "owner",
-							"type": "address"
-						},
-						{
-							"internalType": "uint256",
-							"name": "number",
-							"type": "uint256"
-						}
-					],
-					"internalType": "struct Account.Info",
-					"name": "",
-					"type": "tuple"
-				},
-				{
-					"internalType": "bytes",
-					"name": "_data",
-					"type": "bytes"
 				}
 			],
-			"name": "callFunction",
-			"outputs": [],
-			"stateMutability": "nonpayable",
+			"stateMutability": "view",
 			"type": "function"
 		},
 		{
@@ -240,17 +218,17 @@
 				},
 				{
 					"internalType": "bytes[]",
-					"name": "_subData",
+					"name": "",
 					"type": "bytes[]"
 				},
 				{
 					"internalType": "uint8[]",
-					"name": "_paramMapping",
+					"name": "",
 					"type": "uint8[]"
 				},
 				{
 					"internalType": "bytes32[]",
-					"name": "_returnValues",
+					"name": "",
 					"type": "bytes32[]"
 				}
 			],
@@ -279,6 +257,45 @@
 			"type": "function"
 		},
 		{
+			"inputs": [
+				{
+					"internalType": "address[]",
+					"name": "_assets",
+					"type": "address[]"
+				},
+				{
+					"internalType": "uint256[]",
+					"name": "_amounts",
+					"type": "uint256[]"
+				},
+				{
+					"internalType": "uint256[]",
+					"name": "_fees",
+					"type": "uint256[]"
+				},
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				},
+				{
+					"internalType": "bytes",
+					"name": "_params",
+					"type": "bytes"
+				}
+			],
+			"name": "executeOperation",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
 			"inputs": [],
 			"name": "logger",
 			"outputs": [
@@ -286,6 +303,40 @@
 					"internalType": "contract DefisaverLogger",
 					"name": "",
 					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes[]",
+					"name": "_callData",
+					"type": "bytes[]"
+				}
+			],
+			"name": "parseInputs",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "viewer",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "onBehalfOf",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "receiver",
+					"type": "address"
+				},
+				{
+					"internalType": "bytes",
+					"name": "flashLoanGetterData",
+					"type": "bytes"
 				}
 			],
 			"stateMutability": "view",

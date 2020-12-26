@@ -72,12 +72,6 @@ contract McdHelper is DSMath {
         daiAmount = mul(daiAmount, RAY) < rad ? daiAmount + 1 : daiAmount;
     }
 
-    /// @notice Gets the token address from the Join contract
-    /// @param _joinAddr Address of the Join contract
-    function getCollateralAddr(address _joinAddr) internal view returns (address) {
-        return address(IJoin(_joinAddr).gem());
-    }
-
     /// @notice Checks if the join address is one of the Ether coll. types
     /// @param _joinAddr Join address to check
     function isEthJoinAddr(address _joinAddr) internal view returns (bool) {

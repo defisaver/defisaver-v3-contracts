@@ -40,7 +40,7 @@ describe("Mcd-Open", function() {
 
     });
 
-    for (let i = 0; i < 1; ++i) {
+    for (let i = 0; i < ilks.length; ++i) {
         const ilkData = ilks[i];
         const joinAddr = ilkData.join;
         const tokenData = getAssetInfo(ilkData.asset);

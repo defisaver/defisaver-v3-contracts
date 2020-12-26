@@ -106,10 +106,10 @@ describe("Mcd-Close", function() {
             const withdrawDai = new dfs.Action('SendToken', '0x0', ['address', 'address', 'uint256'], 
                 [daiAddr, senderAcc.address, MAX_UINT]);
 
-            const closeToDaiVaultRecipe = new dfs.ActionSet("CloseToDaiVaultRecipe", [
+            const closeToDaiVaultRecipe = new dfs.Recipe("CloseToDaiVaultRecipe", [
                 new dfs.actions.flashloan.DyDxFlashLoanAction(flAmount, daiAddr),
-                new dfs.actions.maker.MakerPaybackAction(vaultId, flAmount, proxy.address),
-                new dfs.actions.maker.MakerWithdrawAction(vaultId, MAX_UINT, joinAddr, proxy.address),
+                new dfs.actions.maker.MakerPaybackAction(vaultId, flAmount, proxy.address, MCD_MANAGER_ADDR),
+                new dfs.actions.maker.MakerWithdrawAction(vaultId, MAX_UINT, joinAddr, proxy.address, MCD_MANAGER_ADDR),
                 new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
                 repayFl,
                 withdrawDai
@@ -143,10 +143,10 @@ describe("Mcd-Close", function() {
         //     let flAmount = (parseFloat(VAULT_DAI_AMOUNT) + 1).toString();
         //     flAmount = ethers.utils.parseUnits(flAmount, 18);
 
-        //     const closeToCollVaultRecipe = new dfs.ActionSet("CloseToCollVaultRecipe", [
+        //     const closeToCollVaultRecipe = new dfs.Recipe("CloseToCollVaultRecipe", [
         //         new dfs.actions.flashloan.DyDxFlashLoanAction(flAmount, daiAddr),
-        //         new dfs.actions.maker.MakerPaybackAction(vaultId, flAmount, proxy.address),
-        //         new dfs.actions.maker.MakerWithdrawAction(vaultId, MAX_UINT, joinAddr, to),
+        //         new dfs.actions.maker.MakerPaybackAction(vaultId, flAmount, proxy.address, MCD_MANAGER_ADDR),
+        //         new dfs.actions.maker.MakerWithdrawAction(vaultId, MAX_UINT, joinAddr, to, MCD_MANAGER_ADDR),
         //         new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
         //     ]);
 

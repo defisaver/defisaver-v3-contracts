@@ -19,17 +19,37 @@ contract TokenUtils {
         }
     }
 
-    function pullTokens(address _token, address _from, uint256 _amount) internal {
+    function pullTokens(address _token, address _from, uint256 _amount) internal returns (uint) {
+
+        // handle max uint amount
+        if (_amount == uint(-1)) {
+            uint allowance = uint (-1);
+
+            if (_token == ETH_ADDR) {
+                allowance = IERC20(_token).allowance(address(this), _from);
+            }
+
+            uint balance = getBalance(_token, _from);
+
+            _amount = (balance > allowance) ? allowance : balance;
+        }
+
         if (_from != address(0) && _from != address(this) && _token != ETH_ADDR && _amount != 0) {
             IERC20(_token).safeTransferFrom(_from, address(this), _amount);
         }
+
+        return _amount;
     }
 
     function withdrawTokens(
         address _token,
         address _to,
         uint256 _amount
-    ) internal {
+    ) internal returns (uint) {
+        if (_amount == uint(-1)) {
+            _amount = getBalance(_token, address(this));
+        }
+
         if (_to != address(0) && _to != address(this) && _amount != 0) {
             if (_token != ETH_ADDR) {
                 IERC20(_token).safeTransfer(_to, _amount);
@@ -37,6 +57,8 @@ contract TokenUtils {
                 payable(_to).transfer(_amount);
             }
         }
+
+        return _amount;
     }
 
     function convertAndDepositToWeth(address _tokenAddr, uint _amount) internal returns (address) {

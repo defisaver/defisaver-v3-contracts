@@ -83,7 +83,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore, GasBurner {
 
         withdrawTokens(
             exchangeData.srcAddr,
-            _to,
+            _from,
             getBalance(exchangeData.srcAddr, address(this)) - balanceBefore
         );
 

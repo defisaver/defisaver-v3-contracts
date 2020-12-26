@@ -1,14 +1,14 @@
 {
-	"contractName": "FLDyDx",
+	"contractName": "AaveWithdrawV1",
 	"abi": [
 		{
 			"inputs": [],
-			"name": "CALLBACK_SELECTOR",
+			"name": "AAVE_V1_LENDING_POOL_ADDRESSES",
 			"outputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "address",
 					"name": "",
-					"type": "bytes4"
+					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -43,19 +43,6 @@
 		{
 			"inputs": [],
 			"name": "ETH_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ETH_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -120,19 +107,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "SOLO_MARGIN_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "SUB_MAX_INDEX_VALUE",
 			"outputs": [
 				{
@@ -172,19 +146,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "WETH_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "actionType",
 			"outputs": [
 				{
@@ -197,38 +158,16 @@
 			"type": "function"
 		},
 		{
-			"inputs": [
+			"inputs": [],
+			"name": "chiToken",
+			"outputs": [
 				{
-					"internalType": "address",
+					"internalType": "contract IGasToken",
 					"name": "",
 					"type": "address"
-				},
-				{
-					"components": [
-						{
-							"internalType": "address",
-							"name": "owner",
-							"type": "address"
-						},
-						{
-							"internalType": "uint256",
-							"name": "number",
-							"type": "uint256"
-						}
-					],
-					"internalType": "struct Account.Info",
-					"name": "",
-					"type": "tuple"
-				},
-				{
-					"internalType": "bytes",
-					"name": "_data",
-					"type": "bytes"
 				}
 			],
-			"name": "callFunction",
-			"outputs": [],
-			"stateMutability": "nonpayable",
+			"stateMutability": "view",
 			"type": "function"
 		},
 		{
@@ -280,6 +219,19 @@
 		},
 		{
 			"inputs": [],
+			"name": "gasToken",
+			"outputs": [
+				{
+					"internalType": "contract IGasToken",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "logger",
 			"outputs": [
 				{
@@ -303,10 +255,6 @@
 			],
 			"stateMutability": "view",
 			"type": "function"
-		},
-		{
-			"stateMutability": "payable",
-			"type": "receive"
 		}
 	],
 	"networks": {

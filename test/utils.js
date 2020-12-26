@@ -56,6 +56,22 @@ const getAddrFromRegistry = async (name) => {
     return (await registry.getAddr(hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(name))));
 };
 
+const getProxyWithSigner = async (signer, addr) => {
+    const proxyRegistry = await 
+    hre.ethers.getContractAt("IProxyRegistry", "0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4");
+
+    let proxyAddr = await proxyRegistry.proxies(addr);
+
+    if (proxyAddr == nullAddress) {
+        await proxyRegistry.build(addr);
+        proxyAddr = await proxyRegistry.proxies(addr);
+    }
+
+    const dsProxy = await hre.ethers.getContractAt("IDSProxy", proxyAddr, signer);
+
+    return dsProxy;
+} 
+
 const getProxy = async (acc) => {
     const proxyRegistry = await 
     hre.ethers.getContractAt("IProxyRegistry", "0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4");
@@ -191,6 +207,7 @@ const stopImpersonatingAccount = async (account) => {
 module.exports = {
     getAddrFromRegistry,
     getProxy,
+    getProxyWithSigner,
     redeploy,
     send,
     approve,

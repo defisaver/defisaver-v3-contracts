@@ -10,8 +10,6 @@ import "../ActionBase.sol";
 
 /// @title Open a new Maker vault
 contract McdOpen is ActionBase, GasBurner {
-    address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
-    IManager public constant manager = IManager(MANAGER_ADDRESS);
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -20,20 +18,20 @@ contract McdOpen is ActionBase, GasBurner {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public virtual override payable returns (bytes32) {
-        address joinAddr = parseInputs(_callData);
+        (address joinAddr, address mcdManager) = parseInputs(_callData);
 
         joinAddr = _parseParamAddr(joinAddr, _paramMapping[0], _subData, _returnValues);
 
-        uint256 newVaultId = _mcdOpen(joinAddr);
+        uint256 newVaultId = _mcdOpen(joinAddr, mcdManager);
 
         return bytes32(newVaultId);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
-        address joinAddr = parseInputs(_callData);
+        (address joinAddr, address mcdManager) = parseInputs(_callData);
 
-        _mcdOpen(joinAddr);
+        _mcdOpen(joinAddr, mcdManager);
     }
 
     /// @inheritdoc ActionBase
@@ -45,14 +43,15 @@ contract McdOpen is ActionBase, GasBurner {
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
 
-    function _mcdOpen(address _joinAddr) internal returns (uint256 vaultId) {
+    function _mcdOpen(address _joinAddr, address _mcdManager) internal returns (uint256 vaultId) {
         bytes32 ilk = IJoin(_joinAddr).ilk();
-        vaultId = manager.open(ilk, address(this));
+        vaultId = IManager(_mcdManager).open(ilk, address(this));
 
         logger.Log(address(this), msg.sender, "McdOpen", abi.encode(vaultId));
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (address joinAddr) {
+    function parseInputs(bytes[] memory _callData) internal pure returns (address joinAddr, address mcdManager) {
         joinAddr = abi.decode(_callData[0], (address));
+        mcdManager = abi.decode(_callData[1], (address));
     }
 }

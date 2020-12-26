@@ -11,14 +11,13 @@ import "./helpers/AaveHelper.sol";
 
 /// @title Withdraw a token from an Aave market
 contract AaveWithdraw is ActionBase, AaveHelper, TokenUtils, GasBurner {
-
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public virtual override payable returns (bytes32) {
+    ) public payable virtual override returns (bytes32) {
         (address market, address tokenAddr, uint256 amount, address to) = parseInputs(_callData);
 
         market = _parseParamAddr(market, _paramMapping[0], _subData, _returnValues);
@@ -32,27 +31,30 @@ contract AaveWithdraw is ActionBase, AaveHelper, TokenUtils, GasBurner {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+    function executeActionDirect(bytes[] memory _callData) public payable override burnGas {
         (address market, address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
 
         _withdraw(market, tokenAddr, amount, from);
     }
 
     /// @inheritdoc ActionBase
-    function actionType() public virtual override pure returns (uint8) {
+    function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
-
 
     /// @notice User withdraws tokens from the Aave protocol
     /// @param _market address provider for specific market
     /// @param _tokenAddr The address of the token to be withdrawn
     /// @param _amount Amount of tokens to be withdrawn -> send -1 for whole amount
     /// @param _to Where the withdrawn tokens will be sent
-    function _withdraw(address _market, address _tokenAddr, uint256 _amount, address _to) internal returns (uint) {
+    function _withdraw(
+        address _market,
+        address _tokenAddr,
+        uint256 _amount,
+        address _to
+    ) internal returns (uint256) {
         address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
         _tokenAddr = convertToWeth(_tokenAddr);
 
@@ -61,11 +63,11 @@ contract AaveWithdraw is ActionBase, AaveHelper, TokenUtils, GasBurner {
             ILendingPoolV2(lendingPool).withdraw(_tokenAddr, _amount, address(this));
 
             // needs to use balance of in case that amount is -1 for whole debt
-            uint wethBalance = getBalance(WETH_ADDR, address(this));
+            uint256 wethBalance = getBalance(WETH_ADDR, address(this));
             withdrawWeth(wethBalance);
             _amount = wethBalance;
 
-            msg.sender.transfer(_amount);
+            payable(_to).transfer(_amount);
         } else {
             // if not eth send directly to _to
             ILendingPoolV2(lendingPool).withdraw(_tokenAddr, _amount, _to);

@@ -13,13 +13,11 @@ import "./helpers/McdHelper.sol";
 
 /// @title Payback dai debt for a Maker vault
 contract McdPayback is ActionBase, McdHelper, TokenUtils, GasBurner {
-    address public constant MANAGER_ADDRESS = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
     address public constant DAI_JOIN_ADDRESS = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
 
-    IManager public constant manager = IManager(MANAGER_ADDRESS);
     IVat public constant vat = IVat(VAT_ADDRESS);
 
     /// @inheritdoc ActionBase
@@ -29,22 +27,22 @@ contract McdPayback is ActionBase, McdHelper, TokenUtils, GasBurner {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public override payable returns (bytes32) {
-        (uint256 vaultId, uint256 amount, address from) = parseInputs(_callData);
+        (uint256 vaultId, uint256 amount, address from, address mcdManager) = parseInputs(_callData);
 
         vaultId = _parseParamUint(vaultId, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
         from = _parseParamAddr(from, _paramMapping[2], _subData, _returnValues);
 
-        amount = _mcdPayback(vaultId, amount, from);
+        amount = _mcdPayback(vaultId, amount, from, mcdManager);
 
         return bytes32(amount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
-        (uint256 vaultId, uint256 amount, address from) = parseInputs(_callData);
+        (uint256 vaultId, uint256 amount, address from, address mcdManager) = parseInputs(_callData);
 
-        _mcdPayback(vaultId, amount, from);
+        _mcdPayback(vaultId, amount, from, mcdManager);
     }
 
     /// @inheritdoc ActionBase
@@ -58,10 +56,11 @@ contract McdPayback is ActionBase, McdHelper, TokenUtils, GasBurner {
     function _mcdPayback(
         uint256 _vaultId,
         uint256 _amount,
-        address _from
+        address _from,
+        address _mcdManager
     ) internal returns (uint256) {
-        address urn = manager.urns(_vaultId);
-        bytes32 ilk = manager.ilks(_vaultId);
+        address urn = IManager(_mcdManager).urns(_vaultId);
+        bytes32 ilk = IManager(_mcdManager).ilks(_vaultId);
 
         uint256 wholeDebt = getAllDebt(VAT_ADDRESS, urn, urn, ilk);
 
@@ -76,7 +75,7 @@ contract McdPayback is ActionBase, McdHelper, TokenUtils, GasBurner {
 
         IDaiJoin(DAI_JOIN_ADDRESS).join(urn, _amount);
 
-        manager.frob(_vaultId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, ilk));
+        IManager(_mcdManager).frob(_vaultId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, ilk));
 
         logger.Log(address(this), msg.sender, "McdPayback", abi.encode(_vaultId, _amount, _from));
 
@@ -89,11 +88,13 @@ contract McdPayback is ActionBase, McdHelper, TokenUtils, GasBurner {
         returns (
             uint256 vaultId,
             uint256 amount,
-            address from
+            address from,
+            address mcdManager
         )
     {
         vaultId = abi.decode(_callData[0], (uint256));
         amount = abi.decode(_callData[1], (uint256));
         from = abi.decode(_callData[2], (address));
+        mcdManager = abi.decode(_callData[3], (address));
     }
 }
