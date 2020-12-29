@@ -398,24 +398,7 @@ const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, 
         deadline,
     ];
 
-    const uniSupply = new dfs.Action(
-        "UniSupply",
-        "0x0",
-        [
-            [
-                "address",
-                "address",
-                "address",
-                "address",
-                "uint256",
-                "uint256",
-                "uint256",
-                "uint256",
-                "uint256",
-            ],
-        ],
-        [uniObj]
-    );
+    const uniSupply = new dfs.actions.uniswap.UniswapSupplyAction(uniObj);
 
     let value = 0;
 
@@ -459,24 +442,7 @@ const uniWithdraw = async (proxy, addrTokenA, addrTokenB, lpAddr, liquidity, to,
         deadline,
     ];
 
-    const uniWithdraw = new dfs.Action(
-        "UniWithdraw",
-        "0x0",
-        [
-            [
-                "address",
-                "address",
-                "uint256",
-                "address",
-                "address",
-                "uint256",
-                "uint256",
-                "uint256",
-            ],
-        ],
-        [uniObj]
-    );
-
+    const uniWithdraw = new dfs.actions.uniswap.UniswapWithdrawAction(uniObj);
 
     const functionData = uniWithdraw.encodeForDsProxyCall()[1];
 
