@@ -80,6 +80,12 @@ abstract contract IUniswapRouter {
         uint256 deadline
     ) external virtual returns (uint256 amountA, uint256 amountB);
 
+    function quote(
+        uint256 amountA,
+        uint256 reserveA,
+        uint256 reserveB
+    ) public pure virtual returns (uint256 amountB);
+
     function getAmountsOut(uint256 amountIn, address[] memory path)
         public
         view

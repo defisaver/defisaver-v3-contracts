@@ -84,10 +84,6 @@ contract UniSupply is ActionBase, TokenUtils, GasBurner {
         withdrawTokens(_uniData.tokenA, _uniData.to, (_uniData.amountADesired - amountA));
         withdrawTokens(_uniData.tokenB, _uniData.to, (_uniData.amountBDesired - amountB));
 
-        // send LP token
-        address lpTokenAddr = factory.getPair(_uniData.tokenA, _uniData.tokenB);
-        withdrawTokens(lpTokenAddr, _uniData.to, liqAmount);
-
         return liqAmount;
     }
 

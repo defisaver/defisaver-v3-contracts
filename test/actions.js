@@ -20,6 +20,8 @@ const {
 
 const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
 
+const { getSecondTokenAmount } = require('./utils-uni');
+
 const { deployContract } = require("../scripts/utils/deployer");
 
 
@@ -341,6 +343,149 @@ const buyGasTokens = async (proxy, senderAcc) => {
     await proxy['execute(address,bytes)'](dfsSellAddr, functionData, {value: amount, gasLimit: 2000000});
 };
 
+const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, from, to) => {
+    const uniSupplyAddr = await getAddrFromRegistry("UniSupply");
+
+    const amountA = ethers.utils.parseUnits(amount, tokenADecimals);
+    const amountB = await getSecondTokenAmount(
+        addrTokenA,
+        addrTokenB,
+        amountA
+    );
+
+    const amountAMin = amountA.div("2");
+    const amountBMin = amountB.div("2");
+
+    // buy tokens
+    const tokenBalanceA = await balanceOf(addrTokenA, from);
+    const tokenBalanceB = await balanceOf(addrTokenB, from);
+ 
+    if (tokenBalanceA.lt(amountA)) {
+        await sell(
+            proxy,
+            ETH_ADDR,
+            addrTokenA,
+            ethers.utils.parseUnits('5', 18),
+            UNISWAP_WRAPPER,
+            from,
+            from
+        );
+    }
+
+    if (tokenBalanceB.lt(amountB)) {
+        await sell(
+            proxy,
+            ETH_ADDR,
+            addrTokenB,
+            ethers.utils.parseUnits('5', 18),
+            UNISWAP_WRAPPER,
+            from,
+            from
+        );
+    }
+
+    const deadline = Date.now() + Date.now();
+
+    const uniObj = [
+        addrTokenA,
+        addrTokenB,
+        from,
+        to,
+        amountA,
+        amountB,
+        amountAMin,
+        amountBMin,
+        deadline,
+    ];
+
+    const uniSupply = new dfs.Action(
+        "UniSupply",
+        "0x0",
+        [
+            [
+                "address",
+                "address",
+                "address",
+                "address",
+                "uint256",
+                "uint256",
+                "uint256",
+                "uint256",
+                "uint256",
+            ],
+        ],
+        [uniObj]
+    );
+
+    let value = 0;
+
+    if (isEth(addrTokenA)) {
+        value = amountA;
+    } else {
+        await approve(addrTokenA, proxy.address);
+    }
+
+    if (isEth(addrTokenB)) {
+        value = amountB;
+    } else {
+        await approve(addrTokenB, proxy.address);
+    }
+
+    const functionData = uniSupply.encodeForDsProxyCall()[1];
+
+    await proxy["execute(address,bytes)"](uniSupplyAddr, functionData, {
+        value,
+        gasLimit: 3000000,
+    });
+};
+
+const uniWithdraw = async (proxy, addrTokenA, addrTokenB, lpAddr, liquidity, to, from) => {
+    const uniWithdrawAddr = await getAddrFromRegistry("UniWithdraw");
+
+    const amountAMin = 0;
+    const amountBMin = 0;
+    const deadline = Date.now() + Date.now();
+
+    await approve(lpAddr, proxy.address);
+
+    const uniObj = [
+        addrTokenA,
+        addrTokenB,
+        liquidity,
+        to,
+        from,
+        amountAMin,
+        amountBMin,
+        deadline,
+    ];
+
+    const uniWithdraw = new dfs.Action(
+        "UniWithdraw",
+        "0x0",
+        [
+            [
+                "address",
+                "address",
+                "uint256",
+                "address",
+                "address",
+                "uint256",
+                "uint256",
+                "uint256",
+            ],
+        ],
+        [uniObj]
+    );
+
+
+    const functionData = uniWithdraw.encodeForDsProxyCall()[1];
+
+    await proxy["execute(address,bytes)"](uniWithdrawAddr, functionData, {
+        gasLimit: 3000000,
+    });
+};
+
+
 module.exports = {
     sell,
     buy,
@@ -364,4 +509,7 @@ module.exports = {
 
     encodeFLAction,
     buyGasTokens,
+
+    uniSupply,
+    uniWithdraw,
 };

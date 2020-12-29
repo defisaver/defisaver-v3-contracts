@@ -22,6 +22,7 @@ contract UniWithdraw is ActionBase, TokenUtils, GasBurner {
         address tokenB;
         uint256 liquidity;
         address to;
+        address from;
         uint256 amountAMin;
         uint256 amountBMin;
         uint256 deadline;
@@ -45,6 +46,7 @@ contract UniWithdraw is ActionBase, TokenUtils, GasBurner {
             _returnValues
         );
         uniData.to = _parseParamAddr(uniData.to, _paramMapping[3], _subData, _returnValues);
+        uniData.from = _parseParamAddr(uniData.from, _paramMapping[3], _subData, _returnValues);
 
         uint256 liqAmount = _uniWithdraw(uniData);
 
@@ -74,6 +76,8 @@ contract UniWithdraw is ActionBase, TokenUtils, GasBurner {
 
         // approve the lp allowance
         address lpTokenAddr = factory.getPair(_uniData.tokenA, _uniData.tokenB);
+
+        pullTokens(lpTokenAddr, _uniData.from, _uniData.liquidity);
         approveToken(lpTokenAddr, address(router), uint256(-1));
 
         // withdraw liq. and get info how much we got out
@@ -107,7 +111,7 @@ contract UniWithdraw is ActionBase, TokenUtils, GasBurner {
             _uniData.liquidity,
             _uniData.amountAMin,
             _uniData.amountBMin,
-            _uniData.to,
+            address(this),
             _uniData.deadline
         );
     }

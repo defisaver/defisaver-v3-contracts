@@ -189,6 +189,14 @@ const isEth = (tokenAddr) => {
     return false;
 };
 
+const convertToWeth = (tokenAddr) => {
+    if (isEth(tokenAddr)) {
+        return WETH_ADDRESS;
+    }
+
+    return tokenAddr;
+};
+
 const impersonateAccount = async (account) => {
     await hre.network.provider.request({
         method: "hardhat_impersonateAccount",
@@ -217,6 +225,7 @@ module.exports = {
     sendEther,
     impersonateAccount,
     stopImpersonatingAccount,
+    convertToWeth,
     standardAmounts,
     nullAddress,
     REGISTRY_ADDR,
