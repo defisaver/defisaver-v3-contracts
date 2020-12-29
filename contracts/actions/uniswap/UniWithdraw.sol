@@ -46,7 +46,7 @@ contract UniWithdraw is ActionBase, TokenUtils, GasBurner {
             _returnValues
         );
         uniData.to = _parseParamAddr(uniData.to, _paramMapping[3], _subData, _returnValues);
-        uniData.from = _parseParamAddr(uniData.from, _paramMapping[3], _subData, _returnValues);
+        uniData.from = _parseParamAddr(uniData.from, _paramMapping[4], _subData, _returnValues);
 
         uint256 liqAmount = _uniWithdraw(uniData);
 
