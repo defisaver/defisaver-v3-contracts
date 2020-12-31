@@ -13,6 +13,8 @@ const {
     REGISTRY_ADDR,
     standardAmounts,
     UNISWAP_WRAPPER,
+    WETH_ADDRESS,
+    ETH_ADDR,
 } = require('../utils');
 
 const {
@@ -38,11 +40,12 @@ const sellAction = dfs.actions.basic.SellAction;
 describe("Mcd-Repay", function() {
     this.timeout(80000);
 
-    let makerAddresses, senderAcc, proxy, dydxFlAddr, aaveFlAddr, mcdView, taskExecutorAddr;
+    let makerAddresses, senderAcc, proxy, dydxFlAddr, aaveFlAddr, aaveV2FlAddr, mcdView, taskExecutorAddr;
 
     before(async () => {
         await redeploy('FLDyDx');
         await redeploy('FLAave');
+        await redeploy('FLAaveV2');
 
         mcdView = await redeploy('McdView');
         taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
@@ -51,6 +54,8 @@ describe("Mcd-Repay", function() {
         aaveFlAddr = await getAddrFromRegistry('FLAave');
 
         makerAddresses = await fetchMakerAddresses();
+
+        aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -141,6 +146,7 @@ describe("Mcd-Repay", function() {
             const ratioBefore = await getRatio(mcdView, vaultId);
             const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
             console.log(`Ratio before: ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} ${tokenData.symbol}, debt: ${info.debt.toFixed(2)} Dai)`);
+        
 
             const from = proxy.address;
             const to = proxy.address;
@@ -153,6 +159,13 @@ describe("Mcd-Repay", function() {
                 flAmount,
                 UNISWAP_WRAPPER
             );
+
+            console.log(dfs.actions.flashloan);
+
+            const flToken = collToken.toLowerCase() === ETH_ADDR.toLowerCase() ? WETH_ADDRESS : collToken;
+
+            const flAaveV2Action = 
+            new dfs.actions.flashloan.AaveV2FlashLoanAction([flAmount], [flToken], [0], nullAddress);
 
             const repayRecipe = new dfs.Recipe("FLRepayRecipe", [
                 new aaveFLAction(flAmount, collToken),

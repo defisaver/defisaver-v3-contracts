@@ -12,8 +12,6 @@ import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
 import "./DydxFlashLoanBase.sol";
 
-import "hardhat/console.sol";
-
 /// @title Action that gets and receives a FL from DyDx protocol
 contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, TokenUtils {
     using SafeERC20 for IERC20;
@@ -82,11 +80,6 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, TokenUtils {
             taskExecutor,
             abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, amount)
         );
-
-        console.log("should return dydx fl");
-        console.log("FL amount we should return: ", (amount + 2));
-        console.log("ETH balance: ", getBalance(ETH_ADDR, address(this)));
-        console.log("WETH balance: ", getBalance(WETH_ADDR, address(this)));
 
         // return FL
         dydxPaybackLoan(proxy, tokenAddr, amount);
