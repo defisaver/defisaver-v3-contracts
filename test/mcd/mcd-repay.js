@@ -30,6 +30,7 @@ const {
 const VAULT_DAI_AMOUNT = '970';
 
 const dydxFLAction = dfs.actions.flashloan.DyDxFlashLoanAction;
+const aaveFLAction = dfs.actions.flashloan.AaveFlashLoanAction;
 const mcdPaybackAction = dfs.actions.maker.MakerPaybackAction;
 const mcdWithdrawAction = dfs.actions.maker.MakerWithdrawAction;
 const sellAction = dfs.actions.basic.SellAction;
@@ -40,13 +41,8 @@ describe("Mcd-Repay", function() {
     let makerAddresses, senderAcc, proxy, dydxFlAddr, aaveFlAddr, mcdView, taskExecutorAddr;
 
     before(async () => {
-        await redeploy('McdSupply');
-        await redeploy('TaskExecutor');
-        await redeploy('McdGenerate');
         await redeploy('FLDyDx');
         await redeploy('FLAave');
-        await redeploy('TaskExecutor');
-        await redeploy('DFSSell');
 
         mcdView = await redeploy('McdView');
         taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
@@ -159,10 +155,10 @@ describe("Mcd-Repay", function() {
             );
 
             const repayRecipe = new dfs.Recipe("FLRepayRecipe", [
-                new dydxFLAction(flAmount, collToken),
-                new sellAction(exchangeOrder, proxy.address, dydxFlAddr),
+                new aaveFLAction(flAmount, collToken),
+                new sellAction(exchangeOrder, proxy.address, proxy.address),
                 new mcdPaybackAction(vaultId, '$2', proxy.address, MCD_MANAGER_ADDR),
-                new mcdWithdrawAction(vaultId, '$1', joinAddr, proxy.address, MCD_MANAGER_ADDR),
+                new mcdWithdrawAction(vaultId, '$1', joinAddr, aaveFlAddr, MCD_MANAGER_ADDR)
             ]);
 
             const functionData = repayRecipe.encodeForDsProxyCall();

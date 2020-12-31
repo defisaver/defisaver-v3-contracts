@@ -177,7 +177,7 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0) =
         nullAddress,
         wrapper,
         path,
-        [nullAddress, nullAddress, 0, 0, ethers.utils.toUtf8Bytes('')]
+        [nullAddress, nullAddress, nullAddress, 0, 0, ethers.utils.toUtf8Bytes('')]
     ];
 };
 

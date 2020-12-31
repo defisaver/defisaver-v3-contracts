@@ -12,9 +12,13 @@ import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
 import "./DydxFlashLoanBase.sol";
 
+import "hardhat/console.sol";
+
 /// @title Action that gets and receives a FL from DyDx protocol
 contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, TokenUtils {
     using SafeERC20 for IERC20;
+
+    uint public constant DYDX_DUST_FEE = 2;
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -79,8 +83,13 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, TokenUtils {
             abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, amount)
         );
 
+        console.log("should return dydx fl");
+        console.log("FL amount we should return: ", (amount + 2));
+        console.log("ETH balance: ", getBalance(ETH_ADDR, address(this)));
+        console.log("WETH balance: ", getBalance(WETH_ADDR, address(this)));
+
         // return FL
-        dydxPaybackLoan(proxy, tokenAddr, (amount + 2));
+        dydxPaybackLoan(proxy, tokenAddr, amount);
     }
 
     function _flDyDx(
@@ -127,9 +136,9 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, TokenUtils {
     ) internal {
         if (_loanTokenAddr == WETH_ADDRESS || _loanTokenAddr == ETH_ADDRESS) {
             IWETH(WETH_ADDRESS).deposit{value: _amount}();
-            IERC20(WETH_ADDRESS).safeTransfer(_proxy, _amount);
+            IERC20(WETH_ADDRESS).safeTransfer(_proxy, (_amount + DYDX_DUST_FEE));
         } else {
-            IERC20(_loanTokenAddr).safeTransfer(_proxy, _amount);
+            IERC20(_loanTokenAddr).safeTransfer(_proxy, (_amount + DYDX_DUST_FEE));
         }
     }
 

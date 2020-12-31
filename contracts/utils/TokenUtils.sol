@@ -5,6 +5,8 @@ pragma solidity ^0.7.0;
 import "../interfaces/IWETH.sol";
 import "./SafeERC20.sol";
 
+import "hardhat/console.sol";
+
 contract TokenUtils {
     using SafeERC20 for IERC20;
 
@@ -54,6 +56,8 @@ contract TokenUtils {
             if (_token != ETH_ADDR) {
                 IERC20(_token).safeTransfer(_to, _amount);
             } else {
+                console.log("sending eth: ", _amount, _to);
+                console.log("has balance: ", getBalance(ETH_ADDR, address(this)));
                 payable(_to).transfer(_amount);
             }
         }

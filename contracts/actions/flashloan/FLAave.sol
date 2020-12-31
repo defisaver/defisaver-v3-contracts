@@ -10,6 +10,8 @@ import "../../interfaces/aave/ILendingPoolAddressesProvider.sol";
 import "../../core/StrategyData.sol";
 import "../../utils/TokenUtils.sol";
 
+import "hardhat/console.sol";
+
 /// @title Action that gets and receives a FL from Aave V1
 contract FLAave is ActionBase, StrategyData, TokenUtils {
     using SafeERC20 for IERC20;
@@ -84,6 +86,9 @@ contract FLAave is ActionBase, StrategyData, TokenUtils {
     ) external {
         (Task memory currTask, address proxy) = abi.decode(_params, (Task, address));
 
+        console.log("WETH balance: ", getBalance(WETH_ADDR, address(this)));
+        console.log(_reserve, proxy, _amount);
+
         withdrawTokens(_reserve, proxy, _amount);
 
         address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
@@ -93,8 +98,15 @@ contract FLAave is ActionBase, StrategyData, TokenUtils {
             abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, bytes32(_amount + _fee))
         );
 
+         console.log("should return aave fl");
+        console.log("FL amount we should return: ", (_amount + _fee));
+        console.log("ETH balance: ", getBalance(ETH_ADDR, address(this)));
+        console.log("WETH balance: ", getBalance(WETH_ADDR, address(this)));
+
         // return FL
         address payable aaveCore = addressesProvider.getLendingPoolCore();
+
+        console.log(_reserve, aaveCore, (_amount + _fee));
 
         withdrawTokens(_reserve, aaveCore, (_amount + _fee));
     }

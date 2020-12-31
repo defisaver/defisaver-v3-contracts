@@ -38,6 +38,7 @@ async function main() {
     await redeploy("AavePayback");
     await redeploy("AavePaybackV1");
     await redeploy("AaveWithdrawV1");
+    await redeploy("AaveMigrateLend");
 
     // comp actions
     await redeploy("CompSupply");
@@ -60,6 +61,9 @@ async function main() {
     await redeploy("FLAaveV2");
     await redeploy("FLCustomAaveV2");
 
+    // uniswap
+    await redeploy("UniSupply");
+    await redeploy("UniWithdraw");
 }
 
 start(main);

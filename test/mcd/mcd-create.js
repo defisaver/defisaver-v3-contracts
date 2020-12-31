@@ -166,4 +166,14 @@ describe("Mcd-Create", function() {
 
     }
 
+    it(`... should create a leveraged UNIV2ETHDAI vault`, async () => {
+        const uniJoinAddr = '';
+
+        const uniVaultRecipe = new dfs.Recipe("CreateVaultRecipe", [
+            new dfs.actions.maker.MakerOpenVaultAction(uniJoinAddr, MCD_MANAGER_ADDR),
+        
+        ]);
+    });
+
+
 });
