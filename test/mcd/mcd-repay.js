@@ -27,6 +27,7 @@ const {
 
 const {
     openVault,
+    addFlDust
 } = require('../actions.js');
 
 const VAULT_DAI_AMOUNT = '970';
@@ -59,6 +60,8 @@ describe("Mcd-Repay", function() {
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
+
+        await addFlDust(proxy, senderAcc, dydxFlAddr);
     });
 
     for (let i = 0; i < 1; ++i) {
@@ -168,10 +171,10 @@ describe("Mcd-Repay", function() {
             new dfs.actions.flashloan.AaveV2FlashLoanAction([flAmount], [flToken], [0], nullAddress);
 
             const repayRecipe = new dfs.Recipe("FLRepayRecipe", [
-                new aaveFLAction(flAmount, collToken),
+                new dydxFLAction(flAmount, collToken),
                 new sellAction(exchangeOrder, proxy.address, proxy.address),
                 new mcdPaybackAction(vaultId, '$2', proxy.address, MCD_MANAGER_ADDR),
-                new mcdWithdrawAction(vaultId, '$1', joinAddr, aaveFlAddr, MCD_MANAGER_ADDR)
+                new mcdWithdrawAction(vaultId, '$1', joinAddr, dydxFlAddr, MCD_MANAGER_ADDR)
             ]);
 
             const functionData = repayRecipe.encodeForDsProxyCall();

@@ -30,14 +30,15 @@ const {
 
 const {
     sell,
-    openVault
+    openVault,
+    addFlDust
 } = require('../actions.js');
 
 const VAULT_DAI_AMOUNT = '540';
 
 const BigNumber = hre.ethers.BigNumber;
 
-// TODO: calculate how much you are expecting to get based on token price
+// TODO: should take exact debt amount for no dai left overs
 
 describe("Mcd-Close", function() {
     this.timeout(80000);
@@ -45,6 +46,10 @@ describe("Mcd-Close", function() {
     let makerAddresses, senderAcc, proxy, dydxFlAddr, mcdView, taskExecutorAddr;
 
     before(async () => {
+        await redeploy('TaskExecutor');
+        await redeploy('FLDyDx');
+        await redeploy('DFSBuy');
+        await redeploy('SendToken');
 
         mcdView = await redeploy('McdView');
 
@@ -55,6 +60,8 @@ describe("Mcd-Close", function() {
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
+
+        await addFlDust(proxy, senderAcc, dydxFlAddr);
 
     });
 
@@ -134,23 +141,28 @@ describe("Mcd-Close", function() {
             let flAmount = (parseFloat(VAULT_DAI_AMOUNT) + 1).toString();
             flAmount = ethers.utils.parseUnits(flAmount, 18);
 
-            const to = proxy.address;
-            // fl dai debt amount
-            // payback full debt
-            // withdraw whole coll
-            // buy exact fl amount
-            // send whole left over coll balance to user
+            const vaultColl = standardAmounts[tokenData.symbol];
+            const daiAddr = makerAddresses["MCD_DAI"];
+
+            const exchangeOrder = formatExchangeObj(
+                tokenAddr,
+                daiAddr,
+                ethers.utils.parseUnits(vaultColl, tokenData.decimals),
+                UNISWAP_WRAPPER,
+                flAmount
+            );
 
             const closeToCollVaultRecipe = new dfs.Recipe("CloseToCollVaultRecipe", [
                 new dfs.actions.flashloan.DyDxFlashLoanAction(flAmount, makerAddresses["MCD_DAI"]),
                 new dfs.actions.maker.MakerPaybackAction(vaultId, flAmount, proxy.address, MCD_MANAGER_ADDR),
-                new dfs.actions.maker.MakerWithdrawAction(vaultId, MAX_UINT, joinAddr, to, MCD_MANAGER_ADDR),
-                new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
+                new dfs.actions.maker.MakerWithdrawAction(vaultId, MAX_UINT, joinAddr, proxy.address, MCD_MANAGER_ADDR),
+                new dfs.actions.basic.BuyAction(exchangeOrder, proxy.address, dydxFlAddr),
+                new dfs.actions.basic.SendTokenAction(tokenAddr, senderAcc.address, MAX_UINT)
             ]);
 
             const functionData = closeToCollVaultRecipe.encodeForDsProxyCall();
 
-            // await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000});
+            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000});
 
         });
 

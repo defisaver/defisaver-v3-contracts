@@ -11,6 +11,7 @@ const UNISWAP_WRAPPER = '0x6403BD92589F825FfeF6b62177FCe9149947cb9f';
 const OASIS_WRAPPER = '0x2aD7D86C56b7a09742213e1e649C727cB4991A54';
 const ETH_ADDR = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 const DAI_ADDR = '0x6b175474e89094c44da98b954eedeac495271d0f';
+const USDC_ADDR = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 
 const AAVE_MARKET = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
 
@@ -197,6 +198,12 @@ const convertToWeth = (tokenAddr) => {
     return tokenAddr;
 };
 
+const depositToWeth = async (amount) => {
+    const weth = await hre.ethers.getContractAt("IWETH", WETH_ADDRESS);
+
+    await weth.deposit({value: amount});
+};
+
 const impersonateAccount = async (account) => {
     await hre.network.provider.request({
         method: "hardhat_impersonateAccount",
@@ -226,6 +233,7 @@ module.exports = {
     impersonateAccount,
     stopImpersonatingAccount,
     convertToWeth,
+    depositToWeth,
     standardAmounts,
     nullAddress,
     REGISTRY_ADDR,
@@ -239,4 +247,5 @@ module.exports = {
     MAX_UINT,
     OWNER_ACC,
     ADMIN_ACC,
+    USDC_ADDR,
 };
