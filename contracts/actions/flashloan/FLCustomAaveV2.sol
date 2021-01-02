@@ -105,7 +105,11 @@ contract FLCustomAaveV2 is ActionBase, StrategyData, TokenUtils {
     ) public returns (bool) {
         (Task memory currTask, address proxy) = abi.decode(_params, (Task, address));
         for (uint256 i = 0; i < _assets.length; ++i) {
-            withdrawTokens(_assets[i], proxy, _amounts[i]);
+            if (_assets[i] == WETH_ADDR) {
+                withdrawWeth(_amounts[i]);
+            }
+
+            withdrawTokens(convertToEth(_assets[i]), proxy, _amounts[i]);
         }
 
         address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
@@ -118,6 +122,7 @@ contract FLCustomAaveV2 is ActionBase, StrategyData, TokenUtils {
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
+            convertAndDepositToWeth(convertToEth(_assets[i]), (_amounts[i] + _fees[i]));
             approveToken(_assets[i], address(AAVE_LENDING_POOL), _amounts[i] + _fees[i]);
         }
 
