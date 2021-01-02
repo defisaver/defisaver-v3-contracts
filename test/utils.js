@@ -218,6 +218,14 @@ const stopImpersonatingAccount = async (account) => {
     );
 };
 
+const timeTravel = async (timeIncrease) => {
+    await hre.network.provider.request({
+        method: "evm_increaseTime",
+        params: [timeIncrease],
+        id: new Date().getTime()
+    });
+};
+
 
 module.exports = {
     getAddrFromRegistry,
@@ -234,6 +242,7 @@ module.exports = {
     stopImpersonatingAccount,
     convertToWeth,
     depositToWeth,
+    timeTravel,
     standardAmounts,
     nullAddress,
     REGISTRY_ADDR,

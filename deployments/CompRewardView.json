@@ -1,0 +1,161 @@
+{
+	"contractName": "CompRewardView",
+	"abi": [
+		{
+			"inputs": [],
+			"name": "COMPTROLLER_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "COMP_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "comp",
+			"outputs": [
+				{
+					"internalType": "contract IComptroller",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "compInitialIndex",
+			"outputs": [
+				{
+					"internalType": "uint224",
+					"name": "",
+					"type": "uint224"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				},
+				{
+					"internalType": "address[]",
+					"name": "_cTokens",
+					"type": "address[]"
+				}
+			],
+			"name": "getBalance",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_cToken",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_borrower",
+					"type": "address"
+				}
+			],
+			"name": "getBorrowBalance",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "borrowerAccrued",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address[]",
+					"name": "_cTokens",
+					"type": "address[]"
+				},
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "getClaimableAssets",
+			"outputs": [
+				{
+					"internalType": "bool[]",
+					"name": "supplyClaims",
+					"type": "bool[]"
+				},
+				{
+					"internalType": "bool[]",
+					"name": "borrowClaims",
+					"type": "bool[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_cToken",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_supplier",
+					"type": "address"
+				}
+			],
+			"name": "getSuppyBalance",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "supplierAccrued",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		}
+	],
+	"networks": {
+		"local": {}
+	}
+}

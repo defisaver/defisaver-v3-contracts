@@ -483,6 +483,19 @@ const addFlDust = async (proxy, senderAcc, flDyDxAddr) => {
     await send(USDC_ADDR, flDyDxAddr, amountUsdc);
 };
 
+const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) => {
+    const compClaimAddr = await getAddrFromRegistry("CompClaim");
+
+    const claimComp = new dfs.Action("CompClaim", "0x0", 
+    ["address[]", "address[]", "address", "address"], [cSupplyAddresses, cBorrowAddresses, from, to]);
+
+    const functionData = claimComp.encodeForDsProxyCall()[1];
+
+    await proxy["execute(address,bytes)"](compClaimAddr, functionData, {
+        gasLimit: 3000000,
+    });
+};
+
 
 module.exports = {
     sell,
@@ -504,6 +517,7 @@ module.exports = {
     withdrawComp,
     borrowComp,
     paybackComp,
+    claimComp,
 
     encodeFLAction,
     buyGasTokens,
