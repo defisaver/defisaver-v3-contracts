@@ -496,6 +496,19 @@ const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) =>
     });
 };
 
+const mcdGive = async (proxy, vaultId, newOwner, createProxy) => {
+    const mcdGiveAddr = await getAddrFromRegistry("McdGive");
+
+    const mcdGive = new dfs.Action("McdGive", "0x0", 
+    ["uint256", "address", "bool", "address"], [vaultId, newOwner.address, createProxy, MCD_MANAGER_ADDR]);
+
+    const functionData = mcdGive.encodeForDsProxyCall()[1];
+
+    await proxy["execute(address,bytes)"](mcdGiveAddr, functionData, {
+        gasLimit: 3000000,
+    });
+};
+
 
 module.exports = {
     sell,
@@ -507,6 +520,7 @@ module.exports = {
     paybackMcd,
     withdrawMcd,
     openVault,
+    mcdGive,
 
     supplyAave,
     withdrawAave,
