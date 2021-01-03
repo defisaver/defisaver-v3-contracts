@@ -1,21 +1,15 @@
 const { expect } = require("chai");
 
-const { getAssetInfo, ilks } = require("defisaver-tokens");
-
-const dfs = require("defisaver-sdk");
+const { ilks } = require("defisaver-tokens");
 
 const {
-    getAddrFromRegistry,
     getProxy,
     redeploy,
-    send,
-    nullAddress,
-    REGISTRY_ADDR,
 } = require("../utils");
 
-const { fetchMakerAddresses, getVaultsForUser, getRatio, MCD_MANAGER_ADDR } = require("../utils-mcd");
+const { fetchMakerAddresses, MCD_MANAGER_ADDR } = require("../utils-mcd");
 
-const { openMcd, openVault, mcdGive } = require("../actions.js");
+const { openMcd, mcdGive } = require("../actions.js");
 
 describe("Mcd-Give", function () {
     let makerAddresses, senderAcc, secondAcc, thirdAcc, proxy, mcdView, mcdManager;

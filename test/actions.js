@@ -172,7 +172,6 @@ const openVault = async (makerAddresses, proxy, joinAddr, tokenData, collAmount,
     const amountColl = ethers.utils.parseUnits(collAmount, tokenData.decimals);
 
     await supplyMcd(proxy, vaultId, amountColl, tokenData.address, joinAddr, from);
-    console.log("Supply worked");
     await generateMcd(proxy, vaultId, amountDai, to);
 
     return vaultId;
@@ -509,6 +508,19 @@ const mcdGive = async (proxy, vaultId, newOwner, createProxy) => {
     });
 };
 
+const mcdMerge = async (proxy, srcVaultId, destVaultId) => {
+    const mcdMergeAddr = await getAddrFromRegistry("McdMerge");
+
+    const mcdMerge = new dfs.Action("McdMerge", "0x0", 
+    ["uint256", "uint256", "address"], [srcVaultId, destVaultId, MCD_MANAGER_ADDR]);
+
+    const functionData = mcdMerge.encodeForDsProxyCall()[1];
+
+    await proxy["execute(address,bytes)"](mcdMergeAddr, functionData, {
+        gasLimit: 3000000,
+    });
+};
+
 
 module.exports = {
     sell,
@@ -521,6 +533,7 @@ module.exports = {
     withdrawMcd,
     openVault,
     mcdGive,
+    mcdMerge,
 
     supplyAave,
     withdrawAave,
