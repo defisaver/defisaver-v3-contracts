@@ -3,10 +3,11 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
+import "../auth/AdminAuth.sol";
 import "../core/DFSRegistry.sol";
 
 /// @title Implements Action interface and common helpers for pasing inputs
-abstract contract ActionBase {
+abstract contract ActionBase is AdminAuth {
     address public constant REGISTRY_ADDR = 0xB0e1682D17A96E8551191c089673346dF7e1D467;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 

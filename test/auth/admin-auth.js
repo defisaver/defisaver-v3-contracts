@@ -101,20 +101,6 @@ describe("Admin-Auth", function() {
         }
     });
 
-    it(`... admin should change the admin valut`, async () => {
-        await impersonateAccount(ADMIN_ACC);
-
-        const adminAuthByAdmin = adminAuth.connect(adminAcc);
-        await adminAuthByAdmin.changeAdminVault(newAdminVault.address);
-
-        await stopImpersonatingAccount(ADMIN_ACC);
-
-        const currAdminAddr = await adminAuth.adminVault();
-
-        expect(newAdminVault.address).to.eq(currAdminAddr);
-
-    });
-
     it(`... admin should be able to kill the contract`, async () => {
         await impersonateAccount(ADMIN_ACC);
 

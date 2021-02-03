@@ -11,7 +11,7 @@ import "./Subscriptions.sol";
 import "../utils/GasBurner.sol";
 
 /// @title Handles FL taking and executes actions
-contract TaskExecutor is StrategyData, GasBurner, ProxyPermission {
+contract TaskExecutor is StrategyData, GasBurner, ProxyPermission, AdminAuth {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
     address public constant REGISTRY_ADDR = 0xB0e1682D17A96E8551191c089673346dF7e1D467;

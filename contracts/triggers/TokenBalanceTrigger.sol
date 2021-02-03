@@ -2,10 +2,11 @@
 
 pragma solidity ^0.7.0;
 
+import "../auth/AdminAuth.sol";
 import "../interfaces/ITrigger.sol";
 import "../interfaces/IERC20.sol";
 
-contract TokenBalanceTrigger is ITrigger {
+contract TokenBalanceTrigger is ITrigger, AdminAuth {
     enum BalanceState {OVER, UNDER, EQUALS}
 
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {

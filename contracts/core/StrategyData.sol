@@ -3,7 +3,7 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-/// @title Struct Data in a separate contract soit can be used in multiple places
+/// @title Struct data in a separate contract so it can be used in multiple places
 contract StrategyData {
     struct Template {
         string name;

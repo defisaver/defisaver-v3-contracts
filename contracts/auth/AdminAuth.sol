@@ -11,7 +11,7 @@ import "./AdminVault.sol";
 contract AdminAuth {
     using SafeERC20 for IERC20;
 
-    AdminVault public adminVault = AdminVault(0xCCf3d848e08b94478Ed8f46fFead3008faF581fD);
+    AdminVault public constant adminVault = AdminVault(0xCCf3d848e08b94478Ed8f46fFead3008faF581fD);
 
     modifier onlyOwner() {
         require(adminVault.owner() == msg.sender, "msg.sender not owner");
@@ -23,7 +23,7 @@ contract AdminAuth {
         _;
     }
 
-    /// @notice  withdraw stuck funds
+    /// @notice withdraw stuck funds
     function withdrawStuckFunds(address _token, address _receiver, uint256 _amount) public onlyOwner {
         if (_token == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
             payable(_receiver).transfer(_amount);
@@ -35,11 +35,5 @@ contract AdminAuth {
     /// @notice Destroy the contract
     function kill() public onlyAdmin {
         selfdestruct(payable(msg.sender));
-    }
-
-    /// @notice Changes the admin vault that is currently used
-    /// @param _newAdminVault Address of the new Admin Vault contract
-    function changeAdminVault(address _newAdminVault) public onlyAdmin {
-        adminVault = AdminVault(_newAdminVault);
     }
 }

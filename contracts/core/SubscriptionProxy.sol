@@ -3,6 +3,7 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
+import "../auth/AdminAuth.sol";
 import "../auth/ProxyPermission.sol";
 import "../DS/DSGuard.sol";
 import "../DS/DSAuth.sol";
@@ -10,7 +11,7 @@ import "./Subscriptions.sol";
 import "./DFSRegistry.sol";
 
 /// @title Handles auth and calls subscription contract
-contract SubscriptionProxy is StrategyData, ProxyPermission {
+contract SubscriptionProxy is StrategyData, AdminAuth, ProxyPermission {
 
     address public constant REGISTRY_ADDR = 0xB0e1682D17A96E8551191c089673346dF7e1D467;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);

@@ -2,6 +2,7 @@
 
 pragma solidity ^0.7.0;
 
+import "../auth/AdminAuth.sol";
 import "../DS/DSMath.sol";
 import "../interfaces/mcd/IManager.sol";
 import "../interfaces/mcd/IVat.sol";
@@ -10,7 +11,7 @@ import "../core/Subscriptions.sol";
 
 import "../interfaces/ITrigger.sol";
 
-contract McdRatioTrigger is ITrigger, DSMath {
+contract McdRatioTrigger is ITrigger, AdminAuth, DSMath {
     IManager public constant manager = IManager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
     IVat public constant vat = IVat(0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B);
     ISpotter public constant spotter = ISpotter(0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3);

@@ -3,6 +3,7 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
+import "../auth/AdminAuth.sol";
 import "../utils/GasBurner.sol";
 import "../interfaces/ITrigger.sol";
 import "../interfaces/IDSProxy.sol";
@@ -13,7 +14,7 @@ import "./DFSRegistry.sol";
 import "./ProxyAuth.sol";
 
 /// @title Main entry point for executing automated strategies
-contract StrategyExecutor is StrategyData, GasBurner {
+contract StrategyExecutor is StrategyData, AdminAuth, GasBurner {
 
     address public constant PROXY_AUTH_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
 

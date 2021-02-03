@@ -2,6 +2,7 @@
 
 pragma solidity ^0.7.0;
 
+/// @title A stateful contract that holds and can change owner/admin
 contract AdminVault {
     address public owner;
     address public admin;
