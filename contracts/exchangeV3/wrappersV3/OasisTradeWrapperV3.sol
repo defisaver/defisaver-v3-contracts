@@ -6,10 +6,11 @@ import "../../interfaces/exchange/IExchangeV3.sol";
 import "../../interfaces/exchange/IOasis.sol";
 import "../../interfaces/IWETH.sol";
 import "../../DS/DSMath.sol";
+import "../../utils/TokenUtils.sol";
 import "../../utils/SafeERC20.sol";
 import "../../auth/AdminAuth.sol";
 
-contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth {
+contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth, TokenUtils {
 
     using SafeERC20 for IERC20;
 
@@ -23,8 +24,8 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _srcAmount From amount
     /// @return uint Destination amount
     function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory) external override payable returns (uint) {
-        address srcAddr = ethToWethAddr(_srcAddr);
-        address destAddr = ethToWethAddr(_destAddr);
+        address srcAddr = convertToWeth(_srcAddr);
+        address destAddr = convertToWeth(_destAddr);
 
         IERC20(srcAddr).safeApprove(OTC_ADDRESS, _srcAmount);
 
@@ -47,12 +48,14 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _destAmount To amount
     /// @return uint srcAmount
     function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory) external override payable returns(uint) {
-        address srcAddr = ethToWethAddr(_srcAddr);
-        address destAddr = ethToWethAddr(_destAddr);
+        address srcAddr = convertToWeth(_srcAddr);
+        address destAddr = convertToWeth(_destAddr);
 
-        IERC20(srcAddr).safeApprove(OTC_ADDRESS, uint(-1));
+        uint srcAmount = getBalance(srcAddr, address(this));
 
-        uint srcAmount = IOasis(OTC_ADDRESS).buyAllAmount(destAddr, _destAmount, srcAddr, uint(-1));
+        IERC20(srcAddr).safeApprove(OTC_ADDRESS, srcAmount);
+
+        srcAmount = IOasis(OTC_ADDRESS).buyAllAmount(destAddr, _destAmount, srcAddr, uint(-1));
 
         // convert weth -> eth and send back
         if (destAddr == WETH_ADDRESS) {
@@ -74,8 +77,8 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _srcAmount From amount
     /// @return uint Rate
     function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory) public override view returns (uint) {
-        address srcAddr = ethToWethAddr(_srcAddr);
-        address destAddr = ethToWethAddr(_destAddr);
+        address srcAddr = convertToWeth(_srcAddr);
+        address destAddr = convertToWeth(_destAddr);
 
         return wdiv(IOasis(OTC_ADDRESS).getBuyAmount(destAddr, srcAddr, _srcAmount), _srcAmount);
     }
@@ -87,8 +90,8 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _destAmount To amount
     /// @return uint Rate
     function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount, bytes memory) public override view returns (uint) {
-        address srcAddr = ethToWethAddr(_srcAddr);
-        address destAddr = ethToWethAddr(_destAddr);
+        address srcAddr = convertToWeth(_srcAddr);
+        address destAddr = convertToWeth(_destAddr);
 
         return wdiv(1 ether, wdiv(IOasis(OTC_ADDRESS).getPayAmount(srcAddr, destAddr, _destAmount), _destAmount));
     }
@@ -103,12 +106,6 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth {
         }
     }
 
-    /// @notice Converts Kybers Eth address -> Weth
-    /// @param _src Input address
-    function ethToWethAddr(address _src) internal pure returns (address) {
-        return _src == KYBER_ETH_ADDRESS ? WETH_ADDRESS : _src;
-    }
-
     // solhint-disable-next-line no-empty-blocks
-    receive() payable external {}
+    receive() external payable {}
 }

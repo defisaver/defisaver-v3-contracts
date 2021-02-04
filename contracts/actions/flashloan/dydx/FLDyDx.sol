@@ -103,7 +103,6 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, TokenUtils {
 
         uint256 repayAmount = _getRepaymentAmountInternal(_amount);
 
-        IERC20(_token).safeApprove(SOLO_MARGIN_ADDRESS, 0);
         IERC20(_token).safeApprove(SOLO_MARGIN_ADDRESS, repayAmount);
 
         Actions.ActionArgs[] memory operations = new Actions.ActionArgs[](3);
