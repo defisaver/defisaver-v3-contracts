@@ -48,7 +48,7 @@ contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
 
-     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
+    /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     /// @notice User paybacks tokens to the Aave protocol
     /// @param _tokenAddr The address of the token to be paybacked
     /// @param _amount Amount of tokens to be payed back, send uint256(-1) for whole debt
@@ -69,7 +69,7 @@ contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
 
         if (_tokenAddr != ETH_ADDR) {
             pullTokens(_tokenAddr, _from, _amount);
-            approveToken(_tokenAddr, lendingPoolCore, uint(-1));
+            approveToken(_tokenAddr, lendingPoolCore, _amount);
             ethAmount = 0;
         }
 

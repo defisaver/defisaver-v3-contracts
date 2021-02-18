@@ -65,6 +65,9 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @notice Gets a Fl from AaveV2 and returns back the execution to the action address
+    /// @param _flData All the amounts/tokens and related aave fl data
+    /// @param _params Rest of the data we have in the task
     function _flAaveV2(FLAaveV2Data memory _flData, bytes memory _params) internal returns (uint) {
         ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
             _flData.receiver,

@@ -78,7 +78,7 @@ contract UniWithdraw is ActionBase, TokenUtils, GasBurner {
         address lpTokenAddr = factory.getPair(_uniData.tokenA, _uniData.tokenB);
 
         pullTokens(lpTokenAddr, _uniData.from, _uniData.liquidity);
-        approveToken(lpTokenAddr, address(router), uint256(-1));
+        approveToken(lpTokenAddr, address(router), _uniData.liquidity);
 
         // withdraw liq. and get info how much we got out
         (uint256 amountA, uint256 amountB) = _withdrawLiquidity(_uniData);

@@ -65,21 +65,26 @@ contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @notice Sells a specified srcAmount for the dest token
+    /// @param _exchangeData DFS Exchange data struct
+    /// @param _from Address from which we'll pull the srcTokens
+    /// @param _to Address where we'll send the _to token
+    /// @param _fee Fee divider for the exchange action
     function _dfsSell(
-        ExchangeData memory exchangeData,
+        ExchangeData memory _exchangeData,
         address _from,
         address _to,
         uint _fee
     ) internal returns (uint256) {
 
-        pullTokens(exchangeData.srcAddr, _from, exchangeData.srcAmount);
+        pullTokens(_exchangeData.srcAddr, _from, _exchangeData.srcAmount);
 
-        exchangeData.user = getUserAddress();
-        exchangeData.dfsFeeDivider = _fee;
+        _exchangeData.user = getUserAddress();
+        _exchangeData.dfsFeeDivider = _fee;
 
-        (address wrapper, uint256 exchangedAmount) = _sell(exchangeData);
+        (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
 
-        withdrawTokens(exchangeData.destAddr, _to, exchangedAmount);
+        withdrawTokens(_exchangeData.destAddr, _to, exchangedAmount);
 
         logger.Log(
             address(this),
@@ -87,9 +92,9 @@ contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
             "DfsSell",
             abi.encode(
                 wrapper,
-                exchangeData.srcAddr,
-                exchangeData.destAddr,
-                exchangeData.srcAmount,
+                _exchangeData.srcAddr,
+                _exchangeData.destAddr,
+                _exchangeData.srcAmount,
                 exchangedAmount
             )
         );

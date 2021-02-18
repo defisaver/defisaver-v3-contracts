@@ -14,6 +14,8 @@ import "./helpers/CompHelper.sol";
 /// @title Payback a token a user borrowed from Compound
 contract CompPayback is ActionBase, CompHelper, TokenUtils, GasBurner {
 
+    string public constant ERR_COMP_PAYBACK_FAILED = "Compound payback failed";
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
@@ -46,20 +48,24 @@ contract CompPayback is ActionBase, CompHelper, TokenUtils, GasBurner {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @notice Payback a borrowed token from the Compound protcol
+    /// @dev Amount uint(-1) will take the whole borrow amount
+    /// @param _cTokenAddr Address of the cToken we are paybacking
+    /// @param _amount Amount of the underlying token
+    /// @param _from Address where we are pulling the underlying tokens from
     function _payback(address _cTokenAddr, uint _amount, address _from) internal returns (uint) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
-        approveToken(tokenAddr, _cTokenAddr, _amount);
-
-        // if uint(-1) payback whole amount
+        // if uint(-1) payback whole proxy borrow amount
         if (_amount == uint(-1)) {
             _amount = ICToken(_cTokenAddr).borrowBalanceCurrent(address(this));
         }
 
         if (tokenAddr != ETH_ADDR) {
             pullTokens(tokenAddr, _from, _amount);
+            approveToken(tokenAddr, _cTokenAddr, _amount);
 
-            require(ICToken(_cTokenAddr).repayBorrow(_amount) == 0, "Comp Repay fail");
+            require(ICToken(_cTokenAddr).repayBorrow(_amount) == 0, ERR_COMP_PAYBACK_FAILED);
         } else {
             ICToken(_cTokenAddr).repayBorrow{value: _amount}();
         }

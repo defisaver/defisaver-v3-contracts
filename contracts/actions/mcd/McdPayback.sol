@@ -52,7 +52,12 @@ contract McdPayback is ActionBase, McdHelper, TokenUtils, GasBurner {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-
+    /// @notice Paybacks the debt for a specified vault
+    /// @dev If amount over the whole debt only the whole debt amount is pulled
+    /// @param _vaultId Id of the vault
+    /// @param _amount Amount of dai to be payed back
+    /// @param _from Where the Dai is pulled from
+    /// @param _mcdManager The manager address we are using
     function _mcdPayback(
         uint256 _vaultId,
         uint256 _amount,
@@ -64,14 +69,13 @@ contract McdPayback is ActionBase, McdHelper, TokenUtils, GasBurner {
 
         uint256 wholeDebt = getAllDebt(VAT_ADDRESS, urn, urn, ilk);
 
-        // can't repay more than the whole debt, extra debt left on proxy
+        // can't repay more than the whole debt
         if (_amount > wholeDebt) {
             _amount = wholeDebt;
         }
 
         pullTokens(DAI_ADDRESS, _from, _amount);
-
-        approveToken(DAI_ADDRESS, DAI_JOIN_ADDRESS, uint(-1));
+        approveToken(DAI_ADDRESS, DAI_JOIN_ADDRESS, _amount);
 
         IDaiJoin(DAI_JOIN_ADDRESS).join(urn, _amount);
 

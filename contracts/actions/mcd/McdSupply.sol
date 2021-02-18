@@ -52,7 +52,12 @@ contract McdSupply is ActionBase, McdHelper, TokenUtils, GasBurner {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
 
-    /// @dev Will not work if _joinAddr is Dai or invalid
+    /// @notice Supplies collateral to the vault
+    /// @param _vaultId Id of the vault
+    /// @param _amount Amount of tokens to supply
+    /// @param _joinAddr Join address of the maker collateral
+    /// @param _from Address where to pull the collateral from
+    /// @param _mcdManager The manager address we are using
     function _mcdSupply(
         uint256 _vaultId,
         uint256 _amount,
@@ -78,7 +83,7 @@ contract McdSupply is ActionBase, McdHelper, TokenUtils, GasBurner {
             convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
         }
 
-        approveToken(tokenAddr, _joinAddr, uint(-1));
+        approveToken(tokenAddr, _joinAddr, _amount);
 
         IJoin(_joinAddr).join(address(this), _amount);
 

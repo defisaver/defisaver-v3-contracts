@@ -85,6 +85,10 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, TokenUtils {
         dydxPaybackLoan(proxy, tokenAddr, amount);
     }
 
+    /// @notice Gets a Fl from Dydx and returns back the execution to the action address
+    /// @param _token Token address we want to FL
+    /// @param _amount Amount of tokens to FL
+    /// @param _data Rest of the data we have in the task
     function _flDyDx(
         address _token,
         uint256 _amount,

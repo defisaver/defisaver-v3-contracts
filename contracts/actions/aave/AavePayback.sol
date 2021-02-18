@@ -92,7 +92,7 @@ contract AavePayback is ActionBase, AaveHelper, TokenUtils, GasBurner {
 
         _tokenAddr = convertAndDepositToWeth(_tokenAddr, _amount);
 
-        approveToken(_tokenAddr, lendingPool, uint256(-1));
+        approveToken(_tokenAddr, lendingPool, _amount);
 
         uint256 tokensBefore = getBalance(_tokenAddr, address(this));
 

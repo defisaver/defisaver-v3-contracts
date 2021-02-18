@@ -12,6 +12,8 @@ import "./helpers/CompHelper.sol";
 /// @title Supply a token to Compound
 contract CompSupply is ActionBase, CompHelper, TokenUtils, GasBurner {
 
+    string public constant ERR_COMP_SUPPLY_FAILED = "Compound supply failed";
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
@@ -45,7 +47,11 @@ contract CompSupply is ActionBase, CompHelper, TokenUtils, GasBurner {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-
+    /// @notice Supplies a token to the Compound protocol
+    /// @dev If amount == uint(-1) we are getting the whole balance of the proxy
+    /// @param _cTokenAddr Address of the cToken we'll get when supplying
+    /// @param _amount Amount of the underlying token we are supplying
+    /// @param _from Address where we are pulling the underlying tokens from
     function _supply(address _cTokenAddr, uint _amount, address _from) internal returns (uint) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
@@ -55,14 +61,12 @@ contract CompSupply is ActionBase, CompHelper, TokenUtils, GasBurner {
         }
 
         pullTokens(tokenAddr, _from, _amount);
-        approveToken(tokenAddr, _cTokenAddr, uint(-1));
+        approveToken(tokenAddr, _cTokenAddr, _amount);
 
-        if (isAlreadyInMarket(_cTokenAddr)) {
-            enterMarket(_cTokenAddr);
-        }
+        enterMarket(_cTokenAddr);
 
         if (tokenAddr != ETH_ADDR) {
-            require(ICToken(_cTokenAddr).mint(_amount) == 0, "Comp supply failed");
+            require(ICToken(_cTokenAddr).mint(_amount) == 0, ERR_COMP_SUPPLY_FAILED);
         } else {
             ICToken(_cTokenAddr).mint{value: msg.value}(); // reverts on fail
         }

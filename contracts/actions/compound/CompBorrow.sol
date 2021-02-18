@@ -47,13 +47,10 @@ contract CompBorrow is ActionBase, CompHelper, TokenUtils, GasBurner {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-
     function _borrow(address _cTokenAddr, uint _amount, address _to) internal returns (uint) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
-        if (isAlreadyInMarket(_cTokenAddr)) {
-            enterMarket(_cTokenAddr);
-        }
+        enterMarket(_cTokenAddr);
 
         require(ICToken(_cTokenAddr).borrow(_amount) == 0, "Comp borrow failed");
 

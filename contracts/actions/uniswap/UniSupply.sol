@@ -74,8 +74,8 @@ contract UniSupply is ActionBase, TokenUtils, GasBurner {
         _uniData.tokenB = convertAndDepositToWeth(_uniData.tokenB, _uniData.amountBDesired);
 
         // approve router so it can pull tokens
-        approveToken(_uniData.tokenA, address(router), uint256(-1));
-        approveToken(_uniData.tokenB, address(router), uint256(-1));
+        approveToken(_uniData.tokenA, address(router), _uniData.amountADesired);
+        approveToken(_uniData.tokenB, address(router), _uniData.amountBDesired);
 
         // add liq. and get info how much we put in
         (uint amountA, uint amountB, uint liqAmount) = _addLiquidity(_uniData);

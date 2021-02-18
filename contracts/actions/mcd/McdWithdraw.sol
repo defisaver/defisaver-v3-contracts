@@ -51,7 +51,12 @@ contract McdWithdraw is ActionBase, McdHelper, TokenUtils, GasBurner {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-
+    /// @notice Withdraws collateral from the vault
+    /// @param _vaultId Id of the vault
+    /// @param _amount Amount of collateral to withdraw
+    /// @param _joinAddr Join address of the maker collateral
+    /// @param _to Address where to send the collateral we withdrew
+    /// @param _mcdManager The manager address we are using
     function _mcdWithdraw(
         uint256 _vaultId,
         uint256 _amount,

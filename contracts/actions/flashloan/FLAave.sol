@@ -56,6 +56,10 @@ contract FLAave is ActionBase, StrategyData, TokenUtils {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @notice Gets a Fl from AaveV1 and returns back the execution to the action address
+    /// @param _amount Amount of tokens to FL
+    /// @param _tokenAddr Token address we want to FL
+    /// @param _taskData Rest of the data we have in the task
     function _flAave(
         uint256 _amount,
         address _tokenAddr,

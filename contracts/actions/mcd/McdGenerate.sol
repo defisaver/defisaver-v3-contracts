@@ -58,36 +58,40 @@ contract McdGenerate is ActionBase, McdHelper, TokenUtils, GasBurner {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @notice Generates dai from a specified vault
+    /// @dev The actual generated amount might differ, as it will generate up to max debt for vault
+    /// @param _vaultId Id of the vault
+    /// @param _amount Amount of dai to be generated
+    /// @param _to Address which will receive the dai
+    /// @param _mcdManager The manager address we are using
     function _mcdGenerate(
-        uint256 _cdpId,
+        uint256 _vaultId,
         uint256 _amount,
         address _to,
         address _mcdManager
     ) internal returns (uint256) {
-        bytes32 ilk = IManager(_mcdManager).ilks(_cdpId);
+        bytes32 ilk = IManager(_mcdManager).ilks(_vaultId);
 
         uint256 rate = IJug(JUG_ADDRESS).drip(ilk);
-        uint256 daiVatBalance = vat.dai(IManager(_mcdManager).urns(_cdpId));
+        uint256 daiVatBalance = vat.dai(IManager(_mcdManager).urns(_vaultId));
 
-        uint256 maxAmount = getMaxDebt(_mcdManager, _cdpId, ilk);
+        uint256 maxAmount = getMaxDebt(_mcdManager, _vaultId, ilk);
 
         // can't generate more than max amount
         if (_amount >= maxAmount) {
             _amount = maxAmount;
         }
 
-        IManager(_mcdManager).frob(_cdpId, int256(0), normalizeDrawAmount(_amount, rate, daiVatBalance));
-        IManager(_mcdManager).move(_cdpId, address(this), toRad(_amount));
+        IManager(_mcdManager).frob(_vaultId, int256(0), normalizeDrawAmount(_amount, rate, daiVatBalance));
+        IManager(_mcdManager).move(_vaultId, address(this), toRad(_amount));
 
         if (vat.can(address(this), address(DAI_JOIN_ADDRESS)) == 0) {
             vat.hope(DAI_JOIN_ADDRESS);
         }
 
-        IDaiJoin(DAI_JOIN_ADDRESS).exit(address(this), _amount);
+        IDaiJoin(DAI_JOIN_ADDRESS).exit(_to, _amount);
 
-        withdrawTokens(DAI_ADDRESS, _to, _amount);
-
-        logger.Log(address(this), msg.sender, "McdGenerate", abi.encode(_cdpId, _amount));
+        logger.Log(address(this), msg.sender, "McdGenerate", abi.encode(_vaultId, _amount));
 
         return _amount;
     }

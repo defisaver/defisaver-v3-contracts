@@ -42,7 +42,9 @@ contract McdOpen is ActionBase, GasBurner {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
-
+    /// @notice Opens up an empty vault
+    /// @param _joinAddr Join address of the maker collateral
+    /// @param _mcdManager The manager address we are using
     function _mcdOpen(address _joinAddr, address _mcdManager) internal returns (uint256 vaultId) {
         bytes32 ilk = IJoin(_joinAddr).ilk();
         vaultId = IManager(_mcdManager).open(ilk, address(this));

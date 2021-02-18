@@ -49,8 +49,8 @@ contract CompWithdraw is ActionBase, CompHelper, TokenUtils, GasBurner {
     /// @notice Withdraws a underlying token amount from compound
     /// @dev Send uint(-1) to withdraw whole balance
     /// @param _cTokenAddr cToken address
-    /// @param _amount Amount of tokens to withdraw
-    /// @param _to Where to send the tokens to (can be left on proxy)
+    /// @param _amount Amount of underlyinh tokens to withdraw
+    /// @param _to Address where to send the tokens to (can be left on proxy)
     function _withdraw(address _cTokenAddr, uint _amount, address _to) internal returns (uint) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 

@@ -63,28 +63,33 @@ contract DFSBuy is ActionBase, DFSExchangeCore, GasBurner {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @notice Buys an exact _destAmount of tokens
+    /// @param _exchangeData Struct that cointains all the exchange data
+    /// @param _from Where are we pulling the tokens from
+    /// @param _to Where are we sending the tokens to
+    /// @param _fee Fee divider we are using based on the action
     function _dfsBuy(
-        ExchangeData memory exchangeData,
+        ExchangeData memory _exchangeData,
         address _from,
         address _to,
         uint256 _fee
     ) internal returns (uint256) {
-        pullTokens(exchangeData.srcAddr, _from, exchangeData.srcAmount);
+        pullTokens(_exchangeData.srcAddr, _from, _exchangeData.srcAmount);
 
         uint256 balanceBefore =
-            getBalance(exchangeData.srcAddr, address(this)) - exchangeData.srcAmount;
+            getBalance(_exchangeData.srcAddr, address(this)) - _exchangeData.srcAmount;
 
-        exchangeData.user = getUserAddress();
-        exchangeData.dfsFeeDivider = _fee;
+        _exchangeData.user = getUserAddress();
+        _exchangeData.dfsFeeDivider = _fee;
 
-        (address wrapper, uint256 amountSold) = _buy(exchangeData);
+        (address wrapper, uint256 amountSold) = _buy(_exchangeData);
 
-        withdrawTokens(exchangeData.destAddr, _to, exchangeData.destAmount);
+        withdrawTokens(_exchangeData.destAddr, _to, _exchangeData.destAmount);
 
         withdrawTokens(
-            exchangeData.srcAddr,
+            _exchangeData.srcAddr,
             _from,
-            getBalance(exchangeData.srcAddr, address(this)) - balanceBefore
+            getBalance(_exchangeData.srcAddr, address(this)) - balanceBefore
         );
 
         logger.Log(
@@ -93,10 +98,10 @@ contract DFSBuy is ActionBase, DFSExchangeCore, GasBurner {
             "DfsBuy",
             abi.encode(
                 wrapper,
-                exchangeData.srcAddr,
-                exchangeData.destAddr,
+                _exchangeData.srcAddr,
+                _exchangeData.destAddr,
                 amountSold,
-                exchangeData.destAmount
+                _exchangeData.destAmount
             )
         );
 
