@@ -9,7 +9,9 @@ import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
 /// @title Borrow a token a from an Aave market
-contract AaveBorrow is ActionBase, AaveHelper, TokenUtils, GasBurner {
+contract AaveBorrow is ActionBase, AaveHelper, GasBurner {
+
+    using TokenUtils for address;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -76,7 +78,7 @@ contract AaveBorrow is ActionBase, AaveHelper, TokenUtils, GasBurner {
         address _onBehalf
     ) internal returns (uint) {
         address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
-        _tokenAddr = convertToWeth(_tokenAddr);
+        _tokenAddr = _tokenAddr.convertToWeth();
 
         // default to onBehalf of proxy
         if (_onBehalf == address(0)) {
@@ -91,13 +93,13 @@ contract AaveBorrow is ActionBase, AaveHelper, TokenUtils, GasBurner {
             _onBehalf
         );
 
-        if (_tokenAddr == WETH_ADDR) {
+        if (_tokenAddr == TokenUtils.WETH_ADDR) {
             // we do this so the user gets eth instead of weth
-            withdrawWeth(_amount);
-            _tokenAddr = ETH_ADDR;
+            TokenUtils.withdrawWeth(_amount);
+            _tokenAddr = TokenUtils.ETH_ADDR;
         }
 
-        withdrawTokens(_tokenAddr, _to, _amount);
+        _tokenAddr.withdrawTokens(_to, _amount);
 
         return _amount;
     }

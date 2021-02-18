@@ -10,7 +10,10 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
 /// @title Supplies liquidity to uniswap
-contract UniSupply is ActionBase, TokenUtils, GasBurner {
+contract UniSupply is ActionBase, GasBurner {
+    
+    using TokenUtils for address;
+    
     IUniswapRouter public constant router =
         IUniswapRouter(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
 
@@ -66,23 +69,23 @@ contract UniSupply is ActionBase, TokenUtils, GasBurner {
     /// @param _uniData All the required data to deposit to uni
     function _uniSupply(UniSupplyData memory _uniData) internal returns (uint256) {
         // fetch tokens from the address
-        pullTokens(_uniData.tokenA, _uniData.from, _uniData.amountADesired);
-        pullTokens(_uniData.tokenB, _uniData.from, _uniData.amountBDesired);
+        _uniData.tokenA.pullTokens(_uniData.from, _uniData.amountADesired);
+        _uniData.tokenB.pullTokens(_uniData.from, _uniData.amountBDesired);
 
         // handle if tokens are eth, convert to weth
-        _uniData.tokenA = convertAndDepositToWeth(_uniData.tokenA, _uniData.amountADesired);
-        _uniData.tokenB = convertAndDepositToWeth(_uniData.tokenB, _uniData.amountBDesired);
+        _uniData.tokenA = _uniData.tokenA.convertAndDepositToWeth(_uniData.amountADesired);
+        _uniData.tokenB = _uniData.tokenB.convertAndDepositToWeth(_uniData.amountBDesired);
 
         // approve router so it can pull tokens
-        approveToken(_uniData.tokenA, address(router), uint256(-1));
-        approveToken(_uniData.tokenB, address(router), uint256(-1));
+        _uniData.tokenA.approveToken(address(router), type(uint256).max);
+        _uniData.tokenB.approveToken(address(router), type(uint256).max);
 
         // add liq. and get info how much we put in
         (uint amountA, uint amountB, uint liqAmount) = _addLiquidity(_uniData);
 
         // send leftovers
-        withdrawTokens(_uniData.tokenA, _uniData.to, (_uniData.amountADesired - amountA));
-        withdrawTokens(_uniData.tokenB, _uniData.to, (_uniData.amountBDesired - amountB));
+        _uniData.tokenA.withdrawTokens(_uniData.to, (_uniData.amountADesired - amountA));
+        _uniData.tokenB.withdrawTokens(_uniData.to, (_uniData.amountBDesired - amountB));
 
         return liqAmount;
     }

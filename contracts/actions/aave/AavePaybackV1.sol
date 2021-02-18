@@ -10,7 +10,9 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
 /// @title Payback a token a user borrowed from an Aave market
-contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
+contract AavePaybackV1 is ActionBase, GasBurner {
+
+    using TokenUtils for address;
 
     address public constant AAVE_V1_LENDING_POOL_ADDRESSES = 0x24a42fD28C976A61Df5D00D0599C34c4f90748c8;
 
@@ -59,25 +61,25 @@ contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
         address lendingPool = ILendingPoolAddressesProvider(AAVE_V1_LENDING_POOL_ADDRESSES).getLendingPool();
 
         uint256 amount = _amount;
-        uint256 ethAmount = getBalance(ETH_ADDR, address(this));
+        uint256 ethAmount = TokenUtils.ETH_ADDR.getBalance(address(this));
 
         if (_amount == uint256(-1)) {
             (,uint256 borrowAmount,,,,,uint256 originationFee,,,) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, _onBehalf);
             amount = borrowAmount + originationFee;
-            amount = amount > getBalance(_tokenAddr, _from) ? getBalance(_tokenAddr, _from) : amount;
+            amount = amount > _tokenAddr.getBalance(_from) ? _tokenAddr.getBalance(_from) : amount;
         }
 
-        if (_tokenAddr != ETH_ADDR) {
-            pullTokens(_tokenAddr, _from, _amount);
-            approveToken(_tokenAddr, lendingPoolCore, uint(-1));
+        if (_tokenAddr != TokenUtils.ETH_ADDR) {
+            _tokenAddr.pullTokens(_from, _amount);
+            _tokenAddr.approveToken(lendingPoolCore, uint(-1));
             ethAmount = 0;
         }
 
-        uint tokensBefore = getBalance(_tokenAddr, address(this));
+        uint tokensBefore = _tokenAddr.getBalance(address(this));
         ILendingPool(lendingPool).repay{value: ethAmount}(_tokenAddr, amount, payable(_onBehalf));
-        uint tokensAfter = getBalance(_tokenAddr, address(this));
+        uint tokensAfter = _tokenAddr.getBalance(address(this));
 
-        withdrawTokens(_tokenAddr, _from, tokensAfter);
+        _tokenAddr.withdrawTokens(_from, tokensAfter);
         
         return tokensBefore - tokensAfter;
     }

@@ -11,7 +11,9 @@ import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
 
 /// @title Withdraw a token from Compound
-contract CompWithdraw is ActionBase, CompHelper, TokenUtils, GasBurner {
+contract CompWithdraw is ActionBase, CompHelper, GasBurner {
+
+    using TokenUtils for address;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -54,22 +56,22 @@ contract CompWithdraw is ActionBase, CompHelper, TokenUtils, GasBurner {
     function _withdraw(address _cTokenAddr, uint _amount, address _to) internal returns (uint) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
-        uint tokenBalanceBefore = getBalance(tokenAddr, address(this));
+        uint tokenBalanceBefore = tokenAddr.getBalance(address(this));
 
         // if _amount uint(-1) that means take out whole balance
-        if (_amount == uint(-1)) {
-            _amount = getBalance(_cTokenAddr, address(this));
+        if (_amount == type(uint).max) {
+            _amount = _cTokenAddr.getBalance(address(this));
             require(ICToken(_cTokenAddr).redeem(_amount) == 0, "Comp redeem failed");
         } else {
             require(ICToken(_cTokenAddr).redeemUnderlying(_amount) == 0, "Comp redeem failed");
         }
 
-        uint tokenBalanceAfter = getBalance(tokenAddr, address(this));
+        uint tokenBalanceAfter = tokenAddr.getBalance(address(this));
 
         // used to return the precise amount of tokens returned
         _amount = tokenBalanceAfter - tokenBalanceBefore;
 
-        withdrawTokens(tokenAddr, _to, _amount);
+        tokenAddr.withdrawTokens(_to, _amount);
 
         return _amount;
     }

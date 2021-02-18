@@ -9,7 +9,10 @@ import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
 /// @title Suply a token to an Aave market
-contract AaveSupply is ActionBase, AaveHelper, TokenUtils, GasBurner {
+contract AaveSupply is ActionBase, AaveHelper, GasBurner {
+
+    using TokenUtils for address;
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
@@ -63,7 +66,7 @@ contract AaveSupply is ActionBase, AaveHelper, TokenUtils, GasBurner {
         uint256 amount = _amount;
 
         if (_amount == uint256(-1)) {
-            amount = getBalance(_tokenAddr, _tokenAddr == ETH_ADDR ? address(this) : _from);
+            amount = _tokenAddr.getBalance(_tokenAddr == TokenUtils.ETH_ADDR ? address(this) : _from);
         }
 
         // default to onBehalf of proxy
@@ -72,13 +75,13 @@ contract AaveSupply is ActionBase, AaveHelper, TokenUtils, GasBurner {
         }
 
         // pull tokens to proxy so we can supply
-        pullTokens(_tokenAddr, _from, amount);
+        _tokenAddr.pullTokens(_from, amount);
 
         // if Eth, convert to Weth
-        _tokenAddr = convertAndDepositToWeth(_tokenAddr, amount);
+        _tokenAddr = _tokenAddr.convertAndDepositToWeth(amount);
 
         // approve aave pool to pull tokens
-        approveToken(_tokenAddr, lendingPool, uint256(-1));
+        _tokenAddr.approveToken(lendingPool, type(uint256).max);
 
         // deposit in behalf of the proxy
         ILendingPoolV2(lendingPool).deposit(_tokenAddr, amount, _onBehalf, AAVE_REFERRAL_CODE);

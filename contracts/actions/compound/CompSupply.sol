@@ -10,7 +10,9 @@ import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
 
 /// @title Supply a token to Compound
-contract CompSupply is ActionBase, CompHelper, TokenUtils, GasBurner {
+contract CompSupply is ActionBase, CompHelper, GasBurner {
+
+    using TokenUtils for address;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -51,17 +53,17 @@ contract CompSupply is ActionBase, CompHelper, TokenUtils, GasBurner {
 
         // if amount -1, pull current proxy balance
         if (_amount == uint(-1)) {
-            _amount = getBalance(tokenAddr, address(this));
+            _amount = tokenAddr.getBalance(address(this));
         }
 
-        pullTokens(tokenAddr, _from, _amount);
-        approveToken(tokenAddr, _cTokenAddr, uint(-1));
+        tokenAddr.pullTokens(_from, _amount);
+        tokenAddr.approveToken(_cTokenAddr, type(uint).max);
 
         if (isAlreadyInMarket(_cTokenAddr)) {
             enterMarket(_cTokenAddr);
         }
 
-        if (tokenAddr != ETH_ADDR) {
+        if (tokenAddr != TokenUtils.ETH_ADDR) {
             require(ICToken(_cTokenAddr).mint(_amount) == 0, "Comp supply failed");
         } else {
             ICToken(_cTokenAddr).mint{value: msg.value}(); // reverts on fail

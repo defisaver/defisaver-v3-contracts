@@ -12,7 +12,10 @@ import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
 
 /// @title Payback dai debt for a Maker vault
-contract McdPayback is ActionBase, McdHelper, TokenUtils, GasBurner {
+contract McdPayback is ActionBase, McdHelper, GasBurner {
+    
+    using TokenUtils for address;
+    
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
     address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
@@ -69,9 +72,9 @@ contract McdPayback is ActionBase, McdHelper, TokenUtils, GasBurner {
             _amount = wholeDebt;
         }
 
-        pullTokens(DAI_ADDRESS, _from, _amount);
+        DAI_ADDRESS.pullTokens(_from, _amount);
 
-        approveToken(DAI_ADDRESS, DAI_JOIN_ADDRESS, uint(-1));
+        DAI_ADDRESS.approveToken(DAI_JOIN_ADDRESS, type(uint).max);
 
         IDaiJoin(DAI_JOIN_ADDRESS).join(urn, _amount);
 

@@ -7,7 +7,9 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
 /// @title Helper action to pull a token from the specified address
-contract PullToken is ActionBase, TokenUtils {
+contract PullToken is ActionBase {
+    
+    using TokenUtils for address;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -51,10 +53,10 @@ contract PullToken is ActionBase, TokenUtils {
     function _pullToken(address _tokenAddr, address _from, uint _amount) internal returns (uint) {
 
         if (_amount == uint(-1)) {
-            _amount = getBalance(_tokenAddr, _from);
+            _amount = _tokenAddr.getBalance(_from);
         }
 
-        pullTokens(_tokenAddr, _from, _amount);
+        _tokenAddr.pullTokens(_from, _amount);
 
         return _amount;
     }

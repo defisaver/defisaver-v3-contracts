@@ -10,7 +10,10 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
 /// @title Supplies liquidity to uniswap
-contract UniWithdraw is ActionBase, TokenUtils, GasBurner {
+contract UniWithdraw is ActionBase, GasBurner {
+
+    using TokenUtils for address;
+
     IUniswapRouter public constant router =
         IUniswapRouter(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
 
@@ -71,32 +74,32 @@ contract UniWithdraw is ActionBase, TokenUtils, GasBurner {
     /// @param _uniData All the required data to withdraw from uni
     function _uniWithdraw(UniWithdrawData memory _uniData) internal returns (uint256) {
         // handle if tokens are eth, convert to weth
-        _uniData.tokenA = convertToWeth(_uniData.tokenA);
-        _uniData.tokenB = convertToWeth(_uniData.tokenB);
+        _uniData.tokenA = _uniData.tokenA.convertToWeth();
+        _uniData.tokenB = _uniData.tokenB.convertToWeth();
 
         // approve the lp allowance
         address lpTokenAddr = factory.getPair(_uniData.tokenA, _uniData.tokenB);
 
-        pullTokens(lpTokenAddr, _uniData.from, _uniData.liquidity);
-        approveToken(lpTokenAddr, address(router), uint256(-1));
+        lpTokenAddr.pullTokens(_uniData.from, _uniData.liquidity);
+        lpTokenAddr.approveToken(address(router), uint256(-1));
 
         // withdraw liq. and get info how much we got out
         (uint256 amountA, uint256 amountB) = _withdrawLiquidity(_uniData);
 
         // withdraw weth to eth if needed
-        if (_uniData.tokenA == WETH_ADDR) {
-            withdrawWeth(amountA);
-            _uniData.tokenA = ETH_ADDR;
+        if (_uniData.tokenA == TokenUtils.WETH_ADDR) {
+            TokenUtils.withdrawWeth(amountA);
+            _uniData.tokenA = TokenUtils.ETH_ADDR;
         }
 
-        if (_uniData.tokenB == WETH_ADDR) {
-            withdrawWeth(amountB);
-            _uniData.tokenB = ETH_ADDR;
+        if (_uniData.tokenB == TokenUtils.WETH_ADDR) {
+            TokenUtils.withdrawWeth(amountB);
+            _uniData.tokenB = TokenUtils.ETH_ADDR;
         }
 
         // send underlying tokens
-        withdrawTokens(_uniData.tokenA, _uniData.to, amountA);
-        withdrawTokens(_uniData.tokenB, _uniData.to, amountB);
+        _uniData.tokenA.withdrawTokens(_uniData.to, amountA);
+        _uniData.tokenB.withdrawTokens(_uniData.to, amountB);
 
         return _uniData.liquidity;
     }

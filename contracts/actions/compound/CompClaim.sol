@@ -10,7 +10,10 @@ import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
 
 /// @title Claims Comp reward for the specified user
-contract CompClaim is ActionBase, CompHelper, TokenUtils, GasBurner {
+contract CompClaim is ActionBase, CompHelper, GasBurner {
+
+    using TokenUtils for address;
+
     address public constant COMP_ADDR = 0xc00e94Cb662C3520282E6f5717214004A7f26888;
 
     /// @inheritdoc ActionBase
@@ -61,17 +64,17 @@ contract CompClaim is ActionBase, CompHelper, TokenUtils, GasBurner {
         address[] memory u = new address[](1);
         u[0] = _from;
 
-        uint256 compBalanceBefore = getBalance(COMP_ADDR, _from);
+        uint256 compBalanceBefore = COMP_ADDR.getBalance(_from);
 
         IComptroller(COMPTROLLER_ADDR).claimComp(u, _cTokensSupply, false, true);
         IComptroller(COMPTROLLER_ADDR).claimComp(u, _cTokensBorrow, true, false);
 
-        uint256 compBalanceAfter = getBalance(COMP_ADDR, _from);
+        uint256 compBalanceAfter = COMP_ADDR.getBalance(_from);
 
         uint256 compClaimed = compBalanceAfter - compBalanceBefore;
 
         if (_from == address(this)) {
-            withdrawTokens(COMP_ADDR, _to, compClaimed);
+            COMP_ADDR.withdrawTokens(_to, compClaimed);
         }
 
         return compClaimed;

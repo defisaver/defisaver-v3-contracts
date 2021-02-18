@@ -16,6 +16,7 @@ import "../interfaces/exchange/IOffchainWrapper.sol";
 
 contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
     using SafeERC20 for IERC20;
+    using TokenUtils for address;
 
     string public constant ERR_SLIPPAGE_HIT = "Slippage hit";
     string public constant ERR_DEST_AMOUNT_MISSING = "Dest amount missing";
@@ -39,7 +40,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         address originalSrcAddr = exData.srcAddr;
         bool offChainSwapSuccess;
 
-        uint256 destBalanceBefore = getBalance(convertToEth(exData.destAddr), address(this));
+        uint256 destBalanceBefore = exData.destAddr.convertToEth().getBalance(address(this));
 
         // Takes DFS exchange fee
         exData.srcAmount -= getFee(
@@ -50,7 +51,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         );
 
         // converts from ETH -> WETH if needed
-        exData.srcAddr = convertAndDepositToWeth(exData.srcAddr, exData.srcAmount);
+        exData.srcAddr = exData.srcAddr.convertAndDepositToWeth(exData.srcAmount);
 
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
@@ -66,7 +67,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         // if anything is left in weth, pull it to user as eth
         withdrawAllWeth();
 
-        uint256 destBalanceAfter = getBalance(convertToEth(exData.destAddr), address(this));
+        uint256 destBalanceAfter = exData.destAddr.convertToEth().getBalance(address(this));
         uint256 amountBought = sub(destBalanceAfter, destBalanceBefore);
 
         // check slippage
@@ -92,7 +93,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         uint256 amountSold;
         bool offChainSwapSuccess;
 
-        uint256 destBalanceBefore = getBalance(convertToEth(exData.destAddr), address(this));
+        uint256 destBalanceBefore = exData.destAddr.convertToEth().getBalance(address(this));
 
         // Takes DFS exchange fee
         exData.srcAmount -= getFee(
@@ -103,7 +104,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         );
 
         // converts from ETH -> WETH if needed
-        exData.srcAddr = convertAndDepositToWeth(exData.srcAddr, exData.srcAmount);
+        exData.srcAddr = exData.srcAddr.convertAndDepositToWeth(exData.srcAmount);
 
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
@@ -119,7 +120,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         // if anything is left in weth, pull it to user as eth
         withdrawAllWeth();
 
-        uint256 destBalanceAfter = getBalance(convertToEth(exData.destAddr), address(this));
+        uint256 destBalanceAfter = exData.destAddr.convertToEth().getBalance(address(this));
         uint256 amountBought = sub(destBalanceAfter, destBalanceBefore);
 
         // check slippage
@@ -190,10 +191,10 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
     }
 
     function withdrawAllWeth() internal {
-        uint256 wethBalance = getBalance(WETH_ADDR, address(this));
+        uint256 wethBalance = TokenUtils.WETH_ADDR.getBalance(address(this));
 
         if (wethBalance > 0) {
-            withdrawWeth(wethBalance);
+            TokenUtils.withdrawWeth(wethBalance);
         }
     }
 
@@ -225,7 +226,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
 
             address walletAddr = feeRecipient.getFeeAddr();
 
-            withdrawTokens(_token, walletAddr, feeAmount);
+            _token.withdrawTokens(walletAddr, feeAmount);
         }
     }
 
