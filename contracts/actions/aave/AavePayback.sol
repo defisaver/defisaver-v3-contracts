@@ -10,7 +10,10 @@ import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
 /// @title Payback a token a user borrowed from an Aave market
-contract AavePayback is ActionBase, AaveHelper, TokenUtils, GasBurner {
+contract AavePayback is ActionBase, AaveHelper, GasBurner {
+
+    using TokenUtils for address;
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
@@ -79,8 +82,8 @@ contract AavePayback is ActionBase, AaveHelper, TokenUtils, GasBurner {
         address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
 
         // if the amount sent is -1 to repay all, pull only the msg.sender baalnce
-        if (_amount == uint256(-1)) {
-            _amount = getBalance(_tokenAddr, msg.sender);
+        if (_amount == type(uint256).max) {
+            _amount = _tokenAddr.getBalance(msg.sender);
         }
 
         // default to onBehalf of proxy
@@ -88,25 +91,25 @@ contract AavePayback is ActionBase, AaveHelper, TokenUtils, GasBurner {
             _onBehalf = address(this);
         }
 
-        pullTokens(_tokenAddr, _from, _amount);
+        _tokenAddr.pullTokens(_from, _amount);
 
-        _tokenAddr = convertAndDepositToWeth(_tokenAddr, _amount);
+        _tokenAddr = _tokenAddr.convertAndDepositToWeth(_amount);
 
-        approveToken(_tokenAddr, lendingPool, _amount);
+        _tokenAddr.approveToken(lendingPool, _amount);
 
-        uint256 tokensBefore = getBalance(_tokenAddr, address(this));
+        uint256 tokensBefore = _tokenAddr.getBalance(address(this));
 
         ILendingPoolV2(lendingPool).repay(_tokenAddr, _amount, _rateMode, _onBehalf);
 
-        uint256 tokensAfter = getBalance(_tokenAddr, address(this));
+        uint256 tokensAfter = _tokenAddr.getBalance(address(this));
 
         // withraw weth if needed
-        if (_tokenAddr == WETH_ADDR) {
-            withdrawWeth(tokensAfter);
-            _tokenAddr = ETH_ADDR;
+        if (_tokenAddr == TokenUtils.WETH_ADDR) {
+            TokenUtils.withdrawWeth(tokensAfter);
+            _tokenAddr = TokenUtils.ETH_ADDR;
         }
 
-        withdrawTokens(_tokenAddr, _from, tokensAfter);
+        _tokenAddr.withdrawTokens(_from, tokensAfter);
 
         return tokensBefore - tokensAfter;
     }

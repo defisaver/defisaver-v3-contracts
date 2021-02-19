@@ -12,7 +12,9 @@ import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
 
 /// @title Payback a token a user borrowed from Compound
-contract CompPayback is ActionBase, CompHelper, TokenUtils, GasBurner {
+contract CompPayback is ActionBase, CompHelper, GasBurner {
+
+    using TokenUtils for address;
 
     string public constant ERR_COMP_PAYBACK_FAILED = "Compound payback failed";
 
@@ -56,14 +58,15 @@ contract CompPayback is ActionBase, CompHelper, TokenUtils, GasBurner {
     function _payback(address _cTokenAddr, uint _amount, address _from) internal returns (uint) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
-        // if uint(-1) payback whole proxy borrow amount
-        if (_amount == uint(-1)) {
+        tokenAddr.approveToken(_cTokenAddr, _amount);
+
+        // if type(uint).max payback whole amount
+        if (_amount == type(uint).max) {
             _amount = ICToken(_cTokenAddr).borrowBalanceCurrent(address(this));
         }
 
-        if (tokenAddr != ETH_ADDR) {
-            pullTokens(tokenAddr, _from, _amount);
-            approveToken(tokenAddr, _cTokenAddr, _amount);
+        if (tokenAddr != TokenUtils.ETH_ADDR) {
+            tokenAddr.pullTokens(_from, _amount);
 
             require(ICToken(_cTokenAddr).repayBorrow(_amount) == 0, ERR_COMP_PAYBACK_FAILED);
         } else {

@@ -10,7 +10,9 @@ import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
 /// @title Migrates Lend token to Aave token
-contract AaveMigrateLend is ActionBase, AaveHelper, TokenUtils, GasBurner {
+contract AaveMigrateLend is ActionBase, AaveHelper, GasBurner {
+
+    using TokenUtils for address;
 
     address public constant LEND_MIGRATOR_ADDR = 0x317625234562B1526Ea2FaC4030Ea499C5291de4;
     address public constant LEND_ADDR = 0x80fB784B7eD66730e8b1DBd9820aFD29931aab03;
@@ -61,20 +63,20 @@ contract AaveMigrateLend is ActionBase, AaveHelper, TokenUtils, GasBurner {
     ) internal returns (uint) {
 
         // pull tokens to proxy so we can supply
-        _lendAmount = pullTokens(LEND_ADDR, _from, _lendAmount);
+        _lendAmount = LEND_ADDR.pullTokens(_from, _lendAmount);
 
-        approveToken(LEND_ADDR, LEND_MIGRATOR_ADDR, _lendAmount);
+        LEND_ADDR.approveToken(LEND_MIGRATOR_ADDR, _lendAmount);
 
-        uint aaveBalanceBefore = getBalance(AAVE_ADDR, address(this));
+        uint aaveBalanceBefore = AAVE_ADDR.getBalance(address(this));
 
         // migrate
         ILendToAaveMigrator(LEND_MIGRATOR_ADDR).migrateFromLEND(_lendAmount);
 
-        uint aaveBalanceAfter = getBalance(AAVE_ADDR, address(this));
+        uint aaveBalanceAfter = AAVE_ADDR.getBalance(address(this));
         uint aaveMigrated = (aaveBalanceAfter - aaveBalanceBefore);
 
         // withdraw
-        withdrawTokens(AAVE_ADDR, _to, aaveMigrated);
+        AAVE_ADDR.withdrawTokens(_to, aaveMigrated);
        
         return aaveMigrated;
     }

@@ -10,7 +10,9 @@ import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 
 /// @title DFS exchange wrapper for UniswapV2
-contract UniswapWrapperV3 is DSMath, IExchangeV3, TokenUtils, AdminAuth {
+contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth {
+
+    using TokenUtils for address;
 
     address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -24,8 +26,8 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, TokenUtils, AdminAuth {
     /// @param _srcAmount From amount
     /// @return uint Destination amount
     function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) external payable override returns (uint) {
-        _srcAddr = convertToWeth(_srcAddr);
-        _destAddr = convertToWeth(_destAddr);
+        _srcAddr = _srcAddr.convertToWeth();
+        _destAddr = _destAddr.convertToWeth();
 
         uint[] memory amounts;
         address[] memory path = abi.decode(_additionalData, (address[]));
@@ -51,23 +53,23 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, TokenUtils, AdminAuth {
     /// @return uint srcAmount
     function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory _additionalData) external override payable returns(uint) {
 
-        _srcAddr = convertToWeth(_srcAddr);
-        _destAddr = convertToWeth(_destAddr);
+        _srcAddr = _srcAddr.convertToWeth();
+        _destAddr = _destAddr.convertToWeth();
 
         uint[] memory amounts;
         address[] memory path = abi.decode(_additionalData, (address[]));
 
-        uint srcAmount = getBalance(_srcAddr, address(this));
+        uint srcAmount = _srcAddr.getBalance(address(this));
 
         IERC20(_srcAddr).safeApprove(address(router), srcAmount);
 
          // if we are buying ether
         if (_destAddr == WETH_ADDRESS) {
-            amounts = router.swapTokensForExactETH(_destAmount, uint(-1), path, msg.sender, block.timestamp + 1);
+            amounts = router.swapTokensForExactETH(_destAmount, type(uint).max, path, msg.sender, block.timestamp + 1);
         }
         // if we are buying token to token
         else {
-            amounts = router.swapTokensForExactTokens(_destAmount, uint(-1), path, msg.sender, block.timestamp + 1);
+            amounts = router.swapTokensForExactTokens(_destAmount, type(uint).max, path, msg.sender, block.timestamp + 1);
         }
 
         // Send the leftover from the source token back
@@ -82,8 +84,8 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, TokenUtils, AdminAuth {
     /// @param _srcAmount From amount
     /// @return uint Rate
     function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) public override view returns (uint) {
-        _srcAddr = convertToWeth(_srcAddr);
-        _destAddr = convertToWeth(_destAddr);
+        _srcAddr = _srcAddr.convertToWeth();
+        _destAddr = _destAddr.convertToWeth();
 
         address[] memory path = abi.decode(_additionalData, (address[]));
 
@@ -97,8 +99,8 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, TokenUtils, AdminAuth {
     /// @param _destAmount To amount
     /// @return uint Rate
     function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount, bytes memory _additionalData) public override view returns (uint) {
-        _srcAddr = convertToWeth(_srcAddr);
-        _destAddr = convertToWeth(_destAddr);
+        _srcAddr = _srcAddr.convertToWeth();
+        _destAddr = _destAddr.convertToWeth();
 
         address[] memory path = abi.decode(_additionalData, (address[]));
 

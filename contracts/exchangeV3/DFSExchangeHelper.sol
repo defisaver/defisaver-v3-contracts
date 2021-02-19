@@ -6,7 +6,10 @@ import "../utils/TokenUtils.sol";
 import "../utils/SafeERC20.sol";
 import "../utils/Discount.sol";
 
-contract DFSExchangeHelper is TokenUtils {
+contract DFSExchangeHelper {
+    
+    using TokenUtils for address;
+    
     string public constant ERR_OFFCHAIN_DATA_INVALID = "Offchain data invalid";
 
     using SafeERC20 for IERC20;
@@ -17,10 +20,10 @@ contract DFSExchangeHelper is TokenUtils {
         address payable _to
     ) internal {
         // clean out any eth leftover
-        withdrawTokens(ETH_ADDR, _to, uint256(-1));
+        TokenUtils.ETH_ADDR.withdrawTokens(_to, type(uint256).max);
 
-        withdrawTokens(_srcAddr, _to, uint256(-1));
-        withdrawTokens(_destAddr, _to, uint256(-1));
+        _srcAddr.withdrawTokens(_to, type(uint256).max);
+        _destAddr.withdrawTokens(_to, type(uint256).max);
     }
 
     function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {

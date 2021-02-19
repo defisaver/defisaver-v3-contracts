@@ -12,7 +12,10 @@ import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
 
 /// @title Supply collateral to a Maker vault
-contract McdSupply is ActionBase, McdHelper, TokenUtils, GasBurner {
+contract McdSupply is ActionBase, McdHelper, GasBurner {
+    
+    using TokenUtils for address;
+
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
 
     IVat public constant vat = IVat(VAT_ADDRESS);
@@ -68,22 +71,22 @@ contract McdSupply is ActionBase, McdHelper, TokenUtils, GasBurner {
         address tokenAddr = getTokenFromJoin(_joinAddr);
 
         // if amount -1, pull current proxy balance
-        if (_amount == uint(-1)) {
-            _amount = getBalance(tokenAddr, address(this));
+        if (_amount == type(uint).max) {
+            _amount = tokenAddr.getBalance(address(this));
         }
 
-        pullTokens(tokenAddr, _from, _amount);
+        tokenAddr.pullTokens(_from, _amount);
 
         int256 convertAmount = 0;
 
         if (isEthJoinAddr(_joinAddr)) {
-            tokenAddr = convertAndDepositToWeth(ETH_ADDR, _amount);
+            tokenAddr = TokenUtils.ETH_ADDR.convertAndDepositToWeth(_amount);
             convertAmount = toPositiveInt(_amount);
         } else {
             convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
         }
 
-        approveToken(tokenAddr, _joinAddr, _amount);
+        tokenAddr.approveToken(_joinAddr, _amount);
 
         IJoin(_joinAddr).join(address(this), _amount);
 

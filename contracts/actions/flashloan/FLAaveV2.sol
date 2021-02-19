@@ -12,8 +12,9 @@ import "../../core/StrategyData.sol";
 import "../../utils/TokenUtils.sol";
 
 /// @title Action that gets and receives a FL from Aave V2
-contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
+contract FLAaveV2 is ActionBase, StrategyData {
     using SafeERC20 for IERC20;
+    using TokenUtils for address;
 
     address
         public constant AAVE_LENDING_POOL = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
@@ -100,10 +101,10 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
         (Task memory currTask, address proxy) = abi.decode(_params, (Task, address));
 
         for (uint256 i = 0; i < _assets.length; ++i) {
-            if (_assets[i] == WETH_ADDR) {
-                withdrawWeth(_amounts[i]);
+            if (_assets[i] == TokenUtils.WETH_ADDR) {
+                TokenUtils.withdrawWeth(_amounts[i]);
             }
-            withdrawTokens(convertToEth(_assets[i]), proxy, _amounts[i]);
+            _assets[i].convertToEth().withdrawTokens(proxy, _amounts[i]);
         }
 
         address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
@@ -116,8 +117,8 @@ contract FLAaveV2 is ActionBase, StrategyData, TokenUtils {
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
-            convertAndDepositToWeth(convertToEth(_assets[i]), (_amounts[i] + _fees[i]));
-            approveToken(_assets[i], address(AAVE_LENDING_POOL), _amounts[i] + _fees[i]);
+            _assets[i].convertToEth().convertAndDepositToWeth((_amounts[i] + _fees[i]));
+            _assets[i].approveToken(address(AAVE_LENDING_POOL), _amounts[i] + _fees[i]);
         }
 
         return true;

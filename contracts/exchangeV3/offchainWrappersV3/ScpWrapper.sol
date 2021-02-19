@@ -11,6 +11,8 @@ import "../../interfaces/exchange/IOffchainWrapper.sol";
 
 contract ScpWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath {
 
+    using TokenUtils for address;
+    
     string public constant ERR_SRC_AMOUNT = "Not enough funds";
     string public constant ERR_PROTOCOL_FEE = "Not enough eth for protcol fee";
 
@@ -24,8 +26,8 @@ contract ScpWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath {
         ExchangeActionType _type
     ) override public payable returns (bool success, uint256) {
         // check that contract have enough balance for exchange and protocol fee
-        require(getBalance(_exData.srcAddr, address(this)) >= _exData.srcAmount, ERR_SRC_AMOUNT);
-        require(getBalance(ETH_ADDR, address(this)) >= _exData.offchainData.protocolFee, ERR_PROTOCOL_FEE);
+        require(_exData.srcAddr.getBalance(address(this)) >= _exData.srcAmount, ERR_SRC_AMOUNT);
+        require(TokenUtils.ETH_ADDR.getBalance(address(this)) >= _exData.offchainData.protocolFee, ERR_PROTOCOL_FEE);
 
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
         
@@ -36,13 +38,13 @@ contract ScpWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath {
             writeUint256(_exData.offchainData.callData, 36, wdiv(_exData.destAmount, _exData.offchainData.price));
         }
 
-        uint256 tokensBefore = getBalance(_exData.destAddr, address(this));
+        uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
         (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(_exData.offchainData.callData);
         uint256 tokensSwaped = 0;
 
         if (success) {
             // get the current balance of the swaped tokens
-            tokensSwaped = getBalance(_exData.destAddr, address(this)) - tokensBefore;
+            tokensSwaped = _exData.destAddr.getBalance(address(this)) - tokensBefore;
         }
 
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)

@@ -10,8 +10,9 @@ import "../../utils/TokenUtils.sol";
 import "../../utils/SafeERC20.sol";
 import "../../auth/AdminAuth.sol";
 
-contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth, TokenUtils {
+contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth {
 
+    using TokenUtils for address;
     using SafeERC20 for IERC20;
 
     address public constant OTC_ADDRESS = 0x794e6e91555438aFc3ccF1c5076A74F42133d08D;
@@ -24,8 +25,8 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth, TokenUtils {
     /// @param _srcAmount From amount
     /// @return uint Destination amount
     function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory) external override payable returns (uint) {
-        address srcAddr = convertToWeth(_srcAddr);
-        address destAddr = convertToWeth(_destAddr);
+        address srcAddr = _srcAddr.convertToWeth();
+        address destAddr = _destAddr.convertToWeth();
 
         IERC20(srcAddr).safeApprove(OTC_ADDRESS, _srcAmount);
 
@@ -48,14 +49,14 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth, TokenUtils {
     /// @param _destAmount To amount
     /// @return uint srcAmount
     function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory) external override payable returns(uint) {
-        address srcAddr = convertToWeth(_srcAddr);
-        address destAddr = convertToWeth(_destAddr);
+        address srcAddr = _srcAddr.convertToWeth();
+        address destAddr = _destAddr.convertToWeth();
 
-        uint srcAmount = getBalance(srcAddr, address(this));
+        uint srcAmount = srcAddr.getBalance(address(this));
 
         IERC20(srcAddr).safeApprove(OTC_ADDRESS, srcAmount);
 
-        srcAmount = IOasis(OTC_ADDRESS).buyAllAmount(destAddr, _destAmount, srcAddr, uint(-1));
+        srcAmount = IOasis(OTC_ADDRESS).buyAllAmount(destAddr, _destAmount, srcAddr, type(uint).max);
 
         // convert weth -> eth and send back
         if (destAddr == WETH_ADDRESS) {
@@ -77,8 +78,8 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth, TokenUtils {
     /// @param _srcAmount From amount
     /// @return uint Rate
     function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory) public override view returns (uint) {
-        address srcAddr = convertToWeth(_srcAddr);
-        address destAddr = convertToWeth(_destAddr);
+        address srcAddr = _srcAddr.convertToWeth();
+        address destAddr = _destAddr.convertToWeth();
 
         return wdiv(IOasis(OTC_ADDRESS).getBuyAmount(destAddr, srcAddr, _srcAmount), _srcAmount);
     }
@@ -90,8 +91,8 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth, TokenUtils {
     /// @param _destAmount To amount
     /// @return uint Rate
     function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount, bytes memory) public override view returns (uint) {
-        address srcAddr = convertToWeth(_srcAddr);
-        address destAddr = convertToWeth(_destAddr);
+        address srcAddr = _srcAddr.convertToWeth();
+        address destAddr = _destAddr.convertToWeth();
 
         return wdiv(1 ether, wdiv(IOasis(OTC_ADDRESS).getPayAmount(srcAddr, destAddr, _destAmount), _destAmount));
     }

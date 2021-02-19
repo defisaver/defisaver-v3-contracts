@@ -14,7 +14,10 @@ import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
 
 /// @title Generate dai from a Maker Vault
-contract McdGenerate is ActionBase, McdHelper, TokenUtils, GasBurner {
+contract McdGenerate is ActionBase, McdHelper, GasBurner {
+
+    using TokenUtils for address;
+
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
     address public constant JUG_ADDRESS = 0x19c0976f590D67707E62397C87829d896Dc0f1F1;
     address public constant SPOTTER_ADDRESS = 0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3;
@@ -90,6 +93,8 @@ contract McdGenerate is ActionBase, McdHelper, TokenUtils, GasBurner {
         }
 
         IDaiJoin(DAI_JOIN_ADDRESS).exit(_to, _amount);
+
+        DAI_ADDRESS.withdrawTokens(_to, _amount);
 
         logger.Log(address(this), msg.sender, "McdGenerate", abi.encode(_vaultId, _amount));
 

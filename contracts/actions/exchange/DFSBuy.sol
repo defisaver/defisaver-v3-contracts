@@ -10,6 +10,9 @@ import "../ActionBase.sol";
 
 /// @title A exchange sell action through the dfs exchange
 contract DFSBuy is ActionBase, DFSExchangeCore, GasBurner {
+
+    using TokenUtils for address;
+
     uint256 internal constant RECIPIE_FEE = 400;
     uint256 internal constant DIRECT_FEE = 800;
 
@@ -74,22 +77,21 @@ contract DFSBuy is ActionBase, DFSExchangeCore, GasBurner {
         address _to,
         uint256 _fee
     ) internal returns (uint256) {
-        pullTokens(_exchangeData.srcAddr, _from, _exchangeData.srcAmount);
+        _exchangeData.srcAddr.pullTokens(_from, _exchangeData.srcAmount);
 
         uint256 balanceBefore =
-            getBalance(_exchangeData.srcAddr, address(this)) - _exchangeData.srcAmount;
+            _exchangeData.srcAddr.getBalance(address(this)) - _exchangeData.srcAmount;
 
         _exchangeData.user = getUserAddress();
         _exchangeData.dfsFeeDivider = _fee;
 
         (address wrapper, uint256 amountSold) = _buy(_exchangeData);
 
-        withdrawTokens(_exchangeData.destAddr, _to, _exchangeData.destAmount);
+        _exchangeData.destAddr.withdrawTokens(_to, _exchangeData.destAmount);
 
-        withdrawTokens(
-            _exchangeData.srcAddr,
+        _exchangeData.srcAddr.withdrawTokens(
             _from,
-            getBalance(_exchangeData.srcAddr, address(this)) - balanceBefore
+            _exchangeData.srcAddr.getBalance(address(this)) - balanceBefore
         );
 
         logger.Log(

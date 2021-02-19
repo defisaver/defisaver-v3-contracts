@@ -7,7 +7,9 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
 /// @title Helper action to pull a token from the specified address
-contract PullToken is ActionBase, TokenUtils {
+contract PullToken is ActionBase {
+    
+    using TokenUtils for address;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -44,17 +46,17 @@ contract PullToken is ActionBase, TokenUtils {
     
 
     /// @notice Pulls a token from the specified addr, doesn't work with ETH
-    /// @dev If amount is uint(-1) it will send proxy balance
+    /// @dev If amount is type(uint).max it will send proxy balance
     /// @param _tokenAddr Address of token, use 0xEeee... for eth
     /// @param _from From where the tokens are pulled, can't be the proxy or 0x0
-    /// @param _amount Amount of tokens, can be uint(-1)
+    /// @param _amount Amount of tokens, can be type(uint).max
     function _pullToken(address _tokenAddr, address _from, uint _amount) internal returns (uint) {
 
-        if (_amount == uint(-1)) {
-            _amount = getBalance(_tokenAddr, _from);
+        if (_amount == type(uint).max) {
+            _amount = _tokenAddr.getBalance(_from);
         }
 
-        pullTokens(_tokenAddr, _from, _amount);
+        _tokenAddr.pullTokens(_from, _amount);
 
         return _amount;
     }

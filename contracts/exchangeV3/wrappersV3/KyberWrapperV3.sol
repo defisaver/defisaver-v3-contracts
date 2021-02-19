@@ -36,7 +36,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
             _srcAmount,
             destToken,
             msg.sender,
-            uint(-1),
+            type(uint).max,
             0,
             WALLET_ID
         );

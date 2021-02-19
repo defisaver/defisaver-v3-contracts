@@ -11,8 +11,9 @@ import "../../core/StrategyData.sol";
 import "../../utils/TokenUtils.sol";
 
 /// @title Action that gets and receives a FL from Aave V1
-contract FLAave is ActionBase, StrategyData, TokenUtils {
+contract FLAave is ActionBase, StrategyData {
     using SafeERC20 for IERC20;
+    using TokenUtils for address;
 
     address
         public constant AAVE_LENDING_POOL_ADDRESSES = 0x398eC7346DcD622eDc5ae82352F02bE94C62d119;
@@ -88,7 +89,7 @@ contract FLAave is ActionBase, StrategyData, TokenUtils {
     ) external {
         (Task memory currTask, address proxy) = abi.decode(_params, (Task, address));
 
-        withdrawTokens(_reserve, proxy, _amount);
+        _reserve.withdrawTokens(proxy, _amount);
 
         address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
         // call Action execution
@@ -100,10 +101,10 @@ contract FLAave is ActionBase, StrategyData, TokenUtils {
         // return FL
         address payable aaveCore = addressesProvider.getLendingPoolCore();
 
-        if (_reserve == ETH_ADDR) {
+        if (_reserve == TokenUtils.ETH_ADDR) {
             aaveCore.call{value: (_amount + _fee)}("");
         } else {
-            withdrawTokens(_reserve, aaveCore, (_amount + _fee));
+            _reserve.withdrawTokens(aaveCore, (_amount + _fee));
         }
     }
 

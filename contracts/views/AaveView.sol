@@ -10,7 +10,9 @@ import "../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
 import "../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../utils/TokenUtils.sol";
 
-contract AaveView is DSMath, AaveHelper, TokenUtils {
+contract AaveView is DSMath, AaveHelper {
+
+    using TokenUtils for address;
 
     struct LoanData {
         address user;
@@ -249,7 +251,7 @@ contract AaveView is DSMath, AaveHelper, TokenUtils {
             uint256 price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(reserve);
 
             if (aTokenBalance > 0) {
-                uint256 userTokenBalanceEth = wmul(aTokenBalance, price) * (10 ** (18 - getTokenDecimals(reserve)));
+                uint256 userTokenBalanceEth = wmul(aTokenBalance, price) * (10 ** (18 - reserve.getTokenDecimals()));
                 data.collAddr[collPos] = reserve;
                 data.collAmounts[collPos] = userTokenBalanceEth;
                 collPos++;
@@ -257,7 +259,7 @@ contract AaveView is DSMath, AaveHelper, TokenUtils {
 
             // Sum up debt in Eth
             if (borrowsStable > 0) {
-                uint256 userBorrowBalanceEth = wmul(borrowsStable, price) * (10 ** (18 - getTokenDecimals(reserve)));
+                uint256 userBorrowBalanceEth = wmul(borrowsStable, price) * (10 ** (18 - reserve.getTokenDecimals()));
                 data.borrowAddr[borrowStablePos] = reserve;
                 data.borrowStableAmounts[borrowStablePos] = userBorrowBalanceEth;
                 borrowStablePos++;
@@ -265,7 +267,7 @@ contract AaveView is DSMath, AaveHelper, TokenUtils {
 
             // Sum up debt in Eth
             if (borrowsVariable > 0) {
-                uint256 userBorrowBalanceEth = wmul(borrowsVariable, price) * (10 ** (18 - getTokenDecimals(reserve)));
+                uint256 userBorrowBalanceEth = wmul(borrowsVariable, price) * (10 ** (18 - reserve.getTokenDecimals()));
                 data.borrowAddr[borrowVariablePos] = reserve;
                 data.borrowVariableAmounts[borrowVariablePos] = userBorrowBalanceEth;
                 borrowVariablePos++;
