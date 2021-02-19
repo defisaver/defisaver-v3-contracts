@@ -53,8 +53,8 @@ contract CompPayback is ActionBase, CompHelper, GasBurner {
 
         tokenAddr.approveToken(_cTokenAddr, _amount);
 
-        // if uint(-1) payback whole amount
-        if (_amount == uint(-1)) {
+        // if type(uint).max payback whole amount
+        if (_amount == type(uint).max) {
             _amount = ICToken(_cTokenAddr).borrowBalanceCurrent(address(this));
         }
 

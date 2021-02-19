@@ -65,7 +65,7 @@ contract AaveSupply is ActionBase, AaveHelper, GasBurner {
         address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
         uint256 amount = _amount;
 
-        if (_amount == uint256(-1)) {
+        if (_amount == type(uint256).max) {
             amount = _tokenAddr.getBalance(_tokenAddr == TokenUtils.ETH_ADDR ? address(this) : _from);
         }
 

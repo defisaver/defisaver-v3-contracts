@@ -20,10 +20,10 @@ contract DFSExchangeHelper {
         address payable _to
     ) internal {
         // clean out any eth leftover
-        TokenUtils.ETH_ADDR.withdrawTokens(_to, uint256(-1));
+        TokenUtils.ETH_ADDR.withdrawTokens(_to, type(uint256).max);
 
-        _srcAddr.withdrawTokens(_to, uint256(-1));
-        _destAddr.withdrawTokens(_to, uint256(-1));
+        _srcAddr.withdrawTokens(_to, type(uint256).max);
+        _destAddr.withdrawTokens(_to, type(uint256).max);
     }
 
     function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {

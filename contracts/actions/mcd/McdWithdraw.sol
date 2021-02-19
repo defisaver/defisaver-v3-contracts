@@ -63,8 +63,8 @@ contract McdWithdraw is ActionBase, McdHelper, GasBurner {
         address _mcdManager
     ) internal returns (uint256) {
 
-        // if amount uint(-1) _amount is whole collateral amount
-        if (_amount == uint(-1)) {
+        // if amount type(uint).max _amount is whole collateral amount
+        if (_amount == type(uint).max) {
             (_amount, ) = getCdpInfo(IManager(_mcdManager), _vaultId, IManager(_mcdManager).ilks(_vaultId));
         }
 

@@ -53,7 +53,7 @@ contract AavePaybackV1 is ActionBase, GasBurner {
      /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     /// @notice User paybacks tokens to the Aave protocol
     /// @param _tokenAddr The address of the token to be paybacked
-    /// @param _amount Amount of tokens to be payed back, send uint256(-1) for whole debt
+    /// @param _amount Amount of tokens to be payed back, send type(uint256).max for whole debt
     /// @param _from Address from which we pull token
     /// @param _onBehalf Whose debt should be repayed
     function _payback(address _tokenAddr, uint256 _amount, address _from, address _onBehalf) internal returns (uint) {
@@ -63,7 +63,7 @@ contract AavePaybackV1 is ActionBase, GasBurner {
         uint256 amount = _amount;
         uint256 ethAmount = TokenUtils.ETH_ADDR.getBalance(address(this));
 
-        if (_amount == uint256(-1)) {
+        if (_amount == type(uint256).max) {
             (,uint256 borrowAmount,,,,,uint256 originationFee,,,) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, _onBehalf);
             amount = borrowAmount + originationFee;
             amount = amount > _tokenAddr.getBalance(_from) ? _tokenAddr.getBalance(_from) : amount;
@@ -71,7 +71,7 @@ contract AavePaybackV1 is ActionBase, GasBurner {
 
         if (_tokenAddr != TokenUtils.ETH_ADDR) {
             _tokenAddr.pullTokens(_from, _amount);
-            _tokenAddr.approveToken(lendingPoolCore, uint(-1));
+            _tokenAddr.approveToken(lendingPoolCore, type(uint).max);
             ethAmount = 0;
         }
 

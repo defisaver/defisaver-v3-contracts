@@ -56,7 +56,7 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth {
 
         IERC20(srcAddr).safeApprove(OTC_ADDRESS, srcAmount);
 
-        srcAmount = IOasis(OTC_ADDRESS).buyAllAmount(destAddr, _destAmount, srcAddr, uint(-1));
+        srcAmount = IOasis(OTC_ADDRESS).buyAllAmount(destAddr, _destAmount, srcAddr, type(uint).max);
 
         // convert weth -> eth and send back
         if (destAddr == WETH_ADDRESS) {

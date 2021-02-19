@@ -22,7 +22,7 @@ library TokenUtils {
     function pullTokens(address _token, address _from, uint256 _amount) internal returns (uint) {
 
         // handle max uint amount
-        if (_amount == uint(-1)) {
+        if (_amount == type(uint).max) {
             uint allowance = uint (-1);
 
             if (_token == ETH_ADDR) {
@@ -46,7 +46,7 @@ library TokenUtils {
         address _to,
         uint256 _amount
     ) internal returns (uint) {
-        if (_amount == uint(-1)) {
+        if (_amount == type(uint).max) {
             _amount = getBalance(_token, address(this));
         }
 

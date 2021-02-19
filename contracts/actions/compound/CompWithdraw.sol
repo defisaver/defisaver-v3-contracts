@@ -49,7 +49,7 @@ contract CompWithdraw is ActionBase, CompHelper, GasBurner {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Withdraws a underlying token amount from compound
-    /// @dev Send uint(-1) to withdraw whole balance
+    /// @dev Send type(uint).max to withdraw whole balance
     /// @param _cTokenAddr cToken address
     /// @param _amount Amount of tokens to withdraw
     /// @param _to Where to send the tokens to (can be left on proxy)
@@ -58,7 +58,7 @@ contract CompWithdraw is ActionBase, CompHelper, GasBurner {
 
         uint tokenBalanceBefore = tokenAddr.getBalance(address(this));
 
-        // if _amount uint(-1) that means take out whole balance
+        // if _amount type(uint).max that means take out whole balance
         if (_amount == type(uint).max) {
             _amount = _cTokenAddr.getBalance(address(this));
             require(ICToken(_cTokenAddr).redeem(_amount) == 0, "Comp redeem failed");

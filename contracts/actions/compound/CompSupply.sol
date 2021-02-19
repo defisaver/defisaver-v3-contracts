@@ -52,7 +52,7 @@ contract CompSupply is ActionBase, CompHelper, GasBurner {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
         // if amount -1, pull current proxy balance
-        if (_amount == uint(-1)) {
+        if (_amount == type(uint).max) {
             _amount = tokenAddr.getBalance(address(this));
         }
 

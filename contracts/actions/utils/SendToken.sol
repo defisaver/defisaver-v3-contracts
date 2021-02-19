@@ -46,10 +46,10 @@ contract SendToken is ActionBase {
     
 
     /// @notice Sends a token to the specified addr, works with Eth also
-    /// @dev If amount is uint(-1) it will send proxy balance
+    /// @dev If amount is type(uint).max it will send proxy balance
     /// @param _tokenAddr Address of token, use 0xEeee... for eth
     /// @param _to Where the tokens are sent, can't be the proxy or 0x0
-    /// @param _amount Amount of tokens, can be uint(-1)
+    /// @param _amount Amount of tokens, can be type(uint).max
     function _sendToken(address _tokenAddr, address _to, uint _amount) internal returns (uint) {
 
         if (_amount == type(uint).max) {
