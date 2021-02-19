@@ -12,7 +12,9 @@ import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
 
 /// @title Borrow a token from Compound
-contract CompBorrow is ActionBase, CompHelper, TokenUtils, GasBurner {
+contract CompBorrow is ActionBase, CompHelper, GasBurner {
+
+    using TokenUtils for address;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -57,7 +59,7 @@ contract CompBorrow is ActionBase, CompHelper, TokenUtils, GasBurner {
 
         require(ICToken(_cTokenAddr).borrow(_amount) == 0, "Comp borrow failed");
 
-        withdrawTokens(tokenAddr, _to, _amount);
+        tokenAddr.withdrawTokens(_to, _amount);
 
         return _amount;
     }

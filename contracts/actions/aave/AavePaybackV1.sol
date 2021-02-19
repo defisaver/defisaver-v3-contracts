@@ -10,7 +10,9 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
 /// @title Payback a token a user borrowed from an Aave market
-contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
+contract AavePaybackV1 is ActionBase, GasBurner {
+
+    using TokenUtils for address;
 
     address public constant AAVE_V1_LENDING_POOL_ADDRESSES = 0x24a42fD28C976A61Df5D00D0599C34c4f90748c8;
 
@@ -51,7 +53,7 @@ contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
      /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     /// @notice User paybacks tokens to the Aave protocol
     /// @param _tokenAddr The address of the token to be paybacked
-    /// @param _amount Amount of tokens to be payed back, send uint256(-1) for whole debt
+    /// @param _amount Amount of tokens to be payed back, send type(uint256).max for whole debt
     /// @param _from Address from which we pull token
     /// @param _onBehalf Whose debt should be repayed
     function _payback(address _tokenAddr, uint256 _amount, address _from, address _onBehalf) internal returns (uint) {
@@ -59,25 +61,25 @@ contract AavePaybackV1 is ActionBase, TokenUtils, GasBurner {
         address lendingPool = ILendingPoolAddressesProvider(AAVE_V1_LENDING_POOL_ADDRESSES).getLendingPool();
 
         uint256 amount = _amount;
-        uint256 ethAmount = getBalance(ETH_ADDR, address(this));
+        uint256 ethAmount = TokenUtils.ETH_ADDR.getBalance(address(this));
 
-        if (_amount == uint256(-1)) {
+        if (_amount == type(uint256).max) {
             (,uint256 borrowAmount,,,,,uint256 originationFee,,,) = ILendingPool(lendingPool).getUserReserveData(_tokenAddr, _onBehalf);
             amount = borrowAmount + originationFee;
-            amount = amount > getBalance(_tokenAddr, _from) ? getBalance(_tokenAddr, _from) : amount;
+            amount = amount > _tokenAddr.getBalance(_from) ? _tokenAddr.getBalance(_from) : amount;
         }
 
-        if (_tokenAddr != ETH_ADDR) {
-            pullTokens(_tokenAddr, _from, _amount);
-            approveToken(_tokenAddr, lendingPoolCore, uint(-1));
+        if (_tokenAddr != TokenUtils.ETH_ADDR) {
+            _tokenAddr.pullTokens(_from, _amount);
+            _tokenAddr.approveToken(lendingPoolCore, type(uint).max);
             ethAmount = 0;
         }
 
-        uint tokensBefore = getBalance(_tokenAddr, address(this));
+        uint tokensBefore = _tokenAddr.getBalance(address(this));
         ILendingPool(lendingPool).repay{value: ethAmount}(_tokenAddr, amount, payable(_onBehalf));
-        uint tokensAfter = getBalance(_tokenAddr, address(this));
+        uint tokensAfter = _tokenAddr.getBalance(address(this));
 
-        withdrawTokens(_tokenAddr, _from, tokensAfter);
+        _tokenAddr.withdrawTokens(_from, tokensAfter);
         
         return tokensBefore - tokensAfter;
     }

@@ -7,7 +7,9 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
 /// @title Helper action to send a token to the specified address
-contract SendToken is ActionBase, TokenUtils {
+contract SendToken is ActionBase {
+
+    using TokenUtils for address;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -15,7 +17,7 @@ contract SendToken is ActionBase, TokenUtils {
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public virtual override payable returns (bytes32) {
+    ) public virtual payable override returns (bytes32) {
         (address tokenAddr, address to, uint amount) = parseInputs(_callData);
 
         tokenAddr = _parseParamAddr(tokenAddr, _paramMapping[0], _subData, _returnValues);
@@ -28,7 +30,7 @@ contract SendToken is ActionBase, TokenUtils {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable {
+    function executeActionDirect(bytes[] memory _callData) public payable override {
         (address tokenAddr, address to, uint amount) = parseInputs(_callData);
 
         _sendToken(tokenAddr, to, amount);
@@ -44,17 +46,17 @@ contract SendToken is ActionBase, TokenUtils {
     
 
     /// @notice Sends a token to the specified addr, works with Eth also
-    /// @dev If amount is uint(-1) it will send proxy balance
+    /// @dev If amount is type(uint).max it will send proxy balance
     /// @param _tokenAddr Address of token, use 0xEeee... for eth
     /// @param _to Where the tokens are sent, can't be the proxy or 0x0
-    /// @param _amount Amount of tokens, can be uint(-1)
+    /// @param _amount Amount of tokens, can be type(uint).max
     function _sendToken(address _tokenAddr, address _to, uint _amount) internal returns (uint) {
 
-        if (_amount == uint(-1)) {
-            _amount = getBalance(_tokenAddr, address(this));
+        if (_amount == type(uint).max) {
+            _amount = _tokenAddr.getBalance(address(this));
         }
 
-        withdrawTokens(_tokenAddr, _to, _amount);
+        _tokenAddr.withdrawTokens(_to, _amount);
 
         return _amount;
     }

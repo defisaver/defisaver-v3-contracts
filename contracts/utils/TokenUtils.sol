@@ -5,7 +5,7 @@ pragma solidity ^0.7.0;
 import "../interfaces/IWETH.sol";
 import "./SafeERC20.sol";
 
-contract TokenUtils {
+library TokenUtils {
     using SafeERC20 for IERC20;
 
     address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; // mainnet
@@ -22,7 +22,7 @@ contract TokenUtils {
     function pullTokens(address _token, address _from, uint256 _amount) internal returns (uint) {
 
         // handle max uint amount
-        if (_amount == uint(-1)) {
+        if (_amount == type(uint).max) {
             uint allowance = uint (-1);
 
             if (_token == ETH_ADDR) {
@@ -46,7 +46,7 @@ contract TokenUtils {
         address _to,
         uint256 _amount
     ) internal returns (uint) {
-        if (_amount == uint(-1)) {
+        if (_amount == type(uint).max) {
             _amount = getBalance(_token, address(this));
         }
 
@@ -63,7 +63,9 @@ contract TokenUtils {
 
     function convertAndDepositToWeth(address _tokenAddr, uint _amount) internal returns (address) {
         if (_tokenAddr == ETH_ADDR) {
+            uint256 oldBalance = getBalance(_tokenAddr, msg.sender);
             IWETH(WETH_ADDR).deposit{value: _amount}();
+            assert(getBalance(_tokenAddr, msg.sender) == oldBalance + _amount);
             return WETH_ADDR;
         } else {
             return _tokenAddr;

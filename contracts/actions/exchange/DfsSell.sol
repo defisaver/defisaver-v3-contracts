@@ -11,6 +11,8 @@ import "../ActionBase.sol";
 /// @title A exchange sell action through the dfs exchange
 contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
 
+    using TokenUtils for address;
+
     uint internal constant RECIPIE_FEE = 400;
     uint internal constant DIRECT_FEE = 800;
 
@@ -72,14 +74,14 @@ contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
         uint _fee
     ) internal returns (uint256) {
 
-        pullTokens(exchangeData.srcAddr, _from, exchangeData.srcAmount);
+        exchangeData.srcAddr.pullTokens(_from, exchangeData.srcAmount);
 
         exchangeData.user = getUserAddress();
         exchangeData.dfsFeeDivider = _fee;
 
         (address wrapper, uint256 exchangedAmount) = _sell(exchangeData);
 
-        withdrawTokens(exchangeData.destAddr, _to, exchangedAmount);
+        exchangeData.destAddr.withdrawTokens(_to, exchangedAmount);
 
         logger.Log(
             address(this),

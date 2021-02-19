@@ -11,7 +11,9 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
 /// @title Withdraw a token from an AaveV1
-contract AaveWithdrawV1 is ActionBase, TokenUtils, GasBurner {
+contract AaveWithdrawV1 is ActionBase, GasBurner {
+    
+    using TokenUtils for address;
 
     address public constant AAVE_V1_LENDING_POOL_ADDRESSES = 0x24a42fD28C976A61Df5D00D0599C34c4f90748c8;
 
@@ -59,13 +61,13 @@ contract AaveWithdrawV1 is ActionBase, TokenUtils, GasBurner {
 
         uint256 amount = _amount;
 
-        if (_amount == uint256(-1)) {
-            amount = getBalance(aTokenAddr, address(this));
+        if (_amount == type(uint256).max) {
+            amount = aTokenAddr.getBalance(address(this));
         }
 
         IAToken(aTokenAddr).redeem(amount);
 
-        withdrawTokens(_tokenAddr, _to, _amount);
+        _tokenAddr.withdrawTokens(_to, _amount);
 
         return amount;
     }

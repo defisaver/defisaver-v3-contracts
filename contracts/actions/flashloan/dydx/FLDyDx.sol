@@ -13,8 +13,9 @@ import "../../../utils/TokenUtils.sol";
 import "./DydxFlashLoanBase.sol";
 
 /// @title Action that gets and receives a FL from DyDx protocol
-contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, TokenUtils {
+contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
     using SafeERC20 for IERC20;
+    using TokenUtils for address;
 
     uint public constant DYDX_DUST_FEE = 2;
 
@@ -71,7 +72,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, TokenUtils {
             IWETH(WETH_ADDRESS).withdraw(amount);
         }
 
-        withdrawTokens(tokenAddr, proxy, amount);
+        tokenAddr.withdrawTokens(proxy, amount);
 
         address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
 
