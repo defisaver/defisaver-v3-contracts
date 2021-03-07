@@ -61,14 +61,14 @@ library TokenUtils {
         return _amount;
     }
 
-    function convertAndDepositToWeth(address _tokenAddr, uint _amount) internal returns (address) {
+    function convertAndDepositToWeth(address _tokenAddr, uint _amount) internal returns (address, address) {
         if (_tokenAddr == ETH_ADDR) {
             uint256 oldBalance = getBalance(_tokenAddr, msg.sender);
             IWETH(WETH_ADDR).deposit{value: _amount}();
             assert(getBalance(_tokenAddr, msg.sender) == oldBalance + _amount);
-            return WETH_ADDR;
+            return (ETH_ADDR, WETH_ADDR);
         } else {
-            return _tokenAddr;
+            return (_tokenAddr, _tokenAddr);
         }
     }
 
@@ -84,12 +84,8 @@ library TokenUtils {
         }
     }
 
-    function convertToWeth(address _tokenAddr) internal pure returns (address){
-        return _tokenAddr == ETH_ADDR ? WETH_ADDR : _tokenAddr;
-    }
-
-    function convertToEth(address _tokenAddr) internal pure returns (address){
-        return _tokenAddr == WETH_ADDR ? ETH_ADDR : _tokenAddr;
+    function convertToWeth(address _tokenAddr) internal pure returns (address, address){
+        return _tokenAddr == ETH_ADDR ? (ETH_ADDR, WETH_ADDR) : (_tokenAddr, _tokenAddr);
     }
 
     function getTokenDecimals(address _token) internal view returns (uint256) {

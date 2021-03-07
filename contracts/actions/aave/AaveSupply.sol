@@ -77,7 +77,7 @@ contract AaveSupply is ActionBase, AaveHelper {
         _tokenAddr.pullTokens(_from, amount);
 
         // if Eth, convert to Weth
-        _tokenAddr = _tokenAddr.convertAndDepositToWeth(amount);
+        (, _tokenAddr) = _tokenAddr.convertAndDepositToWeth(amount);
 
         // approve aave pool to pull tokens
         _tokenAddr.approveToken(lendingPool, amount);

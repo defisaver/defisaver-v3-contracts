@@ -58,9 +58,11 @@ contract AaveWithdraw is ActionBase, AaveHelper {
         address _to
     ) internal returns (uint256) {
         address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
-        _tokenAddr = _tokenAddr.convertToWeth();
+        address actualToken = _tokenAddr;
+        (actualToken, _tokenAddr) = _tokenAddr.convertToWeth();
 
-        if (_tokenAddr == TokenUtils.WETH_ADDR) {
+        if (actualToken == TokenUtils.ETH_ADDR) {
+            assert(_tokenAddr == TokenUtils.WETH_ADDR);
             // if weth, pull to proxy and return ETH to user
             ILendingPoolV2(lendingPool).withdraw(_tokenAddr, _amount, address(this));
 
