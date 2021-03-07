@@ -78,7 +78,8 @@ contract AaveBorrow is ActionBase, AaveHelper, GasBurner {
         address _onBehalf
     ) internal returns (uint) {
         address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
-        _tokenAddr = _tokenAddr.convertToWeth();
+        address actualToken = _tokenAddr;
+        (actualToken, _tokenAddr) = _tokenAddr.convertToWeth();
 
         // default to onBehalf of proxy
         if (_onBehalf == address(0)) {
@@ -93,7 +94,7 @@ contract AaveBorrow is ActionBase, AaveHelper, GasBurner {
             _onBehalf
         );
 
-        if (_tokenAddr == TokenUtils.WETH_ADDR) {
+        if (actualToken == TokenUtils.ETH_ADDR) {
             // we do this so the user gets eth instead of weth
             TokenUtils.withdrawWeth(_amount);
             _tokenAddr = TokenUtils.ETH_ADDR;

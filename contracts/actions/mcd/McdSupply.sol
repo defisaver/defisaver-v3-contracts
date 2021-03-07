@@ -80,7 +80,7 @@ contract McdSupply is ActionBase, McdHelper, GasBurner {
         int256 convertAmount = 0;
 
         if (isEthJoinAddr(_joinAddr)) {
-            tokenAddr = TokenUtils.ETH_ADDR.convertAndDepositToWeth(_amount);
+            (, tokenAddr) = TokenUtils.ETH_ADDR.convertAndDepositToWeth(_amount);
             convertAmount = toPositiveInt(_amount);
         } else {
             convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));

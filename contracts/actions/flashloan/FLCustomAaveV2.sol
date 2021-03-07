@@ -113,7 +113,7 @@ contract FLCustomAaveV2 is ActionBase, StrategyData {
                 TokenUtils.withdrawWeth(_amounts[i]);
             }
 
-            _assets[i].convertToEth().withdrawTokens(proxy, _amounts[i]);
+            _assets[i].withdrawTokens(proxy, _amounts[i]);
         }
 
         address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
@@ -126,7 +126,7 @@ contract FLCustomAaveV2 is ActionBase, StrategyData {
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
-            _assets[i].convertToEth().convertAndDepositToWeth((_amounts[i] + _fees[i]));
+            _assets[i].convertAndDepositToWeth((_amounts[i] + _fees[i]));
             _assets[i].approveToken(address(AAVE_LENDING_POOL), _amounts[i] + _fees[i]);
         }
 

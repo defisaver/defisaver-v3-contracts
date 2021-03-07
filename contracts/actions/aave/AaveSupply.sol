@@ -77,8 +77,9 @@ contract AaveSupply is ActionBase, AaveHelper, GasBurner {
         // pull tokens to proxy so we can supply
         _tokenAddr.pullTokens(_from, amount);
 
+        address actualToken = _tokenAddr;
         // if Eth, convert to Weth
-        _tokenAddr = _tokenAddr.convertAndDepositToWeth(amount);
+        (actualToken, _tokenAddr) = _tokenAddr.convertAndDepositToWeth(amount);
 
         // approve aave pool to pull tokens
         _tokenAddr.approveToken(lendingPool, amount);
