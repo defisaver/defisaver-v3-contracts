@@ -32,7 +32,7 @@ module.exports = {
         gasPrice: 1600000000
     }
   },
-  solidity: "0.7.5",
+  solidity: "0.7.6",
   settings: {
     optimizer: {
       enabled: false,

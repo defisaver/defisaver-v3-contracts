@@ -7,8 +7,8 @@ import "../interfaces/ILendingPool.sol";
 import "../auth/ProxyPermission.sol";
 import "../actions/ActionBase.sol";
 import "../core/DFSRegistry.sol";
-import "./Subscriptions.sol";
 import "../utils/GasBurner.sol";
+import "./Subscriptions.sol";
 
 /// @title Handles FL taking and executes actions
 contract TaskExecutor is StrategyData, GasBurner, ProxyPermission, AdminAuth {
@@ -40,13 +40,14 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission, AdminAuth {
         Strategy memory strategy = Subscriptions(subAddr).getStrategy(_strategyId);
         Template memory template = Subscriptions(subAddr).getTemplate(strategy.templateId);
 
-        Task memory currTask = Task({
-            name: template.name,
-            callData: _actionCallData,
-            subData: strategy.subData,
-            actionIds: template.actionIds,
-            paramMapping: template.paramMapping
-        });
+        Task memory currTask =
+            Task({
+                name: template.name,
+                callData: _actionCallData,
+                subData: strategy.subData,
+                actionIds: template.actionIds,
+                paramMapping: template.paramMapping
+            });
 
         _executeActions(currTask);
     }
@@ -94,7 +95,6 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission, AdminAuth {
         uint256 _index,
         bytes32[] memory _returnValues
     ) internal returns (bytes32 response) {
-
         response = IDSProxy(address(this)).execute{value: address(this).balance}(
             registry.getAddr(_currTask.actionIds[_index]),
             abi.encodeWithSignature(
@@ -110,7 +110,7 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission, AdminAuth {
     /// @notice Prepares and executes a flash loan action
     /// @dev It addes to the last input value of the FL, the task data so it can be passed on
     /// @param _currTask Task to be executed
-    /// @param _flActionAddr Address of the flash loan action 
+    /// @param _flActionAddr Address of the flash loan action
     /// @param _returnValues An empty array of return values, beacuse it's the first action
     function _parseFLAndExecute(
         Task memory _currTask,
@@ -124,14 +124,20 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission, AdminAuth {
         // last input value is empty for FL action, attach task data there
         _currTask.callData[0][_currTask.callData[0].length - 1] = taskData;
 
-        _executeAction(_currTask, 0, _returnValues);
+        /// @dev FL action is called directly so that we can check who the msg.sender of FL is
+        ActionBase(_flActionAddr).executeAction(
+            _currTask.callData[0],
+            _currTask.subData[0],
+            _currTask.paramMapping[0],
+            _returnValues
+        );
 
         removePermission(_flActionAddr);
     }
 
     /// @notice Checks if the specified address is of FL type action
     /// @param _actionAddr Address of the action
-    function isFL(address _actionAddr) pure internal returns (bool) {
+    function isFL(address _actionAddr) internal pure returns (bool) {
         return ActionBase(_actionAddr).actionType() == uint8(ActionBase.ActionType.FL_ACTION);
     }
 }

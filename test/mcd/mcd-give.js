@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 
-const { ilks } = require("defisaver-tokens");
+const { ilks } = require("@defisaver/tokens");
 
 const {
     getProxy,
