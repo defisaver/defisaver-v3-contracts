@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const { expect } = require("chai");
 
-const { getAssetInfo } = require('defisaver-tokens');
+const { getAssetInfo } = require('@defisaver/tokens');
 const { tenderlyRPC } = require('hardhat');
 // const hre = require("hardhat");
 

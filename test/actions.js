@@ -3,7 +3,7 @@ const dfs = require('defisaver-sdk');
 
 const makerVersion = "1.1.3";
 
-const { getAssetInfo } = require('defisaver-tokens');
+const { getAssetInfo } = require('@defisaver/tokens');
 
 const {
     redeploy,
@@ -28,16 +28,6 @@ const { getSecondTokenAmount } = require('./utils-uni');
 
 const { deployContract } = require("../scripts/utils/deployer");
 
-
-const encodeFLAction = (amount, tokenAddr, flType) => {
-    const abiCoder = new ethers.utils.AbiCoder();
-
-    const amountEncoded = abiCoder.encode(['uint256'], [amount]);
-    const tokenEncoded = abiCoder.encode(['address'], [tokenAddr]);
-    const flTypeEncoded = abiCoder.encode(['uint8'], [flType]);
-
-    return [amountEncoded, tokenEncoded, []];
-};
 
 const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to) => {
     const dfsSellAddr = await getAddrFromRegistry('DFSSell');
@@ -546,7 +536,6 @@ module.exports = {
     paybackComp,
     claimComp,
 
-    encodeFLAction,
     buyGasTokens,
 
     uniSupply,
