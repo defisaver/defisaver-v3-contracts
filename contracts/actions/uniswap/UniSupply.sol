@@ -5,12 +5,11 @@ pragma experimental ABIEncoderV2;
 
 import "../../interfaces/uniswap/IUniswapV2Factory.sol";
 import "../../interfaces/exchange/IUniswapRouter.sol";
-import "../../utils/GasBurner.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
 /// @title Supplies liquidity to uniswap
-contract UniSupply is ActionBase, GasBurner {
+contract UniSupply is ActionBase {
     
     using TokenUtils for address;
     
@@ -51,7 +50,7 @@ contract UniSupply is ActionBase, GasBurner {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override burnGas {
+    function executeActionDirect(bytes[] memory _callData) public payable override   {
         UniSupplyData memory uniData = parseInputs(_callData);
 
         _uniSupply(uniData);

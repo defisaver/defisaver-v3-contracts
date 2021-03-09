@@ -4,13 +4,12 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "../../interfaces/IWETH.sol";
-import "../../utils/GasBurner.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
 
 /// @title Supply a token to Compound
-contract CompSupply is ActionBase, CompHelper, GasBurner {
+contract CompSupply is ActionBase, CompHelper {
 
     using TokenUtils for address;
 
@@ -35,7 +34,7 @@ contract CompSupply is ActionBase, CompHelper, GasBurner {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+    function executeActionDirect(bytes[] memory _callData) public override payable   {
         (address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
 
         _supply(tokenAddr, amount, from);

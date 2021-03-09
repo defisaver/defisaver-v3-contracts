@@ -7,12 +7,11 @@ import "../../interfaces/mcd/IManager.sol";
 import "../../interfaces/mcd//IVat.sol";
 import "../../interfaces/mcd//IJoin.sol";
 import "../../utils/TokenUtils.sol";
-import "../../utils/GasBurner.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
 
 /// @title Supply collateral to a Maker vault
-contract McdSupply is ActionBase, McdHelper, GasBurner {
+contract McdSupply is ActionBase, McdHelper {
     
     using TokenUtils for address;
 
@@ -40,7 +39,7 @@ contract McdSupply is ActionBase, McdHelper, GasBurner {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+    function executeActionDirect(bytes[] memory _callData) public override payable   {
         (uint256 vaultId, uint256 amount, address joinAddr, address from, address mcdManager) = parseInputs(_callData);
 
         _mcdSupply(vaultId, amount, joinAddr, from, mcdManager);

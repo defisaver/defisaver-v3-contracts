@@ -5,11 +5,10 @@ pragma experimental ABIEncoderV2;
 
 import "../../interfaces/mcd/IJoin.sol";
 import "../../interfaces/mcd/IManager.sol";
-import "../../utils/GasBurner.sol";
 import "../ActionBase.sol";
 
 /// @title Open a new Maker vault
-contract McdOpen is ActionBase, GasBurner {
+contract McdOpen is ActionBase {
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -28,7 +27,7 @@ contract McdOpen is ActionBase, GasBurner {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+    function executeActionDirect(bytes[] memory _callData) public override payable   {
         (address joinAddr, address mcdManager) = parseInputs(_callData);
 
         _mcdOpen(joinAddr, mcdManager);

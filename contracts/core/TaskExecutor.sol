@@ -7,11 +7,10 @@ import "../interfaces/ILendingPool.sol";
 import "../auth/ProxyPermission.sol";
 import "../actions/ActionBase.sol";
 import "../core/DFSRegistry.sol";
-import "../utils/GasBurner.sol";
 import "./Subscriptions.sol";
 
 /// @title Handles FL taking and executes actions
-contract TaskExecutor is StrategyData, GasBurner, ProxyPermission, AdminAuth {
+contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
     address public constant REGISTRY_ADDR = 0xB0e1682D17A96E8551191c089673346dF7e1D467;
@@ -24,7 +23,7 @@ contract TaskExecutor is StrategyData, GasBurner, ProxyPermission, AdminAuth {
     /// @dev This is the main entry point for Recipes/Tasks executed manually
     /// @dev It will burn Gst2/Chi if the user has a balance on proxy
     /// @param _currTask Task to be executed
-    function executeTask(Task memory _currTask) public payable burnGas {
+    function executeTask(Task memory _currTask) public payable   {
         _executeActions(_currTask);
     }
 

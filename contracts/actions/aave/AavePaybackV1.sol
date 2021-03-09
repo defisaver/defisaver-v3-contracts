@@ -5,12 +5,11 @@ pragma experimental ABIEncoderV2;
 
 import "../../interfaces/aave/ILendingPoolAddressesProvider.sol";
 import "../../interfaces/aave/ILendingPool.sol";
-import "../../utils/GasBurner.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
 /// @title Payback a token a user borrowed from an Aave market
-contract AavePaybackV1 is ActionBase, GasBurner {
+contract AavePaybackV1 is ActionBase {
 
     using TokenUtils for address;
 
@@ -36,7 +35,7 @@ contract AavePaybackV1 is ActionBase, GasBurner {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+    function executeActionDirect(bytes[] memory _callData) public override payable   {
         (address tokenAddr, uint256 amount, address from, address onBehalf) = parseInputs(_callData);
 
         _payback(tokenAddr, amount, from, onBehalf);

@@ -5,13 +5,12 @@ pragma experimental ABIEncoderV2;
 
 import "../../interfaces/IWETH.sol";
 import "../../interfaces/compound/ICToken.sol";
-import "../../utils/GasBurner.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
 
 /// @title Withdraw a token from Compound
-contract CompWithdraw is ActionBase, CompHelper, GasBurner {
+contract CompWithdraw is ActionBase, CompHelper {
 
     using TokenUtils for address;
 
@@ -34,7 +33,7 @@ contract CompWithdraw is ActionBase, CompHelper, GasBurner {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+    function executeActionDirect(bytes[] memory _callData) public override payable   {
         (address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
 
         _withdraw(tokenAddr, amount, from);

@@ -6,12 +6,11 @@ pragma experimental ABIEncoderV2;
 import "../../interfaces/aave/IAToken.sol";
 import "../../interfaces/aave/ILendingPoolAddressesProvider.sol";
 import "../../interfaces/aave/ILendingPool.sol";
-import "../../utils/GasBurner.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
 /// @title Withdraw a token from an AaveV1
-contract AaveWithdrawV1 is ActionBase, GasBurner {
+contract AaveWithdrawV1 is ActionBase {
     
     using TokenUtils for address;
 
@@ -36,7 +35,7 @@ contract AaveWithdrawV1 is ActionBase, GasBurner {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+    function executeActionDirect(bytes[] memory _callData) public override payable   {
         (address tokenAddr, uint256 amount, address to) = parseInputs(_callData);
 
         _withdraw(tokenAddr, amount, to);

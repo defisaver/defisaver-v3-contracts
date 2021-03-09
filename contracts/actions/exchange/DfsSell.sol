@@ -5,11 +5,10 @@ pragma experimental ABIEncoderV2;
 
 import "../../interfaces/IDSProxy.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
-import "../../utils/GasBurner.sol";
 import "../ActionBase.sol";
 
 /// @title A exchange sell action through the dfs exchange
-contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
+contract DFSSell is ActionBase, DFSExchangeCore {
 
     using TokenUtils for address;
 
@@ -53,7 +52,7 @@ contract DFSSell is ActionBase, DFSExchangeCore, GasBurner {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+    function executeActionDirect(bytes[] memory _callData) public override payable   {
         (ExchangeData memory exchangeData, address from, address to) = parseInputs(_callData);
 
         _dfsSell(exchangeData, from, to, DIRECT_FEE);
