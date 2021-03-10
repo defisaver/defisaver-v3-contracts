@@ -301,7 +301,7 @@ abstract contract ISoloMargin {
 
     function ownerSetEarningsRate(Decimal.D256 memory earningsRate) public virtual;
 
-    function getIsLocalOperator(address owner, address operator)
+    function getIsLocalOperator(address, address)
         public virtual
         view
         returns (bool);

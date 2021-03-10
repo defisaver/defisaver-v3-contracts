@@ -9,12 +9,11 @@ import "../../interfaces/mcd/IVat.sol";
 import "../../interfaces/mcd/IDaiJoin.sol";
 import "../../interfaces/mcd/IJug.sol";
 import "../../utils/TokenUtils.sol";
-import "../../utils/GasBurner.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
 
 /// @title Generate dai from a Maker Vault
-contract McdGenerate is ActionBase, McdHelper, GasBurner {
+contract McdGenerate is ActionBase, McdHelper {
 
     using TokenUtils for address;
 
@@ -46,7 +45,7 @@ contract McdGenerate is ActionBase, McdHelper, GasBurner {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+    function executeActionDirect(bytes[] memory _callData) public override payable   {
         (uint256 cdpId, uint256 amount, address to, address mcdManager) = parseInputs(_callData);
 
         _mcdGenerate(cdpId, amount, to, mcdManager);

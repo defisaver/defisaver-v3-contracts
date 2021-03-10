@@ -7,11 +7,10 @@ import "../../interfaces/IProxyRegistry.sol";
 import "../../interfaces/mcd/IJoin.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/mcd/IManager.sol";
-import "../../utils/GasBurner.sol";
 import "../ActionBase.sol";
 
 /// @title Merge two vaults that are of the same type
-contract McdMerge is ActionBase, GasBurner {
+contract McdMerge is ActionBase {
 
     address public constant PROXY_REGISTRY_ADDR = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
 
@@ -33,7 +32,7 @@ contract McdMerge is ActionBase, GasBurner {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override burnGas {
+    function executeActionDirect(bytes[] memory _callData) public payable override   {
         (uint srcVaultId, uint destVaultId, address mcdManager) = parseInputs(_callData);
 
         _mcdMerge(srcVaultId, destVaultId, mcdManager);

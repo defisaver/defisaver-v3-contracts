@@ -3,13 +3,12 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../utils/GasBurner.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
 /// @title Borrow a token a from an Aave market
-contract AaveBorrow is ActionBase, AaveHelper, GasBurner {
+contract AaveBorrow is ActionBase, AaveHelper {
 
     using TokenUtils for address;
 
@@ -42,7 +41,7 @@ contract AaveBorrow is ActionBase, AaveHelper, GasBurner {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+    function executeActionDirect(bytes[] memory _callData) public override payable {
         (
             address market,
             address tokenAddr,

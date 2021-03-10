@@ -4,12 +4,12 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "../DS/DSMath.sol";
-import "../interfaces/aaveV2/IFlashLoanParamsGetter.sol";
+import "../interfaces/IFLParamGetter.sol";
 import "../interfaces/aave/ILendingPoolAddressesProvider.sol";
 import "../interfaces/aave/ILendingPool.sol";
 
 /// @title Getter contract for positions from Aave protocol
-contract AaveV1FullPositionView is DSMath, IFlashLoanParamsGetter {
+contract AaveV1FullPositionView is DSMath, IFLParamGetter {
 
     address public constant AAVE_V1_LENDING_POOL_ADDRESSES = 0x24a42fD28C976A61Df5D00D0599C34c4f90748c8;
 

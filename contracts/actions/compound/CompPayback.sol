@@ -6,13 +6,12 @@ pragma experimental ABIEncoderV2;
 import "../../interfaces/compound/IComptroller.sol";
 import "../../interfaces/compound/ICToken.sol";
 import "../../interfaces/IWETH.sol";
-import "../../utils/GasBurner.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
 
 /// @title Payback a token a user borrowed from Compound
-contract CompPayback is ActionBase, CompHelper, GasBurner {
+contract CompPayback is ActionBase, CompHelper {
 
     using TokenUtils for address;
 
@@ -36,7 +35,7 @@ contract CompPayback is ActionBase, CompHelper, GasBurner {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+    function executeActionDirect(bytes[] memory _callData) public override payable   {
         (address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
 
         _payback(tokenAddr, amount, from);

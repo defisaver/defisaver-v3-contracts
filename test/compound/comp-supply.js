@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 
-const { getAssetInfo, compoundCollateralAssets } = require('defisaver-tokens');
+const { getAssetInfo, compoundCollateralAssets } = require('@defisaver/tokens');
 
 const {
     getAddrFromRegistry,

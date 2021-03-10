@@ -4,13 +4,12 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "../../interfaces/aave/ILendToAaveMigrator.sol";
-import "../../utils/GasBurner.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
 /// @title Migrates Lend token to Aave token
-contract AaveMigrateLend is ActionBase, AaveHelper, GasBurner {
+contract AaveMigrateLend is ActionBase, AaveHelper {
 
     using TokenUtils for address;
 
@@ -37,7 +36,7 @@ contract AaveMigrateLend is ActionBase, AaveHelper, GasBurner {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable burnGas {
+    function executeActionDirect(bytes[] memory _callData) public override payable   {
         (uint256 lendAmount, address from, address to) = parseInputs(_callData);
 
         _migrate(lendAmount, from, to);

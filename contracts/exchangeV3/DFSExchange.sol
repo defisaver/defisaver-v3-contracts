@@ -6,10 +6,9 @@ pragma experimental ABIEncoderV2;
 import "./DFSExchangeCore.sol";
 import "../utils/DefisaverLogger.sol";
 import "../auth/AdminAuth.sol";
-import "../utils/GasBurner.sol";
 import "../utils/SafeERC20.sol";
 
-contract DFSExchange is DFSExchangeCore, AdminAuth, GasBurner {
+contract DFSExchange is DFSExchangeCore, AdminAuth {
 
     using SafeERC20 for IERC20;
 
@@ -23,7 +22,7 @@ contract DFSExchange is DFSExchangeCore, AdminAuth, GasBurner {
     /// @param exData [srcAddr, destAddr, srcAmount, destAmount, minPrice, exchangeType, exchangeAddr, callData, price0x]
     /// @param _user User address who called the exchange
     // solhint-disable-next-line visibility-modifier-order
-    function sell(ExchangeData memory exData, address payable _user) public payable burnGas {
+    function sell(ExchangeData memory exData, address payable _user) public payable   {
 
         exData.dfsFeeDivider = SERVICE_FEE;
         exData.user = _user;
@@ -43,7 +42,7 @@ contract DFSExchange is DFSExchangeCore, AdminAuth, GasBurner {
     /// @param exData [srcAddr, destAddr, srcAmount, destAmount, minPrice, exchangeType, exchangeAddr, callData, price0x]
     /// @param _user User address who called the exchange
     // solhint-disable-next-line visibility-modifier-order
-    function buy(ExchangeData memory exData, address payable _user) public payable burnGas {
+    function buy(ExchangeData memory exData, address payable _user) public payable   {
 
         exData.dfsFeeDivider = SERVICE_FEE;
         exData.user = _user;

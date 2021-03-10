@@ -50,6 +50,10 @@ const standardAmounts = {
     'YFI': '0.04'
 };
 
+const fetchStandardAmounts = async () => {
+    return standardAmounts;
+};
+
 const getAddrFromRegistry = async (name) => {
     const registryInstance = await hre.ethers.getContractFactory("DFSRegistry");
     const registry = await registryInstance.attach(REGISTRY_ADDR);
@@ -243,6 +247,7 @@ module.exports = {
     convertToWeth,
     depositToWeth,
     timeTravel,
+    fetchStandardAmounts,
     standardAmounts,
     nullAddress,
     REGISTRY_ADDR,

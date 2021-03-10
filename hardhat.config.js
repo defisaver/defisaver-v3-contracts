@@ -18,7 +18,7 @@ module.exports = {
     hardhat: {
       forking: {
         url: process.env.ALCHEMY_NODE,
-        blockNumber: 11503880
+        blockNumber: 11999157
       }
     },
     mainnet: {
@@ -32,7 +32,7 @@ module.exports = {
         gasPrice: 1600000000
     }
   },
-  solidity: "0.7.5",
+  solidity: "0.7.6",
   settings: {
     optimizer: {
       enabled: false,
