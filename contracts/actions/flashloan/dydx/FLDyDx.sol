@@ -79,12 +79,6 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
         bytes memory _data
     ) internal returns (uint256) {
 
-        address originToken = _token;
-
-        if (_token == ETH_ADDRESS) {
-            _token = WETH_ADDRESS;
-        }
-
         address payable receiver = payable(registry.getAddr(FL_DYDX_ID));
 
         ISoloMargin solo = ISoloMargin(SOLO_MARGIN_ADDRESS);
@@ -107,7 +101,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
 
         solo.operate(accountInfos, operations);
 
-        logger.Log(address(this), msg.sender, "FLDyDx", abi.encode(_amount, originToken));
+        logger.Log(address(this), msg.sender, "FLDyDx", abi.encode(_amount, _token));
 
         return _amount;
     }
@@ -126,10 +120,6 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
 
         (Task memory currTask, address proxy) = abi.decode(callData, (Task, address));
 
-        if (tokenAddr == ETH_ADDRESS) {
-            IWETH(WETH_ADDRESS).withdraw(amount);
-        }
-
         tokenAddr.withdrawTokens(proxy, amount);
 
         address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
@@ -140,24 +130,11 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
             abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, amount)
         );
 
-        // return FL
-        dydxPaybackLoan(tokenAddr, amount);
+        // return FL (just send funds to this addr)
+        
+        flFeeFaucet.my2Wei(tokenAddr); // get extra 2 wei for DyDx fee
     }
 
-
-    function dydxPaybackLoan(
-        address _loanTokenAddr,
-        uint256 _amount
-    ) internal {
-
-        if (_loanTokenAddr == ETH_ADDRESS) {
-            IWETH(WETH_ADDRESS).deposit{value: _amount}();
-            _loanTokenAddr = WETH_ADDRESS;
-        }
-
-        flFeeFaucet.my2Wei(_loanTokenAddr); // fetch 2 wei for dydx fee
-
-    }
 
     function parseInputs(bytes[] memory _callData)
         public

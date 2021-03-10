@@ -71,10 +71,6 @@ contract UniSupply is ActionBase {
         _uniData.tokenA.pullTokens(_uniData.from, _uniData.amountADesired);
         _uniData.tokenB.pullTokens(_uniData.from, _uniData.amountBDesired);
 
-        // handle if tokens are eth, convert to weth
-        (, _uniData.tokenA) = _uniData.tokenA.convertAndDepositToWeth(_uniData.amountADesired);
-        (, _uniData.tokenB) = _uniData.tokenB.convertAndDepositToWeth(_uniData.amountBDesired);
-
         // approve router so it can pull tokens
         _uniData.tokenA.approveToken(address(router), _uniData.amountADesired);
         _uniData.tokenB.approveToken(address(router), _uniData.amountBDesired);

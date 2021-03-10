@@ -72,12 +72,6 @@ contract UniWithdraw is ActionBase {
     /// @notice Removes liquidity from uniswap
     /// @param _uniData All the required data to withdraw from uni
     function _uniWithdraw(UniWithdrawData memory _uniData) internal returns (uint256) {
-        // handle if tokens are eth, convert to weth
-        address actualTokenA = _uniData.tokenA;
-        address actualTokenB = _uniData.tokenB;
-        (actualTokenA, _uniData.tokenA) = _uniData.tokenA.convertToWeth();
-        (actualTokenB, _uniData.tokenB) = _uniData.tokenB.convertToWeth();
-
         // approve the lp allowance
         address lpTokenAddr = factory.getPair(_uniData.tokenA, _uniData.tokenB);
 
@@ -86,17 +80,6 @@ contract UniWithdraw is ActionBase {
 
         // withdraw liq. and get info how much we got out
         (uint256 amountA, uint256 amountB) = _withdrawLiquidity(_uniData);
-
-        // withdraw weth to eth if needed
-        if (actualTokenA == TokenUtils.ETH_ADDR) {
-            TokenUtils.withdrawWeth(amountA);
-            _uniData.tokenA = TokenUtils.ETH_ADDR;
-        }
-
-        if (actualTokenB == TokenUtils.ETH_ADDR) {
-            TokenUtils.withdrawWeth(amountB);
-            _uniData.tokenB = TokenUtils.ETH_ADDR;
-        }
 
         // send underlying tokens
         _uniData.tokenA.withdrawTokens(_uniData.to, amountA);

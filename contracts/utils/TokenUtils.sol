@@ -61,12 +61,12 @@ library TokenUtils {
         return _amount;
     }
 
-    function convertAndDepositToWeth(address _tokenAddr, uint _amount) internal returns (address, address) {
+    function convertAndDepositToWeth(address _tokenAddr, uint _amount) internal returns (address) {
         if (_tokenAddr == ETH_ADDR) {
             IWETH(WETH_ADDR).deposit{value: _amount}();
-            return (ETH_ADDR, WETH_ADDR);
+            return WETH_ADDR;
         } else {
-            return (_tokenAddr, _tokenAddr);
+            return _tokenAddr;
         }
     }
 

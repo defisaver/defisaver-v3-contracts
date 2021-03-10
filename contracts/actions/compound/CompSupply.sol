@@ -56,19 +56,25 @@ contract CompSupply is ActionBase, CompHelper {
     function _supply(address _cTokenAddr, uint _amount, address _from) internal returns (uint) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
+        if (tokenAddr != TokenUtils.ETH_ADDR) {
+            tokenAddr = TokenUtils.WETH_ADDR;
+        }
+
         // if amount -1, pull current proxy balance
         if (_amount == type(uint).max) {
             _amount = tokenAddr.getBalance(address(this));
         }
 
         tokenAddr.pullTokens(_from, _amount);
-        tokenAddr.approveToken(_cTokenAddr, _amount);
 
         enterMarket(_cTokenAddr);
 
-        if (tokenAddr != TokenUtils.ETH_ADDR) {
+        if (tokenAddr != TokenUtils.WETH_ADDR) {
+            tokenAddr.approveToken(_cTokenAddr, _amount);
+
             require(ICToken(_cTokenAddr).mint(_amount) == 0, ERR_COMP_SUPPLY_FAILED);
         } else {
+            TokenUtils.withdrawWeth(_amount);
             ICToken(_cTokenAddr).mint{value: msg.value}(); // reverts on fail
         }
 
