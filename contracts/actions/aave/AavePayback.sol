@@ -92,7 +92,8 @@ contract AavePayback is ActionBase, AaveHelper {
 
         _tokenAddr.pullTokens(_from, _amount);
 
-        _tokenAddr = _tokenAddr.convertAndDepositToWeth(_amount);
+        address actualToken = _tokenAddr;
+        (actualToken, _tokenAddr) = _tokenAddr.convertAndDepositToWeth(_amount);
 
         _tokenAddr.approveToken(lendingPool, _amount);
 
@@ -103,7 +104,7 @@ contract AavePayback is ActionBase, AaveHelper {
         uint256 tokensAfter = _tokenAddr.getBalance(address(this));
 
         // withraw weth if needed
-        if (_tokenAddr == TokenUtils.WETH_ADDR) {
+        if (actualToken == TokenUtils.ETH_ADDR) {
             TokenUtils.withdrawWeth(tokensAfter);
             _tokenAddr = TokenUtils.ETH_ADDR;
         }

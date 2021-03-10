@@ -16,7 +16,6 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     using SafeERC20 for IERC20;
 
     address public constant OTC_ADDRESS = 0x794e6e91555438aFc3ccF1c5076A74F42133d08D;
-    address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     /// @notice Sells a _srcAmount of tokens at Oasis
@@ -25,16 +24,19 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _srcAmount From amount
     /// @return uint Destination amount
     function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory) external override payable returns (uint) {
-        address srcAddr = _srcAddr.convertToWeth();
-        address destAddr = _destAddr.convertToWeth();
+        address srcAddr;
+        (, srcAddr) = _srcAddr.convertToWeth();
+        address actualDstAddr; 
+        address destAddr;
+        (actualDstAddr, destAddr) = _destAddr.convertToWeth();
 
         IERC20(srcAddr).safeApprove(OTC_ADDRESS, _srcAmount);
 
         uint destAmount = IOasis(OTC_ADDRESS).sellAllAmount(srcAddr, _srcAmount, destAddr, 0);
 
         // convert weth -> eth and send back
-        if (destAddr == WETH_ADDRESS) {
-            IWETH(WETH_ADDRESS).withdraw(destAmount);
+        if (actualDstAddr == TokenUtils.ETH_ADDR) {
+            IWETH(TokenUtils.WETH_ADDR).withdraw(destAmount);
             msg.sender.transfer(destAmount);
         } else {
             IERC20(destAddr).safeTransfer(msg.sender, destAmount);
@@ -49,8 +51,11 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _destAmount To amount
     /// @return uint srcAmount
     function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory) external override payable returns(uint) {
-        address srcAddr = _srcAddr.convertToWeth();
-        address destAddr = _destAddr.convertToWeth();
+        address srcAddr;
+        (, srcAddr) = _srcAddr.convertToWeth();
+        address actualDstAddr; 
+        address destAddr;
+        (actualDstAddr, destAddr) = _destAddr.convertToWeth();
 
         uint srcAmount = srcAddr.getBalance(address(this));
 
@@ -59,8 +64,8 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth {
         srcAmount = IOasis(OTC_ADDRESS).buyAllAmount(destAddr, _destAmount, srcAddr, type(uint).max);
 
         // convert weth -> eth and send back
-        if (destAddr == WETH_ADDRESS) {
-            IWETH(WETH_ADDRESS).withdraw(_destAmount);
+        if (actualDstAddr == TokenUtils.ETH_ADDR) {
+            IWETH(TokenUtils.WETH_ADDR).withdraw(_destAmount);
             msg.sender.transfer(_destAmount);
         } else {
             IERC20(destAddr).safeTransfer(msg.sender, _destAmount);
@@ -78,8 +83,10 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _srcAmount From amount
     /// @return uint Rate
     function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory) public override view returns (uint) {
-        address srcAddr = _srcAddr.convertToWeth();
-        address destAddr = _destAddr.convertToWeth();
+        address srcAddr;
+        (, srcAddr) = _srcAddr.convertToWeth();
+        address destAddr;
+        (, destAddr) = _destAddr.convertToWeth();
 
         return wdiv(IOasis(OTC_ADDRESS).getBuyAmount(destAddr, srcAddr, _srcAmount), _srcAmount);
     }
@@ -91,8 +98,10 @@ contract OasisTradeWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _destAmount To amount
     /// @return uint Rate
     function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount, bytes memory) public override view returns (uint) {
-        address srcAddr = _srcAddr.convertToWeth();
-        address destAddr = _destAddr.convertToWeth();
+        address srcAddr;
+        (, srcAddr) = _srcAddr.convertToWeth();
+        address destAddr;
+        (, destAddr) = _destAddr.convertToWeth();
 
         return wdiv(1 ether, wdiv(IOasis(OTC_ADDRESS).getPayAmount(srcAddr, destAddr, _destAmount), _destAmount));
     }
