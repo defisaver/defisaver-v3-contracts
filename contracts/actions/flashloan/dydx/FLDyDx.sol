@@ -138,12 +138,11 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
         );
 
         // return FL
-        dydxPaybackLoan(proxy, tokenAddr, amount);
+        dydxPaybackLoan(tokenAddr, amount);
     }
 
 
     function dydxPaybackLoan(
-        address _proxy,
         address _loanTokenAddr,
         uint256 _amount
     ) internal {
@@ -151,9 +150,6 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
 
         if (_loanTokenAddr == WETH_ADDRESS || _loanTokenAddr == ETH_ADDRESS) {
             IWETH(WETH_ADDRESS).deposit{value: _amount}();
-            IERC20(WETH_ADDRESS).safeTransfer(_proxy, (_amount + DYDX_DUST_FEE));
-        } else {
-            IERC20(_loanTokenAddr).safeTransfer(_proxy, (_amount + DYDX_DUST_FEE));
         }
     }
 

@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 
-const dfs = require("defisaver-sdk");
+const dfs =  require("@defisaver/sdk");
 
 const {
     getAddrFromRegistry,

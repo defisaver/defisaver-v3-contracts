@@ -1,74 +1,88 @@
-
-require('dotenv').config();
-
-
-const { getAssetInfo } = require('@defisaver/tokens');
-const dfs = require('defisaver-sdk');
+const { getAssetInfo } = require("@defisaver/tokens");
+const dfs =  require("@defisaver/sdk");
 
 const {
     getAddrFromRegistry,
     getProxy,
     redeploy,
     send,
-    fetchStandardAmounts,
+    balanceOf,
+    standardAmounts,
     nullAddress,
-    REGISTRY_ADDR,
     MAX_UINT,
-} = require('../utils');
+    ETH_ADDR,
+    UNISWAP_WRAPPER,
+    AAVE_FL_FEE,
+} = require("../utils");
 
-const encodeAaveFLAction = (amount, tokenAddr, flParamGetterAddr, flParamGetterData) => {
-    const abiCoder = new ethers.utils.AbiCoder();
+const { sell } = require("../actions");
 
-    const amountEncoded = abiCoder.encode(['uint256'], [amount]);
-    const tokenEncoded = abiCoder.encode(['address'], [tokenAddr]);
-    const flParamGetterAddrEncoded = abiCoder.encode(['address'], [flParamGetterAddr]);
-    const flParamGetterDataEncoded = abiCoder.encode(['bytes'], [flParamGetterData]);
+describe("FL-Aave", function () {
+    this.timeout(60000);
 
-    return [amountEncoded, tokenEncoded, flParamGetterAddrEncoded, flParamGetterDataEncoded, []];
-};
+    let senderAcc, proxy, taskExecutorAddr, aaveFl;
 
-describe("FL-Taker", function() {
-    this.timeout(40000);
-
-    let senderAcc, proxy, flAaveId, sendTokenId, aaveFl;
+    const FLASHLOAN_TOKENS = ["ETH", "DAI", "USDC", "WBTC", "USDT", "YFI", "BAT", "LINK", "MKR"];
 
     before(async () => {
+        taskExecutorAddr = await getAddrFromRegistry("TaskExecutor");
 
         aaveFl = await redeploy("FLAave");
         await redeploy("SendToken");
         await redeploy("TaskExecutor");
-
-        const s = await fetchStandardAmounts();
-
-        flAaveId = ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes('FLAave'));
-        sendTokenId = ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes('SendToken'));
-
+        
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
-    })
-
-    it('... should get an Eth Aave flash loan', async () => {
-
-        const taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
-
-        const loanAmount = ethers.utils.parseEther("1");
-        const flCallData = encodeAaveFLAction(loanAmount, getAssetInfo('ETH').address, nullAddress, []);
-        const abiCoder = new ethers.utils.AbiCoder();
-
-        const repayFL = [abiCoder.encode(['address'], [getAssetInfo('ETH').address]), abiCoder.encode(['address'], [aaveFl.address]), abiCoder.encode(['uint256'], [MAX_UINT])];
-
-        const TaskExecutor = await ethers.getContractFactory("TaskExecutor");
-
-        const functionData = TaskExecutor.interface.encodeFunctionData(
-            "executeTask",
-            [
-                ["Flashloan", [flCallData, repayFL], [[], []], [flAaveId, sendTokenId], [[0, 0, 0], [0, 0, 0]]]
-            ]
-        );
-
-        console.log('sending tx');
-        // value needed because of aave fl fee
-        await proxy['execute(address,bytes)'](taskExecutorAddr, functionData, {value: ethers.utils.parseEther("0.01"), gasLimit: 5000000});
     });
- 
+
+    for (let i = 0; i < FLASHLOAN_TOKENS.length; ++i) {
+        const tokenSymbol = FLASHLOAN_TOKENS[i];
+
+        it(`... should get an ${tokenSymbol} Aave flash loan`, async () => {
+            const assetInfo = getAssetInfo(tokenSymbol);
+
+            const loanAmount = ethers.utils.parseUnits(standardAmounts[tokenSymbol], assetInfo.decimals);
+            const feeAmount = ((standardAmounts[tokenSymbol] * AAVE_FL_FEE) * 10**assetInfo.decimals).toFixed(0);
+           
+            const basicFLRecipe = new dfs.Recipe("BasicFLRecipe", [
+                new dfs.actions.flashloan.AaveFlashLoanAction(
+                    loanAmount,
+                    assetInfo.address,
+                    nullAddress,
+                    []
+                ),
+                new dfs.actions.basic.SendTokenAction(assetInfo.address, aaveFl.address, MAX_UINT),
+            ]);
+
+            const functionData = basicFLRecipe.encodeForDsProxyCall();
+
+            let value = 0;
+
+            if (tokenSymbol === "ETH") {
+                value = feeAmount;
+            } else {
+                // buy token so we have it for fee
+                const tokenBalance = await balanceOf(assetInfo.address, senderAcc.address);
+
+                if (tokenBalance.lt(feeAmount)) {
+                    await sell(
+                        proxy,
+                        ETH_ADDR,
+                        assetInfo.address,
+                        ethers.utils.parseUnits("1", 18),
+                        UNISWAP_WRAPPER,
+                        senderAcc.address,
+                        senderAcc.address
+                    );
+                }
+
+                await send(assetInfo.address, proxy.address, feeAmount);
+            }
+
+            await proxy["execute(address,bytes)"](taskExecutorAddr, functionData[1], {
+                value,
+                gasLimit: 3000000,
+            });
+        });
+    }
 });

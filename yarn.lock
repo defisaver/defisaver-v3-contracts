@@ -20,6 +20,18 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
+"@defisaver/sdk@git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#beta":
+  version "0.0.1"
+  resolved "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#eda00fb42a256cf6846b7d248c579628ee0612dd"
+  dependencies:
+    "@defisaver/tokens" "^1.3.21"
+    "@ethersproject/address" "^5.0.10"
+    "@ethersproject/solidity" "^5.0.9"
+    axios "^0.21.1"
+    decimal.js "^10.2.1"
+    web3-eth-abi "^1.3.0"
+    web3-utils "^1.3.0"
+
 "@defisaver/tokens@^1.3.21", "@defisaver/tokens@^1.3.30":
   version "1.3.30"
   resolved "https://registry.yarnpkg.com/@defisaver/tokens/-/tokens-1.3.30.tgz#011edb0b0dd0e022faef96df0e14fc83ed1a6343"
@@ -2394,18 +2406,6 @@ define-property@^2.0.2:
 defined@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/defined/-/defined-1.0.0.tgz#c98d9bcef75674188e110969151199e39b1fa693"
-
-"defisaver-sdk@git+ssh://git@github.com/DecenterApps/defisaver-sdk.git":
-  version "0.0.1"
-  resolved "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#d88301acd35c40db8cd7b454e49c7cd042773014"
-  dependencies:
-    "@defisaver/tokens" "^1.3.21"
-    "@ethersproject/address" "^5.0.10"
-    "@ethersproject/solidity" "^5.0.9"
-    axios "^0.21.1"
-    decimal.js "^10.2.1"
-    web3-eth-abi "^1.3.0"
-    web3-utils "^1.3.0"
 
 delayed-stream@~1.0.0:
   version "1.0.0"

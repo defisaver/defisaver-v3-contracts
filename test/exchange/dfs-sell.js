@@ -29,6 +29,8 @@ const {
 // TODO: can we make it work with 0x?
 
 describe("Dfs-Sell", function() {
+    this.timeout(40000);
+
     let senderAcc, proxy, dfsSellAddr;
 
     const trades = [
@@ -48,7 +50,6 @@ describe("Dfs-Sell", function() {
 
         dfsSellAddr = await getAddrFromRegistry('DFSSell');
 
-        this.timeout(40000);
     });
 
     for (let i = 0; i < trades.length; ++i) {
