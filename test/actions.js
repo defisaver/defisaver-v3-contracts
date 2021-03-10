@@ -1,5 +1,5 @@
 const axios = require('axios');
-const dfs = require('defisaver-sdk');
+const dfs = require('@defisaver/sdk')
 
 const makerVersion = "1.1.3";
 

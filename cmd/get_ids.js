@@ -1,6 +1,6 @@
 const ethers = require("ethers");
 
-const { actionAddresses } = require('defisaver-sdk');
+const { actionAddresses } = require('@defisaver/sdk')
 
 const actionNames = Object.keys(actionAddresses);
 const actionAddr = Object.values(actionAddresses);

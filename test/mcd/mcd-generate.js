@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const dfs = require('defisaver-sdk');
+const dfs = require('@defisaver/sdk')
 
 const { getAssetInfo, ilks } = require('@defisaver/tokens');
 

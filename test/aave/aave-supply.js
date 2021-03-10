@@ -2,7 +2,7 @@ const { expect } = require("chai");
 
 const { getAssetInfo, ilks, } = require('@defisaver/tokens');
 
-const dfs = require('defisaver-sdk');
+const dfs = require('@defisaver/sdk')
 
 const {
     getAaveDataProvider,

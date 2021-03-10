@@ -7,7 +7,7 @@ const { getAssetInfo } = require('@defisaver/tokens');
 const { tenderlyRPC } = require('hardhat');
 // const hre = require("hardhat");
 
-const dfs = require('defisaver-sdk');
+const dfs = require('@defisaver/sdk')
 
 const {
     getAddrFromRegistry,
