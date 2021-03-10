@@ -68,19 +68,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "ETH_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "ETH_ADDRESS",
 			"outputs": [
 				{
@@ -172,19 +159,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "WETH_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "actionType",
 			"outputs": [
 				{
@@ -202,6 +176,19 @@
 			"outputs": [
 				{
 					"internalType": "contract ILendingPoolAddressesProviderV2",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "adminVault",
+			"outputs": [
+				{
+					"internalType": "contract AdminVault",
 					"name": "",
 					"type": "address"
 				}
@@ -275,7 +262,7 @@
 				},
 				{
 					"internalType": "address",
-					"name": "",
+					"name": "_initiator",
 					"type": "address"
 				},
 				{
@@ -292,6 +279,13 @@
 					"type": "bool"
 				}
 			],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "kill",
+			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
 		},
@@ -321,11 +315,6 @@
 				{
 					"components": [
 						{
-							"internalType": "address",
-							"name": "receiver",
-							"type": "address"
-						},
-						{
 							"internalType": "address[]",
 							"name": "tokens",
 							"type": "address[]"
@@ -346,14 +335,14 @@
 							"type": "address"
 						},
 						{
-							"internalType": "bytes",
-							"name": "params",
-							"type": "bytes"
+							"internalType": "address",
+							"name": "flParamGetterAddr",
+							"type": "address"
 						},
 						{
-							"internalType": "uint16",
-							"name": "refferalCode",
-							"type": "uint16"
+							"internalType": "bytes",
+							"name": "flParamGetterData",
+							"type": "bytes"
 						}
 					],
 					"internalType": "struct FLAaveV2.FLAaveV2Data",
@@ -361,7 +350,7 @@
 					"type": "tuple"
 				}
 			],
-			"stateMutability": "view",
+			"stateMutability": "pure",
 			"type": "function"
 		},
 		{
@@ -375,6 +364,29 @@
 				}
 			],
 			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_token",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_receiver",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_amount",
+					"type": "uint256"
+				}
+			],
+			"name": "withdrawStuckFunds",
+			"outputs": [],
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{

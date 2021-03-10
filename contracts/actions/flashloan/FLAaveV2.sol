@@ -12,6 +12,8 @@ import "../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../core/StrategyData.sol";
 import "../../utils/TokenUtils.sol";
 
+import "hardhat/console.sol";
+
 /// @title Action that gets and receives a FL from Aave V2
 contract FLAaveV2 is ActionBase, StrategyData {
     using SafeERC20 for IERC20;
@@ -33,7 +35,7 @@ contract FLAaveV2 is ActionBase, StrategyData {
 
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
 
-    bytes32 constant FL_AAVE_ID = keccak256("FLAaveV2");
+    bytes32 constant FL_AAVE_V2_ID = keccak256("FLAaveV2");
     bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
 
     struct FLAaveV2Data {
@@ -80,8 +82,10 @@ contract FLAaveV2 is ActionBase, StrategyData {
     /// @param _flData All the amounts/tokens and related aave fl data
     /// @param _params Rest of the data we have in the task
     function _flAaveV2(FLAaveV2Data memory _flData, bytes memory _params) internal returns (uint) {
+
+        console.log("Get Fl");
         ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
-            payable(registry.getAddr(FL_AAVE_ID)),
+            payable(registry.getAddr(FL_AAVE_V2_ID)),
             _flData.tokens,
             _flData.amounts,
             _flData.modes,
@@ -111,14 +115,20 @@ contract FLAaveV2 is ActionBase, StrategyData {
         require(msg.sender == AAVE_LENDING_POOL, ERR_ONLY_AAVE_CALLER);
         require(_initiator == address(this), ERR_SAME_CALLER);
 
+        console.log("Received FL");
+
         (Task memory currTask, address proxy) = abi.decode(_params, (Task, address));
 
+        // Send FL amounts to user proxy
         for (uint256 i = 0; i < _assets.length; ++i) {
-            if (_assets[i] == TokenUtils.WETH_ADDR) {
-                TokenUtils.withdrawWeth(_amounts[i]);
-            }
+            // if (_assets[i] == TokenUtils.WETH_ADDR) {
+            //     TokenUtils.withdrawWeth(_amounts[i]);
+            // }
+
             _assets[i].withdrawTokens(proxy, _amounts[i]);
         }
+
+        console.log("Poslao tokene na proxy");
 
         address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
 
@@ -128,9 +138,11 @@ contract FLAaveV2 is ActionBase, StrategyData {
             abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, bytes32(_amounts[0] + _fees[0]))
         );
 
+        console.log("Return FL");
+
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
-            _assets[i].convertAndDepositToWeth((_amounts[i] + _fees[i]));
+            // _assets[i].convertAndDepositToWeth((_amounts[i] + _fees[i]));
             _assets[i].approveToken(address(AAVE_LENDING_POOL), _amounts[i] + _fees[i]);
         }
 

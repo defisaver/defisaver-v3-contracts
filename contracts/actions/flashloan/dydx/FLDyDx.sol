@@ -27,7 +27,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
-    FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(0xCDD293894a2CAb5F922b75Fa54C48705B7722284);
+    FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(0x47f159C90850D5cE09E21F931d504536840f34b4);
 
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
 
@@ -78,6 +78,9 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
         address _token,
         bytes memory _data
     ) internal returns (uint256) {
+
+        address originToken = _token;
+
         if (_token == ETH_ADDRESS) {
             _token = WETH_ADDRESS;
         }
@@ -104,7 +107,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
 
         solo.operate(accountInfos, operations);
 
-        logger.Log(address(this), msg.sender, "FLDyDx", abi.encode(_amount, _token));
+        logger.Log(address(this), msg.sender, "FLDyDx", abi.encode(_amount, originToken));
 
         return _amount;
     }
@@ -123,7 +126,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
 
         (Task memory currTask, address proxy) = abi.decode(callData, (Task, address));
 
-        if (tokenAddr == WETH_ADDRESS || tokenAddr == ETH_ADDRESS) {
+        if (tokenAddr == ETH_ADDRESS) {
             IWETH(WETH_ADDRESS).withdraw(amount);
         }
 
@@ -146,11 +149,14 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
         address _loanTokenAddr,
         uint256 _amount
     ) internal {
-        flFeeFaucet.my2Wei(); // fetch 2 wei for dydx fee
 
-        if (_loanTokenAddr == WETH_ADDRESS || _loanTokenAddr == ETH_ADDRESS) {
+        if (_loanTokenAddr == ETH_ADDRESS) {
             IWETH(WETH_ADDRESS).deposit{value: _amount}();
+            _loanTokenAddr = WETH_ADDRESS;
         }
+
+        flFeeFaucet.my2Wei(_loanTokenAddr); // fetch 2 wei for dydx fee
+
     }
 
     function parseInputs(bytes[] memory _callData)

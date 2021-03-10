@@ -2,14 +2,18 @@
 
 pragma solidity ^0.7.0;
 
-import "../interfaces/IWETH.sol";
+import "../utils/SafeERC20.sol";
+import "../interfaces/IERC20.sol";
 
 /// @title Helper contract where we can retreive the 2 wei Dydx fee
 contract FLFeeFaucet {
-    address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+
+    using SafeERC20 for IERC20;
 
     /// @notice Sends 2 wei to msg.sender
-    function my2Wei() public {
-        IWETH(WETH_ADDR).transfer(msg.sender, 2);
+    /// @dev Anyone can call this method but it's not economicly feasible to drain
+    /// @param _tokenAddr Address of the token we want 2 wei
+    function my2Wei(address _tokenAddr) public {
+        IERC20(_tokenAddr).safeTransfer(msg.sender, 2);
     }
 }
