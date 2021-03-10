@@ -51,6 +51,6 @@
     }
   },
   "dependencies": {
-    "defisaver-sdk": "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git"
+    "@defisaver/sdk": "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#beta"
   }
 }

@@ -98,6 +98,7 @@ contract FLAave is ActionBase, StrategyData {
         uint256 _fee,
         bytes calldata _params
     ) external {
+
         require(msg.sender == AAVE_LENDING_POOL_ADDRESSES, ERR_ONLY_AAVE_CALLER);
 
         (Task memory currTask, address proxy) = abi.decode(_params, (Task, address));

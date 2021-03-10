@@ -20,6 +20,8 @@ const ADMIN_ACC = '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9';
 
 const MAX_UINT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
+const AAVE_FL_FEE = 0.09;
+
 const standardAmounts = {
     'ETH': '2',
     'AAVE': '15',
@@ -34,8 +36,8 @@ const standardAmounts = {
     'REN': '4000',
     'MKR': '2.5',
     'ENJ': '8000',
-    'DAI': '800',
-    'WBTC': '0.06',
+    'DAI': '2000',
+    'WBTC': '0.05',
     'ZRX': '3000',
     'KNC': '1200',
     'MANA': '28000',
@@ -262,4 +264,5 @@ module.exports = {
     OWNER_ACC,
     ADMIN_ACC,
     USDC_ADDR,
+    AAVE_FL_FEE,
 };

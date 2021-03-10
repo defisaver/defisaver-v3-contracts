@@ -63,9 +63,7 @@ library TokenUtils {
 
     function convertAndDepositToWeth(address _tokenAddr, uint _amount) internal returns (address, address) {
         if (_tokenAddr == ETH_ADDR) {
-            uint256 oldBalance = getBalance(_tokenAddr, msg.sender);
             IWETH(WETH_ADDR).deposit{value: _amount}();
-            assert(getBalance(_tokenAddr, msg.sender) == oldBalance + _amount);
             return (ETH_ADDR, WETH_ADDR);
         } else {
             return (_tokenAddr, _tokenAddr);

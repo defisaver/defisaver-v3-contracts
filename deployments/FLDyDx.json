@@ -55,19 +55,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "ETH_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "ETH_ADDRESS",
 			"outputs": [
 				{
@@ -172,19 +159,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "WETH_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "WETH_ADDRESS",
 			"outputs": [
 				{
@@ -210,10 +184,23 @@
 			"type": "function"
 		},
 		{
+			"inputs": [],
+			"name": "adminVault",
+			"outputs": [
+				{
+					"internalType": "contract AdminVault",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "",
+					"name": "_initiator",
 					"type": "address"
 				},
 				{
@@ -253,17 +240,17 @@
 				},
 				{
 					"internalType": "bytes[]",
-					"name": "_subData",
+					"name": "",
 					"type": "bytes[]"
 				},
 				{
 					"internalType": "uint8[]",
-					"name": "_paramMapping",
+					"name": "",
 					"type": "uint8[]"
 				},
 				{
 					"internalType": "bytes32[]",
-					"name": "_returnValues",
+					"name": "",
 					"type": "bytes32[]"
 				}
 			],
@@ -293,6 +280,26 @@
 		},
 		{
 			"inputs": [],
+			"name": "flFeeFaucet",
+			"outputs": [
+				{
+					"internalType": "contract FLFeeFaucet",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "kill",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "logger",
 			"outputs": [
 				{
@@ -302,6 +309,40 @@
 				}
 			],
 			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes[]",
+					"name": "_callData",
+					"type": "bytes[]"
+				}
+			],
+			"name": "parseInputs",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "amount",
+					"type": "uint256"
+				},
+				{
+					"internalType": "address",
+					"name": "token",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "flParamGetterAddr",
+					"type": "address"
+				},
+				{
+					"internalType": "bytes",
+					"name": "flParamGetterData",
+					"type": "bytes"
+				}
+			],
+			"stateMutability": "pure",
 			"type": "function"
 		},
 		{
@@ -315,6 +356,29 @@
 				}
 			],
 			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_token",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_receiver",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_amount",
+					"type": "uint256"
+				}
+			],
+			"name": "withdrawStuckFunds",
+			"outputs": [],
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{

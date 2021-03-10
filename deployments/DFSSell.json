@@ -236,19 +236,6 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "chiToken",
-			"outputs": [
-				{
-					"internalType": "contract IGasToken",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
 			"inputs": [
 				{
 					"internalType": "bytes[]",
@@ -301,19 +288,6 @@
 			"outputs": [
 				{
 					"internalType": "contract FeeRecipient",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "gasToken",
-			"outputs": [
-				{
-					"internalType": "contract IGasToken",
 					"name": "",
 					"type": "address"
 				}
