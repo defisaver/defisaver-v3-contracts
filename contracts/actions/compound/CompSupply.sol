@@ -56,10 +56,6 @@ contract CompSupply is ActionBase, CompHelper {
     function _supply(address _cTokenAddr, uint _amount, address _from) internal returns (uint) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
-        if (tokenAddr != TokenUtils.ETH_ADDR) {
-            tokenAddr = TokenUtils.WETH_ADDR;
-        }
-
         // if amount -1, pull current proxy balance
         if (_amount == type(uint).max) {
             _amount = tokenAddr.getBalance(address(this));

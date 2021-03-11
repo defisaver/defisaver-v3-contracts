@@ -55,8 +55,8 @@ contract CompBorrow is ActionBase, CompHelper {
 
         require(ICToken(_cTokenAddr).borrow(_amount) == 0, "Comp borrow failed");
 
-        if (tokenAddr == TokenUtils.ETH_ADDR) {
-            TokenUtils.ETH_ADDR.convertAndDepositToWeth(_amount);
+        if (tokenAddr == TokenUtils.WETH_ADDR) {
+            TokenUtils.depositWeth(_amount);
         }
 
         tokenAddr.withdrawTokens(_to, _amount);
