@@ -62,14 +62,16 @@ contract CompSupply is ActionBase, CompHelper {
         }
 
         tokenAddr.pullTokens(_from, _amount);
-        tokenAddr.approveToken(_cTokenAddr, _amount);
 
         enterMarket(_cTokenAddr);
 
-        if (tokenAddr != TokenUtils.ETH_ADDR) {
+        if (tokenAddr != TokenUtils.WETH_ADDR) {
+            tokenAddr.approveToken(_cTokenAddr, _amount);
+
             require(ICToken(_cTokenAddr).mint(_amount) == 0, ERR_COMP_SUPPLY_FAILED);
         } else {
-            ICToken(_cTokenAddr).mint{value: msg.value}(); // reverts on fail
+            TokenUtils.withdrawWeth(_amount);
+            ICToken(_cTokenAddr).mint{value: _amount}(); // reverts on fail
         }
 
         return _amount;

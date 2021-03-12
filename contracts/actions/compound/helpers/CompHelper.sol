@@ -4,6 +4,7 @@ pragma solidity ^0.7.0;
 
 import "../../../interfaces/compound/IComptroller.sol";
 import "../../../interfaces/compound/ICToken.sol";
+import "../../../utils/TokenUtils.sol";
 
 contract CompHelper {
 
@@ -11,7 +12,7 @@ contract CompHelper {
     address public constant COMPTROLLER_ADDR = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
 
     function getUnderlyingAddr(address _cTokenAddr) internal returns (address tokenAddr) {
-        if (_cTokenAddr == C_ETH_ADDR) return 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+        if (_cTokenAddr == C_ETH_ADDR) return TokenUtils.WETH_ADDR;
 
         tokenAddr = ICToken(_cTokenAddr).underlying();
     }

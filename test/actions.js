@@ -47,15 +47,14 @@ const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to) => 
 
     const functionData = sellAction.encodeForDsProxyCall()[1];
 
-    let value = '0';
 
     if (isEth(sellAddr)) {
-        value = sellAmount.toString();
+        await depositToWeth(sellAmount.toString());
     } else {
         await approve(sellAddr, proxy.address);
     }
 
-    await proxy['execute(address,bytes)'](dfsSellAddr, functionData, {value, gasLimit: 3000000});
+    await proxy['execute(address,bytes)'](dfsSellAddr, functionData, {gasLimit: 3000000});
 };
 
 const buy = async (proxy, sellAddr, buyAddr, sellAmount, buyAmount, wrapper, from, to) => {
@@ -255,9 +254,9 @@ const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
 
     let compSupplyAddr = await getAddrFromRegistry('CompSupply');
 
-    let value = '0';
     if (isEth(tokenAddr)) {
-        value = amount.toString();
+        await depositToWeth(amount.toString());
+        await approve(tokenAddr, proxy.address);
     } else {
         await approve(tokenAddr, proxy.address);
     }
@@ -269,7 +268,7 @@ const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
 
     const functionData = compSupplyAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](compSupplyAddr, functionData, {value, gasLimit: 3000000});
+    await proxy['execute(address,bytes)'](compSupplyAddr, functionData, {gasLimit: 3000000});
 };
 
 const withdrawComp = async (proxy, cTokenAddr, amount, to) => {

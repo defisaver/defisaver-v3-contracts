@@ -70,6 +70,10 @@ contract CompWithdraw is ActionBase, CompHelper {
         // used to return the precise amount of tokens returned
         _amount = tokenBalanceAfter - tokenBalanceBefore;
 
+        if (tokenAddr == TokenUtils.WETH_ADDR) {
+            TokenUtils.depositWeth(_amount);
+        }
+
         tokenAddr.withdrawTokens(_to, _amount);
 
         return _amount;

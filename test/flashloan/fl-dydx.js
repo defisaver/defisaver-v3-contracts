@@ -8,6 +8,7 @@ const {
     standardAmounts,
     nullAddress,
     MAX_UINT,
+    WETH_ADDRESS,
 } = require("../utils");
 
 describe("FL-DyDx", function () {
@@ -15,7 +16,7 @@ describe("FL-DyDx", function () {
 
     let senderAcc, proxy, taskExecutorAddr, dydxFl;
 
-    const FLASHLOAN_TOKENS = ["ETH", "DAI", "USDC"];
+    const FLASHLOAN_TOKENS = ["WETH", "DAI", "USDC"];
 
     before(async () => {
         taskExecutorAddr = await getAddrFromRegistry("TaskExecutor");
@@ -33,6 +34,10 @@ describe("FL-DyDx", function () {
 
         it(`... should get an ${tokenSymbol} DyDx flash loan`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
+
+            if (assetInfo.symbol === 'ETH') {
+                assetInfo.address = WETH_ADDRESS;
+            }
 
             const loanAmount = ethers.utils.parseUnits(standardAmounts[tokenSymbol], assetInfo.decimals);
            

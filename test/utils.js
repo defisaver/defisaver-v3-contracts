@@ -189,7 +189,9 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0) =
 };
 
 const isEth = (tokenAddr) => {
-    if (tokenAddr.toLowerCase() === ETH_ADDR.toLowerCase()) {
+    if (tokenAddr.toLowerCase() === ETH_ADDR.toLowerCase() ||
+    tokenAddr.toLowerCase() === WETH_ADDRESS.toLowerCase()
+    ) {
         return true;
     }
 

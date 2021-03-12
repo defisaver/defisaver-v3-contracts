@@ -76,14 +76,7 @@ contract McdSupply is ActionBase, McdHelper {
 
         tokenAddr.pullTokens(_from, _amount);
 
-        int256 convertAmount = 0;
-
-        if (isEthJoinAddr(_joinAddr)) {
-            (, tokenAddr) = TokenUtils.ETH_ADDR.convertAndDepositToWeth(_amount);
-            convertAmount = toPositiveInt(_amount);
-        } else {
-            convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
-        }
+        int256 convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
 
         tokenAddr.approveToken(_joinAddr, _amount);
 

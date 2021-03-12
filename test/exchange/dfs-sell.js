@@ -34,11 +34,11 @@ describe("Dfs-Sell", function() {
     let senderAcc, proxy, dfsSellAddr;
 
     const trades = [
-        {sellToken: "ETH", buyToken: "DAI", amount: "1"},
+        {sellToken: "WETH", buyToken: "DAI", amount: "1"},
         {sellToken: "DAI", buyToken: "WBTC", amount: "200"},
-        {sellToken: "ETH", buyToken: "USDC", amount: "1"},
-        {sellToken: "USDC", buyToken: "ETH", amount: "100"},
-        {sellToken: "ETH", buyToken: "USDT", amount: "1"},
+        {sellToken: "WETH", buyToken: "USDC", amount: "1"},
+        {sellToken: "USDC", buyToken: "WETH", amount: "100"},
+        {sellToken: "WETH", buyToken: "USDT", amount: "1"},
         {sellToken: "USDT", buyToken: "BAT", amount: "150"},
     ];
 
@@ -52,20 +52,21 @@ describe("Dfs-Sell", function() {
 
     });
 
-    for (let i = 0; i < trades.length; ++i) {
+    for (let i = 3; i < 4; ++i) {
         const trade = trades[i];
 
         it(`... should sell ${trade.sellToken} for a ${trade.buyToken}`, async () => {
-            const sellAddr = getAssetInfo(trade.sellToken).address;
-            const buyAddr = getAssetInfo(trade.buyToken).address;
 
-            const buyBalanceBefore = await balanceOf(buyAddr, senderAcc.address);
+            const sellAssetInfo = getAssetInfo(trade.sellToken);
+            const buyAssetInfo = getAssetInfo(trade.buyToken);
+
+            const buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
 
             const amount = trade.amount * 10**getAssetInfo(trade.sellToken).decimals;
 
-            await sell(proxy, sellAddr, buyAddr, amount, UNISWAP_WRAPPER, senderAcc.address, senderAcc.address);
+            await sell(proxy, sellAssetInfo.address, buyAssetInfo.address, amount, UNISWAP_WRAPPER, senderAcc.address, senderAcc.address);
            
-            const buyBalanceAfter = await balanceOf(buyAddr, senderAcc.address);
+            const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
 
             expect(buyBalanceBefore).is.lt(buyBalanceAfter);
         });

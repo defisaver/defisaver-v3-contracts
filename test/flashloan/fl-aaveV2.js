@@ -7,6 +7,7 @@ const {
     redeploy,
     send,
     balanceOf,
+    depositToWeth,
     standardAmounts,
     nullAddress,
     MAX_UINT,
@@ -27,7 +28,7 @@ describe("FL-AaveV2", function () {
 
     let senderAcc, proxy, taskExecutorAddr, aaveFl;
 
-    const FLASHLOAN_TOKENS = ["ETH", "DAI", "USDC", "WBTC", "USDT", "YFI", "BAT", "LINK", "MKR"];
+    const FLASHLOAN_TOKENS = ["WETH", "DAI", "USDC", "WBTC", "USDT", "YFI", "BAT", "LINK", "MKR"];
 
     before(async () => {
         taskExecutorAddr = await getAddrFromRegistry("TaskExecutor");
@@ -40,7 +41,7 @@ describe("FL-AaveV2", function () {
         proxy = await getProxy(senderAcc.address);
     });
 
-    for (let i = 1; i < 2; ++i) {
+    for (let i = 0; i < FLASHLOAN_TOKENS.length; ++i) {
         const tokenSymbol = FLASHLOAN_TOKENS[i];
 
         it(`... should get an ${tokenSymbol} AaveV2 flash loan`, async () => {
@@ -67,10 +68,9 @@ describe("FL-AaveV2", function () {
 
             const functionData = basicFLRecipe.encodeForDsProxyCall();
 
-            let value = 0;
 
             if (tokenSymbol === "ETH") {
-                value = feeAmount;
+                await depositToWeth(feeAmount);
             } else {
                 // buy token so we have it for fee
                 const tokenBalance = await balanceOf(assetInfo.address, senderAcc.address);
@@ -86,12 +86,11 @@ describe("FL-AaveV2", function () {
                         senderAcc.address
                     );
                 }
-
-                await send(assetInfo.address, proxy.address, feeAmount);
             }
 
+            await send(assetInfo.address, proxy.address, feeAmount);
+
             await proxy["execute(address,bytes)"](taskExecutorAddr, functionData[1], {
-                value,
                 gasLimit: 3000000,
             });
         });
