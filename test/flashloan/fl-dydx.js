@@ -16,7 +16,7 @@ describe("FL-DyDx", function () {
 
     let senderAcc, proxy, taskExecutorAddr, dydxFl;
 
-    const FLASHLOAN_TOKENS = ["ETH", "DAI", "USDC"];
+    const FLASHLOAN_TOKENS = ["WETH", "DAI", "USDC"];
 
     before(async () => {
         taskExecutorAddr = await getAddrFromRegistry("TaskExecutor");

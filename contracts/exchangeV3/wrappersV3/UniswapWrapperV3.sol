@@ -25,22 +25,12 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _srcAmount From amount
     /// @return uint Destination amount
     function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) external payable override returns (uint) {
-        (, _srcAddr) = _srcAddr.convertToWeth();
-        (, _destAddr) = _destAddr.convertToWeth();
-
         uint[] memory amounts;
         address[] memory path = abi.decode(_additionalData, (address[]));
 
         IERC20(_srcAddr).safeApprove(address(router), _srcAmount);
 
-        // if we are buying ether
-        if (_destAddr == TokenUtils.WETH_ADDR) {
-            amounts = router.swapExactTokensForETH(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
-        }
-        // if we are selling token to token
-        else {
-            amounts = router.swapExactTokensForTokens(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
-        }
+        amounts = router.swapExactTokensForTokens(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
 
         return amounts[amounts.length - 1];
     }
@@ -51,10 +41,6 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _destAmount To amount
     /// @return uint srcAmount
     function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory _additionalData) external override payable returns(uint) {
-
-        (, _srcAddr) = _srcAddr.convertToWeth();
-        (, _destAddr) = _destAddr.convertToWeth();
-
         uint[] memory amounts;
         address[] memory path = abi.decode(_additionalData, (address[]));
 
@@ -62,14 +48,7 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth {
 
         IERC20(_srcAddr).safeApprove(address(router), srcAmount);
 
-         // if we are buying ether
-        if (_destAddr == TokenUtils.WETH_ADDR) {
-            amounts = router.swapTokensForExactETH(_destAmount, type(uint).max, path, msg.sender, block.timestamp + 1);
-        }
-        // if we are buying token to token
-        else {
-            amounts = router.swapTokensForExactTokens(_destAmount, type(uint).max, path, msg.sender, block.timestamp + 1);
-        }
+        amounts = router.swapTokensForExactTokens(_destAmount, type(uint).max, path, msg.sender, block.timestamp + 1);
 
         // Send the leftover from the source token back
         sendLeftOver(_srcAddr);

@@ -8,6 +8,7 @@ const {
     redeploy,
     balanceOf,
     standardAmounts,
+    WETH_ADDRESS,
 } = require('../utils');
 
 
@@ -28,7 +29,7 @@ describe("Comp-Supply", function () {
         proxy = await getProxy(senderAcc.address);
     });
 
-    for (let i = 0; i < compoundCollateralAssets.length; ++i) {
+    for (let i = 0; i < 1; ++i) { // compoundCollateralAssets.length
         const cTokenData = compoundCollateralAssets[i];
 
         it(`... should supply ${standardAmounts[cTokenData.underlyingAsset]} ${cTokenData.underlyingAsset} to Compound`, async () => {
@@ -36,6 +37,10 @@ describe("Comp-Supply", function () {
             const cToken = cTokenData.address;
 
             if (assetInfo.symbol === 'REP') return;
+
+            if (assetInfo.symbol === 'ETH') {
+                assetInfo.address = WETH_ADDRESS;
+            }
 
             const amount = ethers.utils.parseUnits(standardAmounts[assetInfo.symbol], assetInfo.decimals);
     

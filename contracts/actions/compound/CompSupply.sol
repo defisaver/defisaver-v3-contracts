@@ -71,7 +71,7 @@ contract CompSupply is ActionBase, CompHelper {
             require(ICToken(_cTokenAddr).mint(_amount) == 0, ERR_COMP_SUPPLY_FAILED);
         } else {
             TokenUtils.withdrawWeth(_amount);
-            ICToken(_cTokenAddr).mint{value: msg.value}(); // reverts on fail
+            ICToken(_cTokenAddr).mint{value: _amount}(); // reverts on fail
         }
 
         return _amount;

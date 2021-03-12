@@ -28,7 +28,7 @@ describe("FL-AaveV2", function () {
 
     let senderAcc, proxy, taskExecutorAddr, aaveFl;
 
-    const FLASHLOAN_TOKENS = ["ETH", "DAI", "USDC", "WBTC", "USDT", "YFI", "BAT", "LINK", "MKR"];
+    const FLASHLOAN_TOKENS = ["WETH", "DAI", "USDC", "WBTC", "USDT", "YFI", "BAT", "LINK", "MKR"];
 
     before(async () => {
         taskExecutorAddr = await getAddrFromRegistry("TaskExecutor");
