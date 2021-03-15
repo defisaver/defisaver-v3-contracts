@@ -57,19 +57,17 @@ describe("Aave-Supply", function () {
 
     });
 
-    for (let i = 0; i < aaveV2assetsDefaultMarket.length; ++i) {
+    for (let i = 0; i < 1; ++i) { // aaveV2assetsDefaultMarket.length
         const tokenSymbol = aaveV2assetsDefaultMarket[i];
 
         it(`... should supply ${standardAmounts[tokenSymbol]} ${tokenSymbol} to Aave`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
 
-            let addr = assetInfo.address;
-
-            if (isEth(addr)) {
-                addr = WETH_ADDRESS;
+            if (assetInfo.symbol === 'ETH') {
+                assetInfo.address = WETH_ADDRESS;
             }
 
-            const aaveTokenInfo = await getAaveTokenInfo(dataProvider, addr);
+            const aaveTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
             const aToken = aaveTokenInfo.aTokenAddress;
 
             const amount = ethers.utils.parseUnits(standardAmounts[assetInfo.symbol], assetInfo.decimals);

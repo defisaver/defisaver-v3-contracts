@@ -19,7 +19,7 @@ contract AaveSupply is ActionBase, AaveHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (address market, address tokenAddr, uint256 amount, address from, address onBehalf) =
+        (address market, address tokenAddr, uint256 amount, address from, address onBehalf, bool enableAsColl) =
             parseInputs(_callData);
 
         market = _parseParamAddr(market, _paramMapping[0], _subData, _returnValues);
@@ -28,17 +28,17 @@ contract AaveSupply is ActionBase, AaveHelper {
         from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
         onBehalf = _parseParamAddr(onBehalf, _paramMapping[4], _subData, _returnValues);
 
-        uint256 supplyAmount = _supply(market, tokenAddr, amount, from, onBehalf);
+        uint256 supplyAmount = _supply(market, tokenAddr, amount, from, onBehalf, enableAsColl);
 
         return bytes32(supplyAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable override   {
-        (address market, address tokenAddr, uint256 amount, address from, address onBehalf) =
+        (address market, address tokenAddr, uint256 amount, address from, address onBehalf, bool enableAsColl) =
             parseInputs(_callData);
 
-        _supply(market, tokenAddr, amount, from, onBehalf);
+        _supply(market, tokenAddr, amount, from, onBehalf, enableAsColl);
     }
 
     /// @inheritdoc ActionBase
@@ -54,12 +54,14 @@ contract AaveSupply is ActionBase, AaveHelper {
     /// @param _tokenAddr The address of the token to be deposited
     /// @param _amount Amount of tokens to be deposited
     /// @param _onBehalf For what user we are supplying the tokens, defaults to proxy
+    /// @param _enableAsColl If the supply asset should be collateral
     function _supply(
         address _market,
         address _tokenAddr,
         uint256 _amount,
         address _from,
-        address _onBehalf
+        address _onBehalf,
+        bool _enableAsColl
     ) internal returns (uint256) {
         address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
         uint256 amount = _amount;
@@ -82,8 +84,7 @@ contract AaveSupply is ActionBase, AaveHelper {
         // deposit in behalf of the proxy
         ILendingPoolV2(lendingPool).deposit(_tokenAddr, amount, _onBehalf, AAVE_REFERRAL_CODE);
 
-        // always set as collateral if not already
-        if (!isTokenUsedAsColl(_market, _tokenAddr)) {
+        if (_enableAsColl) {
             setCollStateForToken(_market, _tokenAddr, true);
         }
 
@@ -98,7 +99,8 @@ contract AaveSupply is ActionBase, AaveHelper {
             address tokenAddr,
             uint256 amount,
             address from,
-            address onBehalf
+            address onBehalf,
+            bool enableAsColl
         )
     {
         market = abi.decode(_callData[0], (address));
@@ -106,5 +108,6 @@ contract AaveSupply is ActionBase, AaveHelper {
         amount = abi.decode(_callData[2], (uint256));
         from = abi.decode(_callData[3], (address));
         onBehalf = abi.decode(_callData[4], (address));
+        enableAsColl = abi.decode(_callData[5], (bool));
     }
 }

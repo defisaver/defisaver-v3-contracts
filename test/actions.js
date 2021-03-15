@@ -170,25 +170,24 @@ const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
     const tokenBalance = await balanceOf(tokenAddr, from);
 
     if (tokenBalance.lt(amount)) {
-        await sell(
-            proxy,
-            ETH_ADDR,
-            tokenAddr,
-            ethers.utils.parseUnits('5', 18),
-            UNISWAP_WRAPPER,
-            from,
-            from
-        );
+        if (isEth(tokenAddr)) {
+            await depositToWeth(amount.toString());
+        } else {
+            await sell(
+                proxy,
+                ETH_ADDR,
+                tokenAddr,
+                ethers.utils.parseUnits('5', 18),
+                UNISWAP_WRAPPER,
+                from,
+                from
+            );
+        }
     }
 
     let aaveSupplyAddr = await getAddrFromRegistry('AaveSupply');
 
-    let value = '0';
-    if (isEth(tokenAddr)) {
-        value = amount.toString();
-    } else {
-        await approve(tokenAddr, proxy.address);
-    }
+    await approve(tokenAddr, proxy.address);
 
     const aaveSupplyAction = new dfs.actions.aave.AaveSupplyAction(
         market,
@@ -200,7 +199,7 @@ const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
 
     const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](aaveSupplyAddr, functionData, {value, gasLimit: 3000000});
+    await proxy['execute(address,bytes)'](aaveSupplyAddr, functionData, { gasLimit: 3000000 });
 };
 
 const withdrawAave = async (proxy, market, tokenAddr, amount, to) => {
@@ -241,30 +240,31 @@ const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
     const tokenBalance = await balanceOf(tokenAddr, from);
 
     if (tokenBalance.lt(amount)) {
-        await sell(
-            proxy,
-            ETH_ADDR,
-            tokenAddr,
-            ethers.utils.parseUnits('5', 18),
-            UNISWAP_WRAPPER,
-            from,
-            from
-        );
+        if (isEth(tokenAddr)) {
+            await depositToWeth(amount.toString());
+        } else {
+            await sell(
+                proxy,
+                ETH_ADDR,
+                tokenAddr,
+                ethers.utils.parseUnits('5', 18),
+                UNISWAP_WRAPPER,
+                from,
+                from
+            );
+        }
     }
 
     let compSupplyAddr = await getAddrFromRegistry('CompSupply');
 
-    if (isEth(tokenAddr)) {
-        await depositToWeth(amount.toString());
-        await approve(tokenAddr, proxy.address);
-    } else {
-        await approve(tokenAddr, proxy.address);
-    }
+    await approve(tokenAddr, proxy.address);
 
     const compSupplyAction = new dfs.actions.compound.CompoundSupplyAction(
         cTokenAddr,
         amount,
-        from);
+        from,
+        true
+        );
 
     const functionData = compSupplyAction.encodeForDsProxyCall()[1];
 

@@ -22,22 +22,22 @@ contract CompSupply is ActionBase, CompHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public virtual override payable returns (bytes32) {
-        (address cTokenAddr, uint256 amount, address from) = parseInputs(_callData);
+        (address cTokenAddr, uint256 amount, address from, bool enableAsColl) = parseInputs(_callData);
 
         cTokenAddr = _parseParamAddr(cTokenAddr, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);  
         from = _parseParamAddr(from, _paramMapping[2], _subData, _returnValues);
 
-        uint256 withdrawAmount = _supply(cTokenAddr, amount, from);
+        uint256 withdrawAmount = _supply(cTokenAddr, amount, from, enableAsColl);
 
         return bytes32(withdrawAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public override payable   {
-        (address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
+        (address tokenAddr, uint256 amount, address from, bool enableAsColl) = parseInputs(_callData);
 
-        _supply(tokenAddr, amount, from);
+        _supply(tokenAddr, amount, from, enableAsColl);
     }
 
     /// @inheritdoc ActionBase
@@ -53,7 +53,8 @@ contract CompSupply is ActionBase, CompHelper {
     /// @param _cTokenAddr Address of the cToken we'll get when supplying
     /// @param _amount Amount of the underlying token we are supplying
     /// @param _from Address where we are pulling the underlying tokens from
-    function _supply(address _cTokenAddr, uint _amount, address _from) internal returns (uint) {
+    /// @param _enableAsColl If the supply asset should be collateral
+    function _supply(address _cTokenAddr, uint _amount, address _from, bool _enableAsColl) internal returns (uint) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
         // if amount -1, pull current proxy balance
@@ -63,7 +64,9 @@ contract CompSupply is ActionBase, CompHelper {
 
         tokenAddr.pullTokens(_from, _amount);
 
-        enterMarket(_cTokenAddr);
+        if (_enableAsColl) {
+            enterMarket(_cTokenAddr);
+        }
 
         if (tokenAddr != TokenUtils.WETH_ADDR) {
             tokenAddr.approveToken(_cTokenAddr, _amount);
@@ -83,11 +86,13 @@ contract CompSupply is ActionBase, CompHelper {
         returns (
             address cTokenAddr,
             uint256 amount,
-            address from
+            address from,
+            bool enableAsColl
         )
     {
         cTokenAddr = abi.decode(_callData[0], (address));
         amount = abi.decode(_callData[1], (uint256));
         from = abi.decode(_callData[2], (address));
+        enableAsColl = abi.decode(_callData[3], (bool));
     }
 }
