@@ -9,6 +9,8 @@ const {
     getProxy,
     redeploy,
     standardAmounts,
+    WETH_ADDRESS,
+    MIN_VAULT_DAI_AMOUNT
 } = require('../utils');
 
 const {
@@ -21,7 +23,6 @@ const {
     generateMcd,
 } = require('../actions.js');
 
-const DAI_AMOUNT = '500';
 
 describe("Mcd-Generate", function() {
     let makerAddresses, senderAcc, proxy, mcdGenerateAddr;
@@ -44,8 +45,12 @@ describe("Mcd-Generate", function() {
         const joinAddr = ilkData.join;
         const tokenData = getAssetInfo(ilkData.asset);
 
-        it(`... should generate ${DAI_AMOUNT} DAI for ${ilkData.ilkLabel} vault`, async () => {
+        it(`... should generate ${MIN_VAULT_DAI_AMOUNT} DAI for ${ilkData.ilkLabel} vault`, async () => {
             this.timeout(40000);
+
+            if (tokenData.symbol === 'ETH') {
+                tokenData.address = WETH_ADDRESS;
+            }
 
             const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
             const collAmount = ethers.utils.parseUnits(standardAmounts[tokenData.symbol], tokenData.decimals);
@@ -53,7 +58,7 @@ describe("Mcd-Generate", function() {
             const from = senderAcc.address;
             const to = senderAcc.address;
 
-            const amountDai = ethers.utils.parseUnits(DAI_AMOUNT, 18);
+            const amountDai = ethers.utils.parseUnits(MIN_VAULT_DAI_AMOUNT, 18);
 
             const daiBalanceBefore = await balanceOf(makerAddresses["MCD_DAI"], from);
 

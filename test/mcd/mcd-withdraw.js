@@ -8,7 +8,9 @@ const {
     getProxy,
     redeploy,
     standardAmounts,
-    MAX_UINT
+    MAX_UINT,
+    MIN_VAULT_DAI_AMOUNT,
+    WETH_ADDRESS
 } = require('../utils');
 
 const {
@@ -19,8 +21,6 @@ const {
     withdrawMcd,
     openVault,
 } = require('../actions.js');
-
-const VAULT_DAI_AMOUNT = '540';
 
 describe("Mcd-Withdraw", function() {
     this.timeout(40000);
@@ -37,29 +37,41 @@ describe("Mcd-Withdraw", function() {
 
     });
 
-    for (let i = 0; i < ilks.length; ++i) {
+    for (let i = 2; i < 6; ++i) {
         const ilkData = ilks[i];
         const joinAddr = ilkData.join;
         const tokenData = getAssetInfo(ilkData.asset);
         let vaultId;
 
-        const withdrawAmount = (standardAmounts[tokenData.symbol] / 30).toString();
+        // skip uni tokens
+        if (tokenData.symbol.indexOf("UNIV2") !== -1) {
+            expect(true).to.be.true;
+            return;
+        }
+
+        const withdrawAmount = (standardAmounts[tokenData.symbol] / 20).toString();
 
         it(`... should withdraw ${withdrawAmount} ${tokenData.symbol} from ${ilkData.ilkLabel} vault`, async () => {
+
+            if (tokenData.symbol === 'ETH') {
+                tokenData.address = WETH_ADDRESS;
+            }
 
             vaultId = await openVault(
                 makerAddresses,
                 proxy,
                 joinAddr,
                 tokenData,
-                standardAmounts[tokenData.symbol],
-                VAULT_DAI_AMOUNT
+                (standardAmounts[tokenData.symbol] * 2).toString(),
+                MIN_VAULT_DAI_AMOUNT
             );
 
             const to = senderAcc.address;
             const amountColl = ethers.utils.parseUnits(withdrawAmount, tokenData.decimals);
 
             const collBalanceBefore = await balanceOf(tokenData.address, to);
+
+                console.log('Withdraw');
 
             await withdrawMcd(proxy, vaultId, amountColl, joinAddr, to);
 

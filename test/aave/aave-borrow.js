@@ -60,21 +60,20 @@ describe("Aave-Borrow", function () {
 
     });
 
+    // aaveV2assetsDefaultMarket.length
     for (let i = 0; i < aaveV2assetsDefaultMarket.length; ++i) {
         const tokenSymbol = aaveV2assetsDefaultMarket[i];
 
         it(`... should variable borrow ${standardAmounts[tokenSymbol]} ${tokenSymbol} from Aave`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
 
-            let addr = assetInfo.address;
-
-            if (isEth(addr)) {
-                addr = WETH_ADDRESS;
+            if (assetInfo.symbol === 'ETH') {
+                assetInfo.address = WETH_ADDRESS;
             }
 
-            const reserveInfo = await getAaveReserveInfo(dataProvider, addr);
-            const aTokenInfo = await getAaveTokenInfo(dataProvider, addr);
-            const reserveData = await getAaveReserveData(dataProvider, addr);
+            const reserveInfo = await getAaveReserveInfo(dataProvider, assetInfo.address);
+            const aTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
+            const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
             if (!reserveInfo.borrowingEnabled) {
                 expect(true).to.be.true;
@@ -83,13 +82,13 @@ describe("Aave-Borrow", function () {
 
             const amount = ethers.utils.parseUnits(standardAmounts[assetInfo.symbol], assetInfo.decimals);
     
-            if(reserveData.availableLiquidity.lt(amount)) {
+            if(reserveData.availableLiquidity.lt(amount)) {W
                 expect(true).to.be.true;
                 return;
             }
 
             // eth bada bing bada bum
-            await supplyAave(proxy, AAVE_MARKET,ethers.utils.parseUnits('3', 18), ETH_ADDR, senderAcc.address);
+            await supplyAave(proxy, AAVE_MARKET,ethers.utils.parseUnits('3', 18), WETH_ADDRESS, senderAcc.address);
 
             const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
             const debtBalanceBefore = await balanceOf(aTokenInfo.variableDebtTokenAddress, proxy.address);
@@ -103,18 +102,16 @@ describe("Aave-Borrow", function () {
             expect(balanceAfter).to.be.gt(balanceBefore);
         });
 
-        it(`... should stable borrow ${standardAmounts[tokenSymbol]} ${tokenSymbol} from Aave`, async () => {
+        it(`... should stable borrow ${standardAmounts[tokenSymbol] / 10} ${tokenSymbol} from Aave`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
 
-            let addr = assetInfo.address;
-
-            if (isEth(addr)) {
-                addr = WETH_ADDRESS;
+            if (assetInfo.symbol === 'ETH') {
+                assetInfo.address = WETH_ADDRESS;
             }
 
-            const reserveInfo = await getAaveReserveInfo(dataProvider, addr);
-            const aTokenInfo = await getAaveTokenInfo(dataProvider, addr);
-            const reserveData = await getAaveReserveData(dataProvider, addr);
+            const reserveInfo = await getAaveReserveInfo(dataProvider, assetInfo.address);
+            const aTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
+            const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
 
             if (!reserveInfo.stableBorrowRateEnabled) {
@@ -122,7 +119,7 @@ describe("Aave-Borrow", function () {
                 return;
             }
 
-            const amount = ethers.utils.parseUnits(standardAmounts[assetInfo.symbol], assetInfo.decimals);
+            const amount = ethers.utils.parseUnits((standardAmounts[assetInfo.symbol] / 10).toString(), assetInfo.decimals);
     
             if(reserveData.availableLiquidity.lt(amount)) {
                 expect(true).to.be.true;
@@ -130,7 +127,7 @@ describe("Aave-Borrow", function () {
             }
 
             // eth bada bing bada bum
-            await supplyAave(proxy, AAVE_MARKET,ethers.utils.parseUnits('3', 18), ETH_ADDR, senderAcc.address);
+            await supplyAave(proxy, AAVE_MARKET,ethers.utils.parseUnits('3', 18), WETH_ADDRESS, senderAcc.address);
 
             const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
             const debtBalanceBefore = await balanceOf(aTokenInfo.stableDebtTokenAddress, proxy.address);

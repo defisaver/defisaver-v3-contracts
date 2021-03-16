@@ -84,11 +84,6 @@ contract McdWithdraw is ActionBase, McdHelper {
 
         IJoin(_joinAddr).exit(address(this), _amount);
 
-        // withdraw from weth if needed
-        if (isEthJoinAddr(_joinAddr)) {
-            TokenUtils.withdrawWeth(_amount); // Weth -> Eth
-        }
-
         getTokenFromJoin(_joinAddr).withdrawTokens(_to, _amount);
 
         logger.Log(

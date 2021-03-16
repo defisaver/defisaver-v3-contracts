@@ -57,7 +57,7 @@ describe("Aave-Supply", function () {
 
     });
 
-    for (let i = 0; i < 1; ++i) { // aaveV2assetsDefaultMarket.length
+    for (let i = 0; i < aaveV2assetsDefaultMarket.length; ++i) {
         const tokenSymbol = aaveV2assetsDefaultMarket[i];
 
         it(`... should supply ${standardAmounts[tokenSymbol]} ${tokenSymbol} to Aave`, async () => {

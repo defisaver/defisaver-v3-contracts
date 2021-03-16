@@ -63,13 +63,11 @@ describe("Aave-Withdraw", function () {
         it(`... should withdraw ${standardAmounts[tokenSymbol]} ${tokenSymbol} from Aave`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
 
-            let addr = assetInfo.address;
-
-            if (isEth(addr)) {
-                addr = WETH_ADDRESS;
+            if (assetInfo.symbol === 'ETH') {
+                assetInfo.address = WETH_ADDRESS;
             }
 
-            const aaveTokenInfo = await getAaveTokenInfo(dataProvider, addr);
+            const aaveTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
             const aToken = aaveTokenInfo.aTokenAddress;
 
             const amount = ethers.utils.parseUnits(standardAmounts[assetInfo.symbol], assetInfo.decimals);

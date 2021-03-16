@@ -67,14 +67,13 @@ describe("Aave-Payback", function () {
         it(`... should payback variable borrow ${standardAmounts[tokenSymbol]} ${tokenSymbol} from Aave`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
 
-            let addr = assetInfo.address;
-            if (isEth(addr)) {
-                addr = WETH_ADDRESS;
+            if (assetInfo.symbol === 'ETH') {
+                assetInfo.address = WETH_ADDRESS;
             }
 
-            const reserveInfo = await getAaveReserveInfo(dataProvider, addr);
-            const aTokenInfo = await getAaveTokenInfo(dataProvider, addr);
-            const reserveData = await getAaveReserveData(dataProvider, addr);
+            const reserveInfo = await getAaveReserveInfo(dataProvider, assetInfo.address);
+            const aTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
+            const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
             if (!reserveInfo.borrowingEnabled) {
                 expect(true).to.be.true;
@@ -103,14 +102,13 @@ describe("Aave-Payback", function () {
         it(`... should payback stable borrow ${standardAmounts[tokenSymbol]} ${tokenSymbol} from Aave`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
 
-            let addr = assetInfo.address;
-            if (isEth(addr)) {
-                addr = WETH_ADDRESS;
+            if (assetInfo.symbol === 'ETH') {
+                assetInfo.address = WETH_ADDRESS;
             }
 
-            const reserveInfo = await getAaveReserveInfo(dataProvider, addr);
-            const aTokenInfo = await getAaveTokenInfo(dataProvider, addr);
-            const reserveData = await getAaveReserveData(dataProvider, addr);
+            const reserveInfo = await getAaveReserveInfo(dataProvider, assetInfo.address);
+            const aTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
+            const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
             if (!reserveInfo.stableBorrowRateEnabled) {
                 expect(true).to.be.true;

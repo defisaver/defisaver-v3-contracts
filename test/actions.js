@@ -10,8 +10,8 @@ const {
     approve,
     getAddrFromRegistry,
     nullAddress,
+    WWETH_ADDRESSESS,
     WETH_ADDRESS,
-    ETH_ADDR,
     USDC_ADDR,
     UNISWAP_WRAPPER,
     balanceOf,
@@ -50,9 +50,9 @@ const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to) => 
 
     if (isEth(sellAddr)) {
         await depositToWeth(sellAmount.toString());
-    } else {
-        await approve(sellAddr, proxy.address);
     }
+
+    await approve(sellAddr, proxy.address);
 
     await proxy['execute(address,bytes)'](dfsSellAddr, functionData, {gasLimit: 3000000});
 };
@@ -76,15 +76,13 @@ const buy = async (proxy, sellAddr, buyAddr, sellAmount, buyAmount, wrapper, fro
 
     const functionData = sellAction.encodeForDsProxyCall()[1];
 
-    let value = '0';
-
     if (isEth(sellAddr)) {
-        value = sellAmount.toString();
-    } else {
-        await approve(sellAddr, proxy.address);
-    }
+        await depositToWeth(sellAmount.toString());
+    } 
 
-    await proxy['execute(address,bytes)'](dfsBuyAddr, functionData, {value, gasLimit: 3000000});
+    await approve(sellAddr, proxy.address);
+
+    await proxy['execute(address,bytes)'](dfsBuyAddr, functionData, {gasLimit: 3000000});
 };
 
 const openMcd = async (proxy, makerAddresses, joinAddr) => {
@@ -104,30 +102,29 @@ const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
     const tokenBalance = await balanceOf(tokenAddr, from);
 
     if (tokenBalance.lt(amount)) {
-        await sell(
-            proxy,
-            ETH_ADDR,
-            tokenAddr,
-            ethers.utils.parseUnits('5', 18),
-            UNISWAP_WRAPPER,
-            from,
-            from
-        );
+        if (isEth(tokenAddr)) {
+            await depositToWeth(amount.toString());
+        } else {
+            await sell(
+                proxy,
+                WETH_ADDRESS,
+                tokenAddr,
+                ethers.utils.parseUnits('5', 18),
+                UNISWAP_WRAPPER,
+                from,
+                from
+            );
+        }
     }
 
     let mcdSupplyAddr = await getAddrFromRegistry('McdSupply');
 
-    let value = '0';
-    if (isEth(tokenAddr)) {
-        value = amount.toString();
-    } else {
-        await approve(tokenAddr, proxy.address);
-    }
+    await approve(tokenAddr, proxy.address);
 
     const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(vaultId, amount, joinAddr, from, MCD_MANAGER_ADDR);
     const functionData = mcdSupplyAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdSupplyAddr, functionData, {value, gasLimit: 3000000});
+    await proxy['execute(address,bytes)'](mcdSupplyAddr, functionData, {gasLimit: 3000000});
 
 };
 
@@ -175,7 +172,7 @@ const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
         } else {
             await sell(
                 proxy,
-                ETH_ADDR,
+                WETH_ADDRESS,
                 tokenAddr,
                 ethers.utils.parseUnits('5', 18),
                 UNISWAP_WRAPPER,
@@ -217,6 +214,8 @@ const borrowAave = async (proxy, market, tokenAddr, amount, rateMode, to) => {
     const aaveBorrowAction = new dfs.actions.aave.AaveBorrowAction(market,tokenAddr, amount, rateMode, to, nullAddress);
     const functionData = aaveBorrowAction.encodeForDsProxyCall()[1];
 
+    console.log("Borrow");
+
     await proxy['execute(address,bytes)'](aaveBorroweAddr, functionData, {gasLimit: 3000000});
 };
 
@@ -233,7 +232,7 @@ const paybackAave = async (proxy, market, tokenAddr, amount, rateMode, from) => 
     const aavePaybackAction = new dfs.actions.aave.AavePaybackAction(market, tokenAddr, amount, rateMode, from, nullAddress);
     const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, {value, gasLimit: 4000000});
+    await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, {gasLimit: 4000000});
 };
 
 const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {    
@@ -245,7 +244,7 @@ const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
         } else {
             await sell(
                 proxy,
-                ETH_ADDR,
+                WETH_ADDRESS,
                 tokenAddr,
                 ethers.utils.parseUnits('5', 18),
                 UNISWAP_WRAPPER,
@@ -292,7 +291,6 @@ const borrowComp = async (proxy, cTokenAddr, amount, to) => {
 const paybackComp = async (proxy, cTokenAddr, amount, from) => {
     const compPaybackAddr = await getAddrFromRegistry('CompPayback');
 
-    let value = '0';
     if (cTokenAddr.toLowerCase() === getAssetInfo("cETH").address.toLowerCase()) {
         value = amount;
     } else {
@@ -302,7 +300,7 @@ const paybackComp = async (proxy, cTokenAddr, amount, from) => {
     const compPaybackAction = new dfs.actions.compound.CompoundPaybackAction(cTokenAddr, amount, from);
     const functionData = compPaybackAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](compPaybackAddr, functionData, {value, gasLimit: 4000000});
+    await proxy['execute(address,bytes)'](compPaybackAddr, functionData, {gasLimit: 4000000});
 };
 
 const generateMcd = async (proxy, vaultId, amount, to) => {
@@ -314,26 +312,6 @@ const generateMcd = async (proxy, vaultId, amount, to) => {
     await proxy['execute(address,bytes)'](mcdGenerateAddr, functionData, {gasLimit: 3000000});
 };
 
-const buyGasTokens = async (proxy, senderAcc) => {
-    const dfsSellAddr = await getAddrFromRegistry('DFSSell');
-    const dfsSell = await hre.ethers.getContractAt("DFSSell", dfsSellAddr);
-
-    const sellAddr = getAssetInfo('ETH').address;
-    const buyAddr = '0x0000000000b3F879cb30FE243b4Dfee438691c04';
-
-    const amount = ethers.utils.parseUnits('1', 18);
-
-    const callData = await encodeDfsSellAction(
-        dfsSell, sellAddr, buyAddr, amount, UNISWAP_WRAPPER, proxy.address, senderAcc.address);
-
-    const DfsSell = await ethers.getContractFactory("DFSSell");
-    const functionData = DfsSell.interface.encodeFunctionData(
-        "executeAction",
-         [callData, [], [0, 0, 0, 0, 0], []]
-    );
-
-    await proxy['execute(address,bytes)'](dfsSellAddr, functionData, {value: amount, gasLimit: 2000000});
-};
 
 const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, from, to) => {
     const uniSupplyAddr = await getAddrFromRegistry("UniSupply");
@@ -355,7 +333,7 @@ const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, 
     if (tokenBalanceA.lt(amountA)) {
         await sell(
             proxy,
-            ETH_ADDR,
+            WETH_ADDRESS,
             addrTokenA,
             ethers.utils.parseUnits('5', 18),
             UNISWAP_WRAPPER,
@@ -367,7 +345,7 @@ const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, 
     if (tokenBalanceB.lt(amountB)) {
         await sell(
             proxy,
-            ETH_ADDR,
+            WETH_ADDRESS,
             addrTokenB,
             ethers.utils.parseUnits('5', 18),
             UNISWAP_WRAPPER,
@@ -452,12 +430,12 @@ const addFlDust = async (proxy, senderAcc, flDyDxAddr) => {
 
     // send weth
     await depositToWeth(amount);
-    await send(WETH_ADDRESS, flDyDxAddr, amount);
+    await send(WWETH_ADDRESSESS, flDyDxAddr, amount);
 
     // send dai
     const daiBalance = await balanceOf(DAI_ADDR, from);
     if (daiBalance.lt(amount)) {
-        await sell(proxy, ETH_ADDR, DAI_ADDR, ethers.utils.parseUnits('1', 18), UNISWAP_WRAPPER, from, from);
+        await sell(proxy, WETH_ADDRESS, DAI_ADDR, ethers.utils.parseUnits('1', 18), UNISWAP_WRAPPER, from, from);
     }
 
     await send(DAI_ADDR, flDyDxAddr, amount);
@@ -465,7 +443,7 @@ const addFlDust = async (proxy, senderAcc, flDyDxAddr) => {
     // send usdc
     const usdcBalance = await balanceOf(USDC_ADDR, from);
     if (usdcBalance.lt(amountUsdc)) {
-        await sell(proxy, ETH_ADDR, USDC_ADDR, ethers.utils.parseUnits('1', 18), UNISWAP_WRAPPER, from, from);
+        await sell(proxy, WETH_ADDRESS, USDC_ADDR, ethers.utils.parseUnits('1', 18), UNISWAP_WRAPPER, from, from);
     }
 
     await send(USDC_ADDR, flDyDxAddr, amountUsdc);
@@ -534,8 +512,6 @@ module.exports = {
     borrowComp,
     paybackComp,
     claimComp,
-
-    buyGasTokens,
 
     uniSupply,
     uniWithdraw,

@@ -9,7 +9,7 @@ const {
     approve,
     send,
     nullAddress,
-    REGISTRY_ADDR,
+    WETH_ADDRESS,
     standardAmounts,
     balanceOf,
 } = require('../utils');
@@ -41,7 +41,6 @@ describe("Mcd-Supply", function() {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
 
-        // await buyGasTokens(proxy, senderAcc);
     });
 
     for (let i = 0; i < ilks.length; ++i) {
@@ -51,10 +50,20 @@ describe("Mcd-Supply", function() {
 
         it(`... should supply ${standardAmounts[tokenData.symbol]} ${tokenData.symbol} to a ${ilkData.ilkLabel} vault`, async () => {
 
+            // skip uni tokens
+            if (tokenData.symbol.indexOf("UNIV2") !== -1) {
+                expect(true).to.be.true;
+                return;
+            }
+
             const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
             const amount = BigNumber.from(ethers.utils.parseUnits(standardAmounts[tokenData.symbol], tokenData.decimals));
 
             const from = senderAcc.address;
+
+            if (tokenData.symbol === 'ETH') {
+                tokenData.address = WETH_ADDRESS;
+            }
 
             await supplyMcd(proxy, vaultId, amount, tokenData.address, joinAddr, from);
         });

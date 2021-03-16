@@ -63,9 +63,9 @@ contract CompPayback is ActionBase, CompHelper {
             _amount = ICToken(_cTokenAddr).borrowBalanceCurrent(address(this));
         }
 
-        if (tokenAddr != TokenUtils.WETH_ADDR) {
-            tokenAddr.pullTokens(_from, _amount);
+        tokenAddr.pullTokens(_from, _amount);
 
+        if (tokenAddr != TokenUtils.WETH_ADDR) {
             require(ICToken(_cTokenAddr).repayBorrow(_amount) == 0, ERR_COMP_PAYBACK_FAILED);
         } else {
             TokenUtils.withdrawWeth(_amount);

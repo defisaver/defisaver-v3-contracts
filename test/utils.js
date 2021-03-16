@@ -15,6 +15,8 @@ const USDC_ADDR = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 
 const AAVE_MARKET = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
 
+const MIN_VAULT_DAI_AMOUNT = '2000';
+
 const OWNER_ACC = '0x0528A32fda5beDf89Ba9ad67296db83c9452F28C';
 const ADMIN_ACC = '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9';
 
@@ -24,32 +26,33 @@ const AAVE_FL_FEE = 0.09;
 
 const standardAmounts = {
     'ETH': '2',
-    'AAVE': '15',
+    'AAVE': '8',
     'BAT': '4000',
-    'USDC': '800',
-    'USDT': '800',
-    'UNI': '400',
-    'SUSD': '800',
-    'BUSD': '800',
-    'SNX': '200',
+    'USDC': '2000',
+    'USDT': '2000',
+    'UNI': '50',
+    'SUSD': '2000',
+    'BUSD': '2000',
+    'SNX': '100',
     'REP': '70',
-    'REN': '4000',
-    'MKR': '2.5',
-    'ENJ': '8000',
+    'REN': '1000',
+    'MKR': '1',
+    'ENJ': '1000',
     'DAI': '2000',
-    'WBTC': '0.05',
-    'ZRX': '3000',
-    'KNC': '1200',
-    'MANA': '28000',
-    'PAXUSD': '800',
-    'COMP': '11',
-    'LRC': '6000',
-    'LINK': '90',
-    'USDT': '800',
-    'TUSD': '800',
-    'BAL': '70',
-    'GUSD': '1000',
-    'YFI': '0.04'
+    'WBTC': '0.04',
+    'RENBTC': '0.04',
+    'ZRX': '1000',
+    'KNC': '1000',
+    'MANA': '2000',
+    'PAXUSD': '2000',
+    'COMP': '5',
+    'LRC': '3000',
+    'LINK': '40',
+    'USDT': '2000',
+    'TUSD': '2000',
+    'BAL': '50',
+    'GUSD': '2000',
+    'YFI': '0.05'
 };
 
 const fetchStandardAmounts = async () => {
@@ -267,4 +270,5 @@ module.exports = {
     ADMIN_ACC,
     USDC_ADDR,
     AAVE_FL_FEE,
+    MIN_VAULT_DAI_AMOUNT
 };
