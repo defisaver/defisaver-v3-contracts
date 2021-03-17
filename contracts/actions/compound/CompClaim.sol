@@ -10,7 +10,6 @@ import "./helpers/CompHelper.sol";
 
 /// @title Claims Comp reward for the specified user
 contract CompClaim is ActionBase, CompHelper {
-
     using TokenUtils for address;
 
     address public constant COMP_ADDR = 0xc00e94Cb662C3520282E6f5717214004A7f26888;
@@ -25,6 +24,7 @@ contract CompClaim is ActionBase, CompHelper {
         (address[] memory cTokensSupply, address[] memory cTokensBorrow, address from, address to) =
             parseInputs(_callData);
 
+        // the first 2 inputs are not mappable, just the last two
         from = _parseParamAddr(from, _paramMapping[0], _subData, _returnValues);
         to = _parseParamAddr(to, _paramMapping[1], _subData, _returnValues);
 
@@ -34,7 +34,7 @@ contract CompClaim is ActionBase, CompHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override   {
+    function executeActionDirect(bytes[] memory _callData) public payable override {
         (address[] memory cTokensSupply, address[] memory cTokensBorrow, address from, address to) =
             parseInputs(_callData);
 
@@ -49,7 +49,7 @@ contract CompClaim is ActionBase, CompHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Claims comp for _from address and for specified cTokens
-    /// @dev if _from != proxy, the reciver will always be the _from and not the _to addr
+    /// @dev if _from != proxy, the receiver will always be the _from and not the _to addr
     /// @param _cTokensSupply Array of cTokens which _from supplied and has earned rewards
     /// @param _cTokensBorrow Array of cTokens which _from supplied and has earned rewards
     /// @param _from For which user we are claiming the tokens
@@ -60,13 +60,13 @@ contract CompClaim is ActionBase, CompHelper {
         address _from,
         address _to
     ) internal returns (uint256) {
-        address[] memory u = new address[](1);
-        u[0] = _from;
+        address[] memory users = new address[](1);
+        users[0] = _from;
 
         uint256 compBalanceBefore = COMP_ADDR.getBalance(_from);
 
-        IComptroller(COMPTROLLER_ADDR).claimComp(u, _cTokensSupply, false, true);
-        IComptroller(COMPTROLLER_ADDR).claimComp(u, _cTokensBorrow, true, false);
+        IComptroller(COMPTROLLER_ADDR).claimComp(users, _cTokensSupply, false, true);
+        IComptroller(COMPTROLLER_ADDR).claimComp(users, _cTokensBorrow, true, false);
 
         uint256 compBalanceAfter = COMP_ADDR.getBalance(_from);
 
@@ -75,6 +75,8 @@ contract CompClaim is ActionBase, CompHelper {
         if (_from == address(this)) {
             COMP_ADDR.withdrawTokens(_to, compClaimed);
         }
+
+        logger.Log(address(this), msg.sender, "CompClaim", abi.encode(_from, _to, compClaimed));
 
         return compClaimed;
     }

@@ -29,7 +29,7 @@ describe("Comp-Supply", function () {
         proxy = await getProxy(senderAcc.address);
     });
 
-    for (let i = 0; i < 1; ++i) { // compoundCollateralAssets.length
+    for (let i = 0; i < compoundCollateralAssets.length; ++i) {
         const cTokenData = compoundCollateralAssets[i];
 
         it(`... should supply ${standardAmounts[cTokenData.underlyingAsset]} ${cTokenData.underlyingAsset} to Compound`, async () => {

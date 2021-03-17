@@ -8,6 +8,7 @@ const {
     redeploy,
     balanceOf,
     standardAmounts,
+    WETH_ADDRESS,
 } = require('../utils');
 
 
@@ -37,6 +38,10 @@ describe("Comp-Withdraw", function () {
             const cToken = cTokenData.address;
 
             if (assetInfo.symbol === 'REP') return;
+
+            if (assetInfo.symbol === 'ETH') {
+                assetInfo.address = WETH_ADDRESS;
+            }
 
             const amount = ethers.utils.parseUnits(standardAmounts[assetInfo.symbol], assetInfo.decimals);
     

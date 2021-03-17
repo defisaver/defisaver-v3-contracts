@@ -8,6 +8,7 @@ const {
     redeploy,
     balanceOf,
     standardAmounts,
+    WETH_ADDRESS
 } = require('../utils');
 
 
@@ -37,6 +38,14 @@ describe("Comp-Borrow", function () {
             const cToken = cTokenData.address;
 
             if (assetInfo.symbol === 'REP') return;
+
+            // currently can't borrow any comp
+            // TODO: make the check dynamic
+            if (assetInfo.symbol === 'COMP') return;
+
+            if (assetInfo.symbol === 'ETH') {
+                assetInfo.address = WETH_ADDRESS;
+            }
 
             const amount = ethers.utils.parseUnits(standardAmounts[assetInfo.symbol], assetInfo.decimals);
     

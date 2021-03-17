@@ -12,8 +12,9 @@ import "./helpers/CompHelper.sol";
 
 /// @title Borrow a token from Compound
 contract CompBorrow is ActionBase, CompHelper {
-
     using TokenUtils for address;
+
+    string public constant ERR_COMP_BORROW = "Comp borrow failed";
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -21,7 +22,7 @@ contract CompBorrow is ActionBase, CompHelper {
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public virtual override payable returns (bytes32) {
+    ) public payable virtual override returns (bytes32) {
         (address cTokenAddr, uint256 amount, address to) = parseInputs(_callData);
 
         cTokenAddr = _parseParamAddr(cTokenAddr, _paramMapping[0], _subData, _returnValues);
@@ -34,32 +35,43 @@ contract CompBorrow is ActionBase, CompHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable   {
+    function executeActionDirect(bytes[] memory _callData) public payable override {
         (address tokenAddr, uint256 amount, address to) = parseInputs(_callData);
 
         _borrow(tokenAddr, amount, to);
     }
 
     /// @inheritdoc ActionBase
-    function actionType() public virtual override pure returns (uint8) {
+    function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _borrow(address _cTokenAddr, uint _amount, address _to) internal returns (uint) {
+    /// @notice User borrows tokens to the Compound protocol
+    /// @param _cTokenAddr Address of the cToken we are borrowing
+    /// @param _amount Amount of tokens to be borrowed
+    /// @param _to The address we are sending the borrowed tokens to
+    function _borrow(
+        address _cTokenAddr,
+        uint256 _amount,
+        address _to
+    ) internal returns (uint256) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
+        // if the tokens are borrowed we need to enter the market
         enterMarket(_cTokenAddr);
 
-        require(ICToken(_cTokenAddr).borrow(_amount) == 0, "Comp borrow failed");
+        require(ICToken(_cTokenAddr).borrow(_amount) == 0, ERR_COMP_BORROW);
 
+        // always return WETH, never native Eth
         if (tokenAddr == TokenUtils.WETH_ADDR) {
             TokenUtils.depositWeth(_amount);
         }
 
         tokenAddr.withdrawTokens(_to, _amount);
+
+        logger.Log(address(this), msg.sender, "CompBorrow", abi.encode(tokenAddr, _amount, _to));
 
         return _amount;
     }

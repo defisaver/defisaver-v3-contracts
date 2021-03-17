@@ -61,10 +61,11 @@ contract AaveBorrow is ActionBase, AaveHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice User borrows tokens to the Aave protocol
-    /// @param _market address provider for specific market
+    /// @param _market Address provider for specific market
     /// @param _tokenAddr The address of the token to be borrowed
     /// @param _amount Amount of tokens to be borrowed
     /// @param _rateMode Send 1 for stable rate and 2 for variable
+    /// @param _to The address we are sending the borrowed tokens to
     /// @param _onBehalf From what user we are borrow the tokens, defaults to proxy
     function _borrow(
         address _market,
@@ -82,11 +83,6 @@ contract AaveBorrow is ActionBase, AaveHelper {
         }
 
         lendingPool.borrow(_tokenAddr, _amount, _rateMode, AAVE_REFERRAL_CODE, _onBehalf);
-
-        // if _to is an empty address, withdraw it to the proxy to prevent burning the tokens
-        if (_to == address(0)) {
-            _to = address(this);
-        }
 
         _tokenAddr.withdrawTokens(_to, _amount);
 

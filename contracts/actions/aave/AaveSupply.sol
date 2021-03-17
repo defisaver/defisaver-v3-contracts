@@ -61,9 +61,10 @@ contract AaveSupply is ActionBase, AaveHelper {
 
     /// @notice User deposits tokens to the Aave protocol
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
-    /// @param _market address provider for specific market
+    /// @param _market Address provider for specific market
     /// @param _tokenAddr The address of the token to be deposited
     /// @param _amount Amount of tokens to be deposited
+    /// @param _from Where are we pulling the supply tokens amount from
     /// @param _onBehalf For what user we are supplying the tokens, defaults to proxy
     /// @param _enableAsColl If the supply asset should be collateral
     function _supply(
@@ -76,9 +77,9 @@ contract AaveSupply is ActionBase, AaveHelper {
     ) internal returns (uint256) {
         ILendingPoolV2 lendingPool = getLendingPool(_market);
 
-        // if amount is set to max, take the whole balance _from address
+        // if amount is set to max, take the whole proxy balance
         if (_amount == type(uint256).max) {
-            _amount = _tokenAddr.getBalance(_from);
+            _amount = _tokenAddr.getBalance(address(this));
         }
 
         // default to onBehalf of proxy

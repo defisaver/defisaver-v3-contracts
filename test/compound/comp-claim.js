@@ -9,7 +9,7 @@ const {
     balanceOf,
     timeTravel,
     standardAmounts,
-    ETH_ADDR,
+    WETH_ADDRESS,
     send
 } = require('../utils');
 
@@ -42,7 +42,7 @@ describe("Comp-Claim", function () {
 
         const amount = ethers.utils.parseUnits('10', 18);;
 
-        await supplyComp(proxy, cEth.address, ETH_ADDR, amount, senderAcc.address);
+        await supplyComp(proxy, cEth.address, WETH_ADDRESS, amount, senderAcc.address);
 
         const from = proxy.address;
         const to = senderAcc.address;

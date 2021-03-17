@@ -46,7 +46,7 @@ contract AaveWithdraw is ActionBase, AaveHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice User withdraws tokens from the Aave protocol
-    /// @param _market address provider for specific market
+    /// @param _market Address provider for specific market
     /// @param _tokenAddr The address of the token to be withdrawn
     /// @param _amount Amount of tokens to be withdrawn -> send type(uint).max for whole amount
     /// @param _to Where the withdrawn tokens will be sent
@@ -62,11 +62,6 @@ contract AaveWithdraw is ActionBase, AaveHelper {
         // only need to remember this is _amount is max, no need to waste gas otherwise
         if (_amount == type(uint256).max) {
             tokenBefore = _tokenAddr.getBalance(_to);
-        }
-
-        // if _to is an empty address, withdraw it to the proxy to prevent burning the tokens
-        if (_to == address(0)) {
-            _to = address(this);
         }
 
         // withdraw underlying tokens from aave and send _to address
