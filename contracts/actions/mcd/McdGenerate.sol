@@ -14,17 +14,10 @@ import "./helpers/McdHelper.sol";
 
 /// @title Generate dai from a Maker Vault
 contract McdGenerate is ActionBase, McdHelper {
-
     using TokenUtils for address;
 
-    address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
     address public constant JUG_ADDRESS = 0x19c0976f590D67707E62397C87829d896Dc0f1F1;
-    address public constant SPOTTER_ADDRESS = 0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3;
-    address public constant DAI_JOIN_ADDRESS = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
-    address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-
-    IVat public constant vat = IVat(VAT_ADDRESS);
-    ISpotter public constant spotter = ISpotter(SPOTTER_ADDRESS);
+    ISpotter public constant spotter = ISpotter(0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3);
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -32,7 +25,7 @@ contract McdGenerate is ActionBase, McdHelper {
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public override payable returns (bytes32) {
+    ) public payable override returns (bytes32) {
         (uint256 cdpId, uint256 amount, address to, address mcdManager) = parseInputs(_callData);
 
         cdpId = _parseParamUint(cdpId, _paramMapping[0], _subData, _returnValues);
@@ -45,18 +38,16 @@ contract McdGenerate is ActionBase, McdHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable   {
+    function executeActionDirect(bytes[] memory _callData) public payable override {
         (uint256 cdpId, uint256 amount, address to, address mcdManager) = parseInputs(_callData);
 
         _mcdGenerate(cdpId, amount, to, mcdManager);
     }
 
     /// @inheritdoc ActionBase
-    function actionType() public override pure returns (uint8) {
+    function actionType() public pure override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
-
-
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
@@ -72,30 +63,34 @@ contract McdGenerate is ActionBase, McdHelper {
         address _to,
         address _mcdManager
     ) internal returns (uint256) {
-        bytes32 ilk = IManager(_mcdManager).ilks(_vaultId);
+        IManager mcdManager = IManager(_mcdManager);
 
-        uint256 rate = IJug(JUG_ADDRESS).drip(ilk);
-        uint256 daiVatBalance = vat.dai(IManager(_mcdManager).urns(_vaultId));
+        uint256 rate = IJug(JUG_ADDRESS).drip(mcdManager.ilks(_vaultId));
+        uint256 daiVatBalance = vat.dai(mcdManager.urns(_vaultId));
 
-        uint256 maxAmount = getMaxDebt(_mcdManager, _vaultId, ilk);
+        // Generate dai and move to proxy balance
+        mcdManager.frob(
+            _vaultId,
+            int256(0),
+            normalizeDrawAmount(_amount, rate, daiVatBalance)
+        );
+        mcdManager.move(_vaultId, address(this), toRad(_amount));
 
-        // can't generate more than max amount
-        if (_amount >= maxAmount) {
-            _amount = maxAmount;
+        // add auth so we can exit the dai
+        if (vat.can(address(this), address(DAI_JOIN_ADDR)) == 0) {
+            vat.hope(DAI_JOIN_ADDR);
         }
 
-        IManager(_mcdManager).frob(_vaultId, int256(0), normalizeDrawAmount(_amount, rate, daiVatBalance));
-        IManager(_mcdManager).move(_vaultId, address(this), toRad(_amount));
+        // exit dai from join and send _to if needed
+        IDaiJoin(DAI_JOIN_ADDR).exit(_to, _amount);
+        DAI_ADDR.withdrawTokens(_to, _amount);
 
-        if (vat.can(address(this), address(DAI_JOIN_ADDRESS)) == 0) {
-            vat.hope(DAI_JOIN_ADDRESS);
-        }
-
-        IDaiJoin(DAI_JOIN_ADDRESS).exit(_to, _amount);
-
-        DAI_ADDRESS.withdrawTokens(_to, _amount);
-
-        logger.Log(address(this), msg.sender, "McdGenerate", abi.encode(_vaultId, _amount));
+        logger.Log(
+            address(this),
+            msg.sender,
+            "McdGenerate",
+            abi.encode(_vaultId, _amount, _to, _mcdManager)
+        );
 
         return _amount;
     }
@@ -114,28 +109,5 @@ contract McdGenerate is ActionBase, McdHelper {
         amount = abi.decode(_callData[1], (uint256));
         to = abi.decode(_callData[2], (address));
         mcdManager = abi.decode(_callData[3], (address));
-    }
-
-    /// @notice Gets the maximum amount of debt available to generate
-    /// @param _mcdManager Manager addr
-    /// @param _cdpId Id of the CDP
-    /// @param _ilk Ilk of the CDP
-    /// @dev Substracts 10 wei to aviod rounding error later on
-    function getMaxDebt(address _mcdManager, uint256 _cdpId, bytes32 _ilk) internal view returns (uint256) {
-        uint256 price = getPrice(_ilk);
-
-        (, uint256 mat) = spotter.ilks(_ilk);
-        (uint256 collateral, uint256 debt) = getCdpInfo(IManager(_mcdManager), _cdpId, _ilk);
-
-        return sub(sub(div(mul(collateral, price), mat), debt), 10);
-    }
-
-    /// @notice Gets a price of the asset
-    /// @param _ilk Ilk of the CDP
-    function getPrice(bytes32 _ilk) internal view returns (uint256) {
-        (, uint256 mat) = spotter.ilks(_ilk);
-        (, , uint256 spot, , ) = vat.ilks(_ilk);
-
-        return rmul(rmul(spot, spotter.par()), mat);
     }
 }

@@ -11,7 +11,6 @@ import "../ActionBase.sol";
 
 /// @title Merge two vaults that are of the same type
 contract McdMerge is ActionBase {
-
     address public constant PROXY_REGISTRY_ADDR = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
 
     /// @inheritdoc ActionBase
@@ -21,19 +20,19 @@ contract McdMerge is ActionBase {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (uint srcVaultId, uint destVaultId, address mcdManager) = parseInputs(_callData);
+        (uint256 srcVaultId, uint256 destVaultId, address mcdManager) = parseInputs(_callData);
 
         srcVaultId = _parseParamUint(srcVaultId, _paramMapping[0], _subData, _returnValues);
         destVaultId = _parseParamUint(destVaultId, _paramMapping[1], _subData, _returnValues);
 
-         _mcdMerge(srcVaultId, destVaultId, mcdManager);
+        _mcdMerge(srcVaultId, destVaultId, mcdManager);
 
         return bytes32(destVaultId);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override   {
-        (uint srcVaultId, uint destVaultId, address mcdManager) = parseInputs(_callData);
+    function executeActionDirect(bytes[] memory _callData) public payable override {
+        (uint256 srcVaultId, uint256 destVaultId, address mcdManager) = parseInputs(_callData);
 
         _mcdMerge(srcVaultId, destVaultId, mcdManager);
     }
@@ -50,23 +49,32 @@ contract McdMerge is ActionBase {
     /// @param _srcVaultId Vault we are mergin
     /// @param _destVaultId Destination vault
     /// @param _mcdManager Mcd manager
-    function _mcdMerge(uint _srcVaultId, uint _destVaultId, address _mcdManager) internal {
+    function _mcdMerge(
+        uint256 _srcVaultId,
+        uint256 _destVaultId,
+        address _mcdManager
+    ) internal {
         IManager(_mcdManager).shift(_srcVaultId, _destVaultId);
 
-        logger.Log(address(this), msg.sender, "McdMerge", abi.encode(_srcVaultId, _destVaultId));
+        logger.Log(
+            address(this),
+            msg.sender,
+            "McdMerge",
+            abi.encode(_srcVaultId, _destVaultId, _mcdManager)
+        );
     }
 
     function parseInputs(bytes[] memory _callData)
         internal
         pure
         returns (
-            uint srcVaultId,
-            uint destVaultId,
+            uint256 srcVaultId,
+            uint256 destVaultId,
             address mcdManager
         )
     {
-        srcVaultId = abi.decode(_callData[0], (uint));
-        destVaultId = abi.decode(_callData[1], (uint));
+        srcVaultId = abi.decode(_callData[0], (uint256));
+        destVaultId = abi.decode(_callData[1], (uint256));
         mcdManager = abi.decode(_callData[2], (address));
     }
 }

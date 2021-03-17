@@ -4,6 +4,17 @@ const makerVersion = "1.1.3";
 
 const MCD_MANAGER_ADDR = '0x5ef30b9986345249bc32d8928B7ee64DE9435E39';
 
+const canGenerateDebt = async (ilkInfo) => {
+    const vat = await 
+    hre.ethers.getContractAt("IVat", "0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B");
+
+    const ilkData = await vat.ilks(ilkInfo.ilkBytes);
+    const debtCeiling = Math.round(ilkData.line / 1e45);
+    const debt = (ilkData.Art / 1e18) * (ilkData.rate / 1e27);
+
+    return debtCeiling > (debt + 10000);
+}
+
 const fetchMakerAddresses = async (version = makerVersion, params = {}) => {
     const url = `https://changelog.makerdao.com/releases/mainnet/${version}/contracts.json`;
 
@@ -50,5 +61,6 @@ module.exports = {
     getRatio,
     getVaultInfoRaw,
     getVaultInfo,
+    canGenerateDebt,
     MCD_MANAGER_ADDR
 };

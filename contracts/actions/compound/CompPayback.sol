@@ -73,7 +73,7 @@ contract CompPayback is ActionBase, CompHelper {
             require(ICToken(_cTokenAddr).repayBorrow(_amount) == 0, ERR_COMP_PAYBACK_FAILED);
         } else {
             TokenUtils.withdrawWeth(_amount);
-            ICToken(_cTokenAddr).repayBorrow{value: _amount}();
+            ICToken(_cTokenAddr).repayBorrow{value: _amount}(); // reverts on fail
         }
 
         logger.Log(address(this), msg.sender, "CompPayback", abi.encode(tokenAddr, _amount, _from));

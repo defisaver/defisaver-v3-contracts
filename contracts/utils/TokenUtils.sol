@@ -20,10 +20,9 @@ library TokenUtils {
     }
 
     function pullTokens(address _token, address _from, uint256 _amount) internal returns (uint) {
-
         // handle max uint amount
         if (_amount == type(uint).max) {
-            uint allowance = uint (-1);
+            uint allowance = type(uint).max;
 
             if (_token == ETH_ADDR) {
                 allowance = IERC20(_token).allowance(address(this), _from);

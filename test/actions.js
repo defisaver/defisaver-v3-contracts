@@ -306,6 +306,7 @@ const paybackComp = async (proxy, cTokenAddr, amount, from) => {
 const generateMcd = async (proxy, vaultId, amount, to) => {
     const mcdGenerateAddr = await getAddrFromRegistry('McdGenerate');
 
+    console.log(vaultId, amount.toString(), to, MCD_MANAGER_ADDR);
     const mcdGenerateAction = new dfs.actions.maker.MakerGenerateAction(vaultId, amount, to, MCD_MANAGER_ADDR);
     const functionData = mcdGenerateAction.encodeForDsProxyCall()[1];
 

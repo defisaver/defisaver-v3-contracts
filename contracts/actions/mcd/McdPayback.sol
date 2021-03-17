@@ -12,15 +12,7 @@ import "./helpers/McdHelper.sol";
 
 /// @title Payback dai debt for a Maker vault
 contract McdPayback is ActionBase, McdHelper {
-    
     using TokenUtils for address;
-    
-    address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
-    address public constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-
-    address public constant DAI_JOIN_ADDRESS = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
-
-    IVat public constant vat = IVat(VAT_ADDRESS);
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -28,8 +20,9 @@ contract McdPayback is ActionBase, McdHelper {
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public override payable returns (bytes32) {
-        (uint256 vaultId, uint256 amount, address from, address mcdManager) = parseInputs(_callData);
+    ) public payable override returns (bytes32) {
+        (uint256 vaultId, uint256 amount, address from, address mcdManager) =
+            parseInputs(_callData);
 
         vaultId = _parseParamUint(vaultId, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
@@ -41,14 +34,15 @@ contract McdPayback is ActionBase, McdHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable   {
-        (uint256 vaultId, uint256 amount, address from, address mcdManager) = parseInputs(_callData);
+    function executeActionDirect(bytes[] memory _callData) public payable override {
+        (uint256 vaultId, uint256 amount, address from, address mcdManager) =
+            parseInputs(_callData);
 
         _mcdPayback(vaultId, amount, from, mcdManager);
     }
 
     /// @inheritdoc ActionBase
-    function actionType() public override pure returns (uint8) {
+    function actionType() public pure override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
@@ -66,25 +60,30 @@ contract McdPayback is ActionBase, McdHelper {
         address _from,
         address _mcdManager
     ) internal returns (uint256) {
-        address urn = IManager(_mcdManager).urns(_vaultId);
-        bytes32 ilk = IManager(_mcdManager).ilks(_vaultId);
+        IManager mcdManager = IManager(_mcdManager);
 
-        uint256 wholeDebt = getAllDebt(VAT_ADDRESS, urn, urn, ilk);
+        address urn = mcdManager.urns(_vaultId);
+        bytes32 ilk = mcdManager.ilks(_vaultId);
 
-        // can't repay more than the whole debt
-        if (_amount > wholeDebt) {
-            _amount = wholeDebt;
+        // if amount type(uint256).max payback the whole vault debt
+        if (_amount == type(uint256).max) {
+            _amount = getAllDebt(address(vat), urn, urn, ilk);
         }
 
-        DAI_ADDRESS.pullTokens(_from, _amount);
+        // pull Dai from user and join the maker pool
+        DAI_ADDR.pullTokens(_from, _amount);
+        DAI_ADDR.approveToken(DAI_JOIN_ADDR, _amount);
+        IDaiJoin(DAI_JOIN_ADDR).join(urn, _amount);
 
-        DAI_ADDRESS.approveToken(DAI_JOIN_ADDRESS, _amount);
+        // decrease the vault debt
+        mcdManager.frob(_vaultId, 0, normalizePaybackAmount(address(vat), urn, ilk));
 
-        IDaiJoin(DAI_JOIN_ADDRESS).join(urn, _amount);
-
-        IManager(_mcdManager).frob(_vaultId, 0, normalizePaybackAmount(VAT_ADDRESS, urn, ilk));
-
-        logger.Log(address(this), msg.sender, "McdPayback", abi.encode(_vaultId, _amount, _from));
+        logger.Log(
+            address(this),
+            msg.sender,
+            "McdPayback",
+            abi.encode(_vaultId, _amount, _from, _mcdManager)
+        );
 
         return _amount;
     }

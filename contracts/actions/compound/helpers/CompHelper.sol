@@ -29,4 +29,10 @@ contract CompHelper {
 
         IComptroller(COMPTROLLER_ADDR).enterMarkets(markets);
     }
+
+    /// @notice Exits the Compound market
+    /// @param _cTokenAddr CToken address of the token
+    function exitMarket(address _cTokenAddr) public {
+        IComptroller(COMPTROLLER_ADDR).exitMarket(_cTokenAddr);
+    }
 }

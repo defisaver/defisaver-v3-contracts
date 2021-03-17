@@ -12,12 +12,7 @@ import "./helpers/McdHelper.sol";
 
 /// @title Withdraws collateral from a Maker vault
 contract McdWithdraw is ActionBase, McdHelper {
-
     using TokenUtils for address;
-
-    address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
-
-    IVat public constant vat = IVat(VAT_ADDRESS);
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -25,8 +20,9 @@ contract McdWithdraw is ActionBase, McdHelper {
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public override payable returns (bytes32) {
-        (uint256 vaultId, uint256 amount, address joinAddr, address to, address mcdManager) = parseInputs(_callData);
+    ) public payable override returns (bytes32) {
+        (uint256 vaultId, uint256 amount, address joinAddr, address to, address mcdManager) =
+            parseInputs(_callData);
 
         vaultId = _parseParamUint(vaultId, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
@@ -39,17 +35,17 @@ contract McdWithdraw is ActionBase, McdHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable   {
-        (uint256 vaultId, uint256 amount, address joinAddr, address to, address mcdManager) = parseInputs(_callData);
+    function executeActionDirect(bytes[] memory _callData) public payable override {
+        (uint256 vaultId, uint256 amount, address joinAddr, address to, address mcdManager) =
+            parseInputs(_callData);
 
         _mcdWithdraw(vaultId, amount, joinAddr, to, mcdManager);
     }
 
     /// @inheritdoc ActionBase
-    function actionType() public override pure returns (uint8) {
+    function actionType() public pure override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
-
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
@@ -66,10 +62,15 @@ contract McdWithdraw is ActionBase, McdHelper {
         address _to,
         address _mcdManager
     ) internal returns (uint256) {
+        IManager mcdManager = IManager(_mcdManager);
 
         // if amount type(uint).max _amount is whole collateral amount
-        if (_amount == type(uint).max) {
-            (_amount, ) = getCdpInfo(IManager(_mcdManager), _vaultId, IManager(_mcdManager).ilks(_vaultId));
+        if (_amount == type(uint256).max) {
+            (_amount, ) = getCdpInfo(
+                mcdManager,
+                _vaultId,
+                mcdManager.ilks(_vaultId)
+            );
         }
 
         uint256 frobAmount = _amount;
@@ -79,18 +80,21 @@ contract McdWithdraw is ActionBase, McdHelper {
             frobAmount = _amount * (10**(18 - IJoin(_joinAddr).dec()));
         }
 
-        IManager(_mcdManager).frob(_vaultId, -toPositiveInt(frobAmount), 0);
-        IManager(_mcdManager).flux(_vaultId, address(this), frobAmount);
+        // withdraw from vault and move to proxy balance
+        mcdManager.frob(_vaultId, -toPositiveInt(frobAmount), 0);
+        mcdManager.flux(_vaultId, address(this), frobAmount);
 
+        // withdraw the tokens from Join
         IJoin(_joinAddr).exit(address(this), _amount);
 
+        // send the tokens _to address if needed
         getTokenFromJoin(_joinAddr).withdrawTokens(_to, _amount);
 
         logger.Log(
             address(this),
             msg.sender,
             "McdWithdraw",
-            abi.encode(_vaultId, _amount, _joinAddr)
+            abi.encode(_vaultId, _amount, _joinAddr, _to, _mcdManager)
         );
 
         return _amount;

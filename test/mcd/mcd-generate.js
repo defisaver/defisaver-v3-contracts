@@ -15,6 +15,7 @@ const {
 
 const {
     fetchMakerAddresses,
+    canGenerateDebt,
 } = require('../utils-mcd.js');
 
 const {
@@ -25,6 +26,8 @@ const {
 
 
 describe("Mcd-Generate", function() {
+    this.timeout(80000);
+
     let makerAddresses, senderAcc, proxy, mcdGenerateAddr;
 
     before(async () => {
@@ -36,8 +39,6 @@ describe("Mcd-Generate", function() {
         proxy = await getProxy(senderAcc.address);
 
         mcdGenerateAddr = await getAddrFromRegistry('McdGenerate');
-
-        this.timeout(40000);
     });
 
     for (let i = 0; i < ilks.length; ++i) {
@@ -46,7 +47,12 @@ describe("Mcd-Generate", function() {
         const tokenData = getAssetInfo(ilkData.asset);
 
         it(`... should generate ${MIN_VAULT_DAI_AMOUNT} DAI for ${ilkData.ilkLabel} vault`, async () => {
-            this.timeout(40000);
+
+            const canGenerate = await canGenerateDebt(ilkData);
+            if (!canGenerate) {
+                expect(true).to.be.true;
+                return;
+            }
 
             if (tokenData.symbol === 'ETH') {
                 tokenData.address = WETH_ADDRESS;

@@ -15,7 +15,7 @@ const USDC_ADDR = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 
 const AAVE_MARKET = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
 
-const MIN_VAULT_DAI_AMOUNT = '2000';
+const MIN_VAULT_DAI_AMOUNT = '2010';
 
 const OWNER_ACC = '0x0528A32fda5beDf89Ba9ad67296db83c9452F28C';
 const ADMIN_ACC = '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9';
@@ -41,13 +41,13 @@ const standardAmounts = {
     'DAI': '2000',
     'WBTC': '0.04',
     'RENBTC': '0.04',
-    'ZRX': '1000',
+    'ZRX': '2000',
     'KNC': '1000',
     'MANA': '2000',
     'PAXUSD': '2000',
     'COMP': '5',
     'LRC': '3000',
-    'LINK': '40',
+    'LINK': '70',
     'USDT': '2000',
     'TUSD': '2000',
     'BAL': '50',

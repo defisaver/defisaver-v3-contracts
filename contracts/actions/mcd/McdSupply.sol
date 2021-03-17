@@ -12,12 +12,7 @@ import "./helpers/McdHelper.sol";
 
 /// @title Supply collateral to a Maker vault
 contract McdSupply is ActionBase, McdHelper {
-    
     using TokenUtils for address;
-
-    address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
-
-    IVat public constant vat = IVat(VAT_ADDRESS);
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -25,8 +20,9 @@ contract McdSupply is ActionBase, McdHelper {
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public override payable returns (bytes32) {
-        (uint256 vaultId, uint256 amount, address joinAddr, address from, address mcdManager) = parseInputs(_callData);
+    ) public payable override returns (bytes32) {
+        (uint256 vaultId, uint256 amount, address joinAddr, address from, address mcdManager) =
+            parseInputs(_callData);
 
         vaultId = _parseParamUint(vaultId, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
@@ -39,20 +35,19 @@ contract McdSupply is ActionBase, McdHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable   {
-        (uint256 vaultId, uint256 amount, address joinAddr, address from, address mcdManager) = parseInputs(_callData);
+    function executeActionDirect(bytes[] memory _callData) public payable override {
+        (uint256 vaultId, uint256 amount, address joinAddr, address from, address mcdManager) =
+            parseInputs(_callData);
 
         _mcdSupply(vaultId, amount, joinAddr, from, mcdManager);
     }
 
     /// @inheritdoc ActionBase
-    function actionType() public override pure returns (uint8) {
+    function actionType() public pure override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
-
 
     /// @notice Supplies collateral to the vault
     /// @param _vaultId Id of the vault
@@ -68,23 +63,25 @@ contract McdSupply is ActionBase, McdHelper {
         address _mcdManager
     ) internal returns (uint256) {
         address tokenAddr = getTokenFromJoin(_joinAddr);
+        IManager mcdManager = IManager(_mcdManager);
 
-        // if amount -1, pull current proxy balance
-        if (_amount == type(uint).max) {
+        // if amount type(uint).max, pull current proxy balance
+        if (_amount == type(uint256).max) {
             _amount = tokenAddr.getBalance(address(this));
         }
 
+        // Pull the underlying token and join the maker join pool
         tokenAddr.pullTokens(_from, _amount);
-
-        int256 convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
-
         tokenAddr.approveToken(_joinAddr, _amount);
-
         IJoin(_joinAddr).join(address(this), _amount);
 
+        // format the amount we need for frob
+        int256 convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
+
+        // Supply to the vault balance
         vat.frob(
-            IManager(_mcdManager).ilks(_vaultId),
-            IManager(_mcdManager).urns(_vaultId),
+            mcdManager.ilks(_vaultId),
+            mcdManager.urns(_vaultId),
             address(this),
             address(this),
             convertAmount,
@@ -95,7 +92,7 @@ contract McdSupply is ActionBase, McdHelper {
             address(this),
             msg.sender,
             "McdSupply",
-            abi.encode(_vaultId, _amount, _joinAddr, _from)
+            abi.encode(_vaultId, _amount, _joinAddr, _from, _mcdManager)
         );
 
         return _amount;

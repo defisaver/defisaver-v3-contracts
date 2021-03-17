@@ -7,9 +7,15 @@ import "../../../DS/DSProxy.sol";
 import "../../../interfaces/mcd/IManager.sol";
 import "../../../interfaces/mcd/IJoin.sol";
 import "../../../interfaces/mcd/IVat.sol";
+import "../../../utils/TokenUtils.sol";
 
 /// @title Helper methods for MCDSaverProxy
 contract McdHelper is DSMath {
+
+    IVat public constant vat = IVat(0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B);
+
+    address public constant DAI_JOIN_ADDR = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
+    address public constant DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
     /// @notice Returns a normalized debt _amount based on the current rate
     /// @param _amount Amount of dai to be normalized
@@ -76,10 +82,10 @@ contract McdHelper is DSMath {
     /// @param _joinAddr Join address to check
     function isEthJoinAddr(address _joinAddr) internal view returns (bool) {
         // if it's dai_join_addr don't check gem() it will fail
-        if (_joinAddr == 0x9759A6Ac90977b93B58547b4A71c78317f391A28) return false;
+        if (_joinAddr == DAI_JOIN_ADDR) return false;
 
         // if coll is weth it's and eth type coll
-        if (address(IJoin(_joinAddr).gem()) == 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) {
+        if (address(IJoin(_joinAddr).gem()) == TokenUtils.WETH_ADDR) {
             return true;
         }
 
@@ -90,11 +96,11 @@ contract McdHelper is DSMath {
     /// @dev For eth based collateral returns 0xEee... not weth addr
     /// @param _joinAddr Join address to check
     function getTokenFromJoin(address _joinAddr) internal view returns (address) {
-        if (isEthJoinAddr(_joinAddr)) return 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+        if (isEthJoinAddr(_joinAddr)) return TokenUtils.WETH_ADDR;
 
         // if it's dai_join_addr don't check gem() it will fail, return dai addr
-        if (_joinAddr == 0x9759A6Ac90977b93B58547b4A71c78317f391A28) {
-            return 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+        if (_joinAddr == DAI_JOIN_ADDR) {
+            return DAI_ADDR;
         }
 
         return address(IJoin(_joinAddr).gem());
@@ -105,11 +111,10 @@ contract McdHelper is DSMath {
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
     function getCdpInfo(IManager _manager, uint _cdpId, bytes32 _ilk) public view returns (uint, uint) {
-        address vat = _manager.vat();
         address urn = _manager.urns(_cdpId);
 
-        (uint collateral, uint debt) = IVat(vat).urns(_ilk, urn);
-        (,uint rate,,,) = IVat(vat).ilks(_ilk);
+        (uint collateral, uint debt) = vat.urns(_ilk, urn);
+        (,uint rate,,,) = vat.ilks(_ilk);
 
         return (collateral, rmul(debt, rate));
     }
