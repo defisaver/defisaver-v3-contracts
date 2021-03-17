@@ -209,6 +209,32 @@ const convertToWeth = (tokenAddr) => {
     return tokenAddr;
 };
 
+const setNewExchangeWrapper = async (acc, newAddr) => {
+
+    const exchangeOwnerAddr = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
+
+    await sendEther(acc, exchangeOwnerAddr, '1');
+    await impersonateAccount(exchangeOwnerAddr);
+
+    const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
+
+    console.log("After signer");
+
+    const registryInstance = await hre.ethers.getContractFactory("SaverExchangeRegistry");
+    const registry = await registryInstance.attach('0x25dd3F51e0C3c3Ff164DDC02A8E4D65Bb9cBB12D');
+    const registryByOwner = registry.connect(signer);
+
+    console.log('Before connect');
+
+    console.log(newAddr);
+
+    await registryByOwner.addWrapper(newAddr, {gasLimit: 300000});
+
+    console.log('dodao');
+
+    await stopImpersonatingAccount(exchangeOwnerAddr);
+};
+
 const depositToWeth = async (amount) => {
     const weth = await hre.ethers.getContractAt("IWETH", WETH_ADDRESS);
 
@@ -255,6 +281,7 @@ module.exports = {
     depositToWeth,
     timeTravel,
     fetchStandardAmounts,
+    setNewExchangeWrapper,
     standardAmounts,
     nullAddress,
     REGISTRY_ADDR,

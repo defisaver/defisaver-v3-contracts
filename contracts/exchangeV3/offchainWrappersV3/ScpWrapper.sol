@@ -12,9 +12,10 @@ import "../../interfaces/exchange/IOffchainWrapper.sol";
 contract ScpWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath {
 
     using TokenUtils for address;
-    
+
     string public constant ERR_SRC_AMOUNT = "Not enough funds";
     string public constant ERR_PROTOCOL_FEE = "Not enough eth for protcol fee";
+    string public constant ERR_TOKENS_SWAPED_ZERO = "Order success but amount 0";
 
     using SafeERC20 for IERC20;
 
@@ -30,12 +31,13 @@ contract ScpWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath {
         require(TokenUtils.ETH_ADDR.getBalance(address(this)) >= _exData.offchainData.protocolFee, ERR_PROTOCOL_FEE);
 
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
-        
+
         // write in the exact amount we are selling/buing in an order
         if (_type == ExchangeActionType.SELL) {
             writeUint256(_exData.offchainData.callData, 36, _exData.srcAmount);
         } else {
-            writeUint256(_exData.offchainData.callData, 36, wdiv(_exData.destAmount, _exData.offchainData.price));
+            uint srcAmount = wdiv(_exData.destAmount, _exData.offchainData.price) + 1; // + 1 so we round up
+            writeUint256(_exData.offchainData.callData, 36, srcAmount);
         }
 
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
@@ -45,6 +47,7 @@ contract ScpWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath {
         if (success) {
             // get the current balance of the swaped tokens
             tokensSwaped = _exData.destAddr.getBalance(address(this)) - tokensBefore;
+            require(tokensSwaped > 0, ERR_TOKENS_SWAPED_ZERO);
         }
 
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
@@ -52,4 +55,7 @@ contract ScpWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath {
 
         return (success, tokensSwaped);
     }
+
+    // solhint-disable-next-line no-empty-blocks
+    receive() external virtual payable {}
 }

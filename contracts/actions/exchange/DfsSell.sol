@@ -83,6 +83,11 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         _exchangeData.user = getUserAddress();
         _exchangeData.dfsFeeDivider = _fee;
 
+        // if we set srcAmount to max, take the whole proxy balance
+        if (_exchangeData.srcAmount == type(uint256).max) {
+            _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
+        }
+
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
 
         _exchangeData.destAddr.withdrawTokens(_to, exchangedAmount);
@@ -96,7 +101,8 @@ contract DFSSell is ActionBase, DFSExchangeCore {
                 _exchangeData.srcAddr,
                 _exchangeData.destAddr,
                 _exchangeData.srcAmount,
-                exchangedAmount
+                exchangedAmount,
+                _fee
             )
         );
 

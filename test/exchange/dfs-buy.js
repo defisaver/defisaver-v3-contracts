@@ -17,6 +17,7 @@ const {
     UNISWAP_WRAPPER,
     KYBER_WRAPPER,
     WETH_ADDRESS,
+    setNewExchangeWrapper,
     isEth
 } = require('../utils');
 
@@ -29,26 +30,29 @@ const {
 // TODO: can we make it work with 0x?
 
 describe("Dfs-Buy", function() {
-    let senderAcc, proxy, dfsSellAddr;
+    this.timeout(40000);
+
+    let senderAcc, proxy, dfsSellAddr, uniWrapper;
 
     const trades = [
-        {sellToken: "ETH", buyToken: "DAI", sellAmount: "5", buyAmount: "200"},
+        {sellToken: "WETH", buyToken: "DAI", sellAmount: "5", buyAmount: "200"},
         {sellToken: "DAI", buyToken: "WBTC", sellAmount: "200", buyAmount: "0.001"},
-        {sellToken: "ETH", buyToken: "USDC", sellAmount: "1", buyAmount: "200"},
-        {sellToken: "USDC", buyToken: "ETH", sellAmount: "100", buyAmount: "0.1"},
-        {sellToken: "ETH", buyToken: "USDT", sellAmount: "1", buyAmount: "200"},
+        {sellToken: "WETH", buyToken: "USDC", sellAmount: "1", buyAmount: "200"},
+        {sellToken: "USDC", buyToken: "WETH", sellAmount: "200", buyAmount: "0.1"},
+        {sellToken: "WETH", buyToken: "USDT", sellAmount: "1", buyAmount: "200"},
         {sellToken: "USDT", buyToken: "BAT", sellAmount: "150", buyAmount: "20"},
     ];
 
     before(async () => {
         await redeploy('DFSBuy');
+        uniWrapper = await redeploy('UniswapWrapperV3');
         
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
 
         dfsSellAddr = await getAddrFromRegistry('DFSBuy');
 
-        this.timeout(40000);
+        await setNewExchangeWrapper(senderAcc, uniWrapper.address);
     });
 
     for (let i = 0; i < trades.length; ++i) {
@@ -65,7 +69,7 @@ describe("Dfs-Buy", function() {
             const sellAmount = ethers.utils.parseUnits(trade.sellAmount, getAssetInfo(trade.sellToken).decimals);
             const buyAmount = ethers.utils.parseUnits(trade.buyAmount, getAssetInfo(trade.buyToken).decimals);
 
-            await buy(proxy, sellAddr, buyAddr, sellAmount, buyAmount, UNISWAP_WRAPPER, senderAcc.address, senderAcc.address);
+            await buy(proxy, sellAddr, buyAddr, sellAmount, buyAmount, uniWrapper.address, senderAcc.address, senderAcc.address);
            
             const buyBalanceAfter = await balanceOf(buyAddr, senderAcc.address);
             const proxySellBalanceAfter = await balanceOf(sellAddr, proxy.address);

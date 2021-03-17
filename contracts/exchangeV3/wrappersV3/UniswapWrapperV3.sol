@@ -9,6 +9,8 @@ import "../../interfaces/exchange/IUniswapRouter.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 
+import "hardhat/console.sol";
+
 /// @title DFS exchange wrapper for UniswapV2
 contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth {
 
@@ -21,10 +23,10 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth {
 
     /// @notice Sells a _srcAmount of tokens at UniswapV2
     /// @param _srcAddr From token
-    /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @return uint Destination amount
-    function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) external payable override returns (uint) {
+    function sell(address _srcAddr, address, uint _srcAmount, bytes memory _additionalData) external payable override returns (uint) {
+        console.log("hi");
         uint[] memory amounts;
         address[] memory path = abi.decode(_additionalData, (address[]));
 
@@ -37,10 +39,9 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth {
 
     /// @notice Buys a _destAmount of tokens at UniswapV2
     /// @param _srcAddr From token
-    /// @param _destAddr To token
     /// @param _destAmount To amount
     /// @return uint srcAmount
-    function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory _additionalData) external override payable returns(uint) {
+    function buy(address _srcAddr, address, uint _destAmount, bytes memory _additionalData) external override payable returns(uint) {
         uint[] memory amounts;
         address[] memory path = abi.decode(_additionalData, (address[]));
 

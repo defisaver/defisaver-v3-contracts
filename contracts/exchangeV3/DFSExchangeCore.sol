@@ -50,9 +50,6 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             exData.dfsFeeDivider
         );
 
-        // converts from ETH -> WETH if needed
-        // (, exData.srcAddr) = exData.srcAddr.convertAndDepositToWeth(exData.srcAmount);
-
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
             (offChainSwapSuccess, ) = offChainSwap(exData, ExchangeActionType.SELL);
@@ -63,11 +60,6 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             onChainSwap(exData, ExchangeActionType.SELL);
             wrapper = exData.wrapper;
         }
-
-        // if anything is left in weth, pull it to user as eth
-        // if (exData.destAddr == TokenUtils.ETH_ADDR) {
-        //     withdrawAllWeth();
-        // }
 
         uint256 destBalanceAfter = exData.destAddr.getBalance(address(this));
         uint256 amountBought = sub(destBalanceAfter, destBalanceBefore);
@@ -105,9 +97,6 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             exData.dfsFeeDivider
         );
 
-        // converts from ETH -> WETH if needed
-        // (, exData.srcAddr) = exData.srcAddr.convertAndDepositToWeth(exData.srcAmount);
-
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
             (offChainSwapSuccess, amountSold) = offChainSwap(exData, ExchangeActionType.BUY);
@@ -119,11 +108,6 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             wrapper = exData.wrapper;
         }
 
-        // if anything is left in weth, pull it to user as eth
-        // if (exData.destAddr == TokenUtils.ETH_ADDR) {
-        //     withdrawAllWeth();
-        // }
-        
         uint256 destBalanceAfter = exData.destAddr.getBalance(address(this));
         uint256 amountBought = sub(destBalanceAfter, destBalanceBefore);
 

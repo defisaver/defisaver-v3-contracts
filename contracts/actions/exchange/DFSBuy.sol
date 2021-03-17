@@ -84,6 +84,11 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
         _exchangeData.user = getUserAddress();
         _exchangeData.dfsFeeDivider = _fee;
 
+        // if we set srcAmount to max, take the whole proxy balance
+        if (_exchangeData.srcAmount == type(uint256).max) {
+            _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
+        }
+
         (address wrapper, uint256 amountSold) = _buy(_exchangeData);
 
         _exchangeData.destAddr.withdrawTokens(_to, _exchangeData.destAmount);
@@ -102,7 +107,8 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
                 _exchangeData.srcAddr,
                 _exchangeData.destAddr,
                 amountSold,
-                _exchangeData.destAmount
+                _exchangeData.destAmount,
+                _fee
             )
         );
 

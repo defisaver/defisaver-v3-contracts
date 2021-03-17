@@ -17,6 +17,7 @@ const {
     UNISWAP_WRAPPER,
     KYBER_WRAPPER,
     WETH_ADDRESS,
+    setNewExchangeWrapper,
     isEth
 } = require('../utils');
 
@@ -31,7 +32,7 @@ const {
 describe("Dfs-Sell", function() {
     this.timeout(40000);
 
-    let senderAcc, proxy, dfsSellAddr;
+    let senderAcc, proxy, dfsSellAddr, uniWrapper;
 
     const trades = [
         {sellToken: "WETH", buyToken: "DAI", amount: "1"},
@@ -44,15 +45,19 @@ describe("Dfs-Sell", function() {
 
     before(async () => {
         await redeploy('DFSSell');
+
+        uniWrapper = await redeploy('UniswapWrapperV3');
         
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
+
+        await setNewExchangeWrapper(senderAcc, uniWrapper.address);
 
         dfsSellAddr = await getAddrFromRegistry('DFSSell');
 
     });
 
-    for (let i = 3; i < 4; ++i) {
+    for (let i = 0; i < 4; ++i) {
         const trade = trades[i];
 
         it(`... should sell ${trade.sellToken} for a ${trade.buyToken}`, async () => {
@@ -64,7 +69,7 @@ describe("Dfs-Sell", function() {
 
             const amount = trade.amount * 10**getAssetInfo(trade.sellToken).decimals;
 
-            await sell(proxy, sellAssetInfo.address, buyAssetInfo.address, amount, UNISWAP_WRAPPER, senderAcc.address, senderAcc.address);
+            await sell(proxy, sellAssetInfo.address, buyAssetInfo.address, amount, uniWrapper.address, senderAcc.address, senderAcc.address);
            
             const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
 

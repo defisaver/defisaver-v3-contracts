@@ -15,6 +15,7 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath 
 
     string public constant ERR_SRC_AMOUNT = "Not enough funds";
     string public constant ERR_PROTOCOL_FEE = "Not enough eth for protcol fee";
+    string public constant ERR_TOKENS_SWAPED_ZERO = "Order success but amount 0";
 
     using SafeERC20 for IERC20;
 
@@ -28,13 +29,14 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath 
         // check that contract have enough balance for exchange and protocol fee
         require(_exData.srcAddr.getBalance(address(this)) >= _exData.srcAmount, ERR_SRC_AMOUNT);
         require(TokenUtils.ETH_ADDR.getBalance(address(this)) >= _exData.offchainData.protocolFee, ERR_PROTOCOL_FEE);
-        
+
         /// @dev 0x always uses max approve in v1, so we approve the exact amount we want to sell
         /// @dev safeApprove is modified to always first set approval to 0, then to exact amount
         if (_type == ExchangeActionType.SELL) {
             IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
         } else {
-            IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, wdiv(_exData.destAmount, _exData.offchainData.price));
+            uint srcAmount = wdiv(_exData.destAmount, _exData.offchainData.price) + 1; // + 1 so we round up
+            IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, srcAmount);
         }
 
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
@@ -44,6 +46,7 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath 
         if (success) {
             // get the current balance of the swaped tokens
             tokensSwaped = _exData.destAddr.getBalance(address(this)) - tokensBefore;
+            require(tokensSwaped > 0, ERR_TOKENS_SWAPED_ZERO);
         }
 
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
@@ -51,4 +54,7 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath 
 
         return (success, tokensSwaped);
     }
+
+    // solhint-disable-next-line no-empty-blocks
+    receive() external virtual payable {}
 }
