@@ -9,7 +9,6 @@ import "./helpers/AaveHelper.sol";
 
 /// @title Borrow a token a from an Aave market
 contract AaveBorrow is ActionBase, AaveHelper {
-
     using TokenUtils for address;
 
     /// @inheritdoc ActionBase
@@ -18,7 +17,7 @@ contract AaveBorrow is ActionBase, AaveHelper {
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public virtual override payable returns (bytes32) {
+    ) public payable virtual override returns (bytes32) {
         (
             address market,
             address tokenAddr,
@@ -41,7 +40,7 @@ contract AaveBorrow is ActionBase, AaveHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable {
+    function executeActionDirect(bytes[] memory _callData) public payable override {
         (
             address market,
             address tokenAddr,
@@ -55,12 +54,11 @@ contract AaveBorrow is ActionBase, AaveHelper {
     }
 
     /// @inheritdoc ActionBase
-    function actionType() public virtual override pure returns (uint8) {
+    function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
-
 
     /// @notice User borrows tokens to the Aave protocol
     /// @param _market address provider for specific market
@@ -75,23 +73,29 @@ contract AaveBorrow is ActionBase, AaveHelper {
         uint256 _rateMode,
         address _to,
         address _onBehalf
-    ) internal returns (uint) {
-        address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
+    ) internal returns (uint256) {
+        ILendingPoolV2 lendingPool = getLendingPool(_market);
 
-        // default to onBehalf of proxy
+        // defaults to onBehalf of proxy
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }
 
-        ILendingPoolV2(lendingPool).borrow(
-            _tokenAddr,
-            _amount,
-            _rateMode,
-            AAVE_REFERRAL_CODE,
-            _onBehalf
-        );
+        lendingPool.borrow(_tokenAddr, _amount, _rateMode, AAVE_REFERRAL_CODE, _onBehalf);
+
+        // if _to is an empty address, withdraw it to the proxy to prevent burning the tokens
+        if (_to == address(0)) {
+            _to = address(this);
+        }
 
         _tokenAddr.withdrawTokens(_to, _amount);
+
+        logger.Log(
+            address(this),
+            msg.sender,
+            "AaveBorrow",
+            abi.encode(_market, _tokenAddr, _amount, _rateMode, _to, _onBehalf)
+        );
 
         return _amount;
     }
@@ -115,5 +119,4 @@ contract AaveBorrow is ActionBase, AaveHelper {
         to = abi.decode(_callData[4], (address));
         onBehalf = abi.decode(_callData[5], (address));
     }
-
 }

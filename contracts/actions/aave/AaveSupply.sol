@@ -9,7 +9,6 @@ import "./helpers/AaveHelper.sol";
 
 /// @title Suply a token to an Aave market
 contract AaveSupply is ActionBase, AaveHelper {
-
     using TokenUtils for address;
 
     /// @inheritdoc ActionBase
@@ -19,8 +18,14 @@ contract AaveSupply is ActionBase, AaveHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (address market, address tokenAddr, uint256 amount, address from, address onBehalf, bool enableAsColl) =
-            parseInputs(_callData);
+        (
+            address market,
+            address tokenAddr,
+            uint256 amount,
+            address from,
+            address onBehalf,
+            bool enableAsColl
+        ) = parseInputs(_callData);
 
         market = _parseParamAddr(market, _paramMapping[0], _subData, _returnValues);
         tokenAddr = _parseParamAddr(tokenAddr, _paramMapping[1], _subData, _returnValues);
@@ -34,9 +39,15 @@ contract AaveSupply is ActionBase, AaveHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override   {
-        (address market, address tokenAddr, uint256 amount, address from, address onBehalf, bool enableAsColl) =
-            parseInputs(_callData);
+    function executeActionDirect(bytes[] memory _callData) public payable override {
+        (
+            address market,
+            address tokenAddr,
+            uint256 amount,
+            address from,
+            address onBehalf,
+            bool enableAsColl
+        ) = parseInputs(_callData);
 
         _supply(market, tokenAddr, amount, from, onBehalf, enableAsColl);
     }
@@ -63,11 +74,11 @@ contract AaveSupply is ActionBase, AaveHelper {
         address _onBehalf,
         bool _enableAsColl
     ) internal returns (uint256) {
-        address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
-        uint256 amount = _amount;
+        ILendingPoolV2 lendingPool = getLendingPool(_market);
 
+        // if amount is set to max, take the whole balance _from address
         if (_amount == type(uint256).max) {
-            amount = _tokenAddr.getBalance(_tokenAddr == TokenUtils.ETH_ADDR ? address(this) : _from);
+            _amount = _tokenAddr.getBalance(_from);
         }
 
         // default to onBehalf of proxy
@@ -76,19 +87,26 @@ contract AaveSupply is ActionBase, AaveHelper {
         }
 
         // pull tokens to proxy so we can supply
-        _tokenAddr.pullTokens(_from, amount);
+        _tokenAddr.pullTokens(_from, _amount);
 
         // approve aave pool to pull tokens
-        _tokenAddr.approveToken(lendingPool, amount);
+        _tokenAddr.approveToken(address(lendingPool), _amount);
 
         // deposit in behalf of the proxy
-        ILendingPoolV2(lendingPool).deposit(_tokenAddr, amount, _onBehalf, AAVE_REFERRAL_CODE);
+        lendingPool.deposit(_tokenAddr, _amount, _onBehalf, AAVE_REFERRAL_CODE);
 
         if (_enableAsColl) {
-            setCollStateForToken(_market, _tokenAddr, true);
+            enableAsCollateral(_market, _tokenAddr, true);
         }
 
-        return amount;
+        logger.Log(
+            address(this),
+            msg.sender,
+            "AaveSupply",
+            abi.encode(_market, _tokenAddr, _amount, _onBehalf, _enableAsColl)
+        );
+
+        return _amount;
     }
 
     function parseInputs(bytes[] memory _callData)

@@ -10,7 +10,6 @@ import "./helpers/AaveHelper.sol";
 
 /// @title Payback a token a user borrowed from an Aave market
 contract AavePayback is ActionBase, AaveHelper {
-
     using TokenUtils for address;
 
     /// @inheritdoc ActionBase
@@ -34,7 +33,7 @@ contract AavePayback is ActionBase, AaveHelper {
         amount = _parseParamUint(amount, _paramMapping[2], _subData, _returnValues);
         rateMode = _parseParamUint(rateMode, _paramMapping[3], _subData, _returnValues);
         from = _parseParamAddr(from, _paramMapping[4], _subData, _returnValues);
-        onBehalf = _parseParamAddr(onBehalf, _paramMapping[4], _subData, _returnValues);
+        onBehalf = _parseParamAddr(onBehalf, _paramMapping[5], _subData, _returnValues);
 
         uint256 paybackAmount = _payback(market, tokenAddr, amount, rateMode, from, onBehalf);
 
@@ -42,7 +41,7 @@ contract AavePayback is ActionBase, AaveHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override   {
+    function executeActionDirect(bytes[] memory _callData) public payable override {
         (
             address market,
             address tokenAddr,
@@ -62,9 +61,9 @@ contract AavePayback is ActionBase, AaveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     /// @notice User paybacks tokens to the Aave protocol
-    /// @param _market address provider for specific market
+    /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
+    /// @param _market Address provider for specific market
     /// @param _tokenAddr The address of the token to be paybacked
     /// @param _amount Amount of tokens to be payed back
     /// @param _rateMode Type of borrow debt [Stable: 1, Variable: 2]
@@ -78,11 +77,11 @@ contract AavePayback is ActionBase, AaveHelper {
         address _from,
         address _onBehalf
     ) internal returns (uint256) {
-        address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
+        ILendingPoolV2 lendingPool = getLendingPool(_market);
 
-        // if the amount sent is -1 to repay all, pull only the msg.sender baalnce
+        // if the amount sent is type(uint256).max pull only the _from balance
         if (_amount == type(uint256).max) {
-            _amount = _tokenAddr.getBalance(msg.sender);
+            _amount = _tokenAddr.getBalance(_from);
         }
 
         // default to onBehalf of proxy
@@ -91,17 +90,25 @@ contract AavePayback is ActionBase, AaveHelper {
         }
 
         _tokenAddr.pullTokens(_from, _amount);
-        _tokenAddr.approveToken(lendingPool, _amount);
+        _tokenAddr.approveToken(address(lendingPool), _amount);
 
         uint256 tokensBefore = _tokenAddr.getBalance(address(this));
 
-        ILendingPoolV2(lendingPool).repay(_tokenAddr, _amount, _rateMode, _onBehalf);
+        lendingPool.repay(_tokenAddr, _amount, _rateMode, _onBehalf);
 
         uint256 tokensAfter = _tokenAddr.getBalance(address(this));
 
+        // send back any leftover tokens that weren't used in the repay
         _tokenAddr.withdrawTokens(_from, tokensAfter);
 
-        return tokensBefore - tokensAfter;
+        logger.Log(
+            address(this),
+            msg.sender,
+            "AavePayback",
+            abi.encode(_market, _tokenAddr, _amount, _rateMode, _from, _onBehalf)
+        );
+
+        return (tokensBefore - tokensAfter);
     }
 
     function parseInputs(bytes[] memory _callData)

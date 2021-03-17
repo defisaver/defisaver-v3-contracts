@@ -16,6 +16,19 @@
 		},
 		{
 			"inputs": [],
+			"name": "DATA_PROVIDER_ID",
+			"outputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "ERR_RETURN_INDEX_VALUE",
 			"outputs": [
 				{
@@ -173,6 +186,29 @@
 		{
 			"inputs": [
 				{
+					"internalType": "address",
+					"name": "_market",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_tokenAddr",
+					"type": "address"
+				},
+				{
+					"internalType": "bool",
+					"name": "_useAsCollateral",
+					"type": "bool"
+				}
+			],
+			"name": "enableAsCollateral",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
 					"internalType": "bytes[]",
 					"name": "_callData",
 					"type": "bytes[]"
@@ -215,30 +251,6 @@
 			"name": "executeActionDirect",
 			"outputs": [],
 			"stateMutability": "payable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "_tokenAddr",
-					"type": "address"
-				}
-			],
-			"name": "isTokenUsedAsColl",
-			"outputs": [
-				{
-					"internalType": "bool",
-					"name": "collateralEnabled",
-					"type": "bool"
-				}
-			],
-			"stateMutability": "view",
 			"type": "function"
 		},
 		{
@@ -287,35 +299,12 @@
 					"type": "address"
 				},
 				{
-					"internalType": "bool",
-					"name": "_state",
-					"type": "bool"
+					"internalType": "uint256",
+					"name": "_rateMode",
+					"type": "uint256"
 				}
 			],
-			"name": "setCollStateForToken",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "_tokenAddr",
-					"type": "address"
-				},
-				{
-					"internalType": "bool",
-					"name": "_true",
-					"type": "bool"
-				}
-			],
-			"name": "setUserUseReserveAsCollateral",
+			"name": "switchRateMode",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"

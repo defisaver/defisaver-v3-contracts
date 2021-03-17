@@ -10,7 +10,6 @@ import "./helpers/AaveHelper.sol";
 
 /// @title Withdraw a token from an Aave market
 contract AaveWithdraw is ActionBase, AaveHelper {
-    
     using TokenUtils for address;
 
     /// @inheritdoc ActionBase
@@ -33,7 +32,7 @@ contract AaveWithdraw is ActionBase, AaveHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override   {
+    function executeActionDirect(bytes[] memory _callData) public payable override {
         (address market, address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
 
         _withdraw(market, tokenAddr, amount, from);
@@ -49,7 +48,7 @@ contract AaveWithdraw is ActionBase, AaveHelper {
     /// @notice User withdraws tokens from the Aave protocol
     /// @param _market address provider for specific market
     /// @param _tokenAddr The address of the token to be withdrawn
-    /// @param _amount Amount of tokens to be withdrawn -> send -1 for whole amount
+    /// @param _amount Amount of tokens to be withdrawn -> send type(uint).max for whole amount
     /// @param _to Where the withdrawn tokens will be sent
     function _withdraw(
         address _market,
@@ -57,9 +56,33 @@ contract AaveWithdraw is ActionBase, AaveHelper {
         uint256 _amount,
         address _to
     ) internal returns (uint256) {
-        address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
+        ILendingPoolV2 lendingPool = getLendingPool(_market);
+        uint256 tokenBefore;
 
-        ILendingPoolV2(lendingPool).withdraw(_tokenAddr, _amount, _to);
+        // only need to remember this is _amount is max, no need to waste gas otherwise
+        if (_amount == type(uint256).max) {
+            tokenBefore = _tokenAddr.getBalance(_to);
+        }
+
+        // if _to is an empty address, withdraw it to the proxy to prevent burning the tokens
+        if (_to == address(0)) {
+            _to = address(this);
+        }
+
+        // withdraw underlying tokens from aave and send _to address
+        lendingPool.withdraw(_tokenAddr, _amount, _to);
+
+        // if the input amount is max calc. what was the exact _amount
+        if (_amount == type(uint256).max) {
+            _amount = _tokenAddr.getBalance(_to) - tokenBefore;
+        }
+
+        logger.Log(
+            address(this),
+            msg.sender,
+            "AaveWithdraw",
+            abi.encode(_market, _tokenAddr, _amount, _to)
+        );
 
         return _amount;
     }
