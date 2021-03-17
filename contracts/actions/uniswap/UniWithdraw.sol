@@ -10,7 +10,6 @@ import "../ActionBase.sol";
 
 /// @title Supplies liquidity to uniswap
 contract UniWithdraw is ActionBase {
-
     using TokenUtils for address;
 
     IUniswapRouter public constant router =
@@ -56,7 +55,7 @@ contract UniWithdraw is ActionBase {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override   {
+    function executeActionDirect(bytes[] memory _callData) public payable override {
         UniWithdrawData memory uniData = parseInputs(_callData);
 
         _uniWithdraw(uniData);
@@ -72,7 +71,6 @@ contract UniWithdraw is ActionBase {
     /// @notice Removes liquidity from uniswap
     /// @param _uniData All the required data to withdraw from uni
     function _uniWithdraw(UniWithdrawData memory _uniData) internal returns (uint256) {
-        // approve the lp allowance
         address lpTokenAddr = factory.getPair(_uniData.tokenA, _uniData.tokenB);
 
         lpTokenAddr.pullTokens(_uniData.from, _uniData.liquidity);
@@ -81,9 +79,12 @@ contract UniWithdraw is ActionBase {
         // withdraw liq. and get info how much we got out
         (uint256 amountA, uint256 amountB) = _withdrawLiquidity(_uniData);
 
-        // send underlying tokens
-        _uniData.tokenA.withdrawTokens(_uniData.to, amountA);
-        _uniData.tokenB.withdrawTokens(_uniData.to, amountB);
+        logger.Log(
+            address(this),
+            msg.sender,
+            "UniWithdraw",
+            abi.encode(_uniData, amountA, amountB)
+        );
 
         return _uniData.liquidity;
     }
@@ -98,7 +99,7 @@ contract UniWithdraw is ActionBase {
             _uniData.liquidity,
             _uniData.amountAMin,
             _uniData.amountBMin,
-            address(this),
+            _uniData.to,
             _uniData.deadline
         );
     }

@@ -18,8 +18,8 @@ describe("Uni-Supply", function () {
     let senderAcc, proxy;
 
     const uniPairs = [
-        { tokenA: "ETH", tokenB: "DAI", amount: "1" },
-        { tokenA: "ETH", tokenB: "WBTC", amount: "1" },
+        { tokenA: "WETH", tokenB: "DAI", amount: "1" },
+        { tokenA: "WETH", tokenB: "WBTC", amount: "1" },
         { tokenA: "DAI", tokenB: "USDC", amount: "500" },
     ];
 

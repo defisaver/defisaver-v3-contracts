@@ -369,26 +369,24 @@ const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, 
         deadline,
     ];
 
-    const uniSupply = new dfs.actions.uniswap.UniswapSupplyAction(uniObj);
 
-    let value = 0;
+    const uniSupply = new dfs.actions.uniswap.UniswapSupplyAction(...uniObj);
 
     if (isEth(addrTokenA)) {
-        value = amountA;
-    } else {
-        await approve(addrTokenA, proxy.address);
+        await depositToWeth(amountA);
     }
 
+    await approve(addrTokenA, proxy.address);
+
     if (isEth(addrTokenB)) {
-        value = amountB;
-    } else {
-        await approve(addrTokenB, proxy.address);
+        await depositToWeth(amountA);
     }
+
+    await approve(addrTokenB, proxy.address);
 
     const functionData = uniSupply.encodeForDsProxyCall()[1];
 
     await proxy["execute(address,bytes)"](uniSupplyAddr, functionData, {
-        value,
         gasLimit: 3000000,
     });
 };
@@ -413,7 +411,7 @@ const uniWithdraw = async (proxy, addrTokenA, addrTokenB, lpAddr, liquidity, to,
         deadline,
     ];
 
-    const uniWithdraw = new dfs.actions.uniswap.UniswapWithdrawAction(uniObj);
+    const uniWithdraw = new dfs.actions.uniswap.UniswapWithdrawAction(...uniObj);
 
     const functionData = uniWithdraw.encodeForDsProxyCall()[1];
 

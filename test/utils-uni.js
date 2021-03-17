@@ -9,9 +9,6 @@ const UNISWAP_ROUTER = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
 const getPair = async (tokenA, tokenB) => {
     const uniswapFactory = await hre.ethers.getContractAt("IUniswapV2Factory", UNISWAP_FACTORY_ADDR);
 
-    tokenA = convertToWeth(tokenA);
-    tokenB = convertToWeth(tokenB);
-
     const pairAddr = await uniswapFactory.getPair(tokenA, tokenB);
 
     const pair = await hre.ethers.getContractAt("IPair", pairAddr);
