@@ -64,19 +64,6 @@
 			"type": "function"
 		},
 		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_newAdminVault",
-					"type": "address"
-				}
-			],
-			"name": "changeAdminVault",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
 			"inputs": [],
 			"name": "kill",
 			"outputs": [],

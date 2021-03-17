@@ -231,6 +231,19 @@
 			"type": "function"
 		},
 		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_cTokenAddr",
+					"type": "address"
+				}
+			],
+			"name": "exitMarket",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
 			"inputs": [],
 			"name": "kill",
 			"outputs": [],

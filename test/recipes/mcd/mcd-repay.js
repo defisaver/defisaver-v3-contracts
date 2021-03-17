@@ -15,7 +15,7 @@ const {
     UNISWAP_WRAPPER,
     WETH_ADDRESS,
     ETH_ADDR,
-} = require('../utils');
+} = require('../../utils');
 
 const {
     fetchMakerAddresses,
@@ -23,12 +23,12 @@ const {
     getRatio,
     getVaultInfo,
     MCD_MANAGER_ADDR,
-} = require('../utils-mcd');
+} = require('../../utils-mcd');
 
 const {
     openVault,
     addFlDust
-} = require('../actions.js');
+} = require('../../actions.js');
 
 const VAULT_DAI_AMOUNT = '970';
 

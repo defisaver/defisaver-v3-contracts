@@ -1,7 +1,30 @@
 # defisaver-v3-contracts
-All the contracts related to the Defi Saver ecosystem
+All the contracts related to the Defi Saver ecosystem.
 
-## How to run the code
+Detailed overview about that code can be found https://docs.defisaver.com
+
+## To install
+Run `npm install` or `yarn` in the repo folder.
+You will also need to create a .env file as in the env.example and fill it in with appropriate api keys.
+
+## How to run tests
+
+All of the tests are ran from the forked state of the mainnet. In the hardhat config you can change the 
+block number the fork starts from. If it starts from an old state some tests might not work.
+
+1. You first need to start a hardhat node from the forked mainnet with the following command:
+
+`npx hardhat node --max-memory 8192  --fork ALCHEMY_API_URL`
+
+2. In a different terminal window you can now deploy the recipe system:
+
+`npm run deploy local deploy-core`
+
+3. After that you can run the tests, for example:
+
+`npm run test local ./mcd/mcd-supply.js`
+
+## Common commands
 
 `npm run compile` -  will compile all the contracts
 

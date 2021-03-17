@@ -31,6 +31,7 @@ describe("Mcd-Withdraw", function() {
 
     before(async () => {
         await redeploy('McdWithdraw');
+        await redeploy('McdGenerate');
         mcdView = await redeploy('McdView');
 
         makerAddresses = await fetchMakerAddresses();
@@ -65,9 +66,6 @@ describe("Mcd-Withdraw", function() {
             if (tokenData.symbol === 'ETH') {
                 tokenData.address = WETH_ADDRESS;
             }
-
-            console.log((standardAmounts[tokenData.symbol] * 2).toString(),
-            MIN_VAULT_DAI_AMOUNT);
 
             vaultId = await openVault(
                 makerAddresses,

@@ -68,6 +68,7 @@ contract McdGenerate is ActionBase, McdHelper {
         uint256 rate = IJug(JUG_ADDRESS).drip(mcdManager.ilks(_vaultId));
         uint256 daiVatBalance = vat.dai(mcdManager.urns(_vaultId));
 
+
         // Generate dai and move to proxy balance
         mcdManager.frob(
             _vaultId,
@@ -76,14 +77,16 @@ contract McdGenerate is ActionBase, McdHelper {
         );
         mcdManager.move(_vaultId, address(this), toRad(_amount));
 
+
         // add auth so we can exit the dai
         if (vat.can(address(this), address(DAI_JOIN_ADDR)) == 0) {
             vat.hope(DAI_JOIN_ADDR);
         }
 
+
         // exit dai from join and send _to if needed
         IDaiJoin(DAI_JOIN_ADDR).exit(_to, _amount);
-        DAI_ADDR.withdrawTokens(_to, _amount);
+
 
         logger.Log(
             address(this),

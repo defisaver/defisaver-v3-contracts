@@ -36,9 +36,6 @@ async function main() {
     await redeploy("AaveWithdraw");
     await redeploy("AaveBorrow");
     await redeploy("AavePayback");
-    await redeploy("AavePaybackV1");
-    await redeploy("AaveWithdrawV1");
-    await redeploy("AaveMigrateLend");
 
     // comp actions
     await redeploy("CompSupply");
@@ -56,10 +53,8 @@ async function main() {
     await redeploy("DFSBuy");
 
     // flashloan actions
-    await redeploy("FLAave");
     await redeploy("FLDyDx");
     await redeploy("FLAaveV2");
-    await redeploy("FLCustomAaveV2");
 
     // uniswap
     await redeploy("UniSupply");

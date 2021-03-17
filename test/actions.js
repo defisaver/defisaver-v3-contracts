@@ -222,12 +222,11 @@ const borrowAave = async (proxy, market, tokenAddr, amount, rateMode, to) => {
 const paybackAave = async (proxy, market, tokenAddr, amount, rateMode, from) => {
     const aavePaybackAddr = await getAddrFromRegistry('AavePayback');
 
-    let value = '0';
     if (isEth(tokenAddr)) {
-        value = amount;
-    } else {
-        await approve(tokenAddr, proxy.address);
+        await depositToWeth(amount.toString());
     }
+
+    await approve(tokenAddr, proxy.address);
 
     const aavePaybackAction = new dfs.actions.aave.AavePaybackAction(market, tokenAddr, amount, rateMode, from, nullAddress);
     const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
@@ -292,10 +291,10 @@ const paybackComp = async (proxy, cTokenAddr, amount, from) => {
     const compPaybackAddr = await getAddrFromRegistry('CompPayback');
 
     if (cTokenAddr.toLowerCase() === getAssetInfo("cETH").address.toLowerCase()) {
-        value = amount;
-    } else {
-        await approve(cTokenAddr, proxy.address);
+        await depositToWeth(amount.toString());
     }
+
+    await approve(cTokenAddr, proxy.address);
 
     const compPaybackAction = new dfs.actions.compound.CompoundPaybackAction(cTokenAddr, amount, from);
     const functionData = compPaybackAction.encodeForDsProxyCall()[1];
@@ -306,7 +305,6 @@ const paybackComp = async (proxy, cTokenAddr, amount, from) => {
 const generateMcd = async (proxy, vaultId, amount, to) => {
     const mcdGenerateAddr = await getAddrFromRegistry('McdGenerate');
 
-    console.log(vaultId, amount.toString(), to, MCD_MANAGER_ADDR);
     const mcdGenerateAction = new dfs.actions.maker.MakerGenerateAction(vaultId, amount, to, MCD_MANAGER_ADDR);
     const functionData = mcdGenerateAction.encodeForDsProxyCall()[1];
 

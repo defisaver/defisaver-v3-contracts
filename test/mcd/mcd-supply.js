@@ -16,6 +16,7 @@ const {
 
 const {
     fetchMakerAddresses,
+    getVaultInfo
 } = require('../utils-mcd.js');
 
 const {
@@ -32,11 +33,13 @@ const BigNumber = hre.ethers.BigNumber;
 describe("Mcd-Supply", function() {
     this.timeout(80000);
 
-    let makerAddresses, senderAcc, proxy;
+    let makerAddresses, senderAcc, proxy, mcdView;
 
     before(async () => {
         await redeploy('McdSupply');
         makerAddresses = await fetchMakerAddresses();
+
+        mcdView = await redeploy('McdView');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -66,6 +69,11 @@ describe("Mcd-Supply", function() {
             }
 
             await supplyMcd(proxy, vaultId, amount, tokenData.address, joinAddr, from);
+
+            const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
+
+            expect(standardAmounts[tokenData.symbol]).to.be.eq(info.coll.toString());
+
         });
 
     }
