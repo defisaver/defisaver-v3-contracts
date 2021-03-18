@@ -60,9 +60,6 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _srcAmount From amount
     /// @return uint Rate
     function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) public override view returns (uint) {
-        (, _srcAddr) = _srcAddr.convertToWeth();
-        (, _destAddr) = _destAddr.convertToWeth();
-
         address[] memory path = abi.decode(_additionalData, (address[]));
 
         uint[] memory amounts = router.getAmountsOut(_srcAmount, path);
@@ -75,8 +72,6 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _destAmount To amount
     /// @return uint Rate
     function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount, bytes memory _additionalData) public override view returns (uint) {
-        (, _srcAddr) = _srcAddr.convertToWeth();
-        (, _destAddr) = _destAddr.convertToWeth();
 
         address[] memory path = abi.decode(_additionalData, (address[]));
 
