@@ -417,35 +417,7 @@ const uniWithdraw = async (proxy, addrTokenA, addrTokenB, lpAddr, liquidity, to,
         gasLimit: 3000000,
     });
 };
-
-// send dust amount of tokens to dydx so we have enough for the 2 wei calc. issue
-const addFlDust = async (proxy, senderAcc, flDyDxAddr) => {
-
-    const amount = ethers.utils.parseUnits('0.001', 18);
-    const amountUsdc = ethers.utils.parseUnits('0.001', 6);
-    const from = senderAcc.address;
-
-    // send weth
-    await depositToWeth(amount);
-    await send(WWETH_ADDRESSESS, flDyDxAddr, amount);
-
-    // send dai
-    const daiBalance = await balanceOf(DAI_ADDR, from);
-    if (daiBalance.lt(amount)) {
-        await sell(proxy, WETH_ADDRESS, DAI_ADDR, ethers.utils.parseUnits('1', 18), UNISWAP_WRAPPER, from, from);
-    }
-
-    await send(DAI_ADDR, flDyDxAddr, amount);
-
-    // send usdc
-    const usdcBalance = await balanceOf(USDC_ADDR, from);
-    if (usdcBalance.lt(amountUsdc)) {
-        await sell(proxy, WETH_ADDRESS, USDC_ADDR, ethers.utils.parseUnits('1', 18), UNISWAP_WRAPPER, from, from);
-    }
-
-    await send(USDC_ADDR, flDyDxAddr, amountUsdc);
-};
-
+  
 const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) => {
     const compClaimAddr = await getAddrFromRegistry("CompClaim");
 
@@ -512,6 +484,4 @@ module.exports = {
 
     uniSupply,
     uniWithdraw,
-
-    addFlDust,
 };

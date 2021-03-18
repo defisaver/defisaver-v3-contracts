@@ -42,8 +42,6 @@ describe("Mcd-Boost", function() {
         await redeploy('DFSSell');
 
         uniWrapper = await redeploy('UniswapWrapperV3');
-
-
         mcdView = await redeploy('McdView');
 
         makerAddresses = await fetchMakerAddresses();
@@ -52,13 +50,10 @@ describe("Mcd-Boost", function() {
         dydxFlAddr = await getAddrFromRegistry('FLDyDx');
         aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
 
-        await send(makerAddresses["MCD_DAI"], dydxFlAddr, '200');
-
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
 
         await setNewExchangeWrapper(senderAcc, uniWrapper.address);
-
     });
 
     for (let i = 0; i < 1; ++i) {
@@ -157,8 +152,8 @@ describe("Mcd-Boost", function() {
             const collToken = tokenData.address;
             const fromToken = makerAddresses["MCD_DAI"];
 
-            // const dydxFLAction = 
-            //     new dfs.actions.flashloan.DyDxFlashLoanAction(boostAmount, fromToken);
+            const dydxFLAction = 
+                new dfs.actions.flashloan.DyDxFlashLoanAction(boostAmount, fromToken, nullAddress, []);
 
             const flAaveV2Action = 
                 new dfs.actions.flashloan.AaveV2FlashLoanAction([boostAmount], [fromToken], [0], nullAddress, nullAddress, []);
@@ -178,10 +173,10 @@ describe("Mcd-Boost", function() {
                 new dfs.actions.maker.MakerSupplyAction(vaultId, '$2', joinAddr, from, MCD_MANAGER_ADDR);
 
             const mcdGenerateAction = 
-                new dfs.actions.maker.MakerGenerateAction(vaultId, '$1', aaveV2FlAddr, MCD_MANAGER_ADDR);
+                new dfs.actions.maker.MakerGenerateAction(vaultId, '$1', dydxFlAddr, MCD_MANAGER_ADDR);
 
             const boostRecipe = new dfs.Recipe("FLBoostRecipe", [
-                flAaveV2Action,
+                dydxFLAction,
                 sellAction,
                 mcdSupplyAction,
                 mcdGenerateAction

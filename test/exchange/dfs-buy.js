@@ -32,7 +32,7 @@ const {
 describe("Dfs-Buy", function() {
     this.timeout(40000);
 
-    let senderAcc, proxy, dfsSellAddr, uniWrapper;
+    let senderAcc, proxy, dfsSellAddr, uniWrapper, kyberWrapper;
 
     const trades = [
         {sellToken: "WETH", buyToken: "DAI", sellAmount: "5", buyAmount: "200"},
@@ -46,6 +46,7 @@ describe("Dfs-Buy", function() {
     before(async () => {
         await redeploy('DFSBuy');
         uniWrapper = await redeploy('UniswapWrapperV3');
+        kyberWrapper = await redeploy('KyberWrapperV3');
         
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -53,6 +54,7 @@ describe("Dfs-Buy", function() {
         dfsSellAddr = await getAddrFromRegistry('DFSBuy');
 
         await setNewExchangeWrapper(senderAcc, uniWrapper.address);
+        await setNewExchangeWrapper(senderAcc, kyberWrapper.address);
     });
 
     for (let i = 0; i < trades.length; ++i) {
@@ -69,7 +71,7 @@ describe("Dfs-Buy", function() {
             const sellAmount = ethers.utils.parseUnits(trade.sellAmount, getAssetInfo(trade.sellToken).decimals);
             const buyAmount = ethers.utils.parseUnits(trade.buyAmount, getAssetInfo(trade.buyToken).decimals);
 
-            await buy(proxy, sellAddr, buyAddr, sellAmount, buyAmount, uniWrapper.address, senderAcc.address, senderAcc.address);
+            await buy(proxy, sellAddr, buyAddr, sellAmount, buyAmount, kyberWrapper.address, senderAcc.address, senderAcc.address);
            
             const buyBalanceAfter = await balanceOf(buyAddr, senderAcc.address);
             const proxySellBalanceAfter = await balanceOf(sellAddr, proxy.address);

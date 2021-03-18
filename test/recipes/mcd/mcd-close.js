@@ -31,7 +31,6 @@ const {
 const {
     sell,
     openVault,
-    addFlDust
 } = require('../../actions.js');
 
 const VAULT_DAI_AMOUNT = '540';
@@ -60,8 +59,6 @@ describe("Mcd-Close", function() {
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
-
-        await addFlDust(proxy, senderAcc, dydxFlAddr);
 
     });
 
