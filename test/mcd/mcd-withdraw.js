@@ -22,7 +22,11 @@ const {
 const {
     withdrawMcd,
     openVault,
+    openMcd,
+    supplyMcd,
 } = require('../actions.js');
+
+const BigNumber = hre.ethers.BigNumber;
 
 describe("Mcd-Withdraw", function() {
     this.timeout(40000);
@@ -82,6 +86,41 @@ describe("Mcd-Withdraw", function() {
             const collBalanceBefore = await balanceOf(tokenData.address, to);
 
             await withdrawMcd(proxy, vaultId, amountColl, joinAddr, to);
+
+            const collBalanceAfter = await balanceOf(tokenData.address, to);
+
+            expect(collBalanceAfter).to.be.gt(collBalanceBefore);
+        });
+
+        it(`... should withdraw all coll ${tokenData.symbol} from ${ilkData.ilkLabel} vault`, async () => {
+
+            // skip uni tokens
+            if (tokenData.symbol.indexOf("UNIV2") !== -1) {
+                expect(true).to.be.true;
+                return;
+            }
+
+            const canGenerate = await canGenerateDebt(ilkData);
+            if (!canGenerate) {
+                expect(true).to.be.true;
+                return;
+            }
+            
+            if (tokenData.symbol === 'ETH') {
+                tokenData.address = WETH_ADDRESS;
+            }
+
+            const amount = BigNumber.from(ethers.utils.parseUnits(standardAmounts[tokenData.symbol], tokenData.decimals));
+
+            const to = senderAcc.address;
+            const from = senderAcc.address;
+
+            const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
+            await supplyMcd(proxy, vaultId, amount, tokenData.address, joinAddr, from);
+
+            const collBalanceBefore = await balanceOf(tokenData.address, to);
+
+            await withdrawMcd(proxy, vaultId, MAX_UINT, joinAddr, to);
 
             const collBalanceAfter = await balanceOf(tokenData.address, to);
 

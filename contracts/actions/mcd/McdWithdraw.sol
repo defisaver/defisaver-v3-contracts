@@ -66,18 +66,14 @@ contract McdWithdraw is ActionBase, McdHelper {
 
         // if amount type(uint).max _amount is whole collateral amount
         if (_amount == type(uint256).max) {
-            (_amount, ) = getCdpInfo(
-                mcdManager,
-                _vaultId,
-                mcdManager.ilks(_vaultId)
-            );
+            _amount = getAllColl(mcdManager, _joinAddr, _vaultId);
         }
 
         uint256 frobAmount = _amount;
 
         // convert to 18 decimals for maker frob
         if (IJoin(_joinAddr).dec() != 18) {
-            frobAmount = _amount * (10**(18 - IJoin(_joinAddr).dec()));
+            frobAmount = convertTo18(_joinAddr, _amount);
         }
 
         // withdraw from vault and move to proxy balance
@@ -98,6 +94,19 @@ contract McdWithdraw is ActionBase, McdHelper {
         );
 
         return _amount;
+    }
+
+    function getAllColl(IManager _mcdManager, address _joinAddr, uint _vaultId) internal view returns (uint amount) {
+        (amount, ) = getCdpInfo(
+            _mcdManager,
+            _vaultId,
+            _mcdManager.ilks(_vaultId)
+        );
+
+        if (IJoin(_joinAddr).dec() != 18) {
+            return div(amount, 10 ** (18 - IJoin(_joinAddr).dec()));
+        }
+
     }
 
     function parseInputs(bytes[] memory _callData)
