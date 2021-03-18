@@ -52,11 +52,10 @@ contract McdGenerate is ActionBase, McdHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Generates dai from a specified vault
-    /// @dev The actual generated amount might differ, as it will generate up to max debt for vault
     /// @param _vaultId Id of the vault
     /// @param _amount Amount of dai to be generated
     /// @param _to Address which will receive the dai
-    /// @param _mcdManager The manager address we are using
+    /// @param _mcdManager The manager address we are using [mcd, b.protocol]
     function _mcdGenerate(
         uint256 _vaultId,
         uint256 _amount,
@@ -68,7 +67,6 @@ contract McdGenerate is ActionBase, McdHelper {
         uint256 rate = IJug(JUG_ADDRESS).drip(mcdManager.ilks(_vaultId));
         uint256 daiVatBalance = vat.dai(mcdManager.urns(_vaultId));
 
-
         // Generate dai and move to proxy balance
         mcdManager.frob(
             _vaultId,
@@ -77,16 +75,13 @@ contract McdGenerate is ActionBase, McdHelper {
         );
         mcdManager.move(_vaultId, address(this), toRad(_amount));
 
-
         // add auth so we can exit the dai
         if (vat.can(address(this), address(DAI_JOIN_ADDR)) == 0) {
             vat.hope(DAI_JOIN_ADDR);
         }
 
-
         // exit dai from join and send _to if needed
         IDaiJoin(DAI_JOIN_ADDR).exit(_to, _amount);
-
 
         logger.Log(
             address(this),

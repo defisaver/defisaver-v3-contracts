@@ -54,7 +54,7 @@ contract McdSupply is ActionBase, McdHelper {
     /// @param _amount Amount of tokens to supply
     /// @param _joinAddr Join address of the maker collateral
     /// @param _from Address where to pull the collateral from
-    /// @param _mcdManager The manager address we are using
+    /// @param _mcdManager The manager address we are using [mcd, b.protocol]
     function _mcdSupply(
         uint256 _vaultId,
         uint256 _amount,

@@ -54,7 +54,7 @@ contract McdWithdraw is ActionBase, McdHelper {
     /// @param _amount Amount of collateral to withdraw
     /// @param _joinAddr Join address of the maker collateral
     /// @param _to Address where to send the collateral we withdrew
-    /// @param _mcdManager The manager address we are using
+    /// @param _mcdManager The manager address we are using [mcd, b.protocol]
     function _mcdWithdraw(
         uint256 _vaultId,
         uint256 _amount,
@@ -96,6 +96,7 @@ contract McdWithdraw is ActionBase, McdHelper {
         return _amount;
     }
 
+    /// @notice Returns all the collateral of the vault, formated in the correct decimal
     function getAllColl(IManager _mcdManager, address _joinAddr, uint _vaultId) internal view returns (uint amount) {
         (amount, ) = getCdpInfo(
             _mcdManager,

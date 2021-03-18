@@ -49,7 +49,6 @@ contract McdPayback is ActionBase, McdHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Paybacks the debt for a specified vault
-    /// @dev If amount over the whole debt only the whole debt amount is pulled
     /// @param _vaultId Id of the vault
     /// @param _amount Amount of dai to be payed back
     /// @param _from Where the Dai is pulled from

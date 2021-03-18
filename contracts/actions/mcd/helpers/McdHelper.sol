@@ -75,6 +75,7 @@ contract McdHelper is DSMath {
         uint rad = sub(mul(art, rate), dai);
         daiAmount = rad / RAY;
 
+        // handles precision error (off by 1 wei)
         daiAmount = mul(daiAmount, RAY) < rad ? daiAmount + 1 : daiAmount;
     }
 
