@@ -13,10 +13,9 @@ const {
     balanceOf,
     isEth,
     nullAddress,
-    REGISTRY_ADDR,
     standardAmounts,
-    UNISWAP_WRAPPER,
     WETH_ADDRESS,
+    MIN_VAULT_DAI_AMOUNT,
     MAX_UINT
 } = require('../../utils');
 
