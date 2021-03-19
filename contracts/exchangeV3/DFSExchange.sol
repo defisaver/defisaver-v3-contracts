@@ -18,8 +18,7 @@ contract DFSExchange is DFSExchangeCore, AdminAuth {
     DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
 
     /// @notice Takes a src amount of tokens and converts it into the dest token
-    /// @dev Takes fee from the _srcAmount before the exchange
-    /// @param exData [srcAddr, destAddr, srcAmount, destAmount, minPrice, exchangeType, exchangeAddr, callData, price0x]
+    /// @param exData Exchange data struct
     /// @param _user User address who called the exchange
     // solhint-disable-next-line visibility-modifier-order
     function sell(ExchangeData memory exData, address payable _user) public payable   {
@@ -38,8 +37,7 @@ contract DFSExchange is DFSExchangeCore, AdminAuth {
     }
 
     /// @notice Takes a dest amount of tokens and converts it from the src token
-    /// @dev Send always more than needed for the swap, extra will be returned
-    /// @param exData [srcAddr, destAddr, srcAmount, destAmount, minPrice, exchangeType, exchangeAddr, callData, price0x]
+    /// @param exData Exchange data struct
     /// @param _user User address who called the exchange
     // solhint-disable-next-line visibility-modifier-order
     function buy(ExchangeData memory exData, address payable _user) public payable   {

@@ -21,14 +21,12 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
 
     /// @notice Called directly through DsProxy to execute a task
     /// @dev This is the main entry point for Recipes/Tasks executed manually
-    /// @dev It will burn Gst2/Chi if the user has a balance on proxy
     /// @param _currTask Task to be executed
     function executeTask(Task memory _currTask) public payable   {
         _executeActions(_currTask);
     }
 
     /// @notice Called through the Strategy contract to execute a task
-    /// @dev Doesn't burn gst2/chi as it's handled in the StrategyExecutor
     /// @param _strategyId Id of the strategy we want to execute
     /// @param _actionCallData All the data related to the strategies Task
     function executeStrategyTask(uint256 _strategyId, bytes[][] memory _actionCallData)

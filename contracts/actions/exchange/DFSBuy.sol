@@ -89,7 +89,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
         _exchangeData.user = getUserAddress();
         _exchangeData.dfsFeeDivider = _fee;
 
-        (address wrapper, uint256 amountSold) = _buy(_exchangeData);
+        (address wrapper, uint256 amountBought) = _buy(_exchangeData);
 
         _exchangeData.destAddr.withdrawTokens(_to, _exchangeData.destAmount);
 
@@ -106,13 +106,13 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
                 wrapper,
                 _exchangeData.srcAddr,
                 _exchangeData.destAddr,
-                amountSold,
+                amountBought,
                 _exchangeData.destAmount,
                 _fee
             )
         );
 
-        return amountSold;
+        return amountBought;
     }
 
     function parseInputs(bytes[] memory _callData)

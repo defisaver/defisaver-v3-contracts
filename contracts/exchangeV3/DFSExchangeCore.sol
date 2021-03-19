@@ -37,7 +37,6 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
     function _sell(ExchangeData memory exData) internal returns (address, uint256) {
         uint256 amountWithoutFee = exData.srcAmount;
         address wrapper = exData.offchainData.wrapper;
-        address originalSrcAddr = exData.srcAddr;
         bool offChainSwapSuccess;
 
         uint256 destBalanceBefore = exData.destAddr.getBalance(address(this));
@@ -68,7 +67,6 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         require(amountBought >= wmul(exData.minPrice, exData.srcAmount), ERR_SLIPPAGE_HIT);
 
         // revert back exData changes to keep it consistent
-        exData.srcAddr = originalSrcAddr;
         exData.srcAmount = amountWithoutFee;
 
         return (wrapper, amountBought);
@@ -83,7 +81,6 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
 
         uint256 amountWithoutFee = exData.srcAmount;
         address wrapper = exData.offchainData.wrapper;
-        address originalSrcAddr = exData.srcAddr;
         uint256 amountSold;
         bool offChainSwapSuccess;
 
@@ -115,10 +112,9 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         require(amountBought >= exData.destAmount, ERR_SLIPPAGE_HIT);
 
         // revert back exData changes to keep it consistent
-        exData.srcAddr = originalSrcAddr;
         exData.srcAmount = amountWithoutFee;
 
-        return (wrapper, amountSold);
+        return (wrapper, amountBought);
     }
 
     /// @notice Takes order from 0x and returns bool indicating if it is successful
@@ -175,14 +171,6 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
                 _exData.destAmount,
                 _exData.wrapperData
             );
-        }
-    }
-
-    function withdrawAllWeth() internal {
-        uint256 wethBalance = TokenUtils.WETH_ADDR.getBalance(address(this));
-
-        if (wethBalance > 0) {
-            TokenUtils.withdrawWeth(wethBalance);
         }
     }
 
