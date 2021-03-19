@@ -6,6 +6,7 @@ const {
     getProxy,
     redeploy,
     send,
+    approve,
     balanceOf,
     depositToWeth,
     standardAmounts,
@@ -36,7 +37,7 @@ describe("FL-AaveV2", function () {
         aaveFl = await redeploy("FLAaveV2");
         await redeploy("SendToken");
         await redeploy("TaskExecutor");
-        
+
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
     });
@@ -53,7 +54,9 @@ describe("FL-AaveV2", function () {
 
             const loanAmount = ethers.utils.parseUnits(standardAmounts[tokenSymbol], assetInfo.decimals);
             let feeAmount = ((standardAmounts[tokenSymbol] * AAVE_FL_FEE) * 10**assetInfo.decimals).toFixed(0);
-           
+
+            await approve(assetInfo.address, proxy.address);
+
             const basicFLRecipe = new dfs.Recipe("BasicFLRecipe", [
                 new dfs.actions.flashloan.AaveV2FlashLoanAction(
                     [loanAmount],
@@ -78,7 +81,7 @@ describe("FL-AaveV2", function () {
                 if (tokenBalance.lt(feeAmount)) {
                     await sell(
                         proxy,
-                        ETH_ADDR,
+                        WETH_ADDRESS,
                         assetInfo.address,
                         ethers.utils.parseUnits("1", 18),
                         UNISWAP_WRAPPER,

@@ -36,11 +36,11 @@ describe("Compound: Create", function() {
     let senderAcc, proxy, uniWrapper, taskExecutorAddr, compView, dydxFlAddr, sellAddr;
 
     before(async () => {
-        // await redeploy("CompSupply");
-        // await redeploy("CompBorrow");
-        // await redeploy("TaskExecutor");
-        // await redeploy("FLDyDx");
-        // await redeploy("DFSSell");
+        await redeploy("CompSupply");
+        await redeploy("CompBorrow");
+        await redeploy("TaskExecutor");
+        await redeploy("FLDyDx");
+        await redeploy("DFSSell");
 
         compView = await redeploy("CompView");
         dydxFlAddr = await getAddrFromRegistry('FLDyDx');
@@ -85,7 +85,7 @@ describe("Compound: Create", function() {
 
                 await approve(collAddress, proxy.address);
 
-                const recipe = new dfs.Recipe("Basic Compound position", [
+                const recipe = new dfs.Recipe("Compound Supply & Borrow", [
                     new dfs.actions.compound.CompoundSupplyAction(
                         getAssetInfo(`c${collAsset}`).address,
                         collAmount,
@@ -146,7 +146,7 @@ describe("Compound: Create", function() {
 
         await approve(collAddress, proxy.address);
 
-        const recipe = new dfs.Recipe("Basic Compound position", [
+        const recipe = new dfs.Recipe("Compound Leveraged Create", [
             // Flashloan DAI
             new dfs.actions.flashloan.DyDxFlashLoanAction(
                 assetAmountInWei(debtAmount, debtAsset),
@@ -208,7 +208,7 @@ describe("Compound: Create", function() {
         assert.isBelow(+assetAmountInEth(supplyBalanceBefore, debtAsset) + parseFloat(standardAmounts[collAsset]), +assetAmountInEth(supplyBalanceAfter, debtAsset), "Supply balance");
         const collDelta = assetAmountInEth(supplyBalanceAfter, debtAsset) - assetAmountInEth(supplyBalanceBefore, debtAsset);
         const debtDelta = assetAmountInEth(borrowBalanceAfter, debtAsset) - assetAmountInEth(borrowBalanceBefore, debtAsset);
-        console.log(`Supplied ${collDelta} ETH (${standardAmounts[collAsset]} ETH from wallet) and created ${debtDelta} DAI debt`);
+        console.log(`Supplied ${collDelta} ${collAsset} (${standardAmounts[collAsset]} ${collAsset} from wallet) and created ${debtDelta} ${debtAsset} debt`);
     })
 
 });

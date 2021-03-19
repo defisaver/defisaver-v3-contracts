@@ -26,10 +26,10 @@ const AAVE_FL_FEE = 0.09;
 
 const standardAmounts = {
     'ETH': '2',
+    'WETH': '2',
     'AAVE': '8',
     'BAT': '4000',
     'USDC': '2000',
-    'USDT': '2000',
     'UNI': '50',
     'SUSD': '2000',
     'BUSD': '2000',
@@ -67,7 +67,7 @@ const getAddrFromRegistry = async (name) => {
 };
 
 const getProxyWithSigner = async (signer, addr) => {
-    const proxyRegistry = await 
+    const proxyRegistry = await
     hre.ethers.getContractAt("IProxyRegistry", "0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4");
 
     let proxyAddr = await proxyRegistry.proxies(addr);
@@ -80,10 +80,10 @@ const getProxyWithSigner = async (signer, addr) => {
     const dsProxy = await hre.ethers.getContractAt("IDSProxy", proxyAddr, signer);
 
     return dsProxy;
-} 
+}
 
 const getProxy = async (acc) => {
-    const proxyRegistry = await 
+    const proxyRegistry = await
     hre.ethers.getContractAt("IProxyRegistry", "0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4");
 
     let proxyAddr = await proxyRegistry.proxies(acc);
