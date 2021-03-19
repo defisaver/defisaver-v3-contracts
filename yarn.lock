@@ -22,9 +22,9 @@
 
 "@defisaver/sdk@git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#beta":
   version "0.0.1"
-  resolved "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#dbcea36acfe513ca644f71e7d706ce6e1be602e5"
+  resolved "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#85ac615d6d9440836cd784a452d54d8bcb624868"
   dependencies:
-    "@defisaver/tokens" "^1.3.21"
+    "@defisaver/tokens" "^1.3.31"
     "@ethersproject/address" "^5.0.10"
     "@ethersproject/solidity" "^5.0.9"
     axios "^0.21.1"
@@ -35,6 +35,15 @@
 "@defisaver/tokens@^1.3.21", "@defisaver/tokens@^1.3.30":
   version "1.3.32"
   resolved "https://registry.yarnpkg.com/@defisaver/tokens/-/tokens-1.3.32.tgz#702bfa98a6951c9b9b91175cb57ed50829d1c389"
+  dependencies:
+    decimal.js "^10.2.1"
+    react "^16.8.0"
+    uuid "^8.3.2"
+
+"@defisaver/tokens@^1.3.31":
+  version "1.3.33"
+  resolved "https://registry.yarnpkg.com/@defisaver/tokens/-/tokens-1.3.33.tgz#e2c7f1322c7a91e7e3dc40ceb49ad2b3bf9476d3"
+  integrity sha512-vSN1G/bblQnKigUTp9vaBxbwRGDHN6kzcufBR2O/p7IVABSOyZpf+MhCD5TpYNB2BqyGJOfUaFEC4U1c8dGVTA==
   dependencies:
     decimal.js "^10.2.1"
     react "^16.8.0"
