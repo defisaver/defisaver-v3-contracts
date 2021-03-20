@@ -81,7 +81,6 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
 
         uint256 amountWithoutFee = exData.srcAmount;
         address wrapper = exData.offchainData.wrapper;
-        uint256 amountSold;
         bool offChainSwapSuccess;
 
         uint256 destBalanceBefore = exData.destAddr.getBalance(address(this));
@@ -96,12 +95,12 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
 
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
-            (offChainSwapSuccess, amountSold) = offChainSwap(exData, ExchangeActionType.BUY);
+            (offChainSwapSuccess, ) = offChainSwap(exData, ExchangeActionType.BUY);
         }
 
         // fallback to desired wrapper if 0x failed
         if (!offChainSwapSuccess) {
-            amountSold = onChainSwap(exData, ExchangeActionType.BUY);
+            onChainSwap(exData, ExchangeActionType.BUY);
             wrapper = exData.wrapper;
         }
 
