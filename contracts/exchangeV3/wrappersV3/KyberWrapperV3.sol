@@ -27,9 +27,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
 
         KyberNetworkProxyInterface kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
 
-        if (_srcAddr != KYBER_ETH_ADDRESS) {
-            srcToken.safeApprove(address(kyberNetworkProxy), _srcAmount);
-        }
+        srcToken.safeApprove(address(kyberNetworkProxy), _srcAmount);
 
         uint destAmount = kyberNetworkProxy.trade{value: msg.value}(
             srcToken,
@@ -53,18 +51,11 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
         IERC20 srcToken = IERC20(_srcAddr);
         IERC20 destToken = IERC20(_destAddr);
 
-        uint srcAmount = 0;
-        if (_srcAddr != KYBER_ETH_ADDRESS) {
-            srcAmount = srcToken.balanceOf(address(this));
-        } else {
-            srcAmount = msg.value;
-        }
+        uint256 srcAmount = srcToken.balanceOf(address(this));
 
         KyberNetworkProxyInterface kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
 
-        if (_srcAddr != KYBER_ETH_ADDRESS) {
-            srcToken.safeApprove(address(kyberNetworkProxy), srcAmount);
-        }
+        srcToken.safeApprove(address(kyberNetworkProxy), srcAmount);
 
         uint destAmount = kyberNetworkProxy.trade{value: msg.value}(
             srcToken,
@@ -78,13 +69,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
 
         require(destAmount == _destAmount, "Wrong dest amount");
 
-        uint srcAmountAfter = 0;
-
-        if (_srcAddr != KYBER_ETH_ADDRESS) {
-            srcAmountAfter = srcToken.balanceOf(address(this));
-        } else {
-            srcAmountAfter = address(this).balance;
-        }
+        uint256 srcAmountAfter = srcToken.balanceOf(address(this));
 
         // Send the leftover from the source token back
         sendLeftOver(_srcAddr);
