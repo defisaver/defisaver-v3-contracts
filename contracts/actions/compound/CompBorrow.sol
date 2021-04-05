@@ -62,7 +62,7 @@ contract CompBorrow is ActionBase, CompHelper {
         // if the tokens are borrowed we need to enter the market
         enterMarket(_cTokenAddr);
 
-        require(ICToken(_cTokenAddr).borrow(_amount) == 0, ERR_COMP_BORROW);
+        require(ICToken(_cTokenAddr).borrow(_amount) == NO_ERROR, ERR_COMP_BORROW);
 
         // always return WETH, never native Eth
         if (tokenAddr == TokenUtils.WETH_ADDR) {

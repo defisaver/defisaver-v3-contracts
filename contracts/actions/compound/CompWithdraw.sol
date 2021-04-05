@@ -70,10 +70,10 @@ contract CompWithdraw is ActionBase, CompHelper {
         // if _amount type(uint).max that means take out proxy whole balance
         if (_amount == type(uint256).max) {
             _amount = _cTokenAddr.getBalance(address(this));
-            require(ICToken(_cTokenAddr).redeem(_amount) == 0, ERR_COMP_REDEEM);
+            require(ICToken(_cTokenAddr).redeem(_amount) == NO_ERROR, ERR_COMP_REDEEM);
         } else {
             require(
-                ICToken(_cTokenAddr).redeemUnderlying(_amount) == 0,
+                ICToken(_cTokenAddr).redeemUnderlying(_amount) == NO_ERROR,
                 ERR_COMP_REDEEM_UNDERLYING
             );
         }

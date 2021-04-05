@@ -9,6 +9,11 @@ import "../../../utils/TokenUtils.sol";
 /// @title Utility functions and data used in Compound actions
 contract CompHelper {
 
+    uint256 constant NO_ERROR = 0;
+
+    string public constant ERR_COMP_ENTER_MARKET = "Comp failed to enter market";
+    string public constant ERR_COMP_EXIT_MARKET = "Comp failed to exit market";
+
     address public constant C_ETH_ADDR = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
     address public constant COMPTROLLER_ADDR = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
 
@@ -27,12 +32,13 @@ contract CompHelper {
         address[] memory markets = new address[](1);
         markets[0] = _cTokenAddr;
 
-        IComptroller(COMPTROLLER_ADDR).enterMarkets(markets);
+        uint256[] memory errCodes = IComptroller(COMPTROLLER_ADDR).enterMarkets(markets);
+        require(errCodes[0] == NO_ERROR, ERR_COMP_ENTER_MARKET);
     }
 
     /// @notice Exits the Compound market
     /// @param _cTokenAddr CToken address of the token
     function exitMarket(address _cTokenAddr) public {
-        IComptroller(COMPTROLLER_ADDR).exitMarket(_cTokenAddr);
+        require(IComptroller(COMPTROLLER_ADDR).exitMarket(_cTokenAddr) == NO_ERROR, ERR_COMP_EXIT_MARKET);
     }
 }

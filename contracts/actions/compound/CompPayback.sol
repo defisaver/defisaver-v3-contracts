@@ -70,7 +70,7 @@ contract CompPayback is ActionBase, CompHelper {
 
         // we always expect actions to deal with WETH never Eth
         if (tokenAddr != TokenUtils.WETH_ADDR) {
-            require(ICToken(_cTokenAddr).repayBorrow(_amount) == 0, ERR_COMP_PAYBACK_FAILED);
+            require(ICToken(_cTokenAddr).repayBorrow(_amount) == NO_ERROR, ERR_COMP_PAYBACK_FAILED);
         } else {
             TokenUtils.withdrawWeth(_amount);
             ICToken(_cTokenAddr).repayBorrow{value: _amount}(); // reverts on fail
