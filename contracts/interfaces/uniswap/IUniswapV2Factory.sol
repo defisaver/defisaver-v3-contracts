@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 
 abstract contract IUniswapV2Factory {
     function getPair(address tokenA, address tokenB) external virtual view returns (address pair);
