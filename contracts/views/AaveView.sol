@@ -44,7 +44,7 @@ contract AaveView is DSMath, AaveHelper {
         uint256 liquidationRatio;
         uint256 price;
         bool usageAsCollateralEnabled;
-        bool borrowinEnabled;
+        bool borrowingEnabled;
         bool stableBorrowRateEnabled;
     }
 
@@ -75,7 +75,7 @@ contract AaveView is DSMath, AaveHelper {
         return wdiv(add(totalDebtETH, availableBorrowsETH), totalDebtETH);
     }
 
-    /// @notice Calcualted the ratio of coll/debt for a compound user
+    /// @notice Calculated the ratio of coll/debt for a compound user
     /// @param _market Address of LendingPoolAddressesProvider for specific market
     /// @param _user Address of the user
     function getRatio(address _market, address _user) public view returns (uint256) {
@@ -118,7 +118,7 @@ contract AaveView is DSMath, AaveHelper {
         }
     }
 
-    /// @notice Calcualted the ratio of coll/debt for an aave user
+    /// @notice Calculated the ratio of coll/debt for an aave user
     /// @param _market Address of LendingPoolAddressesProvider for specific market
     /// @param _users Addresses of the user
     /// @return ratios Array of ratios
@@ -133,7 +133,7 @@ contract AaveView is DSMath, AaveHelper {
     /// @notice Information about reserves
     /// @param _market Address of LendingPoolAddressesProvider for specific market
     /// @param _tokenAddresses Array of tokens addresses
-    /// @return tokens Array of reserves infomartion
+    /// @return tokens Array of reserves information
     function getTokensInfo(address _market, address[] memory _tokenAddresses) public view returns(TokenInfo[] memory tokens) {
         IAaveProtocolDataProviderV2 dataProvider = getDataProvider(_market);
         address priceOracleAddress = ILendingPoolAddressesProviderV2(_market).getPriceOracle();
@@ -161,7 +161,7 @@ contract AaveView is DSMath, AaveHelper {
             , //   uint256 liquidationBonus
             , //   uint256 reserveFactor
             bool usageAsCollateralEnabled,
-            bool borrowinEnabled,
+            bool borrowingEnabled,
             bool stableBorrowRateEnabled,
             , //   bool isActive
             //   bool isFrozen
@@ -199,7 +199,7 @@ contract AaveView is DSMath, AaveHelper {
             liquidationRatio: liquidationThreshold,
             price: price,
             usageAsCollateralEnabled: usageAsCollateralEnabled,
-            borrowinEnabled: borrowinEnabled,
+            borrowingEnabled: borrowingEnabled,
             stableBorrowRateEnabled: stableBorrowRateEnabled
         });
     }
@@ -207,7 +207,7 @@ contract AaveView is DSMath, AaveHelper {
     /// @notice Information about reserves
     /// @param _market Address of LendingPoolAddressesProvider for specific market
     /// @param _tokenAddresses Array of token addresses
-    /// @return tokens Array of reserves infomartion
+    /// @return tokens Array of reserves information
     function getFullTokensInfo(address _market, address[] memory _tokenAddresses) public view returns(TokenInfoFull[] memory tokens) {
         IAaveProtocolDataProviderV2 dataProvider = getDataProvider(_market);
         address priceOracleAddress = ILendingPoolAddressesProviderV2(_market).getPriceOracle();

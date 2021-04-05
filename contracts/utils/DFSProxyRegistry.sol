@@ -22,7 +22,7 @@ contract DFSProxyRegistry is AdminAuth {
     }
 
     /// @notice Returns the proxy address associated with the user account
-    /// @dev If user changed ownership of Dsproxy admin can hardcode replacement
+    /// @dev If user changed ownership of DSProxy admin can hardcode replacement
     function getMcdProxy(address _user) public view returns (address) {
         address proxyAddr = mcdRegistry.proxies(_user);
 

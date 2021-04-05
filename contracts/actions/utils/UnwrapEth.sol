@@ -41,7 +41,7 @@ contract UnwrapEth is ActionBase {
 
     /// @notice Unwraps WETH9 -> Eth
     /// @param _amount Amount of Weth to unwrap
-    /// @param _to Address where to send the unwraped Eth
+    /// @param _to Address where to send the unwrapped Eth
     function _unwrapEth(uint256 _amount, address _to) internal returns (uint256) {
         if (_amount == type(uint256).max) {
             _amount = TokenUtils.WETH_ADDR.getBalance(address(this));

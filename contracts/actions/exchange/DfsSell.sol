@@ -12,7 +12,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
 
     using TokenUtils for address;
 
-    uint internal constant RECIPIE_FEE = 400;
+    uint internal constant RECIPE_FEE = 400;
     uint internal constant DIRECT_FEE = 800;
 
     /// @inheritdoc ActionBase
@@ -46,7 +46,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
         to = _parseParamAddr(to, _paramMapping[4], _subData, _returnValues);
 
-        uint256 exchangedAmount = _dfsSell(exchangeData, from, to, RECIPIE_FEE);
+        uint256 exchangedAmount = _dfsSell(exchangeData, from, to, RECIPE_FEE);
 
         return bytes32(exchangedAmount);
     }

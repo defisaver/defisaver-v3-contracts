@@ -35,14 +35,14 @@ contract DFSRegistry is AdminAuth {
     mapping(bytes32 => address) public pendingAddresses;
     mapping(bytes32 => uint256) public pendingWaitTimes;
 
-    /// @notice Given an contract id returns the registred address
+    /// @notice Given an contract id returns the registered address
     /// @dev Id is keccak256 of the contract name
     /// @param _id Id of contract
     function getAddr(bytes32 _id) public view returns (address) {
         return entries[_id].contractAddr;
     }
 
-    /// @notice Helper function to easily query if id is registred
+    /// @notice Helper function to easily query if id is registered
     /// @param _id Id of contract
     function isRegistered(bytes32 _id) public view returns (bool) {
         return entries[_id].exists;
@@ -81,7 +81,7 @@ contract DFSRegistry is AdminAuth {
         );
     }
 
-    /// @notice Revertes to the previous address immediately
+    /// @notice Reverts to the previous address immediately
     /// @dev In case the new version has a fault, a quick way to fallback to the old contract
     /// @param _id Id of contract
     function revertToPreviousAddress(bytes32 _id) public onlyOwner {

@@ -7,7 +7,7 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
-/// @title Suply a token to an Aave market
+/// @title Supply a token to an Aave market
 contract AaveSupply is ActionBase, AaveHelper {
     using TokenUtils for address;
 

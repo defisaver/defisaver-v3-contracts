@@ -28,13 +28,13 @@ contract McdHelper is DSMath {
         }
     }
 
-    /// @notice Converts a number to Rad percision
-    /// @param _wad The input number in wad percision
+    /// @notice Converts a number to Rad precision
+    /// @param _wad The input number in wad precision
     function toRad(uint _wad) internal pure returns (uint) {
         return mul(_wad, 10 ** 27);
     }
 
-    /// @notice Converts a number to 18 decimal percision
+    /// @notice Converts a number to 18 decimal precision
     /// @param _joinAddr Join address of the collateral
     /// @param _amount Number to be converted
     function convertTo18(address _joinAddr, uint256 _amount) internal view returns (uint256) {

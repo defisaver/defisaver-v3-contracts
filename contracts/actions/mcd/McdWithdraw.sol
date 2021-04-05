@@ -92,7 +92,7 @@ contract McdWithdraw is ActionBase, McdHelper {
         return _amount;
     }
 
-    /// @notice Returns all the collateral of the vault, formated in the correct decimal
+    /// @notice Returns all the collateral of the vault, formatted in the correct decimal
     function getAllColl(IManager _mcdManager, address _joinAddr, uint _vaultId) internal view returns (uint amount) {
         (amount, ) = getCdpInfo(
             _mcdManager,

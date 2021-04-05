@@ -7,7 +7,7 @@ import "../utils/SafeERC20.sol";
 
 import "./AdminVault.sol";
 
-/// @title AdminAuth Handles owner/admin priviligies over smart contracts
+/// @title AdminAuth Handles owner/admin privileges over smart contracts
 contract AdminAuth {
     using SafeERC20 for IERC20;
 

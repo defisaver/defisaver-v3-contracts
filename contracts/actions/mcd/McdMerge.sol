@@ -46,7 +46,7 @@ contract McdMerge is ActionBase {
 
     /// @notice Merges two vaults, first into second
     /// @dev Will not work if not the exact same ilk
-    /// @param _srcVaultId Vault we are mergin
+    /// @param _srcVaultId Vault we are merging
     /// @param _destVaultId Destination vault
     /// @param _mcdManager Mcd manager
     function _mcdMerge(

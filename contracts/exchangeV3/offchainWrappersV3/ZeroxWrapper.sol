@@ -14,8 +14,8 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath 
     using TokenUtils for address;
 
     string public constant ERR_SRC_AMOUNT = "Not enough funds";
-    string public constant ERR_PROTOCOL_FEE = "Not enough eth for protcol fee";
-    string public constant ERR_TOKENS_SWAPED_ZERO = "Order success but amount 0";
+    string public constant ERR_PROTOCOL_FEE = "Not enough eth for protocol fee";
+    string public constant ERR_TOKENS_SWAPPED_ZERO = "Order success but amount 0";
 
     using SafeERC20 for IERC20;
 
@@ -41,18 +41,18 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath 
 
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
         (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(_exData.offchainData.callData);
-        uint256 tokensSwaped = 0;
+        uint256 tokensSwapped = 0;
 
         if (success) {
-            // get the current balance of the swaped tokens
-            tokensSwaped = _exData.destAddr.getBalance(address(this)) - tokensBefore;
-            require(tokensSwaped > 0, ERR_TOKENS_SWAPED_ZERO);
+            // get the current balance of the swapped tokens
+            tokensSwapped = _exData.destAddr.getBalance(address(this)) - tokensBefore;
+            require(tokensSwapped > 0, ERR_TOKENS_SWAPPED_ZERO);
         }
 
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
         sendLeftover(_exData.srcAddr, _exData.destAddr, msg.sender);
 
-        return (success, tokensSwaped);
+        return (success, tokensSwapped);
     }
 
     // solhint-disable-next-line no-empty-blocks

@@ -28,7 +28,6 @@ contract DydxFlashLoanBase {
     }
 
     function _getRepaymentAmountInternal(uint256 amount) internal pure returns (uint256) {
-        // Needs to be overcollateralize
         // Needs to provide +2 wei to be safe
         return amount.add(2);
     }

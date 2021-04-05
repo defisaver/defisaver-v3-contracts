@@ -12,7 +12,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
 
     using TokenUtils for address;
 
-    uint256 internal constant RECIPIE_FEE = 400;
+    uint256 internal constant RECIPE_FEE = 400;
     uint256 internal constant DIRECT_FEE = 800;
 
     /// @inheritdoc ActionBase
@@ -46,7 +46,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
         from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
         to = _parseParamAddr(to, _paramMapping[4], _subData, _returnValues);
 
-        uint256 exchangedAmount = _dfsBuy(exchangeData, from, to, RECIPIE_FEE);
+        uint256 exchangedAmount = _dfsBuy(exchangeData, from, to, RECIPE_FEE);
 
         return bytes32(exchangedAmount);
     }
@@ -66,7 +66,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Buys an exact _destAmount of tokens
-    /// @param _exchangeData Struct that cointains all the exchange data
+    /// @param _exchangeData Struct that contains all the exchange data
     /// @param _from Where are we pulling the tokens from
     /// @param _to Where are we sending the tokens to
     /// @param _fee Fee divider we are using based on the action

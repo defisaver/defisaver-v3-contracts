@@ -20,7 +20,7 @@ contract CompRewardView is Exponential {
         uint256 compBalance = 0;
 
         for (uint256 i = 0; i < _cTokens.length; ++i) {
-            compBalance += getSuppyBalance(_cTokens[i], _user);
+            compBalance += getSupplyBalance(_cTokens[i], _user);
             compBalance += getBorrowBalance(_cTokens[i], _user);
         }
 
@@ -40,12 +40,12 @@ contract CompRewardView is Exponential {
         borrowClaims = new bool[](_cTokens.length);
 
         for (uint256 i = 0; i < _cTokens.length; ++i) {
-            supplyClaims[i] = getSuppyBalance(_cTokens[i], _user) > 0;
+            supplyClaims[i] = getSupplyBalance(_cTokens[i], _user) > 0;
             borrowClaims[i] = getBorrowBalance(_cTokens[i], _user) > 0;
         }
     }
 
-    function getSuppyBalance(address _cToken, address _supplier)
+    function getSupplyBalance(address _cToken, address _supplier)
         public
         view
         returns (uint256 supplierAccrued)

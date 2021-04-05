@@ -31,7 +31,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         FeeRecipient(0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A);
 
     /// @notice Internal method that preforms a sell on 0x/on-chain
-    /// @dev Usefull for other DFS contract to integrate for exchanging
+    /// @dev Useful for other DFS contract to integrate for exchanging
     /// @param exData Exchange data struct
     /// @return (address, uint) Address of the wrapper used and destAmount
     function _sell(ExchangeData memory exData) internal returns (address, uint256) {
@@ -73,7 +73,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
     }
 
     /// @notice Internal method that preforms a buy on 0x/on-chain
-    /// @dev Usefull for other DFS contract to integrate for exchanging
+    /// @dev Useful for other DFS contract to integrate for exchanging
     /// @param exData Exchange data struct
     /// @return (address, uint) Address of the wrapper used and srcAmount
     function _buy(ExchangeData memory exData) internal returns (address, uint256) {
@@ -141,13 +141,13 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
             }(_exData, _type);
     }
 
-    /// @notice Calls wraper contract for exchage to preform an on-chain swap
+    /// @notice Calls wrapper contract for exchange to preform an on-chain swap
     /// @param _exData Exchange data struct
     /// @param _type Type of action SELL|BUY
-    /// @return swapedTokens For Sell that the destAmount, for Buy thats the srcAmount
+    /// @return swappedTokens For Sell that the destAmount, for Buy thats the srcAmount
     function onChainSwap(ExchangeData memory _exData, ExchangeActionType _type)
         internal
-        returns (uint256 swapedTokens)
+        returns (uint256 swappedTokens)
     {
         require(
             SaverExchangeRegistry(SAVER_EXCHANGE_REGISTRY).isWrapper(_exData.wrapper),
@@ -157,14 +157,14 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         IERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
 
         if (_type == ExchangeActionType.SELL) {
-            swapedTokens = IExchangeV3(_exData.wrapper).sell(
+            swappedTokens = IExchangeV3(_exData.wrapper).sell(
                 _exData.srcAddr,
                 _exData.destAddr,
                 _exData.srcAmount,
                 _exData.wrapperData
             );
         } else {
-            swapedTokens = IExchangeV3(_exData.wrapper).buy(
+            swappedTokens = IExchangeV3(_exData.wrapper).buy(
                 _exData.srcAddr,
                 _exData.destAddr,
                 _exData.destAmount,

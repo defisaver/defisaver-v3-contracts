@@ -45,7 +45,7 @@ contract CompView is Exponential, DSMath {
      // solhint-disable-next-line const-name-snakecase
     IComptroller public constant comp = IComptroller(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
 
-    /// @notice Calcualted the ratio of debt / adjusted collateral
+    /// @notice Calculated the ratio of debt / adjusted collateral
     /// @param _user Address of the user
     function getSafetyRatio(address _user) public view returns (uint) {
         // For each asset the account is in
@@ -94,7 +94,7 @@ contract CompView is Exponential, DSMath {
     }
 
 
-    /// @notice Calcualted the ratio of coll/debt for a compound user
+    /// @notice Calculated the ratio of coll/debt for a compound user
     /// @param _user Address of the user
     function getRatio(address _user) public view returns (uint) {
         // For each asset the account is in
@@ -207,7 +207,7 @@ contract CompView is Exponential, DSMath {
         }
     }
 
-    /// @notice Calcualted the ratio of coll/debt for a compound user
+    /// @notice Calculated the ratio of coll/debt for a compound user
     /// @param _users Addresses of the user
     /// @return ratios Array of ratios
     function getRatios(address[] memory _users) public view returns (uint[] memory ratios) {
@@ -220,7 +220,7 @@ contract CompView is Exponential, DSMath {
 
     /// @notice Information about cTokens
     /// @param _cTokenAddresses Array of cTokens addresses
-    /// @return tokens Array of cTokens infomartion
+    /// @return tokens Array of cTokens information
     function getTokensInfo(address[] memory _cTokenAddresses) public returns(TokenInfo[] memory tokens) {
         tokens = new TokenInfo[](_cTokenAddresses.length);
         address oracleAddr = comp.oracle();
@@ -239,7 +239,7 @@ contract CompView is Exponential, DSMath {
 
     /// @notice Information about cTokens
     /// @param _cTokenAddresses Array of cTokens addresses
-    /// @return tokens Array of cTokens infomartion
+    /// @return tokens Array of cTokens information
     function getFullTokensInfo(address[] memory _cTokenAddresses) public returns(TokenInfoFull[] memory tokens) {
         tokens = new TokenInfoFull[](_cTokenAddresses.length);
         address oracleAddr = comp.oracle();

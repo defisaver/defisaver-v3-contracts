@@ -37,7 +37,7 @@ contract AaveHelper {
         ILendingPoolV2(lendingPool).swapBorrowRateMode(_tokenAddr, _rateMode);
     }
 
-    /// @notice Fecth the data provider for the specified market
+    /// @notice Fetch the data provider for the specified market
     function getDataProvider(address _market) internal view returns (IAaveProtocolDataProviderV2) {
         return
             IAaveProtocolDataProviderV2(

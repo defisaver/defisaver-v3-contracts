@@ -48,9 +48,9 @@ contract CompPayback is ActionBase, CompHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Payback a borrowed token from the Compound protcol
+    /// @notice Payback a borrowed token from the Compound protocol
     /// @dev Amount type(uint).max will take the whole borrow amount
-    /// @param _cTokenAddr Address of the cToken we are paybacking
+    /// @param _cTokenAddr Address of the cToken we are paying back
     /// @param _amount Amount of the underlying token
     /// @param _from Address where we are pulling the underlying tokens from
     function _payback(
