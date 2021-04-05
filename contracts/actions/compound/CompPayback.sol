@@ -36,9 +36,9 @@ contract CompPayback is ActionBase, CompHelper {
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable override {
-        (address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
+        (address cTokenAddr, uint256 amount, address from) = parseInputs(_callData);
 
-        _payback(tokenAddr, amount, from);
+        _payback(cTokenAddr, amount, from);
     }
 
     /// @inheritdoc ActionBase

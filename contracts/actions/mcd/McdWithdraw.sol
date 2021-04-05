@@ -69,12 +69,8 @@ contract McdWithdraw is ActionBase, McdHelper {
             _amount = getAllColl(mcdManager, _joinAddr, _vaultId);
         }
 
-        uint256 frobAmount = _amount;
-
-        // convert to 18 decimals for maker frob
-        if (IJoin(_joinAddr).dec() != 18) {
-            frobAmount = convertTo18(_joinAddr, _amount);
-        }
+        // convert to 18 decimals for maker frob if needed
+        uint256 frobAmount = convertTo18(_joinAddr, _amount);
 
         // withdraw from vault and move to proxy balance
         mcdManager.frob(_vaultId, -toPositiveInt(frobAmount), 0);

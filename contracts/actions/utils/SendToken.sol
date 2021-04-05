@@ -51,11 +51,6 @@ contract SendToken is ActionBase {
     /// @param _to Where the tokens are sent, can't be the proxy or 0x0
     /// @param _amount Amount of tokens, can be type(uint).max
     function _sendToken(address _tokenAddr, address _to, uint _amount) internal returns (uint) {
-
-        if (_amount == type(uint).max) {
-            _amount = _tokenAddr.getBalance(address(this));
-        }
-
         _tokenAddr.withdrawTokens(_to, _amount);
 
         return _amount;

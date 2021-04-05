@@ -31,6 +31,7 @@ contract FLAaveV2 is ActionBase, StrategyData {
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
+    /// @dev Function sig of TaskExecutor._executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
 
     bytes32 constant FL_AAVE_V2_ID = keccak256("FLAaveV2");

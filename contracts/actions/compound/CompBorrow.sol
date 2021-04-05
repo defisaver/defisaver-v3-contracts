@@ -36,9 +36,9 @@ contract CompBorrow is ActionBase, CompHelper {
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable override {
-        (address tokenAddr, uint256 amount, address to) = parseInputs(_callData);
+        (address cTokenAddr, uint256 amount, address to) = parseInputs(_callData);
 
-        _borrow(tokenAddr, amount, to);
+        _borrow(cTokenAddr, amount, to);
     }
 
     /// @inheritdoc ActionBase

@@ -29,6 +29,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
 
     FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(0x47f159C90850D5cE09E21F931d504536840f34b4);
 
+    /// @dev Function sig of TaskExecutor._executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
 
     bytes32 constant FL_DYDX_ID = keccak256("FLDyDx");

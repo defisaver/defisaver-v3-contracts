@@ -35,10 +35,10 @@ contract CompSupply is ActionBase, CompHelper {
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable override {
-        (address tokenAddr, uint256 amount, address from, bool enableAsColl) =
+        (address cTokenAddr, uint256 amount, address from, bool enableAsColl) =
             parseInputs(_callData);
 
-        _supply(tokenAddr, amount, from, enableAsColl);
+        _supply(cTokenAddr, amount, from, enableAsColl);
     }
 
     /// @inheritdoc ActionBase

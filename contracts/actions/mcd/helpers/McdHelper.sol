@@ -97,8 +97,6 @@ contract McdHelper is DSMath {
     /// @dev For eth based collateral returns 0xEee... not weth addr
     /// @param _joinAddr Join address to check
     function getTokenFromJoin(address _joinAddr) internal view returns (address) {
-        if (isEthJoinAddr(_joinAddr)) return TokenUtils.WETH_ADDR;
-
         // if it's dai_join_addr don't check gem() it will fail, return dai addr
         if (_joinAddr == DAI_JOIN_ADDR) {
             return DAI_ADDR;

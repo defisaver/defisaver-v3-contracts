@@ -36,9 +36,9 @@ contract CompWithdraw is ActionBase, CompHelper {
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable override {
-        (address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
+        (address cTokenAddr, uint256 amount, address to) = parseInputs(_callData);
 
-        _withdraw(tokenAddr, amount, from);
+        _withdraw(cTokenAddr, amount, to);
     }
 
     /// @inheritdoc ActionBase
