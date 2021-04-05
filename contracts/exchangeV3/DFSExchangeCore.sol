@@ -205,6 +205,4 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         }
     }
 
-    // solhint-disable-next-line no-empty-blocks
-    receive() external payable {}
 }
