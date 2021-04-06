@@ -59,7 +59,6 @@ contract CompPayback is ActionBase, CompHelper {
         address _from
     ) internal returns (uint256) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
-        tokenAddr.approveToken(_cTokenAddr, _amount);
 
         // if type(uint).max payback whole amount
         if (_amount == type(uint256).max) {
@@ -70,6 +69,7 @@ contract CompPayback is ActionBase, CompHelper {
 
         // we always expect actions to deal with WETH never Eth
         if (tokenAddr != TokenUtils.WETH_ADDR) {
+            tokenAddr.approveToken(_cTokenAddr, _amount);
             require(ICToken(_cTokenAddr).repayBorrow(_amount) == NO_ERROR, ERR_COMP_PAYBACK_FAILED);
         } else {
             TokenUtils.withdrawWeth(_amount);
