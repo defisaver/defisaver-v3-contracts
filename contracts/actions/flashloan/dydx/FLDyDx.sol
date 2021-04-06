@@ -33,7 +33,6 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
     /// @dev Function sig of TaskExecutor._executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
 
-    bytes32 constant FL_DYDX_ID = keccak256("FLDyDx");
     bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
 
     /// @inheritdoc ActionBase
@@ -81,7 +80,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
         bytes memory _data
     ) internal returns (uint256) {
 
-        address payable receiver = payable(registry.getAddr(FL_DYDX_ID));
+        address payable receiver = address(this);
 
         ISoloMargin solo = ISoloMargin(SOLO_MARGIN_ADDRESS);
 

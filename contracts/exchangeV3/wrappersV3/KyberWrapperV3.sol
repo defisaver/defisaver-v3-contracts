@@ -21,7 +21,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @return uint Destination amount
-    function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory) external override payable returns (uint) {
+    function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory) external override returns (uint) {
         IERC20 srcToken = IERC20(_srcAddr);
         IERC20 destToken = IERC20(_destAddr);
 
@@ -47,7 +47,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _destAddr To token
     /// @param _destAmount To amount
     /// @return uint srcAmount
-    function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory) external override payable returns(uint) {
+    function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory) external override returns(uint) {
         IERC20 srcToken = IERC20(_srcAddr);
         IERC20 destToken = IERC20(_destAddr);
 

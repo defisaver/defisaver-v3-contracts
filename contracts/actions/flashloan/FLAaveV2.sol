@@ -36,7 +36,6 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
     /// @dev Function sig of TaskExecutor._executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
 
-    bytes32 constant FL_AAVE_V2_ID = keccak256("FLAaveV2");
     bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
 
     struct FLAaveV2Data {
@@ -85,7 +84,7 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
     function _flAaveV2(FLAaveV2Data memory _flData, bytes memory _params) internal returns (uint) {
 
         ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
-            payable(registry.getAddr(FL_AAVE_V2_ID)),
+            address(this),
             _flData.tokens,
             _flData.amounts,
             _flData.modes,

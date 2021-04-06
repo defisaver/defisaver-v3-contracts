@@ -48,7 +48,7 @@ contract CompBorrow is ActionBase, CompHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User borrows tokens to the Compound protocol
+    /// @notice User borrows tokens from the Compound protocol
     /// @param _cTokenAddr Address of the cToken we are borrowing
     /// @param _amount Amount of tokens to be borrowed
     /// @param _to The address we are sending the borrowed tokens to
