@@ -11,11 +11,12 @@ import "../../../interfaces/aave/ILendingPoolAddressesProvider.sol";
 import "../../../core/StrategyData.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../../utils/FLFeeFaucet.sol";
+import "../../../utils/ReentrancyGuard.sol";
 import "../../ActionBase.sol";
 import "./DydxFlashLoanBase.sol";
 
 /// @title Action that gets and receives a FL from DyDx protocol
-contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
+contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
@@ -112,7 +113,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
         address _initiator,
         Account.Info memory,
         bytes memory _data
-    ) public {
+    ) public nonReentrant {
         require(msg.sender == SOLO_MARGIN_ADDRESS, ERR_ONLY_DYDX_CALLER);
         require(_initiator == address(this), ERR_SAME_CALLER);
 

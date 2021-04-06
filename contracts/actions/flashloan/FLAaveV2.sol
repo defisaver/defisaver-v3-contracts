@@ -11,9 +11,10 @@ import "../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../core/StrategyData.sol";
 import "../../utils/TokenUtils.sol";
+import "../../utils/ReentrancyGuard.sol";
 
 /// @title Action that gets and receives a FL from Aave V2
-contract FLAaveV2 is ActionBase, StrategyData {
+contract FLAaveV2 is ActionBase, StrategyData, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
@@ -109,7 +110,7 @@ contract FLAaveV2 is ActionBase, StrategyData {
         uint256[] memory _fees,
         address _initiator,
         bytes memory _params
-    ) public returns (bool) {
+    ) public nonReentrant returns (bool) {
         require(msg.sender == AAVE_LENDING_POOL, ERR_ONLY_AAVE_CALLER);
         require(_initiator == address(this), ERR_SAME_CALLER);
 
