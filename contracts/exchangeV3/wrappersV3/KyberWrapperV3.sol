@@ -29,7 +29,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
 
         srcToken.safeApprove(address(kyberNetworkProxy), _srcAmount);
 
-        uint destAmount = kyberNetworkProxy.trade{value: msg.value}(
+        uint destAmount = kyberNetworkProxy.trade(
             srcToken,
             _srcAmount,
             destToken,
@@ -57,7 +57,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
 
         srcToken.safeApprove(address(kyberNetworkProxy), srcAmount);
 
-        uint destAmount = kyberNetworkProxy.trade{value: msg.value}(
+        uint destAmount = kyberNetworkProxy.trade(
             srcToken,
             srcAmount,
             destToken,

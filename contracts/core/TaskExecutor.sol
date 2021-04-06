@@ -92,7 +92,7 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
         uint256 _index,
         bytes32[] memory _returnValues
     ) internal returns (bytes32 response) {
-        response = IDSProxy(address(this)).execute{value: address(this).balance}(
+        response = IDSProxy(address(this)).execute(
             registry.getAddr(_currTask.actionIds[_index]),
             abi.encodeWithSignature(
                 "executeAction(bytes[],bytes[],uint8[],bytes32[])",
