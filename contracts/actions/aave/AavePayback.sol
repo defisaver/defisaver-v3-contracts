@@ -89,7 +89,7 @@ contract AavePayback is ActionBase, AaveHelper {
             _onBehalf = address(this);
         }
 
-        _tokenAddr.pullTokens(_from, _amount);
+        _tokenAddr.pullTokensIfNeeded(_from, _amount);
         _tokenAddr.approveToken(address(lendingPool), _amount);
 
         uint256 tokensBefore = _tokenAddr.getBalance(address(this));

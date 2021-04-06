@@ -68,8 +68,8 @@ contract UniSupply is ActionBase {
     /// @param _uniData All the required data to deposit to uni
     function _uniSupply(UniSupplyData memory _uniData) internal returns (uint256) {
         // fetch tokens from the address
-        _uniData.tokenA.pullTokens(_uniData.from, _uniData.amountADesired);
-        _uniData.tokenB.pullTokens(_uniData.from, _uniData.amountBDesired);
+        _uniData.tokenA.pullTokensIfNeeded(_uniData.from, _uniData.amountADesired);
+        _uniData.tokenB.pullTokensIfNeeded(_uniData.from, _uniData.amountBDesired);
 
         // approve router so it can pull tokens
         _uniData.tokenA.approveToken(address(router), _uniData.amountADesired);

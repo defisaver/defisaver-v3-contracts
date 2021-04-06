@@ -70,7 +70,7 @@ contract McdPayback is ActionBase, McdHelper {
         }
 
         // pull Dai from user and join the maker pool
-        DAI_ADDR.pullTokens(_from, _amount);
+        DAI_ADDR.pullTokensIfNeeded(_from, _amount);
         DAI_ADDR.approveToken(DAI_JOIN_ADDR, _amount);
         IDaiJoin(DAI_JOIN_ADDR).join(urn, _amount);
 

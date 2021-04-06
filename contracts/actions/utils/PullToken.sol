@@ -51,7 +51,7 @@ contract PullToken is ActionBase {
     /// @param _from From where the tokens are pulled, can't be the proxy or 0x0
     /// @param _amount Amount of tokens, can be type(uint).max
     function _pullToken(address _tokenAddr, address _from, uint _amount) internal returns (uint) {
-        _tokenAddr.pullTokens(_from, _amount);
+        _tokenAddr.pullTokensIfNeeded(_from, _amount);
 
         return _amount;
     }

@@ -71,7 +71,7 @@ contract McdSupply is ActionBase, McdHelper {
         }
 
         // Pull the underlying token and join the maker join pool
-        tokenAddr.pullTokens(_from, _amount);
+        tokenAddr.pullTokensIfNeeded(_from, _amount);
         tokenAddr.approveToken(_joinAddr, _amount);
         IJoin(_joinAddr).join(address(this), _amount);
 

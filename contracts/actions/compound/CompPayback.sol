@@ -65,7 +65,7 @@ contract CompPayback is ActionBase, CompHelper {
             _amount = ICToken(_cTokenAddr).borrowBalanceCurrent(_from);
         }
 
-        tokenAddr.pullTokens(_from, _amount);
+        tokenAddr.pullTokensIfNeeded(_from, _amount);
 
         // we always expect actions to deal with WETH never Eth
         if (tokenAddr != TokenUtils.WETH_ADDR) {

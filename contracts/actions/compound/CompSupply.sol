@@ -68,7 +68,7 @@ contract CompSupply is ActionBase, CompHelper {
         }
 
         // pull the tokens _from to the proxy
-        tokenAddr.pullTokens(_from, _amount);
+        tokenAddr.pullTokensIfNeeded(_from, _amount);
 
         // enter the market if needed
         if (_enableAsColl) {

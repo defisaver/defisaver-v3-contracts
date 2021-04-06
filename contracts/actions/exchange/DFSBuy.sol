@@ -81,7 +81,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
         
-        _exchangeData.srcAddr.pullTokens(_from, _exchangeData.srcAmount);
+        _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
 
         uint256 balanceBefore =
             _exchangeData.srcAddr.getBalance(address(this)) - _exchangeData.srcAmount;

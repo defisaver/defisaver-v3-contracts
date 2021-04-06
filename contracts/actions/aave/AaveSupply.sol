@@ -88,7 +88,7 @@ contract AaveSupply is ActionBase, AaveHelper {
         }
 
         // pull tokens to proxy so we can supply
-        _tokenAddr.pullTokens(_from, _amount);
+        _tokenAddr.pullTokensIfNeeded(_from, _amount);
 
         // approve aave pool to pull tokens
         _tokenAddr.approveToken(address(lendingPool), _amount);

@@ -23,17 +23,18 @@ library TokenUtils {
         }
     }
 
-    function pullTokens(
+    function pullTokensIfNeeded(
         address _token,
         address _from,
         uint256 _amount
     ) internal returns (uint256) {
         // handle max uint amount
         if (_amount == type(uint256).max) {
-            uint256 allowance = IERC20(_token).allowance(address(this), _from);
+            uint256 userAllowance = IERC20(_token).allowance(_from, address(this));
             uint256 balance = getBalance(_token, _from);
 
-            _amount = (balance > allowance) ? allowance : balance;
+            // pull max allowance amount if balance is bigger than allowance
+            _amount = (balance > userAllowance) ? userAllowance : balance;
         }
 
         if (_from != address(0) && _from != address(this) && _token != ETH_ADDR && _amount != 0) {
