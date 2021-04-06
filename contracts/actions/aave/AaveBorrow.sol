@@ -60,7 +60,7 @@ contract AaveBorrow is ActionBase, AaveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User borrows tokens to the Aave protocol
+    /// @notice User borrows tokens from the Aave protocol
     /// @param _market Address provider for specific market
     /// @param _tokenAddr The address of the token to be borrowed
     /// @param _amount Amount of tokens to be borrowed

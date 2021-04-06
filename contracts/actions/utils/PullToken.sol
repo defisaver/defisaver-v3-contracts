@@ -48,7 +48,7 @@ contract PullToken is ActionBase {
     /// @notice Pulls a token from the specified addr, doesn't work with ETH
     /// @dev If amount is type(uint).max it will send proxy balance
     /// @param _tokenAddr Address of token
-    /// @param _from From where the tokens are pulled, can't be the proxy or 0x0
+    /// @param _from From where the tokens are pulled
     /// @param _amount Amount of tokens, can be type(uint).max
     function _pullToken(address _tokenAddr, address _from, uint _amount) internal returns (uint) {
         _tokenAddr.pullTokensIfNeeded(_from, _amount);
