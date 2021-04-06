@@ -93,6 +93,7 @@ contract McdWithdraw is ActionBase, McdHelper {
     }
 
     /// @notice Returns all the collateral of the vault, formatted in the correct decimal
+    /// @dev Will fail if token is over 18 decimals
     function getAllColl(IManager _mcdManager, address _joinAddr, uint _vaultId) internal view returns (uint amount) {
         (amount, ) = getCdpInfo(
             _mcdManager,
@@ -101,7 +102,7 @@ contract McdWithdraw is ActionBase, McdHelper {
         );
 
         if (IJoin(_joinAddr).dec() != 18) {
-            return div(amount, 10 ** (18 - IJoin(_joinAddr).dec()));
+            return div(amount, 10 ** sub(18, IJoin(_joinAddr).dec()));
         }
 
     }

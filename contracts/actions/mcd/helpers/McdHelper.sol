@@ -35,10 +35,11 @@ contract McdHelper is DSMath {
     }
 
     /// @notice Converts a number to 18 decimal precision
+    /// @dev If token decimal is bigger than 18, function reverts
     /// @param _joinAddr Join address of the collateral
     /// @param _amount Number to be converted
     function convertTo18(address _joinAddr, uint256 _amount) internal view returns (uint256) {
-        return mul(_amount, 10 ** (18 - IJoin(_joinAddr).dec()));
+        return mul(_amount, 10 ** sub(18 , IJoin(_joinAddr).dec()));
     }
 
     /// @notice Converts a uint to int and checks if positive
