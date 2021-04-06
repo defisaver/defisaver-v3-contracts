@@ -69,12 +69,15 @@ contract UniSupply is ActionBase, DSMath {
     /// @param _uniData All the required data to deposit to uni
     function _uniSupply(UniSupplyData memory _uniData) internal returns (uint256) {
         // fetch tokens from the address
-        _uniData.tokenA.pullTokensIfNeeded(_uniData.from, _uniData.amountADesired);
-        _uniData.tokenB.pullTokensIfNeeded(_uniData.from, _uniData.amountBDesired);
+        uint amountAPulled = _uniData.tokenA.pullTokensIfNeeded(_uniData.from, _uniData.amountADesired);
+        uint amountBPulled = _uniData.tokenB.pullTokensIfNeeded(_uniData.from, _uniData.amountBDesired);
 
         // approve router so it can pull tokens
-        _uniData.tokenA.approveToken(address(router), _uniData.amountADesired);
-        _uniData.tokenB.approveToken(address(router), _uniData.amountBDesired);
+        _uniData.tokenA.approveToken(address(router), amountAPulled);
+        _uniData.tokenB.approveToken(address(router), amountBPulled);
+
+        _uniData.amountADesired = amountAPulled;
+        _uniData.amountBDesired = amountBPulled;
 
         // add liq. and get info how much we put in
         (uint256 amountA, uint256 amountB, uint256 liqAmount) = _addLiquidity(_uniData);

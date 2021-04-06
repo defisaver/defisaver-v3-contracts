@@ -73,8 +73,10 @@ contract UniWithdraw is ActionBase {
     function _uniWithdraw(UniWithdrawData memory _uniData) internal returns (uint256) {
         address lpTokenAddr = factory.getPair(_uniData.tokenA, _uniData.tokenB);
 
-        lpTokenAddr.pullTokensIfNeeded(_uniData.from, _uniData.liquidity);
-        lpTokenAddr.approveToken(address(router), _uniData.liquidity);
+        uint pulledTokens = lpTokenAddr.pullTokensIfNeeded(_uniData.from, _uniData.liquidity);
+        lpTokenAddr.approveToken(address(router), pulledTokens);
+
+        _uniData.liquidity = pulledTokens;
 
         // withdraw liq. and get info how much we got out
         (uint256 amountA, uint256 amountB) = _withdrawLiquidity(_uniData);

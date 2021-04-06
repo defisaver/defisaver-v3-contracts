@@ -84,7 +84,7 @@ contract AaveBorrow is ActionBase, AaveHelper {
 
         lendingPool.borrow(_tokenAddr, _amount, _rateMode, AAVE_REFERRAL_CODE, _onBehalf);
 
-        _tokenAddr.withdrawTokens(_to, _amount);
+        _amount = _tokenAddr.withdrawTokens(_to, _amount);
 
         logger.Log(
             address(this),
