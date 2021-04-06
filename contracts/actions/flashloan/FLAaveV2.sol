@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "../../core/Subscriptions.sol";
+import "../../DS/DSMath.sol";
 import "../../interfaces/IFLParamGetter.sol";
 import "../../interfaces/ILendingPool.sol";
 import "../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
@@ -14,7 +15,7 @@ import "../../utils/TokenUtils.sol";
 import "../../utils/ReentrancyGuard.sol";
 
 /// @title Action that gets and receives a FL from Aave V2
-contract FLAaveV2 is ActionBase, StrategyData, ReentrancyGuard {
+contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
@@ -126,12 +127,12 @@ contract FLAaveV2 is ActionBase, StrategyData, ReentrancyGuard {
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             taskExecutor,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, bytes32(_amounts[0] + _fees[0]))
+            abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, bytes32(add(_amounts[0],_fees[0])))
         );
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
-            _assets[i].approveToken(address(AAVE_LENDING_POOL), _amounts[i] + _fees[i]);
+            _assets[i].approveToken(address(AAVE_LENDING_POOL), add(_amounts[i],_fees[i]));
         }
 
         return true;

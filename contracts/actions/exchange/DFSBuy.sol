@@ -84,7 +84,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
         _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
 
         uint256 balanceBefore =
-            _exchangeData.srcAddr.getBalance(address(this)) - _exchangeData.srcAmount;
+            sub(_exchangeData.srcAddr.getBalance(address(this)), _exchangeData.srcAmount);
 
         _exchangeData.user = getUserAddress();
         _exchangeData.dfsFeeDivider = _fee;
@@ -95,7 +95,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
 
         _exchangeData.srcAddr.withdrawTokens(
             _from,
-            _exchangeData.srcAddr.getBalance(address(this)) - balanceBefore
+            sub(_exchangeData.srcAddr.getBalance(address(this)), balanceBefore)
         );
 
         logger.Log(

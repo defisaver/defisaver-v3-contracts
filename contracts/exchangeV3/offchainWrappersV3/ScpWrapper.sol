@@ -46,7 +46,7 @@ contract ScpWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath {
 
         if (success) {
             // get the current balance of the swapped tokens
-            tokensSwapped = _exData.destAddr.getBalance(address(this)) - tokensBefore;
+            tokensSwapped = sub(_exData.destAddr.getBalance(address(this)), tokensBefore);
             require(tokensSwapped > 0, ERR_TOKENS_SWAPPED_ZERO);
         }
 

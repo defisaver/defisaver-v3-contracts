@@ -6,10 +6,11 @@ pragma experimental ABIEncoderV2;
 import "../../interfaces/uniswap/IUniswapV2Factory.sol";
 import "../../interfaces/exchange/IUniswapRouter.sol";
 import "../../utils/TokenUtils.sol";
+import "../../DS/DSMath.sol";
 import "../ActionBase.sol";
 
 /// @title Supplies liquidity to uniswap
-contract UniSupply is ActionBase {
+contract UniSupply is ActionBase, DSMath {
     using TokenUtils for address;
 
     IUniswapRouter public constant router =
@@ -79,8 +80,8 @@ contract UniSupply is ActionBase {
         (uint256 amountA, uint256 amountB, uint256 liqAmount) = _addLiquidity(_uniData);
 
         // send leftovers
-        _uniData.tokenA.withdrawTokens(_uniData.to, (_uniData.amountADesired - amountA));
-        _uniData.tokenB.withdrawTokens(_uniData.to, (_uniData.amountBDesired - amountB));
+        _uniData.tokenA.withdrawTokens(_uniData.to, sub(_uniData.amountADesired, amountA));
+        _uniData.tokenB.withdrawTokens(_uniData.to, sub(_uniData.amountBDesired, amountB));
 
         logger.Log(
             address(this),
