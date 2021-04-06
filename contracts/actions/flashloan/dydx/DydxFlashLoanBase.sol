@@ -25,6 +25,9 @@ contract DydxFlashLoanBase {
                 return i;
             }
         }
+
+        // if we get this far no id has been found
+        revert("No DyDx market id found for token");
     }
 
     function _getRepaymentAmountInternal(uint256 amount) internal pure returns (uint256) {
