@@ -71,8 +71,9 @@ describe("FL-AaveV2", function () {
 
             const functionData = basicFLRecipe.encodeForDsProxyCall();
 
+            console.log(tokenSymbol);
 
-            if (tokenSymbol === "ETH") {
+            if (tokenSymbol === "WETH") {
                 await depositToWeth(feeAmount);
             } else {
                 // buy token so we have it for fee

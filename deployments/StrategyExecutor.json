@@ -16,7 +16,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "ERR_STARTEGY_NOT_ACTIVE",
+			"name": "ERR_STRATEGY_NOT_ACTIVE",
 			"outputs": [
 				{
 					"internalType": "string",

@@ -3,6 +3,19 @@
 	"abi": [
 		{
 			"inputs": [],
+			"name": "ERR_NO_BURN_VAULT",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "ERR_RETURN_INDEX_VALUE",
 			"outputs": [
 				{
@@ -133,10 +146,10 @@
 		},
 		{
 			"inputs": [],
-			"name": "chiToken",
+			"name": "adminVault",
 			"outputs": [
 				{
-					"internalType": "contract IGasToken",
+					"internalType": "contract AdminVault",
 					"name": "",
 					"type": "address"
 				}
@@ -193,15 +206,9 @@
 		},
 		{
 			"inputs": [],
-			"name": "gasToken",
-			"outputs": [
-				{
-					"internalType": "contract IGasToken",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
+			"name": "kill",
+			"outputs": [],
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
@@ -228,6 +235,29 @@
 				}
 			],
 			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_token",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_receiver",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_amount",
+					"type": "uint256"
+				}
+			],
+			"name": "withdrawStuckFunds",
+			"outputs": [],
+			"stateMutability": "nonpayable",
 			"type": "function"
 		}
 	],

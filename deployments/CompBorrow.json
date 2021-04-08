@@ -42,6 +42,32 @@
 		},
 		{
 			"inputs": [],
+			"name": "ERR_COMP_ENTER_MARKET",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_COMP_EXIT_MARKET",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "ERR_RETURN_INDEX_VALUE",
 			"outputs": [
 				{

@@ -616,7 +616,7 @@
 			"inputs": [
 				{
 					"internalType": "uint256",
-					"name": "_startegyId",
+					"name": "_strategyId",
 					"type": "uint256"
 				},
 				{

@@ -17,7 +17,8 @@ const {
     AAVE_MARKET,
     WETH_ADDRESS,
     setNewExchangeWrapper,
-    depositToWeth
+    depositToWeth,
+    sendEther
 } = require('../utils');
 
 const {
@@ -36,6 +37,7 @@ describe("Unwrap-Eth", function () {
     let makerAddresses, senderAcc, proxy, uniWrapper;
 
     before(async () => {
+        await redeploy('WrapEth');
         await redeploy('UnwrapEth');
         await redeploy('DFSSell');
         uniWrapper = await redeploy('UniswapWrapperV3');
@@ -56,7 +58,7 @@ describe("Unwrap-Eth", function () {
             const amount = ethers.utils.parseUnits('2', 18);
             await depositToWeth(amount);
 
-            await send(WETH_ADDRESS, senderAcc.address, amount);
+            await send(WETH_ADDRESS, proxy.address, amount);
 
             const unwrapEthAction = new dfs.actions.basic.UnwrapEthAction(amount, senderAcc.address);
             const functionData = unwrapEthAction.encodeForDsProxyCall()[1];
@@ -76,7 +78,7 @@ describe("Unwrap-Eth", function () {
 
             const amount = ethers.utils.parseUnits('2', 18);
 
-            await send(ETH_ADDR, proxy.address, amount);
+            await sendEther(senderAcc, proxy.address, '2');
 
             const unwrapRecipe = new dfs.Recipe("UnwrapRecipe", [
                 new dfs.actions.basic.WrapEthAction(amount),

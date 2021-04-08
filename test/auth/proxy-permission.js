@@ -30,7 +30,7 @@ describe("Proxy-Permission", function() {
     
         await proxy['execute(address,bytes)'](proxyPermission.address, functionData, {gasLimit: 1500000});
 
-        // check permission
+        //TODO: check permission
     });
 
     it(`... should through DSProxy remove contract permission`, async () => {
@@ -42,7 +42,7 @@ describe("Proxy-Permission", function() {
     
         await proxy['execute(address,bytes)'](proxyPermission.address, functionData, {gasLimit: 1500000});
 
-        // check permission
+        //TODO: check permission
 
     });
 

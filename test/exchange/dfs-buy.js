@@ -35,12 +35,12 @@ describe("Dfs-Buy", function() {
     let senderAcc, proxy, dfsSellAddr, uniWrapper, kyberWrapper;
 
     const trades = [
-        {sellToken: "WETH", buyToken: "DAI", sellAmount: "5", buyAmount: "200"},
-        {sellToken: "DAI", buyToken: "WBTC", sellAmount: "200", buyAmount: "0.001"},
-        {sellToken: "WETH", buyToken: "USDC", sellAmount: "1", buyAmount: "200"},
-        {sellToken: "USDC", buyToken: "WETH", sellAmount: "200", buyAmount: "0.1"},
-        {sellToken: "WETH", buyToken: "USDT", sellAmount: "1", buyAmount: "200"},
-        {sellToken: "USDT", buyToken: "BAT", sellAmount: "150", buyAmount: "20"},
+        {sellToken: "WETH", buyToken: "DAI", sellAmount: "5", buyAmount: "2000"},
+        {sellToken: "DAI", buyToken: "WBTC", sellAmount: "1000", buyAmount: "0.001"},
+        {sellToken: "WETH", buyToken: "USDC", sellAmount: "1", buyAmount: "1000"},
+        {sellToken: "USDC", buyToken: "WETH", sellAmount: "400", buyAmount: "0.1"},
+        {sellToken: "WETH", buyToken: "USDT", sellAmount: "1", buyAmount: "1000"},
+        {sellToken: "USDT", buyToken: "BAT", sellAmount: "550", buyAmount: "20"},
     ];
 
     before(async () => {

@@ -328,6 +328,14 @@ const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, 
     // buy tokens
     const tokenBalanceA = await balanceOf(addrTokenA, from);
     const tokenBalanceB = await balanceOf(addrTokenB, from);
+
+    if (isEth(addrTokenA)) {
+        await depositToWeth(amountA);
+    }
+
+    if (isEth(addrTokenB)) {
+        await depositToWeth(amountB);
+    }
  
     if (tokenBalanceA.lt(amountA)) {
         await sell(
@@ -367,19 +375,9 @@ const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, 
         deadline,
     ];
 
-
     const uniSupply = new dfs.actions.uniswap.UniswapSupplyAction(...uniObj);
 
-    if (isEth(addrTokenA)) {
-        await depositToWeth(amountA);
-    }
-
     await approve(addrTokenA, proxy.address);
-
-    if (isEth(addrTokenB)) {
-        await depositToWeth(amountA);
-    }
-
     await approve(addrTokenB, proxy.address);
 
     const functionData = uniSupply.encodeForDsProxyCall()[1];
