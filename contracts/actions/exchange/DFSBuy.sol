@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../../interfaces/IDSProxy.sol";
@@ -12,7 +12,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
 
     using TokenUtils for address;
 
-    uint256 internal constant RECIPIE_FEE = 400;
+    uint256 internal constant RECIPE_FEE = 400;
     uint256 internal constant DIRECT_FEE = 800;
 
     /// @inheritdoc ActionBase
@@ -46,7 +46,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
         from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
         to = _parseParamAddr(to, _paramMapping[4], _subData, _returnValues);
 
-        uint256 exchangedAmount = _dfsBuy(exchangeData, from, to, RECIPIE_FEE);
+        uint256 exchangedAmount = _dfsBuy(exchangeData, from, to, RECIPE_FEE);
 
         return bytes32(exchangedAmount);
     }
@@ -66,7 +66,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Buys an exact _destAmount of tokens
-    /// @param _exchangeData Struct that cointains all the exchange data
+    /// @param _exchangeData Struct that contains all the exchange data
     /// @param _from Where are we pulling the tokens from
     /// @param _to Where are we sending the tokens to
     /// @param _fee Fee divider we are using based on the action
@@ -81,10 +81,10 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
         
-        _exchangeData.srcAddr.pullTokens(_from, _exchangeData.srcAmount);
+        _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
 
         uint256 balanceBefore =
-            _exchangeData.srcAddr.getBalance(address(this)) - _exchangeData.srcAmount;
+            sub(_exchangeData.srcAddr.getBalance(address(this)), _exchangeData.srcAmount);
 
         _exchangeData.user = getUserAddress();
         _exchangeData.dfsFeeDivider = _fee;
@@ -95,7 +95,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
 
         _exchangeData.srcAddr.withdrawTokens(
             _from,
-            _exchangeData.srcAddr.getBalance(address(this)) - balanceBefore
+            sub(_exchangeData.srcAddr.getBalance(address(this)), balanceBefore)
         );
 
         logger.Log(

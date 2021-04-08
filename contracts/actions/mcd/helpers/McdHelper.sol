@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 
 import "../../../DS/DSMath.sol";
 import "../../../DS/DSProxy.sol";
@@ -28,17 +28,18 @@ contract McdHelper is DSMath {
         }
     }
 
-    /// @notice Converts a number to Rad percision
-    /// @param _wad The input number in wad percision
+    /// @notice Converts a number to Rad precision
+    /// @param _wad The input number in wad precision
     function toRad(uint _wad) internal pure returns (uint) {
         return mul(_wad, 10 ** 27);
     }
 
-    /// @notice Converts a number to 18 decimal percision
+    /// @notice Converts a number to 18 decimal precision
+    /// @dev If token decimal is bigger than 18, function reverts
     /// @param _joinAddr Join address of the collateral
     /// @param _amount Number to be converted
     function convertTo18(address _joinAddr, uint256 _amount) internal view returns (uint256) {
-        return mul(_amount, 10 ** (18 - IJoin(_joinAddr).dec()));
+        return mul(_amount, 10 ** sub(18 , IJoin(_joinAddr).dec()));
     }
 
     /// @notice Converts a uint to int and checks if positive
@@ -97,8 +98,6 @@ contract McdHelper is DSMath {
     /// @dev For eth based collateral returns 0xEee... not weth addr
     /// @param _joinAddr Join address to check
     function getTokenFromJoin(address _joinAddr) internal view returns (address) {
-        if (isEthJoinAddr(_joinAddr)) return TokenUtils.WETH_ADDR;
-
         // if it's dai_join_addr don't check gem() it will fail, return dai addr
         if (_joinAddr == DAI_JOIN_ADDR) {
             return DAI_ADDR;

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 
 interface IExchangeWrapper {
     function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) external payable returns (uint);

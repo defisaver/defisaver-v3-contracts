@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../../interfaces/IWETH.sol";
@@ -35,10 +35,10 @@ contract CompSupply is ActionBase, CompHelper {
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable override {
-        (address tokenAddr, uint256 amount, address from, bool enableAsColl) =
+        (address cTokenAddr, uint256 amount, address from, bool enableAsColl) =
             parseInputs(_callData);
 
-        _supply(tokenAddr, amount, from, enableAsColl);
+        _supply(cTokenAddr, amount, from, enableAsColl);
     }
 
     /// @inheritdoc ActionBase
@@ -68,7 +68,7 @@ contract CompSupply is ActionBase, CompHelper {
         }
 
         // pull the tokens _from to the proxy
-        tokenAddr.pullTokens(_from, _amount);
+        tokenAddr.pullTokensIfNeeded(_from, _amount);
 
         // enter the market if needed
         if (_enableAsColl) {
@@ -79,7 +79,7 @@ contract CompSupply is ActionBase, CompHelper {
         if (tokenAddr != TokenUtils.WETH_ADDR) {
             tokenAddr.approveToken(_cTokenAddr, _amount);
 
-            require(ICToken(_cTokenAddr).mint(_amount) == 0, ERR_COMP_SUPPLY_FAILED);
+            require(ICToken(_cTokenAddr).mint(_amount) == NO_ERROR, ERR_COMP_SUPPLY_FAILED);
         } else {
             TokenUtils.withdrawWeth(_amount);
             ICToken(_cTokenAddr).mint{value: _amount}(); // reverts on fail

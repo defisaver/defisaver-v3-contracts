@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../auth/AdminAuth.sol";
@@ -26,10 +26,10 @@ contract StrategyExecutor is StrategyData, AdminAuth {
 
     string public constant ERR_TRIGGER_NOT_ACTIVE = "Trigger not activated";
     string public constant ERR_BOT_NOT_APPROVED = "Bot is not approved";
-    string public constant ERR_STARTEGY_NOT_ACTIVE = "Strategy is not active";
+    string public constant ERR_STRATEGY_NOT_ACTIVE = "Strategy is not active";
 
     /// @notice Checks all the triggers and executes actions
-    /// @dev Only auhtorized callers can execute it
+    /// @dev Only authorized callers can execute it
     /// @param _strategyId Id of the strategy
     /// @param _triggerCallData All input data needed to execute triggers
     /// @param _actionsCallData All input data needed to execute actions
@@ -41,7 +41,7 @@ contract StrategyExecutor is StrategyData, AdminAuth {
         Subscriptions sub = Subscriptions(registry.getAddr(SUBSCRIPTION_ID));
 
         Strategy memory strategy = sub.getStrategy(_strategyId);
-        require(strategy.active, ERR_STARTEGY_NOT_ACTIVE);
+        require(strategy.active, ERR_STRATEGY_NOT_ACTIVE);
 
         // check bot auth
         checkCallerAuth(_strategyId);

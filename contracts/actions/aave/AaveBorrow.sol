@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../../utils/TokenUtils.sol";
@@ -60,7 +60,7 @@ contract AaveBorrow is ActionBase, AaveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User borrows tokens to the Aave protocol
+    /// @notice User borrows tokens from the Aave protocol
     /// @param _market Address provider for specific market
     /// @param _tokenAddr The address of the token to be borrowed
     /// @param _amount Amount of tokens to be borrowed
@@ -84,7 +84,7 @@ contract AaveBorrow is ActionBase, AaveHelper {
 
         lendingPool.borrow(_tokenAddr, _amount, _rateMode, AAVE_REFERRAL_CODE, _onBehalf);
 
-        _tokenAddr.withdrawTokens(_to, _amount);
+        _amount = _tokenAddr.withdrawTokens(_to, _amount);
 
         logger.Log(
             address(this),

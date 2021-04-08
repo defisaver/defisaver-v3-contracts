@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../auth/AdminAuth.sol";
 import "../core/DFSRegistry.sol";
 
-/// @title Implements Action interface and common helpers for pasing inputs
+/// @title Implements Action interface and common helpers for passing inputs
 abstract contract ActionBase is AdminAuth {
     address public constant REGISTRY_ADDR = 0xB0e1682D17A96E8551191c089673346dF7e1D467;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
@@ -59,15 +59,15 @@ abstract contract ActionBase is AdminAuth {
     /// @notice Given an uint256 input, injects return/sub values if specified
     /// @param _param The original input value
     /// @param _mapType Indicated the type of the input in paramMapping
-    /// @param _subData Array of subscription data we can repacle the input value with
-    /// @param _returnValues Array of subscription data we can repacle the input value with
+    /// @param _subData Array of subscription data we can replace the input value with
+    /// @param _returnValues Array of subscription data we can replace the input value with
     function _parseParamUint(
         uint _param,
         uint8 _mapType,
         bytes[] memory _subData,
         bytes32[] memory _returnValues
     ) internal pure returns (uint) {
-        if (isReplacable(_mapType)) {
+        if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
                 _param = uint(_returnValues[getReturnIndex(_mapType)]);
             } else {
@@ -82,15 +82,15 @@ abstract contract ActionBase is AdminAuth {
     /// @notice Given an addr input, injects return/sub values if specified
     /// @param _param The original input value
     /// @param _mapType Indicated the type of the input in paramMapping
-    /// @param _subData Array of subscription data we can repacle the input value with
-    /// @param _returnValues Array of subscription data we can repacle the input value with
+    /// @param _subData Array of subscription data we can replace the input value with
+    /// @param _returnValues Array of subscription data we can replace the input value with
     function _parseParamAddr(
         address _param,
         uint8 _mapType,
         bytes[] memory _subData,
         bytes32[] memory _returnValues
     ) internal pure returns (address) {
-        if (isReplacable(_mapType)) {
+        if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
                 _param = address(bytes20((_returnValues[getReturnIndex(_mapType)])));
             } else {
@@ -104,15 +104,15 @@ abstract contract ActionBase is AdminAuth {
     /// @notice Given an bytes32 input, injects return/sub values if specified
     /// @param _param The original input value
     /// @param _mapType Indicated the type of the input in paramMapping
-    /// @param _subData Array of subscription data we can repacle the input value with
-    /// @param _returnValues Array of subscription data we can repacle the input value with
+    /// @param _subData Array of subscription data we can replace the input value with
+    /// @param _returnValues Array of subscription data we can replace the input value with
     function _parseParamABytes32(
         bytes32 _param,
         uint8 _mapType,
         bytes[] memory _subData,
         bytes32[] memory _returnValues
     ) internal pure returns (bytes32) {
-        if (isReplacable(_mapType)) {
+        if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
                 _param = (_returnValues[getReturnIndex(_mapType)]);
             } else {
@@ -125,7 +125,7 @@ abstract contract ActionBase is AdminAuth {
 
     /// @notice Checks if the paramMapping value indicated that we need to inject values
     /// @param _type Indicated the type of the input
-    function isReplacable(uint8 _type) internal pure returns (bool) {
+    function isReplaceable(uint8 _type) internal pure returns (bool) {
         return _type != NO_PARAM_MAPPING;
     }
 

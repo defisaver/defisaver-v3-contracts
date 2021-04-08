@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../auth/AdminAuth.sol";
@@ -90,19 +90,19 @@ contract Subscriptions is StrategyData, AdminAuth {
 
     /// @notice Updates the users strategy
     /// @dev Only callable by proxy who created the strategy
-    /// @param _startegyId Id of the strategy to update
+    /// @param _strategyId Id of the strategy to update
     /// @param _templateId Id of the template used for strategy
     /// @param _active If the strategy is turned on at the start
     /// @param _subData Subscription data for actions
     /// @param _triggerData Subscription data for triggers
     function updateStrategy(
-        uint _startegyId,
+        uint _strategyId,
         uint _templateId,
         bool _active,
         bytes[][] memory _subData,
         bytes[][] memory _triggerData
     ) public {
-        Strategy storage s = strategies[_startegyId];
+        Strategy storage s = strategies[_strategyId];
 
         require(s.proxy != address(0), ERR_EMPTY_STRATEGY);
         require(msg.sender == s.proxy, ERR_SENDER_NOT_OWNER);
@@ -114,7 +114,7 @@ contract Subscriptions is StrategyData, AdminAuth {
 
         updateCounter++;
 
-        logger.Log(address(this), msg.sender, "UpdateStrategy", abi.encode(_startegyId));
+        logger.Log(address(this), msg.sender, "UpdateStrategy", abi.encode(_strategyId));
     }
 
     /// @notice Unsubscribe an existing strategy

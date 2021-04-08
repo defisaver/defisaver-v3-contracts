@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../../../utils/SafeMath.sol";
@@ -25,10 +25,12 @@ contract DydxFlashLoanBase {
                 return i;
             }
         }
+
+        // if we get this far no id has been found
+        revert("No DyDx market id found for token");
     }
 
     function _getRepaymentAmountInternal(uint256 amount) internal pure returns (uint256) {
-        // Needs to be overcollateralize
         // Needs to provide +2 wei to be safe
         return amount.add(2);
     }

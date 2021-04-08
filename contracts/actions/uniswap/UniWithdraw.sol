@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../../interfaces/uniswap/IUniswapV2Factory.sol";
@@ -73,8 +73,10 @@ contract UniWithdraw is ActionBase {
     function _uniWithdraw(UniWithdrawData memory _uniData) internal returns (uint256) {
         address lpTokenAddr = factory.getPair(_uniData.tokenA, _uniData.tokenB);
 
-        lpTokenAddr.pullTokens(_uniData.from, _uniData.liquidity);
-        lpTokenAddr.approveToken(address(router), _uniData.liquidity);
+        uint pulledTokens = lpTokenAddr.pullTokensIfNeeded(_uniData.from, _uniData.liquidity);
+        lpTokenAddr.approveToken(address(router), pulledTokens);
+
+        _uniData.liquidity = pulledTokens;
 
         // withdraw liq. and get info how much we got out
         (uint256 amountA, uint256 amountB) = _withdrawLiquidity(_uniData);

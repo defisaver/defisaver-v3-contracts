@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
+import "../../DS/DSMath.sol";
 import "../../interfaces/IWETH.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
 
 /// @title Claims Comp reward for the specified user
-contract CompClaim is ActionBase, CompHelper {
+contract CompClaim is ActionBase, CompHelper, DSMath {
     using TokenUtils for address;
 
     address public constant COMP_ADDR = 0xc00e94Cb662C3520282E6f5717214004A7f26888;
@@ -70,7 +71,7 @@ contract CompClaim is ActionBase, CompHelper {
 
         uint256 compBalanceAfter = COMP_ADDR.getBalance(_from);
 
-        uint256 compClaimed = compBalanceAfter - compBalanceBefore;
+        uint256 compClaimed = sub(compBalanceAfter, compBalanceBefore);
 
         if (_from == address(this)) {
             COMP_ADDR.withdrawTokens(_to, compClaimed);

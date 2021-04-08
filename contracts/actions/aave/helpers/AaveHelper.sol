@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 
 import "../../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
@@ -37,7 +37,7 @@ contract AaveHelper {
         ILendingPoolV2(lendingPool).swapBorrowRateMode(_tokenAddr, _rateMode);
     }
 
-    /// @notice Fecth the data provider for the specified market
+    /// @notice Fetch the data provider for the specified market
     function getDataProvider(address _market) internal view returns (IAaveProtocolDataProviderV2) {
         return
             IAaveProtocolDataProviderV2(

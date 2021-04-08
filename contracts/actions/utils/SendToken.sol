@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../../utils/TokenUtils.sol";
@@ -48,14 +48,9 @@ contract SendToken is ActionBase {
     /// @notice Sends a token to the specified addr, works with Eth also
     /// @dev If amount is type(uint).max it will send proxy balance
     /// @param _tokenAddr Address of token, use 0xEeee... for eth
-    /// @param _to Where the tokens are sent, can't be the proxy or 0x0
+    /// @param _to Where the tokens are sent
     /// @param _amount Amount of tokens, can be type(uint).max
     function _sendToken(address _tokenAddr, address _to, uint _amount) internal returns (uint) {
-
-        if (_amount == type(uint).max) {
-            _amount = _tokenAddr.getBalance(address(this));
-        }
-
         _tokenAddr.withdrawTokens(_to, _amount);
 
         return _amount;

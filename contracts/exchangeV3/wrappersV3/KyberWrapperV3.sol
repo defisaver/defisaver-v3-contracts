@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 
 import "../../utils/SafeERC20.sol";
 import "../../interfaces//exchange/IKyberNetworkProxy.sol";
@@ -21,17 +21,15 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @return uint Destination amount
-    function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory) external override payable returns (uint) {
+    function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory) external override returns (uint) {
         IERC20 srcToken = IERC20(_srcAddr);
         IERC20 destToken = IERC20(_destAddr);
 
         KyberNetworkProxyInterface kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
 
-        if (_srcAddr != KYBER_ETH_ADDRESS) {
-            srcToken.safeApprove(address(kyberNetworkProxy), _srcAmount);
-        }
+        srcToken.safeApprove(address(kyberNetworkProxy), _srcAmount);
 
-        uint destAmount = kyberNetworkProxy.trade{value: msg.value}(
+        uint destAmount = kyberNetworkProxy.trade(
             srcToken,
             _srcAmount,
             destToken,
@@ -49,24 +47,17 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @param _destAddr To token
     /// @param _destAmount To amount
     /// @return uint srcAmount
-    function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory) external override payable returns(uint) {
+    function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory) external override returns(uint) {
         IERC20 srcToken = IERC20(_srcAddr);
         IERC20 destToken = IERC20(_destAddr);
 
-        uint srcAmount = 0;
-        if (_srcAddr != KYBER_ETH_ADDRESS) {
-            srcAmount = srcToken.balanceOf(address(this));
-        } else {
-            srcAmount = msg.value;
-        }
+        uint256 srcAmount = srcToken.balanceOf(address(this));
 
         KyberNetworkProxyInterface kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
 
-        if (_srcAddr != KYBER_ETH_ADDRESS) {
-            srcToken.safeApprove(address(kyberNetworkProxy), srcAmount);
-        }
+        srcToken.safeApprove(address(kyberNetworkProxy), srcAmount);
 
-        uint destAmount = kyberNetworkProxy.trade{value: msg.value}(
+        uint destAmount = kyberNetworkProxy.trade(
             srcToken,
             srcAmount,
             destToken,
@@ -78,13 +69,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
 
         require(destAmount == _destAmount, "Wrong dest amount");
 
-        uint srcAmountAfter = 0;
-
-        if (_srcAddr != KYBER_ETH_ADDRESS) {
-            srcAmountAfter = srcToken.balanceOf(address(this));
-        } else {
-            srcAmountAfter = address(this).balance;
-        }
+        uint256 srcAmountAfter = srcToken.balanceOf(address(this));
 
         // Send the leftover from the source token back
         sendLeftOver(_srcAddr);
@@ -93,6 +78,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     }
 
     /// @notice Return a rate for which we can sell an amount of tokens
+    /// @dev Will fail if token is over 18 decimals
     /// @param _srcAddr From token
     /// @param _destAddr To token
     /// @param _srcAmount From amount
@@ -102,9 +88,9 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
             .getExpectedRate(IERC20(_srcAddr), IERC20(_destAddr), _srcAmount);
 
         // multiply with decimal difference in src token
-        rate = rate * (10**(18 - getDecimals(_srcAddr)));
+        rate = rate * (10**sub(18, getDecimals(_srcAddr)));
         // divide with decimal difference in dest token
-        rate = rate / (10**(18 - getDecimals(_destAddr)));
+        rate = rate / (10**sub(18, getDecimals(_destAddr)));
     }
 
     /// @notice Return a rate for which we can buy an amount of tokens

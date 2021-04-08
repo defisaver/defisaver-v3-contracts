@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../../interfaces/mcd/IManager.sol";
@@ -69,12 +69,8 @@ contract McdWithdraw is ActionBase, McdHelper {
             _amount = getAllColl(mcdManager, _joinAddr, _vaultId);
         }
 
-        uint256 frobAmount = _amount;
-
-        // convert to 18 decimals for maker frob
-        if (IJoin(_joinAddr).dec() != 18) {
-            frobAmount = convertTo18(_joinAddr, _amount);
-        }
+        // convert to 18 decimals for maker frob if needed
+        uint256 frobAmount = convertTo18(_joinAddr, _amount);
 
         // withdraw from vault and move to proxy balance
         mcdManager.frob(_vaultId, -toPositiveInt(frobAmount), 0);
@@ -96,7 +92,8 @@ contract McdWithdraw is ActionBase, McdHelper {
         return _amount;
     }
 
-    /// @notice Returns all the collateral of the vault, formated in the correct decimal
+    /// @notice Returns all the collateral of the vault, formatted in the correct decimal
+    /// @dev Will fail if token is over 18 decimals
     function getAllColl(IManager _mcdManager, address _joinAddr, uint _vaultId) internal view returns (uint amount) {
         (amount, ) = getCdpInfo(
             _mcdManager,
@@ -105,7 +102,7 @@ contract McdWithdraw is ActionBase, McdHelper {
         );
 
         if (IJoin(_joinAddr).dec() != 18) {
-            return div(amount, 10 ** (18 - IJoin(_joinAddr).dec()));
+            return div(amount, 10 ** sub(18, IJoin(_joinAddr).dec()));
         }
 
     }

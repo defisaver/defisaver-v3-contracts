@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../../../core/Subscriptions.sol";
@@ -11,11 +11,12 @@ import "../../../interfaces/aave/ILendingPoolAddressesProvider.sol";
 import "../../../core/StrategyData.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../../utils/FLFeeFaucet.sol";
+import "../../../utils/ReentrancyGuard.sol";
 import "../../ActionBase.sol";
 import "./DydxFlashLoanBase.sol";
 
 /// @title Action that gets and receives a FL from DyDx protocol
-contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
+contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
@@ -29,9 +30,9 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
 
     FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(0x47f159C90850D5cE09E21F931d504536840f34b4);
 
+    /// @dev Function sig of TaskExecutor._executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
 
-    bytes32 constant FL_DYDX_ID = keccak256("FLDyDx");
     bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
 
     /// @inheritdoc ActionBase
@@ -79,7 +80,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
         bytes memory _data
     ) internal returns (uint256) {
 
-        address payable receiver = payable(registry.getAddr(FL_DYDX_ID));
+        address payable receiver = address(this);
 
         ISoloMargin solo = ISoloMargin(SOLO_MARGIN_ADDRESS);
 
@@ -111,7 +112,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase {
         address _initiator,
         Account.Info memory,
         bytes memory _data
-    ) public {
+    ) public nonReentrant {
         require(msg.sender == SOLO_MARGIN_ADDRESS, ERR_ONLY_DYDX_CALLER);
         require(_initiator == address(this), ERR_SAME_CALLER);
 

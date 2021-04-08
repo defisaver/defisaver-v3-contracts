@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "../../core/Subscriptions.sol";
+import "../../DS/DSMath.sol";
 import "../../interfaces/IFLParamGetter.sol";
 import "../../interfaces/ILendingPool.sol";
 import "../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../core/StrategyData.sol";
 import "../../utils/TokenUtils.sol";
+import "../../utils/ReentrancyGuard.sol";
 
 /// @title Action that gets and receives a FL from Aave V2
-contract FLAaveV2 is ActionBase, StrategyData {
+contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
@@ -31,9 +33,9 @@ contract FLAaveV2 is ActionBase, StrategyData {
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
+    /// @dev Function sig of TaskExecutor._executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
 
-    bytes32 constant FL_AAVE_V2_ID = keccak256("FLAaveV2");
     bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
 
     struct FLAaveV2Data {
@@ -82,7 +84,7 @@ contract FLAaveV2 is ActionBase, StrategyData {
     function _flAaveV2(FLAaveV2Data memory _flData, bytes memory _params) internal returns (uint) {
 
         ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
-            payable(registry.getAddr(FL_AAVE_V2_ID)),
+            address(this),
             _flData.tokens,
             _flData.amounts,
             _flData.modes,
@@ -108,7 +110,7 @@ contract FLAaveV2 is ActionBase, StrategyData {
         uint256[] memory _fees,
         address _initiator,
         bytes memory _params
-    ) public returns (bool) {
+    ) public nonReentrant returns (bool) {
         require(msg.sender == AAVE_LENDING_POOL, ERR_ONLY_AAVE_CALLER);
         require(_initiator == address(this), ERR_SAME_CALLER);
 
@@ -124,12 +126,12 @@ contract FLAaveV2 is ActionBase, StrategyData {
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             taskExecutor,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, bytes32(_amounts[0] + _fees[0]))
+            abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, bytes32(add(_amounts[0],_fees[0])))
         );
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
-            _assets[i].approveToken(address(AAVE_LENDING_POOL), _amounts[i] + _fees[i]);
+            _assets[i].approveToken(address(AAVE_LENDING_POOL), add(_amounts[i],_fees[i]));
         }
 
         return true;

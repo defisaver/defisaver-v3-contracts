@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 
 import "../interfaces/IERC20.sol";
 import "./Address.sol";
@@ -30,10 +30,7 @@ library SafeERC20 {
         );
     }
 
-    /**
-     * @dev Deprecated. This function has issues similar to the ones found in
-     * {ERC20-approve}, and its usage is discouraged.
-     */
+    /// @dev Edited so it always first approves 0 and then the value, because of non standard tokens
     function safeApprove(
         IERC20 token,
         address spender,

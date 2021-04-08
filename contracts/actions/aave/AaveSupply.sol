@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
-/// @title Suply a token to an Aave market
+/// @title Supply a token to an Aave market
 contract AaveSupply is ActionBase, AaveHelper {
     using TokenUtils for address;
 
@@ -88,7 +88,7 @@ contract AaveSupply is ActionBase, AaveHelper {
         }
 
         // pull tokens to proxy so we can supply
-        _tokenAddr.pullTokens(_from, _amount);
+        _tokenAddr.pullTokensIfNeeded(_from, _amount);
 
         // approve aave pool to pull tokens
         _tokenAddr.approveToken(address(lendingPool), _amount);
