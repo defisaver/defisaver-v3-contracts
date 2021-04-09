@@ -13,10 +13,9 @@ import "./Subscriptions.sol";
 contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
-    address public constant REGISTRY_ADDR = 0xB0e1682D17A96E8551191c089673346dF7e1D467;
+    address public constant REGISTRY_ADDR = 0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    bytes32 constant ACTION_EXECUTOR_ID = keccak256("ActionExecutor");
     bytes32 constant SUBSCRIPTION_ID = keccak256("Subscriptions");
 
     /// @notice Called directly through DsProxy to execute a task

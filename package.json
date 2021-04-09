@@ -51,6 +51,7 @@
     }
   },
   "dependencies": {
-    "@defisaver/sdk": "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#beta"
+    "@defisaver/sdk": "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#beta",
+    "@poanet/solidity-flattener": "^3.0.6"
   }
 }
