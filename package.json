@@ -56,7 +56,7 @@
   "husky": {
     "hooks": {
       "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true",
-     
+      "pre-commit": "yarn run hardhat remove-logs && npm run lint",
       "commit-msg": "npx --no-install commitlint --edit $1"
     }
   },
