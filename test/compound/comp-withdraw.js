@@ -1,9 +1,9 @@
-const { expect } = require("chai");
+const { expect } = require('chai');
+const hre = require('hardhat');
 
 const { getAssetInfo, compoundCollateralAssets } = require('@defisaver/tokens');
 
 const {
-    getAddrFromRegistry,
     getProxy,
     redeploy,
     balanceOf,
@@ -11,16 +11,16 @@ const {
     WETH_ADDRESS,
 } = require('../utils');
 
-
 const {
     supplyComp,
     withdrawComp,
 } = require('../actions');
 
-describe("Comp-Withdraw", function () {
+describe('Comp-Withdraw', function () {
     this.timeout(80000);
 
-    let senderAcc, proxy;
+    let senderAcc; let
+        proxy;
 
     before(async () => {
         await redeploy('CompWithdraw');
@@ -43,20 +43,20 @@ describe("Comp-Withdraw", function () {
                 assetInfo.address = WETH_ADDRESS;
             }
 
-            const amount = ethers.utils.parseUnits(standardAmounts[assetInfo.symbol], assetInfo.decimals);
-    
+            const amount = hre.ethers.utils.parseUnits(
+                standardAmounts[assetInfo.symbol],
+                assetInfo.decimals,
+            );
+
             await supplyComp(proxy, cToken, assetInfo.address, amount, senderAcc.address);
 
             const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
 
             await withdrawComp(proxy, cToken, amount, senderAcc.address);
-    
+
             const balanceAfter = await balanceOf(assetInfo.address, senderAcc.address);
-    
+
             expect(balanceAfter).to.be.gt(balanceBefore);
-        
         });
     }
-
 });
-

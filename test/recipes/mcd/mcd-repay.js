@@ -1,17 +1,16 @@
-const { expect } = require("chai");
+const { expect } = require('chai');
+const hre = require('hardhat');
 
 const { getAssetInfo, ilks } = require('@defisaver/tokens');
-const dfs = require('@defisaver/sdk')
+const dfs = require('@defisaver/sdk');
 
 const {
     getAddrFromRegistry,
     getProxy,
     redeploy,
-    send,
     formatExchangeObj,
     setNewExchangeWrapper,
     nullAddress,
-    REGISTRY_ADDR,
     standardAmounts,
     UNISWAP_WRAPPER,
     WETH_ADDRESS,
@@ -20,7 +19,6 @@ const {
 
 const {
     fetchMakerAddresses,
-    getVaultsForUser,
     getRatio,
     getVaultInfo,
     MCD_MANAGER_ADDR,
@@ -30,23 +28,29 @@ const {
     openVault,
 } = require('../../actions.js');
 
-const dydxFLAction = dfs.actions.flashloan.DyDxFlashLoanAction;
-const mcdPaybackAction = dfs.actions.maker.MakerPaybackAction;
-const mcdWithdrawAction = dfs.actions.maker.MakerWithdrawAction;
-const sellAction = dfs.actions.basic.SellAction;
+// const dydxFLAction = dfs.actions.flashloan.DyDxFlashLoanAction;
+const McdPaybackAction = dfs.actions.maker.MakerPaybackAction;
+const McdWithdrawAction = dfs.actions.maker.MakerWithdrawAction;
+const SellAction = dfs.actions.basic.SellAction;
 
-describe("Mcd-Repay", function() {
+describe('Mcd-Repay', function () {
     this.timeout(80000);
 
-    let makerAddresses, uniWrapper, senderAcc, proxy, dydxFlAddr, aaveV2FlAddr, mcdView, taskExecutorAddr;
+    let makerAddresses;
+    let uniWrapper;
+    let senderAcc;
+    let proxy;
+    // let dydxFlAddr;
+    let aaveV2FlAddr;
+    let mcdView;
+    let taskExecutorAddr;
 
     before(async () => {
-     
         uniWrapper = await redeploy('UniswapWrapperV3');
         mcdView = await redeploy('McdView');
         taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
 
-        dydxFlAddr = await getAddrFromRegistry('FLDyDx');
+        // dydxFlAddr = await getAddrFromRegistry('FLDyDx');
 
         makerAddresses = await fetchMakerAddresses();
 
@@ -71,7 +75,6 @@ describe("Mcd-Repay", function() {
         let repayAmount = (standardAmounts[tokenData.symbol] / 30).toString();
 
         it(`... should call a repay ${repayAmount} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
-
             // create a vault
             vaultId = await openVault(
                 makerAddresses,
@@ -79,10 +82,10 @@ describe("Mcd-Repay", function() {
                 joinAddr,
                 tokenData,
                 (standardAmounts[tokenData.symbol] * 2).toString(),
-                (parseInt(MIN_VAULT_DAI_AMOUNT) + 400).toString()
+                (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 400).toString(),
             );
 
-            repayAmount = ethers.utils.parseUnits(repayAmount, tokenData.decimals);
+            repayAmount = hre.ethers.utils.parseUnits(repayAmount, tokenData.decimals);
 
             const ratioBefore = await getRatio(mcdView, vaultId);
             const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
@@ -91,34 +94,38 @@ describe("Mcd-Repay", function() {
             const from = proxy.address;
             const to = proxy.address;
             const collToken = tokenData.address;
-            const fromToken = makerAddresses["MCD_DAI"];
-           
-            const mcdWithdrawAction = 
-                new dfs.actions.maker.MakerWithdrawAction(vaultId, repayAmount, joinAddr, to, MCD_MANAGER_ADDR);
-            
+            const fromToken = makerAddresses.MCD_DAI;
+
+            const mcdWithdrawAction = new dfs.actions.maker.MakerWithdrawAction(
+                vaultId,
+                repayAmount,
+                joinAddr,
+                to,
+                MCD_MANAGER_ADDR,
+            );
+
             const sellAction = new dfs.actions.basic.SellAction(
                 formatExchangeObj(
                     collToken,
                     fromToken,
                     '$1',
-                    UNISWAP_WRAPPER
+                    UNISWAP_WRAPPER,
                 ),
                 from,
-                to
+                to,
             );
 
-            const mcdPaybackAction = 
-                new dfs.actions.maker.MakerPaybackAction(vaultId, '$2', from, MCD_MANAGER_ADDR);
+            const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(vaultId, '$2', from, MCD_MANAGER_ADDR);
 
-            const repayRecipe = new dfs.Recipe("RepayRecipe", [
+            const repayRecipe = new dfs.Recipe('RepayRecipe', [
                 mcdWithdrawAction,
                 sellAction,
-                mcdPaybackAction
+                mcdPaybackAction,
             ]);
 
             const functionData = repayRecipe.encodeForDsProxyCall();
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {gasLimit: 3000000});
+            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
             const ratioAfter = await getRatio(mcdView, vaultId);
             const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
@@ -130,7 +137,6 @@ describe("Mcd-Repay", function() {
         });
 
         it(`... should call a FL repay ${repayAmount} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
-
             // create a vault
             vaultId = await openVault(
                 makerAddresses,
@@ -138,38 +144,44 @@ describe("Mcd-Repay", function() {
                 joinAddr,
                 tokenData,
                 (standardAmounts[tokenData.symbol] * 2).toString(),
-               (parseInt(MIN_VAULT_DAI_AMOUNT) + 500).toString()
+                (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 500).toString(),
             );
 
-            const flAmount = ethers.utils.parseUnits('0.2', 18);
+            const flAmount = hre.ethers.utils.parseUnits('0.2', 18);
 
             const ratioBefore = await getRatio(mcdView, vaultId);
             const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
             console.log(`Ratio before: ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} ${tokenData.symbol}, debt: ${info.debt.toFixed(2)} Dai)`);
-        
+
             const collToken = tokenData.address;
-            const daiToken = makerAddresses["MCD_DAI"];
-      
+            const daiToken = makerAddresses.MCD_DAI;
+
             const exchangeOrder = formatExchangeObj(
                 collToken,
                 daiToken,
                 flAmount,
-                UNISWAP_WRAPPER
+                UNISWAP_WRAPPER,
             );
 
-            const flAaveV2Action = 
-            new dfs.actions.flashloan.AaveV2FlashLoanAction([flAmount], [collToken], [0], nullAddress, nullAddress, []);
+            const flAaveV2Action = new dfs.actions.flashloan.AaveV2FlashLoanAction(
+                [flAmount],
+                [collToken],
+                [0],
+                nullAddress,
+                nullAddress,
+                [],
+            );
 
-            const repayRecipe = new dfs.Recipe("FLRepayRecipe", [
+            const repayRecipe = new dfs.Recipe('FLRepayRecipe', [
                 flAaveV2Action, // new dydxFLAction(flAmount, collToken, nullAddress, []),
-                new sellAction(exchangeOrder, proxy.address, proxy.address),
-                new mcdPaybackAction(vaultId, '$2', proxy.address, MCD_MANAGER_ADDR),
-                new mcdWithdrawAction(vaultId, '$1', joinAddr, aaveV2FlAddr, MCD_MANAGER_ADDR)
+                new SellAction(exchangeOrder, proxy.address, proxy.address),
+                new McdPaybackAction(vaultId, '$2', proxy.address, MCD_MANAGER_ADDR),
+                new McdWithdrawAction(vaultId, '$1', joinAddr, aaveV2FlAddr, MCD_MANAGER_ADDR),
             ]);
 
             const functionData = repayRecipe.encodeForDsProxyCall();
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {gasLimit: 3000000});
+            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
             const ratioAfter = await getRatio(mcdView, vaultId);
             const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
@@ -179,7 +191,5 @@ describe("Mcd-Repay", function() {
             expect(info2.coll).to.be.lt(info.coll);
             expect(info2.debt).to.be.lt(info.debt);
         });
-
     }
-
 });

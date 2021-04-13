@@ -5,7 +5,7 @@ Detailed overview about that code can be found https://docs.defisaver.com
 
 ## To install
 Run `npm install` or `yarn` in the repo folder.
-You will also need to create a .env file as in the env.example and fill it in with appropriate api keys.
+You will also need to create a .env file as in the .env.example and fill it in with appropriate api keys.
 
 ## How to run tests
 
@@ -14,7 +14,7 @@ block number the fork starts from. If it starts from an old state some tests mig
 
 1. You first need to start a hardhat node from the forked mainnet with the following command:
 
-`npx hardhat node --max-memory 8192  --fork ALCHEMY_API_URL`
+`npx hardhat node --max-memory 8192  --fork ETHEREUM_NODE_URL`
 
 2. In a different terminal window you can now deploy the recipe system:
 

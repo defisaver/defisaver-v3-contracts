@@ -1,8 +1,7 @@
-const { expect } = require("chai");
+const { expect } = require('chai');
+const hre = require('hardhat');
 
-const { getAssetInfo, ilks, } = require('@defisaver/tokens');
-
-const dfs = require('@defisaver/sdk')
+const { getAssetInfo } = require('@defisaver/tokens');
 
 const {
     getAaveDataProvider,
@@ -11,53 +10,36 @@ const {
     getAaveReserveData,
     VARIABLE_RATE,
     STABLE_RATE,
-    aaveV2assetsDefaultMarket
+    aaveV2assetsDefaultMarket,
 } = require('../utils-aave');
 
 const {
-    getAddrFromRegistry,
     getProxy,
     redeploy,
-    send,
     balanceOf,
-    isEth,
     standardAmounts,
-    nullAddress,
-    REGISTRY_ADDR,
-    ETH_ADDR,
     AAVE_MARKET,
-    WETH_ADDRESS
+    WETH_ADDRESS,
 } = require('../utils');
-
-const {
-    fetchMakerAddresses,
-    getVaultsForUser,
-    getRatio,
-} = require('../utils-mcd');
 
 const {
     supplyAave,
     borrowAave,
 } = require('../actions');
 
-describe("Aave-Borrow", function () {
+describe('Aave-Borrow', function () {
     this.timeout(80000);
 
-    let makerAddresses, senderAcc, proxy, tokensInAave, dataProvider;
+    let senderAcc; let proxy; let dataProvider;
 
     before(async () => {
         await redeploy('AaveBorrow');
         await redeploy('DFSSell');
 
-        makerAddresses = await fetchMakerAddresses();
-
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
 
         dataProvider = await getAaveDataProvider();
-
-        tokensInAave = await dataProvider.getAllReservesTokens();
-
     });
 
     // aaveV2assetsDefaultMarket.length
@@ -76,27 +58,45 @@ describe("Aave-Borrow", function () {
             const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
             if (!reserveInfo.borrowingEnabled) {
+                // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.true;
                 return;
             }
 
-            const amount = ethers.utils.parseUnits(standardAmounts[assetInfo.symbol], assetInfo.decimals);
-    
-            if(reserveData.availableLiquidity.lt(amount)) {W
+            const amount = hre.ethers.utils.parseUnits(
+                standardAmounts[assetInfo.symbol],
+                assetInfo.decimals,
+            );
+
+            if (reserveData.availableLiquidity.lt(amount)) {
+                // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.true;
                 return;
             }
 
             // eth bada bing bada bum
-            await supplyAave(proxy, AAVE_MARKET,ethers.utils.parseUnits('3', 18), WETH_ADDRESS, senderAcc.address);
+            await supplyAave(proxy, AAVE_MARKET, hre.ethers.utils.parseUnits('3', 18), WETH_ADDRESS, senderAcc.address);
 
             const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
-            const debtBalanceBefore = await balanceOf(aTokenInfo.variableDebtTokenAddress, proxy.address);
+            const debtBalanceBefore = await balanceOf(
+                aTokenInfo.variableDebtTokenAddress,
+                proxy.address,
+            );
 
-            await borrowAave(proxy, AAVE_MARKET, assetInfo.address, amount, VARIABLE_RATE, senderAcc.address);
-    
+            await borrowAave(
+                proxy,
+                AAVE_MARKET,
+                assetInfo.address,
+                amount,
+                VARIABLE_RATE,
+                senderAcc.address,
+            );
+
             const balanceAfter = await balanceOf(assetInfo.address, senderAcc.address);
-            const debtBalanceAfter = await balanceOf(aTokenInfo.variableDebtTokenAddress, proxy.address);
+            const debtBalanceAfter = await balanceOf(
+                aTokenInfo.variableDebtTokenAddress,
+                proxy.address,
+            );
 
             expect(debtBalanceAfter).to.be.gt(debtBalanceBefore);
             expect(balanceAfter).to.be.gt(balanceBefore);
@@ -107,6 +107,7 @@ describe("Aave-Borrow", function () {
 
             if (assetInfo.symbol === 'ETH') {
                 // can't currently stable borrow if position already has eth
+                // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.true;
                 return;
                 // assetInfo.address = WETH_ADDRESS;
@@ -116,34 +117,49 @@ describe("Aave-Borrow", function () {
             const aTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
             const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
-
             if (!reserveInfo.stableBorrowRateEnabled) {
+                // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.true;
                 return;
             }
 
-            const amount = ethers.utils.parseUnits((standardAmounts[assetInfo.symbol] / 10).toString(), assetInfo.decimals);
-    
-            if(reserveData.availableLiquidity.lt(amount)) {
+            const amount = hre.ethers.utils.parseUnits(
+                (standardAmounts[assetInfo.symbol] / 10).toString(),
+                assetInfo.decimals,
+            );
+
+            if (reserveData.availableLiquidity.lt(amount)) {
+                // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.true;
                 return;
             }
 
             // eth bada bing bada bum
-            await supplyAave(proxy, AAVE_MARKET,ethers.utils.parseUnits('3', 18), WETH_ADDRESS, senderAcc.address);
+            await supplyAave(proxy, AAVE_MARKET, hre.ethers.utils.parseUnits('3', 18), WETH_ADDRESS, senderAcc.address);
 
             const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
-            const debtBalanceBefore = await balanceOf(aTokenInfo.stableDebtTokenAddress, proxy.address);
+            const debtBalanceBefore = await balanceOf(
+                aTokenInfo.stableDebtTokenAddress,
+                proxy.address,
+            );
 
-            await borrowAave(proxy, AAVE_MARKET, assetInfo.address, amount, STABLE_RATE, senderAcc.address);
-    
+            await borrowAave(
+                proxy,
+                AAVE_MARKET,
+                assetInfo.address,
+                amount,
+                STABLE_RATE,
+                senderAcc.address,
+            );
+
             const balanceAfter = await balanceOf(assetInfo.address, senderAcc.address);
-            const debtBalanceAfter = await balanceOf(aTokenInfo.stableDebtTokenAddress, proxy.address);
+            const debtBalanceAfter = await balanceOf(
+                aTokenInfo.stableDebtTokenAddress,
+                proxy.address,
+            );
 
             expect(debtBalanceAfter).to.be.gt(debtBalanceBefore);
             expect(balanceAfter).to.be.gt(balanceBefore);
         });
     }
-
 });
-

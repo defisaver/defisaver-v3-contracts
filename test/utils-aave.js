@@ -1,4 +1,4 @@
-const hre = require("hardhat");
+const hre = require('hardhat');
 
 const aaveV2assetsDefaultMarket = [
     'ETH', 'AAVE', 'BAT', 'BUSD', 'DAI', 'ENJ', 'KNC', 'LINK', 'MANA', 'MKR', 'REN', 'SNX', 'SUSD', 'TUSD', 'UNI', 'USDC', 'USDT', 'WBTC', 'YFI', 'ZRX',
@@ -10,7 +10,7 @@ const STABLE_RATE = 1;
 const VARIABLE_RATE = 2;
 
 const getAaveDataProvider = async () => {
-    const dataProvider = await hre.ethers.getContractAt("IAaveProtocolDataProviderV2", AAVE_MARKET_DATA_ADDR);
+    const dataProvider = await hre.ethers.getContractAt('IAaveProtocolDataProviderV2', AAVE_MARKET_DATA_ADDR);
     return dataProvider;
 };
 

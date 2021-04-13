@@ -1,36 +1,33 @@
-const { expect } = require("chai");
-const dfs = require("@defisaver/sdk");
+const { expect } = require('chai');
+const hre = require('hardhat');
 
-const { getAssetInfo, ilks } = require("@defisaver/tokens");
+const { getAssetInfo, ilks } = require('@defisaver/tokens');
 
 const {
-    getAddrFromRegistry,
     balanceOf,
     getProxy,
     redeploy,
     standardAmounts,
     WETH_ADDRESS,
     MIN_VAULT_DAI_AMOUNT,
-} = require("../utils");
+} = require('../utils');
 
-const { fetchMakerAddresses, canGenerateDebt } = require("../utils-mcd.js");
+const { fetchMakerAddresses, canGenerateDebt } = require('../utils-mcd.js');
 
-const { openMcd, supplyMcd, generateMcd } = require("../actions.js");
+const { openMcd, supplyMcd, generateMcd } = require('../actions.js');
 
-describe("Mcd-Generate", function () {
+describe('Mcd-Generate', function () {
     this.timeout(80000);
 
-    let makerAddresses, senderAcc, proxy, mcdGenerateAddr;
+    let makerAddresses; let senderAcc; let proxy;
 
     before(async () => {
-        await redeploy("McdGenerate");
+        await redeploy('McdGenerate');
 
         makerAddresses = await fetchMakerAddresses();
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
-
-        mcdGenerateAddr = await getAddrFromRegistry("McdGenerate");
     });
 
     for (let i = 0; i < ilks.length; ++i) {
@@ -40,38 +37,40 @@ describe("Mcd-Generate", function () {
 
         it(`... should generate ${MIN_VAULT_DAI_AMOUNT} DAI for ${ilkData.ilkLabel} vault`, async () => {
             // skip uni tokens
-            if (tokenData.symbol.indexOf("UNIV2") !== -1) {
+            if (tokenData.symbol.indexOf('UNIV2') !== -1) {
+                // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.true;
                 return;
             }
 
             const canGenerate = await canGenerateDebt(ilkData);
             if (!canGenerate) {
+                // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.true;
                 return;
             }
 
-            if (tokenData.symbol === "ETH") {
+            if (tokenData.symbol === 'ETH') {
                 tokenData.address = WETH_ADDRESS;
             }
 
             const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
-            const collAmount = ethers.utils.parseUnits(
+            const collAmount = hre.ethers.utils.parseUnits(
                 standardAmounts[tokenData.symbol],
-                tokenData.decimals
+                tokenData.decimals,
             );
 
             const from = senderAcc.address;
             const to = senderAcc.address;
 
-            const amountDai = ethers.utils.parseUnits(MIN_VAULT_DAI_AMOUNT, 18);
+            const amountDai = hre.ethers.utils.parseUnits(MIN_VAULT_DAI_AMOUNT, 18);
 
-            const daiBalanceBefore = await balanceOf(makerAddresses["MCD_DAI"], from);
+            const daiBalanceBefore = await balanceOf(makerAddresses.MCD_DAI, from);
 
             await supplyMcd(proxy, vaultId, collAmount, tokenData.address, joinAddr, from);
             await generateMcd(proxy, vaultId, amountDai, to);
 
-            const daiBalanceAfter = await balanceOf(makerAddresses["MCD_DAI"], from);
+            const daiBalanceAfter = await balanceOf(makerAddresses.MCD_DAI, from);
 
             expect(daiBalanceBefore.add(amountDai)).to.be.eq(daiBalanceAfter);
         });

@@ -1,34 +1,36 @@
-const { expect } = require("chai");
+const { expect } = require('chai');
+const hre = require('hardhat');
 
-const { getAssetInfo } = require("@defisaver/tokens");
+const { getAssetInfo } = require('@defisaver/tokens');
 
 const {
     getProxy,
     redeploy,
     balanceOf,
-} = require("../utils");
+} = require('../utils');
 
-const { getPair } = require("../utils-uni.js");
+const { getPair } = require('../utils-uni.js');
 
-const { uniSupply } = require("../actions.js");
+const { uniSupply } = require('../actions.js');
 
-describe("Uni-Supply", function () {
+describe('Uni-Supply', function () {
     this.timeout(80000);
 
-    let senderAcc, proxy;
+    let senderAcc; let
+        proxy;
 
+    // TODO: Amount should be dynamic?
     const uniPairs = [
-        { tokenA: "WETH", tokenB: "DAI", amount: "1" },
-        { tokenA: "WETH", tokenB: "WBTC", amount: "1" },
-        { tokenA: "DAI", tokenB: "USDC", amount: "500" },
+        { tokenA: 'WETH', tokenB: 'DAI', amount: '1' },
+        { tokenA: 'WETH', tokenB: 'WBTC', amount: '1' },
+        { tokenA: 'DAI', tokenB: 'USDC', amount: '500' },
     ];
 
     before(async () => {
-        await redeploy("UniSupply");
+        await redeploy('UniSupply');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
-
     });
 
     for (let i = 0; i < uniPairs.length; ++i) {
@@ -43,11 +45,21 @@ describe("Uni-Supply", function () {
 
             const lpBalanceBefore = await balanceOf(pairData.pairAddr, senderAcc.address);
 
-            await uniSupply(proxy, tokenDataA.address, tokenDataA.decimals, tokenDataB.address, uniPairs[i].amount, from, to);
+            await uniSupply(
+                proxy,
+                tokenDataA.address,
+                tokenDataA.decimals,
+                tokenDataB.address,
+                uniPairs[i].amount,
+                from,
+                to,
+            );
 
             const lpBalanceAfter = await balanceOf(pairData.pairAddr, senderAcc.address);
 
-            expect(lpBalanceAfter).to.be.gt(lpBalanceBefore, "Check if we got back the lp tokens");
+            // TODO: check if we got the correct amount of lp tokens
+
+            expect(lpBalanceAfter).to.be.gt(lpBalanceBefore, 'Check if we got back the lp tokens');
         });
     }
 });

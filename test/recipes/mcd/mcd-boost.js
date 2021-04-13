@@ -1,36 +1,43 @@
-const { expect } = require("chai");
+const { expect } = require('chai');
+const hre = require('hardhat');
 
 const { getAssetInfo, ilks } = require('@defisaver/tokens');
-const dfs = require('@defisaver/sdk')
+const dfs = require('@defisaver/sdk');
 
 const {
     getAddrFromRegistry,
     getProxy,
     redeploy,
-    send,
     formatExchangeObj,
     setNewExchangeWrapper,
     nullAddress,
     standardAmounts,
     WETH_ADDRESS,
-    MIN_VAULT_DAI_AMOUNT
+    MIN_VAULT_DAI_AMOUNT,
 } = require('../../utils');
 
 const {
     fetchMakerAddresses,
     getRatio,
     getVaultInfo,
-    MCD_MANAGER_ADDR
+    MCD_MANAGER_ADDR,
 } = require('../../utils-mcd');
 
 const {
     openVault,
 } = require('../../actions.js');
 
-describe("Mcd-Boost", function() {
+describe('Mcd-Boost', function () {
     this.timeout(80000);
 
-    let makerAddresses, senderAcc, proxy, dydxFlAddr, aaveV2FlAddr, mcdView, taskExecutorAddr, uniWrapper;
+    let makerAddresses;
+    let senderAcc;
+    let proxy;
+    let dydxFlAddr;
+    // let aaveV2FlAddr;
+    let mcdView;
+    let taskExecutorAddr;
+    let uniWrapper;
 
     before(async () => {
         await redeploy('McdOpen');
@@ -48,7 +55,7 @@ describe("Mcd-Boost", function() {
 
         taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
         dydxFlAddr = await getAddrFromRegistry('FLDyDx');
-        aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
+        // aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -69,7 +76,6 @@ describe("Mcd-Boost", function() {
         let boostAmount = '100';
 
         it(`... should call a boost ${boostAmount} on a ${ilkData.ilkLabel} vault`, async () => {
-
             // create a vault
             vaultId = await openVault(
                 makerAddresses,
@@ -77,10 +83,10 @@ describe("Mcd-Boost", function() {
                 joinAddr,
                 tokenData,
                 (standardAmounts[tokenData.symbol] * 2).toString(),
-                (parseInt(MIN_VAULT_DAI_AMOUNT) + 200).toString()
+                (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString(),
             );
 
-            boostAmount = ethers.utils.parseUnits(boostAmount, 18);
+            boostAmount = hre.ethers.utils.parseUnits(boostAmount, 18);
 
             const ratioBefore = await getRatio(mcdView, vaultId);
             const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
@@ -89,34 +95,37 @@ describe("Mcd-Boost", function() {
             const from = proxy.address;
             const to = proxy.address;
             const collToken = tokenData.address;
-            const fromToken = makerAddresses["MCD_DAI"];
+            const fromToken = makerAddresses.MCD_DAI;
 
-            const mcdGenerateAction = 
-                new dfs.actions.maker.MakerGenerateAction(vaultId, boostAmount.toString(), to, MCD_MANAGER_ADDR);
+            const mcdGenerateAction = new dfs.actions.maker.MakerGenerateAction(
+                vaultId,
+                boostAmount.toString(),
+                to,
+                MCD_MANAGER_ADDR,
+            );
 
             const sellAction = new dfs.actions.basic.SellAction(
                 formatExchangeObj(
                     fromToken,
                     collToken,
                     '$1',
-                    uniWrapper.address
+                    uniWrapper.address,
                 ),
                 from,
-                to
+                to,
             );
 
-            const mcdSupplyAction = 
-                new dfs.actions.maker.MakerSupplyAction(vaultId, '$2', joinAddr, from, MCD_MANAGER_ADDR);
+            const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(vaultId, '$2', joinAddr, from, MCD_MANAGER_ADDR);
 
-            const boostRecipe = new dfs.Recipe("BoostRecipe", [
+            const boostRecipe = new dfs.Recipe('BoostRecipe', [
                 mcdGenerateAction,
                 sellAction,
-                mcdSupplyAction
+                mcdSupplyAction,
             ]);
 
             const functionData = boostRecipe.encodeForDsProxyCall();
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {gasLimit: 3000000});
+            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
             const ratioAfter = await getRatio(mcdView, vaultId);
             const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
@@ -128,7 +137,6 @@ describe("Mcd-Boost", function() {
         });
 
         it(`... should call a boost with FL ${boostAmount} Dai on a ${ilkData.ilkLabel} vault`, async () => {
-
             // create a vault
             // vaultId = await openVault(
             //     makerAddresses,
@@ -141,7 +149,7 @@ describe("Mcd-Boost", function() {
 
             boostAmount = '200';
 
-            boostAmount = ethers.utils.parseUnits(boostAmount, 18);
+            boostAmount = hre.ethers.utils.parseUnits(boostAmount, 18);
 
             const ratioBefore = await getRatio(mcdView, vaultId);
             const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
@@ -150,41 +158,49 @@ describe("Mcd-Boost", function() {
             const from = proxy.address;
             const to = proxy.address;
             const collToken = tokenData.address;
-            const fromToken = makerAddresses["MCD_DAI"];
+            const fromToken = makerAddresses.MCD_DAI;
 
-            const dydxFLAction = 
-                new dfs.actions.flashloan.DyDxFlashLoanAction(boostAmount, fromToken, nullAddress, []);
+            const dydxFLAction = new dfs.actions.flashloan.DyDxFlashLoanAction(
+                boostAmount,
+                fromToken,
+                nullAddress,
+                [],
+            );
 
-            const flAaveV2Action = 
-                new dfs.actions.flashloan.AaveV2FlashLoanAction([boostAmount], [fromToken], [0], nullAddress, nullAddress, []);
-            
+            // const flAaveV2Action = new dfs.actions.flashloan.AaveV2FlashLoanAction(
+            //     [boostAmount],
+            //     [fromToken],
+            //     [0],
+            //     nullAddress,
+            //     nullAddress,
+            //     [],
+            // );
+
             const sellAction = new dfs.actions.basic.SellAction(
                 formatExchangeObj(
                     fromToken,
                     collToken,
                     boostAmount,
-                    uniWrapper.address
+                    uniWrapper.address,
                 ),
                 from,
-                to
+                to,
             );
 
-            const mcdSupplyAction = 
-                new dfs.actions.maker.MakerSupplyAction(vaultId, '$2', joinAddr, from, MCD_MANAGER_ADDR);
+            const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(vaultId, '$2', joinAddr, from, MCD_MANAGER_ADDR);
 
-            const mcdGenerateAction = 
-                new dfs.actions.maker.MakerGenerateAction(vaultId, '$1', dydxFlAddr, MCD_MANAGER_ADDR);
+            const mcdGenerateAction = new dfs.actions.maker.MakerGenerateAction(vaultId, '$1', dydxFlAddr, MCD_MANAGER_ADDR);
 
-            const boostRecipe = new dfs.Recipe("FLBoostRecipe", [
+            const boostRecipe = new dfs.Recipe('FLBoostRecipe', [
                 dydxFLAction,
                 sellAction,
                 mcdSupplyAction,
-                mcdGenerateAction
+                mcdGenerateAction,
             ]);
 
             const functionData = boostRecipe.encodeForDsProxyCall();
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {gasLimit: 3000000});
+            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
             const ratioAfter = await getRatio(mcdView, vaultId);
             const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
@@ -195,5 +211,4 @@ describe("Mcd-Boost", function() {
             expect(info2.debt).to.be.gt(info.debt);
         });
     }
-
 });

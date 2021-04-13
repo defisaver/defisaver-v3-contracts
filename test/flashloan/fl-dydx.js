@@ -1,5 +1,7 @@
-const { getAssetInfo } = require("@defisaver/tokens");
-const dfs =  require("@defisaver/sdk");
+const { getAssetInfo } = require('@defisaver/tokens');
+const hre = require('hardhat');
+
+const dfs = require('@defisaver/sdk');
 
 const {
     getAddrFromRegistry,
@@ -9,21 +11,22 @@ const {
     nullAddress,
     MAX_UINT,
     WETH_ADDRESS,
-} = require("../utils");
+} = require('../utils');
 
-describe("FL-DyDx", function () {
+describe('FL-DyDx', function () {
     this.timeout(60000);
 
-    let senderAcc, proxy, taskExecutorAddr, dydxFl;
+    let senderAcc; let proxy; let taskExecutorAddr; let
+        dydxFl;
 
-    const FLASHLOAN_TOKENS = ["WETH", "DAI", "USDC"];
+    const FLASHLOAN_TOKENS = ['WETH', 'DAI', 'USDC'];
 
     before(async () => {
-        taskExecutorAddr = await getAddrFromRegistry("TaskExecutor");
+        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
 
-        dydxFl = await redeploy("FLDyDx");
-        await redeploy("SendToken");
-        await redeploy("TaskExecutor");
+        dydxFl = await redeploy('FLDyDx');
+        await redeploy('SendToken');
+        await redeploy('TaskExecutor');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -39,21 +42,24 @@ describe("FL-DyDx", function () {
                 assetInfo.address = WETH_ADDRESS;
             }
 
-            const loanAmount = ethers.utils.parseUnits(standardAmounts[tokenSymbol], assetInfo.decimals);
-           
-            const basicFLRecipe = new dfs.Recipe("BasicFLRecipe", [
+            const loanAmount = hre.ethers.utils.parseUnits(
+                standardAmounts[tokenSymbol],
+                assetInfo.decimals,
+            );
+
+            const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
                 new dfs.actions.flashloan.DyDxFlashLoanAction(
                     loanAmount,
                     assetInfo.address,
                     nullAddress,
-                    []
+                    [],
                 ),
                 new dfs.actions.basic.SendTokenAction(assetInfo.address, dydxFl.address, MAX_UINT),
             ]);
 
             const functionData = basicFLRecipe.encodeForDsProxyCall();
 
-            await proxy["execute(address,bytes)"](taskExecutorAddr, functionData[1], {
+            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {
                 gasLimit: 3000000,
             });
         });

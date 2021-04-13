@@ -1,52 +1,32 @@
-const axios = require('axios');
-const dfs = require('@defisaver/sdk')
-
-const makerVersion = "1.1.3";
+const dfs = require('@defisaver/sdk');
+const hre = require('hardhat');
 
 const { getAssetInfo } = require('@defisaver/tokens');
 
 const {
-    redeploy,
     approve,
     getAddrFromRegistry,
     nullAddress,
-    WWETH_ADDRESSESS,
     WETH_ADDRESS,
-    USDC_ADDR,
     UNISWAP_WRAPPER,
     balanceOf,
-    send,
     formatExchangeObj,
     isEth,
     depositToWeth,
-    DAI_ADDR,
-} = require("./utils"); 
+} = require('./utils');
 
 const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
 
 const { getSecondTokenAmount } = require('./utils-uni');
 
-const { deployContract } = require("../scripts/utils/deployer");
-
-
 const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to) => {
     const dfsSellAddr = await getAddrFromRegistry('DFSSell');
 
-    const exchangeObject = formatExchangeObj(
-        sellAddr,
-        buyAddr,
-        sellAmount.toString(),
-        wrapper
-    );
-    
-    const sellAction = new dfs.actions.basic.SellAction(
-        exchangeObject,
-        from,
-        to
-    );
+    const exchangeObject = formatExchangeObj(sellAddr, buyAddr, sellAmount.toString(), wrapper);
+
+    const sellAction = new dfs.actions.basic.SellAction(exchangeObject, from, to);
 
     const functionData = sellAction.encodeForDsProxyCall()[1];
-
 
     if (isEth(sellAddr)) {
         await depositToWeth(sellAmount.toString());
@@ -54,7 +34,7 @@ const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to) => 
 
     await approve(sellAddr, proxy.address);
 
-    await proxy['execute(address,bytes)'](dfsSellAddr, functionData, {gasLimit: 3000000});
+    await proxy['execute(address,bytes)'](dfsSellAddr, functionData, { gasLimit: 3000000 });
 };
 
 const buy = async (proxy, sellAddr, buyAddr, sellAmount, buyAmount, wrapper, from, to) => {
@@ -65,24 +45,20 @@ const buy = async (proxy, sellAddr, buyAddr, sellAmount, buyAmount, wrapper, fro
         buyAddr,
         sellAmount.toString(),
         wrapper,
-        buyAmount
+        buyAmount,
     );
-    
-    const sellAction = new dfs.actions.basic.SellAction(
-        exchangeObject,
-        from,
-        to
-    );
+
+    const sellAction = new dfs.actions.basic.SellAction(exchangeObject, from, to);
 
     const functionData = sellAction.encodeForDsProxyCall()[1];
 
     if (isEth(sellAddr)) {
         await depositToWeth(sellAmount.toString());
-    } 
+    }
 
     await approve(sellAddr, proxy.address);
 
-    await proxy['execute(address,bytes)'](dfsBuyAddr, functionData, {gasLimit: 3000000});
+    await proxy['execute(address,bytes)'](dfsBuyAddr, functionData, { gasLimit: 3000000 });
 };
 
 const openMcd = async (proxy, makerAddresses, joinAddr) => {
@@ -91,7 +67,7 @@ const openMcd = async (proxy, makerAddresses, joinAddr) => {
     const openMyVault = new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR);
     const functionData = openMyVault.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdOpenAddr, functionData, {gasLimit: 3000000});
+    await proxy['execute(address,bytes)'](mcdOpenAddr, functionData, { gasLimit: 3000000 });
 
     const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
 
@@ -109,23 +85,28 @@ const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
                 proxy,
                 WETH_ADDRESS,
                 tokenAddr,
-                ethers.utils.parseUnits('5', 18),
+                hre.ethers.utils.parseUnits('5', 18),
                 UNISWAP_WRAPPER,
                 from,
-                from
+                from,
             );
         }
     }
 
-    let mcdSupplyAddr = await getAddrFromRegistry('McdSupply');
+    const mcdSupplyAddr = await getAddrFromRegistry('McdSupply');
 
     await approve(tokenAddr, proxy.address);
 
-    const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(vaultId, amount, joinAddr, from, MCD_MANAGER_ADDR);
+    const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
+        vaultId,
+        amount,
+        joinAddr,
+        from,
+        MCD_MANAGER_ADDR,
+    );
     const functionData = mcdSupplyAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdSupplyAddr, functionData, {gasLimit: 3000000});
-
+    await proxy['execute(address,bytes)'](mcdSupplyAddr, functionData, { gasLimit: 3000000 });
 };
 
 const paybackMcd = async (proxy, vaultId, amount, from, daiAddr) => {
@@ -133,37 +114,33 @@ const paybackMcd = async (proxy, vaultId, amount, from, daiAddr) => {
 
     await approve(daiAddr, proxy.address);
 
-    const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(vaultId, amount, from, MCD_MANAGER_ADDR);
+    const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
+        vaultId,
+        amount,
+        from,
+        MCD_MANAGER_ADDR,
+    );
     const functionData = mcdPaybackAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdPaybackAddr, functionData, {gasLimit: 3000000});
+    await proxy['execute(address,bytes)'](mcdPaybackAddr, functionData, { gasLimit: 3000000 });
 };
 
 const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to) => {
     const mcdWithdrawAddr = await getAddrFromRegistry('McdWithdraw');
 
-    const mcdWithdrawAction = new dfs.actions.maker.MakerWithdrawAction(vaultId, amount, joinAddr, to, MCD_MANAGER_ADDR);
+    const mcdWithdrawAction = new dfs.actions.maker.MakerWithdrawAction(
+        vaultId,
+        amount,
+        joinAddr,
+        to,
+        MCD_MANAGER_ADDR,
+    );
     const functionData = mcdWithdrawAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdWithdrawAddr, functionData, {gasLimit: 3000000});
+    await proxy['execute(address,bytes)'](mcdWithdrawAddr, functionData, { gasLimit: 3000000 });
 };
 
-const openVault = async (makerAddresses, proxy, joinAddr, tokenData, collAmount, daiAmount) => {
-    const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
-
-    const from = proxy.signer.address;
-    const to = proxy.signer.address;
-
-    const amountDai = ethers.utils.parseUnits(daiAmount, 18);
-    const amountColl = ethers.utils.parseUnits(collAmount, tokenData.decimals);
-
-    await supplyMcd(proxy, vaultId, amountColl, tokenData.address, joinAddr, from);
-    await generateMcd(proxy, vaultId, amountDai, to);
-
-    return vaultId;
-};
-
-const supplyAave = async (proxy, market, amount, tokenAddr, from) => {    
+const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
     const tokenBalance = await balanceOf(tokenAddr, from);
 
     if (tokenBalance.lt(amount)) {
@@ -174,15 +151,15 @@ const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
                 proxy,
                 WETH_ADDRESS,
                 tokenAddr,
-                ethers.utils.parseUnits('5', 18),
+                hre.ethers.utils.parseUnits('5', 18),
                 UNISWAP_WRAPPER,
                 from,
-                from
+                from,
             );
         }
     }
 
-    let aaveSupplyAddr = await getAddrFromRegistry('AaveSupply');
+    const aaveSupplyAddr = await getAddrFromRegistry('AaveSupply');
 
     await approve(tokenAddr, proxy.address);
 
@@ -191,7 +168,7 @@ const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
         tokenAddr,
         amount,
         from,
-        nullAddress
+        nullAddress,
     );
 
     const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
@@ -202,21 +179,31 @@ const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
 const withdrawAave = async (proxy, market, tokenAddr, amount, to) => {
     const aaveWithdrawAddr = await getAddrFromRegistry('AaveWithdraw');
 
-    const aaveWithdrawAction = new dfs.actions.aave.AaveWithdrawAction(market, tokenAddr, amount, to);
+    const aaveWithdrawAction = new dfs.actions.aave.AaveWithdrawAction(
+        market,
+        tokenAddr,
+        amount,
+        to,
+    );
     const functionData = aaveWithdrawAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](aaveWithdrawAddr, functionData, {gasLimit: 3000000});
+    await proxy['execute(address,bytes)'](aaveWithdrawAddr, functionData, { gasLimit: 3000000 });
 };
 
 const borrowAave = async (proxy, market, tokenAddr, amount, rateMode, to) => {
-    const aaveBorroweAddr = await getAddrFromRegistry('AaveBorrow');
+    const aaveBorrowAddr = await getAddrFromRegistry('AaveBorrow');
 
-    const aaveBorrowAction = new dfs.actions.aave.AaveBorrowAction(market,tokenAddr, amount, rateMode, to, nullAddress);
+    const aaveBorrowAction = new dfs.actions.aave.AaveBorrowAction(
+        market,
+        tokenAddr,
+        amount,
+        rateMode,
+        to,
+        nullAddress,
+    );
     const functionData = aaveBorrowAction.encodeForDsProxyCall()[1];
 
-    console.log("Borrow");
-
-    await proxy['execute(address,bytes)'](aaveBorroweAddr, functionData, {gasLimit: 3000000});
+    await proxy['execute(address,bytes)'](aaveBorrowAddr, functionData, { gasLimit: 3000000 });
 };
 
 const paybackAave = async (proxy, market, tokenAddr, amount, rateMode, from) => {
@@ -228,13 +215,20 @@ const paybackAave = async (proxy, market, tokenAddr, amount, rateMode, from) => 
 
     await approve(tokenAddr, proxy.address);
 
-    const aavePaybackAction = new dfs.actions.aave.AavePaybackAction(market, tokenAddr, amount, rateMode, from, nullAddress);
+    const aavePaybackAction = new dfs.actions.aave.AavePaybackAction(
+        market,
+        tokenAddr,
+        amount,
+        rateMode,
+        from,
+        nullAddress,
+    );
     const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, {gasLimit: 4000000});
+    await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, { gasLimit: 4000000 });
 };
 
-const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {    
+const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
     const tokenBalance = await balanceOf(tokenAddr, from);
 
     if (tokenBalance.lt(amount)) {
@@ -245,15 +239,15 @@ const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
                 proxy,
                 WETH_ADDRESS,
                 tokenAddr,
-                ethers.utils.parseUnits('5', 18),
+                hre.ethers.utils.parseUnits('5', 18),
                 UNISWAP_WRAPPER,
                 from,
-                from
+                from,
             );
         }
     }
 
-    let compSupplyAddr = await getAddrFromRegistry('CompSupply');
+    const compSupplyAddr = await getAddrFromRegistry('CompSupply');
 
     await approve(tokenAddr, proxy.address);
 
@@ -261,21 +255,25 @@ const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
         cTokenAddr,
         amount,
         from,
-        true
-        );
+        true,
+    );
 
     const functionData = compSupplyAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](compSupplyAddr, functionData, {gasLimit: 3000000});
+    await proxy['execute(address,bytes)'](compSupplyAddr, functionData, { gasLimit: 3000000 });
 };
 
 const withdrawComp = async (proxy, cTokenAddr, amount, to) => {
     const compWithdrawAddr = await getAddrFromRegistry('CompWithdraw');
 
-    const compWithdrawAction = new dfs.actions.compound.CompoundWithdrawAction(cTokenAddr, amount, to);
+    const compWithdrawAction = new dfs.actions.compound.CompoundWithdrawAction(
+        cTokenAddr,
+        amount,
+        to,
+    );
     const functionData = compWithdrawAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](compWithdrawAddr, functionData, {gasLimit: 3000000});
+    await proxy['execute(address,bytes)'](compWithdrawAddr, functionData, { gasLimit: 3000000 });
 };
 
 const borrowComp = async (proxy, cTokenAddr, amount, to) => {
@@ -284,46 +282,65 @@ const borrowComp = async (proxy, cTokenAddr, amount, to) => {
     const compBorrowAction = new dfs.actions.compound.CompoundBorrowAction(cTokenAddr, amount, to);
     const functionData = compBorrowAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](compBorrowAddr, functionData, {gasLimit: 3000000});
+    await proxy['execute(address,bytes)'](compBorrowAddr, functionData, { gasLimit: 3000000 });
 };
 
 const paybackComp = async (proxy, cTokenAddr, amount, from) => {
     const compPaybackAddr = await getAddrFromRegistry('CompPayback');
 
-    if (cTokenAddr.toLowerCase() === getAssetInfo("cETH").address.toLowerCase()) {
+    if (cTokenAddr.toLowerCase() === getAssetInfo('cETH').address.toLowerCase()) {
         await depositToWeth(amount.toString());
     }
 
     await approve(cTokenAddr, proxy.address);
 
-    const compPaybackAction = new dfs.actions.compound.CompoundPaybackAction(cTokenAddr, amount, from);
+    const compPaybackAction = new dfs.actions.compound.CompoundPaybackAction(
+        cTokenAddr,
+        amount,
+        from,
+    );
     const functionData = compPaybackAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](compPaybackAddr, functionData, {gasLimit: 4000000});
+    await proxy['execute(address,bytes)'](compPaybackAddr, functionData, { gasLimit: 4000000 });
 };
 
 const generateMcd = async (proxy, vaultId, amount, to) => {
     const mcdGenerateAddr = await getAddrFromRegistry('McdGenerate');
 
-    const mcdGenerateAction = new dfs.actions.maker.MakerGenerateAction(vaultId, amount, to, MCD_MANAGER_ADDR);
+    const mcdGenerateAction = new dfs.actions.maker.MakerGenerateAction(
+        vaultId,
+        amount,
+        to,
+        MCD_MANAGER_ADDR,
+    );
     const functionData = mcdGenerateAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdGenerateAddr, functionData, {gasLimit: 3000000});
+    await proxy['execute(address,bytes)'](mcdGenerateAddr, functionData, { gasLimit: 3000000 });
 };
 
+const openVault = async (makerAddresses, proxy, joinAddr, tokenData, collAmount, daiAmount) => {
+    const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
+
+    const from = proxy.signer.address;
+    const to = proxy.signer.address;
+
+    const amountDai = hre.ethers.utils.parseUnits(daiAmount, 18);
+    const amountColl = hre.ethers.utils.parseUnits(collAmount, tokenData.decimals);
+
+    await supplyMcd(proxy, vaultId, amountColl, tokenData.address, joinAddr, from);
+    await generateMcd(proxy, vaultId, amountDai, to);
+
+    return vaultId;
+};
 
 const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, from, to) => {
-    const uniSupplyAddr = await getAddrFromRegistry("UniSupply");
+    const uniSupplyAddr = await getAddrFromRegistry('UniSupply');
 
-    const amountA = ethers.utils.parseUnits(amount, tokenADecimals);
-    const amountB = await getSecondTokenAmount(
-        addrTokenA,
-        addrTokenB,
-        amountA
-    );
+    const amountA = hre.ethers.utils.parseUnits(amount, tokenADecimals);
+    const amountB = await getSecondTokenAmount(addrTokenA, addrTokenB, amountA);
 
-    const amountAMin = amountA.div("2");
-    const amountBMin = amountB.div("2");
+    const amountAMin = amountA.div('2');
+    const amountBMin = amountB.div('2');
 
     // buy tokens
     const tokenBalanceA = await balanceOf(addrTokenA, from);
@@ -336,16 +353,16 @@ const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, 
     if (isEth(addrTokenB)) {
         await depositToWeth(amountB);
     }
- 
+
     if (tokenBalanceA.lt(amountA)) {
         await sell(
             proxy,
             WETH_ADDRESS,
             addrTokenA,
-            ethers.utils.parseUnits('5', 18),
+            hre.ethers.utils.parseUnits('5', 18),
             UNISWAP_WRAPPER,
             from,
-            from
+            from,
         );
     }
 
@@ -354,10 +371,10 @@ const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, 
             proxy,
             WETH_ADDRESS,
             addrTokenB,
-            ethers.utils.parseUnits('5', 18),
+            hre.ethers.utils.parseUnits('5', 18),
             UNISWAP_WRAPPER,
             from,
-            from
+            from,
         );
     }
 
@@ -375,20 +392,20 @@ const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, 
         deadline,
     ];
 
-    const uniSupply = new dfs.actions.uniswap.UniswapSupplyAction(...uniObj);
+    const uniSupplyAction = new dfs.actions.uniswap.UniswapSupplyAction(...uniObj);
 
     await approve(addrTokenA, proxy.address);
     await approve(addrTokenB, proxy.address);
 
-    const functionData = uniSupply.encodeForDsProxyCall()[1];
+    const functionData = uniSupplyAction.encodeForDsProxyCall()[1];
 
-    await proxy["execute(address,bytes)"](uniSupplyAddr, functionData, {
+    await proxy['execute(address,bytes)'](uniSupplyAddr, functionData, {
         gasLimit: 3000000,
     });
 };
 
 const uniWithdraw = async (proxy, addrTokenA, addrTokenB, lpAddr, liquidity, to, from) => {
-    const uniWithdrawAddr = await getAddrFromRegistry("UniWithdraw");
+    const uniWithdrawAddr = await getAddrFromRegistry('UniWithdraw');
 
     const amountAMin = 0;
     const amountBMin = 0;
@@ -396,70 +413,72 @@ const uniWithdraw = async (proxy, addrTokenA, addrTokenB, lpAddr, liquidity, to,
 
     await approve(lpAddr, proxy.address);
 
-    const uniObj = [
-        addrTokenA,
-        addrTokenB,
-        liquidity,
-        to,
-        from,
-        amountAMin,
-        amountBMin,
-        deadline,
-    ];
+    const uniObj = [addrTokenA, addrTokenB, liquidity, to, from, amountAMin, amountBMin, deadline];
 
-    const uniWithdraw = new dfs.actions.uniswap.UniswapWithdrawAction(...uniObj);
+    const uniWithdrawAction = new dfs.actions.uniswap.UniswapWithdrawAction(...uniObj);
 
-    const functionData = uniWithdraw.encodeForDsProxyCall()[1];
+    const functionData = uniWithdrawAction.encodeForDsProxyCall()[1];
 
-    await proxy["execute(address,bytes)"](uniWithdrawAddr, functionData, {
+    await proxy['execute(address,bytes)'](uniWithdrawAddr, functionData, {
         gasLimit: 3000000,
     });
 };
-  
+
 const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) => {
-    const compClaimAddr = await getAddrFromRegistry("CompClaim");
+    const compClaimAddr = await getAddrFromRegistry('CompClaim');
 
-    const claimComp = new dfs.Action("CompClaim", "0x0", 
-    ["address[]", "address[]", "address", "address"], [cSupplyAddresses, cBorrowAddresses, from, to]);
+    const claimCompAction = new dfs.Action(
+        'CompClaim',
+        '0x0',
+        ['address[]', 'address[]', 'address', 'address'],
+        [cSupplyAddresses, cBorrowAddresses, from, to],
+    );
 
-    const functionData = claimComp.encodeForDsProxyCall()[1];
+    const functionData = claimCompAction.encodeForDsProxyCall()[1];
 
-    await proxy["execute(address,bytes)"](compClaimAddr, functionData, {
+    await proxy['execute(address,bytes)'](compClaimAddr, functionData, {
         gasLimit: 3000000,
     });
 };
 
 const mcdGive = async (proxy, vaultId, newOwner, createProxy) => {
-    const mcdGiveAddr = await getAddrFromRegistry("McdGive");
+    const mcdGiveAddr = await getAddrFromRegistry('McdGive');
 
-    const mcdGive = new dfs.Action("McdGive", "0x0", 
-    ["uint256", "address", "bool", "address"], [vaultId, newOwner.address, createProxy, MCD_MANAGER_ADDR]);
+    const mcdGiveAction = new dfs.Action(
+        'McdGive',
+        '0x0',
+        ['uint256', 'address', 'bool', 'address'],
+        [vaultId, newOwner.address, createProxy, MCD_MANAGER_ADDR],
+    );
 
-    const functionData = mcdGive.encodeForDsProxyCall()[1];
+    const functionData = mcdGiveAction.encodeForDsProxyCall()[1];
 
-    await proxy["execute(address,bytes)"](mcdGiveAddr, functionData, {
+    await proxy['execute(address,bytes)'](mcdGiveAddr, functionData, {
         gasLimit: 3000000,
     });
 };
 
 const mcdMerge = async (proxy, srcVaultId, destVaultId) => {
-    const mcdMergeAddr = await getAddrFromRegistry("McdMerge");
+    const mcdMergeAddr = await getAddrFromRegistry('McdMerge');
 
-    const mcdMerge = new dfs.Action("McdMerge", "0x0", 
-    ["uint256", "uint256", "address"], [srcVaultId, destVaultId, MCD_MANAGER_ADDR]);
+    const mcdMergeAction = new dfs.Action(
+        'McdMerge',
+        '0x0',
+        ['uint256', 'uint256', 'address'],
+        [srcVaultId, destVaultId, MCD_MANAGER_ADDR],
+    );
 
-    const functionData = mcdMerge.encodeForDsProxyCall()[1];
+    const functionData = mcdMergeAction.encodeForDsProxyCall()[1];
 
-    await proxy["execute(address,bytes)"](mcdMergeAddr, functionData, {
+    await proxy['execute(address,bytes)'](mcdMergeAddr, functionData, {
         gasLimit: 3000000,
     });
 };
 
-
 module.exports = {
     sell,
     buy,
-    
+
     openMcd,
     supplyMcd,
     generateMcd,

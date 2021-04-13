@@ -1,38 +1,33 @@
-const { expect } = require("chai");
+const { expect } = require('chai');
+const hre = require('hardhat');
 
 const { getAssetInfo, ilks } = require('@defisaver/tokens');
 
 const {
-    getAddrFromRegistry,
     balanceOf,
     getProxy,
     redeploy,
     standardAmounts,
-    MAX_UINT,
     MIN_VAULT_DAI_AMOUNT,
-    WETH_ADDRESS
+    WETH_ADDRESS,
 } = require('../utils');
 
 const {
     fetchMakerAddresses,
-    getRatio,
     canGenerateDebt,
 } = require('../utils-mcd.js');
 
 const {
-    openMcd,
-    supplyMcd,
-    generateMcd,
     paybackMcd,
     openVault,
 } = require('../actions.js');
 
 const PARTIAL_DAI_AMOUNT = '20';
 
-describe("Mcd-Payback", function() {
+describe('Mcd-Payback', function () {
     this.timeout(40000);
 
-    let makerAddresses, senderAcc, proxy, mcdView;
+    let makerAddresses; let senderAcc; let proxy;
 
     before(async () => {
         await redeploy('McdPayback');
@@ -42,9 +37,6 @@ describe("Mcd-Payback", function() {
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
-
-        mcdView = await redeploy('McdView');
-
     });
 
     for (let i = 0; i < ilks.length; ++i) {
@@ -54,14 +46,16 @@ describe("Mcd-Payback", function() {
         let vaultId;
 
         it(`... should payback ${PARTIAL_DAI_AMOUNT} DAI for ${ilkData.ilkLabel} vault`, async () => {
-             // skip uni tokens
-             if (tokenData.symbol.indexOf("UNIV2") !== -1) {
+            // skip uni tokens
+            if (tokenData.symbol.indexOf('UNIV2') !== -1) {
+                // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.true;
                 return;
             }
 
             const canGenerate = await canGenerateDebt(ilkData);
             if (!canGenerate) {
+                // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.true;
                 return;
             }
@@ -71,7 +65,7 @@ describe("Mcd-Payback", function() {
             }
 
             console.log((standardAmounts[tokenData.symbol] * 2.5).toString(),
-            (parseInt(MIN_VAULT_DAI_AMOUNT) + 50).toString());
+                (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 50).toString());
 
             vaultId = await openVault(
                 makerAddresses,
@@ -79,22 +73,22 @@ describe("Mcd-Payback", function() {
                 joinAddr,
                 tokenData,
                 (standardAmounts[tokenData.symbol] * 2.5).toString(),
-                (parseInt(MIN_VAULT_DAI_AMOUNT) + 50).toString()
+                (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 50).toString(),
             );
 
             // const ratio = await getRatio(mcdView, vaultId);
             // console.log('ratio: ', ratio.toString());
 
             const from = senderAcc.address;
-            const amountDai = ethers.utils.parseUnits(PARTIAL_DAI_AMOUNT, 18);
+            const amountDai = hre.ethers.utils.parseUnits(PARTIAL_DAI_AMOUNT, 18);
 
-            const daiBalanceBefore = await balanceOf(makerAddresses["MCD_DAI"], from);
+            const daiBalanceBefore = await balanceOf(makerAddresses.MCD_DAI, from);
 
             console.log('daiBalanceBefore: ', daiBalanceBefore / 1e18);
 
-            await paybackMcd(proxy, vaultId, amountDai, from, makerAddresses["MCD_DAI"]);
+            await paybackMcd(proxy, vaultId, amountDai, from, makerAddresses.MCD_DAI);
 
-            const daiBalanceAfter = await balanceOf(makerAddresses["MCD_DAI"], from);
+            const daiBalanceAfter = await balanceOf(makerAddresses.MCD_DAI, from);
 
             expect(daiBalanceBefore.sub(amountDai)).to.be.eq(daiBalanceAfter);
         });
@@ -108,6 +102,5 @@ describe("Mcd-Payback", function() {
 
         //     // expect(daiBalanceBefore.sub(amountDai)).to.be.eq(daiBalanceAfter);
         // });
-
     }
 });

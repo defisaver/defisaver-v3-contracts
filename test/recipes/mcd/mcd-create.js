@@ -1,8 +1,9 @@
-const { expect } = require("chai");
+const { expect } = require('chai');
+const hre = require('hardhat');
 
 const { getAssetInfo, ilks } = require('@defisaver/tokens');
 
-const dfs = require('@defisaver/sdk')
+const dfs = require('@defisaver/sdk');
 
 const {
     getAddrFromRegistry,
@@ -19,7 +20,7 @@ const {
     WETH_ADDRESS,
     MAX_UINT,
     depositToWeth,
-    setNewExchangeWrapper
+    setNewExchangeWrapper,
 } = require('../../utils');
 
 const {
@@ -31,17 +32,22 @@ const {
 } = require('../../utils-mcd');
 
 const {
-    sell
+    sell,
 } = require('../../actions.js');
-
-const VAULT_DAI_AMOUNT = '540';
 
 const BigNumber = hre.ethers.BigNumber;
 
-describe("Mcd-Create", function() {
+describe('Mcd-Create', function () {
     this.timeout(80000);
 
-    let makerAddresses, senderAcc, proxy, dydxFlAddr, aaveV2FlAddr, mcdView, taskExecutorAddr, uniWrapper;
+    let makerAddresses;
+    let senderAcc;
+    let proxy;
+    let dydxFlAddr;
+    // let aaveV2FlAddr;
+    let mcdView;
+    let taskExecutorAddr;
+    let uniWrapper;
 
     before(async () => {
         await redeploy('McdOpen');
@@ -59,13 +65,12 @@ describe("Mcd-Create", function() {
 
         taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
         dydxFlAddr = await getAddrFromRegistry('FLDyDx');
-        aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
+        // aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
 
         await setNewExchangeWrapper(senderAcc, uniWrapper.address);
-
     });
 
     for (let i = 0; i < 1; ++i) {
@@ -80,21 +85,22 @@ describe("Mcd-Create", function() {
         const tokenAddr = tokenData.address;
 
         it(`... should create a ${ilkData.ilkLabel} Vault and generate Dai`, async () => {
-
             const canGenerate = await canGenerateDebt(ilkData);
             if (!canGenerate) {
+                // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.true;
                 return;
             }
 
             const amount = MIN_VAULT_DAI_AMOUNT;
 
-            const daiAmount = ethers.utils.parseUnits(amount, 18);
+            const daiAmount = hre.ethers.utils.parseUnits(amount, 18);
 
             const tokenBalance = await balanceOf(tokenAddr, senderAcc.address);
 
-            const collAmount = BigNumber.from(ethers.utils.parseUnits(
-                (standardAmounts[tokenData.symbol] * 2).toString(), tokenData.decimals));
+            const collAmount = BigNumber.from(hre.ethers.utils.parseUnits(
+                (standardAmounts[tokenData.symbol] * 2).toString(), tokenData.decimals,
+            ));
 
             if (tokenBalance.lt(collAmount)) {
                 if (isEth(tokenAddr)) {
@@ -104,25 +110,25 @@ describe("Mcd-Create", function() {
                         proxy,
                         WETH_ADDRESS,
                         tokenAddr,
-                        ethers.utils.parseUnits('5', 18),
+                        hre.ethers.utils.parseUnits('5', 18),
                         uniWrapper.address,
                         senderAcc.address,
-                        senderAcc.address
+                        senderAcc.address,
                     );
                 }
             }
 
             await approve(tokenAddr, proxy.address);
 
-            const createVaultRecipe = new dfs.Recipe("CreateVaultRecipe", [
+            const createVaultRecipe = new dfs.Recipe('CreateVaultRecipe', [
                 new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR),
                 new dfs.actions.maker.MakerSupplyAction('$1', collAmount, joinAddr, senderAcc.address, MCD_MANAGER_ADDR),
-                new dfs.actions.maker.MakerGenerateAction('$1', daiAmount, senderAcc.address, MCD_MANAGER_ADDR)
+                new dfs.actions.maker.MakerGenerateAction('$1', daiAmount, senderAcc.address, MCD_MANAGER_ADDR),
             ]);
 
             const functionData = createVaultRecipe.encodeForDsProxyCall();
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {gasLimit: 3000000});
+            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
             const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
             const vaultId = vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
@@ -131,27 +137,27 @@ describe("Mcd-Create", function() {
             const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
             console.log(`Ratio: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${tokenData.symbol}, debt: ${info2.debt.toFixed(2)} Dai)`);
 
-            expect(info2.debt).to.be.eq(parseInt(amount));
-
+            expect(info2.debt).to.be.eq(parseInt(amount, 10));
         });
 
         it(`... should create a leveraged ${ilkData.ilkLabel} Vault and generate Dai`, async () => {
-
             const canGenerate = await canGenerateDebt(ilkData);
             if (!canGenerate) {
+                // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.true;
                 return;
             }
-            
+
             const tokenBalance = await balanceOf(tokenAddr, senderAcc.address);
 
-            const amount = (parseInt(MIN_VAULT_DAI_AMOUNT) * 1.5).toString();
+            const amount = (parseInt(MIN_VAULT_DAI_AMOUNT, 10) * 1.5).toString();
 
-            const daiAmount = ethers.utils.parseUnits(amount, 18);
-            const daiAddr = makerAddresses["MCD_DAI"];
+            const daiAmount = hre.ethers.utils.parseUnits(amount, 18);
+            const daiAddr = makerAddresses.MCD_DAI;
 
-            const collAmount = BigNumber.from(ethers.utils.parseUnits(
-                (standardAmounts[tokenData.symbol] * 2).toString(), tokenData.decimals));
+            const collAmount = BigNumber.from(hre.ethers.utils.parseUnits(
+                (standardAmounts[tokenData.symbol] * 2).toString(), tokenData.decimals,
+            ));
 
             if (tokenBalance.lt(collAmount)) {
                 if (isEth(tokenAddr)) {
@@ -161,10 +167,10 @@ describe("Mcd-Create", function() {
                         proxy,
                         WETH_ADDRESS,
                         tokenAddr,
-                        ethers.utils.parseUnits('5', 18),
+                        hre.ethers.utils.parseUnits('5', 18),
                         uniWrapper.address,
                         senderAcc.address,
-                        senderAcc.address
+                        senderAcc.address,
                     );
                 }
             }
@@ -175,23 +181,23 @@ describe("Mcd-Create", function() {
                 daiAddr,
                 tokenAddr,
                 daiAmount,
-                uniWrapper.address
+                uniWrapper.address,
             );
 
-
-            const createVaultRecipe = new dfs.Recipe("CreateVaultRecipe", [
+            const createVaultRecipe = new dfs.Recipe('CreateVaultRecipe', [
+                // eslint-disable-next-line max-len
                 // new dfs.actions.flashloan.AaveV2FlashLoanAction([daiAmount], [daiAddr], [0], nullAddress, nullAddress, []),
                 new dfs.actions.flashloan.DyDxFlashLoanAction(daiAmount, daiAddr, nullAddress, []),
                 new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
                 new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR),
                 new dfs.actions.basic.PullTokenAction(tokenAddr, senderAcc.address, collAmount),
                 new dfs.actions.maker.MakerSupplyAction('$3', MAX_UINT, joinAddr, proxy.address, MCD_MANAGER_ADDR),
-                new dfs.actions.maker.MakerGenerateAction('$3', '$1', dydxFlAddr, MCD_MANAGER_ADDR)
+                new dfs.actions.maker.MakerGenerateAction('$3', '$1', dydxFlAddr, MCD_MANAGER_ADDR),
             ]);
 
             const functionData = createVaultRecipe.encodeForDsProxyCall();
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {gasLimit: 3000000});
+            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
             const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
             const vaultId = vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
@@ -200,9 +206,8 @@ describe("Mcd-Create", function() {
             const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
             console.log(`Ratio: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${tokenData.symbol}, debt: ${info2.debt.toFixed(2)} Dai)`);
 
-            expect(info2.debt).to.be.gte(parseInt(amount));
+            expect(info2.debt).to.be.gte(parseInt(amount, 10));
         });
-
     }
 
     // it(`... should create a leveraged UNIV2ETHDAI vault`, async () => {
@@ -210,9 +215,7 @@ describe("Mcd-Create", function() {
 
     //     const uniVaultRecipe = new dfs.Recipe("CreateVaultRecipe", [
     //         new dfs.actions.maker.MakerOpenVaultAction(uniJoinAddr, MCD_MANAGER_ADDR),
-        
+
     //     ]);
     // });
-
-
 });

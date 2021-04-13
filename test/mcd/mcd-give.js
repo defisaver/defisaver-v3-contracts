@@ -1,21 +1,24 @@
-const { expect } = require("chai");
+const { expect } = require('chai');
+const hre = require('hardhat');
 
-const { ilks } = require("@defisaver/tokens");
+const { ilks } = require('@defisaver/tokens');
 
 const {
     getProxy,
     redeploy,
-} = require("../utils");
+} = require('../utils');
 
-const { fetchMakerAddresses, MCD_MANAGER_ADDR } = require("../utils-mcd");
+const { fetchMakerAddresses, MCD_MANAGER_ADDR } = require('../utils-mcd');
 
-const { openMcd, mcdGive } = require("../actions.js");
+const { openMcd, mcdGive } = require('../actions.js');
 
-describe("Mcd-Give", function () {
-    let makerAddresses, senderAcc, secondAcc, thirdAcc, proxy, mcdView, mcdManager;
+describe('Mcd-Give', () => {
+    let makerAddresses; let senderAcc; let secondAcc; let thirdAcc; let proxy;
+    // let mcdView;
+    let mcdManager;
 
     before(async () => {
-        await redeploy("McdGive");
+        await redeploy('McdGive');
 
         makerAddresses = await fetchMakerAddresses();
 
@@ -24,12 +27,12 @@ describe("Mcd-Give", function () {
         thirdAcc = (await hre.ethers.getSigners())[2];
         proxy = await getProxy(senderAcc.address);
 
-        mcdView = await redeploy("McdView");
+        // mcdView = await redeploy('McdView');
 
-        mcdManager = await hre.ethers.getContractAt("IManager", MCD_MANAGER_ADDR);
+        mcdManager = await hre.ethers.getContractAt('IManager', MCD_MANAGER_ADDR);
     });
 
-    it(`... should give a cdp to another proxy`, async () => {
+    it('... should give a cdp to another proxy', async () => {
         const { join } = ilks[0];
 
         const vaultId = await openMcd(proxy, makerAddresses, join);
@@ -44,7 +47,7 @@ describe("Mcd-Give", function () {
         expect(ownerAfter).to.be.eq(secondProxy.address);
     });
 
-    it(`... should give a cdp to an address and proxy should be created for it`, async () => {
+    it('... should give a cdp to an address and proxy should be created for it', async () => {
         const { join } = ilks[0];
 
         const vaultId = await openMcd(proxy, makerAddresses, join);

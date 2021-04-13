@@ -1,5 +1,7 @@
-const { getAssetInfo } = require("@defisaver/tokens");
-const dfs =  require("@defisaver/sdk");
+const { getAssetInfo } = require('@defisaver/tokens');
+const hre = require('hardhat');
+
+const dfs = require('@defisaver/sdk');
 
 const {
     getAddrFromRegistry,
@@ -12,31 +14,29 @@ const {
     standardAmounts,
     nullAddress,
     MAX_UINT,
-    ETH_ADDR,
     UNISWAP_WRAPPER,
     AAVE_FL_FEE,
     WETH_ADDRESS,
-} = require("../utils");
+} = require('../utils');
 
-const { sell } = require("../actions");
+const { sell } = require('../actions');
 
 const AAVE_NO_DEBT_MODE = 0;
-const AAVE_VAR_DEBT_MODE = 1;
-const AAVE_STABLE_DEBT_MODE = 2;
 
-describe("FL-AaveV2", function () {
+describe('FL-AaveV2', function () {
     this.timeout(60000);
 
-    let senderAcc, proxy, taskExecutorAddr, aaveFl;
+    let senderAcc; let proxy; let taskExecutorAddr; let
+        aaveFl;
 
-    const FLASHLOAN_TOKENS = ["WETH", "DAI", "USDC", "WBTC", "USDT", "YFI", "BAT", "LINK", "MKR"];
+    const FLASHLOAN_TOKENS = ['WETH', 'DAI', 'USDC', 'WBTC', 'USDT', 'YFI', 'BAT', 'LINK', 'MKR'];
 
     before(async () => {
-        taskExecutorAddr = await getAddrFromRegistry("TaskExecutor");
+        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
 
-        aaveFl = await redeploy("FLAaveV2");
-        await redeploy("SendToken");
-        await redeploy("TaskExecutor");
+        aaveFl = await redeploy('FLAaveV2');
+        await redeploy('SendToken');
+        await redeploy('TaskExecutor');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -52,19 +52,26 @@ describe("FL-AaveV2", function () {
                 assetInfo.address = WETH_ADDRESS;
             }
 
-            const loanAmount = ethers.utils.parseUnits(standardAmounts[tokenSymbol], assetInfo.decimals);
-            let feeAmount = ((standardAmounts[tokenSymbol] * AAVE_FL_FEE) * 10**assetInfo.decimals).toFixed(0);
+            const loanAmount = hre.ethers.utils.parseUnits(
+                standardAmounts[tokenSymbol],
+                assetInfo.decimals,
+            );
+            const feeAmount = (
+                standardAmounts[tokenSymbol]
+                * AAVE_FL_FEE
+                * 10 ** assetInfo.decimals
+            ).toFixed(0);
 
             await approve(assetInfo.address, proxy.address);
 
-            const basicFLRecipe = new dfs.Recipe("BasicFLRecipe", [
+            const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
                 new dfs.actions.flashloan.AaveV2FlashLoanAction(
                     [loanAmount],
                     [assetInfo.address],
                     [AAVE_NO_DEBT_MODE],
                     nullAddress,
                     nullAddress,
-                    []
+                    [],
                 ),
                 new dfs.actions.basic.SendTokenAction(assetInfo.address, aaveFl.address, MAX_UINT),
             ]);
@@ -73,7 +80,7 @@ describe("FL-AaveV2", function () {
 
             console.log(tokenSymbol);
 
-            if (tokenSymbol === "WETH") {
+            if (tokenSymbol === 'WETH') {
                 await depositToWeth(feeAmount);
             } else {
                 // buy token so we have it for fee
@@ -84,17 +91,17 @@ describe("FL-AaveV2", function () {
                         proxy,
                         WETH_ADDRESS,
                         assetInfo.address,
-                        ethers.utils.parseUnits("1", 18),
+                        hre.ethers.utils.parseUnits('1', 18),
                         UNISWAP_WRAPPER,
                         senderAcc.address,
-                        senderAcc.address
+                        senderAcc.address,
                     );
                 }
             }
 
             await send(assetInfo.address, proxy.address, feeAmount);
 
-            await proxy["execute(address,bytes)"](taskExecutorAddr, functionData[1], {
+            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {
                 gasLimit: 3000000,
             });
         });

@@ -1,17 +1,15 @@
-const { expect } = require("chai");
+const { expect } = require('chai');
+const hre = require('hardhat');
 
 const { getAssetInfo, compoundCollateralAssets } = require('@defisaver/tokens');
 
 const {
-    getAddrFromRegistry,
     getProxy,
     redeploy,
     balanceOf,
     standardAmounts,
-    send,
-    WETH_ADDRESS
+    WETH_ADDRESS,
 } = require('../utils');
-
 
 const {
     supplyComp,
@@ -23,10 +21,11 @@ const {
     getBorrowBalance,
 } = require('../utils-comp');
 
-describe("Comp-Payback", function () {
+describe('Comp-Payback', function () {
     this.timeout(80000);
 
-    let senderAcc, proxy, compView;
+    let senderAcc; let proxy; let
+        compView;
 
     before(async () => {
         await redeploy('CompPayback');
@@ -55,9 +54,18 @@ describe("Comp-Payback", function () {
             // TODO: make the check dynamic
             if (assetInfo.symbol === 'COMP') return;
 
-            const amount = ethers.utils.parseUnits(standardAmounts[assetInfo.symbol], assetInfo.decimals);
-    
-            await supplyComp(proxy, getAssetInfo('cETH').address, getAssetInfo('ETH').address, ethers.utils.parseUnits('3', 18), senderAcc.address);
+            const amount = hre.ethers.utils.parseUnits(
+                standardAmounts[assetInfo.symbol],
+                assetInfo.decimals,
+            );
+
+            await supplyComp(
+                proxy,
+                getAssetInfo('cETH').address,
+                getAssetInfo('ETH').address,
+                hre.ethers.utils.parseUnits('3', 18),
+                senderAcc.address,
+            );
 
             await borrowComp(proxy, cToken, amount, senderAcc.address);
 
@@ -65,14 +73,12 @@ describe("Comp-Payback", function () {
             const borrowBalanceBefore = await getBorrowBalance(compView, proxy.address, cToken);
 
             await paybackComp(proxy, cToken, amount, senderAcc.address);
-    
+
             const balanceAfter = await balanceOf(assetInfo.address, senderAcc.address);
             const borrowBalanceAfter = await getBorrowBalance(compView, proxy.address, cToken);
-    
+
             expect(balanceAfter).to.be.lt(balanceBefore);
             expect(borrowBalanceAfter).to.be.lt(borrowBalanceBefore);
         });
     }
-
 });
-
