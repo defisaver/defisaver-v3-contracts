@@ -6,11 +6,10 @@
     "compile": "npx hardhat compile",
     "deploy": "cmd/run_deploy",
     "test": "cmd/run_test",
+    "commit": "cz",
     "verify": "cmd/run_verify",
     "lint": "./node_modules/.bin/solhint -f table contracts/**/*.sol",
-    "pretty": "./node_modules/.bin/prettier --write contracts/**/*.sol",
-    "flatten-all": "sol-merger@3.1.0 \"./contracts/*.sol\" ./build",
-    "flatten": "npx sol-merger@3.1.0"
+    "pretty": "./node_modules/.bin/prettier --write contracts/**/*.sol"
   },
   "repository": {
     "type": "git",
@@ -25,6 +24,8 @@
   },
   "homepage": "https://github.com/DecenterApps/defisaver-v3-contracts#readme",
   "devDependencies": {
+    "@commitlint/cli": "^12.1.1",
+    "@commitlint/config-conventional": "^12.1.1",
     "@defisaver/sdk": "0.0.2",
     "@defisaver/tokens": "^1.3.30",
     "@nomiclabs/hardhat-ethers": "^2.0.0",
@@ -33,6 +34,8 @@
     "@tenderly/hardhat-tenderly": "^1.1.0-beta.2",
     "axios": "^0.21.0",
     "chai": "^4.2.0",
+    "commitizen": "^4.2.3",
+    "cz-conventional-changelog": "^3.3.0",
     "dotenv-safe": "^8.2.0",
     "eslint": "^7.24.0",
     "eslint-config-airbnb-base": "^14.2.1",
@@ -52,8 +55,15 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn run hardhat remove-logs && npm run lint"
+      "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true",
+     
+      "commit-msg": "npx --no-install commitlint --edit $1"
     }
   },
-  "dependencies": {}
+  "dependencies": {},
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
 }
