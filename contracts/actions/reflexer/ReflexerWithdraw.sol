@@ -82,11 +82,7 @@ contract ReflexerWithdraw is ActionBase, ReflexerHelper {
 
     /// @notice Returns all the collateral of the safe, formatted in the correct decimal
     /// @dev Will fail if token is over 18 decimals
-    function getAllColl(uint256 _safeId)
-        internal
-        view
-        returns (uint256 amount)
-    {
+    function getAllColl(uint256 _safeId) internal view returns (uint256 amount) {
         (amount, ) = getSafeInfo(_safeId, safeManager.collateralTypes(_safeId));
     }
 

@@ -56,25 +56,24 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
         uint256 _amount,
         address _to
     ) internal returns (uint256) {
-        uint256 rate =
-            ITaxCollector(TAX_COLLECTOR_ADDRESS).taxSingle(safeManager.collateralTypes(_safeId));
-        uint256 raiVatBalance = safeEngine.coinBalance(safeManager.safes(_safeId));
+        address safe = safeManager.safes(_safeId);
+        bytes32 collType = safeManager.collateralTypes(_safeId);
 
         // Generate rai and move to proxy balance
         safeManager.modifySAFECollateralization(
             _safeId,
             int256(0),
-            normalizeDrawAmount(_amount, rate, raiVatBalance)
+            _getGeneratedDeltaDebt(TAX_COLLECTOR_ADDRESS, safe, collType, _amount)
         );
         safeManager.transferInternalCoins(_safeId, address(this), toRad(_amount));
 
         // add auth so we can exit the rai
-        if (safeEngine.safeRights(address(this), address(RAI_JOIN_ADDRESS)) == 0) {
-            safeEngine.approveSAFEModification(RAI_JOIN_ADDRESS);
+        if (safeEngine.safeRights(address(this), address(RAI_ADAPTER_ADDRESS)) == 0) {
+            safeEngine.approveSAFEModification(RAI_ADAPTER_ADDRESS);
         }
 
         // exit rai from adapter and send _to if needed
-        ICoinJoin(RAI_JOIN_ADDRESS).exit(_to, _amount);
+        ICoinJoin(RAI_ADAPTER_ADDRESS).exit(_to, _amount);
 
         logger.Log(
             address(this),
@@ -98,5 +97,32 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
         safeId = abi.decode(_callData[0], (uint256));
         amount = abi.decode(_callData[1], (uint256));
         to = abi.decode(_callData[2], (address));
+    }
+
+    /// @notice Gets delta debt generated (Total Safe debt minus available safeHandler COIN balance)
+    /// @param taxCollector address
+    /// @param safeHandler address
+    /// @param collateralType bytes32
+    /// @return deltaDebt
+    function _getGeneratedDeltaDebt(
+        address taxCollector,
+        address safeHandler,
+        bytes32 collateralType,
+        uint256 wad
+    ) internal returns (int256 deltaDebt) {
+        // Updates stability fee rate
+        uint256 rate = ITaxCollector(taxCollector).taxSingle(collateralType);
+        require(rate > 0, "invalid-collateral-type");
+
+        // Gets COIN balance of the handler in the safeEngine
+        uint256 coin = safeEngine.coinBalance(safeHandler);
+
+        // If there was already enough COIN in the safeEngine balance, just exits it without adding more debt
+        if (coin < mul(wad, RAY)) {
+            // Calculates the needed deltaDebt so together with the existing coins in the safeEngine is enough to exit wad amount of COIN tokens
+            deltaDebt = toPositiveInt(sub(mul(wad, RAY), coin) / rate);
+            // This is neeeded due lack of precision. It might need to sum an extra deltaDebt wei (for the given COIN wad amount)
+            deltaDebt = mul(uint256(deltaDebt), rate) < mul(wad, RAY) ? deltaDebt + 1 : deltaDebt;
+        }
     }
 }
