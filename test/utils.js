@@ -12,6 +12,7 @@ const OASIS_WRAPPER = '0x2aD7D86C56b7a09742213e1e649C727cB4991A54';
 const ETH_ADDR = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 const DAI_ADDR = '0x6b175474e89094c44da98b954eedeac495271d0f';
 const USDC_ADDR = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+const RAI_ADDR = '0x03ab458634910AaD20eF5f1C8ee96F1D6ac54919';
 
 const AAVE_MARKET = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
 
@@ -22,6 +23,7 @@ const MAX_UINT = '11579208923731619542357098500868790785326998466564056403945758
 
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
 const MIN_VAULT_DAI_AMOUNT = '5010'; // TODO: can we fetch this dynamically
+const MIN_VAULT_RAI_AMOUNT = '1000'; // TODO: can we fetch this dynamically
 
 const standardAmounts = {
     ETH: '4',
@@ -285,4 +287,6 @@ module.exports = {
     USDC_ADDR,
     AAVE_FL_FEE,
     MIN_VAULT_DAI_AMOUNT,
+    MIN_VAULT_RAI_AMOUNT,
+    RAI_ADDR,
 };
