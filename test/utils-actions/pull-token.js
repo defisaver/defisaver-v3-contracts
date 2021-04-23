@@ -25,8 +25,8 @@ describe('Pull-Token', function () {
     });
 
     it('... should pull tokens direct action', async () => {
-        depositToWeth(hre.ethers.utils.parseUnits('10', 18));
-        approve(WETH_ADDRESS, proxy.address);
+        await depositToWeth(hre.ethers.utils.parseUnits('10', 18));
+        await approve(WETH_ADDRESS, proxy.address);
 
         const pullTokenAddr = await getAddrFromRegistry('PullToken');
         const pullTokenAction = new dfs.actions.basic.PullTokenAction(
