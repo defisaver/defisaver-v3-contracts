@@ -3,19 +3,15 @@ const hre = require('hardhat');
 const {
     getProxy,
     redeploy,
-    WETH_ADDRESS,
     standardAmounts,
-    balanceOf,
-    MAX_UINT,
-    send,
     depositToWeth,
+    WETH_ADDRESS,
     MIN_VAULT_RAI_AMOUNT,
     RAI_ADDR,
 } = require('../utils');
 
 const {
     lastSafeID,
-    getSafeInfo,
     ADAPTER_ADDRESS,
 } = require('../utils-reflexer.js');
 
@@ -25,39 +21,55 @@ const {
     reflexerGenerate,
 } = require('../actions.js');
 
-describe('Reflexer-Generate', function() {
-    
-    let senderAcc; let proxy; let reflexerView;
+describe('Reflexer-Generate', () => {
+    let senderAcc; let proxy; let rai; let weth; let logger;
 
     before(async () => {
         await redeploy('ReflexerOpen');
         await redeploy('ReflexerSupply');
-        await redeploy('ReflexerWithdraw')
-        await redeploy('ReflexerGenerate')
-        reflexerView = await redeploy('RaiLoanInfo');
+        await redeploy('ReflexerWithdraw');
+        await redeploy('ReflexerGenerate');
+        await redeploy('RaiLoanInfo');
+        logger = await hre.ethers.getContractAt('DefisaverLogger', '0x5c55B921f590a89C1Ebe84dF170E655a82b62126');
 
+        rai = await hre.ethers.getContractAt('IERC20', RAI_ADDR);
+        weth = await hre.ethers.getContractAt('IWETH', WETH_ADDRESS);
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
     });
 
-    it('... should generate ${MIN_VAULT_RAI_AMOUNT} for WETH safe', async () => {
+    it('... should generate RAI for WETH safe', async () => {
         await reflexerOpen(proxy, ADAPTER_ADDRESS);
+        const safeID = await lastSafeID(proxy.address);
 
         const amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
-        const amountWETH = hre.ethers.utils.parseUnits(standardAmounts['WETH'], 18);
+        const amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
         await depositToWeth(amountWETH.toString());
-        
+
         const from = senderAcc.address;
-        const raiBalanceBefore = await balanceOf(RAI_ADDR, from);
-        const safeID = await lastSafeID(proxy.address);
-        await reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from);
-        
+        await expect(() => reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
+            .to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
+
         const to = senderAcc.address;
-        await reflexerGenerate(proxy, safeID, amountRai, to);
-
-        const raiBalanceAfter = await balanceOf(RAI_ADDR, from);
-        
-        expect(raiBalanceBefore.add(amountRai)).to.be.eq(raiBalanceAfter);
-
+        await expect(() => reflexerGenerate(proxy, safeID, amountRai, to))
+            .to.changeTokenBalance(rai, senderAcc, amountRai);
     }).timeout(40000);
-})
+
+    it('... should log every event', async () => {
+        await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
+            .to.emit(logger, 'LogEvent');
+
+        const amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
+        const amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
+        await depositToWeth(amountWETH.toString());
+
+        const safeID = await lastSafeID(proxy.address);
+        const from = senderAcc.address;
+        await expect(reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
+            .to.emit(logger, 'LogEvent');
+
+        const to = senderAcc.address;
+        await expect(reflexerGenerate(proxy, safeID, amountRai, to))
+            .to.emit(logger, 'LogEvent');
+    }).timeout(40000);
+});

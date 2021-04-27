@@ -19,8 +19,6 @@ const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
 
 const { getSecondTokenAmount } = require('./utils-uni');
 
-const { REFLEXER_SAFE_MANAGER_ADDR } = require('./utils-reflexer');
-
 const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to) => {
     const dfsSellAddr = await getAddrFromRegistry('DFSSell');
 
@@ -483,13 +481,12 @@ const reflexerOpen = async (proxy, adapterAddr) => {
     const openMySafe = new dfs.actions.reflexer.ReflexerOpenSafeAction(adapterAddr);
     const functionData = openMySafe.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](reflexerOpenAddr, functionData, { gasLimit: 3000000 });
-}
+    return proxy['execute(address,bytes)'](reflexerOpenAddr, functionData, { gasLimit: 3000000 });
+};
 
-const reflexerSupply = async (proxy, safeId, amount, adapterAddr, from) =>{
-    
+const reflexerSupply = async (proxy, safeId, amount, adapterAddr, from) => {
     await approve(WETH_ADDRESS, proxy.address);
-    
+
     const reflexerSupplyAddr = await getAddrFromRegistry('ReflexerSupply');
 
     const supplyMySafe = new dfs.actions.reflexer.ReflexerSupplyAction(
@@ -498,13 +495,13 @@ const reflexerSupply = async (proxy, safeId, amount, adapterAddr, from) =>{
         adapterAddr,
         from,
     );
-    
+
     const functionData = supplyMySafe.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](reflexerSupplyAddr, functionData, { gasLimit: 3000000 });
-}
+    return proxy['execute(address,bytes)'](reflexerSupplyAddr, functionData, { gasLimit: 3000000 });
+};
 
-const reflexerPayback = async (proxy, safeId, amount, from, raiAddr) =>{
+const reflexerPayback = async (proxy, safeId, amount, from, raiAddr) => {
     const reflexerPaybackAddress = await getAddrFromRegistry('ReflexerPayback');
 
     await approve(raiAddr, proxy.address);
@@ -512,12 +509,12 @@ const reflexerPayback = async (proxy, safeId, amount, from, raiAddr) =>{
     const reflexerPaybackAction = new dfs.actions.reflexer.ReflexerPaybackAction(
         safeId,
         amount,
-        from
+        from,
     );
     const functionData = reflexerPaybackAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](reflexerPaybackAddress, functionData, { gasLimit: 3000000 });
-}
+    return proxy['execute(address,bytes)'](reflexerPaybackAddress, functionData, { gasLimit: 3000000 });
+};
 
 const reflexerWithdraw = async (proxy, safeId, amount, adapterAddr, to) => {
     const reflexerWithdrawAddr = await getAddrFromRegistry('ReflexerWithdraw');
@@ -527,24 +524,24 @@ const reflexerWithdraw = async (proxy, safeId, amount, adapterAddr, to) => {
         amount,
         adapterAddr,
         to,
-    )
+    );
     const functionData = reflexerWithdrawAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](reflexerWithdrawAddr, functionData, { gasLimit: 3000000 });
-}
+    return proxy['execute(address,bytes)'](reflexerWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
 
-const reflexerGenerate = async(proxy, safeId, amount, to) => {
+const reflexerGenerate = async (proxy, safeId, amount, to) => {
     const reflexerGenerateAddr = await getAddrFromRegistry('ReflexerGenerate');
 
     const reflexerGenerateAction = new dfs.actions.reflexer.ReflexerGenerateAction(
         safeId,
         amount,
         to,
-    )
+    );
     const functionData = reflexerGenerateAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](reflexerGenerateAddr, functionData, { gasLimit: 3000000 });
-}
+    return proxy['execute(address,bytes)'](reflexerGenerateAddr, functionData, { gasLimit: 3000000 });
+};
 
 module.exports = {
     sell,

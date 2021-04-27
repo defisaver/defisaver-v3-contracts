@@ -21,4 +21,5 @@ abstract contract ISAFEManager {
     function enterSystem(address, uint) virtual public;
     function moveSAFE(uint, uint) virtual public;
     function safeCount(address) virtual public view returns (uint);
+    function safei() virtual public view returns (uint);
 }
