@@ -51,7 +51,7 @@ describe('Reflexer-Supply', () => {
         expect(info.coll.toString()).to.be.equal(amountWETH);
     }).timeout(40000);
 
-    it('... should supply all WETH to safe', async () => {
+    it('... should supply all WETH to safe from proxy', async () => {
         await reflexerOpen(proxy, ADAPTER_ADDRESS);
 
         const amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
@@ -66,6 +66,22 @@ describe('Reflexer-Supply', () => {
 
         const info = await getSafeInfo(reflexerView, safeID);
         expect(info.coll.toString()).to.be.equal(proxyStartingBalance);
+    }).timeout(40000);
+
+    it('... should supply all WETH to safe from EOA', async () => {
+        await reflexerOpen(proxy, ADAPTER_ADDRESS);
+
+        const amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
+        await depositToWeth(amountWETH.toString());
+
+        const safeID = await lastSafeID(proxy.address);
+        const from = senderAcc.address;
+        const startingBalance = await balanceOf(WETH_ADDRESS, from);
+        await expect(() => reflexerSupply(proxy, safeID, MAX_UINT, ADAPTER_ADDRESS, from))
+            .to.changeTokenBalance(weth, senderAcc, startingBalance.mul(-1));
+
+        const info = await getSafeInfo(reflexerView, safeID);
+        expect(info.coll.toString()).to.be.equal(startingBalance);
     }).timeout(40000);
 
     it('... should log every event', async () => {

@@ -17,6 +17,7 @@
         "func-names": "off",
         "prefer-destructuring": "off",
         "no-plusplus": "off",
-        "no-loop-func": "off"
+        "no-loop-func": "off",
+        "linebreak-style" : "off"
     }
 }

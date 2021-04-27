@@ -59,9 +59,9 @@ contract ReflexerSupply is ActionBase, ReflexerHelper {
     ) internal returns (uint256) {
         address tokenAddr = getTokenFromAdapter(_adapterAddr);
 
-        // if amount type(uint).max, pull current proxy balance
+        // if amount type(uint).max, pull current _from  balance
         if (_amount == type(uint256).max) {
-            _amount = tokenAddr.getBalance(address(this));
+            _amount = tokenAddr.getBalance(_from);
         }
 
         // Pull the underlying token and adapter the reflexer adapter pool
