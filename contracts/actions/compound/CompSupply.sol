@@ -62,9 +62,9 @@ contract CompSupply is ActionBase, CompHelper {
     ) internal returns (uint256) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
-        // if amount type(uint256).max, pull current proxy balance
+        // if amount type(uint256).max, pull current _from balance
         if (_amount == type(uint256).max) {
-            _amount = tokenAddr.getBalance(address(this));
+            _amount = tokenAddr.getBalance(_from);
         }
 
         // pull the tokens _from to the proxy

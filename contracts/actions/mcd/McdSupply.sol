@@ -65,9 +65,9 @@ contract McdSupply is ActionBase, McdHelper {
         address tokenAddr = getTokenFromJoin(_joinAddr);
         IManager mcdManager = IManager(_mcdManager);
 
-        // if amount type(uint).max, pull current proxy balance
+        // if amount type(uint).max, pull current _from balance
         if (_amount == type(uint256).max) {
-            _amount = tokenAddr.getBalance(address(this));
+            _amount = tokenAddr.getBalance(_from);
         }
 
         // Pull the underlying token and join the maker join pool
