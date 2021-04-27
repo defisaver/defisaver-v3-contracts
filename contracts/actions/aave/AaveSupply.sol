@@ -77,9 +77,9 @@ contract AaveSupply is ActionBase, AaveHelper {
     ) internal returns (uint256) {
         ILendingPoolV2 lendingPool = getLendingPool(_market);
 
-        // if amount is set to max, take the whole proxy balance
+        // if amount is set to max, take the whole _from balance
         if (_amount == type(uint256).max) {
-            _amount = _tokenAddr.getBalance(address(this));
+            _amount = _tokenAddr.getBalance(_from);
         }
 
         // default to onBehalf of proxy

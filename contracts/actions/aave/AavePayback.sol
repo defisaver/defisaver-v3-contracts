@@ -79,9 +79,9 @@ contract AavePayback is ActionBase, AaveHelper {
     ) internal returns (uint256) {
         ILendingPoolV2 lendingPool = getLendingPool(_market);
 
-        // if the amount sent is type(uint256).max pull only the _from balance
+        // if the amount sent is type(uint256).max get whole proxy debt
         if (_amount == type(uint256).max) {
-            _amount = _tokenAddr.getBalance(_from);
+            _amount = getWholeDebt(_market, _tokenAddr, _rateMode);
         }
 
         // default to onBehalf of proxy
@@ -129,5 +129,17 @@ contract AavePayback is ActionBase, AaveHelper {
         rateMode = abi.decode(_callData[3], (uint256));
         from = abi.decode(_callData[4], (address));
         onBehalf = abi.decode(_callData[5], (address));
+    }
+
+    function getWholeDebt(address _market, address _tokenAddr, uint _borrowType) internal view returns (uint256) {
+        IAaveProtocolDataProviderV2 dataProvider = getDataProvider(_market);
+        (, uint256 borrowsStable, uint256 borrowsVariable, , , , , , ) =
+            dataProvider.getUserReserveData(_tokenAddr, address(this));
+
+        if (_borrowType == STABLE_ID) {
+            return borrowsStable;
+        } else if (_borrowType == VARIABLE_ID) {
+            return borrowsVariable;
+        }
     }
 }

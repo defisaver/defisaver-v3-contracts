@@ -62,7 +62,7 @@ contract CompPayback is ActionBase, CompHelper {
 
         // if type(uint).max payback whole amount
         if (_amount == type(uint256).max) {
-            _amount = ICToken(_cTokenAddr).borrowBalanceCurrent(_from);
+            _amount = ICToken(_cTokenAddr).borrowBalanceCurrent(address(this));
         }
 
         tokenAddr.pullTokensIfNeeded(_from, _amount);
