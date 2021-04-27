@@ -3,12 +3,12 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "../auth/AdminAuth.sol";
-import "../auth/ProxyPermission.sol";
-import "../DS/DSGuard.sol";
-import "../DS/DSAuth.sol";
+import "../../auth/AdminAuth.sol";
+import "../../auth/ProxyPermission.sol";
+import "../../DS/DSGuard.sol";
+import "../../DS/DSAuth.sol";
 import "./Subscriptions.sol";
-import "./DFSRegistry.sol";
+import "../DFSRegistry.sol";
 
 /// @title Handles auth and calls subscription contract
 contract SubscriptionProxy is StrategyData, AdminAuth, ProxyPermission {

@@ -2,9 +2,9 @@
 
 pragma solidity =0.7.6;
 
-import "../interfaces/IDFSRegistry.sol";
-import "../interfaces/IDSProxy.sol";
-import "../auth/AdminAuth.sol";
+import "../../interfaces/IDFSRegistry.sol";
+import "../../interfaces/IDSProxy.sol";
+import "../../auth/AdminAuth.sol";
 
 /// @title ProxyAuth Gets DSProxy auth from users and is callable by the Executor
 contract ProxyAuth is AdminAuth {

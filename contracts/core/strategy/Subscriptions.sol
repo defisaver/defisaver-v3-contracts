@@ -3,9 +3,9 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "../auth/AdminAuth.sol";
-import "../interfaces/IDSProxy.sol";
-import "../utils/DefisaverLogger.sol";
+import "../../auth/AdminAuth.sol";
+import "../../interfaces/IDSProxy.sol";
+import "../../utils/DefisaverLogger.sol";
 import "./StrategyData.sol";
 
 /// @title Storage of strategies and templates

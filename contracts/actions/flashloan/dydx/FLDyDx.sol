@@ -3,12 +3,12 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "../../../core/Subscriptions.sol";
+import "../../../core/strategy/Subscriptions.sol";
 import "../../../interfaces/ILendingPool.sol";
 import "../../../interfaces/IWETH.sol";
 import "../../../interfaces/IFLParamGetter.sol";
 import "../../../interfaces/aave/ILendingPoolAddressesProvider.sol";
-import "../../../core/StrategyData.sol";
+import "../../../core/strategy/StrategyData.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../../utils/FLFeeFaucet.sol";
 import "../../../utils/ReentrancyGuard.sol";

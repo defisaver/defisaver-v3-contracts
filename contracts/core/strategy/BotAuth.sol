@@ -2,7 +2,7 @@
 
 pragma solidity =0.7.6;
 
-import "../auth/AdminAuth.sol";
+import "../../auth/AdminAuth.sol";
 
 /// @title Handles authorization of who can call the execution of strategies
 contract BotAuth is AdminAuth {

@@ -7,7 +7,7 @@ import "../interfaces/ILendingPool.sol";
 import "../auth/ProxyPermission.sol";
 import "../actions/ActionBase.sol";
 import "../core/DFSRegistry.sol";
-import "./Subscriptions.sol";
+import "./strategy/Subscriptions.sol";
 
 /// @title Handles FL taking and executes actions
 contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {

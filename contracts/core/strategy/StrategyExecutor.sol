@@ -3,13 +3,13 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "../auth/AdminAuth.sol";
-import "../interfaces/ITrigger.sol";
-import "../interfaces/IDSProxy.sol";
+import "../../auth/AdminAuth.sol";
+import "../../interfaces/ITrigger.sol";
+import "../../interfaces/IDSProxy.sol";
 import "./StrategyData.sol";
 import "./Subscriptions.sol";
 import "./BotAuth.sol";
-import "./DFSRegistry.sol";
+import "../DFSRegistry.sol";
 import "./ProxyAuth.sol";
 
 /// @title Main entry point for executing automated strategies
