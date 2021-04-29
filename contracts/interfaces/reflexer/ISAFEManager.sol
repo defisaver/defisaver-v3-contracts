@@ -4,7 +4,7 @@ pragma solidity =0.7.6;
 
 abstract contract ISAFEManager {
 
-    function lastSAFEID(address) virtual public returns (uint);
+    function lastSAFEID(address) virtual public view returns (uint);
     function safeCan(address, uint, address) virtual public view returns (uint);
     function collateralTypes(uint) virtual public view returns (bytes32);
     function ownsSAFE(uint) virtual public view returns (address);
@@ -20,4 +20,6 @@ abstract contract ISAFEManager {
     function quitSystem(uint, address) virtual public;
     function enterSystem(address, uint) virtual public;
     function moveSAFE(uint, uint) virtual public;
+    function safeCount(address) virtual public view returns (uint);
+    function safei() virtual public view returns (uint);
 }

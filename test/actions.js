@@ -475,6 +475,74 @@ const mcdMerge = async (proxy, srcVaultId, destVaultId) => {
     });
 };
 
+const reflexerOpen = async (proxy, adapterAddr) => {
+    const reflexerOpenAddr = await getAddrFromRegistry('ReflexerOpen');
+
+    const openMySafe = new dfs.actions.reflexer.ReflexerOpenSafeAction(adapterAddr);
+    const functionData = openMySafe.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](reflexerOpenAddr, functionData, { gasLimit: 3000000 });
+};
+
+const reflexerSupply = async (proxy, safeId, amount, adapterAddr, from) => {
+    await approve(WETH_ADDRESS, proxy.address);
+
+    const reflexerSupplyAddr = await getAddrFromRegistry('ReflexerSupply');
+
+    const supplyMySafe = new dfs.actions.reflexer.ReflexerSupplyAction(
+        safeId,
+        amount,
+        adapterAddr,
+        from,
+    );
+
+    const functionData = supplyMySafe.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](reflexerSupplyAddr, functionData, { gasLimit: 3000000 });
+};
+
+const reflexerPayback = async (proxy, safeId, amount, from, raiAddr) => {
+    const reflexerPaybackAddress = await getAddrFromRegistry('ReflexerPayback');
+
+    await approve(raiAddr, proxy.address);
+
+    const reflexerPaybackAction = new dfs.actions.reflexer.ReflexerPaybackAction(
+        safeId,
+        amount,
+        from,
+    );
+    const functionData = reflexerPaybackAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](reflexerPaybackAddress, functionData, { gasLimit: 3000000 });
+};
+
+const reflexerWithdraw = async (proxy, safeId, amount, adapterAddr, to) => {
+    const reflexerWithdrawAddr = await getAddrFromRegistry('ReflexerWithdraw');
+
+    const reflexerWithdrawAction = new dfs.actions.reflexer.ReflexerWithdrawAction(
+        safeId,
+        amount,
+        adapterAddr,
+        to,
+    );
+    const functionData = reflexerWithdrawAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](reflexerWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
+
+const reflexerGenerate = async (proxy, safeId, amount, to) => {
+    const reflexerGenerateAddr = await getAddrFromRegistry('ReflexerGenerate');
+
+    const reflexerGenerateAction = new dfs.actions.reflexer.ReflexerGenerateAction(
+        safeId,
+        amount,
+        to,
+    );
+    const functionData = reflexerGenerateAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](reflexerGenerateAddr, functionData, { gasLimit: 3000000 });
+};
+
 module.exports = {
     sell,
     buy,
@@ -501,4 +569,10 @@ module.exports = {
 
     uniSupply,
     uniWithdraw,
+
+    reflexerOpen,
+    reflexerSupply,
+    reflexerWithdraw,
+    reflexerPayback,
+    reflexerGenerate,
 };
