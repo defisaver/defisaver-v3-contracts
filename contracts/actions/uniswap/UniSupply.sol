@@ -83,8 +83,8 @@ contract UniSupply is ActionBase, DSMath {
         (uint256 amountA, uint256 amountB, uint256 liqAmount) = _addLiquidity(_uniData);
 
         // send leftovers
-        _uniData.tokenA.withdrawTokens(_uniData.to, sub(_uniData.amountADesired, amountA));
-        _uniData.tokenB.withdrawTokens(_uniData.to, sub(_uniData.amountBDesired, amountB));
+        _uniData.tokenA.withdrawTokens(_uniData.from, sub(_uniData.amountADesired, amountA));
+        _uniData.tokenB.withdrawTokens(_uniData.from, sub(_uniData.amountBDesired, amountB));
 
         logger.Log(
             address(this),
