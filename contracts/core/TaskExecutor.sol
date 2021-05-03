@@ -21,8 +21,8 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
     /// @notice Called directly through DsProxy to execute a task
     /// @dev This is the main entry point for Recipes/Tasks executed manually
     /// @param _currTask Task to be executed
-    function executeTask(Task memory _currTask) public payable   {
-        _executeActions(_currTask);
+    function executeTask(Task memory _currTask) public payable {
+        _executeActions(_currTask, false);
     }
 
     /// @notice Called through the Strategy contract to execute a task
@@ -45,7 +45,7 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
                 paramMapping: template.paramMapping
             });
 
-        _executeActions(currTask);
+        _executeActions(currTask, true);
     }
 
     /// @notice This is the callback function that FL actions call
@@ -65,7 +65,21 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
     /// @notice Runs all actions from the task
     /// @dev FL action must be first and is parsed separately, execution will go to _executeActionsFromFL
     /// @param _currTask to be executed
-    function _executeActions(Task memory _currTask) internal {
+    /// @param _isStrategy If actions are executed as part of a strategy
+    function _executeActions(Task memory _currTask, bool _isStrategy) internal {
+        if (_isStrategy) {
+            uint256 startGas = gasleft() + 21000;
+            uint256 lastActionIndex = _currTask.actionIds.length - 1;
+
+            address lastActionAddr = registry.getAddr(_currTask.actionIds[lastActionIndex]);
+
+            bytes memory startGasBytes = abi.encode(startGas);
+            _currTask.callData[lastActionIndex][0] = startGasBytes;
+
+            // If it's a strategy must have a way to take fee
+            require(isFeeAction(lastActionAddr), "Last action must take fee");
+        }
+
         address firstActionAddr = registry.getAddr(_currTask.actionIds[0]);
 
         bytes32[] memory returnValues = new bytes32[](_currTask.actionIds.length);
@@ -135,5 +149,11 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
     /// @param _actionAddr Address of the action
     function isFL(address _actionAddr) internal pure returns (bool) {
         return ActionBase(_actionAddr).actionType() == uint8(ActionBase.ActionType.FL_ACTION);
+    }
+
+    /// @notice Checks if the specified address is of Fee type action
+    /// @param _actionAddr Address of the action
+    function isFeeAction(address _actionAddr) internal pure returns (bool) {
+        return ActionBase(_actionAddr).actionType() == uint8(ActionBase.ActionType.FEE_ACTION);
     }
 }

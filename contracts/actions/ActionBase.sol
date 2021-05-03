@@ -30,7 +30,7 @@ abstract contract ActionBase is AdminAuth {
     uint8 public constant NO_PARAM_MAPPING = 0;
 
     /// @dev We need to parse Flash loan actions in a different way
-    enum ActionType { FL_ACTION, STANDARD_ACTION, CUSTOM_ACTION }
+    enum ActionType { FL_ACTION, STANDARD_ACTION, FEE_ACTION, CUSTOM_ACTION }
 
     /// @notice Parses inputs and runs the implemented action through a proxy
     /// @dev Is called by the TaskExecutor chaining actions together
