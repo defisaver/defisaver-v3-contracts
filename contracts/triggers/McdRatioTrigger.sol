@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity =0.7.6;
+pragma abicoder v2;
 
 import "../auth/AdminAuth.sol";
 import "../DS/DSMath.sol";
@@ -18,44 +19,44 @@ contract McdRatioTrigger is ITrigger, AdminAuth, DSMath {
 
     enum RatioState {OVER, UNDER}
 
-    function isTriggered(bytes memory _callData, bytes memory _subData)
+    function isTriggered(bytes[] memory _callData, bytes[] memory _subData)
         public
         view
         override
         returns (bool)
     {
         uint256 nextPrice = parseParamData(_callData);
-        (uint256 cdpId, uint256 ratio, RatioState state) = parseSubData(_subData);
+        (uint256 cdpId, uint256 ratio, uint8 state) = parseSubData(_subData);
 
         uint256 currRatio = getRatio(cdpId, nextPrice);
 
-        if (state == RatioState.OVER) {
+        if (RatioState(state) == RatioState.OVER) {
             if (currRatio > ratio) return true;
         }
 
-        if (state == RatioState.UNDER) {
+        if (RatioState(state) == RatioState.UNDER) {
             if (currRatio < ratio) return true;
         }
 
         return false;
     }
 
-    function parseSubData(bytes memory _data)
+    function parseSubData(bytes[] memory _data)
         public
         pure
         returns (
-            uint256,
-            uint256,
-            RatioState
+            uint256 cdpId,
+            uint256 ratio,
+            uint8 state
         )
     {
-        (uint256 cdpId, uint256 ratio, uint8 state) = abi.decode(_data, (uint256, uint256, uint8));
-
-        return (cdpId, ratio, RatioState(state));
+        cdpId = abi.decode(_data[0], (uint256));
+        ratio= abi.decode(_data[1], (uint256));
+        state = abi.decode(_data[2], (uint8));
     }
 
-    function parseParamData(bytes memory _data) public pure returns (uint256 nextPrice) {
-        (nextPrice) = abi.decode(_data, (uint256));
+    function parseParamData(bytes[] memory _data) public pure returns (uint256 nextPrice) {
+        (nextPrice) = abi.decode(_data[0], (uint256));
     }
 
     /// @notice Gets CDP ratio

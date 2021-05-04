@@ -78,8 +78,7 @@ contract StrategyExecutor is StrategyData, AdminAuth {
         for (uint256 i = 0; i < triggerIds.length; ++i) {
             address triggerAddr = registry.getAddr(triggerIds[i]);
 
-            // TODO: change the 0
-            bool isTriggered = ITrigger(triggerAddr).isTriggered(_triggerCallData[i][0], _strategy.triggerData[i][0]);
+            bool isTriggered = ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _strategy.triggerData[i]);
             require(isTriggered, ERR_TRIGGER_NOT_ACTIVE);
         }
     }

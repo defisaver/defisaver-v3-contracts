@@ -55,7 +55,7 @@ contract GasFeeTaker is ActionBase, DSMath {
         logger.Log(
             address(this),
             msg.sender,
-            "FeeTaker",
+            "GasFeeTaker",
             abi.encode(gasUsed, amount, feeToken) // NOTICE: check if we need to log more
         );
 
