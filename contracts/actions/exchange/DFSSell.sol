@@ -94,7 +94,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         logger.Log(
             address(this),
             msg.sender,
-            "DfsSell",
+            "DFSSell",
             abi.encode(
                 wrapper,
                 _exchangeData.srcAddr,
