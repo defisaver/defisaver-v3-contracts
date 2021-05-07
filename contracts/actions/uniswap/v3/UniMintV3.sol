@@ -11,12 +11,11 @@ import "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol"
 /// @title Mints NFT that represents a position in uni v3
 contract UniMintV3 is ActionBase, DSMath{
     using TokenUtils for address;
-    //TODO CHANGE ADDRESS
     IUniswapV3NonfungiblePositionManager public constant positionManager =
-        IUniswapV3NonfungiblePositionManager(0x0);
+        IUniswapV3NonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
     
     struct Params {
-        address token0; 
+        address token0;
         address token1;
         uint24 fee;
         int24 tickLower;
@@ -37,12 +36,15 @@ contract UniMintV3 is ActionBase, DSMath{
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
+        // console.log("test");
         Params memory uniData = parseInputs(_callData);
         
         uniData.token0 = _parseParamAddr(uniData.token0, _paramMapping[0], _subData, _returnValues);
         uniData.token1 = _parseParamAddr(uniData.token1, _paramMapping[1], _subData, _returnValues);
         uniData.from = _parseParamAddr(uniData.from, _paramMapping[2], _subData, _returnValues);
         uniData.recipient = _parseParamAddr(uniData.recipient, _paramMapping[3], _subData, _returnValues);
+        uniData.amount0Desired = _parseParamUint(uniData.amount0Desired, _paramMapping[4], _subData, _returnValues);
+        uniData.amount1Desired = _parseParamUint(uniData.amount1Desired, _paramMapping[5], _subData, _returnValues);
 
         uint256 tokenId = _uniCreatePosition(uniData);
 
@@ -52,7 +54,6 @@ contract UniMintV3 is ActionBase, DSMath{
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable override {
         Params memory uniData = parseInputs(_callData);
-        
         _uniCreatePosition(uniData);
         
     }
@@ -65,8 +66,9 @@ contract UniMintV3 is ActionBase, DSMath{
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _uniCreatePosition(Params memory _uniData) internal returns (uint256 tokenId){
-            // fetch tokens from address
+            // fetch tokens from address;
             uint amount0Pulled = _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);
+        
             uint amount1Pulled = _uniData.token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
 
             // approve positionManager so it can pull tokens
@@ -84,13 +86,12 @@ contract UniMintV3 is ActionBase, DSMath{
             //send leftovers
             _uniData.token0.withdrawTokens(_uniData.from, sub(_uniData.amount0Desired, amount0));
             _uniData.token1.withdrawTokens(_uniData.from, sub(_uniData.amount1Desired, amount1));
-            //TODO either from or recipient
-
+            
             logger.Log(
                 address(this),
                 msg.sender,
                 "UniMintV3",
-                abi.encode(_uniData,tokenId, liquidity, amount0, amount1)
+                abi.encode(_uniData, tokenId, liquidity, amount0, amount1)
             );
 
             return tokenId;
@@ -130,7 +131,7 @@ contract UniMintV3 is ActionBase, DSMath{
         returns (
             Params memory uniData
         )
-    {
+    {   
         uniData = abi.decode(_callData[0], (Params));
     }
 }

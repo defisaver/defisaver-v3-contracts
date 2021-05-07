@@ -13,7 +13,7 @@ contract UniSupplyV3 is ActionBase, DSMath{
     using TokenUtils for address;
     //TODO CHANGE ADDRESS
     IUniswapV3NonfungiblePositionManager public constant positionManager =
-        IUniswapV3NonfungiblePositionManager(0x0);
+        IUniswapV3NonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
 
     struct Params {
         uint256 tokenId;
@@ -34,14 +34,14 @@ contract UniSupplyV3 is ActionBase, DSMath{
     ) public payable virtual override returns (bytes32) {
         Params memory uniData = parseInputs(_callData);
         
-        uniData.amount0Desired = _parseParamAddr(uniData.amount0Desired, _paramMapping[0], _subData, _returnValues);
-        uniData.amount1Desired = _parseParamAddr(uniData.amount1Desired, _paramMapping[1], _subData, _returnValues);
+        uniData.amount0Desired = _parseParamUint(uniData.amount0Desired, _paramMapping[0], _subData, _returnValues);
+        uniData.amount1Desired = _parseParamUint(uniData.amount1Desired, _paramMapping[1], _subData, _returnValues);
         uniData.from = _parseParamAddr(uniData.from, _paramMapping[2], _subData, _returnValues);
-        uniData.amount0Min = _parseParamAddr(uniData.amount0Min, _paramMapping[0], _subData, _returnValues);
-        uniData.amount1Min = _parseParamAddr(uniData.amount1Min, _paramMapping[1], _subData, _returnValues);
+        uniData.amount0Min = _parseParamUint(uniData.amount0Min, _paramMapping[0], _subData, _returnValues);
+        uniData.amount1Min = _parseParamUint(uniData.amount1Min, _paramMapping[1], _subData, _returnValues);
 
         uint128 liquidity = _uniSupplyPosition(uniData);
-        return bytes32(liquidity);
+        return bytes32(uint256(liquidity));
     }
 
     /// @inheritdoc ActionBase
@@ -62,9 +62,10 @@ contract UniSupplyV3 is ActionBase, DSMath{
     function _uniSupplyPosition(Params memory _uniData)
         internal
         returns(uint128 liquidity)
-    {
-        (,,address token0,address token1,,,,,,,,) = positionManager.positions(_uniData.tokenId);
-
+    {   address token0;
+        address token1;
+        
+        //(address token0, address token1) = _getTokenAdresses(_uniData.tokenId);
         // fetch tokens from address
         uint amount0Pulled = token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);
         uint amount1Pulled = token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
@@ -89,8 +90,30 @@ contract UniSupplyV3 is ActionBase, DSMath{
 
     }
 
+    function _getTokenAdresses(uint tokenId) internal view returns(address token0, address token1){
+        // (,, token0,token1,,,,,,,,) = positionManager.positions(tokenId);
+    uint256[3] memory ret;
+    bytes memory data = abi.encodeWithSignature("positions(uint256)", tokenId);
+
+    assembly {
+        let success := staticcall(
+            gas(),           // gas remaining
+            0xC36442b4a4522E871399CD717aBDD847Ab11FE88,  // destination address
+            add(data, 32), // input buffer (starts after the first 32 bytes in the `data` array)
+            mload(data),   // input length (loaded from the first 32 bytes in the `data` array)
+            ret,           // output buffer
+            64             // output length
+        )
+        if iszero(success) {
+            revert(0, 0)
+        }
+    }
+
+    return (address(ret[1]), address(ret[2]));
+    }
+    
     /// @dev increases liquidity by token amounts desired
-    /// @return new liquidity amount
+    /// @return liquidity new liquidity amount
     function _uniSupply(Params memory _uniData)
         internal
         returns (

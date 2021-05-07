@@ -543,6 +543,121 @@ const reflexerGenerate = async (proxy, safeId, amount, to) => {
     return proxy['execute(address,bytes)'](reflexerGenerateAddr, functionData, { gasLimit: 3000000 });
 };
 
+const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amount0Desired,
+    amount1Desired, recipient, from) => {
+    const uniMintV3Address = await getAddrFromRegistry('UniMintV3');
+    const amount0Min = 0; // amount0Desired.div(2);
+    const amount1Min = 0; // amount1Desired.div(2);
+
+    // buy tokens
+    const tokenBalance0 = await balanceOf(token0, from);
+    const tokenBalance1 = await balanceOf(token1, from);
+
+    if (balanceOf(WETH_ADDRESS, from) === 0) {
+        depositToWeth(hre.ethers.utils.parseUnits('20', 18));
+    }
+
+    if (tokenBalance0.lt(amount0Desired)) {
+        await sell(
+            proxy,
+            WETH_ADDRESS,
+            token0,
+            hre.ethers.utils.parseUnits('10', 18),
+            UNISWAP_WRAPPER,
+            from,
+            from,
+        );
+    }
+
+    if (tokenBalance1.lt(amount1Desired)) {
+        await sell(
+            proxy,
+            WETH_ADDRESS,
+            token1,
+            hre.ethers.utils.parseUnits('10', 18),
+            UNISWAP_WRAPPER,
+            from,
+            from,
+        );
+    }
+
+    // console.log(await balanceOf(token0, from));
+    // console.log(await balanceOf(token1, from));
+    const deadline = Date.now() + Date.now();
+    const uniMintV3Action = new dfs.actions.uniswap.UniMintV3Action(
+        token0,
+        token1,
+        fee,
+        tickLower,
+        tickUpper,
+        amount0Desired,
+        amount1Desired,
+        amount0Min,
+        amount1Min,
+        recipient,
+        deadline,
+        from,
+    );
+    await approve(token0, proxy.address);
+    await approve(token1, proxy.address);
+
+    const functionData = uniMintV3Action.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](uniMintV3Address, functionData, { gasLimit: 3000000 });
+};
+
+const uniV3Supply = async (proxy, tokenId, amount0Desired,
+    amount1Desired, amount0Min, amount1Min, deadline, from) => {
+    const uniSupplyV3Address = await getAddrFromRegistry('UniSupplyV3');
+
+    const uniSupplyV3Action = new dfs.actions.uniswap.UniSupplyV3Action(
+        tokenId,
+        amount0Desired,
+        amount1Desired,
+        amount0Min,
+        amount1Min,
+        deadline,
+        from,
+    );
+    // console.log(hre);
+    // console.log(uniSupplyV3Action.getAssetsToApprove());
+    const functionData = uniSupplyV3Action.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](uniSupplyV3Address, functionData, { gasLimit: 3000000 });
+};
+
+const uniV3Withdraw = async (proxy, tokenId, liquidity, amount0Min, amount1Min,
+    deadline, recipient, amount0Max, amount1Max) => {
+    const uniWithdrawV3Address = await getAddrFromRegistry('UniWithdrawV3');
+
+    const uniWithdrawV3Action = new dfs.actions.uniswap.UniWithdrawV3Action(
+        tokenId,
+        liquidity,
+        amount0Min,
+        amount1Min,
+        deadline,
+        recipient,
+        amount0Max,
+        amount1Max,
+    );
+    const functionData = uniWithdrawV3Action.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](uniWithdrawV3Address, functionData, { gasLimit: 3000000 });
+};
+
+const uniV3Collect = async (proxy, tokenId, recipient, amount0Max, amount1Max) => {
+    const uniCollectV3Address = await getAddrFromRegistry('UniCollectV3');
+    const uniCollectV3Action = new dfs.actions.uniswap.UniCollectV3Action(
+        tokenId,
+        recipient,
+        amount0Max,
+        amount1Max,
+    );
+    const functionData = uniCollectV3Action.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](uniCollectV3Address, functionData, { gasLimit: 3000000 });
+};
+
 module.exports = {
     sell,
     buy,
@@ -575,4 +690,9 @@ module.exports = {
     reflexerWithdraw,
     reflexerPayback,
     reflexerGenerate,
+
+    uniV3Mint,
+    uniV3Supply,
+    uniV3Withdraw,
+    uniV3Collect,
 };

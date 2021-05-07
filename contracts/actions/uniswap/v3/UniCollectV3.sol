@@ -13,7 +13,7 @@ contract UniCollectV3 is ActionBase, DSMath{
     using TokenUtils for address;
     //TODO CHANGE ADDRESS
     IUniswapV3NonfungiblePositionManager public constant positionManager =
-        IUniswapV3NonfungiblePositionManager(0x0);
+        IUniswapV3NonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
 
     /// @param tokenId - The ID of the token for which liquidity is being decreased
     /// @param recipient - accounts to receive the tokens
@@ -36,11 +36,11 @@ contract UniCollectV3 is ActionBase, DSMath{
         Params memory uniData = parseInputs(_callData);
         
         uniData.recipient = _parseParamAddr(uniData.recipient, _paramMapping[0], _subData, _returnValues);
-        uniData.amount0Max = _parseParamAddr(uniData.amount0Max, _paramMapping[1], _subData, _returnValues);
-        uniData.amount1Max = _parseParamAddr(uniData.amount1Max, _paramMapping[2], _subData, _returnValues);
+        uniData.amount0Max = uint128(_parseParamUint(uniData.amount0Max, _paramMapping[1], _subData, _returnValues));
+        uniData.amount1Max = uint128(_parseParamUint(uniData.amount1Max, _paramMapping[2], _subData, _returnValues));
 
-        (uint256 amount0, uint256 amount1) = _uniCollect(uniData);
-        return bytes32(); //TODO what to return
+        _uniCollect(uniData);
+        return bytes32(uniData.tokenId);
     }
 
     /// @inheritdoc ActionBase
@@ -58,7 +58,7 @@ contract UniCollectV3 is ActionBase, DSMath{
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
     /// @dev collects from tokensOwed on position, sends to recipient, up to amountMax
-    /// @return amount sent to the recipient
+    /// @return amount0 sent to the recipient
     function _uniCollect(Params memory _uniData)
         internal
         returns (
@@ -72,7 +72,7 @@ contract UniCollectV3 is ActionBase, DSMath{
                 recipient: _uniData.recipient,
                 amount0Max: _uniData.amount0Max,
                 amount1Max: _uniData.amount1Max
-            })
+            });
         (amount0, amount1) = positionManager.collect(collectParams);
     }
         

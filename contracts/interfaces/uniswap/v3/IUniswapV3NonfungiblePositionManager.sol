@@ -88,5 +88,7 @@ abstract contract IUniswapV3NonfungiblePositionManager{
             uint256 feeGrowthInside1LastX128,
             uint128 tokensOwed0,
             uint128 tokensOwed1
-        )
+        );
+    function balanceOf(address owner) external virtual view returns (uint256 balance);
+    function tokenOfOwnerByIndex(address owner, uint256 index) external virtual view returns (uint256 tokenId);
 }

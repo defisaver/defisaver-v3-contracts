@@ -13,7 +13,7 @@ contract UniWithdrawV3 is ActionBase, DSMath{
     using TokenUtils for address;
     //TODO CHANGE ADDRESS
     IUniswapV3NonfungiblePositionManager public constant positionManager =
-        IUniswapV3NonfungiblePositionManager(0x0);
+        IUniswapV3NonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
 
     /// @param tokenId - The ID of the token for which liquidity is being decreased
     /// @param liquidity -The amount by which liquidity will be decreased,
@@ -43,14 +43,14 @@ contract UniWithdrawV3 is ActionBase, DSMath{
     ) public payable virtual override returns (bytes32) {
         Params memory uniData = parseInputs(_callData);
         
-        uniData.amount0Min = _parseParamAddr(uniData.amount0Min, _paramMapping[0], _subData, _returnValues);
-        uniData.amount1Min = _parseParamAddr(uniData.amount1Min, _paramMapping[1], _subData, _returnValues);
+        uniData.amount0Min = _parseParamUint(uniData.amount0Min, _paramMapping[0], _subData, _returnValues);
+        uniData.amount1Min = _parseParamUint(uniData.amount1Min, _paramMapping[1], _subData, _returnValues);
         uniData.recipient = _parseParamAddr(uniData.recipient, _paramMapping[2], _subData, _returnValues);
-        uniData.amount0Max = _parseParamAddr(uniData.amount0Max, _paramMapping[3], _subData, _returnValues);
-        uniData.amount1Max = _parseParamAddr(uniData.amount1Max, _paramMapping[4], _subData, _returnValues);
+        uniData.amount0Max = uint128(_parseParamUint(uniData.amount0Max, _paramMapping[3], _subData, _returnValues));
+        uniData.amount1Max = uint128(_parseParamUint(uniData.amount1Max, _paramMapping[4], _subData, _returnValues));
 
-        (uint256 amount0, uint256 amount1)= _uniWithdrawFromPosition(uniData);
-        return bytes32(); //TODO what to return
+        _uniWithdrawFromPosition(uniData);
+        return bytes32(uniData.tokenId);
     }
 
     /// @inheritdoc ActionBase
@@ -68,7 +68,7 @@ contract UniWithdrawV3 is ActionBase, DSMath{
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @return amounts of token0 and token1 collected and sent to the recipient
+    /// @return amount0 amounts of token0 and token1 collected and sent to the recipient
     function _uniWithdrawFromPosition(Params memory _uniData)
         internal
         returns(uint256 amount0, uint256 amount1)
@@ -76,7 +76,7 @@ contract UniWithdrawV3 is ActionBase, DSMath{
         //amount0 and amount1 now transfer to tokensOwed on position
         _uniWithdraw(_uniData);
 
-        (uint256 amount0, uint256 amount1) = _uniCollect(_uniData);
+        (amount0, amount1) = _uniCollect(_uniData);
         
         logger.Log(
                 address(this),
@@ -88,7 +88,7 @@ contract UniWithdrawV3 is ActionBase, DSMath{
     }
 
     /// @dev Burns liquidity stated, amount0Min and amount1Min are the least you get for burning that liquidity (else reverted),
-    /// @return returns how much tokens were added to tokensOwed on position
+    /// @return amount0 returns how much tokens were added to tokensOwed on position
     function _uniWithdraw(Params memory _uniData)
         internal
         returns (
@@ -108,7 +108,7 @@ contract UniWithdrawV3 is ActionBase, DSMath{
     }
     
     /// @dev collects from tokensOwed on position, sends to recipient, up to amountMax
-    /// @return amount sent to the recipient
+    /// @return amount0 amount sent to the recipient
     function _uniCollect(Params memory _uniData)
         internal
         returns (
@@ -122,7 +122,7 @@ contract UniWithdrawV3 is ActionBase, DSMath{
                 recipient: _uniData.recipient,
                 amount0Max: _uniData.amount0Max,
                 amount1Max: _uniData.amount1Max
-            })
+            });
         (amount0, amount1) = positionManager.collect(collectParams);
     }
         
