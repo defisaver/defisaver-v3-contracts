@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity =0.7.6;
-pragma abicoder v2;
+pragma abicoder v2; // solhint-disable-line
 
 import "../auth/AdminAuth.sol";
 import "../DS/DSMath.sol";
