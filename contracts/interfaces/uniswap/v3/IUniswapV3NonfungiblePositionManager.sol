@@ -91,4 +91,5 @@ abstract contract IUniswapV3NonfungiblePositionManager{
         );
     function balanceOf(address owner) external virtual view returns (uint256 balance);
     function tokenOfOwnerByIndex(address owner, uint256 index) external virtual view returns (uint256 tokenId);
+    function approve(address to, uint256 tokenId) public virtual;
 }

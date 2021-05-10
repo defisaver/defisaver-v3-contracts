@@ -11,7 +11,6 @@ import "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol"
 /// @title Collects tokensOwed from a position represented by tokenId
 contract UniCollectV3 is ActionBase, DSMath{
     using TokenUtils for address;
-    //TODO CHANGE ADDRESS
     IUniswapV3NonfungiblePositionManager public constant positionManager =
         IUniswapV3NonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
 
@@ -74,6 +73,13 @@ contract UniCollectV3 is ActionBase, DSMath{
                 amount1Max: _uniData.amount1Max
             });
         (amount0, amount1) = positionManager.collect(collectParams);
+
+        logger.Log(
+                address(this),
+                msg.sender,
+                "UniCollectV3",
+                abi.encode(_uniData, amount0, amount1)
+            );
     }
         
     function parseInputs(bytes[] memory _callData)

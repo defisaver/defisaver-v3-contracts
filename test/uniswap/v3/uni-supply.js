@@ -1,8 +1,8 @@
 /* eslint-disable no-await-in-loop */
 const { expect } = require('chai');
+
 const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
-
 const {
     getProxy,
     redeploy,
@@ -10,9 +10,10 @@ const {
 
 const {
     uniV3Mint,
+    uniV3Supply,
 } = require('../../actions.js');
 
-describe('Uni-Mint-V3', () => {
+describe('Uni-Supply-V3', () => {
     let senderAcc; let proxy; let logger; let positionManager;
 
     const uniPairs = [
@@ -29,6 +30,7 @@ describe('Uni-Mint-V3', () => {
 
     before(async () => {
         await redeploy('UniMintV3');
+        await redeploy('UniSupplyV3');
         logger = await hre.ethers.getContractAt('DefisaverLogger', '0x5c55B921f590a89C1Ebe84dF170E655a82b62126');
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -37,7 +39,7 @@ describe('Uni-Mint-V3', () => {
 
     for (let i = 0; i < uniPairs.length; i++) {
         // eslint-disable-next-line prefer-template
-        it('... should mint a ' + uniPairs[i].tokenA + '/' + uniPairs[i].tokenB + ' position to uniswap', async () => {
+        it('... should mint and supply ' + uniPairs[i].tokenA + '/' + uniPairs[i].tokenB + ' to uniswap position', async () => {
             const tokenDataA = await getAssetInfo(uniPairs[i].tokenA);
             const tokenDataB = await getAssetInfo(uniPairs[i].tokenB);
             const numberOfPositionsBefore = await positionManager.balanceOf(senderAcc.address);
@@ -49,18 +51,16 @@ describe('Uni-Mint-V3', () => {
                 tokenDataB.address, uniPairs[i].fee, uniPairs[i].tickLower,
                 uniPairs[i].tickUpper, amount0, amount1, to, from);
 
-            const numberOfPositionsAfter = await positionManager.balanceOf(senderAcc.address);
-            expect(numberOfPositionsAfter.toNumber())
-                .to.be.equal(numberOfPositionsBefore.toNumber() + 1);
             const lastPositionIndex = numberOfPositionsBefore.toNumber();
-            const tokenId = positionManager.tokenOfOwnerByIndex(to, lastPositionIndex);
-            const position = await positionManager.positions(tokenId);
-
-            expect(position.token0.toLowerCase()).to.be.equal(tokenDataA.address.toLowerCase());
-            expect(position.token1.toLowerCase()).to.be.equal(tokenDataB.address.toLowerCase());
-            expect(position.fee).to.be.equal(parseInt(uniPairs[i].fee, 10));
-            expect(position.tickLower).to.be.equal(parseInt(uniPairs[i].tickLower, 10));
-            expect(position.tickUpper).to.be.equal(parseInt(uniPairs[i].tickUpper, 10));
+            const tokenId = await positionManager.tokenOfOwnerByIndex(to, lastPositionIndex);
+            // supply
+            let position = await positionManager.positions(tokenId);
+            const liquidityBeforeSupply = position.liquidity;
+            await uniV3Supply(proxy, tokenId.toNumber(), amount0, amount1,
+                from, tokenDataA.address, tokenDataB.address);
+            position = await positionManager.positions(tokenId);
+            const liquidityAfterSupply = position.liquidity;
+            expect(liquidityAfterSupply.sub(liquidityBeforeSupply)).to.be.gte(0);
         }).timeout(30000);
     }
     it('... should Log event', async () => {
@@ -68,13 +68,22 @@ describe('Uni-Mint-V3', () => {
         const tokenDataA = getAssetInfo(uniPairs[i].tokenA);
         const tokenDataB = getAssetInfo(uniPairs[i].tokenB);
 
+        const numberOfPositionsBefore = await positionManager.balanceOf(senderAcc.address);
         const from = senderAcc.address;
         const to = senderAcc.address;
         const amount0 = hre.ethers.utils.parseUnits(uniPairs[i].amount0, tokenDataA.decimals);
         const amount1 = hre.ethers.utils.parseUnits(uniPairs[i].amount1, tokenDataB.decimals);
+
         await expect(uniV3Mint(proxy, tokenDataA.address,
             tokenDataB.address, uniPairs[i].fee, uniPairs[i].tickLower,
             uniPairs[i].tickUpper, amount0, amount1, to, from))
+            .to.emit(logger, 'LogEvent');
+
+        const lastPositionIndex = numberOfPositionsBefore.toNumber();
+        const tokenId = await positionManager.tokenOfOwnerByIndex(to, lastPositionIndex);
+
+        await expect(uniV3Supply(proxy, tokenId.toNumber(), amount0, amount1,
+            from, tokenDataA.address, tokenDataB.address))
             .to.emit(logger, 'LogEvent');
     }).timeout(30000);
 });

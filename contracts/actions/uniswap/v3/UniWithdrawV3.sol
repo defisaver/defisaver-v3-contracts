@@ -11,7 +11,6 @@ import "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol"
 /// @title Decreases liquidity from a position represented by tokenID, and collects token from position to recipient
 contract UniWithdrawV3 is ActionBase, DSMath{
     using TokenUtils for address;
-    //TODO CHANGE ADDRESS
     IUniswapV3NonfungiblePositionManager public constant positionManager =
         IUniswapV3NonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
 
@@ -48,6 +47,7 @@ contract UniWithdrawV3 is ActionBase, DSMath{
         uniData.recipient = _parseParamAddr(uniData.recipient, _paramMapping[2], _subData, _returnValues);
         uniData.amount0Max = uint128(_parseParamUint(uniData.amount0Max, _paramMapping[3], _subData, _returnValues));
         uniData.amount1Max = uint128(_parseParamUint(uniData.amount1Max, _paramMapping[4], _subData, _returnValues));
+        uniData.liquidity = uint128(_parseParamUint(uniData.liquidity, _paramMapping[5], _subData, _returnValues));
 
         _uniWithdrawFromPosition(uniData);
         return bytes32(uniData.tokenId);
@@ -56,7 +56,6 @@ contract UniWithdrawV3 is ActionBase, DSMath{
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable override {
         Params memory uniData = parseInputs(_callData);
-        
         _uniWithdrawFromPosition(uniData);
         
     }
@@ -77,7 +76,7 @@ contract UniWithdrawV3 is ActionBase, DSMath{
         _uniWithdraw(_uniData);
 
         (amount0, amount1) = _uniCollect(_uniData);
-        
+    
         logger.Log(
                 address(this),
                 msg.sender,

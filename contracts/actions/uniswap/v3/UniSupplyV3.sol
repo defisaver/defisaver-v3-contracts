@@ -11,7 +11,6 @@ import "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol"
 /// @title Mints NFT that represents a position in uni v3
 contract UniSupplyV3 is ActionBase, DSMath{
     using TokenUtils for address;
-    //TODO CHANGE ADDRESS
     IUniswapV3NonfungiblePositionManager public constant positionManager =
         IUniswapV3NonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
 
@@ -47,8 +46,7 @@ contract UniSupplyV3 is ActionBase, DSMath{
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable override {
         Params memory uniData = parseInputs(_callData);
-        
-        _uniSupply(uniData);
+        _uniSupplyPosition(uniData);
         
     }
 
@@ -62,10 +60,7 @@ contract UniSupplyV3 is ActionBase, DSMath{
     function _uniSupplyPosition(Params memory _uniData)
         internal
         returns(uint128 liquidity)
-    {   address token0;
-        address token1;
-        
-        //(address token0, address token1) = _getTokenAdresses(_uniData.tokenId);
+    {  (address token0, address token1) = _getTokenAdresses(_uniData.tokenId);
         // fetch tokens from address
         uint amount0Pulled = token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);
         uint amount1Pulled = token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
@@ -80,7 +75,6 @@ contract UniSupplyV3 is ActionBase, DSMath{
         uint256 amount0;
         uint256 amount1;
         (liquidity, amount0, amount1) = _uniSupply(_uniData);
-
         logger.Log(
                 address(this),
                 msg.sender,
@@ -91,25 +85,23 @@ contract UniSupplyV3 is ActionBase, DSMath{
     }
 
     function _getTokenAdresses(uint tokenId) internal view returns(address token0, address token1){
-        // (,, token0,token1,,,,,,,,) = positionManager.positions(tokenId);
-    uint256[3] memory ret;
-    bytes memory data = abi.encodeWithSignature("positions(uint256)", tokenId);
+        uint256[11] memory ret;
+        bytes memory data = abi.encodeWithSignature("positions(uint256)", tokenId);
 
-    assembly {
-        let success := staticcall(
-            gas(),           // gas remaining
-            0xC36442b4a4522E871399CD717aBDD847Ab11FE88,  // destination address
-            add(data, 32), // input buffer (starts after the first 32 bytes in the `data` array)
-            mload(data),   // input length (loaded from the first 32 bytes in the `data` array)
-            ret,           // output buffer
-            64             // output length
-        )
-        if iszero(success) {
-            revert(0, 0)
+        assembly {
+            let success := staticcall(
+                gas(),           // gas remaining
+                0xC36442b4a4522E871399CD717aBDD847Ab11FE88,  // destination address
+                add(data, 32), // input buffer (starts after the first 32 bytes in the `data` array)
+                mload(data),   // input length (loaded from the first 32 bytes in the `data` array)
+                ret,           // output buffer
+                256             // output length
+            )
+            if iszero(success) {
+                revert(0, 0)
+            }
         }
-    }
-
-    return (address(ret[1]), address(ret[2]));
+        return (address(ret[2]), address(ret[3]));
     }
     
     /// @dev increases liquidity by token amounts desired
