@@ -19,7 +19,6 @@ const AAVE_MARKET = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
 const OWNER_ACC = '0x0528A32fda5beDf89Ba9ad67296db83c9452F28C';
 const ADMIN_ACC = '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9';
 
-const MAX_UINT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
 const MIN_VAULT_DAI_AMOUNT = '5010'; // TODO: can we fetch this dynamically
@@ -151,7 +150,7 @@ const approve = async (tokenAddr, to) => {
     const allowance = await tokenContract.allowance(tokenContract.signer.address, to);
 
     if (allowance.toString() === '0') {
-        await tokenContract.approve(to, MAX_UINT, { gasLimit: 1000000 });
+        await tokenContract.approve(to, hre.ethers.constants.MaxUint256, { gasLimit: 1000000 });
     }
 };
 
@@ -281,7 +280,6 @@ module.exports = {
     OASIS_WRAPPER,
     WETH_ADDRESS,
     ETH_ADDR,
-    MAX_UINT,
     OWNER_ACC,
     ADMIN_ACC,
     USDC_ADDR,

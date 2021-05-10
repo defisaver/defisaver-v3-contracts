@@ -4,7 +4,6 @@ const {
     getProxy,
     redeploy,
     standardAmounts,
-    MAX_UINT,
     depositToWeth,
     MIN_VAULT_RAI_AMOUNT,
     RAI_ADDR,
@@ -84,7 +83,7 @@ describe('Reflexer-Payback', function () {
         await expect(() => reflexerGenerate(proxy, safeID, amountRai, to))
             .to.changeTokenBalance(rai, senderAcc, amountRai);
 
-        await reflexerPayback(proxy, safeID, MAX_UINT, from, RAI_ADDR);
+        await reflexerPayback(proxy, safeID, hre.ethers.constants.MaxUint256, from, RAI_ADDR);
 
         const info = await getSafeInfo(reflexerView, safeID);
         expect(info.debt).to.be.equal(0);
@@ -107,7 +106,7 @@ describe('Reflexer-Payback', function () {
         await expect(reflexerGenerate(proxy, safeID, amountRai, to))
             .to.emit(logger, 'LogEvent');
 
-        await expect(reflexerPayback(proxy, safeID, MAX_UINT, from, RAI_ADDR))
+        await expect(reflexerPayback(proxy, safeID, hre.ethers.constants.MaxUint256, from, RAI_ADDR))
             .to.emit(logger, 'LogEvent');
     }).timeout(40000);
 });

@@ -18,7 +18,6 @@ const {
     standardAmounts,
     MIN_VAULT_DAI_AMOUNT,
     WETH_ADDRESS,
-    MAX_UINT,
     depositToWeth,
     setNewExchangeWrapper,
 } = require('../../utils');
@@ -191,7 +190,7 @@ describe('Mcd-Create', function () {
                 new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
                 new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR),
                 new dfs.actions.basic.PullTokenAction(tokenAddr, senderAcc.address, collAmount),
-                new dfs.actions.maker.MakerSupplyAction('$3', MAX_UINT, joinAddr, proxy.address, MCD_MANAGER_ADDR),
+                new dfs.actions.maker.MakerSupplyAction('$3', hre.ethers.constants.MaxUint256, joinAddr, proxy.address, MCD_MANAGER_ADDR),
                 new dfs.actions.maker.MakerGenerateAction('$3', '$1', dydxFlAddr, MCD_MANAGER_ADDR),
             ]);
 
