@@ -8,7 +8,6 @@ const {
     getProxy,
     redeploy,
     standardAmounts,
-    MAX_UINT,
     MIN_VAULT_DAI_AMOUNT,
     WETH_ADDRESS,
 } = require('../utils');
@@ -122,7 +121,7 @@ describe('Mcd-Withdraw', function () {
 
             const collBalanceBefore = await balanceOf(tokenData.address, to);
 
-            await withdrawMcd(proxy, vaultId, MAX_UINT, joinAddr, to);
+            await withdrawMcd(proxy, vaultId, hre.ethers.constants.MaxUint256, joinAddr, to);
 
             const collBalanceAfter = await balanceOf(tokenData.address, to);
 

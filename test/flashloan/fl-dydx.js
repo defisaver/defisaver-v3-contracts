@@ -9,7 +9,6 @@ const {
     redeploy,
     standardAmounts,
     nullAddress,
-    MAX_UINT,
     WETH_ADDRESS,
 } = require('../utils');
 
@@ -54,7 +53,7 @@ describe('FL-DyDx', function () {
                     nullAddress,
                     [],
                 ),
-                new dfs.actions.basic.SendTokenAction(assetInfo.address, dydxFl.address, MAX_UINT),
+                new dfs.actions.basic.SendTokenAction(assetInfo.address, dydxFl.address, hre.ethers.constants.MaxUint256),
             ]);
 
             const functionData = basicFLRecipe.encodeForDsProxyCall();
