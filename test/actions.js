@@ -543,6 +543,54 @@ const reflexerGenerate = async (proxy, safeId, amount, to) => {
     return proxy['execute(address,bytes)'](reflexerGenerateAddr, functionData, { gasLimit: 3000000 });
 };
 
+const dydxSupply = async (proxy, tokenAddr, amount, from) => {
+    await approve(tokenAddr, proxy.address);
+
+    const dydxSupplyAddr = await getAddrFromRegistry('DyDxSupply');
+
+    const dydxSupplyAction = new dfs.actions.dydx.DyDxSupplyAction(
+        tokenAddr,
+        amount,
+        from,
+    );
+    const functionData = dydxSupplyAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](dydxSupplyAddr, functionData, { gasLimit: 3000000 });
+};
+
+const dydxWithdraw = async (proxy, tokenAddr, amount, to) => {
+    const dydxWithdrawAddr = await getAddrFromRegistry('DyDxWithdraw');
+
+    const dydxWithdrawAction = new dfs.actions.dydx.DyDxWithdrawAction(
+        tokenAddr,
+        amount,
+        to,
+    );
+    const functionData = dydxWithdrawAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](dydxWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
+
+const buyTokenIfNeeded = async (tokenAddr, senderAcc, proxy, standardAmount) => {
+    const tokenBalance = await balanceOf(tokenAddr, senderAcc.address);
+
+    if (tokenBalance.lt(standardAmount)) {
+        if (isEth(tokenAddr)) {
+            await depositToWeth(standardAmount.toString());
+        } else {
+            await sell(
+                proxy,
+                WETH_ADDRESS,
+                tokenAddr,
+                hre.ethers.utils.parseUnits('5', 18),
+                UNISWAP_WRAPPER,
+                senderAcc.address,
+                senderAcc.address,
+            );
+        }
+    }
+};
+
 module.exports = {
     sell,
     buy,
@@ -575,4 +623,9 @@ module.exports = {
     reflexerWithdraw,
     reflexerPayback,
     reflexerGenerate,
+
+    dydxSupply,
+    dydxWithdraw,
+
+    buyTokenIfNeeded,
 };
