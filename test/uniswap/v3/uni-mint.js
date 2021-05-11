@@ -48,20 +48,18 @@ describe('Uni-Mint-V3', () => {
             await uniV3Mint(proxy, tokenDataA.address,
                 tokenDataB.address, uniPairs[i].fee, uniPairs[i].tickLower,
                 uniPairs[i].tickUpper, amount0, amount1, to, from);
-
             const numberOfPositionsAfter = await positionManager.balanceOf(senderAcc.address);
             expect(numberOfPositionsAfter.toNumber())
                 .to.be.equal(numberOfPositionsBefore.toNumber() + 1);
             const lastPositionIndex = numberOfPositionsBefore.toNumber();
             const tokenId = positionManager.tokenOfOwnerByIndex(to, lastPositionIndex);
             const position = await positionManager.positions(tokenId);
-
             expect(position.token0.toLowerCase()).to.be.equal(tokenDataA.address.toLowerCase());
             expect(position.token1.toLowerCase()).to.be.equal(tokenDataB.address.toLowerCase());
             expect(position.fee).to.be.equal(parseInt(uniPairs[i].fee, 10));
             expect(position.tickLower).to.be.equal(parseInt(uniPairs[i].tickLower, 10));
             expect(position.tickUpper).to.be.equal(parseInt(uniPairs[i].tickUpper, 10));
-        }).timeout(30000);
+        }).timeout(50000);
     }
     it('... should Log event', async () => {
         const i = 0;
@@ -76,5 +74,5 @@ describe('Uni-Mint-V3', () => {
             tokenDataB.address, uniPairs[i].fee, uniPairs[i].tickLower,
             uniPairs[i].tickUpper, amount0, amount1, to, from))
             .to.emit(logger, 'LogEvent');
-    }).timeout(30000);
+    }).timeout(50000);
 });

@@ -73,7 +73,7 @@ describe('Uni-Supply-V3', () => {
             position = await positionManager.positions(tokenId);
             expect(position.liquidity).to.be.eq(0);
             expect(position.tokensOwed0.add(position.tokensOwed1)).to.be.eq(0);
-        }).timeout(30000);
+        }).timeout(50000);
     }
     it('... should Log event', async () => {
         const i = 0;
@@ -104,5 +104,5 @@ describe('Uni-Supply-V3', () => {
 
         await expect(uniV3Withdraw(proxy, tokenId.toNumber(), liquidityAfterSupply, to))
             .to.emit(logger, 'LogEvent');
-    }).timeout(30000);
+    }).timeout(50000);
 });

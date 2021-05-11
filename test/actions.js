@@ -557,21 +557,19 @@ const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amoun
     const uniMintV3Address = await getAddrFromRegistry('UniMintV3');
     const amount0Min = 0;
     const amount1Min = 0;
-
     // buy tokens
-    const tokenBalance0 = await balanceOf(token0, from);
-    const tokenBalance1 = await balanceOf(token1, from);
-
-    if (balanceOf(WETH_ADDRESS, from) === 0) {
+    const wethBalance = await balanceOf(WETH_ADDRESS, from);
+    if (wethBalance.eq(0)) {
         await depositToWeth(hre.ethers.utils.parseUnits('20', 18));
     }
-
+    const tokenBalance0 = await balanceOf(token0, from);
+    const tokenBalance1 = await balanceOf(token1, from);
     if (tokenBalance0.lt(amount0Desired)) {
         await sell(
             proxy,
             WETH_ADDRESS,
             token0,
-            hre.ethers.utils.parseUnits('10', 18),
+            hre.ethers.utils.parseUnits('9', 18),
             UNISWAP_WRAPPER,
             from,
             from,
@@ -583,13 +581,12 @@ const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amoun
             proxy,
             WETH_ADDRESS,
             token1,
-            hre.ethers.utils.parseUnits('10', 18),
+            hre.ethers.utils.parseUnits('9', 18),
             UNISWAP_WRAPPER,
             from,
             from,
         );
     }
-
     const deadline = Date.now() + Date.now();
     const uniMintV3Action = new dfs.actions.uniswap.UniMintV3Action(
         token0,
@@ -620,12 +617,14 @@ const uniV3Supply = async (proxy, tokenId, amount0Desired,
     const amount0Min = 0;
     const amount1Min = 0;
 
+    const wethBalance = await balanceOf(WETH_ADDRESS, from);
+    if (wethBalance.eq(0)) {
+        await depositToWeth(hre.ethers.utils.parseUnits('20', 18));
+    }
+
     const tokenBalance0 = await balanceOf(token0, from);
     const tokenBalance1 = await balanceOf(token1, from);
 
-    if (balanceOf(WETH_ADDRESS, from) === 0) {
-        await depositToWeth(hre.ethers.utils.parseUnits('20', 18));
-    }
     // buy tokens
     if (tokenBalance0.lt(amount0Desired)) {
         await sell(
