@@ -59,10 +59,10 @@ describe('Uni-Mint-V3', () => {
             await router.exactInputSingle(struct);
             const tokenId = await positionManager.tokenOfOwnerByIndex(to, lastPositionIndex);
             await positionManager.approve(proxy.address, tokenId);
-            await uniV3Collect(proxy, tokenId, to, 1, 1);
+            await uniV3Collect(proxy, tokenId.toNumber(), to, 1, 1);
             let position = await positionManager.positions(tokenId);
             expect(position.tokensOwed0.add(position.tokensOwed1)).to.be.gt(0);
-            await uniV3Collect(proxy, tokenId, to, MAX_UINT128, MAX_UINT128);
+            await uniV3Collect(proxy, tokenId.toNumber(), to, MAX_UINT128, MAX_UINT128);
 
             position = await positionManager.positions(tokenId);
             expect(position.tokensOwed0.add(position.tokensOwed1)).to.be.eq(0);

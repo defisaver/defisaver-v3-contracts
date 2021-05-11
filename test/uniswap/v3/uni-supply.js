@@ -53,7 +53,6 @@ describe('Uni-Supply-V3', () => {
 
             const lastPositionIndex = numberOfPositionsBefore.toNumber();
             const tokenId = await positionManager.tokenOfOwnerByIndex(to, lastPositionIndex);
-            // supply
             let position = await positionManager.positions(tokenId);
             const liquidityBeforeSupply = position.liquidity;
             await uniV3Supply(proxy, tokenId.toNumber(), amount0, amount1,

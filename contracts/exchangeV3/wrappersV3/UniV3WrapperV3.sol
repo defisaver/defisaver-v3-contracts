@@ -2,7 +2,6 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/exchange/IExchangeV3.sol";
 import "../../interfaces/exchange/ISwapRouter.sol";
@@ -16,8 +15,8 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth {
     using TokenUtils for address;
     using SafeERC20 for IERC20;
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    ISwapRouter public constant router = ISwapRouter(0x0);
-    IQuoter public constant quoter = IQuoter(0x0);
+    ISwapRouter public constant router = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
+    IQuoter public constant quoter = IQuoter(0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6);
     /// @notice Sells _srcAmount of tokens at UniswapV3
     /// @param _srcAddr From token
     /// @param _srcAmount From amount
@@ -25,7 +24,7 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @return uint amount of tokens received from selling
     function sell(address _srcAddr, address, uint _srcAmount, bytes calldata _additionalData) external override returns (uint) {
         IERC20(_srcAddr).safeApprove(address(router), _srcAmount);
-        
+
         ISwapRouter.ExactInputParams memory params = 
             ISwapRouter.ExactInputParams({
                 path: _additionalData,
@@ -34,9 +33,7 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth {
                 amountIn: _srcAmount,
                 amountOutMinimum: 1
             });
-        
         uint amountOut = router.exactInput(params);
-
         return amountOut;
     }
     /// @notice Buys _destAmount of tokens at UniswapV3
@@ -47,7 +44,6 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth {
     function buy(address _srcAddr, address, uint _destAmount, bytes calldata _additionalData) external override returns(uint) {
         uint srcAmount = _srcAddr.getBalance(address(this));
         IERC20(_srcAddr).safeApprove(address(router), srcAmount);
-
         ISwapRouter.ExactOutputParams memory params = 
             ISwapRouter.ExactOutputParams({
                 path: _additionalData,
@@ -56,11 +52,8 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth {
                 amountOut: _destAmount,
                 amountInMaximum: type(uint).max
             });
-        
         uint amountIn = router.exactOutput(params);
-
         sendLeftOver(_srcAddr);
-
         return amountIn;
     }
 

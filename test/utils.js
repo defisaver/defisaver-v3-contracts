@@ -177,7 +177,7 @@ const balanceOf = async (tokenAddr, addr) => {
     return balance;
 };
 
-const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0) => {
+const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, fee) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
     let firstPath = srcAddr;
@@ -191,8 +191,14 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0) =
         secondPath = WETH_ADDRESS;
     }
 
-    const path = abiCoder.encode(['address[]'], [[firstPath, secondPath]]);
-
+    let path = abiCoder.encode(['address[]'], [[firstPath, secondPath]]);
+    if (fee > 0) {
+        if (destAmount > 0) {
+            path = hre.ethers.utils.solidityPack(['address', 'uint24', 'address'], [secondPath, fee, firstPath]);
+        } else {
+            path = hre.ethers.utils.solidityPack(['address', 'uint24', 'address'], [firstPath, fee, secondPath]);
+        }
+    }
     return [
         srcAddr,
         destAddr,
