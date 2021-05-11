@@ -8,12 +8,21 @@ import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
-/// @title Mints NFT that represents a position in uni v3
+/// @title Supplies liquidity to a UniswapV3 position represented by TokenId
 contract UniSupplyV3 is ActionBase, DSMath{
     using TokenUtils for address;
+
     IUniswapV3NonfungiblePositionManager public constant positionManager =
         IUniswapV3NonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
-
+    
+    /// @param tokenId - The ID of the token for which liquidity is being increased
+    /// @param liquidity -The amount by which liquidity will be increased,
+    /// @param amount0Desired - The desired amount of token0 that should be supplied,
+    /// @param amount1Desired - The desired amount of token1 that should be supplied,
+    /// @param amount0Min - The minimum amount of token0 that should be supplied,
+    /// @param amount1Min - The minimum amount of token1 that should be supplied,
+    /// @param deadline - The time by which the transaction must be included to effect the change
+    /// @param from - account to take amounts from
     struct Params {
         uint256 tokenId;
         uint256 amount0Desired;
@@ -84,6 +93,7 @@ contract UniSupplyV3 is ActionBase, DSMath{
 
     }
 
+    /// @dev calls positions from NonFungiblePositionManager for tokenId, and returns addresses for both tokens
     function _getTokenAdresses(uint tokenId) internal view returns(address token0, address token1){
         uint256[11] memory ret;
         bytes memory data = abi.encodeWithSignature("positions(uint256)", tokenId);

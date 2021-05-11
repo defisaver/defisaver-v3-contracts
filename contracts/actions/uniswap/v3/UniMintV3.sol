@@ -67,8 +67,7 @@ contract UniMintV3 is ActionBase, DSMath{
 
     function _uniCreatePosition(Params memory _uniData) internal returns (uint256 tokenId){
             // fetch tokens from address;
-            uint amount0Pulled = _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);
-        
+            uint amount0Pulled = _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);        
             uint amount1Pulled = _uniData.token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
 
             // approve positionManager so it can pull tokens

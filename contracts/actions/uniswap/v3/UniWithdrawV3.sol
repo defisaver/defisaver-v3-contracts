@@ -8,7 +8,7 @@ import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
-/// @title Decreases liquidity from a position represented by tokenID, and collects token from position to recipient
+/// @title Decreases liquidity from a position represented by tokenID, and collects tokensOwed from position to recipient
 contract UniWithdrawV3 is ActionBase, DSMath{
     using TokenUtils for address;
     IUniswapV3NonfungiblePositionManager public constant positionManager =
