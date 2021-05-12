@@ -8,6 +8,7 @@ const {
     redeploy,
     LOGGER_ADDR,
     UNIV3POSITIONMANAGER_ADDR,
+    balanceOf,
 } = require('../../utils');
 
 const {
@@ -60,6 +61,9 @@ describe('Uni-Mint-V3', () => {
             expect(position.fee).to.be.equal(parseInt(uniPairs[i].fee, 10));
             expect(position.tickLower).to.be.equal(parseInt(uniPairs[i].tickLower, 10));
             expect(position.tickUpper).to.be.equal(parseInt(uniPairs[i].tickUpper, 10));
+
+            expect(await balanceOf(tokenDataA.address, proxy.address)).to.be.eq(0);
+            expect(await balanceOf(tokenDataB.address, proxy.address)).to.be.eq(0);
         }).timeout(50000);
     }
     it('... should Log event', async () => {

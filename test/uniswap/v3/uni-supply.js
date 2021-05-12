@@ -8,6 +8,7 @@ const {
     redeploy,
     LOGGER_ADDR,
     UNIV3POSITIONMANAGER_ADDR,
+    balanceOf,
 } = require('../../utils');
 
 const {
@@ -61,6 +62,9 @@ describe('Uni-Supply-V3', () => {
             position = await positionManager.positions(tokenId);
             const liquidityAfterSupply = position.liquidity;
             expect(liquidityAfterSupply.sub(liquidityBeforeSupply)).to.be.gte(0);
+
+            expect(await balanceOf(tokenDataA.address, proxy.address)).to.be.eq(0);
+            expect(await balanceOf(tokenDataB.address, proxy.address)).to.be.eq(0);
         }).timeout(50000);
     }
     it('... should Log event', async () => {
