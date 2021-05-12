@@ -91,5 +91,7 @@ describe('Uni-Mint-V3', () => {
         await positionManager.approve(proxy.address, tokenId);
         await expect(uniV3Collect(proxy, tokenId, to, MAX_UINT128, MAX_UINT128))
             .to.emit(logger, 'LogEvent');
+        const position = await positionManager.positions(tokenId);
+        expect(position.tokensOwed0.add(position.tokensOwed1)).to.be.eq(0);
     }).timeout(50000);
 });

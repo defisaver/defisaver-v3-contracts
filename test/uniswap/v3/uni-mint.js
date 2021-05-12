@@ -42,6 +42,8 @@ describe('Uni-Mint-V3', () => {
         it(`... should mint a ${uniPairs[i].tokenA}/${uniPairs[i].tokenB} position to uniswap V3`, async () => {
             const tokenDataA = await getAssetInfo(uniPairs[i].tokenA);
             const tokenDataB = await getAssetInfo(uniPairs[i].tokenB);
+            const startingProxyBalanceTokenA = await balanceOf(tokenDataA.address, proxy.address);
+            const startingProxyBalanceTokenB = await balanceOf(tokenDataB.address, proxy.address);
             const numberOfPositionsBefore = await positionManager.balanceOf(senderAcc.address);
             const from = senderAcc.address;
             const to = senderAcc.address;
@@ -61,9 +63,10 @@ describe('Uni-Mint-V3', () => {
             expect(position.fee).to.be.equal(parseInt(uniPairs[i].fee, 10));
             expect(position.tickLower).to.be.equal(parseInt(uniPairs[i].tickLower, 10));
             expect(position.tickUpper).to.be.equal(parseInt(uniPairs[i].tickUpper, 10));
-
-            expect(await balanceOf(tokenDataA.address, proxy.address)).to.be.eq(0);
-            expect(await balanceOf(tokenDataB.address, proxy.address)).to.be.eq(0);
+            expect(await balanceOf(tokenDataA.address, proxy.address))
+                .to.be.eq(startingProxyBalanceTokenA);
+            expect(await balanceOf(tokenDataB.address, proxy.address))
+                .to.be.eq(startingProxyBalanceTokenB);
         }).timeout(50000);
     }
     it('... should Log event', async () => {

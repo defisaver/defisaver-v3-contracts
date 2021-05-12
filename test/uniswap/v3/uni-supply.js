@@ -44,6 +44,8 @@ describe('Uni-Supply-V3', () => {
         it(`... should mint and supply  ${uniPairs[i].tokenA}/${uniPairs[i].tokenB} position on uniswap V3`, async () => {
             const tokenDataA = await getAssetInfo(uniPairs[i].tokenA);
             const tokenDataB = await getAssetInfo(uniPairs[i].tokenB);
+            const startingProxyBalanceTokenA = await balanceOf(tokenDataA.address, proxy.address);
+            const startingProxyBalanceTokenB = await balanceOf(tokenDataB.address, proxy.address);
             const numberOfPositionsBefore = await positionManager.balanceOf(senderAcc.address);
             const from = senderAcc.address;
             const to = senderAcc.address;
@@ -62,9 +64,10 @@ describe('Uni-Supply-V3', () => {
             position = await positionManager.positions(tokenId);
             const liquidityAfterSupply = position.liquidity;
             expect(liquidityAfterSupply.sub(liquidityBeforeSupply)).to.be.gte(0);
-
-            expect(await balanceOf(tokenDataA.address, proxy.address)).to.be.eq(0);
-            expect(await balanceOf(tokenDataB.address, proxy.address)).to.be.eq(0);
+            expect(await balanceOf(tokenDataA.address, proxy.address))
+                .to.be.eq(startingProxyBalanceTokenA);
+            expect(await balanceOf(tokenDataB.address, proxy.address))
+                .to.be.eq(startingProxyBalanceTokenB);
         }).timeout(50000);
     }
     it('... should Log event', async () => {
