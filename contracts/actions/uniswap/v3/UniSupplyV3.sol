@@ -42,11 +42,12 @@ contract UniSupplyV3 is ActionBase, DSMath{
     ) public payable virtual override returns (bytes32) {
         Params memory uniData = parseInputs(_callData);
         
-        uniData.amount0Desired = _parseParamUint(uniData.amount0Desired, _paramMapping[0], _subData, _returnValues);
-        uniData.amount1Desired = _parseParamUint(uniData.amount1Desired, _paramMapping[1], _subData, _returnValues);
-        uniData.from = _parseParamAddr(uniData.from, _paramMapping[2], _subData, _returnValues);
-        uniData.amount0Min = _parseParamUint(uniData.amount0Min, _paramMapping[0], _subData, _returnValues);
-        uniData.amount1Min = _parseParamUint(uniData.amount1Min, _paramMapping[1], _subData, _returnValues);
+        uniData.tokenId = _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
+        uniData.amount0Desired = _parseParamUint(uniData.amount0Desired, _paramMapping[1], _subData, _returnValues);
+        uniData.amount1Desired = _parseParamUint(uniData.amount1Desired, _paramMapping[2], _subData, _returnValues);
+        uniData.amount0Min = _parseParamUint(uniData.amount0Min, _paramMapping[3], _subData, _returnValues);
+        uniData.amount1Min = _parseParamUint(uniData.amount1Min, _paramMapping[4], _subData, _returnValues);
+        uniData.from = _parseParamAddr(uniData.from, _paramMapping[5], _subData, _returnValues);
 
         uint128 liquidity = _uniSupplyPosition(uniData);
         return bytes32(uint256(liquidity));
@@ -94,8 +95,9 @@ contract UniSupplyV3 is ActionBase, DSMath{
     }
 
     /// @dev calls positions from NonFungiblePositionManager for tokenId, and returns addresses for both tokens
+    /// @dev workaround for stack too deep error that happens because positions() returns 12 variables
     function _getTokenAdresses(uint tokenId) internal view returns(address token0, address token1){
-        uint256[11] memory ret;
+        uint256[12] memory ret;
         bytes memory data = abi.encodeWithSignature("positions(uint256)", tokenId);
 
         assembly {
@@ -105,7 +107,7 @@ contract UniSupplyV3 is ActionBase, DSMath{
                 add(data, 32), // input buffer (starts after the first 32 bytes in the `data` array)
                 mload(data),   // input length (loaded from the first 32 bytes in the `data` array)
                 ret,           // output buffer
-                256             // output length
+                384             // output length
             )
             if iszero(success) {
                 revert(0, 0)

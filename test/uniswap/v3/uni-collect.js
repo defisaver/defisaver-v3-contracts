@@ -10,6 +10,9 @@ const {
     approve,
     WETH_ADDRESS,
     MAX_UINT128,
+    LOGGER_ADDR,
+    UNIV3ROUTER_ADDR,
+    UNIV3POSITIONMANAGER_ADDR,
 } = require('../../utils');
 
 const {
@@ -30,16 +33,15 @@ describe('Uni-Mint-V3', () => {
         await redeploy('UniMintV3');
         await redeploy('UniSupplyV3');
         await redeploy('UniCollectV3');
-        logger = await hre.ethers.getContractAt('DefisaverLogger', '0x5c55B921f590a89C1Ebe84dF170E655a82b62126');
-        router = await hre.ethers.getContractAt('ISwapRouter', '0xE592427A0AEce92De3Edee1F18E0157C05861564');
+        logger = await hre.ethers.getContractAt('DefisaverLogger', LOGGER_ADDR);
+        router = await hre.ethers.getContractAt('ISwapRouter', UNIV3ROUTER_ADDR);
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
-        positionManager = await hre.ethers.getContractAt('IUniswapV3NonfungiblePositionManager', '0xC36442b4a4522E871399CD717aBDD847Ab11FE88');
+        positionManager = await hre.ethers.getContractAt('IUniswapV3NonfungiblePositionManager', UNIV3POSITIONMANAGER_ADDR);
     });
 
     for (let i = 0; i < uniPairs.length; i++) {
-        // eslint-disable-next-line prefer-template
-        it('... should only collect tokens owed from  ' + uniPairs[i].tokenA + '/' + uniPairs[i].tokenB + ' position on uniswap', async () => {
+        it(`... should only collect tokens owed from  ${uniPairs[i].tokenA}/${uniPairs[i].tokenB} position on uniswap V3`, async () => {
             const tokenDataA = await getAssetInfo(uniPairs[i].tokenA);
             const tokenDataB = await getAssetInfo(uniPairs[i].tokenB);
             const numberOfPositionsBefore = await positionManager.balanceOf(senderAcc.address);
@@ -54,9 +56,10 @@ describe('Uni-Mint-V3', () => {
             const lastPositionIndex = numberOfPositionsBefore.toNumber();
             await depositToWeth(hre.ethers.utils.parseUnits('20', 18));
 
-            const struct = [tokenDataB.address, tokenDataA.address, 3000, to, Date.now(), hre.ethers.utils.parseUnits('19', 18), 0, 0];
+            const swapArguments = [tokenDataB.address, tokenDataA.address, 3000, to, Date.now(), hre.ethers.utils.parseUnits('19', 18), 0, 0];
             await approve(WETH_ADDRESS, router.address);
-            await router.exactInputSingle(struct);
+            await router.exactInputSingle(swapArguments);
+
             const tokenId = await positionManager.tokenOfOwnerByIndex(to, lastPositionIndex);
             await positionManager.approve(proxy.address, tokenId);
             await uniV3Collect(proxy, tokenId.toNumber(), to, 1, 1);

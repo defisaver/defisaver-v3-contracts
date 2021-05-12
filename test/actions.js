@@ -45,7 +45,8 @@ const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee
     await proxy['execute(address,bytes)'](dfsSellAddr, functionData, { gasLimit: 3000000 });
 };
 
-const buy = async (proxy, sellAddr, buyAddr, sellAmount, buyAmount, wrapper, from, to, fee = 0) => {
+const buy = async (proxy, sellAddr, buyAddr,
+    sellAmount, buyAmount, wrapper, from, to, uniV3fee = 0) => {
     const dfsBuyAddr = await getAddrFromRegistry('DFSBuy');
 
     const exchangeObject = formatExchangeObj(
@@ -54,7 +55,7 @@ const buy = async (proxy, sellAddr, buyAddr, sellAmount, buyAmount, wrapper, fro
         sellAmount.toString(),
         wrapper,
         buyAmount,
-        fee,
+        uniV3fee,
     );
 
     const sellAction = new dfs.actions.basic.SellAction(exchangeObject, from, to);
@@ -559,8 +560,11 @@ const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amoun
     const amount1Min = 0;
     // buy tokens
     const wethBalance = await balanceOf(WETH_ADDRESS, from);
-    if (wethBalance.eq(0)) {
-        await depositToWeth(hre.ethers.utils.parseUnits('20', 18));
+
+    const wethAmountToDeposit = hre.ethers.utils.parseUnits('20', 18);
+
+    if (wethBalance.lt(wethAmountToDeposit)) {
+        await depositToWeth(wethAmountToDeposit);
     }
     const tokenBalance0 = await balanceOf(token0, from);
     const tokenBalance1 = await balanceOf(token1, from);
@@ -569,7 +573,7 @@ const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amoun
             proxy,
             WETH_ADDRESS,
             token0,
-            hre.ethers.utils.parseUnits('9', 18),
+            wethAmountToDeposit.div(2),
             UNISWAP_WRAPPER,
             from,
             from,
@@ -581,7 +585,7 @@ const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amoun
             proxy,
             WETH_ADDRESS,
             token1,
-            hre.ethers.utils.parseUnits('9', 18),
+            wethAmountToDeposit.div(2),
             UNISWAP_WRAPPER,
             from,
             from,
@@ -617,9 +621,11 @@ const uniV3Supply = async (proxy, tokenId, amount0Desired,
     const amount0Min = 0;
     const amount1Min = 0;
 
+    const wethAmountToDeposit = hre.ethers.utils.parseUnits('20', 18);
+
     const wethBalance = await balanceOf(WETH_ADDRESS, from);
-    if (wethBalance.eq(0)) {
-        await depositToWeth(hre.ethers.utils.parseUnits('20', 18));
+    if (wethBalance.lt(wethAmountToDeposit)) {
+        await depositToWeth(wethAmountToDeposit);
     }
 
     const tokenBalance0 = await balanceOf(token0, from);
@@ -631,7 +637,7 @@ const uniV3Supply = async (proxy, tokenId, amount0Desired,
             proxy,
             WETH_ADDRESS,
             token0,
-            hre.ethers.utils.parseUnits('10', 18),
+            wethAmountToDeposit.div(2),
             UNISWAP_WRAPPER,
             from,
             from,
@@ -643,7 +649,7 @@ const uniV3Supply = async (proxy, tokenId, amount0Desired,
             proxy,
             WETH_ADDRESS,
             token1,
-            hre.ethers.utils.parseUnits('10', 18),
+            wethAmountToDeposit.div(2),
             UNISWAP_WRAPPER,
             from,
             from,

@@ -36,15 +36,19 @@ contract UniMintV3 is ActionBase, DSMath{
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        // console.log("test");
+
         Params memory uniData = parseInputs(_callData);
         
         uniData.token0 = _parseParamAddr(uniData.token0, _paramMapping[0], _subData, _returnValues);
         uniData.token1 = _parseParamAddr(uniData.token1, _paramMapping[1], _subData, _returnValues);
-        uniData.from = _parseParamAddr(uniData.from, _paramMapping[2], _subData, _returnValues);
-        uniData.recipient = _parseParamAddr(uniData.recipient, _paramMapping[3], _subData, _returnValues);
-        uniData.amount0Desired = _parseParamUint(uniData.amount0Desired, _paramMapping[4], _subData, _returnValues);
-        uniData.amount1Desired = _parseParamUint(uniData.amount1Desired, _paramMapping[5], _subData, _returnValues);
+        
+        uniData.amount0Desired = _parseParamUint(uniData.amount0Desired, _paramMapping[2], _subData, _returnValues);
+        uniData.amount1Desired = _parseParamUint(uniData.amount1Desired, _paramMapping[3], _subData, _returnValues);
+        uniData.amount0Min = _parseParamUint(uniData.amount0Min, _paramMapping[4], _subData, _returnValues);
+        uniData.amount1Min = _parseParamUint(uniData.amount1Min, _paramMapping[5], _subData, _returnValues);
+
+        uniData.recipient = _parseParamAddr(uniData.recipient, _paramMapping[6], _subData, _returnValues);
+        uniData.from = _parseParamAddr(uniData.from, _paramMapping[7], _subData, _returnValues);
 
         uint256 tokenId = _uniCreatePosition(uniData);
 

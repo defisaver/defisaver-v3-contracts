@@ -6,6 +6,8 @@ const { getAssetInfo } = require('@defisaver/tokens');
 const {
     getProxy,
     redeploy,
+    LOGGER_ADDR,
+    UNIV3POSITIONMANAGER_ADDR,
 } = require('../../utils');
 
 const {
@@ -29,15 +31,14 @@ describe('Uni-Mint-V3', () => {
 
     before(async () => {
         await redeploy('UniMintV3');
-        logger = await hre.ethers.getContractAt('DefisaverLogger', '0x5c55B921f590a89C1Ebe84dF170E655a82b62126');
+        logger = await hre.ethers.getContractAt('DefisaverLogger', LOGGER_ADDR);
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
-        positionManager = await hre.ethers.getContractAt('IUniswapV3NonfungiblePositionManager', '0xC36442b4a4522E871399CD717aBDD847Ab11FE88');
+        positionManager = await hre.ethers.getContractAt('IUniswapV3NonfungiblePositionManager', UNIV3POSITIONMANAGER_ADDR);
     });
 
     for (let i = 0; i < uniPairs.length; i++) {
-        // eslint-disable-next-line prefer-template
-        it('... should mint a ' + uniPairs[i].tokenA + '/' + uniPairs[i].tokenB + ' position to uniswap', async () => {
+        it(`... should mint a ${uniPairs[i].tokenA}/${uniPairs[i].tokenB} position to uniswap V3`, async () => {
             const tokenDataA = await getAssetInfo(uniPairs[i].tokenA);
             const tokenDataB = await getAssetInfo(uniPairs[i].tokenB);
             const numberOfPositionsBefore = await positionManager.balanceOf(senderAcc.address);
