@@ -20,6 +20,8 @@ const OWNER_ACC = '0x0528A32fda5beDf89Ba9ad67296db83c9452F28C';
 const ADMIN_ACC = '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9';
 
 
+const dydxTokens = ['WETH', 'USDC', 'DAI'];
+
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
 const MIN_VAULT_DAI_AMOUNT = '5010'; // TODO: can we fetch this dynamically
 const MIN_VAULT_RAI_AMOUNT = '1000'; // TODO: can we fetch this dynamically
@@ -272,6 +274,7 @@ module.exports = {
     setNewExchangeWrapper,
     standardAmounts,
     nullAddress,
+    dydxTokens,
     REGISTRY_ADDR,
     AAVE_MARKET,
     DAI_ADDR,
