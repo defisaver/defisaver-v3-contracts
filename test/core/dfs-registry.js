@@ -20,17 +20,17 @@ describe('DFS-Registry', function () {
     const contractAddr2 = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
     const contractAddr3 = '0x71C8dc1d6315a48850E88530d18d3a97505d2065';
 
-    const id1 = hre.ethers.utils.keccak256(hre.hre.ethers.utils.toUtf8Bytes(contractAddr1));
-    const id2 = hre.ethers.utils.keccak256(hre.hre.ethers.utils.toUtf8Bytes(contractAddr2));
-    const id3 = hre.ethers.utils.keccak256(hre.hre.ethers.utils.toUtf8Bytes(contractAddr3));
+    const id1 = hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(contractAddr1));
+    const id2 = hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(contractAddr2));
+    const id3 = hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(contractAddr3));
 
     before(async () => {
         this.timeout(40000);
 
-        senderAcc2 = (await hre.hre.ethers.getSigners())[1];
+        senderAcc2 = (await hre.ethers.getSigners())[1];
         registry = await deployContract('DFSRegistry');
 
-        owner = await hre.hre.ethers.provider.getSigner(OWNER_ACC);
+        owner = await hre.ethers.provider.getSigner(OWNER_ACC);
 
         registryByOwner = registry.connect(owner);
     });

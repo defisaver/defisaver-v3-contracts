@@ -13,7 +13,6 @@ const {
     depositToWeth,
     standardAmounts,
     nullAddress,
-    MAX_UINT,
     UNISWAP_WRAPPER,
     AAVE_FL_FEE,
     WETH_ADDRESS,
@@ -73,7 +72,7 @@ describe('FL-AaveV2', function () {
                     nullAddress,
                     [],
                 ),
-                new dfs.actions.basic.SendTokenAction(assetInfo.address, aaveFl.address, MAX_UINT),
+                new dfs.actions.basic.SendTokenAction(assetInfo.address, aaveFl.address, hre.ethers.constants.MaxUint256),
             ]);
 
             const functionData = basicFLRecipe.encodeForDsProxyCall();

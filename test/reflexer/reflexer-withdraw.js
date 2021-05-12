@@ -5,7 +5,6 @@ const {
     redeploy,
     WETH_ADDRESS,
     standardAmounts,
-    MAX_UINT,
     depositToWeth,
 } = require('../utils');
 
@@ -70,7 +69,7 @@ describe('Reflexer-Withdraw', () => {
             .to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
 
         const to = senderAcc.address;
-        await expect(() => reflexerWithdraw(proxy, safeID, MAX_UINT, ADAPTER_ADDRESS, to))
+        await expect(() => reflexerWithdraw(proxy, safeID, hre.ethers.constants.MaxUint256, ADAPTER_ADDRESS, to))
             .to.changeTokenBalance(weth, senderAcc, amountWETH);
 
         const infoAfterWithdraw = await getSafeInfo(reflexerView, safeID);
@@ -89,7 +88,7 @@ describe('Reflexer-Withdraw', () => {
         await expect(reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
             .to.emit(logger, 'LogEvent');
         const to = senderAcc.address;
-        await expect(reflexerWithdraw(proxy, safeID, MAX_UINT, ADAPTER_ADDRESS, to))
+        await expect(reflexerWithdraw(proxy, safeID, hre.ethers.constants.MaxUint256, ADAPTER_ADDRESS, to))
             .to.emit(logger, 'LogEvent');
     }).timeout(40000);
 });
