@@ -45,9 +45,6 @@ contract UniSupplyV3 is ActionBase, DSMath{
         uniData.tokenId = _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
         uniData.amount0Desired = _parseParamUint(uniData.amount0Desired, _paramMapping[1], _subData, _returnValues);
         uniData.amount1Desired = _parseParamUint(uniData.amount1Desired, _paramMapping[2], _subData, _returnValues);
-        uniData.amount0Min = _parseParamUint(uniData.amount0Min, _paramMapping[3], _subData, _returnValues);
-        uniData.amount1Min = _parseParamUint(uniData.amount1Min, _paramMapping[4], _subData, _returnValues);
-        uniData.from = _parseParamAddr(uniData.from, _paramMapping[5], _subData, _returnValues);
 
         uint128 liquidity = _uniSupplyPosition(uniData);
         return bytes32(uint256(liquidity));

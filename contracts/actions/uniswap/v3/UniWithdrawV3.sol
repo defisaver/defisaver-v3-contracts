@@ -44,11 +44,6 @@ contract UniWithdrawV3 is ActionBase, DSMath{
 
         uniData.tokenId = _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
         uniData.liquidity = uint128(_parseParamUint(uniData.liquidity, _paramMapping[1], _subData, _returnValues));
-        uniData.amount0Min = _parseParamUint(uniData.amount0Min, _paramMapping[2], _subData, _returnValues);
-        uniData.amount1Min = _parseParamUint(uniData.amount1Min, _paramMapping[3], _subData, _returnValues);
-        uniData.recipient = _parseParamAddr(uniData.recipient, _paramMapping[4], _subData, _returnValues);
-        uniData.amount0Max = uint128(_parseParamUint(uniData.amount0Max, _paramMapping[5], _subData, _returnValues));
-        uniData.amount1Max = uint128(_parseParamUint(uniData.amount1Max, _paramMapping[6], _subData, _returnValues));
 
         (uint256 amount0, ) = _uniWithdrawFromPosition(uniData);
         return bytes32(amount0);

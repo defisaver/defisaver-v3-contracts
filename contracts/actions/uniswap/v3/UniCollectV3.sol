@@ -23,10 +23,7 @@ contract UniCollectV3 is ActionBase, DSMath{
         IUniswapV3NonfungiblePositionManager.CollectParams memory uniData = parseInputs(_callData);
         
         uniData.tokenId = _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
-        uniData.recipient = _parseParamAddr(uniData.recipient, _paramMapping[1], _subData, _returnValues);
-        uniData.amount0Max = uint128(_parseParamUint(uniData.amount0Max, _paramMapping[2], _subData, _returnValues));
-        uniData.amount1Max = uint128(_parseParamUint(uniData.amount1Max, _paramMapping[3], _subData, _returnValues));
-
+        
         (uint256 amount0, ) = _uniCollect(uniData);
         return bytes32(amount0);
     }
