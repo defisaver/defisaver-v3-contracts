@@ -36,7 +36,6 @@ contract UniMintV3 is ActionBase, DSMath{
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-
         Params memory uniData = parseInputs(_callData);
         
         uniData.token0 = _parseParamAddr(uniData.token0, _paramMapping[0], _subData, _returnValues);
@@ -96,8 +95,6 @@ contract UniMintV3 is ActionBase, DSMath{
                 "UniMintV3",
                 abi.encode(_uniData, tokenId, liquidity, amount0, amount1)
             );
-
-            return tokenId;
     }
 
     /// @dev mints new NFT that represents a position with selected parameters

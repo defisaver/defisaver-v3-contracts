@@ -70,7 +70,8 @@ contract UniSupplyV3 is ActionBase, DSMath{
     function _uniSupplyPosition(Params memory _uniData)
         internal
         returns(uint128 liquidity)
-    {  (address token0, address token1) = _getTokenAdresses(_uniData.tokenId);
+    {  
+        (address token0, address token1) = _getTokenAdresses(_uniData.tokenId);
         // fetch tokens from address
         uint amount0Pulled = token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);
         uint amount1Pulled = token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
@@ -85,6 +86,11 @@ contract UniSupplyV3 is ActionBase, DSMath{
         uint256 amount0;
         uint256 amount1;
         (liquidity, amount0, amount1) = _uniSupply(_uniData);
+
+        //send leftovers
+        token0.withdrawTokens(_uniData.from, sub(_uniData.amount0Desired, amount0));
+        token1.withdrawTokens(_uniData.from, sub(_uniData.amount1Desired, amount1));
+
         logger.Log(
                 address(this),
                 msg.sender,
@@ -96,7 +102,7 @@ contract UniSupplyV3 is ActionBase, DSMath{
 
     /// @dev calls positions from NonFungiblePositionManager for tokenId, and returns addresses for both tokens
     /// @dev workaround for stack too deep error that happens because positions() returns 12 variables
-    function _getTokenAdresses(uint tokenId) internal view returns(address token0, address token1){
+    function _getTokenAdresses(uint tokenId) internal view returns(address, address){
         uint256[12] memory ret;
         bytes memory data = abi.encodeWithSignature("positions(uint256)", tokenId);
 
