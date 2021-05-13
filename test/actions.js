@@ -13,16 +13,24 @@ const {
     formatExchangeObj,
     isEth,
     depositToWeth,
+    MAX_UINT128,
 } = require('./utils');
 
 const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
 
 const { getSecondTokenAmount } = require('./utils-uni');
 
-const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to) => {
+const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0) => {
     const dfsSellAddr = await getAddrFromRegistry('DFSSell');
 
-    const exchangeObject = formatExchangeObj(sellAddr, buyAddr, sellAmount.toString(), wrapper);
+    const exchangeObject = formatExchangeObj(
+        sellAddr,
+        buyAddr,
+        sellAmount.toString(),
+        wrapper,
+        0,
+        fee,
+    );
 
     const sellAction = new dfs.actions.basic.SellAction(exchangeObject, from, to);
 
@@ -37,7 +45,8 @@ const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to) => 
     await proxy['execute(address,bytes)'](dfsSellAddr, functionData, { gasLimit: 3000000 });
 };
 
-const buy = async (proxy, sellAddr, buyAddr, sellAmount, buyAmount, wrapper, from, to) => {
+const buy = async (proxy, sellAddr, buyAddr,
+    sellAmount, buyAmount, wrapper, from, to, uniV3fee = 0) => {
     const dfsBuyAddr = await getAddrFromRegistry('DFSBuy');
 
     const exchangeObject = formatExchangeObj(
@@ -46,6 +55,7 @@ const buy = async (proxy, sellAddr, buyAddr, sellAmount, buyAmount, wrapper, fro
         sellAmount.toString(),
         wrapper,
         buyAmount,
+        uniV3fee,
     );
 
     const sellAction = new dfs.actions.basic.SellAction(exchangeObject, from, to);
@@ -543,6 +553,160 @@ const reflexerGenerate = async (proxy, safeId, amount, to) => {
     return proxy['execute(address,bytes)'](reflexerGenerateAddr, functionData, { gasLimit: 3000000 });
 };
 
+const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amount0Desired,
+    amount1Desired, recipient, from) => {
+    const uniMintV3Address = await getAddrFromRegistry('UniMintV3');
+    const amount0Min = 0;
+    const amount1Min = 0;
+    // buy tokens
+    const wethBalance = await balanceOf(WETH_ADDRESS, from);
+
+    const wethAmountToDeposit = hre.ethers.utils.parseUnits('20', 18);
+
+    if (wethBalance.lt(wethAmountToDeposit)) {
+        await depositToWeth(wethAmountToDeposit);
+    }
+    const tokenBalance0 = await balanceOf(token0, from);
+    const tokenBalance1 = await balanceOf(token1, from);
+    if (tokenBalance0.lt(amount0Desired)) {
+        await sell(
+            proxy,
+            WETH_ADDRESS,
+            token0,
+            wethAmountToDeposit.div(2),
+            UNISWAP_WRAPPER,
+            from,
+            from,
+        );
+    }
+
+    if (tokenBalance1.lt(amount1Desired)) {
+        await sell(
+            proxy,
+            WETH_ADDRESS,
+            token1,
+            wethAmountToDeposit.div(2),
+            UNISWAP_WRAPPER,
+            from,
+            from,
+        );
+    }
+    const deadline = Date.now() + Date.now();
+    const uniMintV3Action = new dfs.actions.uniswap.UniMintV3Action(
+        token0,
+        token1,
+        fee,
+        tickLower,
+        tickUpper,
+        amount0Desired,
+        amount1Desired,
+        amount0Min,
+        amount1Min,
+        recipient,
+        deadline,
+        from,
+    );
+    await approve(token0, proxy.address);
+    await approve(token1, proxy.address);
+
+    const functionData = uniMintV3Action.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](uniMintV3Address, functionData, { gasLimit: 3000000 });
+};
+
+const uniV3Supply = async (proxy, tokenId, amount0Desired,
+    amount1Desired, from, token0, token1) => {
+    const uniSupplyV3Address = await getAddrFromRegistry('UniSupplyV3');
+
+    const amount0Min = 0;
+    const amount1Min = 0;
+
+    const wethAmountToDeposit = hre.ethers.utils.parseUnits('20', 18);
+
+    const wethBalance = await balanceOf(WETH_ADDRESS, from);
+    if (wethBalance.lt(wethAmountToDeposit)) {
+        await depositToWeth(wethAmountToDeposit);
+    }
+
+    const tokenBalance0 = await balanceOf(token0, from);
+    const tokenBalance1 = await balanceOf(token1, from);
+
+    // buy tokens
+    if (tokenBalance0.lt(amount0Desired)) {
+        await sell(
+            proxy,
+            WETH_ADDRESS,
+            token0,
+            wethAmountToDeposit.div(2),
+            UNISWAP_WRAPPER,
+            from,
+            from,
+        );
+    }
+
+    if (tokenBalance1.lt(amount1Desired)) {
+        await sell(
+            proxy,
+            WETH_ADDRESS,
+            token1,
+            wethAmountToDeposit.div(2),
+            UNISWAP_WRAPPER,
+            from,
+            from,
+        );
+    }
+    const deadline = Date.now() + Date.now();
+
+    const uniSupplyV3Action = new dfs.actions.uniswap.UniSupplyV3Action(
+        tokenId,
+        amount0Desired,
+        amount1Desired,
+        amount0Min,
+        amount1Min,
+        deadline,
+        from,
+        token0,
+        token1,
+    );
+    await approve(token0, proxy.address);
+    await approve(token1, proxy.address);
+
+    const functionData = uniSupplyV3Action.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](uniSupplyV3Address, functionData, { gasLimit: 3000000 });
+};
+
+const uniV3Withdraw = async (proxy, tokenId, liquidity, recipient) => {
+    const uniWithdrawV3Address = await getAddrFromRegistry('UniWithdrawV3');
+    const deadline = Date.now() + Date.now();
+    const uniWithdrawV3Action = new dfs.actions.uniswap.UniWithdrawV3Action(
+        tokenId,
+        liquidity,
+        0,
+        0,
+        deadline,
+        recipient,
+        MAX_UINT128,
+        MAX_UINT128,
+        recipient,
+    );
+    const functionData = uniWithdrawV3Action.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](uniWithdrawV3Address, functionData, { gasLimit: 3000000 });
+};
+
+const uniV3Collect = async (proxy, tokenId, recipient, amount0Max, amount1Max) => {
+    const uniCollectV3Address = await getAddrFromRegistry('UniCollectV3');
+    const uniCollectV3Action = new dfs.actions.uniswap.UniCollectV3Action(
+        tokenId,
+        recipient,
+        amount0Max,
+        amount1Max,
+        recipient,
+    );
+    const functionData = uniCollectV3Action.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](uniCollectV3Address, functionData, { gasLimit: 3000000 });
+};
+
 const dydxSupply = async (proxy, tokenAddr, amount, from) => {
     await approve(tokenAddr, proxy.address);
 
@@ -623,6 +787,11 @@ module.exports = {
     reflexerWithdraw,
     reflexerPayback,
     reflexerGenerate,
+
+    uniV3Mint,
+    uniV3Supply,
+    uniV3Withdraw,
+    uniV3Collect,
 
     dydxSupply,
     dydxWithdraw,

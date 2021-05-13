@@ -13,12 +13,16 @@ const ETH_ADDR = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 const DAI_ADDR = '0x6b175474e89094c44da98b954eedeac495271d0f';
 const USDC_ADDR = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 const RAI_ADDR = '0x03ab458634910AaD20eF5f1C8ee96F1D6ac54919';
-
+const LOGGER_ADDR = '0x5c55B921f590a89C1Ebe84dF170E655a82b62126';
+const UNIV3ROUTER_ADDR = '0xE592427A0AEce92De3Edee1F18E0157C05861564';
+const UNIV3POSITIONMANAGER_ADDR = '0xC36442b4a4522E871399CD717aBDD847Ab11FE88';
 const AAVE_MARKET = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
 
 const OWNER_ACC = '0x0528A32fda5beDf89Ba9ad67296db83c9452F28C';
 const ADMIN_ACC = '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9';
 
+const MAX_UINT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
+const MAX_UINT128 = '340282366920938463463374607431768211455';
 
 const dydxTokens = ['WETH', 'USDC', 'DAI'];
 
@@ -177,7 +181,7 @@ const balanceOf = async (tokenAddr, addr) => {
     return balance;
 };
 
-const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0) => {
+const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
     let firstPath = srcAddr;
@@ -191,8 +195,14 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0) =
         secondPath = WETH_ADDRESS;
     }
 
-    const path = abiCoder.encode(['address[]'], [[firstPath, secondPath]]);
-
+    let path = abiCoder.encode(['address[]'], [[firstPath, secondPath]]);
+    if (uniV3fee > 0) {
+        if (destAmount > 0) {
+            path = hre.ethers.utils.solidityPack(['address', 'uint24', 'address'], [secondPath, uniV3fee, firstPath]);
+        } else {
+            path = hre.ethers.utils.solidityPack(['address', 'uint24', 'address'], [firstPath, uniV3fee, secondPath]);
+        }
+    }
     return [
         srcAddr,
         destAddr,
@@ -290,4 +300,9 @@ module.exports = {
     MIN_VAULT_DAI_AMOUNT,
     MIN_VAULT_RAI_AMOUNT,
     RAI_ADDR,
+    MAX_UINT,
+    MAX_UINT128,
+    LOGGER_ADDR,
+    UNIV3ROUTER_ADDR,
+    UNIV3POSITIONMANAGER_ADDR,
 };
