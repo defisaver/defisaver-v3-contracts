@@ -665,6 +665,8 @@ const uniV3Supply = async (proxy, tokenId, amount0Desired,
         amount1Min,
         deadline,
         from,
+        token0,
+        token1,
     );
     await approve(token0, proxy.address);
     await approve(token1, proxy.address);

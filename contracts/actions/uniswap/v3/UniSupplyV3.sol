@@ -23,6 +23,8 @@ contract UniSupplyV3 is ActionBase, DSMath{
     /// @param amount1Min - The minimum amount of token1 that should be supplied,
     /// @param deadline - The time by which the transaction must be included to effect the change
     /// @param from - account to take amounts from
+    /// @param token0 - address of the first token
+    /// @param token1 - address of the second token
     struct Params {
         uint256 tokenId;
         uint256 amount0Desired;
@@ -31,6 +33,8 @@ contract UniSupplyV3 is ActionBase, DSMath{
         uint256 amount1Min;
         uint256 deadline;
         address from;
+        address token0;
+        address token1;
     }
 
     /// @inheritdoc ActionBase
@@ -68,14 +72,13 @@ contract UniSupplyV3 is ActionBase, DSMath{
         internal
         returns(uint128 liquidity)
     {  
-        (address token0, address token1) = _getTokenAdresses(_uniData.tokenId);
         // fetch tokens from address
-        uint amount0Pulled = token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);
-        uint amount1Pulled = token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
+        uint amount0Pulled = _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);
+        uint amount1Pulled = _uniData.token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
 
         // approve positionManager so it can pull tokens
-        token0.approveToken(address(positionManager), amount0Pulled);
-        token1.approveToken(address(positionManager), amount1Pulled);
+        _uniData.token0.approveToken(address(positionManager), amount0Pulled);
+        _uniData.token1.approveToken(address(positionManager), amount1Pulled);
 
         _uniData.amount0Desired = amount0Pulled;
         _uniData.amount1Desired = amount1Pulled;
@@ -85,8 +88,8 @@ contract UniSupplyV3 is ActionBase, DSMath{
         (liquidity, amount0, amount1) = _uniSupply(_uniData);
 
         //send leftovers
-        token0.withdrawTokens(_uniData.from, sub(_uniData.amount0Desired, amount0));
-        token1.withdrawTokens(_uniData.from, sub(_uniData.amount1Desired, amount1));
+        _uniData.token0.withdrawTokens(_uniData.from, sub(_uniData.amount0Desired, amount0));
+        _uniData.token1.withdrawTokens(_uniData.from, sub(_uniData.amount1Desired, amount1));
 
         logger.Log(
                 address(this),
@@ -95,30 +98,7 @@ contract UniSupplyV3 is ActionBase, DSMath{
                 abi.encode(_uniData, liquidity, amount0, amount1)
             );
 
-    }
-
-    /// @dev calls positions from NonFungiblePositionManager for tokenId, and returns addresses for both tokens
-    /// @dev workaround for stack too deep error that happens because positions() returns 12 variables
-    function _getTokenAdresses(uint tokenId) internal view returns(address, address){
-        uint256[12] memory ret;
-        bytes memory data = abi.encodeWithSignature("positions(uint256)", tokenId);
-
-        assembly {
-            let success := staticcall(
-                gas(),           // gas remaining
-                0xC36442b4a4522E871399CD717aBDD847Ab11FE88,  // destination address
-                add(data, 32), // input buffer (starts after the first 32 bytes in the `data` array)
-                mload(data),   // input length (loaded from the first 32 bytes in the `data` array)
-                ret,           // output buffer
-                384             // output length
-            )
-            if iszero(success) {
-                revert(0, 0)
-            }
-        }
-        return (address(ret[2]), address(ret[3]));
-    }
-    
+    }    
     /// @dev increases liquidity by token amounts desired
     /// @return liquidity new liquidity amount
     function _uniSupply(Params memory _uniData)
