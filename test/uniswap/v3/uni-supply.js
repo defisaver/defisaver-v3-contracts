@@ -47,6 +47,7 @@ describe('Uni-Supply-V3', () => {
             const startingProxyBalanceTokenA = await balanceOf(tokenDataA.address, proxy.address);
             const startingProxyBalanceTokenB = await balanceOf(tokenDataB.address, proxy.address);
             const numberOfPositionsBefore = await positionManager.balanceOf(senderAcc.address);
+
             const from = senderAcc.address;
             const to = senderAcc.address;
             const amount0 = hre.ethers.utils.parseUnits(uniPairs[i].amount0, tokenDataA.decimals);
@@ -59,10 +60,12 @@ describe('Uni-Supply-V3', () => {
             const tokenId = await positionManager.tokenOfOwnerByIndex(to, lastPositionIndex);
             let position = await positionManager.positions(tokenId);
             const liquidityBeforeSupply = position.liquidity;
+
             await uniV3Supply(proxy, tokenId.toNumber(), amount0, amount1,
                 from, tokenDataA.address, tokenDataB.address);
             position = await positionManager.positions(tokenId);
             const liquidityAfterSupply = position.liquidity;
+
             expect(liquidityAfterSupply.sub(liquidityBeforeSupply)).to.be.gte(0);
             expect(await balanceOf(tokenDataA.address, proxy.address))
                 .to.be.eq(startingProxyBalanceTokenA);

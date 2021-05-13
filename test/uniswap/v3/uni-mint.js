@@ -45,6 +45,7 @@ describe('Uni-Mint-V3', () => {
             const startingProxyBalanceTokenA = await balanceOf(tokenDataA.address, proxy.address);
             const startingProxyBalanceTokenB = await balanceOf(tokenDataB.address, proxy.address);
             const numberOfPositionsBefore = await positionManager.balanceOf(senderAcc.address);
+
             const from = senderAcc.address;
             const to = senderAcc.address;
             const amount0 = hre.ethers.utils.parseUnits(uniPairs[i].amount0, tokenDataA.decimals);
@@ -52,12 +53,14 @@ describe('Uni-Mint-V3', () => {
             await uniV3Mint(proxy, tokenDataA.address,
                 tokenDataB.address, uniPairs[i].fee, uniPairs[i].tickLower,
                 uniPairs[i].tickUpper, amount0, amount1, to, from);
+
             const numberOfPositionsAfter = await positionManager.balanceOf(senderAcc.address);
             expect(numberOfPositionsAfter.toNumber())
                 .to.be.equal(numberOfPositionsBefore.toNumber() + 1);
             const lastPositionIndex = numberOfPositionsBefore.toNumber();
             const tokenId = positionManager.tokenOfOwnerByIndex(to, lastPositionIndex);
             const position = await positionManager.positions(tokenId);
+            // confirming that position representng our mint is the same as parameters we put into
             expect(position.token0.toLowerCase()).to.be.equal(tokenDataA.address.toLowerCase());
             expect(position.token1.toLowerCase()).to.be.equal(tokenDataB.address.toLowerCase());
             expect(position.fee).to.be.equal(parseInt(uniPairs[i].fee, 10));
