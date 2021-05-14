@@ -24,8 +24,8 @@ contract LiquityBorrow is ActionBase {
         //_upperHint = _parseParamAddr(_upperHint, _paramMapping[2], _subData, _returnValues);
         //_lowerHint = _parseParamAddr(_lowerHint, _paramMapping[3], _subData, _returnValues);
 
-        _liquityBorrow(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
-        return bytes32(0);
+        _LUSDAmount = _liquityBorrow(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
+        return bytes32(_LUSDAmount);
     }
 
     /// @inheritdoc ActionBase
@@ -43,15 +43,17 @@ contract LiquityBorrow is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Withdraw LUSD tokens from a trove: mint new LUSD tokens to the owner, and increase the trove's debt accordingly
-    function _liquityBorrow(uint256 _maxFeePercentage, uint256 _LUSDAmount, address _upperHint, address _lowerHint) internal returns (uint256 nothing) {
+    function _liquityBorrow(uint256 _maxFeePercentage, uint256 _LUSDAmount, address _upperHint, address _lowerHint) internal returns (uint256) {
         IBorrowerOperations(_borrowerOperations).withdrawLUSD(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
 
         logger.Log(
             address(this),
             msg.sender,
             "LiquityBorrow",
-            abi.encode(0)
+            abi.encode(_maxFeePercentage, _LUSDAmount)
         );
+
+        return _LUSDAmount;
     }
 
     function parseInputs(bytes[] memory _callData)

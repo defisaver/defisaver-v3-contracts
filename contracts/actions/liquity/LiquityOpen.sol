@@ -23,8 +23,8 @@ contract LiquityOpen is ActionBase {
         //_upperHint = _parseParamAddr(_upperHint, _paramMapping[1], _subData, _returnValues);
         //_lowerHint = _parseParamAddr(_lowerHint, _paramMapping[2], _subData, _returnValues);
 
-        _liquityOpen(_maxFeePercentage, _upperHint, _lowerHint);
-        return bytes32(0);
+        uint256 troveOwner = _liquityOpen(_maxFeePercentage, _upperHint, _lowerHint);
+        return bytes32(troveOwner);
     }
 
     /// @inheritdoc ActionBase
@@ -42,15 +42,17 @@ contract LiquityOpen is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Opens up an empty trove
-    function _liquityOpen(uint256 _maxFeePercentage, address _upperHint, address _lowerHint) internal returns (uint256 nothing) {
+    function _liquityOpen(uint256 _maxFeePercentage, address _upperHint, address _lowerHint) internal returns (uint256) {
         IBorrowerOperations(_borrowerOperations).openTrove(_maxFeePercentage, 0, _upperHint, _lowerHint);
 
         logger.Log(
             address(this),
             msg.sender,
             "LiquityOpen",
-            abi.encode(0)
+            abi.encode(_maxFeePercentage)
         );
+
+        return uint256(msg.sender);
     }
 
     function parseInputs(bytes[] memory _callData)

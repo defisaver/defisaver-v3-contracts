@@ -23,8 +23,8 @@ contract LiquityPayback is ActionBase {
         //_upperHint = _parseParamAddr(_upperHint, _paramMapping[1], _subData, _returnValues);
         //_lowerHint = _parseParamAddr(_lowerHint, _paramMapping[2], _subData, _returnValues);
 
-        _liquityPayback(_LUSDAmount, _upperHint, _lowerHint);
-        return bytes32(0);
+        _LUSDAmount = _liquityPayback(_LUSDAmount, _upperHint, _lowerHint);
+        return bytes32(_LUSDAmount);
     }
 
     /// @inheritdoc ActionBase
@@ -42,15 +42,17 @@ contract LiquityPayback is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Repay LUSD tokens to a Trove: Burn the repaid LUSD tokens, and reduce the trove's debt accordingly
-    function _liquityPayback(uint _LUSDAmount, address _upperHint, address _lowerHint) internal returns (uint256 nothing) {
+    function _liquityPayback(uint _LUSDAmount, address _upperHint, address _lowerHint) internal returns (uint256) {
         IBorrowerOperations(_borrowerOperations).repayLUSD(_LUSDAmount, _upperHint, _lowerHint);
 
         logger.Log(
             address(this),
             msg.sender,
             "LiquityPayback",
-            abi.encode(0)
+            abi.encode(_LUSDAmount)
         );
+
+        return _LUSDAmount;
     }
 
     function parseInputs(bytes[] memory _callData)

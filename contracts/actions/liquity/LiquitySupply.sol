@@ -23,8 +23,8 @@ contract LiquitySupply is ActionBase {
         //_upperHint = _parseParamAddr(_upperHint, _paramMapping[1], _subData, _returnValues);
         //_lowerHint = _parseParamAddr(_lowerHint, _paramMapping[2], _subData, _returnValues);
 
-        _liquitySupply(_amount, _upperHint, _lowerHint);
-        return bytes32(0);
+        _amount = _liquitySupply(_amount, _upperHint, _lowerHint);
+        return bytes32(_amount);
     }
 
     /// @inheritdoc ActionBase
@@ -42,15 +42,17 @@ contract LiquitySupply is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Send ETH as collateral to a trove
-    function _liquitySupply(uint256 _amount, address _upperHint, address _lowerHint) internal returns (uint256 nothing) {
+    function _liquitySupply(uint256 _amount, address _upperHint, address _lowerHint) internal returns (uint256) {
         IBorrowerOperations(_borrowerOperations).addColl{value: _amount}(_upperHint, _lowerHint);
 
         logger.Log(
             address(this),
             msg.sender,
             "LiquitySupply",
-            abi.encode(0)
+            abi.encode(_amount)
         );
+
+        return _amount;
     }
 
     function parseInputs(bytes[] memory _callData)
