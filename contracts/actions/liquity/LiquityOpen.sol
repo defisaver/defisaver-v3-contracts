@@ -20,8 +20,6 @@ contract LiquityOpen is ActionBase {
         (uint256 _maxFeePercentage, address _upperHint, address _lowerHint) = parseInputs(_callData);
 
         _maxFeePercentage = _parseParamUint(_maxFeePercentage, _paramMapping[0], _subData, _returnValues);
-        //_upperHint = _parseParamAddr(_upperHint, _paramMapping[1], _subData, _returnValues);
-        //_lowerHint = _parseParamAddr(_lowerHint, _paramMapping[2], _subData, _returnValues);
 
         uint256 troveOwner = _liquityOpen(_maxFeePercentage, _upperHint, _lowerHint);
         return bytes32(troveOwner);

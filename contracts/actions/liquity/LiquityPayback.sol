@@ -20,8 +20,6 @@ contract LiquityPayback is ActionBase {
         (uint _LUSDAmount, address _upperHint, address _lowerHint) = parseInputs(_callData);
 
         _LUSDAmount = _parseParamUint(_LUSDAmount, _paramMapping[0], _subData, _returnValues);
-        //_upperHint = _parseParamAddr(_upperHint, _paramMapping[1], _subData, _returnValues);
-        //_lowerHint = _parseParamAddr(_lowerHint, _paramMapping[2], _subData, _returnValues);
 
         _LUSDAmount = _liquityPayback(_LUSDAmount, _upperHint, _lowerHint);
         return bytes32(_LUSDAmount);

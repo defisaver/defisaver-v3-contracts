@@ -21,8 +21,6 @@ contract LiquityBorrow is ActionBase {
 
         _maxFeePercentage = _parseParamUint(_maxFeePercentage, _paramMapping[0], _subData, _returnValues);
         _LUSDAmount = _parseParamUint(_LUSDAmount, _paramMapping[1], _subData, _returnValues);
-        //_upperHint = _parseParamAddr(_upperHint, _paramMapping[2], _subData, _returnValues);
-        //_lowerHint = _parseParamAddr(_lowerHint, _paramMapping[3], _subData, _returnValues);
 
         _LUSDAmount = _liquityBorrow(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
         return bytes32(_LUSDAmount);

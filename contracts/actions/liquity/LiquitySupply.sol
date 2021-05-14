@@ -20,8 +20,6 @@ contract LiquitySupply is ActionBase {
         (uint256 _amount, address _upperHint, address _lowerHint) = parseInputs(_callData);
 
         _amount = _parseParamUint(_amount, _paramMapping[0], _subData, _returnValues);
-        //_upperHint = _parseParamAddr(_upperHint, _paramMapping[1], _subData, _returnValues);
-        //_lowerHint = _parseParamAddr(_lowerHint, _paramMapping[2], _subData, _returnValues);
 
         _amount = _liquitySupply(_amount, _upperHint, _lowerHint);
         return bytes32(_amount);
