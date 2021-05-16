@@ -17,19 +17,31 @@ contract LiquityOpen is ActionBase {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (uint256 _maxFeePercentage, address _upperHint, address _lowerHint) = parseInputs(_callData);
+        (
+            uint256 _maxFeePercentage,
+            uint256 _collAmount,
+            uint256 _LUSDAmount,
+            address _upperHint,
+            address _lowerHint
+        )= parseInputs(_callData);
 
         _maxFeePercentage = _parseParamUint(_maxFeePercentage, _paramMapping[0], _subData, _returnValues);
 
-        uint256 troveOwner = _liquityOpen(_maxFeePercentage, _upperHint, _lowerHint);
+        uint256 troveOwner = _liquityOpen(_maxFeePercentage, _collAmount, _LUSDAmount, _upperHint, _lowerHint);
         return bytes32(troveOwner);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public virtual payable override {
-        (uint256 _maxFeePercentage, address _upperHint, address _lowerHint) = parseInputs(_callData);
+        (
+            uint256 _maxFeePercentage,
+            uint256 _collAmount,
+            uint256 _LUSDAmount,
+            address _upperHint,
+            address _lowerHint
+        )= parseInputs(_callData);
 
-        _liquityOpen(_maxFeePercentage, _upperHint, _lowerHint);
+        _liquityOpen(_maxFeePercentage, _collAmount, _LUSDAmount, _upperHint, _lowerHint);
     }
 
     /// @inheritdoc ActionBase
@@ -40,14 +52,14 @@ contract LiquityOpen is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Opens up an empty trove
-    function _liquityOpen(uint256 _maxFeePercentage, address _upperHint, address _lowerHint) internal returns (uint256) {
-        IBorrowerOperations(_borrowerOperations).openTrove(_maxFeePercentage, 0, _upperHint, _lowerHint);
+    function _liquityOpen(uint256 _maxFeePercentage, uint256 _collAmount, uint256 _LUSDAmount, address _upperHint, address _lowerHint) internal returns (uint256) {
+        IBorrowerOperations(_borrowerOperations).openTrove{value: _collAmount}(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
 
         logger.Log(
             address(this),
             msg.sender,
             "LiquityOpen",
-            abi.encode(_maxFeePercentage)
+            abi.encode(_maxFeePercentage, _collAmount, _LUSDAmount)
         );
 
         return uint256(msg.sender);
@@ -56,10 +68,18 @@ contract LiquityOpen is ActionBase {
     function parseInputs(bytes[] memory _callData)
         internal
         pure
-        returns (uint256 _maxFeePercentage, address _upperHint, address _lowerHint)
+        returns (
+            uint256 _maxFeePercentage,
+            uint256 _collAmount,
+            uint256 _LUSDAmount,
+            address _upperHint,
+            address _lowerHint
+        )
     {
         _maxFeePercentage = abi.decode(_callData[0], (uint256));
-        _upperHint = abi.decode(_callData[1], (address));
-        _lowerHint = abi.decode(_callData[2], (address));
+        _collAmount = abi.decode(_callData[1], (uint256));
+        _LUSDAmount = abi.decode(_callData[2], (uint256));
+        _upperHint = abi.decode(_callData[3], (address));
+        _lowerHint = abi.decode(_callData[4], (address));
     }
 }
