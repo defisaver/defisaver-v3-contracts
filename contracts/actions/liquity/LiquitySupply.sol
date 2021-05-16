@@ -8,7 +8,7 @@ import "../ActionBase.sol";
 
 contract LiquitySupply is ActionBase {
 
-    address constant _borrowerOperations = 0x24179CD81c9e782A4096035f7eC97fB8B783e007;
+    address constant BorrowerOperationsAddr = 0x24179CD81c9e782A4096035f7eC97fB8B783e007;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -41,7 +41,7 @@ contract LiquitySupply is ActionBase {
 
     /// @notice Send ETH as collateral to a trove
     function _liquitySupply(uint256 _amount, address _upperHint, address _lowerHint) internal returns (uint256) {
-        IBorrowerOperations(_borrowerOperations).addColl{value: _amount}(_upperHint, _lowerHint);
+        IBorrowerOperations(BorrowerOperationsAddr).addColl{value: _amount}(_upperHint, _lowerHint);
 
         logger.Log(
             address(this),

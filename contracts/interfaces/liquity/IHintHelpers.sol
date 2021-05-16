@@ -4,11 +4,6 @@ pragma solidity =0.7.6;
 
 interface HintHelpers {
 
-    // --- Events ---
-
-    event SortedTrovesAddressChanged(address _sortedTrovesAddress);
-    event TroveManagerAddressChanged(address _troveManagerAddress);
-
     function getRedemptionHints(
         uint _LUSDamount, 
         uint _price,

@@ -8,7 +8,7 @@ import "../ActionBase.sol";
 
 contract LiquityOpen is ActionBase {
 
-    address constant _borrowerOperations = 0x24179CD81c9e782A4096035f7eC97fB8B783e007;
+    address constant BorrowerOperationsAddr = 0x24179CD81c9e782A4096035f7eC97fB8B783e007;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -53,7 +53,7 @@ contract LiquityOpen is ActionBase {
 
     /// @notice Opens up an empty trove
     function _liquityOpen(uint256 _maxFeePercentage, uint256 _collAmount, uint256 _LUSDAmount, address _upperHint, address _lowerHint) internal returns (uint256) {
-        IBorrowerOperations(_borrowerOperations).openTrove{value: _collAmount}(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
+        IBorrowerOperations(BorrowerOperationsAddr).openTrove{value: _collAmount}(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
 
         logger.Log(
             address(this),

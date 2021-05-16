@@ -8,7 +8,7 @@ import "../ActionBase.sol";
 
 contract LiquityBorrow is ActionBase {
 
-    address constant _borrowerOperations = 0x24179CD81c9e782A4096035f7eC97fB8B783e007;
+    address constant BorrowerOperationsAddr = 0x24179CD81c9e782A4096035f7eC97fB8B783e007;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -42,7 +42,7 @@ contract LiquityBorrow is ActionBase {
 
     /// @notice Withdraw LUSD tokens from a trove: mint new LUSD tokens to the owner, and increase the trove's debt accordingly
     function _liquityBorrow(uint256 _maxFeePercentage, uint256 _LUSDAmount, address _upperHint, address _lowerHint) internal returns (uint256) {
-        IBorrowerOperations(_borrowerOperations).withdrawLUSD(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
+        IBorrowerOperations(BorrowerOperationsAddr).withdrawLUSD(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
 
         logger.Log(
             address(this),

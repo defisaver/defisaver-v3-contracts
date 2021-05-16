@@ -8,7 +8,7 @@ import "../ActionBase.sol";
 
 contract LiquityPayback is ActionBase {
 
-    address constant _borrowerOperations = 0x24179CD81c9e782A4096035f7eC97fB8B783e007;
+    address constant BorrowerOperationsAddr = 0x24179CD81c9e782A4096035f7eC97fB8B783e007;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -41,7 +41,7 @@ contract LiquityPayback is ActionBase {
 
     /// @notice Repay LUSD tokens to a Trove: Burn the repaid LUSD tokens, and reduce the trove's debt accordingly
     function _liquityPayback(uint _LUSDAmount, address _upperHint, address _lowerHint) internal returns (uint256) {
-        IBorrowerOperations(_borrowerOperations).repayLUSD(_LUSDAmount, _upperHint, _lowerHint);
+        IBorrowerOperations(BorrowerOperationsAddr).repayLUSD(_LUSDAmount, _upperHint, _lowerHint);
 
         logger.Log(
             address(this),
