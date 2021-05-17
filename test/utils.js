@@ -1,4 +1,5 @@
 const hre = require('hardhat');
+const fs = require('fs');
 
 const { deployAsOwner } = require('../scripts/utils/deployer');
 
@@ -59,6 +60,48 @@ const standardAmounts = {
     BAL: '100',
     GUSD: '4000',
     YFI: '0.1',
+};
+
+const coinGeckoHelper = {
+    ETH: 'ethereum',
+    WETH: 'weth',
+    AAVE: 'aave',
+    BAT: 'basic-attention-token',
+    USDC: 'usd-coin',
+    UNI: 'uniswap',
+    SUSD: 'nusd',
+    BUSD: 'binance-usd',
+    SNX: 'havven',
+    REP: 'augur',
+    REN: 'republic-protocol',
+    MKR: 'maker',
+    ENJ: 'enjincoin',
+    DAI: 'dai',
+    WBTC: 'wrapped-bitcoin',
+    RENBTC: 'renbtc',
+    ZRX: '0x',
+    KNC: '2kyber-network',
+    MANA: 'decentraland',
+    PAXUSD: 'paxos-standard',
+    COMP: 'compound-governance-token',
+    LRC: 'loopring',
+    LINK: 'chainlink',
+    USDT: 'tether',
+    TUSD: 'true-usd',
+    BAL: 'balancer',
+    GUSD: 'gemini-dollar',
+    YFI: 'yearn-finance',
+};
+
+const fetchAmountinUSDPrice = async (tokenSign, amountUSD) => {
+    const data = JSON.parse(fs.readFileSync('test/prices.json', 'utf8'));
+    const tokenNames = Object.keys(data);
+    for (let i = 0; i < tokenNames.length; i++) {
+        if (tokenNames[i] === coinGeckoHelper[tokenSign]) {
+            return amountUSD / data[tokenNames[i]].usd;
+        }
+    }
+    return 0;
 };
 
 const fetchStandardAmounts = async () => standardAmounts;
@@ -282,6 +325,7 @@ module.exports = {
     timeTravel,
     fetchStandardAmounts,
     setNewExchangeWrapper,
+    fetchAmountinUSDPrice,
     standardAmounts,
     nullAddress,
     dydxTokens,
