@@ -19,9 +19,9 @@ contract LiquityHelper {
     address constant public SortedTrovesAddr = 0x8FdD3fbFEb32b28fb73555518f8b361bCeA741A6;
     address constant public HintHelpersAddr = 0xE84251b93D9524E0d2e621Ba7dc7cb3579F997C0;
 
-    function isRecoveryMode() external pure returns (bool) {
+    function isRecoveryMode() public view returns (bool) {
         uint256 price = IPriceFeed(PriceFeedAddr).lastGoodPrice();
-        return IBorrowerOperations(BorrowerOperationsAddr).checkRecoveryMode(price);
+        return ITroveManager(TroveManagerAddr).checkRecoveryMode(price);
     }
     
     function computeNICR(uint256 _coll, uint256 _debt) internal pure returns (uint256) {
@@ -42,7 +42,7 @@ contract LiquityHelper {
         bytes32 _action,
         uint256 _LUSDAmount,
         uint256 _collAmount
-    ) external pure returns (uint256) {
+    ) external view returns (uint256 NICR) {
     
         uint256 debt;
         uint256 coll;
@@ -52,12 +52,12 @@ contract LiquityHelper {
             debt = _LUSDAmount;
             if (!isRecoveryMode())
                 debt.add(ITroveManager(TroveManagerAddr).getBorrowingFeeWithDecay(_LUSDAmount));
-            debt = IBorrowerOperations(BorrowerOperationsAddr).getCompositeDebt(netDebt);
+            debt = IBorrowerOperations(BorrowerOperationsAddr).getCompositeDebt(debt);
             coll = _collAmount;
             return computeNICR(coll, debt);
         }
 
-        ( debt, coll) = ITroveManager(TroveManagerAddr).getEntireDebtAndColl(_troveOwner);
+        ( debt, coll, , ) = ITroveManager(TroveManagerAddr).getEntireDebtAndColl(_troveOwner);
 
         //  LiquityBorrow
         if (_action == 0x1b4a4a5559b4c263afdb368aaf6e2ac0f7d7d257f47350068d17a64c69b89599) {
