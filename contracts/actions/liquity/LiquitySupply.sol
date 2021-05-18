@@ -17,19 +17,19 @@ contract LiquitySupply is ActionBase {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (uint256 _amount, address _upperHint, address _lowerHint) = parseInputs(_callData);
+        (uint256 collAmount, address upperHint, address lowerHint) = parseInputs(_callData);
 
-        _amount = _parseParamUint(_amount, _paramMapping[0], _subData, _returnValues);
+        collAmount = _parseParamUint(collAmount, _paramMapping[0], _subData, _returnValues);
 
-        _amount = _liquitySupply(_amount, _upperHint, _lowerHint);
-        return bytes32(_amount);
+        collAmount = _liquitySupply(collAmount, upperHint, lowerHint);
+        return bytes32(collAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public virtual payable override {
-        (uint256 _amount, address _upperHint, address _lowerHint) = parseInputs(_callData);
+        (uint256 collAmount, address upperHint, address lowerHint) = parseInputs(_callData);
 
-        _liquitySupply(_amount, _upperHint, _lowerHint);
+        _liquitySupply(collAmount, upperHint, lowerHint);
     }
 
     /// @inheritdoc ActionBase
@@ -40,26 +40,26 @@ contract LiquitySupply is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Send ETH as collateral to a trove
-    function _liquitySupply(uint256 _amount, address _upperHint, address _lowerHint) internal returns (uint256) {
-        IBorrowerOperations(BorrowerOperationsAddr).addColl{value: _amount}(_upperHint, _lowerHint);
+    function _liquitySupply(uint256 _collAmount, address _upperHint, address _lowerHint) internal returns (uint256) {
+        IBorrowerOperations(BorrowerOperationsAddr).addColl{value: _collAmount}(_upperHint, _lowerHint);
 
         logger.Log(
             address(this),
             msg.sender,
             "LiquitySupply",
-            abi.encode(_amount)
+            abi.encode(_collAmount)
         );
 
-        return _amount;
+        return _collAmount;
     }
 
     function parseInputs(bytes[] memory _callData)
         internal
         pure
-        returns (uint256 _amount, address _upperHint, address _lowerHint)
+        returns (uint256 collAmount, address upperHint, address lowerHint)
     {
-        _amount = abi.decode(_callData[0], (uint256));
-        _upperHint = abi.decode(_callData[1], (address));
-        _lowerHint = abi.decode(_callData[2], (address));
+        collAmount = abi.decode(_callData[0], (uint256));
+        upperHint = abi.decode(_callData[1], (address));
+        lowerHint = abi.decode(_callData[2], (address));
     }
 }

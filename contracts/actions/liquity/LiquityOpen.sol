@@ -18,30 +18,32 @@ contract LiquityOpen is ActionBase {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         (
-            uint256 _maxFeePercentage,
-            uint256 _collAmount,
-            uint256 _LUSDAmount,
-            address _upperHint,
-            address _lowerHint
+            uint256 maxFeePercentage,
+            uint256 collAmount,
+            uint256 LUSDAmount,
+            address upperHint,
+            address lowerHint
         )= parseInputs(_callData);
 
-        _maxFeePercentage = _parseParamUint(_maxFeePercentage, _paramMapping[0], _subData, _returnValues);
+        maxFeePercentage = _parseParamUint(maxFeePercentage, _paramMapping[0], _subData, _returnValues);
+        collAmount = _parseParamUint(collAmount, _paramMapping[1], _subData, _returnValues);
+        LUSDAmount = _parseParamUint(LUSDAmount, _paramMapping[2], _subData, _returnValues);
 
-        uint256 troveOwner = _liquityOpen(_maxFeePercentage, _collAmount, _LUSDAmount, _upperHint, _lowerHint);
+        uint256 troveOwner = _liquityOpen(maxFeePercentage, collAmount, LUSDAmount, upperHint, lowerHint);
         return bytes32(troveOwner);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public virtual payable override {
         (
-            uint256 _maxFeePercentage,
-            uint256 _collAmount,
-            uint256 _LUSDAmount,
-            address _upperHint,
-            address _lowerHint
+            uint256 maxFeePercentage,
+            uint256 collAmount,
+            uint256 LUSDAmount,
+            address upperHint,
+            address lowerHint
         )= parseInputs(_callData);
 
-        _liquityOpen(_maxFeePercentage, _collAmount, _LUSDAmount, _upperHint, _lowerHint);
+        _liquityOpen(maxFeePercentage, collAmount, LUSDAmount, upperHint, lowerHint);
     }
 
     /// @inheritdoc ActionBase
@@ -69,17 +71,17 @@ contract LiquityOpen is ActionBase {
         internal
         pure
         returns (
-            uint256 _maxFeePercentage,
-            uint256 _collAmount,
-            uint256 _LUSDAmount,
-            address _upperHint,
-            address _lowerHint
+            uint256 maxFeePercentage,
+            uint256 collAmount,
+            uint256 LUSDAmount,
+            address upperHint,
+            address lowerHint
         )
     {
-        _maxFeePercentage = abi.decode(_callData[0], (uint256));
-        _collAmount = abi.decode(_callData[1], (uint256));
-        _LUSDAmount = abi.decode(_callData[2], (uint256));
-        _upperHint = abi.decode(_callData[3], (address));
-        _lowerHint = abi.decode(_callData[4], (address));
+        maxFeePercentage = abi.decode(_callData[0], (uint256));
+        collAmount = abi.decode(_callData[1], (uint256));
+        LUSDAmount = abi.decode(_callData[2], (uint256));
+        upperHint = abi.decode(_callData[3], (address));
+        lowerHint = abi.decode(_callData[4], (address));
     }
 }

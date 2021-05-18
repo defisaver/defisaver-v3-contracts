@@ -17,19 +17,19 @@ contract LiquityPayback is ActionBase {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (uint _LUSDAmount, address _upperHint, address _lowerHint) = parseInputs(_callData);
+        (uint LUSDAmount, address upperHint, address lowerHint) = parseInputs(_callData);
 
-        _LUSDAmount = _parseParamUint(_LUSDAmount, _paramMapping[0], _subData, _returnValues);
+        LUSDAmount = _parseParamUint(LUSDAmount, _paramMapping[0], _subData, _returnValues);
 
-        _LUSDAmount = _liquityPayback(_LUSDAmount, _upperHint, _lowerHint);
-        return bytes32(_LUSDAmount);
+        LUSDAmount = _liquityPayback(LUSDAmount, upperHint, lowerHint);
+        return bytes32(LUSDAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public virtual payable override {
-        (uint _LUSDAmount, address _upperHint, address _lowerHint) = parseInputs(_callData);
+        (uint LUSDAmount, address upperHint, address lowerHint) = parseInputs(_callData);
 
-        _liquityPayback(_LUSDAmount, _upperHint, _lowerHint);
+        _liquityPayback(LUSDAmount, upperHint, lowerHint);
     }
 
     /// @inheritdoc ActionBase
@@ -56,10 +56,10 @@ contract LiquityPayback is ActionBase {
     function parseInputs(bytes[] memory _callData)
         internal
         pure
-        returns (uint _LUSDAmount, address _upperHint, address _lowerHint)
+        returns (uint LUSDAmount, address upperHint, address lowerHint)
     {
-        _LUSDAmount = abi.decode(_callData[0], (uint256));
-        _upperHint = abi.decode(_callData[1], (address));
-        _lowerHint = abi.decode(_callData[2], (address));
+        LUSDAmount = abi.decode(_callData[0], (uint256));
+        upperHint = abi.decode(_callData[1], (address));
+        lowerHint = abi.decode(_callData[2], (address));
     }
 }
