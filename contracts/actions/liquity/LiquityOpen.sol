@@ -3,12 +3,13 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
+import "../../utils/TokenUtils.sol";
+import "./helpers/LiquityHelper.sol";
 import "../../interfaces/liquity/IBorrowerOperations.sol";
 import "../ActionBase.sol";
 
 contract LiquityOpen is ActionBase {
-
-    address constant BorrowerOperationsAddr = 0x24179CD81c9e782A4096035f7eC97fB8B783e007;
+    using TokenUtils for address;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -21,6 +22,8 @@ contract LiquityOpen is ActionBase {
             uint256 maxFeePercentage,
             uint256 collAmount,
             uint256 LUSDAmount,
+            address from,
+            address to,
             address upperHint,
             address lowerHint
         )= parseInputs(_callData);
@@ -28,8 +31,10 @@ contract LiquityOpen is ActionBase {
         maxFeePercentage = _parseParamUint(maxFeePercentage, _paramMapping[0], _subData, _returnValues);
         collAmount = _parseParamUint(collAmount, _paramMapping[1], _subData, _returnValues);
         LUSDAmount = _parseParamUint(LUSDAmount, _paramMapping[2], _subData, _returnValues);
+        from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
+        to = _parseParamAddr(from, _paramMapping[4], _subData, _returnValues);
 
-        uint256 troveOwner = _liquityOpen(maxFeePercentage, collAmount, LUSDAmount, upperHint, lowerHint);
+        uint256 troveOwner = _liquityOpen(maxFeePercentage, collAmount, LUSDAmount, from, to, upperHint, lowerHint);
         return bytes32(troveOwner);
     }
 
@@ -39,11 +44,13 @@ contract LiquityOpen is ActionBase {
             uint256 maxFeePercentage,
             uint256 collAmount,
             uint256 LUSDAmount,
+            address from,
+            address to,
             address upperHint,
             address lowerHint
         )= parseInputs(_callData);
 
-        _liquityOpen(maxFeePercentage, collAmount, LUSDAmount, upperHint, lowerHint);
+        _liquityOpen(maxFeePercentage, collAmount, LUSDAmount, from, to, upperHint, lowerHint);
     }
 
     /// @inheritdoc ActionBase
@@ -54,14 +61,31 @@ contract LiquityOpen is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Opens up an empty trove
-    function _liquityOpen(uint256 _maxFeePercentage, uint256 _collAmount, uint256 _LUSDAmount, address _upperHint, address _lowerHint) internal returns (uint256) {
-        IBorrowerOperations(BorrowerOperationsAddr).openTrove{value: _collAmount}(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
+    function _liquityOpen(
+        uint256 _maxFeePercentage,
+        uint256 _collAmount,
+        uint256 _LUSDAmount,
+        address _from,
+        address _to,
+        address _upperHint,
+        address _lowerHint
+    ) internal returns (uint256) {
+        if (_collAmount == type(uint256).max) {
+            _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
+        }
+
+        TokenUtils.WETH_ADDR.pullTokensIfNeeded(_from, _collAmount);
+        TokenUtils.withdrawWeth(_collAmount);
+
+        IBorrowerOperations(LiquityHelper.BorrowerOperationsAddr).openTrove{value: _collAmount}(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
+
+        LiquityHelper.LUSDTokenAddr.withdrawTokens(_to, _LUSDAmount);
 
         logger.Log(
             address(this),
             msg.sender,
             "LiquityOpen",
-            abi.encode(_maxFeePercentage, _collAmount, _LUSDAmount)
+            abi.encode(_maxFeePercentage, _collAmount, _LUSDAmount, _from, _to)
         );
 
         return uint256(msg.sender);
@@ -74,6 +98,8 @@ contract LiquityOpen is ActionBase {
             uint256 maxFeePercentage,
             uint256 collAmount,
             uint256 LUSDAmount,
+            address from,
+            address to,
             address upperHint,
             address lowerHint
         )
@@ -81,7 +107,9 @@ contract LiquityOpen is ActionBase {
         maxFeePercentage = abi.decode(_callData[0], (uint256));
         collAmount = abi.decode(_callData[1], (uint256));
         LUSDAmount = abi.decode(_callData[2], (uint256));
-        upperHint = abi.decode(_callData[3], (address));
-        lowerHint = abi.decode(_callData[4], (address));
+        from = abi.decode(_callData[3], (address));
+        to = abi.decode(_callData[4], (address));
+        upperHint = abi.decode(_callData[5], (address));
+        lowerHint = abi.decode(_callData[6], (address));
     }
 }

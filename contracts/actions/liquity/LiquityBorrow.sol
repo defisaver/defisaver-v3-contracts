@@ -3,12 +3,13 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
+import "../../utils/TokenUtils.sol";
+import "./helpers/LiquityHelper.sol";
 import "../../interfaces/liquity/IBorrowerOperations.sol";
 import "../ActionBase.sol";
 
 contract LiquityBorrow is ActionBase {
-
-    address constant BorrowerOperationsAddr = 0x24179CD81c9e782A4096035f7eC97fB8B783e007;
+    using TokenUtils for address;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -17,20 +18,21 @@ contract LiquityBorrow is ActionBase {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (uint256 maxFeePercentage, uint256 LUSDAmount, address upperHint, address lowerHint) = parseInputs(_callData);
+        (uint256 maxFeePercentage, uint256 LUSDAmount, address to, address upperHint, address lowerHint) = parseInputs(_callData);
 
         maxFeePercentage = _parseParamUint(maxFeePercentage, _paramMapping[0], _subData, _returnValues);
         LUSDAmount = _parseParamUint(LUSDAmount, _paramMapping[1], _subData, _returnValues);
+        to = _parseParamAddr(to, _paramMapping[2], _subData, _returnValues);
 
-        LUSDAmount = _liquityBorrow(maxFeePercentage, LUSDAmount, upperHint, lowerHint);
+        LUSDAmount = _liquityBorrow(maxFeePercentage, LUSDAmount, to, upperHint, lowerHint);
         return bytes32(LUSDAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public virtual payable override {
-        (uint256 maxFeePercentage, uint256 LUSDAmount, address upperHint, address lowerHint) = parseInputs(_callData);
+        (uint256 maxFeePercentage, uint256 LUSDAmount, address to, address upperHint, address lowerHint) = parseInputs(_callData);
 
-        _liquityBorrow(maxFeePercentage, LUSDAmount, upperHint, lowerHint);
+        _liquityBorrow(maxFeePercentage, LUSDAmount, to, upperHint, lowerHint);
     }
 
     /// @inheritdoc ActionBase
@@ -41,14 +43,16 @@ contract LiquityBorrow is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Withdraw LUSD tokens from a trove: mint new LUSD tokens to the owner, and increase the trove's debt accordingly
-    function _liquityBorrow(uint256 _maxFeePercentage, uint256 _LUSDAmount, address _upperHint, address _lowerHint) internal returns (uint256) {
-        IBorrowerOperations(BorrowerOperationsAddr).withdrawLUSD(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
+    function _liquityBorrow(uint256 _maxFeePercentage, uint256 _LUSDAmount, address _to, address _upperHint, address _lowerHint) internal returns (uint256) {
+        IBorrowerOperations(LiquityHelper.BorrowerOperationsAddr).withdrawLUSD(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
+
+        LiquityHelper.LUSDTokenAddr.withdrawTokens(_to, _LUSDAmount);
 
         logger.Log(
             address(this),
             msg.sender,
             "LiquityBorrow",
-            abi.encode(_maxFeePercentage, _LUSDAmount)
+            abi.encode(_maxFeePercentage, _LUSDAmount, _to)
         );
 
         return _LUSDAmount;
@@ -57,11 +61,12 @@ contract LiquityBorrow is ActionBase {
     function parseInputs(bytes[] memory _callData)
         internal
         pure
-        returns (uint256 maxFeePercentage, uint256 LUSDAmount, address upperHint, address lowerHint)
+        returns (uint256 maxFeePercentage, uint256 LUSDAmount, address to, address upperHint, address lowerHint)
     {
         maxFeePercentage = abi.decode(_callData[0], (uint256));
         LUSDAmount = abi.decode(_callData[1], (uint256));
-        upperHint = abi.decode(_callData[2], (address));
-        lowerHint = abi.decode(_callData[3], (address));
+        to = abi.decode(_callData[2], (address));
+        upperHint = abi.decode(_callData[3], (address));
+        lowerHint = abi.decode(_callData[4], (address));
     }
 }

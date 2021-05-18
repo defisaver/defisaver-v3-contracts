@@ -8,7 +8,7 @@ import "../../../interfaces/liquity/IBorrowerOperations.sol";
 import "../../../interfaces/liquity/IPriceFeed.sol";
 
 
-contract LiquityHelper {
+library LiquityHelper {
 
     using SafeMath for uint256;
 
