@@ -592,7 +592,7 @@ const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amoun
         );
     }
     const deadline = Date.now() + Date.now();
-    const uniMintV3Action = new dfs.actions.uniswap.UniMintV3Action(
+    const uniMintV3Action = new dfs.actions.uniswapV3.UniswapV3MintAction(
         token0,
         token1,
         fee,
@@ -657,7 +657,7 @@ const uniV3Supply = async (proxy, tokenId, amount0Desired,
     }
     const deadline = Date.now() + Date.now();
 
-    const uniSupplyV3Action = new dfs.actions.uniswap.UniSupplyV3Action(
+    const uniSupplyV3Action = new dfs.actions.uniswapV3.UniswapV3SupplyAction(
         tokenId,
         amount0Desired,
         amount1Desired,
@@ -678,7 +678,7 @@ const uniV3Supply = async (proxy, tokenId, amount0Desired,
 const uniV3Withdraw = async (proxy, tokenId, liquidity, recipient) => {
     const uniWithdrawV3Address = await getAddrFromRegistry('UniWithdrawV3');
     const deadline = Date.now() + Date.now();
-    const uniWithdrawV3Action = new dfs.actions.uniswap.UniWithdrawV3Action(
+    const uniWithdrawV3Action = new dfs.actions.uniswapV3.UniswapV3WithdrawAction(
         tokenId,
         liquidity,
         0,
@@ -695,7 +695,7 @@ const uniV3Withdraw = async (proxy, tokenId, liquidity, recipient) => {
 
 const uniV3Collect = async (proxy, tokenId, recipient, amount0Max, amount1Max) => {
     const uniCollectV3Address = await getAddrFromRegistry('UniCollectV3');
-    const uniCollectV3Action = new dfs.actions.uniswap.UniCollectV3Action(
+    const uniCollectV3Action = new dfs.actions.uniswapV3.UniswapV3CollectAction(
         tokenId,
         recipient,
         amount0Max,
