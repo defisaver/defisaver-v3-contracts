@@ -17,7 +17,7 @@ const {
     getProxy,
     redeploy,
     balanceOf,
-    standardAmounts,
+    fetchAmountinUSDPrice,
     AAVE_MARKET,
     WETH_ADDRESS,
 } = require('../utils');
@@ -42,11 +42,10 @@ describe('Aave-Borrow', function () {
         dataProvider = await getAaveDataProvider();
     });
 
-    // aaveV2assetsDefaultMarket.length
     for (let i = 0; i < aaveV2assetsDefaultMarket.length; ++i) {
         const tokenSymbol = aaveV2assetsDefaultMarket[i];
-
-        it(`... should variable borrow ${standardAmounts[tokenSymbol]} ${tokenSymbol} from Aave`, async () => {
+        const fetchedAmountWithUSD = fetchAmountinUSDPrice(tokenSymbol, '5000');
+        it(`... should variable borrow ${fetchedAmountWithUSD} ${tokenSymbol} from Aave`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
 
             if (assetInfo.symbol === 'ETH') {
@@ -64,7 +63,7 @@ describe('Aave-Borrow', function () {
             }
 
             const amount = hre.ethers.utils.parseUnits(
-                standardAmounts[assetInfo.symbol],
+                fetchedAmountWithUSD,
                 assetInfo.decimals,
             );
 
@@ -75,7 +74,7 @@ describe('Aave-Borrow', function () {
             }
 
             // eth bada bing bada bum
-            await supplyAave(proxy, AAVE_MARKET, hre.ethers.utils.parseUnits('3', 18), WETH_ADDRESS, senderAcc.address);
+            await supplyAave(proxy, AAVE_MARKET, hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '20000'), 18), WETH_ADDRESS, senderAcc.address);
 
             const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
             const debtBalanceBefore = await balanceOf(
@@ -102,7 +101,8 @@ describe('Aave-Borrow', function () {
             expect(balanceAfter).to.be.gt(balanceBefore);
         });
 
-        it(`... should stable borrow ${standardAmounts[tokenSymbol] / 10} ${tokenSymbol} from Aave`, async () => {
+        const fetchedAmountDiv10 = fetchAmountinUSDPrice(tokenSymbol, '500');
+        it(`... should stable borrow ${fetchedAmountDiv10} ${tokenSymbol} from Aave`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
 
             if (assetInfo.symbol === 'ETH') {
@@ -124,7 +124,7 @@ describe('Aave-Borrow', function () {
             }
 
             const amount = hre.ethers.utils.parseUnits(
-                (standardAmounts[assetInfo.symbol] / 10).toString(),
+                fetchedAmountDiv10,
                 assetInfo.decimals,
             );
 
@@ -135,7 +135,7 @@ describe('Aave-Borrow', function () {
             }
 
             // eth bada bing bada bum
-            await supplyAave(proxy, AAVE_MARKET, hre.ethers.utils.parseUnits('3', 18), WETH_ADDRESS, senderAcc.address);
+            await supplyAave(proxy, AAVE_MARKET, hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '20000'), 18), WETH_ADDRESS, senderAcc.address);
 
             const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
             const debtBalanceBefore = await balanceOf(
