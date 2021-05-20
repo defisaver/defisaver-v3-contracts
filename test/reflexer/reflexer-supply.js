@@ -5,10 +5,10 @@ const {
     getProxy,
     redeploy,
     WETH_ADDRESS,
-    standardAmounts,
     balanceOf,
     send,
     depositToWeth,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -38,7 +38,7 @@ describe('Reflexer-Supply', () => {
     it('... should supply standard amount of WETH to safe', async () => {
         await reflexerOpen(proxy, ADAPTER_ADDRESS);
 
-        const amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
+        const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18);
         await depositToWeth(amountWETH.toString());
 
         const safeID = await lastSafeID(proxy.address);
@@ -53,14 +53,15 @@ describe('Reflexer-Supply', () => {
     it('... should supply all WETH to safe from proxy', async () => {
         await reflexerOpen(proxy, ADAPTER_ADDRESS);
 
-        const amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
+        const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18);
         await depositToWeth(amountWETH.toString());
         await send(WETH_ADDRESS, proxy.address, amountWETH);
 
         const safeID = await lastSafeID(proxy.address);
         const from = proxy.address;
         const proxyStartingBalance = await balanceOf(WETH_ADDRESS, proxy.address);
-        await expect(() => reflexerSupply(proxy, safeID, hre.ethers.constants.MaxUint256, ADAPTER_ADDRESS, from))
+        await expect(() => reflexerSupply(proxy, safeID,
+            hre.ethers.constants.MaxUint256, ADAPTER_ADDRESS, from))
             .to.changeTokenBalance(weth, proxy, proxyStartingBalance.mul(-1));
 
         const info = await getSafeInfo(reflexerView, safeID);
@@ -70,13 +71,14 @@ describe('Reflexer-Supply', () => {
     it('... should supply all WETH to safe from EOA', async () => {
         await reflexerOpen(proxy, ADAPTER_ADDRESS);
 
-        const amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
+        const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18);
         await depositToWeth(amountWETH.toString());
 
         const safeID = await lastSafeID(proxy.address);
         const from = senderAcc.address;
         const startingBalance = await balanceOf(WETH_ADDRESS, from);
-        await expect(() => reflexerSupply(proxy, safeID, hre.ethers.constants.MaxUint256, ADAPTER_ADDRESS, from))
+        await expect(() => reflexerSupply(proxy, safeID,
+            hre.ethers.constants.MaxUint256, ADAPTER_ADDRESS, from))
             .to.changeTokenBalance(weth, senderAcc, startingBalance.mul(-1));
 
         const info = await getSafeInfo(reflexerView, safeID);
@@ -87,7 +89,7 @@ describe('Reflexer-Supply', () => {
         await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
             .to.emit(logger, 'LogEvent');
 
-        const amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
+        const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18);
         await depositToWeth(amountWETH.toString());
 
         const safeID = await lastSafeID(proxy.address);

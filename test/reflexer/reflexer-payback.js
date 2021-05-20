@@ -3,11 +3,11 @@ const hre = require('hardhat');
 const {
     getProxy,
     redeploy,
-    standardAmounts,
     depositToWeth,
     MIN_VAULT_RAI_AMOUNT,
     RAI_ADDR,
     WETH_ADDRESS,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -46,7 +46,7 @@ describe('Reflexer-Payback', function () {
         const safeID = await lastSafeID(proxy.address);
 
         let amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
-        let amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
+        let amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18);
         amountWETH = amountWETH.mul(5); // 20 eth
         amountRai = amountRai.mul(10); // 10k rai
         await depositToWeth(amountWETH.toString());
@@ -70,7 +70,7 @@ describe('Reflexer-Payback', function () {
         const safeID = await lastSafeID(proxy.address);
 
         let amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
-        let amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
+        let amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18);
         amountWETH = amountWETH.mul(5); // 20 eth
         amountRai = amountRai.mul(10); // 10k rai
         await depositToWeth(amountWETH.toString());
@@ -93,7 +93,7 @@ describe('Reflexer-Payback', function () {
         await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
             .to.emit(logger, 'LogEvent');
 
-        const amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
+        const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18);
         const amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
         await depositToWeth(amountWETH.toString());
 
@@ -106,7 +106,8 @@ describe('Reflexer-Payback', function () {
         await expect(reflexerGenerate(proxy, safeID, amountRai, to))
             .to.emit(logger, 'LogEvent');
 
-        await expect(reflexerPayback(proxy, safeID, hre.ethers.constants.MaxUint256, from, RAI_ADDR))
+        await expect(reflexerPayback(proxy, safeID,
+            hre.ethers.constants.MaxUint256, from, RAI_ADDR))
             .to.emit(logger, 'LogEvent');
     }).timeout(40000);
 });

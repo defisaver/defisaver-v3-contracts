@@ -13,6 +13,7 @@ const {
     LOGGER_ADDR,
     UNIV3ROUTER_ADDR,
     UNIV3POSITIONMANAGER_ADDR,
+    fetchAmountinUSDPrice,
 } = require('../../utils');
 
 const {
@@ -25,7 +26,13 @@ describe('Uni-Mint-V3', () => {
 
     const uniPairs = [
         {
-            tokenA: 'DAI', tokenB: 'WETH', amount0: '1000', amount1: '2', fee: '3000', tickLower: '-85920', tickUpper: '-78300',
+            tokenA: 'DAI',
+            tokenB: 'WETH',
+            amount0: fetchAmountinUSDPrice('DAI', '1000'),
+            amount1: fetchAmountinUSDPrice('WETH', '1000'),
+            fee: '3000',
+            tickLower: '-92100',
+            tickUpper: '-69060',
         },
     ];
 

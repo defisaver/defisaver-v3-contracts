@@ -13,9 +13,9 @@ const {
     getProxy,
     redeploy,
     balanceOf,
-    standardAmounts,
     AAVE_MARKET,
     WETH_ADDRESS,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -24,7 +24,7 @@ const {
 } = require('../actions');
 
 describe('Aave-Withdraw', function () {
-    this.timeout(80000);
+    this.timeout(150000);
 
     let senderAcc; let proxy; let dataProvider;
 
@@ -40,8 +40,9 @@ describe('Aave-Withdraw', function () {
 
     for (let i = 0; i < aaveV2assetsDefaultMarket.length; ++i) {
         const tokenSymbol = aaveV2assetsDefaultMarket[i];
+        const fetchedAmountWithUSD = fetchAmountinUSDPrice(tokenSymbol, '10000');
 
-        it(`... should withdraw ${standardAmounts[tokenSymbol]} ${tokenSymbol} from Aave`, async () => {
+        it(`... should withdraw ${fetchedAmountWithUSD} ${tokenSymbol} from Aave`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
 
             if (assetInfo.symbol === 'ETH') {
@@ -52,7 +53,7 @@ describe('Aave-Withdraw', function () {
             const aToken = aaveTokenInfo.aTokenAddress;
 
             const amount = hre.ethers.utils.parseUnits(
-                standardAmounts[assetInfo.symbol],
+                fetchedAmountWithUSD,
                 assetInfo.decimals,
             );
 

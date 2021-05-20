@@ -80,7 +80,7 @@ const coinGeckoHelper = {
     WBTC: 'wrapped-bitcoin',
     RENBTC: 'renbtc',
     ZRX: '0x',
-    KNC: '2kyber-network',
+    KNC: 'kyber-network',
     MANA: 'decentraland',
     PAXUSD: 'paxos-standard',
     COMP: 'compound-governance-token',
@@ -93,12 +93,13 @@ const coinGeckoHelper = {
     YFI: 'yearn-finance',
 };
 
-const fetchAmountinUSDPrice = async (tokenSign, amountUSD) => {
+const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {
     const data = JSON.parse(fs.readFileSync('test/prices.json', 'utf8'));
     const tokenNames = Object.keys(data);
     for (let i = 0; i < tokenNames.length; i++) {
         if (tokenNames[i] === coinGeckoHelper[tokenSign]) {
-            return amountUSD / data[tokenNames[i]].usd;
+            const amountNumber = (amountUSD / data[tokenNames[i]].usd);
+            return amountNumber.toFixed(2);
         }
     }
     return 0;
