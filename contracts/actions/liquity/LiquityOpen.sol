@@ -3,12 +3,11 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "../../utils/TokenUtils.sol";
 import "./helpers/LiquityHelper.sol";
-import "../../interfaces/liquity/IBorrowerOperations.sol";
+import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
-contract LiquityOpen is ActionBase {
+contract LiquityOpen is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
     /// @inheritdoc ActionBase
@@ -74,12 +73,12 @@ contract LiquityOpen is ActionBase {
             _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
         }
 
-        TokenUtils.WETH_ADDR.pullTokensIfNeeded(_from, _collAmount);
+        WETH_ADDR.pullTokensIfNeeded(_from, _collAmount);
         TokenUtils.withdrawWeth(_collAmount);
 
-        IBorrowerOperations(LiquityHelper.BorrowerOperationsAddr).openTrove{value: _collAmount}(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
+        BorrowerOperations.openTrove{value: _collAmount}(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
 
-        LiquityHelper.LUSDTokenAddr.withdrawTokens(_to, _LUSDAmount);
+        LUSDTokenAddr.withdrawTokens(_to, _LUSDAmount);
 
         logger.Log(
             address(this),

@@ -3,12 +3,11 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "../../utils/TokenUtils.sol";
 import "./helpers/LiquityHelper.sol";
-import "../../interfaces/liquity/IBorrowerOperations.sol";
+import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
-contract LiquityBorrow is ActionBase {
+contract LiquityBorrow is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
     /// @inheritdoc ActionBase
@@ -44,9 +43,9 @@ contract LiquityBorrow is ActionBase {
 
     /// @notice Withdraw LUSD tokens from a trove: mint new LUSD tokens to the owner, and increase the trove's debt accordingly
     function _liquityBorrow(uint256 _maxFeePercentage, uint256 _LUSDAmount, address _to, address _upperHint, address _lowerHint) internal returns (uint256) {
-        IBorrowerOperations(LiquityHelper.BorrowerOperationsAddr).withdrawLUSD(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
+        BorrowerOperations.withdrawLUSD(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
 
-        LiquityHelper.LUSDTokenAddr.withdrawTokens(_to, _LUSDAmount);
+        LUSDTokenAddr.withdrawTokens(_to, _LUSDAmount);
 
         logger.Log(
             address(this),

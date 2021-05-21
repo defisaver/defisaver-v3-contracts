@@ -3,15 +3,13 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "../../utils/TokenUtils.sol";
 import "./helpers/LiquityHelper.sol";
-import "../../interfaces/liquity/ITroveManager.sol";
-import "../../interfaces/liquity/IBorrowerOperations.sol";
+import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
-contract LiquityWithdraw is ActionBase {
+contract LiquityWithdraw is ActionBase, LiquityHelper {
     using TokenUtils for address;
-
+    
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
@@ -45,14 +43,14 @@ contract LiquityWithdraw is ActionBase {
     /// @notice Withdraw ETH collateral from a trove
     function _liquityWithdraw(uint256 _collAmount, address _to, address _upperHint, address _lowerHint) internal returns (uint256) {
         if (_collAmount == type(uint256).max) {
-            _collAmount = ITroveManager(LiquityHelper.TroveManagerAddr).getTroveColl(msg.sender);
+            _collAmount = TroveManager.getTroveColl(msg.sender);
         }
-
-        IBorrowerOperations(LiquityHelper.BorrowerOperationsAddr).withdrawColl(_collAmount, _upperHint, _lowerHint);
-
+        
+        BorrowerOperations.withdrawColl(_collAmount, _upperHint, _lowerHint);
+        
         TokenUtils.depositWeth(_collAmount);
-        TokenUtils.WETH_ADDR.withdrawTokens(_to, _collAmount);
-
+        WETH_ADDR.withdrawTokens(_to, _collAmount);
+        
         logger.Log(
             address(this),
             msg.sender,

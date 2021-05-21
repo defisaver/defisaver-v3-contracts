@@ -3,12 +3,11 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "../../utils/TokenUtils.sol";
 import "./helpers/LiquityHelper.sol";
-import "../../interfaces/liquity/IBorrowerOperations.sol";
+import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
-contract LiquityPayback is ActionBase {
+contract LiquityPayback is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
     /// @inheritdoc ActionBase
@@ -43,9 +42,10 @@ contract LiquityPayback is ActionBase {
 
     /// @notice Repay LUSD tokens to a Trove: Burn the repaid LUSD tokens, and reduce the trove's debt accordingly
     function _liquityPayback(uint _LUSDAmount, address _from, address _upperHint, address _lowerHint) internal returns (uint256) {
-        LiquityHelper.LUSDTokenAddr.pullTokensIfNeeded(_from, _LUSDAmount);
 
-        IBorrowerOperations(LiquityHelper.BorrowerOperationsAddr).repayLUSD(_LUSDAmount, _upperHint, _lowerHint);
+        LUSDTokenAddr.pullTokensIfNeeded(_from, _LUSDAmount);
+
+        BorrowerOperations.repayLUSD(_LUSDAmount, _upperHint, _lowerHint);
 
         logger.Log(
             address(this),

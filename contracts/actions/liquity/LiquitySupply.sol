@@ -3,14 +3,13 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "../../utils/TokenUtils.sol";
 import "./helpers/LiquityHelper.sol";
-import "../../interfaces/liquity/IBorrowerOperations.sol";
+import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
-contract LiquitySupply is ActionBase {
+contract LiquitySupply is ActionBase, LiquityHelper {
     using TokenUtils for address;
-
+    
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
@@ -43,14 +42,15 @@ contract LiquitySupply is ActionBase {
 
     /// @notice Send ETH as collateral to a trove
     function _liquitySupply(uint256 _collAmount, address _from, address _upperHint, address _lowerHint) internal returns (uint256) {
+
         if (_collAmount == type(uint256).max) {
-            _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
+            _collAmount = WETH_ADDR.getBalance(_from);
         }
 
-        TokenUtils.WETH_ADDR.pullTokensIfNeeded(_from, _collAmount);
+        WETH_ADDR.pullTokensIfNeeded(_from, _collAmount);
         TokenUtils.withdrawWeth(_collAmount);
 
-        IBorrowerOperations(LiquityHelper.BorrowerOperationsAddr).addColl{value: _collAmount}(_upperHint, _lowerHint);
+        BorrowerOperations.addColl{value: _collAmount}(_upperHint, _lowerHint);
 
         logger.Log(
             address(this),
