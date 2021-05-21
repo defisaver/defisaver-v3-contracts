@@ -45,7 +45,7 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
                 paramMapping: template.paramMapping
             });
 
-        _executeActions(currTask, true);
+        _executeActions(currTask, false);
     }
 
     /// @notice This is the callback function that FL actions call

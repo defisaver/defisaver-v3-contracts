@@ -42,19 +42,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "PROXY_AUTH_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "REGISTRY_ADDR",
 			"outputs": [
 				{

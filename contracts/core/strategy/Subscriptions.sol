@@ -159,11 +159,11 @@ contract Subscriptions is StrategyData, AdminAuth {
     }
 
     function getStrategyCount() public view returns (uint256) {
-        return strategies.length;
+        return strategies.length - 1;
     }
 
     function getTemplateCount() public view returns (uint256) {
-        return templates.length;
+        return templates.length - 1;
     }
 
     function getStrategies() public view returns (Strategy[] memory) {

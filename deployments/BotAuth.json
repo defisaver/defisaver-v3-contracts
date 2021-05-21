@@ -1,30 +1,17 @@
 {
-	"contractName": "ProxyAuth",
+	"contractName": "BotAuth",
 	"abi": [
 		{
-			"inputs": [],
-			"name": "ERR_SENDER_NOT_EXECUTOR",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "REGISTRY_ADDR",
-			"outputs": [
+			"inputs": [
 				{
 					"internalType": "address",
-					"name": "",
+					"name": "_caller",
 					"type": "address"
 				}
 			],
-			"stateMutability": "view",
+			"name": "addCaller",
+			"outputs": [],
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
@@ -44,23 +31,43 @@
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "_proxyAddr",
+					"name": "",
 					"type": "address"
+				}
+			],
+			"name": "approvedCallers",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
 				},
 				{
 					"internalType": "address",
-					"name": "_contractAddr",
+					"name": "_caller",
 					"type": "address"
-				},
-				{
-					"internalType": "bytes",
-					"name": "_data",
-					"type": "bytes"
 				}
 			],
-			"name": "callExecute",
-			"outputs": [],
-			"stateMutability": "payable",
+			"name": "isApproved",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
 			"type": "function"
 		},
 		{
@@ -71,16 +78,16 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "registry",
-			"outputs": [
+			"inputs": [
 				{
-					"internalType": "contract IDFSRegistry",
-					"name": "",
+					"internalType": "address",
+					"name": "_caller",
 					"type": "address"
 				}
 			],
-			"stateMutability": "view",
+			"name": "removeCaller",
+			"outputs": [],
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{

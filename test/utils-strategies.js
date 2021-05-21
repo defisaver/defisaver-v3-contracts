@@ -1,7 +1,32 @@
 const hre = require('hardhat');
 const {
     getAddrFromRegistry,
+    impersonateAccount,
+    stopImpersonatingAccount,
+    OWNER_ACC,
 } = require('./utils');
+
+const getLatestTemplateId = async () => {
+    const subscriptionAddr = await getAddrFromRegistry('Subscriptions');
+
+    const subscriptionInstance = await hre.ethers.getContractFactory('Subscriptions');
+    const subscription = await subscriptionInstance.attach(subscriptionAddr);
+
+    const latestTemplateId = await subscription.getTemplateCount();
+
+    return latestTemplateId;
+};
+
+const getLatestStrategyId = async () => {
+    const subscriptionAddr = await getAddrFromRegistry('Subscriptions');
+
+    const subscriptionInstance = await hre.ethers.getContractFactory('Subscriptions');
+    const subscription = await subscriptionInstance.attach(subscriptionAddr);
+
+    const latestStrategyId = await subscription.getStrategyCount();
+
+    return latestStrategyId;
+};
 
 const subTemplate = async (proxy, templateName, triggerNames, actionNames, paramMapping) => {
     const subProxyAddr = await getAddrFromRegistry('SubscriptionProxy');
@@ -35,9 +60,32 @@ const subStrategy = async (proxy, templateId, active, actionData, triggerData) =
     await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
         gasLimit: 5000000,
     });
+
+    const latestStrategyId = await getLatestStrategyId();
+
+    return latestStrategyId;
+};
+
+const addBotCaller = async (botAddr) => {
+    await impersonateAccount(OWNER_ACC);
+
+    const signer = await hre.ethers.provider.getSigner(OWNER_ACC);
+    const botAuthAddr = await getAddrFromRegistry('BotAuth');
+
+    const botAuthInstance = await hre.ethers.getContractFactory('BotAuth', signer);
+    const botAuth = await botAuthInstance.attach(botAuthAddr);
+
+    botAuth.connect(signer);
+
+    await botAuth.addCaller(botAddr);
+
+    await stopImpersonatingAccount(OWNER_ACC);
 };
 
 module.exports = {
     subTemplate,
     subStrategy,
+    getLatestTemplateId,
+    getLatestStrategyId,
+    addBotCaller,
 };

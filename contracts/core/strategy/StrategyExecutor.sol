@@ -15,14 +15,14 @@ import "./ProxyAuth.sol";
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutor is StrategyData, AdminAuth {
 
-    address public constant PROXY_AUTH_ADDR = 0x3Aa5ebB10DC797CAC828524e59A333d0A371443c;
+    bytes32 constant PROXY_AUTH_ID = keccak256("ProxyAuth");
 
     address public constant REGISTRY_ADDR = 0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes32 constant BOT_AUTH_ID = keccak256("BotAuth");
     bytes32 constant SUBSCRIPTION_ID = keccak256("Subscriptions");
-    bytes32 constant TASK_MANAGER_ID = keccak256("TaskExecutor");
+    bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
 
     string public constant ERR_TRIGGER_NOT_ACTIVE = "Trigger not activated";
     string public constant ERR_BOT_NOT_APPROVED = "Bot is not approved";
@@ -37,7 +37,7 @@ contract StrategyExecutor is StrategyData, AdminAuth {
         uint256 _strategyId,
         bytes[][] memory _triggerCallData,
         bytes[][] memory _actionsCallData
-    ) public   {
+    ) public {
         Subscriptions sub = Subscriptions(registry.getAddr(SUBSCRIPTION_ID));
 
         Strategy memory strategy = sub.getStrategy(_strategyId);
@@ -87,11 +87,13 @@ contract StrategyExecutor is StrategyData, AdminAuth {
     /// @param _strategy Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
     function callActions(uint _strategyId, Strategy memory _strategy, bytes[][] memory _actionsCallData) internal {
-        address actionManagerProxyAddr = registry.getAddr(TASK_MANAGER_ID);
+        address taskExecutorAddr = registry.getAddr(TASK_EXECUTOR_ID);
 
-        ProxyAuth(PROXY_AUTH_ADDR).callExecute{value: msg.value}(
+        address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
+
+        ProxyAuth(proxyAuthAddr).callExecute{value: msg.value}(
             _strategy.proxy,
-            actionManagerProxyAddr,
+            taskExecutorAddr,
             abi.encodeWithSignature(
                 "executeStrategyTask(uint256,bytes[][])",
                 _strategyId,
