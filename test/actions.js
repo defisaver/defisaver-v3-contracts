@@ -19,6 +19,8 @@ const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
 
 const { getSecondTokenAmount } = require('./utils-uni');
 
+const { getHints } = require('./utils-liquity');
+
 const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to) => {
     const dfsSellAddr = await getAddrFromRegistry('DFSSell');
 
@@ -543,6 +545,100 @@ const reflexerGenerate = async (proxy, safeId, amount, to) => {
     return proxy['execute(address,bytes)'](reflexerGenerateAddr, functionData, { gasLimit: 3000000 });
 };
 
+const liquityOpen = async (
+    proxy, maxFeePercentage, collAmount, LUSDAmount, from, to,
+) => {
+    const liquityOpenAddr = await getAddrFromRegistry('LiquityOpen');
+
+    const { upperHint, lowerHint } = await getHints(proxy.address, '0x9784ddef75074931e96bf82802bd70756a92aaddb03af1f5972b971393e6b0b2', collAmount, LUSDAmount);
+
+    const liquityOpenAction = new dfs.actions.liquity.LiquityOpenAction(
+        maxFeePercentage, collAmount, LUSDAmount, from, to, upperHint, lowerHint,
+    );
+
+    const functionData = liquityOpenAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityOpenAddr, functionData, { gasLimit: 3000000 });
+};
+
+const liquityBorrow = async (
+    proxy, maxFeePercentage, LUSDAmount, to,
+) => {
+    const liquityBorrowAddr = await getAddrFromRegistry('LiquityBorrow');
+
+    const { upperHint, lowerHint } = await getHints(proxy.address, '0x1b4a4a5559b4c263afdb368aaf6e2ac0f7d7d257f47350068d17a64c69b89599', 0, LUSDAmount);
+
+    const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
+        maxFeePercentage, LUSDAmount, to, upperHint, lowerHint,
+    );
+
+    const functionData = liquityBorrowAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityBorrowAddr, functionData, { gasLimit: 3000000 });
+};
+
+const liquityPayback = async (
+    proxy, LUSDAmount, from,
+) => {
+    const liquityPaybackAddr = await getAddrFromRegistry('LiquityPayback');
+
+    const { upperHint, lowerHint } = await getHints(proxy.address, '0x0761723ec860d1b0b21e6b972427628f755d62f9d3ad7e3be1ded93346f4671f', 0, LUSDAmount);
+
+    const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
+        LUSDAmount, from, upperHint, lowerHint,
+    );
+
+    const functionData = liquityPaybackAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityPaybackAddr, functionData, { gasLimit: 3000000 });
+};
+
+const liquitySupply = async (
+    proxy, collAmount, from,
+) => {
+    const liquitySupplyAddr = await getAddrFromRegistry('LiquitySupply');
+
+    const { upperHint, lowerHint } = await getHints(proxy.address, '0x7fe3a18199c1dabe02514e3e7b48a5676e21fa1fdcef93a01b179ed80906ca7b', collAmount, 0);
+
+    const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
+        collAmount, from, upperHint, lowerHint,
+    );
+
+    const functionData = liquitySupplyAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquitySupplyAddr, functionData, { gasLimit: 3000000 });
+};
+
+const liquityWithdraw = async (
+    proxy, collAmount, to,
+) => {
+    const liquityWithdrawAddr = await getAddrFromRegistry('LiquityWithdraw');
+
+    const { upperHint, lowerHint } = await getHints(proxy.address, '0x7fe3a18199c1dabe02514e3e7b48a5676e21fa1fdcef93a01b179ed80906ca7b', collAmount, 0);
+
+    const liquityWithdrawAction = new dfs.actions.liquity.LiquityWithdrawAction(
+        collAmount, to, upperHint, lowerHint,
+    );
+
+    const functionData = liquityWithdrawAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
+
+const liquityClose = async (
+    proxy, from, slip,
+) => {
+    const liquityCloseAddr = await getAddrFromRegistry('LiquityClose');
+
+    const LiquityCloseAction = new dfs.actions.liquity.LiquityCloseAction(
+        from, slip,
+    );
+
+    const functionData = LiquityCloseAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityCloseAddr, functionData, { gasLimit: 3000000 });
+};
+
 module.exports = {
     sell,
     buy,
@@ -575,4 +671,11 @@ module.exports = {
     reflexerWithdraw,
     reflexerPayback,
     reflexerGenerate,
+
+    liquityOpen,
+    liquityBorrow,
+    liquityPayback,
+    liquitySupply,
+    liquityWithdraw,
+    liquityClose,
 };
