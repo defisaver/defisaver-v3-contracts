@@ -11,9 +11,9 @@ const {
     formatExchangeObj,
     setNewExchangeWrapper,
     nullAddress,
-    standardAmounts,
     WETH_ADDRESS,
     MIN_VAULT_DAI_AMOUNT,
+    fetchAmountinUSDPrice,
 } = require('../../utils');
 
 const {
@@ -82,7 +82,7 @@ describe('Mcd-Boost', function () {
                 proxy,
                 joinAddr,
                 tokenData,
-                (standardAmounts[tokenData.symbol] * 2).toString(),
+                fetchAmountinUSDPrice(tokenData.symbol, '15000'),
                 (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString(),
             );
 

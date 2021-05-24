@@ -14,9 +14,9 @@ const {
     setNewExchangeWrapper,
     balanceOf,
     nullAddress,
-    standardAmounts,
     WETH_ADDRESS,
     MIN_VAULT_DAI_AMOUNT,
+    fetchAmountinUSDPrice,
 } = require('../../utils');
 
 const {
@@ -76,7 +76,7 @@ describe('Mcd-Close', function () {
                 return;
             }
 
-            const vaultColl = (standardAmounts[tokenData.symbol] * 2).toString();
+            const vaultColl = fetchAmountinUSDPrice('WETH', '15000');
 
             const amountDai = (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString();
 
@@ -136,7 +136,7 @@ describe('Mcd-Close', function () {
             }
 
             const amountDai = (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString();
-            const amountColl = (standardAmounts[tokenData.symbol] * 2).toString();
+            const amountColl = fetchAmountinUSDPrice(tokenData.symbol, '15000');
 
             const vaultId = await openVault(
                 makerAddresses,

@@ -64,9 +64,6 @@ describe('Mcd-Payback', function () {
                 tokenData.address = WETH_ADDRESS;
             }
 
-            console.log(fetchAmountinUSDPrice(tokenData.symbol, '25000'),
-                (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 50).toString());
-
             vaultId = await openVault(
                 makerAddresses,
                 proxy,
