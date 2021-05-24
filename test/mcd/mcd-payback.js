@@ -7,9 +7,9 @@ const {
     balanceOf,
     getProxy,
     redeploy,
-    standardAmounts,
     MIN_VAULT_DAI_AMOUNT,
     WETH_ADDRESS,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -64,7 +64,7 @@ describe('Mcd-Payback', function () {
                 tokenData.address = WETH_ADDRESS;
             }
 
-            console.log((standardAmounts[tokenData.symbol] * 2.5).toString(),
+            console.log(fetchAmountinUSDPrice(tokenData.symbol, '25000'),
                 (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 50).toString());
 
             vaultId = await openVault(
@@ -72,7 +72,7 @@ describe('Mcd-Payback', function () {
                 proxy,
                 joinAddr,
                 tokenData,
-                (standardAmounts[tokenData.symbol] * 2.5).toString(),
+                fetchAmountinUSDPrice(tokenData.symbol, '25000'),
                 (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 50).toString(),
             );
 
@@ -83,8 +83,6 @@ describe('Mcd-Payback', function () {
             const amountDai = hre.ethers.utils.parseUnits(PARTIAL_DAI_AMOUNT, 18);
 
             const daiBalanceBefore = await balanceOf(makerAddresses.MCD_DAI, from);
-
-            console.log('daiBalanceBefore: ', daiBalanceBefore / 1e18);
 
             await paybackMcd(proxy, vaultId, amountDai, from, makerAddresses.MCD_DAI);
 

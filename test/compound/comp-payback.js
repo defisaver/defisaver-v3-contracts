@@ -39,6 +39,11 @@ describe('Comp-Payback', function () {
 
     for (let i = 0; i < compoundCollateralAssets.length; ++i) {
         const cTokenData = compoundCollateralAssets[i];
+        if (cTokenData.symbol === 'cWBTC Legacy') {
+            // Jump over WBTC Legacy
+            // eslint-disable-next-line no-continue
+            continue;
+        }
         const fetchedAmountWithUSD = fetchAmountinUSDPrice(cTokenData.underlyingAsset, '1000');
 
         it(`... should payback ${fetchedAmountWithUSD} ${cTokenData.underlyingAsset} from Compound`, async () => {

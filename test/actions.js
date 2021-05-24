@@ -95,7 +95,7 @@ const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
                 proxy,
                 WETH_ADDRESS,
                 tokenAddr,
-                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
+                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '30000'), 18),
                 UNISWAP_WRAPPER,
                 from,
                 from,
