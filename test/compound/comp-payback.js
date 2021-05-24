@@ -7,8 +7,8 @@ const {
     getProxy,
     redeploy,
     balanceOf,
-    standardAmounts,
     WETH_ADDRESS,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -39,8 +39,9 @@ describe('Comp-Payback', function () {
 
     for (let i = 0; i < compoundCollateralAssets.length; ++i) {
         const cTokenData = compoundCollateralAssets[i];
+        const fetchedAmountWithUSD = fetchAmountinUSDPrice(cTokenData.underlyingAsset, '1000');
 
-        it(`... should payback ${standardAmounts[cTokenData.underlyingAsset]} ${cTokenData.underlyingAsset} from Compound`, async () => {
+        it(`... should payback ${fetchedAmountWithUSD} ${cTokenData.underlyingAsset} from Compound`, async () => {
             const assetInfo = getAssetInfo(cTokenData.underlyingAsset);
             const cToken = cTokenData.address;
 
@@ -54,25 +55,30 @@ describe('Comp-Payback', function () {
             // TODO: make the check dynamic
             if (assetInfo.symbol === 'COMP') return;
 
-            const amount = hre.ethers.utils.parseUnits(
-                standardAmounts[assetInfo.symbol],
+            const supplyingAmount = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice(cTokenData.underlyingAsset, '3000'),
+                assetInfo.decimals,
+            );
+
+            const borrowingAmount = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice(cTokenData.underlyingAsset, '1000'),
                 assetInfo.decimals,
             );
 
             await supplyComp(
                 proxy,
-                getAssetInfo('cETH').address,
-                getAssetInfo('ETH').address,
-                hre.ethers.utils.parseUnits('3', 18),
+                cToken,
+                assetInfo.address,
+                supplyingAmount,
                 senderAcc.address,
             );
 
-            await borrowComp(proxy, cToken, amount, senderAcc.address);
+            await borrowComp(proxy, cToken, borrowingAmount, senderAcc.address);
 
             const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
             const borrowBalanceBefore = await getBorrowBalance(compView, proxy.address, cToken);
 
-            await paybackComp(proxy, cToken, amount, senderAcc.address);
+            await paybackComp(proxy, cToken, borrowingAmount, senderAcc.address);
 
             const balanceAfter = await balanceOf(assetInfo.address, senderAcc.address);
             const borrowBalanceAfter = await getBorrowBalance(compView, proxy.address, cToken);

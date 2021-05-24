@@ -7,8 +7,8 @@ const {
     getProxy,
     redeploy,
     balanceOf,
-    standardAmounts,
     WETH_ADDRESS,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -28,11 +28,12 @@ describe('Comp-Supply', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
     });
-
+    // WBTC Supply fails
     for (let i = 0; i < compoundCollateralAssets.length; ++i) {
         const cTokenData = compoundCollateralAssets[i];
+        const fetchedAmountWithUSD = fetchAmountinUSDPrice(cTokenData.underlyingAsset, '10000');
 
-        it(`... should supply ${standardAmounts[cTokenData.underlyingAsset]} ${cTokenData.underlyingAsset} to Compound`, async () => {
+        it(`... should supply ${fetchedAmountWithUSD} ${cTokenData.underlyingAsset} to Compound`, async () => {
             const assetInfo = getAssetInfo(cTokenData.underlyingAsset);
             const cToken = cTokenData.address;
 
@@ -43,7 +44,7 @@ describe('Comp-Supply', function () {
             }
 
             const amount = hre.ethers.utils.parseUnits(
-                standardAmounts[assetInfo.symbol],
+                fetchedAmountWithUSD,
                 assetInfo.decimals,
             );
 

@@ -6,9 +6,9 @@ const { getAssetInfo } = require('@defisaver/tokens');
 const {
     getProxy,
     redeploy,
-    standardAmounts,
     dydxTokens,
     balanceOf,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -32,15 +32,16 @@ describe('DyDx-Withdraw', function () {
 
     for (let i = 0; i < dydxTokens.length; ++i) {
         const assetInfo = getAssetInfo(dydxTokens[i]);
+        const fetchedAmountWithUSD = fetchAmountinUSDPrice(assetInfo.symbol, '1000');
 
         const standardAmount = hre.ethers.utils.parseUnits(
-            standardAmounts[assetInfo.symbol],
+            fetchedAmountWithUSD,
             assetInfo.decimals,
         );
 
         const tokenAddr = assetInfo.address;
 
-        it(`... should withdraw standard amount of ${dydxTokens[i]}`, async () => {
+        it(`... should withdraw ${fetchedAmountWithUSD} of ${dydxTokens[i]}`, async () => {
             // supply first
             await buyTokenIfNeeded(tokenAddr, senderAcc, proxy, standardAmount);
             await dydxSupply(proxy, tokenAddr, standardAmount, senderAcc.address);

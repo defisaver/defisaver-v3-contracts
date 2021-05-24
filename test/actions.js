@@ -297,7 +297,10 @@ const paybackComp = async (proxy, cTokenAddr, amount, from) => {
     const compPaybackAddr = await getAddrFromRegistry('CompPayback');
 
     if (cTokenAddr.toLowerCase() === getAssetInfo('cETH').address.toLowerCase()) {
-        await depositToWeth(amount.toString());
+        const wethBalance = await balanceOf(WETH_ADDRESS, from);
+        if (wethBalance.lt(amount)) {
+            await depositToWeth(amount.toString());
+        }
     }
 
     await approve(cTokenAddr, proxy.address);

@@ -8,6 +8,7 @@ const {
     redeploy,
     balanceOf,
     setNewExchangeWrapper,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -25,22 +26,22 @@ describe('Dfs-Buy', function () {
 
     const trades = [
         {
-            sellToken: 'WETH', buyToken: 'DAI', sellAmount: '5', buyAmount: '2000', fee: 3000,
+            sellToken: 'WETH', buyToken: 'DAI', sellAmount: fetchAmountinUSDPrice('WETH', '5000'), buyAmount: fetchAmountinUSDPrice('DAI', '1000'), fee: 3000,
         },
         {
-            sellToken: 'DAI', buyToken: 'WBTC', sellAmount: '1000', buyAmount: '0.001', fee: 3000,
+            sellToken: 'DAI', buyToken: 'WBTC', sellAmount: fetchAmountinUSDPrice('DAI', '5000'), buyAmount: fetchAmountinUSDPrice('WBTC', '1000'), fee: 3000,
         },
         {
-            sellToken: 'WETH', buyToken: 'USDC', sellAmount: '1', buyAmount: '1000', fee: 3000,
+            sellToken: 'WETH', buyToken: 'USDC', sellAmount: fetchAmountinUSDPrice('WETH', '5000'), buyAmount: fetchAmountinUSDPrice('USDC', '1000'), fee: 3000,
         },
         {
-            sellToken: 'USDC', buyToken: 'WETH', sellAmount: '400', buyAmount: '0.1', fee: 3000,
+            sellToken: 'USDC', buyToken: 'WETH', sellAmount: fetchAmountinUSDPrice('USDC', '5000'), buyAmount: fetchAmountinUSDPrice('WETH', '1000'), fee: 3000,
         },
         {
-            sellToken: 'WETH', buyToken: 'USDT', sellAmount: '1', buyAmount: '1000', fee: 3000,
+            sellToken: 'WETH', buyToken: 'USDT', sellAmount: fetchAmountinUSDPrice('WETH', '5000'), buyAmount: fetchAmountinUSDPrice('USDT', '1000'), fee: 3000,
         },
         {
-            sellToken: 'DAI', buyToken: 'USDC', sellAmount: '100', buyAmount: '90', fee: 500,
+            sellToken: 'DAI', buyToken: 'USDC', sellAmount: fetchAmountinUSDPrice('DAI', '5000'), buyAmount: fetchAmountinUSDPrice('USDC', '1000'), fee: 500,
         },
     ];
 
