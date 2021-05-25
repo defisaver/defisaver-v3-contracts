@@ -14,6 +14,7 @@ const {
     isEth,
     depositToWeth,
     MAX_UINT128,
+    fetchAmountinUSDPrice,
 } = require('./utils');
 
 const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
@@ -39,7 +40,6 @@ const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee
     if (isEth(sellAddr)) {
         await depositToWeth(sellAmount.toString());
     }
-
     await approve(sellAddr, proxy.address);
 
     await proxy['execute(address,bytes)'](dfsSellAddr, functionData, { gasLimit: 3000000 });
@@ -95,7 +95,7 @@ const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
                 proxy,
                 WETH_ADDRESS,
                 tokenAddr,
-                hre.ethers.utils.parseUnits('5', 18),
+                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '30000'), 18),
                 UNISWAP_WRAPPER,
                 from,
                 from,
@@ -161,14 +161,13 @@ const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
                 proxy,
                 WETH_ADDRESS,
                 tokenAddr,
-                hre.ethers.utils.parseUnits('5', 18),
+                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
                 UNISWAP_WRAPPER,
                 from,
                 from,
             );
         }
     }
-
     const aaveSupplyAddr = await getAddrFromRegistry('AaveSupply');
 
     await approve(tokenAddr, proxy.address);
@@ -180,7 +179,6 @@ const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
         from,
         nullAddress,
     );
-
     const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
 
     await proxy['execute(address,bytes)'](aaveSupplyAddr, functionData, { gasLimit: 3000000 });
@@ -249,7 +247,7 @@ const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
                 proxy,
                 WETH_ADDRESS,
                 tokenAddr,
-                hre.ethers.utils.parseUnits('5', 18),
+                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
                 UNISWAP_WRAPPER,
                 from,
                 from,
@@ -299,7 +297,10 @@ const paybackComp = async (proxy, cTokenAddr, amount, from) => {
     const compPaybackAddr = await getAddrFromRegistry('CompPayback');
 
     if (cTokenAddr.toLowerCase() === getAssetInfo('cETH').address.toLowerCase()) {
-        await depositToWeth(amount.toString());
+        const wethBalance = await balanceOf(WETH_ADDRESS, from);
+        if (wethBalance.lt(amount)) {
+            await depositToWeth(amount.toString());
+        }
     }
 
     await approve(cTokenAddr, proxy.address);
@@ -369,7 +370,7 @@ const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, 
             proxy,
             WETH_ADDRESS,
             addrTokenA,
-            hre.ethers.utils.parseUnits('5', 18),
+            hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
             UNISWAP_WRAPPER,
             from,
             from,
@@ -381,7 +382,7 @@ const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, 
             proxy,
             WETH_ADDRESS,
             addrTokenB,
-            hre.ethers.utils.parseUnits('5', 18),
+            hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
             UNISWAP_WRAPPER,
             from,
             from,
@@ -746,7 +747,7 @@ const buyTokenIfNeeded = async (tokenAddr, senderAcc, proxy, standardAmount) => 
                 proxy,
                 WETH_ADDRESS,
                 tokenAddr,
-                hre.ethers.utils.parseUnits('5', 18),
+                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
                 UNISWAP_WRAPPER,
                 senderAcc.address,
                 senderAcc.address,

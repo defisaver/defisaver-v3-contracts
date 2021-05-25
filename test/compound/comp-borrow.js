@@ -7,8 +7,8 @@ const {
     getProxy,
     redeploy,
     balanceOf,
-    standardAmounts,
     WETH_ADDRESS,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -32,8 +32,13 @@ describe('Comp-Borrow', function () {
 
     for (let i = 0; i < compoundCollateralAssets.length; ++i) {
         const cTokenData = compoundCollateralAssets[i];
+        if (cTokenData.symbol === 'cWBTC Legacy') {
+            // Jump over WBTC Legacy
+            // eslint-disable-next-line no-continue
+            continue;
+        }
 
-        it(`... should borrow ${standardAmounts[cTokenData.underlyingAsset]} ${cTokenData.underlyingAsset} from Compound`, async () => {
+        it(`... should borrow ${fetchAmountinUSDPrice(cTokenData.underlyingAsset, '1000')} ${cTokenData.underlyingAsset} from Compound`, async () => {
             const assetInfo = getAssetInfo(cTokenData.underlyingAsset);
             const cToken = cTokenData.address;
 
@@ -47,22 +52,27 @@ describe('Comp-Borrow', function () {
                 assetInfo.address = WETH_ADDRESS;
             }
 
-            const amount = hre.ethers.utils.parseUnits(
-                standardAmounts[assetInfo.symbol],
+            const supplyingAmount = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice(cTokenData.underlyingAsset, '3000'),
+                assetInfo.decimals,
+            );
+
+            const borrowingAmount = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice(cTokenData.underlyingAsset, '1000'),
                 assetInfo.decimals,
             );
 
             await supplyComp(
                 proxy,
-                getAssetInfo('cETH').address,
-                getAssetInfo('ETH').address,
-                hre.ethers.utils.parseUnits('3', 18),
+                cToken,
+                assetInfo.address,
+                supplyingAmount,
                 senderAcc.address,
             );
 
             const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
 
-            await borrowComp(proxy, cToken, amount, senderAcc.address);
+            await borrowComp(proxy, cToken, borrowingAmount, senderAcc.address);
 
             const balanceAfter = await balanceOf(assetInfo.address, senderAcc.address);
 

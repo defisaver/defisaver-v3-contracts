@@ -7,7 +7,7 @@ const {
     getProxy,
     redeploy,
     WETH_ADDRESS,
-    standardAmounts,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -42,8 +42,8 @@ describe('Mcd-Supply', function () {
         const ilkData = ilks[i];
         const joinAddr = ilkData.join;
         const tokenData = getAssetInfo(ilkData.asset);
-
-        it(`... should supply ${standardAmounts[tokenData.symbol]} ${tokenData.symbol} to a ${ilkData.ilkLabel} vault`, async () => {
+        const amountFetchedFromUSD = fetchAmountinUSDPrice(tokenData.symbol, '1000');
+        it(`... should supply ${amountFetchedFromUSD} ${tokenData.symbol} to a ${ilkData.ilkLabel} vault`, async () => {
             // skip uni tokens
             if (tokenData.symbol.indexOf('UNIV2') !== -1) {
                 // eslint-disable-next-line no-unused-expressions
@@ -53,7 +53,7 @@ describe('Mcd-Supply', function () {
 
             const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
             const amount = BigNumber.from(
-                hre.ethers.utils.parseUnits(standardAmounts[tokenData.symbol], tokenData.decimals),
+                hre.ethers.utils.parseUnits(amountFetchedFromUSD, tokenData.decimals),
             );
 
             const from = senderAcc.address;
@@ -66,7 +66,7 @@ describe('Mcd-Supply', function () {
 
             const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
 
-            expect(standardAmounts[tokenData.symbol]).to.be.eq(info.coll.toString());
+            expect(parseFloat(amountFetchedFromUSD)).to.be.eq(info.coll);
         });
     }
 });

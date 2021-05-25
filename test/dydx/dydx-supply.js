@@ -6,9 +6,9 @@ const { getAssetInfo } = require('@defisaver/tokens');
 const {
     getProxy,
     redeploy,
-    standardAmounts,
     dydxTokens,
     send,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -31,15 +31,16 @@ describe('DyDx-Supply', function () {
 
     for (let i = 0; i < dydxTokens.length; ++i) {
         const assetInfo = getAssetInfo(dydxTokens[i]);
+        const fetchedAmountWithUSD = fetchAmountinUSDPrice(assetInfo.symbol, '1000');
 
         const standardAmount = hre.ethers.utils.parseUnits(
-            standardAmounts[assetInfo.symbol],
+            fetchedAmountWithUSD,
             assetInfo.decimals,
         );
 
         const tokenAddr = assetInfo.address;
 
-        it(`... should supply standard amount of ${dydxTokens[i]} to DyDx`, async () => {
+        it(`... should supply ${fetchedAmountWithUSD} of ${dydxTokens[i]} to DyDx`, async () => {
             const supplyBefore = await dydxView.getSupplyBalance(proxy.address, tokenAddr);
 
             await buyTokenIfNeeded(tokenAddr, senderAcc, proxy, standardAmount);
@@ -53,7 +54,7 @@ describe('DyDx-Supply', function () {
             const supplyAfter = await dydxView.getSupplyBalance(proxy.address, tokenAddr);
 
             // is not exact, as dydx increments the amount by a few wei
-            expect(supplyAfter).to.be.least(supplyBefore.add(standardAmount).sub(1));
+            expect(supplyAfter).to.be.least(supplyBefore.add(standardAmount).sub(3));
         });
 
         it(`... should supply max.uint amount from proxy ${dydxTokens[i]} to DyDx`, async () => {

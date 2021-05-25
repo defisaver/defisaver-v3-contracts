@@ -11,11 +11,11 @@ const {
     approve,
     balanceOf,
     depositToWeth,
-    standardAmounts,
     nullAddress,
     UNISWAP_WRAPPER,
     AAVE_FL_FEE,
     WETH_ADDRESS,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const { sell } = require('../actions');
@@ -50,13 +50,13 @@ describe('FL-AaveV2', function () {
             if (assetInfo.symbol === 'ETH') {
                 assetInfo.address = WETH_ADDRESS;
             }
-
+            const amount = fetchAmountinUSDPrice(tokenSymbol, '1000');
             const loanAmount = hre.ethers.utils.parseUnits(
-                standardAmounts[tokenSymbol],
+                amount,
                 assetInfo.decimals,
             );
             const feeAmount = (
-                standardAmounts[tokenSymbol]
+                amount
                 * AAVE_FL_FEE
                 * 10 ** assetInfo.decimals
             ).toFixed(0);
@@ -72,12 +72,14 @@ describe('FL-AaveV2', function () {
                     nullAddress,
                     [],
                 ),
-                new dfs.actions.basic.SendTokenAction(assetInfo.address, aaveFl.address, hre.ethers.constants.MaxUint256),
+                new dfs.actions.basic.SendTokenAction(
+                    assetInfo.address,
+                    aaveFl.address,
+                    hre.ethers.constants.MaxUint256,
+                ),
             ]);
 
             const functionData = basicFLRecipe.encodeForDsProxyCall();
-
-            console.log(tokenSymbol);
 
             if (tokenSymbol === 'WETH') {
                 await depositToWeth(feeAmount);

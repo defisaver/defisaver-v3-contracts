@@ -1,4 +1,5 @@
 const hre = require('hardhat');
+const fs = require('fs');
 
 const { deployAsOwner } = require('../scripts/utils/deployer');
 
@@ -18,7 +19,7 @@ const UNIV3ROUTER_ADDR = '0xE592427A0AEce92De3Edee1F18E0157C05861564';
 const UNIV3POSITIONMANAGER_ADDR = '0xC36442b4a4522E871399CD717aBDD847Ab11FE88';
 const AAVE_MARKET = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
 
-const OWNER_ACC = '0x0528A32fda5beDf89Ba9ad67296db83c9452F28C';
+const OWNER_ACC = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
 const ADMIN_ACC = '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9';
 
 const MAX_UINT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
@@ -27,7 +28,7 @@ const MAX_UINT128 = '340282366920938463463374607431768211455';
 const dydxTokens = ['WETH', 'USDC', 'DAI'];
 
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
-const MIN_VAULT_DAI_AMOUNT = '5010'; // TODO: can we fetch this dynamically
+const MIN_VAULT_DAI_AMOUNT = '15010'; // TODO: can we fetch this dynamically
 const MIN_VAULT_RAI_AMOUNT = '1000'; // TODO: can we fetch this dynamically
 
 const standardAmounts = {
@@ -59,6 +60,49 @@ const standardAmounts = {
     BAL: '100',
     GUSD: '4000',
     YFI: '0.1',
+};
+
+const coinGeckoHelper = {
+    ETH: 'ethereum',
+    WETH: 'weth',
+    AAVE: 'aave',
+    BAT: 'basic-attention-token',
+    USDC: 'usd-coin',
+    UNI: 'uniswap',
+    SUSD: 'nusd',
+    BUSD: 'binance-usd',
+    SNX: 'havven',
+    REP: 'augur',
+    REN: 'republic-protocol',
+    MKR: 'maker',
+    ENJ: 'enjincoin',
+    DAI: 'dai',
+    WBTC: 'wrapped-bitcoin',
+    RENBTC: 'renbtc',
+    ZRX: '0x',
+    KNC: 'kyber-network',
+    MANA: 'decentraland',
+    PAXUSD: 'paxos-standard',
+    COMP: 'compound-governance-token',
+    LRC: 'loopring',
+    LINK: 'chainlink',
+    USDT: 'tether',
+    TUSD: 'true-usd',
+    BAL: 'balancer',
+    GUSD: 'gemini-dollar',
+    YFI: 'yearn-finance',
+};
+
+const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {
+    const data = JSON.parse(fs.readFileSync('test/prices.json', 'utf8'));
+    const tokenNames = Object.keys(data);
+    for (let i = 0; i < tokenNames.length; i++) {
+        if (tokenNames[i] === coinGeckoHelper[tokenSign]) {
+            const amountNumber = (amountUSD / data[tokenNames[i]].usd);
+            return amountNumber.toFixed(2);
+        }
+    }
+    return 0;
 };
 
 const fetchStandardAmounts = async () => standardAmounts;
@@ -282,6 +326,7 @@ module.exports = {
     timeTravel,
     fetchStandardAmounts,
     setNewExchangeWrapper,
+    fetchAmountinUSDPrice,
     standardAmounts,
     nullAddress,
     dydxTokens,

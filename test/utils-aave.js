@@ -1,7 +1,7 @@
 const hre = require('hardhat');
 
 const aaveV2assetsDefaultMarket = [
-    'ETH', 'AAVE', 'BAT', 'BUSD', 'DAI', 'ENJ', 'KNC', 'LINK', 'MANA', 'MKR', 'REN', 'SNX', 'SUSD', 'TUSD', 'UNI', 'USDC', 'USDT', 'WBTC', 'YFI', 'ZRX',
+    'ETH', 'AAVE', 'BAT', 'DAI', 'ENJ', 'KNC', 'LINK', 'MANA', 'MKR', 'REN', 'SNX', 'SUSD', 'TUSD', 'UNI', 'USDC', 'USDT', 'WBTC', 'YFI', 'ZRX', // 'BUSD', TODO: SOLVE BUSD LIQUIDITY PROBLEM
 ];
 
 const AAVE_MARKET_DATA_ADDR = '0x057835Ad21a177dbdd3090bB1CAE03EaCF78Fc6d';

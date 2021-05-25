@@ -3,11 +3,11 @@ const hre = require('hardhat');
 const {
     getProxy,
     redeploy,
-    standardAmounts,
     depositToWeth,
     WETH_ADDRESS,
     MIN_VAULT_RAI_AMOUNT,
     RAI_ADDR,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -43,7 +43,7 @@ describe('Reflexer-Generate', () => {
         const safeID = await lastSafeID(proxy.address);
 
         const amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
-        const amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
+        const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18);
         await depositToWeth(amountWETH.toString());
 
         const from = senderAcc.address;
@@ -59,7 +59,7 @@ describe('Reflexer-Generate', () => {
         await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
             .to.emit(logger, 'LogEvent');
 
-        const amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
+        const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18);
         const amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
         await depositToWeth(amountWETH.toString());
 

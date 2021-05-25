@@ -17,9 +17,9 @@ const {
     getProxy,
     redeploy,
     balanceOf,
-    standardAmounts,
     AAVE_MARKET,
     WETH_ADDRESS,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -45,8 +45,8 @@ describe('Aave-Payback', function () {
 
     for (let i = 0; i < aaveV2assetsDefaultMarket.length; ++i) {
         const tokenSymbol = aaveV2assetsDefaultMarket[i];
-
-        it(`... should payback variable borrow ${standardAmounts[tokenSymbol]} ${tokenSymbol} from Aave`, async () => {
+        const fetchedAmountWithUSD = fetchAmountinUSDPrice(tokenSymbol, '5000');
+        it(`... should payback variable borrow ${fetchedAmountWithUSD} ${tokenSymbol} from Aave`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
 
             if (assetInfo.symbol === 'ETH') {
@@ -64,7 +64,7 @@ describe('Aave-Payback', function () {
             }
 
             const amount = hre.ethers.utils.parseUnits(
-                standardAmounts[assetInfo.symbol],
+                fetchedAmountWithUSD,
                 assetInfo.decimals,
             );
 
@@ -77,7 +77,7 @@ describe('Aave-Payback', function () {
             await supplyAave(
                 proxy,
                 AAVE_MARKET,
-                hre.ethers.utils.parseUnits('3', 18),
+                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '20000'), 18),
                 WETH_ADDRESS,
                 senderAcc.address,
             );
@@ -113,7 +113,7 @@ describe('Aave-Payback', function () {
             expect(debtBalanceAfter).to.be.lt(debtBalanceBefore);
         });
 
-        it(`... should payback stable borrow ${standardAmounts[tokenSymbol]} ${tokenSymbol} from Aave`, async () => {
+        it(`... should payback stable borrow ${fetchedAmountWithUSD} ${tokenSymbol} from Aave`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
 
             if (assetInfo.symbol === 'ETH') {
@@ -135,7 +135,7 @@ describe('Aave-Payback', function () {
             }
 
             const amount = hre.ethers.utils.parseUnits(
-                standardAmounts[assetInfo.symbol],
+                fetchedAmountWithUSD,
                 assetInfo.decimals,
             );
 
@@ -148,7 +148,7 @@ describe('Aave-Payback', function () {
             await supplyAave(
                 proxy,
                 AAVE_MARKET,
-                hre.ethers.utils.parseUnits('3', 18),
+                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '20000'), 18),
                 WETH_ADDRESS,
                 senderAcc.address,
             );

@@ -7,9 +7,9 @@ const {
     getAddrFromRegistry,
     getProxy,
     redeploy,
-    standardAmounts,
     nullAddress,
     WETH_ADDRESS,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 describe('FL-DyDx', function () {
@@ -41,8 +41,9 @@ describe('FL-DyDx', function () {
                 assetInfo.address = WETH_ADDRESS;
             }
 
+            const amount = fetchAmountinUSDPrice(tokenSymbol, '1000');
             const loanAmount = hre.ethers.utils.parseUnits(
-                standardAmounts[tokenSymbol],
+                amount,
                 assetInfo.decimals,
             );
 
@@ -53,7 +54,11 @@ describe('FL-DyDx', function () {
                     nullAddress,
                     [],
                 ),
-                new dfs.actions.basic.SendTokenAction(assetInfo.address, dydxFl.address, hre.ethers.constants.MaxUint256),
+                new dfs.actions.basic.SendTokenAction(
+                    assetInfo.address,
+                    dydxFl.address,
+                    hre.ethers.constants.MaxUint256,
+                ),
             ]);
 
             const functionData = basicFLRecipe.encodeForDsProxyCall();

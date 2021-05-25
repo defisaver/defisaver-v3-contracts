@@ -9,6 +9,7 @@ const {
     LOGGER_ADDR,
     UNIV3POSITIONMANAGER_ADDR,
     balanceOf,
+    fetchAmountinUSDPrice,
 } = require('../../utils');
 
 const {
@@ -20,13 +21,31 @@ describe('Uni-Mint-V3', () => {
 
     const uniPairs = [
         {
-            tokenA: 'DAI', tokenB: 'WETH', amount0: '1000', amount1: '2', fee: '3000', tickLower: '-109260', tickUpper: '-84000',
+            tokenA: 'DAI',
+            tokenB: 'WETH',
+            amount0: fetchAmountinUSDPrice('DAI', '1000'),
+            amount1: fetchAmountinUSDPrice('WETH', '1000'),
+            fee: '3000',
+            tickLower: '-92100',
+            tickUpper: '-69060',
         },
         {
-            tokenA: 'DAI', tokenB: 'USDC', amount0: '500', amount1: '500', fee: '500', tickLower: '-120', tickUpper: '120',
+            tokenA: 'DAI',
+            tokenB: 'USDC',
+            amount0: fetchAmountinUSDPrice('DAI', '1000'),
+            amount1: fetchAmountinUSDPrice('WETH', '1000'),
+            fee: '500',
+            tickLower: '-120',
+            tickUpper: '120',
         },
         {
-            tokenA: 'WBTC', tokenB: 'WETH', amount0: '0.02', amount1: '1', fee: '3000', tickLower: '-120', tickUpper: '120',
+            tokenA: 'WBTC',
+            tokenB: 'WETH',
+            amount0: fetchAmountinUSDPrice('WBTC', '1000'),
+            amount1: fetchAmountinUSDPrice('WETH', '1000'),
+            fee: '3000',
+            tickLower: '-120',
+            tickUpper: '120',
         },
     ];
 

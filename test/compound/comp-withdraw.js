@@ -7,8 +7,8 @@ const {
     getProxy,
     redeploy,
     balanceOf,
-    standardAmounts,
     WETH_ADDRESS,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -32,8 +32,14 @@ describe('Comp-Withdraw', function () {
 
     for (let i = 0; i < compoundCollateralAssets.length; ++i) {
         const cTokenData = compoundCollateralAssets[i];
+        if (cTokenData.symbol === 'cWBTC Legacy') {
+            // Jump over WBTC Legacy
+            // eslint-disable-next-line no-continue
+            continue;
+        }
 
-        it(`... should withdraw ${standardAmounts[cTokenData.underlyingAsset]} ${cTokenData.underlyingAsset} from Compound`, async () => {
+        const fetchedAmountWithUSD = fetchAmountinUSDPrice(cTokenData.underlyingAsset, '1000');
+        it(`... should withdraw ${fetchedAmountWithUSD} ${cTokenData.underlyingAsset} from Compound`, async () => {
             const assetInfo = getAssetInfo(cTokenData.underlyingAsset);
             const cToken = cTokenData.address;
 
@@ -44,7 +50,7 @@ describe('Comp-Withdraw', function () {
             }
 
             const amount = hre.ethers.utils.parseUnits(
-                standardAmounts[assetInfo.symbol],
+                fetchedAmountWithUSD,
                 assetInfo.decimals,
             );
 

@@ -4,8 +4,8 @@ const {
     getProxy,
     redeploy,
     WETH_ADDRESS,
-    standardAmounts,
     depositToWeth,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -38,7 +38,7 @@ describe('Reflexer-Withdraw', () => {
     it('... should withdraw 1/4 of coll WETH from safe', async () => {
         await reflexerOpen(proxy, ADAPTER_ADDRESS);
 
-        const amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
+        const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18);
         await depositToWeth(amountWETH.toString());
 
         const safeID = await lastSafeID(proxy.address);
@@ -61,7 +61,7 @@ describe('Reflexer-Withdraw', () => {
         await reflexerOpen(proxy, ADAPTER_ADDRESS);
         const safeID = await lastSafeID(proxy.address);
 
-        const amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
+        const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18);
         await depositToWeth(amountWETH.toString());
 
         const from = senderAcc.address;
@@ -69,7 +69,8 @@ describe('Reflexer-Withdraw', () => {
             .to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
 
         const to = senderAcc.address;
-        await expect(() => reflexerWithdraw(proxy, safeID, hre.ethers.constants.MaxUint256, ADAPTER_ADDRESS, to))
+        await expect(() => reflexerWithdraw(proxy, safeID,
+            hre.ethers.constants.MaxUint256, ADAPTER_ADDRESS, to))
             .to.changeTokenBalance(weth, senderAcc, amountWETH);
 
         const infoAfterWithdraw = await getSafeInfo(reflexerView, safeID);
@@ -80,7 +81,7 @@ describe('Reflexer-Withdraw', () => {
         await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
             .to.emit(logger, 'LogEvent');
 
-        const amountWETH = hre.ethers.utils.parseUnits(standardAmounts.WETH, 18);
+        const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18);
         await depositToWeth(amountWETH.toString());
 
         const safeID = await lastSafeID(proxy.address);
@@ -88,7 +89,8 @@ describe('Reflexer-Withdraw', () => {
         await expect(reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
             .to.emit(logger, 'LogEvent');
         const to = senderAcc.address;
-        await expect(reflexerWithdraw(proxy, safeID, hre.ethers.constants.MaxUint256, ADAPTER_ADDRESS, to))
+        await expect(reflexerWithdraw(proxy, safeID,
+            hre.ethers.constants.MaxUint256, ADAPTER_ADDRESS, to))
             .to.emit(logger, 'LogEvent');
     }).timeout(40000);
 });
