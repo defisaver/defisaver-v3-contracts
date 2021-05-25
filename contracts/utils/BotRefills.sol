@@ -9,7 +9,6 @@ import "./TokenUtils.sol";
 
 /// @title Contract used to refill tx sending bots when they are low on eth
 contract BotRefills is AdminAuth {
-
     using TokenUtils for address;
 
     address internal refillCaller = 0x33fDb79aFB4456B604f376A45A546e7ae700e880;
@@ -20,12 +19,35 @@ contract BotRefills is AdminAuth {
 
     IUniswapRouter internal router = IUniswapRouter(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
 
-    function refill(uint _ethAmount, address _botAddress) public  {
-        require(msg.sender == refillCaller, "Wrong refill caller");
-        require(IBotRegistry(BOT_REGISTRY_ADDRESS).botList(_botAddress), "Not auth bot");
+    mapping(address => bool) public additionalBots;
 
+    constructor() {
+        additionalBots[0x33fDb79aFB4456B604f376A45A546e7ae700e880] = true;
+        additionalBots[0x7fb85Bab66C4a14eb4c048a34CEf0AB16747778d] = true;
+        additionalBots[0x446aD06C447b26D129C131E893f48b3a518a63c7] = true;
+    }
+
+    modifier isApprovedBot(address _botAddr) {
+        require(
+            IBotRegistry(BOT_REGISTRY_ADDRESS).botList(_botAddr) || additionalBots[_botAddr],
+            "Not auth bot"
+        );
+
+        _;
+    }
+
+    modifier isRefillCaller {
+        require(msg.sender == refillCaller, "Wrong refill caller");
+        _;
+    }
+
+    function refill(uint256 _ethAmount, address _botAddress)
+        public
+        isRefillCaller
+        isApprovedBot(_botAddress)
+    {
         // check if we have enough weth to send
-        uint wethBalance = IERC20(TokenUtils.WETH_ADDR).balanceOf(feeAddr);
+        uint256 wethBalance = IERC20(TokenUtils.WETH_ADDR).balanceOf(feeAddr);
 
         if (wethBalance >= _ethAmount) {
             IERC20(TokenUtils.WETH_ADDR).transferFrom(feeAddr, address(this), _ethAmount);
@@ -38,7 +60,7 @@ contract BotRefills is AdminAuth {
             path[1] = TokenUtils.WETH_ADDR;
 
             // get how much dai we need to convert
-            uint daiAmount = getEth2Dai(_ethAmount);
+            uint256 daiAmount = getEth2Dai(_ethAmount);
 
             IERC20(DAI_ADDR).transferFrom(feeAddr, address(this), daiAmount);
             DAI_ADDR.approveToken(address(router), daiAmount);
@@ -48,8 +70,14 @@ contract BotRefills is AdminAuth {
         }
     }
 
+    function refillMany(uint256[] memory _ethAmounts, address[] memory _botAddresses) public {
+        for(uint i = 0; i < _botAddresses.length; ++i) {
+            refill(_ethAmounts[i], _botAddresses[i]);
+        }
+    }
+
     /// @dev Returns Dai amount, given eth amount based on uniV2 pool price
-    function getEth2Dai(uint _ethAmount) internal view returns (uint daiAmount) {
+    function getEth2Dai(uint256 _ethAmount) internal view returns (uint256 daiAmount) {
         address[] memory path = new address[](2);
         path[0] = TokenUtils.WETH_ADDR;
         path[1] = DAI_ADDR;
@@ -63,6 +91,10 @@ contract BotRefills is AdminAuth {
 
     function setFeeAddr(address _newFeeAddr) public onlyOwner {
         feeAddr = _newFeeAddr;
+    }
+
+    function setAdditionalBot(address _botAddr, bool _approved) public onlyOwner {
+        additionalBots[_botAddr] = _approved;
     }
 
     receive() external payable {}
