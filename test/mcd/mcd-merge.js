@@ -60,8 +60,8 @@ describe('Mcd-Merge', () => {
 
             const vault2After = await getVaultInfo(mcdView, vaultId2, ilkData.ilkBytes);
 
-            expect(vault2After.debt).to.be.eq(vault1Before.debt + vault2Before.debt);
-            expect(vault2After.coll).to.be.eq(vault1Before.coll + vault2Before.coll);
-        });
+            expect(vault2After.debt).to.be.closeTo(vault1Before.debt + vault2Before.debt, 0.0001);
+            expect(vault2After.coll).to.be.closeTo(vault1Before.coll + vault2Before.coll, 0.0001);
+        }).timeout(50000);
     }
 });
