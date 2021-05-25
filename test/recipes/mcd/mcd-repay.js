@@ -81,7 +81,7 @@ describe('Mcd-Repay', function () {
                 proxy,
                 joinAddr,
                 tokenData,
-                fetchAmountinUSDPrice(tokenData.symbol, '20000'),
+                fetchAmountinUSDPrice(tokenData.symbol, '40000'),
                 (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 400).toString(),
             );
 
@@ -143,7 +143,7 @@ describe('Mcd-Repay', function () {
                 proxy,
                 joinAddr,
                 tokenData,
-                fetchAmountinUSDPrice(tokenData.symbol, '20000'),
+                fetchAmountinUSDPrice(tokenData.symbol, '40000'),
                 (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 500).toString(),
             );
 

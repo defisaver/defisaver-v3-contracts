@@ -98,7 +98,7 @@ describe('Mcd-Create', function () {
             const tokenBalance = await balanceOf(tokenAddr, senderAcc.address);
 
             const collAmount = BigNumber.from(hre.ethers.utils.parseUnits(
-                fetchAmountinUSDPrice('WETH', '15000'), tokenData.decimals,
+                fetchAmountinUSDPrice('WETH', '30000'), tokenData.decimals,
             ));
 
             if (tokenBalance.lt(collAmount)) {
@@ -155,7 +155,7 @@ describe('Mcd-Create', function () {
             const daiAddr = makerAddresses.MCD_DAI;
 
             const collAmount = BigNumber.from(hre.ethers.utils.parseUnits(
-                fetchAmountinUSDPrice('WETH', '15000'), tokenData.decimals,
+                fetchAmountinUSDPrice('WETH', '30000'), tokenData.decimals,
             ));
 
             if (tokenBalance.lt(collAmount)) {
