@@ -56,7 +56,7 @@ describe('Mcd-Generate', function () {
 
             const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
             const collAmount = hre.ethers.utils.parseUnits(
-                fetchAmountinUSDPrice(tokenData.symbol, '25000'),
+                fetchAmountinUSDPrice(tokenData.symbol, '30000'),
                 tokenData.decimals,
             );
 

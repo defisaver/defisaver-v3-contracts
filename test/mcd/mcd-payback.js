@@ -69,7 +69,7 @@ describe('Mcd-Payback', function () {
                 proxy,
                 joinAddr,
                 tokenData,
-                fetchAmountinUSDPrice(tokenData.symbol, '25000'),
+                fetchAmountinUSDPrice(tokenData.symbol, '30000'),
                 (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 50).toString(),
             );
 
