@@ -253,8 +253,6 @@ const timeTravel = async (timeIncrease) => {
     });
 };
 
-const BNtoFloat = (bn) => web3.utils.fromWei(bn.toString());
-
 module.exports = {
     getAddrFromRegistry,
     getProxy,
@@ -290,5 +288,4 @@ module.exports = {
     MIN_VAULT_DAI_AMOUNT,
     MIN_VAULT_RAI_AMOUNT,
     RAI_ADDR,
-    BNtoFloat,
 };
