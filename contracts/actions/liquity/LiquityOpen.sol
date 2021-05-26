@@ -72,7 +72,6 @@ contract LiquityOpen is ActionBase, LiquityHelper {
         if (_collAmount == type(uint256).max) {
             _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
         }
-
         WETH_ADDR.pullTokensIfNeeded(_from, _collAmount);
         TokenUtils.withdrawWeth(_collAmount);
 
@@ -87,7 +86,7 @@ contract LiquityOpen is ActionBase, LiquityHelper {
             abi.encode(_maxFeePercentage, _collAmount, _LUSDAmount, _from, _to)
         );
 
-        return uint256(msg.sender);
+        return uint256(address(this));
     }
 
     function parseInputs(bytes[] memory _callData)
