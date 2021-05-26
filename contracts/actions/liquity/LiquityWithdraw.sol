@@ -43,7 +43,7 @@ contract LiquityWithdraw is ActionBase, LiquityHelper {
     /// @notice Withdraw ETH collateral from a trove
     function _liquityWithdraw(uint256 _collAmount, address _to, address _upperHint, address _lowerHint) internal returns (uint256) {
         if (_collAmount == type(uint256).max) {
-            _collAmount = TroveManager.getTroveColl(msg.sender);
+            _collAmount = TroveManager.getTroveColl(address(this));
         }
         
         BorrowerOperations.withdrawColl(_collAmount, _upperHint, _lowerHint);

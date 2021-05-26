@@ -21,24 +21,24 @@ contract LiquityClose is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         (
             address from,
-            uint256 slip
-        )= parseInputs(_callData);
+            address to
+        ) = parseInputs(_callData);
 
         from = _parseParamAddr(from, _paramMapping[0], _subData, _returnValues);
-        slip = _parseParamUint(slip, _paramMapping[1], _subData, _returnValues);
+        to = _parseParamAddr(to, _paramMapping[1], _subData, _returnValues);
 
-        uint256 debtRepaid = _liquityClose(from, slip);
-        return bytes32(debtRepaid);
+        uint256 coll = _liquityClose(from, to);
+        return bytes32(coll);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public virtual payable override {
         (
             address from,
-            uint256 slip
+            address to
         )= parseInputs(_callData);
 
-        _liquityClose(from, slip);
+        _liquityClose(from, to);
     }
 
     /// @inheritdoc ActionBase
@@ -49,29 +49,25 @@ contract LiquityClose is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Opens up an empty trove
-    function _liquityClose(address _from, uint256 _slip) internal returns (uint256) {
+    function _liquityClose(address _from, address _to) internal returns (uint256) {
         uint256 debt = TroveManager.getTroveDebt(address(this));
-        uint256 maxRepay = debt.mul(1e18 + _slip).div(1e18);
+        uint256 coll = TroveManager.getTroveColl(address(this));
 
-        uint256 balanceBefore = LUSDTokenAddr.getBalance(address(this));
-        LUSDTokenAddr.pullTokensIfNeeded(_from, maxRepay);
-        uint256 balanceMid = LUSDTokenAddr.getBalance(address(this));
+        LUSDTokenAddr.pullTokensIfNeeded(_from, debt);
+        
         BorrowerOperations.closeTrove();
-        uint256 balanceAfter = LUSDTokenAddr.getBalance(address(this));
 
-        // could be a security issue, dust
-        LUSDTokenAddr.withdrawTokens(_from, balanceAfter.sub(balanceBefore));
-
-        uint256 debtRepaid = balanceMid.sub(balanceAfter);
+        TokenUtils.depositWeth(coll);
+        WETH_ADDR.withdrawTokens(_to, coll);
 
         logger.Log(
             address(this),
             msg.sender,
             "LiquityClose",
-            abi.encode(_from, _slip, debtRepaid)
+            abi.encode(_from, _to, debt, coll)
         );
 
-        return uint256(debtRepaid);
+        return uint256(coll);
     }
 
     function parseInputs(bytes[] memory _callData)
@@ -79,10 +75,10 @@ contract LiquityClose is ActionBase, LiquityHelper {
         pure
         returns (
             address from,
-            uint256 slip
+            address to
         )
     {
         from = abi.decode(_callData[0], (address));
-        slip = abi.decode(_callData[1], (uint256));
+        to = abi.decode(_callData[1], (address));
     }
 }

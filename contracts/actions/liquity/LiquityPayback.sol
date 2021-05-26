@@ -5,10 +5,12 @@ pragma experimental ABIEncoderV2;
 
 import "./helpers/LiquityHelper.sol";
 import "../../utils/TokenUtils.sol";
+import "../../utils/SafeMath.sol";
 import "../ActionBase.sol";
 
 contract LiquityPayback is ActionBase, LiquityHelper {
     using TokenUtils for address;
+    using SafeMath for uint256;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -42,11 +44,10 @@ contract LiquityPayback is ActionBase, LiquityHelper {
 
     /// @notice Repay LUSD tokens to a Trove: Burn the repaid LUSD tokens, and reduce the trove's debt accordingly
     function _liquityPayback(uint _LUSDAmount, address _from, address _upperHint, address _lowerHint) internal returns (uint256) {
-
         LUSDTokenAddr.pullTokensIfNeeded(_from, _LUSDAmount);
-
+        
         BorrowerOperations.repayLUSD(_LUSDAmount, _upperHint, _lowerHint);
-
+        
         logger.Log(
             address(this),
             msg.sender,
