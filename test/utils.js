@@ -118,11 +118,12 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
     const signer = await hre.ethers.provider.getSigner(OWNER_ACC);
 
     const registryInstance = await hre.ethers.getContractFactory('DFSRegistry', signer);
-    const registry = await registryInstance.attach(regAddr);
 
+    const registry = await registryInstance.attach(regAddr);
     registry.connect(signer);
 
     const c = await deployAsOwner(name);
+
     const id = hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(name));
 
     if (!(await registry.isRegistered(id))) {

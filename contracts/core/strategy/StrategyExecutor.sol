@@ -12,8 +12,12 @@ import "./BotAuth.sol";
 import "../DFSRegistry.sol";
 import "./ProxyAuth.sol";
 
+import "../../utils/SignatureChecker.sol";
+
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutor is StrategyData, AdminAuth {
+
+    using SignatureChecker for address;
 
     bytes32 constant PROXY_AUTH_ID = keccak256("ProxyAuth");
 
@@ -51,6 +55,18 @@ contract StrategyExecutor is StrategyData, AdminAuth {
 
         // execute actions
         callActions(_strategyId, strategy, _actionsCallData);
+    }
+
+    function executeOneTime(
+        bytes32  _hash,
+        bytes memory _signedData,
+        address _userProxy
+    ) public {
+        // bytes32 hash = ECDSA.toEthSignedMessageHash(keccak256(_dataHash));
+
+       require( _userProxy.isValidSignatureNow(_hash,  _signedData), "sig check");
+
+       // TODO: construct strategy and do regular call
     }
 
     /// @notice Checks if msg.sender has auth, reverts if not

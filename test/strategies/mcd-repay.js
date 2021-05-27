@@ -62,11 +62,10 @@ describe('Mcd-Repay', function () {
         await addBotCaller(botAcc.address);
 
         proxy = await getProxy(senderAcc.address);
-
         makerAddresses = await fetchMakerAddresses();
     });
 
-    it('... should make a new strategy', async () => {
+    it('... should make a new Mcd repay strategy', async () => {
         const name = 'McdRepayTemplate';
         const triggerIds = ['McdRatioTrigger'];
         const actionIds = ['McdWithdraw', 'DFSSell', 'McdPayback'];
@@ -81,7 +80,7 @@ describe('Mcd-Repay', function () {
             proxy,
             ethJoin,
             tokenData,
-            '5',
+            '6',
             '8000',
         );
 
@@ -93,7 +92,7 @@ describe('Mcd-Repay', function () {
         strategyId = await subStrategy(proxy, templateId, true, [[], [], []], [triggerData]);
     });
 
-    it('... should trigger a maker repay strategy', async () => {
+    it('... should trigger and execute a Mcd Repay strategy', async () => {
         const abiCoder = new hre.ethers.utils.AbiCoder();
 
         const triggerCallData = [];
