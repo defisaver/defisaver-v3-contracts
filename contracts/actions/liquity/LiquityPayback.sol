@@ -40,7 +40,9 @@ contract LiquityPayback is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Repay LUSD tokens to a Trove: Burn the repaid LUSD tokens, and reduce the trove's debt accordingly
+    /// @notice Repays LUSD tokens to the trove
+    /// @param _lusdAmount Amount of LUSD tokens to repay
+    /// @param _from Address where to pull the tokens from
     function _liquityPayback(uint _lusdAmount, address _from, address _upperHint, address _lowerHint) internal returns (uint256) {
         LUSDTokenAddr.pullTokensIfNeeded(_from, _lusdAmount);
         

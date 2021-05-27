@@ -59,7 +59,12 @@ contract LiquityOpen is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Opens up an empty trove
+    /// @notice Opens up a trove
+    /// @param _maxFeePercentage Highest borrowing fee to accept, ranges between 0.5 and 5%
+    /// @param _collAmount Amount of WETH tokens to supply as collateral
+    /// @param _lusdAmount Amount of LUSD tokens to borrow from the trove, protocol minimum net debt is 1800
+    /// @param _from Address where to pull the collateral from
+    /// @param _to Address that will receive the borrowed tokens
     function _liquityOpen(
         uint256 _maxFeePercentage,
         uint256 _collAmount,

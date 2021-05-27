@@ -46,7 +46,9 @@ contract LiquityClose is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Opens up an empty trove
+    /// @notice Closes the trove
+    /// @param _from Address where to pull the LUSD tokens from
+    /// @param _to Address that will receive the collateral
     function _liquityClose(address _from, address _to) internal returns (uint256) {
         uint256 debt = TroveManager.getTroveDebt(address(this));
         uint256 coll = TroveManager.getTroveColl(address(this));

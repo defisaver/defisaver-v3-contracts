@@ -41,7 +41,10 @@ contract LiquityBorrow is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Withdraw LUSD tokens from a trove: mint new LUSD tokens to the owner, and increase the trove's debt accordingly
+    /// @notice Increases the trove's debt and withdraws minted LUSD tokens from the trove
+    /// @param _maxFeePercentage Highest borrowing fee to accept, ranges between 0.5 and 5%
+    /// @param _lusdAmount Amount of LUSD tokens to borrow
+    /// @param _to Address that will receive the tokens
     function _liquityBorrow(uint256 _maxFeePercentage, uint256 _lusdAmount, address _to, address _upperHint, address _lowerHint) internal returns (uint256) {
         BorrowerOperations.withdrawLUSD(_maxFeePercentage, _lusdAmount, _upperHint, _lowerHint);
 

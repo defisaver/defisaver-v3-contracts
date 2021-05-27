@@ -40,7 +40,9 @@ contract LiquityWithdraw is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Withdraw ETH collateral from a trove
+    /// @notice Withdraws collateral from the trove
+    /// @param _collAmount Amount of WETH tokens to withdraw
+    /// @param _to Address that will receive the tokens
     function _liquityWithdraw(uint256 _collAmount, address _to, address _upperHint, address _lowerHint) internal returns (uint256) {
         if (_collAmount == type(uint256).max) {
             _collAmount = TroveManager.getTroveColl(address(this));

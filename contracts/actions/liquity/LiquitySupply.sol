@@ -40,7 +40,9 @@ contract LiquitySupply is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Send ETH as collateral to a trove
+    /// @notice Supplies collateral to the users trove
+    /// @param _collAmount Amount of WETH tokens to supply
+    /// @param _from Address where to pull the tokens from
     function _liquitySupply(uint256 _collAmount, address _from, address _upperHint, address _lowerHint) internal returns (uint256) {
         if (_collAmount == type(uint256).max) {
             _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
