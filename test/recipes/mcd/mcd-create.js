@@ -15,12 +15,11 @@ const {
     isEth,
     nullAddress,
     MCD_MANAGER_ADDR,
-    standardAmounts,
     MIN_VAULT_DAI_AMOUNT,
     WETH_ADDRESS,
-    MAX_UINT,
     depositToWeth,
     setNewExchangeWrapper,
+    fetchAmountinUSDPrice,
 } = require('../../utils');
 
 const {
@@ -99,7 +98,7 @@ describe('Mcd-Create', function () {
             const tokenBalance = await balanceOf(tokenAddr, senderAcc.address);
 
             const collAmount = BigNumber.from(hre.ethers.utils.parseUnits(
-                (standardAmounts[tokenData.symbol] * 2).toString(), tokenData.decimals,
+                fetchAmountinUSDPrice('WETH', '30000'), tokenData.decimals,
             ));
 
             if (tokenBalance.lt(collAmount)) {
@@ -156,7 +155,7 @@ describe('Mcd-Create', function () {
             const daiAddr = makerAddresses.MCD_DAI;
 
             const collAmount = BigNumber.from(hre.ethers.utils.parseUnits(
-                (standardAmounts[tokenData.symbol] * 2).toString(), tokenData.decimals,
+                fetchAmountinUSDPrice('WETH', '30000'), tokenData.decimals,
             ));
 
             if (tokenBalance.lt(collAmount)) {
@@ -191,7 +190,7 @@ describe('Mcd-Create', function () {
                 new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
                 new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR),
                 new dfs.actions.basic.PullTokenAction(tokenAddr, senderAcc.address, collAmount),
-                new dfs.actions.maker.MakerSupplyAction('$3', MAX_UINT, joinAddr, proxy.address, MCD_MANAGER_ADDR),
+                new dfs.actions.maker.MakerSupplyAction('$3', hre.ethers.constants.MaxUint256, joinAddr, proxy.address, MCD_MANAGER_ADDR),
                 new dfs.actions.maker.MakerGenerateAction('$3', '$1', dydxFlAddr, MCD_MANAGER_ADDR),
             ]);
 

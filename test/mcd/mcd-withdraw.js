@@ -7,10 +7,9 @@ const {
     balanceOf,
     getProxy,
     redeploy,
-    standardAmounts,
-    MAX_UINT,
     MIN_VAULT_DAI_AMOUNT,
     WETH_ADDRESS,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
@@ -47,8 +46,14 @@ describe('Mcd-Withdraw', function () {
         const joinAddr = ilkData.join;
         const tokenData = getAssetInfo(ilkData.asset);
         let vaultId;
+        const supplyAmount = fetchAmountinUSDPrice(tokenData.symbol, '25000');
+        const withdrawAmount = fetchAmountinUSDPrice(tokenData.symbol, '500');
 
-        const withdrawAmount = (standardAmounts[tokenData.symbol] / 40).toString();
+        if (supplyAmount === 0) {
+            // skip tokens we don't have price for
+            // eslint-disable-next-line no-continue
+            continue;
+        }
 
         it(`... should withdraw ${withdrawAmount} ${tokenData.symbol} from ${ilkData.ilkLabel} vault`, async () => {
             // skip uni tokens
@@ -69,13 +74,12 @@ describe('Mcd-Withdraw', function () {
             if (tokenData.symbol === 'ETH') {
                 tokenData.address = WETH_ADDRESS;
             }
-
             vaultId = await openVault(
                 makerAddresses,
                 proxy,
                 joinAddr,
                 tokenData,
-                (standardAmounts[tokenData.symbol] * 2).toString(),
+                supplyAmount,
                 MIN_VAULT_DAI_AMOUNT,
             );
 
@@ -111,21 +115,17 @@ describe('Mcd-Withdraw', function () {
             }
 
             const amount = BigNumber.from(
-                hre.ethers.utils.parseUnits(standardAmounts[tokenData.symbol], tokenData.decimals),
+                hre.ethers.utils.parseUnits(supplyAmount, tokenData.decimals),
             );
-
             const to = senderAcc.address;
             const from = senderAcc.address;
 
-            await openMcd(proxy, makerAddresses, joinAddr);
+            vaultId = await openMcd(proxy, makerAddresses, joinAddr);
             await supplyMcd(proxy, vaultId, amount, tokenData.address, joinAddr, from);
-
             const collBalanceBefore = await balanceOf(tokenData.address, to);
-
-            await withdrawMcd(proxy, vaultId, MAX_UINT, joinAddr, to);
+            await withdrawMcd(proxy, vaultId, hre.ethers.constants.MaxUint256, joinAddr, to);
 
             const collBalanceAfter = await balanceOf(tokenData.address, to);
-
             expect(collBalanceAfter).to.be.gt(collBalanceBefore);
         });
     }

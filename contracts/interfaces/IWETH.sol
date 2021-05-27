@@ -5,9 +5,9 @@ pragma solidity =0.7.6;
 import "./IERC20.sol";
 
 abstract contract IWETH {
-    function allowance(address, address) public virtual returns (uint256);
+    function allowance(address, address) public virtual view returns (uint256);
 
-    function balanceOf(address) public virtual returns (uint256);
+    function balanceOf(address) public virtual view returns (uint256);
 
     function approve(address, uint256) public virtual;
 

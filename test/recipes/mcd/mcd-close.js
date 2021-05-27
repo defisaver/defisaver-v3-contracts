@@ -14,10 +14,9 @@ const {
     setNewExchangeWrapper,
     balanceOf,
     nullAddress,
-    standardAmounts,
     WETH_ADDRESS,
     MIN_VAULT_DAI_AMOUNT,
-    MAX_UINT,
+    fetchAmountinUSDPrice,
 } = require('../../utils');
 
 const {
@@ -77,7 +76,7 @@ describe('Mcd-Close', function () {
                 return;
             }
 
-            const vaultColl = (standardAmounts[tokenData.symbol] * 2).toString();
+            const vaultColl = fetchAmountinUSDPrice('WETH', '30000');
 
             const amountDai = (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString();
 
@@ -107,11 +106,11 @@ describe('Mcd-Close', function () {
 
             const closeToDaiVaultRecipe = new dfs.Recipe('CloseToDaiVaultRecipe', [
                 new dfs.actions.flashloan.DyDxFlashLoanAction(flAmount, daiAddr, nullAddress, []),
-                new dfs.actions.maker.MakerPaybackAction(vaultId, MAX_UINT, proxy.address, MCD_MANAGER_ADDR),
-                new dfs.actions.maker.MakerWithdrawAction(vaultId, MAX_UINT, joinAddr, proxy.address, MCD_MANAGER_ADDR),
+                new dfs.actions.maker.MakerPaybackAction(vaultId, hre.ethers.constants.MaxUint256, proxy.address, MCD_MANAGER_ADDR),
+                new dfs.actions.maker.MakerWithdrawAction(vaultId, hre.ethers.constants.MaxUint256, joinAddr, proxy.address, MCD_MANAGER_ADDR),
                 new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
                 new dfs.actions.basic.SendTokenAction(daiAddr, dydxFlAddr, flAmount),
-                new dfs.actions.basic.SendTokenAction(daiAddr, senderAcc.address, MAX_UINT), // return extra dai
+                new dfs.actions.basic.SendTokenAction(daiAddr, senderAcc.address, hre.ethers.constants.MaxUint256), // return extra dai
             ]);
 
             const functionData = closeToDaiVaultRecipe.encodeForDsProxyCall();
@@ -137,7 +136,7 @@ describe('Mcd-Close', function () {
             }
 
             const amountDai = (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString();
-            const amountColl = (standardAmounts[tokenData.symbol] * 2).toString();
+            const amountColl = fetchAmountinUSDPrice(tokenData.symbol, '30000');
 
             const vaultId = await openVault(
                 makerAddresses,
@@ -164,10 +163,10 @@ describe('Mcd-Close', function () {
 
             const closeToCollVaultRecipe = new dfs.Recipe('CloseToCollVaultRecipe', [
                 new dfs.actions.flashloan.DyDxFlashLoanAction(flAmount, daiAddr, nullAddress, []),
-                new dfs.actions.maker.MakerPaybackAction(vaultId, MAX_UINT, proxy.address, MCD_MANAGER_ADDR),
-                new dfs.actions.maker.MakerWithdrawAction(vaultId, MAX_UINT, joinAddr, proxy.address, MCD_MANAGER_ADDR),
+                new dfs.actions.maker.MakerPaybackAction(vaultId, hre.ethers.constants.MaxUint256, proxy.address, MCD_MANAGER_ADDR),
+                new dfs.actions.maker.MakerWithdrawAction(vaultId, hre.ethers.constants.MaxUint256, joinAddr, proxy.address, MCD_MANAGER_ADDR),
                 new dfs.actions.basic.BuyAction(exchangeOrder, proxy.address, dydxFlAddr),
-                new dfs.actions.basic.SendTokenAction(tokenAddr, senderAcc.address, MAX_UINT),
+                new dfs.actions.basic.SendTokenAction(tokenAddr, senderAcc.address, hre.ethers.constants.MaxUint256),
             ]);
 
             const functionData = closeToCollVaultRecipe.encodeForDsProxyCall();

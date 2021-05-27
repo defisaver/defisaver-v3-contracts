@@ -7,6 +7,7 @@ const {
     getProxy,
     redeploy,
     balanceOf,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const { getPair } = require('../utils-uni.js');
@@ -21,11 +22,10 @@ describe('Uni-Withdraw', function () {
     let senderAcc; let
         proxy;
 
-    // TODO: Amount should be dynamic?
     const uniPairs = [
-        { tokenA: 'WETH', tokenB: 'DAI', amount: '1' },
-        { tokenA: 'WETH', tokenB: 'WBTC', amount: '1' },
-        { tokenA: 'DAI', tokenB: 'USDC', amount: '500' },
+        { tokenA: 'WETH', tokenB: 'DAI', amount: fetchAmountinUSDPrice('WETH', '3000') },
+        { tokenA: 'WETH', tokenB: 'WBTC', amount: fetchAmountinUSDPrice('WETH', '3000') },
+        { tokenA: 'DAI', tokenB: 'USDC', amount: fetchAmountinUSDPrice('DAI', '1000') },
     ];
 
     before(async () => {
@@ -36,7 +36,6 @@ describe('Uni-Withdraw', function () {
     });
 
     for (let i = 0; i < uniPairs.length; ++i) {
-        // eslint-disable-next-line no-loop-func
         it(`... should withdraw ${uniPairs[i].tokenA}/${uniPairs[i].tokenB} from uniswap`, async () => {
             const tokenDataA = getAssetInfo(uniPairs[i].tokenA);
             const tokenDataB = getAssetInfo(uniPairs[i].tokenB);

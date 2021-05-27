@@ -11,8 +11,8 @@ const {
     OWNER_ACC,
     ADMIN_ACC,
     DAI_ADDR,
-    ETH_ADDR,
     UNISWAP_WRAPPER,
+    WETH_ADDRESS,
 } = require('../utils.js');
 
 const {
@@ -33,16 +33,6 @@ describe('Admin-Auth', () => {
         proxy = await getProxy(sender.address);
     });
 
-    it('... non admin should fail to change admin vault', async () => {
-        try {
-            await adminAuth.changeAdminVault(sender.address);
-            // eslint-disable-next-line no-unused-expressions
-            expect(true).to.be.false;
-        } catch (err) {
-            expect(err.toString()).to.have.string('msg.sender not admin');
-        }
-    });
-
     it('... owner should withdraw 10 Dai from contract', async () => {
         const tokenBalance = await balanceOf(DAI_ADDR, sender.address);
 
@@ -52,7 +42,7 @@ describe('Admin-Auth', () => {
         if (tokenBalance.lt(amount)) {
             await sell(
                 proxy,
-                ETH_ADDR,
+                WETH_ADDRESS,
                 DAI_ADDR,
                 hre.ethers.utils.parseUnits('1', 18),
                 UNISWAP_WRAPPER,

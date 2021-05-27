@@ -7,9 +7,9 @@ const {
     balanceOf,
     getProxy,
     redeploy,
-    standardAmounts,
     WETH_ADDRESS,
     MIN_VAULT_DAI_AMOUNT,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const { fetchMakerAddresses, canGenerateDebt } = require('../utils-mcd.js');
@@ -29,7 +29,7 @@ describe('Mcd-Generate', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
     });
-
+    // ETH-B fails often
     for (let i = 0; i < ilks.length; ++i) {
         const ilkData = ilks[i];
         const joinAddr = ilkData.join;
@@ -56,7 +56,7 @@ describe('Mcd-Generate', function () {
 
             const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
             const collAmount = hre.ethers.utils.parseUnits(
-                standardAmounts[tokenData.symbol],
+                fetchAmountinUSDPrice(tokenData.symbol, '30000'),
                 tokenData.decimals,
             );
 
@@ -69,7 +69,6 @@ describe('Mcd-Generate', function () {
 
             await supplyMcd(proxy, vaultId, collAmount, tokenData.address, joinAddr, from);
             await generateMcd(proxy, vaultId, amountDai, to);
-
             const daiBalanceAfter = await balanceOf(makerAddresses.MCD_DAI, from);
 
             expect(daiBalanceBefore.add(amountDai)).to.be.eq(daiBalanceAfter);

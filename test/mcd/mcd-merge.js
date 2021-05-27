@@ -6,14 +6,14 @@ const { getAssetInfo, ilks } = require('@defisaver/tokens');
 const {
     getProxy,
     redeploy,
-    standardAmounts,
+    fetchAmountinUSDPrice,
+    MIN_VAULT_DAI_AMOUNT,
+    WETH_ADDRESS,
 } = require('../utils');
 
 const { fetchMakerAddresses, getVaultInfo } = require('../utils-mcd');
 
 const { openVault, mcdMerge } = require('../actions.js');
-
-const VAULT_DAI_AMOUNT = '530';
 
 describe('Mcd-Merge', () => {
     let makerAddresses; let senderAcc; let proxy; let mcdView;
@@ -35,33 +35,33 @@ describe('Mcd-Merge', () => {
         const tokenData = getAssetInfo(ilkData.asset);
 
         it(`... should merge two ${ilkData.ilkLabel} Maker vaults`, async () => {
+            if (tokenData.symbol === 'ETH') {
+                tokenData.address = WETH_ADDRESS;
+            }
             const vaultId1 = await openVault(
                 makerAddresses,
                 proxy,
                 joinAddr,
                 tokenData,
-                standardAmounts[tokenData.symbol],
-                VAULT_DAI_AMOUNT,
+                fetchAmountinUSDPrice(tokenData.symbol, '40000'),
+                (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 50).toString(),
             );
-
             const vaultId2 = await openVault(
                 makerAddresses,
                 proxy,
                 joinAddr,
                 tokenData,
-                standardAmounts[tokenData.symbol],
-                VAULT_DAI_AMOUNT,
+                fetchAmountinUSDPrice(tokenData.symbol, '40000'),
+                (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 50).toString(),
             );
-
             const vault1Before = await getVaultInfo(mcdView, vaultId1, ilkData.ilkBytes);
             const vault2Before = await getVaultInfo(mcdView, vaultId2, ilkData.ilkBytes);
-
             await mcdMerge(proxy, vaultId1, vaultId2);
 
             const vault2After = await getVaultInfo(mcdView, vaultId2, ilkData.ilkBytes);
 
-            expect(vault2After.debt).to.be.eq(vault1Before.debt + vault2Before.debt);
-            expect(vault2After.coll).to.be.eq(vault1Before.coll + vault2Before.coll);
-        });
+            expect(vault2After.debt).to.be.closeTo(vault1Before.debt + vault2Before.debt, 0.0001);
+            expect(vault2After.coll).to.be.closeTo(vault1Before.coll + vault2Before.coll, 0.0001);
+        }).timeout(50000);
     }
 });

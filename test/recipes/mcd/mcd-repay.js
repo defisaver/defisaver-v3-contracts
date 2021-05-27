@@ -11,10 +11,10 @@ const {
     formatExchangeObj,
     setNewExchangeWrapper,
     nullAddress,
-    standardAmounts,
     UNISWAP_WRAPPER,
     WETH_ADDRESS,
     MIN_VAULT_DAI_AMOUNT,
+    fetchAmountinUSDPrice,
 } = require('../../utils');
 
 const {
@@ -72,7 +72,7 @@ describe('Mcd-Repay', function () {
             tokenData.address = WETH_ADDRESS;
         }
 
-        let repayAmount = (standardAmounts[tokenData.symbol] / 30).toString();
+        let repayAmount = fetchAmountinUSDPrice(tokenData.symbol, '100');
 
         it(`... should call a repay ${repayAmount} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
             // create a vault
@@ -81,7 +81,7 @@ describe('Mcd-Repay', function () {
                 proxy,
                 joinAddr,
                 tokenData,
-                (standardAmounts[tokenData.symbol] * 2).toString(),
+                fetchAmountinUSDPrice(tokenData.symbol, '40000'),
                 (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 400).toString(),
             );
 
@@ -143,7 +143,7 @@ describe('Mcd-Repay', function () {
                 proxy,
                 joinAddr,
                 tokenData,
-                (standardAmounts[tokenData.symbol] * 2).toString(),
+                fetchAmountinUSDPrice(tokenData.symbol, '40000'),
                 (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 500).toString(),
             );
 

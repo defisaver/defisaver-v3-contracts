@@ -101,7 +101,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
         logger.Log(
             address(this),
             msg.sender,
-            "DfsBuy",
+            "DFSBuy",
             abi.encode(
                 wrapper,
                 _exchangeData.srcAddr,
