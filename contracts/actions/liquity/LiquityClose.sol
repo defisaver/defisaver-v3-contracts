@@ -5,12 +5,10 @@ pragma experimental ABIEncoderV2;
 
 import "./helpers/LiquityHelper.sol";
 import "../../utils/TokenUtils.sol";
-import "../../utils/SafeMath.sol";
 import "../ActionBase.sol";
 
 contract LiquityClose is ActionBase, LiquityHelper {
     using TokenUtils for address;
-    using SafeMath for uint256;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -58,7 +56,7 @@ contract LiquityClose is ActionBase, LiquityHelper {
         BorrowerOperations.closeTrove();
 
         TokenUtils.depositWeth(coll);
-        WETH_ADDR.withdrawTokens(_to, coll);
+        TokenUtils.WETH_ADDR.withdrawTokens(_to, coll);
 
         logger.Log(
             address(this),

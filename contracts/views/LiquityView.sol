@@ -50,7 +50,7 @@ contract LiquityView is LiquityHelper {
             _LUSDAmount = BorrowerOperations.getCompositeDebt(_LUSDAmount);
 
             if (_collAmount == type(uint256).max)
-                _collAmount = WETH_ADDR.getBalance(_from);
+                _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
             
             return computeNICR(_collAmount, _LUSDAmount);
         }
@@ -74,7 +74,7 @@ contract LiquityView is LiquityHelper {
         //  LiquitySupply
         if (_action == LiquityActionIds.Supply) {
             if (_collAmount == type(uint256).max)
-                _collAmount = WETH_ADDR.getBalance(_from);
+                _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
             
             return computeNICR(coll.add(_collAmount), debt);
         }

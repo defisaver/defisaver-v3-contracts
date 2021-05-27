@@ -43,9 +43,9 @@ contract LiquitySupply is ActionBase, LiquityHelper {
     /// @notice Send ETH as collateral to a trove
     function _liquitySupply(uint256 _collAmount, address _from, address _upperHint, address _lowerHint) internal returns (uint256) {
         if (_collAmount == type(uint256).max) {
-            _collAmount = WETH_ADDR.getBalance(_from);
+            _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
         }
-        WETH_ADDR.pullTokensIfNeeded(_from, _collAmount);
+        TokenUtils.WETH_ADDR.pullTokensIfNeeded(_from, _collAmount);
         TokenUtils.withdrawWeth(_collAmount);
 
         BorrowerOperations.addColl{value: _collAmount}(_upperHint, _lowerHint);

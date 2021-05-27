@@ -49,7 +49,7 @@ contract LiquityWithdraw is ActionBase, LiquityHelper {
         BorrowerOperations.withdrawColl(_collAmount, _upperHint, _lowerHint);
         
         TokenUtils.depositWeth(_collAmount);
-        WETH_ADDR.withdrawTokens(_to, _collAmount);
+        TokenUtils.WETH_ADDR.withdrawTokens(_to, _collAmount);
         
         logger.Log(
             address(this),

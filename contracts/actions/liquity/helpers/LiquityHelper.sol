@@ -9,7 +9,6 @@ import "../../../interfaces/liquity/IHintHelpers.sol";
 import "../../../interfaces/liquity/ISortedTroves.sol";
 
 contract LiquityHelper {
-    address constant public WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address constant public LUSDTokenAddr = 0x5f98805A4E8be255a32880FDeC7F6728C6568bA0;
     address constant public PriceFeedAddr = 0x4c517D4e2C851CA76d7eC94B805269Df0f2201De;
     address constant public BorrowerOperationsAddr = 0x24179CD81c9e782A4096035f7eC97fB8B783e007;

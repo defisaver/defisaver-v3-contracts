@@ -20,7 +20,7 @@ contract LiquityOpen is ActionBase, LiquityHelper {
         (
             uint256 maxFeePercentage,
             uint256 collAmount,
-            uint256 LUSDAmount,
+            uint256 lusdAmount,
             address from,
             address to,
             address upperHint,
@@ -29,11 +29,11 @@ contract LiquityOpen is ActionBase, LiquityHelper {
 
         maxFeePercentage = _parseParamUint(maxFeePercentage, _paramMapping[0], _subData, _returnValues);
         collAmount = _parseParamUint(collAmount, _paramMapping[1], _subData, _returnValues);
-        LUSDAmount = _parseParamUint(LUSDAmount, _paramMapping[2], _subData, _returnValues);
+        lusdAmount = _parseParamUint(lusdAmount, _paramMapping[2], _subData, _returnValues);
         from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
         to = _parseParamAddr(from, _paramMapping[4], _subData, _returnValues);
 
-        uint256 troveOwner = _liquityOpen(maxFeePercentage, collAmount, LUSDAmount, from, to, upperHint, lowerHint);
+        uint256 troveOwner = _liquityOpen(maxFeePercentage, collAmount, lusdAmount, from, to, upperHint, lowerHint);
         return bytes32(troveOwner);
     }
 
@@ -42,14 +42,14 @@ contract LiquityOpen is ActionBase, LiquityHelper {
         (
             uint256 maxFeePercentage,
             uint256 collAmount,
-            uint256 LUSDAmount,
+            uint256 lusdAmount,
             address from,
             address to,
             address upperHint,
             address lowerHint
         )= parseInputs(_callData);
 
-        _liquityOpen(maxFeePercentage, collAmount, LUSDAmount, from, to, upperHint, lowerHint);
+        _liquityOpen(maxFeePercentage, collAmount, lusdAmount, from, to, upperHint, lowerHint);
     }
 
     /// @inheritdoc ActionBase
@@ -63,7 +63,7 @@ contract LiquityOpen is ActionBase, LiquityHelper {
     function _liquityOpen(
         uint256 _maxFeePercentage,
         uint256 _collAmount,
-        uint256 _LUSDAmount,
+        uint256 _lusdAmount,
         address _from,
         address _to,
         address _upperHint,
@@ -72,21 +72,21 @@ contract LiquityOpen is ActionBase, LiquityHelper {
         if (_collAmount == type(uint256).max) {
             _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
         }
-        WETH_ADDR.pullTokensIfNeeded(_from, _collAmount);
+        TokenUtils.WETH_ADDR.pullTokensIfNeeded(_from, _collAmount);
         TokenUtils.withdrawWeth(_collAmount);
 
-        BorrowerOperations.openTrove{value: _collAmount}(_maxFeePercentage, _LUSDAmount, _upperHint, _lowerHint);
+        BorrowerOperations.openTrove{value: _collAmount}(_maxFeePercentage, _lusdAmount, _upperHint, _lowerHint);
 
-        LUSDTokenAddr.withdrawTokens(_to, _LUSDAmount);
+        LUSDTokenAddr.withdrawTokens(_to, _lusdAmount);
 
         logger.Log(
             address(this),
             msg.sender,
             "LiquityOpen",
-            abi.encode(_maxFeePercentage, _collAmount, _LUSDAmount, _from, _to)
+            abi.encode(_maxFeePercentage, _collAmount, _lusdAmount, _from, _to)
         );
 
-        return uint256(address(this));
+        return _collAmount;
     }
 
     function parseInputs(bytes[] memory _callData)
@@ -95,7 +95,7 @@ contract LiquityOpen is ActionBase, LiquityHelper {
         returns (
             uint256 maxFeePercentage,
             uint256 collAmount,
-            uint256 LUSDAmount,
+            uint256 lusdAmount,
             address from,
             address to,
             address upperHint,
@@ -104,7 +104,7 @@ contract LiquityOpen is ActionBase, LiquityHelper {
     {
         maxFeePercentage = abi.decode(_callData[0], (uint256));
         collAmount = abi.decode(_callData[1], (uint256));
-        LUSDAmount = abi.decode(_callData[2], (uint256));
+        lusdAmount = abi.decode(_callData[2], (uint256));
         from = abi.decode(_callData[3], (address));
         to = abi.decode(_callData[4], (address));
         upperHint = abi.decode(_callData[5], (address));
