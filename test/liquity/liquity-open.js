@@ -1,12 +1,12 @@
 const { expect } = require('chai');
 const hre = require('hardhat');
-const dfs = require('@defisaver/sdk');
 const {
-    getAddrFromRegistry,
     balanceOf,
     getProxy,
     redeploy,
     setNewExchangeWrapper,
+    depositToWeth,
+    send,
     WETH_ADDRESS,
 } = require('../utils');
 
@@ -39,13 +39,8 @@ describe('Liquity-Open', () => {
         IPriceFeed = await hre.ethers.getContractAt('IPriceFeed', liquityView.PriceFeed());
         LUSDAddr = await liquityView.LUSDTokenAddr();
 
-        const wrapEthAddr = await getAddrFromRegistry('WrapEth');
-        const wrapEthAction = new dfs.actions.basic.WrapEthAction(WETHAmount);
-        const functionData = wrapEthAction.encodeForDsProxyCall()[1];
-        await proxy['execute(address,bytes)'](wrapEthAddr, functionData, {
-            value: WETHAmount,
-            gasLimit: 3000000,
-        });
+        await depositToWeth(WETHAmount);
+        await send(WETH_ADDRESS, proxyAddr, WETHAmount);
 
         await redeploy('DFSSell');
         uniWrapper = await redeploy('UniswapWrapperV3');
