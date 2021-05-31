@@ -10,6 +10,14 @@ import "../ActionBase.sol";
 contract LiquityBorrow is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    struct Params {
+        uint256 maxFeePercentage;   // Highest borrowing fee to accept, ranges between 0.5 and 5%
+        uint256 lusdAmount;         // Amount of LUSD tokens to borrow
+        address to;                 // Address that will receive the tokens
+        address upperHint;
+        address lowerHint;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
@@ -17,21 +25,31 @@ contract LiquityBorrow is ActionBase, LiquityHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (uint256 maxFeePercentage, uint256 lusdAmount, address to, address upperHint, address lowerHint) = parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        maxFeePercentage = _parseParamUint(maxFeePercentage, _paramMapping[0], _subData, _returnValues);
-        lusdAmount = _parseParamUint(lusdAmount, _paramMapping[1], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[2], _subData, _returnValues);
+        params.maxFeePercentage = _parseParamUint(
+            params.maxFeePercentage,
+            _paramMapping[0],
+            _subData,
+            _returnValues
+        );
+        params.lusdAmount = _parseParamUint(
+            params.lusdAmount,
+            _paramMapping[1],
+            _subData,
+            _returnValues
+        );
+        params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
-        lusdAmount = _liquityBorrow(maxFeePercentage, lusdAmount, to, upperHint, lowerHint);
-        return bytes32(lusdAmount);
+        params.lusdAmount = _liquityBorrow(params);
+        return bytes32(params.lusdAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public virtual payable override {
-        (uint256 maxFeePercentage, uint256 lusdAmount, address to, address upperHint, address lowerHint) = parseInputs(_callData);
+    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+        Params memory params = parseInputs(_callData);
 
-        _liquityBorrow(maxFeePercentage, lusdAmount, to, upperHint, lowerHint);
+        _liquityBorrow(params);
     }
 
     /// @inheritdoc ActionBase
@@ -41,34 +59,28 @@ contract LiquityBorrow is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Increases the trove's debt and withdraws minted LUSD tokens from the trove
-    /// @param _maxFeePercentage Highest borrowing fee to accept, ranges between 0.5 and 5%
-    /// @param _lusdAmount Amount of LUSD tokens to borrow
-    /// @param _to Address that will receive the tokens
-    function _liquityBorrow(uint256 _maxFeePercentage, uint256 _lusdAmount, address _to, address _upperHint, address _lowerHint) internal returns (uint256) {
-        BorrowerOperations.withdrawLUSD(_maxFeePercentage, _lusdAmount, _upperHint, _lowerHint);
+    /// @notice Increases the trove"s debt and withdraws minted LUSD tokens from the trove
+    function _liquityBorrow(Params memory params) internal returns (uint256) {
+        BorrowerOperations.withdrawLUSD(
+            params.maxFeePercentage,
+            params.lusdAmount,
+            params.upperHint,
+            params.lowerHint
+        );
 
-        LUSDTokenAddr.withdrawTokens(_to, _lusdAmount);
+        LUSDTokenAddr.withdrawTokens(params.to, params.lusdAmount);
 
         logger.Log(
             address(this),
             msg.sender,
             "LiquityBorrow",
-            abi.encode(_maxFeePercentage, _lusdAmount, _to)
+            abi.encode(params.maxFeePercentage, params.lusdAmount, params.to)
         );
 
-        return _lusdAmount;
+        return params.lusdAmount;
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
-        pure
-        returns (uint256 maxFeePercentage, uint256 lusdAmount, address to, address upperHint, address lowerHint)
-    {
-        maxFeePercentage = abi.decode(_callData[0], (uint256));
-        lusdAmount = abi.decode(_callData[1], (uint256));
-        to = abi.decode(_callData[2], (address));
-        upperHint = abi.decode(_callData[3], (address));
-        lowerHint = abi.decode(_callData[4], (address));
+    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData[0], (Params));
     }
 }

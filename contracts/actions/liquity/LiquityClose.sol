@@ -17,10 +17,7 @@ contract LiquityClose is ActionBase, LiquityHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (
-            address from,
-            address to
-        ) = parseInputs(_callData);
+        (address from, address to) = parseInputs(_callData);
 
         from = _parseParamAddr(from, _paramMapping[0], _subData, _returnValues);
         to = _parseParamAddr(to, _paramMapping[1], _subData, _returnValues);
@@ -30,11 +27,8 @@ contract LiquityClose is ActionBase, LiquityHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public virtual payable override {
-        (
-            address from,
-            address to
-        )= parseInputs(_callData);
+    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+        (address from, address to) = parseInputs(_callData);
 
         _liquityClose(from, to);
     }
@@ -54,18 +48,13 @@ contract LiquityClose is ActionBase, LiquityHelper {
         uint256 coll = TroveManager.getTroveColl(address(this));
 
         LUSDTokenAddr.pullTokensIfNeeded(_from, debt);
-        
+
         BorrowerOperations.closeTrove();
 
         TokenUtils.depositWeth(coll);
         TokenUtils.WETH_ADDR.withdrawTokens(_to, coll);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "LiquityClose",
-            abi.encode(_from, _to, debt, coll)
-        );
+        logger.Log(address(this), msg.sender, "LiquityClose", abi.encode(_from, _to, debt, coll));
 
         return uint256(coll);
     }
@@ -73,10 +62,7 @@ contract LiquityClose is ActionBase, LiquityHelper {
     function parseInputs(bytes[] memory _callData)
         internal
         pure
-        returns (
-            address from,
-            address to
-        )
+        returns (address from, address to)
     {
         from = abi.decode(_callData[0], (address));
         to = abi.decode(_callData[1], (address));
