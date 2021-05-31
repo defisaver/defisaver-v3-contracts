@@ -16,7 +16,7 @@ contract RaiLoanInfo is DSMath {
     address public constant MANAGER_ADDR = 0xEfe0B4cA532769a3AE758fD82E1426a03A94F185;
     address public constant SAFE_ENGINE_ADDRESS = 0xCC88a9d330da1133Df3A7bD823B95e52511A6962;
     address public constant ORACLE_RELAYER_ADDRESS = 0x4ed9C0dCa0479bC64d8f4EB3007126D5791f7851;
-    address public constant MEDIAN_ORACLE_ADDRESS = 0x12A5E1c81B10B264A575930aEae80681DDF595fe;
+    address public constant MEDIAN_ORACLE_ADDRESS = 0xFbF4849a06F6e6F53EcB31D2f8BD61aA7874b268;
     address public constant TAX_COLLECTOR_ADDRESS = 0xcDB05aEda142a1B0D6044C09C64e4226c1a281EB;
 
     // kovan
@@ -103,6 +103,12 @@ contract RaiLoanInfo is DSMath {
     }
 
     function getRaiInfo() public returns (RaiInfo memory raiInfo) {
+        uint medianPrice = 0;
+        
+        try IMedianOracle(MEDIAN_ORACLE_ADDRESS).read() returns (uint p) {
+            medianPrice = p;
+        } catch(bytes memory) {}
+        
         raiInfo = RaiInfo({
             redemptionPrice: IOracleRelayer(ORACLE_RELAYER_ADDRESS).redemptionPrice(),
             currRaiPrice: IMedianOracle(MEDIAN_ORACLE_ADDRESS).read(),

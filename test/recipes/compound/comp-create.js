@@ -15,10 +15,10 @@ const {
     balanceOf,
     isEth,
     nullAddress,
-    standardAmounts,
     WETH_ADDRESS,
     depositToWeth,
     setNewExchangeWrapper,
+    fetchAmountinUSDPrice,
 } = require('../../utils');
 
 const {
@@ -61,9 +61,10 @@ describe('Compound: Create', function () {
 
     ['ETH', 'WBTC', 'USDC'].forEach((collAsset) => {
         ['DAI', 'BAT', 'USDT'].forEach((debtAsset) => {
-            it(`...should supply ${standardAmounts[collAsset]} ${collAsset} and borrow 500 ${debtAsset}`, async () => {
+            const fetchedAmount = fetchAmountinUSDPrice(collAsset, '2000');
+            it(`...should supply ${fetchedAmount} ${collAsset} and borrow 500 ${debtAsset}`, async () => {
                 const debtAmount = 500;
-                const collAmount = assetAmountInWei(standardAmounts[collAsset], collAsset);
+                const collAmount = assetAmountInWei(fetchedAmount, collAsset);
                 const collAddress = getAssetInfo(collAsset.replace(/^ETH/, 'WETH')).address;
                 let collBalanceBefore = await balanceOf(collAddress, senderAcc.address);
 
@@ -119,18 +120,19 @@ describe('Compound: Create', function () {
                 );
                 const borrowBalanceAfter = await getBorrowBalance(compView, proxy.address, getAssetInfo(`c${debtAsset}`).address);
 
-                assert.closeTo(+assetAmountInEth(collBalanceBefore, collAsset) - standardAmounts[collAsset], +assetAmountInEth(collBalanceAfter, collAsset), 0.005, 'Coll asset balance');
+                assert.closeTo(+assetAmountInEth(collBalanceBefore, collAsset) - fetchedAmount, +assetAmountInEth(collBalanceAfter, collAsset), 0.005, 'Coll asset balance');
                 assert.closeTo(+assetAmountInEth(debtBalanceBefore, debtAsset) + debtAmount, +assetAmountInEth(debtBalanceAfter, debtAsset), 0.005, 'Debt asset balance');
                 assert.closeTo(+assetAmountInEth(borrowBalanceBefore, debtAsset) + debtAmount, +assetAmountInEth(borrowBalanceAfter, debtAsset), 0.005, 'Borrow balance');
             });
         });
     });
 
-    it(`...should create a leveraged position of ${standardAmounts.ETH} ETH/500 DAI using dYdX FL`, async () => {
+    it('...should create a leveraged position of 2000$ in ETH/500 DAI using dYdX FL', async () => {
         const collAsset = 'ETH';
         const debtAsset = 'DAI';
+        const fetchedAmount = fetchAmountinUSDPrice(collAsset, '2000');
         const debtAmount = 500;
-        const collAmount = assetAmountInWei(standardAmounts[collAsset], collAsset);
+        const collAmount = assetAmountInWei(fetchedAmount, collAsset);
         const collAddress = getAssetInfo(collAsset.replace(/^ETH/, 'WETH')).address;
         let collBalanceBefore = await balanceOf(collAddress, senderAcc.address);
 
@@ -221,14 +223,14 @@ describe('Compound: Create', function () {
         const borrowBalanceAfter = await getBorrowBalance(compView, proxy.address, getAssetInfo(`c${debtAsset}`).address);
         const supplyBalanceAfter = await getSupplyBalance(compView, proxy.address, getAssetInfo(`c${collAsset}`).address);
 
-        assert.closeTo(+assetAmountInEth(collBalanceBefore, collAsset) - standardAmounts[collAsset], +assetAmountInEth(collBalanceAfter, collAsset), 0.005, 'Coll asset balance');
+        assert.closeTo(+assetAmountInEth(collBalanceBefore, collAsset) - fetchedAmount, +assetAmountInEth(collBalanceAfter, collAsset), 0.005, 'Coll asset balance');
         assert.closeTo(+assetAmountInEth(debtBalanceBefore, debtAsset), +assetAmountInEth(debtBalanceAfter, debtAsset), 0.005, 'Debt asset balance');
         assert.closeTo(+assetAmountInEth(borrowBalanceBefore, debtAsset) + 500, +assetAmountInEth(borrowBalanceAfter, debtAsset), 0.005, 'Borrow balance');
-        assert.isBelow(+assetAmountInEth(supplyBalanceBefore, debtAsset) + parseFloat(standardAmounts[collAsset]), +assetAmountInEth(supplyBalanceAfter, debtAsset), 'Supply balance');
+        assert.isBelow(+assetAmountInEth(supplyBalanceBefore, debtAsset) + parseFloat(fetchedAmount), +assetAmountInEth(supplyBalanceAfter, debtAsset), 'Supply balance');
         const collDelta = assetAmountInEth(supplyBalanceAfter, debtAsset)
             - assetAmountInEth(supplyBalanceBefore, debtAsset);
         const debtDelta = assetAmountInEth(borrowBalanceAfter, debtAsset)
             - assetAmountInEth(borrowBalanceBefore, debtAsset);
-        console.log(`Supplied ${collDelta} ${collAsset} (${standardAmounts[collAsset]} ${collAsset} from wallet) and created ${debtDelta} ${debtAsset} debt`);
+        console.log(`Supplied ${collDelta} ${collAsset} (${fetchedAmount} ${collAsset} from wallet) and created ${debtDelta} ${debtAsset} debt`);
     });
 });

@@ -44,6 +44,8 @@ contract UniSupply is ActionBase, DSMath {
         uniData.tokenB = _parseParamAddr(uniData.tokenB, _paramMapping[1], _subData, _returnValues);
         uniData.from = _parseParamAddr(uniData.from, _paramMapping[2], _subData, _returnValues);
         uniData.to = _parseParamAddr(uniData.to, _paramMapping[3], _subData, _returnValues);
+        uniData.amountADesired = _parseParamUint(uniData.amountADesired, _paramMapping[4], _subData, _returnValues);
+        uniData.amountBDesired = _parseParamUint(uniData.amountBDesired, _paramMapping[5], _subData, _returnValues);
 
         uint256 liqAmount = _uniSupply(uniData);
 

@@ -7,6 +7,7 @@ const {
     getProxy,
     redeploy,
     balanceOf,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const { getPair } = require('../utils-uni.js');
@@ -19,11 +20,10 @@ describe('Uni-Supply', function () {
     let senderAcc; let
         proxy;
 
-    // TODO: Amount should be dynamic?
     const uniPairs = [
-        { tokenA: 'WETH', tokenB: 'DAI', amount: '1' },
-        { tokenA: 'WETH', tokenB: 'WBTC', amount: '1' },
-        { tokenA: 'DAI', tokenB: 'USDC', amount: '500' },
+        { tokenA: 'WETH', tokenB: 'DAI', amount: fetchAmountinUSDPrice('WETH', '3000') },
+        { tokenA: 'WETH', tokenB: 'WBTC', amount: fetchAmountinUSDPrice('WETH', '3000') },
+        { tokenA: 'DAI', tokenB: 'USDC', amount: fetchAmountinUSDPrice('DAI', '1000') },
     ];
 
     before(async () => {

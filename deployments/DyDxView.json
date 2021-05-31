@@ -1,0 +1,141 @@
+{
+	"contractName": "DyDxView",
+	"abi": [
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_index",
+					"type": "uint256"
+				}
+			],
+			"name": "getAccount",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "owner",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "number",
+							"type": "uint256"
+						}
+					],
+					"internalType": "struct Account.Info",
+					"name": "",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_token",
+					"type": "address"
+				}
+			],
+			"name": "getMarketIdFromTokenAddress",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "marketId",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_tokenAddr",
+					"type": "address"
+				}
+			],
+			"name": "getSupplyBalance",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_index",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_marketId",
+					"type": "uint256"
+				}
+			],
+			"name": "getWeiBalance",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "bool",
+							"name": "sign",
+							"type": "bool"
+						},
+						{
+							"internalType": "uint256",
+							"name": "value",
+							"type": "uint256"
+						}
+					],
+					"internalType": "struct Types.Wei",
+					"name": "",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "soloMargin",
+			"outputs": [
+				{
+					"internalType": "contract ISoloMargin",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		}
+	],
+	"networks": {
+		"local": {}
+	}
+}
