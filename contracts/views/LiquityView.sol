@@ -61,7 +61,6 @@ contract LiquityView is LiquityHelper {
 
         //  LiquityPayback
         if (_action == LiquityActionId.Payback) {
-            if (_lusdAmount == type(uint256).max) return computeNICR(coll, 0);
             return computeNICR(coll, debt.sub(_lusdAmount));
         }
 
@@ -75,7 +74,6 @@ contract LiquityView is LiquityHelper {
 
         //  LiquityWithdraw
         if (_action == LiquityActionId.Withdraw) {
-            if (_lusdAmount == type(uint256).max) return computeNICR(0, debt);
             return computeNICR(coll.sub(_collAmount), debt);
         }
     }
