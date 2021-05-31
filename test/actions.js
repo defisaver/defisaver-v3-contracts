@@ -757,7 +757,6 @@ const buyTokenIfNeeded = async (tokenAddr, senderAcc, proxy, standardAmount) => 
 };
 
 const yearnSupply = async (token, amount, from, to, proxy) => {
-    //buyTokenIfNeeded(token, from, proxy, amount);
     const yearnSupplyAddress = await getAddrFromRegistry('YearnSupply');
     const yearnSupplyAction = new dfs.actions.yearn.YearnSupplyAction(
         token,

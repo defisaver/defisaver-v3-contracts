@@ -3,20 +3,23 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "hardhat/console.sol";
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/yearn/yVault.sol";
 import "../../interfaces/yearn/YearnController.sol";
-import "../../interfaces/IERC20.sol";
+import "../../DS/DSMath.sol";
 
-// @title Supplies tokens to Yearn vault
-contract YearnWithdraw is ActionBase{
+/// @title Supplies tokens to Yearn vault
+contract YearnWithdraw is ActionBase, DSMath {
     using TokenUtils for address;
 
     YearnController public constant yearnController = 
         YearnController(0x9E65Ad11b299CA0Abefc2799dDB6314Ef2d91080);
 
+    /// @param token - address of yToken to withdraw (same as yVault address)
+    /// @param amount - amount of yToken to withdraw
+    /// @param from - address from which to pull tokens from
+    /// @param to - address where received underlying tokens will be sent to
     struct Params {
         address token;
         uint256 amount;
@@ -34,16 +37,18 @@ contract YearnWithdraw is ActionBase{
         Params memory inputData = parseInputs(_callData);
 
         inputData.amount = _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
+        inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
+        inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        _yearnWithdraw(inputData);
-        return (0);
+        uint256 amountReceived = _yearnWithdraw(inputData);
+        return (bytes32(amountReceived));
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
-        _yearnWithdraw(inputData);
+        _yearnDirectWithdraw(inputData);
     }
 
     /// @inheritdoc ActionBase
@@ -52,8 +57,38 @@ contract YearnWithdraw is ActionBase{
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
+    
+    /// @dev this function sends only the amount of tokens received from withdrawing to an account
+    /// @return tokenAmountReceived amount of tokens we received from withdrawing
+    function _yearnWithdraw(Params memory _inputData) internal returns (uint256 tokenAmountReceived){
+            YVault vault = YVault(_inputData.token);
 
-    function _yearnWithdraw(Params memory _inputData) internal {
+            uint amountPulled = _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
+            _inputData.token.approveToken(address(vault), amountPulled);
+            _inputData.amount = amountPulled;
+
+            address underlyingToken = vault.token();
+
+            uint256 underlyingTokenBalanceBefore = underlyingToken.getBalance(address(this));
+            vault.withdraw(_inputData.amount);
+            uint256 underlyingTokenBalanceAfter = underlyingToken.getBalance(address(this));
+
+            tokenAmountReceived = sub(underlyingTokenBalanceAfter, underlyingTokenBalanceBefore);
+
+            if (address(this) != _inputData.to){
+                underlyingToken.withdrawTokens(_inputData.to, tokenAmountReceived);
+            }
+
+            logger.Log(
+                    address(this),
+                    msg.sender,
+                    "YearnWithdraw",
+                    abi.encode(_inputData, tokenAmountReceived)
+                );
+        }
+
+    /// @dev this function sends whole proxy token balance to an address
+    function _yearnDirectWithdraw(Params memory _inputData) internal {
         uint amountPulled = _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
 
         YVault vault = YVault(_inputData.token);
@@ -65,9 +100,7 @@ contract YearnWithdraw is ActionBase{
 
         if (address(this) != _inputData.to){
             address underlyingToken = vault.token();
-            console.log(underlyingToken);
-            console.log(IERC20(underlyingToken).balanceOf(address(this)));
-            IERC20(underlyingToken).transfer(_inputData.to, IERC20(underlyingToken).balanceOf(address(this)));
+            underlyingToken.withdrawTokens(_inputData.to, underlyingToken.getBalance(address(this)));
         }
 
         logger.Log(
@@ -77,7 +110,6 @@ contract YearnWithdraw is ActionBase{
                 abi.encode(_inputData)
             );
     }
-
 
     function parseInputs(bytes[] memory _callData)
             internal
