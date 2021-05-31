@@ -68,9 +68,7 @@ contract YearnSupply is ActionBase, DSMath {
         _inputData.amount = amountPulled;
         
         uint256 yBalanceBefore = vault.balanceOf(address(this));
-        
         vault.deposit(_inputData.amount);
-
         uint yBalanceAfter = vault.balanceOf(address(this));
         yTokenAmount = sub(yBalanceAfter,yBalanceBefore);
 

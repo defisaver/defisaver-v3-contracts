@@ -66,8 +66,6 @@ describe('Yearn-Withdraw', function () {
             const tokenAmountStart = await balanceOf(token, senderAcc.address);
             const yTokenAmountStart = await balanceOf(yToken, senderAcc.address);
             const amountToWithdraw = yTokenAmountStart.div(10);
-            console.log(tokenAmountStart.toString());
-            console.log(yTokenAmountStart.toString());
             await approve(yToken, proxy.address);
             await yearnWithdraw(
                 yToken,
@@ -79,8 +77,6 @@ describe('Yearn-Withdraw', function () {
 
             const tokenAmountAfterFirst = await balanceOf(token, senderAcc.address);
             const yTokenAmountAfterFirst = await balanceOf(yToken, senderAcc.address);
-            console.log(tokenAmountAfterFirst.toString());
-            console.log(yTokenAmountAfterFirst.toString());
             expect(yTokenAmountAfterFirst).to.be.eq(yTokenAmountStart.sub(amountToWithdraw));
             expect(tokenAmountAfterFirst).to.be.gt(tokenAmountStart);
 
@@ -94,10 +90,8 @@ describe('Yearn-Withdraw', function () {
 
             const tokenAmountEnd = await balanceOf(token, senderAcc.address);
             const yTokenAmountEnd = await balanceOf(yToken, senderAcc.address);
-            console.log(tokenAmountEnd.toString());
-            console.log(yTokenAmountEnd.toString());
             expect(tokenAmountEnd).to.be.gt(tokenAmountAfterFirst);
             expect(yTokenAmountEnd).to.be.eq(0);
-        }).timeout(50000);
+        }).timeout(100000);
     }
 });

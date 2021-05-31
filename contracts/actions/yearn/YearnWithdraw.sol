@@ -72,7 +72,6 @@ contract YearnWithdraw is ActionBase, DSMath {
             uint256 underlyingTokenBalanceBefore = underlyingToken.getBalance(address(this));
             vault.withdraw(_inputData.amount);
             uint256 underlyingTokenBalanceAfter = underlyingToken.getBalance(address(this));
-
             tokenAmountReceived = sub(underlyingTokenBalanceAfter, underlyingTokenBalanceBefore);
 
             if (address(this) != _inputData.to){
@@ -92,22 +91,24 @@ contract YearnWithdraw is ActionBase, DSMath {
         uint amountPulled = _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
 
         YVault vault = YVault(_inputData.token);
+        address underlyingToken = vault.token();
 
         _inputData.token.approveToken(address(vault), amountPulled);
         _inputData.amount = amountPulled;
 
         vault.withdraw(_inputData.amount);
+        
+        uint256 tokenAmount = underlyingToken.getBalance(address(this));
 
         if (address(this) != _inputData.to){
-            address underlyingToken = vault.token();
-            underlyingToken.withdrawTokens(_inputData.to, underlyingToken.getBalance(address(this)));
+            underlyingToken.withdrawTokens(_inputData.to, tokenAmount);
         }
 
         logger.Log(
                 address(this),
                 msg.sender,
                 "YearnWithdraw",
-                abi.encode(_inputData)
+                abi.encode(_inputData, tokenAmount)
             );
     }
 
