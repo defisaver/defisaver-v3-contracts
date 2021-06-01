@@ -106,6 +106,7 @@ contract LiquityView is LiquityHelper {
         external
         view
         returns (
+            uint256 troveStatus,
             uint256 collAmount,
             uint256 debtAmount,
             uint256 collPrice,
@@ -113,14 +114,17 @@ contract LiquityView is LiquityHelper {
             bool recoveryMode
         )
     {
-        collAmount = TroveManager.getTroveColl(_troveOwner);
-        debtAmount = TroveManager.getTroveDebt(_troveOwner);
-        collPrice = PriceFeed.lastGoodPrice();
-        TCRatio = TroveManager.getTCR(collPrice);
-        recoveryMode = TroveManager.checkRecoveryMode(collPrice);
+        troveStatus = TroveManager.getTroveStatus(_troveOwner);
+        if (troveStatus == 1) {
+            collAmount = TroveManager.getTroveColl(_troveOwner);
+            debtAmount = TroveManager.getTroveDebt(_troveOwner);
+            collPrice = PriceFeed.lastGoodPrice();
+            TCRatio = TroveManager.getTCR(collPrice);
+            recoveryMode = TroveManager.checkRecoveryMode(collPrice);
+        }
     }
 
-    function getApproxHint(
+    function getInsertPosition(
         uint256 _collAmount,
         uint256 _debtAmount,
         uint256 _numTrials,
