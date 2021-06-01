@@ -756,6 +756,30 @@ const buyTokenIfNeeded = async (tokenAddr, senderAcc, proxy, standardAmount) => 
     }
 };
 
+const yearnSupply = async (token, amount, from, to, proxy) => {
+    const yearnSupplyAddress = await getAddrFromRegistry('YearnSupply');
+    const yearnSupplyAction = new dfs.actions.yearn.YearnSupplyAction(
+        token,
+        amount,
+        from,
+        to,
+    );
+    const functionData = yearnSupplyAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](yearnSupplyAddress, functionData, { gasLimit: 3000000 });
+};
+
+const yearnWithdraw = async (token, amount, from, to, proxy) => {
+    const yearnWithdrawAddress = await getAddrFromRegistry('YearnWithdraw');
+    const yearnWithdrawAction = new dfs.actions.yearn.YearnWithdrawAction(
+        token,
+        amount,
+        from,
+        to,
+    );
+    const functionData = yearnWithdrawAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](yearnWithdrawAddress, functionData, { gasLimit: 3000000 });
+};
+
 module.exports = {
     sell,
     buy,
@@ -796,6 +820,9 @@ module.exports = {
 
     dydxSupply,
     dydxWithdraw,
+
+    yearnSupply,
+    yearnWithdraw,
 
     buyTokenIfNeeded,
 };
