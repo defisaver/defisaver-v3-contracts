@@ -13,7 +13,7 @@ import "../../DS/DSMath.sol";
 contract YearnSupply is ActionBase, DSMath {
     using TokenUtils for address;
 
-    IYearnRegistry public constant yearnRegistry = 
+    IYearnRegistry public constant yearnRegistry =
         IYearnRegistry(0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804);
 
     /// @param token - address of token to supply
@@ -36,10 +36,15 @@ contract YearnSupply is ActionBase, DSMath {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
+        inputData.amount = _parseParamUint(
+            inputData.amount,
+            _paramMapping[0],
+            _subData,
+            _returnValues
+        );
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
-        
+
         uint256 yAmountReceived = _yearnSupply(inputData);
         return bytes32(yAmountReceived);
     }
@@ -61,32 +66,22 @@ contract YearnSupply is ActionBase, DSMath {
     function _yearnSupply(Params memory _inputData) internal returns (uint256 yTokenAmount) {
         IYVault vault = IYVault(yearnRegistry.latestVault(_inputData.token));
 
-        uint amountPulled = _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
+        uint256 amountPulled =
+            _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         _inputData.token.approveToken(address(vault), amountPulled);
         _inputData.amount = amountPulled;
 
         uint256 yBalanceBefore = address(vault).getBalance(address(this));
         vault.deposit(_inputData.amount);
-        uint yBalanceAfter = address(vault).getBalance(address(this));
-        yTokenAmount = sub(yBalanceAfter,yBalanceBefore);
-        
+        uint256 yBalanceAfter = address(vault).getBalance(address(this));
+        yTokenAmount = sub(yBalanceAfter, yBalanceBefore);
+
         address(vault).withdrawTokens(_inputData.to, yTokenAmount);
 
-        logger.Log(
-                address(this),
-                msg.sender,
-                "YearnSupply",
-                abi.encode(_inputData, yTokenAmount)
-            );
+        logger.Log(address(this), msg.sender, "YearnSupply", abi.encode(_inputData, yTokenAmount));
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
-        pure
-        returns (
-            Params memory inputData
-        )
-    {
+    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
         inputData = abi.decode(_callData[0], (Params));
     }
 }
