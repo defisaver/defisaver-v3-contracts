@@ -8,14 +8,14 @@ import "../../utils/TokenUtils.sol";
 import "../../interfaces/yearn/IYVault.sol";
 import "../../DS/DSMath.sol";
 
-/// @title Supplies tokens to Yearn vault
+/// @title Burns yTokens and receive underlying tokens in return
 /// @dev yTokens need to be approved for DSProxy to pull them (yToken address)
 contract YearnWithdraw is ActionBase, DSMath {
     using TokenUtils for address;
 
     /// @param yToken - address of yToken to withdraw (same as yVault address)
     /// @param yAmount - amount of yToken to withdraw
-    /// @param from - address from which to pull tokens from
+    /// @param from - address from which to pull yTokens from
     /// @param to - address where received underlying tokens will be sent to
     struct Params {
         address yToken;
