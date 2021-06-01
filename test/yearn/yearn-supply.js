@@ -39,7 +39,7 @@ describe('Yearn-Supply', function () {
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
-        yearnRegistry = await hre.ethers.getContractAt('YearnRegistry', YEARN_REGISTRY_ADDRESS);
+        yearnRegistry = await hre.ethers.getContractAt('IYearnRegistry', YEARN_REGISTRY_ADDRESS);
     });
 
     for (let i = 0; i < yearnPairs.length; i++) {

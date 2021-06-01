@@ -5,8 +5,7 @@ pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
-import "../../interfaces/yearn/yVault.sol";
-import "../../interfaces/yearn/YearnRegistry.sol";
+import "../../interfaces/yearn/IYVault.sol";
 import "../../DS/DSMath.sol";
 
 /// @title Supplies tokens to Yearn vault
@@ -37,7 +36,7 @@ contract YearnWithdraw is ActionBase, DSMath {
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        uint256 amountReceived = _yearnWithdraw(inputData);
+        uint256 amountReceived = _yearnWithdraw(inputData, false);
         return (bytes32(amountReceived));
     }
 
@@ -45,7 +44,7 @@ contract YearnWithdraw is ActionBase, DSMath {
     function executeActionDirect(bytes[] memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
-        _yearnDirectWithdraw(inputData);
+        _yearnWithdraw(inputData, true);
     }
 
     /// @inheritdoc ActionBase
@@ -55,10 +54,8 @@ contract YearnWithdraw is ActionBase, DSMath {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
-    /// @dev this function sends only the amount of tokens received from withdrawing to an account
-    /// @return tokenAmountReceived amount of tokens we received from withdrawing
-    function _yearnWithdraw(Params memory _inputData) internal returns (uint256 tokenAmountReceived){
-            YVault vault = YVault(_inputData.token);
+    function _yearnWithdraw(Params memory _inputData, bool isDirect) internal returns (uint256 tokenAmountReceived){
+            IYVault vault = IYVault(_inputData.token);
 
             uint amountPulled = _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
             _inputData.token.approveToken(address(vault), amountPulled);
@@ -66,47 +63,24 @@ contract YearnWithdraw is ActionBase, DSMath {
 
             address underlyingToken = vault.token();
 
-            uint256 underlyingTokenBalanceBefore = underlyingToken.getBalance(address(this));
-            vault.withdraw(_inputData.amount);
-            uint256 underlyingTokenBalanceAfter = underlyingToken.getBalance(address(this));
-            tokenAmountReceived = sub(underlyingTokenBalanceAfter, underlyingTokenBalanceBefore);
-
-            if (address(this) != _inputData.to){
-                underlyingToken.withdrawTokens(_inputData.to, tokenAmountReceived);
+            if (isDirect) {
+                vault.withdraw(_inputData.amount);
+                tokenAmountReceived = underlyingToken.getBalance(address(this));
+            } else {
+                uint256 underlyingTokenBalanceBefore = underlyingToken.getBalance(address(this));
+                vault.withdraw(_inputData.amount);
+                uint256 underlyingTokenBalanceAfter = underlyingToken.getBalance(address(this));
+                tokenAmountReceived = sub(underlyingTokenBalanceAfter, underlyingTokenBalanceBefore);
             }
 
+            underlyingToken.withdrawTokens(_inputData.to, tokenAmountReceived);
+            
             logger.Log(
                     address(this),
                     msg.sender,
                     "YearnWithdraw",
                     abi.encode(_inputData, tokenAmountReceived)
                 );
-        }
-
-    /// @dev this function sends whole proxy token balance to an address
-    function _yearnDirectWithdraw(Params memory _inputData) internal {
-        uint amountPulled = _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
-
-        YVault vault = YVault(_inputData.token);
-        address underlyingToken = vault.token();
-
-        _inputData.token.approveToken(address(vault), amountPulled);
-        _inputData.amount = amountPulled;
-
-        vault.withdraw(_inputData.amount);
-        
-        uint256 tokenAmount = underlyingToken.getBalance(address(this));
-
-        if (address(this) != _inputData.to){
-            underlyingToken.withdrawTokens(_inputData.to, tokenAmount);
-        }
-
-        logger.Log(
-                address(this),
-                msg.sender,
-                "YearnWithdraw",
-                abi.encode(_inputData, tokenAmount)
-            );
     }
 
     function parseInputs(bytes[] memory _callData)

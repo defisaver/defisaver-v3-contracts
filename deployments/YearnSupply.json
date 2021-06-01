@@ -239,7 +239,7 @@
 			"name": "yearnRegistry",
 			"outputs": [
 				{
-					"internalType": "contract YearnRegistry",
+					"internalType": "contract IYearnRegistry",
 					"name": "",
 					"type": "address"
 				}

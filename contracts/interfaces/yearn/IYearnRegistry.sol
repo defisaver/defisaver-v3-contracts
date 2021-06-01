@@ -2,6 +2,6 @@
 
 pragma solidity =0.7.6;
 
-abstract contract YearnRegistry {
+abstract contract IYearnRegistry {
     function latestVault(address) external virtual view returns (address);
 }

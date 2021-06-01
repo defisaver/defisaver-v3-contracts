@@ -5,16 +5,16 @@ pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
-import "../../interfaces/yearn/yVault.sol";
-import "../../interfaces/yearn/YearnRegistry.sol";
+import "../../interfaces/yearn/IYVault.sol";
+import "../../interfaces/yearn/IYearnRegistry.sol";
 import "../../DS/DSMath.sol";
 
 /// @title Supplies tokens to Yearn vault
 contract YearnSupply is ActionBase, DSMath {
     using TokenUtils for address;
 
-    YearnRegistry public constant yearnRegistry = 
-        YearnRegistry(0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804);
+    IYearnRegistry public constant yearnRegistry = 
+        IYearnRegistry(0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804);
 
     /// @param token - address of token to supply
     /// @param amount - amount of token to supply
@@ -40,7 +40,7 @@ contract YearnSupply is ActionBase, DSMath {
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
         
-        uint256 yAmountReceived = _yearnSupply(inputData);
+        uint256 yAmountReceived = _yearnSupply(inputData, false);
         return bytes32(yAmountReceived);
     }
 
@@ -48,7 +48,7 @@ contract YearnSupply is ActionBase, DSMath {
     function executeActionDirect(bytes[] memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
-        _yearnDirectSupply(inputData);
+        _yearnSupply(inputData, true);
     }
 
     /// @inheritdoc ActionBase
@@ -58,48 +58,24 @@ contract YearnSupply is ActionBase, DSMath {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @dev this function sends only the amount of yTokens received from supplying to an account
-    /// @return yTokenAmount amount of yTokens we received for supplying
-    function _yearnSupply(Params memory _inputData) internal returns (uint256 yTokenAmount) {
-        YVault vault = YVault(yearnRegistry.latestVault(_inputData.token));
+    function _yearnSupply(Params memory _inputData, bool isDirect) internal returns (uint256 yTokenAmount) {
+        IYVault vault = IYVault(yearnRegistry.latestVault(_inputData.token));
 
         uint amountPulled = _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         _inputData.token.approveToken(address(vault), amountPulled);
         _inputData.amount = amountPulled;
-        
-        uint256 yBalanceBefore = vault.balanceOf(address(this));
-        vault.deposit(_inputData.amount);
-        uint yBalanceAfter = vault.balanceOf(address(this));
-        yTokenAmount = sub(yBalanceAfter,yBalanceBefore);
 
-        if (address(this) != _inputData.to){
-            vault.transfer(_inputData.to, yTokenAmount);
+        if (isDirect) {
+            vault.deposit(_inputData.amount);
+            yTokenAmount = address(vault).getBalance(address(this));
+        } else {
+            uint256 yBalanceBefore = address(vault).getBalance(address(this));
+            vault.deposit(_inputData.amount);
+            uint yBalanceAfter = address(vault).getBalance(address(this));
+            yTokenAmount = sub(yBalanceAfter,yBalanceBefore);
         }
 
-        logger.Log(
-                address(this),
-                msg.sender,
-                "YearnSupply",
-                abi.encode(_inputData, yTokenAmount)
-            );
-    }
-
-    /// @dev this function sends whole proxy yToken balance to an address
-    function _yearnDirectSupply(Params memory _inputData) internal {
-        uint amountPulled = _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
-
-        YVault vault = YVault(yearnRegistry.latestVault(_inputData.token));
-
-        _inputData.token.approveToken(address(vault), amountPulled);
-        _inputData.amount = amountPulled;
-
-        vault.deposit(_inputData.amount);
-
-        uint256 yTokenAmount = vault.balanceOf(address(this));
-
-        if (address(this) != _inputData.to){
-            vault.transfer(_inputData.to, yTokenAmount);
-        }
+        address(vault).withdrawTokens(_inputData.to, yTokenAmount);
 
         logger.Log(
                 address(this),
