@@ -40,7 +40,7 @@ contract YearnSupply is ActionBase, DSMath {
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
         
-        uint256 yAmountReceived = _yearnSupply(inputData, false);
+        uint256 yAmountReceived = _yearnSupply(inputData);
         return bytes32(yAmountReceived);
     }
 
@@ -48,7 +48,7 @@ contract YearnSupply is ActionBase, DSMath {
     function executeActionDirect(bytes[] memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
-        _yearnSupply(inputData, true);
+        _yearnSupply(inputData);
     }
 
     /// @inheritdoc ActionBase
@@ -58,23 +58,18 @@ contract YearnSupply is ActionBase, DSMath {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _yearnSupply(Params memory _inputData, bool isDirect) internal returns (uint256 yTokenAmount) {
+    function _yearnSupply(Params memory _inputData) internal returns (uint256 yTokenAmount) {
         IYVault vault = IYVault(yearnRegistry.latestVault(_inputData.token));
 
         uint amountPulled = _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         _inputData.token.approveToken(address(vault), amountPulled);
         _inputData.amount = amountPulled;
 
-        if (isDirect) {
-            vault.deposit(_inputData.amount);
-            yTokenAmount = address(vault).getBalance(address(this));
-        } else {
-            uint256 yBalanceBefore = address(vault).getBalance(address(this));
-            vault.deposit(_inputData.amount);
-            uint yBalanceAfter = address(vault).getBalance(address(this));
-            yTokenAmount = sub(yBalanceAfter,yBalanceBefore);
-        }
-
+        uint256 yBalanceBefore = address(vault).getBalance(address(this));
+        vault.deposit(_inputData.amount);
+        uint yBalanceAfter = address(vault).getBalance(address(this));
+        yTokenAmount = sub(yBalanceAfter,yBalanceBefore);
+        
         address(vault).withdrawTokens(_inputData.to, yTokenAmount);
 
         logger.Log(

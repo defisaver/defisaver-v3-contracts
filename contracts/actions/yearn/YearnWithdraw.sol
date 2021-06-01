@@ -36,7 +36,7 @@ contract YearnWithdraw is ActionBase, DSMath {
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        uint256 amountReceived = _yearnWithdraw(inputData, false);
+        uint256 amountReceived = _yearnWithdraw(inputData);
         return (bytes32(amountReceived));
     }
 
@@ -44,7 +44,7 @@ contract YearnWithdraw is ActionBase, DSMath {
     function executeActionDirect(bytes[] memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
-        _yearnWithdraw(inputData, true);
+        _yearnWithdraw(inputData);
     }
 
     /// @inheritdoc ActionBase
@@ -54,7 +54,7 @@ contract YearnWithdraw is ActionBase, DSMath {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
-    function _yearnWithdraw(Params memory _inputData, bool isDirect) internal returns (uint256 tokenAmountReceived){
+    function _yearnWithdraw(Params memory _inputData) internal returns (uint256 tokenAmountReceived){
             IYVault vault = IYVault(_inputData.token);
 
             uint amountPulled = _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
@@ -63,16 +63,11 @@ contract YearnWithdraw is ActionBase, DSMath {
 
             address underlyingToken = vault.token();
 
-            if (isDirect) {
-                vault.withdraw(_inputData.amount);
-                tokenAmountReceived = underlyingToken.getBalance(address(this));
-            } else {
-                uint256 underlyingTokenBalanceBefore = underlyingToken.getBalance(address(this));
-                vault.withdraw(_inputData.amount);
-                uint256 underlyingTokenBalanceAfter = underlyingToken.getBalance(address(this));
-                tokenAmountReceived = sub(underlyingTokenBalanceAfter, underlyingTokenBalanceBefore);
-            }
-
+            uint256 underlyingTokenBalanceBefore = underlyingToken.getBalance(address(this));
+            vault.withdraw(_inputData.amount);
+            uint256 underlyingTokenBalanceAfter = underlyingToken.getBalance(address(this));
+            tokenAmountReceived = sub(underlyingTokenBalanceAfter, underlyingTokenBalanceBefore);
+            
             underlyingToken.withdrawTokens(_inputData.to, tokenAmountReceived);
             
             logger.Log(
