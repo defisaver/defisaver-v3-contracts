@@ -16,7 +16,8 @@ const {
 
 const BNtoFloat = (bn) => hre.ethers.utils.formatUnits(bn, 18);
 
-describe('Liquity-Borrow', () => {
+describe('Liquity-Borrow', function () {
+    this.timeout(100000);
     const collAmountOpen = hre.ethers.utils.parseUnits('10', 18);
     const LUSDAmountOpen = hre.ethers.utils.parseUnits('4000', 18);
     const LUSDAmountBorrow = hre.ethers.utils.parseUnits('3000', 18);

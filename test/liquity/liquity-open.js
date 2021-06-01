@@ -18,9 +18,10 @@ const {
 
 const BNtoFloat = (bn) => hre.ethers.utils.formatUnits(bn, 18);
 
-describe('Liquity-Open', () => {
+describe('Liquity-Open', function () {
+    this.timeout(100000);
     const WETHSellAmount = hre.ethers.utils.parseUnits('1', 18);
-    const WETHAmount = hre.ethers.utils.parseUnits('100', 18);
+    const WETHAmount = hre.ethers.utils.parseUnits('500', 18);
     const collAmountOpen = hre.ethers.utils.parseUnits('10', 18);
     const LUSDAmountOpen = hre.ethers.utils.parseUnits('4000', 18);
     const maxFeePercentage = hre.ethers.utils.parseUnits('5', 16);
