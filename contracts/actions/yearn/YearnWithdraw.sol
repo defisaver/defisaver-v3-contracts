@@ -9,6 +9,7 @@ import "../../interfaces/yearn/IYVault.sol";
 import "../../DS/DSMath.sol";
 
 /// @title Supplies tokens to Yearn vault
+/// @dev yTokens need to be approved for DSProxy to pull them (yToken address)
 contract YearnWithdraw is ActionBase, DSMath {
     using TokenUtils for address;
 
