@@ -12,13 +12,13 @@ import "../../DS/DSMath.sol";
 contract YearnWithdraw is ActionBase, DSMath {
     using TokenUtils for address;
 
-    /// @param token - address of yToken to withdraw (same as yVault address)
-    /// @param amount - amount of yToken to withdraw
+    /// @param yToken - address of yToken to withdraw (same as yVault address)
+    /// @param yAmount - amount of yToken to withdraw
     /// @param from - address from which to pull tokens from
     /// @param to - address where received underlying tokens will be sent to
     struct Params {
-        address token;
-        uint256 amount;
+        address yToken;
+        uint256 yAmount;
         address from;
         address to;
     }
@@ -32,7 +32,7 @@ contract YearnWithdraw is ActionBase, DSMath {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
+        inputData.yAmount = _parseParamUint(inputData.yAmount, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
@@ -55,16 +55,16 @@ contract YearnWithdraw is ActionBase, DSMath {
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
     function _yearnWithdraw(Params memory _inputData) internal returns (uint256 tokenAmountReceived){
-            IYVault vault = IYVault(_inputData.token);
+            IYVault vault = IYVault(_inputData.yToken);
 
-            uint amountPulled = _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
-            _inputData.token.approveToken(address(vault), amountPulled);
-            _inputData.amount = amountPulled;
+            uint amountPulled = _inputData.yToken.pullTokensIfNeeded(_inputData.from, _inputData.yAmount);
+            _inputData.yToken.approveToken(address(vault), amountPulled);
+            _inputData.yAmount = amountPulled;
 
             address underlyingToken = vault.token();
 
             uint256 underlyingTokenBalanceBefore = underlyingToken.getBalance(address(this));
-            vault.withdraw(_inputData.amount);
+            vault.withdraw(_inputData.yAmount);
             uint256 underlyingTokenBalanceAfter = underlyingToken.getBalance(address(this));
             tokenAmountReceived = sub(underlyingTokenBalanceAfter, underlyingTokenBalanceBefore);
             
