@@ -233,19 +233,6 @@
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "yearnController",
-			"outputs": [
-				{
-					"internalType": "contract YearnController",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
 		}
 	],
 	"networks": {

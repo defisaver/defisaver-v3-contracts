@@ -6,15 +6,15 @@ pragma experimental ABIEncoderV2;
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/yearn/yVault.sol";
-import "../../interfaces/yearn/YearnController.sol";
+import "../../interfaces/yearn/YearnRegistry.sol";
 import "../../DS/DSMath.sol";
 
 /// @title Supplies tokens to Yearn vault
 contract YearnSupply is ActionBase, DSMath {
     using TokenUtils for address;
 
-    YearnController public constant yearnController = 
-        YearnController(0x9E65Ad11b299CA0Abefc2799dDB6314Ef2d91080);
+    YearnRegistry public constant yearnRegistry = 
+        YearnRegistry(0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804);
 
     /// @param token - address of token to supply
     /// @param amount - amount of token to supply
@@ -61,7 +61,7 @@ contract YearnSupply is ActionBase, DSMath {
     /// @dev this function sends only the amount of yTokens received from supplying to an account
     /// @return yTokenAmount amount of yTokens we received for supplying
     function _yearnSupply(Params memory _inputData) internal returns (uint256 yTokenAmount) {
-        YVault vault = YVault(yearnController.vaults(_inputData.token));
+        YVault vault = YVault(yearnRegistry.latestVault(_inputData.token));
 
         uint amountPulled = _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         _inputData.token.approveToken(address(vault), amountPulled);
@@ -88,7 +88,7 @@ contract YearnSupply is ActionBase, DSMath {
     function _yearnDirectSupply(Params memory _inputData) internal {
         uint amountPulled = _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
 
-        YVault vault = YVault(yearnController.vaults(_inputData.token));
+        YVault vault = YVault(yearnRegistry.latestVault(_inputData.token));
 
         _inputData.token.approveToken(address(vault), amountPulled);
         _inputData.amount = amountPulled;

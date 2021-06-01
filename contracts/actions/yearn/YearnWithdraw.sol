@@ -6,15 +6,12 @@ pragma experimental ABIEncoderV2;
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/yearn/yVault.sol";
-import "../../interfaces/yearn/YearnController.sol";
+import "../../interfaces/yearn/YearnRegistry.sol";
 import "../../DS/DSMath.sol";
 
 /// @title Supplies tokens to Yearn vault
 contract YearnWithdraw is ActionBase, DSMath {
     using TokenUtils for address;
-
-    YearnController public constant yearnController = 
-        YearnController(0x9E65Ad11b299CA0Abefc2799dDB6314Ef2d91080);
 
     /// @param token - address of yToken to withdraw (same as yVault address)
     /// @param amount - amount of yToken to withdraw

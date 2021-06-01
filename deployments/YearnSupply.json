@@ -236,10 +236,10 @@
 		},
 		{
 			"inputs": [],
-			"name": "yearnController",
+			"name": "yearnRegistry",
 			"outputs": [
 				{
-					"internalType": "contract YearnController",
+					"internalType": "contract YearnRegistry",
 					"name": "",
 					"type": "address"
 				}
