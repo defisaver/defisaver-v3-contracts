@@ -309,6 +309,10 @@ const timeTravel = async (timeIncrease) => {
     });
 };
 
+const BN2Float = (bn, decimals) => hre.ethers.utils.formatUnits(bn, decimals);
+
+const Float2BN = (string, decimals) => hre.ethers.utils.parseUnits(string, decimals);
+
 module.exports = {
     getAddrFromRegistry,
     getProxy,
@@ -351,4 +355,6 @@ module.exports = {
     LOGGER_ADDR,
     UNIV3ROUTER_ADDR,
     UNIV3POSITIONMANAGER_ADDR,
+    BN2Float,
+    Float2BN,
 };

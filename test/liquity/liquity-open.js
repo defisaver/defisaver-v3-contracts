@@ -8,6 +8,9 @@ const {
     depositToWeth,
     send,
     WETH_ADDRESS,
+    fetchAmountinUSDPrice,
+    BN2Float,
+    Float2BN,
 } = require('../utils');
 
 const {
@@ -16,19 +19,16 @@ const {
     liquityClose,
 } = require('../actions.js');
 
-const BNtoFloat = (bn) => hre.ethers.utils.formatUnits(bn, 18);
-
 describe('Liquity-Open', function () {
-    this.timeout(100000);
-    const WETHSellAmount = hre.ethers.utils.parseUnits('1', 18);
-    const WETHAmount = hre.ethers.utils.parseUnits('500', 18);
-    const collAmountOpen = hre.ethers.utils.parseUnits('10', 18);
-    const LUSDAmountOpen = hre.ethers.utils.parseUnits('4000', 18);
-    const maxFeePercentage = hre.ethers.utils.parseUnits('5', 16);
+    this.timeout(1000000);
+    const WETHSellAmount = Float2BN(fetchAmountinUSDPrice('WETH', 500), 18);
+    const WETHAmount = Float2BN(fetchAmountinUSDPrice('WETH', 20000), 18);
+    const collAmountOpen = Float2BN(fetchAmountinUSDPrice('WETH', 12000), 18);
+    const LUSDAmountOpen = Float2BN(fetchAmountinUSDPrice('LUSD', 4000), 18);
+    const maxFeePercentage = Float2BN('5', 16);
 
     let senderAcc; let proxy; let proxyAddr;
-    let liquityView; let ITroveManager; let IPriceFeed;
-    let LUSDAddr; let uniWrapper;
+    let liquityView; let LUSDAddr; let uniWrapper;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -36,8 +36,6 @@ describe('Liquity-Open', function () {
         proxyAddr = proxy.address;
 
         liquityView = await redeploy('LiquityView');
-        ITroveManager = await hre.ethers.getContractAt('ITroveManager', liquityView.TroveManagerAddr());
-        IPriceFeed = await hre.ethers.getContractAt('IPriceFeed', liquityView.PriceFeed());
         LUSDAddr = await liquityView.LUSDTokenAddr();
 
         await depositToWeth(WETHAmount);
@@ -52,32 +50,29 @@ describe('Liquity-Open', function () {
     });
 
     afterEach(async () => {
-        const troveStatus = await ITroveManager['getTroveStatus(address)'](proxyAddr);
+        // eslint-disable-next-line object-curly-newline
+        const { troveStatus, collAmount, debtAmount, collPrice } = await liquityView['getTroveInfo(address)'](proxyAddr);
         console.log(`\tTrove status: ${troveStatus}`);
         // eslint-disable-next-line eqeqeq
         if (troveStatus != 1) {
             console.log('\tTrove not active');
             return;
         }
+        const CR = collAmount.mul(collPrice).div(debtAmount);
 
-        const ethPrice = await IPriceFeed['lastGoodPrice()']();
-        const coll = await ITroveManager['getTroveColl(address)'](proxyAddr);
-        const debt = await ITroveManager['getTroveDebt(address)'](proxyAddr);
-        const CR = coll.mul(ethPrice).div(debt);
-
-        console.log(`\tTrove coll:\t${BNtoFloat(coll)} ETH`);
-        console.log(`\tTrove debt:\t${BNtoFloat(debt)} LUSD`);
-        console.log(`\tTrove CR:\t${BNtoFloat(CR.mul(100))}%`);
-        console.log(`\tETH price:\t${BNtoFloat(ethPrice)}`);
+        console.log(`\tTrove coll:\t${BN2Float(collAmount)} ETH`);
+        console.log(`\tTrove debt:\t${BN2Float(debtAmount)} LUSD`);
+        console.log(`\tTrove CR:\t${BN2Float(CR.mul(100))}%`);
+        console.log(`\tETH price:\t${BN2Float(collPrice)}`);
     });
 
-    it(`... should open Trove with ${BNtoFloat(collAmountOpen)} ETH collateral and ${BNtoFloat(LUSDAmountOpen)} LUSD debt`, async () => {
+    it(`... should open Trove with ${BN2Float(collAmountOpen)} WETH collateral and ${BN2Float(LUSDAmountOpen)} LUSD debt`, async () => {
         // eslint-disable-next-line max-len
         await liquityOpen(proxy, maxFeePercentage, collAmountOpen, LUSDAmountOpen, proxyAddr, proxyAddr);
 
-        const coll = await ITroveManager['getTroveColl(address)'](proxyAddr);
+        const { collAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
 
-        expect(coll).to.equal(collAmountOpen);
+        expect(collAmount).to.equal(collAmountOpen);
         expect(await balanceOf(LUSDAddr, proxyAddr)).to.equal(LUSDAmountOpen);
     });
 
@@ -93,13 +88,14 @@ describe('Liquity-Open', function () {
         );
 
         await liquityClose(proxy, proxyAddr, proxyAddr);
+        expect(await balanceOf(WETH_ADDRESS, proxyAddr)).to.equal(WETHAmount);
     });
-    it(`... should open Trove with whole WETH balance as collateral and ${BNtoFloat(LUSDAmountOpen)} LUSD debt`, async () => {
+    it(`... should open Trove with whole WETH balance as collateral and ${BN2Float(LUSDAmountOpen)} LUSD debt`, async () => {
         // eslint-disable-next-line max-len
         await liquityOpen(proxy, maxFeePercentage, hre.ethers.constants.MaxUint256, LUSDAmountOpen, proxyAddr, proxyAddr);
 
-        const coll = await ITroveManager['getTroveColl(address)'](proxyAddr);
+        const { collAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
 
-        expect(coll).to.equal(WETHAmount);
+        expect(collAmount).to.equal(WETHAmount);
     });
 });
