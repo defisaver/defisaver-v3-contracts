@@ -115,13 +115,11 @@ contract LiquityView is LiquityHelper {
         )
     {
         troveStatus = TroveManager.getTroveStatus(_troveOwner);
-        if (troveStatus == 1) {
-            collAmount = TroveManager.getTroveColl(_troveOwner);
-            debtAmount = TroveManager.getTroveDebt(_troveOwner);
-            collPrice = PriceFeed.lastGoodPrice();
-            TCRatio = TroveManager.getTCR(collPrice);
-            recoveryMode = TroveManager.checkRecoveryMode(collPrice);
-        }
+        collAmount = TroveManager.getTroveColl(_troveOwner);
+        debtAmount = TroveManager.getTroveDebt(_troveOwner);
+        collPrice = PriceFeed.lastGoodPrice();
+        TCRatio = TroveManager.getTCR(collPrice);
+        recoveryMode = TroveManager.checkRecoveryMode(collPrice);
     }
 
     function getInsertPosition(
