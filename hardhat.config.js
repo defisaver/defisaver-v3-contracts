@@ -17,6 +17,9 @@ module.exports = {
         local: {
             url: 'http://127.0.0.1:8545',
         },
+        fork: {
+            url: `https://rpc.tenderly.co/fork/${process.env.FORK_ID}`,
+        },
         hardhat: {
             forking: {
                 url: process.env.ETHEREUM_NODE,
