@@ -9,6 +9,8 @@ import "../actions/ActionBase.sol";
 import "../core/DFSRegistry.sol";
 import "./strategy/Subscriptions.sol";
 
+import "hardhat/console.sol";
+
 /// @title Handles FL taking and executes actions
 contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
@@ -45,7 +47,7 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
                 paramMapping: template.paramMapping
             });
 
-        _executeActions(currTask, false);
+        _executeActions(currTask, true);
     }
 
     /// @notice This is the callback function that FL actions call
@@ -67,19 +69,6 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
     /// @param _currTask to be executed
     /// @param _isStrategy If actions are executed as part of a strategy
     function _executeActions(Task memory _currTask, bool _isStrategy) internal {
-        if (_isStrategy) {
-            uint256 startGas = gasleft() + 21000;
-            uint256 lastActionIndex = _currTask.actionIds.length - 1;
-
-            address lastActionAddr = registry.getAddr(_currTask.actionIds[lastActionIndex]);
-
-            bytes memory startGasBytes = abi.encode(startGas);
-            _currTask.callData[lastActionIndex][0] = startGasBytes;
-
-            // If it's a strategy must have a way to take fee
-            require(isFeeAction(lastActionAddr), "Last action must take fee");
-        }
-
         address firstActionAddr = registry.getAddr(_currTask.actionIds[0]);
 
         bytes32[] memory returnValues = new bytes32[](_currTask.actionIds.length);
@@ -88,6 +77,7 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
             _parseFLAndExecute(_currTask, firstActionAddr, returnValues);
         } else {
             for (uint256 i = 0; i < _currTask.actionIds.length; ++i) {
+                console.log(i);
                 returnValues[i] = _executeAction(_currTask, i, returnValues);
             }
         }
@@ -105,8 +95,12 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
         uint256 _index,
         bytes32[] memory _returnValues
     ) internal returns (bytes32 response) {
+        address actionAddr = registry.getAddr(_currTask.actionIds[_index]);
+
+        console.log("actionAddr: ", actionAddr);
+
         response = IDSProxy(address(this)).execute(
-            registry.getAddr(_currTask.actionIds[_index]),
+            actionAddr,
             abi.encodeWithSignature(
                 "executeAction(bytes[],bytes[],uint8[],bytes32[])",
                 _currTask.callData[_index],
@@ -149,11 +143,5 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
     /// @param _actionAddr Address of the action
     function isFL(address _actionAddr) internal pure returns (bool) {
         return ActionBase(_actionAddr).actionType() == uint8(ActionBase.ActionType.FL_ACTION);
-    }
-
-    /// @notice Checks if the specified address is of Fee type action
-    /// @param _actionAddr Address of the action
-    function isFeeAction(address _actionAddr) internal pure returns (bool) {
-        return ActionBase(_actionAddr).actionType() == uint8(ActionBase.ActionType.FEE_ACTION);
     }
 }

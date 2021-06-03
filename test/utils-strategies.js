@@ -73,9 +73,9 @@ const addBotCaller = async (botAddr) => {
     const botAuthAddr = await getAddrFromRegistry('BotAuth');
 
     const botAuthInstance = await hre.ethers.getContractFactory('BotAuth', signer);
-    const botAuth = await botAuthInstance.attach(botAuthAddr);
+    let botAuth = await botAuthInstance.attach(botAuthAddr);
 
-    botAuth.connect(signer);
+    botAuth = botAuth.connect(signer);
 
     await botAuth.addCaller(botAddr);
 

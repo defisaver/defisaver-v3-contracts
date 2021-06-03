@@ -12,6 +12,9 @@ import "./BotAuth.sol";
 import "../DFSRegistry.sol";
 import "./ProxyAuth.sol";
 
+import "hardhat/console.sol";
+
+
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutor is StrategyData, AdminAuth {
 
@@ -77,6 +80,8 @@ contract StrategyExecutor is StrategyData, AdminAuth {
 
         for (uint256 i = 0; i < triggerIds.length; ++i) {
             address triggerAddr = registry.getAddr(triggerIds[i]);
+
+            console.log("triggerAddr: ", triggerAddr);
 
             bool isTriggered = ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _strategy.triggerData[i]);
             require(isTriggered, ERR_TRIGGER_NOT_ACTIVE);

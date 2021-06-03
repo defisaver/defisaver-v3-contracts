@@ -31,13 +31,7 @@ contract ProxyAuth is AdminAuth {
         address _contractAddr,
         bytes memory _data
     ) public payable onlyExecutor {
-
         IDSProxy(_proxyAddr).execute{value: msg.value}(_contractAddr, _data);
-
-        // return if anything left
-        if (address(this).balance > 0) {
-            msg.sender.transfer(address(this).balance);
-        }
     }
 
 }

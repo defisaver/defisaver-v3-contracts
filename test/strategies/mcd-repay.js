@@ -14,9 +14,11 @@ const {
     getProxy,
     redeploy,
     formatExchangeObj,
+    fetchAmountinUSDPrice,
     UNISWAP_WRAPPER,
     WETH_ADDRESS,
     DAI_ADDR,
+    MAX_UINT,
 } = require('../utils');
 
 const {
@@ -50,8 +52,10 @@ describe('Mcd-Repay', function () {
         await redeploy('DFSSell');
         await redeploy('McdPayback');
         await redeploy('Subscriptions');
+        await redeploy('SubInputs');
         await redeploy('SubscriptionProxy');
         await redeploy('TaskExecutor');
+        await redeploy('GasFeeTaker');
         strategyExecutor = await redeploy('StrategyExecutor');
         await redeploy('BotAuth');
         mcdView = await redeploy('McdView');
@@ -69,8 +73,8 @@ describe('Mcd-Repay', function () {
     it('... should make a new strategy', async () => {
         const name = 'McdRepayTemplate';
         const triggerIds = ['McdRatioTrigger'];
-        const actionIds = ['McdWithdraw', 'DFSSell', 'McdPayback'];
-        const paramMapping = [[0, 0, 0, 0], [0, 0, 1, 0, 0], [0, 2, 0]];
+        const actionIds = ['McdWithdraw', 'DFSSell', 'GasFeeTaker', 'SubInputs', 'McdPayback'];
+        const paramMapping = [[0, 0, 0, 0], [0, 0, 1, 0, 0], [0, 0, 0], [2, 3], [0, 4, 0]];
 
         const tokenData = getAssetInfo('WETH');
 
@@ -81,8 +85,8 @@ describe('Mcd-Repay', function () {
             proxy,
             ethJoin,
             tokenData,
-            '5',
-            '8000',
+            fetchAmountinUSDPrice('WETH', '16000'),
+            fetchAmountinUSDPrice('DAI', '8000'),
         );
 
         const rationUnder = hre.ethers.utils.parseUnits('2.5', '18');
@@ -90,7 +94,8 @@ describe('Mcd-Repay', function () {
         const templateId = await getLatestTemplateId();
         const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_UNDER);
 
-        strategyId = await subStrategy(proxy, templateId, true, [[], [], []], [triggerData]);
+        strategyId = await subStrategy(proxy, templateId, true, [[], [], [], [], []],
+            [triggerData]);
     });
 
     it('... should trigger a maker repay strategy', async () => {
@@ -99,7 +104,7 @@ describe('Mcd-Repay', function () {
         const triggerCallData = [];
         const actionsCallData = [];
 
-        const repayAmount = hre.ethers.utils.parseUnits('0.5', '18');
+        const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '500'), '18');
 
         const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
             vaultId,
@@ -120,15 +125,28 @@ describe('Mcd-Repay', function () {
             proxy.address,
         );
 
+        const repayGasCost = 1200000; // 1.2 mil gas
+
+        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+            repayGasCost, DAI_ADDR, true,
+        );
+
+        const subAction = new dfs.actions.basic.SubInputsAction(
+            '$2',
+            '$3',
+        );
+
         const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
             vaultId,
-            '$2',
+            '$4',
             proxy.address,
             MCD_MANAGER_ADDR,
         );
 
         actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
         actionsCallData.push(sellAction.encodeForRecipe()[0]);
+        actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+        actionsCallData.push(subAction.encodeForRecipe()[0]);
         actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
 
         triggerCallData.push([abiCoder.encode(['uint256'], ['0'])]);
@@ -137,7 +155,7 @@ describe('Mcd-Repay', function () {
 
         const strategyExecutorByBot = strategyExecutor.connect(botAcc);
         await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
-            gasLimit: 5000000,
+            gasLimit: 8000000,
         });
 
         const ratioAfter = await getRatio(mcdView, vaultId);
