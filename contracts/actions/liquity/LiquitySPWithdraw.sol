@@ -5,12 +5,11 @@ pragma experimental ABIEncoderV2;
 
 import "./helpers/LiquityHelper.sol";
 import "../../utils/TokenUtils.sol";
-import "../../utils/SafeMath.sol";
 import "../ActionBase.sol";
 
 contract LiquitySPWithdraw is ActionBase, LiquityHelper {
     using TokenUtils for address;
-    
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
