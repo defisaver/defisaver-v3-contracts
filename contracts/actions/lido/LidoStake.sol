@@ -14,6 +14,12 @@ contract LidoStake is ActionBase, DSMath {
 
     address public constant lidoStakingContractAddress = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
 
+    /// @param amount - amount of ETH to supply to Lido
+    /// @param to - address where received stETH will be sent to
+    struct Params {
+        uint256 ethAmount;
+        address to;
+    }
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
@@ -21,19 +27,19 @@ contract LidoStake is ActionBase, DSMath {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (uint256 ethAmount, address to) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        ethAmount = _parseParamUint(ethAmount, _paramMapping[0], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[1], _subData, _returnValues);
+        inputData.ethAmount = _parseParamUint(inputData.ethAmount, _paramMapping[0], _subData, _returnValues);
+        inputData.to = _parseParamAddr(inputData.to, _paramMapping[1], _subData, _returnValues);
 
-        uint256 amount = _lidoStake(ethAmount, to);
-        return bytes32(amount);
+        uint256 stEthReceivedAmount = _lidoStake(inputData);
+        return bytes32(stEthReceivedAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable override {
-        (uint256 ethAmount, address to) = parseInputs(_callData);
-        _lidoStake(ethAmount, to);
+        Params memory inputData = parseInputs(_callData);
+        _lidoStake(inputData);
     }
 
     /// @inheritdoc ActionBase
@@ -44,30 +50,29 @@ contract LidoStake is ActionBase, DSMath {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @dev takes eth sent with the calling transaction, stakes it to lido, and sends received stEth to target address
-    function _lidoStake(uint256 _ethAmount, address _to) internal returns (uint256 amount) {
+    function _lidoStake(Params memory _inputData) internal returns (uint256 stEthReceivedAmount) {
 
         uint256 stEthBalanceBefore = lidoStakingContractAddress.getBalance(address(this));
-        (bool sent, ) = payable(lidoStakingContractAddress).call{value: _ethAmount}("");
+        (bool sent, ) = payable(lidoStakingContractAddress).call{value: _inputData.ethAmount}("");
         require(sent, "Failed to send Ether");
         uint256 stEthBalanceAfter = lidoStakingContractAddress.getBalance(address(this));
 
-        amount = sub(stEthBalanceAfter, stEthBalanceBefore);
+        stEthReceivedAmount = sub(stEthBalanceAfter, stEthBalanceBefore);
 
         console.log(msg.value);
         console.log(lidoStakingContractAddress.getBalance(address(this)));
-        console.log(amount);
-        
-        lidoStakingContractAddress.withdrawTokens(_to, amount);
+        console.log(stEthReceivedAmount);
 
-        logger.Log(address(this), msg.sender, "LidoStake", abi.encode(_to, amount));
+        lidoStakingContractAddress.withdrawTokens(_inputData.to, stEthReceivedAmount);
+
+        logger.Log(address(this), msg.sender, "LidoStake", abi.encode(_inputData.to, stEthReceivedAmount));
     }
 
     function parseInputs(bytes[] memory _callData)
         internal
         pure
-        returns (uint256 ethAmount, address to)
+        returns (Params memory inputData)
     {
-        ethAmount = abi.decode(_callData[0], (uint256));
-        to = abi.decode(_callData[1], (address));
+        inputData = abi.decode(_callData[0], (Params));
     }
 }

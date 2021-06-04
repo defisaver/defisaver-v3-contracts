@@ -41,8 +41,8 @@ contract LidoWETHStake is ActionBase, DSMath {
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        uint256 amount = _lidoStake(inputData);
-        return bytes32(amount);
+        uint256 stEthReceivedAmount = _lidoStake(inputData);
+        return bytes32(stEthReceivedAmount);
     }
 
     /// @inheritdoc ActionBase
@@ -60,7 +60,7 @@ contract LidoWETHStake is ActionBase, DSMath {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice pulls weth, transforms it into eth, stakes it with lido, receives stEth and sends it to target address
-    function _lidoStake(Params memory _inputData) internal returns (uint256 amount) {
+    function _lidoStake(Params memory _inputData) internal returns (uint256 stEthReceivedAmount) {
         uint256 amountPulled =
             TokenUtils.WETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         _inputData.amount = amountPulled;
@@ -71,15 +71,15 @@ contract LidoWETHStake is ActionBase, DSMath {
         require(sent, "Failed to send Ether");
         uint256 stEthBalanceAfter = lidoStakingContractAddress.getBalance(address(this));
 
-        amount = sub(stEthBalanceAfter, stEthBalanceBefore);
+        stEthReceivedAmount = sub(stEthBalanceAfter, stEthBalanceBefore);
 
         console.log(_inputData.amount);
         console.log(lidoStakingContractAddress.getBalance(address(this)));
-        console.log(amount);
-        
-        lidoStakingContractAddress.withdrawTokens(_inputData.to, amount);
+        console.log(stEthReceivedAmount);
 
-        logger.Log(address(this), msg.sender, "LidoWETHStake", abi.encode(_inputData, amount));
+        lidoStakingContractAddress.withdrawTokens(_inputData.to, stEthReceivedAmount);
+
+        logger.Log(address(this), msg.sender, "LidoWETHStake", abi.encode(_inputData, stEthReceivedAmount));
     }
 
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
