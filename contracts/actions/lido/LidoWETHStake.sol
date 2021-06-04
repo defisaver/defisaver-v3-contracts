@@ -15,9 +15,9 @@ contract LidoWETHStake is ActionBase, DSMath {
 
     ILido public constant lidoStakingContract = ILido(0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84);
 
-    /// @param amount - amount of token to supply
-    /// @param from - address from which to pull tokens from
-    /// @param to - address where received yTokens will be sent to
+    /// @param amount - amount of WETH to pull
+    /// @param from - address from which to pull WETH from
+    /// @param to - address where received stETH will be sent to
     struct Params {
         uint256 amount;
         address from;
