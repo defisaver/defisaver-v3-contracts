@@ -92,6 +92,7 @@ const coinGeckoHelper = {
     BAL: 'balancer',
     GUSD: 'gemini-dollar',
     YFI: 'yearn-finance',
+    LUSD: 'liquity-usd',
 };
 
 const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {
@@ -165,7 +166,9 @@ const getProxy = async (acc) => {
 };
 
 const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
-    await impersonateAccount(OWNER_ACC);
+    if (regAddr === REGISTRY_ADDR) {
+        await impersonateAccount(OWNER_ACC);
+    }
 
     const signer = await hre.ethers.provider.getSigner(OWNER_ACC);
 
@@ -178,14 +181,15 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
     const id = hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(name));
 
     if (!(await registry.isRegistered(id))) {
-        await registry.addNewContract(id, c.address, 0);
+        await registry.addNewContract(id, c.address, 0, { gasLimit: 2000000 });
     } else {
         await registry.startContractChange(id, c.address);
         await registry.approveContractChange(id);
     }
 
-    await stopImpersonatingAccount(OWNER_ACC);
-
+    if (regAddr === REGISTRY_ADDR) {
+        await stopImpersonatingAccount(OWNER_ACC);
+    }
     return c;
 };
 
@@ -309,6 +313,10 @@ const timeTravel = async (timeIncrease) => {
     });
 };
 
+const BN2Float = (bn, decimals) => hre.ethers.utils.formatUnits(bn, decimals);
+
+const Float2BN = (string, decimals) => hre.ethers.utils.parseUnits(string, decimals);
+
 module.exports = {
     getAddrFromRegistry,
     getProxy,
@@ -351,5 +359,7 @@ module.exports = {
     LOGGER_ADDR,
     UNIV3ROUTER_ADDR,
     UNIV3POSITIONMANAGER_ADDR,
+    BN2Float,
+    Float2BN,
     YEARN_REGISTRY_ADDRESS,
 };

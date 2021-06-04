@@ -10,7 +10,7 @@ const req = CoinGeckoClient.simple.price({
         + 'republic-protocol,maker,enjincoin,dai,wrapped-bitcoin,weth,'
         + 'renbtc,0x,kyber-network,decentraland,paxos-standard,compound-governance-token,'
         + 'loopring,chainlink,tether,true-usd,balancer,'
-        + 'gemini-dollar,yearn-finance',
+        + 'gemini-dollar,yearn-finance,liquity-usd',
     vs_currencies: 'usd',
 });
 
