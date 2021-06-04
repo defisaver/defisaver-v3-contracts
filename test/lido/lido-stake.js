@@ -5,11 +5,14 @@ const {
     getProxy,
     redeploy,
     balanceOf,
+    WETH_ADDRESS,
+    approve,
+    depositToWeth,
 } = require('../utils');
 
 const { lidoStake } = require('../actions.js');
 
-describe('Lido - Stake', function () {
+describe('Lido WETH staking', function () {
     this.timeout(80000);
 
     let senderAcc; let
@@ -22,9 +25,11 @@ describe('Lido - Stake', function () {
         proxy = await getProxy(senderAcc.address);
     });
 
-    it('... stake 10 ETH to LIDO', async () => {
+    it('... stake 10 WETH to LIDO', async () => {
         const amount = hre.ethers.utils.parseUnits('10', 18);
-        await lidoStake(amount, senderAcc.address, proxy);
+        await depositToWeth(amount);
+        await approve(WETH_ADDRESS, proxy.address);
+        await lidoStake(amount, senderAcc.address, senderAcc.address, proxy);
         console.log(amount.toString());
         console.log((await balanceOf('0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84', senderAcc.address)).toString());
         console.log((await balanceOf('0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84', proxy.address)).toString());
