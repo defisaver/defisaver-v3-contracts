@@ -793,7 +793,7 @@ const lidoWETHStake = async (amount, from, to, proxy) => {
 
 const lidoStake = async (amount, to, proxy) => {
     const lidoStakeAddress = await getAddrFromRegistry('LidoStake');
-    const lidoStakeAction = new dfs.actions.lido.LidoStakeAction(to);
+    const lidoStakeAction = new dfs.actions.lido.LidoStakeAction(amount, to);
     const functionData = lidoStakeAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](lidoStakeAddress, functionData, { gasLimit: 3000000, value: amount });
 };

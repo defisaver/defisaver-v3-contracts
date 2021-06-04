@@ -187,10 +187,10 @@
 		},
 		{
 			"inputs": [],
-			"name": "lidoStakingContract",
+			"name": "lidoStakingContractAddress",
 			"outputs": [
 				{
-					"internalType": "contract ILido",
+					"internalType": "address",
 					"name": "",
 					"type": "address"
 				}

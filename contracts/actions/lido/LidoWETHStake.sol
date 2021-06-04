@@ -6,14 +6,13 @@ pragma experimental ABIEncoderV2;
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../DS/DSMath.sol";
-import "../../interfaces/lido/ILido.sol";
 import "hardhat/console.sol";
 
 /// @title Supplies ETH (action recevies WETH) to Lido for ETH2 Staking. Receives stETH in return
 contract LidoWETHStake is ActionBase, DSMath {
     using TokenUtils for address;
 
-    ILido public constant lidoStakingContract = ILido(0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84);
+    address public constant lidoStakingContractAddress = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
 
     /// @param amount - amount of WETH to pull
     /// @param from - address from which to pull WETH from
@@ -23,6 +22,7 @@ contract LidoWETHStake is ActionBase, DSMath {
         address from;
         address to;
     }
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
@@ -59,22 +59,25 @@ contract LidoWETHStake is ActionBase, DSMath {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @notice pulls weth, transforms it into eth, stakes it with lido, receives stEth and sends it to target address
     function _lidoStake(Params memory _inputData) internal returns (uint256 amount) {
         uint256 amountPulled =
             TokenUtils.WETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         _inputData.amount = amountPulled;
         TokenUtils.withdrawWeth(_inputData.amount);
 
-        uint256 stEthBalanceBefore = address(lidoStakingContract).getBalance(address(this));
-        (bool sent, ) = payable(address(lidoStakingContract)).call{value: _inputData.amount}("");
+        uint256 stEthBalanceBefore = lidoStakingContractAddress.getBalance(address(this));
+        (bool sent, ) = payable(lidoStakingContractAddress).call{value: _inputData.amount}("");
         require(sent, "Failed to send Ether");
-        uint256 stEthBalanceAfter = address(lidoStakingContract).getBalance(address(this));
+        uint256 stEthBalanceAfter = lidoStakingContractAddress.getBalance(address(this));
 
         amount = sub(stEthBalanceAfter, stEthBalanceBefore);
+
         console.log(_inputData.amount);
-        console.log(address(lidoStakingContract).getBalance(address(this)));
+        console.log(lidoStakingContractAddress.getBalance(address(this)));
         console.log(amount);
-        address(lidoStakingContract).withdrawTokens(_inputData.to, amount);
+        
+        lidoStakingContractAddress.withdrawTokens(_inputData.to, amount);
 
         logger.Log(address(this), msg.sender, "LidoWETHStake", abi.encode(_inputData, amount));
     }

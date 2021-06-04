@@ -9,7 +9,7 @@ const {
 
 const { lidoStake } = require('../actions.js');
 
-describe('Yearn-Supply', function () {
+describe('Lido - Stake', function () {
     this.timeout(80000);
 
     let senderAcc; let
@@ -22,7 +22,7 @@ describe('Yearn-Supply', function () {
         proxy = await getProxy(senderAcc.address);
     });
 
-    it('... stake ETH to LIDO', async () => {
+    it('... stake 10 ETH to LIDO', async () => {
         const amount = hre.ethers.utils.parseUnits('10', 18);
         await lidoStake(amount, senderAcc.address, proxy);
         console.log(amount.toString());

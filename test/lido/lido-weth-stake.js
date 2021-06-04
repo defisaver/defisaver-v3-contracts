@@ -25,7 +25,7 @@ describe('Lido WETH staking', function () {
         proxy = await getProxy(senderAcc.address);
     });
 
-    it('... stake WETH to LIDO', async () => {
+    it('... stake 10 WETH to LIDO', async () => {
         const amount = hre.ethers.utils.parseUnits('10', 18);
         await depositToWeth(amount);
         await approve(WETH_ADDRESS, proxy.address);
