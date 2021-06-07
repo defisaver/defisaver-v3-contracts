@@ -59,9 +59,8 @@ contract LidoStake is ActionBase, DSMath {
 
     /// @notice pulls weth, transforms it into eth, stakes it with lido, receives stEth and sends it to target address
     function _lidoStake(Params memory _inputData) internal returns (uint256 stEthReceivedAmount) {
-        uint256 amountPulled =
+        _inputData.amount =
             TokenUtils.WETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
-        _inputData.amount = amountPulled;
         TokenUtils.withdrawWeth(_inputData.amount);
 
         uint256 stEthBalanceBefore = lidoStakingContractAddress.getBalance(address(this));
@@ -73,7 +72,7 @@ contract LidoStake is ActionBase, DSMath {
 
         lidoStakingContractAddress.withdrawTokens(_inputData.to, stEthReceivedAmount);
 
-        logger.Log(address(this), msg.sender, "LidoWETHStake", abi.encode(_inputData, stEthReceivedAmount));
+        logger.Log(address(this), msg.sender, "LidoStake", abi.encode(_inputData, stEthReceivedAmount));
     }
 
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {

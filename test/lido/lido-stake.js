@@ -8,6 +8,7 @@ const {
     WETH_ADDRESS,
     approve,
     depositToWeth,
+    STETH_ADDRESS,
 } = require('../utils');
 
 const { lidoStake } = require('../actions.js');
@@ -30,10 +31,10 @@ describe('Lido WETH staking', function () {
         await depositToWeth(amount);
         await approve(WETH_ADDRESS, proxy.address);
 
-        const stEthBalanceBefore = await balanceOf('0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84', senderAcc.address);
+        const stEthBalanceBefore = await balanceOf(STETH_ADDRESS, senderAcc.address);
         const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
         await lidoStake(amount, senderAcc.address, senderAcc.address, proxy);
-        const stEthBalanceAfter = await balanceOf('0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84', senderAcc.address);
+        const stEthBalanceAfter = await balanceOf(STETH_ADDRESS, senderAcc.address);
         const wethBalanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
 
         expect(wethBalanceAfter).to.be.eq(wethBalanceBefore.sub(amount));
