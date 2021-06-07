@@ -71,7 +71,7 @@ contract LidoStake is ActionBase, DSMath {
 
         stEthReceivedAmount = sub(stEthBalanceAfter, stEthBalanceBefore);
 
-        lidoStakingContractAddress.withdrawTokens(_inputData.to, type(uint256).max);
+        lidoStakingContractAddress.withdrawTokens(_inputData.to, stEthReceivedAmount);
 
         logger.Log(address(this), msg.sender, "LidoWETHStake", abi.encode(_inputData, stEthReceivedAmount));
     }

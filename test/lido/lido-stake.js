@@ -40,13 +40,7 @@ describe('Lido WETH staking', function () {
 
         const wethChange = wethBalanceBefore.sub(wethBalanceAfter);
         const stEthChange = stEthBalanceAfter.sub(stEthBalanceBefore);
-        // first time this is called the difference is 2 because of stEth internal math
-        if (wethChange.sub(stEthChange).eq(2)) {
-            expect((stEthBalanceAfter.sub(stEthBalanceBefore)))
-                .to.be.eq(wethBalanceBefore.sub(wethBalanceAfter).sub(2));
-        } else {
-            expect((stEthBalanceAfter.sub(stEthBalanceBefore)))
-                .to.be.eq(wethBalanceBefore.sub(wethBalanceAfter));
-        }
+        const difference = wethChange.sub(stEthChange);
+        expect(difference.toNumber()).to.be.within(0, 2);
     }).timeout(50000);
 });
