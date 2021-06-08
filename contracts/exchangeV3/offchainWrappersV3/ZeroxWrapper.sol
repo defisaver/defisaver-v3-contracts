@@ -12,9 +12,12 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath 
 
     using TokenUtils for address;
 
-    string public constant ERR_SRC_AMOUNT = "Not enough funds";
-    string public constant ERR_PROTOCOL_FEE = "Not enough eth for protocol fee";
-    string public constant ERR_TOKENS_SWAPPED_ZERO = "Order success but amount 0";
+    //Not enough funds
+    error InsufficientFunds(uint256 available, uint256 required);
+    //Not enough eth for protocol fee
+    error InsufficientFeeFunds(uint256 available, uint256 required);
+    //Order success but amount 0
+    error ZeroTokensSwapped();
 
     using SafeERC20 for IERC20;
 
@@ -26,8 +29,14 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath 
         ExchangeActionType _type
     ) override public payable returns (bool success, uint256) {
         // check that contract have enough balance for exchange and protocol fee
-        require(_exData.srcAddr.getBalance(address(this)) >= _exData.srcAmount, ERR_SRC_AMOUNT);
-        require(TokenUtils.ETH_ADDR.getBalance(address(this)) >= _exData.offchainData.protocolFee, ERR_PROTOCOL_FEE);
+        uint256 tokenBalance = _exData.srcAddr.getBalance(address(this));
+        if (tokenBalance < _exData.srcAmount){
+            revert InsufficientFunds(tokenBalance, _exData.srcAmount);
+        }
+        uint256 ethBalance = TokenUtils.ETH_ADDR.getBalance(address(this));
+        if (ethBalance < _exData.offchainData.protocolFee){
+            revert InsufficientFeeFunds(ethBalance, _exData.offchainData.protocolFee);
+        }
 
         /// @dev 0x always uses max approve in v1, so we approve the exact amount we want to sell
         /// @dev safeApprove is modified to always first set approval to 0, then to exact amount
@@ -45,7 +54,9 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath 
         if (success) {
             // get the current balance of the swapped tokens
             tokensSwapped = sub(_exData.destAddr.getBalance(address(this)), tokensBefore);
-            require(tokensSwapped > 0, ERR_TOKENS_SWAPPED_ZERO);
+            if (tokensSwapped == 0){
+                revert ZeroTokensSwapped();
+            }
         }
 
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)

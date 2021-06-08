@@ -8,8 +8,12 @@ import "./DSNote.sol";
 abstract contract DSProxy is DSAuth, DSNote {
     DSProxyCache public cache; // global cache for contracts
 
+    error CacheNotSetError();
+
     constructor(address _cacheAddr) {
-        require(setCache(_cacheAddr), "Cache not set");
+        if (!(setCache(_cacheAddr))){
+            revert CacheNotSetError();
+        }
     }
 
     // solhint-disable-next-line no-empty-blocks

@@ -14,6 +14,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     address public constant KYBER_INTERFACE = 0x9AAb3f75489902f3a48495025729a0AF77d4b11e;
     address payable public constant WALLET_ID = payable(0x322d58b9E75a6918f7e7849AEe0fF09369977e08);
 
+    error WrongDestAmountError(uint256, uint256);
     using SafeERC20 for IERC20;
 
     /// @notice Sells a _srcAmount of tokens at Kyber
@@ -67,7 +68,9 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
             WALLET_ID
         );
 
-        require(destAmount == _destAmount, "Wrong dest amount");
+        if (destAmount != _destAmount){
+            revert WrongDestAmountError(destAmount, _destAmount);
+        }
 
         uint256 srcAmountAfter = srcToken.balanceOf(address(this));
 

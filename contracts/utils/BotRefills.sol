@@ -31,7 +31,7 @@ contract BotRefills is AdminAuth {
 
     modifier isApprovedBot(address _botAddr) {
         if (!(IBotRegistry(BOT_REGISTRY_ADDRESS).botList(_botAddr) || additionalBots[_botAddr])){
-            revert NotAuthBot();
+            revert NotAuthBotError();
         }
 
         _;

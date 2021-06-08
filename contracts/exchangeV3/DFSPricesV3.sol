@@ -10,6 +10,8 @@ contract DFSPrices is DSMath {
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     enum ActionType { SELL, BUY }
+    
+    error OutOfRangeSlicingError();
 
     /// @notice Returns the best estimated price from 2 exchanges
     /// @param _amount Amount of source tokens you want to exchange
@@ -105,7 +107,9 @@ contract DFSPrices is DSMath {
     }
 
     function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {
-        require(bs.length >= start + 32, "slicing out of range");
+        if (bs.length < start + 32){
+            revert OutOfRangeSlicingError();
+        }
 
         uint256 x;
         assembly {

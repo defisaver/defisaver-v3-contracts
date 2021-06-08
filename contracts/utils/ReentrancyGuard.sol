@@ -50,7 +50,7 @@ abstract contract ReentrancyGuard {
      */
     modifier nonReentrant() {
         // On the first call to nonReentrant, _notEntered will be true
-        if (_status == ENTERED){
+        if (_status == _ENTERED){
             revert ReentrantCall();
         }
 

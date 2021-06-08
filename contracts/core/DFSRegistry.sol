@@ -19,6 +19,14 @@ contract DFSRegistry is AdminAuth {
     string public constant ERR_EMPTY_PREV_ADDR = "Previous addr is 0";
     string public constant ERR_ALREADY_IN_CONTRACT_CHANGE = "Already in contract change";
     string public constant ERR_ALREADY_IN_WAIT_PERIOD_CHANGE = "Already in wait period change";
+    error EntryAlreadyExistsError();
+    error EntryNonExistentError();
+    error EntryNotInChangeError();
+    error WaitPeriodShortError();
+    error ChangeNotReadyError();
+    error EmptyPrevAddrError();
+    error AlreadyInContractChangeError();
+    error AlreadyInWaitPeriodChangeError();
 
     struct Entry {
         address contractAddr;
@@ -59,7 +67,9 @@ contract DFSRegistry is AdminAuth {
         address _contractAddr,
         uint256 _waitPeriod
     ) public onlyOwner {
-        require(!entries[_id].exists, ERR_ENTRY_ALREADY_EXISTS);
+        if (entries[_id].exists){
+            revert EntryAlreadyExistsError();
+        }
 
         entries[_id] = Entry({
             contractAddr: _contractAddr,
@@ -85,8 +95,12 @@ contract DFSRegistry is AdminAuth {
     /// @dev In case the new version has a fault, a quick way to fallback to the old contract
     /// @param _id Id of contract
     function revertToPreviousAddress(bytes32 _id) public onlyOwner {
-        require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
-        require(previousAddresses[_id] != address(0), ERR_EMPTY_PREV_ADDR);
+        if (!(entries[_id].exists)){
+            revert EntryNonExistentError();
+        }
+        if (previousAddresses[_id] == address(0)){
+            revert EmptyPrevAddrError();
+        }
 
         address currentAddr = entries[_id].contractAddr;
         entries[_id].contractAddr = previousAddresses[_id];
@@ -104,8 +118,12 @@ contract DFSRegistry is AdminAuth {
     /// @param _id Id of contract
     /// @param _newContractAddr Address of the new contract
     function startContractChange(bytes32 _id, address _newContractAddr) public onlyOwner {
-        require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
-        require(!entries[_id].inWaitPeriodChange, ERR_ALREADY_IN_WAIT_PERIOD_CHANGE);
+        if (!entries[_id].exists){
+            revert EntryNonExistentError();
+        }
+        if (entries[_id].inWaitPeriodChange){
+            revert AlreadyInWaitPeriodChangeError();
+        }
 
         entries[_id].changeStartTime = block.timestamp; // solhint-disable-line
         entries[_id].inContractChange = true;
@@ -123,12 +141,15 @@ contract DFSRegistry is AdminAuth {
     /// @notice Changes new contract address, correct time must have passed
     /// @param _id Id of contract
     function approveContractChange(bytes32 _id) public onlyOwner {
-        require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
-        require(entries[_id].inContractChange, ERR_ENTRY_NOT_IN_CHANGE);
-        require(
-            block.timestamp >= (entries[_id].changeStartTime + entries[_id].waitPeriod), // solhint-disable-line
-            ERR_CHANGE_NOT_READY
-        );
+        if (!entries[_id].exists){
+            revert EntryNonExistentError();
+        }
+        if (!entries[_id].inContractChange){
+            revert EntryNotInChangeError();
+        }
+        if (block.timestamp < (entries[_id].changeStartTime + entries[_id].waitPeriod)){
+            revert ChangeNotReadyError();
+        }
 
         address oldContractAddr = entries[_id].contractAddr;
         entries[_id].contractAddr = pendingAddresses[_id];
@@ -149,8 +170,12 @@ contract DFSRegistry is AdminAuth {
     /// @notice Cancel pending change
     /// @param _id Id of contract
     function cancelContractChange(bytes32 _id) public onlyOwner {
-        require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
-        require(entries[_id].inContractChange, ERR_ENTRY_NOT_IN_CHANGE);
+        if (!entries[_id].exists){
+            revert EntryNonExistentError();
+        }
+        if (!entries[_id].inContractChange){
+            revert EntryNotInChangeError();
+        }
 
         address oldContractAddr = pendingAddresses[_id];
 
@@ -170,8 +195,12 @@ contract DFSRegistry is AdminAuth {
     /// @param _id Id of contract
     /// @param _newWaitPeriod New wait time
     function startWaitPeriodChange(bytes32 _id, uint256 _newWaitPeriod) public onlyOwner {
-        require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
-        require(!entries[_id].inContractChange, ERR_ALREADY_IN_CONTRACT_CHANGE);
+        if (!entries[_id].exists){
+            revert EntryNonExistentError();
+        }
+        if (entries[_id].inContractChange){
+            revert AlreadyInContractChangeError();
+        }
 
         pendingWaitTimes[_id] = _newWaitPeriod;
 
@@ -189,12 +218,15 @@ contract DFSRegistry is AdminAuth {
     /// @notice Changes new wait period, correct time must have passed
     /// @param _id Id of contract
     function approveWaitPeriodChange(bytes32 _id) public onlyOwner {
-        require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
-        require(entries[_id].inWaitPeriodChange, ERR_ENTRY_NOT_IN_CHANGE);
-        require(
-            block.timestamp >= (entries[_id].changeStartTime + entries[_id].waitPeriod), // solhint-disable-line
-            ERR_CHANGE_NOT_READY
-        );
+        if (!entries[_id].exists){
+            revert EntryNonExistentError();
+        }
+        if (!entries[_id].inWaitPeriodChange){
+            revert EntryNotInChangeError();
+        }
+        if (block.timestamp < (entries[_id].changeStartTime + entries[_id].waitPeriod)){
+            revert ChangeNotReadyError();
+        }
 
         uint256 oldWaitTime = entries[_id].waitPeriod;
         entries[_id].waitPeriod = pendingWaitTimes[_id];
@@ -215,8 +247,12 @@ contract DFSRegistry is AdminAuth {
     /// @notice Cancel wait period change
     /// @param _id Id of contract
     function cancelWaitPeriodChange(bytes32 _id) public onlyOwner {
-        require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
-        require(entries[_id].inWaitPeriodChange, ERR_ENTRY_NOT_IN_CHANGE);
+        if (!entries[_id].exists){
+            revert EntryNonExistentError();
+        }
+        if (!entries[_id].inWaitPeriodChange){
+            revert EntryNotInChangeError();
+        }
 
         uint256 oldWaitPeriod = pendingWaitTimes[_id];
 
