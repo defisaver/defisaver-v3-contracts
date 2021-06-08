@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 
 import "../../../DS/DSMath.sol";
 import "../../../DS/DSProxy.sol";
@@ -123,7 +123,7 @@ contract McdHelper is DSMath {
     /// @param _manager Manager contract
     /// @param _cdpId Id of the CDP
     function getOwner(IManager _manager, uint _cdpId) public view returns (address) {
-        DSProxy proxy = DSProxy(uint160(_manager.owns(_cdpId)));
+        DSProxy proxy = DSProxy(payable(address(uint160(_manager.owns(_cdpId)))));
 
         return proxy.owner();
     }

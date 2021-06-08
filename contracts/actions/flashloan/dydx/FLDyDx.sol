@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../../../core/Subscriptions.sol";
 import "../../../interfaces/ILendingPool.sol";
@@ -80,7 +79,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
         bytes memory _data
     ) internal returns (uint256) {
 
-        address payable receiver = address(this);
+        address payable receiver = payable(address(this));
 
         ISoloMargin solo = ISoloMargin(SOLO_MARGIN_ADDRESS);
 

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../../utils/SafeERC20.sol";
 import "../../DS/DSMath.sol";
@@ -50,7 +49,7 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath 
         }
 
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
-        sendLeftover(_exData.srcAddr, _exData.destAddr, msg.sender);
+        sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
 
         return (success, tokensSwapped);
     }

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 
 import "../interfaces/IDFSRegistry.sol";
 import "../interfaces/IDSProxy.sol";
@@ -36,7 +35,7 @@ contract ProxyAuth is AdminAuth {
 
         // return if anything left
         if (address(this).balance > 0) {
-            msg.sender.transfer(address(this).balance);
+            payable(msg.sender).transfer(address(this).balance);
         }
     }
 

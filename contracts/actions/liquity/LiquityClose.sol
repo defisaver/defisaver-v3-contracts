@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
-
+pragma solidity =0.8.4;
 import "./helpers/LiquityHelper.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
