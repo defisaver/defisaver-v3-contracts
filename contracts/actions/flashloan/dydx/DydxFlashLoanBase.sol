@@ -9,6 +9,8 @@ contract DydxFlashLoanBase {
 
     address public constant SOLO_MARGIN_ADDRESS = 0x1E0447b19BB6EcFdAe1e4AE1694b0C3659614e4e;
 
+    error MarketIdNotFound();
+
     function _getMarketIdFromTokenAddress(address _solo, address _token)
         internal
         view
@@ -25,7 +27,7 @@ contract DydxFlashLoanBase {
         }
 
         // if we get this far no id has been found
-        revert("No DyDx market id found for token");
+        revert MarketIdNotFound();
     }
 
     function _getRepaymentAmountInternal(uint256 amount) internal pure returns (uint256) {

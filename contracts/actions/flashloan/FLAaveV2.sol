@@ -17,8 +17,10 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
-    string constant ERR_ONLY_AAVE_CALLER = "Caller not aave pool";
-    string constant ERR_SAME_CALLER = "FL taker must be this contract";
+    //Caller not aave pool
+    error OnlyAaveCallerError();
+    //FL Taker must be this contract
+    error SameCallerError();
 
     address
         public constant AAVE_LENDING_POOL = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
@@ -109,8 +111,12 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
         address _initiator,
         bytes memory _params
     ) public nonReentrant returns (bool) {
-        require(msg.sender == AAVE_LENDING_POOL, ERR_ONLY_AAVE_CALLER);
-        require(_initiator == address(this), ERR_SAME_CALLER);
+        if (msg.sender != AAVE_LENDING_POOL){
+            revert OnlyAaveCallerError();
+        }
+        if (_initiator != address(this)){
+            revert SameCallerError()
+        }
 
         (Task memory currTask, address proxy) = abi.decode(_params, (Task, address));
 
