@@ -15,7 +15,7 @@ contract StrategyData {
     struct Task {
         string name;
         bytes[][] callData;
-        bytes[][] subData;
+        bytes[] subData;
         bytes32[] actionIds;
         uint8[][] paramMapping;
     }
@@ -23,7 +23,7 @@ contract StrategyData {
     struct Strategy {
         uint templateId;
         address proxy;
-        bytes[][] subData;
+        bytes[] subData;
         bytes[][] triggerData;
         bool active;
 

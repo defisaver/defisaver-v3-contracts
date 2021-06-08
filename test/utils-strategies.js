@@ -48,18 +48,22 @@ const subTemplate = async (proxy, templateName, triggerNames, actionNames, param
     });
 };
 
-const subStrategy = async (proxy, templateId, active, actionData, triggerData) => {
+const subStrategy = async (proxy, templateId, active, subData, triggerData) => {
     const subProxyAddr = await getAddrFromRegistry('SubscriptionProxy');
 
     const SubscriptionProxy = await hre.ethers.getContractFactory('SubscriptionProxy');
     const functionData = SubscriptionProxy.interface.encodeFunctionData(
         'createStrategy',
-        [templateId, active, actionData, triggerData],
+        [templateId, active, subData, triggerData],
     );
 
-    await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
+    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
         gasLimit: 5000000,
     });
+
+    const parsed = await receipt.wait();
+
+    console.log(parsed.gasUsed.toString());
 
     const latestStrategyId = await getLatestStrategyId();
 

@@ -66,11 +66,12 @@ abstract contract ActionBase is AdminAuth {
         uint8 _mapType,
         bytes[] memory _subData,
         bytes32[] memory _returnValues
-    ) internal pure returns (uint) {
+    ) internal view returns (uint) {
         if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
                 _param = uint(_returnValues[getReturnIndex(_mapType)]);
             } else {
+
                 _param = abi.decode(_subData[getSubIndex(_mapType)], (uint));
             }
         }

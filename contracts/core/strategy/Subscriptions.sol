@@ -36,7 +36,7 @@ contract Subscriptions is StrategyData, AdminAuth {
     function createStrategy(
         uint _templateId,
         bool _active,
-        bytes[][] memory _subData,
+        bytes[] memory _subData,
         bytes[][] memory _triggerData
     ) public returns (uint) {
         strategies.push(
@@ -99,7 +99,7 @@ contract Subscriptions is StrategyData, AdminAuth {
         uint _strategyId,
         uint _templateId,
         bool _active,
-        bytes[][] memory _subData,
+        bytes[] memory _subData,
         bytes[][] memory _triggerData
     ) public {
         Strategy storage s = strategies[_strategyId];

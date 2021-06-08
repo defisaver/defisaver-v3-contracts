@@ -66,9 +66,9 @@
 					"type": "bool"
 				},
 				{
-					"internalType": "bytes[][]",
-					"name": "_actionData",
-					"type": "bytes[][]"
+					"internalType": "bytes[]",
+					"name": "_subData",
+					"type": "bytes[]"
 				},
 				{
 					"internalType": "bytes[][]",
@@ -137,9 +137,9 @@
 					"type": "bool"
 				},
 				{
-					"internalType": "bytes[][]",
-					"name": "_actionData",
-					"type": "bytes[][]"
+					"internalType": "bytes[]",
+					"name": "_subData",
+					"type": "bytes[]"
 				},
 				{
 					"internalType": "bytes[][]",
@@ -229,9 +229,9 @@
 					"type": "bool"
 				},
 				{
-					"internalType": "bytes[][]",
-					"name": "_actionData",
-					"type": "bytes[][]"
+					"internalType": "bytes[]",
+					"name": "_subData",
+					"type": "bytes[]"
 				},
 				{
 					"internalType": "bytes[][]",

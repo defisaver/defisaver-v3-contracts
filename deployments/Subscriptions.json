@@ -79,9 +79,9 @@
 					"type": "bool"
 				},
 				{
-					"internalType": "bytes[][]",
+					"internalType": "bytes[]",
 					"name": "_subData",
-					"type": "bytes[][]"
+					"type": "bytes[]"
 				},
 				{
 					"internalType": "bytes[][]",
@@ -162,9 +162,9 @@
 							"type": "address"
 						},
 						{
-							"internalType": "bytes[][]",
+							"internalType": "bytes[]",
 							"name": "subData",
-							"type": "bytes[][]"
+							"type": "bytes[]"
 						},
 						{
 							"internalType": "bytes[][]",
@@ -253,9 +253,9 @@
 							"type": "address"
 						},
 						{
-							"internalType": "bytes[][]",
+							"internalType": "bytes[]",
 							"name": "subData",
-							"type": "bytes[][]"
+							"type": "bytes[]"
 						},
 						{
 							"internalType": "bytes[][]",
@@ -304,9 +304,9 @@
 							"type": "address"
 						},
 						{
-							"internalType": "bytes[][]",
+							"internalType": "bytes[]",
 							"name": "subData",
-							"type": "bytes[][]"
+							"type": "bytes[]"
 						},
 						{
 							"internalType": "bytes[][]",
@@ -498,9 +498,9 @@
 							"type": "address"
 						},
 						{
-							"internalType": "bytes[][]",
+							"internalType": "bytes[]",
 							"name": "subData",
-							"type": "bytes[][]"
+							"type": "bytes[]"
 						},
 						{
 							"internalType": "bytes[][]",
@@ -643,9 +643,9 @@
 					"type": "bool"
 				},
 				{
-					"internalType": "bytes[][]",
+					"internalType": "bytes[]",
 					"name": "_subData",
-					"type": "bytes[][]"
+					"type": "bytes[]"
 				},
 				{
 					"internalType": "bytes[][]",

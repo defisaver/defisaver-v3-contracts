@@ -22,7 +22,7 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
     /// @dev This is the main entry point for Recipes/Tasks executed manually
     /// @param _currTask Task to be executed
     function executeTask(Task memory _currTask) public payable {
-        _executeActions(_currTask, false);
+        _executeActions(_currTask);
     }
 
     /// @notice Called through the Strategy contract to execute a task
@@ -45,7 +45,7 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
                 paramMapping: template.paramMapping
             });
 
-        _executeActions(currTask, true);
+        _executeActions(currTask);
     }
 
     /// @notice This is the callback function that FL actions call
@@ -65,8 +65,7 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
     /// @notice Runs all actions from the task
     /// @dev FL action must be first and is parsed separately, execution will go to _executeActionsFromFL
     /// @param _currTask to be executed
-    /// @param _isStrategy If actions are executed as part of a strategy
-    function _executeActions(Task memory _currTask, bool _isStrategy) internal {
+    function _executeActions(Task memory _currTask) internal {
         address firstActionAddr = registry.getAddr(_currTask.actionIds[0]);
 
         bytes32[] memory returnValues = new bytes32[](_currTask.actionIds.length);
@@ -99,7 +98,7 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
             abi.encodeWithSignature(
                 "executeAction(bytes[],bytes[],uint8[],bytes32[])",
                 _currTask.callData[_index],
-                _currTask.subData[_index],
+                _currTask.subData,
                 _currTask.paramMapping[_index],
                 _returnValues
             )
@@ -126,7 +125,7 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
         /// @dev FL action is called directly so that we can check who the msg.sender of FL is
         ActionBase(_flActionAddr).executeAction(
             _currTask.callData[0],
-            _currTask.subData[0],
+            _currTask.subData,
             _currTask.paramMapping[0],
             _returnValues
         );

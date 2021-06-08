@@ -112,9 +112,9 @@
 							"type": "address"
 						},
 						{
-							"internalType": "bytes[][]",
+							"internalType": "bytes[]",
 							"name": "subData",
-							"type": "bytes[][]"
+							"type": "bytes[]"
 						},
 						{
 							"internalType": "bytes[][]",

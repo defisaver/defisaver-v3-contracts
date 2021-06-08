@@ -19,6 +19,7 @@ const {
     WETH_ADDRESS,
     DAI_ADDR,
     MAX_UINT,
+    nullAddress,
 } = require('../utils');
 
 const {
@@ -36,6 +37,9 @@ const { openVault } = require('../actions');
 
 const { fetchMakerAddresses, MCD_MANAGER_ADDR } = require('../utils-mcd');
 
+// Dfs sdk won't accept 0x0 and we need some rand addr for testing
+const placeHolderAddr = '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF';
+
 describe('Mcd-Repay', function () {
     this.timeout(80000);
 
@@ -44,6 +48,8 @@ describe('Mcd-Repay', function () {
     let mcdView;
 
     const ethJoin = ilks[0].join;
+
+    const abiCoder = new hre.ethers.utils.AbiCoder();
 
     before(async () => {
         await redeploy('ProxyAuth');
@@ -74,7 +80,7 @@ describe('Mcd-Repay', function () {
         const name = 'McdRepayTemplate';
         const triggerIds = ['McdRatioTrigger'];
         const actionIds = ['McdWithdraw', 'GasFeeTaker', 'DFSSell', 'McdPayback'];
-        const paramMapping = [[0, 0, 0, 0], [0, 0, 0], [0, 0, 0, 0, 0], [0, 3, 0]];
+        const paramMapping = [[128, 0, 0, 129], [0, 0, 0], [0, 0, 0, 129, 129], [128, 3, 129]];
 
         const tokenData = getAssetInfo('WETH');
 
@@ -91,28 +97,33 @@ describe('Mcd-Repay', function () {
 
         const rationUnder = hre.ethers.utils.parseUnits('2.5', '18');
 
+        const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
+        const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
+
         const templateId = await getLatestTemplateId();
         const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_UNDER);
 
-        strategyId = await subStrategy(proxy, templateId, true, [[], [], [], []],
+        strategyId = await subStrategy(proxy, templateId, true, [vaultIdEncoded, proxyAddrEncoded],
             [triggerData]);
     });
 
     it('... should trigger a maker repay strategy', async () => {
-        const abiCoder = new hre.ethers.utils.AbiCoder();
-
         const triggerCallData = [];
         const actionsCallData = [];
 
         const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '500'), '18');
 
         const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
-            vaultId,
+            '0',
             repayAmount,
             ethJoin,
-            proxy.address,
+            placeHolderAddr,
             MCD_MANAGER_ADDR,
         );
+
+        // TODO: How to validate amount?
+        // TODO: Try and remove last flag in feeTaking action
+        // TODO: Handle with FL
 
         const repayGasCost = 1200000; // 1.2 mil gas
         const feeTakingAction = new dfs.actions.basic.GasFeeAction(
@@ -126,14 +137,14 @@ describe('Mcd-Repay', function () {
                 MAX_UINT,
                 UNISWAP_WRAPPER,
             ),
-            proxy.address,
-            proxy.address,
+            placeHolderAddr,
+            placeHolderAddr,
         );
 
         const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
-            vaultId,
-            '$4',
-            proxy.address,
+            '0', // vaultId
+            '0', // amount
+            placeHolderAddr, // proxy
             MCD_MANAGER_ADDR,
         );
 

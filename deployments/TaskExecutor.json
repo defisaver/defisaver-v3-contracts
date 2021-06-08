@@ -68,9 +68,9 @@
 							"type": "bytes[][]"
 						},
 						{
-							"internalType": "bytes[][]",
+							"internalType": "bytes[]",
 							"name": "subData",
-							"type": "bytes[][]"
+							"type": "bytes[]"
 						},
 						{
 							"internalType": "bytes32[]",
@@ -144,9 +144,9 @@
 							"type": "bytes[][]"
 						},
 						{
-							"internalType": "bytes[][]",
+							"internalType": "bytes[]",
 							"name": "subData",
-							"type": "bytes[][]"
+							"type": "bytes[]"
 						},
 						{
 							"internalType": "bytes32[]",
