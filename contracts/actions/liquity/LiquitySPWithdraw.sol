@@ -10,6 +10,13 @@ import "../ActionBase.sol";
 contract LiquitySPWithdraw is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    struct Params {
+        uint256 lusdAmount;
+        address to;
+        address wethTo;
+        address lqtyTo;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
@@ -17,19 +24,21 @@ contract LiquitySPWithdraw is ActionBase, LiquityHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (uint256 lusdAmount, address to) = parseInputs(_callData);
-        lusdAmount = _parseParamUint(lusdAmount, _paramMapping[0], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[1], _subData, _returnValues);
+        Params memory params = parseInputs(_callData);
+        params.lusdAmount = _parseParamUint(params.lusdAmount, _paramMapping[0], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
+        params.wethTo = _parseParamAddr(params.wethTo, _paramMapping[2], _subData, _returnValues);
+        params.lqtyTo = _parseParamAddr(params.lqtyTo, _paramMapping[3], _subData, _returnValues);
 
-        lusdAmount = _liquitySPWithdraw(lusdAmount, to);
-        return bytes32(lusdAmount);
+        params.lusdAmount = _liquitySPWithdraw(params);
+        return bytes32(params.lusdAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable virtual override {
-        (uint256 lusdAmount, address from) = parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        _liquitySPWithdraw(lusdAmount, from);
+        _liquitySPWithdraw(params);
     }
 
     /// @inheritdoc ActionBase
@@ -40,36 +49,40 @@ contract LiquitySPWithdraw is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Dont forget natspec
-    function _liquitySPWithdraw(uint256 _lusdAmount, address _to) internal returns (uint256) {
-        // TODO consider adding a destination address for gains
+    function _liquitySPWithdraw(Params memory _params) internal returns (uint256) {
         uint256 ethGain = StabilityPool.getDepositorETHGain(address(this));
         uint256 lqtyGain = StabilityPool.getDepositorLQTYGain(address(this));
 
         uint256 deposit = StabilityPool.getCompoundedLUSDDeposit(address(this));
-        _lusdAmount = deposit > _lusdAmount ? _lusdAmount : deposit;
+        _params.lusdAmount = deposit > _params.lusdAmount ? _params.lusdAmount : deposit;
 
-        StabilityPool.withdrawFromSP(_lusdAmount);
-        // Amount goes trough min(amount, depositedAmount)
+        StabilityPool.withdrawFromSP(_params.lusdAmount);
+        // Amount goes through min(amount, depositedAmount)
+        LUSDTokenAddr.withdrawTokens(_params.to, _params.lusdAmount);
 
-        LUSDTokenAddr.withdrawTokens(_to, _lusdAmount);
+        TokenUtils.depositWeth(ethGain);
+        TokenUtils.WETH_ADDR.withdrawTokens(_params.wethTo, ethGain);
+        LQTYTokenAddr.withdrawTokens(_params.lqtyTo, lqtyGain);
+        
 
         logger.Log(
             address(this),
             msg.sender,
             "LiquitySPWithdraw",
             abi.encode(
-                _lusdAmount,
-                _to,
+                _params.lusdAmount,
+                _params.to,
+                _params.wethTo,
+                _params.lqtyTo,
                 ethGain,
                 lqtyGain
             )
         );
 
-        return _lusdAmount;
+        return _params.lusdAmount;
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (uint256 lusdAmount, address to) {
-        lusdAmount = abi.decode(_callData[0], (uint256));
-        to = abi.decode(_callData[1], (address));
+    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData[0], (Params));
     }
 }

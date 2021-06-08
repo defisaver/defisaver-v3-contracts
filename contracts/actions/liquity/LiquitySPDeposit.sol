@@ -10,6 +10,13 @@ import "../ActionBase.sol";
 contract LiquitySPDeposit is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    struct Params {
+        uint256 lusdAmount;
+        address from;
+        address wethTo;
+        address lqtyTo;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
@@ -17,19 +24,21 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (uint256 lusdAmount, address from) = parseInputs(_callData);
-        lusdAmount = _parseParamUint(lusdAmount, _paramMapping[0], _subData, _returnValues);
-        from = _parseParamAddr(from, _paramMapping[1], _subData, _returnValues);
+        Params memory params = parseInputs(_callData);
+        params.lusdAmount = _parseParamUint(params.lusdAmount, _paramMapping[0], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
+        params.wethTo = _parseParamAddr(params.wethTo, _paramMapping[2], _subData, _returnValues);
+        params.lqtyTo = _parseParamAddr(params.lqtyTo, _paramMapping[3], _subData, _returnValues);
 
-        lusdAmount = _liquitySPDeposit(lusdAmount, from);
-        return bytes32(lusdAmount);
+        params.lusdAmount = _liquitySPDeposit(params);
+        return bytes32(params.lusdAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable virtual override {
-        (uint256 lusdAmount, address from) = parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        _liquitySPDeposit(lusdAmount, from);
+        _liquitySPDeposit(params);
     }
 
     /// @inheritdoc ActionBase
@@ -40,35 +49,39 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Dont forget natspec
-    function _liquitySPDeposit(uint256 _lusdAmount, address _from) internal returns (uint256) {
-        // TODO consider adding a destination address for gains
-        if (_lusdAmount == type(uint256).max) {
-            _lusdAmount = LUSDTokenAddr.getBalance(_from);
+    function _liquitySPDeposit(Params memory _params) internal returns (uint256) {
+        if (_params.lusdAmount == type(uint256).max) {
+            _params.lusdAmount = LUSDTokenAddr.getBalance(_params.from);
         }
 
         uint256 ethGain = StabilityPool.getDepositorETHGain(address(this));
         uint256 lqtyGain = StabilityPool.getDepositorLQTYGain(address(this));
 
-        LUSDTokenAddr.pullTokensIfNeeded(_from, _lusdAmount);
-        StabilityPool.provideToSP(_lusdAmount, address(0));   // No registered frontend means 100% kickback rate for LQTY rewards
+        LUSDTokenAddr.pullTokensIfNeeded(_params.from, _params.lusdAmount);
+        StabilityPool.provideToSP(_params.lusdAmount, address(0));   // No registered frontend means 100% kickback rate for LQTY rewards
+
+        TokenUtils.depositWeth(ethGain);
+        TokenUtils.WETH_ADDR.withdrawTokens(_params.wethTo, ethGain);
+        LQTYTokenAddr.withdrawTokens(_params.lqtyTo, lqtyGain);
 
         logger.Log(
             address(this),
             msg.sender,
             "LiquitySPDeposit",
             abi.encode(
-                _lusdAmount,
-                _from,
+                _params.lusdAmount,
+                _params.from,
+                _params.wethTo,
+                _params.lqtyTo,
                 ethGain,
                 lqtyGain
             )
         );
 
-        return _lusdAmount;
+        return _params.lusdAmount;
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (uint256 lusdAmount, address from) {
-        lusdAmount = abi.decode(_callData[0], (uint256));
-        from = abi.decode(_callData[1], (address));
+    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData[0], (Params));
     }
 }
