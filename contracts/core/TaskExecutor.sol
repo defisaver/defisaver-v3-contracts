@@ -9,8 +9,6 @@ import "../actions/ActionBase.sol";
 import "../core/DFSRegistry.sol";
 import "./strategy/Subscriptions.sol";
 
-import "hardhat/console.sol";
-
 /// @title Handles FL taking and executes actions
 contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
@@ -77,7 +75,6 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
             _parseFLAndExecute(_currTask, firstActionAddr, returnValues);
         } else {
             for (uint256 i = 0; i < _currTask.actionIds.length; ++i) {
-                console.log(i);
                 returnValues[i] = _executeAction(_currTask, i, returnValues);
             }
         }
@@ -96,8 +93,6 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
         bytes32[] memory _returnValues
     ) internal returns (bytes32 response) {
         address actionAddr = registry.getAddr(_currTask.actionIds[_index]);
-
-        console.log("actionAddr: ", actionAddr);
 
         response = IDSProxy(address(this)).execute(
             actionAddr,

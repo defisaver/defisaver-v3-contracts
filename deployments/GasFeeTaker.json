@@ -16,6 +16,19 @@
 		},
 		{
 			"inputs": [],
+			"name": "ADMIN_VAULT_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "ERR_RETURN_INDEX_VALUE",
 			"outputs": [
 				{
@@ -166,17 +179,17 @@
 				},
 				{
 					"internalType": "bytes[]",
-					"name": "_subData",
+					"name": "",
 					"type": "bytes[]"
 				},
 				{
 					"internalType": "uint8[]",
-					"name": "_paramMapping",
+					"name": "",
 					"type": "uint8[]"
 				},
 				{
 					"internalType": "bytes32[]",
-					"name": "_returnValues",
+					"name": "",
 					"type": "bytes32[]"
 				}
 			],

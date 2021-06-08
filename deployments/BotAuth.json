@@ -2,6 +2,19 @@
 	"contractName": "BotAuth",
 	"abi": [
 		{
+			"inputs": [],
+			"name": "ADMIN_VAULT_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
 			"inputs": [
 				{
 					"internalType": "address",

@@ -12,8 +12,6 @@ import "../core/strategy/Subscriptions.sol";
 
 import "../interfaces/ITrigger.sol";
 
-import "hardhat/console.sol";
-
 contract McdRatioTrigger is ITrigger, AdminAuth, DSMath {
     IManager public constant manager = IManager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
     IVat public constant vat = IVat(0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B);
@@ -27,15 +25,12 @@ contract McdRatioTrigger is ITrigger, AdminAuth, DSMath {
         override
         returns (bool)
     {
-        console.log("Hi");
 
 
         uint256 nextPrice = parseParamData(_callData);
         (uint256 cdpId, uint256 ratio, uint8 state) = parseSubData(_subData);
 
         uint256 currRatio = getRatio(cdpId, nextPrice);
-
-                console.log(currRatio);
 
 
         if (RatioState(state) == RatioState.OVER) {

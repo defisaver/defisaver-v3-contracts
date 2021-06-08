@@ -10,13 +10,17 @@ import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/chainlink/IAggregatorV3.sol";
 import "../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../../interfaces/aaveV2/IPriceOracleGetterAave.sol";
-
 import "../ActionBase.sol";
 
 /// @title Helper action to send a token to the specified address
 contract GasFeeTaker is ActionBase, DSMath {
-
     using TokenUtils for address;
+
+    struct Params {
+        uint256 gasUsed;
+        address feeToken;
+        bool payNow;
+    }
 
     FeeRecipient public constant feeRecipient =
         FeeRecipient(0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A);
@@ -28,57 +32,65 @@ contract GasFeeTaker is ActionBase, DSMath {
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
-        bytes[] memory _subData,
-        uint8[] memory _paramMapping,
-        bytes32[] memory _returnValues
-    ) public virtual payable override returns (bytes32) {
-        uint256 gasUsed = abi.decode(_callData[0], (uint256));
-        address feeToken = abi.decode(_callData[1], (address));
-        bool payNow = abi.decode(_callData[2], (bool));
+        bytes[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable virtual override returns (bytes32) {
+        Params memory inputData = parseInputs(_callData);
 
         uint256 gasPrice = tx.gasprice;
+
+        // gas price must be in a reasonable range
         if (tx.gasprice > SANITY_GAS_PRICE) {
             gasPrice = SANITY_GAS_PRICE;
         }
 
+        // can"t use more gas than the block gas limit
+        if (inputData.gasUsed > block.gaslimit) {
+            inputData.gasUsed = block.gaslimit;
+        }
+
         // calc gas used
-        uint256 txCost = gasUsed * gasPrice;
+        uint256 txCost = inputData.gasUsed * gasPrice;
 
         // convert to token amount
-        if (feeToken != TokenUtils.WETH_ADDR) {
-            uint price = getTokenPrice(feeToken);
+        if (inputData.feeToken != TokenUtils.WETH_ADDR) {
+            uint256 price = getTokenPrice(inputData.feeToken);
+            uint256 tokenDecimals = inputData.feeToken.getTokenDecimals();
 
-            // TODO: over 18 decimal bug
-            txCost = wdiv(txCost, uint(price)) / (10 ** (18 - feeToken.getTokenDecimals()));
+            require(tokenDecimals <= 18, "Token decimal too big");
+
+            txCost = wdiv(txCost, uint256(price)) / (10**(18 - tokenDecimals));
         }
 
-        if (payNow) {
-            feeToken.withdrawTokens(feeRecipient.getFeeAddr(), txCost);
+        // We can send the fee inside the action or just use the amount and send it later on
+        if (inputData.payNow) {
+            inputData.feeToken.withdrawTokens(feeRecipient.getFeeAddr(), txCost);
         }
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "GasFeeTaker",
-            abi.encode(gasUsed, txCost, feeToken)
-        );
+        logger.Log(address(this), msg.sender, "GasFeeTaker", abi.encode(inputData, txCost));
 
         return bytes32(txCost);
     }
 
     /// @inheritdoc ActionBase
+    // solhint-disable-next-line no-empty-blocks
     function executeActionDirect(bytes[] memory _callData) public payable override {}
 
     /// @inheritdoc ActionBase
-    function actionType() public virtual override pure returns (uint8) {
+    function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.FEE_ACTION);
     }
 
     /// @dev Fetches token price from aave oracle which they use in the main market
-     function getTokenPrice(address _tokenAddr) public view returns (uint price) {
-        address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
+    function getTokenPrice(address _tokenAddr) public view returns (uint256 price) {
+        address priceOracleAddress =
+            ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
 
         price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr);
     }
-    
+
+    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
+        inputData = abi.decode(_callData[0], (Params));
+    }
 }

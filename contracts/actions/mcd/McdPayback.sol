@@ -10,8 +10,6 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
 
-import "hardhat/console.sol";
-
 /// @title Payback dai debt for a Maker vault
 contract McdPayback is ActionBase, McdHelper {
     using TokenUtils for address;
@@ -25,8 +23,6 @@ contract McdPayback is ActionBase, McdHelper {
     ) public payable override returns (bytes32) {
         (uint256 vaultId, uint256 amount, address from, address mcdManager) =
             parseInputs(_callData);
-
-        console.log("parse is not the issue");
 
         vaultId = _parseParamUint(vaultId, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
@@ -104,8 +100,6 @@ contract McdPayback is ActionBase, McdHelper {
         vaultId = abi.decode(_callData[0], (uint256));
         amount = abi.decode(_callData[1], (uint256));
         from = abi.decode(_callData[2], (address));
-        console.log(vaultId, amount, from);
-        console.log("wut: ", _callData.length);
         mcdManager = abi.decode(_callData[3], (address));
     }
 }

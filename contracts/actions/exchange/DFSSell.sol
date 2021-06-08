@@ -7,8 +7,6 @@ import "../../interfaces/IDSProxy.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../ActionBase.sol";
 
-import "hardhat/console.sol";
-
 /// @title A exchange sell action through the dfs exchange
 contract DFSSell is ActionBase, DFSExchangeCore {
 
@@ -79,7 +77,6 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         address _to,
         uint _fee
     ) internal returns (uint256) {
-        console.log("DFSSEll");
          // if we set srcAmount to max, take the whole proxy balance
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
@@ -89,9 +86,6 @@ contract DFSSell is ActionBase, DFSExchangeCore {
 
         _exchangeData.user = getUserAddress();
         _exchangeData.dfsFeeDivider = _fee;
-
-        console.log("here");
-        console.log(_exchangeData.srcAddr, _exchangeData.destAddr, _exchangeData.srcAmount);
 
 
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);

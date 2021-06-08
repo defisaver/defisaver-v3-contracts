@@ -73,8 +73,8 @@ describe('Mcd-Repay', function () {
     it('... should make a new strategy', async () => {
         const name = 'McdRepayTemplate';
         const triggerIds = ['McdRatioTrigger'];
-        const actionIds = ['McdWithdraw', 'DFSSell', 'GasFeeTaker', 'SubInputs', 'McdPayback'];
-        const paramMapping = [[0, 0, 0, 0], [0, 0, 1, 0, 0], [0, 0, 0], [2, 3], [0, 4, 0]];
+        const actionIds = ['McdWithdraw', 'GasFeeTaker', 'DFSSell', 'McdPayback'];
+        const paramMapping = [[0, 0, 0, 0], [0, 0, 0], [0, 0, 0, 0, 0], [0, 3, 0]];
 
         const tokenData = getAssetInfo('WETH');
 
@@ -94,7 +94,7 @@ describe('Mcd-Repay', function () {
         const templateId = await getLatestTemplateId();
         const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_UNDER);
 
-        strategyId = await subStrategy(proxy, templateId, true, [[], [], [], [], []],
+        strategyId = await subStrategy(proxy, templateId, true, [[], [], [], []],
             [triggerData]);
     });
 
@@ -114,26 +114,20 @@ describe('Mcd-Repay', function () {
             MCD_MANAGER_ADDR,
         );
 
+        const repayGasCost = 1200000; // 1.2 mil gas
+        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+            repayGasCost, WETH_ADDRESS, true,
+        );
+
         const sellAction = new dfs.actions.basic.SellAction(
             formatExchangeObj(
                 WETH_ADDRESS,
                 DAI_ADDR,
-                '$1',
+                MAX_UINT,
                 UNISWAP_WRAPPER,
             ),
             proxy.address,
             proxy.address,
-        );
-
-        const repayGasCost = 1200000; // 1.2 mil gas
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            repayGasCost, DAI_ADDR, true,
-        );
-
-        const subAction = new dfs.actions.basic.SubInputsAction(
-            '$2',
-            '$3',
         );
 
         const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
@@ -144,9 +138,8 @@ describe('Mcd-Repay', function () {
         );
 
         actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
-        actionsCallData.push(sellAction.encodeForRecipe()[0]);
         actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
-        actionsCallData.push(subAction.encodeForRecipe()[0]);
+        actionsCallData.push(sellAction.encodeForRecipe()[0]);
         actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
 
         triggerCallData.push([abiCoder.encode(['uint256'], ['0'])]);
@@ -159,6 +152,8 @@ describe('Mcd-Repay', function () {
         });
 
         const ratioAfter = await getRatio(mcdView, vaultId);
+
+        console.log(`Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`);
 
         expect(ratioAfter).to.be.gt(ratioBefore);
     });
