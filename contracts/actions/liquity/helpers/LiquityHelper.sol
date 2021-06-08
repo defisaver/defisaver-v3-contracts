@@ -7,6 +7,7 @@ import "../../../interfaces/liquity/IBorrowerOperations.sol";
 import "../../../interfaces/liquity/IPriceFeed.sol";
 import "../../../interfaces/liquity/IHintHelpers.sol";
 import "../../../interfaces/liquity/ISortedTroves.sol";
+import "../../../interfaces/liquity/IStabilityPool.sol";
 
 contract LiquityHelper {
     address constant public LUSDTokenAddr = 0x5f98805A4E8be255a32880FDeC7F6728C6568bA0;
@@ -15,10 +16,12 @@ contract LiquityHelper {
     address constant public TroveManagerAddr = 0xA39739EF8b0231DbFA0DcdA07d7e29faAbCf4bb2;
     address constant public SortedTrovesAddr = 0x8FdD3fbFEb32b28fb73555518f8b361bCeA741A6;
     address constant public HintHelpersAddr = 0xE84251b93D9524E0d2e621Ba7dc7cb3579F997C0;
-
+    address constant public StabilityPoolAddr = 0x66017D22b0f8556afDd19FC67041899Eb65a21bb;
+    
     IPriceFeed constant public PriceFeed = IPriceFeed(PriceFeedAddr);
     IBorrowerOperations constant public BorrowerOperations = IBorrowerOperations(BorrowerOperationsAddr);
     ITroveManager constant public TroveManager = ITroveManager(TroveManagerAddr);
     ISortedTroves constant public SortedTroves = ISortedTroves(SortedTrovesAddr);
     IHintHelpers constant public HintHelpers = IHintHelpers(HintHelpersAddr);
+    IStabilityPool constant public StabilityPool = IStabilityPool(StabilityPoolAddr);
 }
