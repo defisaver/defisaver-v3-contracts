@@ -13,7 +13,7 @@ contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
     using SafeMath for uint256;
 
     struct Params {
-        address to;                 // Address that will receive the ETH gain
+        address lqtyTo;
         address upperHint;
         address lowerHint;
     }
@@ -26,7 +26,7 @@ contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
-        params.to = _parseParamAddr(params.to, _paramMapping[0], _subData, _returnValues);
+        params.lqtyTo = _parseParamAddr(params.lqtyTo, _paramMapping[0], _subData, _returnValues);
 
         uint256 ethGain = _liquityEthGainToTrove(params);
         return bytes32(ethGain);
@@ -48,14 +48,12 @@ contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
 
     /// @notice dont forget natspec
     function _liquityEthGainToTrove(Params memory _params) internal returns (uint256) {
-        uint256 balanceBefore = address(this).balance;
-
+        uint256 ethGain = StabilityPool.getDepositorETHGain(address(this));
+        uint256 lqtyGain = StabilityPool.getDepositorLQTYGain(address(this));
+        
         StabilityPool.withdrawETHGainToTrove(_params.upperHint, _params.lowerHint);
 
-        uint256 ethGain = address(this).balance.sub(balanceBefore);
-
-        TokenUtils.depositWeth(ethGain);
-        TokenUtils.WETH_ADDR.withdrawTokens(_params.to, ethGain);
+        LQTYTokenAddr.withdrawTokens(_params.lqtyTo, lqtyGain);
 
         logger.Log(
             address(this),
@@ -63,7 +61,7 @@ contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
             "LiquityEthGainToTrove",
             abi.encode(
                 ethGain,
-                _params.to
+                _params.lqtyTo
             )
         );
 
