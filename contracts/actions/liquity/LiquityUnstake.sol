@@ -30,8 +30,8 @@ contract LiquityUnstake is ActionBase, LiquityHelper {
         params.wethTo = _parseParamAddr(params.wethTo, _paramMapping[2], _subData, _returnValues);
         params.lusdTo = _parseParamAddr(params.lusdTo, _paramMapping[3], _subData, _returnValues);
 
-        lqtyAmount = _liquityUnstake(lqtyAmount, to);
-        return bytes32(lqtyAmount);
+        params.lqtyAmount = _liquityUnstake(params);
+        return bytes32(params.lqtyAmount);
     }
 
     /// @inheritdoc ActionBase
