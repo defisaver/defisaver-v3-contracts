@@ -15,13 +15,20 @@ contract AdminAuth {
 
     AdminVault public constant adminVault = AdminVault(ADMIN_VAULT_ADDR);
 
+    error SenderNotOwner();
+    error SenderNotAdmin();
+
     modifier onlyOwner() {
-        require(adminVault.owner() == msg.sender, "msg.sender not owner");
+        if (adminVault.owner() != msg.sender){
+            revert SenderNotOwner();
+        }
         _;
     }
 
     modifier onlyAdmin() {
-        require(adminVault.admin() == msg.sender, "msg.sender not admin");
+        if (adminVault.admin() != msg.sender){
+            revert SenderNotAdmin();
+        }
         _;
     }
 

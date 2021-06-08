@@ -12,7 +12,8 @@ import "../ActionBase.sol";
 contract McdGive is ActionBase {
     address public constant PROXY_REGISTRY_ADDR = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
 
-    string public constant ERR_NO_BURN_VAULT = "Can't send vault to 0x0";
+    //Can't send vault to 0x0
+    error NoBurnVaultError();
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -71,7 +72,9 @@ contract McdGive is ActionBase {
             newOwner = proxy;
         }
 
-        require(newOwner != address(0), ERR_NO_BURN_VAULT);
+        if (newOwner == address(0)){
+            revert NoBurnVaultError();
+        }
 
         IManager(_mcdManager).give(_vaultId, newOwner);
 

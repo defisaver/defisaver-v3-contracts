@@ -9,8 +9,10 @@ import "../../DS/DSMath.sol";
 /// @title Supplies ETH (action receives WETH) to Lido for ETH2 Staking. Receives stETH in return
 contract LidoStake is ActionBase, DSMath {
     using TokenUtils for address;
-
+    
     address public constant lidoStakingContractAddress = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
+
+    error SendingEtherFailed();
 
     /// @param amount - amount of WETH to pull
     /// @param from - address from which to pull WETH from
@@ -65,7 +67,9 @@ contract LidoStake is ActionBase, DSMath {
 
         uint256 stEthBalanceBefore = lidoStakingContractAddress.getBalance(address(this));
         (bool sent, ) = payable(lidoStakingContractAddress).call{value: _inputData.amount}("");
-        require(sent, "Failed to send Ether");
+        if (!sent){
+            revert SendingEtherFailed();
+        }
         uint256 stEthBalanceAfter = lidoStakingContractAddress.getBalance(address(this));
 
         stEthReceivedAmount = sub(stEthBalanceAfter, stEthBalanceBefore);

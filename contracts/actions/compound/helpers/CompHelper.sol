@@ -42,7 +42,7 @@ contract CompHelper {
     /// @param _cTokenAddr CToken address of the token
     function exitMarket(address _cTokenAddr) public {
         if (IComptroller(COMPTROLLER_ADDR).exitMarket(_cTokenAddr) != NO_ERROR){
-            revert CompExitmarketError();
+            revert CompExitMarketError();
         }
     }
 }

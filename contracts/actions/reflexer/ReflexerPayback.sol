@@ -11,6 +11,8 @@ import "./helpers/ReflexerHelper.sol";
 contract ReflexerPayback is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 
+    error InvalidCollateralType();
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
@@ -107,7 +109,9 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
     ) internal view returns (int256 deltaDebt) {
         // Gets actual rate from the safeEngine
         (, uint256 rate, , , , ) = safeEngine.collateralTypes(collateralType);
-        require(rate > 0, "invalid-collateral-type");
+        if (rate <= 0){
+            revert InvalidCollateralType();
+        }
 
         // Gets actual generatedDebt value of the safe
         (, uint256 generatedDebt) = safeEngine.safes(collateralType, safe);

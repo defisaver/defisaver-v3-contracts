@@ -115,7 +115,7 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
             revert OnlyAaveCallerError();
         }
         if (_initiator != address(this)){
-            revert SameCallerError()
+            revert SameCallerError();
         }
 
         (Task memory currTask, address proxy) = abi.decode(_params, (Task, address));

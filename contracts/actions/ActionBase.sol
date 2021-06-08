@@ -13,8 +13,10 @@ abstract contract ActionBase is AdminAuth {
         0x5c55B921f590a89C1Ebe84dF170E655a82b62126
     );
 
-    string public constant ERR_SUB_INDEX_VALUE = "Wrong sub index value";
-    string public constant ERR_RETURN_INDEX_VALUE = "Wrong return index value";
+    //Wrong sub index value
+    error SubIndexValueError();
+    //Wrong return index value
+    error ReturnIndexValueError();
 
     /// @dev Subscription params index range [128, 255]
     uint8 public constant SUB_MIN_INDEX_VALUE = 128;
@@ -136,7 +138,9 @@ abstract contract ActionBase is AdminAuth {
     /// @notice Transforms the paramMapping value to the index in return array value
     /// @param _type Indicated the type of the input
     function getReturnIndex(uint8 _type) internal pure returns (uint8) {
-        require(isReturnInjection(_type), ERR_SUB_INDEX_VALUE);
+        if (!(isReturnInjection(_type))){
+            revert SubIndexValueError();
+        }
 
         return (_type - RETURN_MIN_INDEX_VALUE);
     }
@@ -144,8 +148,9 @@ abstract contract ActionBase is AdminAuth {
     /// @notice Transforms the paramMapping value to the index in sub array value
     /// @param _type Indicated the type of the input
     function getSubIndex(uint8 _type) internal pure returns (uint8) {
-        require(_type >= SUB_MIN_INDEX_VALUE, ERR_RETURN_INDEX_VALUE);
-
+        if (_type < SUB_MIN_INDEX_VALUE){
+            revert ReturnIndexValueError();
+        }
         return (_type - SUB_MIN_INDEX_VALUE);
     }
 }
