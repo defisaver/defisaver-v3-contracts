@@ -13,8 +13,8 @@ import "./helpers/CompHelper.sol";
 contract CompWithdraw is ActionBase, CompHelper, DSMath {
     using TokenUtils for address;
 
-    string public constant ERR_COMP_REDEEM = "Comp redeem failed";
-    string public constant ERR_COMP_REDEEM_UNDERLYING = "Underlying comp redeem failed";
+    error CompRedeemError();
+    error CompUnderlyingRedeemError();
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -70,12 +70,13 @@ contract CompWithdraw is ActionBase, CompHelper, DSMath {
         // if _amount type(uint).max that means take out proxy whole balance
         if (_amount == type(uint256).max) {
             _amount = _cTokenAddr.getBalance(address(this));
-            require(ICToken(_cTokenAddr).redeem(_amount) == NO_ERROR, ERR_COMP_REDEEM);
+            if (ICToken(_cTokenAddr).redeem(_amount) != NO_ERROR){
+                revert CompRedeemError();
+            }
         } else {
-            require(
-                ICToken(_cTokenAddr).redeemUnderlying(_amount) == NO_ERROR,
-                ERR_COMP_REDEEM_UNDERLYING
-            );
+            if (ICToken(_cTokenAddr).redeemUnderlying(_amount) != NO_ERROR){
+                revert CompUnderlyingRedeemError();
+            }
         }
 
         uint256 tokenBalanceAfter = tokenAddr.getBalance(address(this));

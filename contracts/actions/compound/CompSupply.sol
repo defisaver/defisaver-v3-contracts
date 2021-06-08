@@ -11,7 +11,7 @@ import "./helpers/CompHelper.sol";
 contract CompSupply is ActionBase, CompHelper {
     using TokenUtils for address;
 
-    string public constant ERR_COMP_SUPPLY_FAILED = "Compound supply failed";
+    error CompSupplyFailError();
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -78,7 +78,9 @@ contract CompSupply is ActionBase, CompHelper {
         if (tokenAddr != TokenUtils.WETH_ADDR) {
             tokenAddr.approveToken(_cTokenAddr, _amount);
 
-            require(ICToken(_cTokenAddr).mint(_amount) == NO_ERROR, ERR_COMP_SUPPLY_FAILED);
+            if (ICToken(_cTokenAddr).mint(_amount) != NO_ERROR){
+                revert CompSupplyFailError();
+            }
         } else {
             TokenUtils.withdrawWeth(_amount);
             ICToken(_cTokenAddr).mint{value: _amount}(); // reverts on fail

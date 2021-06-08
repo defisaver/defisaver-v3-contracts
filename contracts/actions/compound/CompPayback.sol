@@ -12,7 +12,7 @@ import "./helpers/CompHelper.sol";
 contract CompPayback is ActionBase, CompHelper {
     using TokenUtils for address;
 
-    string public constant ERR_COMP_PAYBACK_FAILED = "Compound payback failed";
+    error CompPaybackFailError();
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -68,7 +68,9 @@ contract CompPayback is ActionBase, CompHelper {
         // we always expect actions to deal with WETH never Eth
         if (tokenAddr != TokenUtils.WETH_ADDR) {
             tokenAddr.approveToken(_cTokenAddr, _amount);
-            require(ICToken(_cTokenAddr).repayBorrow(_amount) == NO_ERROR, ERR_COMP_PAYBACK_FAILED);
+            if (ICToken(_cTokenAddr).repayBorrow(_amount) != NO_ERROR){
+                revert CompPaybackFailError();
+            }
         } else {
             TokenUtils.withdrawWeth(_amount);
             ICToken(_cTokenAddr).repayBorrow{value: _amount}(); // reverts on fail
