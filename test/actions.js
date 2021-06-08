@@ -21,6 +21,8 @@ const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
 
 const { getSecondTokenAmount } = require('./utils-uni');
 
+const { getHints, LiquityActionIds } = require('./utils-liquity');
+
 const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0) => {
     const dfsSellAddr = await getAddrFromRegistry('DFSSell');
 
@@ -554,6 +556,98 @@ const reflexerGenerate = async (proxy, safeId, amount, to) => {
     return proxy['execute(address,bytes)'](reflexerGenerateAddr, functionData, { gasLimit: 3000000 });
 };
 
+const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from, to) => {
+    const liquityOpenAddr = await getAddrFromRegistry('LiquityOpen');
+
+    const { upperHint, lowerHint } = await getHints(
+        proxy.address, LiquityActionIds.Open, from, collAmount, LUSDAmount,
+    );
+
+    const liquityOpenAction = new dfs.actions.liquity.LiquityOpenAction(
+        maxFeePercentage, collAmount, LUSDAmount, from, to, upperHint, lowerHint,
+    );
+
+    const functionData = liquityOpenAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityOpenAddr, functionData, { gasLimit: 3000000 });
+};
+
+const liquityBorrow = async (proxy, maxFeePercentage, LUSDAmount, to) => {
+    const liquityBorrowAddr = await getAddrFromRegistry('LiquityBorrow');
+
+    const { upperHint, lowerHint } = await getHints(
+        proxy.address, LiquityActionIds.Borrow, hre.ethers.constants.AddressZero, 0, LUSDAmount,
+    );
+
+    const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
+        maxFeePercentage, LUSDAmount, to, upperHint, lowerHint,
+    );
+
+    const functionData = liquityBorrowAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityBorrowAddr, functionData, { gasLimit: 3000000 });
+};
+
+const liquityPayback = async (proxy, LUSDAmount, from) => {
+    const liquityPaybackAddr = await getAddrFromRegistry('LiquityPayback');
+
+    const { upperHint, lowerHint } = await getHints(
+        proxy.address, LiquityActionIds.Payback, from, 0, LUSDAmount,
+    );
+
+    const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
+        LUSDAmount, from, upperHint, lowerHint,
+    );
+
+    const functionData = liquityPaybackAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityPaybackAddr, functionData, { gasLimit: 3000000 });
+};
+
+const liquitySupply = async (proxy, collAmount, from) => {
+    const liquitySupplyAddr = await getAddrFromRegistry('LiquitySupply');
+
+    const { upperHint, lowerHint } = await getHints(
+        proxy.address, LiquityActionIds.Supply, from, collAmount, 0,
+    );
+
+    const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
+        collAmount, from, upperHint, lowerHint,
+    );
+
+    const functionData = liquitySupplyAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquitySupplyAddr, functionData, { gasLimit: 3000000 });
+};
+
+const liquityWithdraw = async (proxy, collAmount, to) => {
+    const liquityWithdrawAddr = await getAddrFromRegistry('LiquityWithdraw');
+
+    const { upperHint, lowerHint } = await getHints(
+        proxy.address, LiquityActionIds.Withdraw, hre.ethers.constants.AddressZero, collAmount, 0,
+    );
+
+    const liquityWithdrawAction = new dfs.actions.liquity.LiquityWithdrawAction(
+        collAmount, to, upperHint, lowerHint,
+    );
+
+    const functionData = liquityWithdrawAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
+
+const liquityClose = async (proxy, from, to) => {
+    const liquityCloseAddr = await getAddrFromRegistry('LiquityClose');
+
+    const LiquityCloseAction = new dfs.actions.liquity.LiquityCloseAction(
+        from, to,
+    );
+
+    const functionData = LiquityCloseAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityCloseAddr, functionData, { gasLimit: 3000000 });
+};
+
 const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amount0Desired,
     amount1Desired, recipient, from) => {
     const uniMintV3Address = await getAddrFromRegistry('UniMintV3');
@@ -756,6 +850,41 @@ const buyTokenIfNeeded = async (tokenAddr, senderAcc, proxy, standardAmount) => 
     }
 };
 
+const yearnSupply = async (token, amount, from, to, proxy) => {
+    const yearnSupplyAddress = await getAddrFromRegistry('YearnSupply');
+    const yearnSupplyAction = new dfs.actions.yearn.YearnSupplyAction(
+        token,
+        amount,
+        from,
+        to,
+    );
+    const functionData = yearnSupplyAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](yearnSupplyAddress, functionData, { gasLimit: 3000000 });
+};
+
+const yearnWithdraw = async (token, amount, from, to, proxy) => {
+    const yearnWithdrawAddress = await getAddrFromRegistry('YearnWithdraw');
+    const yearnWithdrawAction = new dfs.actions.yearn.YearnWithdrawAction(
+        token,
+        amount,
+        from,
+        to,
+    );
+    const functionData = yearnWithdrawAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](yearnWithdrawAddress, functionData, { gasLimit: 3000000 });
+};
+
+const lidoStake = async (amount, from, to, proxy) => {
+    const lidoStakeAddress = await getAddrFromRegistry('LidoStake');
+    const lidoStakeAction = new dfs.actions.lido.LidoStakeAction(
+        amount,
+        from,
+        to,
+    );
+    const functionData = lidoStakeAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](lidoStakeAddress, functionData, { gasLimit: 3000000 });
+};
+
 module.exports = {
     sell,
     buy,
@@ -789,6 +918,13 @@ module.exports = {
     reflexerPayback,
     reflexerGenerate,
 
+    liquityOpen,
+    liquityBorrow,
+    liquityPayback,
+    liquitySupply,
+    liquityWithdraw,
+    liquityClose,
+
     uniV3Mint,
     uniV3Supply,
     uniV3Withdraw,
@@ -796,6 +932,11 @@ module.exports = {
 
     dydxSupply,
     dydxWithdraw,
+
+    yearnSupply,
+    yearnWithdraw,
+
+    lidoStake,
 
     buyTokenIfNeeded,
 };

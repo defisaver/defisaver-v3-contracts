@@ -18,6 +18,8 @@ const LOGGER_ADDR = '0x5c55B921f590a89C1Ebe84dF170E655a82b62126';
 const UNIV3ROUTER_ADDR = '0xE592427A0AEce92De3Edee1F18E0157C05861564';
 const UNIV3POSITIONMANAGER_ADDR = '0xC36442b4a4522E871399CD717aBDD847Ab11FE88';
 const AAVE_MARKET = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
+const YEARN_REGISTRY_ADDRESS = '0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804';
+const STETH_ADDRESS = '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84';
 
 const OWNER_ACC = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
 const ADMIN_ACC = '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9';
@@ -91,6 +93,7 @@ const coinGeckoHelper = {
     BAL: 'balancer',
     GUSD: 'gemini-dollar',
     YFI: 'yearn-finance',
+    LUSD: 'liquity-usd',
 };
 
 const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {
@@ -164,7 +167,9 @@ const getProxy = async (acc) => {
 };
 
 const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
-    await impersonateAccount(OWNER_ACC);
+    if (regAddr === REGISTRY_ADDR) {
+        await impersonateAccount(OWNER_ACC);
+    }
 
     const signer = await hre.ethers.provider.getSigner(OWNER_ACC);
 
@@ -177,14 +182,15 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
     const id = hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(name));
 
     if (!(await registry.isRegistered(id))) {
-        await registry.addNewContract(id, c.address, 0);
+        await registry.addNewContract(id, c.address, 0, { gasLimit: 2000000 });
     } else {
         await registry.startContractChange(id, c.address);
         await registry.approveContractChange(id);
     }
 
-    await stopImpersonatingAccount(OWNER_ACC);
-
+    if (regAddr === REGISTRY_ADDR) {
+        await stopImpersonatingAccount(OWNER_ACC);
+    }
     return c;
 };
 
@@ -308,6 +314,10 @@ const timeTravel = async (timeIncrease) => {
     });
 };
 
+const BN2Float = (bn, decimals) => hre.ethers.utils.formatUnits(bn, decimals);
+
+const Float2BN = (string, decimals) => hre.ethers.utils.parseUnits(string, decimals);
+
 module.exports = {
     getAddrFromRegistry,
     getProxy,
@@ -350,4 +360,7 @@ module.exports = {
     LOGGER_ADDR,
     UNIV3ROUTER_ADDR,
     UNIV3POSITIONMANAGER_ADDR,
+    BN2Float,
+    Float2BN,
+    YEARN_REGISTRY_ADDRESS,
 };

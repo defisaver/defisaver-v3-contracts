@@ -16,13 +16,18 @@ block number the fork starts from. If it starts from an old state some tests mig
 
 `npx hardhat node --max-memory 8192  --fork ETHEREUM_NODE_URL`
 
-2. In a different terminal window you can now deploy the recipe system:
 
-`npm run deploy local deploy-core`
-
-3. After that you can run the tests, for example:
+2. After that you can run the tests, for example:
 
 `npm run test local ./mcd/mcd-supply.js`
+
+## How to deploy on a tenderly fork
+
+1. In the .env file add the tenderly fork id where you want to deploy
+
+2. In the `scripts/deploy-on-fork.js` add contracts you want to deploy using the `redeploy()` function and make sure to specify `reg.address` as second parameter. 
+
+3. To deploy on fork run the following command: `npm run deploy fork deploy-on-fork`
 
 ## Common commands
 
