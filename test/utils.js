@@ -21,6 +21,9 @@ const AAVE_MARKET = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
 const YEARN_REGISTRY_ADDRESS = '0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804';
 const STETH_ADDRESS = '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84';
 
+// Dfs sdk won't accept 0x0 and we need some rand addr for testing
+const placeHolderAddr = '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF';
+
 const OWNER_ACC = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
 const ADMIN_ACC = '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9';
 
@@ -337,6 +340,8 @@ module.exports = {
     fetchStandardAmounts,
     setNewExchangeWrapper,
     fetchAmountinUSDPrice,
+    BN2Float,
+    Float2BN,
     standardAmounts,
     nullAddress,
     dydxTokens,
@@ -360,7 +365,6 @@ module.exports = {
     LOGGER_ADDR,
     UNIV3ROUTER_ADDR,
     UNIV3POSITIONMANAGER_ADDR,
-    BN2Float,
-    Float2BN,
     YEARN_REGISTRY_ADDRESS,
+    placeHolderAddr,
 };
