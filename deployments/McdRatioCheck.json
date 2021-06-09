@@ -1,19 +1,6 @@
 {
-	"contractName": "GasFeeTaker",
+	"contractName": "McdRatioCheck",
 	"abi": [
-		{
-			"inputs": [],
-			"name": "AAVE_V2_MARKET",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
 		{
 			"inputs": [],
 			"name": "ADMIN_VAULT_ADDR",
@@ -107,19 +94,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "SANITY_GAS_PRICE",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "SUB_MAX_INDEX_VALUE",
 			"outputs": [
 				{
@@ -173,30 +147,6 @@
 		{
 			"inputs": [
 				{
-					"internalType": "uint256",
-					"name": "_gasUsed",
-					"type": "uint256"
-				},
-				{
-					"internalType": "address",
-					"name": "_feeToken",
-					"type": "address"
-				}
-			],
-			"name": "calcGasCost",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "txCost",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
 					"internalType": "bytes[]",
 					"name": "_callData",
 					"type": "bytes[]"
@@ -242,13 +192,29 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "feeRecipient",
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_vaultId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "_ilk",
+					"type": "bytes32"
+				}
+			],
+			"name": "getCdpInfo",
 			"outputs": [
 				{
-					"internalType": "contract FeeRecipient",
+					"internalType": "uint256",
 					"name": "",
-					"type": "address"
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
 				}
 			],
 			"stateMutability": "view",
@@ -257,16 +223,40 @@
 		{
 			"inputs": [
 				{
-					"internalType": "address",
-					"name": "_tokenAddr",
-					"type": "address"
+					"internalType": "bytes32",
+					"name": "_ilk",
+					"type": "bytes32"
 				}
 			],
-			"name": "getTokenPrice",
+			"name": "getPrice",
 			"outputs": [
 				{
 					"internalType": "uint256",
-					"name": "price",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_vaultId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_nextPrice",
+					"type": "uint256"
+				}
+			],
+			"name": "getRatio",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
 					"type": "uint256"
 				}
 			],
@@ -295,10 +285,49 @@
 		},
 		{
 			"inputs": [],
+			"name": "manager",
+			"outputs": [
+				{
+					"internalType": "contract IManager",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "registry",
 			"outputs": [
 				{
 					"internalType": "contract DFSRegistry",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "spotter",
+			"outputs": [
+				{
+					"internalType": "contract ISpotter",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "vat",
+			"outputs": [
+				{
+					"internalType": "contract IVat",
 					"name": "",
 					"type": "address"
 				}

@@ -18,8 +18,6 @@ const {
     UNISWAP_WRAPPER,
     WETH_ADDRESS,
     DAI_ADDR,
-    MAX_UINT,
-    nullAddress,
 } = require('../utils');
 
 const {
@@ -62,6 +60,7 @@ describe('Mcd-Repay', function () {
         await redeploy('SubscriptionProxy');
         await redeploy('TaskExecutor');
         await redeploy('GasFeeTaker');
+        await redeploy('McdRatioCheck');
         strategyExecutor = await redeploy('StrategyExecutor');
         await redeploy('BotAuth');
         mcdView = await redeploy('McdView');
@@ -79,8 +78,9 @@ describe('Mcd-Repay', function () {
     it('... should make a new strategy', async () => {
         const name = 'McdRepayTemplate';
         const triggerIds = ['McdRatioTrigger'];
-        const actionIds = ['McdWithdraw', 'GasFeeTaker', 'DFSSell', 'McdPayback'];
-        const paramMapping = [[128, 0, 0, 129], [0, 0, 0], [0, 0, 0, 129, 129], [128, 3, 129]];
+        const actionIds = ['McdWithdraw', 'GasFeeTaker', 'DFSSell', 'McdPayback', 'McdRatioCheck'];
+        // eslint-disable-next-line max-len
+        const paramMapping = [[128, 0, 0, 129], [0, 0, 1], [0, 0, 2, 129, 129], [128, 3, 129], [130, 128, 0]];
 
         const tokenData = getAssetInfo('WETH');
 
@@ -96,14 +96,17 @@ describe('Mcd-Repay', function () {
         );
 
         const rationUnder = hre.ethers.utils.parseUnits('2.5', '18');
+        const targetRatio = hre.ethers.utils.parseUnits('2.2', '18');
 
         const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
         const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
+        const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
 
         const templateId = await getLatestTemplateId();
         const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_UNDER);
 
-        strategyId = await subStrategy(proxy, templateId, true, [vaultIdEncoded, proxyAddrEncoded],
+        // eslint-disable-next-line max-len
+        strategyId = await subStrategy(proxy, templateId, true, [vaultIdEncoded, proxyAddrEncoded, targetRatioEncoded],
             [triggerData]);
     });
 
@@ -111,7 +114,7 @@ describe('Mcd-Repay', function () {
         const triggerCallData = [];
         const actionsCallData = [];
 
-        const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '500'), '18');
+        const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '800'), '18');
 
         const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
             '0',
@@ -122,19 +125,18 @@ describe('Mcd-Repay', function () {
         );
 
         // TODO: How to validate amount?
-        // TODO: Try and remove last flag in feeTaking action
         // TODO: Handle with FL
 
         const repayGasCost = 1200000; // 1.2 mil gas
         const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            repayGasCost, WETH_ADDRESS, true,
+            repayGasCost, WETH_ADDRESS, '0',
         );
 
         const sellAction = new dfs.actions.basic.SellAction(
             formatExchangeObj(
                 WETH_ADDRESS,
                 DAI_ADDR,
-                MAX_UINT,
+                '0',
                 UNISWAP_WRAPPER,
             ),
             placeHolderAddr,
@@ -148,10 +150,17 @@ describe('Mcd-Repay', function () {
             MCD_MANAGER_ADDR,
         );
 
+        const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+            '0', // targetRatio
+            '0', // vaultId
+            '0', // nextPrice
+        );
+
         actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
         actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
         actionsCallData.push(sellAction.encodeForRecipe()[0]);
         actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
+        actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
 
         triggerCallData.push([abiCoder.encode(['uint256'], ['0'])]);
 

@@ -31,7 +31,7 @@
 			"inputs": [
 				{
 					"internalType": "uint256",
-					"name": "_cdpId",
+					"name": "_vaultId",
 					"type": "uint256"
 				},
 				{
@@ -79,7 +79,7 @@
 			"inputs": [
 				{
 					"internalType": "uint256",
-					"name": "_cdpId",
+					"name": "_vaultId",
 					"type": "uint256"
 				},
 				{
@@ -174,7 +174,7 @@
 			"outputs": [
 				{
 					"internalType": "uint256",
-					"name": "cdpId",
+					"name": "vaultId",
 					"type": "uint256"
 				},
 				{
