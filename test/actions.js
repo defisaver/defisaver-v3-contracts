@@ -648,6 +648,30 @@ const liquityClose = async (proxy, from, to) => {
     return proxy['execute(address,bytes)'](liquityCloseAddr, functionData, { gasLimit: 3000000 });
 };
 
+const liquityStake = async (proxy, lqtyAmount, from, wethTo, lusdTo) => {
+    const liquityStakeAddr = await getAddrFromRegistry('LiquityStake');
+
+    const LiquityStakeAction = new dfs.actions.liquity.LiquityStakeAction(
+        lqtyAmount, from, wethTo, lusdTo,
+    );
+
+    const functionData = LiquityStakeAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityStakeAddr, functionData, { gasLimit: 3000000 });
+};
+
+const liquityUnstake = async (proxy, lqtyAmount, to, wethTo, lusdTo) => {
+    const liquityUnstakeAddr = await getAddrFromRegistry('LiquityUnstake');
+
+    const LiquityUnstakeAction = new dfs.actions.liquity.LiquityUnstakeAction(
+        lqtyAmount, to, wethTo, lusdTo,
+    );
+
+    const functionData = LiquityUnstakeAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityUnstakeAddr, functionData, { gasLimit: 3000000 });
+};
+
 const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amount0Desired,
     amount1Desired, recipient, from) => {
     const uniMintV3Address = await getAddrFromRegistry('UniMintV3');
@@ -913,6 +937,8 @@ module.exports = {
     liquitySupply,
     liquityWithdraw,
     liquityClose,
+    liquityStake,
+    liquityUnstake,
 
     uniV3Mint,
     uniV3Supply,
