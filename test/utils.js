@@ -363,4 +363,5 @@ module.exports = {
     BN2Float,
     Float2BN,
     YEARN_REGISTRY_ADDRESS,
+    STETH_ADDRESS,
 };
