@@ -90,7 +90,7 @@ describe('Liquity-ETH-Gain-To-Trove', function () {
         await liquityEthGainToTrove(proxy, proxyAddr);
 
         const collChange = (await liquityView['getTroveInfo(address)'](proxyAddr)).collAmount.sub(collAmount);
-        const lqtyChange = (await balanceOf(LQTYAddr, proxyAddr)).sub(lqtyAmount)
+        const lqtyChange = (await balanceOf(LQTYAddr, proxyAddr)).sub(lqtyAmount);
 
         expect(ethGain).to.be.equal(collChange);
         expect(lqtyGain).to.be.equal(lqtyChange);
