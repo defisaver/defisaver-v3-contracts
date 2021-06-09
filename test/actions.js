@@ -648,6 +648,30 @@ const liquityClose = async (proxy, from, to) => {
     return proxy['execute(address,bytes)'](liquityCloseAddr, functionData, { gasLimit: 3000000 });
 };
 
+const liquitySPDeposit = async (proxy, LUSDAmount, from, wethTo, lqtyTo) => {
+    const liquitySPDepositAddr = await getAddrFromRegistry('LiquitySPDeposit');
+
+    const liquitySPDepositAction = new dfs.actions.liquity.LiquitySPDepositAction(
+        LUSDAmount, from, wethTo, lqtyTo,
+    );
+
+    const functionData = liquitySPDepositAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquitySPDepositAddr, functionData, { gasLimit: 3000000 });
+};
+
+const liquitySPWithdraw = async (proxy, LUSDAmount, to, wethTo, lqtyTo) => {
+    const liquitySPWithdrawAddr = await getAddrFromRegistry('LiquitySPWithdraw');
+
+    const liquitySPWithdrawAction = new dfs.actions.liquity.LiquitySPWithdrawAction(
+        LUSDAmount, to, wethTo, lqtyTo,
+    );
+
+    const functionData = liquitySPWithdrawAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquitySPWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
+
 const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amount0Desired,
     amount1Desired, recipient, from) => {
     const uniMintV3Address = await getAddrFromRegistry('UniMintV3');
@@ -913,6 +937,8 @@ module.exports = {
     liquitySupply,
     liquityWithdraw,
     liquityClose,
+    liquitySPDeposit,
+    liquitySPWithdraw,
 
     uniV3Mint,
     uniV3Supply,
