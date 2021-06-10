@@ -60,8 +60,9 @@ contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
             msg.sender,
             "LiquityEthGainToTrove",
             abi.encode(
+                _params.lqtyTo,
                 ethGain,
-                _params.lqtyTo
+                lqtyGain
             )
         );
 
