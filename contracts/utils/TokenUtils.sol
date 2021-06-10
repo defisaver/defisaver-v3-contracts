@@ -30,11 +30,7 @@ library TokenUtils {
     ) internal returns (uint256) {
         // handle max uint amount
         if (_amount == type(uint256).max) {
-            uint256 userAllowance = IERC20(_token).allowance(_from, address(this));
-            uint256 balance = getBalance(_token, _from);
-
-            // pull max allowance amount if balance is bigger than allowance
-            _amount = (balance > userAllowance) ? userAllowance : balance;
+            _amount = getBalance(_token, _from);
         }
 
         if (_from != address(0) && _from != address(this) && _token != ETH_ADDR && _amount != 0) {
