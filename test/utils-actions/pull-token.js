@@ -28,6 +28,7 @@ describe('Pull-Token', function () {
         await depositToWeth(hre.ethers.utils.parseUnits('10', 18));
         await approve(WETH_ADDRESS, proxy.address);
 
+        const proxyBalanceBefore = await balanceOf(WETH_ADDRESS, proxy.address);
         const pullTokenAddr = await getAddrFromRegistry('PullToken');
         const pullTokenAction = new dfs.actions.basic.PullTokenAction(
             WETH_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('3', 18),
@@ -36,10 +37,15 @@ describe('Pull-Token', function () {
 
         await proxy['execute(address,bytes)'](pullTokenAddr, pullTokenData);
 
-        expect(await balanceOf(WETH_ADDRESS, proxy.address)).to.be.eq(hre.ethers.utils.parseUnits('3', 18));
+        const proxyBalanceAfter = await balanceOf(WETH_ADDRESS, proxy.address);
+        const proxyBalanceDifference = proxyBalanceAfter.sub(proxyBalanceBefore);
+
+        expect(proxyBalanceDifference).to.be.eq(hre.ethers.utils.parseUnits('3', 18));
     });
 
     it('... should pull tokens uint256.max direct action', async () => {
+        const proxyBalanceBefore = await balanceOf(WETH_ADDRESS, proxy.address);
+        const senderAccBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
         const pullTokenAddr = await getAddrFromRegistry('PullToken');
         const pullTokenAction = new dfs.actions.basic.PullTokenAction(
             WETH_ADDRESS, senderAcc.address, hre.ethers.constants.MaxUint256,
@@ -48,6 +54,9 @@ describe('Pull-Token', function () {
 
         await proxy['execute(address,bytes)'](pullTokenAddr, pullTokenData);
 
-        expect(await balanceOf(WETH_ADDRESS, proxy.address)).to.be.eq(hre.ethers.utils.parseUnits('10', 18));
+        const proxyBalanceAfter = await balanceOf(WETH_ADDRESS, proxy.address);
+        const proxyBalanceDifference = proxyBalanceAfter.sub(proxyBalanceBefore);
+
+        expect(proxyBalanceDifference).to.be.eq(senderAccBalanceBefore);
     });
 });

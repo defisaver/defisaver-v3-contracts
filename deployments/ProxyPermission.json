@@ -17,19 +17,6 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes32",
-					"name": "c__0x80403e5d",
-					"type": "bytes32"
-				}
-			],
-			"name": "c_0x80403e5d",
-			"outputs": [],
-			"stateMutability": "pure",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
 					"internalType": "address",
 					"name": "_contractAddr",
 					"type": "address"
@@ -55,6 +42,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"hardhat": {}
 	}
 }

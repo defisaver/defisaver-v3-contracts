@@ -5,11 +5,10 @@ import "../../utils/TokenUtils.sol";
 import "../../interfaces/exchange/IExchangeV3.sol";
 import "../../interfaces/exchange/ISwapRouter.sol";
 import "../../interfaces/exchange/IQuoter.sol";
-import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 
 /// @title DFS exchange wrapper for UniswapV2
-contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth {
+contract UniV3WrapperV3 is IExchangeV3, AdminAuth {
     
     using TokenUtils for address;
     using SafeERC20 for IERC20;

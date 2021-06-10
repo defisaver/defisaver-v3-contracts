@@ -12,7 +12,7 @@ import "./DFSExchangeHelper.sol";
 import "./SaverExchangeRegistry.sol";
 import "../interfaces/exchange/IOffchainWrapper.sol";
 
-contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
+contract DFSExchangeCore is DFSExchangeHelper, DFSExchangeData, DSMath {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
@@ -41,12 +41,12 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         uint256 destBalanceBefore = exData.destAddr.getBalance(address(this));
 
         // Takes DFS exchange fee
-        exData.srcAmount = sub(exData.srcAmount, getFee(
+        exData.srcAmount = exData.srcAmount - getFee(
             exData.srcAmount,
             exData.user,
             exData.srcAddr,
             exData.dfsFeeDivider
-        ));
+        );
 
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
@@ -60,7 +60,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         }
 
         uint256 destBalanceAfter = exData.destAddr.getBalance(address(this));
-        uint256 amountBought = sub(destBalanceAfter, destBalanceBefore);
+        uint256 amountBought = destBalanceAfter - destBalanceBefore;
 
         // check slippage
         if (amountBought < wmul(exData.minPrice, exData.srcAmount)){
@@ -89,12 +89,12 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         uint256 destBalanceBefore = exData.destAddr.getBalance(address(this));
 
         // Takes DFS exchange fee
-        exData.srcAmount = sub(exData.srcAmount, getFee(
+        exData.srcAmount = exData.srcAmount - getFee(
             exData.srcAmount,
             exData.user,
             exData.srcAddr,
             exData.dfsFeeDivider
-        ));
+        );
 
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
@@ -108,7 +108,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         }
 
         uint256 destBalanceAfter = exData.destAddr.getBalance(address(this));
-        uint256 amountBought = sub(destBalanceAfter, destBalanceBefore);
+        uint256 amountBought = destBalanceAfter - destBalanceBefore;
 
         // check slippage
         if (amountBought < exData.destAmount){

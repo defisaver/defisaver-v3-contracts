@@ -4,11 +4,10 @@ pragma solidity =0.8.4;
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/yearn/IYVault.sol";
-import "../../DS/DSMath.sol";
 
 /// @title Burns yTokens and receive underlying tokens in return
 /// @dev yTokens need to be approved for DSProxy to pull them (yToken address)
-contract YearnWithdraw is ActionBase, DSMath {
+contract YearnWithdraw is ActionBase {
     using TokenUtils for address;
 
     /// @param yToken - address of yToken to withdraw (same as yVault address)
@@ -74,7 +73,7 @@ contract YearnWithdraw is ActionBase, DSMath {
         uint256 underlyingTokenBalanceBefore = underlyingToken.getBalance(address(this));
         vault.withdraw(_inputData.yAmount);
         uint256 underlyingTokenBalanceAfter = underlyingToken.getBalance(address(this));
-        tokenAmountReceived = sub(underlyingTokenBalanceAfter, underlyingTokenBalanceBefore);
+        tokenAmountReceived = underlyingTokenBalanceAfter - underlyingTokenBalanceBefore;
 
         underlyingToken.withdrawTokens(_inputData.to, tokenAmountReceived);
 

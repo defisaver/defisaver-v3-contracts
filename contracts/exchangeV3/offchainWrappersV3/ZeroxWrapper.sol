@@ -8,7 +8,7 @@ import "../../auth/AdminAuth.sol";
 import "../DFSExchangeHelper.sol";
 import "../../interfaces/exchange/IOffchainWrapper.sol";
 
-contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath {
+contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath{
 
     using TokenUtils for address;
 
@@ -53,7 +53,7 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath 
 
         if (success) {
             // get the current balance of the swapped tokens
-            tokensSwapped = sub(_exData.destAddr.getBalance(address(this)), tokensBefore);
+            tokensSwapped = _exData.destAddr.getBalance(address(this)) - tokensBefore;
             if (tokensSwapped == 0){
                 revert ZeroTokensSwapped();
             }

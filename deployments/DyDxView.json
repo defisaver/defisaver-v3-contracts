@@ -2,6 +2,11 @@
 	"contractName": "DyDxView",
 	"abi": [
 		{
+			"inputs": [],
+			"name": "MarketIdNotFound",
+			"type": "error"
+		},
+		{
 			"inputs": [
 				{
 					"internalType": "address",
@@ -136,6 +141,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"hardhat": {}
 	}
 }

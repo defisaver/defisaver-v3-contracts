@@ -1,0 +1,383 @@
+{
+	"contractName": "LiquityView",
+	"abi": [
+		{
+			"inputs": [],
+			"name": "BorrowerOperations",
+			"outputs": [
+				{
+					"internalType": "contract IBorrowerOperations",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "BorrowerOperationsAddr",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "HintHelpers",
+			"outputs": [
+				{
+					"internalType": "contract IHintHelpers",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "HintHelpersAddr",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "LUSDTokenAddr",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "PriceFeed",
+			"outputs": [
+				{
+					"internalType": "contract IPriceFeed",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "PriceFeedAddr",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "SortedTroves",
+			"outputs": [
+				{
+					"internalType": "contract ISortedTroves",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "SortedTrovesAddr",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "TroveManager",
+			"outputs": [
+				{
+					"internalType": "contract ITroveManager",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "TroveManagerAddr",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_coll",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_debt",
+					"type": "uint256"
+				}
+			],
+			"name": "computeNICR",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_ICR",
+					"type": "uint256"
+				},
+				{
+					"internalType": "address",
+					"name": "_prevId",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_nextId",
+					"type": "address"
+				}
+			],
+			"name": "findInsertPosition",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "upperHint",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "lowerHint",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_CR",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_numTrials",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_inputRandomSeed",
+					"type": "uint256"
+				}
+			],
+			"name": "getApproxHint",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "hintAddress",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "diff",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "latestRandomSeed",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_collAmount",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_debtAmount",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_numTrials",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_inputRandomSeed",
+					"type": "uint256"
+				}
+			],
+			"name": "getInsertPosition",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "upperHint",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "lowerHint",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_troveOwner",
+					"type": "address"
+				}
+			],
+			"name": "getTroveInfo",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "troveStatus",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "collAmount",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "debtAmount",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "collPrice",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "TCRatio",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bool",
+					"name": "recoveryMode",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "isRecoveryMode",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_troveOwner",
+					"type": "address"
+				},
+				{
+					"internalType": "enum LiquityView.LiquityActionId",
+					"name": "_action",
+					"type": "uint8"
+				},
+				{
+					"internalType": "address",
+					"name": "_from",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_collAmount",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_lusdAmount",
+					"type": "uint256"
+				}
+			],
+			"name": "predictNICR",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "NICR",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		}
+	],
+	"networks": {
+		"hardhat": {}
+	}
+}

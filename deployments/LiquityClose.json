@@ -1,14 +1,9 @@
 {
-	"contractName": "FLDyDx",
+	"contractName": "LiquityClose",
 	"abi": [
 		{
 			"inputs": [],
 			"name": "ERC20OperationFail",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "MarketIdNotFound",
 			"type": "error"
 		},
 		{
@@ -18,22 +13,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "OnlyDyDxCallerError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "ReentrantCall",
-			"type": "error"
-		},
-		{
-			"inputs": [],
 			"name": "ReturnIndexValueError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SameCallerError",
 			"type": "error"
 		},
 		{
@@ -66,12 +46,12 @@
 		},
 		{
 			"inputs": [],
-			"name": "CALLBACK_SELECTOR",
+			"name": "BorrowerOperations",
 			"outputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "contract IBorrowerOperations",
 					"name": "",
-					"type": "bytes4"
+					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -79,12 +59,12 @@
 		},
 		{
 			"inputs": [],
-			"name": "DYDX_DUST_FEE",
+			"name": "BorrowerOperationsAddr",
 			"outputs": [
 				{
-					"internalType": "uint256",
+					"internalType": "address",
 					"name": "",
-					"type": "uint256"
+					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -92,7 +72,33 @@
 		},
 		{
 			"inputs": [],
-			"name": "ETH_ADDRESS",
+			"name": "HintHelpers",
+			"outputs": [
+				{
+					"internalType": "contract IHintHelpers",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "HintHelpersAddr",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "LUSDTokenAddr",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -111,6 +117,32 @@
 					"internalType": "uint8",
 					"name": "",
 					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "PriceFeed",
+			"outputs": [
+				{
+					"internalType": "contract IPriceFeed",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "PriceFeedAddr",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -157,19 +189,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "SOLO_MARGIN_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "SUB_MAX_INDEX_VALUE",
 			"outputs": [
 				{
@@ -196,7 +215,46 @@
 		},
 		{
 			"inputs": [],
-			"name": "WETH_ADDRESS",
+			"name": "SortedTroves",
+			"outputs": [
+				{
+					"internalType": "contract ISortedTroves",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "SortedTrovesAddr",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "TroveManager",
+			"outputs": [
+				{
+					"internalType": "contract ITroveManager",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "TroveManagerAddr",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -236,58 +294,23 @@
 		{
 			"inputs": [
 				{
-					"internalType": "address",
-					"name": "_initiator",
-					"type": "address"
-				},
-				{
-					"components": [
-						{
-							"internalType": "address",
-							"name": "owner",
-							"type": "address"
-						},
-						{
-							"internalType": "uint256",
-							"name": "number",
-							"type": "uint256"
-						}
-					],
-					"internalType": "struct Account.Info",
-					"name": "",
-					"type": "tuple"
-				},
-				{
-					"internalType": "bytes",
-					"name": "_data",
-					"type": "bytes"
-				}
-			],
-			"name": "callFunction",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
 					"internalType": "bytes[]",
 					"name": "_callData",
 					"type": "bytes[]"
 				},
 				{
 					"internalType": "bytes[]",
-					"name": "",
+					"name": "_subData",
 					"type": "bytes[]"
 				},
 				{
 					"internalType": "uint8[]",
-					"name": "",
+					"name": "_paramMapping",
 					"type": "uint8[]"
 				},
 				{
 					"internalType": "bytes32[]",
-					"name": "",
+					"name": "_returnValues",
 					"type": "bytes32[]"
 				}
 			],
@@ -317,19 +340,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "flFeeFaucet",
-			"outputs": [
-				{
-					"internalType": "contract FLFeeFaucet",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "kill",
 			"outputs": [],
 			"stateMutability": "nonpayable",
@@ -346,40 +356,6 @@
 				}
 			],
 			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes[]",
-					"name": "_callData",
-					"type": "bytes[]"
-				}
-			],
-			"name": "parseInputs",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "amount",
-					"type": "uint256"
-				},
-				{
-					"internalType": "address",
-					"name": "token",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "flParamGetterAddr",
-					"type": "address"
-				},
-				{
-					"internalType": "bytes",
-					"name": "flParamGetterData",
-					"type": "bytes"
-				}
-			],
-			"stateMutability": "pure",
 			"type": "function"
 		},
 		{
@@ -417,10 +393,6 @@
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
-		},
-		{
-			"stateMutability": "payable",
-			"type": "receive"
 		}
 	],
 	"networks": {

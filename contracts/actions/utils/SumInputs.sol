@@ -2,11 +2,10 @@
 
 pragma solidity =0.8.4;
 
-import "../../DS/DSMath.sol";
 import "../ActionBase.sol";
 
 /// @title Helper action to sum up 2 inputs/return values
-contract SumInputs is ActionBase, DSMath {
+contract SumInputs is ActionBase {
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -35,6 +34,6 @@ contract SumInputs is ActionBase, DSMath {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _sumInputs(uint _a, uint _b) internal pure returns (uint) {
-        return add(_a, _b);
+        return _a + _b;
     }
 }

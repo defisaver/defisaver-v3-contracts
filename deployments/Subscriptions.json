@@ -3,38 +3,47 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ERR_EMPTY_STRATEGY",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "ERC20OperationFail",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_SENDER_NOT_OWNER",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "NonContractCall",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_USER_POS_EMPTY",
+			"name": "NonexistantStrategyError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotStrategyOwnerError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "UserPositionsEmpty",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ADMIN_VAULT_ADDR",
 			"outputs": [
 				{
-					"internalType": "string",
+					"internalType": "address",
 					"name": "",
-					"type": "string"
+					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -713,6 +722,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"hardhat": {}
 	}
 }

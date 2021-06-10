@@ -3,7 +3,67 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "DISCOUNT_ADDRESS",
+			"name": "DestAmountMissingError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ERC20OperationFail",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "InvalidExchangeZeroXError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "InvalidOffchainData",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "InvalidWrapperError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "NonContractCall",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "OutOfRangeSlicingError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ReturnIndexValueError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SlippageHitError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SubIndexValueError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ADMIN_VAULT_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -16,90 +76,12 @@
 		},
 		{
 			"inputs": [],
-			"name": "ERR_DEST_AMOUNT_MISSING",
+			"name": "DISCOUNT_ADDRESS",
 			"outputs": [
 				{
-					"internalType": "string",
+					"internalType": "address",
 					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_NOT_ZEROX_EXCHANGE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_OFFCHAIN_DATA_INVALID",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_RETURN_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_SLIPPAGE_HIT",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_SUB_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_WRAPPER_INVALID",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
+					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -672,6 +654,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"hardhat": {}
 	}
 }

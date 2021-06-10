@@ -91,9 +91,9 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
             .getExpectedRate(IERC20(_srcAddr), IERC20(_destAddr), _srcAmount);
 
         // multiply with decimal difference in src token
-        rate = rate * (10**sub(18, getDecimals(_srcAddr)));
+        rate = rate * (10 ** (18 - getDecimals(_srcAddr)));
         // divide with decimal difference in dest token
-        rate = rate / (10**sub(18, getDecimals(_destAddr)));
+        rate = rate / (10 ** (18 - getDecimals(_srcAddr)));
     }
 
     /// @notice Return a rate for which we can buy an amount of tokens

@@ -2,12 +2,11 @@
 
 pragma solidity =0.8.4;
 
-
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
-import "../../DS/DSMath.sol";
+
 /// @title Supplies ETH (action receives WETH) to Lido for ETH2 Staking. Receives stETH in return
-contract LidoStake is ActionBase, DSMath {
+contract LidoStake is ActionBase {
     using TokenUtils for address;
     
     address public constant lidoStakingContractAddress = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
@@ -72,7 +71,7 @@ contract LidoStake is ActionBase, DSMath {
         }
         uint256 stEthBalanceAfter = lidoStakingContractAddress.getBalance(address(this));
 
-        stEthReceivedAmount = sub(stEthBalanceAfter, stEthBalanceBefore);
+        stEthReceivedAmount = stEthBalanceAfter - stEthBalanceBefore;
 
         lidoStakingContractAddress.withdrawTokens(_inputData.to, stEthReceivedAmount);
 

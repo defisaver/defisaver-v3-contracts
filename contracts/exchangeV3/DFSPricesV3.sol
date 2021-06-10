@@ -2,10 +2,9 @@
 
 pragma solidity =0.8.4;
 
-import "../DS/DSMath.sol";
 import "../utils/SafeERC20.sol";
 
-contract DFSPrices is DSMath {
+contract DFSPrices {
 
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
