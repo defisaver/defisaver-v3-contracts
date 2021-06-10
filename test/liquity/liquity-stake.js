@@ -25,7 +25,7 @@ describe('Liquity-Stake', function () {
 
     let senderAcc; let proxy; let proxyAddr;
     let liquityView; let LQTYAddr; let uniWrapper;
-    let lqtyAmountBought;
+    let lqtyAmountBought; let LUSDAddr;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -34,6 +34,7 @@ describe('Liquity-Stake', function () {
 
         liquityView = await redeploy('LiquityView');
         LQTYAddr = await liquityView.LQTYTokenAddr();
+        LUSDAddr = await liquityView.LUSDTokenAddr();
 
         await depositToWeth(WETHSellAmount);
         await send(WETH_ADDRESS, proxyAddr, WETHSellAmount);
@@ -74,10 +75,19 @@ describe('Liquity-Stake', function () {
     });
 
     it('... should deposit the remainder of available LQTY', async () => {
+        const wethBalance = await balanceOf(WETH_ADDRESS, proxyAddr);
+        const lusdBalance = await balanceOf(LUSDAddr, proxyAddr);
+
+        const { ethGain, lusdGain } = await liquityView['getStakeInfo(address)'](proxyAddr);
         // eslint-disable-next-line max-len
         await liquityStake(proxy, hre.ethers.constants.MaxUint256, proxyAddr, proxyAddr, proxyAddr);
 
+        const wethChange = (await balanceOf(WETH_ADDRESS, proxyAddr)).sub(wethBalance);
+        const lusdChange = (await balanceOf(LUSDAddr, proxyAddr)).sub(lusdBalance);
+
         const { stake } = await liquityView['getStakeInfo(address)'](proxyAddr);
         expect(stake).to.be.equal(lqtyAmountBought);
+        expect(wethChange).to.be.equal(ethGain);
+        expect(lusdChange).to.be.equal(lusdGain);
     });
 });

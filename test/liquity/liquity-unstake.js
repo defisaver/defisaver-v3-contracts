@@ -27,7 +27,7 @@ describe('Liquity-Unstake', function () {
 
     let senderAcc; let proxy; let proxyAddr;
     let liquityView; let LQTYAddr; let uniWrapper;
-    let lqtyAmountBought;
+    let lqtyAmountBought; let LUSDAddr;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -36,6 +36,7 @@ describe('Liquity-Unstake', function () {
 
         liquityView = await redeploy('LiquityView');
         LQTYAddr = await liquityView.LQTYTokenAddr();
+        LUSDAddr = await liquityView.LUSDTokenAddr();
 
         await depositToWeth(WETHSellAmount);
         await send(WETH_ADDRESS, proxyAddr, WETHSellAmount);
@@ -77,19 +78,37 @@ describe('Liquity-Unstake', function () {
     });
 
     it(`... should withdraw ${BN2Float(lqtyAmountUnstake)} LQTY from the staking contract`, async () => {
+        const wethBalance = await balanceOf(WETH_ADDRESS, proxyAddr);
+        const lusdBalance = await balanceOf(LUSDAddr, proxyAddr);
+
+        const { ethGain, lusdGain } = await liquityView['getStakeInfo(address)'](proxyAddr);
         // eslint-disable-next-line max-len
         await liquityUnstake(proxy, lqtyAmountUnstake, proxyAddr, proxyAddr, proxyAddr);
 
+        const wethChange = (await balanceOf(WETH_ADDRESS, proxyAddr)).sub(wethBalance);
+        const lusdChange = (await balanceOf(LUSDAddr, proxyAddr)).sub(lusdBalance);
+
         const { stake } = await liquityView['getStakeInfo(address)'](proxyAddr);
         expect(stake).to.be.equal(lqtyAmountStake.sub(lqtyAmountUnstake));
+        expect(wethChange).to.be.equal(ethGain);
+        expect(lusdChange).to.be.equal(lusdGain);
     });
 
     it('... should withdraw all staked LQTY from the staking contract', async () => {
+        const wethBalance = await balanceOf(WETH_ADDRESS, proxyAddr);
+        const lusdBalance = await balanceOf(LUSDAddr, proxyAddr);
+
+        const { ethGain, lusdGain } = await liquityView['getStakeInfo(address)'](proxyAddr);
         // eslint-disable-next-line max-len
         await liquityUnstake(proxy, hre.ethers.constants.MaxUint256, proxyAddr, proxyAddr, proxyAddr);
+
+        const wethChange = (await balanceOf(WETH_ADDRESS, proxyAddr)).sub(wethBalance);
+        const lusdChange = (await balanceOf(LUSDAddr, proxyAddr)).sub(lusdBalance);
 
         const { stake } = await liquityView['getStakeInfo(address)'](proxyAddr);
         expect(stake).to.be.equal(0);
         expect(lqtyAmountBought).to.be.equal(await balanceOf(LQTYAddr, proxyAddr));
+        expect(wethChange).to.be.equal(ethGain);
+        expect(lusdChange).to.be.equal(lusdGain);
     });
 });
