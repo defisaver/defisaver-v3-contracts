@@ -73,7 +73,7 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
         }
         LUSDTokenAddr.pullTokensIfNeeded(_params.from, _params.lusdAmount);
 
-        uint256 lusdBefore = LUSDTokenAddr.getBalance(_params.from);
+        uint256 lusdBefore = LUSDTokenAddr.getBalance(address(this));
         uint256 ethBefore = address(this).balance;
 
         TroveManager.redeemCollateral(
@@ -86,18 +86,19 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
             _params.maxFeePercentage
         );
 
-        _params.lusdAmount = lusdBefore.sub(LUSDTokenAddr.getBalance(_params.from));
+        uint256 lusdAmountActual = lusdBefore.sub(LUSDTokenAddr.getBalance(address(this)));
         uint256 ethRedeemed = address(this).balance.sub(ethBefore);
 
         TokenUtils.depositWeth(ethRedeemed);
         TokenUtils.WETH_ADDR.withdrawTokens(_params.to, ethRedeemed);
+        LUSDTokenAddr.withdrawTokens(_params.from, _params.lusdAmount.sub(lusdAmountActual));
 
         logger.Log(
             address(this),
             msg.sender,
             "LiquityRedeem",
             abi.encode(
-                _params.lusdAmount,
+                lusdAmountActual,
                 ethRedeemed,
                 _params.maxFeePercentage,
                 _params.from,
