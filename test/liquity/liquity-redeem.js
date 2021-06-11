@@ -4,7 +4,6 @@ const {
     balanceOf,
     getProxy,
     redeploy,
-    setNewExchangeWrapper,
     depositToWeth,
     send,
     WETH_ADDRESS,
@@ -27,7 +26,7 @@ describe('Liquity-Redeem', function () {
     const maxFeePercentage = Float2BN('5', 16);
 
     let senderAcc; let proxy; let proxyAddr;
-    let liquityView; let LUSDAddr; let uniWrapper;
+    let liquityView; let LUSDAddr;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -39,10 +38,6 @@ describe('Liquity-Redeem', function () {
 
         await depositToWeth(WETHAmount);
         await send(WETH_ADDRESS, proxyAddr, WETHAmount);
-
-        await redeploy('DFSSell');
-        uniWrapper = await redeploy('UniswapWrapperV3');
-        await setNewExchangeWrapper(senderAcc, uniWrapper.address);
 
         await redeploy('LiquityOpen');
         await redeploy('LiquityRedeem');
