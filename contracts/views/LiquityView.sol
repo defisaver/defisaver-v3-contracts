@@ -132,4 +132,19 @@ contract LiquityView is LiquityHelper {
         (address hintAddress, , ) = HintHelpers.getApproxHint(NICR, _numTrials, _inputRandomSeed);
         (upperHint, lowerHint) = SortedTroves.findInsertPosition(NICR, hintAddress, hintAddress);
     }
+
+    function getRedemptionHints(
+        uint _LUSDamount, 
+        uint _price,
+        uint _maxIterations
+    )
+        external
+        view
+        returns (
+        address firstRedemptionHint,
+        uint partialRedemptionHintNICR,
+        uint truncatedLUSDamount
+    ) {
+        return HintHelpers.getRedemptionHints(_LUSDamount, _price, _maxIterations);
+    }
 }

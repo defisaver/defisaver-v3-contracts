@@ -648,6 +648,48 @@ const liquityClose = async (proxy, from, to) => {
     return proxy['execute(address,bytes)'](liquityCloseAddr, functionData, { gasLimit: 3000000 });
 };
 
+const liquityRedeem = async (proxy, lusdAmount, from, to, maxFeePercentage) => {
+    const maxIterations = 0;
+    const liquityRedeemAddr = await getAddrFromRegistry('LiquityRedeem');
+
+    const liquityViewAddr = await getAddrFromRegistry('LiquityView');
+    const liquityView = await hre.ethers.getContractAt('LiquityView', liquityViewAddr);
+    const { collPrice } = await liquityView['getTroveInfo(address)'](proxy.address);
+    const { firstRedemptionHint, partialRedemptionHintNICR, truncatedLUSDamount } = await liquityView['getRedemptionHints(uint256,uint256,uint256)'](lusdAmount, collPrice, maxIterations);
+    const { hintAddress } = await liquityView['getApproxHint(uint256,uint256,uint256)'](partialRedemptionHintNICR, 200, 42);
+    const { upperHint, lowerHint } = await liquityView['findInsertPosition(uint256,address,address)'](partialRedemptionHintNICR, hintAddress, hintAddress);
+
+    /*
+    console.log(
+        truncatedLUSDamount,
+        from,
+        to,
+        firstRedemptionHint,
+        upperHint,
+        lowerHint,
+        partialRedemptionHintNICR,
+        maxIterations,
+        maxFeePercentage,
+    );
+    */
+
+    const liquityRedeemAction = new dfs.actions.liquity.LiquityRedeemAction(
+        truncatedLUSDamount,
+        from,
+        to,
+        firstRedemptionHint,
+        upperHint,
+        lowerHint,
+        partialRedemptionHintNICR,
+        maxIterations,
+        maxFeePercentage,
+    );
+
+    const functionData = liquityRedeemAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityRedeemAddr, functionData, { gasLimit: 3000000 });
+};
+
 const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amount0Desired,
     amount1Desired, recipient, from) => {
     const uniMintV3Address = await getAddrFromRegistry('UniMintV3');
@@ -913,6 +955,7 @@ module.exports = {
     liquitySupply,
     liquityWithdraw,
     liquityClose,
+    liquityRedeem,
 
     uniV3Mint,
     uniV3Supply,
