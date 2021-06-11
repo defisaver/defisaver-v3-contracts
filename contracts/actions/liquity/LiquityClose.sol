@@ -5,10 +5,12 @@ pragma experimental ABIEncoderV2;
 
 import "./helpers/LiquityHelper.sol";
 import "../../utils/TokenUtils.sol";
+import "../../utils/SafeMath.sol";
 import "../ActionBase.sol";
 
 contract LiquityClose is ActionBase, LiquityHelper {
     using TokenUtils for address;
+    using SafeMath for uint256;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -44,7 +46,7 @@ contract LiquityClose is ActionBase, LiquityHelper {
     /// @param _from Address where to pull the LUSD tokens from
     /// @param _to Address that will receive the collateral
     function _liquityClose(address _from, address _to) internal returns (uint256) {
-        uint256 debt = TroveManager.getTroveDebt(address(this));
+        uint256 debt = TroveManager.getTroveDebt(address(this)).sub(200e18);
         uint256 coll = TroveManager.getTroveColl(address(this));
 
         LUSDTokenAddr.pullTokensIfNeeded(_from, debt);
