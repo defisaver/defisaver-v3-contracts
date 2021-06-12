@@ -317,6 +317,12 @@ const timeTravel = async (timeIncrease) => {
     });
 };
 
+const getGasUsed = async (receipt) => {
+    const parsed = await receipt.wait();
+
+    return parsed.gasUsed.toString();
+};
+
 const BN2Float = (bn, decimals) => hre.ethers.utils.formatUnits(bn, decimals);
 
 const Float2BN = (string, decimals) => hre.ethers.utils.parseUnits(string, decimals);
@@ -342,6 +348,7 @@ module.exports = {
     fetchAmountinUSDPrice,
     BN2Float,
     Float2BN,
+    getGasUsed,
     standardAmounts,
     nullAddress,
     dydxTokens,

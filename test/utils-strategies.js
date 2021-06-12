@@ -3,6 +3,7 @@ const {
     getAddrFromRegistry,
     impersonateAccount,
     stopImpersonatingAccount,
+    getGasUsed,
     OWNER_ACC,
 } = require('./utils');
 
@@ -43,9 +44,12 @@ const subTemplate = async (proxy, templateName, triggerNames, actionNames, param
         [templateName, triggerIds, actionIds, paramMapping],
     );
 
-    await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
+    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
         gasLimit: 5000000,
     });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed subTemplate; ${gasUsed}`);
 };
 
 const subStrategy = async (proxy, templateId, active, subData, triggerData) => {
@@ -61,9 +65,8 @@ const subStrategy = async (proxy, templateId, active, subData, triggerData) => {
         gasLimit: 5000000,
     });
 
-    const parsed = await receipt.wait();
-
-    console.log(parsed.gasUsed.toString());
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed createStrategy; ${gasUsed}`);
 
     const latestStrategyId = await getLatestStrategyId();
 

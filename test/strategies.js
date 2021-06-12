@@ -13,6 +13,7 @@ const {
 
 const {
     formatExchangeObj,
+    getGasUsed,
     placeHolderAddr,
     MCD_MANAGER_ADDR,
     WETH_ADDRESS,
@@ -29,6 +30,8 @@ const subMcdRepayStrategy = async (proxy, vaultId, rationUnder, targetRatio) => 
 
     const templateId = await getLatestTemplateId();
     const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_UNDER);
+
+    // NOTICE: maybe we can add multiple templateIds per strategy?
 
     // eslint-disable-next-line max-len
     const strategyId = await subStrategy(proxy, templateId, true, [vaultIdEncoded, proxyAddrEncoded, targetRatioEncoded],
@@ -89,9 +92,13 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyId, ethJoi
     triggerCallData.push([abiCoder.encode(['uint256'], ['0'])]);
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
         gasLimit: 8000000,
     });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed callMcdRepayStrategy; ${gasUsed}`);
 };
 
 module.exports = {
