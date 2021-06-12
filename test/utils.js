@@ -374,4 +374,5 @@ module.exports = {
     UNIV3POSITIONMANAGER_ADDR,
     YEARN_REGISTRY_ADDRESS,
     placeHolderAddr,
+    STETH_ADDRESS,
 };
