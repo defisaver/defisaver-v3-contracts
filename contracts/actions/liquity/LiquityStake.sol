@@ -11,10 +11,10 @@ contract LiquityStake is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
     struct Params {
-        uint256 lqtyAmount;
-        address from;
-        address wethTo;
-        address lusdTo;
+        uint256 lqtyAmount; // Amount of LQTY tokens to stake
+        address from;       // Address where to pull the tokens from
+        address wethTo;     // Address that will receive ETH(wrapped) gains
+        address lusdTo;     // Address that will receive LUSD token gains
     }
 
     /// @inheritdoc ActionBase
@@ -48,7 +48,7 @@ contract LiquityStake is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Dont forget natspec
+    /// @notice Stakes LQTY tokens
     function _liquityStake(Params memory _params) internal returns (uint256) {
         if (_params.lqtyAmount == type(uint256).max) {
             _params.lqtyAmount = LQTYTokenAddr.getBalance(_params.from);
@@ -60,9 +60,7 @@ contract LiquityStake is ActionBase, LiquityHelper {
         LQTYTokenAddr.pullTokensIfNeeded(_params.from, _params.lqtyAmount);
         LQTYStaking.stake(_params.lqtyAmount);
 
-        TokenUtils.depositWeth(ethGain);
-        TokenUtils.WETH_ADDR.withdrawTokens(_params.wethTo, ethGain);
-        LUSDTokenAddr.withdrawTokens(_params.lusdTo, lusdGain);
+        withdrawStaking(ethGain, lusdGain, _params.wethTo, _params.lusdTo);
 
         logger.Log(
             address(this),
