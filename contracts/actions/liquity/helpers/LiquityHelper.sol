@@ -36,8 +36,12 @@ contract LiquityHelper {
     ILQTYStaking constant public LQTYStaking = ILQTYStaking(LQTYStakingAddr);
 
     function withdrawStaking(uint256 _ethGain, uint256 _lusdGain, address _wethTo, address _lusdTo) internal {
-        TokenUtils.depositWeth(_ethGain);
-        TokenUtils.WETH_ADDR.withdrawTokens(_wethTo, _ethGain);
-        LUSDTokenAddr.withdrawTokens(_lusdTo, _lusdGain);
+        if (_ethGain > 0) {
+            TokenUtils.depositWeth(_ethGain);
+            TokenUtils.WETH_ADDR.withdrawTokens(_wethTo, _ethGain);
+        }
+        if (_lusdGain > 0) {
+            LUSDTokenAddr.withdrawTokens(_lusdTo, _lusdGain);
+        }        
     }
 }
