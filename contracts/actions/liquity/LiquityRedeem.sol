@@ -66,7 +66,7 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice dont forget natspec
+    /// @notice Redeems ETH(wrapped) using LUSD with the target price of LUSD = 1$
     function _liquityRedeem(Params memory _params) internal returns (uint256) {
         if (_params.lusdAmount == type(uint256).max) {
             _params.lusdAmount = LUSDTokenAddr.getBalance(_params.from);
