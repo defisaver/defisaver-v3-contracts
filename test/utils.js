@@ -95,6 +95,7 @@ const coinGeckoHelper = {
     YFI: 'yearn-finance',
     LUSD: 'liquity-usd',
     KNCL: 'kyber-network',
+    LQTY: 'liquity',
 };
 
 const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {
