@@ -46,17 +46,17 @@ contract LiquityClose is ActionBase, LiquityHelper {
     /// @param _from Address where to pull the LUSD tokens from
     /// @param _to Address that will receive the collateral
     function _liquityClose(address _from, address _to) internal returns (uint256) {
-        uint256 debt = TroveManager.getTroveDebt(address(this)).sub(200e18);
+        uint256 netDebt = TroveManager.getTroveDebt(address(this)).sub(LUSD_GAS_COMPENSATION);
         uint256 coll = TroveManager.getTroveColl(address(this));
 
-        LUSDTokenAddr.pullTokensIfNeeded(_from, debt);
+        LUSDTokenAddr.pullTokensIfNeeded(_from, netDebt);
 
         BorrowerOperations.closeTrove();
 
         TokenUtils.depositWeth(coll);
         TokenUtils.WETH_ADDR.withdrawTokens(_to, coll);
 
-        logger.Log(address(this), msg.sender, "LiquityClose", abi.encode(_from, _to, debt, coll));
+        logger.Log(address(this), msg.sender, "LiquityClose", abi.encode(_from, _to, netDebt, coll));
 
         return uint256(coll);
     }
