@@ -35,12 +35,22 @@ contract LiquityHelper {
     ICollSurplusPool constant public CollSurplusPool = ICollSurplusPool(CollSurplusPoolAddr);
     IStabilityPool constant public StabilityPool = IStabilityPool(StabilityPoolAddr);
     ILQTYStaking constant public LQTYStaking = ILQTYStaking(LQTYStakingAddr);
+
+    function withdrawStaking(uint256 _ethGain, uint256 _lusdGain, address _wethTo, address _lusdTo) internal {
+        if (_ethGain > 0) {
+            TokenUtils.depositWeth(_ethGain);
+            TokenUtils.WETH_ADDR.withdrawTokens(_wethTo, _ethGain);
+        }
+        if (_lusdGain > 0) {
+            LUSDTokenAddr.withdrawTokens(_lusdTo, _lusdGain);
+        }
+    }
     
     function withdrawStabilityGains(uint256 _ethGain, uint256 _lqtyGain, address _wethTo, address _lqtyTo) internal {
         if (_ethGain > 0) {
             TokenUtils.depositWeth(_ethGain);
             TokenUtils.WETH_ADDR.withdrawTokens(_wethTo, _ethGain);
-        }
+        }      
         if (_lqtyGain > 0) {
             LQTYTokenAddr.withdrawTokens(_lqtyTo, _lqtyGain);
         }

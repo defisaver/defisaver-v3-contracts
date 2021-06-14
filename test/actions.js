@@ -648,6 +648,30 @@ const liquityClose = async (proxy, from, to) => {
     return proxy['execute(address,bytes)'](liquityCloseAddr, functionData, { gasLimit: 3000000 });
 };
 
+const liquityStake = async (proxy, lqtyAmount, from, wethTo, lusdTo) => {
+    const liquityStakeAddr = await getAddrFromRegistry('LiquityStake');
+
+    const LiquityStakeAction = new dfs.actions.liquity.LiquityStakeAction(
+        lqtyAmount, from, wethTo, lusdTo,
+    );
+
+    const functionData = LiquityStakeAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityStakeAddr, functionData, { gasLimit: 3000000 });
+};
+
+const liquityUnstake = async (proxy, lqtyAmount, to, wethTo, lusdTo) => {
+    const liquityUnstakeAddr = await getAddrFromRegistry('LiquityUnstake');
+
+    const LiquityUnstakeAction = new dfs.actions.liquity.LiquityUnstakeAction(
+        lqtyAmount, to, wethTo, lusdTo,
+    );
+
+    const functionData = LiquityUnstakeAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityUnstakeAddr, functionData, { gasLimit: 3000000 });
+};
+
 const liquitySPDeposit = async (proxy, LUSDAmount, from, wethTo, lqtyTo) => {
     const liquitySPDepositAddr = await getAddrFromRegistry('LiquitySPDeposit');
 
@@ -968,6 +992,8 @@ module.exports = {
     liquitySupply,
     liquityWithdraw,
     liquityClose,
+    liquityStake,
+    liquityUnstake,
     liquitySPDeposit,
     liquitySPWithdraw,
     liquityEthGainToTrove,

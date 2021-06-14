@@ -94,6 +94,7 @@ const coinGeckoHelper = {
     GUSD: 'gemini-dollar',
     YFI: 'yearn-finance',
     LUSD: 'liquity-usd',
+    LQTY: 'liquity',
 };
 
 const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {
