@@ -132,4 +132,10 @@ contract LiquityView is LiquityHelper {
         (address hintAddress, , ) = HintHelpers.getApproxHint(NICR, _numTrials, _inputRandomSeed);
         (upperHint, lowerHint) = SortedTroves.findInsertPosition(NICR, hintAddress, hintAddress);
     }
+
+    function getDepositorInfo(address _depositor) external view returns(uint256 compoundedLUSD, uint256 ethGain, uint256 lqtyGain) {
+        compoundedLUSD = StabilityPool.getCompoundedLUSDDeposit(_depositor);
+        ethGain = StabilityPool.getDepositorETHGain(_depositor);
+        lqtyGain = StabilityPool.getDepositorLQTYGain(_depositor);
+    }
 }
