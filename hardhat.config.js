@@ -19,10 +19,12 @@ module.exports = {
         },
         fork: {
             url: `https://rpc.tenderly.co/fork/${process.env.FORK_ID}`,
+            timeout: 1000000,
         },
         hardhat: {
             forking: {
                 url: process.env.ETHEREUM_NODE,
+                timeout: 1000000,
                 // blockNumber: 12068716
             },
         },
@@ -30,6 +32,7 @@ module.exports = {
             url: process.env.ETHEREUM_NODE,
             accounts: [process.env.PRIV_KEY_MAINNET],
             gasPrice: 40000000000,
+            timeout: 10000000,
         },
     },
     solidity: {

@@ -53,7 +53,7 @@ describe('Reflexer-Generate', () => {
         const to = senderAcc.address;
         await expect(() => reflexerGenerate(proxy, safeID, amountRai, to))
             .to.changeTokenBalance(rai, senderAcc, amountRai);
-    }).timeout(40000);
+    }).timeout(80000);
 
     it('... should log every event', async () => {
         await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
@@ -71,5 +71,5 @@ describe('Reflexer-Generate', () => {
         const to = senderAcc.address;
         await expect(reflexerGenerate(proxy, safeID, amountRai, to))
             .to.emit(logger, 'LogEvent');
-    }).timeout(40000);
+    }).timeout(80000);
 });

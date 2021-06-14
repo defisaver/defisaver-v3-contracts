@@ -37,20 +37,20 @@ describe('Aave-Supply', function () {
         dataProvider = await getAaveDataProvider();
     });
 
-    for (let i = 0; i < aaveV2assetsDefaultMarket.length; ++i) {
+    for (let i = 5; i < 6; ++i) {
         const tokenSymbol = aaveV2assetsDefaultMarket[i];
         const fetchedAmountWithUSD = fetchAmountinUSDPrice(tokenSymbol, '10000');
 
         it(`... should supply ${fetchedAmountWithUSD} ${tokenSymbol} to Aave`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
-
+            console.log(assetInfo);
             if (assetInfo.symbol === 'ETH') {
                 assetInfo.address = WETH_ADDRESS;
             }
 
             const aaveTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
             const aToken = aaveTokenInfo.aTokenAddress;
-
+            console.log(aToken);
             const amount = hre.ethers.utils.parseUnits(
                 fetchedAmountWithUSD,
                 assetInfo.decimals,

@@ -271,6 +271,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"hardhat": {}
 	}
 }
