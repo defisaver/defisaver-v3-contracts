@@ -13,7 +13,7 @@ contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
     using SafeMath for uint256;
 
     struct Params {
-        address lqtyTo;
+        address lqtyTo;     // Address that will receive LQTY token gains
         address upperHint;
         address lowerHint;
     }
@@ -46,7 +46,7 @@ contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice dont forget natspec
+    /// @notice Withdraws ETH gains to the users Trove
     function _liquityEthGainToTrove(Params memory _params) internal returns (uint256) {
         uint256 ethGain = StabilityPool.getDepositorETHGain(address(this));
         uint256 lqtyGain = StabilityPool.getDepositorLQTYGain(address(this));

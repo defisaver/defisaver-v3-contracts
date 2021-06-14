@@ -11,10 +11,10 @@ contract LiquitySPWithdraw is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
     struct Params {
-        uint256 lusdAmount;
-        address to;
-        address wethTo;
-        address lqtyTo;
+        uint256 lusdAmount; // Amount of LUSD tokens to withdraw
+        address to;         // Address that will receive the tokens
+        address wethTo;     // Address that will receive ETH(wrapped) gains
+        address lqtyTo;     // Address that will receive LQTY token gains
     }
 
     /// @inheritdoc ActionBase
@@ -48,7 +48,7 @@ contract LiquitySPWithdraw is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Dont forget natspec
+    /// @notice Withdraws LUSD from the user's stability pool deposit
     function _liquitySPWithdraw(Params memory _params) internal returns (uint256) {
         uint256 ethGain = StabilityPool.getDepositorETHGain(address(this));
         uint256 lqtyGain = StabilityPool.getDepositorLQTYGain(address(this));
@@ -60,10 +60,7 @@ contract LiquitySPWithdraw is ActionBase, LiquityHelper {
         // Amount goes through min(amount, depositedAmount)
         LUSDTokenAddr.withdrawTokens(_params.to, _params.lusdAmount);
 
-        TokenUtils.depositWeth(ethGain);
-        TokenUtils.WETH_ADDR.withdrawTokens(_params.wethTo, ethGain);
-        LQTYTokenAddr.withdrawTokens(_params.lqtyTo, lqtyGain);
-        
+        withdrawStabilityGains(ethGain, lqtyGain, _params.wethTo, _params.lqtyTo);
 
         logger.Log(
             address(this),

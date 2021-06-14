@@ -2,6 +2,7 @@
 
 pragma solidity =0.7.6;
 
+import "../../../utils/TokenUtils.sol";
 import "../../../interfaces/liquity/ITroveManager.sol";
 import "../../../interfaces/liquity/IBorrowerOperations.sol";
 import "../../../interfaces/liquity/IPriceFeed.sol";
@@ -12,6 +13,8 @@ import "../../../interfaces/liquity/IStabilityPool.sol";
 import "../../../interfaces/liquity/ILQTYStaking.sol";
 
 contract LiquityHelper {
+    using TokenUtils for address;
+
     address constant public LUSDTokenAddr = 0x5f98805A4E8be255a32880FDeC7F6728C6568bA0;
     address constant public LQTYTokenAddr = 0x6DEA81C8171D0bA574754EF6F8b412F2Ed88c54D;
     address constant public PriceFeedAddr = 0x4c517D4e2C851CA76d7eC94B805269Df0f2201De;
@@ -31,4 +34,10 @@ contract LiquityHelper {
     ICollSurplusPool constant public CollSurplusPool = ICollSurplusPool(CollSurplusPoolAddr);
     IStabilityPool constant public StabilityPool = IStabilityPool(StabilityPoolAddr);
     ILQTYStaking constant public LQTYStaking = ILQTYStaking(LQTYStakingAddr);
+    
+    function withdrawStabilityGains(uint256 _ethGain, uint256 _lqtyGain, address _wethTo, address _lqtyTo) internal {
+        TokenUtils.depositWeth(_ethGain);
+        TokenUtils.WETH_ADDR.withdrawTokens(_wethTo, _ethGain);
+        LQTYTokenAddr.withdrawTokens(_lqtyTo, _lqtyGain);
+    }
 }

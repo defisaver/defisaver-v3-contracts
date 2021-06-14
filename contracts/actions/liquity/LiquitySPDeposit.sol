@@ -11,10 +11,10 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
     struct Params {
-        uint256 lusdAmount;
-        address from;
-        address wethTo;
-        address lqtyTo;
+        uint256 lusdAmount; // Amount of LUSD tokens to deposit
+        address from;       // Address where to pull the tokens from
+        address wethTo;     // Address that will receive ETH(wrapped) gains
+        address lqtyTo;     // Address that will receive LQTY token gains
     }
 
     /// @inheritdoc ActionBase
@@ -48,7 +48,7 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Dont forget natspec
+    /// @notice Deposits LUSD to the stability pool
     function _liquitySPDeposit(Params memory _params) internal returns (uint256) {
         if (_params.lusdAmount == type(uint256).max) {
             _params.lusdAmount = LUSDTokenAddr.getBalance(_params.from);
@@ -60,9 +60,7 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
         LUSDTokenAddr.pullTokensIfNeeded(_params.from, _params.lusdAmount);
         StabilityPool.provideToSP(_params.lusdAmount, address(0));   // No registered frontend means 100% kickback rate for LQTY rewards
 
-        TokenUtils.depositWeth(ethGain);
-        TokenUtils.WETH_ADDR.withdrawTokens(_params.wethTo, ethGain);
-        LQTYTokenAddr.withdrawTokens(_params.lqtyTo, lqtyGain);
+        withdrawStabilityGains(ethGain, lqtyGain, _params.wethTo, _params.lqtyTo);
 
         logger.Log(
             address(this),
