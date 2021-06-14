@@ -38,7 +38,7 @@ contract LiquityClaim is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Dont forget natspec
+    /// @notice Claims remaining collateral from the user's closed Trove
     function _liquityClaim(address _to) internal returns (uint256) {
         uint256 claimableColl = CollSurplusPool.getCollateral(address(this));
 
