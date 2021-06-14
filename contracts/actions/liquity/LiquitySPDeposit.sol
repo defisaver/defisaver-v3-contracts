@@ -67,10 +67,7 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
             msg.sender,
             "LiquitySPDeposit",
             abi.encode(
-                _params.lusdAmount,
-                _params.from,
-                _params.wethTo,
-                _params.lqtyTo,
+                _params,
                 ethGain,
                 lqtyGain
             )

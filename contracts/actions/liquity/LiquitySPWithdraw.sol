@@ -67,10 +67,7 @@ contract LiquitySPWithdraw is ActionBase, LiquityHelper {
             msg.sender,
             "LiquitySPWithdraw",
             abi.encode(
-                _params.lusdAmount,
-                _params.to,
-                _params.wethTo,
-                _params.lqtyTo,
+                _params,
                 ethGain,
                 lqtyGain
             )
