@@ -187,10 +187,6 @@ interface IStabilityPool {
      * The front end's compounded stake is equal to the sum of its depositors' compounded deposits.
      */
     function getCompoundedFrontEndStake(address _frontEnd) external view returns (uint);
-
-    /*
-     * Fallback function
-     * Only callable by Active Pool, it just accounts for ETH received
-     * receive() external payable;
-     */
+     
+     // function deposits(address) external view returns ()
 }

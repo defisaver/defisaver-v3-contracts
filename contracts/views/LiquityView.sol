@@ -138,4 +138,10 @@ contract LiquityView is LiquityHelper {
         ethGain = LQTYStaking.getPendingETHGain(_user);
         lusdGain = LQTYStaking.getPendingLUSDGain(_user);
     }
+    
+    function getDepositorInfo(address _depositor) external view returns(uint256 compoundedLUSD, uint256 ethGain, uint256 lqtyGain) {
+        compoundedLUSD = StabilityPool.getCompoundedLUSDDeposit(_depositor);
+        ethGain = StabilityPool.getDepositorETHGain(_depositor);
+        lqtyGain = StabilityPool.getDepositorLQTYGain(_depositor);
+    }
 }

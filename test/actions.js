@@ -672,6 +672,50 @@ const liquityUnstake = async (proxy, lqtyAmount, to, wethTo, lusdTo) => {
     return proxy['execute(address,bytes)'](liquityUnstakeAddr, functionData, { gasLimit: 3000000 });
 };
 
+const liquitySPDeposit = async (proxy, LUSDAmount, from, wethTo, lqtyTo) => {
+    const liquitySPDepositAddr = await getAddrFromRegistry('LiquitySPDeposit');
+
+    const liquitySPDepositAction = new dfs.actions.liquity.LiquitySPDepositAction(
+        LUSDAmount, from, wethTo, lqtyTo,
+    );
+
+    const functionData = liquitySPDepositAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquitySPDepositAddr, functionData, { gasLimit: 3000000 });
+};
+
+const liquitySPWithdraw = async (proxy, LUSDAmount, to, wethTo, lqtyTo) => {
+    const liquitySPWithdrawAddr = await getAddrFromRegistry('LiquitySPWithdraw');
+
+    const liquitySPWithdrawAction = new dfs.actions.liquity.LiquitySPWithdrawAction(
+        LUSDAmount, to, wethTo, lqtyTo,
+    );
+
+    const functionData = liquitySPWithdrawAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquitySPWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
+
+const liquityEthGainToTrove = async (proxy, lqtyTo) => {
+    const liquityEthGainToTroveAddr = await getAddrFromRegistry('LiquityEthGainToTrove');
+
+    const liquityViewAddr = await getAddrFromRegistry('LiquityView');
+    const liquityView = await hre.ethers.getContractAt('LiquityView', liquityViewAddr);
+
+    const { ethGain } = await liquityView['getDepositorInfo(address)'](proxy.address);
+    const { upperHint, lowerHint } = await getHints(
+        proxy.address, LiquityActionIds.Supply, '0x0000000000000000000000000000000000000000', ethGain, 0,
+    );
+
+    const liquityEthGainToTroveAction = new dfs.actions.liquity.LiquityEthGainToTroveAction(
+        lqtyTo, upperHint, lowerHint,
+    );
+
+    const functionData = liquityEthGainToTroveAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](liquityEthGainToTroveAddr, functionData, { gasLimit: 3000000 });
+};
+
 const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amount0Desired,
     amount1Desired, recipient, from) => {
     const uniMintV3Address = await getAddrFromRegistry('UniMintV3');
@@ -898,6 +942,17 @@ const yearnWithdraw = async (token, amount, from, to, proxy) => {
     return proxy['execute(address,bytes)'](yearnWithdrawAddress, functionData, { gasLimit: 3000000 });
 };
 
+const lidoStake = async (amount, from, to, proxy) => {
+    const lidoStakeAddress = await getAddrFromRegistry('LidoStake');
+    const lidoStakeAction = new dfs.actions.lido.LidoStakeAction(
+        amount,
+        from,
+        to,
+    );
+    const functionData = lidoStakeAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](lidoStakeAddress, functionData, { gasLimit: 3000000 });
+};
+
 module.exports = {
     sell,
     buy,
@@ -939,6 +994,9 @@ module.exports = {
     liquityClose,
     liquityStake,
     liquityUnstake,
+    liquitySPDeposit,
+    liquitySPWithdraw,
+    liquityEthGainToTrove,
 
     uniV3Mint,
     uniV3Supply,
@@ -950,6 +1008,8 @@ module.exports = {
 
     yearnSupply,
     yearnWithdraw,
+
+    lidoStake,
 
     buyTokenIfNeeded,
 };
