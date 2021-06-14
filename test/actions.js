@@ -918,6 +918,17 @@ const yearnWithdraw = async (token, amount, from, to, proxy) => {
     return proxy['execute(address,bytes)'](yearnWithdrawAddress, functionData, { gasLimit: 3000000 });
 };
 
+const lidoStake = async (amount, from, to, proxy) => {
+    const lidoStakeAddress = await getAddrFromRegistry('LidoStake');
+    const lidoStakeAction = new dfs.actions.lido.LidoStakeAction(
+        amount,
+        from,
+        to,
+    );
+    const functionData = lidoStakeAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](lidoStakeAddress, functionData, { gasLimit: 3000000 });
+};
+
 module.exports = {
     sell,
     buy,
@@ -971,6 +982,8 @@ module.exports = {
 
     yearnSupply,
     yearnWithdraw,
+
+    lidoStake,
 
     buyTokenIfNeeded,
 };

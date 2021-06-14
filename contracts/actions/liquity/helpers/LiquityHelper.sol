@@ -15,6 +15,7 @@ import "../../../interfaces/liquity/ILQTYStaking.sol";
 contract LiquityHelper {
     using TokenUtils for address;
 
+    uint constant public LUSD_GAS_COMPENSATION = 200e18;
     address constant public LUSDTokenAddr = 0x5f98805A4E8be255a32880FDeC7F6728C6568bA0;
     address constant public LQTYTokenAddr = 0x6DEA81C8171D0bA574754EF6F8b412F2Ed88c54D;
     address constant public PriceFeedAddr = 0x4c517D4e2C851CA76d7eC94B805269Df0f2201De;
