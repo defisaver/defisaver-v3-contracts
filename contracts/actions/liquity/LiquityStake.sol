@@ -67,10 +67,7 @@ contract LiquityStake is ActionBase, LiquityHelper {
             msg.sender,
             "LiquityStake",
             abi.encode(
-                _params.lqtyAmount,
-                _params.from,
-                _params.wethTo,
-                _params.lusdTo,
+                _params,
                 ethGain,
                 lusdGain
             )

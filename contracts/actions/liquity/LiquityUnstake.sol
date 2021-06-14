@@ -66,10 +66,7 @@ contract LiquityUnstake is ActionBase, LiquityHelper {
             msg.sender,
             "LiquityUnstake",
             abi.encode(
-                _params.lqtyAmount,
-                _params.to,
-                _params.wethTo,
-                _params.lusdTo,
+                _params,
                 ethGain,
                 lusdGain
             )
