@@ -9,6 +9,8 @@ import "../../../interfaces/liquity/IHintHelpers.sol";
 import "../../../interfaces/liquity/ISortedTroves.sol";
 
 contract LiquityHelper {
+    uint constant public LUSD_GAS_COMPENSATION = 200e18;
+    
     address constant public LUSDTokenAddr = 0x5f98805A4E8be255a32880FDeC7F6728C6568bA0;
     address constant public PriceFeedAddr = 0x4c517D4e2C851CA76d7eC94B805269Df0f2201De;
     address constant public BorrowerOperationsAddr = 0x24179CD81c9e782A4096035f7eC97fB8B783e007;
