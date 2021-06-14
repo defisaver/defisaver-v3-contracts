@@ -86,19 +86,24 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
             _params.maxFeePercentage
         );
 
-        uint256 lusdAmountActual = lusdBefore.sub(LUSDTokenAddr.getBalance(address(this)));
+        uint256 lusdAmountUsed = lusdBefore.sub(LUSDTokenAddr.getBalance(address(this)));   // It isn't guaranteed that the whole requested LUSD amount will be used
         uint256 ethRedeemed = address(this).balance.sub(ethBefore);
+        uint256 lusdToReturn = _params.lusdAmount.sub(lusdAmountUsed);
 
-        TokenUtils.depositWeth(ethRedeemed);
-        TokenUtils.WETH_ADDR.withdrawTokens(_params.to, ethRedeemed);
-        LUSDTokenAddr.withdrawTokens(_params.from, _params.lusdAmount.sub(lusdAmountActual));
+        if (ethRedeemed > 0) {
+            TokenUtils.depositWeth(ethRedeemed);
+            TokenUtils.WETH_ADDR.withdrawTokens(_params.to, ethRedeemed);
+        }
+        if (lusdToReturn > 0) {
+            LUSDTokenAddr.withdrawTokens(_params.from, lusdToReturn);
+        }
 
         logger.Log(
             address(this),
             msg.sender,
             "LiquityRedeem",
             abi.encode(
-                lusdAmountActual,
+                lusdAmountUsed,
                 ethRedeemed,
                 _params.maxFeePercentage,
                 _params.from,
