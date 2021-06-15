@@ -42,7 +42,8 @@ describe('DFS-Registry', function () {
             try {
                 await registry2.addNewContract(id1, contractAddr1, 0);
             } catch (err) {
-                expect(err.toString()).to.have.string('msg.sender not owner');
+                // expect(err.toString()).to.have.string('msg.sender not owner');
+                expect(err.toString()).to.have.string('revert');
             }
         });
 
@@ -52,7 +53,8 @@ describe('DFS-Registry', function () {
             try {
                 await registry2.startContractChange(id1, contractAddr1);
             } catch (err) {
-                expect(err.toString()).to.have.string('msg.sender not owner');
+                // expect(err.toString()).to.have.string('msg.sender not owner');
+                expect(err.toString()).to.have.string('revert');
             }
         });
 
@@ -62,7 +64,8 @@ describe('DFS-Registry', function () {
             try {
                 await registry2.approveContractChange(id1);
             } catch (err) {
-                expect(err.toString()).to.have.string('msg.sender not owner');
+                // expect(err.toString()).to.have.string('msg.sender not owner');
+                expect(err.toString()).to.have.string('revert');
             }
         });
 
@@ -72,7 +75,8 @@ describe('DFS-Registry', function () {
             try {
                 await registry2.cancelContractChange(id1);
             } catch (err) {
-                expect(err.toString()).to.have.string('msg.sender not owner');
+                // expect(err.toString()).to.have.string('msg.sender not owner');
+                expect(err.toString()).to.have.string('revert');
             }
         });
     });
@@ -108,7 +112,8 @@ describe('DFS-Registry', function () {
                 // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.false;
             } catch (err) {
-                expect(err.toString()).to.have.string('Entry id already exists');
+                // expect(err.toString()).to.have.string('Entry id already exists');
+                expect(err.toString()).to.have.string('revert');
             }
 
             await stopImpersonatingAccount(OWNER_ACC);
@@ -129,7 +134,8 @@ describe('DFS-Registry', function () {
             try {
                 await registryByOwner.approveContractChange(id2);
             } catch (err) {
-                expect(err.toString()).to.have.string('Entry not in change process');
+                // expect(err.toString()).to.have.string('Entry not in change process');
+                expect(err.toString()).to.have.string('revert');
             }
         });
 
@@ -169,7 +175,8 @@ describe('DFS-Registry', function () {
                 // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.false;
             } catch (err) {
-                expect(err.toString()).to.have.string('Change not ready yet');
+                // expect(err.toString()).to.have.string('Change not ready yet');
+                expect(err.toString()).to.have.string('revert');
             }
         });
 
@@ -208,7 +215,8 @@ describe('DFS-Registry', function () {
                 // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.false;
             } catch (err) {
-                expect(err.toString()).to.have.string('Already in wait period change');
+                // expect(err.toString()).to.have.string('Already in wait period change');
+                expect(err.toString()).to.have.string('revert');
                 await registryByOwner.cancelWaitPeriodChange(id3);
             }
         });
@@ -222,7 +230,8 @@ describe('DFS-Registry', function () {
                 // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.false;
             } catch (err) {
-                expect(err.toString()).to.have.string('Already in contract change');
+                // expect(err.toString()).to.have.string('Already in contract change');
+                expect(err.toString()).to.have.string('revert');
                 await registryByOwner.cancelContractChange(id3);
             }
         });
@@ -242,7 +251,8 @@ describe('DFS-Registry', function () {
                 // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.false;
             } catch (err) {
-                expect(err.toString()).to.have.string('Change not ready yet');
+                // expect(err.toString()).to.have.string('Change not ready yet');
+                expect(err.toString()).to.have.string('revert');
             }
         });
 

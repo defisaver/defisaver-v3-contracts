@@ -29,6 +29,32 @@
 		},
 		{
 			"inputs": [],
+			"name": "CollSurplusPool",
+			"outputs": [
+				{
+					"internalType": "contract ICollSurplusPool",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "CollSurplusPoolAddr",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "HintHelpers",
 			"outputs": [
 				{
@@ -55,12 +81,64 @@
 		},
 		{
 			"inputs": [],
+			"name": "LQTYStaking",
+			"outputs": [
+				{
+					"internalType": "contract ILQTYStaking",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "LQTYStakingAddr",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "LQTYTokenAddr",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "LUSDTokenAddr",
 			"outputs": [
 				{
 					"internalType": "address",
 					"name": "",
 					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "LUSD_GAS_COMPENSATION",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
 				}
 			],
 			"stateMutability": "view",
@@ -108,6 +186,32 @@
 		{
 			"inputs": [],
 			"name": "SortedTrovesAddr",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "StabilityPool",
+			"outputs": [
+				{
+					"internalType": "contract IStabilityPool",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "StabilityPoolAddr",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -244,6 +348,35 @@
 		{
 			"inputs": [
 				{
+					"internalType": "address",
+					"name": "_depositor",
+					"type": "address"
+				}
+			],
+			"name": "getDepositorInfo",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "compoundedLUSD",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "ethGain",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "lqtyGain",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
 					"internalType": "uint256",
 					"name": "_collAmount",
 					"type": "uint256"
@@ -275,6 +408,35 @@
 					"internalType": "address",
 					"name": "lowerHint",
 					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "getStakeInfo",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "stake",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "ethGain",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "lusdGain",
+					"type": "uint256"
 				}
 			],
 			"stateMutability": "view",

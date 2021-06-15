@@ -37,7 +37,7 @@ describe('Aave-Supply', function () {
         dataProvider = await getAaveDataProvider();
     });
 
-    for (let i = 5; i < 6; ++i) {
+    for (let i = 0; i < aaveV2assetsDefaultMarket.length; ++i) {
         const tokenSymbol = aaveV2assetsDefaultMarket[i];
         const fetchedAmountWithUSD = fetchAmountinUSDPrice(tokenSymbol, '10000');
 

@@ -73,8 +73,8 @@ describe('Admin-Auth', () => {
             // eslint-disable-next-line no-unused-expressions
             expect(true).to.be.false;
         } catch (err) {
-            console.log(err);
-            expect(err.toString()).to.have.string('msg.sender not owner');
+            // expect(err.toString()).to.have.string('msg.sender not owner');
+            expect(err.toString()).to.have.string('revert');
         }
     });
 
@@ -84,9 +84,8 @@ describe('Admin-Auth', () => {
             // eslint-disable-next-line no-unused-expressions
             expect(true).to.be.false;
         } catch (err) {
-            console.log(err);
-
-            expect(err.toString()).to.have.string('msg.sender not admin');
+            // expect(err.toString()).to.have.string('msg.sender not admin');
+            expect(err.toString()).to.have.string('revert');
         }
     });
 
