@@ -133,6 +133,21 @@ contract LiquityView is LiquityHelper {
         (upperHint, lowerHint) = SortedTroves.findInsertPosition(NICR, hintAddress, hintAddress);
     }
 
+    function getRedemptionHints(
+        uint _LUSDamount, 
+        uint _price,
+        uint _maxIterations
+    )
+        external
+        view
+        returns (
+        address firstRedemptionHint,
+        uint partialRedemptionHintNICR,
+        uint truncatedLUSDamount
+    ) {
+        return HintHelpers.getRedemptionHints(_LUSDamount, _price, _maxIterations);
+    }
+    
     function getStakeInfo(address _user) external view returns (uint256 stake, uint256 ethGain, uint256 lusdGain) {
         stake = LQTYStaking.stakes(_user);
         ethGain = LQTYStaking.getPendingETHGain(_user);
