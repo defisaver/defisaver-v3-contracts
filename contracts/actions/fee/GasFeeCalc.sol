@@ -18,7 +18,7 @@ contract GasFeeCalc is ActionBase, GasFeeHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory,
         uint8[] memory,
         bytes32[] memory
@@ -32,7 +32,7 @@ contract GasFeeCalc is ActionBase, GasFeeHelper {
 
     /// @inheritdoc ActionBase
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes[] memory _callData) public payable override {}
+    function executeActionDirect(bytes memory _callData) public payable override {}
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {
@@ -40,7 +40,7 @@ contract GasFeeCalc is ActionBase, GasFeeHelper {
     }
 
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
         inputData = abi.decode(_callData[0], (Params));
     }
 }

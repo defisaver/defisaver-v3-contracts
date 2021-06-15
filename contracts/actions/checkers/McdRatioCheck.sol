@@ -21,7 +21,7 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -43,7 +43,7 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
 
     /// @inheritdoc ActionBase
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes[] memory _callData) public payable override {}
+    function executeActionDirect(bytes memory _callData) public payable override {}
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {
@@ -57,7 +57,7 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
         return true;
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
         inputData = abi.decode(_callData[0], (Params));
     }
 }

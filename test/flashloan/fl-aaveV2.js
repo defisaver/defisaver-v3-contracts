@@ -25,17 +25,17 @@ const AAVE_NO_DEBT_MODE = 0;
 describe('FL-AaveV2', function () {
     this.timeout(60000);
 
-    let senderAcc; let proxy; let taskExecutorAddr; let
+    let senderAcc; let proxy; let RecipeExecutorAddr; let
         aaveFl;
 
     const FLASHLOAN_TOKENS = ['WETH', 'DAI', 'USDC', 'WBTC', 'USDT', 'YFI', 'BAT', 'LINK', 'MKR'];
 
     before(async () => {
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
 
         aaveFl = await redeploy('FLAaveV2');
         await redeploy('SendToken');
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -102,7 +102,7 @@ describe('FL-AaveV2', function () {
 
             await send(assetInfo.address, proxy.address, feeAmount);
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {
+            await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], {
                 gasLimit: 3000000,
             });
         });

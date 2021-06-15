@@ -1,4 +1,4 @@
-const { deployContract } = require('./utils/deployer');
+const { deployContract, deployAsOwner } = require('./utils/deployer');
 const { start } = require('./utils/starter');
 
 const { changeConstantInFiles } = require('./utils/utils');
@@ -7,29 +7,30 @@ const { redeploy } = require('../test/utils');
 
 async function main() {
     const proxyAuth = await deployContract('ProxyAuth');
+    const reg = await deployAsOwner('DFSRegistry');
 
-    await changeConstantInFiles(
-        './contracts',
-        ['StrategyExecutor'],
-        'PROXY_AUTH_ADDR',
-        proxyAuth.address,
-    );
+    // await changeConstantInFiles(
+    //     './contracts',
+    //     ['StrategyExecutor'],
+    //     'PROXY_AUTH_ADDR',
+    //     proxyAuth.address,
+    // );
 
-    await run('compile');
+    // await run('compile');
 
     // await redeploy('StrategyExecutor');
     // await redeploy('SubscriptionProxy');
     // await redeploy('Subscriptions');
-    // await redeploy('TaskExecutor');
+    // await redeploy('RecipeExecutor');
 
     // // mcd actions
-    // await redeploy('McdSupply');
-    // await redeploy('McdWithdraw');
-    // await redeploy('McdGenerate');
-    // await redeploy('McdPayback');
-    // await redeploy('McdOpen');
-    // await redeploy('McdGive');
-    // await redeploy('McdMerge');
+    await redeploy('McdSupply', reg.address);
+    await redeploy('McdWithdraw', reg.address);
+    await redeploy('McdGenerate', reg.address);
+    await redeploy('McdPayback', reg.address);
+    await redeploy('McdOpen', reg.address);
+    await redeploy('McdGive', reg.address);
+    await redeploy('McdMerge', reg.address);
 
     // // aave actions
     // await redeploy('AaveSupply');

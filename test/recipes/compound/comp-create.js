@@ -36,14 +36,14 @@ describe('Compound: Create', function () {
     let senderAcc;
     let proxy;
     let uniWrapper;
-    let taskExecutorAddr;
+    let RecipeExecutorAddr;
     let compView;
     let dydxFlAddr;
 
     before(async () => {
         await redeploy('CompSupply');
         await redeploy('CompBorrow');
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
         await redeploy('FLDyDx');
         await redeploy('DFSSell');
 
@@ -51,7 +51,7 @@ describe('Compound: Create', function () {
         dydxFlAddr = await getAddrFromRegistry('FLDyDx');
 
         uniWrapper = await redeploy('UniswapWrapperV3');
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -111,7 +111,7 @@ describe('Compound: Create', function () {
 
                 const functionData = recipe.encodeForDsProxyCall();
 
-                await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
+                await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
                 const collBalanceAfter = await balanceOf(collAddress, senderAcc.address);
                 const debtBalanceAfter = await balanceOf(
@@ -213,7 +213,7 @@ describe('Compound: Create', function () {
 
         const functionData = recipe.encodeForDsProxyCall();
 
-        await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
+        await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
         const collBalanceAfter = await balanceOf(collAddress, senderAcc.address);
         const debtBalanceAfter = await balanceOf(

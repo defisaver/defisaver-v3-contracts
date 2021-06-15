@@ -22,16 +22,16 @@ describe('Unwrap-Eth', function () {
     this.timeout(80000);
 
     let senderAcc; let proxy; let
-        uniWrapper; let taskExecutorAddr;
+        uniWrapper; let RecipeExecutorAddr;
 
     before(async () => {
         await redeploy('WrapEth');
         await redeploy('UnwrapEth');
         await redeploy('DFSSell');
         uniWrapper = await redeploy('UniswapWrapperV3');
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
 
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -75,7 +75,7 @@ describe('Unwrap-Eth', function () {
         const ethBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
         console.log(`Eth proxy before: ${ethBalanceBefore / 1e18}`);
 
-        await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
+        await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
         const ethBalanceAfter = await balanceOf(ETH_ADDR, senderAcc.address);
         console.log(`Eth proxy after: ${ethBalanceAfter / 1e18}`);

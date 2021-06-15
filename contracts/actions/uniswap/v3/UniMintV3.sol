@@ -31,7 +31,7 @@ contract UniMintV3 is ActionBase, DSMath{
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -46,7 +46,7 @@ contract UniMintV3 is ActionBase, DSMath{
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory uniData = parseInputs(_callData);
         _uniCreatePosition(uniData);
         
@@ -116,7 +116,7 @@ contract UniMintV3 is ActionBase, DSMath{
         (tokenId, liquidity, amount0, amount1) = positionManager.mint(mintParams);
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (

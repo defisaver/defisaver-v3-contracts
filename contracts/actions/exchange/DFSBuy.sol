@@ -17,7 +17,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -52,7 +52,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override   {
+    function executeActionDirect(bytes memory _callData) public payable override   {
         (ExchangeData memory exchangeData, address from, address to) = parseInputs(_callData);
 
         _dfsBuy(exchangeData, from, to, DIRECT_FEE);
@@ -115,7 +115,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
         return amountBought;
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         public
         pure
         returns (

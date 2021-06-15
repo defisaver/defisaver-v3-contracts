@@ -18,7 +18,7 @@ contract CompWithdraw is ActionBase, CompHelper, DSMath {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -35,7 +35,7 @@ contract CompWithdraw is ActionBase, CompHelper, DSMath {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         (address cTokenAddr, uint256 amount, address to) = parseInputs(_callData);
 
         _withdraw(cTokenAddr, amount, to);
@@ -97,7 +97,7 @@ contract CompWithdraw is ActionBase, CompHelper, DSMath {
         return _amount;
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (

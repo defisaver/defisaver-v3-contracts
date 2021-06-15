@@ -4,6 +4,7 @@ const {
     impersonateAccount,
     stopImpersonatingAccount,
     getGasUsed,
+    getNameId,
     OWNER_ACC,
 } = require('./utils');
 
@@ -29,20 +30,22 @@ const getLatestStrategyId = async () => {
     return latestStrategyId;
 };
 
-const subTemplate = async (proxy, templateName, triggerNames, actionNames, paramMapping) => {
-    const subProxyAddr = await getAddrFromRegistry('SubscriptionProxy');
+const subTemplate = async (regAddr, proxy, templateName, triggerNames, actionNames, paramMapping) => {
+    const subProxyAddr = await getAddrFromRegistry('SubscriptionProxy', regAddr);
 
-    // eslint-disable-next-line max-len
-    const triggerIds = triggerNames.map((trigName) => hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(trigName)));
+    console.log('cool');
 
-    // eslint-disable-next-line max-len
-    const actionIds = actionNames.map((actionName) => hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(actionName)));
+    const triggerIds = triggerNames.map((trigName) => getNameId(trigName));
+
+    const actionIds = actionNames.map((actionName) => getNameId(actionName));
 
     const SubscriptionProxy = await hre.ethers.getContractFactory('SubscriptionProxy');
     const functionData = SubscriptionProxy.interface.encodeFunctionData(
         'createTemplate',
         [templateName, triggerIds, actionIds, paramMapping],
     );
+
+    console.log('Before');
 
     const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
         gasLimit: 5000000,
@@ -73,11 +76,11 @@ const subStrategy = async (proxy, templateId, active, subData, triggerData) => {
     return latestStrategyId;
 };
 
-const addBotCaller = async (botAddr) => {
+const addBotCaller = async (regAddr, botAddr) => {
     await impersonateAccount(OWNER_ACC);
 
     const signer = await hre.ethers.provider.getSigner(OWNER_ACC);
-    const botAuthAddr = await getAddrFromRegistry('BotAuth');
+    const botAuthAddr = await getAddrFromRegistry('BotAuth', regAddr);
 
     const botAuthInstance = await hre.ethers.getContractFactory('BotAuth', signer);
     let botAuth = await botAuthInstance.attach(botAuthAddr);

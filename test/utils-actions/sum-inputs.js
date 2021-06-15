@@ -15,14 +15,14 @@ const {
 describe('Sum-Inputs', function () {
     this.timeout(80000);
 
-    let taskExecutorAddr; let senderAcc; let proxy;
+    let RecipeExecutorAddr; let senderAcc; let proxy;
 
     before(async () => {
         await redeploy('PullToken');
         await redeploy('SumInputs');
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
 
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
     });
@@ -39,7 +39,7 @@ describe('Sum-Inputs', function () {
         ]);
         const functionData = testSumInputs.encodeForDsProxyCall()[1];
 
-        await proxy['execute(address,bytes)'](taskExecutorAddr, functionData);
+        await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData);
 
         expect(await balanceOf(WETH_ADDRESS, proxy.address)).to.be.eq(hre.ethers.utils.parseUnits('9', 18));
     });
@@ -56,6 +56,6 @@ describe('Sum-Inputs', function () {
         ]);
         const functionData = testSumInputs.encodeForDsProxyCall()[1];
 
-        await expect(proxy['execute(address,bytes)'](taskExecutorAddr, functionData)).to.be.reverted;
+        await expect(proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData)).to.be.reverted;
     });
 });

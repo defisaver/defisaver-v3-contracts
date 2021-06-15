@@ -33,10 +33,10 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
-    /// @dev Function sig of TaskExecutor._executeActionsFromFL()
+    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
 
-    bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
+    bytes4 constant TASK_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     struct FLAaveV2Data {
         address[] tokens;
@@ -49,7 +49,7 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory,
         uint8[] memory,
         bytes32[] memory
@@ -69,7 +69,7 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes[] memory _callData) public override payable {}
+    function executeActionDirect(bytes memory _callData) public override payable {}
 
     /// @inheritdoc ActionBase
     function actionType() public override pure returns (uint8) {
@@ -103,7 +103,7 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
         return _flData.amounts[0];
     }
 
-    /// @notice Aave callback function that formats and calls back TaskExecutor
+    /// @notice Aave callback function that formats and calls back RecipeExecutor
     function executeOperation(
         address[] memory _assets,
         uint256[] memory _amounts,
@@ -114,18 +114,18 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
         require(msg.sender == AAVE_LENDING_POOL, ERR_ONLY_AAVE_CALLER);
         require(_initiator == address(this), ERR_SAME_CALLER);
 
-        (Task memory currTask, address proxy) = abi.decode(_params, (Task, address));
+        (Recipe memory currTask, address proxy) = abi.decode(_params, (Recipe, address));
 
         // Send FL amounts to user proxy
         for (uint256 i = 0; i < _assets.length; ++i) {
             _assets[i].withdrawTokens(proxy, _amounts[i]);
         }
 
-        address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
+        address payable RecipeExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
 
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
-            taskExecutor,
+            RecipeExecutor,
             abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, bytes32(add(_amounts[0],_fees[0])))
         );
 
@@ -137,7 +137,7 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
         return true;
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         public
         pure
         returns (FLAaveV2Data memory flData)

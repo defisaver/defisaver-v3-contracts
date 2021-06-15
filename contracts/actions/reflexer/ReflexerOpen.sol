@@ -10,7 +10,7 @@ import "./helpers/ReflexerHelper.sol";
 contract ReflexerOpen is ActionBase, ReflexerHelper {
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -25,7 +25,7 @@ contract ReflexerOpen is ActionBase, ReflexerHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         address adapterAddr = parseInputs(_callData);
 
         _reflexerOpen(adapterAddr);
@@ -47,7 +47,7 @@ contract ReflexerOpen is ActionBase, ReflexerHelper {
         logger.Log(address(this), msg.sender, "ReflexerOpen", abi.encode(safeId, _adapterAddr));
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (address adapterAddr) {
+    function parseInputs(bytes memory _callData) internal pure returns (address adapterAddr) {
         adapterAddr = abi.decode(_callData[0], (address));
     }
 }

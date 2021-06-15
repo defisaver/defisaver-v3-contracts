@@ -14,7 +14,7 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -31,7 +31,7 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         (uint256 safeId, uint256 amount, address from) = parseInputs(_callData);
 
         _reflexerPayback(safeId, amount, from);
@@ -82,7 +82,7 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
         return _amount;
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (

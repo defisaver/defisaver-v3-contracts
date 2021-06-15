@@ -76,6 +76,8 @@ const buy = async (proxy, sellAddr, buyAddr,
 const openMcd = async (proxy, makerAddresses, joinAddr) => {
     const mcdOpenAddr = await getAddrFromRegistry('McdOpen');
 
+    console.log(`mcdOpenAddr: ${mcdOpenAddr}`);
+
     const openMyVault = new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR);
     const functionData = openMyVault.encodeForDsProxyCall()[1];
 

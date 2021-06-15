@@ -20,7 +20,7 @@ contract LiquityBorrow is ActionBase, LiquityHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -46,7 +46,7 @@ contract LiquityBorrow is ActionBase, LiquityHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
         _liquityBorrow(params);
@@ -80,7 +80,7 @@ contract LiquityBorrow is ActionBase, LiquityHelper {
         return params.lusdAmount;
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
         params = abi.decode(_callData[0], (Params));
     }
 }

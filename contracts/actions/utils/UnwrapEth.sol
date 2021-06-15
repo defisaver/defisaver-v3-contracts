@@ -12,7 +12,7 @@ contract UnwrapEth is ActionBase {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -26,7 +26,7 @@ contract UnwrapEth is ActionBase {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         (uint256 amount, address to) = parseInputs(_callData);
 
         _unwrapEth(amount, to);
@@ -55,7 +55,7 @@ contract UnwrapEth is ActionBase {
         return _amount;
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (uint256 amount, address to)

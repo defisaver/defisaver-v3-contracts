@@ -12,7 +12,7 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper {
 
     enum RatioState { OVER, UNDER }
 
-    function isTriggered(bytes[] memory _callData, bytes[] memory _subData)
+    function isTriggered(bytes memory _callData, bytes[] memory _subData)
         public
         view
         override

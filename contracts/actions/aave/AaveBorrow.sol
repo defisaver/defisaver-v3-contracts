@@ -13,7 +13,7 @@ contract AaveBorrow is ActionBase, AaveHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -40,7 +40,7 @@ contract AaveBorrow is ActionBase, AaveHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         (
             address market,
             address tokenAddr,
@@ -96,7 +96,7 @@ contract AaveBorrow is ActionBase, AaveHelper {
         return _amount;
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (

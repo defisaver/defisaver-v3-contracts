@@ -13,7 +13,7 @@ contract PullToken is ActionBase {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -30,7 +30,7 @@ contract PullToken is ActionBase {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable {
+    function executeActionDirect(bytes memory _callData) public override payable {
         (address tokenAddr, address from, uint amount) = parseInputs(_callData);
 
         _pullToken(tokenAddr, from, amount);
@@ -56,7 +56,7 @@ contract PullToken is ActionBase {
         return _amount;
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (

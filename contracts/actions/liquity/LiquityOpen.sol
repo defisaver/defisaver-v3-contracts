@@ -22,7 +22,7 @@ contract LiquityOpen is ActionBase, LiquityHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -55,7 +55,7 @@ contract LiquityOpen is ActionBase, LiquityHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
         _liquityOpen(params);
@@ -101,7 +101,7 @@ contract LiquityOpen is ActionBase, LiquityHelper {
         return _params.collAmount;
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
         params = abi.decode(_callData[0], (Params));
     }
 }

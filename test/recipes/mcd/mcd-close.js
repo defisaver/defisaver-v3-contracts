@@ -33,11 +33,11 @@ describe('Mcd-Close', function () {
     this.timeout(80000);
 
     let makerAddresses; let senderAcc; let proxy; let dydxFlAddr; let uniWrapper; let
-        taskExecutorAddr;
+        RecipeExecutorAddr;
     // let mcdView;
 
     before(async () => {
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
         await redeploy('FLDyDx');
         await redeploy('DFSBuy');
         await redeploy('DFSSell');
@@ -48,7 +48,7 @@ describe('Mcd-Close', function () {
         makerAddresses = await fetchMakerAddresses();
         uniWrapper = await redeploy('UniswapWrapperV3');
 
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
         dydxFlAddr = await getAddrFromRegistry('FLDyDx');
 
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -118,7 +118,7 @@ describe('Mcd-Close', function () {
             const daiBalanceBefore = await balanceOf(daiAddr, senderAcc.address);
             console.log(`Dai balance before: ${daiBalanceBefore / 1e18}`);
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
+            await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
             const daiBalanceAfter = await balanceOf(daiAddr, senderAcc.address);
             console.log(`Dai balance before: ${daiBalanceAfter / 1e18}`);
@@ -174,7 +174,7 @@ describe('Mcd-Close', function () {
             const collBalanceBefore = await balanceOf(tokenAddr, senderAcc.address);
             console.log(`Coll balance before: ${collBalanceBefore / 10 ** tokenData.decimals}`);
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
+            await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
             const collBalanceAfter = await balanceOf(tokenAddr, senderAcc.address);
             console.log(`Coll balance after: ${collBalanceAfter / 10 ** tokenData.decimals}`);

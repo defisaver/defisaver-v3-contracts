@@ -17,7 +17,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -52,7 +52,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public override payable   {
+    function executeActionDirect(bytes memory _callData) public override payable   {
         (ExchangeData memory exchangeData, address from, address to) = parseInputs(_callData);
 
         _dfsSell(exchangeData, from, to, DIRECT_FEE);
@@ -109,7 +109,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         return exchangedAmount;
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         public
         pure
         returns (

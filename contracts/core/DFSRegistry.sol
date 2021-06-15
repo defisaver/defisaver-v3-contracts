@@ -29,22 +29,22 @@ contract DFSRegistry is AdminAuth {
         bool exists;
     }
 
-    mapping(bytes32 => Entry) public entries;
-    mapping(bytes32 => address) public previousAddresses;
+    mapping(bytes4 => Entry) public entries;
+    mapping(bytes4 => address) public previousAddresses;
 
-    mapping(bytes32 => address) public pendingAddresses;
-    mapping(bytes32 => uint256) public pendingWaitTimes;
+    mapping(bytes4 => address) public pendingAddresses;
+    mapping(bytes4 => uint256) public pendingWaitTimes;
 
     /// @notice Given an contract id returns the registered address
     /// @dev Id is keccak256 of the contract name
     /// @param _id Id of contract
-    function getAddr(bytes32 _id) public view returns (address) {
+    function getAddr(bytes4 _id) public view returns (address) {
         return entries[_id].contractAddr;
     }
 
     /// @notice Helper function to easily query if id is registered
     /// @param _id Id of contract
-    function isRegistered(bytes32 _id) public view returns (bool) {
+    function isRegistered(bytes4 _id) public view returns (bool) {
         return entries[_id].exists;
     }
 
@@ -55,7 +55,7 @@ contract DFSRegistry is AdminAuth {
     /// @param _contractAddr Address of the contract
     /// @param _waitPeriod Amount of time to wait before a contract address can be changed
     function addNewContract(
-        bytes32 _id,
+        bytes4 _id,
         address _contractAddr,
         uint256 _waitPeriod
     ) public onlyOwner {
@@ -84,7 +84,7 @@ contract DFSRegistry is AdminAuth {
     /// @notice Reverts to the previous address immediately
     /// @dev In case the new version has a fault, a quick way to fallback to the old contract
     /// @param _id Id of contract
-    function revertToPreviousAddress(bytes32 _id) public onlyOwner {
+    function revertToPreviousAddress(bytes4 _id) public onlyOwner {
         require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
         require(previousAddresses[_id] != address(0), ERR_EMPTY_PREV_ADDR);
 
@@ -103,7 +103,7 @@ contract DFSRegistry is AdminAuth {
     /// @dev Can override a change that is currently in progress
     /// @param _id Id of contract
     /// @param _newContractAddr Address of the new contract
-    function startContractChange(bytes32 _id, address _newContractAddr) public onlyOwner {
+    function startContractChange(bytes4 _id, address _newContractAddr) public onlyOwner {
         require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
         require(!entries[_id].inWaitPeriodChange, ERR_ALREADY_IN_WAIT_PERIOD_CHANGE);
 
@@ -122,7 +122,7 @@ contract DFSRegistry is AdminAuth {
 
     /// @notice Changes new contract address, correct time must have passed
     /// @param _id Id of contract
-    function approveContractChange(bytes32 _id) public onlyOwner {
+    function approveContractChange(bytes4 _id) public onlyOwner {
         require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
         require(entries[_id].inContractChange, ERR_ENTRY_NOT_IN_CHANGE);
         require(
@@ -148,7 +148,7 @@ contract DFSRegistry is AdminAuth {
 
     /// @notice Cancel pending change
     /// @param _id Id of contract
-    function cancelContractChange(bytes32 _id) public onlyOwner {
+    function cancelContractChange(bytes4 _id) public onlyOwner {
         require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
         require(entries[_id].inContractChange, ERR_ENTRY_NOT_IN_CHANGE);
 
@@ -169,7 +169,7 @@ contract DFSRegistry is AdminAuth {
     /// @notice Starts the change for waitPeriod
     /// @param _id Id of contract
     /// @param _newWaitPeriod New wait time
-    function startWaitPeriodChange(bytes32 _id, uint256 _newWaitPeriod) public onlyOwner {
+    function startWaitPeriodChange(bytes4 _id, uint256 _newWaitPeriod) public onlyOwner {
         require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
         require(!entries[_id].inContractChange, ERR_ALREADY_IN_CONTRACT_CHANGE);
 
@@ -188,7 +188,7 @@ contract DFSRegistry is AdminAuth {
 
     /// @notice Changes new wait period, correct time must have passed
     /// @param _id Id of contract
-    function approveWaitPeriodChange(bytes32 _id) public onlyOwner {
+    function approveWaitPeriodChange(bytes4 _id) public onlyOwner {
         require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
         require(entries[_id].inWaitPeriodChange, ERR_ENTRY_NOT_IN_CHANGE);
         require(
@@ -214,7 +214,7 @@ contract DFSRegistry is AdminAuth {
 
     /// @notice Cancel wait period change
     /// @param _id Id of contract
-    function cancelWaitPeriodChange(bytes32 _id) public onlyOwner {
+    function cancelWaitPeriodChange(bytes4 _id) public onlyOwner {
         require(entries[_id].exists, ERR_ENTRY_NON_EXISTENT);
         require(entries[_id].inWaitPeriodChange, ERR_ENTRY_NOT_IN_CHANGE);
 

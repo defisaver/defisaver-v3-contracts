@@ -7,14 +7,14 @@ import "./helpers/LiquityHelper.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
-contract LiquityPayback is ActionBase, LiquityHelper {
+contract LiquitySPDeposit is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
     struct Params {
-        uint256 lusdAmount; // Amount of LUSD tokens to repay
+        uint256 lusdAmount; // Amount of LUSD tokens to deposit
         address from;       // Address where to pull the tokens from
-        address upperHint;
-        address lowerHint;
+        address wethTo;     // Address that will receive ETH(wrapped) gains
+        address lqtyTo;     // Address that will receive LQTY token gains
     }
 
     /// @inheritdoc ActionBase
@@ -25,16 +25,12 @@ contract LiquityPayback is ActionBase, LiquityHelper {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
-
-        params.lusdAmount = _parseParamUint(
-            params.lusdAmount,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
+        params.lusdAmount = _parseParamUint(params.lusdAmount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
+        params.wethTo = _parseParamAddr(params.wethTo, _paramMapping[2], _subData, _returnValues);
+        params.lqtyTo = _parseParamAddr(params.lqtyTo, _paramMapping[3], _subData, _returnValues);
 
-        params.lusdAmount = _liquityPayback(params);
+        params.lusdAmount = _liquitySPDeposit(params);
         return bytes32(params.lusdAmount);
     }
 
@@ -42,7 +38,7 @@ contract LiquityPayback is ActionBase, LiquityHelper {
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
-        _liquityPayback(params);
+        _liquitySPDeposit(params);
     }
 
     /// @inheritdoc ActionBase
@@ -52,17 +48,29 @@ contract LiquityPayback is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Repays LUSD tokens to the trove
-    function _liquityPayback(Params memory _params) internal returns (uint256) {
-        LUSDTokenAddr.pullTokensIfNeeded(_params.from, _params.lusdAmount);
+    /// @notice Deposits LUSD to the stability pool
+    function _liquitySPDeposit(Params memory _params) internal returns (uint256) {
+        if (_params.lusdAmount == type(uint256).max) {
+            _params.lusdAmount = LUSDTokenAddr.getBalance(_params.from);
+        }
 
-        BorrowerOperations.repayLUSD(_params.lusdAmount, _params.upperHint, _params.lowerHint);
+        uint256 ethGain = StabilityPool.getDepositorETHGain(address(this));
+        uint256 lqtyGain = StabilityPool.getDepositorLQTYGain(address(this));
+
+        LUSDTokenAddr.pullTokensIfNeeded(_params.from, _params.lusdAmount);
+        StabilityPool.provideToSP(_params.lusdAmount, address(0));   // No registered frontend means 100% kickback rate for LQTY rewards
+
+        withdrawStabilityGains(ethGain, lqtyGain, _params.wethTo, _params.lqtyTo);
 
         logger.Log(
             address(this),
             msg.sender,
-            "LiquityPayback",
-            abi.encode(_params.lusdAmount, _params.from)
+            "LiquitySPDeposit",
+            abi.encode(
+                _params,
+                ethGain,
+                lqtyGain
+            )
         );
 
         return _params.lusdAmount;

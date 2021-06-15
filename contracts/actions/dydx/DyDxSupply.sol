@@ -13,7 +13,7 @@ contract DyDxSupply is ActionBase, DyDxHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -34,7 +34,7 @@ contract DyDxSupply is ActionBase, DyDxHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         (
             address tokenAddr,
             uint256 amount,
@@ -106,7 +106,7 @@ contract DyDxSupply is ActionBase, DyDxHelper {
         return _amount;
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (

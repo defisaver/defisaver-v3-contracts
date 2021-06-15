@@ -45,13 +45,13 @@ describe('Mcd-Create', function () {
     let dydxFlAddr;
     // let aaveV2FlAddr;
     let mcdView;
-    let taskExecutorAddr;
+    let RecipeExecutorAddr;
     let uniWrapper;
 
     before(async () => {
         await redeploy('McdOpen');
         await redeploy('McdSupply');
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
         await redeploy('SumInputs');
         await redeploy('McdGenerate');
         await redeploy('FLDyDx');
@@ -62,7 +62,7 @@ describe('Mcd-Create', function () {
 
         makerAddresses = await fetchMakerAddresses();
 
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
         dydxFlAddr = await getAddrFromRegistry('FLDyDx');
         // aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
 
@@ -127,7 +127,7 @@ describe('Mcd-Create', function () {
 
             const functionData = createVaultRecipe.encodeForDsProxyCall();
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
+            await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
             const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
             const vaultId = vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
@@ -196,7 +196,7 @@ describe('Mcd-Create', function () {
 
             const functionData = createVaultRecipe.encodeForDsProxyCall();
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
+            await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
             const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
             const vaultId = vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();

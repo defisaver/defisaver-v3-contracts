@@ -16,14 +16,14 @@ import "./ProxyAuth.sol";
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutor is StrategyData, AdminAuth {
 
-    bytes32 constant PROXY_AUTH_ID = keccak256("ProxyAuth");
+    bytes4 constant PROXY_AUTH_ID = bytes4(keccak256("ProxyAuth"));
 
     address public constant REGISTRY_ADDR = 0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    bytes32 constant BOT_AUTH_ID = keccak256("BotAuth");
-    bytes32 constant SUBSCRIPTION_ID = keccak256("Subscriptions");
-    bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
+    bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));
+    bytes4 constant SUBSCRIPTION_ID = bytes4(keccak256("Subscriptions"));
+    bytes4 constant TASK_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     string public constant ERR_TRIGGER_NOT_ACTIVE = "Trigger not activated";
     string public constant ERR_BOT_NOT_APPROVED = "Bot is not approved";
@@ -74,7 +74,7 @@ contract StrategyExecutor is StrategyData, AdminAuth {
         Subscriptions _sub
     ) public {
 
-        bytes32[] memory triggerIds = _sub.getTemplateFromStrategy(_strategyId).triggerIds;
+        bytes4[] memory triggerIds = _sub.getTemplateFromStrategy(_strategyId).triggerIds;
 
         for (uint256 i = 0; i < triggerIds.length; ++i) {
             address triggerAddr = registry.getAddr(triggerIds[i]);
@@ -88,13 +88,13 @@ contract StrategyExecutor is StrategyData, AdminAuth {
     /// @param _strategy Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
     function callActions(uint _strategyId, Strategy memory _strategy, bytes[][] memory _actionsCallData) internal {
-        address taskExecutorAddr = registry.getAddr(TASK_EXECUTOR_ID);
+        address RecipeExecutorAddr = registry.getAddr(TASK_EXECUTOR_ID);
 
         address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
 
         ProxyAuth(proxyAuthAddr).callExecute{value: msg.value}(
             _strategy.proxy,
-            taskExecutorAddr,
+            RecipeExecutorAddr,
             abi.encodeWithSignature(
                 "executeStrategyTask(uint256,bytes[][])",
                 _strategyId,

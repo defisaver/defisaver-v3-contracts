@@ -26,7 +26,7 @@ contract YearnWithdraw is ActionBase, DSMath {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -47,7 +47,7 @@ contract YearnWithdraw is ActionBase, DSMath {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
         _yearnWithdraw(inputData);
@@ -88,7 +88,7 @@ contract YearnWithdraw is ActionBase, DSMath {
         );
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
         inputData = abi.decode(_callData[0], (Params));
     }
 }

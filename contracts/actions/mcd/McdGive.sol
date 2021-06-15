@@ -17,7 +17,7 @@ contract McdGive is ActionBase {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -34,7 +34,7 @@ contract McdGive is ActionBase {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         (uint256 vaultId, address newOwner, bool createProxy, address mcdManager) =
             parseInputs(_callData);
 
@@ -84,7 +84,7 @@ contract McdGive is ActionBase {
         );
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (

@@ -13,7 +13,7 @@ contract SendToken is ActionBase {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -30,7 +30,7 @@ contract SendToken is ActionBase {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         (address tokenAddr, address to, uint amount) = parseInputs(_callData);
 
         _sendToken(tokenAddr, to, amount);
@@ -56,7 +56,7 @@ contract SendToken is ActionBase {
         return _amount;
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (

@@ -33,7 +33,7 @@ contract UniSupply is ActionBase, DSMath {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -53,7 +53,7 @@ contract UniSupply is ActionBase, DSMath {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         UniSupplyData memory uniData = parseInputs(_callData);
 
         _uniSupply(uniData);
@@ -118,7 +118,7 @@ contract UniSupply is ActionBase, DSMath {
         );
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (UniSupplyData memory uniData)

@@ -15,17 +15,17 @@ const {
 describe('FL-DyDx', function () {
     this.timeout(60000);
 
-    let senderAcc; let proxy; let taskExecutorAddr; let
+    let senderAcc; let proxy; let RecipeExecutorAddr; let
         dydxFl;
 
     const FLASHLOAN_TOKENS = ['WETH', 'DAI', 'USDC'];
 
     before(async () => {
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
 
         dydxFl = await redeploy('FLDyDx');
         await redeploy('SendToken');
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -63,7 +63,7 @@ describe('FL-DyDx', function () {
 
             const functionData = basicFLRecipe.encodeForDsProxyCall();
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {
+            await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], {
                 gasLimit: 3000000,
             });
         });

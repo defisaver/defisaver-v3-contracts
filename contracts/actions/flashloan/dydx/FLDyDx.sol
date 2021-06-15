@@ -30,14 +30,14 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
 
     FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(0x47f159C90850D5cE09E21F931d504536840f34b4);
 
-    /// @dev Function sig of TaskExecutor._executeActionsFromFL()
+    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
 
-    bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
+    bytes4 constant TASK_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory,
         uint8[] memory,
         bytes32[] memory
@@ -61,7 +61,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes[] memory _callData) public payable override {}
+    function executeActionDirect(bytes memory _callData) public payable override {}
 
     /// @inheritdoc ActionBase
     function actionType() public pure override returns (uint8) {
@@ -107,7 +107,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
         return _amount;
     }
 
-    /// @notice Dydx callback function that formats and calls back TaskExecutor
+    /// @notice Dydx callback function that formats and calls back RecipeExecutor
     function callFunction(
         address _initiator,
         Account.Info memory,
@@ -119,15 +119,15 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
         (bytes memory callData, uint256 amount, address tokenAddr) =
             abi.decode(_data, (bytes, uint256, address));
 
-        (Task memory currTask, address proxy) = abi.decode(callData, (Task, address));
+        (Recipe memory currTask, address proxy) = abi.decode(callData, (Recipe, address));
 
         tokenAddr.withdrawTokens(proxy, amount);
 
-        address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
+        address payable RecipeExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
 
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
-            taskExecutor,
+            RecipeExecutor,
             abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, amount)
         );
 
@@ -137,7 +137,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
     }
 
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         public
         pure
         returns (

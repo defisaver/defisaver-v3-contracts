@@ -16,7 +16,7 @@ contract CompSupply is ActionBase, CompHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -34,7 +34,7 @@ contract CompSupply is ActionBase, CompHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         (address cTokenAddr, uint256 amount, address from, bool enableAsColl) =
             parseInputs(_callData);
 
@@ -95,7 +95,7 @@ contract CompSupply is ActionBase, CompHelper {
         return _amount;
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (

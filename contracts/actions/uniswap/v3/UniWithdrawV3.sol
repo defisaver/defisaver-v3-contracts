@@ -35,7 +35,7 @@ contract UniWithdrawV3 is ActionBase, DSMath{
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -50,7 +50,7 @@ contract UniWithdrawV3 is ActionBase, DSMath{
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory uniData = parseInputs(_callData);
         _uniWithdrawFromPosition(uniData);
         
@@ -121,7 +121,7 @@ contract UniWithdrawV3 is ActionBase, DSMath{
         (amount0, amount1) = positionManager.collect(collectParams);
     }
         
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (

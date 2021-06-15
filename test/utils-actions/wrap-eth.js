@@ -22,16 +22,16 @@ describe('Wrap-Eth', function () {
 
     let makerAddresses; let senderAcc; let proxy; let
         uniWrapper;
-    let taskExecutorAddr;
+    let RecipeExecutorAddr;
 
     before(async () => {
         await redeploy('WrapEth');
         await redeploy('DFSSell');
         uniWrapper = await redeploy('UniswapWrapperV3');
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
 
         makerAddresses = await fetchMakerAddresses();
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
 
         // eslint-disable-next-line prefer-destructuring
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -81,7 +81,7 @@ describe('Wrap-Eth', function () {
         const daiBalanceBefore = await balanceOf(makerAddresses.MCD_DAI, senderAcc.address);
         console.log(`Dai acc before: ${daiBalanceBefore / 1e18}`);
 
-        await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {
+        await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], {
             gasLimit: 3000000,
             value: amount,
         });

@@ -10,7 +10,7 @@ contract SumInputs is ActionBase, DSMath {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -25,7 +25,7 @@ contract SumInputs is ActionBase, DSMath {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes[] memory _callData) public override payable {}
+    function executeActionDirect(bytes memory _callData) public override payable {}
 
     /// @inheritdoc ActionBase
     function actionType() public virtual override pure returns (uint8) {

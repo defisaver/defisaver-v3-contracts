@@ -8,7 +8,7 @@ import "../core/DFSRegistry.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
 abstract contract ActionBase is AdminAuth {
-    address public constant REGISTRY_ADDR = 0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C;
+    address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     DefisaverLogger public constant logger = DefisaverLogger(
@@ -33,14 +33,14 @@ abstract contract ActionBase is AdminAuth {
     enum ActionType { FL_ACTION, STANDARD_ACTION, FEE_ACTION, CHECK_ACTION, CUSTOM_ACTION }
 
     /// @notice Parses inputs and runs the implemented action through a proxy
-    /// @dev Is called by the TaskExecutor chaining actions together
+    /// @dev Is called by the RecipeExecutor chaining actions together
     /// @param _callData Array of input values each value encoded as bytes
     /// @param _subData Array of subscribed vales, replaces input values if specified
     /// @param _paramMapping Array that specifies how return and subscribed values are mapped in input
     /// @param _returnValues Returns values from actions before, which can be injected in inputs
     /// @return Returns a bytes32 value through DSProxy, each actions implements what that value is
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -48,7 +48,7 @@ abstract contract ActionBase is AdminAuth {
 
     /// @notice Parses inputs and runs the single implemented action through a proxy
     /// @dev Used to save gas when executing a single action directly
-    function executeActionDirect(bytes[] memory _callData) public virtual payable;
+    function executeActionDirect(bytes memory _callData) public virtual payable;
 
     /// @notice Returns the type of action we are implementing
     function actionType() public pure virtual returns (uint8);

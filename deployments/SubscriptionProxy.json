@@ -89,14 +89,14 @@
 					"type": "string"
 				},
 				{
-					"internalType": "bytes32[]",
+					"internalType": "bytes4[]",
 					"name": "_triggerIds",
-					"type": "bytes32[]"
+					"type": "bytes4[]"
 				},
 				{
-					"internalType": "bytes32[]",
+					"internalType": "bytes4[]",
 					"name": "_actionIds",
-					"type": "bytes32[]"
+					"type": "bytes4[]"
 				},
 				{
 					"internalType": "uint8[][]",
@@ -117,14 +117,14 @@
 					"type": "string"
 				},
 				{
-					"internalType": "bytes32[]",
+					"internalType": "bytes4[]",
 					"name": "_triggerIds",
-					"type": "bytes32[]"
+					"type": "bytes4[]"
 				},
 				{
-					"internalType": "bytes32[]",
+					"internalType": "bytes4[]",
 					"name": "_actionIds",
-					"type": "bytes32[]"
+					"type": "bytes4[]"
 				},
 				{
 					"internalType": "uint8[][]",

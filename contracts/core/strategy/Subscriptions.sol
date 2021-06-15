@@ -23,7 +23,7 @@ contract Subscriptions is StrategyData, AdminAuth {
     Template[] public templates;
 
     /// @dev Keeps track of all the users strategies (their indexes in the array)
-    mapping (address => uint[]) public usersPos;
+    mapping (address => uint64[]) public usersPos;
 
     /// @dev Increments on state change, used for easier off chain tracking of changes
     uint public updateCounter;
@@ -34,7 +34,7 @@ contract Subscriptions is StrategyData, AdminAuth {
     /// @param _subData Subscription data for actions
     /// @param _triggerData Subscription data for triggers
     function createStrategy(
-        uint _templateId,
+        uint64 _templateId,
         bool _active,
         bytes[] memory _subData,
         bytes[][] memory _triggerData
@@ -46,11 +46,11 @@ contract Subscriptions is StrategyData, AdminAuth {
                 active: _active,
                 subData: _subData,
                 triggerData: _triggerData,
-                posInUserArr: (usersPos[msg.sender].length - 1)
+                posInUserArr: (uint64(usersPos[msg.sender].length - 1))
             })
         );
 
-        usersPos[msg.sender].push(strategies.length - 1);
+        usersPos[msg.sender].push(uint64(strategies.length - 1));
 
         updateCounter++;
 
@@ -67,10 +67,10 @@ contract Subscriptions is StrategyData, AdminAuth {
     /// @param _paramMapping Array that holds metadata of how inputs are mapped to sub/return data
     function createTemplate(
         string memory _name,
-        bytes32[] memory _triggerIds,
-        bytes32[] memory _actionIds,
+        bytes4[] memory _triggerIds,
+        bytes4[] memory _actionIds,
         uint8[][] memory _paramMapping
-    ) public returns (uint) {
+    ) public returns (uint64 ) {
         
         templates.push(
             Template({
@@ -83,9 +83,11 @@ contract Subscriptions is StrategyData, AdminAuth {
 
         updateCounter++;
 
-        logger.Log(address(this), msg.sender, "CreateTemplate", abi.encode(templates.length - 1));
+        uint64 latestTemplateId = uint64(templates.length - 1);
 
-        return templates.length - 1;
+        logger.Log(address(this), msg.sender, "CreateTemplate", abi.encode(latestTemplateId));
+
+        return latestTemplateId;
     }
 
     /// @notice Updates the users strategy
@@ -97,7 +99,7 @@ contract Subscriptions is StrategyData, AdminAuth {
     /// @param _triggerData Subscription data for triggers
     function updateStrategy(
         uint _strategyId,
-        uint _templateId,
+        uint64 _templateId,
         bool _active,
         bytes[] memory _subData,
         bytes[][] memory _triggerData

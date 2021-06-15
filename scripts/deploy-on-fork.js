@@ -29,14 +29,14 @@ async function main() {
 
     await changeConstantInFiles(
         './contracts',
-        ['ActionBase', 'TaskExecutor'],
+        ['ActionBase', 'RecipeExecutor'],
         'REGISTRY_ADDR',
         reg.address,
     );
 
     await run('compile');
 
-    await redeploy('TaskExecutor', reg.address);
+    await redeploy('RecipeExecutor', reg.address);
 
     // actions
     await redeploy('McdSupply', reg.address);
@@ -52,7 +52,7 @@ async function main() {
 
     await changeConstantInFiles(
         './contracts',
-        ['ActionBase', 'TaskExecutor'],
+        ['ActionBase', 'RecipeExecutor'],
         'REGISTRY_ADDR',
         MAINNET_REGISTRY,
     );

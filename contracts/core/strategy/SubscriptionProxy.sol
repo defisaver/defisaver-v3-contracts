@@ -9,18 +9,19 @@ import "../../DS/DSGuard.sol";
 import "../../DS/DSAuth.sol";
 import "./Subscriptions.sol";
 import "../DFSRegistry.sol";
+import "hardhat/console.sol";
 
 /// @title Handles auth and calls subscription contract
 contract SubscriptionProxy is StrategyData, AdminAuth, ProxyPermission {
 
-    address public constant REGISTRY_ADDR = 0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C;
+    address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    bytes32 constant PROXY_AUTH_ID = keccak256("ProxyAuth");
-    bytes32 constant SUBSCRIPTION_ID = keccak256("Subscriptions");
+    bytes4 constant PROXY_AUTH_ID = bytes4(keccak256("ProxyAuth"));
+    bytes4 constant SUBSCRIPTION_ID = bytes4(keccak256("Subscriptions"));
 
     function createStrategy(
-        uint _templateId,
+        uint64 _templateId,
         bool _active,
         bytes[] memory _subData,
         bytes[][] memory _triggerData
@@ -35,19 +36,23 @@ contract SubscriptionProxy is StrategyData, AdminAuth, ProxyPermission {
 
     function createTemplate(
         string memory _name,
-        bytes32[] memory _triggerIds,
-        bytes32[] memory _actionIds,
+        bytes4[] memory _triggerIds,
+        bytes4[] memory _actionIds,
         uint8[][] memory _paramMapping
     ) public {
+        console.logBytes4(SUBSCRIPTION_ID);
+        console.logBytes32(keccak256("Subscriptions"));
+
         address subAddr = registry.getAddr(SUBSCRIPTION_ID);
+        console.log(subAddr);
 
         Subscriptions(subAddr).createTemplate(_name, _triggerIds, _actionIds, _paramMapping);
     }
 
     function createTemplateAndStrategy(
         string memory _name,
-        bytes32[] memory _triggerIds,
-        bytes32[] memory _actionIds,
+        bytes4[] memory _triggerIds,
+        bytes4[] memory _actionIds,
         uint8[][] memory _paramMapping,
         bool _active,
         bytes[] memory _subData,
@@ -58,7 +63,7 @@ contract SubscriptionProxy is StrategyData, AdminAuth, ProxyPermission {
 
         givePermission(proxyAuthAddr);
 
-        uint templateId = 
+        uint64 templateId = 
             Subscriptions(subAddr).createTemplate(_name, _triggerIds, _actionIds, _paramMapping);
 
         Subscriptions(subAddr).createStrategy(templateId, _active, _subData, _triggerData);
@@ -66,7 +71,7 @@ contract SubscriptionProxy is StrategyData, AdminAuth, ProxyPermission {
 
     function updateStrategy(
         uint _strategyId,
-        uint _templateId,
+        uint64 _templateId,
         bool _active,
         bytes[] memory _subData,
         bytes[][] memory _triggerData

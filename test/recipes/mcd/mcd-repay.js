@@ -43,12 +43,12 @@ describe('Mcd-Repay', function () {
     // let dydxFlAddr;
     let aaveV2FlAddr;
     let mcdView;
-    let taskExecutorAddr;
+    let RecipeExecutorAddr;
 
     before(async () => {
         uniWrapper = await redeploy('UniswapWrapperV3');
         mcdView = await redeploy('McdView');
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
 
         // dydxFlAddr = await getAddrFromRegistry('FLDyDx');
 
@@ -125,7 +125,7 @@ describe('Mcd-Repay', function () {
 
             const functionData = repayRecipe.encodeForDsProxyCall();
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
+            await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
             const ratioAfter = await getRatio(mcdView, vaultId);
             const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
@@ -181,7 +181,7 @@ describe('Mcd-Repay', function () {
 
             const functionData = repayRecipe.encodeForDsProxyCall();
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
+            await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
             const ratioAfter = await getRatio(mcdView, vaultId);
             const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);

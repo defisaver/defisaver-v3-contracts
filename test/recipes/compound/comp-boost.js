@@ -33,7 +33,7 @@ describe('Compound: Boost', function () {
     let senderAcc;
     let proxy;
     let uniWrapper;
-    let taskExecutorAddr;
+    let RecipeExecutorAddr;
     let compView;
     let dydxFlAddr;
     let aaveV2FlAddr;
@@ -41,7 +41,7 @@ describe('Compound: Boost', function () {
     before(async () => {
         await redeploy('CompSupply');
         await redeploy('CompBorrow');
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
         await redeploy('DFSSell');
         await redeploy('FLDyDx');
         await redeploy('FLAaveV2');
@@ -51,7 +51,7 @@ describe('Compound: Boost', function () {
         aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
 
         uniWrapper = await redeploy('UniswapWrapperV3');
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -108,7 +108,7 @@ describe('Compound: Boost', function () {
 
                 const functionData = recipe.encodeForDsProxyCall();
 
-                await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
+                await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
                 const collBalanceAfter = await balanceOf(collAddress, senderAcc.address);
                 const debtBalanceAfter = await balanceOf(
@@ -187,7 +187,7 @@ describe('Compound: Boost', function () {
 
         const functionData = recipe.encodeForDsProxyCall();
 
-        await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
+        await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
         const collBalanceAfter = await balanceOf(collAddress, senderAcc.address);
         const debtBalanceAfter = await balanceOf(
@@ -259,7 +259,7 @@ describe('Compound: Boost', function () {
 
         const functionData = recipe.encodeForDsProxyCall();
 
-        await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
+        await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
         const collBalanceAfter = await balanceOf(collAddress, senderAcc.address);
         const debtBalanceAfter = await balanceOf(

@@ -7,26 +7,25 @@ pragma experimental ABIEncoderV2;
 contract StrategyData {
     struct Template {
         string name;
-        bytes32[] triggerIds;
-        bytes32[] actionIds;
+        bytes4[] triggerIds;
+        bytes4[] actionIds;
         uint8[][] paramMapping;
     }
 
-    struct Task {
+    struct Recipe {
         string name;
-        bytes[][] callData;
+        bytes[] callData;
         bytes[] subData;
-        bytes32[] actionIds;
+        bytes4[] actionIds;
         uint8[][] paramMapping;
     }
 
     struct Strategy {
-        uint templateId;
         address proxy;
+        bool active;
+        uint64 templateId;
+        uint64 posInUserArr;
         bytes[] subData;
         bytes[][] triggerData;
-        bool active;
-
-        uint posInUserArr;
     }
 }

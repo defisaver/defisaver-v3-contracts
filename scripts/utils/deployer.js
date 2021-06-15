@@ -26,11 +26,11 @@ const getGasPrice = async (exGasPrice) => {
 
 const deploy = async (contractName, signer, action, gasPrice, nonce, ...args) => {
     try {
-        console.log('-------------------------------------------------------------');
+        console.log(`---------------------------- ${contractName} --------------------------------`);
 
         const Contract = await hre.ethers.getContractFactory(contractName, signer);
 
-        let options = { gasPrice, nonce };
+        let options = { gasPrice, nonce, gasLimit: 8000000 };
 
         if (nonce === -1) {
             options = { gasPrice };
@@ -38,6 +38,7 @@ const deploy = async (contractName, signer, action, gasPrice, nonce, ...args) =>
 
         let contract;
         if (args.length === 0) {
+            console.log("Pre deploy: ");
             contract = await Contract.deploy(options);
         } else {
             contract = await Contract.deploy(...args, options);

@@ -30,7 +30,7 @@ contract YearnSupply is ActionBase, DSMath {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -51,7 +51,7 @@ contract YearnSupply is ActionBase, DSMath {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
         _yearnSupply(inputData);
@@ -82,7 +82,7 @@ contract YearnSupply is ActionBase, DSMath {
         logger.Log(address(this), msg.sender, "YearnSupply", abi.encode(_inputData, yTokenAmount));
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
         inputData = abi.decode(_callData[0], (Params));
     }
 }

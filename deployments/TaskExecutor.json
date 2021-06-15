@@ -1,5 +1,5 @@
 {
-	"contractName": "TaskExecutor",
+	"contractName": "RecipeExecutor",
 	"abi": [
 		{
 			"inputs": [],
@@ -73,9 +73,9 @@
 							"type": "bytes[]"
 						},
 						{
-							"internalType": "bytes32[]",
+							"internalType": "bytes4[]",
 							"name": "actionIds",
-							"type": "bytes32[]"
+							"type": "bytes4[]"
 						},
 						{
 							"internalType": "uint8[][]",
@@ -83,8 +83,8 @@
 							"type": "uint8[][]"
 						}
 					],
-					"internalType": "struct StrategyData.Task",
-					"name": "_currTask",
+					"internalType": "struct StrategyData.Recipe",
+					"name": "_currRecipe",
 					"type": "tuple"
 				},
 				{
@@ -149,9 +149,9 @@
 							"type": "bytes[]"
 						},
 						{
-							"internalType": "bytes32[]",
+							"internalType": "bytes4[]",
 							"name": "actionIds",
-							"type": "bytes32[]"
+							"type": "bytes4[]"
 						},
 						{
 							"internalType": "uint8[][]",
@@ -159,8 +159,8 @@
 							"type": "uint8[][]"
 						}
 					],
-					"internalType": "struct StrategyData.Task",
-					"name": "_currTask",
+					"internalType": "struct StrategyData.Recipe",
+					"name": "_currRecipe",
 					"type": "tuple"
 				}
 			],

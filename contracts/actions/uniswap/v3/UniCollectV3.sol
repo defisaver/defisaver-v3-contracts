@@ -15,7 +15,7 @@ contract UniCollectV3 is ActionBase, DSMath{
         IUniswapV3NonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -29,7 +29,7 @@ contract UniCollectV3 is ActionBase, DSMath{
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         IUniswapV3NonfungiblePositionManager.CollectParams memory uniData = parseInputs(_callData);
         
         _uniCollect(uniData);
@@ -61,7 +61,7 @@ contract UniCollectV3 is ActionBase, DSMath{
             );
     }
         
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (

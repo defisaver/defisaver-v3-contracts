@@ -1,9 +1,10 @@
 const hre = require('hardhat');
 const fs = require('fs');
 
-const { deployAsOwner } = require('../scripts/utils/deployer');
+const { deployContract, deployAsOwner } = require('../scripts/utils/deployer');
+const { changeConstantInFiles } = require('../scripts/utils/utils');
 
-const REGISTRY_ADDR = '0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C';
+let REGISTRY_ADDR = '0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C';
 
 const nullAddress = '0x0000000000000000000000000000000000000000';
 const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
@@ -127,12 +128,23 @@ const stopImpersonatingAccount = async (account) => {
     });
 };
 
-const getAddrFromRegistry = async (name) => {
+const getNameId = (name) => {
+    const hash = hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(name));
+
+    console.log(hash);
+    console.log(`${name} - ${hash.substr(0, 10)}`);
+
+    return hash.substr(0, 10);
+};
+
+const getAddrFromRegistry = async (name, regAddr = REGISTRY_ADDR) => {
+    console.log(`regAddr: ${regAddr}`);
+
     const registryInstance = await hre.ethers.getContractFactory('DFSRegistry');
-    const registry = await registryInstance.attach(REGISTRY_ADDR);
+    const registry = await registryInstance.attach(regAddr);
 
     const addr = await registry.getAddr(
-        hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(name)),
+        getNameId(name),
     );
     return addr;
 };
@@ -170,9 +182,9 @@ const getProxy = async (acc) => {
 };
 
 const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
-    if (regAddr === REGISTRY_ADDR) {
-        await impersonateAccount(OWNER_ACC);
-    }
+    // if (regAddr === REGISTRY_ADDR) {
+    await impersonateAccount(OWNER_ACC);
+    // }
 
     const signer = await hre.ethers.provider.getSigner(OWNER_ACC);
 
@@ -182,7 +194,7 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
     registry = registry.connect(signer);
 
     const c = await deployAsOwner(name);
-    const id = hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(name));
+    const id = getNameId(name);
 
     if (!(await registry.isRegistered(id))) {
         await registry.addNewContract(id, c.address, 0, { gasLimit: 2000000 });
@@ -191,9 +203,9 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
         await registry.approveContractChange(id);
     }
 
-    if (regAddr === REGISTRY_ADDR) {
-        await stopImpersonatingAccount(OWNER_ACC);
-    }
+    // if (regAddr === REGISTRY_ADDR) {
+    await stopImpersonatingAccount(OWNER_ACC);
+    // }
     return c;
 };
 
@@ -323,6 +335,21 @@ const getGasUsed = async (receipt) => {
     return parsed.gasUsed.toString();
 };
 
+const redeployRegistry = async () => {
+    const reg = await deployContract('DFSRegistry');
+
+    await changeConstantInFiles(
+        './contracts',
+        ['ActionBase', 'RecipeExecutor', 'SubscriptionProxy'],
+        'REGISTRY_ADDR',
+        reg.address,
+    );
+
+    REGISTRY_ADDR = reg.address;
+
+    return reg.address;
+};
+
 const BN2Float = (bn, decimals) => hre.ethers.utils.formatUnits(bn, decimals);
 
 const Float2BN = (string, decimals) => hre.ethers.utils.parseUnits(string, decimals);
@@ -349,6 +376,8 @@ module.exports = {
     BN2Float,
     Float2BN,
     getGasUsed,
+    getNameId,
+    redeployRegistry,
     standardAmounts,
     nullAddress,
     dydxTokens,

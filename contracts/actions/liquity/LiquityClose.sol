@@ -12,7 +12,7 @@ contract LiquityClose is ActionBase, LiquityHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -27,7 +27,7 @@ contract LiquityClose is ActionBase, LiquityHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         (address from, address to) = parseInputs(_callData);
 
         _liquityClose(from, to);
@@ -59,7 +59,7 @@ contract LiquityClose is ActionBase, LiquityHelper {
         return uint256(coll);
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (address from, address to)

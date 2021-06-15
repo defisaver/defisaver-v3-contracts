@@ -16,7 +16,7 @@ contract McdSupply is ActionBase, McdHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
+        bytes memory _callData,
         bytes[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -35,7 +35,7 @@ contract McdSupply is ActionBase, McdHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         (uint256 vaultId, uint256 amount, address joinAddr, address from, address mcdManager) =
             parseInputs(_callData);
 
@@ -98,7 +98,7 @@ contract McdSupply is ActionBase, McdHelper {
         return _amount;
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (
