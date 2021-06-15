@@ -648,7 +648,6 @@ const liquityClose = async (proxy, from, to) => {
     return proxy['execute(address,bytes)'](liquityCloseAddr, functionData, { gasLimit: 3000000 });
 };
 
-<<<<<<< HEAD
 const liquityRedeem = async (proxy, lusdAmount, from, to, maxFeePercentage) => {
     const maxIterations = 0;
     const liquityRedeemAddr = await getAddrFromRegistry('LiquityRedeem');
@@ -689,7 +688,8 @@ const liquityRedeem = async (proxy, lusdAmount, from, to, maxFeePercentage) => {
     const functionData = liquityRedeemAction.encodeForDsProxyCall()[1];
 
     return proxy['execute(address,bytes)'](liquityRedeemAddr, functionData, { gasLimit: 3000000 });
-=======
+};
+
 const liquityStake = async (proxy, lqtyAmount, from, wethTo, lusdTo) => {
     const liquityStakeAddr = await getAddrFromRegistry('LiquityStake');
 
@@ -756,7 +756,6 @@ const liquityEthGainToTrove = async (proxy, lqtyTo) => {
     const functionData = liquityEthGainToTroveAction.encodeForDsProxyCall()[1];
 
     return proxy['execute(address,bytes)'](liquityEthGainToTroveAddr, functionData, { gasLimit: 3000000 });
->>>>>>> bd17f83d4d7a48cb385f271fca0ee0f457fe5dd0
 };
 
 const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amount0Desired,
