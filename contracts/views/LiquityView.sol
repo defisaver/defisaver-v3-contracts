@@ -147,4 +147,16 @@ contract LiquityView is LiquityHelper {
     ) {
         return HintHelpers.getRedemptionHints(_LUSDamount, _price, _maxIterations);
     }
+    
+    function getStakeInfo(address _user) external view returns (uint256 stake, uint256 ethGain, uint256 lusdGain) {
+        stake = LQTYStaking.stakes(_user);
+        ethGain = LQTYStaking.getPendingETHGain(_user);
+        lusdGain = LQTYStaking.getPendingLUSDGain(_user);
+    }
+    
+    function getDepositorInfo(address _depositor) external view returns(uint256 compoundedLUSD, uint256 ethGain, uint256 lqtyGain) {
+        compoundedLUSD = StabilityPool.getCompoundedLUSDDeposit(_depositor);
+        ethGain = StabilityPool.getDepositorETHGain(_depositor);
+        lqtyGain = StabilityPool.getDepositorLQTYGain(_depositor);
+    }
 }
