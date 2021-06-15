@@ -87,16 +87,10 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
         );
 
         uint256 lusdAmountUsed = lusdBefore.sub(LUSDTokenAddr.getBalance(address(this)));   // It isn't guaranteed that the whole requested LUSD amount will be used
-        uint256 ethRedeemed = address(this).balance.sub(ethBefore);
         uint256 lusdToReturn = _params.lusdAmount.sub(lusdAmountUsed);
+        uint256 ethRedeemed = address(this).balance.sub(ethBefore);
 
-        if (ethRedeemed > 0) {
-            TokenUtils.depositWeth(ethRedeemed);
-            TokenUtils.WETH_ADDR.withdrawTokens(_params.to, ethRedeemed);
-        }
-        if (lusdToReturn > 0) {
-            LUSDTokenAddr.withdrawTokens(_params.from, lusdToReturn);
-        }
+        withdrawStaking(ethRedeemed, lusdToReturn, _params.to, _params.from);
 
         logger.Log(
             address(this),
