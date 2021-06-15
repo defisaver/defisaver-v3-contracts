@@ -5,13 +5,11 @@ pragma experimental ABIEncoderV2;
 
 import "./helpers/LiquityHelper.sol";
 import "../../utils/TokenUtils.sol";
-import "../../utils/SafeMath.sol";
 import "../ActionBase.sol";
 
 contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
     using TokenUtils for address;
-    using SafeMath for uint256;
-
+    
     struct Params {
         address lqtyTo;     // Address that will receive LQTY token gains
         address upperHint;
@@ -53,7 +51,8 @@ contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
         
         StabilityPool.withdrawETHGainToTrove(_params.upperHint, _params.lowerHint);
 
-        LQTYTokenAddr.withdrawTokens(_params.lqtyTo, lqtyGain);
+        if (lqtyGain > 0)
+            LQTYTokenAddr.withdrawTokens(_params.lqtyTo, lqtyGain);
 
         logger.Log(
             address(this),
