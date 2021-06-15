@@ -187,6 +187,4 @@ interface IStabilityPool {
      * The front end's compounded stake is equal to the sum of its depositors' compounded deposits.
      */
     function getCompoundedFrontEndStake(address _frontEnd) external view returns (uint);
-     
-     // function deposits(address) external view returns ()
 }
