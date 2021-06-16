@@ -16,7 +16,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DFSExchangeData, DSMath {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
-    error SlippageHitError();
+    error SlippageHitError(uint256, uint256);
     error DestAmountMissingError();
     error InvalidWrapperError();
     //Zerox exchange invalid
@@ -64,7 +64,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DFSExchangeData, DSMath {
 
         // check slippage
         if (amountBought < wmul(exData.minPrice, exData.srcAmount)){
-            revert SlippageHitError();
+            revert SlippageHitError(amountBought, wmul(exData.minPrice, exData.srcAmount));
         }
 
         // revert back exData changes to keep it consistent
@@ -112,7 +112,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DFSExchangeData, DSMath {
 
         // check slippage
         if (amountBought < exData.destAmount){
-            revert SlippageHitError();
+            revert SlippageHitError(amountBought, exData.destAmount);
         }
 
         // revert back exData changes to keep it consistent

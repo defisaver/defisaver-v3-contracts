@@ -8,11 +8,9 @@ import "./DSNote.sol";
 abstract contract DSProxy is DSAuth, DSNote {
     DSProxyCache public cache; // global cache for contracts
 
-    error CacheNotSetError();
-
     constructor(address _cacheAddr) {
         if (!(setCache(_cacheAddr))){
-            revert CacheNotSetError();
+            require(isAuthorized(msg.sender, msg.sig), "Not authorized");
         }
     }
 

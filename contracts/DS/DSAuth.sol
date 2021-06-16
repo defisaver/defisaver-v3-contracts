@@ -12,7 +12,6 @@ contract DSAuthEvents {
 contract DSAuth is DSAuthEvents {
     DSAuthority public authority;
     address public owner;
-    error NotAuthorized();
 
     constructor() {
         owner = msg.sender;
@@ -30,9 +29,7 @@ contract DSAuth is DSAuthEvents {
     }
 
     modifier auth {
-        if (!(isAuthorized(msg.sender, msg.sig))){
-            revert NotAuthorized();
-        }
+        require(isAuthorized(msg.sender, msg.sig), "Not authorized");
         _;
     }
 

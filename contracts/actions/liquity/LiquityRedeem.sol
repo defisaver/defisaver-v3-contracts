@@ -4,12 +4,10 @@ pragma solidity =0.8.4;
 
 import "./helpers/LiquityHelper.sol";
 import "../../utils/TokenUtils.sol";
-import "../../utils/SafeMath.sol";
 import "../ActionBase.sol";
 
 contract LiquityRedeem is ActionBase, LiquityHelper {
     using TokenUtils for address;
-    using SafeMath for uint256;
 
     struct Params {
         uint256 lusdAmount;
@@ -85,9 +83,9 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
             _params.maxFeePercentage
         );
 
-        uint256 lusdAmountUsed = lusdBefore.sub(LUSDTokenAddr.getBalance(address(this)));   // It isn't guaranteed that the whole requested LUSD amount will be used
-        uint256 lusdToReturn = _params.lusdAmount.sub(lusdAmountUsed);
-        uint256 ethRedeemed = address(this).balance.sub(ethBefore);
+        uint256 lusdAmountUsed = lusdBefore - (LUSDTokenAddr.getBalance(address(this)));   // It isn't guaranteed that the whole requested LUSD amount will be used
+        uint256 lusdToReturn = _params.lusdAmount - lusdAmountUsed;
+        uint256 ethRedeemed = address(this).balance -ethBefore;
 
         withdrawStaking(ethRedeemed, lusdToReturn, _params.to, _params.from);
 

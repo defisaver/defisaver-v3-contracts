@@ -12,7 +12,7 @@ import "./helpers/CompHelper.sol";
 contract CompPayback is ActionBase, CompHelper {
     using TokenUtils for address;
 
-    error CompPaybackFailError();
+    error CompPaybackError();
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -69,7 +69,7 @@ contract CompPayback is ActionBase, CompHelper {
         if (tokenAddr != TokenUtils.WETH_ADDR) {
             tokenAddr.approveToken(_cTokenAddr, _amount);
             if (ICToken(_cTokenAddr).repayBorrow(_amount) != NO_ERROR){
-                revert CompPaybackFailError();
+                revert CompPaybackError();
             }
         } else {
             TokenUtils.withdrawWeth(_amount);

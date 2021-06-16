@@ -10,8 +10,6 @@ library SafeERC20 {
     using SafeMath for uint256;
     using Address for address;
 
-    error ERC20OperationFail();
-
     function safeTransfer(
         IERC20 token,
         address to,
@@ -76,9 +74,8 @@ library SafeERC20 {
         );
         if (returndata.length > 0) {
             // Return data is optional
-            if (!(abi.decode(returndata, (bool)))){
-                revert ERC20OperationFail();
-            }
+            // solhint-disable-next-line max-line-length
+            require(abi.decode(returndata, (bool)), "SafeERC20: ERC20 operation did not succeed");
         }
     }
 }

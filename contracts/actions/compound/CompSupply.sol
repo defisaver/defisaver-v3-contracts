@@ -11,7 +11,7 @@ import "./helpers/CompHelper.sol";
 contract CompSupply is ActionBase, CompHelper {
     using TokenUtils for address;
 
-    error CompSupplyFailError();
+    error CompSupplyError();
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -79,7 +79,7 @@ contract CompSupply is ActionBase, CompHelper {
             tokenAddr.approveToken(_cTokenAddr, _amount);
 
             if (ICToken(_cTokenAddr).mint(_amount) != NO_ERROR){
-                revert CompSupplyFailError();
+                revert CompSupplyError();
             }
         } else {
             TokenUtils.withdrawWeth(_amount);

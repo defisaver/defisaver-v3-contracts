@@ -10,15 +10,6 @@ contract DFSRegistry is AdminAuth {
     DefisaverLogger public constant logger = DefisaverLogger(
         0x5c55B921f590a89C1Ebe84dF170E655a82b62126
     );
-
-    string public constant ERR_ENTRY_ALREADY_EXISTS = "Entry id already exists";
-    string public constant ERR_ENTRY_NON_EXISTENT = "Entry id doesn't exists";
-    string public constant ERR_ENTRY_NOT_IN_CHANGE = "Entry not in change process";
-    string public constant ERR_WAIT_PERIOD_SHORTER = "New wait period must be bigger";
-    string public constant ERR_CHANGE_NOT_READY = "Change not ready yet";
-    string public constant ERR_EMPTY_PREV_ADDR = "Previous addr is 0";
-    string public constant ERR_ALREADY_IN_CONTRACT_CHANGE = "Already in contract change";
-    string public constant ERR_ALREADY_IN_WAIT_PERIOD_CHANGE = "Already in wait period change";
     error EntryAlreadyExistsError();
     error EntryNonExistentError();
     error EntryNotInChangeError();
@@ -147,7 +138,7 @@ contract DFSRegistry is AdminAuth {
         if (!entries[_id].inContractChange){
             revert EntryNotInChangeError();
         }
-        if (block.timestamp < (entries[_id].changeStartTime + entries[_id].waitPeriod)){
+        if (block.timestamp < (entries[_id].changeStartTime + entries[_id].waitPeriod)){// solhint-disable-line
             revert ChangeNotReadyError();
         }
 
@@ -224,7 +215,7 @@ contract DFSRegistry is AdminAuth {
         if (!entries[_id].inWaitPeriodChange){
             revert EntryNotInChangeError();
         }
-        if (block.timestamp < (entries[_id].changeStartTime + entries[_id].waitPeriod)){
+        if (block.timestamp < (entries[_id].changeStartTime + entries[_id].waitPeriod)){ // solhint-disable-line
             revert ChangeNotReadyError();
         }
 
