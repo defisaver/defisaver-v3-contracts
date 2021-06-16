@@ -83,6 +83,6 @@ contract YearnSupply is ActionBase, DSMath {
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
-        inputData = abi.decode(_callData[0], (Params));
+        inputData = abi.decode(_callData, (Params));
     }
 }

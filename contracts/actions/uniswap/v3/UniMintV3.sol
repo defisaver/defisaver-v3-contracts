@@ -123,6 +123,6 @@ contract UniMintV3 is ActionBase, DSMath{
             Params memory uniData
         )
     {   
-        uniData = abi.decode(_callData[0], (Params));
+        uniData = abi.decode(_callData, (Params));
     }
 }

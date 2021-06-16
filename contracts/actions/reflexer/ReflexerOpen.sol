@@ -8,6 +8,11 @@ import "./helpers/ReflexerHelper.sol";
 
 /// @title Open a new Reflexer safe
 contract ReflexerOpen is ActionBase, ReflexerHelper {
+
+    struct Params {
+        address adapterAddr;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
@@ -15,20 +20,20 @@ contract ReflexerOpen is ActionBase, ReflexerHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        address adapterAddr = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        adapterAddr = _parseParamAddr(adapterAddr, _paramMapping[0], _subData, _returnValues);
+        inputData.adapterAddr = _parseParamAddr(inputData.adapterAddr, _paramMapping[0], _subData, _returnValues);
 
-        uint256 newSafeId = _reflexerOpen(adapterAddr);
+        uint256 newSafeId = _reflexerOpen(inputData.adapterAddr);
 
         return bytes32(newSafeId);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
-        address adapterAddr = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        _reflexerOpen(adapterAddr);
+        _reflexerOpen(inputData.adapterAddr);
     }
 
     /// @inheritdoc ActionBase
@@ -47,7 +52,7 @@ contract ReflexerOpen is ActionBase, ReflexerHelper {
         logger.Log(address(this), msg.sender, "ReflexerOpen", abi.encode(safeId, _adapterAddr));
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (address adapterAddr) {
-        adapterAddr = abi.decode(_callData[0], (address));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

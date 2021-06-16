@@ -10,6 +10,11 @@ import "../ActionBase.sol";
 contract PullToken is ActionBase {
     
     using TokenUtils for address;
+    struct Params {
+        address tokenAddr;
+        address from;
+        uint256 amount;
+    }
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -18,22 +23,22 @@ contract PullToken is ActionBase {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public virtual override payable returns (bytes32) {
-        (address tokenAddr, address from, uint amount) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        tokenAddr = _parseParamAddr(tokenAddr, _paramMapping[0], _subData, _returnValues);
-        from = _parseParamAddr(from, _paramMapping[1], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[2], _subData, _returnValues);
+        inputData.tokenAddr = _parseParamAddr(inputData.tokenAddr, _paramMapping[0], _subData, _returnValues);
+        inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[2], _subData, _returnValues);
 
-        amount = _pullToken(tokenAddr, from, amount);
+        inputData.amount = _pullToken(inputData.tokenAddr, inputData.from, inputData.amount);
 
-        return bytes32(amount);
+        return bytes32(inputData.amount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public override payable {
-        (address tokenAddr, address from, uint amount) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        _pullToken(tokenAddr, from, amount);
+        _pullToken(inputData.tokenAddr, inputData.from, inputData.amount);
     }
 
     /// @inheritdoc ActionBase
@@ -56,17 +61,7 @@ contract PullToken is ActionBase {
         return _amount;
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (
-            address tokenAddr,
-            address from,
-            uint amount
-        )
-    {
-        tokenAddr = abi.decode(_callData[0], (address));
-        from = abi.decode(_callData[1], (address));
-        amount = abi.decode(_callData[2], (uint256));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

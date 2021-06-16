@@ -68,6 +68,6 @@ contract UniCollectV3 is ActionBase, DSMath{
             IUniswapV3NonfungiblePositionManager.CollectParams memory uniData
         )
     {
-        uniData = abi.decode(_callData[0], (IUniswapV3NonfungiblePositionManager.CollectParams));
+        uniData = abi.decode(_callData, (IUniswapV3NonfungiblePositionManager.CollectParams));
     }
 }

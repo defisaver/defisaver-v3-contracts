@@ -14,6 +14,11 @@ contract DFSSell is ActionBase, DFSExchangeCore {
 
     uint internal constant RECIPE_FEE = 400;
     uint internal constant DIRECT_FEE = 800;
+    struct Params {
+        ExchangeData exchangeData;
+        address from;
+        address to;
+    }
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -22,40 +27,40 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public override payable returns (bytes32) {
-        (ExchangeData memory exchangeData, address from, address to) = parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        exchangeData.srcAddr = _parseParamAddr(
-            exchangeData.srcAddr,
+        params.exchangeData.srcAddr = _parseParamAddr(
+            params.exchangeData.srcAddr,
             _paramMapping[0],
             _subData,
             _returnValues
         );
-        exchangeData.destAddr = _parseParamAddr(
-            exchangeData.destAddr,
+        params.exchangeData.destAddr = _parseParamAddr(
+            params.exchangeData.destAddr,
             _paramMapping[1],
             _subData,
             _returnValues
         );
 
-        exchangeData.srcAmount = _parseParamUint(
-            exchangeData.srcAmount,
+        params.exchangeData.srcAmount = _parseParamUint(
+            params.exchangeData.srcAmount,
             _paramMapping[2],
             _subData,
             _returnValues
         );
-        from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[4], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        uint256 exchangedAmount = _dfsSell(exchangeData, from, to, RECIPE_FEE);
+        uint256 exchangedAmount = _dfsSell(params.exchangeData, params.from, params.to, RECIPE_FEE);
 
         return bytes32(exchangedAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public override payable   {
-        (ExchangeData memory exchangeData, address from, address to) = parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        _dfsSell(exchangeData, from, to, DIRECT_FEE);
+        _dfsSell(params.exchangeData, params.from, params.to, DIRECT_FEE);
     }
 
     /// @inheritdoc ActionBase
@@ -109,19 +114,8 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         return exchangedAmount;
     }
 
-    function parseInputs(bytes memory _callData)
-        public
-        pure
-        returns (
-            ExchangeData memory exchangeData,
-            address from,
-            address to
-        )
-    {
-        exchangeData = unpackExchangeData(_callData[0]);
-
-        from = abi.decode(_callData[1], (address));
-        to = abi.decode(_callData[2], (address));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 
     /// @notice Returns the owner of the DSProxy that called the contract

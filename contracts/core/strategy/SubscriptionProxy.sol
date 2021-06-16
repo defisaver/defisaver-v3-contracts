@@ -24,7 +24,7 @@ contract SubscriptionProxy is StrategyData, AdminAuth, ProxyPermission {
         uint64 _templateId,
         bool _active,
         bytes[] memory _subData,
-        bytes[][] memory _triggerData
+        bytes[] memory _triggerData
     ) public {
         address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
         address subAddr = registry.getAddr(SUBSCRIPTION_ID);
@@ -56,7 +56,7 @@ contract SubscriptionProxy is StrategyData, AdminAuth, ProxyPermission {
         uint8[][] memory _paramMapping,
         bool _active,
         bytes[] memory _subData,
-        bytes[][] memory _triggerData
+        bytes[] memory _triggerData
     ) public {
         address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
         address subAddr = registry.getAddr(SUBSCRIPTION_ID);
@@ -74,7 +74,7 @@ contract SubscriptionProxy is StrategyData, AdminAuth, ProxyPermission {
         uint64 _templateId,
         bool _active,
         bytes[] memory _subData,
-        bytes[][] memory _triggerData
+        bytes[] memory _triggerData
     ) public {
         address subAddr = registry.getAddr(SUBSCRIPTION_ID);
 

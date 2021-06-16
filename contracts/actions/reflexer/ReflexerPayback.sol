@@ -12,6 +12,12 @@ import "./helpers/ReflexerHelper.sol";
 contract ReflexerPayback is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 
+    struct Params {
+        uint256 safeId;
+        uint256 amount;
+        address from;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
@@ -19,22 +25,22 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable override returns (bytes32) {
-        (uint256 safeId, uint256 amount, address from) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        safeId = _parseParamUint(safeId, _paramMapping[0], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
-        from = _parseParamAddr(from, _paramMapping[2], _subData, _returnValues);
+        inputData.safeId = _parseParamUint(inputData.safeId, _paramMapping[0], _subData, _returnValues);
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.from = _parseParamAddr(inputData.from, _paramMapping[2], _subData, _returnValues);
 
-        amount = _reflexerPayback(safeId, amount, from);
+        inputData.amount = _reflexerPayback(inputData.safeId, inputData.amount, inputData.from);
 
-        return bytes32(amount);
+        return bytes32(inputData.amount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
-        (uint256 safeId, uint256 amount, address from) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        _reflexerPayback(safeId, amount, from);
+        _reflexerPayback(inputData.safeId, inputData.amount, inputData.from);
     }
 
     /// @inheritdoc ActionBase
@@ -82,20 +88,6 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
         return _amount;
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (
-            uint256 safeId,
-            uint256 amount,
-            address from
-        )
-    {
-        safeId = abi.decode(_callData[0], (uint256));
-        amount = abi.decode(_callData[1], (uint256));
-        from = abi.decode(_callData[2], (address));
-    }
-
     /// @notice Gets repaid delta debt generated (rate adjusted debt)
     /// @param coin uint amount
     /// @param safe uint - safeId
@@ -138,5 +130,9 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
         raiAmount = rad / RAY;
 
         raiAmount = mul(raiAmount, RAY) < rad ? raiAmount + 1 : raiAmount;
+    }
+
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

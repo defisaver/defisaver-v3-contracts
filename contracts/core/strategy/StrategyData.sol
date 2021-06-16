@@ -26,6 +26,6 @@ contract StrategyData {
         uint64 templateId;
         uint64 posInUserArr;
         bytes[] subData;
-        bytes[][] triggerData;
+        bytes[] triggerData;
     }
 }

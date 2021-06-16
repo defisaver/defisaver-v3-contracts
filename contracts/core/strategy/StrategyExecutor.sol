@@ -36,7 +36,7 @@ contract StrategyExecutor is StrategyData, AdminAuth {
     /// @param _actionsCallData All input data needed to execute actions
     function executeStrategy(
         uint256 _strategyId,
-        bytes[][] memory _triggerCallData,
+        bytes[] memory _triggerCallData,
         bytes[][] memory _actionsCallData
     ) public {
         Subscriptions sub = Subscriptions(registry.getAddr(SUBSCRIPTION_ID));
@@ -70,7 +70,7 @@ contract StrategyExecutor is StrategyData, AdminAuth {
     function checkTriggers(
         uint _strategyId,
         Strategy memory _strategy,
-        bytes[][] memory _triggerCallData,
+        bytes[] memory _triggerCallData,
         Subscriptions _sub
     ) public {
 

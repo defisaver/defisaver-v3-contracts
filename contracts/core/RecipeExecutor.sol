@@ -124,7 +124,7 @@ contract RecipeExecutor is StrategyData, ProxyPermission, AdminAuth {
 
         /// @dev FL action is called directly so that we can check who the msg.sender of FL is
         ActionBase(_flActionAddr).executeAction(
-            _currRecipe.callData,
+            _currRecipe.callData[0], // TODO: check this
             _currRecipe.subData,
             _currRecipe.paramMapping[0],
             _returnValues

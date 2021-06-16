@@ -81,6 +81,6 @@ contract LiquityBorrow is ActionBase, LiquityHelper {
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+        params = abi.decode(_callData, (Params));
     }
 }

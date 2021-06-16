@@ -111,6 +111,6 @@ contract UniWithdraw is ActionBase {
         pure
         returns (UniWithdrawData memory uniData)
     {
-        uniData = abi.decode(_callData[0], (UniWithdrawData));
+        uniData = abi.decode(_callData, (UniWithdrawData));
     }
 }

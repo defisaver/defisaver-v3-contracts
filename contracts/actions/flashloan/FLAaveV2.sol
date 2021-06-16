@@ -38,13 +38,14 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
 
     bytes4 constant TASK_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
-    struct FLAaveV2Data {
+    struct Params {
         address[] tokens;
         uint256[] amounts;
         uint256[] modes;
         address onBehalfOf;
         address flParamGetterAddr;
         bytes flParamGetterData;
+        bytes taskData;
     }
 
     /// @inheritdoc ActionBase
@@ -54,7 +55,7 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
         uint8[] memory,
         bytes32[] memory
     ) public override payable returns (bytes32) {
-        FLAaveV2Data memory flData = parseInputs(_callData);
+        Params memory flData = parseInputs(_callData);
 
         // if we want to get on chain info about FL params
         if (flData.flParamGetterAddr != address(0)) {
@@ -62,7 +63,7 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
                 IFLParamGetter(flData.flParamGetterAddr).getFlashLoanParams(flData.flParamGetterData);
         }
 
-        bytes memory taskData = _callData[_callData.length - 1];
+        bytes memory taskData = flData.taskData; // TODO: Fix this
         uint flAmount = _flAaveV2(flData, taskData);
 
         return bytes32(flAmount);
@@ -81,7 +82,7 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
     /// @notice Gets a Fl from AaveV2 and returns back the execution to the action address
     /// @param _flData All the amounts/tokens and related aave fl data
     /// @param _params Rest of the data we have in the task
-    function _flAaveV2(FLAaveV2Data memory _flData, bytes memory _params) internal returns (uint) {
+    function _flAaveV2(Params memory _flData, bytes memory _params) internal returns (uint) {
 
         ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
             address(this),
@@ -137,17 +138,8 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
         return true;
     }
 
-    function parseInputs(bytes memory _callData)
-        public
-        pure
-        returns (FLAaveV2Data memory flData)
-    {
-        flData.amounts = abi.decode(_callData[0], (uint256[]));
-        flData.tokens = abi.decode(_callData[1], (address[]));
-        flData.modes = abi.decode(_callData[2], (uint256[]));
-        flData.onBehalfOf = abi.decode(_callData[3], (address));
-        flData.flParamGetterAddr = abi.decode(_callData[4], (address));
-        flData.flParamGetterData = abi.decode(_callData[5], (bytes));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
+        inputData = abi.decode(_callData, (Params));
     }
 
     // solhint-disable-next-line no-empty-blocks

@@ -13,6 +13,12 @@ import "./helpers/ReflexerHelper.sol";
 contract ReflexerGenerate is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 
+    struct Params {
+        uint256 safeId;
+        uint256 amount;
+        address to;
+    }
+
     address public constant TAX_COLLECTOR_ADDRESS = 0xcDB05aEda142a1B0D6044C09C64e4226c1a281EB;
 
     /// @inheritdoc ActionBase
@@ -22,22 +28,22 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable override returns (bytes32) {
-        (uint256 safeId, uint256 amount, address to) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        safeId = _parseParamUint(safeId, _paramMapping[0], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[2], _subData, _returnValues);
+        inputData.safeId = _parseParamUint(inputData.safeId, _paramMapping[0], _subData, _returnValues);
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        amount = _reflexerGenerate(safeId, amount, to);
+        inputData.amount = _reflexerGenerate(inputData.safeId, inputData.amount, inputData.to);
 
-        return bytes32(amount);
+        return bytes32(inputData.amount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
-        (uint256 safeId, uint256 amount, address to) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        _reflexerGenerate(safeId, amount, to);
+        _reflexerGenerate(inputData.safeId, inputData.amount, inputData.to);
     }
 
     /// @inheritdoc ActionBase
@@ -85,18 +91,8 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
         return _amount;
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (
-            uint256 safeId,
-            uint256 amount,
-            address to
-        )
-    {
-        safeId = abi.decode(_callData[0], (uint256));
-        amount = abi.decode(_callData[1], (uint256));
-        to = abi.decode(_callData[2], (address));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 
     /// @notice Gets delta debt generated (Total Safe debt minus available safeHandler COIN balance)

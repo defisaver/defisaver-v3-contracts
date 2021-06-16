@@ -14,6 +14,13 @@ import "./helpers/McdHelper.sol";
 contract McdPayback is ActionBase, McdHelper {
     using TokenUtils for address;
 
+    struct Params {
+        uint256 vaultId;
+        uint256 amount;
+        address from;
+        address mcdManager;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
@@ -21,24 +28,23 @@ contract McdPayback is ActionBase, McdHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable override returns (bytes32) {
-        (uint256 vaultId, uint256 amount, address from, address mcdManager) =
-            parseInputs(_callData);
 
-        vaultId = _parseParamUint(vaultId, _paramMapping[0], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
-        from = _parseParamAddr(from, _paramMapping[2], _subData, _returnValues);
+        Params memory inputData = parseInputs(_callData);
 
-        amount = _mcdPayback(vaultId, amount, from, mcdManager);
+        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.from = _parseParamAddr(inputData.from, _paramMapping[2], _subData, _returnValues);
 
-        return bytes32(amount);
+        inputData.amount = _mcdPayback(inputData.vaultId, inputData.amount, inputData.from, inputData.mcdManager);
+
+        return bytes32(inputData.amount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
-        (uint256 vaultId, uint256 amount, address from, address mcdManager) =
-            parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        _mcdPayback(vaultId, amount, from, mcdManager);
+        _mcdPayback(inputData.vaultId, inputData.amount, inputData.from, inputData.mcdManager);
     }
 
     /// @inheritdoc ActionBase
@@ -87,19 +93,7 @@ contract McdPayback is ActionBase, McdHelper {
         return _amount;
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        view
-        returns (
-            uint256 vaultId,
-            uint256 amount,
-            address from,
-            address mcdManager
-        )
-    {
-        vaultId = abi.decode(_callData[0], (uint256));
-        amount = abi.decode(_callData[1], (uint256));
-        from = abi.decode(_callData[2], (address));
-        mcdManager = abi.decode(_callData[3], (address));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

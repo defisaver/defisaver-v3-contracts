@@ -11,6 +11,13 @@ import "./helpers/ReflexerHelper.sol";
 contract ReflexerWithdraw is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 
+    struct Params {
+        uint256 safeId;
+        uint256 amount;
+        address adapterAddr;
+        address to;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
@@ -18,23 +25,23 @@ contract ReflexerWithdraw is ActionBase, ReflexerHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable override returns (bytes32) {
-        (uint256 safeId, uint256 amount, address adapterAddr, address to) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        safeId = _parseParamUint(safeId, _paramMapping[0], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
-        adapterAddr = _parseParamAddr(adapterAddr, _paramMapping[2], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[3], _subData, _returnValues);
+        inputData.safeId = _parseParamUint(inputData.safeId, _paramMapping[0], _subData, _returnValues);
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.adapterAddr = _parseParamAddr(inputData.adapterAddr, _paramMapping[2], _subData, _returnValues);
+        inputData.to = _parseParamAddr(inputData.to, _paramMapping[3], _subData, _returnValues);
 
-        amount = _reflexerWithdraw(safeId, amount, adapterAddr, to);
+        inputData.amount = _reflexerWithdraw(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.to);
 
-        return bytes32(amount);
+        return bytes32(inputData.amount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
-        (uint256 safeId, uint256 amount, address adapterAddr, address to) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        _reflexerWithdraw(safeId, amount, adapterAddr, to);
+        _reflexerWithdraw(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.to);
     }
 
     /// @inheritdoc ActionBase
@@ -101,19 +108,7 @@ contract ReflexerWithdraw is ActionBase, ReflexerHelper {
         return (collateral, rmul(debt, rate));
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (
-            uint256 safeId,
-            uint256 amount,
-            address adapterAddr,
-            address to
-        )
-    {
-        safeId = abi.decode(_callData[0], (uint256));
-        amount = abi.decode(_callData[1], (uint256));
-        adapterAddr = abi.decode(_callData[2], (address));
-        to = abi.decode(_callData[3], (address));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

@@ -14,6 +14,12 @@ contract CompClaim is ActionBase, CompHelper, DSMath {
     using TokenUtils for address;
 
     address public constant COMP_ADDR = 0xc00e94Cb662C3520282E6f5717214004A7f26888;
+    struct Params {
+        address[] cTokensSupply;
+        address[] cTokensBorrow;
+        address from;
+        address to;
+    }
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -22,24 +28,22 @@ contract CompClaim is ActionBase, CompHelper, DSMath {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (address[] memory cTokensSupply, address[] memory cTokensBorrow, address from, address to) =
-            parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
         // the first 2 inputs are not mappable, just the last two
-        from = _parseParamAddr(from, _paramMapping[0], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[1], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[0], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
 
-        uint256 compClaimed = _claim(cTokensSupply, cTokensBorrow, from, to);
+        uint256 compClaimed = _claim(params.cTokensSupply, params.cTokensBorrow, params.from, params.to);
 
         return bytes32(compClaimed);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
-        (address[] memory cTokensSupply, address[] memory cTokensBorrow, address from, address to) =
-            parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        _claim(cTokensSupply, cTokensBorrow, from, to);
+        _claim(params.cTokensSupply, params.cTokensBorrow, params.from, params.to);
     }
 
     /// @inheritdoc ActionBase
@@ -82,19 +86,7 @@ contract CompClaim is ActionBase, CompHelper, DSMath {
         return compClaimed;
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (
-            address[] memory cTokensSupply,
-            address[] memory cTokensBorrow,
-            address from,
-            address to
-        )
-    {
-        cTokensSupply = abi.decode(_callData[0], (address[]));
-        cTokensBorrow = abi.decode(_callData[1], (address[]));
-        from = abi.decode(_callData[2], (address));
-        to = abi.decode(_callData[3], (address));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

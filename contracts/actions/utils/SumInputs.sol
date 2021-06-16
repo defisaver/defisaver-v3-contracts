@@ -7,6 +7,10 @@ import "../ActionBase.sol";
 
 /// @title Helper action to sum up 2 inputs/return values
 contract SumInputs is ActionBase, DSMath {
+    struct Params {
+        uint256 a;
+        uint256 b;
+    }
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -15,13 +19,12 @@ contract SumInputs is ActionBase, DSMath {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public virtual override payable returns (bytes32) {
-        uint a = abi.decode(_callData[0], (uint));
-        uint b = abi.decode(_callData[1], (uint));
+        Params memory inputData = parseInputs(_callData);
 
-        a = _parseParamUint(a, _paramMapping[0], _subData, _returnValues);
-        b = _parseParamUint(b, _paramMapping[1], _subData, _returnValues);
+        inputData.a = _parseParamUint(inputData.a, _paramMapping[0], _subData, _returnValues);
+        inputData.b = _parseParamUint(inputData.b, _paramMapping[1], _subData, _returnValues);
 
-        return bytes32(_sumInputs(a, b));
+        return bytes32(_sumInputs(inputData.a, inputData.b));
     }
 
     // solhint-disable-next-line no-empty-blocks
@@ -36,5 +39,9 @@ contract SumInputs is ActionBase, DSMath {
 
     function _sumInputs(uint _a, uint _b) internal pure returns (uint) {
         return add(_a, _b);
+    }
+
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

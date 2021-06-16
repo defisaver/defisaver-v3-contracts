@@ -7,12 +7,12 @@ import "./helpers/LiquityHelper.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
-contract LiquitySPDeposit is ActionBase, LiquityHelper {
+contract LiquitySPWithdraw is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
     struct Params {
-        uint256 lusdAmount; // Amount of LUSD tokens to deposit
-        address from;       // Address where to pull the tokens from
+        uint256 lusdAmount; // Amount of LUSD tokens to withdraw
+        address to;         // Address that will receive the tokens
         address wethTo;     // Address that will receive ETH(wrapped) gains
         address lqtyTo;     // Address that will receive LQTY token gains
     }
@@ -26,11 +26,11 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
         params.lusdAmount = _parseParamUint(params.lusdAmount, _paramMapping[0], _subData, _returnValues);
-        params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.wethTo = _parseParamAddr(params.wethTo, _paramMapping[2], _subData, _returnValues);
         params.lqtyTo = _parseParamAddr(params.lqtyTo, _paramMapping[3], _subData, _returnValues);
 
-        params.lusdAmount = _liquitySPDeposit(params);
+        params.lusdAmount = _liquitySPWithdraw(params);
         return bytes32(params.lusdAmount);
     }
 
@@ -38,7 +38,7 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
-        _liquitySPDeposit(params);
+        _liquitySPWithdraw(params);
     }
 
     /// @inheritdoc ActionBase
@@ -48,24 +48,24 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Deposits LUSD to the stability pool
-    function _liquitySPDeposit(Params memory _params) internal returns (uint256) {
-        if (_params.lusdAmount == type(uint256).max) {
-            _params.lusdAmount = LUSDTokenAddr.getBalance(_params.from);
-        }
-
+    /// @notice Withdraws LUSD from the user's stability pool deposit
+    function _liquitySPWithdraw(Params memory _params) internal returns (uint256) {
         uint256 ethGain = StabilityPool.getDepositorETHGain(address(this));
         uint256 lqtyGain = StabilityPool.getDepositorLQTYGain(address(this));
 
-        LUSDTokenAddr.pullTokensIfNeeded(_params.from, _params.lusdAmount);
-        StabilityPool.provideToSP(_params.lusdAmount, address(0));   // No registered frontend means 100% kickback rate for LQTY rewards
+        uint256 deposit = StabilityPool.getCompoundedLUSDDeposit(address(this));
+        _params.lusdAmount = deposit > _params.lusdAmount ? _params.lusdAmount : deposit;
+
+        StabilityPool.withdrawFromSP(_params.lusdAmount);
+        // Amount goes through min(amount, depositedAmount)
+        LUSDTokenAddr.withdrawTokens(_params.to, _params.lusdAmount);
 
         withdrawStabilityGains(ethGain, lqtyGain, _params.wethTo, _params.lqtyTo);
 
         logger.Log(
             address(this),
             msg.sender,
-            "LiquitySPDeposit",
+            "LiquitySPWithdraw",
             abi.encode(
                 _params,
                 ethGain,

@@ -12,6 +12,13 @@ import "./helpers/AaveHelper.sol";
 contract AaveWithdraw is ActionBase, AaveHelper {
     using TokenUtils for address;
 
+    struct Params {
+        address market;
+        address tokenAddr;
+        uint256 amount;
+        address to;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
@@ -19,23 +26,23 @@ contract AaveWithdraw is ActionBase, AaveHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (address market, address tokenAddr, uint256 amount, address to) = parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        market = _parseParamAddr(market, _paramMapping[0], _subData, _returnValues);
-        tokenAddr = _parseParamAddr(tokenAddr, _paramMapping[1], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[2], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[3], _subData, _returnValues);
+        params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
+        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
 
-        uint256 withdrawAmount = _withdraw(market, tokenAddr, amount, to);
+        uint256 withdrawAmount = _withdraw(params.market, params.tokenAddr, params.amount, params.to);
 
         return bytes32(withdrawAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
-        (address market, address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        _withdraw(market, tokenAddr, amount, from);
+        _withdraw(params.market, params.tokenAddr, params.amount, params.to);
     }
 
     /// @inheritdoc ActionBase
@@ -82,19 +89,7 @@ contract AaveWithdraw is ActionBase, AaveHelper {
         return _amount;
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (
-            address market,
-            address tokenAddr,
-            uint256 amount,
-            address to
-        )
-    {
-        market = abi.decode(_callData[0], (address));
-        tokenAddr = abi.decode(_callData[1], (address));
-        amount = abi.decode(_callData[2], (uint256));
-        to = abi.decode(_callData[3], (address));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

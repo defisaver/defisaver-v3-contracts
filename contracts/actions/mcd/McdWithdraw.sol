@@ -13,6 +13,13 @@ import "./helpers/McdHelper.sol";
 /// @title Withdraws collateral from a Maker vault
 contract McdWithdraw is ActionBase, McdHelper {
     using TokenUtils for address;
+    struct Params {
+        uint256 vaultId;
+        uint256 amount;
+        address joinAddr;
+        address to;
+        address mcdManager;
+    }
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -21,25 +28,24 @@ contract McdWithdraw is ActionBase, McdHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable override returns (bytes32) {
-        (uint256 vaultId, uint256 amount, address joinAddr, address to, address mcdManager) =
-            parseInputs(_callData);
+     
+        Params memory inputData = parseInputs(_callData);
 
-        vaultId = _parseParamUint(vaultId, _paramMapping[0], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
-        joinAddr = _parseParamAddr(joinAddr, _paramMapping[2], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[3], _subData, _returnValues);
+        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.joinAddr = _parseParamAddr(inputData.joinAddr, _paramMapping[2], _subData, _returnValues);
+        inputData.to = _parseParamAddr(inputData.to, _paramMapping[3], _subData, _returnValues);
 
-        amount = _mcdWithdraw(vaultId, amount, joinAddr, to, mcdManager);
+        inputData.amount = _mcdWithdraw(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager);
 
-        return bytes32(amount);
+        return bytes32(inputData.amount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
-        (uint256 vaultId, uint256 amount, address joinAddr, address to, address mcdManager) =
-            parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        _mcdWithdraw(vaultId, amount, joinAddr, to, mcdManager);
+        _mcdWithdraw(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager);
     }
 
     /// @inheritdoc ActionBase
@@ -107,21 +113,7 @@ contract McdWithdraw is ActionBase, McdHelper {
 
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (
-            uint256 vaultId,
-            uint256 amount,
-            address joinAddr,
-            address to,
-            address mcdManager
-        )
-    {
-        vaultId = abi.decode(_callData[0], (uint256));
-        amount = abi.decode(_callData[1], (uint256));
-        joinAddr = abi.decode(_callData[2], (address));
-        to = abi.decode(_callData[3], (address));
-        mcdManager = abi.decode(_callData[4], (address));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

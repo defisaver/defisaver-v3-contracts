@@ -37,7 +37,7 @@ contract Subscriptions is StrategyData, AdminAuth {
         uint64 _templateId,
         bool _active,
         bytes[] memory _subData,
-        bytes[][] memory _triggerData
+        bytes[] memory _triggerData
     ) public returns (uint) {
         strategies.push(
             Strategy({
@@ -102,7 +102,7 @@ contract Subscriptions is StrategyData, AdminAuth {
         uint64 _templateId,
         bool _active,
         bytes[] memory _subData,
-        bytes[][] memory _triggerData
+        bytes[] memory _triggerData
     ) public {
         Strategy storage s = strategies[_strategyId];
 

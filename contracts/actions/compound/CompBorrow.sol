@@ -15,6 +15,11 @@ contract CompBorrow is ActionBase, CompHelper {
     using TokenUtils for address;
 
     string public constant ERR_COMP_BORROW = "Comp borrow failed";
+    struct Params {
+        address cTokenAddr;
+        uint256 amount;
+        address to;
+    }
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -23,22 +28,22 @@ contract CompBorrow is ActionBase, CompHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (address cTokenAddr, uint256 amount, address to) = parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        cTokenAddr = _parseParamAddr(cTokenAddr, _paramMapping[0], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[2], _subData, _returnValues);
+        params.cTokenAddr = _parseParamAddr(params.cTokenAddr, _paramMapping[0], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
-        uint256 withdrawAmount = _borrow(cTokenAddr, amount, to);
+        uint256 withdrawAmount = _borrow(params.cTokenAddr, params.amount, params.to);
 
         return bytes32(withdrawAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
-        (address cTokenAddr, uint256 amount, address to) = parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        _borrow(cTokenAddr, amount, to);
+        _borrow(params.cTokenAddr, params.amount, params.to);
     }
 
     /// @inheritdoc ActionBase
@@ -76,17 +81,7 @@ contract CompBorrow is ActionBase, CompHelper {
         return _amount;
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (
-            address cTokenAddr,
-            uint256 amount,
-            address to
-        )
-    {
-        cTokenAddr = abi.decode(_callData[0], (address));
-        amount = abi.decode(_callData[1], (uint256));
-        to = abi.decode(_callData[2], (address));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

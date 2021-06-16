@@ -10,6 +10,11 @@ import "../ActionBase.sol";
 contract UnwrapEth is ActionBase {
     using TokenUtils for address;
 
+    struct Params {
+        uint256 amount;
+        address to;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
@@ -17,19 +22,19 @@ contract UnwrapEth is ActionBase {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (uint256 amount, address to) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        amount = _parseParamUint(amount, _paramMapping[0], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[1], _subData, _returnValues);
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
+        inputData.to = _parseParamAddr(inputData.to, _paramMapping[1], _subData, _returnValues);
 
-        return bytes32(_unwrapEth(amount, to));
+        return bytes32(_unwrapEth(inputData.amount, inputData.to));
     }
 
     // solhint-disable-next-line no-empty-blocks
     function executeActionDirect(bytes memory _callData) public payable override {
-        (uint256 amount, address to) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        _unwrapEth(amount, to);
+        _unwrapEth(inputData.amount, inputData.to);
     }
 
     /// @inheritdoc ActionBase
@@ -55,12 +60,7 @@ contract UnwrapEth is ActionBase {
         return _amount;
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (uint256 amount, address to)
-    {
-        amount = abi.decode(_callData[0], (uint256));
-        to = abi.decode(_callData[1], (address));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

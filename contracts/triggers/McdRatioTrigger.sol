@@ -11,45 +11,43 @@ import "../interfaces/ITrigger.sol";
 contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper {
 
     enum RatioState { OVER, UNDER }
+    struct CallParams {
+        uint256 nextPrice;
+    }
+    struct SubParams {
+        uint256 vaultId;
+        uint256 ratio;
+        uint8 state;
+    }
 
-    function isTriggered(bytes memory _callData, bytes[] memory _subData)
+    function isTriggered(bytes memory _callData, bytes memory _subData)
         public
         view
         override
         returns (bool)
     {
-        uint256 nextPrice = parseParamData(_callData);
-        (uint256 vaultId, uint256 ratio, uint8 state) = parseSubData(_subData);
+        CallParams memory callInputData = parseCallInputs(_callData);
+        SubParams memory subInputData = parseSubInputs(_subData);
 
-        uint256 currRatio = getRatio(vaultId, nextPrice);
+        uint256 currRatio = getRatio(subInputData.vaultId, callInputData.nextPrice);
 
-        if (RatioState(state) == RatioState.OVER) {
-            if (currRatio > ratio) return true;
+        if (RatioState(subInputData.state) == RatioState.OVER) {
+            if (currRatio > subInputData.ratio) return true;
         }
 
-        if (RatioState(state) == RatioState.UNDER) {
-            if (currRatio < ratio) return true;
+        if (RatioState(subInputData.state) == RatioState.UNDER) {
+            if (currRatio < subInputData.ratio) return true;
         }
 
         return false;
     }
 
-    function parseSubData(bytes[] memory _data)
-        public
-        pure
-        returns (
-            uint256 vaultId,
-            uint256 ratio,
-            uint8 state
-        )
-    {
-        vaultId = abi.decode(_data[0], (uint256));
-        ratio= abi.decode(_data[1], (uint256));
-        state = abi.decode(_data[2], (uint8));
+    function parseSubInputs(bytes memory _callData) internal pure returns (SubParams memory params) {
+        params = abi.decode(_callData, (SubParams));
     }
 
-    function parseParamData(bytes[] memory _data) public pure returns (uint256 nextPrice) {
-        (nextPrice) = abi.decode(_data[0], (uint256));
+    function parseCallInputs(bytes memory _callData) internal pure returns (CallParams memory params) {
+        params = abi.decode(_callData, (CallParams));
     }
 
 }

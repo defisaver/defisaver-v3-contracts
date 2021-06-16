@@ -123,6 +123,6 @@ contract UniSupply is ActionBase, DSMath {
         pure
         returns (UniSupplyData memory uniData)
     {
-        uniData = abi.decode(_callData[0], (UniSupplyData));
+        uniData = abi.decode(_callData, (UniSupplyData));
     }
 }

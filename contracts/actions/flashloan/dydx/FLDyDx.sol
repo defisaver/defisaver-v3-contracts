@@ -19,6 +19,13 @@ import "./DydxFlashLoanBase.sol";
 contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
+    struct Params {
+        uint256 amount;
+        address token;
+        address flParamGetterAddr;
+        bytes flParamGetterData;
+        bytes taskData;
+    }
 
     string constant ERR_ONLY_DYDX_CALLER = "Caller not dydx";
     string constant ERR_SAME_CALLER = "FL taker must be this contract";
@@ -42,20 +49,19 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
         uint8[] memory,
         bytes32[] memory
     ) public payable override returns (bytes32) {
-        (uint256 amount, address token, address flParamGetterAddr, bytes memory flParamGetterData) =
-            parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
          // if we want to get on chain info about FL params
-        if (flParamGetterAddr != address(0)) {
+        if (inputData.flParamGetterAddr != address(0)) {
             (address[] memory tokens, uint256[] memory amounts, ) =
-                IFLParamGetter(flParamGetterAddr).getFlashLoanParams(flParamGetterData);
+                IFLParamGetter(inputData.flParamGetterAddr).getFlashLoanParams(inputData.flParamGetterData);
 
-            amount = amounts[0];
-            token = tokens[0];
+            inputData.amount = amounts[0];
+            inputData.token = tokens[0];
         }
 
-        bytes memory taskData = _callData[_callData.length - 1];
-        uint256 flAmount = _flDyDx(amount, token, abi.encode(taskData, amount, token));
+        bytes memory taskData = inputData.taskData; // TODO: FIX this
+        uint256 flAmount = _flDyDx(inputData.amount, inputData.token, abi.encode(taskData, inputData.amount, inputData.token));
 
         return bytes32(flAmount);
     }
@@ -136,21 +142,8 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
         flFeeFaucet.my2Wei(tokenAddr); // get extra 2 wei for DyDx fee
     }
 
-
-    function parseInputs(bytes memory _callData)
-        public
-        pure
-        returns (
-            uint256 amount,
-            address token,
-            address flParamGetterAddr,
-            bytes memory flParamGetterData
-        )
-    {
-        amount = abi.decode(_callData[0], (uint256));
-        token = abi.decode(_callData[1], (address));
-        flParamGetterAddr = abi.decode(_callData[2], (address));
-        flParamGetterData = abi.decode(_callData[3], (bytes));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
+        inputData = abi.decode(_callData, (Params));
     }
 
     // solhint-disable-next-line no-empty-blocks

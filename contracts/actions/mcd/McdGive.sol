@@ -15,6 +15,13 @@ contract McdGive is ActionBase {
 
     string public constant ERR_NO_BURN_VAULT = "Can't send vault to 0x0";
 
+    struct Params {
+        uint256 vaultId;
+        address newOwner;
+        bool createProxy;
+        address mcdManager;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
@@ -22,23 +29,21 @@ contract McdGive is ActionBase {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (uint256 vaultId, address newOwner, bool createProxy, address mcdManager) =
-            parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        vaultId = _parseParamUint(vaultId, _paramMapping[0], _subData, _returnValues);
-        newOwner = _parseParamAddr(newOwner, _paramMapping[1], _subData, _returnValues);
+        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.newOwner = _parseParamAddr(inputData.newOwner, _paramMapping[1], _subData, _returnValues);
 
-        newOwner = _mcdGive(vaultId, newOwner, createProxy, mcdManager);
+        inputData.newOwner = _mcdGive(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager);
 
-        return bytes32(bytes20(newOwner));
+        return bytes32(bytes20(inputData.newOwner));
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
-        (uint256 vaultId, address newOwner, bool createProxy, address mcdManager) =
-            parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        _mcdGive(vaultId, newOwner, createProxy, mcdManager);
+        _mcdGive(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager);
     }
 
     /// @inheritdoc ActionBase
@@ -84,19 +89,7 @@ contract McdGive is ActionBase {
         );
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (
-            uint256 vaultId,
-            address newOwner,
-            bool createProxy,
-            address mcdManager
-        )
-    {
-        vaultId = abi.decode(_callData[0], (uint256));
-        newOwner = abi.decode(_callData[1], (address));
-        createProxy = abi.decode(_callData[2], (bool));
-        mcdManager = abi.decode(_callData[3], (address));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

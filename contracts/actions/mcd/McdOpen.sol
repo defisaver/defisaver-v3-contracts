@@ -9,6 +9,12 @@ import "../ActionBase.sol";
 
 /// @title Open a new Maker vault
 contract McdOpen is ActionBase {
+
+    struct Params {
+        address joinAddr;
+        address mcdManager;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
@@ -16,20 +22,20 @@ contract McdOpen is ActionBase {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (address joinAddr, address mcdManager) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        joinAddr = _parseParamAddr(joinAddr, _paramMapping[0], _subData, _returnValues);
+        inputData.joinAddr = _parseParamAddr(inputData.joinAddr, _paramMapping[0], _subData, _returnValues);
 
-        uint256 newVaultId = _mcdOpen(joinAddr, mcdManager);
+        uint256 newVaultId = _mcdOpen(inputData.joinAddr, inputData.mcdManager);
 
         return bytes32(newVaultId);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
-        (address joinAddr, address mcdManager) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        _mcdOpen(joinAddr, mcdManager);
+        _mcdOpen(inputData.joinAddr, inputData.mcdManager);
     }
 
     /// @inheritdoc ActionBase
@@ -54,12 +60,7 @@ contract McdOpen is ActionBase {
         );
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (address joinAddr, address mcdManager)
-    {
-        joinAddr = abi.decode(_callData[0], (address));
-        mcdManager = abi.decode(_callData[1], (address));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

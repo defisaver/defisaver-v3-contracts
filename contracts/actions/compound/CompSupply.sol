@@ -11,6 +11,12 @@ import "./helpers/CompHelper.sol";
 /// @title Supply a token to Compound
 contract CompSupply is ActionBase, CompHelper {
     using TokenUtils for address;
+    struct Params {
+        address cTokenAddr;
+        uint256 amount;
+        address from;
+        bool enableAsColl;
+    }
 
     string public constant ERR_COMP_SUPPLY_FAILED = "Compound supply failed";
 
@@ -21,24 +27,22 @@ contract CompSupply is ActionBase, CompHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (address cTokenAddr, uint256 amount, address from, bool enableAsColl) =
-            parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        cTokenAddr = _parseParamAddr(cTokenAddr, _paramMapping[0], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
-        from = _parseParamAddr(from, _paramMapping[2], _subData, _returnValues);
+        params.cTokenAddr = _parseParamAddr(params.cTokenAddr, _paramMapping[0], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
 
-        uint256 withdrawAmount = _supply(cTokenAddr, amount, from, enableAsColl);
+        uint256 withdrawAmount = _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
 
         return bytes32(withdrawAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
-        (address cTokenAddr, uint256 amount, address from, bool enableAsColl) =
-            parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        _supply(cTokenAddr, amount, from, enableAsColl);
+        _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
     }
 
     /// @inheritdoc ActionBase
@@ -95,19 +99,7 @@ contract CompSupply is ActionBase, CompHelper {
         return _amount;
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (
-            address cTokenAddr,
-            uint256 amount,
-            address from,
-            bool enableAsColl
-        )
-    {
-        cTokenAddr = abi.decode(_callData[0], (address));
-        amount = abi.decode(_callData[1], (uint256));
-        from = abi.decode(_callData[2], (address));
-        enableAsColl = abi.decode(_callData[3], (bool));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }
