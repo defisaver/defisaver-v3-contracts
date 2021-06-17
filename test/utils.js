@@ -86,7 +86,7 @@ const coinGeckoHelper = {
     WBTC: 'wrapped-bitcoin',
     RENBTC: 'renbtc',
     ZRX: '0x',
-    KNC: 'kyber-network',
+    KNC: 'kyber-network-crystal',
     MANA: 'decentraland',
     PAXUSD: 'paxos-standard',
     COMP: 'compound-governance-token',
@@ -98,6 +98,7 @@ const coinGeckoHelper = {
     GUSD: 'gemini-dollar',
     YFI: 'yearn-finance',
     LUSD: 'liquity-usd',
+    KNCL: 'kyber-network',
     LQTY: 'liquity',
 };
 

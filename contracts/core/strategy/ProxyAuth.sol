@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 
 import "../../interfaces/IDFSRegistry.sol";
 import "../../interfaces/IDSProxy.sol";
@@ -15,9 +14,13 @@ contract ProxyAuth is AdminAuth {
     bytes32 constant STRATEGY_EXECUTOR_ID = keccak256("StrategyExecutor");
     string public constant ERR_SENDER_NOT_EXECUTOR = "Sender not executor addr";
 
+    error SenderNotExecutorError();
+
     modifier onlyExecutor {
         address executorAddr = registry.getAddr(STRATEGY_EXECUTOR_ID);
-        require(msg.sender == executorAddr, ERR_SENDER_NOT_EXECUTOR);
+        if (msg.sender != executorAddr){
+            revert SenderNotExecutorError();
+        }
         _;
     }
 

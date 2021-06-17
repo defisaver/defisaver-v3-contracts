@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../../../interfaces/dydx/ISoloMargin.sol";
 
@@ -9,6 +8,8 @@ contract DyDxHelper {
     ISoloMargin public constant soloMargin =
         ISoloMargin(0x1E0447b19BB6EcFdAe1e4AE1694b0C3659614e4e);
 
+    error MarketIdNotFound();
+    
     function getWeiBalance(
         address _user,
         uint256 _index,
@@ -40,6 +41,6 @@ contract DyDxHelper {
         }
 
         // if we get this far no id has been found
-        revert("No DyDx market id found for token");
+        revert MarketIdNotFound();
     }
 }

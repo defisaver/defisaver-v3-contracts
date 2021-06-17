@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../../auth/AdminAuth.sol";
 import "../../interfaces/ITrigger.sol";
@@ -25,9 +24,9 @@ contract StrategyExecutor is StrategyData, AdminAuth {
     bytes4 constant SUBSCRIPTION_ID = bytes4(keccak256("Subscriptions"));
     bytes4 constant TASK_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
-    string public constant ERR_TRIGGER_NOT_ACTIVE = "Trigger not activated";
-    string public constant ERR_BOT_NOT_APPROVED = "Bot is not approved";
-    string public constant ERR_STRATEGY_NOT_ACTIVE = "Strategy is not active";
+    error TriggerNotActiveError();
+    error BotNotApprovedError();
+    error StrategyNotActiveError();
 
     /// @notice Checks all the triggers and executes actions
     /// @dev Only authorized callers can execute it
@@ -42,7 +41,9 @@ contract StrategyExecutor is StrategyData, AdminAuth {
         Subscriptions sub = Subscriptions(registry.getAddr(SUBSCRIPTION_ID));
 
         Strategy memory strategy = sub.getStrategy(_strategyId);
-        require(strategy.active, ERR_STRATEGY_NOT_ACTIVE);
+        if (!(strategy.active)){
+            revert StrategyNotActiveError();
+        }
 
         // check bot auth
         checkCallerAuth(_strategyId);
@@ -58,10 +59,9 @@ contract StrategyExecutor is StrategyData, AdminAuth {
     /// @param _strategyId Id of the strategy
     function checkCallerAuth(uint256 _strategyId) public view {
         address botAuthAddr = registry.getAddr(BOT_AUTH_ID);
-        require(
-            BotAuth(botAuthAddr).isApproved(_strategyId, msg.sender),
-            ERR_BOT_NOT_APPROVED
-        );
+        if (!(BotAuth(botAuthAddr).isApproved(_strategyId, msg.sender))){
+            revert BotNotApprovedError();
+        }
     }
 
     /// @notice Checks if all the triggers are true, reverts if not
@@ -80,7 +80,9 @@ contract StrategyExecutor is StrategyData, AdminAuth {
             address triggerAddr = registry.getAddr(triggerIds[i]);
 
             bool isTriggered = ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _strategy.triggerData[i]);
-            require(isTriggered, ERR_TRIGGER_NOT_ACTIVE);
+            if (!(isTriggered)){
+                revert TriggerNotActiveError();
+            }
         }
     }
 

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 
 import "../auth/AdminAuth.sol";
 import "../interfaces/exchange/IUniswapRouter.sol";
@@ -10,6 +10,8 @@ import "./TokenUtils.sol";
 /// @title Contract used to refill tx sending bots when they are low on eth
 contract BotRefills is AdminAuth {
     using TokenUtils for address;
+    error WrongRefillCallerError();
+    error NotAuthBotError();
 
     address internal refillCaller = 0x33fDb79aFB4456B604f376A45A546e7ae700e880;
     address internal feeAddr = 0x76720aC2574631530eC8163e4085d6F98513fb27;
@@ -28,16 +30,17 @@ contract BotRefills is AdminAuth {
     }
 
     modifier isApprovedBot(address _botAddr) {
-        require(
-            IBotRegistry(BOT_REGISTRY_ADDRESS).botList(_botAddr) || additionalBots[_botAddr],
-            "Not auth bot"
-        );
+        if (!(IBotRegistry(BOT_REGISTRY_ADDRESS).botList(_botAddr) || additionalBots[_botAddr])){
+            revert NotAuthBotError();
+        }
 
         _;
     }
 
     modifier isRefillCaller {
-        require(msg.sender == refillCaller, "Wrong refill caller");
+        if (msg.sender != refillCaller){
+            revert WrongRefillCallerError();
+        }
         _;
     }
 

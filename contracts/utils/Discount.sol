@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 
 contract Discount {
     address public owner;
     mapping(address => CustomServiceFee) public serviceFees;
 
     uint256 constant MAX_SERVICE_FEE = 400;
+
+    error OnlyOwner();
+    error WrongFeeValue();
 
     struct CustomServiceFee {
         bool active;
@@ -26,14 +28,21 @@ contract Discount {
     }
 
     function setServiceFee(address _user, uint256 _fee) public {
-        require(msg.sender == owner, "Only owner");
-        require(_fee >= MAX_SERVICE_FEE || _fee == 0, "Wrong fee value");
+        if (msg.sender != owner){
+            revert OnlyOwner();
+        }
+
+        if (!(_fee >= MAX_SERVICE_FEE || _fee == 0)){
+            revert WrongFeeValue();
+        }
 
         serviceFees[_user] = CustomServiceFee({active: true, amount: _fee});
     }
 
     function disableServiceFee(address _user) public {
-        require(msg.sender == owner, "Only owner");
+        if (msg.sender != owner){
+            revert OnlyOwner();
+        }
 
         serviceFees[_user] = CustomServiceFee({active: false, amount: 0});
     }

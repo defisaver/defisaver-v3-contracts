@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../../../core/strategy/Subscriptions.sol";
 import "../../../interfaces/ILendingPool.sol";
@@ -27,8 +26,10 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
         bytes taskData;
     }
 
-    string constant ERR_ONLY_DYDX_CALLER = "Caller not dydx";
-    string constant ERR_SAME_CALLER = "FL taker must be this contract";
+    //Caller not dydx
+    error OnlyDyDxCallerError();
+    //FL taker must be this contract
+    error SameCallerError();
 
     uint256 public constant DYDX_DUST_FEE = 2;
 
@@ -86,7 +87,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
         bytes memory _data
     ) internal returns (uint256) {
 
-        address payable receiver = address(this);
+        address payable receiver = payable(address(this));
 
         ISoloMargin solo = ISoloMargin(SOLO_MARGIN_ADDRESS);
 
@@ -119,8 +120,12 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
         Account.Info memory,
         bytes memory _data
     ) public nonReentrant {
-        require(msg.sender == SOLO_MARGIN_ADDRESS, ERR_ONLY_DYDX_CALLER);
-        require(_initiator == address(this), ERR_SAME_CALLER);
+        if (msg.sender != SOLO_MARGIN_ADDRESS){
+            revert OnlyDyDxCallerError();
+        }
+        if (_initiator != address(this)){
+            revert SameCallerError();
+        }
 
         (bytes memory callData, uint256 amount, address tokenAddr) =
             abi.decode(_data, (bytes, uint256, address));

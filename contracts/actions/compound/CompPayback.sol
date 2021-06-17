@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../../interfaces/compound/IComptroller.sol";
 import "../../interfaces/compound/ICToken.sol";
@@ -14,12 +12,12 @@ import "./helpers/CompHelper.sol";
 contract CompPayback is ActionBase, CompHelper {
     using TokenUtils for address;
 
-    string public constant ERR_COMP_PAYBACK_FAILED = "Compound payback failed";
     struct Params {
         address cTokenAddr;
         uint256 amount;
         address from;
     }
+    error CompPaybackError();
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -75,7 +73,9 @@ contract CompPayback is ActionBase, CompHelper {
         // we always expect actions to deal with WETH never Eth
         if (tokenAddr != TokenUtils.WETH_ADDR) {
             tokenAddr.approveToken(_cTokenAddr, _amount);
-            require(ICToken(_cTokenAddr).repayBorrow(_amount) == NO_ERROR, ERR_COMP_PAYBACK_FAILED);
+            if (ICToken(_cTokenAddr).repayBorrow(_amount) != NO_ERROR){
+                revert CompPaybackError();
+            }
         } else {
             TokenUtils.withdrawWeth(_amount);
             ICToken(_cTokenAddr).repayBorrow{value: _amount}(); // reverts on fail

@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../../interfaces/uniswap/IUniswapV2Factory.sol";
 import "../../interfaces/exchange/IUniswapRouter.sol";
 import "../../utils/TokenUtils.sol";
-import "../../DS/DSMath.sol";
 import "../ActionBase.sol";
 
 /// @title Supplies liquidity to uniswap
-contract UniSupply is ActionBase, DSMath {
+contract UniSupply is ActionBase {
     using TokenUtils for address;
 
     IUniswapRouter public constant router =
@@ -85,8 +83,8 @@ contract UniSupply is ActionBase, DSMath {
         (uint256 amountA, uint256 amountB, uint256 liqAmount) = _addLiquidity(_uniData);
 
         // send leftovers
-        _uniData.tokenA.withdrawTokens(_uniData.from, sub(_uniData.amountADesired, amountA));
-        _uniData.tokenB.withdrawTokens(_uniData.from, sub(_uniData.amountBDesired, amountB));
+        _uniData.tokenA.withdrawTokens(_uniData.from, _uniData.amountADesired - amountA);
+        _uniData.tokenB.withdrawTokens(_uniData.from, _uniData.amountBDesired - amountB);
 
         logger.Log(
             address(this),

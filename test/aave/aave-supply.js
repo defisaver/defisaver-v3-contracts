@@ -43,14 +43,14 @@ describe('Aave-Supply', function () {
 
         it(`... should supply ${fetchedAmountWithUSD} ${tokenSymbol} to Aave`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
-
+            console.log(assetInfo);
             if (assetInfo.symbol === 'ETH') {
                 assetInfo.address = WETH_ADDRESS;
             }
 
             const aaveTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
             const aToken = aaveTokenInfo.aTokenAddress;
-
+            console.log(aToken);
             const amount = hre.ethers.utils.parseUnits(
                 fetchedAmountWithUSD,
                 assetInfo.decimals,

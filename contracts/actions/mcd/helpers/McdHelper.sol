@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 
 import "../../../DS/DSMath.sol";
 import "../../../DS/DSProxy.sol";
@@ -17,21 +17,23 @@ contract McdHelper is DSMath {
     address public constant DAI_JOIN_ADDR = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
     address public constant DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
+    error IntOverflow();
+
     /// @notice Returns a normalized debt _amount based on the current rate
     /// @param _amount Amount of dai to be normalized
     /// @param _rate Current rate of the stability fee
     /// @param _daiVatBalance Balance od Dai in the Vat for that CDP
     function normalizeDrawAmount(uint _amount, uint _rate, uint _daiVatBalance) internal pure returns (int dart) {
-        if (_daiVatBalance < mul(_amount, RAY)) {
-            dart = toPositiveInt(sub(mul(_amount, RAY), _daiVatBalance) / _rate);
-            dart = mul(uint(dart), _rate) < mul(_amount, RAY) ? dart + 1 : dart;
+        if (_daiVatBalance < _amount * RAY) {
+            dart = toPositiveInt((_amount * RAY - _daiVatBalance) / _rate);
+            dart = uint(dart) * _rate < _amount * RAY ? dart + 1 : dart;
         }
     }
 
     /// @notice Converts a number to Rad precision
     /// @param _wad The input number in wad precision
     function toRad(uint _wad) internal pure returns (uint) {
-        return mul(_wad, 10 ** 27);
+        return _wad * (10 ** 27);
     }
 
     /// @notice Converts a number to 18 decimal precision
@@ -39,14 +41,16 @@ contract McdHelper is DSMath {
     /// @param _joinAddr Join address of the collateral
     /// @param _amount Number to be converted
     function convertTo18(address _joinAddr, uint256 _amount) internal view returns (uint256) {
-        return mul(_amount, 10 ** sub(18 , IJoin(_joinAddr).dec()));
+        return _amount * (10 ** (18 - IJoin(_joinAddr).dec()));
     }
 
     /// @notice Converts a uint to int and checks if positive
     /// @param _x Number to be converted
     function toPositiveInt(uint _x) internal pure returns (int y) {
         y = int(_x);
-        require(y >= 0, "int-overflow");
+        if (y < 0){
+            revert IntOverflow();
+        }
     }
 
     /// @notice Gets Dai amount in Vat which can be added to Cdp
@@ -73,11 +77,11 @@ contract McdHelper is DSMath {
         (, uint art) = IVat(_vat).urns(_ilk, _urn);
         uint dai = IVat(_vat).dai(_usr);
 
-        uint rad = sub(mul(art, rate), dai);
+        uint rad = art * rate - dai;
         daiAmount = rad / RAY;
 
         // handles precision error (off by 1 wei)
-        daiAmount = mul(daiAmount, RAY) < rad ? daiAmount + 1 : daiAmount;
+        daiAmount = daiAmount * RAY < rad ? daiAmount + 1 : daiAmount;
     }
 
     /// @notice Checks if the join address is one of the Ether coll. types
@@ -123,7 +127,7 @@ contract McdHelper is DSMath {
     /// @param _manager Manager contract
     /// @param _cdpId Id of the CDP
     function getOwner(IManager _manager, uint _cdpId) public view returns (address) {
-        DSProxy proxy = DSProxy(uint160(_manager.owns(_cdpId)));
+        DSProxy proxy = DSProxy(payable(address(uint160(_manager.owns(_cdpId)))));
 
         return proxy.owner();
     }

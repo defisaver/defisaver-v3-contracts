@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../../auth/AdminAuth.sol";
 import "../../interfaces/IDSProxy.sol";
@@ -12,9 +11,9 @@ import "./StrategyData.sol";
 contract Subscriptions is StrategyData, AdminAuth {
     DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
 
-    string public constant ERR_EMPTY_STRATEGY = "Strategy does not exist";
-    string public constant ERR_SENDER_NOT_OWNER = "Sender is not strategy owner";
-    string public constant ERR_USER_POS_EMPTY = "No user positions";
+    error NonexistantStrategyError();
+    error SenderNotStrategyOwnerError();
+    error UserPositionsEmpty();
 
     /// @dev The order of strategies might change as they are deleted
     Strategy[] public strategies;
@@ -106,8 +105,12 @@ contract Subscriptions is StrategyData, AdminAuth {
     ) public {
         Strategy storage s = strategies[_strategyId];
 
-        require(s.proxy != address(0), ERR_EMPTY_STRATEGY);
-        require(msg.sender == s.proxy, ERR_SENDER_NOT_OWNER);
+        if (s.proxy == address(0)){
+            revert NonexistantStrategyError();
+        }
+        if (msg.sender != s.proxy){
+            revert SenderNotStrategyOwnerError();
+        }
 
         s.templateId = _templateId;
         s.active = _active;
@@ -124,8 +127,12 @@ contract Subscriptions is StrategyData, AdminAuth {
     /// @param _subId Subscription id
     function removeStrategy(uint256 _subId) public {
         Strategy memory s = strategies[_subId];
-        require(s.proxy != address(0), ERR_EMPTY_STRATEGY);
-        require(msg.sender == s.proxy, ERR_SENDER_NOT_OWNER);
+        if (s.proxy == address(0)){
+            revert NonexistantStrategyError();
+        }
+        if (msg.sender != s.proxy){
+            revert SenderNotStrategyOwnerError();
+        }
 
         uint lastSub = strategies.length - 1;
 
@@ -138,7 +145,9 @@ contract Subscriptions is StrategyData, AdminAuth {
     }
 
     function _removeUserPos(address _user, uint _index) internal {
-        require(usersPos[_user].length > 0, ERR_USER_POS_EMPTY);
+        if (usersPos[_user].length == 0){
+            revert UserPositionsEmpty();
+        }
         uint lastPos = usersPos[_user].length - 1;
 
         usersPos[_user][_index] = usersPos[_user][lastPos];

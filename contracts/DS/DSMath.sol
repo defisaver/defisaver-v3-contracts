@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 
 contract DSMath {
     function add(uint256 x, uint256 y) internal pure returns (uint256 z) {
-        require((z = x + y) >= x, "");
+        z = x + y;
     }
 
     function sub(uint256 x, uint256 y) internal pure returns (uint256 z) {
-        require((z = x - y) <= x, "");
+        z = x - y;
     }
 
     function mul(uint256 x, uint256 y) internal pure returns (uint256 z) {
-        require(y == 0 || (z = x * y) / y == x, "");
+        z = x * y;
     }
 
     function div(uint256 x, uint256 y) internal pure returns (uint256 z) {

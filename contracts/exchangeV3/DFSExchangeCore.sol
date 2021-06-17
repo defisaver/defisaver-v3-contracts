@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../DS/DSMath.sol";
 import "../interfaces/IWETH.sol";
@@ -14,14 +12,15 @@ import "./DFSExchangeHelper.sol";
 import "./SaverExchangeRegistry.sol";
 import "../interfaces/exchange/IOffchainWrapper.sol";
 
-contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
+contract DFSExchangeCore is DFSExchangeHelper, DFSExchangeData, DSMath {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
-    string public constant ERR_SLIPPAGE_HIT = "Slippage hit";
-    string public constant ERR_DEST_AMOUNT_MISSING = "Dest amount missing";
-    string public constant ERR_WRAPPER_INVALID = "Wrapper invalid";
-    string public constant ERR_NOT_ZEROX_EXCHANGE = "Zerox exchange invalid";
+    error SlippageHitError(uint256, uint256);
+    error DestAmountMissingError();
+    error InvalidWrapperError();
+    //Zerox exchange invalid
+    error InvalidExchangeZeroXError();
 
     address public constant DISCOUNT_ADDRESS = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
     address public constant SAVER_EXCHANGE_REGISTRY = 0x25dd3F51e0C3c3Ff164DDC02A8E4D65Bb9cBB12D;
@@ -42,12 +41,12 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         uint256 destBalanceBefore = exData.destAddr.getBalance(address(this));
 
         // Takes DFS exchange fee
-        exData.srcAmount = sub(exData.srcAmount, getFee(
+        exData.srcAmount = exData.srcAmount - getFee(
             exData.srcAmount,
             exData.user,
             exData.srcAddr,
             exData.dfsFeeDivider
-        ));
+        );
 
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
@@ -61,10 +60,12 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         }
 
         uint256 destBalanceAfter = exData.destAddr.getBalance(address(this));
-        uint256 amountBought = sub(destBalanceAfter, destBalanceBefore);
+        uint256 amountBought = destBalanceAfter - destBalanceBefore;
 
         // check slippage
-        require(amountBought >= wmul(exData.minPrice, exData.srcAmount), ERR_SLIPPAGE_HIT);
+        if (amountBought < wmul(exData.minPrice, exData.srcAmount)){
+            revert SlippageHitError(amountBought, wmul(exData.minPrice, exData.srcAmount));
+        }
 
         // revert back exData changes to keep it consistent
         exData.srcAmount = amountWithoutFee;
@@ -77,7 +78,9 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
     /// @param exData Exchange data struct
     /// @return (address, uint) Address of the wrapper used and srcAmount
     function _buy(ExchangeData memory exData) internal returns (address, uint256) {
-        require(exData.destAmount != 0, ERR_DEST_AMOUNT_MISSING);
+        if (exData.destAmount == 0){
+            revert DestAmountMissingError();
+        }
 
         uint256 amountWithoutFee = exData.srcAmount;
         address wrapper = exData.offchainData.wrapper;
@@ -86,12 +89,12 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         uint256 destBalanceBefore = exData.destAddr.getBalance(address(this));
 
         // Takes DFS exchange fee
-        exData.srcAmount = sub(exData.srcAmount, getFee(
+        exData.srcAmount = exData.srcAmount - getFee(
             exData.srcAmount,
             exData.user,
             exData.srcAddr,
             exData.dfsFeeDivider
-        ));
+        );
 
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
@@ -105,10 +108,12 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         }
 
         uint256 destBalanceAfter = exData.destAddr.getBalance(address(this));
-        uint256 amountBought = sub(destBalanceAfter, destBalanceBefore);
+        uint256 amountBought = destBalanceAfter - destBalanceBefore;
 
         // check slippage
-        require(amountBought >= exData.destAmount, ERR_SLIPPAGE_HIT);
+        if (amountBought < exData.destAmount){
+            revert SlippageHitError(amountBought, exData.destAmount);
+        }
 
         // revert back exData changes to keep it consistent
         exData.srcAmount = amountWithoutFee;
@@ -149,10 +154,9 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData {
         internal
         returns (uint256 swappedTokens)
     {
-        require(
-            SaverExchangeRegistry(SAVER_EXCHANGE_REGISTRY).isWrapper(_exData.wrapper),
-            ERR_WRAPPER_INVALID
-        );
+        if (!(SaverExchangeRegistry(SAVER_EXCHANGE_REGISTRY).isWrapper(_exData.wrapper))){
+            revert InvalidWrapperError();
+        }
 
         IERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
 

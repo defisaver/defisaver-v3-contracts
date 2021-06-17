@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 
 abstract contract IOasis {
     function getBuyAmount(address tokenToBuy, address tokenToPay, uint256 amountToPay)

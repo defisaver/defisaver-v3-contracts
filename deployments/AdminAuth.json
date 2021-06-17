@@ -3,6 +3,39 @@
 	"abi": [
 		{
 			"inputs": [],
+			"name": "ERC20OperationFail",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "NonContractCall",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ADMIN_VAULT_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "adminVault",
 			"outputs": [
 				{
@@ -12,19 +45,6 @@
 				}
 			],
 			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_newAdminVault",
-					"type": "address"
-				}
-			],
-			"name": "changeAdminVault",
-			"outputs": [],
-			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
@@ -59,9 +79,6 @@
 		}
 	],
 	"networks": {
-		"local": {
-			"address": "0xB0f05d25e41FbC2b52013099ED9616f1206Ae21B",
-			"args": []
-		}
+		"hardhat": {}
 	}
 }

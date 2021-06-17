@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
-import "../../DS/DSMath.sol";
+pragma solidity =0.8.4;
+
 import "../ActionBase.sol";
 
 /// @title Helper action to sum up 2 inputs/return values
-contract SumInputs is ActionBase, DSMath {
+contract SumInputs is ActionBase {
     struct Params {
         uint256 a;
         uint256 b;
@@ -38,7 +37,7 @@ contract SumInputs is ActionBase, DSMath {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _sumInputs(uint _a, uint _b) internal pure returns (uint) {
-        return add(_a, _b);
+        return _a + _b;
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {

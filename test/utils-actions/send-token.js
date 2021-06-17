@@ -25,7 +25,6 @@ describe('Send-Token', function () {
         const wrapEthAddr = await getAddrFromRegistry('WrapEth');
         const wrapEthAction = new dfs.actions.basic.WrapEthAction(hre.ethers.utils.parseUnits('4', 18));
         const functionData = wrapEthAction.encodeForDsProxyCall()[1];
-
         await proxy['execute(address,bytes)'](wrapEthAddr, functionData, {
             value: hre.ethers.utils.parseUnits('4', 18),
             gasLimit: 3000000,
@@ -36,10 +35,11 @@ describe('Send-Token', function () {
             WETH_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('3', 18),
         );
         const sendTokenData = sendTokenAction.encodeForDsProxyCall()[1];
-
+        const balanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
         await proxy['execute(address,bytes)'](sendTokenAddr, sendTokenData);
-
-        expect(await balanceOf(WETH_ADDRESS, senderAcc.address)).to.be.eq(hre.ethers.utils.parseUnits('3', 18));
+        const balanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
+        const balanceDiff = balanceAfter.sub(balanceBefore);
+        expect(balanceDiff).to.be.eq(hre.ethers.utils.parseUnits('3', 18));
     });
 
     it('... should send tokens direct action uint256.max', async () => {
@@ -48,9 +48,13 @@ describe('Send-Token', function () {
             WETH_ADDRESS, senderAcc.address, hre.ethers.constants.MaxUint256,
         );
         const sendTokenData = sendTokenAction.encodeForDsProxyCall()[1];
+        const proxyBalanceAtStart = await balanceOf(WETH_ADDRESS, proxy.address);
+        const balanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
 
         await proxy['execute(address,bytes)'](sendTokenAddr, sendTokenData);
+        const balanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
+        const balanceDiff = balanceAfter.sub(balanceBefore);
 
-        expect(await balanceOf(WETH_ADDRESS, senderAcc.address)).to.be.eq(hre.ethers.utils.parseUnits('4', 18));
+        expect(balanceDiff).to.be.eq(proxyBalanceAtStart);
     });
 });

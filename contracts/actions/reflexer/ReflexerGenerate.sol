@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../../interfaces/reflexer/ITaxCollector.sol";
 import "../../interfaces/reflexer/ICoinJoin.sol";
@@ -20,6 +19,8 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
     }
 
     address public constant TAX_COLLECTOR_ADDRESS = 0xcDB05aEda142a1B0D6044C09C64e4226c1a281EB;
+    
+    error InvalidCollateralType();
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -108,7 +109,10 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
     ) internal returns (int256 deltaDebt) {
         // Updates stability fee rate
         uint256 rate = ITaxCollector(taxCollector).taxSingle(collateralType);
-        require(rate > 0, "invalid-collateral-type");
+
+        if (rate <= 0){
+            revert InvalidCollateralType();
+        }
 
         // Gets COIN balance of the handler in the safeEngine
         uint256 coin = safeEngine.coinBalance(safeHandler);

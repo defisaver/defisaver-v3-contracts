@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/exchange/IExchangeV3.sol";
 import "../../interfaces/exchange/ISwapRouter.sol";
 import "../../interfaces/exchange/IQuoter.sol";
-import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 
 /// @title DFS exchange wrapper for UniswapV2
-contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth {
+contract UniV3WrapperV3 is IExchangeV3, AdminAuth {
     
     using TokenUtils for address;
     using SafeERC20 for IERC20;
@@ -68,7 +66,7 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth {
     /// @notice Send any leftover tokens, we use to clear out srcTokens after buy
     /// @param _srcAddr Source token address
     function sendLeftOver(address _srcAddr) internal {
-        msg.sender.transfer(address(this).balance);
+        payable(msg.sender).transfer(address(this).balance);
 
         if (_srcAddr != KYBER_ETH_ADDRESS) {
             IERC20(_srcAddr).safeTransfer(msg.sender, IERC20(_srcAddr).balanceOf(address(this)));

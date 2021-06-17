@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
-import "../../../DS/DSMath.sol";
 import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
 /// @title Mints NFT that represents a position in uni v3
-contract UniMintV3 is ActionBase, DSMath{
+contract UniMintV3 is ActionBase{
     using TokenUtils for address;
     IUniswapV3NonfungiblePositionManager public constant positionManager =
         IUniswapV3NonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
@@ -77,8 +75,8 @@ contract UniMintV3 is ActionBase, DSMath{
             (tokenId, liquidity, amount0, amount1) = _uniMint(_uniData);
 
             //send leftovers
-            _uniData.token0.withdrawTokens(_uniData.from, sub(_uniData.amount0Desired, amount0));
-            _uniData.token1.withdrawTokens(_uniData.from, sub(_uniData.amount1Desired, amount1));
+            _uniData.token0.withdrawTokens(_uniData.from, _uniData.amount0Desired - amount0);
+            _uniData.token1.withdrawTokens(_uniData.from, _uniData.amount1Desired - amount1);
             
             logger.Log(
                 address(this),

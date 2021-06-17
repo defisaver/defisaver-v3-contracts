@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../../auth/AdminAuth.sol";
 import "../../auth/ProxyPermission.sol";
@@ -9,7 +8,6 @@ import "../../DS/DSGuard.sol";
 import "../../DS/DSAuth.sol";
 import "./Subscriptions.sol";
 import "../DFSRegistry.sol";
-import "hardhat/console.sol";
 
 /// @title Handles auth and calls subscription contract
 contract SubscriptionProxy is StrategyData, AdminAuth, ProxyPermission {
@@ -40,11 +38,7 @@ contract SubscriptionProxy is StrategyData, AdminAuth, ProxyPermission {
         bytes4[] memory _actionIds,
         uint8[][] memory _paramMapping
     ) public {
-        console.logBytes4(SUBSCRIPTION_ID);
-        console.logBytes32(keccak256("Subscriptions"));
-
         address subAddr = registry.getAddr(SUBSCRIPTION_ID);
-        console.log(subAddr);
 
         Subscriptions(subAddr).createTemplate(_name, _triggerIds, _actionIds, _paramMapping);
     }

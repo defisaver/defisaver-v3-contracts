@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../ActionBase.sol";
 import "../../core/strategy/Subscriptions.sol";
-import "../../DS/DSMath.sol";
 import "../../interfaces/IFLParamGetter.sol";
 import "../../interfaces/ILendingPool.sol";
 import "../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
@@ -15,12 +12,14 @@ import "../../utils/TokenUtils.sol";
 import "../../utils/ReentrancyGuard.sol";
 
 /// @title Action that gets and receives a FL from Aave V2
-contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
+contract FLAaveV2 is ActionBase, StrategyData, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
-    string constant ERR_ONLY_AAVE_CALLER = "Caller not aave pool";
-    string constant ERR_SAME_CALLER = "FL taker must be this contract";
+    //Caller not aave pool
+    error OnlyAaveCallerError();
+    //FL Taker must be this contract
+    error SameCallerError();
 
     address
         public constant AAVE_LENDING_POOL = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
@@ -112,8 +111,12 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
         address _initiator,
         bytes memory _params
     ) public nonReentrant returns (bool) {
-        require(msg.sender == AAVE_LENDING_POOL, ERR_ONLY_AAVE_CALLER);
-        require(_initiator == address(this), ERR_SAME_CALLER);
+        if (msg.sender != AAVE_LENDING_POOL){
+            revert OnlyAaveCallerError();
+        }
+        if (_initiator != address(this)){
+            revert SameCallerError();
+        }
 
         (Recipe memory currTask, address proxy) = abi.decode(_params, (Recipe, address));
 
@@ -122,17 +125,17 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
             _assets[i].withdrawTokens(proxy, _amounts[i]);
         }
 
-        address payable RecipeExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
+        address payable recipeExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
 
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
-            RecipeExecutor,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, bytes32(add(_amounts[0],_fees[0])))
+            recipeExecutor,
+            abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, bytes32(_amounts[0] + _fees[0]))
         );
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
-            _assets[i].approveToken(address(AAVE_LENDING_POOL), add(_amounts[i],_fees[i]));
+            _assets[i].approveToken(address(AAVE_LENDING_POOL), _amounts[i] + _fees[i]);
         }
 
         return true;

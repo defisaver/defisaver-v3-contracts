@@ -3,6 +3,66 @@
 	"abi": [
 		{
 			"inputs": [],
+			"name": "AlreadyInContractChangeError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "AlreadyInWaitPeriodChangeError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ChangeNotReadyError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ERC20OperationFail",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "EmptyPrevAddrError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "EntryAlreadyExistsError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "EntryNonExistentError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "EntryNotInChangeError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "NonContractCall",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "WaitPeriodShortError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
 			"name": "ADMIN_VAULT_ADDR",
 			"outputs": [
 				{
@@ -439,6 +499,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"hardhat": {}
 	}
 }

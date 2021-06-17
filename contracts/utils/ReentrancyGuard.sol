@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 
 /**
  * @dev Contract module that helps prevent reentrant calls to a function.
@@ -34,6 +34,8 @@ abstract contract ReentrancyGuard {
     uint256 private constant _ENTERED = 2;
 
     uint256 private _status;
+    
+    error ReentrantCall();
 
     constructor () {
         _status = _NOT_ENTERED;
@@ -48,7 +50,9 @@ abstract contract ReentrancyGuard {
      */
     modifier nonReentrant() {
         // On the first call to nonReentrant, _notEntered will be true
-        require(_status != _ENTERED, "ReentrancyGuard: reentrant call");
+        if (_status == _ENTERED){
+            revert ReentrantCall();
+        }
 
         // Any calls to nonReentrant after this point will fail
         _status = _ENTERED;

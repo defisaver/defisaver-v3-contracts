@@ -3,6 +3,69 @@
 	"abi": [
 		{
 			"inputs": [],
+			"name": "ERC20OperationFail",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "MarketIdNotFound",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "NonContractCall",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "OnlyDyDxCallerError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ReentrantCall",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ReturnIndexValueError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SameCallerError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SubIndexValueError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ADMIN_VAULT_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "CALLBACK_SELECTOR",
 			"outputs": [
 				{
@@ -22,32 +85,6 @@
 					"internalType": "uint256",
 					"name": "",
 					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_RETURN_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_SUB_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
 				}
 			],
 			"stateMutability": "view",

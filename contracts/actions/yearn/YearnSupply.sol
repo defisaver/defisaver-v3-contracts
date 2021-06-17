@@ -1,17 +1,14 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/yearn/IYVault.sol";
 import "../../interfaces/yearn/IYearnRegistry.sol";
-import "../../DS/DSMath.sol";
 
 /// @title Supplies tokens to Yearn vault
 /// @dev tokens need to be approved for DSProxy to pull them (token address)
-contract YearnSupply is ActionBase, DSMath {
+contract YearnSupply is ActionBase {
     using TokenUtils for address;
 
     IYearnRegistry public constant yearnRegistry =
@@ -75,7 +72,7 @@ contract YearnSupply is ActionBase, DSMath {
         uint256 yBalanceBefore = address(vault).getBalance(address(this));
         vault.deposit(_inputData.amount);
         uint256 yBalanceAfter = address(vault).getBalance(address(this));
-        yTokenAmount = sub(yBalanceAfter, yBalanceBefore);
+        yTokenAmount = yBalanceAfter - yBalanceBefore;
 
         address(vault).withdrawTokens(_inputData.to, yTokenAmount);
 

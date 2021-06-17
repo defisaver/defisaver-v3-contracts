@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../../interfaces/compound/IComptroller.sol";
 import "../../interfaces/compound/ICToken.sol";
@@ -14,12 +13,12 @@ import "./helpers/CompHelper.sol";
 contract CompBorrow is ActionBase, CompHelper {
     using TokenUtils for address;
 
-    string public constant ERR_COMP_BORROW = "Comp borrow failed";
     struct Params {
         address cTokenAddr;
         uint256 amount;
         address to;
     }
+    error CompBorrowError();
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -67,7 +66,9 @@ contract CompBorrow is ActionBase, CompHelper {
         // if the tokens are borrowed we need to enter the market
         enterMarket(_cTokenAddr);
 
-        require(ICToken(_cTokenAddr).borrow(_amount) == NO_ERROR, ERR_COMP_BORROW);
+        if (ICToken(_cTokenAddr).borrow(_amount) != NO_ERROR){
+            revert CompBorrowError();
+        }
 
         // always return WETH, never native Eth
         if (tokenAddr == TokenUtils.WETH_ADDR) {

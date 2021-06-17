@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
-import "../DS/DSMath.sol";
 import "../utils/SafeERC20.sol";
 
-contract DFSPrices is DSMath {
+contract DFSPrices {
 
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     enum ActionType { SELL, BUY }
+    
+    error OutOfRangeSlicingError();
 
     /// @notice Returns the best estimated price from 2 exchanges
     /// @param _amount Amount of source tokens you want to exchange
@@ -106,7 +106,9 @@ contract DFSPrices is DSMath {
     }
 
     function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {
-        require(bs.length >= start + 32, "slicing out of range");
+        if (bs.length < start + 32){
+            revert OutOfRangeSlicingError();
+        }
 
         uint256 x;
         assembly {

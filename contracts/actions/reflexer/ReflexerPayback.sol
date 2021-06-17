@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../../interfaces/reflexer/ICoinJoin.sol";
 import "../../utils/TokenUtils.sol";
@@ -17,6 +16,7 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
         uint256 amount;
         address from;
     }
+    error InvalidCollateralType();
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -100,7 +100,9 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
     ) internal view returns (int256 deltaDebt) {
         // Gets actual rate from the safeEngine
         (, uint256 rate, , , , ) = safeEngine.collateralTypes(collateralType);
-        require(rate > 0, "invalid-collateral-type");
+        if (rate <= 0){
+            revert InvalidCollateralType();
+        }
 
         // Gets actual generatedDebt value of the safe
         (, uint256 generatedDebt) = safeEngine.safes(collateralType, safe);

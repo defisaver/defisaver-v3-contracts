@@ -3,25 +3,42 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ERR_RETURN_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "ERC20OperationFail",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_SUB_INDEX_VALUE",
+			"name": "NonContractCall",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ReturnIndexValueError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SubIndexValueError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ADMIN_VAULT_ADDR",
 			"outputs": [
 				{
-					"internalType": "string",
+					"internalType": "address",
 					"name": "",
-					"type": "string"
+					"type": "address"
 				}
 			],
 			"stateMutability": "view",

@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
-import "../../DS/DSMath.sol";
+pragma solidity =0.8.4;
+
 import "../../interfaces/IWETH.sol";
 import "../../interfaces/compound/ICToken.sol";
 import "../../utils/TokenUtils.sol";
@@ -10,7 +9,7 @@ import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
 
 /// @title Withdraw a token from Compound
-contract CompWithdraw is ActionBase, CompHelper, DSMath {
+contract CompWithdraw is ActionBase, CompHelper {
     using TokenUtils for address;
     struct Params {
         address cTokenAddr;
@@ -18,8 +17,8 @@ contract CompWithdraw is ActionBase, CompHelper, DSMath {
         address to;
     }
 
-    string public constant ERR_COMP_REDEEM = "Comp redeem failed";
-    string public constant ERR_COMP_REDEEM_UNDERLYING = "Underlying comp redeem failed";
+    error CompRedeemError();
+    error CompUnderlyingRedeemError();
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -75,18 +74,19 @@ contract CompWithdraw is ActionBase, CompHelper, DSMath {
         // if _amount type(uint).max that means take out proxy whole balance
         if (_amount == type(uint256).max) {
             _amount = _cTokenAddr.getBalance(address(this));
-            require(ICToken(_cTokenAddr).redeem(_amount) == NO_ERROR, ERR_COMP_REDEEM);
+            if (ICToken(_cTokenAddr).redeem(_amount) != NO_ERROR){
+                revert CompRedeemError();
+            }
         } else {
-            require(
-                ICToken(_cTokenAddr).redeemUnderlying(_amount) == NO_ERROR,
-                ERR_COMP_REDEEM_UNDERLYING
-            );
+            if (ICToken(_cTokenAddr).redeemUnderlying(_amount) != NO_ERROR){
+                revert CompUnderlyingRedeemError();
+            }
         }
 
         uint256 tokenBalanceAfter = tokenAddr.getBalance(address(this));
 
         // used to return the precise amount of tokens returned
-        _amount = sub(tokenBalanceAfter, tokenBalanceBefore);
+        _amount = tokenBalanceAfter - tokenBalanceBefore;
 
         // always return WETH, never native Eth
         if (tokenAddr == TokenUtils.ETH_ADDR) {

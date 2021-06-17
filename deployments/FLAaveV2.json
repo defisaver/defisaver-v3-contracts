@@ -3,6 +3,51 @@
 	"abi": [
 		{
 			"inputs": [],
+			"name": "ERC20OperationFail",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "NonContractCall",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "OnlyAaveCallerError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ReentrantCall",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ReturnIndexValueError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SameCallerError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SubIndexValueError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
 			"name": "AAVE_LENDING_POOL",
 			"outputs": [
 				{
@@ -29,38 +74,25 @@
 		},
 		{
 			"inputs": [],
+			"name": "ADMIN_VAULT_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "CALLBACK_SELECTOR",
 			"outputs": [
 				{
 					"internalType": "bytes4",
 					"name": "",
 					"type": "bytes4"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_RETURN_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_SUB_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
 				}
 			],
 			"stateMutability": "view",

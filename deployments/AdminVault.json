@@ -8,6 +8,11 @@
 		},
 		{
 			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
 			"name": "admin",
 			"outputs": [
 				{

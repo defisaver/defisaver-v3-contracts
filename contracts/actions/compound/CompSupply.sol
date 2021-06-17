@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.4;
 
 import "../../interfaces/IWETH.sol";
 import "../../utils/TokenUtils.sol";
@@ -18,7 +17,7 @@ contract CompSupply is ActionBase, CompHelper {
         bool enableAsColl;
     }
 
-    string public constant ERR_COMP_SUPPLY_FAILED = "Compound supply failed";
+    error CompSupplyError();
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -83,7 +82,9 @@ contract CompSupply is ActionBase, CompHelper {
         if (tokenAddr != TokenUtils.WETH_ADDR) {
             tokenAddr.approveToken(_cTokenAddr, _amount);
 
-            require(ICToken(_cTokenAddr).mint(_amount) == NO_ERROR, ERR_COMP_SUPPLY_FAILED);
+            if (ICToken(_cTokenAddr).mint(_amount) != NO_ERROR){
+                revert CompSupplyError();
+            }
         } else {
             TokenUtils.withdrawWeth(_amount);
             ICToken(_cTokenAddr).mint{value: _amount}(); // reverts on fail
