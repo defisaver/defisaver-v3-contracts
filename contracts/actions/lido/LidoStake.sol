@@ -78,7 +78,7 @@ contract LidoStake is ActionBase {
         logger.Log(address(this), msg.sender, "LidoStake", abi.encode(_inputData, stEthReceivedAmount));
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
 }

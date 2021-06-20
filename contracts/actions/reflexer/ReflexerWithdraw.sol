@@ -107,7 +107,7 @@ contract ReflexerWithdraw is ActionBase, ReflexerHelper {
         return (collateral, rmul(debt, rate));
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
 }

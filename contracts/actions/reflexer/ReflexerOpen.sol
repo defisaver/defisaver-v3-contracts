@@ -51,7 +51,7 @@ contract ReflexerOpen is ActionBase, ReflexerHelper {
         logger.Log(address(this), msg.sender, "ReflexerOpen", abi.encode(safeId, _adapterAddr));
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
 }

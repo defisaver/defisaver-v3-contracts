@@ -106,7 +106,7 @@ contract UniWithdraw is ActionBase {
     }
 
     function parseInputs(bytes memory _callData)
-        internal
+       public
         pure
         returns (UniWithdrawData memory uniData)
     {

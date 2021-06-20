@@ -147,7 +147,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
         flFeeFaucet.my2Wei(tokenAddr); // get extra 2 wei for DyDx fee
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
 

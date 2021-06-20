@@ -134,7 +134,7 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
         raiAmount = mul(raiAmount, RAY) < rad ? raiAmount + 1 : raiAmount;
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
 }

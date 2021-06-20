@@ -79,7 +79,7 @@ contract YearnSupply is ActionBase {
         logger.Log(address(this), msg.sender, "YearnSupply", abi.encode(_inputData, yTokenAmount));
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
 }

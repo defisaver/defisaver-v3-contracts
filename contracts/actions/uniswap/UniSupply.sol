@@ -117,7 +117,7 @@ contract UniSupply is ActionBase {
     }
 
     function parseInputs(bytes memory _callData)
-        internal
+       public
         pure
         returns (UniSupplyData memory uniData)
     {

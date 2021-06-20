@@ -120,7 +120,7 @@ contract UniSupplyV3 is ActionBase{
     }
 
     function parseInputs(bytes memory _callData)
-        internal
+       public
         pure
         returns (
             Params memory uniData

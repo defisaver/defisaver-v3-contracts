@@ -60,7 +60,7 @@ contract UniCollectV3 is ActionBase{
     }
         
     function parseInputs(bytes memory _callData)
-        internal
+       public
         pure
         returns (
             IUniswapV3NonfungiblePositionManager.CollectParams memory uniData
