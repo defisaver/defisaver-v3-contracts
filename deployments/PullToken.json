@@ -3,11 +3,6 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ERC20OperationFail",
-			"type": "error"
-		},
-		{
-			"inputs": [],
 			"name": "NonContractCall",
 			"type": "error"
 		},
@@ -151,9 +146,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				},
 				{
 					"internalType": "bytes[]",
@@ -185,9 +180,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "executeActionDirect",

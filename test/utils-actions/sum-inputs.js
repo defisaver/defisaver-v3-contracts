@@ -19,8 +19,13 @@ describe('Sum-Inputs', function () {
 
     before(async () => {
         await redeploy('PullToken');
+        console.log('redeployed');
+
         await redeploy('SumInputs');
+        console.log('redeployed');
+
         await redeploy('RecipeExecutor');
+        console.log('redeployed');
 
         RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
         senderAcc = (await hre.ethers.getSigners())[0];

@@ -38,11 +38,10 @@ describe('Admin-Vault', () => {
     });
 
     it('... should fail to change the owner address if not called by admin', async () => {
-        // await expect(adminVault.changeAdmin(newOwner.address)).to.be.revertedWith('msg.sender not admin');
         try {
             await adminVault.changeAdmin(newOwner.address);
         } catch (err) {
-            expect(err.toString()).to.have.string('revert');
+            expect(err.toString()).to.have.string('SenderNotAdmin');
         }
     });
 
@@ -64,8 +63,7 @@ describe('Admin-Vault', () => {
             // eslint-disable-next-line no-unused-expressions
             expect(true).to.be.false;
         } catch (err) {
-            // expect(err.toString()).to.have.string('msg.sender not admin');
-            expect(err.toString()).to.have.string('revert');
+            expect(err.toString()).to.have.string('SenderNotAdmin');
         }
     });
 });
