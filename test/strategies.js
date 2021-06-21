@@ -89,7 +89,7 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyId, ethJoi
     actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
 
-    triggerCallData.push([abiCoder.encode(['uint256'], ['0'])]);
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len

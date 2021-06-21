@@ -4,7 +4,7 @@ pragma solidity =0.8.4;
 
 abstract contract IDFSRegistry {
  
-    function getAddr(bytes32 _id) public view virtual returns (address);
+    function getAddr(bytes4 _id) public view virtual returns (address);
 
     function addNewContract(
         bytes32 _id,

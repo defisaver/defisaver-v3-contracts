@@ -3,11 +3,6 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ERC20OperationFail",
-			"type": "error"
-		},
-		{
-			"inputs": [],
 			"name": "NonContractCall",
 			"type": "error"
 		},
@@ -65,9 +60,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "uint256",
+					"internalType": "uint64",
 					"name": "_templateId",
-					"type": "uint256"
+					"type": "uint64"
 				},
 				{
 					"internalType": "bool",
@@ -80,9 +75,9 @@
 					"type": "bytes[]"
 				},
 				{
-					"internalType": "bytes[][]",
+					"internalType": "bytes[]",
 					"name": "_triggerData",
-					"type": "bytes[][]"
+					"type": "bytes[]"
 				}
 			],
 			"name": "createStrategy",
@@ -122,9 +117,9 @@
 			"name": "createTemplate",
 			"outputs": [
 				{
-					"internalType": "uint256",
+					"internalType": "uint64",
 					"name": "",
-					"type": "uint256"
+					"type": "uint64"
 				}
 			],
 			"stateMutability": "nonpayable",
@@ -148,24 +143,9 @@
 				{
 					"components": [
 						{
-							"internalType": "uint256",
-							"name": "templateId",
-							"type": "uint256"
-						},
-						{
 							"internalType": "address",
 							"name": "proxy",
 							"type": "address"
-						},
-						{
-							"internalType": "bytes[]",
-							"name": "subData",
-							"type": "bytes[]"
-						},
-						{
-							"internalType": "bytes[][]",
-							"name": "triggerData",
-							"type": "bytes[][]"
 						},
 						{
 							"internalType": "bool",
@@ -173,9 +153,24 @@
 							"type": "bool"
 						},
 						{
-							"internalType": "uint256",
+							"internalType": "uint64",
+							"name": "templateId",
+							"type": "uint64"
+						},
+						{
+							"internalType": "uint64",
 							"name": "posInUserArr",
-							"type": "uint256"
+							"type": "uint64"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "subData",
+							"type": "bytes[]"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
 						}
 					],
 					"internalType": "struct StrategyData.Strategy[]",
@@ -239,24 +234,9 @@
 				{
 					"components": [
 						{
-							"internalType": "uint256",
-							"name": "templateId",
-							"type": "uint256"
-						},
-						{
 							"internalType": "address",
 							"name": "proxy",
 							"type": "address"
-						},
-						{
-							"internalType": "bytes[]",
-							"name": "subData",
-							"type": "bytes[]"
-						},
-						{
-							"internalType": "bytes[][]",
-							"name": "triggerData",
-							"type": "bytes[][]"
 						},
 						{
 							"internalType": "bool",
@@ -264,9 +244,24 @@
 							"type": "bool"
 						},
 						{
-							"internalType": "uint256",
+							"internalType": "uint64",
+							"name": "templateId",
+							"type": "uint64"
+						},
+						{
+							"internalType": "uint64",
 							"name": "posInUserArr",
-							"type": "uint256"
+							"type": "uint64"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "subData",
+							"type": "bytes[]"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
 						}
 					],
 					"internalType": "struct StrategyData.Strategy[]",
@@ -290,24 +285,9 @@
 				{
 					"components": [
 						{
-							"internalType": "uint256",
-							"name": "templateId",
-							"type": "uint256"
-						},
-						{
 							"internalType": "address",
 							"name": "proxy",
 							"type": "address"
-						},
-						{
-							"internalType": "bytes[]",
-							"name": "subData",
-							"type": "bytes[]"
-						},
-						{
-							"internalType": "bytes[][]",
-							"name": "triggerData",
-							"type": "bytes[][]"
 						},
 						{
 							"internalType": "bool",
@@ -315,9 +295,24 @@
 							"type": "bool"
 						},
 						{
-							"internalType": "uint256",
+							"internalType": "uint64",
+							"name": "templateId",
+							"type": "uint64"
+						},
+						{
+							"internalType": "uint64",
 							"name": "posInUserArr",
-							"type": "uint256"
+							"type": "uint64"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "subData",
+							"type": "bytes[]"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
 						}
 					],
 					"internalType": "struct StrategyData.Strategy",
@@ -484,24 +479,9 @@
 				{
 					"components": [
 						{
-							"internalType": "uint256",
-							"name": "templateId",
-							"type": "uint256"
-						},
-						{
 							"internalType": "address",
 							"name": "proxy",
 							"type": "address"
-						},
-						{
-							"internalType": "bytes[]",
-							"name": "subData",
-							"type": "bytes[]"
-						},
-						{
-							"internalType": "bytes[][]",
-							"name": "triggerData",
-							"type": "bytes[][]"
 						},
 						{
 							"internalType": "bool",
@@ -509,9 +489,24 @@
 							"type": "bool"
 						},
 						{
-							"internalType": "uint256",
+							"internalType": "uint64",
+							"name": "templateId",
+							"type": "uint64"
+						},
+						{
+							"internalType": "uint64",
 							"name": "posInUserArr",
-							"type": "uint256"
+							"type": "uint64"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "subData",
+							"type": "bytes[]"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
 						}
 					],
 					"internalType": "struct StrategyData.Strategy[]",
@@ -566,11 +561,6 @@
 			"name": "strategies",
 			"outputs": [
 				{
-					"internalType": "uint256",
-					"name": "templateId",
-					"type": "uint256"
-				},
-				{
 					"internalType": "address",
 					"name": "proxy",
 					"type": "address"
@@ -581,9 +571,14 @@
 					"type": "bool"
 				},
 				{
-					"internalType": "uint256",
+					"internalType": "uint64",
+					"name": "templateId",
+					"type": "uint64"
+				},
+				{
+					"internalType": "uint64",
 					"name": "posInUserArr",
-					"type": "uint256"
+					"type": "uint64"
 				}
 			],
 			"stateMutability": "view",
@@ -629,9 +624,9 @@
 					"type": "uint256"
 				},
 				{
-					"internalType": "uint256",
+					"internalType": "uint64",
 					"name": "_templateId",
-					"type": "uint256"
+					"type": "uint64"
 				},
 				{
 					"internalType": "bool",
@@ -644,9 +639,9 @@
 					"type": "bytes[]"
 				},
 				{
-					"internalType": "bytes[][]",
+					"internalType": "bytes[]",
 					"name": "_triggerData",
-					"type": "bytes[][]"
+					"type": "bytes[]"
 				}
 			],
 			"name": "updateStrategy",
@@ -689,9 +684,9 @@
 			"name": "usersPos",
 			"outputs": [
 				{
-					"internalType": "uint256",
+					"internalType": "uint64",
 					"name": "",
-					"type": "uint256"
+					"type": "uint64"
 				}
 			],
 			"stateMutability": "view",
@@ -722,6 +717,6 @@
 		}
 	],
 	"networks": {
-		"hardhat": {}
+		"local": {}
 	}
 }

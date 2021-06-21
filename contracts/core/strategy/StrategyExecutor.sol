@@ -17,7 +17,7 @@ contract StrategyExecutor is StrategyData, AdminAuth {
 
     bytes4 constant PROXY_AUTH_ID = bytes4(keccak256("ProxyAuth"));
 
-    address public constant REGISTRY_ADDR = 0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C;
+    address public constant REGISTRY_ADDR = 0xcD0048A5628B37B8f743cC2FeA18817A29e97270;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));
@@ -36,7 +36,7 @@ contract StrategyExecutor is StrategyData, AdminAuth {
     function executeStrategy(
         uint256 _strategyId,
         bytes[] memory _triggerCallData,
-        bytes[][] memory _actionsCallData
+        bytes[] memory _actionsCallData
     ) public {
         Subscriptions sub = Subscriptions(registry.getAddr(SUBSCRIPTION_ID));
 
@@ -89,7 +89,7 @@ contract StrategyExecutor is StrategyData, AdminAuth {
     /// @notice Execute all the actions in order
     /// @param _strategy Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
-    function callActions(uint _strategyId, Strategy memory _strategy, bytes[][] memory _actionsCallData) internal {
+    function callActions(uint _strategyId, Strategy memory _strategy, bytes[] memory _actionsCallData) internal {
         address RecipeExecutorAddr = registry.getAddr(TASK_EXECUTOR_ID);
 
         address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
@@ -98,7 +98,7 @@ contract StrategyExecutor is StrategyData, AdminAuth {
             _strategy.proxy,
             RecipeExecutorAddr,
             abi.encodeWithSignature(
-                "executeStrategyTask(uint256,bytes[][])",
+                "executeStrategyTask(uint256,bytes[])",
                 _strategyId,
                 _actionsCallData
             )

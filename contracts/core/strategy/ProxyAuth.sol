@@ -8,16 +8,17 @@ import "../../auth/AdminAuth.sol";
 /// @title ProxyAuth Gets DSProxy auth from users and is callable by the Executor
 contract ProxyAuth is AdminAuth {
 
-    address public constant REGISTRY_ADDR = 0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C;
+    address public constant REGISTRY_ADDR = 0xcD0048A5628B37B8f743cC2FeA18817A29e97270;
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
-    bytes32 constant STRATEGY_EXECUTOR_ID = keccak256("StrategyExecutor");
+    bytes4 constant STRATEGY_EXECUTOR_ID = bytes4(keccak256("StrategyExecutor"));
     string public constant ERR_SENDER_NOT_EXECUTOR = "Sender not executor addr";
 
     error SenderNotExecutorError();
 
     modifier onlyExecutor {
         address executorAddr = registry.getAddr(STRATEGY_EXECUTOR_ID);
+
         if (msg.sender != executorAddr){
             revert SenderNotExecutorError();
         }

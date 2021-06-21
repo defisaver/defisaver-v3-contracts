@@ -3,6 +3,21 @@
 	"abi": [
 		{
 			"inputs": [],
+			"name": "NonContractCall",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [],
 			"name": "ADMIN_VAULT_ADDR",
 			"outputs": [
 				{
@@ -102,14 +117,14 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				},
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_subData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "isTriggered",
@@ -141,54 +156,6 @@
 				}
 			],
 			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes[]",
-					"name": "_data",
-					"type": "bytes[]"
-				}
-			],
-			"name": "parseParamData",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "nextPrice",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "pure",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes[]",
-					"name": "_data",
-					"type": "bytes[]"
-				}
-			],
-			"name": "parseSubData",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "vaultId",
-					"type": "uint256"
-				},
-				{
-					"internalType": "uint256",
-					"name": "ratio",
-					"type": "uint256"
-				},
-				{
-					"internalType": "uint8",
-					"name": "state",
-					"type": "uint8"
-				}
-			],
-			"stateMutability": "pure",
 			"type": "function"
 		},
 		{

@@ -3,7 +3,7 @@ const { expect } = require('chai');
 
 const { getAssetInfo, ilks } = require('@defisaver/tokens');
 
-const { getProxy, redeploy, fetchAmountinUSDPrice, redeployRegistry } = require('../utils');
+const { getProxy, redeploy, fetchAmountinUSDPrice } = require('../utils');
 
 const { subTemplate, addBotCaller } = require('../utils-strategies.js');
 
@@ -26,7 +26,6 @@ describe('Mcd-Repay', function () {
     let strategyId;
     let vaultId;
     let mcdView;
-    let regAddr;
 
     const ethJoin = ilks[0].join;
 
@@ -34,29 +33,27 @@ describe('Mcd-Repay', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
-        regAddr = await redeployRegistry();
+        await redeploy('BotAuth');
+        await redeploy('ProxyAuth');
+        await redeploy('McdRatioTrigger');
+        await redeploy('McdWithdraw');
+        await redeploy('DFSSell');
+        await redeploy('McdPayback');
+        await redeploy('Subscriptions');
+        mcdView = await redeploy('McdView');
+        await redeploy('SubscriptionProxy');
+        await redeploy('RecipeExecutor');
+        await redeploy('GasFeeTaker');
+        await redeploy('McdRatioCheck');
+        strategyExecutor = await redeploy('StrategyExecutor');
 
-        await redeploy('BotAuth', regAddr);
-        await redeploy('ProxyAuth', regAddr);
-        await redeploy('McdRatioTrigger', regAddr);
-        await redeploy('McdWithdraw', regAddr);
-        await redeploy('DFSSell', regAddr);
-        await redeploy('McdPayback', regAddr);
-        await redeploy('Subscriptions', regAddr);
-        mcdView = await redeploy('McdView', regAddr);
-        await redeploy('SubscriptionProxy', regAddr);
-        await redeploy('RecipeExecutor', regAddr);
-        await redeploy('GasFeeTaker', regAddr);
-        await redeploy('McdRatioCheck', regAddr);
-        strategyExecutor = await redeploy('StrategyExecutor', regAddr);
+        await redeploy('McdSupply');
+        await redeploy('McdWithdraw');
+        await redeploy('McdGenerate');
+        await redeploy('McdPayback');
+        await redeploy('McdOpen');
 
-        await redeploy('McdSupply', regAddr);
-        await redeploy('McdWithdraw', regAddr);
-        await redeploy('McdGenerate', regAddr);
-        await redeploy('McdPayback', regAddr);
-        await redeploy('McdOpen', regAddr);
-
-        await addBotCaller(regAddr, botAcc.address);
+        await addBotCaller(botAcc.address);
 
         proxy = await getProxy(senderAcc.address);
 
@@ -78,9 +75,7 @@ describe('Mcd-Repay', function () {
 
         const tokenData = getAssetInfo('WETH');
 
-        console.log('Hi');
-
-        await subTemplate(regAddr, proxy, name, triggerIds, actionIds, paramMapping);
+        await subTemplate(proxy, name, triggerIds, actionIds, paramMapping);
 
         vaultId = await openVault(
             makerAddresses,
@@ -98,17 +93,17 @@ describe('Mcd-Repay', function () {
     });
 
     it('... should trigger a maker repay strategy', async () => {
-        // const ratioBefore = await getRatio(mcdView, vaultId);
-        // const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '800'), '18');
+        const ratioBefore = await getRatio(mcdView, vaultId);
+        const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '800'), '18');
 
-        // await callMcdRepayStrategy(botAcc, strategyExecutor, strategyId, ethJoin, repayAmount);
+        await callMcdRepayStrategy(botAcc, strategyExecutor, strategyId, ethJoin, repayAmount);
 
-        // const ratioAfter = await getRatio(mcdView, vaultId);
+        const ratioAfter = await getRatio(mcdView, vaultId);
 
-        // console.log(
-        //     `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
-        // );
+        console.log(
+            `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+        );
 
-        // expect(ratioAfter).to.be.gt(ratioBefore);
+        expect(ratioAfter).to.be.gt(ratioBefore);
     });
 });

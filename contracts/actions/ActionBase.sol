@@ -6,7 +6,7 @@ import "../core/DFSRegistry.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
 abstract contract ActionBase is AdminAuth {
-    address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
+    address public constant REGISTRY_ADDR = 0xcD0048A5628B37B8f743cC2FeA18817A29e97270;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     DefisaverLogger public constant logger = DefisaverLogger(

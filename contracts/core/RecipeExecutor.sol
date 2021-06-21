@@ -12,7 +12,7 @@ import "./strategy/Subscriptions.sol";
 contract RecipeExecutor is StrategyData, ProxyPermission, AdminAuth {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
-    address public constant REGISTRY_ADDR = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
+    address public constant REGISTRY_ADDR = 0xcD0048A5628B37B8f743cC2FeA18817A29e97270;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes4 constant SUBSCRIPTION_ID = bytes4(keccak256("Subscriptions"));
@@ -95,7 +95,7 @@ contract RecipeExecutor is StrategyData, ProxyPermission, AdminAuth {
         response = IDSProxy(address(this)).execute(
             actionAddr,
             abi.encodeWithSignature(
-                "executeAction(bytes[],bytes[],uint8[],bytes32[])",
+                "executeAction(bytes,bytes[],uint8[],bytes32[])",
                 _currRecipe.callData[_index],
                 _currRecipe.subData,
                 _currRecipe.paramMapping[_index],

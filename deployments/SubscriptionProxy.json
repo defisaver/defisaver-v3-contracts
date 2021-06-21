@@ -3,6 +3,21 @@
 	"abi": [
 		{
 			"inputs": [],
+			"name": "NonContractCall",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [],
 			"name": "ADMIN_VAULT_ADDR",
 			"outputs": [
 				{
@@ -56,9 +71,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "uint256",
+					"internalType": "uint64",
 					"name": "_templateId",
-					"type": "uint256"
+					"type": "uint64"
 				},
 				{
 					"internalType": "bool",
@@ -71,9 +86,9 @@
 					"type": "bytes[]"
 				},
 				{
-					"internalType": "bytes[][]",
+					"internalType": "bytes[]",
 					"name": "_triggerData",
-					"type": "bytes[][]"
+					"type": "bytes[]"
 				}
 			],
 			"name": "createStrategy",
@@ -142,9 +157,9 @@
 					"type": "bytes[]"
 				},
 				{
-					"internalType": "bytes[][]",
+					"internalType": "bytes[]",
 					"name": "_triggerData",
-					"type": "bytes[][]"
+					"type": "bytes[]"
 				}
 			],
 			"name": "createTemplateAndStrategy",
@@ -219,9 +234,9 @@
 					"type": "uint256"
 				},
 				{
-					"internalType": "uint256",
+					"internalType": "uint64",
 					"name": "_templateId",
-					"type": "uint256"
+					"type": "uint64"
 				},
 				{
 					"internalType": "bool",
@@ -234,9 +249,9 @@
 					"type": "bytes[]"
 				},
 				{
-					"internalType": "bytes[][]",
+					"internalType": "bytes[]",
 					"name": "_triggerData",
-					"type": "bytes[][]"
+					"type": "bytes[]"
 				}
 			],
 			"name": "updateStrategy",

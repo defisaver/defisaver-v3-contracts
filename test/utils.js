@@ -4,7 +4,7 @@ const fs = require('fs');
 const { deployContract, deployAsOwner } = require('../scripts/utils/deployer');
 const { changeConstantInFiles } = require('../scripts/utils/utils');
 
-let REGISTRY_ADDR = '0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C';
+let REGISTRY_ADDR = '0xcD0048A5628B37B8f743cC2FeA18817A29e97270';
 
 const nullAddress = '0x0000000000000000000000000000000000000000';
 const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
@@ -133,15 +133,10 @@ const stopImpersonatingAccount = async (account) => {
 const getNameId = (name) => {
     const hash = hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(name));
 
-    console.log(hash);
-    console.log(`${name} - ${hash.substr(0, 10)}`);
-
     return hash.substr(0, 10);
 };
 
 const getAddrFromRegistry = async (name, regAddr = REGISTRY_ADDR) => {
-    console.log(`regAddr: ${regAddr}`);
-
     const registryInstance = await hre.ethers.getContractFactory('DFSRegistry');
     const registry = await registryInstance.attach(regAddr);
 

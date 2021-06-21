@@ -76,8 +76,6 @@ const buy = async (proxy, sellAddr, buyAddr,
 const openMcd = async (proxy, makerAddresses, joinAddr) => {
     const mcdOpenAddr = await getAddrFromRegistry('McdOpen');
 
-    console.log(`mcdOpenAddr: ${mcdOpenAddr}`);
-
     const openMyVault = new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR);
     const functionData = openMyVault.encodeForDsProxyCall()[1];
 
@@ -660,20 +658,6 @@ const liquityRedeem = async (proxy, lusdAmount, from, to, maxFeePercentage) => {
     const { firstRedemptionHint, partialRedemptionHintNICR, truncatedLUSDamount } = await liquityView['getRedemptionHints(uint256,uint256,uint256)'](lusdAmount, collPrice, maxIterations);
     const { hintAddress } = await liquityView['getApproxHint(uint256,uint256,uint256)'](partialRedemptionHintNICR, 200, 42);
     const { upperHint, lowerHint } = await liquityView['findInsertPosition(uint256,address,address)'](partialRedemptionHintNICR, hintAddress, hintAddress);
-
-    /*
-    console.log(
-        truncatedLUSDamount,
-        from,
-        to,
-        firstRedemptionHint,
-        upperHint,
-        lowerHint,
-        partialRedemptionHintNICR,
-        maxIterations,
-        maxFeePercentage,
-    );
-    */
 
     const liquityRedeemAction = new dfs.actions.liquity.LiquityRedeemAction(
         truncatedLUSDamount,

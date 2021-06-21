@@ -3,51 +3,42 @@
 	"abi": [
 		{
 			"inputs": [],
+			"name": "BotNotApprovedError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "NonContractCall",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "StrategyNotActiveError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "TriggerNotActiveError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
 			"name": "ADMIN_VAULT_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
 					"name": "",
 					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_BOT_NOT_APPROVED",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_STRATEGY_NOT_ACTIVE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_TRIGGER_NOT_ACTIVE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
 				}
 			],
 			"stateMutability": "view",
@@ -102,24 +93,9 @@
 				{
 					"components": [
 						{
-							"internalType": "uint256",
-							"name": "templateId",
-							"type": "uint256"
-						},
-						{
 							"internalType": "address",
 							"name": "proxy",
 							"type": "address"
-						},
-						{
-							"internalType": "bytes[]",
-							"name": "subData",
-							"type": "bytes[]"
-						},
-						{
-							"internalType": "bytes[][]",
-							"name": "triggerData",
-							"type": "bytes[][]"
 						},
 						{
 							"internalType": "bool",
@@ -127,9 +103,24 @@
 							"type": "bool"
 						},
 						{
-							"internalType": "uint256",
+							"internalType": "uint64",
+							"name": "templateId",
+							"type": "uint64"
+						},
+						{
+							"internalType": "uint64",
 							"name": "posInUserArr",
-							"type": "uint256"
+							"type": "uint64"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "subData",
+							"type": "bytes[]"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
 						}
 					],
 					"internalType": "struct StrategyData.Strategy",
@@ -137,9 +128,9 @@
 					"type": "tuple"
 				},
 				{
-					"internalType": "bytes[][]",
+					"internalType": "bytes[]",
 					"name": "_triggerCallData",
-					"type": "bytes[][]"
+					"type": "bytes[]"
 				},
 				{
 					"internalType": "contract Subscriptions",
@@ -160,14 +151,14 @@
 					"type": "uint256"
 				},
 				{
-					"internalType": "bytes[][]",
+					"internalType": "bytes[]",
 					"name": "_triggerCallData",
-					"type": "bytes[][]"
+					"type": "bytes[]"
 				},
 				{
-					"internalType": "bytes[][]",
+					"internalType": "bytes[]",
 					"name": "_actionsCallData",
-					"type": "bytes[][]"
+					"type": "bytes[]"
 				}
 			],
 			"name": "executeStrategy",

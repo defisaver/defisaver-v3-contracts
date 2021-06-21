@@ -45,11 +45,12 @@ contract Subscriptions is StrategyData, AdminAuth {
                 active: _active,
                 subData: _subData,
                 triggerData: _triggerData,
-                posInUserArr: (uint64(usersPos[msg.sender].length - 1))
+                posInUserArr: (uint64(usersPos[msg.sender].length))
             })
         );
 
         usersPos[msg.sender].push(uint64(strategies.length - 1));
+
 
         updateCounter++;
 
@@ -170,11 +171,11 @@ contract Subscriptions is StrategyData, AdminAuth {
     }
 
     function getStrategyCount() public view returns (uint256) {
-        return strategies.length - 1;
+        return strategies.length;
     }
 
     function getTemplateCount() public view returns (uint256) {
-        return templates.length - 1;
+        return templates.length;
     }
 
     function getStrategies() public view returns (Strategy[] memory) {

@@ -6,11 +6,9 @@ const RATIO_STATE_UNDER = 1;
 const createMcdTrigger = async (vaultId, ratio, ratioState) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
-    const param1 = abiCoder.encode(['uint256'], [vaultId]);
-    const param2 = abiCoder.encode(['uint256'], [ratio]);
-    const param3 = abiCoder.encode(['uint8'], [ratioState]);
+    const param = abiCoder.encode(['uint256', 'uint256', 'uint8'], [vaultId, ratio, ratioState]);
 
-    return [param1, param2, param3];
+    return param;
 };
 
 module.exports = {
