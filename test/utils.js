@@ -4,7 +4,7 @@ const fs = require('fs');
 const { deployContract, deployAsOwner } = require('../scripts/utils/deployer');
 const { changeConstantInFiles } = require('../scripts/utils/utils');
 
-let REGISTRY_ADDR = '0xcD0048A5628B37B8f743cC2FeA18817A29e97270';
+let REGISTRY_ADDR = '0xD5cec8F03f803A74B60A7603Ed13556279376b09';
 
 const nullAddress = '0x0000000000000000000000000000000000000000';
 const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';

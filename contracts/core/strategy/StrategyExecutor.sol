@@ -17,7 +17,7 @@ contract StrategyExecutor is StrategyData, AdminAuth {
 
     bytes4 constant PROXY_AUTH_ID = bytes4(keccak256("ProxyAuth"));
 
-    address public constant REGISTRY_ADDR = 0xcD0048A5628B37B8f743cC2FeA18817A29e97270;
+    address public constant REGISTRY_ADDR = 0xD5cec8F03f803A74B60A7603Ed13556279376b09;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));
