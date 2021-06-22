@@ -31,16 +31,18 @@ contract StrategyExecutor is StrategyData, AdminAuth {
     /// @notice Checks all the triggers and executes actions
     /// @dev Only authorized callers can execute it
     /// @param _strategyId Id of the strategy
+    /// @param _templateIndex Index of the template we want to use
     /// @param _triggerCallData All input data needed to execute triggers
     /// @param _actionsCallData All input data needed to execute actions
     function executeStrategy(
         uint256 _strategyId,
+        uint256 _templateIndex,
         bytes[] memory _triggerCallData,
         bytes[] memory _actionsCallData
     ) public {
         Subscriptions sub = Subscriptions(registry.getAddr(SUBSCRIPTION_ID));
 
-        Strategy memory strategy = sub.getStrategy(_strategyId);
+        Strategy memory strategy = sub.getStrategy(_strategyId); // GAS: 55k gas cost
         if (!(strategy.active)){
             revert StrategyNotActiveError();
         }
@@ -49,10 +51,10 @@ contract StrategyExecutor is StrategyData, AdminAuth {
         checkCallerAuth(_strategyId);
 
         // check if all the triggers are true
-        checkTriggers(_strategyId, strategy, _triggerCallData, sub);
+        checkTriggers(_strategyId, _templateIndex, strategy, _triggerCallData, sub);
 
         // execute actions
-        callActions(_strategyId, strategy, _actionsCallData);
+        callActions(_strategyId, _templateIndex, strategy, _actionsCallData);
     }
 
     /// @notice Checks if msg.sender has auth, reverts if not
@@ -69,12 +71,13 @@ contract StrategyExecutor is StrategyData, AdminAuth {
     /// @param _triggerCallData All input data needed to execute triggers
     function checkTriggers(
         uint _strategyId,
+        uint _templateIndex,
         Strategy memory _strategy,
         bytes[] memory _triggerCallData,
         Subscriptions _sub
     ) public {
 
-        bytes4[] memory triggerIds = _sub.getTemplateFromStrategy(_strategyId).triggerIds;
+        bytes4[] memory triggerIds = _sub.getTemplateFromStrategy(_strategyId, _templateIndex).triggerIds;
 
         for (uint256 i = 0; i < triggerIds.length; ++i) {
             address triggerAddr = registry.getAddr(triggerIds[i]);
@@ -89,7 +92,7 @@ contract StrategyExecutor is StrategyData, AdminAuth {
     /// @notice Execute all the actions in order
     /// @param _strategy Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
-    function callActions(uint _strategyId, Strategy memory _strategy, bytes[] memory _actionsCallData) internal {
+    function callActions(uint _strategyId, uint _templateIndex, Strategy memory _strategy, bytes[] memory _actionsCallData) internal {
         address RecipeExecutorAddr = registry.getAddr(TASK_EXECUTOR_ID);
 
         address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
@@ -98,8 +101,9 @@ contract StrategyExecutor is StrategyData, AdminAuth {
             _strategy.proxy,
             RecipeExecutorAddr,
             abi.encodeWithSignature(
-                "executeStrategyTask(uint256,bytes[])",
+                "executeStrategyTask(uint256,uint256,bytes[])",
                 _strategyId,
+                _templateIndex,
                 _actionsCallData
             )
         );

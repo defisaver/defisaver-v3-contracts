@@ -28,19 +28,19 @@ contract Subscriptions is StrategyData, AdminAuth {
     uint public updateCounter;
 
     /// @notice Creates a new strategy with an existing template
-    /// @param _templateId Id of the template used for strategy
+    /// @param _templateIds Ids of the template used for strategy
     /// @param _active If the strategy is turned on at the start
     /// @param _subData Subscription data for actions
     /// @param _triggerData Subscription data for triggers
     function createStrategy(
-        uint64 _templateId,
+        uint64[] memory _templateIds,
         bool _active,
         bytes[] memory _subData,
         bytes[] memory _triggerData
     ) public returns (uint) {
         strategies.push(
             Strategy({
-                templateId: _templateId,
+                templateIds: _templateIds,
                 proxy: msg.sender,
                 active: _active,
                 subData: _subData,
@@ -93,13 +93,13 @@ contract Subscriptions is StrategyData, AdminAuth {
     /// @notice Updates the users strategy
     /// @dev Only callable by proxy who created the strategy
     /// @param _strategyId Id of the strategy to update
-    /// @param _templateId Id of the template used for strategy
+    /// @param _templateIds Ids of the template used for strategy
     /// @param _active If the strategy is turned on at the start
     /// @param _subData Subscription data for actions
     /// @param _triggerData Subscription data for triggers
     function updateStrategy(
         uint _strategyId,
-        uint64 _templateId,
+        uint64[] memory _templateIds,
         bool _active,
         bytes[] memory _subData,
         bytes[] memory _triggerData
@@ -113,7 +113,7 @@ contract Subscriptions is StrategyData, AdminAuth {
             revert SenderNotStrategyOwnerError();
         }
 
-        s.templateId = _templateId;
+        s.templateIds = _templateIds;
         s.active = _active;
         s.subData = _subData;
         s.triggerData = _triggerData;
@@ -157,8 +157,8 @@ contract Subscriptions is StrategyData, AdminAuth {
 
     ///////////////////// VIEW ONLY FUNCTIONS ////////////////////////////
 
-    function getTemplateFromStrategy(uint _strategyId) public view returns (Template memory) {
-        uint templateId = strategies[_strategyId].templateId;
+    function getTemplateFromStrategy(uint _strategyId, uint _templateIndex) public view returns (Template memory) {
+        uint templateId = strategies[_strategyId].templateIds[_templateIndex];
         return templates[templateId];
     }
 

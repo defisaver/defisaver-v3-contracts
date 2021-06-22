@@ -91,6 +91,11 @@
 					"type": "uint256"
 				},
 				{
+					"internalType": "uint256",
+					"name": "_templateIndex",
+					"type": "uint256"
+				},
+				{
 					"components": [
 						{
 							"internalType": "address",
@@ -103,9 +108,9 @@
 							"type": "bool"
 						},
 						{
-							"internalType": "uint64",
-							"name": "templateId",
-							"type": "uint64"
+							"internalType": "uint64[]",
+							"name": "templateIds",
+							"type": "uint64[]"
 						},
 						{
 							"internalType": "uint64",
@@ -148,6 +153,11 @@
 				{
 					"internalType": "uint256",
 					"name": "_strategyId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_templateIndex",
 					"type": "uint256"
 				},
 				{

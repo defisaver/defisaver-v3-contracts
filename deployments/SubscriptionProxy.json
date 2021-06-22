@@ -71,9 +71,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "uint64",
-					"name": "_templateId",
-					"type": "uint64"
+					"internalType": "uint64[]",
+					"name": "_templateIds",
+					"type": "uint64[]"
 				},
 				{
 					"internalType": "bool",
@@ -120,49 +120,6 @@
 				}
 			],
 			"name": "createTemplate",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "string",
-					"name": "_name",
-					"type": "string"
-				},
-				{
-					"internalType": "bytes4[]",
-					"name": "_triggerIds",
-					"type": "bytes4[]"
-				},
-				{
-					"internalType": "bytes4[]",
-					"name": "_actionIds",
-					"type": "bytes4[]"
-				},
-				{
-					"internalType": "uint8[][]",
-					"name": "_paramMapping",
-					"type": "uint8[][]"
-				},
-				{
-					"internalType": "bool",
-					"name": "_active",
-					"type": "bool"
-				},
-				{
-					"internalType": "bytes[]",
-					"name": "_subData",
-					"type": "bytes[]"
-				},
-				{
-					"internalType": "bytes[]",
-					"name": "_triggerData",
-					"type": "bytes[]"
-				}
-			],
-			"name": "createTemplateAndStrategy",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
@@ -234,9 +191,9 @@
 					"type": "uint256"
 				},
 				{
-					"internalType": "uint64",
-					"name": "_templateId",
-					"type": "uint64"
+					"internalType": "uint64[]",
+					"name": "_templateIds",
+					"type": "uint64[]"
 				},
 				{
 					"internalType": "bool",

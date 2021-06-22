@@ -134,6 +134,11 @@
 					"type": "uint256"
 				},
 				{
+					"internalType": "uint256",
+					"name": "_templateIndex",
+					"type": "uint256"
+				},
+				{
 					"internalType": "bytes[]",
 					"name": "_actionCallData",
 					"type": "bytes[]"

@@ -27,14 +27,14 @@ contract RecipeExecutor is StrategyData, ProxyPermission, AdminAuth {
     /// @notice Called through the Strategy contract to execute a task
     /// @param _strategyId Id of the strategy we want to execute
     /// @param _actionCallData All the data related to the strategies Recipe
-    function executeStrategyTask(uint256 _strategyId, bytes[] memory _actionCallData)
+    function executeStrategyTask(uint256 _strategyId, uint256 _templateIndex, bytes[] memory _actionCallData)
         public
         payable
     {
         address subAddr = registry.getAddr(SUBSCRIPTION_ID);
-        Strategy memory strategy = Subscriptions(subAddr).getStrategy(_strategyId);
-        Template memory template = Subscriptions(subAddr).getTemplate(strategy.templateId);
 
+        Strategy memory strategy = Subscriptions(subAddr).getStrategy(_strategyId); // GAS: 18k gas cost
+        Template memory template = Subscriptions(subAddr).getTemplate(strategy.templateIds[_templateIndex]); // GAS: 36k
         Recipe memory currTask =
             Recipe({
                 name: template.name,

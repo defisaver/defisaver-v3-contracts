@@ -22,7 +22,7 @@ contract StrategyData {
     struct Strategy {
         address proxy;
         bool active;
-        uint64 templateId;
+        uint64[] templateIds;
         uint64 posInUserArr;
         bytes[] subData;
         bytes[] triggerData;

@@ -60,9 +60,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "uint64",
-					"name": "_templateId",
-					"type": "uint64"
+					"internalType": "uint64[]",
+					"name": "_templateIds",
+					"type": "uint64[]"
 				},
 				{
 					"internalType": "bool",
@@ -153,9 +153,9 @@
 							"type": "bool"
 						},
 						{
-							"internalType": "uint64",
-							"name": "templateId",
-							"type": "uint64"
+							"internalType": "uint64[]",
+							"name": "templateIds",
+							"type": "uint64[]"
 						},
 						{
 							"internalType": "uint64",
@@ -244,9 +244,9 @@
 							"type": "bool"
 						},
 						{
-							"internalType": "uint64",
-							"name": "templateId",
-							"type": "uint64"
+							"internalType": "uint64[]",
+							"name": "templateIds",
+							"type": "uint64[]"
 						},
 						{
 							"internalType": "uint64",
@@ -295,9 +295,9 @@
 							"type": "bool"
 						},
 						{
-							"internalType": "uint64",
-							"name": "templateId",
-							"type": "uint64"
+							"internalType": "uint64[]",
+							"name": "templateIds",
+							"type": "uint64[]"
 						},
 						{
 							"internalType": "uint64",
@@ -396,6 +396,11 @@
 					"internalType": "uint256",
 					"name": "_strategyId",
 					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_templateIndex",
+					"type": "uint256"
 				}
 			],
 			"name": "getTemplateFromStrategy",
@@ -489,9 +494,9 @@
 							"type": "bool"
 						},
 						{
-							"internalType": "uint64",
-							"name": "templateId",
-							"type": "uint64"
+							"internalType": "uint64[]",
+							"name": "templateIds",
+							"type": "uint64[]"
 						},
 						{
 							"internalType": "uint64",
@@ -572,11 +577,6 @@
 				},
 				{
 					"internalType": "uint64",
-					"name": "templateId",
-					"type": "uint64"
-				},
-				{
-					"internalType": "uint64",
 					"name": "posInUserArr",
 					"type": "uint64"
 				}
@@ -624,9 +624,9 @@
 					"type": "uint256"
 				},
 				{
-					"internalType": "uint64",
-					"name": "_templateId",
-					"type": "uint64"
+					"internalType": "uint64[]",
+					"name": "_templateIds",
+					"type": "uint64[]"
 				},
 				{
 					"internalType": "bool",

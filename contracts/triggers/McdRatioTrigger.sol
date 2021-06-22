@@ -28,7 +28,7 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper {
         CallParams memory callInputData = parseCallInputs(_callData);
         SubParams memory subInputData = parseSubInputs(_subData);
 
-        uint256 currRatio = getRatio(subInputData.vaultId, callInputData.nextPrice);
+        uint256 currRatio = getRatio(subInputData.vaultId, callInputData.nextPrice); // GAS 50k
 
         if (RatioState(subInputData.state) == RatioState.OVER) {
             if (currRatio > subInputData.ratio) return true;
