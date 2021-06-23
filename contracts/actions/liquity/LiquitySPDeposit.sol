@@ -5,10 +5,12 @@ pragma experimental ABIEncoderV2;
 
 import "./helpers/LiquityHelper.sol";
 import "../../utils/TokenUtils.sol";
+import "../../utils/SafeMath.sol";
 import "../ActionBase.sol";
 
 contract LiquitySPDeposit is ActionBase, LiquityHelper {
     using TokenUtils for address;
+    using SafeMath for uint256;
 
     struct Params {
         uint256 lusdAmount; // Amount of LUSD tokens to deposit
@@ -55,10 +57,12 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
         }
 
         uint256 ethGain = StabilityPool.getDepositorETHGain(address(this));
-        uint256 lqtyGain = StabilityPool.getDepositorLQTYGain(address(this));
+        uint256 lqtyBefore = LQTYTokenAddr.getBalance(address(this));
 
         LUSDTokenAddr.pullTokensIfNeeded(_params.from, _params.lusdAmount);
         StabilityPool.provideToSP(_params.lusdAmount, address(0));   // No registered frontend means 100% kickback rate for LQTY rewards
+
+        uint256 lqtyGain = LQTYTokenAddr.getBalance(address(this)).sub(lqtyBefore);
 
         withdrawStabilityGains(ethGain, lqtyGain, _params.wethTo, _params.lqtyTo);
 
