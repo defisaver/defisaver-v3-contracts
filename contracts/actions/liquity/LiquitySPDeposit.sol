@@ -60,7 +60,7 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
         uint256 lqtyBefore = LQTYTokenAddr.getBalance(address(this));
 
         LUSDTokenAddr.pullTokensIfNeeded(_params.from, _params.lusdAmount);
-        StabilityPool.provideToSP(_params.lusdAmount, address(0));   // No registered frontend means 100% kickback rate for LQTY rewards
+        StabilityPool.provideToSP(_params.lusdAmount, LQTYFrontEndAddr);
 
         uint256 lqtyGain = LQTYTokenAddr.getBalance(address(this)).sub(lqtyBefore);
 

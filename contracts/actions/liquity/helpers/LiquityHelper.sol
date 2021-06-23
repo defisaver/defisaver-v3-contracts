@@ -26,6 +26,7 @@ contract LiquityHelper {
     address constant public CollSurplusPoolAddr = 0x3D32e8b97Ed5881324241Cf03b2DA5E2EBcE5521;
     address constant public StabilityPoolAddr = 0x66017D22b0f8556afDd19FC67041899Eb65a21bb;
     address constant public LQTYStakingAddr = 0x4f9Fbb3f1E99B56e0Fe2892e623Ed36A76Fc605d;
+    address constant public LQTYFrontEndAddr = 0x76720aC2574631530eC8163e4085d6F98513fb27;
 
     IPriceFeed constant public PriceFeed = IPriceFeed(PriceFeedAddr);
     IBorrowerOperations constant public BorrowerOperations = IBorrowerOperations(BorrowerOperationsAddr);
