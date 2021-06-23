@@ -4,11 +4,13 @@ pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "./helpers/LiquityHelper.sol";
+import "../../utils/SafeMath.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
 contract LiquitySPWithdraw is ActionBase, LiquityHelper {
     using TokenUtils for address;
+    using SafeMath for uint256;
 
     struct Params {
         uint256 lusdAmount; // Amount of LUSD tokens to withdraw
@@ -51,7 +53,7 @@ contract LiquitySPWithdraw is ActionBase, LiquityHelper {
     /// @notice Withdraws LUSD from the user's stability pool deposit
     function _liquitySPWithdraw(Params memory _params) internal returns (uint256) {
         uint256 ethGain = StabilityPool.getDepositorETHGain(address(this));
-        uint256 lqtyGain = StabilityPool.getDepositorLQTYGain(address(this));
+        uint256 lqtyBefore = LQTYTokenAddr.getBalance(address(this));
 
         uint256 deposit = StabilityPool.getCompoundedLUSDDeposit(address(this));
         _params.lusdAmount = deposit > _params.lusdAmount ? _params.lusdAmount : deposit;
@@ -59,6 +61,8 @@ contract LiquitySPWithdraw is ActionBase, LiquityHelper {
         StabilityPool.withdrawFromSP(_params.lusdAmount);
         // Amount goes through min(amount, depositedAmount)
         LUSDTokenAddr.withdrawTokens(_params.to, _params.lusdAmount);
+
+        uint256 lqtyGain = LQTYTokenAddr.getBalance(address(this)).sub(lqtyBefore);
 
         withdrawStabilityGains(ethGain, lqtyGain, _params.wethTo, _params.lqtyTo);
 
