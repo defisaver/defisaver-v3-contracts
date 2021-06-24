@@ -10,12 +10,12 @@ const {
     Float2BN,
     BN2Float,
     fetchAmountinUSDPrice,
-} = require('../utils');
+} = require('../../utils');
 
 const {
     liquityOpen,
     liquityBorrow,
-} = require('../actions.js');
+} = require('../../actions.js');
 
 describe('Liquity-Borrow', function () {
     this.timeout(1000000);
