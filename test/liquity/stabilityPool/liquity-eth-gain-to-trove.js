@@ -10,13 +10,13 @@ const {
     fetchAmountinUSDPrice,
     BN2Float,
     Float2BN,
-} = require('../utils');
+} = require('../../utils');
 
 const {
     liquityOpen,
     liquitySPDeposit,
     liquityEthGainToTrove,
-} = require('../actions.js');
+} = require('../../actions.js');
 
 describe('Liquity-ETH-Gain-To-Trove', function () {
     this.timeout(1000000);

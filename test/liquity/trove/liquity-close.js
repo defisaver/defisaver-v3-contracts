@@ -8,27 +8,26 @@ const {
     depositToWeth,
     send,
     WETH_ADDRESS,
-    fetchAmountinUSDPrice,
-    BN2Float,
     Float2BN,
-} = require('../utils');
+    BN2Float,
+    fetchAmountinUSDPrice,
+} = require('../../utils');
 
 const {
     sell,
     liquityOpen,
     liquityClose,
-} = require('../actions.js');
+} = require('../../actions.js');
 
-describe('Liquity-Open', function () {
+describe('Liquity-Close', function () {
     this.timeout(1000000);
     const WETHSellAmount = Float2BN(fetchAmountinUSDPrice('WETH', 500), 18);
-    const WETHAmount = Float2BN(fetchAmountinUSDPrice('WETH', 20000), 18);
     const collAmountOpen = Float2BN(fetchAmountinUSDPrice('WETH', 12000), 18);
-    const LUSDAmountOpen = Float2BN(fetchAmountinUSDPrice('LUSD', 4000), 18);
-    const maxFeePercentage = Float2BN('5', 16);
+    const LUSDAmountOpen = Float2BN(fetchAmountinUSDPrice('LUSD', 6000), 18);
+    const maxFeePercentage = hre.ethers.utils.parseUnits('5', 16);
 
     let senderAcc; let proxy; let proxyAddr;
-    let liquityView; let LUSDAddr; let uniWrapper;
+    let LUSDAddr; let liquityView; let uniWrapper;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -38,8 +37,8 @@ describe('Liquity-Open', function () {
         liquityView = await redeploy('LiquityView');
         LUSDAddr = await liquityView.LUSDTokenAddr();
 
-        await depositToWeth(WETHAmount);
-        await send(WETH_ADDRESS, proxyAddr, WETHAmount);
+        await depositToWeth(collAmountOpen);
+        await send(WETH_ADDRESS, proxyAddr, collAmountOpen);
 
         await redeploy('DFSSell');
         uniWrapper = await redeploy('UniswapWrapperV3');
@@ -88,14 +87,6 @@ describe('Liquity-Open', function () {
         );
 
         await liquityClose(proxy, proxyAddr, proxyAddr);
-        expect(await balanceOf(WETH_ADDRESS, proxyAddr)).to.equal(WETHAmount);
-    });
-    it(`... should open Trove with whole WETH balance as collateral and ${BN2Float(LUSDAmountOpen)} LUSD debt`, async () => {
-        // eslint-disable-next-line max-len
-        await liquityOpen(proxy, maxFeePercentage, hre.ethers.constants.MaxUint256, LUSDAmountOpen, proxyAddr, proxyAddr);
-
-        const { collAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
-
-        expect(collAmount).to.equal(WETHAmount);
+        expect(await balanceOf(WETH_ADDRESS, proxyAddr)).to.equal(collAmountOpen);
     });
 });

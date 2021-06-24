@@ -4,28 +4,31 @@ const {
     balanceOf,
     getProxy,
     redeploy,
+    setNewExchangeWrapper,
     depositToWeth,
     send,
     WETH_ADDRESS,
-    Float2BN,
-    BN2Float,
     fetchAmountinUSDPrice,
-} = require('../utils');
+    BN2Float,
+    Float2BN,
+} = require('../../utils');
 
 const {
+    sell,
     liquityOpen,
-    liquityPayback,
-} = require('../actions.js');
+    liquityClose,
+} = require('../../actions.js');
 
-describe('Liquity-Payback', function () {
+describe('Liquity-Open', function () {
     this.timeout(1000000);
-    const collAmountOpen = Float2BN(fetchAmountinUSDPrice('WETH', 24000), 18);
-    const LUSDAmountOpen = Float2BN(fetchAmountinUSDPrice('LUSD', 12000), 18);
-    const LUSDAmountRepay = Float2BN(fetchAmountinUSDPrice('LUSD', 4000), 18);
-    const maxFeePercentage = hre.ethers.utils.parseUnits('5', 16);
+    const WETHSellAmount = Float2BN(fetchAmountinUSDPrice('WETH', 500), 18);
+    const WETHAmount = Float2BN(fetchAmountinUSDPrice('WETH', 20000), 18);
+    const collAmountOpen = Float2BN(fetchAmountinUSDPrice('WETH', 12000), 18);
+    const LUSDAmountOpen = Float2BN(fetchAmountinUSDPrice('LUSD', 4000), 18);
+    const maxFeePercentage = Float2BN('5', 16);
 
     let senderAcc; let proxy; let proxyAddr;
-    let liquityView; let LUSDAddr;
+    let liquityView; let LUSDAddr; let uniWrapper;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -35,11 +38,15 @@ describe('Liquity-Payback', function () {
         liquityView = await redeploy('LiquityView');
         LUSDAddr = await liquityView.LUSDTokenAddr();
 
-        await depositToWeth(collAmountOpen);
-        await send(WETH_ADDRESS, proxyAddr, collAmountOpen);
+        await depositToWeth(WETHAmount);
+        await send(WETH_ADDRESS, proxyAddr, WETHAmount);
+
+        await redeploy('DFSSell');
+        uniWrapper = await redeploy('UniswapWrapperV3');
+        await setNewExchangeWrapper(senderAcc, uniWrapper.address);
 
         await redeploy('LiquityOpen');
-        await redeploy('LiquityPayback');
+        await redeploy('LiquityClose');
     });
 
     afterEach(async () => {
@@ -69,13 +76,26 @@ describe('Liquity-Payback', function () {
         expect(await balanceOf(LUSDAddr, proxyAddr)).to.equal(LUSDAmountOpen);
     });
 
-    it(`... should payback ${BN2Float(LUSDAmountRepay)} LUSD of debt`, async () => {
-        const debtBefore = (await liquityView['getTroveInfo(address)'](proxyAddr)).debtAmount;
+    it('... should close Trove', async () => {
+        await sell(
+            proxy,
+            WETH_ADDRESS,
+            LUSDAddr,
+            WETHSellAmount,
+            uniWrapper.address,
+            senderAcc.address,
+            proxyAddr,
+        );
 
-        await liquityPayback(proxy, LUSDAmountRepay, proxyAddr);
+        await liquityClose(proxy, proxyAddr, proxyAddr);
+        expect(await balanceOf(WETH_ADDRESS, proxyAddr)).to.equal(WETHAmount);
+    });
+    it(`... should open Trove with whole WETH balance as collateral and ${BN2Float(LUSDAmountOpen)} LUSD debt`, async () => {
+        // eslint-disable-next-line max-len
+        await liquityOpen(proxy, maxFeePercentage, hre.ethers.constants.MaxUint256, LUSDAmountOpen, proxyAddr, proxyAddr);
 
-        const debtAfter = (await liquityView['getTroveInfo(address)'](proxyAddr)).debtAmount;
+        const { collAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
 
-        expect(debtBefore.sub(debtAfter)).to.equal(LUSDAmountRepay);
+        expect(collAmount).to.equal(WETHAmount);
     });
 });
