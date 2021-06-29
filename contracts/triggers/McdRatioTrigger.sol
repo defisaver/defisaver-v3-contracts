@@ -30,6 +30,8 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper {
 
         uint256 currRatio = getRatio(subInputData.vaultId, callInputData.nextPrice); // GAS 50k
 
+        // TODO: validation for nextPrice?
+
         if (RatioState(subInputData.state) == RatioState.OVER) {
             if (currRatio > subInputData.ratio) return true;
         }

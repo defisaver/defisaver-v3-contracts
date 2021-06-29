@@ -15,7 +15,7 @@ const { openVault } = require('../actions');
 
 const { fetchMakerAddresses } = require('../utils-mcd');
 
-describe('Mcd-Repay', function () {
+describe('Mcd-Repay-Recipe', function () {
     this.timeout(120000);
 
     let senderAcc;

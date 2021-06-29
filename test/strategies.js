@@ -99,7 +99,67 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyId, ethJoi
     console.log(`GasUsed callMcdRepayStrategy; ${gasUsed}`);
 };
 
+const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyId, ethJoin, boostAmount) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const generateAction = new dfs.actions.maker.MakerGenerateAction(
+        '0',
+        boostAmount,
+        placeHolderAddr,
+        MCD_MANAGER_ADDR,
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            DAI_ADDR,
+            WETH_ADDRESS,
+            '0',
+            UNISWAP_WRAPPER,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const boostGasCost = 1_000_000; // 1 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        boostGasCost, WETH_ADDRESS, '0',
+    );
+
+    const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
+        '0', // vaultId
+        '0', // amount
+        ethJoin,
+        placeHolderAddr, // proxy
+        MCD_MANAGER_ADDR,
+    );
+
+    const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+        '0', // targetRatio
+        '0', // vaultId
+        '0', // nextPrice
+    );
+
+    actionsCallData.push(generateAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(mcdSupplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, 0, triggerCallData, actionsCallData, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed callMcdBoostStrategy; ${gasUsed}`);
+};
+
 module.exports = {
     subMcdRepayStrategy,
     callMcdRepayStrategy,
+    callMcdBoostStrategy,
 };
