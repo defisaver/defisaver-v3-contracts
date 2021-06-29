@@ -11,12 +11,12 @@ const {
     fetchAmountinUSDPrice,
     BN2Float,
     Float2BN,
-} = require('../utils');
+} = require('../../utils');
 
 const {
     sell,
     liquityStake,
-} = require('../actions.js');
+} = require('../../actions.js');
 
 describe('Liquity-Stake', function () {
     this.timeout(1000000);

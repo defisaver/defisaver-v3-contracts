@@ -4,30 +4,28 @@ const {
     balanceOf,
     getProxy,
     redeploy,
-    setNewExchangeWrapper,
     depositToWeth,
     send,
     WETH_ADDRESS,
     Float2BN,
     BN2Float,
     fetchAmountinUSDPrice,
-} = require('../utils');
+} = require('../../utils');
 
 const {
-    sell,
     liquityOpen,
-    liquityClose,
-} = require('../actions.js');
+    liquityWithdraw,
+} = require('../../actions.js');
 
-describe('Liquity-Close', function () {
+describe('Liquity-Withdraw', function () {
     this.timeout(1000000);
-    const WETHSellAmount = Float2BN(fetchAmountinUSDPrice('WETH', 500), 18);
     const collAmountOpen = Float2BN(fetchAmountinUSDPrice('WETH', 12000), 18);
-    const LUSDAmountOpen = Float2BN(fetchAmountinUSDPrice('LUSD', 6000), 18);
+    const collAmountWithdraw = Float2BN(fetchAmountinUSDPrice('WETH', 4000), 18);
+    const LUSDAmountOpen = Float2BN(fetchAmountinUSDPrice('LUSD', 4000), 18);
     const maxFeePercentage = hre.ethers.utils.parseUnits('5', 16);
 
     let senderAcc; let proxy; let proxyAddr;
-    let LUSDAddr; let liquityView; let uniWrapper;
+    let liquityView; let LUSDAddr;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -40,12 +38,8 @@ describe('Liquity-Close', function () {
         await depositToWeth(collAmountOpen);
         await send(WETH_ADDRESS, proxyAddr, collAmountOpen);
 
-        await redeploy('DFSSell');
-        uniWrapper = await redeploy('UniswapWrapperV3');
-        await setNewExchangeWrapper(senderAcc, uniWrapper.address);
-
         await redeploy('LiquityOpen');
-        await redeploy('LiquityClose');
+        await redeploy('LiquityWithdraw');
     });
 
     afterEach(async () => {
@@ -75,18 +69,10 @@ describe('Liquity-Close', function () {
         expect(await balanceOf(LUSDAddr, proxyAddr)).to.equal(LUSDAmountOpen);
     });
 
-    it('... should close Trove', async () => {
-        await sell(
-            proxy,
-            WETH_ADDRESS,
-            LUSDAddr,
-            WETHSellAmount,
-            uniWrapper.address,
-            senderAcc.address,
-            proxyAddr,
-        );
+    it(`... should withdraw ${BN2Float(collAmountWithdraw)} WETH from collateral`, async () => {
+        await liquityWithdraw(proxy, collAmountWithdraw, proxyAddr);
 
-        await liquityClose(proxy, proxyAddr, proxyAddr);
-        expect(await balanceOf(WETH_ADDRESS, proxyAddr)).to.equal(collAmountOpen);
+        // eslint-disable-next-line max-len
+        expect(await balanceOf(WETH_ADDRESS, proxyAddr)).to.equal(collAmountWithdraw);
     });
 });

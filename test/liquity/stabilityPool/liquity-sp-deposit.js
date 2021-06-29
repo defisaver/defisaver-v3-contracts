@@ -11,19 +11,17 @@ const {
     fetchAmountinUSDPrice,
     BN2Float,
     Float2BN,
-} = require('../utils');
+} = require('../../utils');
 
 const {
     sell,
     liquitySPDeposit,
-    liquitySPWithdraw,
-} = require('../actions.js');
+} = require('../../actions.js');
 
-describe('Liquity-SP-Withdraw', function () {
+describe('Liquity-SP-Deposit', function () {
     this.timeout(1000000);
     const WETHSellAmount = Float2BN(fetchAmountinUSDPrice('WETH', 12000), 18);
-    const lusdAmountDeposit = Float2BN(fetchAmountinUSDPrice('LUSD', 10000), 18);
-    const lusdAmountWithdraw = Float2BN(fetchAmountinUSDPrice('LUSD', 4000), 18);
+    const lusdAmountDeposit = Float2BN(fetchAmountinUSDPrice('LUSD', 4000), 18);
 
     let senderAcc; let proxy; let proxyAddr;
     let liquityView; let LUSDAddr; let uniWrapper;
@@ -46,7 +44,6 @@ describe('Liquity-SP-Withdraw', function () {
         await setNewExchangeWrapper(senderAcc, uniWrapper.address);
 
         await redeploy('LiquitySPDeposit');
-        await redeploy('LiquitySPWithdraw');
 
         await sell(
             proxy,
@@ -77,44 +74,21 @@ describe('Liquity-SP-Withdraw', function () {
         expect(compoundedLUSD).to.be.equal(lusdAmountDeposit);
     });
 
-    it(`... should withdraw ${BN2Float(lusdAmountWithdraw)}`, async () => {
+    it('... should deposit the remainder of available LUSD', async () => {
         const wethBalance = await balanceOf(WETH_ADDRESS, proxyAddr);
         const lqtyBalance = await balanceOf(LQTYAddr, proxyAddr);
 
         const { ethGain, lqtyGain } = await liquityView['getDepositorInfo(address)'](proxyAddr);
         // eslint-disable-next-line max-len
-        await liquitySPWithdraw(proxy, lusdAmountWithdraw, proxyAddr, proxyAddr, proxyAddr);
+        await liquitySPDeposit(proxy, hre.ethers.constants.MaxUint256, proxyAddr, proxyAddr, proxyAddr);
 
         const { compoundedLUSD } = await liquityView['getDepositorInfo(address)'](proxyAddr);
-        const lusdBalance = await balanceOf(LUSDAddr, proxyAddr);
 
         const wethChange = (await balanceOf(WETH_ADDRESS, proxyAddr)).sub(wethBalance);
         const lqtyChange = (await balanceOf(LQTYAddr, proxyAddr)).sub(lqtyBalance);
 
         expect(ethGain).to.be.equal(wethChange);
         expect(lqtyGain).to.be.equal(lqtyChange);
-        expect(compoundedLUSD).to.be.equal(lusdAmountDeposit.sub(lusdAmountWithdraw));
-        // eslint-disable-next-line max-len
-        expect(lusdBalance).to.be.equal(lusdAmountBought.sub(lusdAmountDeposit.sub(lusdAmountWithdraw)));
-    });
-
-    it('... should withdraw the rest of the deposited LUSD', async () => {
-        const wethBalance = await balanceOf(WETH_ADDRESS, proxyAddr);
-        const lqtyBalance = await balanceOf(LQTYAddr, proxyAddr);
-
-        const { ethGain, lqtyGain } = await liquityView['getDepositorInfo(address)'](proxyAddr);
-        // eslint-disable-next-line max-len
-        await liquitySPWithdraw(proxy, hre.ethers.constants.MaxUint256, proxyAddr, proxyAddr, proxyAddr);
-
-        const { compoundedLUSD } = await liquityView['getDepositorInfo(address)'](proxyAddr);
-        const lusdBalance = await balanceOf(LUSDAddr, proxyAddr);
-
-        const wethChange = (await balanceOf(WETH_ADDRESS, proxyAddr)).sub(wethBalance);
-        const lqtyChange = (await balanceOf(LQTYAddr, proxyAddr)).sub(lqtyBalance);
-
-        expect(ethGain).to.be.equal(wethChange);
-        expect(lqtyGain).to.be.equal(lqtyChange);
-        expect(compoundedLUSD).to.be.equal(0);
-        expect(lusdBalance).to.be.equal(lusdAmountBought);
+        expect(compoundedLUSD).to.be.equal(lusdAmountBought);
     });
 });

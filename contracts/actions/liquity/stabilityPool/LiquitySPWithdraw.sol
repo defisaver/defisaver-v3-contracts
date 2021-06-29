@@ -3,10 +3,10 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "./helpers/LiquityHelper.sol";
-import "../../utils/SafeMath.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
+import "../helpers/LiquityHelper.sol";
+import "../../../utils/TokenUtils.sol";
+import "../../../utils/SafeMath.sol";
+import "../../ActionBase.sol";
 
 contract LiquitySPWithdraw is ActionBase, LiquityHelper {
     using TokenUtils for address;
