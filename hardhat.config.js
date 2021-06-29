@@ -45,19 +45,12 @@ module.exports = {
         },
     },
     solidity: {
-        compilers: [
-            {
-                version: '0.8.4',
+        version: '0.7.6',
+        settings: {
+            optimizer: {
+                enabled: true,
+                runs: 1000,
             },
-            {
-                version: '0.7.6',
-            },
-        ],
-    },
-    settings: {
-        optimizer: {
-            enabled: true,
-            runs: 1000,
         },
     },
     paths: {
@@ -131,8 +124,8 @@ async function verifyContract(contractAddress, contractName) {
     params.append('codeformat', 'solidity-single-file"');
     // TODO: auto select compilerversions
     params.append('compilerversion', 'v0.7.6+commit.7338295f');
-    params.append('optimizationUsed', 0);
-    params.append('runs', 200);
+    params.append('optimizationUsed', 1);
+    params.append('runs', 1000);
     /// @notice : MIT license
     params.append('licenseType', 3);
 
