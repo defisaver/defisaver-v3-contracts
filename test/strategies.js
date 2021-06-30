@@ -50,8 +50,6 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyId, ethJoi
         MCD_MANAGER_ADDR,
     );
 
-    // TODO: Handle with FL
-
     const repayGasCost = 1200000; // 1.2 mil gas
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         repayGasCost, WETH_ADDRESS, '0',
@@ -87,7 +85,7 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyId, ethJoi
     actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
 
-    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0'])); // next price
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len

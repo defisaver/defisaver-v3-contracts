@@ -4,7 +4,6 @@ const {
     impersonateAccount,
     stopImpersonatingAccount,
     getGasUsed,
-    getNameId,
     OWNER_ACC,
 } = require('./utils');
 
@@ -33,14 +32,11 @@ const getLatestStrategyId = async () => {
 };
 
 // eslint-disable-next-line max-len
-const subTemplate = async (proxy, templateName, triggerNames, actionNames, paramMapping) => {
+const subTemplate = async (proxy, templateName, triggerIds, actionIds, paramMapping) => {
     const subProxyAddr = await getAddrFromRegistry('SubscriptionProxy');
 
-    const triggerIds = triggerNames.map((trigName) => getNameId(trigName));
-
-    const actionIds = actionNames.map((actionName) => getNameId(actionName));
-
     const SubscriptionProxy = await hre.ethers.getContractFactory('SubscriptionProxy');
+
     const functionData = SubscriptionProxy.interface.encodeFunctionData(
         'createTemplate',
         [templateName, triggerIds, actionIds, paramMapping],

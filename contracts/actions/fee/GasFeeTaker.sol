@@ -27,8 +27,8 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.feeToken = _parseParamAddr(inputData.feeToken, _paramMapping[1], _subData, _returnValues);
-        inputData.availableAmount = _parseParamUint(inputData.availableAmount, _paramMapping[2], _subData, _returnValues);
+        inputData.feeToken = _parseParamAddr(inputData.feeToken, _paramMapping[0], _subData, _returnValues);
+        inputData.availableAmount = _parseParamUint(inputData.availableAmount, _paramMapping[1], _subData, _returnValues);
 
         uint256 txCost = calcGasCost(inputData.gasUsed, inputData.feeToken);
 

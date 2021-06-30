@@ -257,6 +257,12 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, u
         secondPath = WETH_ADDRESS;
     }
 
+    // quick fix if we use strategy placeholder value
+    if (firstPath[0] === '%') {
+        firstPath = nullAddress;
+        secondPath = nullAddress;
+    }
+
     let path = abiCoder.encode(['address[]'], [[firstPath, secondPath]]);
     if (uniV3fee > 0) {
         if (destAmount > 0) {
