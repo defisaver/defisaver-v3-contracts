@@ -9,6 +9,7 @@ const {
 const {
     createMcdTrigger,
     RATIO_STATE_UNDER,
+    RATIO_STATE_OVER,
 } = require('./triggers');
 
 const {
@@ -30,6 +31,21 @@ const subMcdRepayStrategy = async (proxy, vaultId, rationUnder, targetRatio) => 
 
     const templateId = await getLatestTemplateId();
     const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_UNDER);
+
+    // eslint-disable-next-line max-len
+    const strategyId = await subStrategy(proxy, [templateId], true, [vaultIdEncoded, proxyAddrEncoded, targetRatioEncoded],
+        [triggerData]);
+
+    return strategyId;
+};
+
+const subMcdBoostStrategy = async (proxy, vaultId, rationUnder, targetRatio) => {
+    const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
+    const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+
+    const templateId = await getLatestTemplateId();
+    const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_OVER);
 
     // eslint-disable-next-line max-len
     const strategyId = await subStrategy(proxy, [templateId], true, [vaultIdEncoded, proxyAddrEncoded, targetRatioEncoded],
@@ -119,7 +135,7 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyId, ethJoi
         placeHolderAddr,
     );
 
-    const boostGasCost = 1_000_000; // 1 mil gas
+    const boostGasCost = 1200000; // 1.2 mil gas
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         boostGasCost, WETH_ADDRESS, '0',
     );
@@ -158,6 +174,7 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyId, ethJoi
 
 module.exports = {
     subMcdRepayStrategy,
+    subMcdBoostStrategy,
     callMcdRepayStrategy,
     callMcdBoostStrategy,
 };

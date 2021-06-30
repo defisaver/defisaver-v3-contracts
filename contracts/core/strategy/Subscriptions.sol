@@ -7,8 +7,6 @@ import "../../interfaces/IDSProxy.sol";
 import "../../utils/DefisaverLogger.sol";
 import "./StrategyData.sol";
 
-import "hardhat/console.sol";
-
 /// @title Storage of strategies and templates
 contract Subscriptions is StrategyData, AdminAuth {
     DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
@@ -82,8 +80,6 @@ contract Subscriptions is StrategyData, AdminAuth {
                 paramMapping: _paramMapping
             })
         );
-
-        console.log("Gas used for template: ", gasStart - gasleft());
 
         updateCounter++;
 
