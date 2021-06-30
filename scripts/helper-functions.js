@@ -1,10 +1,22 @@
 /* eslint-disable no-undef */ // This is to disable warning for hre undefined in file
 /* eslint-disable import/no-extraneous-dependencies */ // This is to disable warnings for imports
 const fs = require('fs-extra');
+const { exec } = require('child_process');
 const axios = require('axios');
 const path = require('path');
 
 const hardhatImport = import('../hardhat.config.js');
+
+function execShellCommand(cmd) {
+    return new Promise((resolve) => {
+        exec(cmd, (error, stdout, stderr) => {
+            if (error) {
+                console.warn(error);
+            }
+            resolve(stdout || stderr);
+        });
+    });
+}
 function sleep(ms) {
     return new Promise((resolve) => {
         setTimeout(resolve, ms);
@@ -125,5 +137,4 @@ module.exports = {
     verifyContract,
     deployContract,
     sleep,
-    execShellCommand,
 };
