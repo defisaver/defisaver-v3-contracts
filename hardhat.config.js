@@ -41,7 +41,7 @@ module.exports = {
             timeout: 10000000,
         },
         kovan: {
-            url: 'https://kovan.infura.io/v3/9bf6a93bea5c42528c70099e4f8a7b4d',
+            url: process.env.KOVAN_ETHEREUM_NODE,
             chainId: 42,
             accounts: [process.env.PRIV_KEY_KOVAN],
         },
