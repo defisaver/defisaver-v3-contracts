@@ -38,14 +38,14 @@ function sleep(ms) {
 async function deployContract(contractName, gasPriceSelected) {
     const network = (await hre.ethers.provider.getNetwork()).name;
     const prompt = await getInput(`You're deploying ${contractName} on ${network} at gas price of ${gasPriceSelected} gwei. Type YES to continue!\n`);
-    if (prompt !== 'YES') {
+    if (prompt.toLowerCase() !== 'yes') {
         rl.close();
         console.log('You did not agree to continue with deployment');
         process.exit(1);
     }
     if (gasPriceSelected > 300) {
         gasPriceWarning = await getInput(`You used a gas price of ${gasPriceSelected} gwei. Are you 100% sure? Type YES to continue!\n`);
-        if (gasPriceWarning !== 'YES') {
+        if (gasPriceWarning.toLowerCase() !== 'yes') {
             rl.close();
             console.log('You did not agree to continue with deployment');
             process.exit(1);
