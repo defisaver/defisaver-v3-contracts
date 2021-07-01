@@ -4,7 +4,20 @@ const fs = require('fs-extra');
 const { exec } = require('child_process');
 const axios = require('axios');
 const path = require('path');
+const readline = require('readline');
 
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+});
+
+function getInput(text) {
+    return new Promise((resolve) => {
+        rl.question(`${text}`, (input) => {
+            resolve(input);
+        });
+    });
+}
 const hardhatImport = import('../hardhat.config.js');
 
 function execShellCommand(cmd) {
@@ -23,6 +36,22 @@ function sleep(ms) {
     });
 }
 async function deployContract(contractName, gasPriceSelected) {
+    const network = (await hre.ethers.provider.getNetwork()).name;
+    const prompt = await getInput(`You're deploying ${contractName} on ${network} at gas price of ${gasPriceSelected} gwei. Type YES to continue!\n`);
+    if (prompt !== 'YES') {
+        rl.close();
+        console.log('You did not agree to continue with deployment');
+        process.exit(1);
+    }
+    if (gasPriceSelected > 300) {
+        gasPriceWarning = await getInput(`You used a gas price of ${gasPriceSelected} gwei. Are you 100% sure? Type YES to continue!\n`);
+        if (gasPriceWarning !== 'YES') {
+            rl.close();
+            console.log('You did not agree to continue with deployment');
+            process.exit(1);
+        }
+    }
+    console.log('Starting deployment process');
     await execShellCommand('npx hardhat compile');
     const overrides = {
         // The price (in wei) per unit of gas
@@ -47,7 +76,7 @@ async function verifyContract(contractAddress, contractName) {
     const flattenedFile = (
         await fs.readFileSync(`contracts/flattened/${contractName}.sol`)
     ).toString();
-    console.log('verifying');
+    console.log('Starting verification process');
     const config = {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -78,27 +107,13 @@ async function verifyContract(contractAddress, contractName) {
     /// @notice : MIT license
     params.append('licenseType', 3);
 
-    let url;
-    switch (network) {
-    case 'mainnet':
-        url = 'https://api.etherscan.io/api';
-        break;
-    case 'kovan':
-        url = 'https://api-kovan.etherscan.io/api';
-        break;
-    case 'ropsten':
-        url = 'https://api-ropsten.etherscan.io/api';
-        break;
-    case 'rinkeby':
-        url = 'https://api-rinkeby.etherscan.io/api';
-        break;
-    case 'goerli':
-        url = 'https://api-goerli.etherscan.io/api';
-        break;
-    default:
+    let url = 'https://api.etherscan.io/api';
+    if (network !== 'mainnet') {
+        url = `https://api-${network}.etherscan.io/api`;
     }
     const tx = await axios.post(url, params, config);
     console.log(tx.data);
+    console.log(`https://${network === 'mainnet' ? '' : `${network}.`}etherscan.io/address/${contractAddress}`);
 }
 
 async function flatten(filePath) {

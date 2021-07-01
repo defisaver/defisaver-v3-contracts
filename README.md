@@ -41,8 +41,8 @@ block number the fork starts from. If it starts from an old state some tests mig
 
 ## Custom hardhat tasks
 
-`npx hardhat customFlatten [file-path]` -  will flatten contract that is ready for deployment
+`npx hardhat customFlatten [file-path]` -  will flatten contract that is ready for deployment and put it in contracts/flattened folder
 
 `npx hardhat customVerify [contract-address] [contract-name] --network [hardhat-settings-network-name]`  - will verify on etherscan if a contract was deployed using a single file from customFlatten task 
 
-`npx hardhat fladepver [file-path] [gas-in-gwei] --network [hardhat-settings-network-name]` - will flatten to a single file, deploy from it and then verify it on etherscan
+`npx hardhat fladepver [file-path] [gas-in-gwei] --network [hardhat-settings-network-name]` - will flatten to a single file (save it in contracts/flattened), deploy from it and then verify it on etherscan
