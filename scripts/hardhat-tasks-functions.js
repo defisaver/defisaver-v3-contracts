@@ -23,6 +23,7 @@ function sleep(ms) {
     });
 }
 async function deployContract(contractName, gasPriceSelected) {
+    await execShellCommand('npx hardhat compile');
     const overrides = {
         // The price (in wei) per unit of gas
         gasPrice: hre.ethers.utils.parseUnits(gasPriceSelected, 'gwei'),
@@ -101,6 +102,10 @@ async function verifyContract(contractAddress, contractName) {
 }
 
 async function flatten(filePath) {
+    const dir = './contracts/flattened';
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir);
+    }
     const fileName = path.basename(filePath);
     const pragmaRegex = /^pragma.*$\n?/gm; // anything starting with pragma
     const licenseRegex = /^[//SPDX].*$\n?/gm; // anything starting with //SPDX
@@ -122,10 +127,6 @@ async function flatten(filePath) {
     console.log(data);
     data = data.replace(pragmaRegex, '');
     data = data.replace(licenseRegex, '');
-    const dir = './contracts/flattened';
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir);
-    }
     const flags = { flag: 'a+' };
 
     fs.writeFileSync(`contracts/flattened/${fileName}`, globalLicense[0]);
