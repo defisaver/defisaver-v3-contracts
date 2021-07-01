@@ -115,15 +115,19 @@ async function flatten(filePath) {
         console.error(err);
     }
     // Flatten file, delete unneeded licenses and pragmas
-    let data = await execShellCommand(`npx hardhat flatten ${filePath}`);
+    await execShellCommand(`npx hardhat flatten ${filePath} > contracts/flattened/${fileName}`);
+    let data = (
+        await fs.readFileSync(`contracts/flattened/${fileName}`)
+    ).toString();
+    console.log(data);
     data = data.replace(pragmaRegex, '');
     data = data.replace(licenseRegex, '');
-
     const dir = './contracts/flattened';
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
     }
     const flags = { flag: 'a+' };
+
     fs.writeFileSync(`contracts/flattened/${fileName}`, globalLicense[0]);
     fs.writeFileSync(`contracts/flattened/${fileName}`, '\n', flags);
     pragma.forEach((element) => {

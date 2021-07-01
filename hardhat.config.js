@@ -12,7 +12,7 @@ const {
     verifyContract,
     deployContract,
     sleep,
-} = require('./scripts/helper-functions');
+} = require('./scripts/hardhat-tasks-functions');
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
