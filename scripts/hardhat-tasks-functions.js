@@ -124,7 +124,6 @@ async function flatten(filePath) {
     let data = (
         await fs.readFileSync(`contracts/flattened/${fileName}`)
     ).toString();
-    console.log(data);
     data = data.replace(pragmaRegex, '');
     data = data.replace(licenseRegex, '');
     const flags = { flag: 'a+' };
