@@ -18,7 +18,7 @@ function getInput(text) {
         });
     });
 }
-const hardhatImport = import('../hardhat.config.js');
+const hardhatImport = import('../hardhat.config');
 
 function execShellCommand(cmd) {
     return new Promise((resolve) => {
@@ -108,12 +108,12 @@ async function verifyContract(contractAddress, contractName) {
     params.append('licenseType', 3);
 
     let url = 'https://api.etherscan.io/api';
-    if (network !== 'mainnet') {
+    if (network !== 'homestead') {
         url = `https://api-${network}.etherscan.io/api`;
     }
     const tx = await axios.post(url, params, config);
     console.log(tx.data);
-    console.log(`https://${network === 'mainnet' ? '' : `${network}.`}etherscan.io/address/${contractAddress}`);
+    console.log(`https://${network === 'homestead' ? '' : `${network}.`}etherscan.io/address/${contractAddress}`);
 }
 
 async function flatten(filePath) {
