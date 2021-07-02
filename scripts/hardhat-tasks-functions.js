@@ -35,9 +35,10 @@ function sleep(ms) {
         setTimeout(resolve, ms);
     });
 }
-async function deployContract(contractName, gasPriceSelected) {
+async function deployContract(contractName, args) {
+    const gasPriceSelected = args.gas;
     const network = (await hre.ethers.provider.getNetwork()).name;
-    const prompt = await getInput(`You're deploying ${contractName} on ${network} at gas price of ${gasPriceSelected} gwei. Type YES to continue!\n`);
+    const prompt = await getInput(`You're deploying ${contractName} on ${network} at gas price of ${gasPriceSelected} gwei${args.nonce ? ` with nonce : ${args.nonce}` : ''}. Type YES to continue!\n`);
     if (prompt.toLowerCase() !== 'yes') {
         rl.close();
         console.log('You did not agree to continue with deployment');
@@ -57,6 +58,9 @@ async function deployContract(contractName, gasPriceSelected) {
         // The price (in wei) per unit of gas
         gasPrice: hre.ethers.utils.parseUnits(gasPriceSelected, 'gwei'),
     };
+    if (args.nonce) {
+        overrides.nonce = parseInt(args.nonce, 10);
+    }
     const [deployer] = await hre.ethers.getSigners();
     console.log('Deploying contracts with the account:', deployer.address);
 
