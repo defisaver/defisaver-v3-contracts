@@ -109,3 +109,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Flattened solidity contracts
+contracts/flattened/
