@@ -6,6 +6,7 @@ import "../../../DS/DSMath.sol";
 import "../../../interfaces/reflexer/ISAFEEngine.sol";
 import "../../../interfaces/reflexer/ISAFEManager.sol";
 import "../../../interfaces/reflexer/IBasicTokenAdapters.sol";
+import "../../../interfaces/reflexer/ISAFESaviour.sol";
 
 /// @title Helper methods for MCDSaverProxy
 contract ReflexerHelper is DSMath {
