@@ -16,6 +16,8 @@ contract ReflexerHelper is DSMath {
     address public constant SAFE_ENGINE_ADDRESS = 0xCC88a9d330da1133Df3A7bD823B95e52511A6962;
     address public constant SAFE_MANAGER_ADDRESS = 0xEfe0B4cA532769a3AE758fD82E1426a03A94F185;
 
+    address public constant LIQUIDATION_ENGINE_ADDRESS = 0x27Efc6FFE79692E0521E7e27657cF228240A06c2;
+
     address public constant NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS = 0xA9402De5ce3F1E03Be28871b914F77A4dd5e4364;
 
     ISAFEEngine public constant safeEngine = ISAFEEngine(SAFE_ENGINE_ADDRESS);

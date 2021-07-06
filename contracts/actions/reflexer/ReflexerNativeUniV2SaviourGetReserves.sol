@@ -6,15 +6,13 @@ pragma experimental ABIEncoderV2;
 import "../ActionBase.sol";
 import "./helpers/ReflexerHelper.sol";
 
-/// @title Withdraw lpToken from the contract and provide less cover for a SAFE
-contract ReflexerNativeUniV2SaviourWithdraw is ActionBase, ReflexerHelper {
-    /// @param to - The address that will receive the LP tokens
-    /// @param safeId - The ID of the SAFE that's protected. This ID should be registered inside GebSafeManager
-    /// @param lpTokenAmount - amount of LP tokens to withdraw
+/// @title Get back system coins or collateral tokens that were withdrawn from Uniswap and not used to save a specific SAFE
+contract ReflexerNativeUniV2SaviourGetReserves is ActionBase, ReflexerHelper {
+    /// @param to - The address that will receive tokens
+    /// @param safeId - The ID of the SAFE. This ID should be registered inside GebSafeManager
     struct Params {
         address to;
         uint256 safeId;
-        uint256 lpTokenAmount;
     }
 
     /// @inheritdoc ActionBase
@@ -26,22 +24,16 @@ contract ReflexerNativeUniV2SaviourWithdraw is ActionBase, ReflexerHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[0], _subData, _returnValues);
-        inputData.lpTokenAmount = _parseParamUint(
-            inputData.lpTokenAmount,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
 
-        _reflexerSaviourWithdraw(inputData);
-        return bytes32(inputData.lpTokenAmount);
+        _reflexerSaviourGetReserves(inputData);
+        return bytes32(inputData.safeId);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
-        _reflexerSaviourWithdraw(inputData);
+        _reflexerSaviourGetReserves(inputData);
     }
 
     /// @inheritdoc ActionBase
@@ -51,18 +43,17 @@ contract ReflexerNativeUniV2SaviourWithdraw is ActionBase, ReflexerHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _reflexerSaviourWithdraw(Params memory _inputData) internal {
+    function _reflexerSaviourGetReserves(Params memory _inputData) internal {
         
-        ISAFESaviour(NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS).withdraw(
+        ISAFESaviour(NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS).getReserves(
             _inputData.safeId,
-            _inputData.lpTokenAmount,
             _inputData.to
         );
 
         logger.Log(
             address(this),
             msg.sender,
-            "ReflexerNativeUniV2SaviourWithdraw",
+            "ReflexerNativeUniV2SaviourGetReserves",
             abi.encode(_inputData)
         );
     }

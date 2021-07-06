@@ -10,12 +10,11 @@ import "../../utils/TokenUtils.sol";
 /// @title Deposit lpToken in the contract in order to provide cover for a specific SAFE managed by the SAFE Manager
 contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
     using TokenUtils for address;
-    address public constant LIQUIDATION_ENGINE_ADDRESS = 0x27Efc6FFE79692E0521E7e27657cF228240A06c2;
-    // do i hardcode liq engine address or put it into params?
 
     /// @param from - The address from which to pull LP tokens
     /// @param safeId - The ID of the SAFE to protect. This ID should be registered inside GebSafeManager
-    /// @param lpTokenAmount - The amount of lpToken to deposit
+    /// @param lpTokenAmount - The amount of LP tokens to deposit
+    /// @param lpTokenAddress - RAI/WETH UNI V2 LP token address
     struct Params {
         address from;
         uint256 safeId;
@@ -84,7 +83,7 @@ contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
             address(this),
             msg.sender,
             "ReflexerNativeUniV2SaviourDeposit",
-            abi.encode(_inputData.safeId, _inputData.lpTokenAmount, _inputData.from)
+            abi.encode(_inputData)
         );
     }
 

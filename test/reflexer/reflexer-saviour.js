@@ -7,7 +7,6 @@ const {
     WETH_ADDRESS,
     MIN_VAULT_RAI_AMOUNT,
     RAI_ADDR,
-    LOGGER_ADDR,
     fetchAmountinUSDPrice,
     approve,
     balanceOf,
@@ -33,7 +32,6 @@ const {
 describe('Reflexer-Generate', () => {
     let senderAcc;
     let proxy;
-    let logger;
     let saviour;
     let uniRouter;
     let safeManager;
@@ -46,7 +44,6 @@ describe('Reflexer-Generate', () => {
         await redeploy('ReflexerNativeUniV2SaviourDeposit');
         await redeploy('ReflexerNativeUniV2SaviourWithdraw');
 
-        logger = await hre.ethers.getContractAt('DefisaverLogger', LOGGER_ADDR);
         saviour = await hre.ethers.getContractAt(
             'ISAFESaviour',
             NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS,
@@ -87,14 +84,31 @@ describe('Reflexer-Generate', () => {
             hre.ethers.constants.MaxUint256,
         );
         const lpTokenAmount = await balanceOf(RAI_WETH_LP_TOKEN_ADDRESS, to);
-        // deposit half
+
         await approve(RAI_WETH_LP_TOKEN_ADDRESS, proxy.address);
-        await reflexerSaviourDeposit(proxy, from, safeID, lpTokenAmount, RAI_WETH_LP_TOKEN_ADDRESS);
-        const saviourBalance = await saviour.lpTokenCover(safeHandler);
-        expect(saviourBalance).to.be.eq(lpTokenAmount);
+        // deposit half
+        await reflexerSaviourDeposit(
+            proxy,
+            from,
+            safeID,
+            lpTokenAmount.div(2),
+            RAI_WETH_LP_TOKEN_ADDRESS,
+        );
+        let saviourBalance = await saviour.lpTokenCover(safeHandler);
+        expect(saviourBalance).to.be.eq(lpTokenAmount.div(2));
 
         // deposit uint max
+        await reflexerSaviourDeposit(
+            proxy,
+            from,
+            safeID,
+            hre.ethers.constants.MaxUint256,
+            RAI_WETH_LP_TOKEN_ADDRESS,
+        );
+        saviourBalance = await saviour.lpTokenCover(safeHandler);
+        expect(saviourBalance).to.be.eq(lpTokenAmount);
 
+        expect(await balanceOf(RAI_WETH_LP_TOKEN_ADDRESS, to)).to.be.eq(0);
         // withdraw tokens
         await reflexerSaviourWithdraw(proxy, to, safeID, saviourBalance);
         const lpTokenAmountAfterWithdraw = await balanceOf(RAI_WETH_LP_TOKEN_ADDRESS, to);

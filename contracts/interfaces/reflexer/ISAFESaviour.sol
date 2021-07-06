@@ -6,4 +6,5 @@ abstract contract ISAFESaviour {
     function withdraw(uint256 safeID, uint256 lpTokenAmount, address dst) virtual public;
     function lpToken() virtual public view returns (address);
     function lpTokenCover(address) virtual public view returns (uint256);
+    function getReserves(uint256, address) virtual public;
 }
