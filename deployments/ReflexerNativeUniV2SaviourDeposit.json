@@ -198,6 +198,19 @@
 		},
 		{
 			"inputs": [],
+			"name": "UNDERLYING_NATIVE_TOKEN_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "actionType",
 			"outputs": [
 				{

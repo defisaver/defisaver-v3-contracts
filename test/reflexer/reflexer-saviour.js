@@ -92,7 +92,6 @@ describe('Reflexer-Generate', () => {
             from,
             safeID,
             lpTokenAmount.div(2),
-            RAI_WETH_LP_TOKEN_ADDRESS,
         );
         let saviourBalance = await saviour.lpTokenCover(safeHandler);
         expect(saviourBalance).to.be.eq(lpTokenAmount.div(2));
@@ -103,7 +102,6 @@ describe('Reflexer-Generate', () => {
             from,
             safeID,
             hre.ethers.constants.MaxUint256,
-            RAI_WETH_LP_TOKEN_ADDRESS,
         );
         saviourBalance = await saviour.lpTokenCover(safeHandler);
         expect(saviourBalance).to.be.eq(lpTokenAmount);

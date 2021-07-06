@@ -994,14 +994,13 @@ const lidoStake = async (amount, from, to, proxy) => {
     return proxy['execute(address,bytes)'](lidoStakeAddress, functionData, { gasLimit: 3000000 });
 };
 
-const reflexerSaviourDeposit = async (proxy, from, safeId, lpTokenAmount, lpTokenAddress) => {
+const reflexerSaviourDeposit = async (proxy, from, safeId, lpTokenAmount) => {
     const reflexerSaviourDepositAddress = await getAddrFromRegistry('ReflexerNativeUniV2SaviourDeposit');
     // eslint-disable-next-line max-len
     const reflexerSaviourDepositAction = new dfs.actions.reflexer.ReflexerNativeUniV2SaviourDepositAction(
         from,
         safeId,
         lpTokenAmount,
-        lpTokenAddress,
     );
     const functionData = reflexerSaviourDepositAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](reflexerSaviourDepositAddress, functionData, { gasLimit: 3000000 });

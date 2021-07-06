@@ -11,15 +11,14 @@ import "../../utils/TokenUtils.sol";
 contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 
+    address public constant UNDERLYING_NATIVE_TOKEN_ADDRESS = 0x8aE720a71622e824F576b4A8C03031066548A3B1;
     /// @param from - The address from which to pull LP tokens
     /// @param safeId - The ID of the SAFE to protect. This ID should be registered inside GebSafeManager
     /// @param lpTokenAmount - The amount of LP tokens to deposit
-    /// @param lpTokenAddress - RAI/WETH UNI V2 LP token address
     struct Params {
         address from;
         uint256 safeId;
         uint256 lpTokenAmount;
-        address lpTokenAddress;
     }
 
     /// @inheritdoc ActionBase
@@ -59,18 +58,18 @@ contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
     function _reflexerSaviourDeposit(Params memory _inputData)
         internal
         returns (uint256 amountPulled)
-    {
+    {   
         safeManager.protectSAFE(
             _inputData.safeId,
             LIQUIDATION_ENGINE_ADDRESS,
             NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS
         );
 
-        amountPulled = _inputData.lpTokenAddress.pullTokensIfNeeded(
+        amountPulled = UNDERLYING_NATIVE_TOKEN_ADDRESS.pullTokensIfNeeded(
             _inputData.from,
             _inputData.lpTokenAmount
         );
-        _inputData.lpTokenAddress.approveToken(
+        UNDERLYING_NATIVE_TOKEN_ADDRESS.approveToken(
             NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS,
             amountPulled
         );
