@@ -5,20 +5,16 @@ pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "./helpers/ReflexerHelper.sol";
-import "../../utils/TokenUtils.sol";
 
-/// @title Withdraw RAI/WETH UniV2 LP tokens that were used for safe protection
-contract ReflexerSaviourWithdraw is ActionBase, ReflexerHelper {
-
-    /// @param to - address to which the withdrawn LP tokens will be sent to
-    /// @param safeId - ID of the SAFE
+/// @title Withdraw lpToken from the contract and provide less cover for a SAFE
+contract ReflexerNativeUniV2SaviourWithdraw is ActionBase, ReflexerHelper {
+    /// @param to - The address that will receive the LP tokens
+    /// @param safeId - The ID of the SAFE to protect. This ID should be registered inside GebSafeManager
     /// @param lpTokenAmount - amount of LP tokens to withdraw
-    /// @param saviour - address of the saviour contract where the LP tokens were deposited to
     struct Params {
         address to;
         uint256 safeId;
         uint256 lpTokenAmount;
-        address saviour;
     }
 
     /// @inheritdoc ActionBase
@@ -36,7 +32,7 @@ contract ReflexerSaviourWithdraw is ActionBase, ReflexerHelper {
             _subData,
             _returnValues
         );
-        
+
         _reflexerSaviourWithdraw(inputData);
         return bytes32(inputData.lpTokenAmount);
     }
@@ -56,7 +52,18 @@ contract ReflexerSaviourWithdraw is ActionBase, ReflexerHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _reflexerSaviourWithdraw(Params memory _inputData) internal {
-        ISAFESaviour(_inputData.saviour).withdraw(_inputData.safeId, _inputData.lpTokenAmount, _inputData.to);
+        ISAFESaviour(NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS).withdraw(
+            _inputData.safeId,
+            _inputData.lpTokenAmount,
+            _inputData.to
+        );
+
+        logger.Log(
+            address(this),
+            msg.sender,
+            "ReflexerNativeUniV2SaviourWithdraw",
+            abi.encode(_inputData.safeId, _inputData.lpTokenAmount, _inputData.to)
+        );
     }
 
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {

@@ -7,20 +7,20 @@ import "../ActionBase.sol";
 import "./helpers/ReflexerHelper.sol";
 import "../../utils/TokenUtils.sol";
 
-/// @title Deposit RAI/WETH UniV2 LP tokens for safe protection
-contract ReflexerSaviourDeposit is ActionBase, ReflexerHelper {
+/// @title Deposit lpToken in the contract in order to provide cover for a specific SAFE managed by the SAFE Manager
+contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
     using TokenUtils for address;
     address public constant LIQUIDATION_ENGINE_ADDRESS = 0x27Efc6FFE79692E0521E7e27657cF228240A06c2;
+    // do i hardcode liq engine address or put it into params?
 
-    /// @param from - amount of token to supply
-    /// @param safeId - address of token to supply
-    /// @param lpTokenAmount - amount of token to supply
-    /// @param saviour - address of token to supply
+    /// @param from - The address from which to pull LP tokens
+    /// @param safeId - The ID of the SAFE to protect. This ID should be registered inside GebSafeManager
+    /// @param lpTokenAmount - The amount of lpToken to deposit
     struct Params {
         address from;
         uint256 safeId;
         uint256 lpTokenAmount;
-        address saviour;
+        address lpTokenAddress;
     }
 
     /// @inheritdoc ActionBase
@@ -57,14 +57,35 @@ contract ReflexerSaviourDeposit is ActionBase, ReflexerHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _reflexerSaviourDeposit(Params memory _inputData) internal returns (uint256 amountPulled) {
-        safeManager.protectSAFE(_inputData.safeId, LIQUIDATION_ENGINE_ADDRESS, _inputData.saviour);
-        
-        address lpTokenAddress = ISAFESaviour(_inputData.saviour).lpToken();
-        amountPulled = lpTokenAddress.pullTokensIfNeeded(_inputData.from, _inputData.lpTokenAmount);
-        lpTokenAddress.approveToken(_inputData.saviour, amountPulled);
-        
-        ISAFESaviour(_inputData.saviour).deposit(_inputData.safeId, amountPulled);
+    function _reflexerSaviourDeposit(Params memory _inputData)
+        internal
+        returns (uint256 amountPulled)
+    {
+        safeManager.protectSAFE(
+            _inputData.safeId,
+            LIQUIDATION_ENGINE_ADDRESS,
+            NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS
+        );
+
+        amountPulled = _inputData.lpTokenAddress.pullTokensIfNeeded(
+            _inputData.from,
+            _inputData.lpTokenAmount
+        );
+        _inputData.lpTokenAddress.approveToken(
+            NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS,
+            amountPulled
+        );
+        ISAFESaviour(NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS).deposit(
+            _inputData.safeId,
+            amountPulled
+        );
+
+        logger.Log(
+            address(this),
+            msg.sender,
+            "ReflexerNativeUniV2SaviourDeposit",
+            abi.encode(_inputData.safeId, _inputData.lpTokenAmount, _inputData.from)
+        );
     }
 
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {

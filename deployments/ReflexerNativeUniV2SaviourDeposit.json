@@ -1,5 +1,5 @@
 {
-	"contractName": "ReflexerOpen",
+	"contractName": "ReflexerNativeUniV2SaviourDeposit",
 	"abi": [
 		{
 			"inputs": [],
@@ -35,6 +35,19 @@
 					"internalType": "string",
 					"name": "",
 					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "LIQUIDATION_ENGINE_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
 				}
 			],
 			"stateMutability": "view",

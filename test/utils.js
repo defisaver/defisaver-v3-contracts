@@ -20,6 +20,7 @@ const UNIV3POSITIONMANAGER_ADDR = '0xC36442b4a4522E871399CD717aBDD847Ab11FE88';
 const AAVE_MARKET = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
 const YEARN_REGISTRY_ADDRESS = '0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804';
 const STETH_ADDRESS = '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84';
+const UNIV2_ROUTER_ADDRESS = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
 
 const OWNER_ACC = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
 const ADMIN_ACC = '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9';
@@ -220,7 +221,6 @@ const sendEther = async (signer, to, amount) => {
 
 const balanceOf = async (tokenAddr, addr) => {
     const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
-
     let balance = '';
 
     if (tokenAddr.toLowerCase() === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
@@ -228,7 +228,6 @@ const balanceOf = async (tokenAddr, addr) => {
     } else {
         balance = await tokenContract.balanceOf(addr);
     }
-
     return balance;
 };
 
@@ -365,4 +364,5 @@ module.exports = {
     Float2BN,
     YEARN_REGISTRY_ADDRESS,
     STETH_ADDRESS,
+    UNIV2_ROUTER_ADDRESS,
 };
