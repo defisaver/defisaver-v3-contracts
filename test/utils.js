@@ -95,6 +95,7 @@ const coinGeckoHelper = {
     YFI: 'yearn-finance',
     LUSD: 'liquity-usd',
     LQTY: 'liquity',
+    TORN: 'tornado-cash',
 };
 
 const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {

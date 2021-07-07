@@ -18,7 +18,7 @@ function getInput(text) {
         });
     });
 }
-const hardhatImport = import('../hardhat.config');
+const hardhatImport = import('../hardhat.config.js');
 
 function execShellCommand(cmd) {
     return new Promise((resolve) => {
