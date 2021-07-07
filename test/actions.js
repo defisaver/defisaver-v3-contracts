@@ -238,6 +238,19 @@ const paybackAave = async (proxy, market, tokenAddr, amount, rateMode, from) => 
     await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, { gasLimit: 4000000 });
 };
 
+const claimStkAave = async (proxy, assets, amount, to) => {
+    const aaveClaimStkAaveAddr = await getAddrFromRegistry('AaveClaimStkAave');
+
+    const aaveClaimStkAaveAction = new dfs.actions.aave.AaveClaimStkAaveAction(
+        assets,
+        amount,
+        to,
+    );
+    const functionData = aaveClaimStkAaveAction.encodeForDsProxyCall()[1];
+
+    await proxy['execute(address,bytes)'](aaveClaimStkAaveAddr, functionData, { gasLimit: 4000000 });
+};
+
 const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
     const tokenBalance = await balanceOf(tokenAddr, from);
 
@@ -1012,6 +1025,7 @@ module.exports = {
     withdrawAave,
     borrowAave,
     paybackAave,
+    claimStkAave,
 
     supplyComp,
     withdrawComp,
