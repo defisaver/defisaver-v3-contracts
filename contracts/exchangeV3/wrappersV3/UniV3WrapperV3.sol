@@ -9,7 +9,7 @@ import "../../interfaces/exchange/IQuoter.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 
-/// @title DFS exchange wrapper for UniswapV2
+/// @title DFS exchange wrapper for UniswapV3
 contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth {
     
     using TokenUtils for address;
@@ -58,11 +58,13 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth {
     }
 
     function getSellRate(address, address, uint _srcAmount, bytes memory _additionalData) public override returns (uint) {
-        return quoter.quoteExactInput(_additionalData, _srcAmount);
+        uint amountOut = quoter.quoteExactInput(_additionalData, _srcAmount);
+        return wdiv(amountOut, _srcAmount);
     }
 
     function getBuyRate(address, address, uint _destAmount, bytes memory _additionalData) public override returns (uint) {
-        return quoter.quoteExactOutput(_additionalData, _destAmount);
+        uint amountIn = quoter.quoteExactOutput(_additionalData, _destAmount);
+        return wdiv(_destAmount, amountIn);
     }
 
     /// @notice Send any leftover tokens, we use to clear out srcTokens after buy
