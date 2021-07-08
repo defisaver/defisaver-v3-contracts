@@ -27,7 +27,6 @@ contract UniCreatePoolV3 is ActionBase, DSMath {
     /// @param deadline The time by which the transaction must be included to effect the change
     /// @param from account to take amounts from
     /// @param sqrtPriceX96 The initial square root price of the pool as a Q64.96 value
-    /// @return tokenId The ID of the token that represents the position
     struct Params {
         address token0;
         address token1;
@@ -88,8 +87,8 @@ contract UniCreatePoolV3 is ActionBase, DSMath {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _createPool(Params memory _inputData) internal returns (address pool) {
-        pool = positionManager.createAndInitializePoolIfNecessary(
+    function _createPool(Params memory _inputData) internal {
+        positionManager.createAndInitializePoolIfNecessary(
             _inputData.token0,
             _inputData.token1,
             _inputData.fee,
@@ -133,7 +132,7 @@ contract UniCreatePoolV3 is ActionBase, DSMath {
     }
 
     /// @dev mints new NFT that represents a position with selected parameters
-    /// @return tokenId of new NFT, how much liquidity it now has and token amounts
+    /// @return tokenId of new NFT, how much liquidity it now has and amount of tokens that were transfered to uniswap pool
     function _uniMint(Params memory _inputData)
         internal
         returns (
