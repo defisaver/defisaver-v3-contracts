@@ -6,7 +6,6 @@ require('@tenderly/hardhat-tenderly');
 require('@nomiclabs/hardhat-ethers');
 // require("hardhat-gas-reporter");
 require('hardhat-log-remover');
-require('./scripts/hardhat-tasks.js');
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -64,3 +63,5 @@ module.exports = {
         forkNetwork: '1',
     },
 };
+
+require('./scripts/hardhat-tasks.js');
