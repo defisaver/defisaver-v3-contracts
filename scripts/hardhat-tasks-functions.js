@@ -5,6 +5,7 @@ const { exec } = require('child_process');
 const axios = require('axios');
 const path = require('path');
 const readline = require('readline');
+const hardhatSettings = require('../hardhat.config');
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -18,7 +19,6 @@ function getInput(text) {
         });
     });
 }
-const hardhatImport = import('../hardhat.config.js');
 
 function execShellCommand(cmd) {
     return new Promise((resolve) => {
@@ -75,7 +75,6 @@ async function deployContract(contractName, args) {
 }
 
 async function verifyContract(contractAddress, contractName) {
-    const hardhatSettings = (await hardhatImport).default;
     const network = (await hre.ethers.provider.getNetwork()).name;
     const flattenedFile = (
         await fs.readFileSync(`contracts/flattened/${contractName}.sol`)
