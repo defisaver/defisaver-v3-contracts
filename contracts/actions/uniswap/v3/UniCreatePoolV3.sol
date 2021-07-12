@@ -9,6 +9,7 @@ import "../../../utils/TokenUtils.sol";
 import "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
 /// @title Action for creating Uniswap V3 Pool and minting a position in it after that
+/// @notice If pool already exists, it will only mint a position in pool
 contract UniCreatePoolV3 is ActionBase, DSMath {
     using TokenUtils for address;
     IUniswapV3NonfungiblePositionManager public constant positionManager =
