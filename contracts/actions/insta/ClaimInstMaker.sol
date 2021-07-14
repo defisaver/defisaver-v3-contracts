@@ -10,6 +10,7 @@ import "../../interfaces/insta/IInstaIndex.sol";
 import "../../interfaces/insta/IInstaMakerDAOMerkleDistributor.sol";
 import "../../interfaces/mcd/IManager.sol";
 
+// @notice Transfer Maker vault to DSA account owned by dsproxy, claims INST reward, transfers vault back
 contract ClaimInstMaker is ActionBase, DSMath {
     using TokenUtils for address;
 
@@ -23,7 +24,7 @@ contract ClaimInstMaker is ActionBase, DSMath {
         IInstaMakerDAOMerkleDistributor(0xAC838332afc2937FdED89c16a59b2ED8e8e2743c);
 
     address public constant INST_TOKEN_ADDR = 0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb;
-
+    
     struct Params {
         uint256 index;
         uint256 vaultId;
@@ -41,8 +42,10 @@ contract ClaimInstMaker is ActionBase, DSMath {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
+
         _claimInst(inputData);
-        return bytes32(0);
+
+        return bytes32(inputData.vaultId);
     }
 
     /// @inheritdoc ActionBase
@@ -73,12 +76,12 @@ contract ClaimInstMaker is ActionBase, DSMath {
             _inputData.networthAmount,
             _inputData.merkleProof
         );
-        address INST_TOKEN = 0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb;
 
         string[] memory _targetNames = new string[](2);
         bytes[] memory _datas = new bytes[](2);
         address _origin = address(this);
 
+        // connects dsaAccount with BASIC INST connector and transfers INST tokens
         _targetNames[0] = "BASIC-A";
         _datas[0] = abi.encodeWithSignature(
             "withdraw(address,uint256,address,uint256,uint256)",
@@ -89,6 +92,7 @@ contract ClaimInstMaker is ActionBase, DSMath {
             0
         );
         
+        // connects dsaAccount with MAKER INST connector and transfers ownership of the vault
         _targetNames[1] = "MAKERDAO-A";
         _datas[1] = abi.encodeWithSignature(
             "transfer(uint256,address)",
@@ -96,9 +100,17 @@ contract ClaimInstMaker is ActionBase, DSMath {
             address(this)
         );
         
-        (bool success, bytes memory data) =
+        // calling fallback function of dsaAccount
+        (bool success, ) =
             dsaAddress.call(abi.encodeWithSignature("cast(string[],bytes[],address)", _targetNames, _datas, _origin));
-        require(success);
+        require(success, "fallback function call failed");
+
+        logger.Log(
+            address(this),
+            msg.sender,
+            "ClaimInstMaker",
+            abi.encode(_inputData)
+        );
     }
 
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
