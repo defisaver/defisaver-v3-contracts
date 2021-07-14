@@ -1069,6 +1069,15 @@ const lidoStake = async (amount, from, to, proxy) => {
     return proxy['execute(address,bytes)'](lidoStakeAddress, functionData, { gasLimit: 3000000 });
 };
 
+const claimInstMaker = async (proxy, index, vaultId, rewardAmount, networthAmount, merkle, to) => {
+    const claimInstMakerAddress = await getAddrFromRegistry('ClaimInstMaker');
+    const claimInstMakerAction = new dfs.actions.insta.ClaimInstMakerAction(
+        index, vaultId, rewardAmount, networthAmount, merkle, to,
+    );
+    const functionData = claimInstMakerAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](claimInstMakerAddress, functionData);
+};
+
 module.exports = {
     sell,
     buy,
@@ -1131,4 +1140,5 @@ module.exports = {
     lidoStake,
 
     buyTokenIfNeeded,
+    claimInstMaker,
 };
