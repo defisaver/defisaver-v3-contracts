@@ -31,6 +31,7 @@ contract ClaimInstMaker is ActionBase, DSMath {
         uint256 rewardAmount;
         uint256 networthAmount;
         bytes32[] merkleProof;
+        address owner;
         address to;
     }
 
@@ -43,9 +44,9 @@ contract ClaimInstMaker is ActionBase, DSMath {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        _claimInst(inputData);
+        uint tokensClaimed = _claimInst(inputData);
 
-        return bytes32(inputData.vaultId);
+        return bytes32(tokensClaimed);
     }
 
     /// @inheritdoc ActionBase
@@ -62,8 +63,9 @@ contract ClaimInstMaker is ActionBase, DSMath {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _claimInst(Params memory _inputData) internal {
+    function _claimInst(Params memory _inputData) internal returns (uint tokensClaimed){
         address dsaAddress = instaAccountBuilder.build(address(this), 2, address(0));
+        require(dsaAddress != address(0), "Failed building dsa account");
 
         mcdManager.give(_inputData.vaultId, dsaAddress);
 
@@ -71,11 +73,33 @@ contract ClaimInstMaker is ActionBase, DSMath {
             _inputData.index,
             _inputData.vaultId,
             dsaAddress,
-            0x9cCf93089cb14F94BAeB8822F8CeFfd91Bd71649,
+            _inputData.owner,
             _inputData.rewardAmount,
             _inputData.networthAmount,
             _inputData.merkleProof
         );
+
+        bytes memory spellData = _createSpell(_inputData);
+        
+        uint instaBalanceBefore = INST_TOKEN_ADDR.getBalance(_inputData.to);
+        // calling fallback function of dsaAccount
+        (bool success, ) = dsaAddress.call(spellData);
+
+        require(success, "fallback function call failed");
+        require(mcdManager.owns(_inputData.vaultId) == address(this), "Vault ownership not transfered back");
+
+        uint instaBalanceAfter = INST_TOKEN_ADDR.getBalance(_inputData.to);
+        tokensClaimed = sub(instaBalanceAfter, instaBalanceBefore);
+    
+        logger.Log(
+            address(this),
+            msg.sender,
+            "ClaimInstMaker",
+            abi.encode(_inputData)
+        );
+    }
+
+    function _createSpell(Params memory _inputData) internal view returns (bytes memory) {
 
         string[] memory _targetNames = new string[](2);
         bytes[] memory _datas = new bytes[](2);
@@ -99,18 +123,8 @@ contract ClaimInstMaker is ActionBase, DSMath {
             _inputData.vaultId,
             address(this)
         );
-        
-        // calling fallback function of dsaAccount
-        (bool success, ) =
-            dsaAddress.call(abi.encodeWithSignature("cast(string[],bytes[],address)", _targetNames, _datas, _origin));
-        require(success, "fallback function call failed");
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "ClaimInstMaker",
-            abi.encode(_inputData)
-        );
+        return abi.encodeWithSignature("cast(string[],bytes[],address)", _targetNames, _datas, _origin);
     }
 
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {

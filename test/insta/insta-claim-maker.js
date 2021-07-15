@@ -31,6 +31,7 @@ describe('claim INST', function () {
         const index = '3570';
         const rewardAmount = '35152894943847522649';
         const networthAmount = '5926144717204641000000';
+        const owner = '0x9ccf93089cb14f94baeb8822f8ceffd91bd71649';
         const merkleProof = [
             '0xadf6648083080d45a44d25d400e399d3cc49189e7b6f497714d3dd0eabfa85f5',
             '0x75498e5089efb5104ee04ebf124d0498ddc9103fbcf231f40c951315e85a8bc6',
@@ -60,6 +61,7 @@ describe('claim INST', function () {
             rewardAmount,
             networthAmount,
             merkleProof,
+            owner,
             OWNER_ACC,
         );
         const balanceAfter = await balanceOf(INST_TOKEN_ADDR, OWNER_ACC);
