@@ -44,7 +44,7 @@ contract ReflexerNativeUniV2SaviourGetReserves is ActionBase, ReflexerHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _reflexerSaviourGetReserves(Params memory _inputData) internal {
-        
+        require(_inputData.to != address(0), "Can't send to 0x0");
         ISAFESaviour(NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS).getReserves(
             _inputData.safeId,
             _inputData.to
