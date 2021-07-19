@@ -97,14 +97,13 @@ const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
                 proxy,
                 WETH_ADDRESS,
                 tokenAddr,
-                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '30000'), 18),
+                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '100000'), 18),
                 UNISWAP_WRAPPER,
                 from,
                 from,
             );
         }
     }
-
     const mcdSupplyAddr = await getAddrFromRegistry('McdSupply');
 
     await approve(tokenAddr, proxy.address);
@@ -346,7 +345,6 @@ const generateMcd = async (proxy, vaultId, amount, to) => {
 
 const openVault = async (makerAddresses, proxy, joinAddr, tokenData, collAmount, daiAmount) => {
     const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
-
     const from = proxy.signer.address;
     const to = proxy.signer.address;
 
@@ -355,7 +353,6 @@ const openVault = async (makerAddresses, proxy, joinAddr, tokenData, collAmount,
 
     await supplyMcd(proxy, vaultId, amountColl, tokenData.address, joinAddr, from);
     await generateMcd(proxy, vaultId, amountDai, to);
-
     return vaultId;
 };
 
