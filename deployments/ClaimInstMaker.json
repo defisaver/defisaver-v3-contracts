@@ -1,5 +1,5 @@
 {
-	"contractName": "UniMintV3",
+	"contractName": "ClaimInstMaker",
 	"abi": [
 		{
 			"inputs": [],
@@ -35,6 +35,19 @@
 					"internalType": "string",
 					"name": "",
 					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "INST_TOKEN_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -193,6 +206,19 @@
 		},
 		{
 			"inputs": [],
+			"name": "instaAccountBuilder",
+			"outputs": [
+				{
+					"internalType": "contract IInstaIndex",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "kill",
 			"outputs": [],
 			"stateMutability": "nonpayable",
@@ -213,10 +239,10 @@
 		},
 		{
 			"inputs": [],
-			"name": "positionManager",
+			"name": "mcdManager",
 			"outputs": [
 				{
-					"internalType": "contract IUniswapV3NonfungiblePositionManager",
+					"internalType": "contract IManager",
 					"name": "",
 					"type": "address"
 				}
@@ -230,6 +256,19 @@
 			"outputs": [
 				{
 					"internalType": "contract DFSRegistry",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "rewardDistributor",
+			"outputs": [
+				{
+					"internalType": "contract IInstaMakerDAOMerkleDistributor",
 					"name": "",
 					"type": "address"
 				}

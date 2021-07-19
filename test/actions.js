@@ -238,6 +238,19 @@ const paybackAave = async (proxy, market, tokenAddr, amount, rateMode, from) => 
     await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, { gasLimit: 4000000 });
 };
 
+const claimStkAave = async (proxy, assets, amount, to) => {
+    const aaveClaimStkAaveAddr = await getAddrFromRegistry('AaveClaimStkAave');
+
+    const aaveClaimStkAaveAction = new dfs.actions.aave.AaveClaimStkAaveAction(
+        assets,
+        amount,
+        to,
+    );
+    const functionData = aaveClaimStkAaveAction.encodeForDsProxyCall()[1];
+
+    await proxy['execute(address,bytes)'](aaveClaimStkAaveAddr, functionData, { gasLimit: 4000000 });
+};
+
 const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
     const tokenBalance = await balanceOf(tokenAddr, from);
 
@@ -758,6 +771,67 @@ const liquityEthGainToTrove = async (proxy, lqtyTo) => {
     return proxy['execute(address,bytes)'](liquityEthGainToTroveAddr, functionData, { gasLimit: 3000000 });
 };
 
+const uniV3CreatePool = async (proxy, token0, token1, fee, tickLower, tickUpper, amount0Desired,
+    amount1Desired, recipient, from, sqrtPriceX96) => {
+    const uniCreatePoolAddress = await getAddrFromRegistry('UniCreatePoolV3');
+    const amount0Min = 0;
+    const amount1Min = 0;
+    // buy tokens
+    const wethBalance = await balanceOf(WETH_ADDRESS, from);
+
+    const wethAmountToDeposit = hre.ethers.utils.parseUnits('20', 18);
+
+    if (wethBalance.lt(wethAmountToDeposit)) {
+        await depositToWeth(wethAmountToDeposit);
+    }
+    const tokenBalance0 = await balanceOf(token0, from);
+    const tokenBalance1 = await balanceOf(token1, from);
+    if (tokenBalance0.lt(amount0Desired)) {
+        await sell(
+            proxy,
+            WETH_ADDRESS,
+            token0,
+            wethAmountToDeposit.div(2),
+            UNISWAP_WRAPPER,
+            from,
+            from,
+        );
+    }
+
+    if (tokenBalance1.lt(amount1Desired)) {
+        await sell(
+            proxy,
+            WETH_ADDRESS,
+            token1,
+            wethAmountToDeposit.div(2),
+            UNISWAP_WRAPPER,
+            from,
+            from,
+        );
+    }
+    const deadline = Date.now() + Date.now();
+    const uniCreatePoolAction = new dfs.actions.uniswapV3.UniswapV3CreatePoolAction(
+        token0,
+        token1,
+        fee,
+        tickLower,
+        tickUpper,
+        amount0Desired,
+        amount1Desired,
+        amount0Min,
+        amount1Min,
+        recipient,
+        deadline,
+        from,
+        sqrtPriceX96,
+    );
+    await approve(token0, proxy.address);
+    await approve(token1, proxy.address);
+
+    const functionData = uniCreatePoolAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](uniCreatePoolAddress, functionData);
+};
+
 const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amount0Desired,
     amount1Desired, recipient, from) => {
     const uniMintV3Address = await getAddrFromRegistry('UniMintV3');
@@ -1017,6 +1091,14 @@ const reflexerSaviourWithdraw = async (proxy, to, safeId, lpTokenAmount) => {
     const functionData = reflexerSaviourWithdrawAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](reflexerSaviourWithdrawAddress, functionData, { gasLimit: 3000000 });
 };
+const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, owner, to) => {
+    const claimInstMakerAddress = await getAddrFromRegistry('ClaimInstMaker');
+    const claimInstMakerAction = new dfs.actions.insta.ClaimInstMakerAction(
+        index, vaultId, reward, networth, merkle, owner, to,
+    );
+    const functionData = claimInstMakerAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](claimInstMakerAddress, functionData);
+};
 
 module.exports = {
     sell,
@@ -1035,6 +1117,7 @@ module.exports = {
     withdrawAave,
     borrowAave,
     paybackAave,
+    claimStkAave,
 
     supplyComp,
     withdrawComp,
@@ -1070,6 +1153,7 @@ module.exports = {
     uniV3Supply,
     uniV3Withdraw,
     uniV3Collect,
+    uniV3CreatePool,
 
     dydxSupply,
     dydxWithdraw,
@@ -1080,4 +1164,5 @@ module.exports = {
     lidoStake,
 
     buyTokenIfNeeded,
+    claimInstMaker,
 };

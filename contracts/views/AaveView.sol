@@ -290,4 +290,8 @@ contract AaveView is DSMath, AaveHelper {
             loans[i] = getLoanData(_market, _users[i]);
         }
     }
+
+    function getUserUnclaimedRewards(address _user) external view returns (uint256) {
+        return AaveIncentivesController.getUserUnclaimedRewards(_user);
+    }
 }

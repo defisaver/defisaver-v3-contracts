@@ -1,37 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.6;
 
-/*
- * The Stability Pool holds LUSD tokens deposited by Stability Pool depositors.
- *
- * When a trove is liquidated, then depending on system conditions, some of its LUSD debt gets offset with
- * LUSD in the Stability Pool:  that is, the offset debt evaporates, and an equal amount of LUSD tokens in the Stability Pool is burned.
- *
- * Thus, a liquidation causes each depositor to receive a LUSD loss, in proportion to their deposit as a share of total deposits.
- * They also receive an ETH gain, as the ETH collateral of the liquidated trove is distributed among Stability depositors,
- * in the same proportion.
- *
- * When a liquidation occurs, it depletes every deposit by the same fraction: for example, a liquidation that depletes 40%
- * of the total LUSD in the Stability Pool, depletes 40% of each deposit.
- *
- * A deposit that has experienced a series of liquidations is termed a "compounded deposit": each liquidation depletes the deposit,
- * multiplying it by some factor in range ]0,1[
- *
- * Please see the implementation spec in the proof document, which closely follows on from the compounded deposit / ETH gain derivations:
- * https://github.com/liquity/liquity/blob/master/papers/Scalable_Reward_Distribution_with_Compounding_Stakes.pdf
- *
- * --- LQTY ISSUANCE TO STABILITY POOL DEPOSITORS ---
- *
- * An LQTY issuance event occurs at every deposit operation, and every liquidation.
- *
- * Each deposit is tagged with the address of the front end through which it was made.
- *
- * All deposits earn a share of the issued LQTY in proportion to the deposit as a share of total deposits. The LQTY earned
- * by a given deposit, is split between the depositor and the front end through which the deposit was made, based on the front end's kickbackRate.
- *
- * Please see the system Readme for an overview:
- * https://github.com/liquity/dev/blob/main/README.md#lqty-issuance-to-stability-providers
- */
 interface IStabilityPool {
 
     // --- Events ---
