@@ -198,7 +198,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "UNDERLYING_NATIVE_TOKEN_ADDRESS",
+			"name": "UNIV2_RAI_WETH_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",

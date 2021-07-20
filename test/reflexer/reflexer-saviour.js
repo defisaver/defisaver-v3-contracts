@@ -29,7 +29,7 @@ const {
     reflexerSaviourWithdraw,
 } = require('../actions.js');
 
-describe('Reflexer-Generate', () => {
+describe('Reflexer-Saviour', () => {
     let senderAcc;
     let proxy;
     let saviour;

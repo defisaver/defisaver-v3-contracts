@@ -3,9 +3,9 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "../ActionBase.sol";
-import "./helpers/ReflexerHelper.sol";
-import "../../utils/TokenUtils.sol";
+import "../../../ActionBase.sol";
+import "./../../helpers/ReflexerHelper.sol";
+import "../../../../utils/TokenUtils.sol";
 
 /// @title Deposit lpToken in the contract in order to provide cover for a specific SAFE managed by the SAFE Manager
 contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
