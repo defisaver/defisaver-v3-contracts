@@ -1013,7 +1013,6 @@ const dydxWithdraw = async (proxy, tokenAddr, amount, to) => {
 
 const buyTokenIfNeeded = async (tokenAddr, senderAcc, proxy, standardAmount) => {
     const tokenBalance = await balanceOf(tokenAddr, senderAcc.address);
-
     if (tokenBalance.lt(standardAmount)) {
         if (isEth(tokenAddr)) {
             await depositToWeth(standardAmount.toString());
@@ -1066,6 +1065,29 @@ const lidoStake = async (amount, from, to, proxy) => {
     return proxy['execute(address,bytes)'](lidoStakeAddress, functionData, { gasLimit: 3000000 });
 };
 
+const reflexerSaviourDeposit = async (proxy, from, safeId, lpTokenAmount) => {
+    const reflexerSaviourDepositAddress = await getAddrFromRegistry('ReflexerNativeUniV2SaviourDeposit');
+    // eslint-disable-next-line max-len
+    const reflexerSaviourDepositAction = new dfs.actions.reflexer.ReflexerNativeUniV2SaviourDepositAction(
+        from,
+        safeId,
+        lpTokenAmount,
+    );
+    const functionData = reflexerSaviourDepositAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](reflexerSaviourDepositAddress, functionData, { gasLimit: 3000000 });
+};
+
+const reflexerSaviourWithdraw = async (proxy, to, safeId, lpTokenAmount) => {
+    const reflexerSaviourWithdrawAddress = await getAddrFromRegistry('ReflexerNativeUniV2SaviourWithdraw');
+    // eslint-disable-next-line max-len
+    const reflexerSaviourWithdrawAction = new dfs.actions.reflexer.ReflexerNativeUniV2SaviourWithdrawAction(
+        to,
+        safeId,
+        lpTokenAmount,
+    );
+    const functionData = reflexerSaviourWithdrawAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](reflexerSaviourWithdrawAddress, functionData, { gasLimit: 3000000 });
+};
 const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, owner, to) => {
     const claimInstMakerAddress = await getAddrFromRegistry('ClaimInstMaker');
     const claimInstMakerAction = new dfs.actions.insta.ClaimInstMakerAction(
@@ -1108,6 +1130,8 @@ module.exports = {
     reflexerWithdraw,
     reflexerPayback,
     reflexerGenerate,
+    reflexerSaviourDeposit,
+    reflexerSaviourWithdraw,
 
     liquityOpen,
     liquityBorrow,

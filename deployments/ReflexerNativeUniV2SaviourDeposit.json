@@ -1,5 +1,5 @@
 {
-	"contractName": "ReflexerSupply",
+	"contractName": "ReflexerNativeUniV2SaviourDeposit",
 	"abi": [
 		{
 			"inputs": [],
@@ -191,6 +191,19 @@
 					"internalType": "uint8",
 					"name": "",
 					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "UNIV2_RAI_WETH_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
 				}
 			],
 			"stateMutability": "view",

@@ -9,6 +9,7 @@ const {
     send,
     depositToWeth,
     fetchAmountinUSDPrice,
+    LOGGER_ADDR,
 } = require('../utils');
 
 const {
@@ -30,7 +31,7 @@ describe('Reflexer-Supply', () => {
         await redeploy('ReflexerSupply');
         reflexerView = await redeploy('RaiLoanInfo');
         weth = await hre.ethers.getContractAt('IWETH', WETH_ADDRESS);
-        logger = await hre.ethers.getContractAt('DefisaverLogger', '0x5c55B921f590a89C1Ebe84dF170E655a82b62126');
+        logger = await hre.ethers.getContractAt('DefisaverLogger', LOGGER_ADDR);
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
     });
