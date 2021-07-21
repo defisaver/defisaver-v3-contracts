@@ -8,7 +8,6 @@ import "../DS/DSProxyFactoryInterface.sol";
 
 /// @title User facing contract to manage new proxies (is owner of DFSProxyRegistry)
 contract DFSProxyRegistryController is AdminAuth {
-
     address constant PROXY_FACTORY_ADDR = 0xA26e15C895EFc0616177B7c1e7270A4C7D51C997;
     address constant DFS_PROXY_REGISTRY_ADDR = 0x29474FdaC7142f9aB7773B8e38264FA15E3805ed;
 
@@ -36,7 +35,7 @@ contract DFSProxyRegistryController is AdminAuth {
     }
 
     /// @notice Adds proxies to pool for users to later claim and save on gas
-    function addToPool(uint _numNewProxies) public {
+    function addToPool(uint256 _numNewProxies) public {
         for (uint256 i = 0; i < _numNewProxies; ++i) {
             DSProxy newProxy = DSProxyFactoryInterface(PROXY_FACTORY_ADDR).build();
             proxyPool.push(address(newProxy));
@@ -58,5 +57,26 @@ contract DFSProxyRegistryController is AdminAuth {
         }
     }
 
+    function getProxies(address _user) public view returns (address[] memory) {
+        (address mcdProxy, address[] memory additionalProxies) = DFSProxyRegistry(
+            DFS_PROXY_REGISTRY_ADDR
+        ).getAllProxies(_user);
 
+        if (mcdProxy == address(0)) {
+            return additionalProxies;
+        }
+
+        address[] memory proxies = new address[](additionalProxies.length + 1);
+        proxies[0] = mcdProxy;
+
+        if (additionalProxies.length == 0) {
+            return proxies;
+        }
+
+        for (uint256 i = 0; i < additionalProxies.length; ++i) {
+            proxies[i + 1] = additionalProxies[i];
+        }
+
+        return proxies;
+    }
 }
