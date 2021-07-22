@@ -5,6 +5,7 @@ const hre = require('hardhat');
 const {
     getProxy,
     redeploy,
+    LOGGER_ADDR,
 } = require('../utils');
 
 const {
@@ -24,7 +25,7 @@ describe('Reflexer-Open', () => {
     before(async () => {
         await redeploy('ReflexerOpen');
         reflexerView = await redeploy('RaiLoanInfo');
-        logger = await hre.ethers.getContractAt('DefisaverLogger', '0x5c55B921f590a89C1Ebe84dF170E655a82b62126');
+        logger = await hre.ethers.getContractAt('DefisaverLogger', LOGGER_ADDR);
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
     });

@@ -6,10 +6,10 @@ import "../../interfaces/exchange/IExchangeV3.sol";
 import "../../interfaces/exchange/ISwapRouter.sol";
 import "../../interfaces/exchange/IQuoter.sol";
 import "../../auth/AdminAuth.sol";
+import "../../DS/DSMath.sol";
 
-/// @title DFS exchange wrapper for UniswapV2
-contract UniV3WrapperV3 is IExchangeV3, AdminAuth {
-    
+/// @title DFS exchange wrapper for UniswapV3
+contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth {    
     using TokenUtils for address;
     using SafeERC20 for IERC20;
     address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -55,12 +55,22 @@ contract UniV3WrapperV3 is IExchangeV3, AdminAuth {
         return amountIn;
     }
 
+    /// @notice Return a rate for which we can sell an amount of tokens
+    /// @param _srcAmount From amount
+    /// @param _additionalData path object (encoded path_fee_path_fee_path etc.)
+    /// @return uint Rate (price)
     function getSellRate(address, address, uint _srcAmount, bytes memory _additionalData) public override returns (uint) {
-        return quoter.quoteExactInput(_additionalData, _srcAmount);
+        uint amountOut = quoter.quoteExactInput(_additionalData, _srcAmount);
+        return wdiv(amountOut, _srcAmount);
     }
 
+    /// @notice Return a rate for which we can buy an amount of tokens
+    /// @param _destAmount To amount
+    /// @param _additionalData path object (encoded path_fee_path_fee_path etc.)
+    /// @return uint Rate (price)
     function getBuyRate(address, address, uint _destAmount, bytes memory _additionalData) public override returns (uint) {
-        return quoter.quoteExactOutput(_additionalData, _destAmount);
+        uint amountIn = quoter.quoteExactOutput(_additionalData, _destAmount);
+        return wdiv(_destAmount, amountIn);
     }
 
     /// @notice Send any leftover tokens, we use to clear out srcTokens after buy

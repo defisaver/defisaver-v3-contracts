@@ -1,13 +1,11 @@
 /* eslint-disable import/no-extraneous-dependencies */
 require('dotenv-safe').config();
-
 require('@nomiclabs/hardhat-waffle');
 require('@nomiclabs/hardhat-etherscan');
 require('@tenderly/hardhat-tenderly');
 require('@nomiclabs/hardhat-ethers');
 // require("hardhat-gas-reporter");
 require('hardhat-log-remover');
-require('solidity-coverage');
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -35,18 +33,19 @@ module.exports = {
             gasPrice: 40000000000,
             timeout: 10000000,
         },
+        kovan: {
+            url: process.env.KOVAN_ETHEREUM_NODE,
+            chainId: 42,
+            accounts: [process.env.PRIV_KEY_KOVAN],
+        },
     },
     solidity: {
-        compilers: [
-            {
-                version: '0.8.4',
+        version: '0.8.4',
+        settings: {
+            optimizer: {
+                enabled: true,
+                runs: 1000,
             },
-        ],
-    },
-    settings: {
-        optimizer: {
-            enabled: false,
-            runs: 1000,
         },
     },
     paths: {
@@ -63,4 +62,9 @@ module.exports = {
         project: process.env.TENDERLY_PROJECT,
         forkNetwork: '1',
     },
+    mocha: {
+        timeout: 100000,
+    },
 };
+
+require('./scripts/hardhat-tasks.js');

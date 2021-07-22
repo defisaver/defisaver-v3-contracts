@@ -56,6 +56,32 @@
 		},
 		{
 			"inputs": [],
+			"name": "LIQUIDATION_ENGINE_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "NO_PARAM_MAPPING",
 			"outputs": [
 				{

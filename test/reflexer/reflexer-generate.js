@@ -8,6 +8,7 @@ const {
     MIN_VAULT_RAI_AMOUNT,
     RAI_ADDR,
     fetchAmountinUSDPrice,
+    LOGGER_ADDR,
 } = require('../utils');
 
 const {
@@ -30,7 +31,7 @@ describe('Reflexer-Generate', () => {
         await redeploy('ReflexerWithdraw');
         await redeploy('ReflexerGenerate');
         await redeploy('RaiLoanInfo');
-        logger = await hre.ethers.getContractAt('DefisaverLogger', '0x5c55B921f590a89C1Ebe84dF170E655a82b62126');
+        logger = await hre.ethers.getContractAt('DefisaverLogger', LOGGER_ADDR);
 
         rai = await hre.ethers.getContractAt('IERC20', RAI_ADDR);
         weth = await hre.ethers.getContractAt('IWETH', WETH_ADDRESS);
