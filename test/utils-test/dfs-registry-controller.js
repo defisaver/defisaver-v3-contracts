@@ -2,11 +2,11 @@ const { expect } = require('chai');
 const hre = require('hardhat');
 
 const {
-    redeploy,
     impersonateAccount,
     stopImpersonatingAccount,
     getProxy,
     ADMIN_ACC,
+    DFS_REG_CONTROLLER,
 } = require('../utils');
 
 describe('DFS-Registry-Controller', function () {
@@ -17,7 +17,7 @@ describe('DFS-Registry-Controller', function () {
     const ADMIN_VAULT = '0xCCf3d848e08b94478Ed8f46fFead3008faF581fD';
 
     before(async () => {
-        dfsRegController = await redeploy('DFSProxyRegistryController');
+        dfsRegController = await hre.ethers.getContractAt('DFSProxyRegistryController', DFS_REG_CONTROLLER);
 
         await impersonateAccount(ADMIN_ACC);
 
