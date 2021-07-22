@@ -30,9 +30,10 @@ contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[0], _subData, _returnValues);
+        inputData.safeId = _parseParamUint(inputData.safeId, _paramMapping[1], _subData, _returnValues);
         inputData.lpTokenAmount = _parseParamUint(
             inputData.lpTokenAmount,
-            _paramMapping[1],
+            _paramMapping[2],
             _subData,
             _returnValues
         );
