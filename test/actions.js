@@ -1097,6 +1097,39 @@ const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, o
     return proxy['execute(address,bytes)'](claimInstMakerAddress, functionData);
 };
 
+const balancerSupply = async (proxy, poolId, from, to, tokens, maxAmountsIn, userData) => {
+    const balancerSupplyAddress = await getAddrFromRegistry('BalancerV2Supply');
+    const balancerSupplyAction = new dfs.actions.balancer.BalancerV2SupplyAction(
+        poolId, from, to, tokens, maxAmountsIn, userData,
+    );
+    const functionData = balancerSupplyAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](balancerSupplyAddress, functionData);
+};
+
+const balancerWithdraw = async (
+    proxy,
+    poolId,
+    from,
+    to,
+    lpTokenAmount,
+    tokens,
+    minAmountsOut,
+    userData,
+) => {
+    const balancerWithdrawAddress = await getAddrFromRegistry('BalancerV2Withdraw');
+    const balancerWithdrawAction = new dfs.actions.balancer.BalancerV2WithdrawAction(
+        poolId,
+        from,
+        to,
+        lpTokenAmount,
+        tokens,
+        minAmountsOut,
+        userData,
+    );
+    const functionData = balancerWithdrawAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](balancerWithdrawAddress, functionData);
+};
+
 module.exports = {
     sell,
     buy,
@@ -1162,4 +1195,7 @@ module.exports = {
 
     buyTokenIfNeeded,
     claimInstMaker,
+
+    balancerSupply,
+    balancerWithdraw,
 };
