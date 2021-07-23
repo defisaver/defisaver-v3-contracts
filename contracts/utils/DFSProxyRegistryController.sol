@@ -18,11 +18,13 @@ contract DFSProxyRegistryController is AdminAuth {
     event ChangedOwner(address, address);
 
     /// @notice User calls from EOA to build a new DFS registred proxy
-    function addNewProxy() public {
+    function addNewProxy() public returns (address) {
         address newProxy = getFromPoolOrBuild(msg.sender);
-        DFSProxyRegistry(DFS_PROXY_REGISTRY_ADDR).addAdditionalProxy(msg.sender, address(newProxy));
+        DFSProxyRegistry(DFS_PROXY_REGISTRY_ADDR).addAdditionalProxy(msg.sender, newProxy);
 
         emit NewProxy(msg.sender, newProxy);
+
+        return newProxy;
     }
 
     /// @notice Will change owner of proxy in DFSRegistry
@@ -78,5 +80,9 @@ contract DFSProxyRegistryController is AdminAuth {
         }
 
         return proxies;
+    }
+
+    function getProxyPoolCount() public view returns (uint256) {
+        return proxyPool.length;
     }
 }

@@ -27,7 +27,6 @@ contract ChangeProxyOwner is ActionBase {
         return bytes32(bytes20(newOwner));
     }
 
-    // solhint-disable-next-line no-empty-blocks
     function executeActionDirect(bytes[] memory _callData) public payable override {
         address newOwner = parseInputs(_callData);
 
