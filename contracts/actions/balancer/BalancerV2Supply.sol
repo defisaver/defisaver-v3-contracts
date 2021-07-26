@@ -56,6 +56,7 @@ contract BalancerV2Supply is ActionBase, DSMath {
 
     function _balancerSupply(Params memory _inputData) internal returns (uint256 poolLPTokensReceived) {
         address poolAddress = _getPoolAddress(_inputData.poolId);
+        console.log(poolAddress);
         uint256 poolLPTokensBefore = poolAddress.getBalance(_inputData.to);
 
         uint256[] memory tokenBalancesBefore = new uint256[](_inputData.tokens.length);
@@ -65,7 +66,7 @@ contract BalancerV2Supply is ActionBase, DSMath {
         }
         
         _prepareTokensForPoolJoin(_inputData);
-
+        console.log("pulled tokens");
         IVault.JoinPoolRequest memory requestData = IVault.JoinPoolRequest(
             _inputData.tokens,
             _inputData.maxAmountsIn,
@@ -73,7 +74,7 @@ contract BalancerV2Supply is ActionBase, DSMath {
             false
         );
         vault.joinPool(_inputData.poolId, address(this), _inputData.to, requestData);
-
+        console.log("joined pool");
 
         for (uint256 i = 0; i < tokenBalancesBefore.length; i++) {
             tokenBalancesBefore[i] = sub(
