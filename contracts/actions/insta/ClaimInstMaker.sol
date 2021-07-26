@@ -14,9 +14,6 @@ import "../../interfaces/mcd/IManager.sol";
 contract ClaimInstMaker is ActionBase, DSMath {
     using TokenUtils for address;
 
-    IManager public constant mcdManager =  
-        IManager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
-
     IInstaIndex public constant instaAccountBuilder = 
         IInstaIndex(0x2971AdFa57b20E5a416aE5a708A8655A9c74f723);
 
@@ -33,6 +30,7 @@ contract ClaimInstMaker is ActionBase, DSMath {
         bytes32[] merkleProof;
         address owner;
         address to;
+        address mcdManager;
     }
 
     /// @inheritdoc ActionBase
@@ -64,6 +62,7 @@ contract ClaimInstMaker is ActionBase, DSMath {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _claimInst(Params memory _inputData) internal returns (uint tokensClaimed){
+        IManager mcdManager = IManager(_inputData.mcdManager);
         address dsaAddress = instaAccountBuilder.build(address(this), 2, address(0));
         require(dsaAddress != address(0), "Failed building dsa account");
 

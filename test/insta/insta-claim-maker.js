@@ -9,6 +9,7 @@ const {
     balanceOf,
 } = require('../utils');
 const { claimInstMaker } = require('../actions.js');
+const { MCD_MANAGER_ADDR } = require('../utils-mcd');
 
 describe('claim INST', function () {
     this.timeout(80000);
@@ -63,6 +64,7 @@ describe('claim INST', function () {
             merkleProof,
             owner,
             OWNER_ACC,
+            MCD_MANAGER_ADDR,
         );
         const balanceAfter = await balanceOf(INST_TOKEN_ADDR, OWNER_ACC);
         expect(await manager.owns(vaultId)).to.be.eq(proxy.address);

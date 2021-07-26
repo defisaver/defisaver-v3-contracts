@@ -239,19 +239,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "mcdManager",
-			"outputs": [
-				{
-					"internalType": "contract IManager",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "registry",
 			"outputs": [
 				{
