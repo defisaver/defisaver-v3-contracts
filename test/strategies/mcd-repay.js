@@ -69,13 +69,14 @@ describe('Mcd-Repay-Strategy', function () {
 
     it('... should make a new strategy', async () => {
         const tokenData = getAssetInfo('WETH');
+
         vaultId = await openVault(
             makerAddresses,
             proxy,
             ethJoin,
             tokenData,
-            fetchAmountinUSDPrice('WETH', '16000'),
-            fetchAmountinUSDPrice('DAI', '8000'),
+            fetchAmountinUSDPrice('WETH', '25000'),
+            fetchAmountinUSDPrice('DAI', '12000'),
         );
 
         const repayStrategy = new dfs.Strategy('McdRepayStrategy');

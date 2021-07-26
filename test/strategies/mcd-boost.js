@@ -69,8 +69,8 @@ describe('Mcd-Boost-Strategy', function () {
             proxy,
             ethJoin,
             tokenData,
-            fetchAmountinUSDPrice('WETH', '16000'),
-            fetchAmountinUSDPrice('DAI', '8000'),
+            fetchAmountinUSDPrice('WETH', '25000'),
+            fetchAmountinUSDPrice('DAI', '12000'),
         );
 
         const mcdBoostStrategy = new dfs.Strategy('MakerBoostStrategy');
