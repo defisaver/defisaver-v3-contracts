@@ -63,7 +63,11 @@ describe('Balancer-Supply', function () {
         it('... supply exact tokens for LP tokens', async () => {
             const lpTokenBalanceBefore = await balanceOf(balancerPairs[i].poolAddress, to);
             console.log(balancerPairs[i].tokens);
+            const proxyBalanceAmounts = [];
             for (let j = 0; j < balancerPairs[i].tokens.length; j++) {
+                proxyBalanceAmounts.push(
+                    await balanceOf(balancerPairs[i].tokens[j], proxy.address),
+                );
                 await buyTokenIfNeeded(
                     balancerPairs[i].tokens[j],
                     senderAcc,
@@ -88,6 +92,11 @@ describe('Balancer-Supply', function () {
             const lpTokenDiff = lpTokenBalanceAfter.sub(lpTokenBalanceBefore);
             console.log(lpTokenDiff.toString());
             expect(lpTokenDiff).to.be.gt(0);
+            for (let j = 0; j < balancerPairs[i].tokens.length; j++) {
+                expect(
+                    await balanceOf(balancerPairs[i].tokens[j], proxy.address),
+                ).to.be.eq(proxyBalanceAmounts[j]);
+            }
         }).timeout(50000);
 
         it('... supply only first token for LP tokens', async () => {
