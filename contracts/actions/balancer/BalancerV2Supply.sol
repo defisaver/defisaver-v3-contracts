@@ -7,8 +7,7 @@ import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/balancer/IVault.sol";
 import "../../DS/DSMath.sol";
-import "hardhat/console.sol";
-
+/// @title Supply tokens to a Balancer V2 Pool for pool LP tokens in return
 contract BalancerV2Supply is ActionBase, DSMath {
     using TokenUtils for address;
 
@@ -19,6 +18,7 @@ contract BalancerV2Supply is ActionBase, DSMath {
         address from;
         address to;
         IAsset[] tokens;
+        // think about piping maxAmountsIn
         uint256[] maxAmountsIn;
         bytes userData;
     }
@@ -36,7 +36,6 @@ contract BalancerV2Supply is ActionBase, DSMath {
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[1], _subData, _returnValues);
 
         uint256 poolLPTokensReceived = _balancerSupply(inputData);
-        console.log(poolLPTokensReceived);
         return bytes32(poolLPTokensReceived);
     }
 
@@ -56,17 +55,14 @@ contract BalancerV2Supply is ActionBase, DSMath {
 
     function _balancerSupply(Params memory _inputData) internal returns (uint256 poolLPTokensReceived) {
         address poolAddress = _getPoolAddress(_inputData.poolId);
-        console.log(poolAddress);
         uint256 poolLPTokensBefore = poolAddress.getBalance(_inputData.to);
 
-        uint256[] memory tokenBalancesBefore = new uint256[](_inputData.tokens.length);
-        for (uint256 i = 0; i < tokenBalancesBefore.length; i++) {
-            tokenBalancesBefore[i] = address(_inputData.tokens[i]).getBalance(address(this));
-            console.log(tokenBalancesBefore[i]);
+        uint256[] memory tokenBalances = new uint256[](_inputData.tokens.length);
+        for (uint256 i = 0; i < tokenBalances.length; i++) {
+            tokenBalances[i] = address(_inputData.tokens[i]).getBalance(address(this));
         }
         
         _prepareTokensForPoolJoin(_inputData);
-        console.log("pulled tokens");
         IVault.JoinPoolRequest memory requestData = IVault.JoinPoolRequest(
             _inputData.tokens,
             _inputData.maxAmountsIn,
@@ -74,16 +70,14 @@ contract BalancerV2Supply is ActionBase, DSMath {
             false
         );
         vault.joinPool(_inputData.poolId, address(this), _inputData.to, requestData);
-        console.log("joined pool");
 
-        for (uint256 i = 0; i < tokenBalancesBefore.length; i++) {
-            tokenBalancesBefore[i] = sub(
+        for (uint256 i = 0; i < tokenBalances.length; i++) {
+            tokenBalances[i] = sub(
                 address(_inputData.tokens[i]).getBalance(address(this)),
-                tokenBalancesBefore[i]
+                tokenBalances[i]
             );
             // sending leftovers back
-            console.log(tokenBalancesBefore[i]);
-            address(_inputData.tokens[i]).withdrawTokens(_inputData.from, tokenBalancesBefore[i]);
+            address(_inputData.tokens[i]).withdrawTokens(_inputData.from, tokenBalances[i]);
         }
 
         uint256 poolLPTokensAfter = poolAddress.getBalance(_inputData.to);
@@ -93,9 +87,8 @@ contract BalancerV2Supply is ActionBase, DSMath {
             address(this),
             msg.sender,
             "BalancerV2Supply",
-            abi.encode(_inputData, tokenBalancesBefore, poolLPTokensReceived)
+            abi.encode(_inputData, tokenBalances, poolLPTokensReceived)
         );
-        console.log(poolLPTokensReceived);
     }
 
     function _prepareTokensForPoolJoin(Params memory _inputData) internal {
@@ -107,7 +100,6 @@ contract BalancerV2Supply is ActionBase, DSMath {
             );
             // approve vault so it can pull tokens
             address(_inputData.tokens[i]).approveToken(address(vault), _inputData.maxAmountsIn[i]);
-            console.log(_inputData.maxAmountsIn[i]);
         }
     }
     
