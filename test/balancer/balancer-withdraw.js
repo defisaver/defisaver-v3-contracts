@@ -103,7 +103,7 @@ describe('Balancer-Withdraw', function () {
             // to calculate difference in balances
             const eoaTokenBalancesBeforeWithdraw = [];
             for (let j = 0; j < balancerPairs[i].tokens.length; j++) {
-                minAmountsOut.push(balancerPairs[i].amountsIn[j].div(2));
+                minAmountsOut.push(balancerPairs[i].amountsIn[j].div(100).mul(90));
                 eoaTokenBalancesBeforeWithdraw.push(
                     await balanceOf(balancerPairs[i].tokens[j], to),
                 );
