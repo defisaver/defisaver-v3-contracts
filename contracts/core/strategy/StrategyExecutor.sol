@@ -5,7 +5,7 @@ pragma solidity =0.8.4;
 import "../../auth/AdminAuth.sol";
 import "../../interfaces/ITrigger.sol";
 import "../../interfaces/IDSProxy.sol";
-import "./StrategyData.sol";
+import "./StrategyModel.sol";
 import "./Subscriptions.sol";
 import "./BotAuth.sol";
 import "../DFSRegistry.sol";
@@ -13,7 +13,7 @@ import "./ProxyAuth.sol";
 
 
 /// @title Main entry point for executing automated strategies
-contract StrategyExecutor is StrategyData, AdminAuth {
+contract StrategyExecutor is StrategyModel, AdminAuth {
 
     bytes4 constant PROXY_AUTH_ID = bytes4(keccak256("ProxyAuth"));
 

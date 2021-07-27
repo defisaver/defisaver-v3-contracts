@@ -5,7 +5,9 @@ const dfs = require('@defisaver/sdk');
 
 const { getAssetInfo, ilks } = require('@defisaver/tokens');
 
-const { getProxy, redeploy, fetchAmountinUSDPrice, formatExchangeObj } = require('../utils');
+const {
+    getProxy, redeploy, fetchAmountinUSDPrice, formatExchangeObj,
+} = require('../utils');
 
 const { subTemplate, addBotCaller } = require('../utils-strategies.js');
 

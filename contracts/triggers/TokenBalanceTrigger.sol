@@ -8,7 +8,6 @@ import "../interfaces/IERC20.sol";
 
 contract TokenBalanceTrigger is ITrigger, AdminAuth {
     enum BalanceState {OVER, UNDER, EQUALS}
-
     struct Params {
         address tokenAddr;
         address userAddr;

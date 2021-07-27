@@ -7,12 +7,12 @@ import "../../interfaces/IFLParamGetter.sol";
 import "../../interfaces/ILendingPool.sol";
 import "../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../../interfaces/aaveV2/ILendingPoolV2.sol";
-import "../../core/strategy/StrategyData.sol";
+import "../../core/strategy/StrategyModel.sol";
 import "../../utils/TokenUtils.sol";
 import "../../utils/ReentrancyGuard.sol";
 
 /// @title Action that gets and receives a FL from Aave V2
-contract FLAaveV2 is ActionBase, StrategyData, ReentrancyGuard {
+contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 

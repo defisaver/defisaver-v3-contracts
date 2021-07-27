@@ -7,7 +7,7 @@ import "../../../interfaces/ILendingPool.sol";
 import "../../../interfaces/IWETH.sol";
 import "../../../interfaces/IFLParamGetter.sol";
 import "../../../interfaces/aave/ILendingPoolAddressesProvider.sol";
-import "../../../core/strategy/StrategyData.sol";
+import "../../../core/strategy/StrategyModel.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../../utils/FLFeeFaucet.sol";
 import "../../../utils/ReentrancyGuard.sol";
@@ -15,7 +15,7 @@ import "../../ActionBase.sol";
 import "./DydxFlashLoanBase.sol";
 
 /// @title Action that gets and receives a FL from DyDx protocol
-contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard {
+contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
     struct Params {

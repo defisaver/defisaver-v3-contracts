@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.4;
 
-/// @title Struct data in a separate contract so it can be used in multiple places
-contract StrategyData {
+/// @title StrategyModel - contract that implements the structs used in the core system
+contract StrategyModel {
     struct Template {
         string name;
         bytes4[] triggerIds;
@@ -14,7 +14,7 @@ contract StrategyData {
     struct Recipe {
         string name;
         bytes[] callData;
-        bytes[] subData;
+        bytes[] subData; // why is this here?
         bytes4[] actionIds;
         uint8[][] paramMapping;
     }

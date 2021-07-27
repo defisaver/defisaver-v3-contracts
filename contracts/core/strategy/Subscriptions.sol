@@ -5,10 +5,10 @@ pragma solidity =0.8.4;
 import "../../auth/AdminAuth.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../utils/DefisaverLogger.sol";
-import "./StrategyData.sol";
+import "./StrategyModel.sol";
 
 /// @title Storage of strategies and templates
-contract Subscriptions is StrategyData, AdminAuth {
+contract Subscriptions is StrategyModel, AdminAuth {
     DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
 
     error NonexistantStrategyError();
