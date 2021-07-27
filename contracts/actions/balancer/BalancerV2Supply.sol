@@ -18,7 +18,6 @@ contract BalancerV2Supply is ActionBase, DSMath {
         address from;
         address to;
         IAsset[] tokens;
-        // think about piping maxAmountsIn
         uint256[] maxAmountsIn;
         bytes userData;
     }
