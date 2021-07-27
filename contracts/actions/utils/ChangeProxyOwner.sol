@@ -9,7 +9,7 @@ import "../../utils/DFSProxyRegistryController.sol";
 /// @title Changes the owner of the DSProxy and updated the DFSRegistry
 contract ChangeProxyOwner is ActionBase {
     DFSProxyRegistryController constant dfsRegController =
-        DFSProxyRegistryController(0xfc7b5881d36F7Cfa40380E26D6Dc8eBf2C942CB6);
+        DFSProxyRegistryController(0xF8f8B3C98Cf2E63Df3041b73f80F362a4cf3A576);
 
     /// @inheritdoc ActionBase
     function executeAction(
