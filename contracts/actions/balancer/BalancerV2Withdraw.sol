@@ -7,7 +7,6 @@ import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/balancer/IVault.sol";
 import "../../DS/DSMath.sol";
-import "hardhat/console.sol";
 
 contract BalancerV2Withdraw is ActionBase, DSMath {
     using TokenUtils for address;
@@ -41,8 +40,12 @@ contract BalancerV2Withdraw is ActionBase, DSMath {
             _subData,
             _returnValues
         );
+        for (uint256 i = 0; i < inputData.minAmountsOut.length; i++){
+            inputData.minAmountsOut[i] = _parseParamUint(inputData.minAmountsOut[i], _paramMapping[3+i], _subData, _returnValues);
+        }
 
-        _balancerWithdraw(inputData);
+        uint256 poolLPTokensSent = _balancerWithdraw(inputData);
+        return bytes32(poolLPTokensSent);
     }
 
     /// @inheritdoc ActionBase
@@ -59,21 +62,15 @@ contract BalancerV2Withdraw is ActionBase, DSMath {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _balancerWithdraw(Params memory _inputData) internal {
+    function _balancerWithdraw(Params memory _inputData) internal returns (uint256 poolLPTokensSent){
         address poolAddress = _getPoolAddress(_inputData.poolId);
         uint256 poolLPTokensBefore = poolAddress.getBalance(address(this));
-        console.log(poolLPTokensBefore);
+
         _inputData.lpTokenAmount = poolAddress.pullTokensIfNeeded(
             _inputData.from,
             _inputData.lpTokenAmount
         );
-        console.log(_inputData.lpTokenAmount);
         poolAddress.approveToken(address(vault), _inputData.lpTokenAmount);
-        uint256[] memory tokenBalancesBefore = new uint256[](_inputData.tokens.length);
-        for (uint256 i = 0; i < tokenBalancesBefore.length; i++) {
-            tokenBalancesBefore[i] = address(_inputData.tokens[i]).getBalance(_inputData.to);
-            console.log(tokenBalancesBefore[i]);
-        }
 
         IVault.ExitPoolRequest memory requestData = IVault.ExitPoolRequest(
             _inputData.tokens,
@@ -82,22 +79,10 @@ contract BalancerV2Withdraw is ActionBase, DSMath {
             false
         );
         vault.exitPool(_inputData.poolId, address(this), payable(_inputData.to), requestData);
-        console.log("exit");
-        for (uint256 i = 0; i < tokenBalancesBefore.length; i++) {
-            tokenBalancesBefore[i] = sub(
-                address(_inputData.tokens[i]).getBalance(_inputData.to),
-                tokenBalancesBefore[i]
-            );
-            // sending leftovers back
-            console.log(tokenBalancesBefore[i]);
-        }
 
         uint256 poolLPTokensAfter = poolAddress.getBalance(address(this));
-
-        console.log(_inputData.lpTokenAmount);
-        console.log(poolLPTokensAfter);
-        uint256 poolLPTokensSent = sub(poolLPTokensAfter, poolLPTokensBefore);
-        console.log(poolLPTokensSent);
+        poolLPTokensSent = sub(poolLPTokensAfter, poolLPTokensBefore);
+        // return any leftover LP tokens
         poolAddress.withdrawTokens(
             _inputData.from,
             poolLPTokensSent
@@ -107,9 +92,8 @@ contract BalancerV2Withdraw is ActionBase, DSMath {
             address(this),
             msg.sender,
             "BalancerV2Withdraw",
-            abi.encode(_inputData, tokenBalancesBefore, poolLPTokensSent)
+            abi.encode(_inputData, poolLPTokensSent)
         );
-        console.log(poolLPTokensSent);
     }
 
     function _getPoolAddress(bytes32 poolId) internal pure returns (address) {

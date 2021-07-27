@@ -34,6 +34,9 @@ contract BalancerV2Supply is ActionBase, DSMath {
 
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[0], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[1], _subData, _returnValues);
+        for (uint256 i = 0; i < inputData.maxAmountsIn.length; i++){
+            inputData.maxAmountsIn[i] = _parseParamUint(inputData.maxAmountsIn[i], _paramMapping[2+i], _subData, _returnValues);
+        }
 
         uint256 poolLPTokensReceived = _balancerSupply(inputData);
         return bytes32(poolLPTokensReceived);
