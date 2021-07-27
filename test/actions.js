@@ -1088,6 +1088,7 @@ const reflexerSaviourWithdraw = async (proxy, to, safeId, lpTokenAmount) => {
     const functionData = reflexerSaviourWithdrawAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](reflexerSaviourWithdrawAddress, functionData, { gasLimit: 3000000 });
 };
+
 const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, owner, to) => {
     const claimInstMakerAddress = await getAddrFromRegistry('ClaimInstMaker');
     const claimInstMakerAction = new dfs.actions.insta.ClaimInstMakerAction(
@@ -1128,6 +1129,15 @@ const balancerWithdraw = async (
     );
     const functionData = balancerWithdrawAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](balancerWithdrawAddress, functionData);
+};
+
+const changeProxyOwner = async (proxy, newOwner) => {
+    const changeProxyOwnerAddress = await getAddrFromRegistry('ChangeProxyOwner');
+    const changeProxyOwnerAction = new dfs.actions.basic.ChangeProxyOwnerAction(
+        newOwner,
+    );
+    const functionData = changeProxyOwnerAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](changeProxyOwnerAddress, functionData);
 };
 
 module.exports = {
@@ -1198,4 +1208,6 @@ module.exports = {
 
     balancerSupply,
     balancerWithdraw,
+
+    changeProxyOwner,
 };
