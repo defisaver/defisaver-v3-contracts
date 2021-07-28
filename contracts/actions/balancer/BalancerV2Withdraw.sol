@@ -5,13 +5,12 @@ pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
-import "../../interfaces/balancer/IVault.sol";
 import "../../DS/DSMath.sol";
-/// @title Return LP tokens to Balancer Vault in exchange for underlying tokens
-contract BalancerV2Withdraw is ActionBase, DSMath {
-    using TokenUtils for address;
+import "./helpers/BalancerV2Helper.sol";
 
-    IVault public constant vault = IVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8);
+/// @title Return LP tokens to Balancer Vault in exchange for underlying tokens
+contract BalancerV2Withdraw is ActionBase, DSMath, BalancerV2Helper{
+    using TokenUtils for address;
 
     struct Params {
         bytes32 poolId;
@@ -63,6 +62,7 @@ contract BalancerV2Withdraw is ActionBase, DSMath {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _balancerWithdraw(Params memory _inputData) internal returns (uint256 poolLPTokensSent){
+        require(_inputData.to != address(0), ADDR_MUST_NOT_BE_ZERO);
         address poolAddress = _getPoolAddress(_inputData.poolId);
         uint256 poolLPTokensBefore = poolAddress.getBalance(address(this));
 
@@ -94,12 +94,6 @@ contract BalancerV2Withdraw is ActionBase, DSMath {
             "BalancerV2Withdraw",
             abi.encode(_inputData, poolLPTokensSent)
         );
-    }
-
-    function _getPoolAddress(bytes32 poolId) internal pure returns (address) {
-        // 12 byte logical shift left to remove the nonce and specialization setting. We don't need to mask,
-        // since the logical shift already sets the upper bits to zero.
-        return address(uint256(poolId) >> (12 * 8));
     }
 
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
