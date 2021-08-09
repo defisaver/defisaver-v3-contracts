@@ -1107,6 +1107,15 @@ const balancerSupply = async (proxy, poolId, from, to, tokens, maxAmountsIn, use
     return proxy['execute(address,bytes)'](balancerSupplyAddress, functionData);
 };
 
+const balancerClaim = async (proxy, liquidityProvider, to, weeks, balances, merkleProofs) => {
+    const balancerClaimAddress = await getAddrFromRegistry('BalancerV2Claim');
+    const balancerClaimAction = new dfs.actions.balancer.BalancerV2ClaimAction(
+        liquidityProvider, to, weeks, balances, merkleProofs,
+    );
+    const functionData = balancerClaimAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](balancerClaimAddress, functionData);
+};
+
 const balancerWithdraw = async (
     proxy,
     poolId,
@@ -1208,6 +1217,7 @@ module.exports = {
 
     balancerSupply,
     balancerWithdraw,
+    balancerClaim,
 
     changeProxyOwner,
 };

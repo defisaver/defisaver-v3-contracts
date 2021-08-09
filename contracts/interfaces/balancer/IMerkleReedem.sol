@@ -6,11 +6,11 @@ pragma experimental ABIEncoderV2;
 interface IMerkleReedem{
 
     struct Claim {
-        uint week;
-        uint balance;
+        uint256 week;
+        uint256 balance;
         bytes32[] merkleProof;
     }
-    
+
     function claimWeeks(
         address _liquidityProvider,
         Claim[] memory claims
