@@ -1,5 +1,5 @@
 {
-	"contractName": "PullToken",
+	"contractName": "SubInputs",
 	"abi": [
 		{
 			"inputs": [],
@@ -209,6 +209,37 @@
 				}
 			],
 			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes[]",
+					"name": "_callData",
+					"type": "bytes[]"
+				}
+			],
+			"name": "parseInputs",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "uint256",
+							"name": "a",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "b",
+							"type": "uint256"
+						}
+					],
+					"internalType": "struct SubInputs.Params",
+					"name": "params",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "pure",
 			"type": "function"
 		},
 		{
