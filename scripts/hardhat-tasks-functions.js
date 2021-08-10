@@ -38,15 +38,15 @@ function sleep(ms) {
 async function deployContract(contractName, args) {
     const gasPriceSelected = args.gas;
     const network = (await hre.ethers.provider.getNetwork()).name;
-    const prompt = await getInput(`You're deploying ${contractName} on ${network} at gas price of ${gasPriceSelected} gwei${args.nonce ? ` with nonce : ${args.nonce}` : ''}. Type YES to continue!\n`);
-    if (prompt.toLowerCase() !== 'yes') {
+    const prompt = await getInput(`You're deploying ${contractName} on ${network} at gas price of ${gasPriceSelected} gwei${args.nonce ? ` with nonce : ${args.nonce}` : ''}. Are you 100% sure? (Y/n)!\n`);
+    if (prompt.toLowerCase() === 'n') {
         rl.close();
         console.log('You did not agree to continue with deployment');
         process.exit(1);
     }
     if (gasPriceSelected > 300) {
-        gasPriceWarning = await getInput(`You used a gas price of ${gasPriceSelected} gwei. Are you 100% sure? Type YES to continue!\n`);
-        if (gasPriceWarning.toLowerCase() !== 'yes') {
+        gasPriceWarning = await getInput(`You used a gas price of ${gasPriceSelected} gwei. Are you 100% sure? (Y/n)!\n`);
+        if (gasPriceWarning.toLowerCase() === 'n') {
             rl.close();
             console.log('You did not agree to continue with deployment');
             process.exit(1);
@@ -69,8 +69,11 @@ async function deployContract(contractName, args) {
         `contracts/flattened/${contractName}.sol:${contractName}`,
     );
     const contract = await Contract.deploy(overrides);
+    console.log(`Transaction : https://${network === 'homestead' ? '' : `${network}.`}etherscan.io/tx/${contract.deployTransaction.hash}`);
+
     await contract.deployed();
-    console.log('Contract deployed to:', contract.address);
+    console.log(`Contract deployed to: https://${network === 'homestead' ? '' : `${network}.`}etherscan.io/address/${contract.address}`);
+
     return contract.address;
 }
 
@@ -111,12 +114,13 @@ async function verifyContract(contractAddress, contractName) {
     params.append('licenseType', 3);
 
     let url = 'https://api.etherscan.io/api';
+    let demo = 'https://etherscan.io/sourcecode-demo.html';
     if (network !== 'homestead') {
         url = `https://api-${network}.etherscan.io/api`;
+        demo = `https://${network}.etherscan.io/sourcecode-demo.html`;
     }
     const tx = await axios.post(url, params, config);
-    console.log(tx.data);
-    console.log(`https://${network === 'homestead' ? '' : `${network}.`}etherscan.io/address/${contractAddress}`);
+    console.log(`Check how verification is going at ${demo} with API key ${process.env.ETHERSCAN_API_KEY} and receipt GUID ${tx.data.result}`);
 }
 
 async function flatten(filePath) {
