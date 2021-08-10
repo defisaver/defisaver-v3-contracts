@@ -15,6 +15,12 @@ contract BalancerV2Claim is ActionBase, DSMath, BalancerV2Helper {
     IMerkleReedem public constant merkleReedemer = IMerkleReedem(0x6d19b2bF3A36A61530909Ae65445a906D98A2Fa8);
     address public constant balToken = 0xba100000625a3754423978a60c9317c58a424e3D;
 
+    /// @param liquidityProvider - The address of the liquidity provider that the tokens are claimed for
+    /// @param to - The address to which to send Balancer tokens to
+    /// @param week - List of weeks for which to claim balancer tokens for
+    /// @param balances - Amounts of balances to claim
+    /// @param merkleProofs - Array of bytes32[] merkle proofs
+    /// @dev week - balances - merkleProofs arrays must be the same lengths
     struct Params {
         address liquidityProvider;
         address to;
@@ -60,6 +66,7 @@ contract BalancerV2Claim is ActionBase, DSMath, BalancerV2Helper {
         merkleReedemer.claimWeeks(_inputData.liquidityProvider, claims);
         balClaimedAmount = sub(balToken.getBalance(_inputData.liquidityProvider), balClaimedAmount);
         
+        /// @dev if _to isn't the same as _lp, liquidityProvider needs to approve DSProxy to pull BAL tokens
         if (_inputData.to != _inputData.liquidityProvider) {
             balToken.pullTokensIfNeeded(_inputData.liquidityProvider, balClaimedAmount);
             balToken.withdrawTokens(_inputData.to, balClaimedAmount);
@@ -73,6 +80,7 @@ contract BalancerV2Claim is ActionBase, DSMath, BalancerV2Helper {
         );
     }
 
+    /// @dev Decoding Claims[] from _callData returns stack too deep error, so packing must be done onchain
     function packClaims(uint256[] memory _weeks, uint256[] memory _balances, bytes32[][] memory _merkleProofs) internal pure returns (IMerkleReedem.Claim[] memory){
         require (_weeks.length == _balances.length && _weeks.length == _merkleProofs.length);
         IMerkleReedem.Claim[] memory claims = new IMerkleReedem.Claim[](_weeks.length);
