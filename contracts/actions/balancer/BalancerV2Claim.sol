@@ -7,9 +7,10 @@ import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../DS/DSMath.sol";
 import "../../interfaces/balancer/IMerkleReedem.sol";
+import "./helpers/BalancerV2Helper.sol";
 
 /// @title Claim BAL tokens
-contract BalancerV2Claim is ActionBase, DSMath {
+contract BalancerV2Claim is ActionBase, DSMath, BalancerV2Helper {
     using TokenUtils for address;
     IMerkleReedem public constant merkleReedemer = IMerkleReedem(0x6d19b2bF3A36A61530909Ae65445a906D98A2Fa8);
     address public constant balToken = 0xba100000625a3754423978a60c9317c58a424e3D;
@@ -52,14 +53,14 @@ contract BalancerV2Claim is ActionBase, DSMath {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
     function claim(Params memory _inputData) internal returns (uint256 balClaimedAmount) {
-
+        require(_inputData.to != address(0), ADDR_MUST_NOT_BE_ZERO);
         IMerkleReedem.Claim[] memory claims = packClaims(_inputData.week, _inputData.balances, _inputData.merkleProofs);
         
         balClaimedAmount = balToken.getBalance(_inputData.liquidityProvider);
         merkleReedemer.claimWeeks(_inputData.liquidityProvider, claims);
         balClaimedAmount = sub(balToken.getBalance(_inputData.liquidityProvider), balClaimedAmount);
         
-        if (_inputData.to != _inputData.liquidityProvider && _inputData.to != address(0)) {
+        if (_inputData.to != _inputData.liquidityProvider) {
             balToken.pullTokensIfNeeded(_inputData.liquidityProvider, balClaimedAmount);
             balToken.withdrawTokens(_inputData.to, balClaimedAmount);
         }
