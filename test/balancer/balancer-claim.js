@@ -5,9 +5,9 @@ const {
     getProxy,
     redeploy,
     balanceOf,
-    approve,
     impersonateAccount,
-    stopImpersonatingAccount
+    stopImpersonatingAccount,
+    BAL_ADDR,
 } = require('../utils');
 
 const { balancerClaim } = require('../actions.js');
@@ -17,7 +17,7 @@ describe('Balancer Claiming', function () {
 
     let senderAcc; let
         proxy;
-
+    /// @dev this is tested on block number 12984088
     before(async () => {
         await redeploy('BalancerV2Claim');
 
@@ -27,6 +27,7 @@ describe('Balancer Claiming', function () {
 
     it('... claim Balancer tokens and leave them on liquidity provider wallet', async () => {
         const liqProvider = '0x7eb510a2d3316dd2cdca937a95ec81cdf140a98d';
+        const balBalanceBefore = await balanceOf(BAL_ADDR, liqProvider);
         const weeks = ['40', '41'];
         const balances = ['7206527418624000000', '4956940391238000000'];
         const merkleProofs = [[
@@ -56,10 +57,16 @@ describe('Balancer Claiming', function () {
             '0xd9bdc288545f8f7b4d201fb70b58817a91292c7d69a3c848fd19aad7278cd2f0',
             '0xfc2a36ece494c459bc02e38c3590876eb35219d0521087fd99c70de08c286117',
         ]];
+        const balanceChangeAmount = '12163467809862000000';
+
         await balancerClaim(proxy, liqProvider, liqProvider, weeks, balances, merkleProofs);
+
+        const balBalanceAfter = await balanceOf(BAL_ADDR, liqProvider);
+        expect(balBalanceBefore).to.be.eq(balBalanceAfter.sub(balanceChangeAmount));
     }).timeout(50000);
 
     it('... claim Balancer tokens and pull them to proxy', async () => {
+        const balBalanceBefore = await balanceOf(BAL_ADDR, proxy.address);
         const liqProvider = '0xbb44be3a16dada1c1b3217f3f3d17000aa4d8a0e';
         const weeks = ['38', '39', '40', '41'];
         const balances = ['58497362051000000', '299641995864000000', '328600678547000000', '314590040799000000'];
@@ -116,19 +123,18 @@ describe('Balancer Claiming', function () {
             '0x2e76924e4ec2febe3f9ab1673f88554c086bdf0cfe479fae0f38252daa960a09',
         ]];
 
+        const balanceChangeAmount = '1001330077261000000';
+
         await impersonateAccount('0xbb44be3a16dada1c1b3217f3f3d17000aa4d8a0e');
-        const tokenContract = await hre.ethers.getContractAt('IERC20', '0xba100000625a3754423978a60c9317c58a424e3D');
+        const tokenContract = await hre.ethers.getContractAt('IERC20', BAL_ADDR);
         const liquidityProviderAccount = await hre.ethers.provider.getSigner('0xbb44be3a16dada1c1b3217f3f3d17000aa4d8a0e');
 
         const connectedTokenContract = tokenContract.connect(liquidityProviderAccount);
         await connectedTokenContract.approve(proxy.address, hre.ethers.constants.MaxUint256);
-
-        const allowance = await tokenContract.allowance('0xbb44be3a16dada1c1b3217f3f3d17000aa4d8a0e', proxy.address);
-        console.log(allowance);
-
         await stopImpersonatingAccount('0xbb44be3a16dada1c1b3217f3f3d17000aa4d8a0e');
 
         await balancerClaim(proxy, liqProvider, proxy.address, weeks, balances, merkleProofs);
-        console.log(await balanceOf('0xba100000625a3754423978a60c9317c58a424e3D', proxy.address));
+        const balBalanceAfter = await balanceOf(BAL_ADDR, proxy.address);
+        expect(balBalanceBefore).to.be.eq(balBalanceAfter.sub(balanceChangeAmount));
     }).timeout(50000);
 });
