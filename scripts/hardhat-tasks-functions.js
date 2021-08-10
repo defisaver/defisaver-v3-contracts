@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-undef */ // This is to disable warning for hre undefined in file
 /* eslint-disable import/no-extraneous-dependencies */ // This is to disable warnings for imports
 const fs = require('fs-extra');
@@ -158,9 +159,40 @@ async function flatten(filePath) {
     });
     fs.writeFileSync(`contracts/flattened/${fileName}`, data, flags);
 }
+const getAllFiles = function (dirPath, arrayOfFiles) {
+    files = fs.readdirSync(dirPath);
+
+    arrayOfFiles = arrayOfFiles || [];
+
+    files.forEach((file) => {
+        if (file !== 'flattened') {
+            if (fs.statSync(`${dirPath}/${file}`).isDirectory()) {
+                arrayOfFiles = getAllFiles(`${dirPath}/${file}`, arrayOfFiles);
+            } else {
+                arrayOfFiles.push(path.join(dirPath, '/', file));
+            }
+        }
+    });
+
+    return arrayOfFiles;
+};
+
+async function findPathByContractName(contractName) {
+    console.log(contractName);
+    files = getAllFiles('./contracts');
+    let foundPath = '';
+    files.forEach((file) => {
+        if (contractName === path.basename(file, '.sol')) {
+            foundPath = file;
+        }
+    });
+    return foundPath;
+}
+
 module.exports = {
     flatten,
     verifyContract,
     deployContract,
     sleep,
+    findPathByContractName,
 };
