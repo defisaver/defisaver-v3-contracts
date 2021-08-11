@@ -7,6 +7,7 @@ const axios = require('axios');
 const path = require('path');
 const readline = require('readline');
 const hardhatSettings = require('../hardhat.config');
+const { encrypt, decrypt } = require('./utils/crypto');
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -62,13 +63,18 @@ async function deployContract(contractName, args) {
     if (args.nonce) {
         overrides.nonce = parseInt(args.nonce, 10);
     }
-    const [deployer] = await hre.ethers.getSigners();
-    console.log('Deploying contracts with the account:', deployer.address);
+    const secretKey = await getInput('Enter secret key for decrypting private key for deployment address!\n');
+    const decryptedKey = decrypt(process.env.ENCRYPTED_KEY, secretKey);
+    const deployer = new hre.ethers.Wallet(
+        decryptedKey,
+        hre.ethers.provider,
+    );
 
     console.log('Account balance:', (await deployer.getBalance()).toString());
-    const Contract = await hre.ethers.getContractFactory(
+    let Contract = await hre.ethers.getContractFactory(
         `contracts/flattened/${contractName}.sol:${contractName}`,
     );
+    Contract = Contract.connect(deployer);
     const contract = await Contract.deploy(overrides);
     console.log(`Transaction : https://${network === 'homestead' ? '' : `${network}.`}etherscan.io/tx/${contract.deployTransaction.hash}`);
 
@@ -189,10 +195,17 @@ async function findPathByContractName(contractName) {
     return foundPath;
 }
 
+async function encryptPrivateKey(privateKey, secretKey) {
+    encryptedKey = await encrypt(privateKey, secretKey);
+    console.log('Encrypted key to put in .env file:');
+    console.log(encryptedKey);
+}
+
 module.exports = {
     flatten,
     verifyContract,
     deployContract,
     sleep,
     findPathByContractName,
+    encryptPrivateKey,
 };

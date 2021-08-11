@@ -4,6 +4,7 @@ const {
     deployContract,
     sleep,
     findPathByContractName,
+    encryptPrivateKey,
 } = require('./hardhat-tasks-functions');
 
 // eslint-disable-next-line no-undef
@@ -31,4 +32,12 @@ task('customFlatten', 'Flattens for our DFS team')
     .addOptionalPositionalParam('contractName', 'The contract to flatten')
     .setAction(async (args) => {
         await flatten(await findPathByContractName(args.contractName));
+    });
+
+// eslint-disable-next-line no-undef
+task('encryptPrivateKey', 'Encrypt private key')
+    .addOptionalPositionalParam('privateKey', 'Private key for eth address')
+    .addOptionalPositionalParam('secretKey', 'Keyword for encryption and decryption')
+    .setAction(async (args) => {
+        encryptPrivateKey(args.privateKey, args.secretKey);
     });
