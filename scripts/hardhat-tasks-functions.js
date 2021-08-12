@@ -69,7 +69,7 @@ async function deployContract(contractName, args) {
         decryptedKey,
         hre.ethers.provider,
     );
-
+    console.log('Deploying from:', deployer.address)
     console.log('Account balance:', (await deployer.getBalance()).toString());
     let Contract = await hre.ethers.getContractFactory(
         `contracts/flattened/${contractName}.sol:${contractName}`,
