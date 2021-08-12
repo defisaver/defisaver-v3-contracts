@@ -6,6 +6,7 @@ const { exec } = require('child_process');
 const axios = require('axios');
 const path = require('path');
 const readline = require('readline');
+const readlineSync = require('readline-sync');
 const hardhatSettings = require('../hardhat.config');
 const { encrypt, decrypt } = require('./utils/crypto');
 
@@ -66,7 +67,10 @@ async function deployContract(contractName, args) {
     const useEncrypted = await getInput('Do you wish to use encrypted key from .env? (Y/n)!\n');
     let deployer;
     if (useEncrypted.toLowerCase() !== 'n') {
-        const secretKey = await getInput('Enter secret key for decrypting private key for deployment address!\n');
+        const secretKey = readlineSync.question('Enter secret key for decrypting private key for deployment address!\n', {
+            hideEchoBack: true, // The typed text on screen is hidden by `*` (default).
+            mask: '',
+        });
         const decryptedKey = decrypt(process.env.ENCRYPTED_KEY, secretKey);
         deployer = new hre.ethers.Wallet(
             decryptedKey,
