@@ -7,42 +7,42 @@ const {
     OWNER_ACC,
 } = require('./utils');
 
-const getLatestTemplateId = async () => {
-    const subscriptionAddr = await getAddrFromRegistry('Subscriptions');
-
-    const subscriptionInstance = await hre.ethers.getContractFactory('Subscriptions');
-    const subscription = await subscriptionInstance.attach(subscriptionAddr);
-
-    let latestTemplateId = await subscription.getTemplateCount();
-    latestTemplateId = (latestTemplateId - 1).toString();
-
-    return latestTemplateId;
-};
-
 const getLatestStrategyId = async () => {
-    const subscriptionAddr = await getAddrFromRegistry('Subscriptions');
+    const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
 
-    const subscriptionInstance = await hre.ethers.getContractFactory('Subscriptions');
-    const subscription = await subscriptionInstance.attach(subscriptionAddr);
+    const strategyStorageInstance = await hre.ethers.getContractFactory('StrategyStorage');
+    const strategyStorage = await strategyStorageInstance.attach(strategyStorageAddr);
 
-    let latestStrategyId = await subscription.getStrategyCount();
+    let latestStrategyId = await strategyStorage.getStrategyCount();
     latestStrategyId = (latestStrategyId - 1).toString();
 
     return latestStrategyId;
 };
 
+const getLatestSubId = async () => {
+    const subStorageAddr = await getAddrFromRegistry('SubStorage');
+
+    const subStorageInstance = await hre.ethers.getContractFactory('SubStorage');
+    const subStorage = await subStorageInstance.attach(subStorageAddr);
+
+    let latestSubId = await subStorage.getSubsCount();
+    latestSubId = (latestSubId - 1).toString();
+
+    return latestSubId;
+};
+
 // eslint-disable-next-line max-len
-const subTemplate = async (proxy, templateName, triggerIds, actionIds, paramMapping) => {
-    const subProxyAddr = await getAddrFromRegistry('SubscriptionProxy');
+const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramMapping) => {
+    const strategyProxyAddr = await getAddrFromRegistry('StrategyProxy');
 
-    const SubscriptionProxy = await hre.ethers.getContractFactory('SubscriptionProxy');
+    const StrategyProxy = await hre.ethers.getContractFactory('StrategyProxy');
 
-    const functionData = SubscriptionProxy.interface.encodeFunctionData(
-        'createTemplate',
-        [templateName, triggerIds, actionIds, paramMapping],
+    const functionData = StrategyProxy.interface.encodeFunctionData(
+        'createStrategy',
+        [strategyName, triggerIds, actionIds, paramMapping],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
+    const receipt = await proxy['execute(address,bytes)'](strategyProxyAddr, functionData, {
         gasLimit: 5000000,
     });
 
@@ -50,23 +50,23 @@ const subTemplate = async (proxy, templateName, triggerIds, actionIds, paramMapp
     console.log(`GasUsed subTemplate; ${gasUsed}`);
 };
 
-const subStrategy = async (proxy, templateId, active, subData, triggerData) => {
-    const subProxyAddr = await getAddrFromRegistry('SubscriptionProxy');
+const subToStrategy = async (proxy, strategyId, active, subData, triggerData) => {
+    const SubProxyAddr = await getAddrFromRegistry('SubProxy');
 
-    const SubscriptionProxy = await hre.ethers.getContractFactory('SubscriptionProxy');
-    const functionData = SubscriptionProxy.interface.encodeFunctionData(
-        'createStrategy',
-        [templateId, active, subData, triggerData],
+    const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
+    const functionData = SubProxyProxy.interface.encodeFunctionData(
+        'subscribeToStrategy',
+        [strategyId, active, triggerData, subData],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
+    const receipt = await proxy['execute(address,bytes)'](SubProxyAddr, functionData, {
         gasLimit: 5000000,
     });
 
     const gasUsed = await getGasUsed(receipt);
     console.log(`GasUsed createStrategy; ${gasUsed}`);
 
-    const latestStrategyId = await getLatestStrategyId();
+    const latestStrategyId = await getLatestSubId();
 
     return latestStrategyId;
 };
@@ -88,9 +88,9 @@ const addBotCaller = async (botAddr) => {
 };
 
 module.exports = {
-    subTemplate,
-    subStrategy,
-    getLatestTemplateId,
+    subToStrategy,
+    createStrategy,
     getLatestStrategyId,
+    getLatestSubId,
     addBotCaller,
 };

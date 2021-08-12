@@ -1,0 +1,477 @@
+{
+	"contractName": "SubStorage",
+	"abi": [
+		{
+			"inputs": [],
+			"name": "NonContractCall",
+			"type": "error"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "NonexistantSubError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "SenderNotSubOwnerError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "UserPositionsEmpty",
+			"type": "error"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "ActivateSub",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "DeactivateSub",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "RemoveSub",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				},
+				{
+					"components": [
+						{
+							"internalType": "uint64",
+							"name": "strategyId",
+							"type": "uint64"
+						},
+						{
+							"internalType": "bool",
+							"name": "active",
+							"type": "bool"
+						},
+						{
+							"internalType": "address",
+							"name": "userProxy",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "recipeData",
+							"type": "bytes[]"
+						}
+					],
+					"indexed": false,
+					"internalType": "struct StrategyModel.StrategySub",
+					"name": "",
+					"type": "tuple"
+				}
+			],
+			"name": "Subscribe",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				},
+				{
+					"components": [
+						{
+							"internalType": "uint64",
+							"name": "strategyId",
+							"type": "uint64"
+						},
+						{
+							"internalType": "bool",
+							"name": "active",
+							"type": "bool"
+						},
+						{
+							"internalType": "address",
+							"name": "userProxy",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "recipeData",
+							"type": "bytes[]"
+						}
+					],
+					"indexed": false,
+					"internalType": "struct StrategyModel.StrategySub",
+					"name": "",
+					"type": "tuple"
+				}
+			],
+			"name": "UpdateData",
+			"type": "event"
+		},
+		{
+			"inputs": [],
+			"name": "ADMIN_VAULT_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_subId",
+					"type": "uint256"
+				}
+			],
+			"name": "activateSub",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "adminVault",
+			"outputs": [
+				{
+					"internalType": "contract AdminVault",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_subId",
+					"type": "uint256"
+				}
+			],
+			"name": "deactivateSub",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_page",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_perPage",
+					"type": "uint256"
+				}
+			],
+			"name": "getPaginatedSubs",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "uint64",
+							"name": "strategyId",
+							"type": "uint64"
+						},
+						{
+							"internalType": "bool",
+							"name": "active",
+							"type": "bool"
+						},
+						{
+							"internalType": "address",
+							"name": "userProxy",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "recipeData",
+							"type": "bytes[]"
+						}
+					],
+					"internalType": "struct StrategyModel.StrategySub[]",
+					"name": "",
+					"type": "tuple[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_subId",
+					"type": "uint256"
+				}
+			],
+			"name": "getSub",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "uint64",
+							"name": "strategyId",
+							"type": "uint64"
+						},
+						{
+							"internalType": "bool",
+							"name": "active",
+							"type": "bool"
+						},
+						{
+							"internalType": "address",
+							"name": "userProxy",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "recipeData",
+							"type": "bytes[]"
+						}
+					],
+					"internalType": "struct StrategyModel.StrategySub",
+					"name": "",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "getSubsCount",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "kill",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_subId",
+					"type": "uint256"
+				}
+			],
+			"name": "removeSub",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "strategiesSubs",
+			"outputs": [
+				{
+					"internalType": "uint64",
+					"name": "strategyId",
+					"type": "uint64"
+				},
+				{
+					"internalType": "bool",
+					"name": "active",
+					"type": "bool"
+				},
+				{
+					"internalType": "address",
+					"name": "userProxy",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint64",
+					"name": "_strategyId",
+					"type": "uint64"
+				},
+				{
+					"internalType": "bool",
+					"name": "_active",
+					"type": "bool"
+				},
+				{
+					"internalType": "bytes[]",
+					"name": "_triggerData",
+					"type": "bytes[]"
+				},
+				{
+					"internalType": "bytes[]",
+					"name": "_recipeData",
+					"type": "bytes[]"
+				}
+			],
+			"name": "subscribeToStrategy",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_subId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bytes[]",
+					"name": "_triggerData",
+					"type": "bytes[]"
+				},
+				{
+					"internalType": "bytes[]",
+					"name": "_recipeData",
+					"type": "bytes[]"
+				}
+			],
+			"name": "updateSubData",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_token",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_receiver",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_amount",
+					"type": "uint256"
+				}
+			],
+			"name": "withdrawStuckFunds",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		}
+	],
+	"networks": {
+		"local": {}
+	}
+}

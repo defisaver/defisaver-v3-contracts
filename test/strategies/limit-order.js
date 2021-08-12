@@ -24,7 +24,7 @@ describe('Limit-Order-Strategy', function () {
 
         await redeploy('BotAuth');
         await redeploy('ProxyAuth');
-        await redeploy('Subscriptions');
+        // await redeploy('Subscriptions');
         await redeploy('SubscriptionProxy');
         await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');

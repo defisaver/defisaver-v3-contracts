@@ -12,7 +12,7 @@ const {
     formatExchangeObj,
 } = require('../utils');
 
-const { subTemplate, addBotCaller } = require('../utils-strategies');
+const { createStrategy, addBotCaller } = require('../utils-strategies');
 
 const { getRatio } = require('../utils-mcd');
 
@@ -46,9 +46,11 @@ describe('Mcd-Repay-Strategy', function () {
         await redeploy('McdWithdraw');
         await redeploy('DFSSell');
         await redeploy('McdPayback');
-        await redeploy('Subscriptions');
+        await redeploy('StrategyStorage');
+        await redeploy('SubStorage');
         mcdView = await redeploy('McdView');
-        await redeploy('SubscriptionProxy');
+        await redeploy('SubProxy');
+        await redeploy('StrategyProxy');
         await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');
         await redeploy('McdRatioCheck');
@@ -78,6 +80,8 @@ describe('Mcd-Repay-Strategy', function () {
             fetchAmountinUSDPrice('WETH', '25000'),
             fetchAmountinUSDPrice('DAI', '12000'),
         );
+
+        console.log('Vault id: ', vaultId);
 
         const repayStrategy = new dfs.Strategy('McdRepayStrategy');
 
@@ -132,7 +136,7 @@ describe('Mcd-Repay-Strategy', function () {
 
         const callData = repayStrategy.encodeForDsProxyCall();
 
-        await subTemplate(proxy, ...callData);
+        await createStrategy(proxy, ...callData);
 
         const rationUnder = hre.ethers.utils.parseUnits('2.5', '18');
         const targetRatio = hre.ethers.utils.parseUnits('2.2', '18');

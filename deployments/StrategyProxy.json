@@ -1,11 +1,6 @@
 {
-	"contractName": "StrategyExecutor",
+	"contractName": "StrategyProxy",
 	"abi": [
-		{
-			"inputs": [],
-			"name": "BotNotApprovedError",
-			"type": "error"
-		},
 		{
 			"inputs": [],
 			"name": "NonContractCall",
@@ -22,24 +17,21 @@
 			"type": "error"
 		},
 		{
-			"inputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"name": "SubNotActiveError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "TriggerNotActiveError",
-			"type": "error"
-		},
-		{
 			"inputs": [],
 			"name": "ADMIN_VAULT_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "FACTORY_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -79,57 +71,27 @@
 		{
 			"inputs": [
 				{
-					"internalType": "uint256",
-					"name": "_subId",
-					"type": "uint256"
-				}
-			],
-			"name": "checkCallerAuth",
-			"outputs": [],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"components": [
-						{
-							"internalType": "uint64",
-							"name": "strategyId",
-							"type": "uint64"
-						},
-						{
-							"internalType": "bool",
-							"name": "active",
-							"type": "bool"
-						},
-						{
-							"internalType": "address",
-							"name": "userProxy",
-							"type": "address"
-						},
-						{
-							"internalType": "bytes[]",
-							"name": "triggerData",
-							"type": "bytes[]"
-						},
-						{
-							"internalType": "bytes[]",
-							"name": "recipeData",
-							"type": "bytes[]"
-						}
-					],
-					"internalType": "struct StrategyModel.StrategySub",
-					"name": "_sub",
-					"type": "tuple"
+					"internalType": "string",
+					"name": "_name",
+					"type": "string"
 				},
 				{
-					"internalType": "bytes[]",
-					"name": "_triggerCallData",
-					"type": "bytes[]"
+					"internalType": "bytes4[]",
+					"name": "_triggerIds",
+					"type": "bytes4[]"
+				},
+				{
+					"internalType": "bytes4[]",
+					"name": "_actionIds",
+					"type": "bytes4[]"
+				},
+				{
+					"internalType": "uint8[][]",
+					"name": "_paramMapping",
+					"type": "uint8[][]"
 				}
 			],
-			"name": "checkTriggers",
+			"name": "createStrategy",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
@@ -137,22 +99,12 @@
 		{
 			"inputs": [
 				{
-					"internalType": "uint256",
-					"name": "_subId",
-					"type": "uint256"
-				},
-				{
-					"internalType": "bytes[]",
-					"name": "_triggerCallData",
-					"type": "bytes[]"
-				},
-				{
-					"internalType": "bytes[]",
-					"name": "_actionsCallData",
-					"type": "bytes[]"
+					"internalType": "address",
+					"name": "_contractAddr",
+					"type": "address"
 				}
 			],
-			"name": "executeStrategy",
+			"name": "givePermission",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
@@ -175,6 +127,19 @@
 				}
 			],
 			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_contractAddr",
+					"type": "address"
+				}
+			],
+			"name": "removePermission",
+			"outputs": [],
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{

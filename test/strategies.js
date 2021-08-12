@@ -2,8 +2,8 @@ const dfs = require('@defisaver/sdk');
 const hre = require('hardhat');
 
 const {
-    subStrategy,
-    getLatestTemplateId,
+    subToStrategy,
+    getLatestStrategyId,
 } = require('./utils-strategies');
 
 const {
@@ -29,14 +29,14 @@ const subMcdRepayStrategy = async (proxy, vaultId, rationUnder, targetRatio) => 
     const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
 
-    const templateId = await getLatestTemplateId();
+    const strategyId = await getLatestStrategyId();
     const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_UNDER);
 
     // eslint-disable-next-line max-len
-    const strategyId = await subStrategy(proxy, [templateId], true, [vaultIdEncoded, proxyAddrEncoded, targetRatioEncoded],
+    const subId = await subToStrategy(proxy, strategyId, true, [vaultIdEncoded, proxyAddrEncoded, targetRatioEncoded],
         [triggerData]);
 
-    return strategyId;
+    return subId;
 };
 
 const subMcdBoostStrategy = async (proxy, vaultId, rationUnder, targetRatio) => {
@@ -44,14 +44,14 @@ const subMcdBoostStrategy = async (proxy, vaultId, rationUnder, targetRatio) => 
     const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
 
-    const templateId = await getLatestTemplateId();
+    const strategyId = await getLatestStrategyId();
     const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_OVER);
 
     // eslint-disable-next-line max-len
-    const strategyId = await subStrategy(proxy, [templateId], true, [vaultIdEncoded, proxyAddrEncoded, targetRatioEncoded],
+    const subId = await subToStrategy(proxy, strategyId, true, [vaultIdEncoded, proxyAddrEncoded, targetRatioEncoded],
         [triggerData]);
 
-    return strategyId;
+    return subId;
 };
 
 const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyId, ethJoin, repayAmount) => {
@@ -105,7 +105,7 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyId, ethJoi
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, 0, triggerCallData, actionsCallData, {
+    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
         gasLimit: 8000000,
     });
 
@@ -164,7 +164,7 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyId, ethJoi
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, 0, triggerCallData, actionsCallData, {
+    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
         gasLimit: 8000000,
     });
 

@@ -18,7 +18,7 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission {
     bytes4 constant PROXY_AUTH_ID = bytes4(keccak256("ProxyAuth"));
     bytes4 constant SUB_STORAGE_ID = bytes4(keccak256("SubStorage"));
 
-    function subsribeToStrategy(
+    function subscribeToStrategy(
         uint64 _strategyId,
         bool _active,
         bytes[] memory _triggerData,

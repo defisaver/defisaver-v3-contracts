@@ -9,7 +9,7 @@ const {
     getProxy, redeploy, fetchAmountinUSDPrice, formatExchangeObj,
 } = require('../utils');
 
-const { subTemplate, addBotCaller } = require('../utils-strategies.js');
+const { createStrategy, addBotCaller } = require('../utils-strategies.js');
 
 const { getRatio } = require('../utils-mcd.js');
 
@@ -43,9 +43,11 @@ describe('Mcd-Boost-Strategy', function () {
         await redeploy('McdWithdraw');
         await redeploy('DFSSell');
         await redeploy('McdPayback');
-        await redeploy('Subscriptions');
+        await redeploy('StrategyStorage');
+        await redeploy('SubStorage');
         mcdView = await redeploy('McdView');
-        await redeploy('SubscriptionProxy');
+        await redeploy('SubProxy');
+        await redeploy('StrategyProxy');
         await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');
         await redeploy('McdRatioCheck');
@@ -74,6 +76,8 @@ describe('Mcd-Boost-Strategy', function () {
             fetchAmountinUSDPrice('WETH', '25000'),
             fetchAmountinUSDPrice('DAI', '12000'),
         );
+
+        console.log('VaultId: ', vaultId);
 
         const mcdBoostStrategy = new dfs.Strategy('MakerBoostStrategy');
         mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
@@ -127,7 +131,7 @@ describe('Mcd-Boost-Strategy', function () {
 
         const callData = mcdBoostStrategy.encodeForDsProxyCall();
 
-        await subTemplate(proxy, ...callData);
+        await createStrategy(proxy, ...callData);
 
         const rationOver = hre.ethers.utils.parseUnits('1.7', '18');
         const targetRatio = hre.ethers.utils.parseUnits('2', '18');

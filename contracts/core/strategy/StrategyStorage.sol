@@ -5,7 +5,6 @@ pragma solidity =0.8.4;
 import "./StrategyModel.sol";
 import "../../auth/AdminAuth.sol";
 
-
 /// @title StrategyStorage - Record of all the Strategies created
 contract StrategyStorage is StrategyModel, AdminAuth {
 
@@ -23,9 +22,13 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         _;
     }
 
+    // TODO: REMOVE ONLY USED FOR TESTING
+    constructor() {
+        openToPublic = true;
+    }
+
     function createStrategy(
         string memory _name,
-        address _creator,
         bytes4[] memory _triggerIds,
         bytes4[] memory _actionIds,
         uint8[][] memory _paramMapping
@@ -33,7 +36,7 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         strategies.push(
             Strategy({
                 name: _name,
-                creator: _creator,
+                creator: msg.sender,
                 triggerIds: _triggerIds,
                 actionIds: _actionIds,
                 paramMapping: _paramMapping

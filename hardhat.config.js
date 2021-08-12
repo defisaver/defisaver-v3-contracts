@@ -15,6 +15,7 @@ module.exports = {
         local: {
             url: 'http://127.0.0.1:8545',
             timeout: 1000000,
+            gasPrice: 70000000000,
         },
         fork: {
             url: `https://rpc.tenderly.co/fork/${process.env.FORK_ID}`,

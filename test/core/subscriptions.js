@@ -7,11 +7,12 @@ const {
     redeploy,
 } = require('../utils');
 
+// TODO: deprecated
 describe('Subscriptions', function () {
     let proxy; let subAddr; let senderAcc;
 
     before(async () => {
-        await redeploy('Subscriptions');
+        // await redeploy('Subscriptions');
 
         this.timeout(40000);
 
