@@ -63,13 +63,20 @@ async function deployContract(contractName, args) {
     if (args.nonce) {
         overrides.nonce = parseInt(args.nonce, 10);
     }
-    const secretKey = await getInput('Enter secret key for decrypting private key for deployment address!\n');
-    const decryptedKey = decrypt(process.env.ENCRYPTED_KEY, secretKey);
-    const deployer = new hre.ethers.Wallet(
-        decryptedKey,
-        hre.ethers.provider,
-    );
-    console.log('Deploying from:', deployer.address)
+    const useEncrypted = await getInput('Do you wish to use encrypted key from .env? (Y/n)!\n');
+    let deployer;
+    if (useEncrypted.toLowerCase() !== 'n') {
+        const secretKey = await getInput('Enter secret key for decrypting private key for deployment address!\n');
+        const decryptedKey = decrypt(process.env.ENCRYPTED_KEY, secretKey);
+        deployer = new hre.ethers.Wallet(
+            decryptedKey,
+            hre.ethers.provider,
+        );
+    } else {
+        [deployer] = await hre.ethers.getSigners();
+    }
+
+    console.log('Deploying from:', deployer.address);
     console.log('Account balance:', (await deployer.getBalance()).toString());
     let Contract = await hre.ethers.getContractFactory(
         `contracts/flattened/${contractName}.sol:${contractName}`,
