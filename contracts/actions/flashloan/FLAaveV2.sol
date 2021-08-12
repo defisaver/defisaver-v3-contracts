@@ -2,7 +2,7 @@
 pragma solidity =0.8.4;
 
 import "../ActionBase.sol";
-import "../../core/strategy/Subscriptions.sol";
+import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/IFLParamGetter.sol";
 import "../../interfaces/ILendingPool.sol";
 import "../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";

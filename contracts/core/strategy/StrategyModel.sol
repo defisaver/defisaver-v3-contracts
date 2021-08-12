@@ -4,11 +4,14 @@ pragma solidity =0.8.4;
 
 /// @title StrategyModel - contract that implements the structs used in the core system
 contract StrategyModel {
-    struct Template {
+    /// @dev Template/Class which defines a Strategy
+    struct Strategy {
         string name;
-        bytes4[] triggerIds;
+        address creator;
+        bytes4[] triggerIds; // not optimal for storage
         bytes4[] actionIds;
         uint8[][] paramMapping;
+        // TODO: sibling strategies (here || StrategySub)?
     }
 
     struct Recipe {
@@ -19,12 +22,12 @@ contract StrategyModel {
         uint8[][] paramMapping;
     }
 
-    struct Strategy {
-        address proxy;
+    /// @dev Instance of a strategy, user supplied data
+    struct StrategySub {
+        uint64 strategyId;
         bool active;
-        uint64[] templateIds;
-        uint64 posInUserArr;
-        bytes[] subData;
+        address userProxy;
         bytes[] triggerData;
+        bytes[] recipeData;
     }
 }

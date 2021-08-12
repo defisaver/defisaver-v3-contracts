@@ -3,7 +3,6 @@
 pragma solidity =0.8.4;
 
 import "../auth/AdminAuth.sol";
-import "../core/strategy/Subscriptions.sol";
 import "../actions/mcd/helpers/McdRatioHelper.sol";
 import "../interfaces/ITrigger.sol";
 

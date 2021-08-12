@@ -6,7 +6,10 @@ import "../interfaces/ILendingPool.sol";
 import "../auth/ProxyPermission.sol";
 import "../actions/ActionBase.sol";
 import "../core/DFSRegistry.sol";
-import "./strategy/Subscriptions.sol";
+import "./strategy/StrategyModel.sol";
+import "./strategy/StrategyStorage.sol";
+import "./strategy/SubStorage.sol";
+
 
 /// @title Handles FL taking and executes actions
 contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
@@ -15,36 +18,39 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
     address public constant REGISTRY_ADDR = 0xD5cec8F03f803A74B60A7603Ed13556279376b09;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    bytes4 constant SUBSCRIPTION_ID = bytes4(keccak256("Subscriptions"));
+    bytes4 constant STRATEGY_STORAGE_ID = bytes4(keccak256("StrategyStorage"));
+    bytes4 constant SUB_STORAGE_ID = bytes4(keccak256("SubStorage"));
 
-    /// @notice Called directly through DsProxy to execute a task
-    /// @dev This is the main entry point for Recipes/Tasks executed manually
+    /// @notice Called directly through DsProxy to execute a recipe
+    /// @dev This is the main entry point for Recipes executed manually
     /// @param _currRecipe Recipe to be executed
-    function executeTask(Recipe memory _currRecipe) public payable {
+    function executeRecipe(Recipe memory _currRecipe) public payable {
         _executeActions(_currRecipe);
     }
 
-    /// @notice Called through the Strategy contract to execute a task
-    /// @param _strategyId Id of the strategy we want to execute
+    /// @notice Called through the Strategy contract to execute a recipe
+    /// @param _subId Id of the subscription we want to execute
     /// @param _actionCallData All the data related to the strategies Recipe
-    function executeStrategyTask(uint256 _strategyId, uint256 _templateIndex, bytes[] memory _actionCallData)
+    function executeRecipeFromStrategy(uint256 _subId, bytes[] memory _actionCallData)
         public
         payable
     {
-        address subAddr = registry.getAddr(SUBSCRIPTION_ID);
+        address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
+        address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
 
-        Strategy memory strategy = Subscriptions(subAddr).getStrategy(_strategyId); // GAS: 18k gas cost
-        Template memory template = Subscriptions(subAddr).getTemplate(strategy.templateIds[_templateIndex]); // GAS: 36k
-        Recipe memory currTask =
+        StrategySub memory sub = SubStorage(subStorageAddr).getSub(_subId);
+        Strategy memory strategy = StrategyStorage(strategyStorageAddr).getStrategy(sub.strategyId);
+
+        Recipe memory currRecipe =
             Recipe({
-                name: template.name,
+                name: strategy.name,
                 callData: _actionCallData,
-                subData: strategy.subData,
-                actionIds: template.actionIds,
-                paramMapping: template.paramMapping
+                subData: sub.recipeData,
+                actionIds: strategy.actionIds,
+                paramMapping: strategy.paramMapping
             });
 
-        _executeActions(currTask);
+        _executeActions(currRecipe);
     }
 
     /// @notice This is the callback function that FL actions call
@@ -61,7 +67,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         }
     }
 
-    /// @notice Runs all actions from the task
+    /// @notice Runs all actions from the recipe
     /// @dev FL action must be first and is parsed separately, execution will go to _executeActionsFromFL
     /// @param _currRecipe to be executed
     function _executeActions(Recipe memory _currRecipe) internal {
@@ -77,13 +83,13 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
             }
         }
 
-        /// log the task name
+        /// log the recipe name
         DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, _currRecipe.name, "");
     }
 
     /// @notice Gets the action address and executes it
     /// @param _currRecipe Recipe to be executed
-    /// @param _index Index of the action in the task array
+    /// @param _index Index of the action in the recipe array
     /// @param _returnValues Return values from previous actions
     function _executeAction(
         Recipe memory _currRecipe,
@@ -105,7 +111,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
     }
 
     /// @notice Prepares and executes a flash loan action
-    /// @dev It adds to the last input value of the FL, the task data so it can be passed on
+    /// @dev It adds to the last input value of the FL, the recipe data so it can be passed on
     /// @param _currRecipe Recipe to be executed
     /// @param _flActionAddr Address of the flash loan action
     /// @param _returnValues An empty array of return values, because it's the first action
@@ -116,10 +122,10 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
     ) internal {
         givePermission(_flActionAddr);
 
-        bytes memory taskData = abi.encode(_currRecipe, address(this));
+        bytes memory recipeData = abi.encode(_currRecipe, address(this));
 
-        // last input value is empty for FL action, attach task data there
-        _currRecipe.callData[_currRecipe.callData[0].length - 1] = taskData; // TODO: check this
+        // last input value is empty for FL action, attach recipe data there
+        _currRecipe.callData[_currRecipe.callData[0].length - 1] = recipeData; // TODO: check this
 
         /// @dev FL action is called directly so that we can check who the msg.sender of FL is
         ActionBase(_flActionAddr).executeAction(

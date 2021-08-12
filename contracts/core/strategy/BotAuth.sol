@@ -7,7 +7,7 @@ import "../../auth/AdminAuth.sol";
 contract BotAuth is AdminAuth {
     mapping(address => bool) public approvedCallers;
 
-    /// @notice Checks if the caller is approved for the specific strategy
+    /// @notice Checks if the caller is approved for the specific subscription
     /// @dev Currently auth callers are approved for all strategies
     /// @param _caller Address of the caller
     function isApproved(uint256, address _caller) public view returns (bool) {
