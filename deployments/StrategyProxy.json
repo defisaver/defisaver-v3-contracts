@@ -89,6 +89,11 @@
 					"internalType": "uint8[][]",
 					"name": "_paramMapping",
 					"type": "uint8[][]"
+				},
+				{
+					"internalType": "bool",
+					"name": "continous",
+					"type": "bool"
 				}
 			],
 			"name": "createStrategy",

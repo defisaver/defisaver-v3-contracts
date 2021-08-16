@@ -10,6 +10,7 @@ const {
     redeploy,
     fetchAmountinUSDPrice,
     formatExchangeObj,
+    nullAddress,
 } = require('../utils');
 
 const { createStrategy, addBotCaller } = require('../utils-strategies');
@@ -136,7 +137,7 @@ describe('Mcd-Repay-Strategy', function () {
 
         const callData = repayStrategy.encodeForDsProxyCall();
 
-        await createStrategy(proxy, ...callData);
+        await createStrategy(proxy, ...callData, true);
 
         const rationUnder = hre.ethers.utils.parseUnits('2.5', '18');
         const targetRatio = hre.ethers.utils.parseUnits('2.2', '18');

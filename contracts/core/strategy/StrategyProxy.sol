@@ -21,11 +21,12 @@ contract StrategyProxy is StrategyModel, AdminAuth, ProxyPermission {
         string memory _name,
         bytes4[] memory _triggerIds,
         bytes4[] memory _actionIds,
-        uint8[][] memory _paramMapping
+        uint8[][] memory _paramMapping,
+        bool continous
     ) public {
         address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
 
-        StrategyStorage(strategyStorageAddr).createStrategy(_name, _triggerIds, _actionIds, _paramMapping);
+        StrategyStorage(strategyStorageAddr).createStrategy(_name, _triggerIds, _actionIds, _paramMapping, continous);
     }
 
     

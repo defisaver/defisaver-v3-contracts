@@ -110,6 +110,11 @@
 					"internalType": "uint8[][]",
 					"name": "_paramMapping",
 					"type": "uint8[][]"
+				},
+				{
+					"internalType": "bool",
+					"name": "_continous",
+					"type": "bool"
 				}
 			],
 			"name": "createStrategy",
@@ -164,6 +169,11 @@
 							"internalType": "uint8[][]",
 							"name": "paramMapping",
 							"type": "uint8[][]"
+						},
+						{
+							"internalType": "bool",
+							"name": "continous",
+							"type": "bool"
 						}
 					],
 					"internalType": "struct StrategyModel.Strategy[]",
@@ -210,6 +220,11 @@
 							"internalType": "uint8[][]",
 							"name": "paramMapping",
 							"type": "uint8[][]"
+						},
+						{
+							"internalType": "bool",
+							"name": "continous",
+							"type": "bool"
 						}
 					],
 					"internalType": "struct StrategyModel.Strategy",
@@ -272,6 +287,11 @@
 					"internalType": "address",
 					"name": "creator",
 					"type": "address"
+				},
+				{
+					"internalType": "bool",
+					"name": "continous",
+					"type": "bool"
 				}
 			],
 			"stateMutability": "view",

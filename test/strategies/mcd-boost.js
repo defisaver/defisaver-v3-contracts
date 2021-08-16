@@ -131,7 +131,7 @@ describe('Mcd-Boost-Strategy', function () {
 
         const callData = mcdBoostStrategy.encodeForDsProxyCall();
 
-        await createStrategy(proxy, ...callData);
+        await createStrategy(proxy, ...callData, true);
 
         const rationOver = hre.ethers.utils.parseUnits('1.7', '18');
         const targetRatio = hre.ethers.utils.parseUnits('2', '18');

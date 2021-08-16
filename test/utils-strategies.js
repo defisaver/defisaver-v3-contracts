@@ -32,14 +32,14 @@ const getLatestSubId = async () => {
 };
 
 // eslint-disable-next-line max-len
-const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramMapping) => {
+const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramMapping, continous) => {
     const strategyProxyAddr = await getAddrFromRegistry('StrategyProxy');
 
     const StrategyProxy = await hre.ethers.getContractFactory('StrategyProxy');
 
     const functionData = StrategyProxy.interface.encodeFunctionData(
         'createStrategy',
-        [strategyName, triggerIds, actionIds, paramMapping],
+        [strategyName, triggerIds, actionIds, paramMapping, continous],
     );
 
     const receipt = await proxy['execute(address,bytes)'](strategyProxyAddr, functionData, {

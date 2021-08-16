@@ -31,7 +31,8 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         string memory _name,
         bytes4[] memory _triggerIds,
         bytes4[] memory _actionIds,
-        uint8[][] memory _paramMapping
+        uint8[][] memory _paramMapping,
+        bool _continous
     ) public onlyAuthCreators returns (uint256) {
         strategies.push(
             Strategy({
@@ -39,7 +40,8 @@ contract StrategyStorage is StrategyModel, AdminAuth {
                 creator: msg.sender,
                 triggerIds: _triggerIds,
                 actionIds: _actionIds,
-                paramMapping: _paramMapping
+                paramMapping: _paramMapping,
+                continous : _continous
             })
         );
 
