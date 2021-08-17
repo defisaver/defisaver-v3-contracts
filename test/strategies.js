@@ -8,6 +8,7 @@ const {
 
 const {
     createMcdTrigger,
+    createChainLinkPriceTrigger,
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
 } = require('./triggers');
@@ -49,6 +50,25 @@ const subMcdBoostStrategy = async (proxy, vaultId, rationUnder, targetRatio) => 
 
     // eslint-disable-next-line max-len
     const subId = await subToStrategy(proxy, strategyId, true, [vaultIdEncoded, proxyAddrEncoded, targetRatioEncoded],
+        [triggerData]);
+
+    return subId;
+};
+
+// eslint-disable-next-line max-len
+const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrBuy, amount, targetPrice) => {
+    const tokenAddrSellEncoded = abiCoder.encode(['address'], [tokenAddrSell]);
+    const tokenAddrBuyEncoded = abiCoder.encode(['address'], [tokenAddrBuy]);
+    const amountEncoded = abiCoder.encode(['uint256'], [amount.toString()]);
+    const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
+    const eoaAddrEncoded = abiCoder.encode(['address'], [senderAcc.address]);
+
+    const strategyId = await getLatestStrategyId();
+    // eslint-disable-next-line max-len
+    const triggerData = await createChainLinkPriceTrigger(tokenAddrSell, targetPrice, RATIO_STATE_OVER);
+
+    // eslint-disable-next-line max-len
+    const subId = await subToStrategy(proxy, strategyId, true, [tokenAddrSellEncoded, tokenAddrBuyEncoded, amountEncoded, proxyAddrEncoded, eoaAddrEncoded],
         [triggerData]);
 
     return subId;
@@ -172,9 +192,48 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyId, ethJoi
     console.log(`GasUsed callMcdBoostStrategy; ${gasUsed}`);
 };
 
+const callLimitOrderStrategy = async (botAcc, senderAcc, strategyExecutor, subId) => {
+    const actionsCallData = [];
+
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        WETH_ADDRESS, senderAcc.address, '0',
+    );
+
+    const txGasCost = 500000; // 500k gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        txGasCost, WETH_ADDRESS, '0',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            WETH_ADDRESS, // can't be placeholder because of proper formatting of uni path
+            DAI_ADDR,
+            '0',
+            UNISWAP_WRAPPER,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, [[]], actionsCallData, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed callLimitOrderStrategy; ${gasUsed}`);
+};
+
 module.exports = {
     subMcdRepayStrategy,
     subMcdBoostStrategy,
+    subLimitOrderStrategy,
     callMcdRepayStrategy,
     callMcdBoostStrategy,
+    callLimitOrderStrategy,
 };

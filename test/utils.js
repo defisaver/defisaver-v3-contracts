@@ -22,6 +22,8 @@ const AAVE_MARKET = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
 const YEARN_REGISTRY_ADDRESS = '0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804';
 const STETH_ADDRESS = '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84';
 const UNIV2_ROUTER_ADDRESS = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
+const FEED_REGISTRY_ADDRESS = '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf';
+const USD_DENOMINATION = '0x0000000000000000000000000000000000000348';
 
 // Dfs sdk won't accept 0x0 and we need some rand addr for testing
 const placeHolderAddr = '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF';
@@ -258,7 +260,7 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, u
     }
 
     // quick fix if we use strategy placeholder value
-    if (firstPath[0] === '%') {
+    if (firstPath[0] === '%' || firstPath[0] === '&') {
         firstPath = nullAddress;
         secondPath = nullAddress;
     }
@@ -353,6 +355,16 @@ const redeployRegistry = async () => {
     return reg.address;
 };
 
+const getChainLinkPrice = async (tokenAddr) => {
+    const feedRegistry = await hre.ethers.getContractAt('IFeedRegistry', FEED_REGISTRY_ADDRESS);
+
+    const data = await feedRegistry.latestRoundData(tokenAddr, USD_DENOMINATION);
+
+    // const decimals = await feedRegistry.decimals(tokenAddr, USD_DENOMINATION);
+
+    return data.answer.toString();
+};
+
 const BN2Float = (bn, decimals) => hre.ethers.utils.formatUnits(bn, decimals);
 
 const Float2BN = (string, decimals) => hre.ethers.utils.parseUnits(string, decimals);
@@ -381,6 +393,7 @@ module.exports = {
     getGasUsed,
     getNameId,
     redeployRegistry,
+    getChainLinkPrice,
     standardAmounts,
     nullAddress,
     dydxTokens,
