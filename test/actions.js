@@ -841,7 +841,6 @@ const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amoun
             from,
         );
     }
-
     if (tokenBalance1.lt(amount1Desired)) {
         await sell(
             proxy,

@@ -7,6 +7,7 @@ const {
 } = require('./utils-strategies');
 
 const {
+    createUniV3RangeOrderTrigger,
     createMcdTrigger,
     createChainLinkPriceTrigger,
     RATIO_STATE_UNDER,
@@ -21,9 +22,23 @@ const {
     WETH_ADDRESS,
     DAI_ADDR,
     UNISWAP_WRAPPER,
+    MAX_UINT128,
 } = require('./utils');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
+
+const subUniV3RangeOrderStrategy = async (proxy, tokenId, state, recipient) => {
+    const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
+    const tokenIdEncoded = abiCoder.encode(['uint256'], [tokenId.toString()]);
+    const recipientEncoded = abiCoder.encode(['address'], [recipient]);
+    const strategyId = await getLatestStrategyId();
+    const triggerData = await createUniV3RangeOrderTrigger(tokenId, state);
+
+    // eslint-disable-next-line max-len
+    const subId = await subToStrategy(proxy, strategyId, true, [tokenIdEncoded, proxyAddrEncoded, recipientEncoded], [triggerData]);
+
+    return subId;
+};
 
 const subMcdRepayStrategy = async (proxy, vaultId, rationUnder, targetRatio) => {
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
@@ -72,6 +87,35 @@ const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrB
         [triggerData]);
 
     return subId;
+}
+const callUniV3RangeOrderStrategy = async (botAcc, strategyExecutor, strategyId, liquidity, recipient, nftOwner) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const deadline = Date.now() + Date.now();
+    const withdrawAction = new dfs.actions.uniswapV3.UniswapV3WithdrawAction(
+        '0',
+        liquidity,
+        0,
+        0,
+        deadline,
+        recipient,
+        MAX_UINT128,
+        MAX_UINT128,
+        nftOwner,
+    );
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed callUniV3RangeOrderStrategy: ${gasUsed}`);
 };
 
 const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyId, ethJoin, repayAmount) => {
@@ -236,4 +280,6 @@ module.exports = {
     callMcdRepayStrategy,
     callMcdBoostStrategy,
     callLimitOrderStrategy,
+    subUniV3RangeOrderStrategy,
+    callUniV3RangeOrderStrategy,
 };
