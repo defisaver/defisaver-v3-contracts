@@ -3,15 +3,15 @@ const { expect } = require('chai');
 
 const dfs = require('@defisaver/sdk');
 
-const { getAssetInfo, ilks } = require('@defisaver/tokens');
+const { getAssetInfo } = require('@defisaver/tokens');
 
 const {
     getProxy,
     redeploy,
     fetchAmountinUSDPrice,
-    formatExchangeObj,
     UNIV3POSITIONMANAGER_ADDR,
-    MAX_UINT128,
+    balanceOf,
+    DAI_ADDR,
 } = require('../utils');
 
 const { createStrategy, addBotCaller } = require('../utils-strategies');
@@ -65,7 +65,6 @@ describe('Uni-v3-range-order strat', function () {
     });
 
     it('... should make a new strategy for uniswap v3 range order', async () => {
-        const nftOwner = proxy.address;
         const tokenDataA = await getAssetInfo(uniPair.tokenA);
         const tokenDataB = await getAssetInfo(uniPair.tokenB);
         const amount0 = hre.ethers.utils.parseUnits(uniPair.amount0, tokenDataA.decimals);
@@ -77,7 +76,6 @@ describe('Uni-v3-range-order strat', function () {
         const numberOfPositions = await positionManager.balanceOf(senderAcc.address);
         const tokenId = await positionManager.tokenOfOwnerByIndex(senderAcc.address, numberOfPositions.sub('1').toString());
         const position = await positionManager.positions(tokenId);
-        const liquidity = position.liquidity;
         console.log(`Liquidity after minting : ${position.liquidity.toString()}`);
         // mint univ3 NFT - nftOwner is senderAcc.address
 
@@ -109,11 +107,12 @@ describe('Uni-v3-range-order strat', function () {
         positionManager.approve(proxy.address, tokenId);
         strategyId = await subUniV3RangeOrderStrategy(proxy, tokenId, 0, senderAcc.address);
         // user subscribes to strategy and fills three slots
-        console.log(strategyId.toString());
+        expect(strategyId).to.be.eq(0);
         console.log(await subStorage.getSub(strategyId));
     });
 
     it('... should trigger and execute uniswap v3 range order strategy', async () => {
+        const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
         const numberOfPositions = await positionManager.balanceOf(senderAcc.address);
         const tokenId = await positionManager.tokenOfOwnerByIndex(senderAcc.address, numberOfPositions.sub('1').toString());
         const position = await positionManager.positions(tokenId);
@@ -126,6 +125,10 @@ describe('Uni-v3-range-order strat', function () {
             senderAcc.address,
             senderAcc.address,
         );
+        const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
+        const liquidityAfter = (await positionManager.positions(tokenId)).liquidity;
+        expect(liquidityAfter).to.be.eq(0);
+        expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
         console.log((await positionManager.positions(tokenId)).liquidity.toString());
     });
 });
