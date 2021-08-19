@@ -42,7 +42,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         Strategy memory strategy = StrategyStorage(strategyStorageAddr).getStrategy(sub.strategyId);
 
         // if this is a one time strategy
-        if (!strategy.continous) {
+        if (!strategy.continuous) {
             SubStorage(subStorageAddr).deactivateSub(_subId);
         }
 

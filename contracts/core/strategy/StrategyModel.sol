@@ -11,7 +11,7 @@ contract StrategyModel {
         bytes4[] triggerIds; // not optimal for storage
         bytes4[] actionIds;
         uint8[][] paramMapping;
-        bool continous; // if the action is repeated (continous) or one time
+        bool continuous; // if the action is repeated (continous) or one time
         // TODO: sibling strategies (here || StrategySub)?
     }
 
