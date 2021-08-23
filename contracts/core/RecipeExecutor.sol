@@ -136,7 +136,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         givePermission(_flActionAddr);
 
         bytes memory recipeData = abi.encode(_currRecipe, address(this));
-
+        // TODO: this only works for dydx flash loan, try to fix for aave
         DydxFlashloanParams memory params = abi.decode(_currRecipe.callData[0], (DydxFlashloanParams));
 
         params.taskData = recipeData;

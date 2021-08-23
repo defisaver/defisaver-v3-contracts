@@ -25,7 +25,7 @@ const { subMcdCloseStrategy, callMcdCloseStrategy } = require('../strategies');
 
 const { openVault } = require('../actions');
 
-const { fetchMakerAddresses, MCD_MANAGER_ADDR } = require('../utils-mcd');
+const { fetchMakerAddresses } = require('../utils-mcd');
 
 describe('Mcd-Repay-Strategy', function () {
     this.timeout(120000);
@@ -76,7 +76,7 @@ describe('Mcd-Repay-Strategy', function () {
         makerAddresses = await fetchMakerAddresses();
     });
 
-    it('... should make a new strategy that closes CDP when price hits a point', async () => {
+    it('... should make a new strategy that closes CDP when price hits a point, transfers ETH to DAI, repays debt, transfers all remaining DAI to user', async () => {
         const tokenData = getAssetInfo('WETH');
         const vaultColl = fetchAmountinUSDPrice('WETH', '30000');
         const amountDai = fetchAmountinUSDPrice('DAI', '12000');
@@ -104,7 +104,7 @@ describe('Mcd-Repay-Strategy', function () {
         console.log(flAmount.toString());
         mcdCloseStrategy.addAction(
             new dfs.actions.flashloan.DyDxFlashLoanAction(
-                flAmount,
+                '0',
                 nullAddress,
                 nullAddress,
                 [],
@@ -113,26 +113,26 @@ describe('Mcd-Repay-Strategy', function () {
         mcdCloseStrategy.addAction(
             new dfs.actions.maker.MakerPaybackAction(
                 '&vaultId',
-                hre.ethers.constants.MaxUint256,
+                '0',
                 '&proxy',
-                MCD_MANAGER_ADDR,
+                nullAddress,
             ),
         );
         mcdCloseStrategy.addAction(
             new dfs.actions.maker.MakerWithdrawAction(
                 '&vaultId',
-                hre.ethers.constants.MaxUint256,
-                ethJoin,
+                '0',
+                nullAddress,
                 '&proxy',
-                MCD_MANAGER_ADDR,
+                nullAddress,
             ),
         );
         mcdCloseStrategy.addAction(
             new dfs.actions.basic.SellAction(
                 formatExchangeObj(
-                    WETH_ADDRESS,
-                    DAI_ADDR,
-                    hre.ethers.utils.parseUnits(vaultColl, tokenData.decimals),
+                    nullAddress,
+                    nullAddress,
+                    '0',
                     '%exchangeWrapper',
                 ),
                 '&proxy',
@@ -141,16 +141,16 @@ describe('Mcd-Repay-Strategy', function () {
         );
         mcdCloseStrategy.addAction(
             new dfs.actions.basic.SendTokenAction(
-                DAI_ADDR,
-                dydxFlAddr,
-                flAmount,
+                nullAddress,
+                nullAddress,
+                '0',
             ),
         );
         mcdCloseStrategy.addAction(
             new dfs.actions.basic.SendTokenAction(
-                DAI_ADDR,
+                nullAddress,
                 '&recipient',
-                hre.ethers.constants.MaxUint256,
+                '0',
             ),
         );
         const callData = mcdCloseStrategy.encodeForDsProxyCall();
