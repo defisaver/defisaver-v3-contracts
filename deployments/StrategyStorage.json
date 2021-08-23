@@ -113,7 +113,7 @@
 				},
 				{
 					"internalType": "bool",
-					"name": "_continous",
+					"name": "_continuous",
 					"type": "bool"
 				}
 			],
@@ -172,7 +172,7 @@
 						},
 						{
 							"internalType": "bool",
-							"name": "continous",
+							"name": "continuous",
 							"type": "bool"
 						}
 					],
@@ -223,7 +223,7 @@
 						},
 						{
 							"internalType": "bool",
-							"name": "continous",
+							"name": "continuous",
 							"type": "bool"
 						}
 					],
@@ -290,7 +290,7 @@
 				},
 				{
 					"internalType": "bool",
-					"name": "continous",
+					"name": "continuous",
 					"type": "bool"
 				}
 			],

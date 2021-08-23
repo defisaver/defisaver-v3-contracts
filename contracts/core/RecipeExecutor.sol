@@ -10,9 +10,17 @@ import "./strategy/StrategyModel.sol";
 import "./strategy/StrategyStorage.sol";
 import "./strategy/SubStorage.sol";
 
-
 /// @title Handles FL taking and executes actions
 contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
+
+    struct DydxFlashloanParams {
+        uint256 amount;
+        address token;
+        address flParamGetterAddr;
+        bytes flParamGetterData;
+        bytes taskData;
+    }
+
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
     address public constant REGISTRY_ADDR = 0xD5cec8F03f803A74B60A7603Ed13556279376b09;
@@ -129,12 +137,14 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
 
         bytes memory recipeData = abi.encode(_currRecipe, address(this));
 
-        // last input value is empty for FL action, attach recipe data there
-        _currRecipe.callData[_currRecipe.callData[0].length - 1] = recipeData; // TODO: check this
+        DydxFlashloanParams memory params = abi.decode(_currRecipe.callData[0], (DydxFlashloanParams));
+
+        params.taskData = recipeData;
+        _currRecipe.callData[0] = abi.encode(params);
 
         /// @dev FL action is called directly so that we can check who the msg.sender of FL is
         ActionBase(_flActionAddr).executeAction(
-            _currRecipe.callData[0], // TODO: check this
+            _currRecipe.callData[0],
             _currRecipe.subData,
             _currRecipe.paramMapping[0],
             _returnValues

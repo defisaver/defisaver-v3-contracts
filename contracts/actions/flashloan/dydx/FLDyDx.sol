@@ -18,6 +18,7 @@ import "./DydxFlashLoanBase.sol";
 contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
+    
     struct Params {
         uint256 amount;
         address token;
@@ -38,9 +39,6 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
 
     FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(0x47f159C90850D5cE09E21F931d504536840f34b4);
 
-    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
-    bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
-
     bytes4 constant TASK_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     /// @inheritdoc ActionBase
@@ -60,8 +58,7 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
             inputData.amount = amounts[0];
             inputData.token = tokens[0];
         }
-
-        bytes memory taskData = inputData.taskData; // TODO: FIX this
+        bytes memory taskData = inputData.taskData;
         uint256 flAmount = _flDyDx(inputData.amount, inputData.token, abi.encode(taskData, inputData.amount, inputData.token));
 
         return bytes32(flAmount);
@@ -126,22 +123,18 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
         if (_initiator != address(this)){
             revert SameCallerError();
         }
-
         (bytes memory callData, uint256 amount, address tokenAddr) =
             abi.decode(_data, (bytes, uint256, address));
 
         (Recipe memory currTask, address proxy) = abi.decode(callData, (Recipe, address));
-
         tokenAddr.withdrawTokens(proxy, amount);
 
         address payable RecipeExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
-
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             RecipeExecutor,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, amount)
+            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes[],bytes4[],uint8[][]),bytes32)", currTask, amount)
         );
-
         // return FL (just send funds to this addr)
         
         flFeeFaucet.my2Wei(tokenAddr); // get extra 2 wei for DyDx fee

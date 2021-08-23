@@ -3,11 +3,6 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ERC20OperationFail",
-			"type": "error"
-		},
-		{
-			"inputs": [],
 			"name": "MarketIdNotFound",
 			"type": "error"
 		},
@@ -59,19 +54,6 @@
 					"internalType": "address",
 					"name": "",
 					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "CALLBACK_SELECTOR",
-			"outputs": [
-				{
-					"internalType": "bytes4",
-					"name": "",
-					"type": "bytes4"
 				}
 			],
 			"stateMutability": "view",
@@ -271,9 +253,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				},
 				{
 					"internalType": "bytes[]",
@@ -305,9 +287,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "executeActionDirect",
@@ -351,32 +333,44 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "parseInputs",
 			"outputs": [
 				{
-					"internalType": "uint256",
-					"name": "amount",
-					"type": "uint256"
-				},
-				{
-					"internalType": "address",
-					"name": "token",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "flParamGetterAddr",
-					"type": "address"
-				},
-				{
-					"internalType": "bytes",
-					"name": "flParamGetterData",
-					"type": "bytes"
+					"components": [
+						{
+							"internalType": "uint256",
+							"name": "amount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "address",
+							"name": "token",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "flParamGetterAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes",
+							"name": "flParamGetterData",
+							"type": "bytes"
+						},
+						{
+							"internalType": "bytes",
+							"name": "taskData",
+							"type": "bytes"
+						}
+					],
+					"internalType": "struct FLDyDx.Params",
+					"name": "inputData",
+					"type": "tuple"
 				}
 			],
 			"stateMutability": "pure",

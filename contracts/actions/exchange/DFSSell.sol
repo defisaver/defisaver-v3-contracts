@@ -5,6 +5,7 @@ pragma solidity =0.8.4;
 import "../../interfaces/IDSProxy.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../ActionBase.sol";
+import "hardhat/console.sol";
 
 /// @title A exchange sell action through the dfs exchange
 contract DFSSell is ActionBase, DFSExchangeCore {
@@ -85,7 +86,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
-
+        console.log(_exchangeData.srcAmount);
         _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
 
         _exchangeData.user = getUserAddress();

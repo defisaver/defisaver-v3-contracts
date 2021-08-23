@@ -78,7 +78,7 @@
 			"inputs": [
 				{
 					"internalType": "bytes",
-					"name": "_callData",
+					"name": "",
 					"type": "bytes"
 				},
 				{
