@@ -9,17 +9,11 @@ import "../core/DFSRegistry.sol";
 import "./strategy/StrategyModel.sol";
 import "./strategy/StrategyStorage.sol";
 import "./strategy/SubStorage.sol";
+import "../interfaces/flashloan/IFlashLoanBase.sol";
 
 /// @title Handles FL taking and executes actions
 contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
-
-    struct DydxFlashloanParams {
-        uint256 amount;
-        address token;
-        address flParamGetterAddr;
-        bytes flParamGetterData;
-        bytes taskData;
-    }
+    //TODO aave fl needs different input params check out
 
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
@@ -136,9 +130,8 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         givePermission(_flActionAddr);
 
         bytes memory recipeData = abi.encode(_currRecipe, address(this));
-        // TODO: this only works for dydx flash loan, try to fix for aave
-        DydxFlashloanParams memory params = abi.decode(_currRecipe.callData[0], (DydxFlashloanParams));
 
+        IFlashLoanBase.FlashLoanParams memory params = abi.decode(_currRecipe.callData[0], (IFlashLoanBase.FlashLoanParams));
         params.taskData = recipeData;
         _currRecipe.callData[0] = abi.encode(params);
 

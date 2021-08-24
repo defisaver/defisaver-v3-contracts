@@ -343,13 +343,23 @@
 				{
 					"components": [
 						{
-							"internalType": "uint256",
-							"name": "amount",
-							"type": "uint256"
+							"internalType": "address[]",
+							"name": "tokens",
+							"type": "address[]"
+						},
+						{
+							"internalType": "uint256[]",
+							"name": "amounts",
+							"type": "uint256[]"
+						},
+						{
+							"internalType": "uint256[]",
+							"name": "modes",
+							"type": "uint256[]"
 						},
 						{
 							"internalType": "address",
-							"name": "token",
+							"name": "onBehalfOf",
 							"type": "address"
 						},
 						{
@@ -368,7 +378,7 @@
 							"type": "bytes"
 						}
 					],
-					"internalType": "struct FLDyDx.Params",
+					"internalType": "struct IFlashLoanBase.FlashLoanParams",
 					"name": "inputData",
 					"type": "tuple"
 				}

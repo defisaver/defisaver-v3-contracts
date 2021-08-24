@@ -10,9 +10,10 @@ import "../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../core/strategy/StrategyModel.sol";
 import "../../utils/TokenUtils.sol";
 import "../../utils/ReentrancyGuard.sol";
+import "../../interfaces/flashloan/IFlashLoanBase.sol";
 
 /// @title Action that gets and receives a FL from Aave V2
-contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard {
+contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, IFlashLoanBase {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
@@ -32,20 +33,7 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard {
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
-    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
-    bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
-
     bytes4 constant TASK_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
-
-    struct Params {
-        address[] tokens;
-        uint256[] amounts;
-        uint256[] modes;
-        address onBehalfOf;
-        address flParamGetterAddr;
-        bytes flParamGetterData;
-        bytes taskData;
-    }
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -54,7 +42,7 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard {
         uint8[] memory,
         bytes32[] memory
     ) public override payable returns (bytes32) {
-        Params memory flData = parseInputs(_callData);
+        FlashLoanParams memory flData = parseInputs(_callData);
 
         // if we want to get on chain info about FL params
         if (flData.flParamGetterAddr != address(0)) {
@@ -81,7 +69,7 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard {
     /// @notice Gets a Fl from AaveV2 and returns back the execution to the action address
     /// @param _flData All the amounts/tokens and related aave fl data
     /// @param _params Rest of the data we have in the task
-    function _flAaveV2(Params memory _flData, bytes memory _params) internal returns (uint) {
+    function _flAaveV2(FlashLoanParams memory _flData, bytes memory _params) internal returns (uint) {
 
         ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
             address(this),
@@ -130,7 +118,7 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard {
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             recipeExecutor,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, bytes32(_amounts[0] + _fees[0]))
+            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes[],bytes4[],uint8[][]),bytes32)", currTask, bytes32(_amounts[0] + _fees[0]))
         );
 
         // return FL
@@ -141,8 +129,8 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard {
         return true;
     }
 
-    function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
-        inputData = abi.decode(_callData, (Params));
+    function parseInputs(bytes memory _callData) public pure returns (FlashLoanParams memory inputData) {
+        inputData = abi.decode(_callData, (FlashLoanParams));
     }
 
     // solhint-disable-next-line no-empty-blocks

@@ -13,19 +13,12 @@ import "../../../utils/FLFeeFaucet.sol";
 import "../../../utils/ReentrancyGuard.sol";
 import "../../ActionBase.sol";
 import "./DydxFlashLoanBase.sol";
+import "../../../interfaces/flashloan/IFlashLoanBase.sol";
 
 /// @title Action that gets and receives a FL from DyDx protocol
-contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard {
+contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard, IFlashLoanBase {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
-    
-    struct Params {
-        uint256 amount;
-        address token;
-        address flParamGetterAddr;
-        bytes flParamGetterData;
-        bytes taskData;
-    }
 
     //Caller not dydx
     error OnlyDyDxCallerError();
@@ -48,19 +41,19 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
         uint8[] memory,
         bytes32[] memory
     ) public payable override returns (bytes32) {
-        Params memory inputData = parseInputs(_callData);
 
+        FlashLoanParams memory inputData = parseInputs(_callData);
          // if we want to get on chain info about FL params
         if (inputData.flParamGetterAddr != address(0)) {
             (address[] memory tokens, uint256[] memory amounts, ) =
                 IFLParamGetter(inputData.flParamGetterAddr).getFlashLoanParams(inputData.flParamGetterData);
 
-            inputData.amount = amounts[0];
-            inputData.token = tokens[0];
+            inputData.amounts[0] = amounts[0];
+            inputData.tokens[0] = tokens[0];
         }
-        bytes memory taskData = inputData.taskData;
-        uint256 flAmount = _flDyDx(inputData.amount, inputData.token, abi.encode(taskData, inputData.amount, inputData.token));
 
+        bytes memory taskData = inputData.taskData;
+        uint256 flAmount = _flDyDx(inputData.amounts[0], inputData.tokens[0], abi.encode(taskData, inputData.amounts[0], inputData.tokens[0]));
         return bytes32(flAmount);
     }
 
@@ -140,8 +133,8 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
         flFeeFaucet.my2Wei(tokenAddr); // get extra 2 wei for DyDx fee
     }
 
-    function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
-        inputData = abi.decode(_callData, (Params));
+    function parseInputs(bytes memory _callData) public pure returns (FlashLoanParams memory inputData) {
+        inputData = abi.decode(_callData, (FlashLoanParams));
     }
 
     // solhint-disable-next-line no-empty-blocks
