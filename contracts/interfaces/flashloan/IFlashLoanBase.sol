@@ -10,6 +10,6 @@ abstract contract IFlashLoanBase{
         address onBehalfOf;
         address flParamGetterAddr;
         bytes flParamGetterData;
-        bytes taskData;
+        bytes recipeData;
     }
 }

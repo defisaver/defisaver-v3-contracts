@@ -32,7 +32,7 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
 
     FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(0x47f159C90850D5cE09E21F931d504536840f34b4);
 
-    bytes4 constant TASK_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
+    bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -52,8 +52,8 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
             inputData.tokens[0] = tokens[0];
         }
 
-        bytes memory taskData = inputData.taskData;
-        uint256 flAmount = _flDyDx(inputData.amounts[0], inputData.tokens[0], abi.encode(taskData, inputData.amounts[0], inputData.tokens[0]));
+        bytes memory recipeData = inputData.recipeData;
+        uint256 flAmount = _flDyDx(inputData.amounts[0], inputData.tokens[0], abi.encode(recipeData, inputData.amounts[0], inputData.tokens[0]));
         return bytes32(flAmount);
     }
 
@@ -70,7 +70,7 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
     /// @notice Gets a Fl from Dydx and returns back the execution to the action address
     /// @param _amount Amount of tokens to FL
     /// @param _token Token address we want to FL
-    /// @param _data Rest of the data we have in the task
+    /// @param _data Rest of the data we have in the recipe
     function _flDyDx(
         uint256 _amount,
         address _token,
@@ -119,14 +119,14 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
         (bytes memory callData, uint256 amount, address tokenAddr) =
             abi.decode(_data, (bytes, uint256, address));
 
-        (Recipe memory currTask, address proxy) = abi.decode(callData, (Recipe, address));
+        (Recipe memory currRecipe, address proxy) = abi.decode(callData, (Recipe, address));
         tokenAddr.withdrawTokens(proxy, amount);
 
-        address payable RecipeExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
+        address payable RecipeExecutor = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             RecipeExecutor,
-            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes[],bytes4[],uint8[][]),bytes32)", currTask, amount)
+            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes[],bytes4[],uint8[][]),bytes32)", currRecipe, amount)
         );
         // return FL (just send funds to this addr)
         

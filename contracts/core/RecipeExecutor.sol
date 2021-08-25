@@ -13,7 +13,6 @@ import "../interfaces/flashloan/IFlashLoanBase.sol";
 
 /// @title Handles FL taking and executes actions
 contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
-    //TODO aave fl needs different input params check out
 
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
@@ -132,7 +131,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         bytes memory recipeData = abi.encode(_currRecipe, address(this));
 
         IFlashLoanBase.FlashLoanParams memory params = abi.decode(_currRecipe.callData[0], (IFlashLoanBase.FlashLoanParams));
-        params.taskData = recipeData;
+        params.recipeData = recipeData;
         _currRecipe.callData[0] = abi.encode(params);
 
         /// @dev FL action is called directly so that we can check who the msg.sender of FL is

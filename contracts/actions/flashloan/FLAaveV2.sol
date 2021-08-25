@@ -33,7 +33,7 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, IFlashLoanBase 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
-    bytes4 constant TASK_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
+    bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -50,8 +50,8 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, IFlashLoanBase 
                 IFLParamGetter(flData.flParamGetterAddr).getFlashLoanParams(flData.flParamGetterData);
         }
 
-        bytes memory taskData = flData.taskData; // TODO: Fix this
-        uint flAmount = _flAaveV2(flData, taskData);
+        bytes memory recipeData = flData.recipeData; // TODO: Fix this
+        uint flAmount = _flAaveV2(flData, recipeData);
 
         return bytes32(flAmount);
     }
@@ -68,7 +68,7 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, IFlashLoanBase 
 
     /// @notice Gets a Fl from AaveV2 and returns back the execution to the action address
     /// @param _flData All the amounts/tokens and related aave fl data
-    /// @param _params Rest of the data we have in the task
+    /// @param _params Rest of the data we have in the recipe
     function _flAaveV2(FlashLoanParams memory _flData, bytes memory _params) internal returns (uint) {
 
         ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
@@ -106,19 +106,19 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, IFlashLoanBase 
             revert SameCallerError();
         }
 
-        (Recipe memory currTask, address proxy) = abi.decode(_params, (Recipe, address));
+        (Recipe memory currRecipe, address proxy) = abi.decode(_params, (Recipe, address));
 
         // Send FL amounts to user proxy
         for (uint256 i = 0; i < _assets.length; ++i) {
             _assets[i].withdrawTokens(proxy, _amounts[i]);
         }
 
-        address payable recipeExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
+        address payable recipeExecutor = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
 
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             recipeExecutor,
-            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes[],bytes4[],uint8[][]),bytes32)", currTask, bytes32(_amounts[0] + _fees[0]))
+            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes[],bytes4[],uint8[][]),bytes32)", currRecipe, bytes32(_amounts[0] + _fees[0]))
         );
 
         // return FL
