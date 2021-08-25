@@ -23,7 +23,7 @@ const { subLimitOrderStrategy, callLimitOrderStrategy } = require('../strategies
 
 const { createStrategy, addBotCaller } = require('../utils-strategies.js');
 
-describe('Limit-Order-Strategy', function () {
+describe('Test change-sub-data as direct action', function () {
     this.timeout(120000);
 
     let senderAcc;

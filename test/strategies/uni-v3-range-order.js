@@ -107,7 +107,7 @@ describe('Uni-v3-range-order strat', function () {
         positionManager.approve(proxy.address, tokenId);
         strategyId = await subUniV3RangeOrderStrategy(proxy, tokenId, 0, senderAcc.address);
         // user subscribes to strategy and fills three slots
-        expect(strategyId).to.be.eq(0);
+        expect(strategyId).to.be.eq('0');
         console.log(await subStorage.getSub(strategyId));
     });
 

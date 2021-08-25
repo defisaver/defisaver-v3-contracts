@@ -15,7 +15,7 @@ contract UniV3CurrentTickTrigger is ITrigger, AdminAuth {
     IUniswapV3Factory public constant uniswapFactory = 
         IUniswapV3Factory(0x1F98431c8aD98523631AE4a59f267346ea31F984);
     
-    enum WantedTickPosition {UNDER, OVER}
+    enum CurrTickState {UNDER, OVER}
 
     struct SubParams {
         uint256 tokenId;
@@ -31,10 +31,10 @@ contract UniV3CurrentTickTrigger is ITrigger, AdminAuth {
         
         int24 currTick = pool.slot0().tick;
 
-        if (WantedTickPosition(inputData.state) == WantedTickPosition.UNDER){
+        if (CurrTickState(inputData.state) == CurrTickState.UNDER){
             if (currTick < tickLower) return true;
         }
-        if (WantedTickPosition(inputData.state) == WantedTickPosition.OVER){
+        if (CurrTickState(inputData.state) == CurrTickState.OVER){
             if (currTick > tickUpper) return true;
         }
 

@@ -27,7 +27,7 @@ const { openVault } = require('../actions');
 
 const { fetchMakerAddresses } = require('../utils-mcd');
 
-describe('Mcd-Repay-Strategy', function () {
+describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to recipient)', function () {
     this.timeout(120000);
     const ethJoin = ilks[0].join;
     let senderAcc;
@@ -170,7 +170,7 @@ describe('Mcd-Repay-Strategy', function () {
         console.log(await subStorage.getSub(subId));
     });
 
-    it('... should trigger a maker repay strategy', async () => {
+    it('... should trigger a mcd close strategy', async () => {
         const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
         console.log(`Dai before closing : ${daiBalanceBefore.toString()}`);
         await callMcdCloseStrategy(
