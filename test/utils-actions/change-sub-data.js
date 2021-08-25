@@ -127,9 +127,9 @@ describe('Limit-Order-Strategy', function () {
         // eslint-disable-next-line max-len
         const currPrice = await getChainLinkPrice(ETH_ADDR);
 
-        const targetPrice = currPrice + 100; // Target is smaller so we can execute it
+        const targetPrice = currPrice - 100; // Target is smaller so we can execute it
         const triggerData = await createChainLinkPriceTrigger(WETH_ADDRESS, targetPrice, 0);
-        await changeSubDataForSub(proxy, subStorage.address, subId, [triggerData], []);
+        await changeSubDataForSub(proxy, subStorage.address, subId, [triggerData]);
 
         // get weth and approve dsproxy to pull
         await depositToWeth(amount.toString());

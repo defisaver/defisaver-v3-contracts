@@ -135,11 +135,6 @@
 							"internalType": "bytes[]",
 							"name": "triggerData",
 							"type": "bytes[]"
-						},
-						{
-							"internalType": "bytes[]",
-							"name": "recipeData",
-							"type": "bytes[]"
 						}
 					],
 					"internalType": "struct ChangeSubData.Params",
@@ -270,11 +265,6 @@
 						{
 							"internalType": "bytes[]",
 							"name": "triggerData",
-							"type": "bytes[]"
-						},
-						{
-							"internalType": "bytes[]",
-							"name": "recipeData",
 							"type": "bytes[]"
 						}
 					],

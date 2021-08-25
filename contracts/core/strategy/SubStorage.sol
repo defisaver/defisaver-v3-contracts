@@ -83,6 +83,23 @@ contract SubStorage is StrategyModel, AdminAuth {
         emit UpdateData(_subId, sub);
     }
 
+    /// @notice Updates the users strategy trigger data
+    /// @dev Only callable by proxy who created the strategy
+    /// @param _subId Id of the subscription to update
+    /// @param _triggerData Subscription data for triggers
+    function updateSubTriggerData(
+        uint256 _subId,
+        bytes[] memory _triggerData
+    ) public onlySubOwner(_subId) {
+        StrategySub storage sub = strategiesSubs[_subId];
+
+        if (_triggerData.length > 0){
+            sub.triggerData = _triggerData;
+        }
+
+        emit UpdateData(_subId, sub);
+    }
+
     function activateSub(
         uint _subId
     ) public onlySubOwner(_subId) {

@@ -1081,10 +1081,10 @@ const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, o
     const functionData = claimInstMakerAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](claimInstMakerAddress, functionData);
 };
-const changeSubDataForSub = async (proxy, subStorageAddr, subId, triggerData, recipeData) => {
+const changeSubDataForSub = async (proxy, subStorageAddr, subId, triggerData) => {
     const changeSubDataAddress = await getAddrFromRegistry('ChangeSubData');
     const changeSubDataAction = new dfs.actions.basic.ChangeSubDataAction(
-        subStorageAddr, subId, triggerData, recipeData,
+        subStorageAddr, subId, triggerData,
     );
     const functionData = changeSubDataAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](changeSubDataAddress, functionData);

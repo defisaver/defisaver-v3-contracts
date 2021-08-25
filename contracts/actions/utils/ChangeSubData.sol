@@ -11,7 +11,6 @@ contract ChangeSubData is ActionBase {
         address subStorageAddr;
         uint256 subId;
         bytes[] triggerData;
-        bytes[] recipeData;
     }
 
     /// @inheritdoc ActionBase
@@ -41,7 +40,7 @@ contract ChangeSubData is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
     function _changeSubData(Params memory params) public{
-        ISubStorage(params.subStorageAddr).updateSubData(params.subId, params.triggerData, params.recipeData);
+        ISubStorage(params.subStorageAddr).updateSubTriggerData(params.subId, params.triggerData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
