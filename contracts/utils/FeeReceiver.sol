@@ -49,6 +49,15 @@ contract FeeReceiver {
         _to.transfer(_amount);
     }
 
+    /// @notice Gives ERC20 token approval from this contract to an address
+    /// @dev This is needed if we change the BotRefill contract which needs to pull funds
+    /// @param _tokenAddr ERC20 token address
+    /// @param _to Address of the address to approve
+    /// @param _amount Amount to approve
+    function approveAddress(address _tokenAddr, address _to, uint256 _amount) public onlyAdmin {
+        IERC20(_tokenAddr).safeApprove(_to, _amount);
+    }
+
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
     fallback() external payable {}

@@ -6,14 +6,14 @@ const {
     balanceOf,
     WETH_ADDRESS,
     ETH_ADDR,
+    USDC_ADDR,
     depositToWeth,
     sendEther,
     impersonateAccount,
     stopImpersonatingAccount,
-    DAI_ADDR,
     MAX_UINT,
     send,
-    nullAddress,
+    getAllowance,
 } = require('../utils');
 
 describe('Fee-Receiver', function () {
@@ -100,6 +100,44 @@ describe('Fee-Receiver', function () {
         expect(ethBalanceBefore.add(contractEthBalance)).to.be.eq(ethBalanceAfter);
     });
 
+    it('... should give approval from a contract to the address', async () => {
+        const allowanceBefore = await getAllowance(
+            USDC_ADDR,
+            feeReceiver.address,
+            senderAcc.address,
+        );
+
+        await feeReceiver.approveAddress(USDC_ADDR, senderAcc.address, MAX_UINT);
+
+        const allowanceAfter = await getAllowance(
+            USDC_ADDR,
+            feeReceiver.address,
+            senderAcc.address,
+        );
+
+        expect(allowanceBefore).to.be.eq(0);
+        expect(allowanceAfter).to.be.eq(MAX_UINT);
+    });
+
+    it('... should remove approval from a contract to the address', async () => {
+        const allowanceBefore = await getAllowance(
+            USDC_ADDR,
+            feeReceiver.address,
+            senderAcc.address,
+        );
+
+        await feeReceiver.approveAddress(USDC_ADDR, senderAcc.address, 0);
+
+        const allowanceAfter = await getAllowance(
+            USDC_ADDR,
+            feeReceiver.address,
+            senderAcc.address,
+        );
+
+        expect(allowanceBefore).to.be.eq(MAX_UINT);
+        expect(allowanceAfter).to.be.eq(0);
+    });
+
     it('... should fail to withdraw Weth as the caller is not admin', async () => {
         try {
             feeReceiver = feeReceiver.connect(senderAcc);
@@ -115,6 +153,8 @@ describe('Fee-Receiver', function () {
             feeReceiver = feeReceiver.connect(senderAcc);
 
             await feeReceiver.withdrawEth(senderAcc.address, 0);
+
+            await stopImpersonatingAccount(MULTISIG_ADDR);
         } catch (err) {
             expect(err.toString()).to.have.string('Only Admin');
         }
