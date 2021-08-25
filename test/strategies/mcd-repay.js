@@ -10,7 +10,6 @@ const {
     redeploy,
     fetchAmountinUSDPrice,
     formatExchangeObj,
-    nullAddress,
 } = require('../utils');
 
 const { createStrategy, addBotCaller } = require('../utils-strategies');
