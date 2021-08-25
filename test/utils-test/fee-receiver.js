@@ -76,15 +76,15 @@ describe('Fee-Receiver', function () {
         // deposit 3 eth to contract
         await sendEther(senderAcc, feeReceiver.address, ethAmount);
 
-        const ethBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
+        const ethBalanceBefore = await balanceOf(ETH_ADDR, MULTISIG_ADDR);
 
         // withdraw 1 eth
-        await feeReceiver.withdrawEth(senderAcc.address, oneEth);
+        await feeReceiver.withdrawEth(MULTISIG_ADDR, oneEth);
 
-        const ethBalanceAfter = await balanceOf(ETH_ADDR, senderAcc.address);
+        const ethBalanceAfter = await balanceOf(ETH_ADDR, MULTISIG_ADDR);
 
         // if we got that one eth to senderAcc
-        expect(ethBalanceBefore.add(oneEth)).to.be.eq(ethBalanceAfter);
+        expect(ethBalanceBefore.add(oneEth)).to.be.gt(ethBalanceAfter);
     });
 
     it('... should be able to withdraw whole Eth balance', async () => {

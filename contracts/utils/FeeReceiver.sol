@@ -46,7 +46,8 @@ contract FeeReceiver {
             _amount = address(this).balance;
         }
 
-        _to.transfer(_amount);
+        (bool success, ) = _to.call{value: _amount}("");
+        require(success, "Eth send failed");
     }
 
     /// @notice Gives ERC20 token approval from this contract to an address
