@@ -89,14 +89,14 @@ describe('Uni-v3-range-order strat', function () {
 
         const withdrawAction = new dfs.actions.uniswapV3.UniswapV3WithdrawAction(
             '&tokenId',
-            0,
-            0,
-            0,
-            0,
+            '%liquidityAmount',
+            '%amount0Min',
+            '%amount1Min',
+            '%deadline',
             '&recipient',
-            0,
-            0,
-            0,
+            '%amount0Max',
+            '%amount1Max',
+            '%nftOwner',
         );
         rangeOrderStrategy.addAction(withdrawAction);
         const callData = rangeOrderStrategy.encodeForDsProxyCall();

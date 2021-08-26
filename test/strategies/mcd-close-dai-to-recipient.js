@@ -104,8 +104,8 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         console.log(flAmount.toString());
         mcdCloseStrategy.addAction(
             new dfs.actions.flashloan.DyDxFlashLoanAction(
-                '0',
-                nullAddress,
+                '%loanAmount',
+                '%daiAddr',
                 nullAddress,
                 [],
             ),
@@ -113,26 +113,26 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         mcdCloseStrategy.addAction(
             new dfs.actions.maker.MakerPaybackAction(
                 '&vaultId',
-                '0',
+                '%daiAmountToPayback(maxUint)',
                 '&proxy',
-                nullAddress,
+                '%mcdManager',
             ),
         );
         mcdCloseStrategy.addAction(
             new dfs.actions.maker.MakerWithdrawAction(
                 '&vaultId',
-                '0',
-                nullAddress,
+                '%ethAmountToWithdraw(maxUint)',
+                '%ethJoin',
                 '&proxy',
-                nullAddress,
+                '%mcdManager',
             ),
         );
         mcdCloseStrategy.addAction(
             new dfs.actions.basic.SellAction(
                 formatExchangeObj(
-                    nullAddress,
-                    nullAddress,
-                    '0',
+                    '%wethAddr',
+                    '%daiAddr',
+                    '%amountToSell(maxUint)',
                     '%exchangeWrapper',
                 ),
                 '&proxy',
@@ -141,16 +141,16 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         );
         mcdCloseStrategy.addAction(
             new dfs.actions.basic.SendTokenAction(
-                nullAddress,
-                nullAddress,
-                '0',
+                '%daiAddr',
+                '%dydxFlAddr',
+                '%amountToPayback',
             ),
         );
         mcdCloseStrategy.addAction(
             new dfs.actions.basic.SendTokenAction(
-                nullAddress,
+                '%daiAddr',
                 '&recipient',
-                '0',
+                '%amountToRecipient(maxUint)',
             ),
         );
         const callData = mcdCloseStrategy.encodeForDsProxyCall();
@@ -158,7 +158,7 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
 
         const currPrice = await getChainLinkPrice(ETH_ADDR);
 
-        const targetPrice = currPrice - 100; // Target is smaller so we can execute itc
+        const targetPrice = currPrice - 100; // Target is smaller so we can execute it
         subId = await subMcdCloseStrategy(
             vaultId,
             proxy,

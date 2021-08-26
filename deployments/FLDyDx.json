@@ -374,7 +374,7 @@
 						},
 						{
 							"internalType": "bytes",
-							"name": "taskData",
+							"name": "recipeData",
 							"type": "bytes"
 						}
 					],
