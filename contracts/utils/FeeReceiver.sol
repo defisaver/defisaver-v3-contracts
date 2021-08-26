@@ -12,7 +12,6 @@ contract FeeReceiver {
     address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
     address public constant ADMIN_ADDR = 0xA74e9791D7D66c6a14B2C571BdA0F2A1f6D64E06;
-    address public constant BOT_REFILL_ADDR = 0xCD73a63f2cb03d1a11c5C009B0fB2b5c9C430754;
 
     modifier onlyAdmin {
         require(msg.sender == ADMIN_ADDR, "Only Admin");
@@ -22,8 +21,9 @@ contract FeeReceiver {
 
     /// @dev Approves bot refill as it needs to pull funds for gas feeds from this addr
     constructor() {
-        IERC20(DAI_ADDR).approve(BOT_REFILL_ADDR, type(uint256).max);
-        IERC20(WETH_ADDR).approve(BOT_REFILL_ADDR, type(uint256).max);
+        address botRefill = 0xCD73a63f2cb03d1a11c5C009B0fB2b5c9C430754;
+        IERC20(DAI_ADDR).approve(botRefill, type(uint256).max);
+        IERC20(WETH_ADDR).approve(botRefill, type(uint256).max);
     }
 
     /// @notice Withdraws ERC20 tokens from the contract
