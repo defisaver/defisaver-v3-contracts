@@ -18,7 +18,7 @@ const {
 } = require('../utils');
 const { createChainLinkPriceTrigger } = require('../triggers.js');
 
-const { changeSubDataForSub } = require('../actions.js');
+const { changeTriggerData } = require('../actions.js');
 const { subLimitOrderStrategy, callLimitOrderStrategy } = require('../strategies');
 
 const { createStrategy, addBotCaller } = require('../utils-strategies.js');
@@ -49,7 +49,7 @@ describe('Test change-sub-data as direct action', function () {
         await redeploy('SubProxy');
         await redeploy('StrategyProxy');
         await redeploy('PullToken');
-        await redeploy('ChangeSubData');
+        await redeploy('ChangeTriggerData');
         strategyExecutor = await redeploy('StrategyExecutor');
 
         await addBotCaller(botAcc.address);
@@ -129,7 +129,7 @@ describe('Test change-sub-data as direct action', function () {
 
         const targetPrice = currPrice - 100; // Target is smaller so we can execute it
         const triggerData = await createChainLinkPriceTrigger(WETH_ADDRESS, targetPrice, 0);
-        await changeSubDataForSub(proxy, subStorage.address, subId, [triggerData]);
+        await changeTriggerData(proxy, subStorage.address, subId, [triggerData]);
 
         // get weth and approve dsproxy to pull
         await depositToWeth(amount.toString());
