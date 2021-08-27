@@ -92,7 +92,7 @@
 				},
 				{
 					"internalType": "bool",
-					"name": "continous",
+					"name": "continuous",
 					"type": "bool"
 				}
 			],

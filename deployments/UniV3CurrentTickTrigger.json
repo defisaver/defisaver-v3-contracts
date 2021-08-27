@@ -1,5 +1,5 @@
 {
-	"contractName": "ChainLinkPriceTrigger",
+	"contractName": "UniV3CurrentTickTrigger",
 	"abi": [
 		{
 			"inputs": [],
@@ -43,38 +43,6 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "feedRegistry",
-			"outputs": [
-				{
-					"internalType": "contract IFeedRegistry",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_tokenAddr",
-					"type": "address"
-				}
-			],
-			"name": "getPrice",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
 			"inputs": [
 				{
 					"internalType": "bytes",
@@ -103,6 +71,63 @@
 			"name": "kill",
 			"outputs": [],
 			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes",
+					"name": "_subData",
+					"type": "bytes"
+				}
+			],
+			"name": "parseInputs",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "uint256",
+							"name": "tokenId",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint8",
+							"name": "state",
+							"type": "uint8"
+						}
+					],
+					"internalType": "struct UniV3CurrentTickTrigger.SubParams",
+					"name": "params",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "positionManager",
+			"outputs": [
+				{
+					"internalType": "contract IUniswapV3NonfungiblePositionManager",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "uniswapFactory",
+			"outputs": [
+				{
+					"internalType": "contract IUniswapV3Factory",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
 			"type": "function"
 		},
 		{

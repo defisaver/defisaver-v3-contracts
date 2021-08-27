@@ -841,7 +841,6 @@ const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amoun
             from,
         );
     }
-
     if (tokenBalance1.lt(amount1Desired)) {
         await sell(
             proxy,
@@ -1082,6 +1081,14 @@ const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, o
     const functionData = claimInstMakerAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](claimInstMakerAddress, functionData);
 };
+const changeTriggerData = async (proxy, subStorageAddr, subId, triggerData) => {
+    const changeTriggerDataAddress = await getAddrFromRegistry('ChangeTriggerData');
+    const changeTriggerDataAction = new dfs.actions.basic.ChangeTriggerData(
+        subStorageAddr, subId, triggerData,
+    );
+    const functionData = changeTriggerDataAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](changeTriggerDataAddress, functionData);
+};
 
 module.exports = {
     sell,
@@ -1148,4 +1155,5 @@ module.exports = {
 
     buyTokenIfNeeded,
     claimInstMaker,
+    changeTriggerData,
 };

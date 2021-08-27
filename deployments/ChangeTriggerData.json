@@ -1,11 +1,6 @@
 {
-	"contractName": "FLDyDx",
+	"contractName": "ChangeTriggerData",
 	"abi": [
-		{
-			"inputs": [],
-			"name": "MarketIdNotFound",
-			"type": "error"
-		},
 		{
 			"inputs": [],
 			"name": "NonContractCall",
@@ -13,22 +8,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "OnlyDyDxCallerError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "ReentrantCall",
-			"type": "error"
-		},
-		{
-			"inputs": [],
 			"name": "ReturnIndexValueError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SameCallerError",
 			"type": "error"
 		},
 		{
@@ -49,32 +29,6 @@
 		{
 			"inputs": [],
 			"name": "ADMIN_VAULT_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "DYDX_DUST_FEE",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ETH_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -139,19 +93,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "SOLO_MARGIN_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "SUB_MAX_INDEX_VALUE",
 			"outputs": [
 				{
@@ -177,16 +118,33 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "WETH_ADDRESS",
-			"outputs": [
+			"inputs": [
 				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
+					"components": [
+						{
+							"internalType": "address",
+							"name": "subStorageAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "subId",
+							"type": "uint256"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
+						}
+					],
+					"internalType": "struct ChangeTriggerData.Params",
+					"name": "params",
+					"type": "tuple"
 				}
 			],
-			"stateMutability": "view",
+			"name": "_changeSubData",
+			"outputs": [],
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
@@ -218,58 +176,23 @@
 		{
 			"inputs": [
 				{
-					"internalType": "address",
-					"name": "_initiator",
-					"type": "address"
-				},
-				{
-					"components": [
-						{
-							"internalType": "address",
-							"name": "owner",
-							"type": "address"
-						},
-						{
-							"internalType": "uint256",
-							"name": "number",
-							"type": "uint256"
-						}
-					],
-					"internalType": "struct Account.Info",
-					"name": "",
-					"type": "tuple"
-				},
-				{
-					"internalType": "bytes",
-					"name": "_data",
-					"type": "bytes"
-				}
-			],
-			"name": "callFunction",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
 					"internalType": "bytes",
 					"name": "_callData",
 					"type": "bytes"
 				},
 				{
 					"internalType": "bytes[]",
-					"name": "",
+					"name": "_subData",
 					"type": "bytes[]"
 				},
 				{
 					"internalType": "uint8[]",
-					"name": "",
+					"name": "_paramMapping",
 					"type": "uint8[]"
 				},
 				{
 					"internalType": "bytes32[]",
-					"name": "",
+					"name": "_returnValues",
 					"type": "bytes32[]"
 				}
 			],
@@ -295,19 +218,6 @@
 			"name": "executeActionDirect",
 			"outputs": [],
 			"stateMutability": "payable",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "flFeeFaucet",
-			"outputs": [
-				{
-					"internalType": "contract FLFeeFaucet",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
 			"type": "function"
 		},
 		{
@@ -343,43 +253,23 @@
 				{
 					"components": [
 						{
-							"internalType": "address[]",
-							"name": "tokens",
-							"type": "address[]"
-						},
-						{
-							"internalType": "uint256[]",
-							"name": "amounts",
-							"type": "uint256[]"
-						},
-						{
-							"internalType": "uint256[]",
-							"name": "modes",
-							"type": "uint256[]"
-						},
-						{
 							"internalType": "address",
-							"name": "onBehalfOf",
+							"name": "subStorageAddr",
 							"type": "address"
 						},
 						{
-							"internalType": "address",
-							"name": "flParamGetterAddr",
-							"type": "address"
+							"internalType": "uint256",
+							"name": "subId",
+							"type": "uint256"
 						},
 						{
-							"internalType": "bytes",
-							"name": "flParamGetterData",
-							"type": "bytes"
-						},
-						{
-							"internalType": "bytes",
-							"name": "recipeData",
-							"type": "bytes"
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
 						}
 					],
-					"internalType": "struct IFlashLoanBase.FlashLoanParams",
-					"name": "inputData",
+					"internalType": "struct ChangeTriggerData.Params",
+					"name": "params",
 					"type": "tuple"
 				}
 			],
@@ -421,10 +311,6 @@
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
-		},
-		{
-			"stateMutability": "payable",
-			"type": "receive"
 		}
 	],
 	"networks": {

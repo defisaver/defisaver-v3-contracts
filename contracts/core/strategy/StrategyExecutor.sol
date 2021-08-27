@@ -23,7 +23,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
     bytes4 constant SUB_STORAGE_ID = bytes4(keccak256("SubStorage"));
     bytes4 constant STRATEGY_STORAGE_ID = bytes4(keccak256("StrategyStorage"));
 
-    bytes4 constant TASK_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
+    bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     error TriggerNotActiveError();
     error BotNotApprovedError(address, uint256);
@@ -104,7 +104,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         bytes[] memory _actionsCallData,
         address _proxy
     ) internal {
-        address RecipeExecutorAddr = registry.getAddr(TASK_EXECUTOR_ID);
+        address RecipeExecutorAddr = registry.getAddr(RECIPE_EXECUTOR_ID);
 
         address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
 

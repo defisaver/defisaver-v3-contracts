@@ -15,11 +15,18 @@ const createChainLinkPriceTrigger = async (tokenAddr, price, state) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
     const param = abiCoder.encode(['address', 'uint256', 'uint8'], [tokenAddr, price, state]);
+    return param;
+};
+const createUniV3RangeOrderTrigger = async (tokenId, state) => {
+    const abiCoder = new hre.ethers.utils.AbiCoder();
+
+    const param = abiCoder.encode(['uint256', 'uint8'], [tokenId, state]);
 
     return param;
 };
 
 module.exports = {
+    createUniV3RangeOrderTrigger,
     createMcdTrigger,
     createChainLinkPriceTrigger,
     RATIO_STATE_OVER,

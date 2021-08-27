@@ -85,7 +85,6 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
-
         _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
 
         _exchangeData.user = getUserAddress();

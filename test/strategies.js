@@ -7,6 +7,7 @@ const {
 } = require('./utils-strategies');
 
 const {
+    createUniV3RangeOrderTrigger,
     createMcdTrigger,
     createChainLinkPriceTrigger,
     RATIO_STATE_UNDER,
@@ -21,9 +22,24 @@ const {
     WETH_ADDRESS,
     DAI_ADDR,
     UNISWAP_WRAPPER,
+    MAX_UINT128,
+    nullAddress,
 } = require('./utils');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
+
+const subUniV3RangeOrderStrategy = async (proxy, tokenId, state, recipient) => {
+    const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
+    const tokenIdEncoded = abiCoder.encode(['uint256'], [tokenId.toString()]);
+    const recipientEncoded = abiCoder.encode(['address'], [recipient]);
+    const strategyId = await getLatestStrategyId();
+    const triggerData = await createUniV3RangeOrderTrigger(tokenId, state);
+
+    // eslint-disable-next-line max-len
+    const subId = await subToStrategy(proxy, strategyId, true, [tokenIdEncoded, proxyAddrEncoded, recipientEncoded], [triggerData]);
+
+    return subId;
+};
 
 const subMcdRepayStrategy = async (proxy, vaultId, rationUnder, targetRatio) => {
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
@@ -55,6 +71,24 @@ const subMcdBoostStrategy = async (proxy, vaultId, rationUnder, targetRatio) => 
     return subId;
 };
 
+const subMcdCloseStrategy = async (vaultId, proxy, recipient, targetPrice, tokenAddress) => {
+    const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
+    const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
+    const recipientEncoded = abiCoder.encode(['address'], [recipient]);
+
+    const strategyId = await getLatestStrategyId();
+
+    const triggerData = await createChainLinkPriceTrigger(
+        tokenAddress, targetPrice, RATIO_STATE_OVER,
+    );
+    const subId = await subToStrategy(
+        proxy, strategyId, true,
+        [vaultIdEncoded, proxyAddrEncoded, recipientEncoded],
+        [triggerData],
+    );
+    return subId;
+};
+
 // eslint-disable-next-line max-len
 const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrBuy, amount, targetPrice) => {
     const tokenAddrSellEncoded = abiCoder.encode(['address'], [tokenAddrSell]);
@@ -72,6 +106,36 @@ const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrB
         [triggerData]);
 
     return subId;
+};
+// eslint-disable-next-line max-len
+const callUniV3RangeOrderStrategy = async (botAcc, strategyExecutor, strategyId, liquidity, recipient, nftOwner) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const deadline = Date.now() + Date.now();
+    const withdrawAction = new dfs.actions.uniswapV3.UniswapV3WithdrawAction(
+        '0',
+        liquidity,
+        0,
+        0,
+        deadline,
+        recipient,
+        MAX_UINT128,
+        MAX_UINT128,
+        nftOwner,
+    );
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed callUniV3RangeOrderStrategy: ${gasUsed}`);
 };
 
 const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyId, ethJoin, repayAmount) => {
@@ -229,6 +293,65 @@ const callLimitOrderStrategy = async (botAcc, senderAcc, strategyExecutor, subId
     console.log(`GasUsed callLimitOrderStrategy; ${gasUsed}`);
 };
 
+// eslint-disable-next-line max-len
+const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, flAmount, ethJoin, dydxFlAddr) => {
+    const actionsCallData = [];
+    const flashLoanAction = new dfs.actions.flashloan.DyDxFlashLoanAction(
+        flAmount,
+        DAI_ADDR,
+        nullAddress,
+        [],
+    );
+    const paybackAction = new dfs.actions.maker.MakerPaybackAction(
+        '0',
+        hre.ethers.constants.MaxUint256,
+        placeHolderAddr,
+        MCD_MANAGER_ADDR,
+    );
+    const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
+        '0',
+        hre.ethers.constants.MaxUint256,
+        ethJoin,
+        placeHolderAddr,
+        MCD_MANAGER_ADDR,
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            WETH_ADDRESS, // can't be placeholder because of proper formatting of uni path
+            DAI_ADDR,
+            hre.ethers.constants.MaxUint256,
+            UNISWAP_WRAPPER,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+    const sendFirst = new dfs.actions.basic.SendTokenAction(
+        DAI_ADDR,
+        dydxFlAddr,
+        flAmount,
+    );
+    const sendSecond = new dfs.actions.basic.SendTokenAction(
+        DAI_ADDR,
+        placeHolderAddr,
+        hre.ethers.constants.MaxUint256,
+    );
+    actionsCallData.push(flashLoanAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(sendFirst.encodeForRecipe()[0]);
+    actionsCallData.push(sendSecond.encodeForRecipe()[0]);
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, [[]], actionsCallData, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed callLimitOrderStrategy; ${gasUsed}`);
+};
+
 module.exports = {
     subMcdRepayStrategy,
     subMcdBoostStrategy,
@@ -236,4 +359,8 @@ module.exports = {
     callMcdRepayStrategy,
     callMcdBoostStrategy,
     callLimitOrderStrategy,
+    subUniV3RangeOrderStrategy,
+    callUniV3RangeOrderStrategy,
+    subMcdCloseStrategy,
+    callMcdCloseStrategy,
 };
