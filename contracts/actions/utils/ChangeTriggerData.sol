@@ -5,7 +5,7 @@ import "../ActionBase.sol";
 import "../../interfaces/strategy/ISubStorage.sol";
 
 /// @title Helper action to change sub data for user proxy
-contract ChangeTriggerData is ActionBase {
+contract ChangeSubData is ActionBase {
     
     struct Params {
         address subStorageAddr;

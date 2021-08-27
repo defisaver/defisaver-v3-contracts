@@ -24,11 +24,18 @@ const createUniV3RangeOrderTrigger = async (tokenId, state) => {
 
     return param;
 };
+const createTimestampTrigger = async (timestamp) => {
+    const abiCoder = new hre.ethers.utils.AbiCoder();
+    const param = abiCoder.encode(['uint256'], [timestamp]);
+
+    return param;
+};
 
 module.exports = {
     createUniV3RangeOrderTrigger,
     createMcdTrigger,
     createChainLinkPriceTrigger,
+    createTimestampTrigger,
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
 };
