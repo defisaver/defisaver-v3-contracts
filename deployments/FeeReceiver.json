@@ -1,0 +1,137 @@
+{
+	"contractName": "FeeReceiver",
+	"abi": [
+		{
+			"inputs": [],
+			"stateMutability": "nonpayable",
+			"type": "constructor"
+		},
+		{
+			"stateMutability": "payable",
+			"type": "fallback"
+		},
+		{
+			"inputs": [],
+			"name": "ADMIN_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "BOT_REFILL_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "DAI_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "WETH_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_tokenAddr",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_to",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_amount",
+					"type": "uint256"
+				}
+			],
+			"name": "approveAddress",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address payable",
+					"name": "_to",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_amount",
+					"type": "uint256"
+				}
+			],
+			"name": "withdrawEth",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_tokenAddr",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_to",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_amount",
+					"type": "uint256"
+				}
+			],
+			"name": "withdrawToken",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"stateMutability": "payable",
+			"type": "receive"
+		}
+	],
+	"networks": {
+		"local": {}
+	}
+}

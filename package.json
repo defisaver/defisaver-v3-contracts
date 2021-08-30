@@ -41,8 +41,8 @@
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
     "ethereum-waffle": "^3.1.1",
-    "ethers": "^5.0.19",
-    "hardhat": "^2.0.4",
+    "ethers": "^5.4.5",
+    "hardhat": "^2.6.1",
     "hardhat-contract-sizer": "^2.0.1",
     "hardhat-gas-reporter": "^1.0.1",
     "hardhat-log-remover": "^2.0.0",
@@ -59,9 +59,6 @@
       "pre-commit": "npm run lint",
       "commit-msg": "npx --no-install commitlint --edit $1"
     }
-  },
-  "dependencies": {
-    "crypto": "^1.0.1"
   },
   "config": {
     "commitizen": {
