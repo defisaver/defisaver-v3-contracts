@@ -206,7 +206,15 @@ async function findPathByContractName(contractName) {
     return foundPath;
 }
 
-async function encryptPrivateKey(privateKey, secretKey) {
+async function encryptPrivateKey() {
+    const privateKey = readlineSync.question('Enter wallet private key!\n', {
+        hideEchoBack: true, // The typed text on screen is hidden by `*` (default).
+        mask: '',
+    });
+    const secretKey = readlineSync.question('Enter secret key for decrypting private key for deployment address!\n', {
+        hideEchoBack: true, // The typed text on screen is hidden by `*` (default).
+        mask: '',
+    });
     encryptedKey = await encrypt(privateKey, secretKey);
     console.log('Encrypted key to put in .env file:');
     console.log(encryptedKey);

@@ -36,8 +36,6 @@ task('customFlatten', 'Flattens for our DFS team')
 
 // eslint-disable-next-line no-undef
 task('encryptPrivateKey', 'Encrypt private key')
-    .addOptionalPositionalParam('privateKey', 'Private key for eth address')
-    .addOptionalPositionalParam('secretKey', 'Keyword for encryption and decryption')
-    .setAction(async (args) => {
-        encryptPrivateKey(args.privateKey, args.secretKey);
+    .setAction(async () => {
+        encryptPrivateKey();
     });
