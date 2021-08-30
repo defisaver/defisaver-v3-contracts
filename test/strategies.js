@@ -13,6 +13,7 @@ const {
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
     createTimestampTrigger,
+    createGasPriceTrigger,
 } = require('./triggers');
 
 const {
@@ -29,15 +30,17 @@ const {
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
-const subUniContinuousCollectStrategy = async (proxy, tokenId, recipient, timestamp) => {
+// eslint-disable-next-line max-len
+const subUniContinuousCollectStrategy = async (proxy, tokenId, recipient, timestamp, maxGasPrice) => {
     const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
     const tokenIdEncoded = abiCoder.encode(['uint256'], [tokenId.toString()]);
     const recipientEncoded = abiCoder.encode(['address'], [recipient]);
     const strategyId = await getLatestStrategyId();
-    const triggerData = await createTimestampTrigger(timestamp);
+    const timestampTriggerData = await createTimestampTrigger(timestamp);
+    const gasTriggerData = await createGasPriceTrigger(maxGasPrice);
 
     // eslint-disable-next-line max-len
-    const subId = await subToStrategy(proxy, strategyId, true, [tokenIdEncoded, proxyAddrEncoded, recipientEncoded], [triggerData]);
+    const subId = await subToStrategy(proxy, strategyId, true, [tokenIdEncoded, proxyAddrEncoded, recipientEncoded], [timestampTriggerData, gasTriggerData]);
 
     return subId;
 };
@@ -164,12 +167,14 @@ const callUniV3CollectStrategy = async (botAcc, strategyExecutor, strategyId, nf
         MAX_UINT128,
         nftOwner,
     );
-    const triggerData = await createTimestampTrigger(newTimestamp);
+    const timestampTriggerData = await createTimestampTrigger(newTimestamp);
     const changeTriggerDataAction = new dfs.actions.basic.ChangeTriggerDataAction(
         subStorageAddr,
         strategyId,
-        [triggerData],
+        timestampTriggerData,
+        0,
     );
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
     actionsCallData.push(collectAction.encodeForRecipe()[0]);
     actionsCallData.push(changeTriggerDataAction.encodeForRecipe()[0]);
@@ -178,6 +183,7 @@ const callUniV3CollectStrategy = async (botAcc, strategyExecutor, strategyId, nf
     // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
         gasLimit: 8000000,
+        gasPrice: hre.ethers.utils.parseUnits('10', 'gwei'),
     });
 
     const gasUsed = await getGasUsed(receipt);

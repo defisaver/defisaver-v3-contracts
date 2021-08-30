@@ -69,7 +69,6 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         return BotAuth(registry.getAddr(BOT_AUTH_ID)).isApproved(_subId, msg.sender);
     }
 
-    // TODO: dont revert here
     /// @notice Checks if all the triggers are true, reverts if not
     function checkTriggers(StrategySub memory _sub, bytes[] memory _triggerCallData)
         public

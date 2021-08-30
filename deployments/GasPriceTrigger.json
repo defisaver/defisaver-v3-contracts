@@ -1,5 +1,5 @@
 {
-	"contractName": "TimestampTrigger",
+	"contractName": "GasPriceTrigger",
 	"abi": [
 		{
 			"inputs": [],
@@ -87,11 +87,11 @@
 					"components": [
 						{
 							"internalType": "uint256",
-							"name": "timestamp",
+							"name": "maxGasPrice",
 							"type": "uint256"
 						}
 					],
-					"internalType": "struct TimestampTrigger.Params",
+					"internalType": "struct GasPriceTrigger.Params",
 					"name": "params",
 					"type": "tuple"
 				}

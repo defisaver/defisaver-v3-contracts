@@ -6,15 +6,15 @@ import "../auth/AdminAuth.sol";
 import "../interfaces/ITrigger.sol";
 import "../interfaces/IERC20.sol";
 
-contract TimestampTrigger is ITrigger, AdminAuth {
+contract GasPriceTrigger is ITrigger, AdminAuth {
     struct Params {
-        uint256 timestamp;
+        uint256 maxGasPrice;
     }
 
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         Params memory inputData = parseInputs(_subData);
 
-        if (inputData.timestamp < block.timestamp) return true;
+        if (inputData.maxGasPrice >= tx.gasprice) return true;
 
         return false;
     }

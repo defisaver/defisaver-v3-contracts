@@ -31,11 +31,19 @@ const createTimestampTrigger = async (timestamp) => {
     return param;
 };
 
+const createGasPriceTrigger = async (maxGasPrice) => {
+    const abiCoder = new hre.ethers.utils.AbiCoder();
+    const param = abiCoder.encode(['uint256'], [maxGasPrice]);
+
+    return param;
+};
+
 module.exports = {
     createUniV3RangeOrderTrigger,
     createMcdTrigger,
     createChainLinkPriceTrigger,
     createTimestampTrigger,
+    createGasPriceTrigger,
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
 };

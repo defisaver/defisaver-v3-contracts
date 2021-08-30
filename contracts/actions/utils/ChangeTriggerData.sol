@@ -5,12 +5,13 @@ import "../ActionBase.sol";
 import "../../interfaces/strategy/ISubStorage.sol";
 
 /// @title Helper action to change sub data for user proxy
-contract ChangeSubData is ActionBase {
+contract ChangeTriggerData is ActionBase {
     
     struct Params {
         address subStorageAddr;
         uint256 subId;
-        bytes[] triggerData;
+        bytes triggerData;
+        uint256 triggerNum;
     }
 
     /// @inheritdoc ActionBase
@@ -39,8 +40,8 @@ contract ChangeSubData is ActionBase {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
-    function _changeSubData(Params memory params) public{
-        ISubStorage(params.subStorageAddr).updateSubTriggerData(params.subId, params.triggerData);
+    function _changeSubData(Params memory _params) public{
+        ISubStorage(_params.subStorageAddr).updateSubTriggerData(_params.subId, _params.triggerData, _params.triggerNum);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

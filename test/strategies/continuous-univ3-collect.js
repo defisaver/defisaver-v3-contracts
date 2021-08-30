@@ -45,6 +45,7 @@ describe('Uni-v3-range-order strat', function () {
         await redeploy('BotAuth');
         await redeploy('ProxyAuth');
         await redeploy('TimestampTrigger');
+        await redeploy('GasPriceTrigger');
         await redeploy('DFSSell');
         await redeploy('StrategyStorage');
         subStorage = await redeploy('SubStorage');
@@ -86,6 +87,9 @@ describe('Uni-v3-range-order strat', function () {
         const timestampTrigger = new dfs.triggers.TimestampTrigger('0');
         rangeOrderStrategy.addTrigger(timestampTrigger);
 
+        const gasTrigger = new dfs.triggers.GasPriceTrigger('0');
+        rangeOrderStrategy.addTrigger(gasTrigger);
+
         const collectAction = new dfs.actions.uniswapV3.UniswapV3CollectAction(
             '&tokenId',
             '&recipient',
@@ -97,6 +101,7 @@ describe('Uni-v3-range-order strat', function () {
             '%subStorageAddr',
             '%strategyId',
             '%newTriggerData',
+            '%triggerNum',
         );
         rangeOrderStrategy.addAction(collectAction);
         rangeOrderStrategy.addAction(changeTriggerDataAction);
@@ -107,8 +112,9 @@ describe('Uni-v3-range-order strat', function () {
 
         positionManager.approve(proxy.address, tokenId);
         const timestamp = '1630056191';
+        const maxGasPrice = '20000000000';
         strategyId = await subUniContinuousCollectStrategy(
-            proxy, tokenId, senderAcc.address, timestamp,
+            proxy, tokenId, senderAcc.address, timestamp, maxGasPrice,
         );
         // user subscribes to strategy and fills three slots
         expect(strategyId).to.be.eq('0');
