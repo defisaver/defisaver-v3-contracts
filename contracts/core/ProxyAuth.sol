@@ -5,11 +5,11 @@ pragma solidity =0.7.6;
 import "../interfaces/IDFSRegistry.sol";
 import "../interfaces/IDSProxy.sol";
 import "../auth/AdminAuth.sol";
+import "./helpers/CoreHelper.sol";
 
 /// @title ProxyAuth Gets DSProxy auth from users and is callable by the Executor
-contract ProxyAuth is AdminAuth {
+contract ProxyAuth is AdminAuth, CoreHelper {
 
-    address public constant REGISTRY_ADDR = 0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C;
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     bytes32 constant STRATEGY_EXECUTOR_ID = keccak256("StrategyExecutor");

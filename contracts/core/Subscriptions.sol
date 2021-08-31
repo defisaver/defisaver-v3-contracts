@@ -7,10 +7,10 @@ import "../auth/AdminAuth.sol";
 import "../interfaces/IDSProxy.sol";
 import "../utils/DefisaverLogger.sol";
 import "./StrategyData.sol";
+import "./helpers/CoreHelper.sol";
 
 /// @title Storage of strategies and templates
-contract Subscriptions is StrategyData, AdminAuth {
-    DefisaverLogger public constant logger = DefisaverLogger(0x5c55B921f590a89C1Ebe84dF170E655a82b62126);
+contract Subscriptions is StrategyData, AdminAuth, CoreHelper {
 
     string public constant ERR_EMPTY_STRATEGY = "Strategy does not exist";
     string public constant ERR_SENDER_NOT_OWNER = "Sender is not strategy owner";
