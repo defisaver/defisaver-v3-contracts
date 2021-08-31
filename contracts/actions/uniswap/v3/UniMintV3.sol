@@ -6,13 +6,11 @@ pragma experimental ABIEncoderV2;
 import "../../../DS/DSMath.sol";
 import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
-import "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+import "./helpers/UniV3Helper.sol";
 
 /// @title Mints NFT that represents a position in uni v3
-contract UniMintV3 is ActionBase, DSMath{
+contract UniMintV3 is ActionBase, DSMath, UniV3Helper{
     using TokenUtils for address;
-    IUniswapV3NonfungiblePositionManager public constant positionManager =
-        IUniswapV3NonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
     
     struct Params {
         address token0;

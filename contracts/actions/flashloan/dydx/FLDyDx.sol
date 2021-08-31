@@ -14,6 +14,7 @@ import "../../../utils/FLFeeFaucet.sol";
 import "../../../utils/ReentrancyGuard.sol";
 import "../../ActionBase.sol";
 import "./DydxFlashLoanBase.sol";
+import "../helpers/FLHelper.sol";
 
 /// @title Action that gets and receives a FL from DyDx protocol
 contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard {
@@ -25,10 +26,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
 
     uint256 public constant DYDX_DUST_FEE = 2;
 
-    address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-
-    FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(0x47f159C90850D5cE09E21F931d504536840f34b4);
+    FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
 
     /// @dev Function sig of TaskExecutor._executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;

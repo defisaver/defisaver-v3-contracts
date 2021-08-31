@@ -4,10 +4,11 @@ pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../../../interfaces/dydx/ISoloMargin.sol";
+import "./MainnetDyDxHelper.sol";
 
-contract DyDxHelper {
+contract DyDxHelper is MainnetDyDxHelper{
     ISoloMargin public constant soloMargin =
-        ISoloMargin(0x1E0447b19BB6EcFdAe1e4AE1694b0C3659614e4e);
+        ISoloMargin(SOLO_MARGIN_ADDR);
 
     function getWeiBalance(
         address _user,

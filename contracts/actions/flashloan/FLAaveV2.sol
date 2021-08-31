@@ -13,24 +13,21 @@ import "../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../core/StrategyData.sol";
 import "../../utils/TokenUtils.sol";
 import "../../utils/ReentrancyGuard.sol";
+import "./helpers/FLHelper.sol";
 
 /// @title Action that gets and receives a FL from Aave V2
-contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard {
+contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard, FLHelper {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
     string constant ERR_ONLY_AAVE_CALLER = "Caller not aave pool";
     string constant ERR_SAME_CALLER = "FL taker must be this contract";
 
-    address
-        public constant AAVE_LENDING_POOL = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
-
     ILendingPoolAddressesProviderV2
         public constant addressesProvider = ILendingPoolAddressesProviderV2(
-        0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5
+            AAVE_LENDING_POOL_ADDRESS_PROVIDER
     );
 
-    address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
     /// @dev Function sig of TaskExecutor._executeActionsFromFL()

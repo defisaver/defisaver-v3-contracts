@@ -4,13 +4,16 @@ pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
+import "./helpers/UtilHelper.sol";
 import "../../utils/DFSProxyRegistryController.sol";
 
-/// @title Changes the owner of the DSProxy and updated the DFSRegistry
-contract ChangeProxyOwner is ActionBase {
-    DFSProxyRegistryController constant dfsRegController =
-        DFSProxyRegistryController(0xF8f8B3C98Cf2E63Df3041b73f80F362a4cf3A576);
 
+/// @title Changes the owner of the DSProxy and updated the DFSRegistry
+contract ChangeProxyOwner is ActionBase{
+
+    DFSProxyRegistryController constant dfsRegController =
+        DFSProxyRegistryController(DFS_REG_CONTROLLER_ADDR);
+    
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,

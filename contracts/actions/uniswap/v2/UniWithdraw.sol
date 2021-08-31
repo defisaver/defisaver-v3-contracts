@@ -3,20 +3,15 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "../../interfaces/uniswap/IUniswapV2Factory.sol";
-import "../../interfaces/exchange/IUniswapRouter.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
+import "../../../interfaces/uniswap/IUniswapV2Factory.sol";
+import "../../../interfaces/exchange/IUniswapRouter.sol";
+import "../../../utils/TokenUtils.sol";
+import "../../ActionBase.sol";
+import "./helpers/UniV2Helper.sol";
 
 /// @title Supplies liquidity to uniswap
-contract UniWithdraw is ActionBase {
+contract UniWithdraw is ActionBase, UniV2Helper {
     using TokenUtils for address;
-
-    IUniswapRouter public constant router =
-        IUniswapRouter(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
-
-    IUniswapV2Factory public constant factory =
-        IUniswapV2Factory(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
 
     struct UniWithdrawData {
         address tokenA;
