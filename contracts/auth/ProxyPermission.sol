@@ -5,9 +5,10 @@ pragma solidity =0.7.6;
 import "../DS/DSGuard.sol";
 import "../DS/DSAuth.sol";
 
+import "./helpers/AuthHelper.sol";
+
 /// @title ProxyPermission Proxy contract which works with DSProxy to give execute permission
-contract ProxyPermission {
-    address public constant FACTORY_ADDRESS = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
+contract ProxyPermission is AuthHelper {
 
     /// @notice Called in the context of DSProxy to authorize an address
     /// @param _contractAddr Address which will be authorized
