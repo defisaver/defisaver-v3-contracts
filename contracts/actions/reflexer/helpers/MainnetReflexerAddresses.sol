@@ -3,7 +3,7 @@
 pragma solidity =0.7.6;
 
 /// @title Helper methods for MCDSaverProxy
-contract MainnetReflexerHelper {
+contract MainnetReflexerAddresses {
 
     address public constant RAI_ADDRESS = 0x03ab458634910AaD20eF5f1C8ee96F1D6ac54919;
     address public constant RAI_ADAPTER_ADDRESS = 0x0A5653CCa4DB1B6E265F47CAf6969e64f1CFdC45;

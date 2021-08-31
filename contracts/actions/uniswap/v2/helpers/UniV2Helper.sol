@@ -2,11 +2,11 @@
 
 pragma solidity =0.7.6;
 
-import "./MainnetUniV2Helper.sol";
+import "./MainnetUniV2Addresses.sol";
 import "../../../../interfaces/uniswap/IUniswapV2Factory.sol";
 import "../../../../interfaces/exchange/IUniswapRouter.sol";
 
-contract UniV2Helper is MainnetUniV2Helper {
+contract UniV2Helper is MainnetUniV2Addresses {
     IUniswapRouter public constant router =
         IUniswapRouter(UNI_V2_ROUTER_ADDR);
 

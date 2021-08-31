@@ -2,10 +2,10 @@
 
 pragma solidity =0.7.6;
 
-import "./MainnetYearnHelper.sol";
+import "./MainnetYearnAddresses.sol";
 import "../../../interfaces/yearn/IYearnRegistry.sol";
 
-contract YearnHelper is MainnetYearnHelper {
+contract YearnHelper is MainnetYearnAddresses {
 
     IYearnRegistry public constant yearnRegistry =
         IYearnRegistry(YEARN_REGISTRY_ADDR);

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity =0.7.6;
-import "./MainnetInstHelper.sol";
+import "./MainnetInstAddresses.sol";
 
 import "../../../interfaces/insta/IInstaIndex.sol";
 import "../../../interfaces/insta/IInstaMakerDAOMerkleDistributor.sol";
 import "../../../interfaces/mcd/IManager.sol";
 
 /// @title Utility functions and data used in AaveV2 actions
-contract InstHelper is MainnetInstHelper{
+contract InstHelper is MainnetInstAddresses{
 
     IManager public constant mcdManager =  
         IManager(MCD_MANAGER);

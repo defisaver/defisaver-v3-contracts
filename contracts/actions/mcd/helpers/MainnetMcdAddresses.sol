@@ -2,7 +2,7 @@
 
 pragma solidity =0.7.6;
 
-contract MainnetMcdHelper {
+contract MainnetMcdAddresses {
     address public constant VAT_ADDR = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
     address public constant DAI_JOIN_ADDR = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
     address public constant DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;

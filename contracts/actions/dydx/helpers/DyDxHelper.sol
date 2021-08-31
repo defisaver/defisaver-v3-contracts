@@ -4,9 +4,9 @@ pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../../../interfaces/dydx/ISoloMargin.sol";
-import "./MainnetDyDxHelper.sol";
+import "./MainnetDyDxAddresses.sol";
 
-contract DyDxHelper is MainnetDyDxHelper{
+contract DyDxHelper is MainnetDyDxAddresses{
     ISoloMargin public constant soloMargin =
         ISoloMargin(SOLO_MARGIN_ADDR);
 

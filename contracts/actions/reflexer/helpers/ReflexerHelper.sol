@@ -7,10 +7,10 @@ import "../../../interfaces/reflexer/ISAFEEngine.sol";
 import "../../../interfaces/reflexer/ISAFEManager.sol";
 import "../../../interfaces/reflexer/IBasicTokenAdapters.sol";
 import "../../../interfaces/reflexer/ISAFESaviour.sol";
-import "./MainnetReflexerHelper.sol";
+import "./MainnetReflexerAddresses.sol";
 
 /// @title Helper methods for MCDSaverProxy
-contract ReflexerHelper is DSMath, MainnetReflexerHelper {
+contract ReflexerHelper is DSMath, MainnetReflexerAddresses {
 
     ISAFEEngine public constant safeEngine = ISAFEEngine(SAFE_ENGINE_ADDRESS);
     ISAFEManager public constant safeManager = ISAFEManager(SAFE_MANAGER_ADDRESS);

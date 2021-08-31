@@ -5,10 +5,10 @@ pragma solidity =0.7.6;
 import "../../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
 import "../../../interfaces/aaveV2/IAaveIncentivesController.sol";
-import "./MainnetAaveHelper.sol";
+import "./MainnetAaveAddresses.sol";
 
 /// @title Utility functions and data used in AaveV2 actions
-contract AaveHelper is MainnetAaveHelper{
+contract AaveHelper is MainnetAaveAddresses {
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
     uint256 public constant STABLE_ID = 1;

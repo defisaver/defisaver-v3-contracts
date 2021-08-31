@@ -8,10 +8,10 @@ import "../../../interfaces/mcd/IManager.sol";
 import "../../../interfaces/mcd/IJoin.sol";
 import "../../../interfaces/mcd/IVat.sol";
 import "../../../utils/TokenUtils.sol";
-import "./MainnetMcdHelper.sol";
+import "./MainnetMcdAddresses.sol";
 
 /// @title Helper methods for MCDSaverProxy
-contract McdHelper is DSMath, MainnetMcdHelper {
+contract McdHelper is DSMath, MainnetMcdAddresses {
 
     IVat public constant vat = IVat(VAT_ADDR);
 

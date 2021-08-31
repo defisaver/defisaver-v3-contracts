@@ -11,9 +11,9 @@ import "../../../interfaces/liquity/ISortedTroves.sol";
 import "../../../interfaces/liquity/ICollSurplusPool.sol";
 import "../../../interfaces/liquity/IStabilityPool.sol";
 import "../../../interfaces/liquity/ILQTYStaking.sol";
-import "./MainnetLiquityHelper.sol";
+import "./MainnetLiquityAddresses.sol";
 
-contract LiquityHelper is MainnetLiquityHelper {
+contract LiquityHelper is MainnetLiquityAddresses {
     using TokenUtils for address;
 
     uint constant public LUSD_GAS_COMPENSATION = 200e18;

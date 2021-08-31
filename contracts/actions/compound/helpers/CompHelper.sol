@@ -5,10 +5,10 @@ pragma solidity =0.7.6;
 import "../../../interfaces/compound/IComptroller.sol";
 import "../../../interfaces/compound/ICToken.sol";
 import "../../../utils/TokenUtils.sol";
-import "./MainnetCompHelper.sol";
+import "./MainnetCompAddresses.sol";
 
 /// @title Utility functions and data used in Compound actions
-contract CompHelper is MainnetCompHelper{
+contract CompHelper is MainnetCompAddresses{
 
     uint256 constant NO_ERROR = 0;
 

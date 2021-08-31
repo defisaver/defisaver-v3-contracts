@@ -2,7 +2,7 @@
 
 pragma solidity =0.7.6;
 
-import "./MainnetFLHelper.sol";
+import "./MainnetFLAddresses.sol";
 
-contract FLHelper is MainnetFLHelper {
+contract FLHelper is MainnetFLAddresses {
 }
