@@ -129,7 +129,7 @@ describe('Test change-sub-data as direct action', function () {
 
         const targetPrice = currPrice - 100; // Target is smaller so we can execute it
         const triggerData = await createChainLinkPriceTrigger(WETH_ADDRESS, targetPrice, 0);
-        await changeTriggerData(proxy, subStorage.address, subId, [triggerData]);
+        await changeTriggerData(proxy, subStorage.address, subId, triggerData, 0);
 
         // get weth and approve dsproxy to pull
         await depositToWeth(amount.toString());

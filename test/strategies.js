@@ -12,6 +12,8 @@ const {
     createChainLinkPriceTrigger,
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
+    createTimestampTrigger,
+    createGasPriceTrigger,
 } = require('./triggers');
 
 const {
@@ -27,6 +29,21 @@ const {
 } = require('./utils');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
+
+// eslint-disable-next-line max-len
+const subUniContinuousCollectStrategy = async (proxy, tokenId, recipient, timestamp, maxGasPrice) => {
+    const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
+    const tokenIdEncoded = abiCoder.encode(['uint256'], [tokenId.toString()]);
+    const recipientEncoded = abiCoder.encode(['address'], [recipient]);
+    const strategyId = await getLatestStrategyId();
+    const timestampTriggerData = await createTimestampTrigger(timestamp);
+    const gasTriggerData = await createGasPriceTrigger(maxGasPrice);
+
+    // eslint-disable-next-line max-len
+    const subId = await subToStrategy(proxy, strategyId, true, [tokenIdEncoded, proxyAddrEncoded, recipientEncoded], [timestampTriggerData, gasTriggerData]);
+
+    return subId;
+};
 
 const subUniV3RangeOrderStrategy = async (proxy, tokenId, state, recipient) => {
     const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
@@ -132,6 +149,41 @@ const callUniV3RangeOrderStrategy = async (botAcc, strategyExecutor, strategyId,
     // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
         gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed callUniV3RangeOrderStrategy: ${gasUsed}`);
+};
+
+// eslint-disable-next-line max-len
+const callUniV3CollectStrategy = async (botAcc, strategyExecutor, strategyId, nftOwner, subStorageAddr, newTimestamp) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const collectAction = new dfs.actions.uniswapV3.UniswapV3CollectAction(
+        '0',
+        placeHolderAddr,
+        MAX_UINT128,
+        MAX_UINT128,
+        nftOwner,
+    );
+    const timestampTriggerData = await createTimestampTrigger(newTimestamp);
+    const changeTriggerDataAction = new dfs.actions.basic.ChangeTriggerDataAction(
+        subStorageAddr,
+        strategyId,
+        timestampTriggerData,
+        0,
+    );
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+    actionsCallData.push(collectAction.encodeForRecipe()[0]);
+    actionsCallData.push(changeTriggerDataAction.encodeForRecipe()[0]);
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
+        gasLimit: 8000000,
+        gasPrice: hre.ethers.utils.parseUnits('10', 'gwei'),
     });
 
     const gasUsed = await getGasUsed(receipt);
@@ -363,4 +415,6 @@ module.exports = {
     callUniV3RangeOrderStrategy,
     subMcdCloseStrategy,
     callMcdCloseStrategy,
+    subUniContinuousCollectStrategy,
+    callUniV3CollectStrategy,
 };

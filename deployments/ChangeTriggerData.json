@@ -132,13 +132,18 @@
 							"type": "uint256"
 						},
 						{
-							"internalType": "bytes[]",
+							"internalType": "bytes",
 							"name": "triggerData",
-							"type": "bytes[]"
+							"type": "bytes"
+						},
+						{
+							"internalType": "uint256",
+							"name": "triggerNum",
+							"type": "uint256"
 						}
 					],
 					"internalType": "struct ChangeTriggerData.Params",
-					"name": "params",
+					"name": "_params",
 					"type": "tuple"
 				}
 			],
@@ -263,9 +268,14 @@
 							"type": "uint256"
 						},
 						{
-							"internalType": "bytes[]",
+							"internalType": "bytes",
 							"name": "triggerData",
-							"type": "bytes[]"
+							"type": "bytes"
+						},
+						{
+							"internalType": "uint256",
+							"name": "triggerNum",
+							"type": "uint256"
 						}
 					],
 					"internalType": "struct ChangeTriggerData.Params",

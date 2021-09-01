@@ -5,6 +5,7 @@ pragma solidity =0.8.4;
 abstract contract ISubStorage {
     function updateSubTriggerData(
         uint256 _subId,
-        bytes[] memory _triggerData
+        bytes memory _triggerData,
+        uint256 _triggerNum
     ) public virtual;
 }

@@ -455,9 +455,14 @@
 					"type": "uint256"
 				},
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_triggerData",
-					"type": "bytes[]"
+					"type": "bytes"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_triggerNum",
+					"type": "uint256"
 				}
 			],
 			"name": "updateSubTriggerData",

@@ -6,7 +6,6 @@ import "../../auth/AdminAuth.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../utils/DefisaverLogger.sol";
 import "./StrategyModel.sol";
-
 /// @title Storage of users subscriptions to strategies
 contract SubStorage is StrategyModel, AdminAuth {
     error NonexistantSubError(uint256);
@@ -89,13 +88,12 @@ contract SubStorage is StrategyModel, AdminAuth {
     /// @param _triggerData Subscription data for triggers
     function updateSubTriggerData(
         uint256 _subId,
-        bytes[] memory _triggerData
+        bytes memory _triggerData,
+        uint256 _triggerNum
     ) public onlySubOwner(_subId) {
         StrategySub storage sub = strategiesSubs[_subId];
-
-        if (_triggerData.length > 0){
-            sub.triggerData = _triggerData;
-        }
+        
+        sub.triggerData[_triggerNum] = _triggerData;
 
         emit UpdateData(_subId, sub);
     }
