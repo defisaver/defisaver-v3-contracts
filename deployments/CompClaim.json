@@ -3,6 +3,32 @@
 	"abi": [
 		{
 			"inputs": [],
+			"name": "ADMIN_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ADMIN_VAULT_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "COMPTROLLER_ADDR",
 			"outputs": [
 				{
@@ -30,6 +56,32 @@
 		{
 			"inputs": [],
 			"name": "C_ETH_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "DFS_LOGGER_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "DFS_REG_CONTROLLER_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -87,6 +139,19 @@
 					"internalType": "string",
 					"name": "",
 					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "FACTORY_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -327,6 +392,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"hardhat": {}
 	}
 }

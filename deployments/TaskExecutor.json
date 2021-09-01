@@ -3,6 +3,19 @@
 	"abi": [
 		{
 			"inputs": [],
+			"name": "ADMIN_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "ADMIN_VAULT_ADDR",
 			"outputs": [
 				{
@@ -16,7 +29,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "DEFISAVER_LOGGER",
+			"name": "DEFI_SAVER_LOGGER_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -30,6 +43,19 @@
 		{
 			"inputs": [],
 			"name": "FACTORY_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "PROXY_AUTH_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -240,6 +266,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"hardhat": {}
 	}
 }

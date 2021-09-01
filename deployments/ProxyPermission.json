@@ -3,7 +3,7 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "FACTORY_ADDRESS",
+			"name": "ADMIN_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -15,16 +15,29 @@
 			"type": "function"
 		},
 		{
-			"inputs": [
+			"inputs": [],
+			"name": "ADMIN_VAULT_ADDR",
+			"outputs": [
 				{
-					"internalType": "bytes32",
-					"name": "c__0x80403e5d",
-					"type": "bytes32"
+					"internalType": "address",
+					"name": "",
+					"type": "address"
 				}
 			],
-			"name": "c_0x80403e5d",
-			"outputs": [],
-			"stateMutability": "pure",
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "FACTORY_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
 			"type": "function"
 		},
 		{
@@ -55,6 +68,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"hardhat": {}
 	}
 }

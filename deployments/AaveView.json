@@ -16,12 +16,25 @@
 		},
 		{
 			"inputs": [],
-			"name": "ETH_ADDR",
+			"name": "AaveIncentivesController",
 			"outputs": [
 				{
-					"internalType": "address",
+					"internalType": "contract IAaveIncentivesController",
 					"name": "",
 					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "DATA_PROVIDER_ID",
+			"outputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
 				}
 			],
 			"stateMutability": "view",
@@ -42,6 +55,19 @@
 		},
 		{
 			"inputs": [],
+			"name": "STAKED_CONTROLLER_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "VARIABLE_ID",
 			"outputs": [
 				{
@@ -54,16 +80,26 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "WETH_ADDR",
-			"outputs": [
+			"inputs": [
 				{
 					"internalType": "address",
-					"name": "",
+					"name": "_market",
 					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_tokenAddr",
+					"type": "address"
+				},
+				{
+					"internalType": "bool",
+					"name": "_useAsCollateral",
+					"type": "bool"
 				}
 			],
-			"stateMutability": "view",
+			"name": "enableAsCollateral",
+			"outputs": [],
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
@@ -169,7 +205,7 @@
 						},
 						{
 							"internalType": "bool",
-							"name": "borrowinEnabled",
+							"name": "borrowingEnabled",
 							"type": "bool"
 						},
 						{
@@ -510,21 +546,16 @@
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "_tokenAddr",
+					"name": "_user",
 					"type": "address"
 				}
 			],
-			"name": "isTokenUsedAsColl",
+			"name": "getUserUnclaimedRewards",
 			"outputs": [
 				{
-					"internalType": "bool",
-					"name": "collateralEnabled",
-					"type": "bool"
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
 				}
 			],
 			"stateMutability": "view",
@@ -543,44 +574,18 @@
 					"type": "address"
 				},
 				{
-					"internalType": "bool",
-					"name": "_state",
-					"type": "bool"
+					"internalType": "uint256",
+					"name": "_rateMode",
+					"type": "uint256"
 				}
 			],
-			"name": "setCollStateForToken",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "_tokenAddr",
-					"type": "address"
-				},
-				{
-					"internalType": "bool",
-					"name": "_true",
-					"type": "bool"
-				}
-			],
-			"name": "setUserUseReserveAsCollateral",
+			"name": "switchRateMode",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
 		}
 	],
 	"networks": {
-		"local": {
-			"address": "0x8198f5d8F8CfFE8f9C413d98a0A55aEB8ab9FbB7",
-			"args": []
-		}
+		"hardhat": {}
 	}
 }
