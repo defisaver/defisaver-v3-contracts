@@ -77,7 +77,7 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth, CoreHelper {
         }
 
         /// log the task name
-        DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, _currTask.name, "");
+        DefisaverLogger(DEFI_SAVER_LOGGER_ADDR).Log(address(this), msg.sender, _currTask.name, "");
     }
 
     /// @notice Gets the action address and executes it

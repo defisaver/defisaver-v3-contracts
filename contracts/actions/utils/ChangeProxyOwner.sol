@@ -4,9 +4,7 @@ pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
-import "./helpers/UtilHelper.sol";
 import "../../utils/DFSProxyRegistryController.sol";
-
 
 /// @title Changes the owner of the DSProxy and updated the DFSRegistry
 contract ChangeProxyOwner is ActionBase{

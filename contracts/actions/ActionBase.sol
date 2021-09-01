@@ -5,10 +5,10 @@ pragma experimental ABIEncoderV2;
 
 import "../auth/AdminAuth.sol";
 import "../core/DFSRegistry.sol";
-import "./utils/helpers/UtilHelper.sol";
+import "./utils/helpers/ActionsUtilHelper.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
-abstract contract ActionBase is AdminAuth, UtilHelper {
+abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     DefisaverLogger public constant logger = DefisaverLogger(

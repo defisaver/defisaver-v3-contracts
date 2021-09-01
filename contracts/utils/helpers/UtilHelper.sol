@@ -2,8 +2,7 @@
 
 pragma solidity =0.7.6;
 
-import "./MainnetUtilAddresses.sol";
-import "../../../utils/DFSProxyRegistryController.sol";
+import "./MainnetUtilAdresses.sol";
 
 contract UtilHelper is MainnetUtilAddresses {
 }

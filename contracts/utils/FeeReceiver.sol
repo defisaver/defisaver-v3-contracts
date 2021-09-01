@@ -3,18 +3,16 @@
 pragma solidity =0.7.6;
 
 import "./SafeERC20.sol";
+import "./helpers/UtilHelper.sol";
+
 
 /// @title Contract that receivers fees and can be withdrawn from with the admin
-contract FeeReceiver {
+contract FeeReceiver is UtilHelper {
     using SafeERC20 for IERC20;
 
-    address public constant DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-
-    address public constant ADMIN_ADDR = 0xA74e9791D7D66c6a14B2C571BdA0F2A1f6D64E06;
 
     modifier onlyAdmin {
-        require(msg.sender == ADMIN_ADDR, "Only Admin");
+        require(msg.sender == FEE_RECEIVER_ADMIN_ADDR, "Only Admin");
 
         _;
     }

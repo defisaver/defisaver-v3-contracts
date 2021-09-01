@@ -5,10 +5,9 @@ pragma experimental ABIEncoderV2;
 
 import "../DS/DSMath.sol";
 import "../utils/SafeERC20.sol";
+import "./helpers/ExchangeHelper.sol";
 
-contract DFSPrices is DSMath {
-
-    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+contract DFSPrices is DSMath, ExchangeHelper {
 
     enum ActionType { SELL, BUY }
 

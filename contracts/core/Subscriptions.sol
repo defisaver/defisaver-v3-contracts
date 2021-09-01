@@ -15,7 +15,7 @@ contract Subscriptions is StrategyData, AdminAuth, CoreHelper {
     string public constant ERR_EMPTY_STRATEGY = "Strategy does not exist";
     string public constant ERR_SENDER_NOT_OWNER = "Sender is not strategy owner";
     string public constant ERR_USER_POS_EMPTY = "No user positions";
-
+    DefisaverLogger public constant logger = DefisaverLogger(DEFI_SAVER_LOGGER_ADDR);
     /// @dev The order of strategies might change as they are deleted
     Strategy[] public strategies;
 

@@ -5,11 +5,11 @@ pragma solidity =0.7.6;
 import "./DFSProxyRegistry.sol";
 import "../interfaces/IDSProxy.sol";
 import "../DS/DSProxyFactoryInterface.sol";
+import "./helpers/UtilHelper.sol";
+
 
 /// @title User facing contract to manage new proxies (is owner of DFSProxyRegistry)
-contract DFSProxyRegistryController is AdminAuth {
-    address constant PROXY_FACTORY_ADDR = 0xA26e15C895EFc0616177B7c1e7270A4C7D51C997;
-    address constant DFS_PROXY_REGISTRY_ADDR = 0x29474FdaC7142f9aB7773B8e38264FA15E3805ed;
+contract DFSProxyRegistryController is AdminAuth, UtilHelper {
 
     /// @dev List of prebuild proxies the users can claim to save gas
     address[] public proxyPool;

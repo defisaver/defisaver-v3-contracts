@@ -8,13 +8,13 @@ import "../../interfaces/exchange/IExchangeV3.sol";
 import "../../interfaces/exchange/IUniswapRouter.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
+import "./helpers/WrapperHelper.sol";
 
 /// @title DFS exchange wrapper for UniswapV2
-contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth {
+contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
 
     using TokenUtils for address;
 
-    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     IUniswapRouter public constant router = IUniswapRouter(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
 
     using SafeERC20 for IERC20;

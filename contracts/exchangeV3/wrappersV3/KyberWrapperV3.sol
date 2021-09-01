@@ -7,12 +7,10 @@ import "../../interfaces//exchange/IKyberNetworkProxy.sol";
 import "../../interfaces/exchange/IExchangeV3.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
+import "./helpers/WrapperHelper.sol";
 
-contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth {
 
-    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant KYBER_INTERFACE = 0x9AAb3f75489902f3a48495025729a0AF77d4b11e;
-    address payable public constant WALLET_ID = 0x322d58b9E75a6918f7e7849AEe0fF09369977e08;
+contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
 
     using SafeERC20 for IERC20;
 
