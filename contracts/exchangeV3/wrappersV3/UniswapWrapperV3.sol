@@ -15,7 +15,7 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
 
     using TokenUtils for address;
 
-    IUniswapRouter public constant router = IUniswapRouter(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+    IUniswapRouter public constant router = IUniswapRouter(UNI_V2_ROUTER);
 
     using SafeERC20 for IERC20;
 

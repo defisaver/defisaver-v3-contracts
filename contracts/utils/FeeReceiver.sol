@@ -19,9 +19,6 @@ contract FeeReceiver is UtilHelper {
 
     /// @dev Approves bot refill as it needs to pull funds for gas feeds from this addr
     constructor() {
-        address botRefill = 0xCD73a63f2cb03d1a11c5C009B0fB2b5c9C430754;
-        IERC20(DAI_ADDR).approve(botRefill, type(uint256).max);
-        IERC20(WETH_ADDR).approve(botRefill, type(uint256).max);
     }
 
     /// @notice Withdraws ERC20 tokens from the contract
