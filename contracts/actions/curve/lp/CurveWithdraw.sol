@@ -3,41 +3,21 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "./helpers/CurveHelper.sol";
-import "../../utils/TokenUtils.sol";
-import "../../utils/SafeMath.sol";
-import "../ActionBase.sol";
+import "../helpers/CurveHelper.sol";
+import "../../../utils/TokenUtils.sol";
+import "../../../utils/SafeMath.sol";
+import "../../ActionBase.sol";
 
 contract CurveWithdraw is ActionBase, CurveHelper {
     using TokenUtils for address;
     using SafeMath for uint256;
-
-    function _sig(uint256 _nCoins, bool _useUnderlying) internal pure returns(bytes4) {
-        if (!_useUnderlying) {
-            if (_nCoins == 2) return bytes4(0x5b36389c);
-            if (_nCoins == 3) return bytes4(0xecb586a5);
-            if (_nCoins == 4) return bytes4(0x7d49d875);
-            if (_nCoins == 5) return bytes4(0xe3bff5ce);
-            if (_nCoins == 6) return bytes4(0x684916a5);
-            if (_nCoins == 7) return bytes4(0x5c912d2b);
-            if (_nCoins == 8) return bytes4(0x3fec6549);
-            revert("Invalid number of coins in pool.");
-        }
-        if (_nCoins == 2) return bytes4(0x269b5581);
-        if (_nCoins == 3) return bytes4(0xfce64736);
-        if (_nCoins == 4) return bytes4(0xa6929895);
-        if (_nCoins == 5) return bytes4(0xcbfe789f);
-        if (_nCoins == 6) return bytes4(0xfe27e085);
-        if (_nCoins == 7) return bytes4(0x78afd240);
-        if (_nCoins == 8) return bytes4(0xef930778);
-        revert("Invalid number of coins in pool.");
-    }
 
     struct Params {
         address sender;
         address receiver;
         address pool;
         address lpToken;
+        bytes4 sig;
         uint256 burnAmount;
         uint256[] minAmounts;
         address[] tokens;
@@ -91,7 +71,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
             balances[i] = _params.tokens[i].getBalance(address(this));
         }
 
-        bytes memory payload = _constructPayload(_params.minAmounts, _params.burnAmount, _params.useUnderlying);
+        bytes memory payload = _constructPayload(_params.sig, _params.minAmounts, _params.burnAmount, _params.useUnderlying);
         (bool success, ) = _params.pool.call(payload);
         require(success);
 
@@ -115,15 +95,13 @@ contract CurveWithdraw is ActionBase, CurveHelper {
         );
     }
 
-    function _constructPayload(uint256[] memory _minAmounts, uint256 _burnAmount, bool _useUnderlying) internal pure returns (bytes memory payload) {
+    function _constructPayload(bytes4 _sig, uint256[] memory _minAmounts, uint256 _burnAmount, bool _useUnderlying) internal pure returns (bytes memory payload) {
         uint256 payloadSize = 4 + (_minAmounts.length + 1) * 32;
         if (_useUnderlying) payloadSize = payloadSize.add(32);
         payload = new bytes(payloadSize);
         
-        bytes4 sig = _sig(_minAmounts.length, _useUnderlying);
-        
         assembly {
-            mstore(add(payload, 0x20), sig)    // store the signature after dynamic array length field (&callData + 0x20)
+            mstore(add(payload, 0x20), _sig)    // store the signature after dynamic array length field (&callData + 0x20)
             mstore(add(payload, 0x24), _burnAmount)    // copy the first arg after the selector (0x20 + 0x4 bytes)
 
             let offset := 0x20  // offset of the first element in '_minAmounts'

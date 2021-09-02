@@ -1159,9 +1159,20 @@ const curveDeposit = async (
     useUnderlying,
 ) => {
     const curveDepositAddr = await getAddrFromRegistry('CurveDeposit');
+    const curveViewAddr = await getAddrFromRegistry('CurveView');
+    const curveView = await hre.ethers.getContractAt('CurveView', curveViewAddr);
+    const sig = await curveView['curveDepositSig(uint256,bool)'](tokens.length, useUnderlying);
 
     const curveDepositAction = new dfs.actions.curve.CurveDepositAction(
-        sender, receiver, depositTarget, lpToken, minMintAmount, amounts, tokens, useUnderlying,
+        sender,
+        receiver,
+        depositTarget,
+        lpToken,
+        sig,
+        minMintAmount,
+        amounts,
+        tokens,
+        useUnderlying,
     );
 
     const functionData = curveDepositAction.encodeForDsProxyCall()[1];
@@ -1181,9 +1192,20 @@ const curveWithdraw = async (
     useUnderlying,
 ) => {
     const curveWithdrawAddr = await getAddrFromRegistry('CurveWithdraw');
+    const curveViewAddr = await getAddrFromRegistry('CurveView');
+    const curveView = await hre.ethers.getContractAt('CurveView', curveViewAddr);
+    const sig = await curveView.curveWithdrawSig(tokens.length, useUnderlying);
 
     const curveWithdrawAction = new dfs.actions.curve.CurveWithdrawAction(
-        sender, receiver, pool, lpToken, burnAmount, minAmounts, tokens, useUnderlying,
+        sender,
+        receiver,
+        pool,
+        lpToken,
+        sig,
+        burnAmount,
+        minAmounts,
+        tokens,
+        useUnderlying,
     );
 
     const functionData = curveWithdrawAction.encodeForDsProxyCall()[1];

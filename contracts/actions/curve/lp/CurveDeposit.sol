@@ -3,41 +3,21 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "./helpers/CurveHelper.sol";
-import "../../utils/TokenUtils.sol";
-import "../../utils/SafeMath.sol";
-import "../ActionBase.sol";
+import "../helpers/CurveHelper.sol";
+import "../../../utils/TokenUtils.sol";
+import "../../../utils/SafeMath.sol";
+import "../../ActionBase.sol";
 
 contract CurveDeposit is ActionBase, CurveHelper {
     using TokenUtils for address;
     using SafeMath for uint256;
-
-    function _sig(uint256 _nCoins, bool _useUnderlying) internal pure returns(bytes4) {
-        if (!_useUnderlying) {
-            if (_nCoins == 2) return bytes4(0x0b4c7e4d);
-            if (_nCoins == 3) return bytes4(0x4515cef3);
-            if (_nCoins == 4) return bytes4(0x029b2f34);
-            if (_nCoins == 5) return bytes4(0x84738499);
-            if (_nCoins == 6) return bytes4(0x3f8a44f3);
-            if (_nCoins == 7) return bytes4(0xa5918ca1);
-            if (_nCoins == 8) return bytes4(0x52d7f317);
-            revert("Invalid number of coins in pool.");
-        }
-        if (_nCoins == 2) return bytes4(0xee22be23);
-        if (_nCoins == 3) return bytes4(0x2b6e993a);
-        if (_nCoins == 4) return bytes4(0xdc3a2d81);
-        if (_nCoins == 5) return bytes4(0xc25fd565);
-        if (_nCoins == 6) return bytes4(0x12b7ef1e);
-        if (_nCoins == 7) return bytes4(0xd3c347e8);
-        if (_nCoins == 8) return bytes4(0xfca08421);
-        revert("Invalid number of coins in pool.");
-    }
 
     struct Params {
         address sender;
         address receiver;
         address depositTarget;  // pool contract or zap deposit contract
         address lpToken;
+        bytes4 sig;
         uint256 minMintAmount;
         uint256[] amounts;
         address[] tokens;
@@ -57,10 +37,11 @@ contract CurveDeposit is ActionBase, CurveHelper {
         params.lpToken = _parseParamAddr(params.lpToken, _paramMapping[3], _subData, _returnValues);
         params.minMintAmount = _parseParamUint(params.minMintAmount, _paramMapping[4], _subData, _returnValues);
         
-        require(params.amounts.length == params.tokens.length);
+        uint256 N_COINS = params.amounts.length;
+        require(N_COINS == params.tokens.length);
         for (uint256 i = 0; i < params.amounts.length; i++) {
             params.amounts[i] = _parseParamUint(params.amounts[i], _paramMapping[5 + i], _subData, _returnValues);
-            params.tokens[i] = _parseParamAddr(params.tokens[i], _paramMapping[5 + params.amounts.length + i], _subData, _returnValues);
+            params.tokens[i] = _parseParamAddr(params.tokens[i], _paramMapping[5 + N_COINS + i], _subData, _returnValues);
         }
 
         uint256 received = _curveDeposit(params);
@@ -97,7 +78,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
             _params.tokens[i].approveToken(_params.depositTarget, _params.amounts[i]);
         }
 
-        bytes memory payload = _constructPayload(_params.amounts, _params.minMintAmount, _params.useUnderlying);
+        bytes memory payload = _constructPayload(_params.sig, _params.amounts, _params.minMintAmount, _params.useUnderlying);
         (bool success, ) = _params.depositTarget.call{ value: msgValue }(payload);
         require(success);
 
@@ -118,14 +99,13 @@ contract CurveDeposit is ActionBase, CurveHelper {
     }
 
     /// @notice dont forget NatSpec
-    function _constructPayload(uint256[] memory _amounts, uint256 _minMintAmount, bool _useUnderlying) internal pure returns (bytes memory payload) {
+    function _constructPayload(bytes4 _sig, uint256[] memory _amounts, uint256 _minMintAmount, bool _useUnderlying) internal pure returns (bytes memory payload) {
         uint256 payloadSize = 4 + (_amounts.length + 1) * 32;
         if (_useUnderlying) payloadSize = payloadSize.add(32);
         payload = new bytes(payloadSize);
-        
-        bytes4 sig = _sig(_amounts.length, _useUnderlying);
+
         assembly {
-            mstore(add(payload, 0x20), sig)    // store the signature after dynamic array length field (&callData + 0x20)
+            mstore(add(payload, 0x20), _sig)    // store the signature after dynamic array length field (&callData + 0x20)
 
             let offset := 0x20  // offset of the first element in '_amounts'
             for { let i := 0 } lt(i, mload(_amounts)) { i := add(i, 1) } {

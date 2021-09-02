@@ -8,14 +8,14 @@ const {
     WETH_ADDRESS,
     approve,
     ETH_ADDR,
-} = require('../utils');
+} = require('../../utils');
 
 const {
     curveSwap,
     buyTokenIfNeeded,
-} = require('../actions.js');
+} = require('../../actions.js');
 
-const poolData = require('./poolData');
+const poolData = require('../poolData');
 
 describe('Curve-Swap', function () {
     this.timeout(1000000);

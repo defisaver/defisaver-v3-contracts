@@ -8,14 +8,14 @@ const {
     approve,
     ETH_ADDR,
     WETH_ADDRESS,
-} = require('../utils');
+} = require('../../utils');
 
 const {
     buyTokenIfNeeded,
     curveDeposit,
-} = require('../actions.js');
+} = require('../../actions.js');
 
-const poolData = require('./poolData');
+const poolData = require('../poolData');
 
 describe('Curve-Deposit', function () {
     this.timeout(1000000);
@@ -31,6 +31,7 @@ describe('Curve-Deposit', function () {
         proxyAddr = proxy.address;
 
         await redeploy('CurveDeposit');
+        await redeploy('CurveView');
     });
 
     Object.keys(poolData).map(async (poolName) => {

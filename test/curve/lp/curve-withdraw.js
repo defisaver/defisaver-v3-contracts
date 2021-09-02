@@ -8,15 +8,15 @@ const {
     approve,
     ETH_ADDR,
     WETH_ADDRESS,
-} = require('../utils');
+} = require('../../utils');
 
 const {
     buyTokenIfNeeded,
     curveDeposit,
     curveWithdraw,
-} = require('../actions.js');
+} = require('../../actions.js');
 
-const poolData = require('./poolData');
+const poolData = require('../poolData');
 
 describe('Curve-Withdraw', function () {
     this.timeout(1000000);
@@ -33,6 +33,7 @@ describe('Curve-Withdraw', function () {
 
         await redeploy('CurveDeposit');
         await redeploy('CurveWithdraw');
+        await redeploy('CurveView');
     });
 
     Object.keys(poolData).forEach(async (poolName) => {

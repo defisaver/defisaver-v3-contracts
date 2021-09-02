@@ -3,9 +3,9 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "./helpers/CurveHelper.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
+import "../helpers/CurveHelper.sol";
+import "../../../utils/TokenUtils.sol";
+import "../../ActionBase.sol";
 
 contract CurveSwap is ActionBase, CurveHelper {
     using TokenUtils for address;
@@ -14,8 +14,8 @@ contract CurveSwap is ActionBase, CurveHelper {
         address sender;
         address receiver;
         address pool;
-        address from;
-        address to;
+        address tokenA;
+        address tokenB;
         uint256 amount;
         uint256 expected;
     }
@@ -30,8 +30,8 @@ contract CurveSwap is ActionBase, CurveHelper {
         params.sender = _parseParamAddr(params.sender, _paramMapping[0], _subData, _returnValues);
         params.receiver = _parseParamAddr(params.receiver, _paramMapping[1], _subData, _returnValues);
         params.pool = _parseParamAddr(params.pool, _paramMapping[2], _subData, _returnValues);
-        params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
-        params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
+        params.tokenA = _parseParamAddr(params.tokenA, _paramMapping[3], _subData, _returnValues);
+        params.tokenB = _parseParamAddr(params.tokenB, _paramMapping[4], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[5], _subData, _returnValues);
         params.expected = _parseParamUint(params.expected, _paramMapping[6], _subData, _returnValues);
         
@@ -57,23 +57,23 @@ contract CurveSwap is ActionBase, CurveHelper {
     /// @notice Dont forget NatSpec
     function _curveSwap(Params memory _params) internal returns (uint256) {
         if (_params.amount == type(uint256).max) {
-            _params.amount = _params.from.getBalance(_params.sender);
+            _params.amount = _params.tokenA.getBalance(_params.sender);
         }
         uint256 msgValue;
-        if (_params.from == TokenUtils.ETH_ADDR) {
+        if (_params.tokenA == TokenUtils.ETH_ADDR) {
             TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.sender, _params.amount);
             TokenUtils.withdrawWeth(_params.amount);
             msgValue = _params.amount;
         }
         else {
-            _params.from.pullTokensIfNeeded(_params.sender, _params.amount);
-            _params.from.approveToken(address(getSwaps()), _params.amount);
+            _params.tokenA.pullTokensIfNeeded(_params.sender, _params.amount);
+            _params.tokenA.approveToken(address(getSwaps()), _params.amount);
         }
         
         uint256 received = getSwaps().exchange{ value: msgValue }(
             _params.pool,
-            _params.from,
-            _params.to,
+            _params.tokenA,
+            _params.tokenB,
             _params.amount,
             _params.expected,
             _params.receiver
