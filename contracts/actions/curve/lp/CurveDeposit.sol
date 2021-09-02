@@ -114,8 +114,10 @@ contract CurveDeposit is ActionBase, CurveHelper {
             }
 
             mstore(add(payload, add(0x4, offset)), _minMintAmount)
-            offset := add(offset, 0x20) // offset for final conditional copy
-            if eq(_useUnderlying, true) { mstore(add(payload, add(0x4, offset)), true) }
+            if eq(_useUnderlying, true) {
+                offset := add(offset, 0x20) // offset for final conditional copy
+                mstore(add(payload, add(0x4, offset)), true)
+            }
         }
     }
 
