@@ -73,7 +73,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
 
         bytes memory payload = _constructPayload(_params.sig, _params.minAmounts, _params.burnAmount, _params.useUnderlying);
         (bool success, ) = _params.pool.call(payload);
-        require(success);
+        require(success, "Bad payload or revert in pool contract");
 
         for (uint256 i = 0; i < _params.tokens.length; i++) {
             uint256 balanceDelta = _params.tokens[i].getBalance(address(this)).sub(balances[i]);

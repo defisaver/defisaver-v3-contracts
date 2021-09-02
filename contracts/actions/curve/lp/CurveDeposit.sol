@@ -80,7 +80,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
 
         bytes memory payload = _constructPayload(_params.sig, _params.amounts, _params.minMintAmount, _params.useUnderlying);
         (bool success, ) = _params.depositTarget.call{ value: msgValue }(payload);
-        require(success);
+        require(success, "Bad payload or revert in pool contract");
 
         uint256 received = _params.lpToken.getBalance(address(this)).sub(tokensBefore);
         _params.lpToken.withdrawTokens(_params.receiver, received);
