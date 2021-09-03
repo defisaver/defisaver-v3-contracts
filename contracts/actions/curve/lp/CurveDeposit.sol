@@ -64,6 +64,8 @@ contract CurveDeposit is ActionBase, CurveHelper {
 
     /// @notice Dont forget NatSpec
     function _curveDeposit(Params memory _params) internal returns (uint256) {
+        require(_params.receiver != address(0), "receiver cant be 0x0");
+
         uint256 tokensBefore = _params.lpToken.getBalance(address(this));
         uint256 msgValue;
 

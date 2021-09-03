@@ -56,6 +56,8 @@ contract CurveSwap is ActionBase, CurveHelper {
 
     /// @notice Dont forget NatSpec
     function _curveSwap(Params memory _params) internal returns (uint256) {
+        require(_params.receiver != address(0), "receiver cant be 0x0");
+        
         if (_params.amount == type(uint256).max) {
             _params.amount = _params.tokenA.getBalance(_params.sender);
         }

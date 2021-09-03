@@ -63,6 +63,8 @@ contract CurveWithdraw is ActionBase, CurveHelper {
 
     /// @notice Dont forget NatSpec
     function _curveWithdraw(Params memory _params) internal {
+        require(_params.receiver != address(0), "receiver cant be 0x0");
+        
         _params.lpToken.pullTokensIfNeeded(_params.sender, _params.burnAmount);
         _params.lpToken.approveToken(_params.pool, _params.burnAmount);
         
