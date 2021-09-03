@@ -4,9 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "../../ActionBase.sol";
 import "../helpers/CurveHelper.sol";
-
 import "../../../utils/TokenUtils.sol";
-import "../../../utils/SafeMath.sol";
 
 import "../../../interfaces/curve/ILiquidityGauge.sol";
 

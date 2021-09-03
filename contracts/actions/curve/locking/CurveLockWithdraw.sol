@@ -4,7 +4,6 @@ pragma experimental ABIEncoderV2;
 
 import "../../ActionBase.sol";
 import "../helpers/CurveHelper.sol";
-
 import "../../../utils/TokenUtils.sol";
 import "../../../utils/SafeMath.sol";
 
@@ -38,7 +37,7 @@ contract CurveLockWithdraw is ActionBase, CurveHelper {
 
     function _curveLockWthdraw(address _receiver) internal returns (uint256) {
         require(_receiver != address(0), "receiver cant be 0x0");
-        
+
         uint256 balanceBefore = CrvTokenAddr.getBalance(address(this));
         VotingEscrow.withdraw();
 

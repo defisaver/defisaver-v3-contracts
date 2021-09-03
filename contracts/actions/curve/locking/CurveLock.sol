@@ -4,7 +4,6 @@ pragma experimental ABIEncoderV2;
 
 import "../../ActionBase.sol";
 import "../helpers/CurveHelper.sol";
-
 import "../../../utils/TokenUtils.sol";
 
 contract CurveLock is ActionBase, CurveHelper {
