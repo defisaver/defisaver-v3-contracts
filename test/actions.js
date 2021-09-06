@@ -1226,6 +1226,82 @@ const curveWithdrawImbalance = async (proxy, sender, receiver, pool, lpToken, ma
     return proxy['execute(address,bytes)'](curveWithdrawImbalanceAddr, functionData, { gasLimit: 3000000 });
 };
 
+const curveGaugeDeposit = async (
+    proxy,
+    gaugeAddr,
+    lpToken,
+    sender,
+    onBehalfOf,
+    amount,
+) => {
+    const curveGaugeDepositAddr = await getAddrFromRegistry('CurveGaugeDeposit');
+
+    const curveGaugeDepositAction = new dfs.actions.curve.CurveGaugeDepositAction(
+        gaugeAddr,
+        lpToken,
+        sender,
+        onBehalfOf,
+        amount,
+    );
+
+    const functionData = curveGaugeDepositAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](curveGaugeDepositAddr, functionData, { gasLimit: 3000000 });
+};
+
+const curveGaugeWithdraw = async (
+    proxy,
+    gaugeAddr,
+    receiver,
+    amount,
+) => {
+    const curveGaugeWithdrawAddr = await getAddrFromRegistry('CurveGaugeWithdraw');
+
+    const curveGaugeWithdrawAction = new dfs.actions.curve.CurveGaugeWithdrawAction(
+        gaugeAddr,
+        receiver,
+        amount,
+    );
+
+    const functionData = curveGaugeWithdrawAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](curveGaugeWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
+
+const curveMintCrv = async (
+    proxy,
+    gaugeAddr,
+    receiver,
+) => {
+    const curveMintCrvAddr = await getAddrFromRegistry('CurveMintCrv');
+
+    const curveMintCrvAction = new dfs.actions.curve.CurveMintCrvAction(
+        gaugeAddr,
+        receiver,
+    );
+
+    const functionData = curveMintCrvAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](curveMintCrvAddr, functionData, { gasLimit: 3000000 });
+};
+
+const curveMintCrvMany = async (
+    proxy,
+    gaugeAddrs,
+    receiver,
+) => {
+    const curveMintCrvManyAddr = await getAddrFromRegistry('CurveMintCrvMany');
+
+    const curveMintCrvManyAction = new dfs.actions.curve.CurveMintCrvManyAction(
+        gaugeAddrs,
+        receiver,
+    );
+
+    const functionData = curveMintCrvManyAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](curveMintCrvManyAddr, functionData, { gasLimit: 3000000 });
+};
+
 module.exports = {
     sell,
     buy,
@@ -1293,6 +1369,11 @@ module.exports = {
     curveDeposit,
     curveWithdraw,
     curveWithdrawImbalance,
+
+    curveGaugeDeposit,
+    curveGaugeWithdraw,
+    curveMintCrv,
+    curveMintCrvMany,
 
     buyTokenIfNeeded,
     claimInstMaker,
