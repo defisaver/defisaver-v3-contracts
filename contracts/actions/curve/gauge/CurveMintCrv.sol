@@ -12,8 +12,8 @@ contract CurveMintCrv is ActionBase, CurveHelper {
     using SafeMath for uint256;
     
     struct Params {
-        address gaugeAddr;
-        address receiver;
+        address gaugeAddr;  // gauge determening Crv issuance
+        address receiver;   // address that will receive the Crv issuance
     }
 
     function executeAction(
@@ -40,6 +40,7 @@ contract CurveMintCrv is ActionBase, CurveHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
+    /// @notice Mints Crv tokens based on one Liquidity Gauge
     function _curveMintCrv(Params memory _params) internal returns (uint256) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
 

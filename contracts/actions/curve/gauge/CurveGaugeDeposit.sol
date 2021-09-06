@@ -12,11 +12,11 @@ contract CurveGaugeDeposit is ActionBase, CurveHelper {
     using TokenUtils for address;
 
     struct Params {
-        address gaugeAddr;
-        address lpToken;
-        address sender;
-        address onBehalfOf;
-        uint256 amount;
+        address gaugeAddr;  // gauge to deposit into
+        address lpToken;    // LP token address, needed for approval
+        address sender;     // address where the LP tokens are pulled from
+        address onBehalfOf; // address of the deposit beneficiary
+        uint256 amount;     // amount of LP tokens to deposit
     }
 
     function executeAction(
@@ -45,7 +45,7 @@ contract CurveGaugeDeposit is ActionBase, CurveHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    /// @notice Dont forget NatSpec
+    /// @notice Deposits LP tokens into pool Liquidity Gauge
     function _curveGaugeDeposit(Params memory _params) internal returns (uint256) {
         require(_params.onBehalfOf != address(0), "cant deposit on behalf of 0x0");
         // if _params.receiver != address(this) the receiver must call set_approve_deposit on gauge

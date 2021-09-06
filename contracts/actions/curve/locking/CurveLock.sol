@@ -10,9 +10,9 @@ contract CurveLock is ActionBase, CurveHelper {
     using TokenUtils for address;
 
     struct Params {
-        address sender;
-        uint256 amount;
-        uint256 unlockTime;
+        address sender;     // address from which to pull Crv tokens
+        uint256 amount;     // amount of tokens to lock
+        uint256 unlockTime; // time of lock expiration
     }
 
     function executeAction(
@@ -39,6 +39,7 @@ contract CurveLock is ActionBase, CurveHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
+    /// @notice Locks Crv tokens in VotingEscrow contract
     function _curveLock(Params memory _params) internal returns (uint256) {
         if (_params.amount == type(uint256).max) {
             _params.amount = CrvTokenAddr.getBalance(_params.sender);

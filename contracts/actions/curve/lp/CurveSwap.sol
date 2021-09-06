@@ -11,13 +11,13 @@ contract CurveSwap is ActionBase, CurveHelper {
     using TokenUtils for address;
 
     struct Params {
-        address sender;
-        address receiver;
-        address pool;
+        address sender;     // address from where to pull tokenA
+        address receiver;   // address that will receive tokenB
+        address pool;       // pool to use for swap
         address tokenA;
         address tokenB;
-        uint256 amount;
-        uint256 expected;
+        uint256 amount;     // amount of tokenA to swap
+        uint256 expected;   // minimum amount of tokenB to accept
     }
 
     function executeAction(
@@ -54,7 +54,7 @@ contract CurveSwap is ActionBase, CurveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Dont forget NatSpec
+    /// @notice Swaps token pair
     function _curveSwap(Params memory _params) internal returns (uint256) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
         

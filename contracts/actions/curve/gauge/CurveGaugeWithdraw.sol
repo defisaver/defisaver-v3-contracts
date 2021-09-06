@@ -12,9 +12,9 @@ contract CurveGaugeWithdraw is ActionBase, CurveHelper {
     using TokenUtils for address;
 
     struct Params {
-        address gaugeAddr;
-        address receiver;
-        uint256 amount;
+        address gaugeAddr;  // gauge to withdraw from
+        address receiver;   // address that will receive withdrawn tokens
+        uint256 amount;     // amount of LP tokens to withdraw
     }
 
     function executeAction(
@@ -42,7 +42,7 @@ contract CurveGaugeWithdraw is ActionBase, CurveHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    /// @notice Dont forget NatSpec
+    /// @notice Withdraws LP tokens from Liquidity Gauge
     function _curveGaugeWithdraw(Params memory _params) internal returns (uint256) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
         // if _params.receiver != address(this) the receiver must call set_approve_deposit on gauge

@@ -33,6 +33,9 @@ contract CurveLockAmount is ActionBase, CurveHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
+    /// @notice Increases the amount of Crv tokens locked in the VotingEscrow contract
+    /// @param _sender address where the tokens are pulled from
+    /// @param _amount amount of additional tokens to lock
     function _curveLockAmount(address _sender, uint256 _amount) internal returns (uint256) {
         if (_amount == type(uint256).max) {
             _amount = CrvTokenAddr.getBalance(_sender);

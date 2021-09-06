@@ -13,15 +13,15 @@ contract CurveWithdraw is ActionBase, CurveHelper {
     using SafeMath for uint256;
 
     struct Params {
-        address sender;
-        address receiver;
-        address pool;
-        address lpToken;
-        bytes4 sig;
-        uint256 burnAmount;
-        uint256[] minAmounts;
-        address[] tokens;
-        bool useUnderlying;
+        address sender;     // address where the LP tokens are pulled from
+        address receiver;   // address that will receive withdrawn tokens
+        address pool;       // pool from which to withdraw
+        address lpToken;    // LP token address, needed for approval
+        bytes4 sig;         // target contract function signature
+        uint256 burnAmount; // amount of LP tokens to use for withdrawal
+        uint256[] minAmounts;   // minimum amount of each token to accept
+        address[] tokens;       // token addresses, needed for token withdrawal
+        bool useUnderlying;     // some contracts take this additional parameter
     }
 
     function executeAction(
@@ -61,7 +61,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Dont forget NatSpec
+    /// @notice Withdraws user deposited tokens from pool
     function _curveWithdraw(Params memory _params) internal {
         require(_params.receiver != address(0), "receiver cant be 0x0");
         
@@ -97,6 +97,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
         );
     }
 
+    /// @notice Constructs payload for external contract call
     function _constructPayload(bytes4 _sig, uint256[] memory _minAmounts, uint256 _burnAmount, bool _useUnderlying) internal pure returns (bytes memory payload) {
         uint256 payloadSize = 4 + (_minAmounts.length + 1) * 32;
         if (_useUnderlying) payloadSize = payloadSize.add(32);

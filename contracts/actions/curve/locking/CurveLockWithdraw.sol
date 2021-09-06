@@ -35,6 +35,8 @@ contract CurveLockWithdraw is ActionBase, CurveHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
+    /// @notice Withdraws Crv tokens locked in the VotingEscrow contract
+    /// @param _receiver address that will receive the withdrawn tokens
     function _curveLockWthdraw(address _receiver) internal returns (uint256) {
         require(_receiver != address(0), "receiver cant be 0x0");
 

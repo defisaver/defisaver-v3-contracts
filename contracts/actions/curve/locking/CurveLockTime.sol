@@ -29,6 +29,8 @@ contract CurveLockTime is ActionBase, CurveHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
+    /// @notice Extends unlock time of locked Crv tokens
+    /// @param _unlockTime new time of lock expiration
     function _curveLockTime(uint256 _unlockTime) internal {
         VotingEscrow.increase_unlock_time(_unlockTime);
 

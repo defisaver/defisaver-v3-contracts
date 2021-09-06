@@ -13,15 +13,15 @@ contract CurveDeposit is ActionBase, CurveHelper {
     using SafeMath for uint256;
 
     struct Params {
-        address sender;
-        address receiver;
-        address depositTarget;  // pool contract or zap deposit contract
-        address lpToken;
-        bytes4 sig;
-        uint256 minMintAmount;
-        uint256[] amounts;
-        address[] tokens;
-        bool useUnderlying;
+        address sender;         // address where to pull tokens from
+        address receiver;       // address that will receive the LP tokens
+        address depositTarget;  // pool contract or zap deposit contract in which to deposit
+        address lpToken;        // LP token of the pool
+        bytes4 sig;             // target contract function signature
+        uint256 minMintAmount;  // minimum amount of LP tokens to accept
+        uint256[] amounts;      // amount of each token to deposit
+        address[] tokens;       // tokens to deposit, needed for token approval
+        bool useUnderlying;     // some contracts take this aditional parameter
     }
 
     function executeAction(
@@ -62,7 +62,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Dont forget NatSpec
+    /// @notice Deposits tokens into liquidity pool
     function _curveDeposit(Params memory _params) internal returns (uint256) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
 
@@ -100,7 +100,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
         return received;
     }
 
-    /// @notice dont forget NatSpec
+    /// @notice Constructs payload for external contract call
     function _constructPayload(bytes4 _sig, uint256[] memory _amounts, uint256 _minMintAmount, bool _useUnderlying) internal pure returns (bytes memory payload) {
         uint256 payloadSize = 4 + (_amounts.length + 1) * 32;
         if (_useUnderlying) payloadSize = payloadSize.add(32);
