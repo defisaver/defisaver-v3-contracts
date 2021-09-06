@@ -79,10 +79,8 @@ contract AavePayback is ActionBase, AaveHelper {
     ) internal returns (uint256) {
         ILendingPoolV2 lendingPool = getLendingPool(_market);
 
-        // if the amount sent is type(uint256).max get whole proxy debt
-        if (_amount == type(uint256).max) {
-            _amount = getWholeDebt(_market, _tokenAddr, _rateMode);
-        }
+        uint256 maxDebt = getWholeDebt(_market, _tokenAddr, _rateMode);
+        _amount = _amount > maxDebt ? maxDebt : _amount;
 
         // default to onBehalf of proxy
         if (_onBehalf == address(0)) {
