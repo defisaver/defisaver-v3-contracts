@@ -9,6 +9,11 @@ const {
     balanceOf,
 } = require('../utils');
 const { pullTokensInstDSA } = require('../actions.js');
+const {
+    AUNI_ADDR,
+    AWETH_ADDR,
+    ADAI_ADDR,
+} = require('../utils');
 
 describe('Pull tokens from DSA', function () {
     this.timeout(80000);
@@ -39,17 +44,14 @@ describe('Pull tokens from DSA', function () {
         dsaContractImpersonated.cast(['AUTHORITY-A'], [data], OWNER_ACC);
         proxy = await getProxy(OWNER_ACC);
         const impersonatedProxy = proxy.connect(ownerAcc);
-        const aUNI = '0xb9d7cb55f463405cdfbe4e90a6d2df01c2b92bf1';
-        const aWETH = '0x030ba81f1c18d280636f32af80b9aad02cf0854e';
-        const aDai = '0x028171bca77440897b824ca71d1c56cac55b68a3';
 
-        const aUniBalanceBefore = await balanceOf(aUNI, OWNER_ACC);
-        const aWethBalanceBefore = await balanceOf(aUNI, OWNER_ACC);
-        const aDaiBalanceBefore = await balanceOf(aUNI, OWNER_ACC);
+        const aUniBalanceBefore = await balanceOf(AUNI_ADDR, OWNER_ACC);
+        const aWethBalanceBefore = await balanceOf(AWETH_ADDR, OWNER_ACC);
+        const aDaiBalanceBefore = await balanceOf(ADAI_ADDR, OWNER_ACC);
         await pullTokensInstDSA(
             impersonatedProxy,
             dsaAddress,
-            [aUNI, aWETH, aDai],
+            [AUNI_ADDR, AWETH_ADDR, ADAI_ADDR],
             [
                 hre.ethers.constants.MaxUint256,
                 hre.ethers.constants.MaxUint256,
@@ -57,9 +59,9 @@ describe('Pull tokens from DSA', function () {
             ],
             OWNER_ACC,
         );
-        const aUniBalanceAfter = await balanceOf(aUNI, OWNER_ACC);
-        const aWethBalanceAfter = await balanceOf(aUNI, OWNER_ACC);
-        const aDaiBalanceAfter = await balanceOf(aUNI, OWNER_ACC);
+        const aUniBalanceAfter = await balanceOf(AUNI_ADDR, OWNER_ACC);
+        const aWethBalanceAfter = await balanceOf(AWETH_ADDR, OWNER_ACC);
+        const aDaiBalanceAfter = await balanceOf(ADAI_ADDR, OWNER_ACC);
         expect(aUniBalanceAfter).to.be.gt(aUniBalanceBefore);
         expect(aWethBalanceAfter).to.be.gt(aWethBalanceBefore);
         expect(aDaiBalanceAfter).to.be.gt(aDaiBalanceBefore);

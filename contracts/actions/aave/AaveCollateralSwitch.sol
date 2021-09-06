@@ -24,9 +24,7 @@ contract AaveCollateralSwitch is ActionBase, AaveHelper {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
-
         _switchAsCollateral(inputData);
-
         return bytes32(0);
     }
 
