@@ -51,4 +51,25 @@ contract CurveView is CurveHelper {
         if (_nCoins == 8) return bytes4(keccak256("remove_liquidity(uint256,uint256[8],bool)"));
         revert("Invalid number of coins in pool.");
     }
+
+    function curveWithdrawImbalanceSig(uint256 _nCoins, bool _useUnderlying) external pure returns (bytes4) {
+        if (!_useUnderlying) {
+            if (_nCoins == 2) return bytes4(keccak256("remove_liquidity_imbalance(uint256[2],uint256)"));
+            if (_nCoins == 3) return bytes4(keccak256("remove_liquidity_imbalance(uint256[3],uint256)"));
+            if (_nCoins == 4) return bytes4(keccak256("remove_liquidity_imbalance(uint256[4],uint256)"));
+            if (_nCoins == 5) return bytes4(keccak256("remove_liquidity_imbalance(uint256[5],uint256)"));
+            if (_nCoins == 6) return bytes4(keccak256("remove_liquidity_imbalance(uint256[6],uint256)"));
+            if (_nCoins == 7) return bytes4(keccak256("remove_liquidity_imbalance(uint256[7],uint256)"));
+            if (_nCoins == 8) return bytes4(keccak256("remove_liquidity_imbalance(uint256[8],uint256)"));
+            revert("Invalid number of coins in pool.");
+        }
+        if (_nCoins == 2) return bytes4(keccak256("remove_liquidity_imbalance(uint256[2],uint256,bool)"));
+        if (_nCoins == 3) return bytes4(keccak256("remove_liquidity_imbalance(uint256[3],uint256,bool)"));
+        if (_nCoins == 4) return bytes4(keccak256("remove_liquidity_imbalance(uint256[4],uint256,bool)"));
+        if (_nCoins == 5) return bytes4(keccak256("remove_liquidity_imbalance(uint256[5],uint256,bool)"));
+        if (_nCoins == 6) return bytes4(keccak256("remove_liquidity_imbalance(uint256[6],uint256,bool)"));
+        if (_nCoins == 7) return bytes4(keccak256("remove_liquidity_imbalance(uint256[7],uint256,bool)"));
+        if (_nCoins == 8) return bytes4(keccak256("remove_liquidity_imbalance(uint256[8],uint256,bool)"));
+        revert("Invalid number of coins in pool.");
+    }
 }

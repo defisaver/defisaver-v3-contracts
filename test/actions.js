@@ -1214,11 +1214,32 @@ const curveWithdraw = async (
 };
 
 // eslint-disable-next-line max-len
-const curveWithdrawImbalance = async (proxy, sender, receiver, pool, lpToken, maxBurnAmount, amounts) => {
+const curveWithdrawImbalance = async (
+    proxy,
+    sender,
+    receiver,
+    pool,
+    lpToken,
+    maxBurnAmount,
+    amounts,
+    tokens,
+    useUnderlying,
+) => {
     const curveWithdrawImbalanceAddr = await getAddrFromRegistry('CurveWithdrawImbalance');
+    const curveViewAddr = await getAddrFromRegistry('CurveView');
+    const curveView = await hre.ethers.getContractAt('CurveView', curveViewAddr);
+    const sig = await curveView.curveWithdrawImbalanceSig(tokens.length, useUnderlying);
 
     const curveWithdrawImbalanceAction = new dfs.actions.curve.CurveWithdrawImbalanceAction(
-        sender, receiver, pool, lpToken, maxBurnAmount, amounts,
+        sender,
+        receiver,
+        pool,
+        lpToken,
+        sig,
+        maxBurnAmount,
+        amounts,
+        tokens,
+        useUnderlying,
     );
 
     const functionData = curveWithdrawImbalanceAction.encodeForDsProxyCall()[1];
