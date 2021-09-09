@@ -47,7 +47,7 @@ describe('Mcd-Boost', function () {
         ];
         const iface = new hre.ethers.utils.Interface(ABI);
         const data = iface.encodeFunctionData('add', [OWNER_ACC]);
-        dsaContractImpersonated.cast(['AUTHORITY-A'], [data], OWNER_ACC);
+        await dsaContractImpersonated.cast(['AUTHORITY-A'], [data], OWNER_ACC);
 
         // create recipe
         proxy = await getProxy(OWNER_ACC);
