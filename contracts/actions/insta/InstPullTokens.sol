@@ -48,7 +48,7 @@ contract InstPullTokens is ActionBase, DSMath {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _pullTokens(Params memory _inputData) internal {
-
+        require (_inputData.to != address(0), "Receiver address can't be burn address");
         bytes memory spellData = _createSpell(_inputData);
         (bool success, ) = _inputData.dsaAddress.call(spellData);
 

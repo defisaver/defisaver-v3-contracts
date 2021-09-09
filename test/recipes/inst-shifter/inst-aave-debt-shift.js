@@ -9,10 +9,7 @@ const {
     redeploy,
     WETH_ADDRESS,
     impersonateAccount,
-    balanceOf,
-    AUNI_ADDR,
     AWETH_ADDR,
-    ADAI_ADDR,
     nullAddress,
     AAVE_MARKET,
     ALINK_ADDR,
@@ -20,11 +17,9 @@ const {
     USDT_ADDR,
     BUSD_ADDR,
     sendEther,
-    ETH_ADDR,
     AWBTC_ADDR,
-    depositToWeth,
-    send,
     WBTC_ADDR,
+    balanceOf,
 } = require('../../utils');
 
 describe('Mcd-Boost', function () {
@@ -137,7 +132,18 @@ describe('Mcd-Boost', function () {
         ]);
         const functionData = transferRecipe.encodeForDsProxyCall();
 
+        const usdtDebtAmount = await balanceOf('0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', dsaAddress);
+        const wbtcCollAmount = await balanceOf(AWBTC_ADDR, dsaAddress);
+        const wethCollAmount = await balanceOf(AWETH_ADDR, dsaAddress);
         await impersonatedProxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 10000000 });
+        const usdtDebtAmountAfter = await balanceOf('0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', proxy.address);
+        const wbtcCollAmountAfter = await balanceOf(AWBTC_ADDR, proxy.address);
+        const wethCollAmountAfter = await balanceOf(AWETH_ADDR, proxy.address);
+
+        expect(wbtcCollAmount).to.be.lte(wbtcCollAmountAfter);
+        expect(wethCollAmount).to.be.lte(wethCollAmountAfter);
+        console.log(usdtDebtAmount);
+        console.log(usdtDebtAmountAfter);
     }).timeout(1000000);
 
     it('... Migrate aave position from INST (COLL : WETH, LINK | DEBT : USDT, BUSD) ', async () => {
@@ -255,6 +261,20 @@ describe('Mcd-Boost', function () {
         ]);
         const functionData = transferRecipe.encodeForDsProxyCall();
 
+        const busdDebtAmount = await balanceOf('0xbA429f7011c9fa04cDd46a2Da24dc0FF0aC6099c', dsaAddress);
+        const usdtDebtAmount = await balanceOf('0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', dsaAddress);
+        const linkCollAmount = await balanceOf(ALINK_ADDR, dsaAddress);
+        const wethCollAmount = await balanceOf(AWETH_ADDR, dsaAddress);
         await impersonatedProxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 10000000 });
+        const busdDebtAmountAfter = await balanceOf('0xbA429f7011c9fa04cDd46a2Da24dc0FF0aC6099c', proxy.address);
+        const usdtDebtAmountAfter = await balanceOf('0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', proxy.address);
+        const linkCollAmountAfter = await balanceOf(ALINK_ADDR, proxy.address);
+        const wethCollAmountAfter = await balanceOf(AWETH_ADDR, proxy.address);
+        expect(linkCollAmount).to.be.lte(linkCollAmountAfter);
+        expect(wethCollAmount).to.be.lte(wethCollAmountAfter);
+        console.log(usdtDebtAmount);
+        console.log(usdtDebtAmountAfter);
+        console.log(busdDebtAmount);
+        console.log(busdDebtAmountAfter);
     }).timeout(1000000);
 });
