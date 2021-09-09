@@ -42,10 +42,10 @@ contract CurveLock is ActionBase, CurveHelper {
     /// @notice Locks Crv tokens in VotingEscrow contract
     function _curveLock(Params memory _params) internal returns (uint256) {
         if (_params.amount == type(uint256).max) {
-            _params.amount = CrvTokenAddr.getBalance(_params.sender);
+            _params.amount = CRV_TOKEN_ADDR.getBalance(_params.sender);
         }
 
-        CrvTokenAddr.pullTokensIfNeeded(_params.sender, _params.amount);
+        CRV_TOKEN_ADDR.pullTokensIfNeeded(_params.sender, _params.amount);
         VotingEscrow.create_lock(_params.amount, _params.unlockTime);
 
         logger.Log(

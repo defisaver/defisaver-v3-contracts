@@ -64,7 +64,7 @@ describe('Curve-Gauge-Withdraw', function () {
             await curveGaugeDeposit(proxy, pool.gaugeAddr, pool.lpTokenAddr, senderAddr, proxyAddr, minted);
             expect(await curveView.gaugeBalance(pool.gaugeAddr, proxyAddr)).to.be.eq(minted);
             // eslint-disable-next-line max-len
-            await curveGaugeWithdraw(proxy, pool.gaugeAddr, senderAddr, hre.ethers.constants.MaxUint256);
+            await curveGaugeWithdraw(proxy, pool.gaugeAddr, pool.lpTokenAddr, senderAddr, hre.ethers.constants.MaxUint256);
             expect(await balanceOf(pool.lpTokenAddr, senderAddr)).to.be.eq(tokensAfter);
         });
         if (pool.useUnderlying) {
@@ -90,7 +90,7 @@ describe('Curve-Gauge-Withdraw', function () {
                 await curveGaugeDeposit(proxy, pool.gaugeAddr, pool.lpTokenAddr, senderAddr, proxyAddr, minted);
                 expect(await curveView.gaugeBalance(pool.gaugeAddr, proxyAddr)).to.be.eq(minted);
                 // eslint-disable-next-line max-len
-                await curveGaugeWithdraw(proxy, pool.gaugeAddr, senderAddr, hre.ethers.constants.MaxUint256);
+                await curveGaugeWithdraw(proxy, pool.gaugeAddr, pool.lpTokenAddr, senderAddr, hre.ethers.constants.MaxUint256);
                 expect(await balanceOf(pool.lpTokenAddr, senderAddr)).to.be.eq(tokensAfter);
             });
         }
@@ -117,7 +117,7 @@ describe('Curve-Gauge-Withdraw', function () {
             await curveGaugeDeposit(proxy, pool.gaugeAddr, pool.lpTokenAddr, senderAddr, proxyAddr, minted);
             expect(await curveView.gaugeBalance(pool.gaugeAddr, proxyAddr)).to.be.eq(minted);
             // eslint-disable-next-line max-len
-            await curveGaugeWithdraw(proxy, pool.gaugeAddr, senderAddr, hre.ethers.constants.MaxUint256);
+            await curveGaugeWithdraw(proxy, pool.gaugeAddr, pool.lpTokenAddr, senderAddr, hre.ethers.constants.MaxUint256);
             expect(await balanceOf(pool.lpTokenAddr, senderAddr)).to.be.eq(tokensAfter);
         });
     });

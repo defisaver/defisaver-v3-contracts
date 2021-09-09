@@ -37,11 +37,11 @@ contract CurveDeposit is ActionBase, CurveHelper {
         params.lpToken = _parseParamAddr(params.lpToken, _paramMapping[3], _subData, _returnValues);
         params.minMintAmount = _parseParamUint(params.minMintAmount, _paramMapping[4], _subData, _returnValues);
         
-        uint256 N_COINS = params.amounts.length;
-        require(N_COINS == params.tokens.length);
+        uint256 nCoins = params.amounts.length;
+        require(nCoins == params.tokens.length);
         for (uint256 i = 0; i < params.amounts.length; i++) {
             params.amounts[i] = _parseParamUint(params.amounts[i], _paramMapping[5 + i], _subData, _returnValues);
-            params.tokens[i] = _parseParamAddr(params.tokens[i], _paramMapping[5 + N_COINS + i], _subData, _returnValues);
+            params.tokens[i] = _parseParamAddr(params.tokens[i], _paramMapping[5 + nCoins + i], _subData, _returnValues);
         }
 
         uint256 received = _curveDeposit(params);

@@ -37,11 +37,11 @@ contract CurveWithdraw is ActionBase, CurveHelper {
         params.lpToken = _parseParamAddr(params.lpToken, _paramMapping[3], _subData, _returnValues);
         params.burnAmount = _parseParamUint(params.burnAmount, _paramMapping[4], _subData, _returnValues);
         
-        uint256 N_COINS = params.minAmounts.length;
-        require(N_COINS == params.tokens.length);
+        uint256 nCoins = params.minAmounts.length;
+        require(nCoins == params.tokens.length);
         for (uint256 i = 0; i < params.tokens.length; i++) {
             params.minAmounts[i] = _parseParamUint(params.minAmounts[i], _paramMapping[5 + i], _subData, _returnValues);
-            params.tokens[i] = _parseParamAddr(params.tokens[i], _paramMapping[5 + N_COINS + i], _subData, _returnValues);
+            params.tokens[i] = _parseParamAddr(params.tokens[i], _paramMapping[5 + nCoins + i], _subData, _returnValues);
         }
 
         _curveWithdraw(params);

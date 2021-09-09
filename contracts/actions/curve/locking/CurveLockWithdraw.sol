@@ -40,11 +40,11 @@ contract CurveLockWithdraw is ActionBase, CurveHelper {
     function _curveLockWthdraw(address _receiver) internal returns (uint256) {
         require(_receiver != address(0), "receiver cant be 0x0");
 
-        uint256 balanceBefore = CrvTokenAddr.getBalance(address(this));
+        uint256 balanceBefore = CRV_TOKEN_ADDR.getBalance(address(this));
         VotingEscrow.withdraw();
 
-        uint256 withdrawn = CrvTokenAddr.getBalance(address(this)).sub(balanceBefore);
-        CrvTokenAddr.withdrawTokens(_receiver, withdrawn);
+        uint256 withdrawn = CRV_TOKEN_ADDR.getBalance(address(this)).sub(balanceBefore);
+        CRV_TOKEN_ADDR.withdrawTokens(_receiver, withdrawn);
 
         logger.Log(
             address(this),

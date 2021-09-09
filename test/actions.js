@@ -1273,6 +1273,7 @@ const curveGaugeDeposit = async (
 const curveGaugeWithdraw = async (
     proxy,
     gaugeAddr,
+    lpToken,
     receiver,
     amount,
 ) => {
@@ -1280,6 +1281,7 @@ const curveGaugeWithdraw = async (
 
     const curveGaugeWithdrawAction = new dfs.actions.curve.CurveGaugeWithdrawAction(
         gaugeAddr,
+        lpToken,
         receiver,
         amount,
     );

@@ -13,6 +13,7 @@ contract CurveGaugeWithdraw is ActionBase, CurveHelper {
 
     struct Params {
         address gaugeAddr;  // gauge to withdraw from
+        address lpToken;    // LP token address, needed for withdrawal
         address receiver;   // address that will receive withdrawn tokens
         uint256 amount;     // amount of LP tokens to withdraw
     }
@@ -25,7 +26,8 @@ contract CurveGaugeWithdraw is ActionBase, CurveHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
         params.receiver = _parseParamAddr(params.receiver, _paramMapping[1], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
+        params.lpToken = _parseParamAddr(params.lpToken, _paramMapping[2], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
 
         uint256 withdrawn = _curveGaugeWithdraw(params);
         return bytes32(withdrawn);
@@ -43,16 +45,16 @@ contract CurveGaugeWithdraw is ActionBase, CurveHelper {
     }
 
     /// @notice Withdraws LP tokens from Liquidity Gauge
+    /// @dev if _params.receiver != address(this) the receiver must call set_approve_deposit on gauge
     function _curveGaugeWithdraw(Params memory _params) internal returns (uint256) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
-        // if _params.receiver != address(this) the receiver must call set_approve_deposit on gauge
+        
         if (_params.amount == type(uint256).max) {
             _params.amount = ILiquidityGauge(_params.gaugeAddr).balanceOf(address(this));
         }
 
         ILiquidityGauge(_params.gaugeAddr).withdraw(_params.amount);
-        address lpToken = ILiquidityGauge(_params.gaugeAddr).lp_token();
-        lpToken.withdrawTokens(_params.receiver, _params.amount);
+        _params.lpToken.withdrawTokens(_params.receiver, _params.amount);
 
         logger.Log(
             address(this),

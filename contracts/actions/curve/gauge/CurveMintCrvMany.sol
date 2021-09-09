@@ -12,7 +12,7 @@ contract CurveMintCrvMany is ActionBase, CurveHelper {
     using SafeMath for uint256;
     
     struct Params {
-        address[8] gaugeAddrs;  // array of gauges determening Crv issuance
+        address[8] gaugeAddrs;  // array of gauges determining Crv issuance
         address receiver;       // address that will receive the Crv issuance
     }
 
@@ -44,11 +44,11 @@ contract CurveMintCrvMany is ActionBase, CurveHelper {
     function _curveMintCrvMany(Params memory _params) internal returns (uint256) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
 
-        uint256 balanceBefore = CrvTokenAddr.getBalance(address(this));
+        uint256 balanceBefore = CRV_TOKEN_ADDR.getBalance(address(this));
         Minter.mint_many(_params.gaugeAddrs);
-        uint256 minted = CrvTokenAddr.getBalance(address(this)).sub(balanceBefore);
+        uint256 minted = CRV_TOKEN_ADDR.getBalance(address(this)).sub(balanceBefore);
 
-        CrvTokenAddr.withdrawTokens(_params.receiver, minted);
+        CRV_TOKEN_ADDR.withdrawTokens(_params.receiver, minted);
 
         logger.Log(
             address(this),

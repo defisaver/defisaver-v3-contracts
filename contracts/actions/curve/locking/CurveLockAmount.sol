@@ -38,10 +38,10 @@ contract CurveLockAmount is ActionBase, CurveHelper {
     /// @param _amount amount of additional tokens to lock
     function _curveLockAmount(address _sender, uint256 _amount) internal returns (uint256) {
         if (_amount == type(uint256).max) {
-            _amount = CrvTokenAddr.getBalance(_sender);
+            _amount = CRV_TOKEN_ADDR.getBalance(_sender);
         }
 
-        CrvTokenAddr.pullTokensIfNeeded(_sender, _amount);
+        CRV_TOKEN_ADDR.pullTokensIfNeeded(_sender, _amount);
         VotingEscrow.increase_amount(_amount);
 
         logger.Log(

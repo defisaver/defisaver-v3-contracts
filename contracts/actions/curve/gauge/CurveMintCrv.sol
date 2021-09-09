@@ -44,11 +44,11 @@ contract CurveMintCrv is ActionBase, CurveHelper {
     function _curveMintCrv(Params memory _params) internal returns (uint256) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
 
-        uint256 balanceBefore = CrvTokenAddr.getBalance(address(this));
+        uint256 balanceBefore = CRV_TOKEN_ADDR.getBalance(address(this));
         Minter.mint(_params.gaugeAddr);
-        uint256 minted = CrvTokenAddr.getBalance(address(this)).sub(balanceBefore);
+        uint256 minted = CRV_TOKEN_ADDR.getBalance(address(this)).sub(balanceBefore);
 
-        CrvTokenAddr.withdrawTokens(_params.receiver, minted);
+        CRV_TOKEN_ADDR.withdrawTokens(_params.receiver, minted);
 
         logger.Log(
             address(this),
