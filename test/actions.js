@@ -1189,12 +1189,18 @@ const curveWithdraw = async (
     burnAmount,
     minAmounts,
     tokens,
+    withdrawExact,
     useUnderlying,
 ) => {
     const curveWithdrawAddr = await getAddrFromRegistry('CurveWithdraw');
     const curveViewAddr = await getAddrFromRegistry('CurveView');
     const curveView = await hre.ethers.getContractAt('CurveView', curveViewAddr);
-    const sig = await curveView.curveWithdrawSig(tokens.length, useUnderlying);
+    let sig;
+    if (withdrawExact) {
+        sig = await curveView.curveWithdrawImbalanceSig(tokens.length, useUnderlying);
+    } else {
+        sig = await curveView.curveWithdrawSig(tokens.length, useUnderlying);
+    }
 
     const curveWithdrawAction = new dfs.actions.curve.CurveWithdrawAction(
         sender,
@@ -1205,46 +1211,12 @@ const curveWithdraw = async (
         burnAmount,
         minAmounts,
         tokens,
+        withdrawExact,
         useUnderlying,
     );
 
     const functionData = curveWithdrawAction.encodeForDsProxyCall()[1];
-
     return proxy['execute(address,bytes)'](curveWithdrawAddr, functionData, { gasLimit: 3000000 });
-};
-
-// eslint-disable-next-line max-len
-const curveWithdrawImbalance = async (
-    proxy,
-    sender,
-    receiver,
-    pool,
-    lpToken,
-    maxBurnAmount,
-    amounts,
-    tokens,
-    useUnderlying,
-) => {
-    const curveWithdrawImbalanceAddr = await getAddrFromRegistry('CurveWithdrawImbalance');
-    const curveViewAddr = await getAddrFromRegistry('CurveView');
-    const curveView = await hre.ethers.getContractAt('CurveView', curveViewAddr);
-    const sig = await curveView.curveWithdrawImbalanceSig(tokens.length, useUnderlying);
-
-    const curveWithdrawImbalanceAction = new dfs.actions.curve.CurveWithdrawImbalanceAction(
-        sender,
-        receiver,
-        pool,
-        lpToken,
-        sig,
-        maxBurnAmount,
-        amounts,
-        tokens,
-        useUnderlying,
-    );
-
-    const functionData = curveWithdrawImbalanceAction.encodeForDsProxyCall()[1];
-
-    return proxy['execute(address,bytes)'](curveWithdrawImbalanceAddr, functionData, { gasLimit: 3000000 });
 };
 
 const curveGaugeDeposit = async (
@@ -1391,7 +1363,6 @@ module.exports = {
     curveSwap,
     curveDeposit,
     curveWithdraw,
-    curveWithdrawImbalance,
 
     curveGaugeDeposit,
     curveGaugeWithdraw,

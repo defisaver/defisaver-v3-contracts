@@ -18,9 +18,16 @@ contract CurveWithdraw is ActionBase, CurveHelper {
         address pool;       // pool from which to withdraw
         address lpToken;    // LP token address, needed for approval
         bytes4 sig;         // target contract function signature
-        uint256 burnAmount; // amount of LP tokens to use for withdrawal
-        uint256[] minAmounts;   // minimum amount of each token to accept
+        uint256 burnAmount; // amount of LP tokens to burn for withdrawal
+        uint256[] withdrawAmounts;   // amount of each token to withdraw
         address[] tokens;       // token addresses, needed for token withdrawal
+        bool withdrawExact;     // if set to 'true' this action will withdraw the exact
+                                //      amount of each token specified in withdrawAmounts
+                                //      and burnAmount will define the upper limit of lp tokens to burn
+                                //
+                                // if set to 'false' this action will burn the whole burnAmount
+                                //      of lp tokens and withdrawAmounts will define the lower limit
+                                //      of each token to withdraw
         bool useUnderlying;     // some contracts take this additional parameter
     }
 
@@ -37,10 +44,10 @@ contract CurveWithdraw is ActionBase, CurveHelper {
         params.lpToken = _parseParamAddr(params.lpToken, _paramMapping[3], _subData, _returnValues);
         params.burnAmount = _parseParamUint(params.burnAmount, _paramMapping[4], _subData, _returnValues);
         
-        uint256 nCoins = params.minAmounts.length;
+        uint256 nCoins = params.withdrawAmounts.length;
         require(nCoins == params.tokens.length);
         for (uint256 i = 0; i < params.tokens.length; i++) {
-            params.minAmounts[i] = _parseParamUint(params.minAmounts[i], _paramMapping[5 + i], _subData, _returnValues);
+            params.withdrawAmounts[i] = _parseParamUint(params.withdrawAmounts[i], _paramMapping[5 + i], _subData, _returnValues);
             params.tokens[i] = _parseParamAddr(params.tokens[i], _paramMapping[5 + nCoins + i], _subData, _returnValues);
         }
 
@@ -73,7 +80,8 @@ contract CurveWithdraw is ActionBase, CurveHelper {
             balances[i] = _params.tokens[i].getBalance(address(this));
         }
 
-        bytes memory payload = _constructPayload(_params.sig, _params.minAmounts, _params.burnAmount, _params.useUnderlying);
+        bytes memory payload = _constructPayload(_params.sig, _params.withdrawAmounts, _params.burnAmount, _params.withdrawExact, _params.useUnderlying);
+
         (bool success, ) = _params.pool.call(payload);
         require(success, "Bad payload or revert in pool contract");
 
@@ -98,22 +106,33 @@ contract CurveWithdraw is ActionBase, CurveHelper {
     }
 
     /// @notice Constructs payload for external contract call
-    function _constructPayload(bytes4 _sig, uint256[] memory _minAmounts, uint256 _burnAmount, bool _useUnderlying) internal pure returns (bytes memory payload) {
-        uint256 payloadSize = 4 + (_minAmounts.length + 1) * 32;
+    function _constructPayload(bytes4 _sig, uint256[] memory _withdrawAmounts, uint256 _burnAmount, bool _withdrawExact, bool _useUnderlying) internal pure returns (bytes memory payload) {
+        uint256 payloadSize = 4 + (_withdrawAmounts.length + 1) * 32;
         if (_useUnderlying) payloadSize = payloadSize.add(32);
         payload = new bytes(payloadSize);
         
         assembly {
-            mstore(add(payload, 0x20), _sig)    // store the signature after dynamic array length field (&callData + 0x20)
-            mstore(add(payload, 0x24), _burnAmount)    // copy the first arg after the selector (0x20 + 0x4 bytes)
+            mstore(add(payload, 0x20), _sig)    // store the selector after dynamic array length field (&callData + 0x20)
+            let payloadOffset := 0x4            // skip the selector
 
-            let offset := 0x20  // offset of the first element in '_minAmounts'
-            for { let i := 0 } lt(i, mload(_minAmounts)) { i := add(i, 1) } {
-                mstore(add(payload, add(0x24, offset)), mload(add(_minAmounts, offset)))   // payload offset needs to account for 0x4 bytes of selector and 0x20 bytes for _burnAmount arg
+            if eq(_withdrawExact, false) {
+                mstore(add(payload, 0x24), _burnAmount)    // copy the first arg after the selector (0x20 + 0x4 bytes)
+                payloadOffset := 0x24           // skip the first arg and the selector
+            }
+
+            let offset := 0x20  // offset of the first element in '_withdrawAmounts'
+            for { let i := 0 } lt(i, mload(_withdrawAmounts)) { i := add(i, 1) } {
+                mstore(add(payload, add(payloadOffset, offset)), mload(add(_withdrawAmounts, offset)))
                 offset := add(offset, 0x20) // offset for next copy
             }
 
-            if eq(_useUnderlying, true) { mstore(add(payload, add(0x24, offset)), true) }
+            if eq(_withdrawExact, true) {
+                mstore(add(payload, add(0x4, offset)), _burnAmount)     // copy the last arg after the copied array
+                offset := add(offset, 0x20) // offset for next copy
+            }
+            if eq(_useUnderlying, true) {
+                mstore(add(payload, add(0x24, offset)), true)
+            }
         }
     }
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {

@@ -52,13 +52,25 @@ describe('Curve-Withdraw', function () {
             await curveDeposit(proxy, senderAddr, senderAddr, poolData[poolName].swapAddr, poolData[poolName].lpTokenAddr, '0', amounts, coins, false);
             const tokensAfter = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
             const minted = tokensAfter.sub(tokensBefore);
+
             expect(minted).to.be.gt('0');
 
             // eslint-disable-next-line max-len
             const balancesBefore = await Promise.all(coins.map(async (c) => balanceOf(c === ETH_ADDR ? WETH_ADDRESS : c, senderAddr)));
 
             await approve(poolData[poolName].lpTokenAddr, proxyAddr);
-            await curveWithdraw(proxy, senderAddr, senderAddr, poolData[poolName].swapAddr, poolData[poolName].lpTokenAddr, minted, amounts.map(() => '0'), coins, false);
+
+            await curveWithdraw(
+                proxy,
+                senderAddr,
+                senderAddr,
+                poolData[poolName].swapAddr,
+                poolData[poolName].lpTokenAddr,
+                minted, amounts.map(() => '0'),
+                coins,
+                false,
+                false,
+            );
             // eslint-disable-next-line max-len
             const balancesAfter = await Promise.all(coins.map(async (c) => balanceOf(c === ETH_ADDR ? WETH_ADDRESS : c, senderAddr)));
 
@@ -90,7 +102,18 @@ describe('Curve-Withdraw', function () {
                 const balancesBefore = await Promise.all(underlyingCoins.map(async (c) => balanceOf(c, senderAddr)));
 
                 await approve(poolData[poolName].lpTokenAddr, proxyAddr);
-                await curveWithdraw(proxy, senderAddr, senderAddr, poolData[poolName].swapAddr, poolData[poolName].lpTokenAddr, minted, amounts.map(() => '0'), underlyingCoins, true);
+                await curveWithdraw(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    poolData[poolName].swapAddr,
+                    poolData[poolName].lpTokenAddr,
+                    minted,
+                    amounts.map(() => '0'),
+                    underlyingCoins,
+                    false,
+                    true,
+                );
 
                 // eslint-disable-next-line max-len
                 const balancesAfter = await Promise.all(underlyingCoins.map(async (c) => balanceOf(c, senderAddr)));
@@ -115,7 +138,7 @@ describe('Curve-Withdraw', function () {
             }));
 
             const tokensBefore = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-            await curveDeposit(proxy, senderAddr, senderAddr, poolData[poolName].depositAddr, poolData[poolName].lpTokenAddr, '0', amounts, underlyingCoins, false);
+            await curveDeposit(proxy, senderAddr, senderAddr, poolData[poolName].depositAddr, poolData[poolName].lpTokenAddr, '0', amounts, underlyingCoins, false, false);
             const tokensAfter = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
             const minted = tokensAfter.sub(tokensBefore);
             expect(minted).to.be.gt('0');
@@ -124,7 +147,18 @@ describe('Curve-Withdraw', function () {
             const balancesBefore = await Promise.all(underlyingCoins.map(async (c) => balanceOf(c, senderAddr)));
 
             await approve(poolData[poolName].lpTokenAddr, proxyAddr);
-            await curveWithdraw(proxy, senderAddr, senderAddr, poolData[poolName].depositAddr, poolData[poolName].lpTokenAddr, minted, amounts.map(() => '0'), underlyingCoins, false);
+            await curveWithdraw(
+                proxy,
+                senderAddr,
+                senderAddr,
+                poolData[poolName].depositAddr,
+                poolData[poolName].lpTokenAddr,
+                minted,
+                amounts.map(() => '0'),
+                underlyingCoins,
+                false,
+                false,
+            );
 
             // eslint-disable-next-line max-len
             const balancesAfter = await Promise.all(underlyingCoins.map(async (c) => balanceOf(c, senderAddr)));

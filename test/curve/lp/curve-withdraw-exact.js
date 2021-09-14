@@ -13,12 +13,12 @@ const {
 const {
     buyTokenIfNeeded,
     curveDeposit,
-    curveWithdrawImbalance,
+    curveWithdraw,
 } = require('../../actions.js');
 
 const poolData = require('../poolData');
 
-describe('Curve-Withdraw-Imbalance', function () {
+describe('Curve-Withdraw-Exact', function () {
     this.timeout(1000000);
     const amount = '1000';
     const withdrawAmount = '900';
@@ -33,7 +33,7 @@ describe('Curve-Withdraw-Imbalance', function () {
         proxyAddr = proxy.address;
 
         await redeploy('CurveDeposit');
-        await redeploy('CurveWithdrawImbalance');
+        await redeploy('CurveWithdraw');
         await redeploy('CurveView');
     });
 
@@ -59,7 +59,7 @@ describe('Curve-Withdraw-Imbalance', function () {
             const balancesBefore = await Promise.all(coins.map(async (c) => balanceOf(c === ETH_ADDR ? WETH_ADDRESS : c, senderAddr)));
 
             await approve(poolData[poolName].lpTokenAddr, proxyAddr);
-            await curveWithdrawImbalance(
+            await curveWithdraw(
                 proxy,
                 senderAddr,
                 senderAddr,
@@ -68,6 +68,7 @@ describe('Curve-Withdraw-Imbalance', function () {
                 minted,
                 amounts.map(() => withdrawAmount),
                 coins,
+                true,
                 false,
             );
 
@@ -102,7 +103,7 @@ describe('Curve-Withdraw-Imbalance', function () {
                 const balancesBefore = await Promise.all(underlyingCoins.map(async (c) => balanceOf(c, senderAddr)));
 
                 await approve(poolData[poolName].lpTokenAddr, proxyAddr);
-                await curveWithdrawImbalance(
+                await curveWithdraw(
                     proxy,
                     senderAddr,
                     senderAddr,
@@ -111,6 +112,7 @@ describe('Curve-Withdraw-Imbalance', function () {
                     minted,
                     amounts.map(() => withdrawAmount),
                     underlyingCoins,
+                    true,
                     true,
                 );
 
@@ -146,7 +148,7 @@ describe('Curve-Withdraw-Imbalance', function () {
             const balancesBefore = await Promise.all(underlyingCoins.map(async (c) => balanceOf(c, senderAddr)));
 
             await approve(poolData[poolName].lpTokenAddr, proxyAddr);
-            await curveWithdrawImbalance(
+            await curveWithdraw(
                 proxy,
                 senderAddr,
                 senderAddr,
@@ -155,6 +157,7 @@ describe('Curve-Withdraw-Imbalance', function () {
                 minted,
                 amounts.map(() => withdrawAmount),
                 underlyingCoins,
+                true,
                 false,
             );
 
