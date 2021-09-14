@@ -1265,29 +1265,12 @@ const curveGaugeWithdraw = async (
 
 const curveMintCrv = async (
     proxy,
-    gaugeAddr,
-    receiver,
-) => {
-    const curveMintCrvAddr = await getAddrFromRegistry('CurveMintCrv');
-
-    const curveMintCrvAction = new dfs.actions.curve.CurveMintCrvAction(
-        gaugeAddr,
-        receiver,
-    );
-
-    const functionData = curveMintCrvAction.encodeForDsProxyCall()[1];
-
-    return proxy['execute(address,bytes)'](curveMintCrvAddr, functionData, { gasLimit: 3000000 });
-};
-
-const curveMintCrvMany = async (
-    proxy,
     gaugeAddrs,
     receiver,
 ) => {
-    const curveMintCrvManyAddr = await getAddrFromRegistry('CurveMintCrvMany');
+    const curveMintCrvManyAddr = await getAddrFromRegistry('CurveMintCrv');
 
-    const curveMintCrvManyAction = new dfs.actions.curve.CurveMintCrvManyAction(
+    const curveMintCrvManyAction = new dfs.actions.curve.CurveMintCrvAction(
         gaugeAddrs,
         receiver,
     );
@@ -1367,7 +1350,6 @@ module.exports = {
     curveGaugeDeposit,
     curveGaugeWithdraw,
     curveMintCrv,
-    curveMintCrvMany,
 
     buyTokenIfNeeded,
     claimInstMaker,

@@ -7,7 +7,7 @@ import "../helpers/CurveHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../../utils/SafeMath.sol";
 
-contract CurveMintCrvMany is ActionBase, CurveHelper {
+contract CurveMintCrv is ActionBase, CurveHelper {
     using TokenUtils for address;
     using SafeMath for uint256;
     
@@ -25,14 +25,14 @@ contract CurveMintCrvMany is ActionBase, CurveHelper {
         Params memory params = parseInputs(_callData);
         params.receiver = _parseParamAddr(params.receiver, _paramMapping[0], _subData, _returnValues);
         
-        uint256 minted = _curveMintCrvMany(params);
+        uint256 minted = _curveMintCrv(params);
         return bytes32(minted);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-        _curveMintCrvMany(params);
+        _curveMintCrv(params);
     }
 
     /// @inheritdoc ActionBase
@@ -41,7 +41,7 @@ contract CurveMintCrvMany is ActionBase, CurveHelper {
     }
 
     /// @notice Mints Crv tokens based on up to 8 gauges
-    function _curveMintCrvMany(Params memory _params) internal returns (uint256) {
+    function _curveMintCrv(Params memory _params) internal returns (uint256) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
 
         uint256 balanceBefore = CRV_TOKEN_ADDR.getBalance(address(this));
@@ -53,7 +53,7 @@ contract CurveMintCrvMany is ActionBase, CurveHelper {
         logger.Log(
             address(this),
             msg.sender,
-            "CurveMintCrvMany",
+            "CurveMintCrv",
             abi.encode(
                 _params,
                 minted
