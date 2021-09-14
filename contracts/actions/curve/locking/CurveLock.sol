@@ -9,8 +9,16 @@ import "../../../utils/TokenUtils.sol";
 contract CurveLock is ActionBase, CurveHelper {
     using TokenUtils for address;
 
+    enum LockOperation {
+        CreateLock,
+        IncreaseAmount,
+        IncreaseTime,
+        IncreaseAmountAndTime
+    }
+
     struct Params {
         address sender;     // address from which to pull Crv tokens
+        LockOperation operation;
         uint256 amount;     // amount of tokens to lock
         uint256 unlockTime; // time of lock expiration
     }
@@ -41,12 +49,27 @@ contract CurveLock is ActionBase, CurveHelper {
 
     /// @notice Locks Crv tokens in VotingEscrow contract
     function _curveLock(Params memory _params) internal returns (uint256) {
-        if (_params.amount == type(uint256).max) {
-            _params.amount = CRV_TOKEN_ADDR.getBalance(_params.sender);
-        }
 
-        CRV_TOKEN_ADDR.pullTokensIfNeeded(_params.sender, _params.amount);
-        VotingEscrow.create_lock(_params.amount, _params.unlockTime);
+        if (_params.operation != LockOperation.IncreaseTime) {
+            if (_params.amount == type(uint256).max) {
+                _params.amount = CRV_TOKEN_ADDR.getBalance(_params.sender);
+            }
+            CRV_TOKEN_ADDR.pullTokensIfNeeded(_params.sender, _params.amount);
+        }
+        
+        if (_params.operation == LockOperation.CreateLock)
+            VotingEscrow.create_lock(_params.amount, _params.unlockTime);
+        
+        else if (_params.operation == LockOperation.IncreaseAmount)
+            VotingEscrow.increase_amount(_params.amount);
+        
+        else if (_params.operation == LockOperation.IncreaseTime)
+            VotingEscrow.increase_unlock_time(_params.unlockTime);
+
+        else if (_params.operation == LockOperation.IncreaseAmountAndTime) {
+            VotingEscrow.increase_amount(_params.amount);
+            VotingEscrow.increase_unlock_time(_params.unlockTime);
+        } else revert("Invalid lock operation");
 
         logger.Log(
             address(this),
