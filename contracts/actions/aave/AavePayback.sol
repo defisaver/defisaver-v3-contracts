@@ -98,7 +98,6 @@ contract AavePayback is ActionBase, AaveHelper {
         // send back any leftover tokens that weren't used in the repay
         _tokenAddr.withdrawTokens(_from, tokensAfter);
 
-        uint256 debt = getWholeDebt(_market, _tokenAddr, _rateMode, _onBehalf);
         logger.Log(
             address(this),
             msg.sender,

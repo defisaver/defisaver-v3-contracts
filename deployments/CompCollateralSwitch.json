@@ -1,5 +1,5 @@
 {
-	"contractName": "CompPayback",
+	"contractName": "CompCollateralSwitch",
 	"abi": [
 		{
 			"inputs": [],
@@ -56,19 +56,6 @@
 		{
 			"inputs": [],
 			"name": "ERR_COMP_EXIT_MARKET",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_COMP_PAYBACK_FAILED",
 			"outputs": [
 				{
 					"internalType": "string",

@@ -22,7 +22,7 @@ const {
     balanceOf,
 } = require('../../utils');
 
-describe('Mcd-Boost', function () {
+describe('Inst Aave position shift', function () {
     this.timeout(80000);
 
     let proxy;

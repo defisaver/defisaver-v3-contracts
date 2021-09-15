@@ -28,7 +28,6 @@ contract CompWithdraw is ActionBase, CompHelper, DSMath {
         tokenAddr = _parseParamAddr(tokenAddr, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
         to = _parseParamAddr(to, _paramMapping[2], _subData, _returnValues);
-
         uint256 withdrawAmount = _withdraw(tokenAddr, amount, to);
 
         return bytes32(withdrawAmount);

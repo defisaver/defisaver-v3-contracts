@@ -1,5 +1,5 @@
 {
-	"contractName": "CompPayback",
+	"contractName": "CompGetDebt",
 	"abi": [
 		{
 			"inputs": [],
@@ -9,71 +9,6 @@
 					"internalType": "address",
 					"name": "",
 					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "COMPTROLLER_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "C_ETH_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_COMP_ENTER_MARKET",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_COMP_EXIT_MARKET",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_COMP_PAYBACK_FAILED",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
 				}
 			],
 			"stateMutability": "view",
@@ -212,19 +147,6 @@
 		{
 			"inputs": [
 				{
-					"internalType": "address",
-					"name": "_cTokenAddr",
-					"type": "address"
-				}
-			],
-			"name": "enterMarket",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
 					"internalType": "bytes[]",
 					"name": "_callData",
 					"type": "bytes[]"
@@ -270,19 +192,6 @@
 			"type": "function"
 		},
 		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_cTokenAddr",
-					"type": "address"
-				}
-			],
-			"name": "exitMarket",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
 			"inputs": [],
 			"name": "kill",
 			"outputs": [],
@@ -300,6 +209,37 @@
 				}
 			],
 			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes[]",
+					"name": "_callData",
+					"type": "bytes[]"
+				}
+			],
+			"name": "parseInputs",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "tokenAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "debtorAddr",
+							"type": "address"
+						}
+					],
+					"internalType": "struct CompGetDebt.Params",
+					"name": "params",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "pure",
 			"type": "function"
 		},
 		{

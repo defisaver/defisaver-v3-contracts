@@ -17,7 +17,7 @@ const {
     UNI_ADDR,
 } = require('../../utils');
 
-describe('Mcd-Boost', function () {
+describe('Inst Aave debtless position shift', function () {
     this.timeout(80000);
 
     let proxy;
