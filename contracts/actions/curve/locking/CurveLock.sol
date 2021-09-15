@@ -30,7 +30,9 @@ contract CurveLock is ActionBase, CurveHelper {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
-        params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
+        params.sender = _parseParamAddr(params.sender, _paramMapping[0], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
+        params.unlockTime = _parseParamUint(params.unlockTime, _paramMapping[2], _subData, _returnValues);
         
         uint256 locked = _curveLock(params);
         return bytes32(locked);
