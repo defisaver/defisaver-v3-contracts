@@ -6,6 +6,7 @@ import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/compound/ICToken.sol";
 
+/// @title Action that gets debt amount for a single asset on Compound for debtor
 contract CompGetDebt is ActionBase {
     using TokenUtils for address;
 

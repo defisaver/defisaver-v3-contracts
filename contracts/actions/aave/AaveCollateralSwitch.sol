@@ -7,7 +7,7 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
-/// @title Supply a token to an Aave market
+/// @title Switch if you'll use tokens for collateral on aave for a market
 contract AaveCollateralSwitch is ActionBase, AaveHelper {
     using TokenUtils for address;
     struct Params {

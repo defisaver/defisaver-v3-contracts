@@ -7,7 +7,7 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
 
-/// @title Supply a token to an Comp market
+/// @title Switch if you'll use tokens for collateral on compound
 contract CompCollateralSwitch is ActionBase, CompHelper {
     using TokenUtils for address;
 

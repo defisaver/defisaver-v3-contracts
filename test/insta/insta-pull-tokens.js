@@ -30,7 +30,7 @@ describe('Pull tokens from DSA', function () {
         dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress);
     });
 
-    it('... claim INST', async () => {
+    it('... pull aUni, aWETH, aDAI tokens from dsa', async () => {
         await impersonateAccount(OWNER_ACC);
         ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
         const dsaContractImpersonated = dsaContract.connect(ownerAcc);
