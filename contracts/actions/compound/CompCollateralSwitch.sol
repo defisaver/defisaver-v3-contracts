@@ -12,7 +12,7 @@ contract CompCollateralSwitch is ActionBase, CompHelper {
     using TokenUtils for address;
 
     struct Params {
-        address[] tokens;
+        address[] cTokens;
         bool[] useAsCollateral;
     }
 
@@ -43,11 +43,11 @@ contract CompCollateralSwitch is ActionBase, CompHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _switchAsCollateral(Params memory _inputData) internal {
-        for (uint256 i = 0; i < _inputData.tokens.length; i++){
+        for (uint256 i = 0; i < _inputData.cTokens.length; i++){
             if (_inputData.useAsCollateral[i]){
-                enterMarket(_inputData.tokens[i]);
+                enterMarket(_inputData.cTokens[i]);
             }else{
-                exitMarket(_inputData.tokens[i]);
+                exitMarket(_inputData.cTokens[i]);
             }
         }
     }

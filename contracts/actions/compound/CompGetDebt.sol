@@ -11,7 +11,7 @@ contract CompGetDebt is ActionBase {
     using TokenUtils for address;
 
     struct Params {
-        address tokenAddr;
+        address cTokenAddr;
         address debtorAddr;
     }
 
@@ -24,7 +24,7 @@ contract CompGetDebt is ActionBase {
     ) public virtual override payable returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        uint256 debtAmount = ICToken(inputData.tokenAddr).borrowBalanceCurrent(inputData.debtorAddr);
+        uint256 debtAmount = ICToken(inputData.cTokenAddr).borrowBalanceCurrent(inputData.debtorAddr);
         return bytes32(debtAmount);
     }
 

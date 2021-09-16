@@ -122,7 +122,7 @@ describe('Inst Compound position shift', function () {
             dydxFlAddr,
         );
         // repay flashloan
-        const transferRecipe = new dfs.Recipe('TransferDebtlessAaveFromInstadapp', [
+        const transferRecipe = new dfs.Recipe('TransferCompoundPositionFromInstadapp', [
             flashloanAction,
             // find debt balances
             daiCompGetDebtAction,

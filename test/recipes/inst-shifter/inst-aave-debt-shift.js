@@ -120,7 +120,7 @@ describe('Inst Aave position shift', function () {
             dydxFlAddr,
         );
         // repay flashloan
-        const transferRecipe = new dfs.Recipe('TransferDebtlessAaveFromInstadapp', [
+        const transferRecipe = new dfs.Recipe('TransferAavePositionFromInstadapp', [
             flashloanAction,
             balanceCheckerActionUSDT,
             aaveSupplyAction,

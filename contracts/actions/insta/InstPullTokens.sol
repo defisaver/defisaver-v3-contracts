@@ -8,7 +8,7 @@ import "../../utils/TokenUtils.sol";
 import "../../DS/DSMath.sol";
 import "../../interfaces/mcd/IManager.sol";
 
-// @notice Pull tokens from DSA
+// @title Action for withdrawing tokens from DSA
 contract InstPullTokens is ActionBase, DSMath {
     using TokenUtils for address;
     
@@ -52,7 +52,7 @@ contract InstPullTokens is ActionBase, DSMath {
         bytes memory spellData = _createSpell(_inputData);
         (bool success, ) = _inputData.dsaAddress.call(spellData);
 
-        require(success, "fallback function call failed");
+        require(success, "Withdrawing tokens from DSA failed");
     
         logger.Log(
             address(this),

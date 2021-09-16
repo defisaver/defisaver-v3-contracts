@@ -68,7 +68,7 @@ describe('Inst Aave debtless position shift', function () {
             [UNI_ADDR, WETH_ADDRESS, DAI_ADDR],
             [true, true, true],
         );
-        const transferRecipe = new dfs.Recipe('TransferDebtlessAaveFromInstadapp', [
+        const transferRecipe = new dfs.Recipe('TransferDebtlessAavePositionFromInstadapp', [
             instTokenPullAction,
             aaveSetAsCollateral,
         ]);
