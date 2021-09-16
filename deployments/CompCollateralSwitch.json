@@ -1,19 +1,6 @@
 {
-	"contractName": "AavePayback",
+	"contractName": "CompCollateralSwitch",
 	"abi": [
-		{
-			"inputs": [],
-			"name": "AAVE_REFERRAL_CODE",
-			"outputs": [
-				{
-					"internalType": "uint16",
-					"name": "",
-					"type": "uint16"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
 		{
 			"inputs": [],
 			"name": "ADMIN_VAULT_ADDR",
@@ -29,10 +16,10 @@
 		},
 		{
 			"inputs": [],
-			"name": "AaveIncentivesController",
+			"name": "COMPTROLLER_ADDR",
 			"outputs": [
 				{
-					"internalType": "contract IAaveIncentivesController",
+					"internalType": "address",
 					"name": "",
 					"type": "address"
 				}
@@ -42,12 +29,38 @@
 		},
 		{
 			"inputs": [],
-			"name": "DATA_PROVIDER_ID",
+			"name": "C_ETH_ADDR",
 			"outputs": [
 				{
-					"internalType": "bytes32",
+					"internalType": "address",
 					"name": "",
-					"type": "bytes32"
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_COMP_ENTER_MARKET",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_COMP_EXIT_MARKET",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
 				}
 			],
 			"stateMutability": "view",
@@ -133,32 +146,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "STABLE_ID",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "STAKED_CONTROLLER_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "SUB_MAX_INDEX_VALUE",
 			"outputs": [
 				{
@@ -178,19 +165,6 @@
 					"internalType": "uint8",
 					"name": "",
 					"type": "uint8"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "VARIABLE_ID",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
 				}
 			],
 			"stateMutability": "view",
@@ -226,21 +200,11 @@
 			"inputs": [
 				{
 					"internalType": "address",
-					"name": "_market",
+					"name": "_cTokenAddr",
 					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "_tokenAddr",
-					"type": "address"
-				},
-				{
-					"internalType": "bool",
-					"name": "_useAsCollateral",
-					"type": "bool"
 				}
 			],
-			"name": "enableAsCollateral",
+			"name": "enterMarket",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"
@@ -293,6 +257,19 @@
 			"type": "function"
 		},
 		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_cTokenAddr",
+					"type": "address"
+				}
+			],
+			"name": "exitMarket",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
 			"inputs": [],
 			"name": "kill",
 			"outputs": [],
@@ -323,29 +300,6 @@
 				}
 			],
 			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "_tokenAddr",
-					"type": "address"
-				},
-				{
-					"internalType": "uint256",
-					"name": "_rateMode",
-					"type": "uint256"
-				}
-			],
-			"name": "switchRateMode",
-			"outputs": [],
-			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{

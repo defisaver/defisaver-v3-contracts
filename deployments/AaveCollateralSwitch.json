@@ -1,5 +1,5 @@
 {
-	"contractName": "AavePayback",
+	"contractName": "AaveCollateralSwitch",
 	"abi": [
 		{
 			"inputs": [],

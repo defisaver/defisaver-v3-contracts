@@ -66,7 +66,6 @@ contract CompSupply is ActionBase, CompHelper {
         if (_amount == type(uint256).max) {
             _amount = tokenAddr.getBalance(_from);
         }
-
         // pull the tokens _from to the proxy
         tokenAddr.pullTokensIfNeeded(_from, _amount);
 
@@ -84,7 +83,6 @@ contract CompSupply is ActionBase, CompHelper {
             TokenUtils.withdrawWeth(_amount);
             ICToken(_cTokenAddr).mint{value: _amount}(); // reverts on fail
         }
-
         logger.Log(
             address(this),
             msg.sender,

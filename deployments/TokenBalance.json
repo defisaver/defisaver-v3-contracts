@@ -1,19 +1,6 @@
 {
-	"contractName": "AavePayback",
+	"contractName": "TokenBalance",
 	"abi": [
-		{
-			"inputs": [],
-			"name": "AAVE_REFERRAL_CODE",
-			"outputs": [
-				{
-					"internalType": "uint16",
-					"name": "",
-					"type": "uint16"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
 		{
 			"inputs": [],
 			"name": "ADMIN_VAULT_ADDR",
@@ -22,32 +9,6 @@
 					"internalType": "address",
 					"name": "",
 					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "AaveIncentivesController",
-			"outputs": [
-				{
-					"internalType": "contract IAaveIncentivesController",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "DATA_PROVIDER_ID",
-			"outputs": [
-				{
-					"internalType": "bytes32",
-					"name": "",
-					"type": "bytes32"
 				}
 			],
 			"stateMutability": "view",
@@ -133,32 +94,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "STABLE_ID",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "STAKED_CONTROLLER_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "SUB_MAX_INDEX_VALUE",
 			"outputs": [
 				{
@@ -178,19 +113,6 @@
 					"internalType": "uint8",
 					"name": "",
 					"type": "uint8"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "VARIABLE_ID",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
 				}
 			],
 			"stateMutability": "view",
@@ -220,29 +142,6 @@
 				}
 			],
 			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "_tokenAddr",
-					"type": "address"
-				},
-				{
-					"internalType": "bool",
-					"name": "_useAsCollateral",
-					"type": "bool"
-				}
-			],
-			"name": "enableAsCollateral",
-			"outputs": [],
-			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
@@ -313,6 +212,37 @@
 			"type": "function"
 		},
 		{
+			"inputs": [
+				{
+					"internalType": "bytes[]",
+					"name": "_callData",
+					"type": "bytes[]"
+				}
+			],
+			"name": "parseInputs",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "tokenAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "holderAddr",
+							"type": "address"
+						}
+					],
+					"internalType": "struct TokenBalance.Params",
+					"name": "params",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
 			"inputs": [],
 			"name": "registry",
 			"outputs": [
@@ -323,29 +253,6 @@
 				}
 			],
 			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_market",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "_tokenAddr",
-					"type": "address"
-				},
-				{
-					"internalType": "uint256",
-					"name": "_rateMode",
-					"type": "uint256"
-				}
-			],
-			"name": "switchRateMode",
-			"outputs": [],
-			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{

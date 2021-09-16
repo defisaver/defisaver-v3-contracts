@@ -78,8 +78,7 @@ contract AavePayback is ActionBase, AaveHelper {
         address _onBehalf
     ) internal returns (uint256) {
         ILendingPoolV2 lendingPool = getLendingPool(_market);
-
-        uint256 maxDebt = getWholeDebt(_market, _tokenAddr, _rateMode);
+        uint256 maxDebt = getWholeDebt(_market, _tokenAddr, _rateMode, _onBehalf);
         _amount = _amount > maxDebt ? maxDebt : _amount;
 
         // default to onBehalf of proxy
@@ -129,10 +128,10 @@ contract AavePayback is ActionBase, AaveHelper {
         onBehalf = abi.decode(_callData[5], (address));
     }
 
-    function getWholeDebt(address _market, address _tokenAddr, uint _borrowType) internal view returns (uint256) {
+    function getWholeDebt(address _market, address _tokenAddr, uint _borrowType, address _debtOwner) internal view returns (uint256) {
         IAaveProtocolDataProviderV2 dataProvider = getDataProvider(_market);
         (, uint256 borrowsStable, uint256 borrowsVariable, , , , , , ) =
-            dataProvider.getUserReserveData(_tokenAddr, address(this));
+            dataProvider.getUserReserveData(_tokenAddr, _debtOwner);
 
         if (_borrowType == STABLE_ID) {
             return borrowsStable;
