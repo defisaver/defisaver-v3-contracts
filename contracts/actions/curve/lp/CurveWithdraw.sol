@@ -15,7 +15,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
     struct Params {
         address sender;     // address where the LP tokens are pulled from
         address receiver;   // address that will receive withdrawn tokens
-        address pool;       // pool from which to withdraw
+        address depositTarget;       // depositTarget from which to withdraw
         address lpToken;    // LP token address, needed for approval
         bytes4 sig;         // target contract function signature
         uint256 burnAmount; // amount of LP tokens to burn for withdrawal
@@ -40,7 +40,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
         Params memory params = parseInputs(_callData);
         params.sender = _parseParamAddr(params.sender, _paramMapping[0], _subData, _returnValues);
         params.receiver = _parseParamAddr(params.receiver, _paramMapping[1], _subData, _returnValues);
-        params.pool = _parseParamAddr(params.pool, _paramMapping[2], _subData, _returnValues);
+        params.depositTarget = _parseParamAddr(params.depositTarget, _paramMapping[2], _subData, _returnValues);
         params.lpToken = _parseParamAddr(params.lpToken, _paramMapping[3], _subData, _returnValues);
         params.burnAmount = _parseParamUint(params.burnAmount, _paramMapping[4], _subData, _returnValues);
         
@@ -68,12 +68,12 @@ contract CurveWithdraw is ActionBase, CurveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Withdraws user deposited tokens from pool
+    /// @notice Withdraws user deposited tokens from depositTarget
     function _curveWithdraw(Params memory _params) internal {
         require(_params.receiver != address(0), "receiver cant be 0x0");
         
         _params.lpToken.pullTokensIfNeeded(_params.sender, _params.burnAmount);
-        _params.lpToken.approveToken(_params.pool, _params.burnAmount);
+        _params.lpToken.approveToken(_params.depositTarget, _params.burnAmount);
         
         uint256[] memory balances = new uint256[](_params.tokens.length);
         for (uint256 i = 0; i < _params.tokens.length; i++) {
@@ -82,8 +82,8 @@ contract CurveWithdraw is ActionBase, CurveHelper {
 
         bytes memory payload = _constructPayload(_params.sig, _params.withdrawAmounts, _params.burnAmount, _params.withdrawExact, _params.useUnderlying);
 
-        (bool success, ) = _params.pool.call(payload);
-        require(success, "Bad payload or revert in pool contract");
+        (bool success, ) = _params.depositTarget.call(payload);
+        require(success, "Bad payload or revert in depositTarget contract");
 
         for (uint256 i = 0; i < _params.tokens.length; i++) {
             uint256 balanceDelta = _params.tokens[i].getBalance(address(this)).sub(balances[i]);

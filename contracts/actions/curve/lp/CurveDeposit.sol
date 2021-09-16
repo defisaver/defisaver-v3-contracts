@@ -21,7 +21,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
         uint256 minMintAmount;  // minimum amount of LP tokens to accept
         uint256[] amounts;      // amount of each token to deposit
         address[] tokens;       // tokens to deposit, needed for token approval
-        bool useUnderlying;     // some contracts take this aditional parameter
+        bool useUnderlying;     // some contracts take this additional parameter
     }
 
     function executeAction(

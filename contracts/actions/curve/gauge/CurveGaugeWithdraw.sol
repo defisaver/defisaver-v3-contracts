@@ -45,8 +45,7 @@ contract CurveGaugeWithdraw is ActionBase, CurveHelper {
     }
 
     /// @notice Withdraws LP tokens from Liquidity Gauge
-    /// @dev if _params.receiver != address(this) the receiver must call set_approve_deposit on gauge
-    function _curveGaugeWithdraw(Params memory _params) internal returns (uint256) {
+       function _curveGaugeWithdraw(Params memory _params) internal returns (uint256) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
         
         if (_params.amount == type(uint256).max) {
