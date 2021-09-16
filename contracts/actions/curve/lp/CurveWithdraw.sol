@@ -15,7 +15,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
     struct Params {
         address sender;     // address where the LP tokens are pulled from
         address receiver;   // address that will receive withdrawn tokens
-        address depositTarget;       // depositTarget from which to withdraw
+        address depositTarget;       // pool contract or zap deposit contract from which to withdraw
         address lpToken;    // LP token address, needed for approval
         bytes4 sig;         // target contract function signature
         uint256 burnAmount; // amount of LP tokens to burn for withdrawal
