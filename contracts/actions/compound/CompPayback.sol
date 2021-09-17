@@ -62,6 +62,7 @@ contract CompPayback is ActionBase, CompHelper {
     /// @param _cTokenAddr Address of the cToken we are paying back
     /// @param _amount Amount of the underlying token
     /// @param _from Address where we are pulling the underlying tokens from
+    /// @param _onBehalf Repay on behalf of which address (if 0x0 defaults to proxy)
     function _payback(
         address _cTokenAddr,
         uint256 _amount,
