@@ -59,20 +59,23 @@ contract CurveLock is ActionBase, CurveHelper {
             CRV_TOKEN_ADDR.pullTokensIfNeeded(_params.sender, _params.amount);
         }
         
-        if (_params.operation == LockOperation.CreateLock)
+        if (_params.operation == LockOperation.CreateLock) {
             VotingEscrow.create_lock(_params.amount, _params.unlockTime);
-        
-        else if (_params.operation == LockOperation.IncreaseAmount)
+        }
+        else if (_params.operation == LockOperation.IncreaseAmount) {
             VotingEscrow.increase_amount(_params.amount);
-        
-        else if (_params.operation == LockOperation.IncreaseTime)
+        }
+        else if (_params.operation == LockOperation.IncreaseTime) {
             VotingEscrow.increase_unlock_time(_params.unlockTime);
-
+        }
         else if (_params.operation == LockOperation.IncreaseAmountAndTime) {
             VotingEscrow.increase_amount(_params.amount);
             VotingEscrow.increase_unlock_time(_params.unlockTime);
-        } else revert("Invalid lock operation");
-
+        }
+        else {
+            revert("Invalid lock operation");
+        }
+        
         logger.Log(
             address(this),
             msg.sender,

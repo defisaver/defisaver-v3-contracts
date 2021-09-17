@@ -25,8 +25,9 @@ contract CurveGaugeWithdraw is ActionBase, CurveHelper {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
-        params.receiver = _parseParamAddr(params.receiver, _paramMapping[1], _subData, _returnValues);
-        params.lpToken = _parseParamAddr(params.lpToken, _paramMapping[2], _subData, _returnValues);
+        params.gaugeAddr = _parseParamAddr(params.gaugeAddr, _paramMapping[0], _subData, _returnValues);
+        params.lpToken = _parseParamAddr(params.lpToken, _paramMapping[1], _subData, _returnValues);
+        params.receiver = _parseParamAddr(params.receiver, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
 
         uint256 withdrawn = _curveGaugeWithdraw(params);

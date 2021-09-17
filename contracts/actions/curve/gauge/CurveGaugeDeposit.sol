@@ -26,9 +26,11 @@ contract CurveGaugeDeposit is ActionBase, CurveHelper {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
-        params.sender = _parseParamAddr(params.sender, _paramMapping[0], _subData, _returnValues);
-        params.onBehalfOf = _parseParamAddr(params.onBehalfOf, _paramMapping[1], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
+        params.gaugeAddr = _parseParamAddr(params.gaugeAddr, _paramMapping[0], _subData, _returnValues);
+        params.lpToken = _parseParamAddr(params.lpToken, _paramMapping[1], _subData, _returnValues);
+        params.sender = _parseParamAddr(params.sender, _paramMapping[2], _subData, _returnValues);
+        params.onBehalfOf = _parseParamAddr(params.onBehalfOf, _paramMapping[3], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[4], _subData, _returnValues);
 
         uint256 deposited = _curveGaugeDeposit(params);
         return bytes32(deposited);
