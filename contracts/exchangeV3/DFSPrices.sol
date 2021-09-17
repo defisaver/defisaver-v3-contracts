@@ -99,7 +99,7 @@ contract DFSPrices is DSMath, ExchangeHelper {
     }
 
     function getDecimals(address _token) internal view returns (uint256) {
-        if (_token == KYBER_ETH_ADDRESS) return 18;
+        if (_token == ETH_ADDRESS) return 18;
 
         return IERC20(_token).decimals();
     }
