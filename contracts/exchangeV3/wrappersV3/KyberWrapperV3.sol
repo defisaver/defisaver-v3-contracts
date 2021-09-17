@@ -111,7 +111,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     function sendLeftOver(address _srcAddr) internal {
         msg.sender.transfer(address(this).balance);
 
-        if (_srcAddr != KYBER_ETH_ADDRESS) {
+        if (_srcAddr != ETH_ADDRESS) {
             IERC20(_srcAddr).safeTransfer(msg.sender, IERC20(_srcAddr).balanceOf(address(this)));
         }
     }
@@ -120,7 +120,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     receive() payable external {}
 
     function getDecimals(address _token) internal view returns (uint256) {
-        if (_token == KYBER_ETH_ADDRESS) return 18;
+        if (_token == ETH_ADDRESS) return 18;
 
         return IERC20(_token).decimals();
     }
