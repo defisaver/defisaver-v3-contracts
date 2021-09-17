@@ -28,7 +28,6 @@ contract CompBorrow is ActionBase, CompHelper {
         cTokenAddr = _parseParamAddr(cTokenAddr, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
         to = _parseParamAddr(to, _paramMapping[2], _subData, _returnValues);
-
         uint256 withdrawAmount = _borrow(cTokenAddr, amount, to);
 
         return bytes32(withdrawAmount);
@@ -58,17 +57,13 @@ contract CompBorrow is ActionBase, CompHelper {
         address _to
     ) internal returns (uint256) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
-
         // if the tokens are borrowed we need to enter the market
         enterMarket(_cTokenAddr);
-
         require(ICToken(_cTokenAddr).borrow(_amount) == NO_ERROR, ERR_COMP_BORROW);
-
         // always return WETH, never native Eth
         if (tokenAddr == TokenUtils.WETH_ADDR) {
             TokenUtils.depositWeth(_amount);
         }
-
         tokenAddr.withdrawTokens(_to, _amount);
 
         logger.Log(address(this), msg.sender, "CompBorrow", abi.encode(tokenAddr, _amount, _to));

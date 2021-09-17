@@ -1098,6 +1098,15 @@ const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, o
     return proxy['execute(address,bytes)'](claimInstMakerAddress, functionData);
 };
 
+const pullTokensInstDSA = async (proxy, dsaAddress, tokens, amounts, to) => {
+    const instPulLTokenAddress = await getAddrFromRegistry('InstPullTokens');
+    const instPullTokenAction = new dfs.actions.insta.InstPullTokensAction(
+        dsaAddress, tokens, amounts, to,
+    );
+    const functionData = instPullTokenAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](instPulLTokenAddress, functionData);
+};
+
 const balancerSupply = async (proxy, poolId, from, to, tokens, maxAmountsIn, userData) => {
     const balancerSupplyAddress = await getAddrFromRegistry('BalancerV2Supply');
     const balancerSupplyAction = new dfs.actions.balancer.BalancerV2SupplyAction(
@@ -1214,6 +1223,7 @@ module.exports = {
 
     buyTokenIfNeeded,
     claimInstMaker,
+    pullTokensInstDSA,
 
     balancerSupply,
     balancerWithdraw,
