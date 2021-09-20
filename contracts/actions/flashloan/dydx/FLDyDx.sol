@@ -22,6 +22,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
 
     string constant ERR_ONLY_DYDX_CALLER = "Caller not dydx";
     string constant ERR_SAME_CALLER = "FL taker must be this contract";
+    string constant ERR_WRONG_PAYBACK_AMOUNT = "Wrong FL payback amount sent";
 
     uint256 public constant DYDX_DUST_FEE = 2;
 
@@ -132,6 +133,7 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
         );
 
         // return FL (just send funds to this addr)
+        require(tokenAddr.getBalance(address(this)) == amount, ERR_WRONG_PAYBACK_AMOUNT);
         
         flFeeFaucet.my2Wei(tokenAddr); // get extra 2 wei for DyDx fee
     }
