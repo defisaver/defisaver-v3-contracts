@@ -1268,16 +1268,33 @@ const curveMintCrv = async (
     gaugeAddrs,
     receiver,
 ) => {
-    const curveMintCrvManyAddr = await getAddrFromRegistry('CurveMintCrv');
+    const curveMintCrvAddr = await getAddrFromRegistry('CurveMintCrv');
 
-    const curveMintCrvManyAction = new dfs.actions.curve.CurveMintCrvAction(
+    const curveMintCrvAction = new dfs.actions.curve.CurveMintCrvAction(
         gaugeAddrs,
         receiver,
     );
 
-    const functionData = curveMintCrvManyAction.encodeForDsProxyCall()[1];
+    const functionData = curveMintCrvAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](curveMintCrvManyAddr, functionData, { gasLimit: 3000000 });
+    return proxy['execute(address,bytes)'](curveMintCrvAddr, functionData, { gasLimit: 3000000 });
+};
+
+const curveClaimFees = async (
+    proxy,
+    claimFor,
+    receiver,
+) => {
+    const curveClaimFeesAddr = await getAddrFromRegistry('CurveClaimFees');
+
+    const curveClaimFeesAction = new dfs.actions.curve.CurveClaimFeesAction(
+        claimFor,
+        receiver,
+    );
+
+    const functionData = curveClaimFeesAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](curveClaimFeesAddr, functionData, { gasLimit: 3000000 });
 };
 
 module.exports = {
@@ -1350,6 +1367,7 @@ module.exports = {
     curveGaugeDeposit,
     curveGaugeWithdraw,
     curveMintCrv,
+    curveClaimFees,
 
     buyTokenIfNeeded,
     claimInstMaker,
