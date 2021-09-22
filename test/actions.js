@@ -1144,18 +1144,6 @@ const changeProxyOwner = async (proxy, newOwner) => {
     return proxy['execute(address,bytes)'](changeProxyOwnerAddress, functionData);
 };
 
-const curveSwap = async (proxy, sender, receiver, pool, from, to, amount, expected) => {
-    const curveSwapAddr = await getAddrFromRegistry('CurveSwap');
-
-    const curveSwapAction = new dfs.actions.curve.CurveSwapAction(
-        sender, receiver, pool, from, to, amount, expected,
-    );
-
-    const functionData = curveSwapAction.encodeForDsProxyCall()[1];
-
-    return proxy['execute(address,bytes)'](curveSwapAddr, functionData, { gasLimit: 3000000 });
-};
-
 const curveDeposit = async (
     proxy,
     sender,
@@ -1369,7 +1357,6 @@ module.exports = {
 
     lidoStake,
 
-    curveSwap,
     curveDeposit,
     curveWithdraw,
 
