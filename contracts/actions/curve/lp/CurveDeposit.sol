@@ -33,15 +33,11 @@ contract CurveDeposit is ActionBase, CurveHelper {
         Params memory params = parseInputs(_callData);
         params.sender = _parseParamAddr(params.sender, _paramMapping[0], _subData, _returnValues);
         params.receiver = _parseParamAddr(params.receiver, _paramMapping[1], _subData, _returnValues);
-        params.depositTarget = _parseParamAddr(params.depositTarget, _paramMapping[2], _subData, _returnValues);
-        params.lpToken = _parseParamAddr(params.lpToken, _paramMapping[3], _subData, _returnValues);
-        params.minMintAmount = _parseParamUint(params.minMintAmount, _paramMapping[4], _subData, _returnValues);
+        params.minMintAmount = _parseParamUint(params.minMintAmount, _paramMapping[2], _subData, _returnValues);
         
-        uint256 nCoins = params.amounts.length;
-        require(nCoins == params.tokens.length);
+        require(params.amounts.length == params.tokens.length, "amounts and tokens array length mismatch");
         for (uint256 i = 0; i < params.amounts.length; i++) {
-            params.amounts[i] = _parseParamUint(params.amounts[i], _paramMapping[5 + i], _subData, _returnValues);
-            params.tokens[i] = _parseParamAddr(params.tokens[i], _paramMapping[5 + nCoins + i], _subData, _returnValues);
+            params.amounts[i] = _parseParamUint(params.amounts[i], _paramMapping[3 + i], _subData, _returnValues);
         }
 
         uint256 received = _curveDeposit(params);

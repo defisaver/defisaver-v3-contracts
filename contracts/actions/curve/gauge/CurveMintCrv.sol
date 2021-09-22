@@ -23,10 +23,7 @@ contract CurveMintCrv is ActionBase, CurveHelper {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
-        for (uint8 i = 0; i < 8; i++) {
-            params.gaugeAddrs[i] = _parseParamAddr(params.gaugeAddrs[i], _paramMapping[i], _subData, _returnValues);
-        }
-        params.receiver = _parseParamAddr(params.receiver, _paramMapping[8], _subData, _returnValues);
+        params.receiver = _parseParamAddr(params.receiver, _paramMapping[0], _subData, _returnValues);
         
         uint256 minted = _curveMintCrv(params);
         return bytes32(minted);

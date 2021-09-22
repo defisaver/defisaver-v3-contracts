@@ -29,11 +29,8 @@ contract CurveSwap is ActionBase, CurveHelper {
         Params memory params = parseInputs(_callData);
         params.sender = _parseParamAddr(params.sender, _paramMapping[0], _subData, _returnValues);
         params.receiver = _parseParamAddr(params.receiver, _paramMapping[1], _subData, _returnValues);
-        params.pool = _parseParamAddr(params.pool, _paramMapping[2], _subData, _returnValues);
-        params.tokenA = _parseParamAddr(params.tokenA, _paramMapping[3], _subData, _returnValues);
-        params.tokenB = _parseParamAddr(params.tokenB, _paramMapping[4], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[5], _subData, _returnValues);
-        params.expected = _parseParamUint(params.expected, _paramMapping[6], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
+        params.expected = _parseParamUint(params.expected, _paramMapping[3], _subData, _returnValues);
         
 
         uint256 received = _curveSwap(params);
