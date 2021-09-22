@@ -13,6 +13,7 @@ const {
 } = require('../actions.js');
 
 describe('Curve-Claim-Fees', function () {
+    console.log('this test should be run forking the block 13000000');
     this.timeout(1000000);
 
     const claimFor = '0x7563839e02004d3f419ff78df4256e9c5dd713ed';
