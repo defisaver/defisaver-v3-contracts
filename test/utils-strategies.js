@@ -4,8 +4,11 @@ const {
     impersonateAccount,
     stopImpersonatingAccount,
     getGasUsed,
+    calcGasToUSD,
     OWNER_ACC,
+    AVG_GAS_PRICE,
 } = require('./utils');
+
 
 const getLatestStrategyId = async () => {
     const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
@@ -47,7 +50,9 @@ const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramM
     });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed subTemplate; ${gasUsed}`);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed createStrategy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 const subToStrategy = async (proxy, strategyId, active, subData, triggerData) => {
@@ -64,7 +69,8 @@ const subToStrategy = async (proxy, strategyId, active, subData, triggerData) =>
     });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed createStrategy; ${gasUsed}`);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToStrategy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 
     const latestStrategyId = await getLatestSubId();
 

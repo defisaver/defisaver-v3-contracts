@@ -40,6 +40,8 @@ const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
 const MIN_VAULT_DAI_AMOUNT = '15010'; // TODO: can we fetch this dynamically
 const MIN_VAULT_RAI_AMOUNT = '1000'; // TODO: can we fetch this dynamically
 
+const AVG_GAS_PRICE = 100; // gwei
+
 const standardAmounts = {
     ETH: '4',
     WETH: '4',
@@ -113,6 +115,17 @@ const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {
         if (tokenNames[i] === coinGeckoHelper[tokenSign]) {
             const amountNumber = (amountUSD / data[tokenNames[i]].usd);
             return amountNumber.toFixed(2);
+        }
+    }
+    return 0;
+};
+
+const getLocalTokenPrice = (tokenSymbol) => {
+    const data = JSON.parse(fs.readFileSync('test/prices.json', 'utf8'));
+    const tokenNames = Object.keys(data);
+    for (let i = 0; i < tokenNames.length; i++) {
+        if (tokenNames[i] === coinGeckoHelper[tokenSymbol]) {
+            return data[tokenNames[i]].usd;
         }
     }
     return 0;
@@ -340,6 +353,12 @@ const getGasUsed = async (receipt) => {
     return parsed.gasUsed.toString();
 };
 
+const calcGasToUSD = (gasUsed, gasPriceInGwei) => {
+    const ethSpent = (gasUsed * gasPriceInGwei * 1000000000) / 1e18;
+
+    return (ethSpent * getLocalTokenPrice('WETH')).toFixed(0);
+};
+
 const redeployRegistry = async () => {
     const reg = await deployContract('DFSRegistry');
 
@@ -394,6 +413,9 @@ module.exports = {
     getNameId,
     redeployRegistry,
     getChainLinkPrice,
+    getLocalTokenPrice,
+    calcGasToUSD,
+    AVG_GAS_PRICE,
     standardAmounts,
     nullAddress,
     dydxTokens,

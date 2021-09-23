@@ -19,6 +19,8 @@ const {
 const {
     formatExchangeObj,
     getGasUsed,
+    calcGasToUSD,
+    AVG_GAS_PRICE,
     placeHolderAddr,
     MCD_MANAGER_ADDR,
     WETH_ADDRESS,
@@ -41,6 +43,46 @@ const subUniContinuousCollectStrategy = async (proxy, tokenId, recipient, timest
 
     // eslint-disable-next-line max-len
     const subId = await subToStrategy(proxy, strategyId, true, [tokenIdEncoded, proxyAddrEncoded, recipientEncoded], [timestampTriggerData, gasTriggerData]);
+
+    return subId;
+};
+
+const subDcaStrategy = async (
+    proxy,
+    tokenAddrSell,
+    tokenAddrBuy,
+    amount,
+    interval,
+    lastTimestamp,
+    eoa,
+) => {
+    const tokenAddrSellEncoded = abiCoder.encode(['address'], [tokenAddrSell]);
+    const tokenAddrBuyEncoded = abiCoder.encode(['address'], [tokenAddrBuy]);
+    const amountEncoded = abiCoder.encode(['uint256'], [amount]);
+    const intervalEncoded = abiCoder.encode(['uint256'], [interval]);
+    const lastTimestampEncoded = abiCoder.encode(['uint256'], [lastTimestamp]);
+    const proxyEncoded = abiCoder.encode(['address'], [proxy.address]);
+    const eoaEncoded = abiCoder.encode(['address'], [eoa]);
+
+    const strategyId = await getLatestStrategyId();
+
+    const timestampTriggerData = await createTimestampTrigger(lastTimestamp);
+
+    const subId = await subToStrategy(
+        proxy,
+        strategyId,
+        true,
+        [
+            tokenAddrSellEncoded,
+            tokenAddrBuyEncoded,
+            amountEncoded,
+            intervalEncoded,
+            lastTimestampEncoded,
+            proxyEncoded,
+            eoaEncoded,
+        ],
+        [timestampTriggerData],
+    );
 
     return subId;
 };
@@ -124,6 +166,60 @@ const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrB
 
     return subId;
 };
+
+// eslint-disable-next-line max-len
+const callDcaStrategy = async (botAcc, strategyExecutor, strategyId, subStorageAddr, newTimestamp) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        placeHolderAddr, placeHolderAddr, placeHolderAddr,
+    );
+
+    const gasCost = 500_000;
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        gasCost, placeHolderAddr, '$1',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            WETH_ADDRESS, // TODO: Why we need to hardcode this, can't be passed as &
+            DAI_ADDR,
+            '$2',
+            UNISWAP_WRAPPER,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const timestampTriggerData = await createTimestampTrigger(newTimestamp);
+
+    const changeTriggerDataAction = new dfs.actions.basic.ChangeTriggerDataAction(
+        subStorageAddr,
+        strategyId,
+        timestampTriggerData,
+        0,
+    );
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(changeTriggerDataAction.encodeForRecipe()[0]);
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callDcaStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
 // eslint-disable-next-line max-len
 const callUniV3RangeOrderStrategy = async (botAcc, strategyExecutor, strategyId, liquidity, recipient, nftOwner) => {
     const triggerCallData = [];
@@ -152,7 +248,9 @@ const callUniV3RangeOrderStrategy = async (botAcc, strategyExecutor, strategyId,
     });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed callUniV3RangeOrderStrategy: ${gasUsed}`);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callUniV3RangeOrderStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 // eslint-disable-next-line max-len
@@ -187,7 +285,9 @@ const callUniV3CollectStrategy = async (botAcc, strategyExecutor, strategyId, nf
     });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed callUniV3RangeOrderStrategy: ${gasUsed}`);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callUniV3CollectStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyId, ethJoin, repayAmount) => {
@@ -246,7 +346,9 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyId, ethJoi
     });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed callMcdRepayStrategy; ${gasUsed}`);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callMcdRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyId, ethJoin, boostAmount) => {
@@ -305,7 +407,9 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyId, ethJoi
     });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed callMcdBoostStrategy; ${gasUsed}`);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callMcdBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 const callLimitOrderStrategy = async (botAcc, senderAcc, strategyExecutor, subId) => {
@@ -342,7 +446,9 @@ const callLimitOrderStrategy = async (botAcc, senderAcc, strategyExecutor, subId
     });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed callLimitOrderStrategy; ${gasUsed}`);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callLimitOrderStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 // eslint-disable-next-line max-len
@@ -401,10 +507,14 @@ const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, flAm
     });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed callLimitOrderStrategy; ${gasUsed}`);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callMcdCloseStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 module.exports = {
+    subDcaStrategy,
+    callDcaStrategy,
     subMcdRepayStrategy,
     subMcdBoostStrategy,
     subLimitOrderStrategy,
