@@ -72,4 +72,30 @@ contract CurveView is CurveHelper {
         if (_nCoins == 8) return bytes4(keccak256("remove_liquidity_imbalance(uint256[8],uint256,bool)"));
         revert("Invalid number of coins in pool.");
     }
+
+    function getPoolDataFromLpToken(address _lpToken) external view returns (
+        uint256 virtualPrice,
+        address pool,
+        string memory poolName,
+        address[8] memory tokens,
+        uint256[8] memory decimals,
+        uint256[8] memory balances,
+        address[8] memory underlyingTokens,
+        uint256[8] memory underlyingDecimals,
+        uint256[8] memory underlyingBalances,
+        address[10] memory gauges,
+        int128[10] memory gaugeTypes
+    ) {
+        IRegistry Registry = getRegistry();
+        virtualPrice = Registry.get_virtual_price_from_lp_token(_lpToken);
+        pool = Registry.get_pool_from_lp_token(_lpToken);
+        poolName = Registry.get_pool_name(pool);
+        tokens = Registry.get_coins(pool);
+        decimals = Registry.get_decimals(pool);
+        balances = Registry.get_balances(pool);
+        underlyingTokens = Registry.get_underlying_coins(pool);
+        underlyingDecimals = Registry.get_underlying_decimals(pool);
+        underlyingBalances = Registry.get_underlying_balances(pool);
+        (gauges, gaugeTypes) = Registry.get_gauges(pool);
+    }
 }
