@@ -171,9 +171,9 @@
 					"type": "bytes[]"
 				},
 				{
-					"internalType": "bytes[]",
-					"name": "_recipeData",
-					"type": "bytes[]"
+					"internalType": "bytes32[]",
+					"name": "_subData",
+					"type": "bytes32[]"
 				}
 			],
 			"name": "subscribeToStrategy",
@@ -194,9 +194,9 @@
 					"type": "bytes[]"
 				},
 				{
-					"internalType": "bytes[]",
-					"name": "_recipeData",
-					"type": "bytes[]"
+					"internalType": "bytes32[]",
+					"name": "_subData",
+					"type": "bytes32[]"
 				}
 			],
 			"name": "updateSubData",

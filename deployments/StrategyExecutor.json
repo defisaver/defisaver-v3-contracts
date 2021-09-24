@@ -131,9 +131,9 @@
 							"type": "bytes[]"
 						},
 						{
-							"internalType": "bytes[]",
-							"name": "recipeData",
-							"type": "bytes[]"
+							"internalType": "bytes32[]",
+							"name": "subData",
+							"type": "bytes32[]"
 						}
 					],
 					"internalType": "struct StrategyModel.StrategySub",

@@ -28,7 +28,7 @@ contract McdGenerate is ActionBase, McdHelper {
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
-        bytes[] memory _subData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable override returns (bytes32) {

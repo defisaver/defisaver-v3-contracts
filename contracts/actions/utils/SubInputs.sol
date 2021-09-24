@@ -15,7 +15,7 @@ contract SubInputs is ActionBase, DSMath {
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
-        bytes[] memory _subData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public virtual override payable returns (bytes32) {

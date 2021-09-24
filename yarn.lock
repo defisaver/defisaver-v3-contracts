@@ -169,7 +169,7 @@
     "chalk" "^4.0.0"
 
 "@defisaver/sdk@github:DecenterApps/defisaver-sdk#feature/strategies":
-  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#21861cc44daf3ab5964acb8c964f7e50df3cf718"
+  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#dd4fb478f0f93818231418c3c1289db0ea426a86"
   "version" "0.0.16"
   dependencies:
     "@defisaver/tokens" "^1.3.44"

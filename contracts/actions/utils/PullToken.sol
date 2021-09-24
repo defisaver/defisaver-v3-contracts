@@ -4,6 +4,8 @@ pragma solidity =0.8.4;
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
+import "hardhat/console.sol";
+
 /// @title Helper action to pull a token from the specified address
 contract PullToken is ActionBase {
     
@@ -17,15 +19,19 @@ contract PullToken is ActionBase {
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
-        bytes[] memory _subData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public virtual override payable returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
+        console.log("Hi");
+
         inputData.tokenAddr = _parseParamAddr(inputData.tokenAddr, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.amount = _parseParamUint(inputData.amount, _paramMapping[2], _subData, _returnValues);
+
+        console.log("Bye", inputData.tokenAddr, inputData.from, inputData.amount);
 
         inputData.amount = _pullToken(inputData.tokenAddr, inputData.from, inputData.amount);
 
@@ -55,6 +61,9 @@ contract PullToken is ActionBase {
     /// @param _amount Amount of tokens, can be type(uint).max
     function _pullToken(address _tokenAddr, address _from, uint _amount) internal returns (uint) {
         _tokenAddr.pullTokensIfNeeded(_from, _amount);
+
+                console.log("Wrks");
+
 
         return _amount;
     }

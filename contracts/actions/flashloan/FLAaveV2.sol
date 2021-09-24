@@ -38,7 +38,7 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, IFlashLoanBase 
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
-        bytes[] memory,
+        bytes32[] memory,
         uint8[] memory,
         bytes32[] memory
     ) public override payable returns (bytes32) {

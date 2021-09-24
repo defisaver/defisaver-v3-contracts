@@ -22,24 +22,24 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission {
         uint64 _strategyId,
         bool _active,
         bytes[] memory _triggerData,
-        bytes[] memory _recipeData
+        bytes32[] memory _subData
     ) public {
         address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
         address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
 
         givePermission(proxyAuthAddr);
 
-        SubStorage(subStorageAddr).subscribeToStrategy(_strategyId, _active, _triggerData, _recipeData);
+        SubStorage(subStorageAddr).subscribeToStrategy(_strategyId, _active, _triggerData, _subData);
     }
 
     function updateSubData(
         uint256 _subId,
         bytes[] memory _triggerData,
-        bytes[] memory _recipeData
+        bytes32[] memory _subData
     ) public {
         address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
 
-        SubStorage(subStorageAddr).updateSubData(_subId, _triggerData, _recipeData);
+        SubStorage(subStorageAddr).updateSubData(_subId, _triggerData, _subData);
     }
 
     function activateSub(

@@ -24,7 +24,7 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
-        bytes[] memory _subData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {

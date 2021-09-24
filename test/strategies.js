@@ -68,6 +68,8 @@ const subDcaStrategy = async (
 
     const timestampTriggerData = await createTimestampTrigger(lastTimestamp);
 
+    console.log(eoaEncoded);
+
     const subId = await subToStrategy(
         proxy,
         strategyId,

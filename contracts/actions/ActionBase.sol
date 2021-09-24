@@ -41,7 +41,7 @@ abstract contract ActionBase is AdminAuth {
     /// @return Returns a bytes32 value through DSProxy, each actions implements what that value is
     function executeAction(
         bytes memory _callData,
-        bytes[] memory _subData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual returns (bytes32);
@@ -64,7 +64,7 @@ abstract contract ActionBase is AdminAuth {
     function _parseParamUint(
         uint _param,
         uint8 _mapType,
-        bytes[] memory _subData,
+        bytes32[] memory _subData,
         bytes32[] memory _returnValues
     ) internal pure returns (uint) {
         if (isReplaceable(_mapType)) {
@@ -72,7 +72,7 @@ abstract contract ActionBase is AdminAuth {
                 _param = uint(_returnValues[getReturnIndex(_mapType)]);
             } else {
 
-                _param = abi.decode(_subData[getSubIndex(_mapType)], (uint));
+                _param = uint256(_subData[getSubIndex(_mapType)]);
             }
         }
 
@@ -88,14 +88,14 @@ abstract contract ActionBase is AdminAuth {
     function _parseParamAddr(
         address _param,
         uint8 _mapType,
-        bytes[] memory _subData,
+        bytes32[] memory _subData,
         bytes32[] memory _returnValues
     ) internal pure returns (address) {
         if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
                 _param = address(bytes20((_returnValues[getReturnIndex(_mapType)])));
             } else {
-                _param = abi.decode(_subData[getSubIndex(_mapType)], (address));
+                _param = address(uint160(uint256(_subData[getSubIndex(_mapType)])));
             }
         }
 
@@ -110,14 +110,14 @@ abstract contract ActionBase is AdminAuth {
     function _parseParamABytes32(
         bytes32 _param,
         uint8 _mapType,
-        bytes[] memory _subData,
+        bytes32[] memory _subData,
         bytes32[] memory _returnValues
     ) internal pure returns (bytes32) {
         if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
                 _param = (_returnValues[getReturnIndex(_mapType)]);
             } else {
-                _param = abi.decode(_subData[getSubIndex(_mapType)], (bytes32));
+                _param = _subData[getSubIndex(_mapType)];
             }
         }
 

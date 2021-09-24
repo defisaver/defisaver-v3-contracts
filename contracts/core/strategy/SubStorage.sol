@@ -36,20 +36,20 @@ contract SubStorage is StrategyModel, AdminAuth {
     /// @param _strategyId Id of the strategy beding subscribed to
     /// @param _active If the strategy is turned on at the start
     /// @param _triggerData Subscription data for triggers
-    /// @param _recipeData Subscription data for recipe
+    /// @param _subData Subscription data for recipe
     function subscribeToStrategy(
         uint64 _strategyId,
         bool _active,
         bytes[] memory _triggerData,
-        bytes[] memory _recipeData
+        bytes32[] memory _subData
     ) public returns (uint) {
         strategiesSubs.push(
             StrategySub({
                 strategyId: _strategyId,
-                userProxy: msg.sender, // should we check if the user is dsproxy?
                 active: _active,
+                userProxy: msg.sender, // should we check if the user is dsproxy?
                 triggerData: _triggerData,
-                recipeData: _recipeData
+                subData: _subData
             })
         );
 
@@ -64,19 +64,19 @@ contract SubStorage is StrategyModel, AdminAuth {
     /// @dev Only callable by proxy who created the strategy
     /// @param _subId Id of the subscription to update
     /// @param _triggerData Subscription data for triggers
-    /// @param _recipeData Subscription data for recipe
+    /// @param _subData Subscription data for recipe
     function updateSubData(
         uint256 _subId,
         bytes[] memory _triggerData,
-        bytes[] memory _recipeData
+        bytes32[] memory _subData
     ) public onlySubOwner(_subId) {
         StrategySub storage sub = strategiesSubs[_subId];
 
         if (_triggerData.length > 0){
             sub.triggerData = _triggerData;
         }
-        if (_recipeData.length > 0){
-            sub.recipeData = _recipeData;
+        if (_subData.length > 0){
+            sub.subData = _subData;
         }
 
         emit UpdateData(_subId, sub);

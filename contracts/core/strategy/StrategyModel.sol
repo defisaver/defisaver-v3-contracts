@@ -18,7 +18,7 @@ contract StrategyModel {
     struct Recipe {
         string name;
         bytes[] callData;
-        bytes[] subData; // why is this here?
+        bytes32[] subData; // why is this here?
         bytes4[] actionIds;
         uint8[][] paramMapping;
     }
@@ -29,6 +29,6 @@ contract StrategyModel {
         bool active;
         address userProxy;
         bytes[] triggerData;
-        bytes[] recipeData;
+        bytes32[] subData;
     }
 }

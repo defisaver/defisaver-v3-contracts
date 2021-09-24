@@ -37,7 +37,7 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
-        bytes[] memory,
+        bytes32[] memory,
         uint8[] memory,
         bytes32[] memory
     ) public payable override returns (bytes32) {

@@ -119,9 +119,9 @@
 							"type": "bytes[]"
 						},
 						{
-							"internalType": "bytes[]",
-							"name": "recipeData",
-							"type": "bytes[]"
+							"internalType": "bytes32[]",
+							"name": "subData",
+							"type": "bytes32[]"
 						}
 					],
 					"indexed": false,
@@ -165,9 +165,9 @@
 							"type": "bytes[]"
 						},
 						{
-							"internalType": "bytes[]",
-							"name": "recipeData",
-							"type": "bytes[]"
+							"internalType": "bytes32[]",
+							"name": "subData",
+							"type": "bytes32[]"
 						}
 					],
 					"indexed": false,
@@ -269,9 +269,9 @@
 							"type": "bytes[]"
 						},
 						{
-							"internalType": "bytes[]",
-							"name": "recipeData",
-							"type": "bytes[]"
+							"internalType": "bytes32[]",
+							"name": "subData",
+							"type": "bytes32[]"
 						}
 					],
 					"internalType": "struct StrategyModel.StrategySub[]",
@@ -315,9 +315,9 @@
 							"type": "bytes[]"
 						},
 						{
-							"internalType": "bytes[]",
-							"name": "recipeData",
-							"type": "bytes[]"
+							"internalType": "bytes32[]",
+							"name": "subData",
+							"type": "bytes32[]"
 						}
 					],
 					"internalType": "struct StrategyModel.StrategySub",
@@ -408,9 +408,9 @@
 					"type": "bytes[]"
 				},
 				{
-					"internalType": "bytes[]",
-					"name": "_recipeData",
-					"type": "bytes[]"
+					"internalType": "bytes32[]",
+					"name": "_subData",
+					"type": "bytes32[]"
 				}
 			],
 			"name": "subscribeToStrategy",
@@ -437,9 +437,9 @@
 					"type": "bytes[]"
 				},
 				{
-					"internalType": "bytes[]",
-					"name": "_recipeData",
-					"type": "bytes[]"
+					"internalType": "bytes32[]",
+					"name": "_subData",
+					"type": "bytes32[]"
 				}
 			],
 			"name": "updateSubData",

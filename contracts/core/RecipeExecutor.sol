@@ -51,7 +51,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
             Recipe({
                 name: strategy.name,
                 callData: _actionCallData,
-                subData: sub.recipeData,
+                subData: sub.subData,
                 actionIds: strategy.actionIds,
                 paramMapping: strategy.paramMapping
             });
@@ -107,7 +107,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         response = IDSProxy(address(this)).execute(
             actionAddr,
             abi.encodeWithSignature(
-                "executeAction(bytes,bytes[],uint8[],bytes32[])",
+                "executeAction(bytes,bytes32[],uint8[],bytes32[])",
                 _currRecipe.callData[_index],
                 _currRecipe.subData,
                 _currRecipe.paramMapping[_index],

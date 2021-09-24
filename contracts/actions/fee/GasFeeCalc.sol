@@ -19,7 +19,7 @@ contract GasFeeCalc is ActionBase, GasFeeHelper {
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
-        bytes[] memory,
+        bytes32[] memory,
         uint8[] memory,
         bytes32[] memory
     ) public payable virtual override returns (bytes32) {
