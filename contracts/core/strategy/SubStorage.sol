@@ -6,14 +6,15 @@ import "../../auth/AdminAuth.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../utils/DefisaverLogger.sol";
 import "./StrategyModel.sol";
+
 /// @title Storage of users subscriptions to strategies
 contract SubStorage is StrategyModel, AdminAuth {
     error NonexistantSubError(uint256);
     error SenderNotSubOwnerError(address, uint256);
     error UserPositionsEmpty();
 
-    event Subscribe(uint256, StrategySub);
-    event UpdateData(uint256, StrategySub);
+    event Subscribe(uint256);
+    event UpdateData(uint256);
     event ActivateSub(uint256);
     event DeactivateSub(uint256);
     event RemoveSub(uint256);
@@ -47,7 +48,7 @@ contract SubStorage is StrategyModel, AdminAuth {
             StrategySub({
                 strategyId: _strategyId,
                 active: _active,
-                userProxy: msg.sender, // should we check if the user is dsproxy?
+                userProxy: msg.sender, // TODO: should we check if the user is dsproxy?
                 triggerData: _triggerData,
                 subData: _subData
             })
@@ -55,7 +56,7 @@ contract SubStorage is StrategyModel, AdminAuth {
 
         uint256 currentId = strategiesSubs.length - 1;
 
-        emit Subscribe(currentId, strategiesSubs[currentId]);
+        emit Subscribe(currentId);
 
         return currentId;
     }
@@ -79,7 +80,7 @@ contract SubStorage is StrategyModel, AdminAuth {
             sub.subData = _subData;
         }
 
-        emit UpdateData(_subId, sub);
+        emit UpdateData(_subId);
     }
 
     /// @notice Updates the users strategy trigger data
@@ -95,7 +96,7 @@ contract SubStorage is StrategyModel, AdminAuth {
         
         sub.triggerData[_triggerNum] = _triggerData;
 
-        emit UpdateData(_subId, sub);
+        emit UpdateData(_subId);
     }
 
     function activateSub(

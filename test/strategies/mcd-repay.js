@@ -41,7 +41,7 @@ describe('Mcd-Repay-Strategy', function () {
         botAcc = (await hre.ethers.getSigners())[1];
 
         await redeploy('BotAuth');
-        await redeploy('ProxyAuth');
+        // await redeploy('ProxyAuth');
         await redeploy('McdRatioTrigger');
         await redeploy('McdWithdraw');
         await redeploy('DFSSell');
@@ -138,7 +138,7 @@ describe('Mcd-Repay-Strategy', function () {
 
         await createStrategy(proxy, ...callData, true);
 
-        const rationUnder = hre.ethers.utils.parseUnits('2.5', '18');
+        const rationUnder = hre.ethers.utils.parseUnits('2.6', '18');
         const targetRatio = hre.ethers.utils.parseUnits('2.2', '18');
 
         strategyId = await subMcdRepayStrategy(proxy, vaultId, rationUnder, targetRatio);

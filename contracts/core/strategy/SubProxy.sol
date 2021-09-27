@@ -15,6 +15,7 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission {
     address public constant REGISTRY_ADDR = 0xD5cec8F03f803A74B60A7603Ed13556279376b09;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
+    // TODO: Switch to constant hardcoded addresses for gas saving
     bytes4 constant PROXY_AUTH_ID = bytes4(keccak256("ProxyAuth"));
     bytes4 constant SUB_STORAGE_ID = bytes4(keccak256("SubStorage"));
 
@@ -24,10 +25,12 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission {
         bytes[] memory _triggerData,
         bytes32[] memory _subData
     ) public {
+        /// gas-block-0
         address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
         address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
+        /// gas-block-0 - 11k gas cost
 
-        givePermission(proxyAuthAddr);
+        givePermission(proxyAuthAddr); // gas-block-1 - 12,233 gas cost if have permission, 54,938 first time
 
         SubStorage(subStorageAddr).subscribeToStrategy(_strategyId, _active, _triggerData, _subData);
     }

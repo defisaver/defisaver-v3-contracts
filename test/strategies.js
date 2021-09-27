@@ -75,15 +75,17 @@ const subDcaStrategy = async (
         strategyId,
         true,
         [
-            tokenAddrSellEncoded,
-            tokenAddrBuyEncoded,
+            // tokenAddrSellEncoded,
+            // tokenAddrBuyEncoded,
             amountEncoded,
             intervalEncoded,
             lastTimestampEncoded,
             proxyEncoded,
             eoaEncoded,
         ],
-        [timestampTriggerData],
+        [
+            timestampTriggerData,
+        ],
     );
 
     return subId;
@@ -111,8 +113,19 @@ const subMcdRepayStrategy = async (proxy, vaultId, rationUnder, targetRatio) => 
     const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_UNDER);
 
     // eslint-disable-next-line max-len
-    const subId = await subToStrategy(proxy, strategyId, true, [vaultIdEncoded, proxyAddrEncoded, targetRatioEncoded],
-        [triggerData]);
+    const subId = await subToStrategy(
+        proxy,
+        strategyId,
+        true,
+        [
+            vaultIdEncoded,
+            // proxyAddrEncoded,
+            targetRatioEncoded,
+        ],
+        [
+            triggerData,
+        ],
+    );
 
     return subId;
 };

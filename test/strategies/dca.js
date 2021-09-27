@@ -48,7 +48,7 @@ describe('DCA Strategy', function () {
         console.log(timestamp);
 
         await redeploy('BotAuth');
-        await redeploy('ProxyAuth');
+        // await redeploy('ProxyAuth');
         await redeploy('StrategyStorage');
         subStorage = await redeploy('SubStorage');
         await redeploy('RecipeExecutor');
@@ -134,43 +134,43 @@ describe('DCA Strategy', function () {
         );
     });
 
-    it('... should trigger DCA strategy', async () => {
-        // get weth and approve dsproxy to pull
-        await depositToWeth(amount.toString());
-        await approve(WETH_ADDRESS, proxy.address);
+    // it('... should trigger DCA strategy', async () => {
+    //     // get weth and approve dsproxy to pull
+    //     await depositToWeth(amount.toString());
+    //     await approve(WETH_ADDRESS, proxy.address);
 
-        const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
-        const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
+    //     const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
+    //     const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
 
-        const newTimestamp = lastTimestamp + TWO_DAYS;
+    //     const newTimestamp = lastTimestamp + TWO_DAYS;
 
-        await callDcaStrategy(botAcc, strategyExecutor, subId, subStorage.address, newTimestamp);
+    //     await callDcaStrategy(botAcc, strategyExecutor, subId, subStorage.address, newTimestamp);
 
-        const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
-        const wethBalanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
+    //     const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
+    //     const wethBalanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
 
-        expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
-        expect(wethBalanceBefore).to.be.gt(wethBalanceAfter);
-    });
+    //     expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
+    //     expect(wethBalanceBefore).to.be.gt(wethBalanceAfter);
+    // });
 
-    it('... should trigger DCA strategy again after 2 days', async () => {
+    // it('... should trigger DCA strategy again after 2 days', async () => {
 
-        await timeTravel(TWO_DAYS);
-        // get weth and approve dsproxy to pull
-        await depositToWeth(amount.toString());
-        await approve(WETH_ADDRESS, proxy.address);
+    //     await timeTravel(TWO_DAYS);
+    //     // get weth and approve dsproxy to pull
+    //     await depositToWeth(amount.toString());
+    //     await approve(WETH_ADDRESS, proxy.address);
 
-        const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
-        const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
+    //     const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
+    //     const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
 
-        const newTimestamp = lastTimestamp + TWO_DAYS;
+    //     const newTimestamp = lastTimestamp + TWO_DAYS;
 
-        await callDcaStrategy(botAcc, strategyExecutor, subId, subStorage.address, newTimestamp);
+    //     await callDcaStrategy(botAcc, strategyExecutor, subId, subStorage.address, newTimestamp);
 
-        const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
-        const wethBalanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
+    //     const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
+    //     const wethBalanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
 
-        expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
-        expect(wethBalanceBefore).to.be.gt(wethBalanceAfter);
-    });
+    //     expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
+    //     expect(wethBalanceBefore).to.be.gt(wethBalanceAfter);
+    // });
 });

@@ -95,39 +95,6 @@
 					"internalType": "uint256",
 					"name": "",
 					"type": "uint256"
-				},
-				{
-					"components": [
-						{
-							"internalType": "uint64",
-							"name": "strategyId",
-							"type": "uint64"
-						},
-						{
-							"internalType": "bool",
-							"name": "active",
-							"type": "bool"
-						},
-						{
-							"internalType": "address",
-							"name": "userProxy",
-							"type": "address"
-						},
-						{
-							"internalType": "bytes[]",
-							"name": "triggerData",
-							"type": "bytes[]"
-						},
-						{
-							"internalType": "bytes32[]",
-							"name": "subData",
-							"type": "bytes32[]"
-						}
-					],
-					"indexed": false,
-					"internalType": "struct StrategyModel.StrategySub",
-					"name": "",
-					"type": "tuple"
 				}
 			],
 			"name": "Subscribe",
@@ -141,39 +108,6 @@
 					"internalType": "uint256",
 					"name": "",
 					"type": "uint256"
-				},
-				{
-					"components": [
-						{
-							"internalType": "uint64",
-							"name": "strategyId",
-							"type": "uint64"
-						},
-						{
-							"internalType": "bool",
-							"name": "active",
-							"type": "bool"
-						},
-						{
-							"internalType": "address",
-							"name": "userProxy",
-							"type": "address"
-						},
-						{
-							"internalType": "bytes[]",
-							"name": "triggerData",
-							"type": "bytes[]"
-						},
-						{
-							"internalType": "bytes32[]",
-							"name": "subData",
-							"type": "bytes32[]"
-						}
-					],
-					"indexed": false,
-					"internalType": "struct StrategyModel.StrategySub",
-					"name": "",
-					"type": "tuple"
 				}
 			],
 			"name": "UpdateData",

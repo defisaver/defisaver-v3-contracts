@@ -9,6 +9,8 @@ import "../DS/DSAuth.sol";
 contract ProxyPermission {
     address public constant FACTORY_ADDRESS = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
 
+    bytes4 public constant EXECUTE_SELECTOR = bytes4(keccak256("execute(address,bytes)"));
+
     /// @notice Called in the context of DSProxy to authorize an address
     /// @param _contractAddr Address which will be authorized
     function givePermission(address _contractAddr) public {
@@ -20,7 +22,9 @@ contract ProxyPermission {
             DSAuth(address(this)).setAuthority(DSAuthority(address(guard)));
         }
 
-        guard.permit(_contractAddr, address(this), bytes4(keccak256("execute(address,bytes)")));
+        if (!guard.canCall(_contractAddr, address(this), EXECUTE_SELECTOR)) {
+            guard.permit(_contractAddr, address(this), EXECUTE_SELECTOR);
+        }
     }
 
     /// @notice Called in the context of DSProxy to remove authority of an address
@@ -34,10 +38,6 @@ contract ProxyPermission {
         }
 
         DSGuard guard = DSGuard(currAuthority);
-        guard.forbid(_contractAddr, address(this), bytes4(keccak256("execute(address,bytes)")));
-    }
-
-    function proxyOwner() internal view returns (address) {
-        return DSAuth(address(this)).owner();
+        guard.forbid(_contractAddr, address(this), EXECUTE_SELECTOR);
     }
 }

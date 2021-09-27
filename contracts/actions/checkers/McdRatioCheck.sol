@@ -11,7 +11,7 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
 
     // TODO: Maybe not be a constant?
     /// @dev 20% offset acceptable, used for testing
-    uint256 internal constant RATIO_OFFSET = 200000000000000000;
+    uint256 internal constant RATIO_OFFSET = 500000000000000000;
 
     struct Params {
         uint256 ratioTarget;
