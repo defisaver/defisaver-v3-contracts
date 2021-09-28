@@ -22,6 +22,7 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard, FLHelper
 
     string constant ERR_ONLY_AAVE_CALLER = "Caller not aave pool";
     string constant ERR_SAME_CALLER = "FL taker must be this contract";
+    string constant ERR_WRONG_PAYBACK_AMOUNT = "Wrong FL payback amount sent";
 
     ILendingPoolAddressesProviderV2
         public constant addressesProvider = ILendingPoolAddressesProviderV2(
@@ -128,7 +129,12 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard, FLHelper
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
-            _assets[i].approveToken(address(AAVE_LENDING_POOL), add(_amounts[i],_fees[i]));
+            uint256 paybackAmount = add(_amounts[i],_fees[i]);
+            
+            require(_assets[i].getBalance(address(this)) == paybackAmount, ERR_WRONG_PAYBACK_AMOUNT);
+
+            _assets[i].approveToken(address(AAVE_LENDING_POOL), paybackAmount);
+
         }
 
         return true;
