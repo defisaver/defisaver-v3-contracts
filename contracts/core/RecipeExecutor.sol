@@ -10,9 +10,11 @@ import "./strategy/StrategyModel.sol";
 import "./strategy/StrategyStorage.sol";
 import "./strategy/SubStorage.sol";
 import "../interfaces/flashloan/IFlashLoanBase.sol";
+import "../interfaces/ITrigger.sol";
+import "../decoders/Decoder.sol";
 
 /// @title Handles FL taking and executes actions
-contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
+contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
 
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
@@ -21,6 +23,8 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
 
     bytes4 constant STRATEGY_STORAGE_ID = bytes4(keccak256("StrategyStorage"));
     bytes4 constant SUB_STORAGE_ID = bytes4(keccak256("SubStorage"));
+
+    error TriggerNotActiveError();
 
     /// @notice Called directly through DsProxy to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
@@ -32,15 +36,31 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
     /// @notice Called through the Strategy contract to execute a recipe
     /// @param _subId Id of the subscription we want to execute
     /// @param _actionCallData All the data related to the strategies Recipe
-    function executeRecipeFromStrategy(uint256 _subId, bytes[] memory _actionCallData)
+    function executeRecipeFromStrategy(uint256 _subId, bytes[] memory _actionCallData, bytes[] memory _triggerCallData)
         public
         payable
     {
+        // TODO: we can hardcode this for gas savings
         address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
         address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
+        ///// 
 
         StrategySub memory sub = SubStorage(subStorageAddr).getSub(_subId);
         Strategy memory strategy = StrategyStorage(strategyStorageAddr).getStrategy(sub.strategyId);
+
+        // check if all the triggers are true
+        bool triggered = checkTriggers(strategy, sub, _triggerCallData);
+
+        if (!triggered) {
+            revert TriggerNotActiveError();
+        }
+
+        bytes32[] memory __subData = sub.subData;
+
+        // TODO: just testing this out now
+        // if (sub.dataPool.length != 0) {
+        //   __subData = decodeRepay(sub.dataPool);
+        // }
 
         // if this is a one time strategy
         if (!strategy.continuous) {
@@ -51,12 +71,37 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
             Recipe({
                 name: strategy.name,
                 callData: _actionCallData,
-                subData: sub.subData,
+                subData: __subData,
                 actionIds: strategy.actionIds,
                 paramMapping: strategy.paramMapping
             });
 
         _executeActions(currRecipe);
+    }
+
+    /// @notice Checks if all the triggers are true
+    function checkTriggers(Strategy memory strategy, StrategySub memory _sub, bytes[] memory _triggerCallData)
+        public
+        returns (bool)
+    {
+        bytes4[] memory triggerIds = strategy.triggerIds;
+
+        for (uint256 i = 0; i < triggerIds.length; i++) {
+            address triggerAddr = registry.getAddr(triggerIds[i]);
+
+            bytes32 isTriggered = IDSProxy(address(this)).execute(
+                triggerAddr,
+                abi.encodeWithSignature(
+                    "isTriggered(bytes,bytes)",
+                    _triggerCallData[i],
+                    _sub.triggerData[i]
+                    )
+                );
+
+                if (isTriggered == "") return false;
+        }
+
+        return true;
     }
 
     /// @notice This is the callback function that FL actions call

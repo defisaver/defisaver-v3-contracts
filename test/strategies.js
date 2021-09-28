@@ -112,6 +112,8 @@ const subMcdRepayStrategy = async (proxy, vaultId, rationUnder, targetRatio) => 
     const strategyId = await getLatestStrategyId();
     const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_UNDER);
 
+    const poolPacked = hre.ethers.utils.solidityPack(['uint64', 'uint64', 'bytes20'], [vaultId, rationUnder, proxy.address]);
+
     // eslint-disable-next-line max-len
     const subId = await subToStrategy(
         proxy,
@@ -119,12 +121,13 @@ const subMcdRepayStrategy = async (proxy, vaultId, rationUnder, targetRatio) => 
         true,
         [
             vaultIdEncoded,
-            // proxyAddrEncoded,
+            proxyAddrEncoded,
             targetRatioEncoded,
         ],
         [
             triggerData,
         ],
+        poolPacked,
     );
 
     return subId;

@@ -8,17 +8,16 @@ contract StrategyModel {
     struct Strategy {
         string name;
         address creator;
-        bytes4[] triggerIds; // not optimal for storage
+        bytes4[] triggerIds;
         bytes4[] actionIds;
         uint8[][] paramMapping;
         bool continuous; // if the action is repeated (continous) or one time
-        // TODO: sibling strategies (here || StrategySub)?
     }
 
     struct Recipe {
         string name;
         bytes[] callData;
-        bytes32[] subData; // why is this here?
+        bytes32[] subData;
         bytes4[] actionIds;
         uint8[][] paramMapping;
     }
@@ -30,5 +29,6 @@ contract StrategyModel {
         address userProxy;
         bytes[] triggerData;
         bytes32[] subData;
+        bytes dataPool; // TODO: remove later just for tight packing testing
     }
 }

@@ -42,7 +42,8 @@ contract SubStorage is StrategyModel, AdminAuth {
         uint64 _strategyId,
         bool _active,
         bytes[] memory _triggerData,
-        bytes32[] memory _subData
+        bytes32[] memory _subData,
+        bytes memory _dataPool
     ) public returns (uint) {
         strategiesSubs.push(
             StrategySub({
@@ -50,7 +51,8 @@ contract SubStorage is StrategyModel, AdminAuth {
                 active: _active,
                 userProxy: msg.sender, // TODO: should we check if the user is dsproxy?
                 triggerData: _triggerData,
-                subData: _subData
+                subData: _subData,
+                dataPool: _dataPool
             })
         );
 

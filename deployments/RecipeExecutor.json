@@ -18,6 +18,11 @@
 		},
 		{
 			"inputs": [],
+			"name": "TriggerNotActiveError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
 			"name": "ADMIN_VAULT_ADDR",
 			"outputs": [
 				{
@@ -149,6 +154,118 @@
 							"type": "string"
 						},
 						{
+							"internalType": "address",
+							"name": "creator",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes4[]",
+							"name": "triggerIds",
+							"type": "bytes4[]"
+						},
+						{
+							"internalType": "bytes4[]",
+							"name": "actionIds",
+							"type": "bytes4[]"
+						},
+						{
+							"internalType": "uint8[][]",
+							"name": "paramMapping",
+							"type": "uint8[][]"
+						},
+						{
+							"internalType": "bool",
+							"name": "continuous",
+							"type": "bool"
+						}
+					],
+					"internalType": "struct StrategyModel.Strategy",
+					"name": "strategy",
+					"type": "tuple"
+				},
+				{
+					"components": [
+						{
+							"internalType": "uint64",
+							"name": "strategyId",
+							"type": "uint64"
+						},
+						{
+							"internalType": "bool",
+							"name": "active",
+							"type": "bool"
+						},
+						{
+							"internalType": "address",
+							"name": "userProxy",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
+						},
+						{
+							"internalType": "bytes32[]",
+							"name": "subData",
+							"type": "bytes32[]"
+						},
+						{
+							"internalType": "bytes",
+							"name": "dataPool",
+							"type": "bytes"
+						}
+					],
+					"internalType": "struct StrategyModel.StrategySub",
+					"name": "_sub",
+					"type": "tuple"
+				},
+				{
+					"internalType": "bytes[]",
+					"name": "_triggerCallData",
+					"type": "bytes[]"
+				}
+			],
+			"name": "checkTriggers",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes",
+					"name": "_tightPacked",
+					"type": "bytes"
+				}
+			],
+			"name": "decodeRepay",
+			"outputs": [
+				{
+					"internalType": "bytes32[]",
+					"name": "subData",
+					"type": "bytes32[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"components": [
+						{
+							"internalType": "string",
+							"name": "name",
+							"type": "string"
+						},
+						{
 							"internalType": "bytes[]",
 							"name": "callData",
 							"type": "bytes[]"
@@ -189,6 +306,11 @@
 				{
 					"internalType": "bytes[]",
 					"name": "_actionCallData",
+					"type": "bytes[]"
+				},
+				{
+					"internalType": "bytes[]",
+					"name": "_triggerCallData",
 					"type": "bytes[]"
 				}
 			],

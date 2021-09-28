@@ -3,7 +3,6 @@
 pragma solidity =0.8.4;
 
 import "../../auth/AdminAuth.sol";
-import "../../interfaces/ITrigger.sol";
 import "../../interfaces/IDSProxy.sol";
 import "./StrategyModel.sol";
 import "./BotAuth.sol";
@@ -25,7 +24,6 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
 
     bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
-    error TriggerNotActiveError();
     error BotNotApprovedError(address, uint256);
     error SubNotActiveError(uint256);
 
@@ -52,15 +50,8 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
             revert BotNotApprovedError(msg.sender, _subId);
         }
 
-        // check if all the triggers are true
-        bool triggered = checkTriggers(sub, _triggerCallData);
-
-        if (!triggered) {
-            revert TriggerNotActiveError();
-        }
-
         // execute actions
-        callActions(_subId, _actionsCallData, sub.userProxy);
+        callActions(_subId, _actionsCallData, _triggerCallData, sub.userProxy);
     }
 
     /// @notice Checks if msg.sender has auth, reverts if not
@@ -69,38 +60,15 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         return BotAuth(registry.getAddr(BOT_AUTH_ID)).isApproved(_subId, msg.sender);
     }
 
-    /// @notice Checks if all the triggers are true, reverts if not
-    function checkTriggers(StrategySub memory _sub, bytes[] memory _triggerCallData)
-        public
-        returns (bool)
-    {
-        address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
+    
 
-        bytes4[] memory triggerIds = StrategyStorage(strategyStorageAddr)
-            .getStrategy(_sub.strategyId)
-            .triggerIds;
-
-        for (uint256 i = 0; i < triggerIds.length; ++i) {
-            address triggerAddr = registry.getAddr(triggerIds[i]);
-
-            bool isTriggered = ITrigger(triggerAddr).isTriggered(
-                _triggerCallData[i],
-                _sub.triggerData[i]
-            );
-            if (!isTriggered) {
-                return isTriggered;
-            }
-        }
-
-        return true;
-    }
-
-    /// @notice Execute all the actions in order
+    /// @notice Checks triggers and execute all the actions in order
     /// @param _subId Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
     function callActions(
         uint256 _subId,
         bytes[] memory _actionsCallData,
+        bytes[] memory _triggerCallData,
         address _proxy
     ) internal {
         address RecipeExecutorAddr = registry.getAddr(RECIPE_EXECUTOR_ID);
@@ -111,9 +79,10 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
             _proxy,
             RecipeExecutorAddr,
             abi.encodeWithSignature(
-                "executeRecipeFromStrategy(uint256,bytes[])",
+                "executeRecipeFromStrategy(uint256,bytes[],bytes[])",
                 _subId,
-                _actionsCallData
+                _actionsCallData,
+                _triggerCallData
             )
         );
     }

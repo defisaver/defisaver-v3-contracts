@@ -55,13 +55,13 @@ const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramM
     console.log(`GasUsed createStrategy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const subToStrategy = async (proxy, strategyId, active, subData, triggerData) => {
+const subToStrategy = async (proxy, strategyId, active, subData, triggerData, poolData) => {
     const SubProxyAddr = await getAddrFromRegistry('SubProxy');
 
     const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
     const functionData = SubProxyProxy.interface.encodeFunctionData(
         'subscribeToStrategy',
-        [strategyId, active, triggerData, subData],
+        [strategyId, active, triggerData, subData, poolData],
     );
 
     const receipt = await proxy['execute(address,bytes)'](SubProxyAddr, functionData, {
