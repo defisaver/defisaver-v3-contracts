@@ -65,6 +65,10 @@ module.exports = {
     mocha: {
         timeout: 100000,
     },
+    wethAddress: {
+        Mainnet: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        Arbitrum: '0x0',
+    },
 };
 
 require('./scripts/hardhat-tasks.js');
