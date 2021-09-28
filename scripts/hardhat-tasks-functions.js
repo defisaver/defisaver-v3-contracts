@@ -220,6 +220,20 @@ async function encryptPrivateKey() {
     console.log(encryptedKey);
 }
 
+async function changeNetworkNameForAddresses(oldNetworkName, newNetworkName) {
+    files = getAllFiles('./contracts');
+    files.map(async (file) => {
+        if (file.toString().includes('Helper.sol')) {
+            console.log(file.toString());
+            const contractContent = (
+                await fs.readFileSync(file.toString())
+            ).toString();
+            fs.writeFileSync(file, contractContent.replaceAll(oldNetworkName, newNetworkName));
+        }
+    });
+    await execShellCommand('npx hardhat compile');
+}
+
 module.exports = {
     flatten,
     verifyContract,
@@ -227,4 +241,5 @@ module.exports = {
     sleep,
     findPathByContractName,
     encryptPrivateKey,
+    changeNetworkNameForAddresses,
 };
