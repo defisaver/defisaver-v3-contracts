@@ -55,11 +55,9 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
             revert TriggerNotActiveError();
         }
 
-        bytes32[] memory __subData = sub.subData;
-
         // TODO: just testing this out now
         // if (sub.dataPool.length != 0) {
-        //   __subData = decodeRepay(sub.dataPool);
+        //   sub.subData = decodeRepay(sub.dataPool);
         // }
 
         // if this is a one time strategy
@@ -71,7 +69,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
             Recipe({
                 name: strategy.name,
                 callData: _actionCallData,
-                subData: __subData,
+                subData: sub.subData,
                 actionIds: strategy.actionIds,
                 paramMapping: strategy.paramMapping
             });

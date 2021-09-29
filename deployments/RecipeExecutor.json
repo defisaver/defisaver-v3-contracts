@@ -177,6 +177,11 @@
 							"internalType": "bool",
 							"name": "continuous",
 							"type": "bool"
+						},
+						{
+							"internalType": "uint64[]",
+							"name": "sibblingStrategies",
+							"type": "uint64[]"
 						}
 					],
 					"internalType": "struct StrategyModel.Strategy",

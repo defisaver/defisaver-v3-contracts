@@ -12,6 +12,7 @@ contract StrategyModel {
         bytes4[] actionIds;
         uint8[][] paramMapping;
         bool continuous; // if the action is repeated (continous) or one time
+        uint64[] sibblingStrategies;
     }
 
     struct Recipe {

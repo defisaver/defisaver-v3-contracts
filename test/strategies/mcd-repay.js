@@ -41,7 +41,7 @@ describe('Mcd-Repay-Strategy', function () {
         botAcc = (await hre.ethers.getSigners())[1];
 
         await redeploy('BotAuth');
-        // await redeploy('ProxyAuth');
+        await redeploy('ProxyAuth');
         await redeploy('McdRatioTrigger');
         await redeploy('McdWithdraw');
         await redeploy('DFSSell');

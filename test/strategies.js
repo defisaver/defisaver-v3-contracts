@@ -121,8 +121,8 @@ const subMcdRepayStrategy = async (proxy, vaultId, rationUnder, targetRatio) => 
         true,
         [
             vaultIdEncoded,
-            proxyAddrEncoded,
             targetRatioEncoded,
+            proxyAddrEncoded,
         ],
         [
             triggerData,

@@ -94,7 +94,8 @@ abstract contract ActionBase is AdminAuth {
             if (isReturnInjection(_mapType)) {
                 _param = address(bytes20((_returnValues[getReturnIndex(_mapType)])));
             } else {
-                _param = address(bytes20(_subData[getSubIndex(_mapType)]));
+                _param = address(uint160(uint256(_subData[getSubIndex(_mapType)])));
+                // _param = address(bytes20(_subData[getSubIndex(_mapType)]));
             }
         }
 
