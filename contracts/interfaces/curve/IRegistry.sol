@@ -13,4 +13,6 @@ interface IRegistry {
     function get_underlying_balances(address) external view returns (uint256[8] memory);
     function get_virtual_price_from_lp_token(address) external view returns (uint256);
     function get_gauges(address) external view returns (address[10] memory, int128[10] memory);
+    function pool_count() external view returns (uint256);
+    function pool_list(uint256) external view returns (address);
 }

@@ -5,7 +5,16 @@ pragma experimental ABIEncoderV2;
 import "../actions/curve/helpers/CurveHelper.sol";
 import "../interfaces/curve/ILiquidityGauge.sol";
 
+interface IERC20 {
+    function balanceOf(address) external view returns (uint256);
+}
+
 contract CurveView is CurveHelper {
+    struct LpBalance {
+        address lpToken;
+        uint256 balance;
+    }
+
     function gaugeBalance(address _gaugeAddr, address _user) external view returns (uint256) {
         return ILiquidityGauge(_gaugeAddr).balanceOf(_user);
     }
@@ -97,5 +106,32 @@ contract CurveView is CurveHelper {
         underlyingDecimals = Registry.get_underlying_decimals(pool);
         underlyingBalances = Registry.get_underlying_balances(pool);
         (gauges, gaugeTypes) = Registry.get_gauges(pool);
+    }
+
+    function getUserLP(
+        address _user,
+        uint256 _startIndex,
+        uint256 _returnSize,
+        uint256 _loopLimit
+    ) external view returns (
+        LpBalance[] memory lpBalances,
+        uint256 nextIndex
+    ) {
+        lpBalances = new LpBalance[](_returnSize);
+        IRegistry registry = getRegistry();
+        uint256 listSize = registry.pool_count();
+        
+        uint256 nzCount = 0;
+        uint256 index = _startIndex;
+        for (uint256 i = 0; index < listSize && nzCount < _returnSize && i < _loopLimit; i++) {
+            address pool = registry.pool_list(index++);
+            address lpToken = registry.get_lp_token(pool);
+            uint256 balance = IERC20(lpToken).balanceOf(_user);
+            if (balance != 0) {
+                lpBalances[nzCount++] = LpBalance(lpToken, balance);
+            }
+        }
+
+        nextIndex = index < listSize ? index : 0;
     }
 }
