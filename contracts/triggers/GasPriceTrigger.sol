@@ -18,6 +18,13 @@ contract GasPriceTrigger is ITrigger, AdminAuth {
 
         return false;
     }
+    
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {
+    }
+    
+    function isChangeable() public pure override returns (bool){
+        return false;
+    }
 
     function parseInputs(bytes memory _subData) public pure returns (Params memory params) {
         params = abi.decode(_subData, (Params));

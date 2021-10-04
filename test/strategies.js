@@ -33,14 +33,13 @@ const {
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
 // eslint-disable-next-line max-len
-const subUniContinuousCollectStrategy = async (proxy, tokenId, recipient, timestamp, maxGasPrice) => {
+const subUniContinuousCollectStrategy = async (proxy, tokenId, recipient, timestamp, maxGasPrice, interval) => {
     const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
     const tokenIdEncoded = abiCoder.encode(['uint256'], [tokenId.toString()]);
     const recipientEncoded = abiCoder.encode(['address'], [recipient]);
     const strategyId = await getLatestStrategyId();
-    const timestampTriggerData = await createTimestampTrigger(timestamp);
+    const timestampTriggerData = await createTimestampTrigger(timestamp, interval);
     const gasTriggerData = await createGasPriceTrigger(maxGasPrice);
-
     // eslint-disable-next-line max-len
     const subId = await subToStrategy(proxy, strategyId, true, [tokenIdEncoded, proxyAddrEncoded, recipientEncoded], [timestampTriggerData, gasTriggerData]);
 
@@ -56,8 +55,8 @@ const subDcaStrategy = async (
     lastTimestamp,
     eoa,
 ) => {
-    const tokenAddrSellEncoded = abiCoder.encode(['address'], [tokenAddrSell]);
-    const tokenAddrBuyEncoded = abiCoder.encode(['address'], [tokenAddrBuy]);
+    // const tokenAddrSellEncoded = abiCoder.encode(['address'], [tokenAddrSell]);
+    // const tokenAddrBuyEncoded = abiCoder.encode(['address'], [tokenAddrBuy]);
     const amountEncoded = abiCoder.encode(['uint256'], [amount]);
     const intervalEncoded = abiCoder.encode(['uint256'], [interval]);
     const lastTimestampEncoded = abiCoder.encode(['uint256'], [lastTimestamp]);
@@ -137,10 +136,8 @@ const subMcdBoostStrategy = async (proxy, vaultId, rationUnder, targetRatio) => 
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
     const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
-
     const strategyId = await getLatestStrategyId();
     const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_OVER);
-
     // eslint-disable-next-line max-len
     const subId = await subToStrategy(proxy, strategyId, true, [vaultIdEncoded, proxyAddrEncoded, targetRatioEncoded],
         [triggerData]);
@@ -283,7 +280,7 @@ const callUniV3CollectStrategy = async (botAcc, strategyExecutor, strategyId, nf
         MAX_UINT128,
         nftOwner,
     );
-    const timestampTriggerData = await createTimestampTrigger(newTimestamp);
+    const timestampTriggerData = await createTimestampTrigger('0', '0');
     const changeTriggerDataAction = new dfs.actions.basic.ChangeTriggerDataAction(
         subStorageAddr,
         strategyId,
@@ -293,7 +290,6 @@ const callUniV3CollectStrategy = async (botAcc, strategyExecutor, strategyId, nf
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
     actionsCallData.push(collectAction.encodeForRecipe()[0]);
-    actionsCallData.push(changeTriggerDataAction.encodeForRecipe()[0]);
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len

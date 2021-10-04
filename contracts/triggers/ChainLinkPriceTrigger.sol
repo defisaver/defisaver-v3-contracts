@@ -51,6 +51,13 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth {
 
         return uint256(price);
     }
+    
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {
+    }
+    
+    function isChangeable() public pure override returns (bool){
+        return false;
+    }
 
     function parseSubInputs(bytes memory _callData)
         internal

@@ -49,7 +49,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
         Strategy memory strategy = StrategyStorage(strategyStorageAddr).getStrategy(sub.strategyId);
 
         // check if all the triggers are true
-        bool triggered = checkTriggers(strategy, sub, _triggerCallData);
+        bool triggered = checkTriggers(strategy, sub, _triggerCallData, _subId);
 
         if (!triggered) {
             revert TriggerNotActiveError();
@@ -78,7 +78,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
     }
 
     /// @notice Checks if all the triggers are true
-    function checkTriggers(Strategy memory strategy, StrategySub memory _sub, bytes[] memory _triggerCallData)
+    function checkTriggers(Strategy memory strategy, StrategySub memory _sub, bytes[] memory _triggerCallData, uint256 _subId)
         public
         returns (bool)
     {
@@ -86,7 +86,6 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
 
         for (uint256 i = 0; i < triggerIds.length; i++) {
             address triggerAddr = registry.getAddr(triggerIds[i]);
-
             bytes32 isTriggered = IDSProxy(address(this)).execute(
                 triggerAddr,
                 abi.encodeWithSignature(
@@ -96,7 +95,10 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
                     )
                 );
 
-                if (isTriggered == "") return false;
+            if (isTriggered == "") return false;
+            if (ITrigger(triggerAddr).isChangeable()){
+                SubStorage(registry.getAddr(SUB_STORAGE_ID)).updateSubTriggerData(_subId, ITrigger(triggerAddr).changedSubData(_sub.triggerData[i]), i);
+            }
         }
 
         return true;
@@ -109,7 +111,6 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
     function _executeActionsFromFL(Recipe memory _currRecipe, bytes32 _flAmount) public payable {
         bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
         returnValues[0] = _flAmount; // set the flash loan action as first return value
-
         // skips the first actions as it was the fl action
         for (uint256 i = 1; i < _currRecipe.actionIds.length; ++i) {
             returnValues[i] = _executeAction(_currRecipe, i, returnValues);

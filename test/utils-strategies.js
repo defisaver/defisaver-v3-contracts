@@ -7,8 +7,8 @@ const {
     calcGasToUSD,
     OWNER_ACC,
     AVG_GAS_PRICE,
+    nullAddress,
 } = require('./utils');
-
 
 const getLatestStrategyId = async () => {
     const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
@@ -55,7 +55,7 @@ const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramM
     console.log(`GasUsed createStrategy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const subToStrategy = async (proxy, strategyId, active, subData, triggerData, poolData) => {
+const subToStrategy = async (proxy, strategyId, active, subData, triggerData, poolData = nullAddress) => {
     const SubProxyAddr = await getAddrFromRegistry('SubProxy');
 
     const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');

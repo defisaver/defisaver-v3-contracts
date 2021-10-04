@@ -46,6 +46,38 @@
 			"inputs": [
 				{
 					"internalType": "bytes",
+					"name": "_subData",
+					"type": "bytes"
+				}
+			],
+			"name": "changedSubData",
+			"outputs": [
+				{
+					"internalType": "bytes",
+					"name": "",
+					"type": "bytes"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "isChangeable",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes",
 					"name": "",
 					"type": "bytes"
 				},
@@ -88,6 +120,11 @@
 						{
 							"internalType": "uint256",
 							"name": "timestamp",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "interval",
 							"type": "uint256"
 						}
 					],

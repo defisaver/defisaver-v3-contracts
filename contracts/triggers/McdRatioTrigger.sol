@@ -23,7 +23,7 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper {
         view
         override
         returns (bool)
-    {
+    {   
         CallParams memory callInputData = parseCallInputs(_callData);
         SubParams memory subInputData = parseSubInputs(_subData);
 
@@ -56,6 +56,12 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper {
         params.vaultId = uint64(_vaultId);
         params.ratio = uint64(_ratio);
         params.state = uint8(_state);
+    }
+    function changedSubData(bytes memory _subData) public pure override  returns (bytes memory) {
+    }
+    
+    function isChangeable() public pure override returns (bool){
+        return false;
     }
 
     function parseCallInputs(bytes memory _callData) internal pure returns (CallParams memory params) {
