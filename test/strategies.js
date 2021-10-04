@@ -209,19 +209,11 @@ const callDcaStrategy = async (botAcc, strategyExecutor, strategyId, subStorageA
 
     const timestampTriggerData = await createTimestampTrigger(newTimestamp);
 
-    const changeTriggerDataAction = new dfs.actions.basic.ChangeTriggerDataAction(
-        subStorageAddr,
-        strategyId,
-        timestampTriggerData,
-        0,
-    );
-
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
     actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
-    actionsCallData.push(changeTriggerDataAction.encodeForRecipe()[0]);
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
