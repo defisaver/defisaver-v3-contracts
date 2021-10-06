@@ -13,6 +13,9 @@ import "../interfaces/flashloan/IFlashLoanBase.sol";
 import "../interfaces/ITrigger.sol";
 import "../decoders/Decoder.sol";
 
+import "hardhat/console.sol";
+
+
 /// @title Handles FL taking and executes actions
 contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
 
@@ -40,6 +43,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
         public
         payable
     {
+        console.log(gasleft());
         // TODO: we can hardcode this for gas savings
         address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
         address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
@@ -84,19 +88,15 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
     {
         bytes4[] memory triggerIds = strategy.triggerIds;
 
+        bool isTriggered;
+        address triggerAddr;
+
         for (uint256 i = 0; i < triggerIds.length; i++) {
-            address triggerAddr = registry.getAddr(triggerIds[i]);
+            triggerAddr = registry.getAddr(triggerIds[i]);
 
-            bytes32 isTriggered = IDSProxy(address(this)).execute(
-                triggerAddr,
-                abi.encodeWithSignature(
-                    "isTriggered(bytes,bytes)",
-                    _triggerCallData[i],
-                    _sub.triggerData[i]
-                    )
-                );
+            isTriggered = ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i]);
 
-                if (isTriggered == "") return false;
+            if (!isTriggered) return false;
         }
 
         return true;
