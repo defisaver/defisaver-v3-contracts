@@ -229,6 +229,16 @@
 					"internalType": "bytes[]",
 					"name": "_triggerCallData",
 					"type": "bytes[]"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_subId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "address",
+					"name": "_storageAddr",
+					"type": "address"
 				}
 			],
 			"name": "checkTriggers",

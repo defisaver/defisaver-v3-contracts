@@ -1081,14 +1081,6 @@ const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, o
     const functionData = claimInstMakerAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](claimInstMakerAddress, functionData);
 };
-const changeTriggerData = async (proxy, subStorageAddr, subId, triggerData, triggerNum) => {
-    const changeTriggerDataAddress = await getAddrFromRegistry('ChangeTriggerData');
-    const changeTriggerDataAction = new dfs.actions.basic.ChangeTriggerDataAction(
-        subStorageAddr, subId, triggerData, triggerNum,
-    );
-    const functionData = changeTriggerDataAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](changeTriggerDataAddress, functionData);
-};
 
 module.exports = {
     sell,
@@ -1155,5 +1147,4 @@ module.exports = {
 
     buyTokenIfNeeded,
     claimInstMaker,
-    changeTriggerData,
 };

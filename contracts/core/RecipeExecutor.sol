@@ -15,10 +15,8 @@ import "../decoders/Decoder.sol";
 
 import "hardhat/console.sol";
 
-
 /// @title Handles FL taking and executes actions
 contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
-
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
     address public constant REGISTRY_ADDR = 0xD5cec8F03f803A74B60A7603Ed13556279376b09;
@@ -39,21 +37,21 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
     /// @notice Called through the Strategy contract to execute a recipe
     /// @param _subId Id of the subscription we want to execute
     /// @param _actionCallData All the data related to the strategies Recipe
-    function executeRecipeFromStrategy(uint256 _subId, bytes[] memory _actionCallData, bytes[] memory _triggerCallData)
-        public
-        payable
-    {
-        console.log(gasleft());
-        // TODO: we can hardcode this for gas savings
+    function executeRecipeFromStrategy(
+        uint256 _subId,
+        bytes[] memory _actionCallData,
+        bytes[] memory _triggerCallData
+    ) public payable {
+
+        // TODO: can hardcode in prod to save gas
         address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
         address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
-        ///// 
-
+     
         StrategySub memory sub = SubStorage(subStorageAddr).getSub(_subId);
         Strategy memory strategy = StrategyStorage(strategyStorageAddr).getStrategy(sub.strategyId);
 
         // check if all the triggers are true
-        bool triggered = checkTriggers(strategy, sub, _triggerCallData);
+        bool triggered = checkTriggers(strategy, sub, _triggerCallData, _subId, subStorageAddr);
 
         if (!triggered) {
             revert TriggerNotActiveError();
@@ -69,23 +67,25 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
             SubStorage(subStorageAddr).deactivateSub(_subId);
         }
 
-        Recipe memory currRecipe =
-            Recipe({
-                name: strategy.name,
-                callData: _actionCallData,
-                subData: sub.subData,
-                actionIds: strategy.actionIds,
-                paramMapping: strategy.paramMapping
-            });
+        Recipe memory currRecipe = Recipe({
+            name: strategy.name,
+            callData: _actionCallData,
+            subData: sub.subData,
+            actionIds: strategy.actionIds,
+            paramMapping: strategy.paramMapping
+        });
 
         _executeActions(currRecipe);
     }
 
     /// @notice Checks if all the triggers are true
-    function checkTriggers(Strategy memory strategy, StrategySub memory _sub, bytes[] memory _triggerCallData)
-        public
-        returns (bool)
-    {
+    function checkTriggers(
+        Strategy memory strategy,
+        StrategySub memory _sub,
+        bytes[] memory _triggerCallData,
+        uint256 _subId,
+        address _storageAddr
+    ) public returns (bool) {
         bytes4[] memory triggerIds = strategy.triggerIds;
 
         bool isTriggered;
@@ -94,9 +94,20 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
         for (uint256 i = 0; i < triggerIds.length; i++) {
             triggerAddr = registry.getAddr(triggerIds[i]);
 
-            isTriggered = ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i]);
+            isTriggered = ITrigger(triggerAddr).isTriggered(
+                _triggerCallData[i],
+                _sub.triggerData[i]
+            );
 
             if (!isTriggered) return false;
+
+            if (ITrigger(triggerAddr).isChangeable()) {
+                SubStorage(_storageAddr).updateSubTriggerData(
+                    _subId,
+                    ITrigger(triggerAddr).changedSubData(_sub.triggerData[i]),
+                    i
+                );
+            }
         }
 
         return true;
@@ -109,7 +120,6 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
     function _executeActionsFromFL(Recipe memory _currRecipe, bytes32 _flAmount) public payable {
         bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
         returnValues[0] = _flAmount; // set the flash loan action as first return value
-
         // skips the first actions as it was the fl action
         for (uint256 i = 1; i < _currRecipe.actionIds.length; ++i) {
             returnValues[i] = _executeAction(_currRecipe, i, returnValues);
@@ -163,7 +173,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
     /// @dev It adds to the last input value of the FL, the recipe data so it can be passed on
     /// @param _currRecipe Recipe to be executed
     /// @param _flActionAddr Address of the flash loan action
-    /// @param _returnValues An empty array of return values, because it's the first action
+    /// @param _returnValues An empty array of return values, because it"s the first action
     function _parseFLAndExecute(
         Recipe memory _currRecipe,
         address _flActionAddr,
@@ -173,7 +183,10 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
 
         bytes memory recipeData = abi.encode(_currRecipe, address(this));
 
-        IFlashLoanBase.FlashLoanParams memory params = abi.decode(_currRecipe.callData[0], (IFlashLoanBase.FlashLoanParams));
+        IFlashLoanBase.FlashLoanParams memory params = abi.decode(
+            _currRecipe.callData[0],
+            (IFlashLoanBase.FlashLoanParams)
+        );
         params.recipeData = recipeData;
         _currRecipe.callData[0] = abi.encode(params);
 

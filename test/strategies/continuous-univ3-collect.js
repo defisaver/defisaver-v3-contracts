@@ -55,7 +55,6 @@ describe('Uni-v3-range-order strat', function () {
         await redeploy('GasFeeTaker');
         await redeploy('UniMintV3');
         await redeploy('UniCollectV3');
-        await redeploy('ChangeTriggerData');
         strategyExecutor = await redeploy('StrategyExecutor');
         positionManager = await hre.ethers.getContractAt('IUniswapV3NonfungiblePositionManager', UNIV3POSITIONMANAGER_ADDR);
 
@@ -72,23 +71,22 @@ describe('Uni-v3-range-order strat', function () {
         await uniV3Mint(proxy, tokenDataA.address, tokenDataB.address, uniPair.fee,
             uniPair.tickLower, uniPair.tickUpper,
             amount0, amount1, senderAcc.address, senderAcc.address);
-
         const numberOfPositions = await positionManager.balanceOf(senderAcc.address);
         const tokenId = await positionManager.tokenOfOwnerByIndex(senderAcc.address, numberOfPositions.sub('1').toString());
         const position = await positionManager.positions(tokenId);
         console.log(`Liquidity after minting : ${position.liquidity.toString()}`);
         // mint univ3 NFT - nftOwner is senderAcc.address
 
-        const rangeOrderStrategy = new dfs.Strategy('Continuous-UniV3-Collect-Strategy');
-        rangeOrderStrategy.addSubSlot('&tokenId', 'uint256');
-        rangeOrderStrategy.addSubSlot('&proxy', 'address');
-        rangeOrderStrategy.addSubSlot('&recipient', 'address');
+        const continuousUniV3Strat = new dfs.Strategy('Continuous-UniV3-Collect-Strategy');
+        continuousUniV3Strat.addSubSlot('&tokenId', 'uint256');
+        continuousUniV3Strat.addSubSlot('&proxy', 'address');
+        continuousUniV3Strat.addSubSlot('&recipient', 'address');
 
         const timestampTrigger = new dfs.triggers.TimestampTrigger('0');
-        rangeOrderStrategy.addTrigger(timestampTrigger);
+        continuousUniV3Strat.addTrigger(timestampTrigger);
 
         const gasTrigger = new dfs.triggers.GasPriceTrigger('0');
-        rangeOrderStrategy.addTrigger(gasTrigger);
+        continuousUniV3Strat.addTrigger(gasTrigger);
 
         const collectAction = new dfs.actions.uniswapV3.UniswapV3CollectAction(
             '&tokenId',
@@ -97,24 +95,18 @@ describe('Uni-v3-range-order strat', function () {
             '%amount1Max',
             '%nftOwner',
         );
-        const changeTriggerDataAction = new dfs.actions.basic.ChangeTriggerDataAction(
-            '%subStorageAddr',
-            '%strategyId',
-            '%newTriggerData',
-            '%triggerNum',
-        );
-        rangeOrderStrategy.addAction(collectAction);
-        rangeOrderStrategy.addAction(changeTriggerDataAction);
-        const callData = rangeOrderStrategy.encodeForDsProxyCall();
+        continuousUniV3Strat.addAction(collectAction);
+        const callData = continuousUniV3Strat.encodeForDsProxyCall();
         await createStrategy(proxy, ...callData, true);
         // Created strategy with three slots for user input when they subscribe
         // One trigger and recipe consisting of one action
 
         positionManager.approve(proxy.address, tokenId);
-        const timestamp = '1630056191';
+        const timestamp = '13352450';
         const maxGasPrice = '20000000000';
+        const interval = '2';
         strategyId = await subUniContinuousCollectStrategy(
-            proxy, tokenId, senderAcc.address, timestamp, maxGasPrice,
+            proxy, tokenId, senderAcc.address, timestamp, maxGasPrice, interval,
         );
         // user subscribes to strategy and fills three slots
         expect(strategyId).to.be.eq('0');

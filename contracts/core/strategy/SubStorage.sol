@@ -97,7 +97,6 @@ contract SubStorage is StrategyModel, AdminAuth {
         StrategySub storage sub = strategiesSubs[_subId];
         
         sub.triggerData[_triggerNum] = _triggerData;
-
         emit UpdateData(_subId);
     }
 

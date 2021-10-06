@@ -58,7 +58,6 @@ describe('DCA Strategy', function () {
         await redeploy('TimestampTrigger');
         await redeploy('StrategyProxy');
         await redeploy('PullToken');
-        await redeploy('ChangeTriggerData');
 
         strategyExecutor = await redeploy('StrategyExecutor');
 
@@ -99,17 +98,9 @@ describe('DCA Strategy', function () {
             '&eoa'
         );
 
-        const changeTriggerDataAction = new dfs.actions.basic.ChangeTriggerDataAction(
-            '%subStorageAddr',
-            '%strategyId',
-            '%newTriggerData',
-            '%triggerNum',
-        );
-
         dcaStrategy.addAction(pullTokenAction);
         dcaStrategy.addAction(feeTakingAction);
         dcaStrategy.addAction(sellAction);
-        dcaStrategy.addAction(changeTriggerDataAction);
 
         const callData = dcaStrategy.encodeForDsProxyCall();
 

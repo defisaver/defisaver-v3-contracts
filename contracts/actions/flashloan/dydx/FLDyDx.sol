@@ -126,7 +126,7 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             RecipeExecutor,
-            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes[],bytes4[],uint8[][]),bytes32)", currRecipe, amount)
+            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, amount)
         );
         // return FL (just send funds to this addr)
         
