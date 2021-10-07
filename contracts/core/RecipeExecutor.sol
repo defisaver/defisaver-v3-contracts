@@ -30,7 +30,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
     /// @notice Called directly through DsProxy to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
     /// @param _currRecipe Recipe to be executed
-    function executeRecipe(Recipe memory _currRecipe) public payable {
+    function executeRecipe(Recipe calldata _currRecipe) public payable {
         _executeActions(_currRecipe);
     }
 
@@ -39,8 +39,8 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
     /// @param _actionCallData All the data related to the strategies Recipe
     function executeRecipeFromStrategy(
         uint256 _subId,
-        bytes[] memory _actionCallData,
-        bytes[] memory _triggerCallData
+        bytes[] calldata _actionCallData,
+        bytes[] calldata _triggerCallData
     ) public payable {
 
         // TODO: can hardcode in prod to save gas
@@ -82,7 +82,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
     function checkTriggers(
         Strategy memory strategy,
         StrategySub memory _sub,
-        bytes[] memory _triggerCallData,
+        bytes[] calldata _triggerCallData,
         uint256 _subId,
         address _storageAddr
     ) public returns (bool) {
@@ -117,7 +117,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
     /// @dev FL function must be the first action and repayment is done last
     /// @param _currRecipe Recipe to be executed
     /// @param _flAmount Result value from FL action
-    function _executeActionsFromFL(Recipe memory _currRecipe, bytes32 _flAmount) public payable {
+    function _executeActionsFromFL(Recipe calldata _currRecipe, bytes32 _flAmount) public payable {
         bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
         returnValues[0] = _flAmount; // set the flash loan action as first return value
         // skips the first actions as it was the fl action
