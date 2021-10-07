@@ -2,17 +2,17 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "../../ActionBase.sol";
-import "../../../utils/ReentrancyGuard.sol";
-import "../../../interfaces/flashloan/IERC3156FlashBorrower.sol";
-import "../../../interfaces/flashloan/IERC3156FlashLender.sol";
+import "../ActionBase.sol";
+import "../../utils/ReentrancyGuard.sol";
+import "../../interfaces/flashloan/IERC3156FlashBorrower.sol";
+import "../../interfaces/flashloan/IERC3156FlashLender.sol";
 
-import "../../../core/StrategyData.sol";
-import "../../../interfaces/IDSProxy.sol";
-import "../../../interfaces/IFLParamGetter.sol";
+import "../../core/StrategyData.sol";
+import "../../interfaces/IDSProxy.sol";
+import "../../interfaces/IFLParamGetter.sol";
 
-import "../../../utils/TokenUtils.sol";
-import "../../../utils/SafeMath.sol";
+import "../../utils/TokenUtils.sol";
+import "../../utils/SafeMath.sol";
 
 contract FLMaker is ActionBase, StrategyData, ReentrancyGuard, IERC3156FlashBorrower {
     using TokenUtils for address;
@@ -28,9 +28,9 @@ contract FLMaker is ActionBase, StrategyData, ReentrancyGuard, IERC3156FlashBorr
     bytes32 public constant CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
     struct Params {
-        uint256 amount;
-        address flParamGetterAddr;
-        bytes flParamGetterData;
+        uint256 amount;             // Amount of DAI to flash loan
+        address flParamGetterAddr;  // On-chain contract used for piping FL action parameters 
+        bytes flParamGetterData;    // Data to supply to flParamGetter
     }
 
     function executeAction(
@@ -61,6 +61,9 @@ contract FLMaker is ActionBase, StrategyData, ReentrancyGuard, IERC3156FlashBorr
         return uint8(ActionType.FL_ACTION);
     }
 
+    /// @notice Gets a DAI flash loan from Maker and returns back the execution to the action address
+    /// @param _amount Amount of DAI to FL
+    /// @param _taskData Rest of the data we have in the task
     function _flMaker(uint256 _amount, bytes memory _taskData) internal returns (uint256) {
         IERC3156FlashLender(DSS_FLASH_ADDR).flashLoan(
             IERC3156FlashBorrower(address(this)),
@@ -81,6 +84,7 @@ contract FLMaker is ActionBase, StrategyData, ReentrancyGuard, IERC3156FlashBorr
         return _amount;
     }
 
+    /// @notice ERC3156 callback function that formats and calls back TaskExecutor
     function onFlashLoan(
         address _initiator,
         address _token,
