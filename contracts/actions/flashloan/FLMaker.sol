@@ -100,13 +100,13 @@ contract FLMaker is ActionBase, StrategyData, ReentrancyGuard, IERC3156FlashBorr
 
         address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
 
+        uint256 paybackAmount = _amount.add(_fee);
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             taskExecutor,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, _amount)
+            abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, paybackAmount)
         );
 
-        uint256 paybackAmount = _amount.add(_fee);
         require(_token.getBalance(address(this)) == paybackAmount, "Wrong payback amount");
 
         _token.approveToken(DSS_FLASH_ADDR, paybackAmount);
