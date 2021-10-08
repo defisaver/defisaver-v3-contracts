@@ -48,8 +48,6 @@ describe('FL-Maker', function () {
         );
         const feeAmount = '0';
 
-        await approve(assetInfo.address, proxy.address);
-
         const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
             new dfs.actions.flashloan.MakerFlashLoanAction(
                 loanAmount,
