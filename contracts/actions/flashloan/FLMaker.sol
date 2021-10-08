@@ -14,7 +14,7 @@ import "../../interfaces/IFLParamGetter.sol";
 import "../../utils/TokenUtils.sol";
 import "../../utils/SafeMath.sol";
 
-contract FLMaker is ActionBase, StrategyData, ReentrancyGuard, IERC3156FlashBorrower {
+contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower {
     using TokenUtils for address;
     using SafeMath for uint256;
 
@@ -95,7 +95,7 @@ contract FLMaker is ActionBase, StrategyData, ReentrancyGuard, IERC3156FlashBorr
         require(msg.sender == address(DSS_FLASH_ADDR), "Untrusted lender");
         require(_initiator == address(this), "Untrusted loan initiator");
 
-        (Task memory currTask, address proxy) = abi.decode(_data, (Task, address));
+        (StrategyData.Task memory currTask, address proxy) = abi.decode(_data, (StrategyData.Task, address));
         _token.withdrawTokens(proxy, _amount);
 
         address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
