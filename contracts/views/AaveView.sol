@@ -294,4 +294,15 @@ contract AaveView is DSMath, AaveHelper {
     function getUserUnclaimedRewards(address _user) external view returns (uint256) {
         return AaveIncentivesController.getUserUnclaimedRewards(_user);
     }
+
+    function getIncentivesRewardsBalance(
+        address[] calldata _assets,
+        address _user
+    ) external view returns (uint256) {
+        return AaveIncentivesController.getRewardsBalance(_assets, _user);
+    }
+
+    function getStakingRewardsBalance(address _staker) external view returns (uint256) {
+        return StakedToken.getTotalRewardsBalance(_staker);
+    }
 }
