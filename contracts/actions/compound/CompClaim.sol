@@ -13,8 +13,6 @@ import "./helpers/CompHelper.sol";
 contract CompClaim is ActionBase, CompHelper, DSMath {
     using TokenUtils for address;
 
-    address public constant COMP_ADDR = 0xc00e94Cb662C3520282E6f5717214004A7f26888;
-
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,

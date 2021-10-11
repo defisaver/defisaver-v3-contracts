@@ -8,14 +8,14 @@ import "../../interfaces/exchange/IExchangeV3.sol";
 import "../../interfaces/exchange/IUniswapRouter.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
+import "./helpers/WrapperHelper.sol";
 
 /// @title DFS exchange wrapper for UniswapV2
-contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth {
+contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
 
     using TokenUtils for address;
 
-    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    IUniswapRouter public constant router = IUniswapRouter(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+    IUniswapRouter public constant router = IUniswapRouter(UNI_V2_ROUTER);
 
     using SafeERC20 for IERC20;
 
@@ -84,7 +84,7 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth {
     function sendLeftOver(address _srcAddr) internal {
         msg.sender.transfer(address(this).balance);
 
-        if (_srcAddr != KYBER_ETH_ADDRESS) {
+        if (_srcAddr != ETH_ADDRESS) {
             IERC20(_srcAddr).safeTransfer(msg.sender, IERC20(_srcAddr).balanceOf(address(this)));
         }
     }

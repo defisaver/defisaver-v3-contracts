@@ -11,13 +11,11 @@ import "./Subscriptions.sol";
 import "./BotAuth.sol";
 import "./DFSRegistry.sol";
 import "./ProxyAuth.sol";
+import "./helpers/CoreHelper.sol";
 
 /// @title Main entry point for executing automated strategies
-contract StrategyExecutor is StrategyData, AdminAuth {
+contract StrategyExecutor is StrategyData, AdminAuth, CoreHelper {
 
-    address public constant PROXY_AUTH_ADDR = 0x3Aa5ebB10DC797CAC828524e59A333d0A371443c;
-
-    address public constant REGISTRY_ADDR = 0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes32 constant BOT_AUTH_ID = keccak256("BotAuth");

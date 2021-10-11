@@ -12,8 +12,7 @@ import "./helpers/BalancerV2Helper.sol";
 /// @title Claim BAL tokens
 contract BalancerV2Claim is ActionBase, DSMath, BalancerV2Helper {
     using TokenUtils for address;
-    IMerkleReedem public constant merkleReedemer = IMerkleReedem(0x6d19b2bF3A36A61530909Ae65445a906D98A2Fa8);
-    address public constant balToken = 0xba100000625a3754423978a60c9317c58a424e3D;
+    IMerkleReedem public constant merkleReedemer = IMerkleReedem(MERKLE_REEDEM_ADDR);
 
     /// @param liquidityProvider - The address of the liquidity provider that the tokens are claimed for
     /// @param to - The address to which to send Balancer tokens to

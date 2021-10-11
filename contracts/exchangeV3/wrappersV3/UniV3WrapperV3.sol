@@ -8,15 +8,16 @@ import "../../interfaces/exchange/ISwapRouter.sol";
 import "../../interfaces/exchange/IQuoter.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
+import "./helpers/WrapperHelper.sol";
 
 /// @title DFS exchange wrapper for UniswapV3
-contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth {
+contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     
     using TokenUtils for address;
     using SafeERC20 for IERC20;
-    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    ISwapRouter public constant router = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
-    IQuoter public constant quoter = IQuoter(0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6);
+
+    ISwapRouter public constant router = ISwapRouter(UNI_V3_ROUTER);
+    IQuoter public constant quoter = IQuoter(UNI_V3_QUOTER);
     /// @notice Sells _srcAmount of tokens at UniswapV3
     /// @param _srcAddr From token
     /// @param _srcAmount From amount
@@ -80,7 +81,7 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth {
     function sendLeftOver(address _srcAddr) internal {
         msg.sender.transfer(address(this).balance);
 
-        if (_srcAddr != KYBER_ETH_ADDRESS) {
+        if (_srcAddr != ETH_ADDRESS) {
             IERC20(_srcAddr).safeTransfer(msg.sender, IERC20(_srcAddr).balanceOf(address(this)));
         }
     }

@@ -14,12 +14,12 @@ import "../../interfaces/IFLParamGetter.sol";
 import "../../utils/TokenUtils.sol";
 import "../../utils/SafeMath.sol";
 
-contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower {
+import "./helpers/FLHelper.sol";
+
+contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, FLHelper {
     using TokenUtils for address;
     using SafeMath for uint256;
 
-    address public constant DSS_FLASH_ADDR = 0x1EB4CF3A948E7D72A198fe073cCb8C7a948cD853;
-    address public constant DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
     /// @dev Function sig of TaskExecutor._executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;

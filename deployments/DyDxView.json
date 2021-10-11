@@ -2,6 +2,19 @@
 	"contractName": "DyDxView",
 	"abi": [
 		{
+			"inputs": [],
+			"name": "SOLO_MARGIN_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
 			"inputs": [
 				{
 					"internalType": "address",
@@ -136,6 +149,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"hardhat": {}
 	}
 }

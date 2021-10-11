@@ -10,6 +10,21 @@ const readlineSync = require('readline-sync');
 const hardhatSettings = require('../hardhat.config');
 const { encrypt, decrypt } = require('./utils/crypto');
 
+async function changeWethAddress(oldNetworkName, newNetworkName) {
+    const TokenUtilsContract = 'contracts/utils/TokenUtils.sol';
+    const tokenUtilsContract = (
+        await fs.readFileSync(TokenUtilsContract)
+    ).toString();
+
+    fs.writeFileSync(
+        TokenUtilsContract,
+        tokenUtilsContract.replaceAll(
+            hardhatSettings.wethAddress[oldNetworkName],
+            hardhatSettings.wethAddress[newNetworkName],
+        ),
+    );
+}
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -33,11 +48,13 @@ function execShellCommand(cmd) {
         });
     });
 }
+
 function sleep(ms) {
     return new Promise((resolve) => {
         setTimeout(resolve, ms);
     });
 }
+
 async function deployContract(contractName, args) {
     const gasPriceSelected = args.gas;
     const network = (await hre.ethers.provider.getNetwork()).name;
@@ -221,6 +238,21 @@ async function encryptPrivateKey() {
     console.log(encryptedKey);
 }
 
+async function changeNetworkNameForAddresses(oldNetworkName, newNetworkName) {
+    files = getAllFiles('./contracts');
+    files.map(async (file) => {
+        if (file.toString().includes('Helper.sol')) {
+            const contractContent = (
+                await fs.readFileSync(file.toString())
+            ).toString();
+            fs.writeFileSync(file, contractContent.replaceAll(oldNetworkName, newNetworkName));
+        }
+    });
+    changeWethAddress(oldNetworkName, newNetworkName);
+
+    await execShellCommand('npx hardhat compile');
+}
+
 module.exports = {
     flatten,
     verifyContract,
@@ -228,4 +260,5 @@ module.exports = {
     sleep,
     findPathByContractName,
     encryptPrivateKey,
+    changeNetworkNameForAddresses,
 };

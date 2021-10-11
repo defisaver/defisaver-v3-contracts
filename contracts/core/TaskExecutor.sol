@@ -8,12 +8,10 @@ import "../auth/ProxyPermission.sol";
 import "../actions/ActionBase.sol";
 import "../core/DFSRegistry.sol";
 import "./Subscriptions.sol";
+import "./helpers/CoreHelper.sol";
 
 /// @title Handles FL taking and executes actions
-contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
-    address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
-
-    address public constant REGISTRY_ADDR = 0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C;
+contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth, CoreHelper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes32 constant SUBSCRIPTION_ID = keccak256("Subscriptions");
@@ -79,7 +77,7 @@ contract TaskExecutor is StrategyData, ProxyPermission, AdminAuth {
         }
 
         /// log the task name
-        DefisaverLogger(DEFISAVER_LOGGER).Log(address(this), msg.sender, _currTask.name, "");
+        DefisaverLogger(DEFI_SAVER_LOGGER_ADDR).Log(address(this), msg.sender, _currTask.name, "");
     }
 
     /// @notice Gets the action address and executes it

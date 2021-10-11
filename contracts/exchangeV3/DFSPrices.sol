@@ -5,10 +5,9 @@ pragma experimental ABIEncoderV2;
 
 import "../DS/DSMath.sol";
 import "../utils/SafeERC20.sol";
+import "./helpers/ExchangeHelper.sol";
 
-contract DFSPrices is DSMath {
-
-    address public constant KYBER_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+contract DFSPrices is DSMath, ExchangeHelper {
 
     enum ActionType { SELL, BUY }
 
@@ -100,7 +99,7 @@ contract DFSPrices is DSMath {
     }
 
     function getDecimals(address _token) internal view returns (uint256) {
-        if (_token == KYBER_ETH_ADDRESS) return 18;
+        if (_token == ETH_ADDRESS) return 18;
 
         return IERC20(_token).decimals();
     }

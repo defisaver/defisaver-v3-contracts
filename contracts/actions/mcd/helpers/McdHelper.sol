@@ -8,14 +8,12 @@ import "../../../interfaces/mcd/IManager.sol";
 import "../../../interfaces/mcd/IJoin.sol";
 import "../../../interfaces/mcd/IVat.sol";
 import "../../../utils/TokenUtils.sol";
+import "./MainnetMcdAddresses.sol";
 
 /// @title Helper methods for MCDSaverProxy
-contract McdHelper is DSMath {
+contract McdHelper is DSMath, MainnetMcdAddresses {
 
-    IVat public constant vat = IVat(0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B);
-
-    address public constant DAI_JOIN_ADDR = 0x9759A6Ac90977b93B58547b4A71c78317f391A28;
-    address public constant DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+    IVat public constant vat = IVat(VAT_ADDR);
 
     /// @notice Returns a normalized debt _amount based on the current rate
     /// @param _amount Amount of dai to be normalized

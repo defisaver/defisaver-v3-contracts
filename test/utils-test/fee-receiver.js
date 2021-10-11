@@ -25,6 +25,7 @@ describe('Fee-Receiver', function () {
     const MULTISIG_ADDR = '0xA74e9791D7D66c6a14B2C571BdA0F2A1f6D64E06';
 
     before(async () => {
+        /// @dev don't run dfs-registry-controller before this
         feeReceiver = await redeploy('FeeReceiver');
 
         senderAcc = (await hre.ethers.getSigners())[0];

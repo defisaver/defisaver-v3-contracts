@@ -5,6 +5,7 @@ const {
     sleep,
     findPathByContractName,
     encryptPrivateKey,
+    changeNetworkNameForAddresses,
 } = require('./hardhat-tasks-functions');
 
 // eslint-disable-next-line no-undef
@@ -32,6 +33,14 @@ task('customFlatten', 'Flattens for our DFS team')
     .addOptionalPositionalParam('contractName', 'The contract to flatten')
     .setAction(async (args) => {
         await flatten(await findPathByContractName(args.contractName));
+    });
+
+// eslint-disable-next-line no-undef
+task('changeRepoNetwork', 'Changes addresses in helper files')
+    .addOptionalPositionalParam('oldNetworkName', 'Name of the network that replaces old')
+    .addOptionalPositionalParam('newNetworkName', 'Name of the network that replaces old')
+    .setAction(async (args) => {
+        await changeNetworkNameForAddresses(args.oldNetworkName, args.newNetworkName);
     });
 
 // eslint-disable-next-line no-undef

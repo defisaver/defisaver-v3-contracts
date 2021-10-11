@@ -13,8 +13,6 @@ import "./helpers/ReflexerHelper.sol";
 contract ReflexerGenerate is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 
-    address public constant TAX_COLLECTOR_ADDRESS = 0xcDB05aEda142a1B0D6044C09C64e4226c1a281EB;
-
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,

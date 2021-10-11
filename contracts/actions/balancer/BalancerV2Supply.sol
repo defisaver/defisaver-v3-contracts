@@ -12,7 +12,6 @@ import "./helpers/BalancerV2Helper.sol";
 contract BalancerV2Supply is ActionBase, DSMath, BalancerV2Helper {
     using TokenUtils for address;
 
-
     struct Params {
         bytes32 poolId;
         address from;
