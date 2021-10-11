@@ -131,6 +131,9 @@ const subMcdRepayStrategy = async (proxy, vaultId, rationUnder, targetRatio) => 
 
     return subId;
 };
+const subCompBoostStrategy = async (proxy, rationOver, targetRatio) => {
+    
+}
 
 const subMcdBoostStrategy = async (proxy, vaultId, rationUnder, targetRatio) => {
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
@@ -533,4 +536,5 @@ module.exports = {
     callMcdCloseStrategy,
     subUniContinuousCollectStrategy,
     callUniV3CollectStrategy,
+    subCompBoostStrategy,
 };

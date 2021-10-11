@@ -7,14 +7,14 @@ import "../interfaces/ITrigger.sol";
 import "../interfaces/IERC20.sol";
 
 contract GasPriceTrigger is ITrigger, AdminAuth {
-    struct Params {
+    struct SubParams {
         uint256 maxGasPrice;
     }
 
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
-        Params memory inputData = parseInputs(_subData);
+        SubParams memory triggerSubData = parseInputs(_subData);
 
-        if (inputData.maxGasPrice >= tx.gasprice) return true;
+        if (triggerSubData.maxGasPrice >= tx.gasprice) return true;
 
         return false;
     }
@@ -26,7 +26,7 @@ contract GasPriceTrigger is ITrigger, AdminAuth {
         return false;
     }
 
-    function parseInputs(bytes memory _subData) public pure returns (Params memory params) {
-        params = abi.decode(_subData, (Params));
+    function parseInputs(bytes memory _subData) public pure returns (SubParams memory params) {
+        params = abi.decode(_subData, (SubParams));
     }
 }

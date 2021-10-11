@@ -3,11 +3,6 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ERC20OperationFail",
-			"type": "error"
-		},
-		{
-			"inputs": [],
 			"name": "NonContractCall",
 			"type": "error"
 		},

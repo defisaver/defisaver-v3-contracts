@@ -23,18 +23,18 @@ contract UniV3CurrentTickTrigger is ITrigger, AdminAuth {
     }
 
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
-        SubParams memory inputData = parseInputs(_subData);
+        SubParams memory triggerSubData = parseInputs(_subData);
 
-        (,, address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper,,,,,) = positionManager.positions(inputData.tokenId);
+        (,, address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper,,,,,) = positionManager.positions(triggerSubData.tokenId);
 
         IUniswapV3Pool pool = IUniswapV3Pool(uniswapFactory.getPool(token0, token1, fee));
         
         int24 currTick = pool.slot0().tick;
 
-        if (TickState(inputData.state) == TickState.UNDER){
+        if (TickState(triggerSubData.state) == TickState.UNDER){
             if (currTick < tickLower) return true;
         }
-        if (TickState(inputData.state) == TickState.OVER){
+        if (TickState(triggerSubData.state) == TickState.OVER){
             if (currTick > tickUpper) return true;
         }
 

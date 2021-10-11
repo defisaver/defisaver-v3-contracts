@@ -3,11 +3,6 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ERC20OperationFail",
-			"type": "error"
-		},
-		{
-			"inputs": [],
 			"name": "NonContractCall",
 			"type": "error"
 		},
@@ -80,19 +75,6 @@
 					"internalType": "address",
 					"name": "",
 					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "CALLBACK_SELECTOR",
-			"outputs": [
-				{
-					"internalType": "bytes4",
-					"name": "",
-					"type": "bytes4"
 				}
 			],
 			"stateMutability": "view",
@@ -231,14 +213,14 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				},
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes32[]",
 					"name": "",
-					"type": "bytes[]"
+					"type": "bytes32[]"
 				},
 				{
 					"internalType": "uint8[]",
@@ -265,9 +247,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "executeActionDirect",
@@ -337,9 +319,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "parseInputs",
@@ -375,10 +357,15 @@
 							"internalType": "bytes",
 							"name": "flParamGetterData",
 							"type": "bytes"
+						},
+						{
+							"internalType": "bytes",
+							"name": "recipeData",
+							"type": "bytes"
 						}
 					],
-					"internalType": "struct FLAaveV2.FLAaveV2Data",
-					"name": "flData",
+					"internalType": "struct IFlashLoanBase.FlashLoanParams",
+					"name": "inputData",
 					"type": "tuple"
 				}
 			],

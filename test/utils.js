@@ -239,11 +239,12 @@ const approve = async (tokenAddr, to) => {
     }
 };
 
-const sendEther = async (signer, to, amount) => {
-    const value = hre.ethers.utils.parseUnits(amount, 18);
-    const txObj = await signer.populateTransaction({ to, value, gasLimit: 300000 });
-
-    await signer.sendTransaction(txObj);
+const sendEther = async (signer, toAddress, amount) => {
+    const valueAmount = hre.ethers.utils.parseUnits(amount, 18);
+    await signer.sendTransaction({
+        to: toAddress,
+        value: valueAmount,
+    });
 };
 
 const balanceOf = async (tokenAddr, addr) => {

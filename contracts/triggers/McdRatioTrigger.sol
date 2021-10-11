@@ -9,6 +9,7 @@ import "../interfaces/ITrigger.sol";
 contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper {
 
     enum RatioState { OVER, UNDER }
+    
     struct CallParams {
         uint256 nextPrice;
     }
@@ -24,21 +25,28 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper {
         override
         returns (bool)
     {   
-        CallParams memory callInputData = parseCallInputs(_callData);
-        SubParams memory subInputData = parseSubInputs(_subData);
+        CallParams memory triggerCallData = parseCallInputs(_callData);
+        SubParams memory triggerSubData = parseSubInputs(_subData);
 
-        uint256 currRatio = getRatio(subInputData.vaultId, callInputData.nextPrice); // GAS 50k
+        uint256 currRatio = getRatio(triggerSubData.vaultId, triggerCallData.nextPrice); // GAS 50k
 
         // TODO: validation for nextPrice?
 
-        if (RatioState(subInputData.state) == RatioState.OVER) {
-            if (currRatio > subInputData.ratio) return true;
+        if (RatioState(triggerSubData.state) == RatioState.OVER) {
+            if (currRatio > triggerSubData.ratio) return true;
         }
 
-        if (RatioState(subInputData.state) == RatioState.UNDER) {
-            if (currRatio < subInputData.ratio) return true;
+        if (RatioState(triggerSubData.state) == RatioState.UNDER) {
+            if (currRatio < triggerSubData.ratio) return true;
         }
 
+        return false;
+    }
+   
+    function changedSubData(bytes memory _subData) public pure override  returns (bytes memory) {
+    }
+    
+    function isChangeable() public pure override returns (bool){
         return false;
     }
 
@@ -56,12 +64,6 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper {
         params.vaultId = uint64(_vaultId);
         params.ratio = uint64(_ratio);
         params.state = uint8(_state);
-    }
-    function changedSubData(bytes memory _subData) public pure override  returns (bytes memory) {
-    }
-    
-    function isChangeable() public pure override returns (bool){
-        return false;
     }
 
     function parseCallInputs(bytes memory _callData) internal pure returns (CallParams memory params) {

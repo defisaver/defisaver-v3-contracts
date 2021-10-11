@@ -13,12 +13,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "CompSupplyFailError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "ERC20OperationFail",
+			"name": "CompSupplyError",
 			"type": "error"
 		},
 		{
@@ -205,14 +200,14 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				},
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes32[]",
 					"name": "_subData",
-					"type": "bytes[]"
+					"type": "bytes32[]"
 				},
 				{
 					"internalType": "uint8[]",
@@ -239,9 +234,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "executeActionDirect",
@@ -280,6 +275,47 @@
 				}
 			],
 			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes",
+					"name": "_callData",
+					"type": "bytes"
+				}
+			],
+			"name": "parseInputs",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "cTokenAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "amount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "address",
+							"name": "from",
+							"type": "address"
+						},
+						{
+							"internalType": "bool",
+							"name": "enableAsColl",
+							"type": "bool"
+						}
+					],
+					"internalType": "struct CompSupply.Params",
+					"name": "params",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "pure",
 			"type": "function"
 		},
 		{
