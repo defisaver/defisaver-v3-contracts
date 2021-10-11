@@ -13,6 +13,13 @@ const createMcdTrigger = async (vaultId, ratio, ratioState) => {
     return paramPacked;
 };
 
+const createCompTrigger = async (user, ratio, ratioState) => {
+    const abiCoder = new hre.ethers.utils.AbiCoder();
+    const param = abiCoder.encode(['address', 'uint256', 'uint8'], [user, ratio, ratioState]);
+
+    return param;
+};
+
 const createChainLinkPriceTrigger = async (tokenAddr, price, state) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -46,6 +53,7 @@ module.exports = {
     createChainLinkPriceTrigger,
     createTimestampTrigger,
     createGasPriceTrigger,
+    createCompTrigger,
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
 };

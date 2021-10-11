@@ -12,7 +12,7 @@ contract CompoundRatioTrigger is ITrigger, AdminAuth, CompRatioHelper {
 
     struct SubParams {
         address user;
-        uint64 ratio;
+        uint256 ratio;
         uint8 state;
     }
 

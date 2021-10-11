@@ -21,11 +21,12 @@ const {
 const {
     getBorrowBalance,
     getSupplyBalance,
+    getCompRatio,
 } = require('../utils-comp');
 
 const { createStrategy, addBotCaller } = require('../utils-strategies.js');
 
-const { subCompBoostStrategy } = require('../strategies');
+const { subCompBoostStrategy, callCompBoostStrategy } = require('../strategies');
 
 const { supplyComp, borrowComp } = require('../actions.js');
 
@@ -60,7 +61,6 @@ describe('Compound-Boost-Strategy', function () {
         RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
         await redeploy('BotAuth');
         await redeploy('ProxyAuth');
-        await redeploy('DFSSell');
         await redeploy('StrategyStorage');
         await redeploy('SubStorage');
         await redeploy('SubProxy');
@@ -70,6 +70,7 @@ describe('Compound-Boost-Strategy', function () {
         await redeploy('McdRatioCheck');
         await redeploy('CompSupply');
         await redeploy('CompBorrow');
+        await redeploy('CompoundRatioTrigger');
         strategyExecutor = await redeploy('StrategyExecutor');
         compView = await redeploy('CompView');
 
@@ -80,19 +81,19 @@ describe('Compound-Boost-Strategy', function () {
         proxy = await getProxy(senderAcc.address);
 
         await setNewExchangeWrapper(senderAcc, uniWrapper.address);
+        await addBotCaller(botAcc.address);
 
         const supplyBalance = await getSupplyBalance(compView, proxy.address, getAssetInfo('cETH').address);
         if (supplyBalance.lt(assetAmountInWei('20', 'ETH'))) {
-            console.log('Supplying 20 ETH');
-            let initialCollAmount = fetchAmountinUSDPrice('WETH', '25000');
+            let initialCollAmount = fetchAmountinUSDPrice('WETH', '35000');
             initialCollAmount = hre.ethers.utils.parseUnits(initialCollAmount, 18);
-            const initialBorrowAmount = hre.ethers.utils.parseUnits('12000', 6);
+            const initialBorrowAmount = hre.ethers.utils.parseUnits('10000', 18);
             await approve(getAssetInfo('WETH').address, proxy.address);
             await depositToWeth(initialCollAmount);
-
+            console.log(`supplying${initialCollAmount}`);
             await supplyComp(proxy, getAssetInfo('cETH').address, getAssetInfo('WETH').address, initialCollAmount, senderAcc.address);
-
-            await borrowComp(proxy, getAssetInfo('cUSDT').address, initialBorrowAmount, senderAcc.address);
+            console.log(`borrowing${initialBorrowAmount}`);
+            await borrowComp(proxy, getAssetInfo('cDAI').address, initialBorrowAmount, senderAcc.address);
         }
     });
 
@@ -101,7 +102,7 @@ describe('Compound-Boost-Strategy', function () {
         compBoostStrategy.addSubSlot('&proxy', 'address');
         compBoostStrategy.addSubSlot('&targetRatio', 'uint256');
 
-        const compRatioTrigger = new dfs.triggers.CompoundRatioTrigger('0', '0');
+        const compRatioTrigger = new dfs.triggers.CompoundRatioTrigger('0', '0', '0');
         compBoostStrategy.addTrigger(compRatioTrigger);
 
         const compBorrowAction = new dfs.actions.compound.CompoundBorrowAction(
@@ -127,7 +128,7 @@ describe('Compound-Boost-Strategy', function () {
 
         const compSupplyAction = new dfs.actions.compound.CompoundSupplyAction(
             'cAssetToSupply',
-            '$2',
+            '$3',
             '&proxy',
             true,
         );
@@ -140,13 +141,20 @@ describe('Compound-Boost-Strategy', function () {
 
         await createStrategy(proxy, ...callData, true);
 
-        const rationOver = hre.ethers.utils.parseUnits('1.7', '18');
         const targetRatio = hre.ethers.utils.parseUnits('2', '18');
+        const ratioOver = hre.ethers.utils.parseUnits('2.5', '18');
 
-        strategyId = await subCompBoostStrategy(proxy, rationOver, targetRatio);
+        strategyId = await subCompBoostStrategy(proxy, ratioOver, targetRatio);
         // sub strategy
     });
 
     it('... should trigger a Comp boost strategy', async () => {
+        const ratioBefore = await getCompRatio(compView, proxy.address);
+        console.log(ratioBefore.toString());
+        const boostAmount = hre.ethers.utils.parseUnits('12000', 18);
+        await callCompBoostStrategy(botAcc, strategyExecutor, strategyId, boostAmount);
+
+        const ratioAfter = await getCompRatio(compView, proxy.address);
+        console.log(ratioAfter.toString());
     });
 });
