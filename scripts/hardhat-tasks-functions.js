@@ -59,7 +59,8 @@ async function deployContract(contractName, args) {
     await execShellCommand('npx hardhat compile');
     const overrides = {
         // The price (in wei) per unit of gas
-        gasPrice: hre.ethers.utils.parseUnits(gasPriceSelected, 'gwei'),
+        maxFeePerGas: hre.ethers.utils.parseUnits(gasPriceSelected, 'gwei'),
+        maxPriorityFeePerGas: hre.ethers.utils.parseUnits('1.1', 'gwei'),
     };
     if (args.nonce) {
         overrides.nonce = parseInt(args.nonce, 10);
