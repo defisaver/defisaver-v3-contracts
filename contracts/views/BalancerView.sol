@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.7.6;
 
+pragma experimental ABIEncoderV2;
+
 import "../actions/balancer/helpers/BalancerV2Helper.sol";
 import "../interfaces/balancer/IPool.sol";
 
