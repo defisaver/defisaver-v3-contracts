@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "../../../interfaces/curve/IAddressProvider.sol";
 import "../../../interfaces/curve/ISwaps.sol";
+import "../../../interfaces/curve/IRegistry.sol";
 import "../../../interfaces/curve/IMinter.sol";
 import "../../../interfaces/curve/IVotingEscrow.sol";
 import "../../../interfaces/curve/IFeeDistributor.sol";
@@ -17,5 +18,9 @@ contract CurveHelper is MainnetCurveAddresses {
 
     function getSwaps() internal view returns (ISwaps) {
         return ISwaps(AddressProvider.get_address(2));
+    }
+
+    function getRegistry() internal view returns (IRegistry) {
+        return IRegistry(AddressProvider.get_registry());
     }
 }

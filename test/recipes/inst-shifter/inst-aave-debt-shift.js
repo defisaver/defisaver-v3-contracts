@@ -20,6 +20,7 @@ const {
     AWBTC_ADDR,
     WBTC_ADDR,
     balanceOf,
+    DAI_ADDR,
 } = require('../../utils');
 
 describe('Inst Aave position shift', function () {
@@ -29,9 +30,9 @@ describe('Inst Aave position shift', function () {
     let ownerAcc;
     let taskExecutorAddr;
     let dydxFlAddr;
+    let flMaker;
 
-    /// @notice run on block number 13165792
-
+    /// @notice run on block number 13172393
     before(async () => {
         taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
         await redeploy('InstPullTokens');
@@ -41,8 +42,12 @@ describe('Inst Aave position shift', function () {
         await redeploy('AaveSupply');
         await redeploy('AaveBorrow');
         await redeploy('AavePayback');
+        flMaker = await redeploy('FLMaker');
+        await redeploy('SendToken');
+        await redeploy('TaskExecutor');
         dydxFlAddr = await getAddrFromRegistry('FLDyDx');
     });
+
     it('... Migrate aave position from INST (COLL : WETH, WBTC | DEBT : USDT)', async () => {
         const OWNER_ACC = '0x2Ee8670d2b936985D5fb1EE968810c155D3bB9cA';
         const dsaAddress = '0x63bf1D484d7D799722b1BA9c91f5ffa6d416D60A';
@@ -63,9 +68,16 @@ describe('Inst Aave position shift', function () {
         const impersonatedProxy = proxy.connect(ownerAcc);
         // flashloan enough to repay all debt
 
+        /*
         const flashloanAction = new dfs.actions.flashloan.DyDxFlashLoanAction(
             hre.ethers.utils.parseUnits('1000', 18),
             WETH_ADDRESS,
+            nullAddress,
+            [],
+        );
+    */
+        const flashloanAction = new dfs.actions.flashloan.MakerFlashLoanAction(
+            hre.ethers.utils.parseUnits('1000000', 18),
             nullAddress,
             [],
         );
@@ -76,7 +88,7 @@ describe('Inst Aave position shift', function () {
         // supply eth to aave
         const aaveSupplyAction = new dfs.actions.aave.AaveSupplyAction(
             AAVE_MARKET,
-            WETH_ADDRESS,
+            DAI_ADDR,
             '$1',
             proxy.address,
             nullAddress,
@@ -115,9 +127,9 @@ describe('Inst Aave position shift', function () {
         // withdraw flashloan eth
         const aaveWithdrawAction = new dfs.actions.aave.AaveWithdrawAction(
             AAVE_MARKET,
-            WETH_ADDRESS,
+            DAI_ADDR,
             '$1',
-            dydxFlAddr,
+            flMaker.address,
         );
         // repay flashloan
         const transferRecipe = new dfs.Recipe('TransferAavePositionFromInstadapp', [
@@ -145,7 +157,6 @@ describe('Inst Aave position shift', function () {
         console.log(usdtDebtAmount);
         console.log(usdtDebtAmountAfter);
     }).timeout(1000000);
-
     it('... Migrate aave position from INST (COLL : WETH, LINK | DEBT : USDT, BUSD) ', async () => {
         const OWNER_ACC = '0xb5fDB9c33C4EbbF020eDE0138EdE8d7563dFe71A';
         const dsaAddress = '0x2E15905711635118da35D5aB9a0f994f2cfb304C';
