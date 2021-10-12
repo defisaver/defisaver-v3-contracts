@@ -148,6 +148,20 @@ const subCompBoostStrategy = async (proxy, ratioOver, targetRatio) => {
 
     return subId;
 };
+const subCompRepayStrategy = async (proxy, ratioUnder, targetRatio) => {
+    const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const strategyId = await getLatestStrategyId();
+    const triggerData = await createCompTrigger(proxy.address, ratioUnder, RATIO_STATE_UNDER);
+
+    const subId = await subToStrategy(
+        proxy, strategyId, true,
+        [proxyAddrEncoded, targetRatioEncoded],
+        [triggerData],
+    );
+
+    return subId;
+};
 
 const subMcdBoostStrategy = async (proxy, vaultId, rationUnder, targetRatio) => {
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
@@ -372,6 +386,53 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyId, ethJoi
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
     console.log(`GasUsed callMcdRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+const callCompRepayStrategy = async (botAcc, strategyExecutor, strategyId, repayAmount) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const compWithdrawAction = new dfs.actions.compound.CompoundWithdrawAction(
+        getAssetInfo('cETH').address,
+        repayAmount,
+        placeHolderAddr,
+    );
+    const repayGasCost = 1200000; // 1.2 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        repayGasCost, WETH_ADDRESS, '0',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            WETH_ADDRESS,
+            DAI_ADDR,
+            '0',
+            UNISWAP_WRAPPER,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+    const paybackAction = new dfs.actions.compound.CompoundPaybackAction(
+        getAssetInfo('cDAI').address,
+        '1',
+        placeHolderAddr,
+    );
+
+    actionsCallData.push(compWithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callCompRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 const callCompBoostStrategy = async (botAcc, strategyExecutor, strategyId, boostAmount) => {
     const triggerCallData = [];
@@ -598,4 +659,6 @@ module.exports = {
     callUniV3CollectStrategy,
     subCompBoostStrategy,
     callCompBoostStrategy,
+    subCompRepayStrategy,
+    callCompRepayStrategy,
 };

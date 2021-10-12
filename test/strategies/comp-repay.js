@@ -22,11 +22,11 @@ const {
 
 const { createStrategy, addBotCaller } = require('../utils-strategies.js');
 
-const { subCompBoostStrategy, callCompBoostStrategy } = require('../strategies');
+const { subCompRepayStrategy, callCompRepayStrategy } = require('../strategies');
 
 const { supplyComp, borrowComp } = require('../actions.js');
 
-describe('Compound-Boost-Strategy', function () {
+describe('Compound-Repay-Strategy', function () {
     this.timeout(120000);
 
     let senderAcc;
@@ -36,31 +36,29 @@ describe('Compound-Boost-Strategy', function () {
     let strategyId;
     let uniWrapper;
     let compView;
-    let ratioOver;
+    let ratioUnder;
     let targetRatio;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
-
         await redeploy('RecipeExecutor');
         await redeploy('DFSSell');
-        await redeploy('FLDyDx');
-        await redeploy('FLAaveV2');
         compView = await redeploy('CompView');
+        uniWrapper = await redeploy('UniswapWrapperV3');
         await redeploy('BotAuth');
         await redeploy('ProxyAuth');
         await redeploy('StrategyStorage');
         await redeploy('SubStorage');
         await redeploy('SubProxy');
         await redeploy('StrategyProxy');
-        await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');
         await redeploy('CompSupply');
         await redeploy('CompBorrow');
+        await redeploy('CompPayback');
+        await redeploy('CompWithdraw');
         await redeploy('CompoundRatioTrigger');
         strategyExecutor = await redeploy('StrategyExecutor');
-        uniWrapper = await redeploy('UniswapWrapperV3');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -82,66 +80,61 @@ describe('Compound-Boost-Strategy', function () {
         }
     });
 
-    it('... should make a new Comp Boost strategy', async () => {
+    it('... should make a new Comp Repay strategy', async () => {
         const compBoostStrategy = new dfs.Strategy('CompBoostStrategy');
         compBoostStrategy.addSubSlot('&proxy', 'address');
         compBoostStrategy.addSubSlot('&targetRatio', 'uint256');
 
         const compRatioTrigger = new dfs.triggers.CompoundRatioTrigger('0', '0', '0');
         compBoostStrategy.addTrigger(compRatioTrigger);
-
-        const compBorrowAction = new dfs.actions.compound.CompoundBorrowAction(
-            '%assetToBorrow',
-            '%amountToBorrw',
+        const compWithdrawAction = new dfs.actions.compound.CompoundWithdrawAction(
+            '%cETH',
+            '%amount',
             '&proxy',
         );
-
+        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+            '0', '%wethAddr', '$1',
+        );
         const sellAction = new dfs.actions.basic.SellAction(
             formatExchangeObj(
-                '%assetBorrowed',
-                '%assetWanted',
-                '$1',
-                '%wrapper',
+                '%wethAddr',
+                '%daiAddr',
+                '$2',
+                '%exchangeWrapper',
             ),
             '&proxy',
             '&proxy',
         );
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '0', '%wethAddr', '$2',
-        );
-
-        const compSupplyAction = new dfs.actions.compound.CompoundSupplyAction(
-            'cAssetToSupply',
+        const paybackAction = new dfs.actions.compound.CompoundPaybackAction(
+            '%cDai',
             '$3',
             '&proxy',
-            true,
         );
-        compBoostStrategy.addAction(compBorrowAction);
-        compBoostStrategy.addAction(sellAction);
+        compBoostStrategy.addAction(compWithdrawAction);
         compBoostStrategy.addAction(feeTakingAction);
-        compBoostStrategy.addAction(compSupplyAction);
+        compBoostStrategy.addAction(sellAction);
+        compBoostStrategy.addAction(paybackAction);
 
         const callData = compBoostStrategy.encodeForDsProxyCall();
 
         await createStrategy(proxy, ...callData, true);
 
-        targetRatio = hre.ethers.utils.parseUnits('2', '18');
-        ratioOver = hre.ethers.utils.parseUnits('2.5', '18');
+        targetRatio = hre.ethers.utils.parseUnits('4', '18');
+        ratioUnder = hre.ethers.utils.parseUnits('3', '18');
 
-        strategyId = await subCompBoostStrategy(proxy, ratioOver, targetRatio);
+        strategyId = await subCompRepayStrategy(proxy, ratioUnder, targetRatio);
         // sub strategy
     });
 
     it('... should trigger a Comp boost strategy', async () => {
         const ratioBefore = await getCompRatio(compView, proxy.address);
         console.log(ratioBefore.toString());
-        expect(ratioBefore).to.be.gt(ratioOver);
-        const boostAmount = hre.ethers.utils.parseUnits('12000', 18);
-        await callCompBoostStrategy(botAcc, strategyExecutor, strategyId, boostAmount);
+        expect(ratioBefore).to.be.lt(ratioUnder);
+        const repayAmount = hre.ethers.utils.parseUnits('1.5', 18);
+        await callCompRepayStrategy(botAcc, strategyExecutor, strategyId, repayAmount);
 
         const ratioAfter = await getCompRatio(compView, proxy.address);
         console.log(ratioAfter.toString());
-        expect(ratioAfter).to.be.lt(targetRatio);
+        expect(ratioAfter).to.be.gt(targetRatio);
     });
 });
