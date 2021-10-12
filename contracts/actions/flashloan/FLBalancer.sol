@@ -2,23 +2,23 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
+import "../balancer/helpers/BalancerV2Helper.sol";
 import "../ActionBase.sol";
-import "../../utils/ReentrancyGuard.sol";
+import "../../core/StrategyData.sol";
+
 import "../../interfaces/balancer/IFlashLoanRecipient.sol";
 import "../../interfaces/balancer/IFlashLoans.sol";
-
-import "../../core/StrategyData.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/IFLParamGetter.sol";
 
 import "../../utils/TokenUtils.sol";
 import "../../utils/SafeMath.sol";
+import "../../utils/ReentrancyGuard.sol";
 
-contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient {
+contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, BalancerV2Helper {
     using TokenUtils for address;
     using SafeMath for uint256;
 
-    address internal constant VAULT_ADDR = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
     /// @dev Function sig of TaskExecutor._executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
     bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
