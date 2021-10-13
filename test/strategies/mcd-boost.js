@@ -73,7 +73,7 @@ describe('Mcd-Boost-Strategy', function () {
             proxy,
             ethJoin,
             tokenData,
-            fetchAmountinUSDPrice('WETH', '25000'),
+            fetchAmountinUSDPrice('WETH', '30000'),
             fetchAmountinUSDPrice('DAI', '12000'),
         );
 
@@ -141,7 +141,7 @@ describe('Mcd-Boost-Strategy', function () {
 
     it('... should trigger a maker boost strategy', async () => {
         const ratioBefore = await getRatio(mcdView, vaultId);
-        const boostAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('DAI', '400'), '18');
+        const boostAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('DAI', '4000'), '18');
 
         await callMcdBoostStrategy(botAcc, strategyExecutor, strategyId, ethJoin, boostAmount);
 

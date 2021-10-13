@@ -206,11 +206,6 @@
 							"internalType": "bytes32[]",
 							"name": "subData",
 							"type": "bytes32[]"
-						},
-						{
-							"internalType": "bytes",
-							"name": "dataPool",
-							"type": "bytes"
 						}
 					],
 					"internalType": "struct StrategyModel.StrategySub[]",
@@ -257,11 +252,6 @@
 							"internalType": "bytes32[]",
 							"name": "subData",
 							"type": "bytes32[]"
-						},
-						{
-							"internalType": "bytes",
-							"name": "dataPool",
-							"type": "bytes"
 						}
 					],
 					"internalType": "struct StrategyModel.StrategySub",
@@ -329,11 +319,6 @@
 					"internalType": "address",
 					"name": "userProxy",
 					"type": "address"
-				},
-				{
-					"internalType": "bytes",
-					"name": "dataPool",
-					"type": "bytes"
 				}
 			],
 			"stateMutability": "view",
@@ -360,11 +345,6 @@
 					"internalType": "bytes32[]",
 					"name": "_subData",
 					"type": "bytes32[]"
-				},
-				{
-					"internalType": "bytes",
-					"name": "_dataPool",
-					"type": "bytes"
 				}
 			],
 			"name": "subscribeToStrategy",

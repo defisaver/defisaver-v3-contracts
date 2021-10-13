@@ -11,12 +11,9 @@ import "./strategy/StrategyStorage.sol";
 import "./strategy/SubStorage.sol";
 import "../interfaces/flashloan/IFlashLoanBase.sol";
 import "../interfaces/ITrigger.sol";
-import "../decoders/Decoder.sol";
-
-import "hardhat/console.sol";
 
 /// @title Handles FL taking and executes actions
-contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
+contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
     address public constant REGISTRY_ADDR = 0xD5cec8F03f803A74B60A7603Ed13556279376b09;
@@ -57,11 +54,6 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
             revert TriggerNotActiveError();
         }
 
-        // TODO: just testing this out now
-        // if (sub.dataPool.length != 0) {
-        //   sub.subData = decodeRepay(sub.dataPool);
-        // }
-
         // if this is a one time strategy
         if (!strategy.continuous) {
             SubStorage(subStorageAddr).deactivateSub(_subId);
@@ -93,7 +85,6 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, Decoder {
 
         for (uint256 i = 0; i < triggerIds.length; i++) {
             triggerAddr = registry.getAddr(triggerIds[i]);
-
             isTriggered = ITrigger(triggerAddr).isTriggered(
                 _triggerCallData[i],
                 _sub.triggerData[i]

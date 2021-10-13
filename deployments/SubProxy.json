@@ -187,11 +187,6 @@
 					"internalType": "bytes32[]",
 					"name": "_subData",
 					"type": "bytes32[]"
-				},
-				{
-					"internalType": "bytes",
-					"name": "_dataPool",
-					"type": "bytes"
 				}
 			],
 			"name": "subscribeToStrategy",

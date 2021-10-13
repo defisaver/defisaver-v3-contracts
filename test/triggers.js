@@ -6,11 +6,9 @@ const RATIO_STATE_UNDER = 1;
 const createMcdTrigger = async (vaultId, ratio, ratioState) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
-    // const param = abiCoder.encode(['tuple(uint128,uint128,uint80)'], [vaultId, ratio, ratioState]);
+    const param = abiCoder.encode(['uint256', 'uint256', 'uint8'], [vaultId, ratio, ratioState]);
 
-    const paramPacked = hre.ethers.utils.solidityPack(['uint64', 'uint64', 'uint8'], [vaultId, ratio, ratioState]);
-
-    return paramPacked;
+    return param;
 };
 
 const createChainLinkPriceTrigger = async (tokenAddr, price, state) => {

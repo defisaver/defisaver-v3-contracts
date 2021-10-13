@@ -30,6 +30,5 @@ contract StrategyModel {
         address userProxy;
         bytes[] triggerData;
         bytes32[] subData;
-        bytes dataPool; // TODO: remove later just for tight packing testing
     }
 }
