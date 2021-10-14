@@ -15,29 +15,6 @@
 			"type": "function"
 		},
 		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_user",
-					"type": "address"
-				},
-				{
-					"internalType": "address[]",
-					"name": "_cTokensSupply",
-					"type": "address[]"
-				},
-				{
-					"internalType": "address[]",
-					"name": "_cTokensBorrow",
-					"type": "address[]"
-				}
-			],
-			"name": "claimComp",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
 			"inputs": [],
 			"name": "comp",
 			"outputs": [

@@ -9,6 +9,13 @@ abstract contract IComptroller {
         uint32 block;
     }
 
+    mapping(address => uint) public compSpeeds;
+
+    mapping(address => uint) public borrowCaps;
+
+    mapping(address => uint) public compBorrowSpeeds;
+    mapping(address => uint) public compSupplySpeeds;
+
     function claimComp(address holder) public virtual;
     function claimComp(address holder, address[] memory cTokens) public virtual;
     function claimComp(address[] memory holders, address[] memory cTokens, bool borrowers, bool suppliers) public virtual;

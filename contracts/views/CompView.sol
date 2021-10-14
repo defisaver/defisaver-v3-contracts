@@ -37,24 +37,20 @@ contract CompView is Exponential, DSMath {
         uint totalBorrow;
         uint collateralFactor;
         uint price;
+        uint compBorrowSpeeds;
+        uint compSupplySpeeds;
+        uint borrowCap;
     }
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant CETH_ADDRESS = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
-    address public constant COMP_ADDR = 0xc00e94Cb662C3520282E6f5717214004A7f26888;
-    address public constant COMPTROLLER_ADDR = 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
 
-    uint224 public constant compInitialIndex = 1e36;
+    IComptroller public constant comp = IComptroller(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
 
-     // solhint-disable-next-line const-name-snakecase
-    IComptroller public constant Comptroller = IComptroller(COMPTROLLER_ADDR);
-
-    /// @notice Calculated the ratio of debt / adjusted collateral
-    /// @param _user Address of the user
     function getSafetyRatio(address _user) public view returns (uint) {
         // For each asset the account is in
-        address[] memory assets = Comptroller.getAssetsIn(_user);
-        address oracleAddr = Comptroller.oracle();
+        address[] memory assets = comp.getAssetsIn(_user);
+        address oracleAddr = comp.oracle();
 
 
         uint sumCollateral = 0;
@@ -75,7 +71,7 @@ contract CompView is Exponential, DSMath {
             // Sum up collateral in Usd
             if (cTokenBalance != 0) {
 
-                (, uint collFactorMantissa) = Comptroller.markets(address(asset));
+                (, uint collFactorMantissa) = comp.markets(address(asset));
 
                 Exp memory collateralFactor = Exp({mantissa: collFactorMantissa});
                 Exp memory exchangeRate = Exp({mantissa: exchangeRateMantissa});
@@ -91,14 +87,14 @@ contract CompView is Exponential, DSMath {
             }
         }
 
-        if (sumBorrow == 0) return type(uint).max;
+        if (sumBorrow == 0) return uint(-1);
 
         uint borrowPowerUsed = (sumBorrow * 10**18) / sumCollateral;
         return wdiv(1e18, borrowPowerUsed);
     }
 
 
-    /// @notice Calculated the ratio of coll/debt for a compound user
+    /// @notice Calcualted the ratio of coll/debt for a compound user
     /// @param _user Address of the user
     function getRatio(address _user) public view returns (uint) {
         // For each asset the account is in
@@ -110,7 +106,7 @@ contract CompView is Exponential, DSMath {
     /// @return prices Array of prices
     function getPrices(address[] memory _cTokens) public view returns (uint[] memory prices) {
         prices = new uint[](_cTokens.length);
-        address oracleAddr = Comptroller.oracle();
+        address oracleAddr = comp.oracle();
 
         for (uint i = 0; i < _cTokens.length; ++i) {
             prices[i] = ICompoundOracle(oracleAddr).getUnderlyingPrice(_cTokens[i]);
@@ -124,7 +120,7 @@ contract CompView is Exponential, DSMath {
         collFactors = new uint[](_cTokens.length);
 
         for (uint i = 0; i < _cTokens.length; ++i) {
-            (, collFactors[i]) = Comptroller.markets(_cTokens[i]);
+            (, collFactors[i]) = comp.markets(_cTokens[i]);
         }
     }
 
@@ -132,8 +128,8 @@ contract CompView is Exponential, DSMath {
     /// @param _user Address of the user
     /// @return data LoanData information
     function getLoanData(address _user) public view returns (LoanData memory data) {
-        address[] memory assets = Comptroller.getAssetsIn(_user);
-        address oracleAddr = Comptroller.oracle();
+        address[] memory assets = comp.getAssetsIn(_user);
+        address oracleAddr = comp.oracle();
 
         data = LoanData({
             user: _user,
@@ -211,7 +207,7 @@ contract CompView is Exponential, DSMath {
         }
     }
 
-    /// @notice Calculated the ratio of coll/debt for a compound user
+    /// @notice Calcualted the ratio of coll/debt for a compound user
     /// @param _users Addresses of the user
     /// @return ratios Array of ratios
     function getRatios(address[] memory _users) public view returns (uint[] memory ratios) {
@@ -224,13 +220,13 @@ contract CompView is Exponential, DSMath {
 
     /// @notice Information about cTokens
     /// @param _cTokenAddresses Array of cTokens addresses
-    /// @return tokens Array of cTokens information
+    /// @return tokens Array of cTokens infomartion
     function getTokensInfo(address[] memory _cTokenAddresses) public returns(TokenInfo[] memory tokens) {
         tokens = new TokenInfo[](_cTokenAddresses.length);
-        address oracleAddr = Comptroller.oracle();
+        address oracleAddr = comp.oracle();
 
         for (uint i = 0; i < _cTokenAddresses.length; ++i) {
-            (, uint collFactor) = Comptroller.markets(_cTokenAddresses[i]);
+            (, uint collFactor) = comp.markets(_cTokenAddresses[i]);
 
             tokens[i] = TokenInfo({
                 cTokenAddress: _cTokenAddresses[i],
@@ -243,13 +239,13 @@ contract CompView is Exponential, DSMath {
 
     /// @notice Information about cTokens
     /// @param _cTokenAddresses Array of cTokens addresses
-    /// @return tokens Array of cTokens information
+    /// @return tokens Array of cTokens infomartion
     function getFullTokensInfo(address[] memory _cTokenAddresses) public returns(TokenInfoFull[] memory tokens) {
         tokens = new TokenInfoFull[](_cTokenAddresses.length);
-        address oracleAddr = Comptroller.oracle();
+        address oracleAddr = comp.oracle();
 
         for (uint i = 0; i < _cTokenAddresses.length; ++i) {
-            (, uint collFactor) = Comptroller.markets(_cTokenAddresses[i]);
+            (, uint collFactor) = comp.markets(_cTokenAddresses[i]);
             ICToken cToken = ICToken(_cTokenAddresses[i]);
 
             tokens[i] = TokenInfoFull({
@@ -261,7 +257,10 @@ contract CompView is Exponential, DSMath {
                 totalSupply: cToken.totalSupply(),
                 totalBorrow: cToken.totalBorrowsCurrent(),
                 collateralFactor: collFactor,
-                price: ICompoundOracle(oracleAddr).getUnderlyingPrice(_cTokenAddresses[i])
+                price: ICompoundOracle(oracleAddr).getUnderlyingPrice(_cTokenAddresses[i]),
+                compSupplySpeeds: comp.compSupplySpeeds(_cTokenAddresses[i]),
+                compBorrowSpeeds: comp.compBorrowSpeeds(_cTokenAddresses[i]),
+                borrowCap: comp.borrowCaps(_cTokenAddresses[i])
             });
         }
     }
