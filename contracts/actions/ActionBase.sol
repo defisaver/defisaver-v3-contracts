@@ -3,6 +3,7 @@ pragma solidity =0.8.4;
 
 import "../auth/AdminAuth.sol";
 import "../core/DFSRegistry.sol";
+import "../DS/DSProxy.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
 abstract contract ActionBase is AdminAuth {
@@ -89,11 +90,13 @@ abstract contract ActionBase is AdminAuth {
         uint8 _mapType,
         bytes32[] memory _subData,
         bytes32[] memory _returnValues
-    ) internal pure returns (address) {
+    ) internal view returns (address) {
         if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
                 _param = address(bytes20((_returnValues[getReturnIndex(_mapType)])));
             } else {
+                if (_mapType == 254) return address(this); //DSProxy address
+                if (_mapType == 255) return DSProxy(payable(address(this))).owner();
                 _param = address(uint160(uint256(_subData[getSubIndex(_mapType)])));
                 // _param = address(bytes20(_subData[getSubIndex(_mapType)]));
             }

@@ -214,11 +214,6 @@
 							"internalType": "bytes32[]",
 							"name": "subData",
 							"type": "bytes32[]"
-						},
-						{
-							"internalType": "bytes",
-							"name": "dataPool",
-							"type": "bytes"
 						}
 					],
 					"internalType": "struct StrategyModel.StrategySub",
@@ -234,6 +229,11 @@
 					"internalType": "uint256",
 					"name": "_subId",
 					"type": "uint256"
+				},
+				{
+					"internalType": "address",
+					"name": "_storageAddr",
+					"type": "address"
 				}
 			],
 			"name": "checkTriggers",
@@ -245,25 +245,6 @@
 				}
 			],
 			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes",
-					"name": "_tightPacked",
-					"type": "bytes"
-				}
-			],
-			"name": "decodeRepay",
-			"outputs": [
-				{
-					"internalType": "bytes32[]",
-					"name": "subData",
-					"type": "bytes32[]"
-				}
-			],
-			"stateMutability": "view",
 			"type": "function"
 		},
 		{

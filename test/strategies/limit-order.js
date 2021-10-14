@@ -58,8 +58,6 @@ describe('Limit-Order-Strategy', function () {
         limitOrderStrategy.addSubSlot('&tokenAddrSell', 'address');
         limitOrderStrategy.addSubSlot('&tokenAddrBuy', 'address');
         limitOrderStrategy.addSubSlot('&amount', 'uint256');
-        limitOrderStrategy.addSubSlot('&proxy', 'address');
-        limitOrderStrategy.addSubSlot('&eoa', 'address');
 
         const chainLinkPriceTrigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
         limitOrderStrategy.addTrigger(chainLinkPriceTrigger);

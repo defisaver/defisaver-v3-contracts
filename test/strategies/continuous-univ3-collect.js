@@ -79,7 +79,6 @@ describe('Uni-v3-range-order strat', function () {
 
         const continuousUniV3Strat = new dfs.Strategy('Continuous-UniV3-Collect-Strategy');
         continuousUniV3Strat.addSubSlot('&tokenId', 'uint256');
-        continuousUniV3Strat.addSubSlot('&proxy', 'address');
         continuousUniV3Strat.addSubSlot('&recipient', 'address');
 
         const timestampTrigger = new dfs.triggers.TimestampTrigger('0');

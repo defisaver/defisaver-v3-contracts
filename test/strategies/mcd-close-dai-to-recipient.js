@@ -96,7 +96,6 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
 
         const mcdCloseStrategy = new dfs.Strategy('MakerCloseStrategy');
         mcdCloseStrategy.addSubSlot('&vaultId', 'uint256');
-        mcdCloseStrategy.addSubSlot('&proxy', 'address');
         mcdCloseStrategy.addSubSlot('&recipient', 'address');
 
         const chainLinkPriceTrigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');

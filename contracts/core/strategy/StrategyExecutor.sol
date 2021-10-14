@@ -34,8 +34,8 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
     /// @param _actionsCallData All input data needed to execute actions
     function executeStrategy(
         uint256 _subId,
-        bytes[] memory _triggerCallData,
-        bytes[] memory _actionsCallData
+        bytes[] calldata _triggerCallData,
+        bytes[] calldata _actionsCallData
     ) public {
         StrategySub memory sub = SubStorage(registry.getAddr(SUB_STORAGE_ID)).getSub(_subId);
 
@@ -67,8 +67,8 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
     /// @param _actionsCallData All input data needed to execute actions
     function callActions(
         uint256 _subId,
-        bytes[] memory _actionsCallData,
-        bytes[] memory _triggerCallData,
+        bytes[] calldata _actionsCallData,
+        bytes[] calldata _triggerCallData,
         address _proxy
     ) internal {
         address RecipeExecutorAddr = registry.getAddr(RECIPE_EXECUTOR_ID);
