@@ -3,7 +3,7 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "COMPTROLLER_ADDR",
+			"name": "COMP_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -15,16 +15,26 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
-			"name": "COMP_ADDR",
-			"outputs": [
+			"inputs": [
 				{
 					"internalType": "address",
-					"name": "",
+					"name": "_user",
 					"type": "address"
+				},
+				{
+					"internalType": "address[]",
+					"name": "_cTokensSupply",
+					"type": "address[]"
+				},
+				{
+					"internalType": "address[]",
+					"name": "_cTokensBorrow",
+					"type": "address[]"
 				}
 			],
-			"stateMutability": "view",
+			"name": "claimComp",
+			"outputs": [],
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
@@ -74,84 +84,7 @@
 					"type": "uint256"
 				}
 			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_cToken",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "_borrower",
-					"type": "address"
-				}
-			],
-			"name": "getBorrowBalance",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "borrowerAccrued",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address[]",
-					"name": "_cTokens",
-					"type": "address[]"
-				},
-				{
-					"internalType": "address",
-					"name": "_user",
-					"type": "address"
-				}
-			],
-			"name": "getClaimableAssets",
-			"outputs": [
-				{
-					"internalType": "bool[]",
-					"name": "supplyClaims",
-					"type": "bool[]"
-				},
-				{
-					"internalType": "bool[]",
-					"name": "borrowClaims",
-					"type": "bool[]"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "_cToken",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "_supplier",
-					"type": "address"
-				}
-			],
-			"name": "getSupplyBalance",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "supplierAccrued",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
+			"stateMutability": "nonpayable",
 			"type": "function"
 		}
 	],
