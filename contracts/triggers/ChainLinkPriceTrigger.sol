@@ -26,16 +26,16 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth {
         IFeedRegistry(0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf);
 
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
-        SubParams memory subInputData = parseSubInputs(_subData);
+        SubParams memory triggerSubData = parseSubInputs(_subData);
 
-        uint256 currPrice = getPrice(subInputData.tokenAddr);
+        uint256 currPrice = getPrice(triggerSubData.tokenAddr);
 
-        if (PriceState(subInputData.state) == PriceState.OVER) {
-            if (currPrice > subInputData.price) return true;
+        if (PriceState(triggerSubData.state) == PriceState.OVER) {
+            if (currPrice > triggerSubData.price) return true;
         }
 
-        if (PriceState(subInputData.state) == PriceState.UNDER) {
-            if (currPrice < subInputData.price) return true;
+        if (PriceState(triggerSubData.state) == PriceState.UNDER) {
+            if (currPrice < triggerSubData.price) return true;
         }
 
         return false;

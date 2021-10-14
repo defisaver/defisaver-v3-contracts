@@ -3,11 +3,6 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ERC20OperationFail",
-			"type": "error"
-		},
-		{
-			"inputs": [],
 			"name": "NonContractCall",
 			"type": "error"
 		},
@@ -151,14 +146,14 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				},
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes32[]",
 					"name": "_subData",
-					"type": "bytes[]"
+					"type": "bytes32[]"
 				},
 				{
 					"internalType": "uint8[]",
@@ -185,9 +180,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "executeActionDirect",
@@ -213,6 +208,32 @@
 				}
 			],
 			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes",
+					"name": "_callData",
+					"type": "bytes"
+				}
+			],
+			"name": "parseInputs",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "uint256",
+							"name": "amount",
+							"type": "uint256"
+						}
+					],
+					"internalType": "struct WrapEth.Params",
+					"name": "params",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "pure",
 			"type": "function"
 		},
 		{

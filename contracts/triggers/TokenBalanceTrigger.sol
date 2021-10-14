@@ -8,7 +8,7 @@ import "../interfaces/IERC20.sol";
 
 contract TokenBalanceTrigger is ITrigger, AdminAuth {
     enum BalanceState {OVER, UNDER, EQUALS}
-    struct Params {
+    struct SubParams {
         address tokenAddr;
         address userAddr;
         uint256 targetBalance;
@@ -16,20 +16,21 @@ contract TokenBalanceTrigger is ITrigger, AdminAuth {
     }
 
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
-        Params memory inputData = parseInputs(_subData);
+        SubParams memory triggerSubData = parseInputs(_subData);
         
-        uint256 currBalance = IERC20(inputData.tokenAddr).balanceOf(inputData.userAddr);
+        uint256 currBalance = IERC20(triggerSubData.tokenAddr).balanceOf(triggerSubData.userAddr);
 
-        if (BalanceState(inputData.state) == BalanceState.OVER) {
-            if (currBalance > inputData.targetBalance) return true;
-        } else if (BalanceState(inputData.state) == BalanceState.UNDER) {
-            if (currBalance < inputData.targetBalance) return true;
-        } else if (BalanceState(inputData.state) == BalanceState.EQUALS) {
-            if (currBalance == inputData.targetBalance) return true;
+        if (BalanceState(triggerSubData.state) == BalanceState.OVER) {
+            if (currBalance > triggerSubData.targetBalance) return true;
+        } else if (BalanceState(triggerSubData.state) == BalanceState.UNDER) {
+            if (currBalance < triggerSubData.targetBalance) return true;
+        } else if (BalanceState(triggerSubData.state) == BalanceState.EQUALS) {
+            if (currBalance == triggerSubData.targetBalance) return true;
         }
 
         return false;
     }
+
     function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {
     }
     
@@ -37,7 +38,7 @@ contract TokenBalanceTrigger is ITrigger, AdminAuth {
         return false;
     }
 
-    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
-        params = abi.decode(_callData, (Params));
+    function parseInputs(bytes memory _subData) public pure returns (SubParams memory params) {
+        params = abi.decode(_subData, (SubParams));
     }
 }
