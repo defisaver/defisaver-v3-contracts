@@ -81,7 +81,6 @@ describe('Uni-v3-range-order strat', function () {
 
         const rangeOrderStrategy = new dfs.Strategy('UniV3RangeOrderStrategy');
         rangeOrderStrategy.addSubSlot('&tokenId', 'uint256');
-        rangeOrderStrategy.addSubSlot('&proxy', 'address');
         rangeOrderStrategy.addSubSlot('&recipient', 'address');
 
         const univ3TickTrigger = new dfs.triggers.UniV3CurrentTickTrigger('0', '0');

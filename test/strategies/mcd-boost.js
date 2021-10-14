@@ -81,7 +81,6 @@ describe('Mcd-Boost-Strategy', function () {
 
         const mcdBoostStrategy = new dfs.Strategy('MakerBoostStrategy');
         mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
-        mcdBoostStrategy.addSubSlot('&proxy', 'address');
         mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
 
         const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');

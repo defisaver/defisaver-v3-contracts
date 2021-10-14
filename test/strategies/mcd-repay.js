@@ -87,7 +87,6 @@ describe('Mcd-Repay-Strategy', function () {
 
         repayStrategy.addSubSlot('&vaultId', 'uint256');
         repayStrategy.addSubSlot('&targetRatio', 'uint256');
-        repayStrategy.addSubSlot('&proxy', 'address');
 
         const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
         repayStrategy.addTrigger(mcdRatioTrigger);
