@@ -4,10 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "../actions/curve/helpers/CurveHelper.sol";
 import "../interfaces/curve/ILiquidityGauge.sol";
-
-interface IERC20 {
-    function balanceOf(address) external view returns (uint256);
-}
+import "../interfaces/IERC20.sol";
 
 contract CurveView is CurveHelper {
     struct LpBalance {
