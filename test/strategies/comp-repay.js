@@ -82,7 +82,6 @@ describe('Compound-Repay-Strategy', function () {
 
     it('... should make a new Comp Repay strategy', async () => {
         const compBoostStrategy = new dfs.Strategy('CompBoostStrategy');
-        compBoostStrategy.addSubSlot('&proxy', 'address');
         compBoostStrategy.addSubSlot('&targetRatio', 'uint256');
 
         const compRatioTrigger = new dfs.triggers.CompoundRatioTrigger('0', '0', '0');

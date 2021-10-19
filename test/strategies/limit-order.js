@@ -55,12 +55,13 @@ describe('Limit-Order-Strategy', function () {
 
     it('... should make a new Limit order strategy', async () => {
         const limitOrderStrategy = new dfs.Strategy('LimitOrderStrategy');
-        limitOrderStrategy.addSubSlot('&tokenAddrSell', 'address');
-        limitOrderStrategy.addSubSlot('&tokenAddrBuy', 'address');
-        limitOrderStrategy.addSubSlot('&amount', 'uint256');
 
         const chainLinkPriceTrigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
         limitOrderStrategy.addTrigger(chainLinkPriceTrigger);
+
+        limitOrderStrategy.addSubSlot('&tokenAddrSell', 'address');
+        limitOrderStrategy.addSubSlot('&tokenAddrBuy', 'address');
+        limitOrderStrategy.addSubSlot('&amount', 'uint256');
 
         const pullTokenAction = new dfs.actions.basic.PullTokenAction(
             WETH_ADDRESS, '&eoa', '&amount',
