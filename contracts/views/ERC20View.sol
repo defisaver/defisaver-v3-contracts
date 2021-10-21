@@ -28,24 +28,4 @@ contract ERC20View {
             );
         }
     }
-
-    function batchInfoGas(address[] memory _tokens, address _user, uint256 _returnSize) external view returns (Info[] memory tokenInfo, uint256 breakIndex) {
-        uint256 tokensLength = _tokens.length;
-        tokenInfo = new Info[](_returnSize);
-        breakIndex = 0;
-        for (uint256 tokenCount = 0; breakIndex < tokensLength && tokenCount < _returnSize; breakIndex++) {
-            IERC20 token = IERC20(_tokens[breakIndex]);
-            uint256 userBalance = token.balanceOf(_user);
-            
-            if (userBalance != 0) {
-                tokenInfo[tokenCount++] = Info(
-                    token.name(),
-                    token.symbol(),
-                    token.decimals(),
-                    token.totalSupply(),
-                    userBalance
-                );
-            }
-        }
-    }
 }
