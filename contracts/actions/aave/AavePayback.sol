@@ -77,14 +77,14 @@ contract AavePayback is ActionBase, AaveHelper {
         address _from,
         address _onBehalf
     ) internal returns (uint256) {
-        ILendingPoolV2 lendingPool = getLendingPool(_market);
-        uint256 maxDebt = getWholeDebt(_market, _tokenAddr, _rateMode, _onBehalf);
-        _amount = _amount > maxDebt ? maxDebt : _amount;
-
         // default to onBehalf of proxy
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }
+
+        ILendingPoolV2 lendingPool = getLendingPool(_market);
+        uint256 maxDebt = getWholeDebt(_market, _tokenAddr, _rateMode, _onBehalf);
+        _amount = _amount > maxDebt ? maxDebt : _amount;
 
         _tokenAddr.pullTokensIfNeeded(_from, _amount);
         _tokenAddr.approveToken(address(lendingPool), _amount);
