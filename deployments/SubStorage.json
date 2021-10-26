@@ -193,6 +193,11 @@
 							"type": "bool"
 						},
 						{
+							"internalType": "bool",
+							"name": "isBundle",
+							"type": "bool"
+						},
+						{
 							"internalType": "address",
 							"name": "userProxy",
 							"type": "address"
@@ -236,6 +241,11 @@
 						{
 							"internalType": "bool",
 							"name": "active",
+							"type": "bool"
+						},
+						{
+							"internalType": "bool",
+							"name": "isBundle",
 							"type": "bool"
 						},
 						{
@@ -313,6 +323,11 @@
 				{
 					"internalType": "bool",
 					"name": "active",
+					"type": "bool"
+				},
+				{
+					"internalType": "bool",
+					"name": "isBundle",
 					"type": "bool"
 				},
 				{

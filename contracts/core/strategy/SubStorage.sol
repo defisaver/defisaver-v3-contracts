@@ -48,6 +48,7 @@ contract SubStorage is StrategyModel, AdminAuth {
             StrategySub({
                 strategyId: _strategyId,
                 active: _active,
+                isBundle: false,
                 userProxy: msg.sender, // TODO: should we check if the user is dsproxy?
                 triggerData: _triggerData,
                 subData: _subData
