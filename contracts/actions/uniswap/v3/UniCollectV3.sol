@@ -7,7 +7,7 @@ import "../../../utils/TokenUtils.sol";
 import "./helpers/UniV3Helper.sol";
 
 /// @title Collects tokensOwed from a position represented by tokenId
-contract UniCollectV3 is ActionBase, DSMath, UniV3Helper {
+contract UniCollectV3 is ActionBase, UniV3Helper {
     using TokenUtils for address;
     /// @inheritdoc ActionBase
     function executeAction(

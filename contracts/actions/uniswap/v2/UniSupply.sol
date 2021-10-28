@@ -3,12 +3,11 @@
 pragma solidity =0.8.4;
 
 import "../../../utils/TokenUtils.sol";
-import "../../../DS/DSMath.sol";
 import "../../ActionBase.sol";
 import "./helpers/UniV2Helper.sol";
 
 /// @title Supplies liquidity to uniswap
-contract UniSupply is ActionBase, DSMath, UniV2Helper {
+contract UniSupply is ActionBase, UniV2Helper {
     using TokenUtils for address;
 
     struct UniSupplyData {

@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
-import "../../DS/DSMath.sol";
 import "../../interfaces/balancer/IMerkleReedem.sol";
 import "./helpers/BalancerV2Helper.sol";
 
 /// @title Claim BAL tokens
-contract BalancerV2Claim is ActionBase, DSMath, BalancerV2Helper {
+contract BalancerV2Claim is ActionBase, BalancerV2Helper {
     using TokenUtils for address;
     IMerkleReedem public constant merkleReedemer = IMerkleReedem(MERKLE_REEDEM_ADDR);
 
@@ -30,8 +29,8 @@ contract BalancerV2Claim is ActionBase, DSMath, BalancerV2Helper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -45,7 +44,7 @@ contract BalancerV2Claim is ActionBase, DSMath, BalancerV2Helper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
         
         claim(inputData);
@@ -63,7 +62,7 @@ contract BalancerV2Claim is ActionBase, DSMath, BalancerV2Helper {
         
         balClaimedAmount = balToken.getBalance(_inputData.liquidityProvider);
         merkleReedemer.claimWeeks(_inputData.liquidityProvider, claims);
-        balClaimedAmount = sub(balToken.getBalance(_inputData.liquidityProvider), balClaimedAmount);
+        balClaimedAmount = balToken.getBalance(_inputData.liquidityProvider) - balClaimedAmount;
         
         /// @dev if _to isn't the same as _lp, liquidityProvider needs to approve DSProxy to pull BAL tokens
         if (_inputData.to != _inputData.liquidityProvider) {
@@ -89,7 +88,7 @@ contract BalancerV2Claim is ActionBase, DSMath, BalancerV2Helper {
         return claims;
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
-        inputData = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

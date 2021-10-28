@@ -15,14 +15,14 @@ const {
 describe('Sub-Inputs', function () {
     this.timeout(80000);
 
-    let taskExecutorAddr; let senderAcc; let proxy;
+    let recipeExecutorAddr; let senderAcc; let proxy;
 
     before(async () => {
         await redeploy('PullToken');
         await redeploy('SubInputs');
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
 
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
     });
@@ -38,10 +38,10 @@ describe('Sub-Inputs', function () {
             new dfs.actions.basic.PullTokenAction(WETH_ADDRESS, senderAcc.address, '$1'),
         ]);
         const functionData = testSubInputs.encodeForDsProxyCall()[1];
-
-        await proxy['execute(address,bytes)'](taskExecutorAddr, functionData);
-
-        expect(await balanceOf(WETH_ADDRESS, proxy.address)).to.be.eq(hre.ethers.utils.parseUnits('7', 18));
+        const balanceBefore = await balanceOf(WETH_ADDRESS, proxy.address);
+        await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData);
+        const balanceAfter = await balanceOf(WETH_ADDRESS, proxy.address);
+        expect(balanceAfter.sub(balanceBefore)).to.be.eq(hre.ethers.utils.parseUnits('7', 18));
     });
 
     it('... should revert in event of underflow', async () => {
@@ -56,6 +56,6 @@ describe('Sub-Inputs', function () {
         ]);
         const functionData = testSubInputs.encodeForDsProxyCall()[1];
 
-        await expect(proxy['execute(address,bytes)'](taskExecutorAddr, functionData)).to.be.reverted;
+        await expect(proxy['execute(address,bytes)'](recipeExecutorAddr, functionData)).to.be.reverted;
     });
 });

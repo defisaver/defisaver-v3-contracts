@@ -52,6 +52,7 @@ describe('Balancer-Withdraw', function () {
     ];
 
     before(async () => {
+        await redeploy('DFSSell');
         await redeploy('BalancerV2Supply');
         await redeploy('BalancerV2Withdraw');
 

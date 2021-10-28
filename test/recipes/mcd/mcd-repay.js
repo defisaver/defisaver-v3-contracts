@@ -46,6 +46,16 @@ describe('Mcd-Repay', function () {
     let RecipeExecutorAddr;
 
     before(async () => {
+        await redeploy('McdOpen');
+        await redeploy('McdSupply');
+        await redeploy('RecipeExecutor');
+        await redeploy('SumInputs');
+        await redeploy('McdGenerate');
+        await redeploy('McdWithdraw');
+        await redeploy('McdPayback');
+        await redeploy('DFSSell');
+        await redeploy('FLDyDx');
+        await redeploy('FLAaveV2');
         uniWrapper = await redeploy('UniswapWrapperV3');
         mcdView = await redeploy('McdView');
         RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');

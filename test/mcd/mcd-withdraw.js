@@ -32,6 +32,7 @@ describe('Mcd-Withdraw', function () {
     let makerAddresses; let senderAcc; let proxy;
 
     before(async () => {
+        await redeploy('McdSupply');
         await redeploy('McdWithdraw');
         await redeploy('McdGenerate');
 

@@ -3,198 +3,69 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ADMIN_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "DestAmountMissingError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ADMIN_VAULT_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "InvalidExchangeZeroXError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "DFS_LOGGER_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "InvalidOffchainData",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "DFS_REG_CONTROLLER_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "InvalidWrapperError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "DISCOUNT_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "NonContractCall",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_DEST_AMOUNT_MISSING",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "OutOfRangeSlicingError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_NOT_ZEROX_EXCHANGE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "ReturnIndexValueError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_OFFCHAIN_DATA_INVALID",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "SenderNotAdmin",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_RETURN_INDEX_VALUE",
-			"outputs": [
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [
 				{
-					"internalType": "string",
+					"internalType": "uint256",
 					"name": "",
-					"type": "string"
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
 				}
 			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "SlippageHitError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_SLIPPAGE_HIT",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_SUB_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_WRAPPER_INVALID",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "FACTORY_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "FEE_RECIPIENT_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "KYBER_ETH_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "SubIndexValueError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
@@ -204,19 +75,6 @@
 					"internalType": "uint8",
 					"name": "",
 					"type": "uint8"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "REGISTRY_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -250,19 +108,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "SAVER_EXCHANGE_REGISTRY",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "SUB_MAX_INDEX_VALUE",
 			"outputs": [
 				{
@@ -282,19 +127,6 @@
 					"internalType": "uint8",
 					"name": "",
 					"type": "uint8"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ZRX_ALLOWLIST_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -329,14 +161,14 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				},
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes32[]",
 					"name": "_subData",
-					"type": "bytes[]"
+					"type": "bytes32[]"
 				},
 				{
 					"internalType": "uint8[]",
@@ -363,9 +195,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "executeActionDirect",
@@ -512,9 +344,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "parseInputs",
@@ -522,101 +354,108 @@
 				{
 					"components": [
 						{
-							"internalType": "address",
-							"name": "srcAddr",
-							"type": "address"
-						},
-						{
-							"internalType": "address",
-							"name": "destAddr",
-							"type": "address"
-						},
-						{
-							"internalType": "uint256",
-							"name": "srcAmount",
-							"type": "uint256"
-						},
-						{
-							"internalType": "uint256",
-							"name": "destAmount",
-							"type": "uint256"
-						},
-						{
-							"internalType": "uint256",
-							"name": "minPrice",
-							"type": "uint256"
-						},
-						{
-							"internalType": "uint256",
-							"name": "dfsFeeDivider",
-							"type": "uint256"
-						},
-						{
-							"internalType": "address",
-							"name": "user",
-							"type": "address"
-						},
-						{
-							"internalType": "address",
-							"name": "wrapper",
-							"type": "address"
-						},
-						{
-							"internalType": "bytes",
-							"name": "wrapperData",
-							"type": "bytes"
-						},
-						{
 							"components": [
+								{
+									"internalType": "address",
+									"name": "srcAddr",
+									"type": "address"
+								},
+								{
+									"internalType": "address",
+									"name": "destAddr",
+									"type": "address"
+								},
+								{
+									"internalType": "uint256",
+									"name": "srcAmount",
+									"type": "uint256"
+								},
+								{
+									"internalType": "uint256",
+									"name": "destAmount",
+									"type": "uint256"
+								},
+								{
+									"internalType": "uint256",
+									"name": "minPrice",
+									"type": "uint256"
+								},
+								{
+									"internalType": "uint256",
+									"name": "dfsFeeDivider",
+									"type": "uint256"
+								},
+								{
+									"internalType": "address",
+									"name": "user",
+									"type": "address"
+								},
 								{
 									"internalType": "address",
 									"name": "wrapper",
 									"type": "address"
 								},
 								{
-									"internalType": "address",
-									"name": "exchangeAddr",
-									"type": "address"
-								},
-								{
-									"internalType": "address",
-									"name": "allowanceTarget",
-									"type": "address"
-								},
-								{
-									"internalType": "uint256",
-									"name": "price",
-									"type": "uint256"
-								},
-								{
-									"internalType": "uint256",
-									"name": "protocolFee",
-									"type": "uint256"
-								},
-								{
 									"internalType": "bytes",
-									"name": "callData",
+									"name": "wrapperData",
 									"type": "bytes"
+								},
+								{
+									"components": [
+										{
+											"internalType": "address",
+											"name": "wrapper",
+											"type": "address"
+										},
+										{
+											"internalType": "address",
+											"name": "exchangeAddr",
+											"type": "address"
+										},
+										{
+											"internalType": "address",
+											"name": "allowanceTarget",
+											"type": "address"
+										},
+										{
+											"internalType": "uint256",
+											"name": "price",
+											"type": "uint256"
+										},
+										{
+											"internalType": "uint256",
+											"name": "protocolFee",
+											"type": "uint256"
+										},
+										{
+											"internalType": "bytes",
+											"name": "callData",
+											"type": "bytes"
+										}
+									],
+									"internalType": "struct DFSExchangeData.OffchainData",
+									"name": "offchainData",
+									"type": "tuple"
 								}
 							],
-							"internalType": "struct DFSExchangeData.OffchainData",
-							"name": "offchainData",
+							"internalType": "struct DFSExchangeData.ExchangeData",
+							"name": "exchangeData",
 							"type": "tuple"
+						},
+						{
+							"internalType": "address",
+							"name": "from",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "to",
+							"type": "address"
 						}
 					],
-					"internalType": "struct DFSExchangeData.ExchangeData",
-					"name": "exchangeData",
+					"internalType": "struct DFSSell.Params",
+					"name": "params",
 					"type": "tuple"
-				},
-				{
-					"internalType": "address",
-					"name": "from",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "to",
-					"type": "address"
 				}
 			],
 			"stateMutability": "pure",
@@ -763,6 +602,6 @@
 		}
 	],
 	"networks": {
-		"hardhat": {}
+		"local": {}
 	}
 }

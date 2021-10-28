@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 
 interface IRegistry {
     function get_lp_token(address) external view returns (address);

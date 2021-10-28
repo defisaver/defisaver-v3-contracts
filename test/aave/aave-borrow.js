@@ -33,6 +33,7 @@ describe('Aave-Borrow', function () {
     let senderAcc; let proxy; let dataProvider;
 
     before(async () => {
+        await redeploy('AaveSupply');
         await redeploy('AaveBorrow');
         await redeploy('DFSSell');
 
@@ -101,7 +102,7 @@ describe('Aave-Borrow', function () {
             expect(balanceAfter).to.be.gt(balanceBefore);
         });
 
-        const fetchedAmountDiv10 = fetchAmountinUSDPrice(tokenSymbol, '500');
+        const fetchedAmountDiv10 = fetchAmountinUSDPrice(tokenSymbol, '5000');
         it(`... should stable borrow ${fetchedAmountDiv10} ${tokenSymbol} from Aave`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
 

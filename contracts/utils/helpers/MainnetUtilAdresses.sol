@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 
 contract MainnetUtilAddresses {
     address internal refillCaller = 0x33fDb79aFB4456B604f376A45A546e7ae700e880;

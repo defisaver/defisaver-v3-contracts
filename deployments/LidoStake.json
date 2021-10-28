@@ -3,94 +3,33 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ADMIN_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "NonContractCall",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ADMIN_VAULT_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "ReturnIndexValueError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "DFS_LOGGER_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "SenderNotAdmin",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "DFS_REG_CONTROLLER_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "SenderNotOwner",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_RETURN_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "SendingEtherFailed",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_SUB_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "FACTORY_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "SubIndexValueError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
@@ -100,19 +39,6 @@
 					"internalType": "uint8",
 					"name": "",
 					"type": "uint8"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "REGISTRY_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -199,14 +125,14 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				},
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes32[]",
 					"name": "_subData",
-					"type": "bytes[]"
+					"type": "bytes32[]"
 				},
 				{
 					"internalType": "uint8[]",
@@ -233,9 +159,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "executeActionDirect",
@@ -277,6 +203,42 @@
 			"type": "function"
 		},
 		{
+			"inputs": [
+				{
+					"internalType": "bytes",
+					"name": "_callData",
+					"type": "bytes"
+				}
+			],
+			"name": "parseInputs",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "uint256",
+							"name": "amount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "address",
+							"name": "from",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "to",
+							"type": "address"
+						}
+					],
+					"internalType": "struct LidoStake.Params",
+					"name": "inputData",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
 			"inputs": [],
 			"name": "registry",
 			"outputs": [
@@ -314,6 +276,6 @@
 		}
 	],
 	"networks": {
-		"hardhat": {}
+		"local": {}
 	}
 }

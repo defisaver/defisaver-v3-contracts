@@ -8,6 +8,8 @@ import "../helpers/FLHelper.sol";
 contract DydxFlashLoanBase is FLHelper {
     using SafeMath for uint256;
 
+    error MarketIdNotFound();
+
     function _getMarketIdFromTokenAddress(address _solo, address _token)
         internal
         view

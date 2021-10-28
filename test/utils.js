@@ -259,20 +259,14 @@ const sendEther = async (signer, toAddress, amount) => {
         to: toAddress,
         value: valueAmount,
     });
-}
+};
+
 const getAllowance = async (tokenAddr, from, to) => {
     const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
 
     const allowance = await tokenContract.allowance(from, to);
 
     return allowance;
-};
-
-const sendEther = async (signer, to, amount) => {
-    const value = hre.ethers.utils.parseUnits(amount, 18);
-    const txObj = await signer.populateTransaction({ to, value, gasLimit: 300000 });
-
-    await signer.sendTransaction(txObj);
 };
 
 const balanceOf = async (tokenAddr, addr) => {
@@ -446,8 +440,6 @@ module.exports = {
     calcGasToUSD,
     AVG_GAS_PRICE,
     getAllowance,
-    BN2Float,
-    Float2BN,
     standardAmounts,
     nullAddress,
     dydxTokens,

@@ -17,8 +17,6 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
         uint256 amount;
         address to;
     }
-
-    address public constant TAX_COLLECTOR_ADDRESS = 0xcDB05aEda142a1B0D6044C09C64e4226c1a281EB;
     
     error InvalidCollateralType();
 

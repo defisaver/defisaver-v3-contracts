@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 
 contract MainnetLiquityAddresses {
     address internal constant LUSDTokenAddr = 0x5f98805A4E8be255a32880FDeC7F6728C6568bA0;

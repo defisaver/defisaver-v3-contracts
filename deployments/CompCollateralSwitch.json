@@ -3,94 +3,38 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ADMIN_VAULT_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "CompEnterMarketError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "COMPTROLLER_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "CompExitMarketError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "C_ETH_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "NonContractCall",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_COMP_ENTER_MARKET",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "ReturnIndexValueError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_COMP_EXIT_MARKET",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "SenderNotAdmin",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_RETURN_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "SenderNotOwner",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_SUB_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "SubIndexValueError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
@@ -100,19 +44,6 @@
 					"internalType": "uint8",
 					"name": "",
 					"type": "uint8"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "REGISTRY_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -212,23 +143,23 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				},
 				{
-					"internalType": "bytes[]",
-					"name": "_subData",
-					"type": "bytes[]"
+					"internalType": "bytes32[]",
+					"name": "",
+					"type": "bytes32[]"
 				},
 				{
 					"internalType": "uint8[]",
-					"name": "_paramMapping",
+					"name": "",
 					"type": "uint8[]"
 				},
 				{
 					"internalType": "bytes32[]",
-					"name": "_returnValues",
+					"name": "",
 					"type": "bytes32[]"
 				}
 			],
@@ -246,9 +177,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "executeActionDirect",

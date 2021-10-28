@@ -3,94 +3,28 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ADMIN_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "NonContractCall",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ADMIN_VAULT_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "NotAuthBotError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "DAI_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "SenderNotAdmin",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ETH_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "SenderNotOwner",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "FACTORY_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "FEE_RECEIVER_ADMIN_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "WETH_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "WrongRefillCallerError",
+			"type": "error"
 		},
 		{
 			"inputs": [

@@ -18,6 +18,7 @@ describe('Mcd-Give', () => {
     let mcdManager;
 
     before(async () => {
+        await redeploy('McdOpen');
         await redeploy('McdGive');
 
         makerAddresses = await fetchMakerAddresses();
@@ -34,14 +35,10 @@ describe('Mcd-Give', () => {
 
     it('... should give a cdp to another proxy', async () => {
         const { join } = ilks[0];
-
         const vaultId = await openMcd(proxy, makerAddresses, join);
-
         const secondProxy = await getProxy(secondAcc.address);
         const createProxy = false;
-
         await mcdGive(proxy, vaultId, secondProxy, createProxy);
-
         const ownerAfter = await mcdManager.owns(vaultId);
 
         expect(ownerAfter).to.be.eq(secondProxy.address);

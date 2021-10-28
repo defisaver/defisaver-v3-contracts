@@ -42,6 +42,6 @@ describe('Lido WETH staking', function () {
         const wethChange = wethBalanceBefore.sub(wethBalanceAfter);
         const stEthChange = stEthBalanceAfter.sub(stEthBalanceBefore);
         const difference = wethChange.sub(stEthChange);
-        expect(difference.toNumber()).to.be.within(0, 2);
+        expect(difference.toNumber()).to.be.within(0, 5);
     }).timeout(50000);
 });

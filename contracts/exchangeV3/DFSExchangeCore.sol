@@ -17,10 +17,12 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
-    string public constant ERR_SLIPPAGE_HIT = "Slippage hit";
-    string public constant ERR_DEST_AMOUNT_MISSING = "Dest amount missing";
-    string public constant ERR_WRAPPER_INVALID = "Wrapper invalid";
-    string public constant ERR_NOT_ZEROX_EXCHANGE = "Zerox exchange invalid";
+    error SlippageHitError(uint256, uint256);
+    error DestAmountMissingError();
+    error InvalidWrapperError();
+    //Zerox exchange invalid
+    error InvalidExchangeZeroXError();
+
     FeeRecipient public constant feeRecipient =
         FeeRecipient(FEE_RECIPIENT_ADDRESS);
 

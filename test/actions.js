@@ -350,7 +350,6 @@ const openVault = async (makerAddresses, proxy, joinAddr, tokenData, collAmount,
 
     const amountDai = hre.ethers.utils.parseUnits(daiAmount, 18);
     const amountColl = hre.ethers.utils.parseUnits(collAmount, tokenData.decimals);
-
     await supplyMcd(proxy, vaultId, amountColl, tokenData.address, joinAddr, from);
     await generateMcd(proxy, vaultId, amountDai, to);
     return vaultId;
@@ -450,11 +449,8 @@ const uniWithdraw = async (proxy, addrTokenA, addrTokenB, lpAddr, liquidity, to,
 const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) => {
     const compClaimAddr = await getAddrFromRegistry('CompClaim');
 
-    const claimCompAction = new dfs.Action(
-        'CompClaim',
-        '0x0',
-        ['address[]', 'address[]', 'address', 'address'],
-        [cSupplyAddresses, cBorrowAddresses, from, to],
+    const claimCompAction = new dfs.actions.compound.CompoundClaimAction(
+        cSupplyAddresses, cBorrowAddresses, from, to,
     );
 
     const functionData = claimCompAction.encodeForDsProxyCall()[1];
@@ -466,12 +462,8 @@ const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) =>
 
 const mcdGive = async (proxy, vaultId, newOwner, createProxy) => {
     const mcdGiveAddr = await getAddrFromRegistry('McdGive');
-
-    const mcdGiveAction = new dfs.Action(
-        'McdGive',
-        '0x0',
-        ['uint256', 'address', 'bool', 'address'],
-        [vaultId, newOwner.address, createProxy, MCD_MANAGER_ADDR],
+    const mcdGiveAction = new dfs.actions.maker.MakerGiveAction(
+        vaultId, newOwner.address, createProxy, MCD_MANAGER_ADDR,
     );
 
     const functionData = mcdGiveAction.encodeForDsProxyCall()[1];
@@ -483,12 +475,8 @@ const mcdGive = async (proxy, vaultId, newOwner, createProxy) => {
 
 const mcdMerge = async (proxy, srcVaultId, destVaultId) => {
     const mcdMergeAddr = await getAddrFromRegistry('McdMerge');
-
-    const mcdMergeAction = new dfs.Action(
-        'McdMerge',
-        '0x0',
-        ['uint256', 'uint256', 'address'],
-        [srcVaultId, destVaultId, MCD_MANAGER_ADDR],
+    const mcdMergeAction = new dfs.actions.maker.MakerMergeAction(
+        srcVaultId, destVaultId, MCD_MANAGER_ADDR,
     );
 
     const functionData = mcdMergeAction.encodeForDsProxyCall()[1];

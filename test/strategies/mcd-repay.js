@@ -54,6 +54,7 @@ describe('Mcd-Repay-Strategy', function () {
         await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');
         await redeploy('McdRatioCheck');
+        await redeploy('GasFeeTaker');
         strategyExecutor = await redeploy('StrategyExecutor');
 
         await redeploy('McdSupply');
@@ -145,7 +146,7 @@ describe('Mcd-Repay-Strategy', function () {
 
     it('... should trigger a maker repay strategy', async () => {
         const ratioBefore = await getRatio(mcdView, vaultId);
-        const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '800'), '18');
+        const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '1200'), '18');
 
         await callMcdRepayStrategy(botAcc, strategyExecutor, strategyId, ethJoin, repayAmount);
 

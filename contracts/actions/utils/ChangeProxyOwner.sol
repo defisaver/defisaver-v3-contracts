@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
@@ -14,8 +14,8 @@ contract ChangeProxyOwner is ActionBase{
     
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -28,7 +28,7 @@ contract ChangeProxyOwner is ActionBase{
         return bytes32(bytes20(newOwner));
     }
 
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         address newOwner = parseInputs(_callData);
 
         _changeOwner(newOwner);
@@ -49,7 +49,7 @@ contract ChangeProxyOwner is ActionBase{
         dfsRegController.changeOwnerInDFSRegistry(_newOwner);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (address newOwner) {
-        newOwner = abi.decode(_callData[0], (address));
+    function parseInputs(bytes memory _callData) internal pure returns (address newOwner) {
+        newOwner = abi.decode(_callData, (address));
     }
 }

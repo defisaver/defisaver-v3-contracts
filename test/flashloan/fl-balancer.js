@@ -15,15 +15,15 @@ const {
 describe('FL-Balancer', function () {
     this.timeout(60000);
 
-    let senderAcc; let proxy; let taskExecutorAddr;
+    let senderAcc; let proxy; let recipeExecutorAddr;
     let flBalancer;
 
     before(async () => {
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        await redeploy('RecipeExecutor');
+        recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
 
         flBalancer = await redeploy('FLBalancer');
         await redeploy('SendToken');
-        await redeploy('TaskExecutor');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -61,7 +61,7 @@ describe('FL-Balancer', function () {
 
         const functionData = basicFLRecipe.encodeForDsProxyCall();
 
-        await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {
+        await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], {
             gasLimit: 3000000,
         });
     });

@@ -3,38 +3,12 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ADMIN_ADDR",
+			"name": "EXECUTE_SELECTOR",
 			"outputs": [
 				{
-					"internalType": "address",
+					"internalType": "bytes4",
 					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ADMIN_VAULT_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "FACTORY_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
+					"type": "bytes4"
 				}
 			],
 			"stateMutability": "view",
@@ -68,6 +42,6 @@
 		}
 	],
 	"networks": {
-		"hardhat": {}
+		"local": {}
 	}
 }

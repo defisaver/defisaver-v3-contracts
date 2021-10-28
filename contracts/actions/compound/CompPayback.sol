@@ -7,7 +7,6 @@ import "../../interfaces/IWETH.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
-
 /// @title Payback a token a user borrowed from Compound
 contract CompPayback is ActionBase, CompHelper {
     using TokenUtils for address;
@@ -16,6 +15,7 @@ contract CompPayback is ActionBase, CompHelper {
         address cTokenAddr;
         uint256 amount;
         address from;
+        address onBehalf;
     }
     error CompPaybackError();
 
@@ -31,8 +31,9 @@ contract CompPayback is ActionBase, CompHelper {
         params.cTokenAddr = _parseParamAddr(params.cTokenAddr, _paramMapping[0], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
+        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
 
-        uint256 withdrawAmount = _payback(params.cTokenAddr, params.amount, params.from);
+        uint256 withdrawAmount = _payback(params.cTokenAddr, params.amount, params.from, params.onBehalf);
 
         return bytes32(withdrawAmount);
     }
@@ -41,7 +42,7 @@ contract CompPayback is ActionBase, CompHelper {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
 
-        _payback(params.cTokenAddr, params.amount, params.from);
+        _payback(params.cTokenAddr, params.amount, params.from, params.onBehalf);
     }
 
     /// @inheritdoc ActionBase
@@ -69,7 +70,7 @@ contract CompPayback is ActionBase, CompHelper {
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }
-
+        
         uint256 maxDebt = ICToken(_cTokenAddr).borrowBalanceCurrent(_onBehalf);
         _amount = _amount > maxDebt ? maxDebt : _amount;
 

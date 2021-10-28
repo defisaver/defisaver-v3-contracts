@@ -7,7 +7,7 @@ import "../../../utils/TokenUtils.sol";
 import "./helpers/UniV3Helper.sol";
 
 /// @title Supplies liquidity to a UniswapV3 position represented by TokenId
-contract UniSupplyV3 is ActionBase, DSMath, UniV3Helper{
+contract UniSupplyV3 is ActionBase, UniV3Helper{
     using TokenUtils for address;
     
     /// @param tokenId - The ID of the token for which liquidity is being increased

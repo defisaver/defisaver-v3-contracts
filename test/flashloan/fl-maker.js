@@ -9,7 +9,6 @@ const {
     getProxy,
     redeploy,
     send,
-    approve,
     balanceOf,
     nullAddress,
     UNISWAP_WRAPPER,
@@ -22,15 +21,15 @@ const { sell } = require('../actions');
 describe('FL-Maker', function () {
     this.timeout(60000);
 
-    let senderAcc; let proxy; let taskExecutorAddr;
+    let senderAcc; let proxy; let recipeExecutorAddr;
     let flMaker;
 
     before(async () => {
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        await redeploy('RecipeExecutor');
+        recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
 
         flMaker = await redeploy('FLMaker');
         await redeploy('SendToken');
-        await redeploy('TaskExecutor');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -80,7 +79,7 @@ describe('FL-Maker', function () {
 
         await send(assetInfo.address, proxy.address, feeAmount);
 
-        await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {
+        await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], {
             gasLimit: 3000000,
         });
     });

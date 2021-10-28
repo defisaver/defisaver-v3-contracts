@@ -34,7 +34,8 @@ describe('Inst Compound position shift', function () {
         await redeploy('CompPayback');
         await redeploy('CompSupply');
         await redeploy('CompWithdraw');
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        await redeploy('RecipeExecutor');
+        taskExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
         dydxFlAddr = await getAddrFromRegistry('FLDyDx');
     });
     it('... Migrate Comp position from INST (COLL : COMP, UNI | DEBT : DAI, USDC)', async () => {
@@ -43,7 +44,7 @@ describe('Inst Compound position shift', function () {
         const dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress);
         sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '10');
         proxy = await getProxy(OWNER_ACC);
-        // Approve dsproxy to have authoritiy over DSA account!
+        // Approve dsproxy to have authority over DSA account!
         await impersonateAccount(OWNER_ACC);
         ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
         const dsaContractImpersonated = await dsaContract.connect(ownerAcc);
@@ -146,7 +147,7 @@ describe('Inst Compound position shift', function () {
         const cCompDSABalanceBefore = await balanceOf(CCOMP_ADDR, dsaAddress);
         const cUNIDSABalanceBefore = await balanceOf(CUNI_ADDR, dsaAddress);
 
-        await impersonatedProxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 10000000 });
+        await impersonatedProxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 30000000 });
 
         const cCompProxyBalanceAfter = await balanceOf(CCOMP_ADDR, proxy.address);
         const cUNIProxyBalanceAfter = await balanceOf(CUNI_ADDR, proxy.address);

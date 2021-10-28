@@ -59,6 +59,7 @@ contract McdMerge is ActionBase, McdHelper {
         uint256 _destVaultId,
         address _mcdManager
     ) internal {
+
         IManager(_mcdManager).shift(_srcVaultId, _destVaultId);
 
         logger.Log(

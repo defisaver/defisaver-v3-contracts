@@ -146,8 +146,8 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         uint256 _index,
         bytes32[] memory _returnValues
     ) internal returns (bytes32 response) {
-        address actionAddr = registry.getAddr(_currRecipe.actionIds[_index]);
 
+        address actionAddr = registry.getAddr(_currRecipe.actionIds[_index]);
         response = IDSProxy(address(this)).execute(
             actionAddr,
             abi.encodeWithSignature(
@@ -173,7 +173,6 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         givePermission(_flActionAddr);
 
         bytes memory recipeData = abi.encode(_currRecipe, address(this));
-
         IFlashLoanBase.FlashLoanParams memory params = abi.decode(
             _currRecipe.callData[0],
             (IFlashLoanBase.FlashLoanParams)

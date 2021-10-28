@@ -23,19 +23,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "ADMIN_VAULT_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "DEFISAVER_LOGGER",
 			"outputs": [
 				{
@@ -55,19 +42,6 @@
 					"internalType": "bytes4",
 					"name": "",
 					"type": "bytes4"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "FACTORY_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
 				}
 			],
 			"stateMutability": "view",

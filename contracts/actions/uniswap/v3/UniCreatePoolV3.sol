@@ -3,14 +3,13 @@
 pragma solidity =0.8.4;
 pragma experimental ABIEncoderV2;
 
-import "../../../DS/DSMath.sol";
 import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
 import "./helpers/UniV3Helper.sol";
 
 /// @title Action for creating Uniswap V3 Pool and minting a position in it after that
 /// @notice If pool already exists, it will only mint a position in pool
-contract UniCreatePoolV3 is ActionBase, DSMath, UniV3Helper {
+contract UniCreatePoolV3 is ActionBase, UniV3Helper {
     using TokenUtils for address;
 
     /// @param token0 The contract address of token0 of the pool
@@ -119,8 +118,8 @@ contract UniCreatePoolV3 is ActionBase, DSMath, UniV3Helper {
         (tokenId, liquidity, amount0, amount1) = _uniMint(_inputData);
 
         //send leftovers
-        _inputData.token0.withdrawTokens(_inputData.from, sub(_inputData.amount0Desired, amount0));
-        _inputData.token1.withdrawTokens(_inputData.from, sub(_inputData.amount1Desired, amount1));
+        _inputData.token0.withdrawTokens(_inputData.from, _inputData.amount0Desired - amount0);
+        _inputData.token1.withdrawTokens(_inputData.from, _inputData.amount1Desired - amount1);
 
         logger.Log(
             address(this),

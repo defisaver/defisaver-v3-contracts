@@ -5,7 +5,7 @@ pragma solidity =0.8.4;
 import "../utils/SafeERC20.sol";
 import "./helpers/ExchangeHelper.sol";
 
-contract DFSPrices is DSMath, ExchangeHelper {
+contract DFSPrices is ExchangeHelper {
 
     enum ActionType { SELL, BUY }
     

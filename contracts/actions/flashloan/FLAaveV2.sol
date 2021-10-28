@@ -11,9 +11,12 @@ import "../../core/strategy/StrategyModel.sol";
 import "../../utils/TokenUtils.sol";
 import "../../utils/ReentrancyGuard.sol";
 import "./helpers/FLHelper.sol";
+import "../../interfaces/flashloan/IFlashLoanBase.sol";
+import "../../core/strategy/StrategyModel.sol";
+
 
 /// @title Action that gets and receives a FL from Aave V2
-contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard, FLHelper {
+contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlashLoanBase {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
     //Caller not aave pool
@@ -49,7 +52,7 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard, FLHelper
                 IFLParamGetter(flData.flParamGetterAddr).getFlashLoanParams(flData.flParamGetterData);
         }
 
-        bytes memory recipeData = flData.recipeData; // TODO: Fix this
+        bytes memory recipeData = flData.recipeData;
         uint flAmount = _flAaveV2(flData, recipeData);
 
         return bytes32(flAmount);
@@ -117,12 +120,12 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard, FLHelper
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             recipeExecutor,
-            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes[],bytes4[],uint8[][]),bytes32)", currRecipe, bytes32(_amounts[0] + _fees[0]))
+            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, bytes32(_amounts[0] + _fees[0]))
         );
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
-            uint256 paybackAmount = add(_amounts[i],_fees[i]);
+            uint256 paybackAmount = _amounts[i] + _fees[i];
             
             require(_assets[i].getBalance(address(this)) == paybackAmount, ERR_WRONG_PAYBACK_AMOUNT);
 

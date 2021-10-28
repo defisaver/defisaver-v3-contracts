@@ -52,6 +52,7 @@ describe('Balancer-Supply', function () {
     ];
 
     before(async () => {
+        await redeploy('DFSSell');
         await redeploy('BalancerV2Supply');
 
         senderAcc = (await hre.ethers.getSigners())[0];

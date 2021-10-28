@@ -28,6 +28,8 @@ describe('Comp-Payback', function () {
         compView;
 
     before(async () => {
+        await redeploy('CompSupply');
+        await redeploy('CompBorrow');
         await redeploy('CompPayback');
         await redeploy('DFSSell');
 

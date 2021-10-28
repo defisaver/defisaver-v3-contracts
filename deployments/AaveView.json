@@ -55,10 +55,10 @@
 		},
 		{
 			"inputs": [],
-			"name": "STAKED_CONTROLLER_ADDR",
+			"name": "StakedToken",
 			"outputs": [
 				{
-					"internalType": "address",
+					"internalType": "contract IStakedToken",
 					"name": "",
 					"type": "address"
 				}
@@ -217,6 +217,30 @@
 					"internalType": "struct AaveView.TokenInfoFull[]",
 					"name": "tokens",
 					"type": "tuple[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address[]",
+					"name": "_assets",
+					"type": "address[]"
+				},
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "getIncentivesRewardsBalance",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
 				}
 			],
 			"stateMutability": "view",
@@ -444,6 +468,25 @@
 			"inputs": [
 				{
 					"internalType": "address",
+					"name": "_staker",
+					"type": "address"
+				}
+			],
+			"name": "getStakingRewardsBalance",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
 					"name": "_market",
 					"type": "address"
 				},
@@ -586,6 +629,6 @@
 		}
 	],
 	"networks": {
-		"hardhat": {}
+		"local": {}
 	}
 }

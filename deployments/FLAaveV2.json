@@ -3,29 +3,43 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "AAVE_LENDING_POOL",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "NonContractCall",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "AAVE_LENDING_POOL_ADDRESS_PROVIDER",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "OnlyAaveCallerError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ReentrantCall",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ReturnIndexValueError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SameCallerError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SubIndexValueError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
@@ -42,142 +56,12 @@
 		},
 		{
 			"inputs": [],
-			"name": "ADMIN_VAULT_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "CALLBACK_SELECTOR",
-			"outputs": [
-				{
-					"internalType": "bytes4",
-					"name": "",
-					"type": "bytes4"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "DFS_LOGGER_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "DFS_REG_CONTROLLER_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "DYDX_FL_FEE_FAUCET",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_RETURN_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_SUB_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ETH_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "FACTORY_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "NO_PARAM_MAPPING",
 			"outputs": [
 				{
 					"internalType": "uint8",
 					"name": "",
 					"type": "uint8"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "REGISTRY_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -211,19 +95,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "SOLO_MARGIN_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "SUB_MAX_INDEX_VALUE",
 			"outputs": [
 				{
@@ -243,19 +114,6 @@
 					"internalType": "uint8",
 					"name": "",
 					"type": "uint8"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "WETH_ADDRESS",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -303,14 +161,14 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				},
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes32[]",
 					"name": "",
-					"type": "bytes[]"
+					"type": "bytes32[]"
 				},
 				{
 					"internalType": "uint8[]",
@@ -337,9 +195,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "executeActionDirect",
@@ -409,9 +267,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "parseInputs",
@@ -447,10 +305,15 @@
 							"internalType": "bytes",
 							"name": "flParamGetterData",
 							"type": "bytes"
+						},
+						{
+							"internalType": "bytes",
+							"name": "recipeData",
+							"type": "bytes"
 						}
 					],
-					"internalType": "struct FLAaveV2.FLAaveV2Data",
-					"name": "flData",
+					"internalType": "struct IFlashLoanBase.FlashLoanParams",
+					"name": "inputData",
 					"type": "tuple"
 				}
 			],
@@ -499,6 +362,6 @@
 		}
 	],
 	"networks": {
-		"hardhat": {}
+		"local": {}
 	}
 }

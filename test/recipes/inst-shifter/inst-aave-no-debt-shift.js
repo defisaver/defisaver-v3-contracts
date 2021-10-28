@@ -30,7 +30,8 @@ describe('Inst Aave debtless position shift', function () {
 
     const OWNER_ACC = '0x6F6c0194A67c2727c61370e76042B3D92F3AC35E';
     before(async () => {
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        await redeploy('RecipeExecutor');
+        taskExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
         await redeploy('InstPullTokens');
         await redeploy('AaveCollateralSwitch');
 

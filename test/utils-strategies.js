@@ -7,7 +7,6 @@ const {
     calcGasToUSD,
     OWNER_ACC,
     AVG_GAS_PRICE,
-    nullAddress,
 } = require('./utils');
 
 const getLatestStrategyId = async () => {

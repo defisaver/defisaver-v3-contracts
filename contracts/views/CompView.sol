@@ -86,7 +86,7 @@ contract CompView is Exponential, DSMath {
             }
         }
 
-        if (sumBorrow == 0) return uint(-1);
+        if (sumBorrow == 0) return type(uint256).max;
 
         uint borrowPowerUsed = (sumBorrow * 10**18) / sumCollateral;
         return wdiv(1e18, borrowPowerUsed);

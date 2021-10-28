@@ -3,42 +3,33 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ADMIN_VAULT_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "IntOverflow",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_RETURN_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "NonContractCall",
+			"type": "error"
 		},
 		{
 			"inputs": [],
-			"name": "ERR_SUB_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "ReturnIndexValueError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SubIndexValueError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
@@ -48,32 +39,6 @@
 					"internalType": "uint8",
 					"name": "",
 					"type": "uint8"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "PROXY_REGISTRY_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "REGISTRY_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -160,14 +125,14 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				},
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes32[]",
 					"name": "_subData",
-					"type": "bytes[]"
+					"type": "bytes32[]"
 				},
 				{
 					"internalType": "uint8[]",
@@ -194,14 +159,72 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "executeActionDirect",
 			"outputs": [],
 			"stateMutability": "payable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "contract IManager",
+					"name": "_manager",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_cdpId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "_ilk",
+					"type": "bytes32"
+				}
+			],
+			"name": "getCdpInfo",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "contract IManager",
+					"name": "_manager",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_cdpId",
+					"type": "uint256"
+				}
+			],
+			"name": "getOwner",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
 			"type": "function"
 		},
 		{
@@ -225,11 +248,60 @@
 			"type": "function"
 		},
 		{
+			"inputs": [
+				{
+					"internalType": "bytes",
+					"name": "_callData",
+					"type": "bytes"
+				}
+			],
+			"name": "parseInputs",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "uint256",
+							"name": "srcVaultId",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "destVaultId",
+							"type": "uint256"
+						},
+						{
+							"internalType": "address",
+							"name": "mcdManager",
+							"type": "address"
+						}
+					],
+					"internalType": "struct McdMerge.Params",
+					"name": "params",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
 			"inputs": [],
 			"name": "registry",
 			"outputs": [
 				{
 					"internalType": "contract DFSRegistry",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "vat",
+			"outputs": [
+				{
+					"internalType": "contract IVat",
 					"name": "",
 					"type": "address"
 				}

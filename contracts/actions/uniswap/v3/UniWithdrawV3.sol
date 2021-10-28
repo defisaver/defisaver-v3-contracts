@@ -6,7 +6,7 @@ import "../../../utils/TokenUtils.sol";
 import "./helpers/UniV3Helper.sol";
 
 /// @title Decreases liquidity from a position represented by tokenID, and collects tokensOwed from position to recipient
-contract UniWithdrawV3 is ActionBase, DSMath, UniV3Helper{
+contract UniWithdrawV3 is ActionBase, UniV3Helper{
     using TokenUtils for address;
 
     /// @param tokenId - The ID of the token for which liquidity is being decreased

@@ -7,7 +7,7 @@ import "../../../utils/TokenUtils.sol";
 import "./helpers/UniV3Helper.sol";
 
 /// @title Mints NFT that represents a position in uni v3
-contract UniMintV3 is ActionBase, DSMath, UniV3Helper{
+contract UniMintV3 is ActionBase, UniV3Helper{
     using TokenUtils for address;
     
     struct Params {

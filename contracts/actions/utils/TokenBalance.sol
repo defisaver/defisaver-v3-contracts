@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 pragma experimental ABIEncoderV2;
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
@@ -15,10 +15,10 @@ contract TokenBalance is ActionBase {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
-        uint8[] memory _paramMapping,
-        bytes32[] memory _returnValues
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
     ) public virtual override payable returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
@@ -26,7 +26,7 @@ contract TokenBalance is ActionBase {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes[] memory _callData) public override payable {}
+    function executeActionDirect(bytes memory _callData) public override payable {}
 
     /// @inheritdoc ActionBase
     function actionType() public virtual override pure returns (uint8) {
@@ -35,7 +35,7 @@ contract TokenBalance is ActionBase {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function parseInputs(bytes[] memory _callData) public pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

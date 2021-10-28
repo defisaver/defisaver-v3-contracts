@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 
 import "../../../interfaces/balancer/IVault.sol";
 import "./MainnetBalancerV2Addresses.sol";
@@ -12,6 +12,6 @@ contract BalancerV2Helper is MainnetBalancerV2Addresses{
     function _getPoolAddress(bytes32 poolId) internal pure returns (address) {
         // 12 byte logical shift left to remove the nonce and specialization setting. We don't need to mask,
         // since the logical shift already sets the upper bits to zero.
-        return address(uint256(poolId) >> (12 * 8));
+        return address(uint160(uint256(poolId) >> (12 * 8)));
     }
 }

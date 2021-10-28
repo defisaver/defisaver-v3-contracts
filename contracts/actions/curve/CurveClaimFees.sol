@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
@@ -15,8 +15,8 @@ contract CurveClaimFees is ActionBase, CurveHelper {
     }
 
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -29,7 +29,7 @@ contract CurveClaimFees is ActionBase, CurveHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
         _curveClaimFees(params);
@@ -63,7 +63,7 @@ contract CurveClaimFees is ActionBase, CurveHelper {
         return claimed;
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

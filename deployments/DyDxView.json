@@ -3,16 +3,8 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "SOLO_MARGIN_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "MarketIdNotFound",
+			"type": "error"
 		},
 		{
 			"inputs": [
@@ -149,6 +141,6 @@
 		}
 	],
 	"networks": {
-		"hardhat": {}
+		"local": {}
 	}
 }

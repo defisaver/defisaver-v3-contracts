@@ -3,16 +3,33 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ADMIN_VAULT_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
+			"name": "NonContractCall",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ReentrantCall",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ReturnIndexValueError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SubIndexValueError",
+			"type": "error"
 		},
 		{
 			"inputs": [],
@@ -42,77 +59,12 @@
 		},
 		{
 			"inputs": [],
-			"name": "DAI_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "DSS_FLASH_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_RETURN_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ERR_SUB_INDEX_VALUE",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "",
-					"type": "string"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "NO_PARAM_MAPPING",
 			"outputs": [
 				{
 					"internalType": "uint8",
 					"name": "",
 					"type": "uint8"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "REGISTRY_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
 				}
 			],
 			"stateMutability": "view",
@@ -199,14 +151,14 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				},
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes32[]",
 					"name": "",
-					"type": "bytes[]"
+					"type": "bytes32[]"
 				},
 				{
 					"internalType": "uint8[]",
@@ -233,9 +185,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "executeActionDirect",
@@ -305,9 +257,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes[]",
+					"internalType": "bytes",
 					"name": "_callData",
-					"type": "bytes[]"
+					"type": "bytes"
 				}
 			],
 			"name": "parseInputs",
@@ -315,9 +267,24 @@
 				{
 					"components": [
 						{
-							"internalType": "uint256",
-							"name": "amount",
-							"type": "uint256"
+							"internalType": "address[]",
+							"name": "tokens",
+							"type": "address[]"
+						},
+						{
+							"internalType": "uint256[]",
+							"name": "amounts",
+							"type": "uint256[]"
+						},
+						{
+							"internalType": "uint256[]",
+							"name": "modes",
+							"type": "uint256[]"
+						},
+						{
+							"internalType": "address",
+							"name": "onBehalfOf",
+							"type": "address"
 						},
 						{
 							"internalType": "address",
@@ -328,9 +295,14 @@
 							"internalType": "bytes",
 							"name": "flParamGetterData",
 							"type": "bytes"
+						},
+						{
+							"internalType": "bytes",
+							"name": "recipeData",
+							"type": "bytes"
 						}
 					],
-					"internalType": "struct FLMaker.Params",
+					"internalType": "struct IFlashLoanBase.FlashLoanParams",
 					"name": "params",
 					"type": "tuple"
 				}

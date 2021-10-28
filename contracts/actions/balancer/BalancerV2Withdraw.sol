@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.4;
 pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
-import "../../DS/DSMath.sol";
 import "./helpers/BalancerV2Helper.sol";
 
 /// @title Return LP tokens to Balancer Vault in exchange for underlying tokens
-contract BalancerV2Withdraw is ActionBase, DSMath, BalancerV2Helper{
+contract BalancerV2Withdraw is ActionBase, BalancerV2Helper{
     using TokenUtils for address;
 
     struct Params {
@@ -24,8 +23,8 @@ contract BalancerV2Withdraw is ActionBase, DSMath, BalancerV2Helper{
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -48,7 +47,7 @@ contract BalancerV2Withdraw is ActionBase, DSMath, BalancerV2Helper{
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
         _balancerWithdraw(inputData);
@@ -81,7 +80,7 @@ contract BalancerV2Withdraw is ActionBase, DSMath, BalancerV2Helper{
         vault.exitPool(_inputData.poolId, address(this), payable(_inputData.to), requestData);
 
         uint256 poolLPTokensAfter = poolAddress.getBalance(address(this));
-        poolLPTokensSent = sub(poolLPTokensAfter, poolLPTokensBefore);
+        poolLPTokensSent = poolLPTokensAfter - poolLPTokensBefore;
         // return any leftover LP tokens
         poolAddress.withdrawTokens(
             _inputData.from,
@@ -96,7 +95,7 @@ contract BalancerV2Withdraw is ActionBase, DSMath, BalancerV2Helper{
         );
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
-        inputData = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

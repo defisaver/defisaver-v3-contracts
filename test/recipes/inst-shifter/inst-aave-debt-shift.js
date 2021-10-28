@@ -28,13 +28,14 @@ describe('Inst Aave position shift', function () {
 
     let proxy;
     let ownerAcc;
-    let taskExecutorAddr;
+    let recipeExecutorAddr;
     let dydxFlAddr;
     let flMaker;
 
     /// @notice run on block number 13172393
     before(async () => {
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+        await redeploy('RecipeExecutor');
+        recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
         await redeploy('InstPullTokens');
         await redeploy('AaveCollateralSwitch');
         await redeploy('TokenBalance');
@@ -42,9 +43,9 @@ describe('Inst Aave position shift', function () {
         await redeploy('AaveSupply');
         await redeploy('AaveBorrow');
         await redeploy('AavePayback');
+        await redeploy('AaveWithdraw');
         flMaker = await redeploy('FLMaker');
         await redeploy('SendToken');
-        await redeploy('TaskExecutor');
         dydxFlAddr = await getAddrFromRegistry('FLDyDx');
     });
 
@@ -147,7 +148,7 @@ describe('Inst Aave position shift', function () {
         const usdtDebtAmount = await balanceOf('0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', dsaAddress);
         const wbtcCollAmount = await balanceOf(AWBTC_ADDR, dsaAddress);
         const wethCollAmount = await balanceOf(AWETH_ADDR, dsaAddress);
-        await impersonatedProxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 10000000 });
+        await impersonatedProxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], { gasLimit: 10000000 });
         const usdtDebtAmountAfter = await balanceOf('0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', proxy.address);
         const wbtcCollAmountAfter = await balanceOf(AWBTC_ADDR, proxy.address);
         const wethCollAmountAfter = await balanceOf(AWETH_ADDR, proxy.address);
@@ -276,7 +277,7 @@ describe('Inst Aave position shift', function () {
         const usdtDebtAmount = await balanceOf('0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', dsaAddress);
         const linkCollAmount = await balanceOf(ALINK_ADDR, dsaAddress);
         const wethCollAmount = await balanceOf(AWETH_ADDR, dsaAddress);
-        await impersonatedProxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 10000000 });
+        await impersonatedProxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], { gasLimit: 10000000 });
         const busdDebtAmountAfter = await balanceOf('0xbA429f7011c9fa04cDd46a2Da24dc0FF0aC6099c', proxy.address);
         const usdtDebtAmountAfter = await balanceOf('0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', proxy.address);
         const linkCollAmountAfter = await balanceOf(ALINK_ADDR, proxy.address);

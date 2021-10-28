@@ -46,6 +46,7 @@ describe('Compound: Create', function () {
         await redeploy('RecipeExecutor');
         await redeploy('FLDyDx');
         await redeploy('DFSSell');
+        await redeploy('SendToken');
 
         compView = await redeploy('CompView');
         dydxFlAddr = await getAddrFromRegistry('FLDyDx');
@@ -135,7 +136,6 @@ describe('Compound: Create', function () {
         const collAmount = assetAmountInWei(fetchedAmount, collAsset);
         const collAddress = getAssetInfo(collAsset.replace(/^ETH/, 'WETH')).address;
         let collBalanceBefore = await balanceOf(collAddress, senderAcc.address);
-
         if (collBalanceBefore.lt(collAmount)) {
             if (isEth(collAddress)) {
                 await depositToWeth(collAmount);
@@ -153,7 +153,6 @@ describe('Compound: Create', function () {
                 );
             }
         }
-
         collBalanceBefore = await balanceOf(collAddress, senderAcc.address);
         const debtBalanceBefore = await balanceOf(
             getAssetInfo(debtAsset).address,
