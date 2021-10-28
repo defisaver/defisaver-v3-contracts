@@ -17,6 +17,7 @@ const {
     createTimestampTrigger,
     createGasPriceTrigger,
     createCompTrigger,
+    createLiquityTrigger,
 } = require('./triggers');
 
 const {
@@ -31,7 +32,16 @@ const {
     UNISWAP_WRAPPER,
     MAX_UINT128,
     nullAddress,
+    fetchAmountinUSDPrice,
+    Float2BN,
+    getLocalTokenPrice,
+    BN2Float,
 } = require('./utils');
+
+const {
+    getTroveInfo,
+    findInsertPosition,
+} = require('./utils-liquity');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -200,6 +210,18 @@ const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrB
 
     // eslint-disable-next-line max-len
     const subId = await subToStrategy(proxy, strategyId, true, [tokenAddrSellEncoded, tokenAddrBuyEncoded, amountEncoded],
+        [triggerData]);
+
+    return subId;
+};
+
+const subLiquityBoostStrategy = async (proxy, maxFeePercentage, ratioOver, targetRatio) => {
+    const maxFeePercentageEncoded = abiCoder.encode(['uint256'], [maxFeePercentage.toString()]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const strategyId = await getLatestStrategyId();
+    const triggerData = await createLiquityTrigger(proxy.address, ratioOver, RATIO_STATE_OVER);
+    // eslint-disable-next-line max-len
+    const subId = await subToStrategy(proxy, strategyId, true, [maxFeePercentageEncoded, targetRatioEncoded],
         [triggerData]);
 
     return subId;
@@ -626,6 +648,76 @@ const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, flAm
     console.log(`GasUsed callMcdCloseStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
+const callLiquityBoostStrategy = async (
+    botAcc,
+    strategyExecutor,
+    strategyId,
+    boostAmount,
+    proxyAddr,
+) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const { collAmount, debtAmount } = await getTroveInfo(proxyAddr);
+
+    const newDebtAmount = debtAmount.add(boostAmount);
+    let { upperHint, lowerHint } = await findInsertPosition(collAmount, newDebtAmount);
+
+    const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
+        '0', // &maxFeePercentage
+        boostAmount,
+        placeHolderAddr,
+        upperHint,
+        lowerHint,
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            getAssetInfo('LUSD').address,
+            getAssetInfo('WETH').address,
+            '$1',
+            UNISWAP_WRAPPER,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const boostGasCost = 1200000; // 1.2 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        boostGasCost, WETH_ADDRESS, '0',
+    );
+
+    const supplyDollarValue = BN2Float(boostAmount) / getLocalTokenPrice('LUSD');
+    const newCollAmount = collAmount.add(Float2BN(fetchAmountinUSDPrice('WETH', supplyDollarValue)));
+    ({ upperHint, lowerHint } = await findInsertPosition(newCollAmount, newDebtAmount));
+
+    const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
+        '$2',
+        placeHolderAddr,
+        upperHint,
+        lowerHint,
+    );
+
+    actionsCallData.push(liquityBorrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquitySupplyAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const strategyExecutorByBot = await strategyExecutor.connect(botAcc);
+
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callLiquityBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
 module.exports = {
     subDcaStrategy,
     callDcaStrategy,
@@ -645,4 +737,6 @@ module.exports = {
     callCompBoostStrategy,
     subCompRepayStrategy,
     callCompRepayStrategy,
+    subLiquityBoostStrategy,
+    callLiquityBoostStrategy,
 };
