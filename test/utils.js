@@ -385,9 +385,9 @@ const getChainLinkPrice = async (tokenAddr) => {
     return data.answer.toString();
 };
 
-const BN2Float = (bn, decimals) => hre.ethers.utils.formatUnits(bn, decimals);
+const BN2Float = hre.ethers.utils.formatUnits;
 
-const Float2BN = (string, decimals) => hre.ethers.utils.parseUnits(string, decimals);
+const Float2BN = hre.ethers.utils.parseUnits;
 
 module.exports = {
     getAddrFromRegistry,

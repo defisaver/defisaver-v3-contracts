@@ -32,7 +32,7 @@ const findInsertPosition = async (collAmount, debtAmount, numOfTrials = 400, ran
 const getTroveInfo = async (troveOwner) => {
     const liquityView = await hre.ethers.getContractAt('LiquityView', getAddrFromRegistry('LiquityView'));
 
-    return await liquityView['getTroveInfo(address)'](troveOwner);
+    return liquityView['getTroveInfo(address)'](troveOwner);
 };
 
 const getRatio = async (liquityView, troveOwner) => {

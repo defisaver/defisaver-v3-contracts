@@ -18,11 +18,11 @@ const { createStrategy, addBotCaller } = require('../utils-strategies.js');
 
 const { getRatio } = require('../utils-liquity.js');
 
-const { subLiquityBoostStrategy, callLiquityBoostStrategy } = require('../strategies');
+const { subLiquityRepayStrategy, callLiquityRepayStrategy } = require('../strategies');
 
 const { liquityOpen } = require('../actions');
 
-describe('Liquity-Boost-Strategy', function () {
+describe('Liquity-Repay-Strategy', function () {
     this.timeout(1200000);
 
     let senderAcc;
@@ -55,8 +55,8 @@ describe('Liquity-Boost-Strategy', function () {
 
         liquityView = await redeploy('LiquityView');
         await redeploy('LiquityOpen');
-        await redeploy('LiquitySupply');
-        await redeploy('LiquityBorrow');
+        await redeploy('LiquityWithdraw');
+        await redeploy('LiquityPayback');
         await redeploy('LiquityRatioTrigger');
 
         await addBotCaller(botAcc.address);
@@ -74,66 +74,64 @@ describe('Liquity-Boost-Strategy', function () {
         );
     });
 
-    it('... should make a new Liquity Boost strategy', async () => {
-        const liquityBoostStrategy = new dfs.Strategy('LiquityBoostStrategy');
-        liquityBoostStrategy.addSubSlot('&maxFeePercentage', 'uint256');
-        liquityBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    it('... should make a new Liquity Repay strategy', async () => {
+        const liquityRepayStrategy = new dfs.Strategy('LiquityRepayStrategy');
+        liquityRepayStrategy.addSubSlot('&targetRatio', 'uint256');
 
         const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
-        liquityBoostStrategy.addTrigger(liquityRatioTrigger);
+        liquityRepayStrategy.addTrigger(liquityRatioTrigger);
 
-        const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
-            '&maxFeePercentage',
-            '%borrowAmount',
+        const liquityWithdrawAction = new dfs.actions.liquity.LiquityWithdrawAction(
+            '%withdrawAmount',
             '&proxy',
             '%upperHint',
             '%lowerHint',
         );
 
+        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+            '%repayGasCost', '%wethAddr', '$1',
+        );
+
         const sellAction = new dfs.actions.basic.SellAction(
             formatExchangeObj(
-                '%lusdAddr',
                 '%wethAddr',
-                '$1',
+                '%lusdAddr',
+                '$2',
                 '%wrapper',
             ),
             '&proxy',
             '&proxy',
         );
 
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '%boostGasCost', '%wethAddr', '$2',
-        );
-
-        const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
+        const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
             '$3',
             '&proxy',
             '%upperHint',
             '%lowerHint',
         );
 
-        liquityBoostStrategy.addAction(liquityBorrowAction);
-        liquityBoostStrategy.addAction(sellAction);
-        liquityBoostStrategy.addAction(feeTakingAction);
-        liquityBoostStrategy.addAction(liquitySupplyAction);
+        liquityRepayStrategy.addAction(liquityWithdrawAction);
+        liquityRepayStrategy.addAction(feeTakingAction);
+        liquityRepayStrategy.addAction(sellAction);
+        liquityRepayStrategy.addAction(liquityPaybackAction);
 
-        const callData = liquityBoostStrategy.encodeForDsProxyCall();
+        const callData = liquityRepayStrategy.encodeForDsProxyCall();
 
         await createStrategy(proxy, ...callData, true);
 
-        const ratioOver = Float2BN('2.4');
-        const targetRatio = Float2BN('2');
+        const ratioUnder = Float2BN('2.5');
+        const targetRatio = Float2BN('3');
 
         // eslint-disable-next-line max-len
-        strategyId = await subLiquityBoostStrategy(proxy, maxFeePercentage, ratioOver, targetRatio);
+        strategyId = await subLiquityRepayStrategy(proxy, ratioUnder, targetRatio);
     });
 
-    it('... should trigger a Liquity Boost strategy', async () => {
+    it('... should trigger a Liquity Repay strategy', async () => {
         const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
-        const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', '5000'));
+        const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', '3500'));
 
         // eslint-disable-next-line max-len
-        await callLiquityBoostStrategy(botAcc, strategyExecutor, strategyId, boostAmount, proxyAddr);
+        await callLiquityRepayStrategy(botAcc, strategyExecutor, strategyId, repayAmount, proxyAddr);
 
         const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 
@@ -141,6 +139,6 @@ describe('Liquity-Boost-Strategy', function () {
             `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
         );
 
-        expect(ratioBefore).to.be.gt(ratioAfter);
+        expect(ratioBefore).to.be.lt(ratioAfter);
     });
 });
