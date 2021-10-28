@@ -10,28 +10,29 @@ const {
     redeploy,
     fetchAmountinUSDPrice,
     formatExchangeObj,
+    DAI_ADDR,
+    WETH_ADDRESS,
 } = require('../utils');
 
 const { createStrategy, addBotCaller } = require('../utils-strategies');
 
 const { getRatio } = require('../utils-mcd');
 
-const { subMcdRepayStrategy, callMcdRepayStrategy } = require('../strategies');
+const { subMcdRepayStrategy, callMcdRepayStrategy, callFLMcdRepayStrategy } = require('../strategies');
 
 const { openVault } = require('../actions');
-
-const { fetchMakerAddresses } = require('../utils-mcd');
 
 describe('Mcd-Repay-Strategy', function () {
     this.timeout(120000);
 
     let senderAcc;
     let proxy;
-    let makerAddresses;
     let botAcc;
+    let flDyDx;
     let strategyExecutor;
     let strategyId;
     let vaultId;
+    let vaultId2;
     let mcdView;
 
     const ethJoin = ilks[0].join;
@@ -61,29 +62,113 @@ describe('Mcd-Repay-Strategy', function () {
         await redeploy('McdGenerate');
         await redeploy('McdPayback');
         await redeploy('McdOpen');
+        flDyDx = await redeploy('FLDyDx');
 
         await addBotCaller(botAcc.address);
 
         proxy = await getProxy(senderAcc.address);
-
-        makerAddresses = await fetchMakerAddresses();
     });
 
-    it('... should make a new strategy', async () => {
-        const tokenData = getAssetInfo('WETH');
+    // it('... should make a new strategy', async () => {
+    //     const tokenData = getAssetInfo('WETH');
 
-        vaultId = await openVault(
-            makerAddresses,
+    //     vaultId = await openVault(
+    //         proxy,
+    //         'ETH-A',
+    //         fetchAmountinUSDPrice('WETH', '25000'),
+    //         fetchAmountinUSDPrice('DAI', '12000'),
+    //     );
+
+    //     console.log('Vault id: ', vaultId);
+
+    //     const repayStrategy = new dfs.Strategy('McdRepayStrategy');
+
+    //     repayStrategy.addSubSlot('&vaultId', 'uint256');
+    //     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    //     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
+    //     repayStrategy.addTrigger(mcdRatioTrigger);
+
+    //     const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
+    //         '&vaultId',
+    //         '%withdrawAmount',
+    //         '%ethJoin',
+    //         '&proxy',
+    //         '%mcdManager',
+    //     );
+
+    //     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+    //         '0', '%wethAddr', '$1',
+    //     );
+
+    //     const sellAction = new dfs.actions.basic.SellAction(
+    //         formatExchangeObj(
+    //             '%wethAddr',
+    //             '%daiAddr',
+    //             '$2',
+    //             '%exchangeWrapper',
+    //         ),
+    //         '&proxy',
+    //         '&proxy',
+    //     );
+
+    //     const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
+    //         '&vaultId',
+    //         '$3',
+    //         '&proxy',
+    //         '%mcdManager',
+    //     );
+
+    //     const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+    //         '&targetRatio',
+    //         '&vaultId',
+    //         '%nextPrice',
+    //     );
+
+    //     repayStrategy.addAction(withdrawAction);
+    //     repayStrategy.addAction(feeTakingAction);
+    //     repayStrategy.addAction(sellAction);
+    //     repayStrategy.addAction(mcdPaybackAction);
+    //     repayStrategy.addAction(mcdRatioCheckAction);
+
+    //     const callData = repayStrategy.encodeForDsProxyCall();
+
+    //     await createStrategy(proxy, ...callData, true);
+
+    //     const rationUnder = hre.ethers.utils.parseUnits('2.6', '18');
+    //     const targetRatio = hre.ethers.utils.parseUnits('2.2', '18');
+
+    //     strategyId = await subMcdRepayStrategy(proxy, vaultId, rationUnder, targetRatio);
+    // });
+
+    // it('... should trigger a maker repay strategy', async () => {
+    //     const ratioBefore = await getRatio(mcdView, vaultId);
+    //     const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '800'), '18');
+
+    //     await callMcdRepayStrategy(botAcc, strategyExecutor, strategyId, ethJoin, repayAmount);
+
+    //     const ratioAfter = await getRatio(mcdView, vaultId);
+
+    //     console.log(
+    //         `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+    //     );
+
+    //     expect(ratioAfter).to.be.gt(ratioBefore);
+    // });
+
+
+    // FL(DAI), Sell, Fee, Payback, Withdraw
+    it('... should make a new FL Mcd Repay strategy', async () => {
+        vaultId2 = await openVault(
             proxy,
-            ethJoin,
-            tokenData,
+            'ETH-A',
             fetchAmountinUSDPrice('WETH', '25000'),
             fetchAmountinUSDPrice('DAI', '12000'),
         );
 
-        console.log('Vault id: ', vaultId);
+        console.log('Vault id: ', vaultId2);
 
-        const repayStrategy = new dfs.Strategy('McdRepayStrategy');
+        const repayStrategy = new dfs.Strategy('MakerFLRepayStrategy');
 
         repayStrategy.addSubSlot('&vaultId', 'uint256');
         repayStrategy.addSubSlot('&targetRatio', 'uint256');
@@ -91,27 +176,21 @@ describe('Mcd-Repay-Strategy', function () {
         const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
         repayStrategy.addTrigger(mcdRatioTrigger);
 
-        const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
-            '&vaultId',
-            '%withdrawAmount',
-            '%ethJoin',
-            '&proxy',
-            '%mcdManager',
-        );
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '0', '%wethAddr', '$1',
-        );
+        const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction('%amount', WETH_ADDRESS);
 
         const sellAction = new dfs.actions.basic.SellAction(
             formatExchangeObj(
                 '%wethAddr',
                 '%daiAddr',
-                '$2',
+                '$1',
                 '%exchangeWrapper',
             ),
             '&proxy',
             '&proxy',
+        );
+
+        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+            '0', '%daiAddr', '$2',
         );
 
         const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
@@ -121,17 +200,19 @@ describe('Mcd-Repay-Strategy', function () {
             '%mcdManager',
         );
 
-        const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
-            '&targetRatio',
+        const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
             '&vaultId',
-            '%nextPrice',
+            '$1',
+            '%ethJoin',
+            '%flAddr',
+            '%mcdManager',
         );
 
-        repayStrategy.addAction(withdrawAction);
-        repayStrategy.addAction(feeTakingAction);
+        repayStrategy.addAction(flAction);
         repayStrategy.addAction(sellAction);
+        repayStrategy.addAction(feeTakingAction);
         repayStrategy.addAction(mcdPaybackAction);
-        repayStrategy.addAction(mcdRatioCheckAction);
+        repayStrategy.addAction(withdrawAction);
 
         const callData = repayStrategy.encodeForDsProxyCall();
 
@@ -140,16 +221,17 @@ describe('Mcd-Repay-Strategy', function () {
         const rationUnder = hre.ethers.utils.parseUnits('2.6', '18');
         const targetRatio = hre.ethers.utils.parseUnits('2.2', '18');
 
-        strategyId = await subMcdRepayStrategy(proxy, vaultId, rationUnder, targetRatio);
+        strategyId = await subMcdRepayStrategy(proxy, vaultId2, rationUnder, targetRatio);
     });
 
-    it('... should trigger a maker repay strategy', async () => {
-        const ratioBefore = await getRatio(mcdView, vaultId);
+    it('... should trigger a FL MCD repay strategy', async () => {
+        const ratioBefore = await getRatio(mcdView, vaultId2);
         const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '800'), '18');
 
-        await callMcdRepayStrategy(botAcc, strategyExecutor, strategyId, ethJoin, repayAmount);
+        // eslint-disable-next-line max-len
+        await callFLMcdRepayStrategy(botAcc, strategyExecutor, flDyDx.address, strategyId, ethJoin, repayAmount);
 
-        const ratioAfter = await getRatio(mcdView, vaultId);
+        const ratioAfter = await getRatio(mcdView, vaultId2);
 
         console.log(
             `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,

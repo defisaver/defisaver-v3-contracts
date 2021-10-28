@@ -1,7 +1,7 @@
 const dfs = require('@defisaver/sdk');
 const hre = require('hardhat');
 
-const { getAssetInfo } = require('@defisaver/tokens');
+const { getAssetInfo, ilks } = require('@defisaver/tokens');
 
 const {
     approve,
@@ -17,7 +17,7 @@ const {
     fetchAmountinUSDPrice,
 } = require('./utils');
 
-const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
+const { getVaultsForUser, MCD_MANAGER_ADDR, canGenerateDebt } = require('./utils-mcd');
 
 const { getSecondTokenAmount } = require('./utils-uni');
 
@@ -73,7 +73,7 @@ const buy = async (proxy, sellAddr, buyAddr,
     await proxy['execute(address,bytes)'](dfsBuyAddr, functionData, { gasLimit: 3000000 });
 };
 
-const openMcd = async (proxy, makerAddresses, joinAddr) => {
+const openMcd = async (proxy, joinAddr) => {
     const mcdOpenAddr = await getAddrFromRegistry('McdOpen');
 
     const openMyVault = new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR);
@@ -81,7 +81,7 @@ const openMcd = async (proxy, makerAddresses, joinAddr) => {
 
     await proxy['execute(address,bytes)'](mcdOpenAddr, functionData, { gasLimit: 3000000 });
 
-    const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
+    const vaultsAfter = await getVaultsForUser(proxy.address);
 
     return vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
 };
@@ -343,16 +343,30 @@ const generateMcd = async (proxy, vaultId, amount, to) => {
     await proxy['execute(address,bytes)'](mcdGenerateAddr, functionData, { gasLimit: 3000000 });
 };
 
-const openVault = async (makerAddresses, proxy, joinAddr, tokenData, collAmount, daiAmount) => {
-    const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
+const openVault = async (proxy, collType, collAmount, daiAmount) => {
+    const ilkObj = ilks.find((i) => i.ilkLabel === collType);
+
+    let asset = ilkObj.asset;
+    if (asset === 'ETH') asset = 'WETH';
+    const tokenData = getAssetInfo(asset);
+
+    const vaultId = await openMcd(proxy, ilkObj.join);
     const from = proxy.signer.address;
     const to = proxy.signer.address;
 
     const amountDai = hre.ethers.utils.parseUnits(daiAmount, 18);
     const amountColl = hre.ethers.utils.parseUnits(collAmount, tokenData.decimals);
 
-    await supplyMcd(proxy, vaultId, amountColl, tokenData.address, joinAddr, from);
+    const hasMoreDebt = await canGenerateDebt(ilkObj);
+
+    if (!hasMoreDebt) {
+        console.log('Cant open a vault not debt ceiling reached');
+        return -1;
+    }
+
+    await supplyMcd(proxy, vaultId, amountColl, tokenData.address, ilkObj.join, from);
     await generateMcd(proxy, vaultId, amountDai, to);
+
     return vaultId;
 };
 

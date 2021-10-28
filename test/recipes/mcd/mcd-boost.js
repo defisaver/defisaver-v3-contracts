@@ -78,10 +78,8 @@ describe('Mcd-Boost', function () {
         it(`... should call a boost ${boostAmount} on a ${ilkData.ilkLabel} vault`, async () => {
             // create a vault
             vaultId = await openVault(
-                makerAddresses,
                 proxy,
-                joinAddr,
-                tokenData,
+                ilkData.ilkLabel,
                 fetchAmountinUSDPrice(tokenData.symbol, '30000'),
                 (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString(),
             );
@@ -139,10 +137,8 @@ describe('Mcd-Boost', function () {
         it(`... should call a boost with FL ${boostAmount} Dai on a ${ilkData.ilkLabel} vault`, async () => {
             // create a vault
             // vaultId = await openVault(
-            //     makerAddresses,
             //     proxy,
-            //     joinAddr,
-            //     tokenData,
+            //     ilkData.ilkLabel,
             //     (standardAmounts[tokenData.symbol] * 2).toString(),
             //     (parseInt(MIN_VAULT_DAI_AMOUNT) + 200).toString()
             // );

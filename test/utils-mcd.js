@@ -4,6 +4,7 @@ const hre = require('hardhat');
 const makerVersion = '1.1.3';
 
 const MCD_MANAGER_ADDR = '0x5ef30b9986345249bc32d8928B7ee64DE9435E39';
+const GET_CDPS_ADDR = '0x36a724Bd100c39f0Ea4D3A20F7097eE01A8Ff573';
 
 const canGenerateDebt = async (ilkInfo) => {
     const vat = await
@@ -13,7 +14,7 @@ const canGenerateDebt = async (ilkInfo) => {
     const debtCeiling = Math.round(ilkData.line / 1e45);
     const debt = (ilkData.Art / 1e18) * (ilkData.rate / 1e27);
 
-    return debtCeiling > (debt + 10000);
+    return debtCeiling > (debt + 40_0000);
 };
 
 const fetchMakerAddresses = async (version = makerVersion, params = {}) => {
@@ -24,11 +25,11 @@ const fetchMakerAddresses = async (version = makerVersion, params = {}) => {
     return res.data;
 };
 
-const getVaultsForUser = async (user, makerAddresses) => {
+const getVaultsForUser = async (user) => {
     const GetCdps = await
-    hre.ethers.getContractAt('IGetCdps', makerAddresses.GET_CDPS);
+    hre.ethers.getContractAt('IGetCdps', GET_CDPS_ADDR);
 
-    const vaults = await GetCdps.getCdpsAsc(makerAddresses.CDP_MANAGER, user);
+    const vaults = await GetCdps.getCdpsAsc(MCD_MANAGER_ADDR, user);
 
     return vaults;
 };

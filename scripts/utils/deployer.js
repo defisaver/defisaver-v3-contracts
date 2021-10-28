@@ -7,7 +7,7 @@ const ethers = require('ethers');
 const { write } = require('./writer');
 
 const getGasPrice = async (exGasPrice) => {
-    let defaultGasPrice = 100000000000;
+    let defaultGasPrice = 500000000000;
     let newGasPrice = defaultGasPrice;
 
     if (exGasPrice.gt('0')) {

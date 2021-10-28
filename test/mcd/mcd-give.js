@@ -35,7 +35,7 @@ describe('Mcd-Give', () => {
     it('... should give a cdp to another proxy', async () => {
         const { join } = ilks[0];
 
-        const vaultId = await openMcd(proxy, makerAddresses, join);
+        const vaultId = await openMcd(proxy, join);
 
         const secondProxy = await getProxy(secondAcc.address);
         const createProxy = false;
@@ -50,7 +50,7 @@ describe('Mcd-Give', () => {
     it('... should give a cdp to an address and proxy should be created for it', async () => {
         const { join } = ilks[0];
 
-        const vaultId = await openMcd(proxy, makerAddresses, join);
+        const vaultId = await openMcd(proxy, join);
 
         const createProxy = true;
 

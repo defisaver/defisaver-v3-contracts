@@ -45,6 +45,8 @@ const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramM
         [strategyName, triggerIds, actionIds, paramMapping, continuous],
     );
 
+    console.log('Create strategy');
+
     const receipt = await proxy['execute(address,bytes)'](strategyProxyAddr, functionData, {
         gasLimit: 5000000,
     });

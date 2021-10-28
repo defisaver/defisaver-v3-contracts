@@ -81,10 +81,8 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         const vaultColl = fetchAmountinUSDPrice('WETH', '30000');
         const amountDai = fetchAmountinUSDPrice('DAI', '12000');
         vaultId = await openVault(
-            makerAddresses,
             proxy,
-            ethJoin,
-            tokenData,
+            'ETH-A',
             vaultColl,
             amountDai,
         );
