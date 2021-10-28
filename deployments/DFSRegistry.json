@@ -3,58 +3,16 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "AlreadyInContractChangeError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "AlreadyInWaitPeriodChangeError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "ChangeNotReadyError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "EmptyPrevAddrError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "EntryAlreadyExistsError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "EntryNonExistentError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "EntryNotInChangeError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "NonContractCall",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SenderNotAdmin",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SenderNotOwner",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "WaitPeriodShortError",
-			"type": "error"
+			"name": "ADMIN_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
 		},
 		{
 			"inputs": [],
@@ -70,11 +28,167 @@
 			"type": "function"
 		},
 		{
+			"inputs": [],
+			"name": "DEFI_SAVER_LOGGER_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_ALREADY_IN_CONTRACT_CHANGE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_ALREADY_IN_WAIT_PERIOD_CHANGE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_CHANGE_NOT_READY",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_EMPTY_PREV_ADDR",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_ENTRY_ALREADY_EXISTS",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_ENTRY_NON_EXISTENT",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_ENTRY_NOT_IN_CHANGE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_WAIT_PERIOD_SHORTER",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "FACTORY_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "PROXY_AUTH_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "REGISTRY_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
 			"inputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "bytes32",
 					"name": "_id",
-					"type": "bytes4"
+					"type": "bytes32"
 				},
 				{
 					"internalType": "address",
@@ -108,9 +222,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "bytes32",
 					"name": "_id",
-					"type": "bytes4"
+					"type": "bytes32"
 				}
 			],
 			"name": "approveContractChange",
@@ -121,9 +235,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "bytes32",
 					"name": "_id",
-					"type": "bytes4"
+					"type": "bytes32"
 				}
 			],
 			"name": "approveWaitPeriodChange",
@@ -134,9 +248,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "bytes32",
 					"name": "_id",
-					"type": "bytes4"
+					"type": "bytes32"
 				}
 			],
 			"name": "cancelContractChange",
@@ -147,9 +261,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "bytes32",
 					"name": "_id",
-					"type": "bytes4"
+					"type": "bytes32"
 				}
 			],
 			"name": "cancelWaitPeriodChange",
@@ -160,9 +274,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "bytes32",
 					"name": "",
-					"type": "bytes4"
+					"type": "bytes32"
 				}
 			],
 			"name": "entries",
@@ -204,9 +318,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "bytes32",
 					"name": "_id",
-					"type": "bytes4"
+					"type": "bytes32"
 				}
 			],
 			"name": "getAddr",
@@ -223,9 +337,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "bytes32",
 					"name": "_id",
-					"type": "bytes4"
+					"type": "bytes32"
 				}
 			],
 			"name": "isRegistered",
@@ -262,9 +376,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "bytes32",
 					"name": "",
-					"type": "bytes4"
+					"type": "bytes32"
 				}
 			],
 			"name": "pendingAddresses",
@@ -281,9 +395,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "bytes32",
 					"name": "",
-					"type": "bytes4"
+					"type": "bytes32"
 				}
 			],
 			"name": "pendingWaitTimes",
@@ -300,9 +414,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "bytes32",
 					"name": "",
-					"type": "bytes4"
+					"type": "bytes32"
 				}
 			],
 			"name": "previousAddresses",
@@ -319,9 +433,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "bytes32",
 					"name": "_id",
-					"type": "bytes4"
+					"type": "bytes32"
 				}
 			],
 			"name": "revertToPreviousAddress",
@@ -332,9 +446,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "bytes32",
 					"name": "_id",
-					"type": "bytes4"
+					"type": "bytes32"
 				},
 				{
 					"internalType": "address",
@@ -350,9 +464,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes4",
+					"internalType": "bytes32",
 					"name": "_id",
-					"type": "bytes4"
+					"type": "bytes32"
 				},
 				{
 					"internalType": "uint256",
@@ -390,6 +504,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"hardhat": {}
 	}
 }

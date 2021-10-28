@@ -4,15 +4,13 @@ pragma solidity =0.8.4;
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/yearn/IYVault.sol";
-import "../../interfaces/yearn/IYearnRegistry.sol";
+import "../../DS/DSMath.sol";
+import "./helpers/YearnHelper.sol";
 
 /// @title Supplies tokens to Yearn vault
 /// @dev tokens need to be approved for DSProxy to pull them (token address)
-contract YearnSupply is ActionBase {
+contract YearnSupply is ActionBase, DSMath, YearnHelper {
     using TokenUtils for address;
-
-    IYearnRegistry public constant yearnRegistry =
-        IYearnRegistry(0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804);
 
     /// @param token - address of token to supply
     /// @param amount - amount of token to supply

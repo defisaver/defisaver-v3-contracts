@@ -4,13 +4,11 @@ pragma solidity =0.8.4;
 
 import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
-import "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+import "./helpers/UniV3Helper.sol";
 
 /// @title Collects tokensOwed from a position represented by tokenId
-contract UniCollectV3 is ActionBase{
+contract UniCollectV3 is ActionBase, DSMath, UniV3Helper {
     using TokenUtils for address;
-    IUniswapV3NonfungiblePositionManager public constant positionManager =
-        IUniswapV3NonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,

@@ -3,9 +3,6 @@
 
 pragma solidity =0.8.4;
 
-/************
-@title IPriceOracleGetterAave interface
-@notice Interface for the Aave price oracle.*/
 abstract contract IPriceOracleGetterAave {
     function getAssetPrice(address _asset) external virtual view returns (uint256);
     function getAssetsPrices(address[] calldata _assets) external virtual view returns(uint256[] memory);

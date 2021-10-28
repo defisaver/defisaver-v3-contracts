@@ -56,17 +56,22 @@ contract CompPayback is ActionBase, CompHelper {
     /// @param _cTokenAddr Address of the cToken we are paying back
     /// @param _amount Amount of the underlying token
     /// @param _from Address where we are pulling the underlying tokens from
+    /// @param _onBehalf Repay on behalf of which address (if 0x0 defaults to proxy)
     function _payback(
         address _cTokenAddr,
         uint256 _amount,
-        address _from
+        address _from,
+        address _onBehalf
     ) internal returns (uint256) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
-        // if type(uint).max payback whole amount
-        if (_amount == type(uint256).max) {
-            _amount = ICToken(_cTokenAddr).borrowBalanceCurrent(address(this));
+        // default to onBehalf of proxy
+        if (_onBehalf == address(0)) {
+            _onBehalf = address(this);
         }
+
+        uint256 maxDebt = ICToken(_cTokenAddr).borrowBalanceCurrent(_onBehalf);
+        _amount = _amount > maxDebt ? maxDebt : _amount;
 
         tokenAddr.pullTokensIfNeeded(_from, _amount);
 
@@ -78,10 +83,10 @@ contract CompPayback is ActionBase, CompHelper {
             }
         } else {
             TokenUtils.withdrawWeth(_amount);
-            ICToken(_cTokenAddr).repayBorrow{value: _amount}(); // reverts on fail
+            ICToken(_cTokenAddr).repayBorrowBehalf{value: _amount}(_onBehalf); // reverts on fail
         }
 
-        logger.Log(address(this), msg.sender, "CompPayback", abi.encode(tokenAddr, _amount, _from));
+        logger.Log(address(this), msg.sender, "CompPayback", abi.encode(tokenAddr, _amount, _from, _onBehalf));
 
         return _amount;
     }

@@ -3,8 +3,16 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "MarketIdNotFound",
-			"type": "error"
+			"name": "SOLO_MARGIN_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
 		},
 		{
 			"inputs": [

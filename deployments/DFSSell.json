@@ -3,69 +3,16 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "DestAmountMissingError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "InvalidExchangeZeroXError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "InvalidOffchainData",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "InvalidWrapperError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "NonContractCall",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "OutOfRangeSlicingError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "ReturnIndexValueError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SenderNotAdmin",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SenderNotOwner",
-			"type": "error"
-		},
-		{
-			"inputs": [
+			"name": "ADMIN_ADDR",
+			"outputs": [
 				{
-					"internalType": "uint256",
+					"internalType": "address",
 					"name": "",
-					"type": "uint256"
-				},
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
+					"type": "address"
 				}
 			],
-			"name": "SlippageHitError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SubIndexValueError",
-			"type": "error"
+			"stateMutability": "view",
+			"type": "function"
 		},
 		{
 			"inputs": [],
@@ -82,7 +29,163 @@
 		},
 		{
 			"inputs": [],
+			"name": "DFS_LOGGER_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "DFS_REG_CONTROLLER_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "DISCOUNT_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_DEST_AMOUNT_MISSING",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_NOT_ZEROX_EXCHANGE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_OFFCHAIN_DATA_INVALID",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_RETURN_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_SLIPPAGE_HIT",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_SUB_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_WRAPPER_INVALID",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "FACTORY_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "FEE_RECIPIENT_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "KYBER_ETH_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -226,14 +329,14 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes",
+					"internalType": "bytes[]",
 					"name": "_callData",
-					"type": "bytes"
+					"type": "bytes[]"
 				},
 				{
-					"internalType": "bytes32[]",
+					"internalType": "bytes[]",
 					"name": "_subData",
-					"type": "bytes32[]"
+					"type": "bytes[]"
 				},
 				{
 					"internalType": "uint8[]",
@@ -260,9 +363,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes",
+					"internalType": "bytes[]",
 					"name": "_callData",
-					"type": "bytes"
+					"type": "bytes[]"
 				}
 			],
 			"name": "executeActionDirect",
@@ -409,9 +512,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes",
+					"internalType": "bytes[]",
 					"name": "_callData",
-					"type": "bytes"
+					"type": "bytes[]"
 				}
 			],
 			"name": "parseInputs",
@@ -419,108 +522,101 @@
 				{
 					"components": [
 						{
+							"internalType": "address",
+							"name": "srcAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "destAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "srcAmount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "destAmount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "minPrice",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "dfsFeeDivider",
+							"type": "uint256"
+						},
+						{
+							"internalType": "address",
+							"name": "user",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "wrapper",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes",
+							"name": "wrapperData",
+							"type": "bytes"
+						},
+						{
 							"components": [
-								{
-									"internalType": "address",
-									"name": "srcAddr",
-									"type": "address"
-								},
-								{
-									"internalType": "address",
-									"name": "destAddr",
-									"type": "address"
-								},
-								{
-									"internalType": "uint256",
-									"name": "srcAmount",
-									"type": "uint256"
-								},
-								{
-									"internalType": "uint256",
-									"name": "destAmount",
-									"type": "uint256"
-								},
-								{
-									"internalType": "uint256",
-									"name": "minPrice",
-									"type": "uint256"
-								},
-								{
-									"internalType": "uint256",
-									"name": "dfsFeeDivider",
-									"type": "uint256"
-								},
-								{
-									"internalType": "address",
-									"name": "user",
-									"type": "address"
-								},
 								{
 									"internalType": "address",
 									"name": "wrapper",
 									"type": "address"
 								},
 								{
-									"internalType": "bytes",
-									"name": "wrapperData",
-									"type": "bytes"
+									"internalType": "address",
+									"name": "exchangeAddr",
+									"type": "address"
 								},
 								{
-									"components": [
-										{
-											"internalType": "address",
-											"name": "wrapper",
-											"type": "address"
-										},
-										{
-											"internalType": "address",
-											"name": "exchangeAddr",
-											"type": "address"
-										},
-										{
-											"internalType": "address",
-											"name": "allowanceTarget",
-											"type": "address"
-										},
-										{
-											"internalType": "uint256",
-											"name": "price",
-											"type": "uint256"
-										},
-										{
-											"internalType": "uint256",
-											"name": "protocolFee",
-											"type": "uint256"
-										},
-										{
-											"internalType": "bytes",
-											"name": "callData",
-											"type": "bytes"
-										}
-									],
-									"internalType": "struct DFSExchangeData.OffchainData",
-									"name": "offchainData",
-									"type": "tuple"
+									"internalType": "address",
+									"name": "allowanceTarget",
+									"type": "address"
+								},
+								{
+									"internalType": "uint256",
+									"name": "price",
+									"type": "uint256"
+								},
+								{
+									"internalType": "uint256",
+									"name": "protocolFee",
+									"type": "uint256"
+								},
+								{
+									"internalType": "bytes",
+									"name": "callData",
+									"type": "bytes"
 								}
 							],
-							"internalType": "struct DFSExchangeData.ExchangeData",
-							"name": "exchangeData",
+							"internalType": "struct DFSExchangeData.OffchainData",
+							"name": "offchainData",
 							"type": "tuple"
-						},
-						{
-							"internalType": "address",
-							"name": "from",
-							"type": "address"
-						},
-						{
-							"internalType": "address",
-							"name": "to",
-							"type": "address"
 						}
 					],
-					"internalType": "struct DFSSell.Params",
-					"name": "params",
+					"internalType": "struct DFSExchangeData.ExchangeData",
+					"name": "exchangeData",
 					"type": "tuple"
+				},
+				{
+					"internalType": "address",
+					"name": "from",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "to",
+					"type": "address"
 				}
 			],
 			"stateMutability": "pure",
@@ -667,6 +763,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"hardhat": {}
 	}
 }

@@ -11,23 +11,18 @@ import "../utils/FeeRecipient.sol";
 import "./DFSExchangeHelper.sol";
 import "./SaverExchangeRegistry.sol";
 import "../interfaces/exchange/IOffchainWrapper.sol";
+import "./helpers/ExchangeHelper.sol";
 
-contract DFSExchangeCore is DFSExchangeHelper, DFSExchangeData, DSMath {
+contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, ExchangeHelper {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
-    error SlippageHitError(uint256, uint256);
-    error DestAmountMissingError();
-    error InvalidWrapperError();
-    //Zerox exchange invalid
-    error InvalidExchangeZeroXError();
-
-    address public constant DISCOUNT_ADDRESS = 0x1b14E8D511c9A4395425314f849bD737BAF8208F;
-    address public constant SAVER_EXCHANGE_REGISTRY = 0x25dd3F51e0C3c3Ff164DDC02A8E4D65Bb9cBB12D;
-    address public constant ZRX_ALLOWLIST_ADDR = 0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F;
-
+    string public constant ERR_SLIPPAGE_HIT = "Slippage hit";
+    string public constant ERR_DEST_AMOUNT_MISSING = "Dest amount missing";
+    string public constant ERR_WRAPPER_INVALID = "Wrapper invalid";
+    string public constant ERR_NOT_ZEROX_EXCHANGE = "Zerox exchange invalid";
     FeeRecipient public constant feeRecipient =
-        FeeRecipient(0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A);
+        FeeRecipient(FEE_RECIPIENT_ADDRESS);
 
     /// @notice Internal method that preforms a sell on 0x/on-chain
     /// @dev Useful for other DFS contract to integrate for exchanging

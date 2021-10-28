@@ -3,63 +3,16 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "DestAmountMissingError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "ERC20OperationFail",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "InvalidExchangeZeroXError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "InvalidOffchainData",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "InvalidWrapperError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "NonContractCall",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "OutOfRangeSlicingError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "ReturnIndexValueError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SenderNotAdmin",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SenderNotOwner",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SlippageHitError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SubIndexValueError",
-			"type": "error"
+			"name": "ADMIN_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
 		},
 		{
 			"inputs": [],
@@ -76,7 +29,163 @@
 		},
 		{
 			"inputs": [],
+			"name": "DFS_LOGGER_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "DFS_REG_CONTROLLER_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "DISCOUNT_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_DEST_AMOUNT_MISSING",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_NOT_ZEROX_EXCHANGE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_OFFCHAIN_DATA_INVALID",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_RETURN_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_SLIPPAGE_HIT",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_SUB_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_WRAPPER_INVALID",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "FACTORY_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "FEE_RECIPIENT_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "KYBER_ETH_ADDRESS",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -654,6 +763,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"hardhat": {}
 	}
 }

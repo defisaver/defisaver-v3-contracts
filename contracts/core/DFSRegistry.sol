@@ -4,11 +4,12 @@ pragma solidity =0.8.4;
 
 import "../auth/AdminAuth.sol";
 import "../utils/DefisaverLogger.sol";
+import "./helpers/CoreHelper.sol";
 
 /// @title Stores all the important DFS addresses and can be changed (timelock)
-contract DFSRegistry is AdminAuth {
+contract DFSRegistry is AdminAuth, CoreHelper {
     DefisaverLogger public constant logger = DefisaverLogger(
-        0x5c55B921f590a89C1Ebe84dF170E655a82b62126
+        DEFI_SAVER_LOGGER_ADDR
     );
     error EntryAlreadyExistsError();
     error EntryNonExistentError();

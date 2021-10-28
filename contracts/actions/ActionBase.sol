@@ -3,15 +3,14 @@ pragma solidity =0.8.4;
 
 import "../auth/AdminAuth.sol";
 import "../core/DFSRegistry.sol";
-import "../DS/DSProxy.sol";
+import "./utils/helpers/ActionsUtilHelper.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
-abstract contract ActionBase is AdminAuth {
-    address public constant REGISTRY_ADDR = 0xD5cec8F03f803A74B60A7603Ed13556279376b09;
+abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     DefisaverLogger public constant logger = DefisaverLogger(
-        0x5c55B921f590a89C1Ebe84dF170E655a82b62126
+        DFS_LOGGER_ADDR
     );
 
     //Wrong sub index value

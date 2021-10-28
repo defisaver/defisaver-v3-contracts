@@ -6,28 +6,17 @@ import "../auth/AdminAuth.sol";
 import "../interfaces/exchange/IUniswapRouter.sol";
 import "../interfaces/IBotRegistry.sol";
 import "./TokenUtils.sol";
+import "./helpers/UtilHelper.sol";
 
 /// @title Contract used to refill tx sending bots when they are low on eth
-contract BotRefills is AdminAuth {
+contract BotRefills is AdminAuth, UtilHelper {
     using TokenUtils for address;
     error WrongRefillCallerError();
     error NotAuthBotError();
 
-    address internal refillCaller = 0x33fDb79aFB4456B604f376A45A546e7ae700e880;
-    address internal feeAddr = 0x76720aC2574631530eC8163e4085d6F98513fb27;
-
-    address internal constant BOT_REGISTRY_ADDRESS = 0x637726f8b08a7ABE3aE3aCaB01A80E2d8ddeF77B;
-    address internal constant DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-
-    IUniswapRouter internal router = IUniswapRouter(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+    IUniswapRouter internal router = IUniswapRouter(UNI_V2_ROUTER);
 
     mapping(address => bool) public additionalBots;
-
-    constructor() {
-        additionalBots[0x33fDb79aFB4456B604f376A45A546e7ae700e880] = true;
-        additionalBots[0x7fb85Bab66C4a14eb4c048a34CEf0AB16747778d] = true;
-        additionalBots[0x446aD06C447b26D129C131E893f48b3a518a63c7] = true;
-    }
 
     modifier isApprovedBot(address _botAddr) {
         if (!(IBotRegistry(BOT_REGISTRY_ADDRESS).botList(_botAddr) || additionalBots[_botAddr])){

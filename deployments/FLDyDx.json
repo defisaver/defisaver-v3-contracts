@@ -3,51 +3,6 @@
 	"abi": [
 		{
 			"inputs": [],
-			"name": "MarketIdNotFound",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "NonContractCall",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "OnlyDyDxCallerError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "ReentrantCall",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "ReturnIndexValueError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SameCallerError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SenderNotAdmin",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SenderNotOwner",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SubIndexValueError",
-			"type": "error"
-		},
-		{
-			"inputs": [],
 			"name": "ADMIN_VAULT_ADDR",
 			"outputs": [
 				{
@@ -61,12 +16,51 @@
 		},
 		{
 			"inputs": [],
+			"name": "CALLBACK_SELECTOR",
+			"outputs": [
+				{
+					"internalType": "bytes4",
+					"name": "",
+					"type": "bytes4"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "DYDX_DUST_FEE",
 			"outputs": [
 				{
 					"internalType": "uint256",
 					"name": "",
 					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_RETURN_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_SUB_INDEX_VALUE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
 				}
 			],
 			"stateMutability": "view",
@@ -253,14 +247,14 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes",
+					"internalType": "bytes[]",
 					"name": "_callData",
-					"type": "bytes"
+					"type": "bytes[]"
 				},
 				{
-					"internalType": "bytes32[]",
+					"internalType": "bytes[]",
 					"name": "",
-					"type": "bytes32[]"
+					"type": "bytes[]"
 				},
 				{
 					"internalType": "uint8[]",
@@ -287,9 +281,9 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes",
+					"internalType": "bytes[]",
 					"name": "_callData",
-					"type": "bytes"
+					"type": "bytes[]"
 				}
 			],
 			"name": "executeActionDirect",
@@ -333,54 +327,32 @@
 		{
 			"inputs": [
 				{
-					"internalType": "bytes",
+					"internalType": "bytes[]",
 					"name": "_callData",
-					"type": "bytes"
+					"type": "bytes[]"
 				}
 			],
 			"name": "parseInputs",
 			"outputs": [
 				{
-					"components": [
-						{
-							"internalType": "address[]",
-							"name": "tokens",
-							"type": "address[]"
-						},
-						{
-							"internalType": "uint256[]",
-							"name": "amounts",
-							"type": "uint256[]"
-						},
-						{
-							"internalType": "uint256[]",
-							"name": "modes",
-							"type": "uint256[]"
-						},
-						{
-							"internalType": "address",
-							"name": "onBehalfOf",
-							"type": "address"
-						},
-						{
-							"internalType": "address",
-							"name": "flParamGetterAddr",
-							"type": "address"
-						},
-						{
-							"internalType": "bytes",
-							"name": "flParamGetterData",
-							"type": "bytes"
-						},
-						{
-							"internalType": "bytes",
-							"name": "recipeData",
-							"type": "bytes"
-						}
-					],
-					"internalType": "struct IFlashLoanBase.FlashLoanParams",
-					"name": "inputData",
-					"type": "tuple"
+					"internalType": "uint256",
+					"name": "amount",
+					"type": "uint256"
+				},
+				{
+					"internalType": "address",
+					"name": "token",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "flParamGetterAddr",
+					"type": "address"
+				},
+				{
+					"internalType": "bytes",
+					"name": "flParamGetterData",
+					"type": "bytes"
 				}
 			],
 			"stateMutability": "pure",

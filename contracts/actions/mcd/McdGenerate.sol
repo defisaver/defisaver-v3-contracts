@@ -15,8 +15,7 @@ import "./helpers/McdHelper.sol";
 contract McdGenerate is ActionBase, McdHelper {
     using TokenUtils for address;
 
-    address public constant JUG_ADDRESS = 0x19c0976f590D67707E62397C87829d896Dc0f1F1;
-    ISpotter public constant spotter = ISpotter(0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3);
+    ISpotter public constant spotter = ISpotter(SPOTTER_ADDRESS);
 
     struct Params {
         uint256 vaultId;

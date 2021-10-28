@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-operators */
 const { getAssetInfo } = require('@defisaver/tokens');
 const hre = require('hardhat');
 
@@ -28,7 +29,7 @@ describe('FL-AaveV2', function () {
     let senderAcc; let proxy; let RecipeExecutorAddr; let
         aaveFl;
 
-    const FLASHLOAN_TOKENS = ['WETH', 'DAI', 'USDC', 'WBTC', 'USDT', 'YFI', 'BAT', 'LINK', 'MKR'];
+    const FLASHLOAN_TOKENS = ['WETH', 'DAI', 'USDC', 'WBTC', 'USDT', 'YFI', 'LINK', 'MKR'];
 
     before(async () => {
         RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
@@ -58,8 +59,11 @@ describe('FL-AaveV2', function () {
             const feeAmount = (
                 amount
                 * AAVE_FL_FEE
-                * 10 ** assetInfo.decimals
+                * (10 ** assetInfo.decimals)
+                / 100
             ).toFixed(0);
+
+            console.log(loanAmount.toString(), feeAmount.toString());
 
             await approve(assetInfo.address, proxy.address);
 

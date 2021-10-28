@@ -1073,6 +1073,7 @@ const reflexerSaviourWithdraw = async (proxy, to, safeId, lpTokenAmount) => {
     const functionData = reflexerSaviourWithdrawAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](reflexerSaviourWithdrawAddress, functionData, { gasLimit: 3000000 });
 };
+
 const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, owner, to) => {
     const claimInstMakerAddress = await getAddrFromRegistry('ClaimInstMaker');
     const claimInstMakerAction = new dfs.actions.insta.ClaimInstMakerAction(
@@ -1080,6 +1081,216 @@ const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, o
     );
     const functionData = claimInstMakerAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](claimInstMakerAddress, functionData);
+};
+
+const pullTokensInstDSA = async (proxy, dsaAddress, tokens, amounts, to) => {
+    const instPulLTokenAddress = await getAddrFromRegistry('InstPullTokens');
+    const instPullTokenAction = new dfs.actions.insta.InstPullTokensAction(
+        dsaAddress, tokens, amounts, to,
+    );
+    const functionData = instPullTokenAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](instPulLTokenAddress, functionData);
+};
+
+const balancerSupply = async (proxy, poolId, from, to, tokens, maxAmountsIn, userData) => {
+    const balancerSupplyAddress = await getAddrFromRegistry('BalancerV2Supply');
+    const balancerSupplyAction = new dfs.actions.balancer.BalancerV2SupplyAction(
+        poolId, from, to, tokens, maxAmountsIn, userData,
+    );
+    const functionData = balancerSupplyAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](balancerSupplyAddress, functionData);
+};
+
+const balancerClaim = async (proxy, liquidityProvider, to, weeks, balances, merkleProofs) => {
+    const balancerClaimAddress = await getAddrFromRegistry('BalancerV2Claim');
+    const balancerClaimAction = new dfs.actions.balancer.BalancerV2ClaimAction(
+        liquidityProvider, to, weeks, balances, merkleProofs,
+    );
+    const functionData = balancerClaimAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](balancerClaimAddress, functionData);
+};
+
+const balancerWithdraw = async (
+    proxy,
+    poolId,
+    from,
+    to,
+    lpTokenAmount,
+    tokens,
+    minAmountsOut,
+    userData,
+) => {
+    const balancerWithdrawAddress = await getAddrFromRegistry('BalancerV2Withdraw');
+    const balancerWithdrawAction = new dfs.actions.balancer.BalancerV2WithdrawAction(
+        poolId,
+        from,
+        to,
+        lpTokenAmount,
+        tokens,
+        minAmountsOut,
+        userData,
+    );
+    const functionData = balancerWithdrawAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](balancerWithdrawAddress, functionData);
+};
+
+const changeProxyOwner = async (proxy, newOwner) => {
+    const changeProxyOwnerAddress = await getAddrFromRegistry('ChangeProxyOwner');
+    const changeProxyOwnerAction = new dfs.actions.basic.ChangeProxyOwnerAction(
+        newOwner,
+    );
+    const functionData = changeProxyOwnerAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](changeProxyOwnerAddress, functionData);
+};
+
+const curveDeposit = async (
+    proxy,
+    sender,
+    receiver,
+    depositTarget,
+    lpToken,
+    minMintAmount,
+    amounts,
+    tokens,
+    useUnderlying,
+) => {
+    const curveDepositAddr = await getAddrFromRegistry('CurveDeposit');
+    const curveViewAddr = await getAddrFromRegistry('CurveView');
+    const curveView = await hre.ethers.getContractAt('CurveView', curveViewAddr);
+    const sig = await curveView['curveDepositSig(uint256,bool)'](tokens.length, useUnderlying);
+
+    const curveDepositAction = new dfs.actions.curve.CurveDepositAction(
+        sender,
+        receiver,
+        depositTarget,
+        lpToken,
+        sig,
+        minMintAmount,
+        amounts,
+        tokens,
+        useUnderlying,
+    );
+
+    const functionData = curveDepositAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](curveDepositAddr, functionData, { gasLimit: 3000000 });
+};
+
+const curveWithdraw = async (
+    proxy,
+    sender,
+    receiver,
+    pool,
+    lpToken,
+    burnAmount,
+    minAmounts,
+    tokens,
+    withdrawExact,
+    useUnderlying,
+) => {
+    const curveWithdrawAddr = await getAddrFromRegistry('CurveWithdraw');
+    const curveViewAddr = await getAddrFromRegistry('CurveView');
+    const curveView = await hre.ethers.getContractAt('CurveView', curveViewAddr);
+    let sig;
+    if (withdrawExact) {
+        sig = await curveView.curveWithdrawImbalanceSig(tokens.length, useUnderlying);
+    } else {
+        sig = await curveView.curveWithdrawSig(tokens.length, useUnderlying);
+    }
+
+    const curveWithdrawAction = new dfs.actions.curve.CurveWithdrawAction(
+        sender,
+        receiver,
+        pool,
+        lpToken,
+        sig,
+        burnAmount,
+        minAmounts,
+        tokens,
+        withdrawExact,
+        useUnderlying,
+    );
+
+    const functionData = curveWithdrawAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](curveWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
+
+const curveGaugeDeposit = async (
+    proxy,
+    gaugeAddr,
+    lpToken,
+    sender,
+    onBehalfOf,
+    amount,
+) => {
+    const curveGaugeDepositAddr = await getAddrFromRegistry('CurveGaugeDeposit');
+
+    const curveGaugeDepositAction = new dfs.actions.curve.CurveGaugeDepositAction(
+        gaugeAddr,
+        lpToken,
+        sender,
+        onBehalfOf,
+        amount,
+    );
+
+    const functionData = curveGaugeDepositAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](curveGaugeDepositAddr, functionData, { gasLimit: 3000000 });
+};
+
+const curveGaugeWithdraw = async (
+    proxy,
+    gaugeAddr,
+    lpToken,
+    receiver,
+    amount,
+) => {
+    const curveGaugeWithdrawAddr = await getAddrFromRegistry('CurveGaugeWithdraw');
+
+    const curveGaugeWithdrawAction = new dfs.actions.curve.CurveGaugeWithdrawAction(
+        gaugeAddr,
+        lpToken,
+        receiver,
+        amount,
+    );
+
+    const functionData = curveGaugeWithdrawAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](curveGaugeWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
+
+const curveMintCrv = async (
+    proxy,
+    gaugeAddrs,
+    receiver,
+) => {
+    const curveMintCrvAddr = await getAddrFromRegistry('CurveMintCrv');
+
+    const curveMintCrvAction = new dfs.actions.curve.CurveMintCrvAction(
+        gaugeAddrs,
+        receiver,
+    );
+
+    const functionData = curveMintCrvAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](curveMintCrvAddr, functionData, { gasLimit: 3000000 });
+};
+
+const curveClaimFees = async (
+    proxy,
+    claimFor,
+    receiver,
+) => {
+    const curveClaimFeesAddr = await getAddrFromRegistry('CurveClaimFees');
+
+    const curveClaimFeesAction = new dfs.actions.curve.CurveClaimFeesAction(
+        claimFor,
+        receiver,
+    );
+
+    const functionData = curveClaimFeesAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](curveClaimFeesAddr, functionData, { gasLimit: 3000000 });
 };
 
 module.exports = {
@@ -1145,6 +1356,21 @@ module.exports = {
 
     lidoStake,
 
+    curveDeposit,
+    curveWithdraw,
+
+    curveGaugeDeposit,
+    curveGaugeWithdraw,
+    curveMintCrv,
+    curveClaimFees,
+
     buyTokenIfNeeded,
     claimInstMaker,
+    pullTokensInstDSA,
+
+    balancerSupply,
+    balancerWithdraw,
+    balancerClaim,
+
+    changeProxyOwner,
 };

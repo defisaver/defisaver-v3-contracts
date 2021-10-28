@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.4;
 
-import "../../interfaces/IDFSRegistry.sol";
-import "../../interfaces/IDSProxy.sol";
-import "../../auth/AdminAuth.sol";
+import "../interfaces/IDFSRegistry.sol";
+import "../interfaces/IDSProxy.sol";
+import "../auth/AdminAuth.sol";
+import "./helpers/CoreHelper.sol";
 
 /// @title ProxyAuth Gets DSProxy auth from users and is callable by the Executor
-contract ProxyAuth is AdminAuth {
+contract ProxyAuth is AdminAuth, CoreHelper {
 
-    address public constant REGISTRY_ADDR = 0xD5cec8F03f803A74B60A7603Ed13556279376b09;
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     bytes4 constant STRATEGY_EXECUTOR_ID = bytes4(keccak256("StrategyExecutor"));

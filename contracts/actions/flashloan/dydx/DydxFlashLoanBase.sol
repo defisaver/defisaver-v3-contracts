@@ -3,13 +3,10 @@
 pragma solidity =0.8.4;
 import "../../../utils/SafeMath.sol";
 import "../../../interfaces/dydx/ISoloMargin.sol";
+import "../helpers/FLHelper.sol";
 
-contract DydxFlashLoanBase {
+contract DydxFlashLoanBase is FLHelper {
     using SafeMath for uint256;
-
-    address public constant SOLO_MARGIN_ADDRESS = 0x1E0447b19BB6EcFdAe1e4AE1694b0C3659614e4e;
-
-    error MarketIdNotFound();
 
     function _getMarketIdFromTokenAddress(address _solo, address _token)
         internal

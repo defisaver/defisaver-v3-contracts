@@ -5,10 +5,11 @@ pragma solidity =0.8.4;
 import "../auth/AdminAuth.sol";
 import "../interfaces/IProxyRegistry.sol";
 import "../interfaces/IDSProxy.sol";
+import "./helpers/UtilHelper.sol";
 
 /// @title Checks Mcd registry and replaces the proxy addr if owner changed
-contract DFSProxyRegistry is AdminAuth {
-    IProxyRegistry public mcdRegistry = IProxyRegistry(0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4);
+contract DFSProxyRegistry is AdminAuth, UtilHelper {
+    IProxyRegistry public mcdRegistry = IProxyRegistry(MKR_PROXY_REGISTRY);
 
     mapping(address => address) public changedOwners;
     mapping(address => address[]) public additionalProxies;
