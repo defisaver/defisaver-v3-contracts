@@ -68,6 +68,9 @@ contract LidoWrap is ActionBase, DSMath, LidoHelper {
         }else{
             wStEthReceivedAmount = _lidoWrapStEth(_inputData);
         }
+        lidoWrappedStEth.withdrawTokens(_inputData.to, wStEthReceivedAmount);
+
+        logger.Log(address(this), msg.sender, "LidoWrap", abi.encode(_inputData, wStEthReceivedAmount));
     }
 
 
@@ -82,10 +85,6 @@ contract LidoWrap is ActionBase, DSMath, LidoHelper {
         uint256 wStEthBalanceAfter = lidoWrappedStEth.getBalance(address(this));
 
         wStEthReceivedAmount = sub(wStEthBalanceAfter, wStEthBalanceBefore);
-
-        lidoWrappedStEth.withdrawTokens(_inputData.to, wStEthReceivedAmount);
-
-        logger.Log(address(this), msg.sender, "LidoWrap", abi.encode(_inputData, wStEthReceivedAmount));
     }
 
     function _lidoWrapStEth(Params memory _inputData) internal returns (uint256 wStEthReceivedAmount){
@@ -94,9 +93,6 @@ contract LidoWrap is ActionBase, DSMath, LidoHelper {
         lidoStEth.approveToken(lidoWrappedStEth, _inputData.amount);
 
         wStEthReceivedAmount = IWStEth(lidoWrappedStEth).wrap(_inputData.amount);
-        lidoWrappedStEth.withdrawTokens(_inputData.to, wStEthReceivedAmount);
-
-        logger.Log(address(this), msg.sender, "LidoWrap", abi.encode(_inputData, wStEthReceivedAmount));
     }
 
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
