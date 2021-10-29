@@ -1,5 +1,5 @@
 {
-	"contractName": "LidoStake",
+	"contractName": "LidoWrap",
 	"abi": [
 		{
 			"inputs": [],
@@ -174,7 +174,20 @@
 		},
 		{
 			"inputs": [],
-			"name": "lidoStakingContractAddress",
+			"name": "lidoStEth",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "lidoWrappedStEth",
 			"outputs": [
 				{
 					"internalType": "address",

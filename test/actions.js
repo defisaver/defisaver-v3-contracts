@@ -1050,6 +1050,28 @@ const lidoStake = async (amount, from, to, proxy) => {
     const functionData = lidoStakeAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](lidoStakeAddress, functionData, { gasLimit: 3000000 });
 };
+const lidoUnwrap = async (amount, from, to, proxy) => {
+    const lidoUnwrapAddress = await getAddrFromRegistry('LidoUnwrap');
+    const lidoUnwrapAction = new dfs.actions.lido.LidoUnwrapAction(
+        amount,
+        from,
+        to,
+    );
+    const functionData = lidoUnwrapAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](lidoUnwrapAddress, functionData, { gasLimit: 3000000 });
+};
+
+const lidoWrap = async (amount, from, to, useEth, proxy) => {
+    const lidoWrapAddress = await getAddrFromRegistry('LidoWrap');
+    const lidoWrapAction = new dfs.actions.lido.LidoWrapAction(
+        amount,
+        from,
+        to,
+        useEth,
+    );
+    const functionData = lidoWrapAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](lidoWrapAddress, functionData, { gasLimit: 3000000 });
+};
 
 const reflexerSaviourDeposit = async (proxy, from, safeId, lpTokenAmount) => {
     const reflexerSaviourDepositAddress = await getAddrFromRegistry('ReflexerNativeUniV2SaviourDeposit');
@@ -1356,6 +1378,8 @@ module.exports = {
     yearnWithdraw,
 
     lidoStake,
+    lidoWrap,
+    lidoUnwrap,
 
     curveDeposit,
     curveWithdraw,
