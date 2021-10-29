@@ -7,13 +7,11 @@ import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../DS/DSMath.sol";
 import "../../interfaces/lido/IWStEth.sol";
+import "./helpers/LidoHelper.sol";
 
 /// @title Wraps either WETH or StEth into WrappedStakedEther (WStEth)
-contract LidoWrap is ActionBase, DSMath {
+contract LidoWrap is ActionBase, DSMath, LidoHelper {
     using TokenUtils for address;
-
-    address public constant lidoWrappedStEth = 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;
-    address public constant lidoStEth = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
 
     /// @param amount - amount to pull
     /// @param from - address from which to pull token from

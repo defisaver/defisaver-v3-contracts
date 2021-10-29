@@ -6,11 +6,10 @@ pragma experimental ABIEncoderV2;
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../DS/DSMath.sol";
+import "./helpers/LidoHelper.sol";
 /// @title Supplies ETH (action receives WETH) to Lido for ETH2 Staking. Receives stETH in return
-contract LidoStake is ActionBase, DSMath {
+contract LidoStake is ActionBase, DSMath, LidoHelper {
     using TokenUtils for address;
-
-    address public constant lidoStakingContractAddress = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
 
     /// @param amount - amount of WETH to pull
     /// @param from - address from which to pull WETH from
@@ -63,14 +62,14 @@ contract LidoStake is ActionBase, DSMath {
             TokenUtils.WETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         TokenUtils.withdrawWeth(_inputData.amount);
 
-        uint256 stEthBalanceBefore = lidoStakingContractAddress.getBalance(address(this));
-        (bool sent, ) = payable(lidoStakingContractAddress).call{value: _inputData.amount}("");
+        uint256 stEthBalanceBefore = lidoStEth.getBalance(address(this));
+        (bool sent, ) = payable(lidoStEth).call{value: _inputData.amount}("");
         require(sent, "Failed to send Ether");
-        uint256 stEthBalanceAfter = lidoStakingContractAddress.getBalance(address(this));
+        uint256 stEthBalanceAfter = lidoStEth.getBalance(address(this));
 
         stEthReceivedAmount = sub(stEthBalanceAfter, stEthBalanceBefore);
 
-        lidoStakingContractAddress.withdrawTokens(_inputData.to, stEthReceivedAmount);
+        lidoStEth.withdrawTokens(_inputData.to, stEthReceivedAmount);
 
         logger.Log(address(this), msg.sender, "LidoStake", abi.encode(_inputData, stEthReceivedAmount));
     }

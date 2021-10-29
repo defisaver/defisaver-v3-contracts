@@ -104,7 +104,9 @@ describe('Lido WStEth', function () {
 
         expect(wethBalanceAfter).to.be.eq(wethBalanceBefore.sub(amount));
 
+        const wethChange = wethBalanceBefore.sub(wethBalanceAfter);
+        console.log(`Deposited ${wethChange.toString()} WETH`);
         const wStEthChange = wStEthBalanceAfter.sub(wStEthBalanceBefore);
-        console.log(wStEthChange.toString());
+        console.log(`After wrapping received ${wStEthChange.toString()} WStEth`);
     }).timeout(50000);
 });
