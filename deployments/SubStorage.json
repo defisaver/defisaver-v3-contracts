@@ -347,6 +347,11 @@
 					"internalType": "bytes32[]",
 					"name": "_subData",
 					"type": "bytes32[]"
+				},
+				{
+					"internalType": "bool",
+					"name": "_isBundle",
+					"type": "bool"
 				}
 			],
 			"name": "subscribeToStrategy",

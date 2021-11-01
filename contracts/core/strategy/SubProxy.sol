@@ -23,7 +23,8 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission {
         uint64 _strategyId,
         bool _active,
         bytes[] memory _triggerData,
-        bytes32[] memory _subData
+        bytes32[] memory _subData,
+        bool _isBundle
     ) public {
         /// gas-block-0
         address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
@@ -32,7 +33,7 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission {
 
         givePermission(proxyAuthAddr); // gas-block-1 - 12,233 gas cost if have permission, 54,938 first time
 
-        SubStorage(subStorageAddr).subscribeToStrategy(_strategyId, _active, _triggerData, _subData);
+        SubStorage(subStorageAddr).subscribeToStrategy(_strategyId, _active, _triggerData, _subData, _isBundle);
     }
 
     function updateSubData(

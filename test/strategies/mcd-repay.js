@@ -13,7 +13,7 @@ const {
     WETH_ADDRESS,
 } = require('../utils');
 
-const { createStrategy, addBotCaller } = require('../utils-strategies');
+const { createStrategy, createBundle, addBotCaller } = require('../utils-strategies');
 
 const { getRatio } = require('../utils-mcd');
 
@@ -29,7 +29,7 @@ describe('Mcd-Repay-Strategy', function () {
     let botAcc;
     let flDyDx;
     let strategyExecutor;
-    let strategyId;
+    let subId;
     let vaultId;
     let vaultId2;
     let mcdView;
@@ -48,7 +48,10 @@ describe('Mcd-Repay-Strategy', function () {
         await redeploy('McdPayback');
         await redeploy('StrategyStorage');
         await redeploy('SubStorage');
+        await redeploy('BundleStorage');
+
         mcdView = await redeploy('McdView');
+
         await redeploy('SubProxy');
         await redeploy('StrategyProxy');
         await redeploy('RecipeExecutor');
@@ -69,21 +72,7 @@ describe('Mcd-Repay-Strategy', function () {
         proxy = await getProxy(senderAcc.address);
     });
 
-    it('... should make a new strategy', async () => {
-
-        console.log('pre open');
-        vaultId = await openVault(
-            proxy,
-            'ETH-A',
-            fetchAmountinUSDPrice('WETH', '25000'),
-            fetchAmountinUSDPrice('DAI', '12000'),
-        );
-
-        console.log('post open');
-
-
-        console.log('Vault id: ', vaultId);
-
+    const createRepayStrategy = () => {
         const repayStrategy = new dfs.Strategy('McdRepayStrategy');
 
         repayStrategy.addSubSlot('&vaultId', 'uint256');
@@ -134,42 +123,10 @@ describe('Mcd-Repay-Strategy', function () {
         repayStrategy.addAction(mcdPaybackAction);
         repayStrategy.addAction(mcdRatioCheckAction);
 
-        const callData = repayStrategy.encodeForDsProxyCall();
+        return repayStrategy.encodeForDsProxyCall();
+    };
 
-        await createStrategy(proxy, ...callData, true);
-
-        const rationUnder = hre.ethers.utils.parseUnits('2.6', '18');
-        const targetRatio = hre.ethers.utils.parseUnits('2.2', '18');
-
-        strategyId = await subMcdRepayStrategy(proxy, vaultId, rationUnder, targetRatio);
-    });
-
-    it('... should trigger a maker repay strategy', async () => {
-        const ratioBefore = await getRatio(mcdView, vaultId);
-        const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '800'), '18');
-
-        await callMcdRepayStrategy(botAcc, strategyExecutor, strategyId, ethJoin, repayAmount);
-
-        const ratioAfter = await getRatio(mcdView, vaultId);
-
-        console.log(
-            `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
-        );
-
-        expect(ratioAfter).to.be.gt(ratioBefore);
-    });
-
-    // FL(DAI), Sell, Fee, Payback, Withdraw
-    it('... should make a new FL Mcd Repay strategy', async () => {
-        vaultId2 = await openVault(
-            proxy,
-            'ETH-A',
-            fetchAmountinUSDPrice('WETH', '25000'),
-            fetchAmountinUSDPrice('DAI', '12000'),
-        );
-
-        console.log('Vault id: ', vaultId2);
-
+    const createFLRepayStrategy = () => {
         const repayStrategy = new dfs.Strategy('MakerFLRepayStrategy');
 
         repayStrategy.addSubSlot('&vaultId', 'uint256');
@@ -216,24 +173,60 @@ describe('Mcd-Repay-Strategy', function () {
         repayStrategy.addAction(mcdPaybackAction);
         repayStrategy.addAction(withdrawAction);
 
-        const callData = repayStrategy.encodeForDsProxyCall();
+        return repayStrategy.encodeForDsProxyCall();
+    };
 
-        await createStrategy(proxy, ...callData, true);
+    it('... should create 2 repay strategies and create a bundle', async () => {
+        const repayStrategyEncoded = createRepayStrategy();
+        const flRepayStrategyEncoded = createFLRepayStrategy();
 
-        const rationUnder = hre.ethers.utils.parseUnits('2.6', '18');
+        await createStrategy(proxy, ...repayStrategyEncoded, true);
+        await createStrategy(proxy, ...flRepayStrategyEncoded, true);
+
+        await createBundle(proxy, [0, 1]);
+    });
+
+    it('... should sub the user to a repay bundle ', async () => {
+        vaultId = await openVault(
+            proxy,
+            'ETH-A',
+            fetchAmountinUSDPrice('WETH', '25000'),
+            fetchAmountinUSDPrice('DAI', '12000'),
+        );
+
+        console.log('Vault id: ', vaultId);
+
+        const ratioUnder = hre.ethers.utils.parseUnits('2.6', '18');
         const targetRatio = hre.ethers.utils.parseUnits('2.2', '18');
 
-        strategyId = await subMcdRepayStrategy(proxy, vaultId2, rationUnder, targetRatio);
+        const bundleId = 0;
+
+        subId = subMcdRepayStrategy(proxy, bundleId, vaultId, ratioUnder, targetRatio, true);
     });
 
     it('... should trigger a maker repay strategy', async () => {
         const ratioBefore = await getRatio(mcdView, vaultId);
         const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '1200'), '18');
 
-        // eslint-disable-next-line max-len
-        await callFLMcdRepayStrategy(botAcc, strategyExecutor, flDyDx.address, strategyId, ethJoin, repayAmount);
+        await callMcdRepayStrategy(botAcc, strategyExecutor, 0, subId, ethJoin, repayAmount);
 
-        const ratioAfter = await getRatio(mcdView, vaultId2);
+        const ratioAfter = await getRatio(mcdView, vaultId);
+
+        console.log(
+            `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+        );
+
+        expect(ratioAfter).to.be.gt(ratioBefore);
+    });
+
+    it('... should trigger a maker FL repay strategy', async () => {
+        const ratioBefore = await getRatio(mcdView, vaultId);
+        const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '1000'), '18');
+
+        // eslint-disable-next-line max-len
+        await callFLMcdRepayStrategy(botAcc, strategyExecutor, 1, flDyDx.address, subId, ethJoin, repayAmount);
+
+        const ratioAfter = await getRatio(mcdView, vaultId);
 
         console.log(
             `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
