@@ -13,8 +13,6 @@ import "./strategy/SubStorage.sol";
 import "../interfaces/flashloan/IFlashLoanBase.sol";
 import "../interfaces/ITrigger.sol";
 
-import "hardhat/console.sol";
-
 /// @title Handles FL taking and executes actions
 contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
@@ -57,9 +55,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
             address bundleStorageAddr = registry.getAddr(BUNDLE_STORAGE_ID);
             address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
 
-            console.log("Here ", sub.isBundle);
             if (sub.isBundle) {
-
                 strategyId = BundleStorage(bundleStorageAddr).getStrategyId(sub.strategyId, _strategyIndex);
             }
 

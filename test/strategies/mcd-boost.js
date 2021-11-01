@@ -9,7 +9,7 @@ const {
     getProxy, redeploy, fetchAmountinUSDPrice, formatExchangeObj, DAI_ADDR,
 } = require('../utils');
 
-const { createStrategy, addBotCaller } = require('../utils-strategies.js');
+const { createBundle, createStrategy, addBotCaller } = require('../utils-strategies.js');
 
 const { getRatio } = require('../utils-mcd.js');
 
@@ -24,56 +24,14 @@ describe('Mcd-Boost-Strategy', function () {
     let proxy;
     let botAcc;
     let strategyExecutor;
-    let strategyId;
+    let subId;
     let vaultId;
-    let vaultIdFL;
     let mcdView;
     let flDyDx;
 
     const ethJoin = ilks[0].join;
 
-    before(async () => {
-        senderAcc = (await hre.ethers.getSigners())[0];
-        botAcc = (await hre.ethers.getSigners())[1];
-
-        await redeploy('BotAuth');
-        await redeploy('ProxyAuth');
-        await redeploy('McdRatioTrigger');
-        await redeploy('McdWithdraw');
-        await redeploy('DFSSell');
-        await redeploy('McdPayback');
-        await redeploy('StrategyStorage');
-        await redeploy('SubStorage');
-        mcdView = await redeploy('McdView');
-        await redeploy('SubProxy');
-        await redeploy('StrategyProxy');
-        await redeploy('RecipeExecutor');
-        await redeploy('GasFeeTaker');
-        await redeploy('McdRatioCheck');
-        strategyExecutor = await redeploy('StrategyExecutor');
-
-        flDyDx = await redeploy('FLDyDx');
-        await redeploy('McdSupply');
-        await redeploy('McdWithdraw');
-        await redeploy('McdGenerate');
-        await redeploy('McdPayback');
-        await redeploy('McdOpen');
-
-        await addBotCaller(botAcc.address);
-
-        proxy = await getProxy(senderAcc.address);
-    });
-
-    it('... should make a new Mcd Boost strategy', async () => {
-        vaultId = await openVault(
-            proxy,
-            'ETH-A',
-            fetchAmountinUSDPrice('WETH', '30000'),
-            fetchAmountinUSDPrice('DAI', '12000'),
-        );
-
-        console.log('VaultId: ', vaultId);
-
+    const createMcdBoostStrategy = () => {
         const mcdBoostStrategy = new dfs.Strategy('MakerBoostStrategy');
         mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
         mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
@@ -123,44 +81,10 @@ describe('Mcd-Boost-Strategy', function () {
         mcdBoostStrategy.addAction(mcdSupplyAction);
         mcdBoostStrategy.addAction(mcdRatioCheckAction);
 
-        const callData = mcdBoostStrategy.encodeForDsProxyCall();
+        return mcdBoostStrategy.encodeForDsProxyCall();
+    };
 
-        await createStrategy(proxy, ...callData, true);
-
-        const rationOver = hre.ethers.utils.parseUnits('1.7', '18');
-        const targetRatio = hre.ethers.utils.parseUnits('2', '18');
-
-        strategyId = await subMcdBoostStrategy(proxy, vaultId, rationOver, targetRatio);
-    });
-
-    it('... should trigger a maker boost strategy', async () => {
-        const ratioBefore = await getRatio(mcdView, vaultId);
-        const boostAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('DAI', '4000'), '18');
-
-        await callMcdBoostStrategy(botAcc, strategyExecutor, strategyId, ethJoin, boostAmount);
-
-        const ratioAfter = await getRatio(mcdView, vaultId);
-
-        console.log(
-            `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
-        );
-
-        expect(ratioBefore).to.be.gt(ratioAfter);
-    });
-
-    // FL(dai), Sell, Supply, Generate
-    it('... should make a new FL Mcd Boost strategy', async () => {
-        console.log('Vault opening');
-
-        vaultIdFL = await openVault(
-            proxy,
-            'ETH-A',
-            fetchAmountinUSDPrice('WETH', '30000'),
-            fetchAmountinUSDPrice('DAI', '12000'),
-        );
-
-        console.log('VaultId: ', vaultIdFL);
-
+    const createFlMcdBoostStrategy = () => {
         const mcdBoostStrategy = new dfs.Strategy('MakerFLBoostStrategy');
         mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
         mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
@@ -200,37 +124,101 @@ describe('Mcd-Boost-Strategy', function () {
             '%managerAddr',
         );
 
-        // const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
-        //     '&targetRatio', // targetRatio
-        //     '&vaultId', // vaultId
-        //     '%nextPrice', // nextPrice
-        // );
-
         mcdBoostStrategy.addAction(flAction);
         mcdBoostStrategy.addAction(sellAction);
         mcdBoostStrategy.addAction(feeTakingAction);
         mcdBoostStrategy.addAction(mcdSupplyAction);
         mcdBoostStrategy.addAction(generateAction);
-        // mcdBoostStrategy.addAction(mcdRatioCheckAction);
 
-        const callData = mcdBoostStrategy.encodeForDsProxyCall();
+        return mcdBoostStrategy.encodeForDsProxyCall();
+    };
 
-        await createStrategy(proxy, ...callData, true);
+    before(async () => {
+        senderAcc = (await hre.ethers.getSigners())[0];
+        botAcc = (await hre.ethers.getSigners())[1];
+
+        await redeploy('BotAuth');
+        await redeploy('ProxyAuth');
+        await redeploy('McdRatioTrigger');
+        await redeploy('McdWithdraw');
+        await redeploy('DFSSell');
+        await redeploy('McdPayback');
+        await redeploy('StrategyStorage');
+        await redeploy('SubStorage');
+        await redeploy('BundleStorage');
+
+        mcdView = await redeploy('McdView');
+
+        await redeploy('SubProxy');
+        await redeploy('StrategyProxy');
+        await redeploy('RecipeExecutor');
+        await redeploy('GasFeeTaker');
+        await redeploy('McdRatioCheck');
+        strategyExecutor = await redeploy('StrategyExecutor');
+
+        flDyDx = await redeploy('FLDyDx');
+        await redeploy('McdSupply');
+        await redeploy('McdWithdraw');
+        await redeploy('McdGenerate');
+        await redeploy('McdPayback');
+        await redeploy('McdOpen');
+
+        await addBotCaller(botAcc.address);
+
+        proxy = await getProxy(senderAcc.address);
+    });
+
+    it('... should create 2 boost strategies and create a bundle', async () => {
+        const boostStrategy = createMcdBoostStrategy();
+        const flBoostStrategy = createFlMcdBoostStrategy();
+
+        await createStrategy(proxy, ...boostStrategy, true);
+        await createStrategy(proxy, ...flBoostStrategy, true);
+
+        await createBundle(proxy, [0, 1]);
+    });
+
+    it('... should sub to boost bundle', async () => {
+        vaultId = await openVault(
+            proxy,
+            'ETH-A',
+            fetchAmountinUSDPrice('WETH', '30000'),
+            fetchAmountinUSDPrice('DAI', '12000'),
+        );
+
+        console.log('VaultId: ', vaultId);
 
         const rationOver = hre.ethers.utils.parseUnits('1.7', '18');
         const targetRatio = hre.ethers.utils.parseUnits('2', '18');
 
-        strategyId = await subMcdBoostStrategy(proxy, vaultIdFL, rationOver, targetRatio);
+        const bundleId = 0;
+
+        subId = await subMcdBoostStrategy(proxy, bundleId, vaultId, rationOver, targetRatio, true);
+    });
+
+    it('... should trigger a maker boost strategy', async () => {
+        const ratioBefore = await getRatio(mcdView, vaultId);
+        const boostAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('DAI', '2000'), '18');
+
+        await callMcdBoostStrategy(botAcc, strategyExecutor, 0, subId, ethJoin, boostAmount);
+
+        const ratioAfter = await getRatio(mcdView, vaultId);
+
+        console.log(
+            `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+        );
+
+        expect(ratioBefore).to.be.gt(ratioAfter);
     });
 
     it('... should trigger a maker FL boost strategy', async () => {
-        const ratioBefore = await getRatio(mcdView, vaultIdFL);
+        const ratioBefore = await getRatio(mcdView, vaultId);
         const boostAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('DAI', '400'), '18');
 
         // eslint-disable-next-line max-len
-        await callFLMcdBoostStrategy(botAcc, strategyExecutor, flDyDx.address, strategyId, ethJoin, boostAmount);
+        await callFLMcdBoostStrategy(botAcc, strategyExecutor, 1, flDyDx.address, subId, ethJoin, boostAmount);
 
-        const ratioAfter = await getRatio(mcdView, vaultIdFL);
+        const ratioAfter = await getRatio(mcdView, vaultId);
 
         console.log(
             `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,

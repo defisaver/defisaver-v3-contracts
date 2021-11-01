@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const dfs = require('@defisaver/sdk');
 const hre = require('hardhat');
 
@@ -159,14 +160,16 @@ const subCompRepayStrategy = async (proxy, ratioUnder, targetRatio) => {
     return subId;
 };
 
-const subMcdBoostStrategy = async (proxy, vaultId, rationUnder, targetRatio) => {
+const subMcdBoostStrategy = async (proxy, bundleId, vaultId, rationUnder, targetRatio, isBundle) => {
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
+
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
-    const strategyId = await getLatestStrategyId();
+    // const strategyId = await getLatestStrategyId();
+
     const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_OVER);
     // eslint-disable-next-line max-len
-    const subId = await subToStrategy(proxy, strategyId, true, [vaultIdEncoded, targetRatioEncoded],
-        [triggerData]);
+    const subId = await subToStrategy(proxy, bundleId, true, [vaultIdEncoded, targetRatioEncoded],
+        [triggerData], isBundle);
 
     return subId;
 };
@@ -533,7 +536,8 @@ const callCompBoostStrategy = async (botAcc, strategyExecutor, strategyId, boost
     console.log(`GasUsed callCompBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callMcdBoostStrategy = async (botAcc, strategyExecutor, subId, ethJoin, boostAmount) => {
+// eslint-disable-next-line max-len
+const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, ethJoin, boostAmount) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -584,7 +588,7 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, subId, ethJoin, bo
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, 0, triggerCallData, actionsCallData, {
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, {
         gasLimit: 8000000,
     });
 
@@ -595,7 +599,7 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, subId, ethJoin, bo
 };
 
 // eslint-disable-next-line max-len
-const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, flLoanAddr, subId, ethJoin, boostAmount) => {
+const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, flLoanAddr, subId, ethJoin, boostAmount) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -642,7 +646,7 @@ const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, flLoanAddr, subI
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, 0, triggerCallData, actionsCallData, {
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, {
         gasLimit: 8000000,
     });
 

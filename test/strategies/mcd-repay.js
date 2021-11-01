@@ -31,7 +31,6 @@ describe('Mcd-Repay-Strategy', function () {
     let strategyExecutor;
     let subId;
     let vaultId;
-    let vaultId2;
     let mcdView;
 
     const ethJoin = ilks[0].join;
