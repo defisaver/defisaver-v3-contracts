@@ -1,25 +1,18 @@
 {
-	"contractName": "RecipeExecutor",
+	"contractName": "TaskExecutor",
 	"abi": [
 		{
 			"inputs": [],
-			"name": "ERC20OperationFail",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "NonContractCall",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SenderNotAdmin",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "SenderNotOwner",
-			"type": "error"
+			"name": "ADMIN_ADDR",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
 		},
 		{
 			"inputs": [],
@@ -36,7 +29,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "DEFISAVER_LOGGER",
+			"name": "DEFI_SAVER_LOGGER_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -50,6 +43,19 @@
 		{
 			"inputs": [],
 			"name": "FACTORY_ADDRESS",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "PROXY_AUTH_ADDR",
 			"outputs": [
 				{
 					"internalType": "address",
@@ -88,14 +94,14 @@
 							"type": "bytes[][]"
 						},
 						{
-							"internalType": "bytes[]",
+							"internalType": "bytes[][]",
 							"name": "subData",
-							"type": "bytes[]"
+							"type": "bytes[][]"
 						},
 						{
-							"internalType": "bytes4[]",
+							"internalType": "bytes32[]",
 							"name": "actionIds",
-							"type": "bytes4[]"
+							"type": "bytes32[]"
 						},
 						{
 							"internalType": "uint8[][]",
@@ -103,8 +109,8 @@
 							"type": "uint8[][]"
 						}
 					],
-					"internalType": "struct StrategyData.Recipe",
-					"name": "_currRecipe",
+					"internalType": "struct StrategyData.Task",
+					"name": "_currTask",
 					"type": "tuple"
 				},
 				{
@@ -164,14 +170,14 @@
 							"type": "bytes[][]"
 						},
 						{
-							"internalType": "bytes[]",
+							"internalType": "bytes[][]",
 							"name": "subData",
-							"type": "bytes[]"
+							"type": "bytes[][]"
 						},
 						{
-							"internalType": "bytes4[]",
+							"internalType": "bytes32[]",
 							"name": "actionIds",
-							"type": "bytes4[]"
+							"type": "bytes32[]"
 						},
 						{
 							"internalType": "uint8[][]",
@@ -179,8 +185,8 @@
 							"type": "uint8[][]"
 						}
 					],
-					"internalType": "struct StrategyData.Recipe",
-					"name": "_currRecipe",
+					"internalType": "struct StrategyData.Task",
+					"name": "_currTask",
 					"type": "tuple"
 				}
 			],
@@ -260,6 +266,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"hardhat": {}
 	}
 }

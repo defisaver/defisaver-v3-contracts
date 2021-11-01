@@ -2,11 +2,10 @@
 
 pragma solidity =0.8.4;
 pragma experimental ABIEncoderV2;
-import "../../DS/DSMath.sol";
 import "../ActionBase.sol";
 
 /// @title Helper action to subtract 2 inputs/return values
-contract SubInputs is ActionBase, DSMath {
+contract SubInputs is ActionBase {
     struct Params {
         uint256 a;
         uint256 b;
@@ -38,7 +37,7 @@ contract SubInputs is ActionBase, DSMath {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _subInputs(uint _a, uint _b) internal pure returns (uint) {
-        return sub(_a, _b);
+        return (_a - _b);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

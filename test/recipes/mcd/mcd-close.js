@@ -42,6 +42,9 @@ describe('Mcd-Close', function () {
         await redeploy('DFSBuy');
         await redeploy('DFSSell');
         await redeploy('SendToken');
+        await redeploy('McdPayback');
+        await redeploy('McdWithdraw');
+        await redeploy('McdGenerate');
 
         // mcdView = await redeploy('McdView');
 

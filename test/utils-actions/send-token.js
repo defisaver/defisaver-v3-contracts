@@ -17,6 +17,7 @@ describe('Send-Token', function () {
 
     before(async () => {
         await redeploy('WrapEth');
+        await redeploy('SendToken');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);

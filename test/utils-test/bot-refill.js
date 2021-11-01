@@ -76,7 +76,6 @@ describe('Bot-Refills', function () {
 
     it('... should call refill with DAI', async () => {
         await impersonateAccount(refillCaller);
-
         const ethBotAddrBalanceBefore = await balanceOf(ETH_ADDR, refillAddr);
 
         const signer = await hre.ethers.provider.getSigner(refillCaller);

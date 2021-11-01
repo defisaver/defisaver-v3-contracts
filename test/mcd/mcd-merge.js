@@ -19,7 +19,11 @@ describe('Mcd-Merge', () => {
     let senderAcc; let proxy; let mcdView;
 
     before(async () => {
+        await redeploy('McdOpen');
         await redeploy('McdMerge');
+        await redeploy('DFSSell');
+        await redeploy('McdSupply');
+        await redeploy('McdGenerate');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -35,12 +39,14 @@ describe('Mcd-Merge', () => {
             if (tokenData.symbol === 'ETH') {
                 tokenData.address = WETH_ADDRESS;
             }
+
             const vaultId1 = await openVault(
                 proxy,
                 ilkData.ilkLabel,
                 fetchAmountinUSDPrice(tokenData.symbol, '40000'),
                 (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 50).toString(),
             );
+
             const vaultId2 = await openVault(
                 proxy,
                 ilkData.ilkLabel,

@@ -8,19 +8,18 @@ const {
     redeploy,
 } = require('../utils');
 
-const { fetchMakerAddresses, MCD_MANAGER_ADDR } = require('../utils-mcd');
+const { MCD_MANAGER_ADDR } = require('../utils-mcd');
 
 const { openMcd, mcdGive } = require('../actions.js');
 
 describe('Mcd-Give', () => {
-    let makerAddresses; let senderAcc; let secondAcc; let thirdAcc; let proxy;
+    let senderAcc; let secondAcc; let thirdAcc; let proxy;
     // let mcdView;
     let mcdManager;
 
     before(async () => {
+        await redeploy('McdOpen');
         await redeploy('McdGive');
-
-        makerAddresses = await fetchMakerAddresses();
 
         senderAcc = (await hre.ethers.getSigners())[0];
         secondAcc = (await hre.ethers.getSigners())[1];
@@ -39,9 +38,7 @@ describe('Mcd-Give', () => {
 
         const secondProxy = await getProxy(secondAcc.address);
         const createProxy = false;
-
         await mcdGive(proxy, vaultId, secondProxy, createProxy);
-
         const ownerAfter = await mcdManager.owns(vaultId);
 
         expect(ownerAfter).to.be.eq(secondProxy.address);

@@ -34,6 +34,8 @@ describe('Aave-Payback', function () {
     let senderAcc; let proxy; let dataProvider;
 
     before(async () => {
+        await redeploy('AaveSupply');
+        await redeploy('AaveBorrow');
         await redeploy('AavePayback');
         await redeploy('DFSSell');
 

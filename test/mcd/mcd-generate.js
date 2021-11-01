@@ -22,6 +22,8 @@ describe('Mcd-Generate', function () {
     let makerAddresses; let senderAcc; let proxy;
 
     before(async () => {
+        await redeploy('DFSSell');
+        await redeploy('McdSupply');
         await redeploy('McdGenerate');
 
         makerAddresses = await fetchMakerAddresses();

@@ -36,16 +36,16 @@ contract CompView is Exponential, DSMath {
         uint totalBorrow;
         uint collateralFactor;
         uint price;
+        uint compBorrowSpeeds;
+        uint compSupplySpeeds;
+        uint borrowCap;
     }
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant CETH_ADDRESS = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
 
-     // solhint-disable-next-line const-name-snakecase
     IComptroller public constant comp = IComptroller(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
 
-    /// @notice Calculated the ratio of debt / adjusted collateral
-    /// @param _user Address of the user
     function getSafetyRatio(address _user) public view returns (uint) {
         // For each asset the account is in
         address[] memory assets = comp.getAssetsIn(_user);
@@ -86,14 +86,14 @@ contract CompView is Exponential, DSMath {
             }
         }
 
-        if (sumBorrow == 0) return type(uint).max;
+        if (sumBorrow == 0) return type(uint256).max;
 
         uint borrowPowerUsed = (sumBorrow * 10**18) / sumCollateral;
         return wdiv(1e18, borrowPowerUsed);
     }
 
 
-    /// @notice Calculated the ratio of coll/debt for a compound user
+    /// @notice Calcualted the ratio of coll/debt for a compound user
     /// @param _user Address of the user
     function getRatio(address _user) public view returns (uint) {
         // For each asset the account is in
@@ -206,7 +206,7 @@ contract CompView is Exponential, DSMath {
         }
     }
 
-    /// @notice Calculated the ratio of coll/debt for a compound user
+    /// @notice Calcualted the ratio of coll/debt for a compound user
     /// @param _users Addresses of the user
     /// @return ratios Array of ratios
     function getRatios(address[] memory _users) public view returns (uint[] memory ratios) {
@@ -219,7 +219,7 @@ contract CompView is Exponential, DSMath {
 
     /// @notice Information about cTokens
     /// @param _cTokenAddresses Array of cTokens addresses
-    /// @return tokens Array of cTokens information
+    /// @return tokens Array of cTokens infomartion
     function getTokensInfo(address[] memory _cTokenAddresses) public returns(TokenInfo[] memory tokens) {
         tokens = new TokenInfo[](_cTokenAddresses.length);
         address oracleAddr = comp.oracle();
@@ -238,7 +238,7 @@ contract CompView is Exponential, DSMath {
 
     /// @notice Information about cTokens
     /// @param _cTokenAddresses Array of cTokens addresses
-    /// @return tokens Array of cTokens information
+    /// @return tokens Array of cTokens infomartion
     function getFullTokensInfo(address[] memory _cTokenAddresses) public returns(TokenInfoFull[] memory tokens) {
         tokens = new TokenInfoFull[](_cTokenAddresses.length);
         address oracleAddr = comp.oracle();
@@ -256,7 +256,10 @@ contract CompView is Exponential, DSMath {
                 totalSupply: cToken.totalSupply(),
                 totalBorrow: cToken.totalBorrowsCurrent(),
                 collateralFactor: collFactor,
-                price: ICompoundOracle(oracleAddr).getUnderlyingPrice(_cTokenAddresses[i])
+                price: ICompoundOracle(oracleAddr).getUnderlyingPrice(_cTokenAddresses[i]),
+                compSupplySpeeds: comp.compSupplySpeeds(_cTokenAddresses[i]),
+                compBorrowSpeeds: comp.compBorrowSpeeds(_cTokenAddresses[i]),
+                borrowCap: comp.borrowCaps(_cTokenAddresses[i])
             });
         }
     }

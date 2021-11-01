@@ -15,6 +15,7 @@ const ETH_ADDR = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 const DAI_ADDR = '0x6b175474e89094c44da98b954eedeac495271d0f';
 const USDC_ADDR = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 const RAI_ADDR = '0x03ab458634910AaD20eF5f1C8ee96F1D6ac54919';
+const BAL_ADDR = '0xba100000625a3754423978a60c9317c58a424e3D';
 const LOGGER_ADDR = '0x5c55B921f590a89C1Ebe84dF170E655a82b62126';
 const UNIV3ROUTER_ADDR = '0xE592427A0AEce92De3Edee1F18E0157C05861564';
 const UNIV3POSITIONMANAGER_ADDR = '0xC36442b4a4522E871399CD717aBDD847Ab11FE88';
@@ -27,12 +28,25 @@ const USD_DENOMINATION = '0x0000000000000000000000000000000000000348';
 
 // Dfs sdk won't accept 0x0 and we need some rand addr for testing
 const placeHolderAddr = '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF';
+const AUNI_ADDR = '0xb9d7cb55f463405cdfbe4e90a6d2df01c2b92bf1';
+const AWETH_ADDR = '0x030ba81f1c18d280636f32af80b9aad02cf0854e';
+const AWBTC_ADDR = '0x9ff58f4ffb29fa2266ab25e75e2a8b3503311656';
+const ALINK_ADDR = '0xa06bc25b5805d5f8d82847d191cb4af5a3e873e0';
+const ADAI_ADDR = '0x028171bca77440897b824ca71d1c56cac55b68a3';
+const UNI_ADDR = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984';
+const LINK_ADDR = '0x514910771af9ca656af840dff83e8264ecf986ca';
+const WBTC_ADDR = '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599';
+
+const USDT_ADDR = '0xdac17f958d2ee523a2206206994597c13d831ec7';
+const BUSD_ADDR = '0x4fabb145d64652a948d72533023f6e7a623c7c53';
 
 const OWNER_ACC = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
 const ADMIN_ACC = '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9';
 
 const MAX_UINT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 const MAX_UINT128 = '340282366920938463463374607431768211455';
+
+const DFS_REG_CONTROLLER = '0xF8f8B3C98Cf2E63Df3041b73f80F362a4cf3A576';
 
 const dydxTokens = ['WETH', 'USDC', 'DAI'];
 
@@ -247,6 +261,14 @@ const sendEther = async (signer, toAddress, amount) => {
     });
 };
 
+const getAllowance = async (tokenAddr, from, to) => {
+    const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
+
+    const allowance = await tokenContract.allowance(from, to);
+
+    return allowance;
+};
+
 const balanceOf = async (tokenAddr, addr) => {
     const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
     let balance = '';
@@ -417,6 +439,7 @@ module.exports = {
     getLocalTokenPrice,
     calcGasToUSD,
     AVG_GAS_PRICE,
+    getAllowance,
     standardAmounts,
     nullAddress,
     dydxTokens,
@@ -444,4 +467,16 @@ module.exports = {
     placeHolderAddr,
     STETH_ADDRESS,
     UNIV2_ROUTER_ADDRESS,
+    DFS_REG_CONTROLLER,
+    BAL_ADDR,
+    AUNI_ADDR,
+    AWETH_ADDR,
+    ADAI_ADDR,
+    UNI_ADDR,
+    ALINK_ADDR,
+    LINK_ADDR,
+    USDT_ADDR,
+    BUSD_ADDR,
+    AWBTC_ADDR,
+    WBTC_ADDR,
 };

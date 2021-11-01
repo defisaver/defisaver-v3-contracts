@@ -25,6 +25,7 @@ describe('Comp-Claim', function () {
     let senderAcc; let proxy;
 
     before(async () => {
+        await redeploy('CompSupply');
         await redeploy('CompClaim');
 
         senderAcc = (await hre.ethers.getSigners())[0];

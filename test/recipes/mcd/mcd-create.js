@@ -56,7 +56,8 @@ describe('Mcd-Create', function () {
         await redeploy('McdGenerate');
         await redeploy('FLDyDx');
         await redeploy('FLAaveV2');
-
+        await redeploy('DFSSell');
+        await redeploy('PullToken');
         mcdView = await redeploy('McdView');
         uniWrapper = await redeploy('UniswapWrapperV3');
 

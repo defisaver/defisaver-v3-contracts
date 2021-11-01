@@ -70,17 +70,14 @@ contract AavePayback is ActionBase, AaveHelper {
         address _from,
         address _onBehalf
     ) internal returns (uint256) {
-        ILendingPoolV2 lendingPool = getLendingPool(_market);
-
-        // if the amount sent is type(uint256).max get whole proxy debt
-        if (_amount == type(uint256).max) {
-            _amount = getWholeDebt(_market, _tokenAddr, _rateMode);
-        }
-
         // default to onBehalf of proxy
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }
+        ILendingPoolV2 lendingPool = getLendingPool(_market);
+        uint256 maxDebt = getWholeDebt(_market, _tokenAddr, _rateMode, _onBehalf);
+        _amount = _amount > maxDebt ? maxDebt : _amount;
+
 
         _tokenAddr.pullTokensIfNeeded(_from, _amount);
         _tokenAddr.approveToken(address(lendingPool), _amount);
@@ -108,10 +105,10 @@ contract AavePayback is ActionBase, AaveHelper {
         params = abi.decode(_callData, (Params));
     }
 
-    function getWholeDebt(address _market, address _tokenAddr, uint _borrowType) internal view returns (uint256) {
+    function getWholeDebt(address _market, address _tokenAddr, uint _borrowType, address _debtOwner) internal view returns (uint256) {
         IAaveProtocolDataProviderV2 dataProvider = getDataProvider(_market);
         (, uint256 borrowsStable, uint256 borrowsVariable, , , , , , ) =
-            dataProvider.getUserReserveData(_tokenAddr, address(this));
+            dataProvider.getUserReserveData(_tokenAddr, _debtOwner);
 
         if (_borrowType == STABLE_ID) {
             return borrowsStable;

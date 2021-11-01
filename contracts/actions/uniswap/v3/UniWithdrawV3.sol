@@ -3,13 +3,11 @@ pragma solidity =0.8.4;
 
 import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
-import "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+import "./helpers/UniV3Helper.sol";
 
 /// @title Decreases liquidity from a position represented by tokenID, and collects tokensOwed from position to recipient
-contract UniWithdrawV3 is ActionBase{
+contract UniWithdrawV3 is ActionBase, UniV3Helper{
     using TokenUtils for address;
-    IUniswapV3NonfungiblePositionManager public constant positionManager =
-        IUniswapV3NonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
 
     /// @param tokenId - The ID of the token for which liquidity is being decreased
     /// @param liquidity -The amount by which liquidity will be decreased,

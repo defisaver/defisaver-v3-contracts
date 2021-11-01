@@ -5,25 +5,14 @@ pragma experimental ABIEncoderV2;
 
 import "./../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
-import "../../DS/DSMath.sol";
 import "../../interfaces/insta/IInstaIndex.sol";
 import "../../interfaces/insta/IInstaMakerDAOMerkleDistributor.sol";
 import "../../interfaces/mcd/IManager.sol";
+import "./helpers/InstHelper.sol";
 
 // @notice Transfer Maker vault to DSA account owned by dsproxy, claims INST reward, transfers vault back
-contract ClaimInstMaker is ActionBase, DSMath {
+contract ClaimInstMaker is ActionBase, InstHelper {
     using TokenUtils for address;
-
-    IManager public constant mcdManager =  
-        IManager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
-
-    IInstaIndex public constant instaAccountBuilder = 
-        IInstaIndex(0x2971AdFa57b20E5a416aE5a708A8655A9c74f723);
-
-    IInstaMakerDAOMerkleDistributor public constant rewardDistributor =
-        IInstaMakerDAOMerkleDistributor(0xAC838332afc2937FdED89c16a59b2ED8e8e2743c);
-
-    address public constant INST_TOKEN_ADDR = 0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb;
     
     struct Params {
         uint256 index;
@@ -38,9 +27,9 @@ contract ClaimInstMaker is ActionBase, DSMath {
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
-        bytes32[] memory _subData,
-        uint8[] memory _paramMapping,
-        bytes32[] memory _returnValues
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
@@ -89,7 +78,7 @@ contract ClaimInstMaker is ActionBase, DSMath {
         require(mcdManager.owns(_inputData.vaultId) == address(this), "Vault ownership not transfered back");
 
         uint instaBalanceAfter = INST_TOKEN_ADDR.getBalance(_inputData.to);
-        tokensClaimed = sub(instaBalanceAfter, instaBalanceBefore);
+        tokensClaimed = instaBalanceAfter - instaBalanceBefore;
     
         logger.Log(
             address(this),
