@@ -58,8 +58,8 @@ const subDcaStrategy = async (
     lastTimestamp,
     eoa,
 ) => {
-    // const tokenAddrSellEncoded = abiCoder.encode(['address'], [tokenAddrSell]);
-    // const tokenAddrBuyEncoded = abiCoder.encode(['address'], [tokenAddrBuy]);
+    const tokenAddrSellEncoded = abiCoder.encode(['address'], [tokenAddrSell]);
+    const tokenAddrBuyEncoded = abiCoder.encode(['address'], [tokenAddrBuy]);
     const amountEncoded = abiCoder.encode(['uint256'], [amount]);
     const intervalEncoded = abiCoder.encode(['uint256'], [interval]);
     const lastTimestampEncoded = abiCoder.encode(['uint256'], [lastTimestamp]);
@@ -68,17 +68,15 @@ const subDcaStrategy = async (
 
     const strategyId = await getLatestStrategyId();
 
-    const timestampTriggerData = await createTimestampTrigger(lastTimestamp);
-
-    console.log(eoaEncoded);
+    const timestampTriggerData = await createTimestampTrigger(lastTimestamp, interval);
 
     const subId = await subToStrategy(
         proxy,
         strategyId,
         true,
         [
-            // tokenAddrSellEncoded,
-            // tokenAddrBuyEncoded,
+            tokenAddrSellEncoded,
+            tokenAddrBuyEncoded,
             amountEncoded,
             intervalEncoded,
             lastTimestampEncoded,
@@ -478,7 +476,7 @@ const callCompRepayStrategy = async (botAcc, strategyExecutor, strategyId, repay
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
+    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, 0, triggerCallData, actionsCallData, {
         gasLimit: 8000000,
     });
 
@@ -526,7 +524,7 @@ const callCompBoostStrategy = async (botAcc, strategyExecutor, strategyId, boost
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
+    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, 0, triggerCallData, actionsCallData, {
         gasLimit: 8000000,
     });
 
