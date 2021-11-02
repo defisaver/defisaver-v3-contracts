@@ -76,10 +76,8 @@ describe('Mcd-Withdraw', function () {
                 tokenData.address = WETH_ADDRESS;
             }
             vaultId = await openVault(
-                makerAddresses,
                 proxy,
-                joinAddr,
-                tokenData,
+                ilkData.ilkLabel,
                 supplyAmount,
                 MIN_VAULT_DAI_AMOUNT,
             );
@@ -121,7 +119,7 @@ describe('Mcd-Withdraw', function () {
             const to = senderAcc.address;
             const from = senderAcc.address;
 
-            vaultId = await openMcd(proxy, makerAddresses, joinAddr);
+            vaultId = await openMcd(proxy, joinAddr);
             await supplyMcd(proxy, vaultId, amount, tokenData.address, joinAddr, from);
             const collBalanceBefore = await balanceOf(tokenData.address, to);
             await withdrawMcd(proxy, vaultId, hre.ethers.constants.MaxUint256, joinAddr, to);

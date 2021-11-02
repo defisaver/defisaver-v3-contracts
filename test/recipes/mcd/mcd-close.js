@@ -84,10 +84,8 @@ describe('Mcd-Close', function () {
             const amountDai = (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString();
 
             const vaultId = await openVault(
-                makerAddresses,
                 proxy,
-                joinAddr,
-                tokenData,
+                ilkData.ilkLabel,
                 vaultColl,
                 amountDai,
             );
@@ -142,10 +140,8 @@ describe('Mcd-Close', function () {
             const amountColl = fetchAmountinUSDPrice(tokenData.symbol, '30000');
 
             const vaultId = await openVault(
-                makerAddresses,
                 proxy,
-                joinAddr,
-                tokenData,
+                ilkData.ilkLabel,
                 amountColl,
                 amountDai,
             );

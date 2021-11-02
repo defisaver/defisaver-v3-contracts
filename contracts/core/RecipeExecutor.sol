@@ -8,6 +8,7 @@ import "../actions/ActionBase.sol";
 import "../core/DFSRegistry.sol";
 import "./strategy/StrategyModel.sol";
 import "./strategy/StrategyStorage.sol";
+import "./strategy/BundleStorage.sol";
 import "./strategy/SubStorage.sol";
 import "../interfaces/flashloan/IFlashLoanBase.sol";
 import "../interfaces/ITrigger.sol";
@@ -21,6 +22,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
 
     bytes4 constant STRATEGY_STORAGE_ID = bytes4(keccak256("StrategyStorage"));
     bytes4 constant SUB_STORAGE_ID = bytes4(keccak256("SubStorage"));
+    bytes4 constant BUNDLE_STORAGE_ID = bytes4(keccak256("BundleStorage"));
 
     error TriggerNotActiveError();
 
@@ -31,21 +33,34 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         _executeActions(_currRecipe);
     }
 
+
     /// @notice Called through the Strategy contract to execute a recipe
     /// @param _subId Id of the subscription we want to execute
     /// @param _actionCallData All the data related to the strategies Recipe
     function executeRecipeFromStrategy(
         uint256 _subId,
         bytes[] calldata _actionCallData,
-        bytes[] calldata _triggerCallData
+        bytes[] calldata _triggerCallData,
+        uint256 _strategyIndex
     ) public payable {
 
         // TODO: can hardcode in prod to save gas
         address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
-        address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
-     
+             
         StrategySub memory sub = SubStorage(subStorageAddr).getSub(_subId);
-        Strategy memory strategy = StrategyStorage(strategyStorageAddr).getStrategy(sub.strategyId);
+        Strategy memory strategy;
+
+        { // to handle stack too deep
+            uint256 strategyId = sub.strategyId;
+            address bundleStorageAddr = registry.getAddr(BUNDLE_STORAGE_ID);
+            address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
+
+            if (sub.isBundle) {
+                strategyId = BundleStorage(bundleStorageAddr).getStrategyId(sub.strategyId, _strategyIndex);
+            }
+
+            strategy = StrategyStorage(strategyStorageAddr).getStrategy(strategyId);
+        }
 
         // check if all the triggers are true
         bool triggered = checkTriggers(strategy, sub, _triggerCallData, _subId, subStorageAddr);

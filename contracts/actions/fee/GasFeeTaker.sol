@@ -35,7 +35,12 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
         if (inputData.availableAmount == type(uint256).max) {
             inputData.availableAmount =  inputData.feeToken.getBalance(address(this));
         }
-        require(inputData.availableAmount >= txCost, "Not enough funds for gas fee");
+
+        // cap at 20% of the max amount
+        // TODO: should this be changeable
+        if (txCost >= (inputData.availableAmount / 5)) {
+            txCost = inputData.availableAmount / 5;
+        }
 
         uint256 amountLeft = sub(inputData.availableAmount, txCost);
 

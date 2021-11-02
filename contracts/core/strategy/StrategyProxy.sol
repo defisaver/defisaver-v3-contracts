@@ -7,6 +7,7 @@ import "../../auth/ProxyPermission.sol";
 import "../../DS/DSGuard.sol";
 import "../../DS/DSAuth.sol";
 import "./StrategyStorage.sol";
+import "./BundleStorage.sol";
 import "../DFSRegistry.sol";
 
 contract StrategyProxy is StrategyModel, AdminAuth, ProxyPermission {
@@ -16,18 +17,27 @@ contract StrategyProxy is StrategyModel, AdminAuth, ProxyPermission {
 
     bytes4 constant PROXY_AUTH_ID = bytes4(keccak256("ProxyAuth"));
     bytes4 constant STRATEGY_STORAGE_ID = bytes4(keccak256("StrategyStorage"));
+    bytes4 constant BUNDLE_STORAGE_ID = bytes4(keccak256("BundleStorage"));
 
     function createStrategy(
         string memory _name,
         bytes4[] memory _triggerIds,
         bytes4[] memory _actionIds,
         uint8[][] memory _paramMapping,
-        bool continuous,
-        uint64[] memory _sibblingStrategies
+        bool continuous
     ) public {
         address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
 
-        StrategyStorage(strategyStorageAddr).createStrategy(_name, _triggerIds, _actionIds, _paramMapping, continuous, _sibblingStrategies);
+        StrategyStorage(strategyStorageAddr).createStrategy(_name, _triggerIds, _actionIds, _paramMapping, continuous);
+    }
+
+    function createBundle(
+        uint64[] memory _strategyIds
+    ) public {
+        address bundleStorageAddr = registry.getAddr(BUNDLE_STORAGE_ID);
+
+        BundleStorage(bundleStorageAddr).createBundle(_strategyIds);
+
     }
 
     

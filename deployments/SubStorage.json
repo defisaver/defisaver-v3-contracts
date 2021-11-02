@@ -180,6 +180,11 @@
 							"type": "bool"
 						},
 						{
+							"internalType": "bool",
+							"name": "isBundle",
+							"type": "bool"
+						},
+						{
 							"internalType": "address",
 							"name": "userProxy",
 							"type": "address"
@@ -223,6 +228,11 @@
 						{
 							"internalType": "bool",
 							"name": "active",
+							"type": "bool"
+						},
+						{
+							"internalType": "bool",
+							"name": "isBundle",
 							"type": "bool"
 						},
 						{
@@ -303,6 +313,11 @@
 					"type": "bool"
 				},
 				{
+					"internalType": "bool",
+					"name": "isBundle",
+					"type": "bool"
+				},
+				{
 					"internalType": "address",
 					"name": "userProxy",
 					"type": "address"
@@ -332,6 +347,11 @@
 					"internalType": "bytes32[]",
 					"name": "_subData",
 					"type": "bytes32[]"
+				},
+				{
+					"internalType": "bool",
+					"name": "_isBundle",
+					"type": "bool"
 				}
 			],
 			"name": "subscribeToStrategy",

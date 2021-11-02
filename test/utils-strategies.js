@@ -34,15 +34,17 @@ const getLatestSubId = async () => {
 };
 
 // eslint-disable-next-line max-len
-const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramMapping, continuous, siblings = []) => {
+const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramMapping, continuous) => {
     const strategyProxyAddr = await getAddrFromRegistry('StrategyProxy');
 
     const StrategyProxy = await hre.ethers.getContractFactory('StrategyProxy');
 
     const functionData = StrategyProxy.interface.encodeFunctionData(
         'createStrategy',
-        [strategyName, triggerIds, actionIds, paramMapping, continuous, siblings],
+        [strategyName, triggerIds, actionIds, paramMapping, continuous],
     );
+
+    console.log('Create strategy');
 
     const receipt = await proxy['execute(address,bytes)'](strategyProxyAddr, functionData, {
         gasLimit: 5000000,
@@ -54,13 +56,33 @@ const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramM
     console.log(`GasUsed createStrategy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const subToStrategy = async (proxy, strategyId, active, subData, triggerData) => {
+const createBundle = async (proxy, strategyIds) => {
+    const strategyProxyAddr = await getAddrFromRegistry('StrategyProxy');
+
+    const StrategyProxy = await hre.ethers.getContractFactory('StrategyProxy');
+
+    const functionData = StrategyProxy.interface.encodeFunctionData(
+        'createBundle',
+        [strategyIds],
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](strategyProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed createBundle; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
+const subToStrategy = async (proxy, strategyId, active, subData, triggerData, isBundle = false) => {
     const SubProxyAddr = await getAddrFromRegistry('SubProxy');
 
     const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
     const functionData = SubProxyProxy.interface.encodeFunctionData(
         'subscribeToStrategy',
-        [strategyId, active, triggerData, subData],
+        [strategyId, active, triggerData, subData, isBundle],
     );
 
     const receipt = await proxy['execute(address,bytes)'](SubProxyAddr, functionData, {
@@ -95,6 +117,7 @@ const addBotCaller = async (botAddr) => {
 module.exports = {
     subToStrategy,
     createStrategy,
+    createBundle,
     getLatestStrategyId,
     getLatestSubId,
     addBotCaller,

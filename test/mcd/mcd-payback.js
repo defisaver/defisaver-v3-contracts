@@ -65,10 +65,8 @@ describe('Mcd-Payback', function () {
             }
 
             vaultId = await openVault(
-                makerAddresses,
                 proxy,
-                joinAddr,
-                tokenData,
+                ilkData.ilkLabel,
                 fetchAmountinUSDPrice(tokenData.symbol, '70000'),
                 fetchAmountinUSDPrice('DAI', '31000'),
             );
@@ -108,19 +106,15 @@ describe('Mcd-Payback', function () {
             }
             const amountDebt = '30000';
             await openVault(
-                makerAddresses,
                 proxy,
-                joinAddr,
-                tokenData,
+                ilkData.ilkLabel,
                 fetchAmountinUSDPrice(tokenData.symbol, '70000'),
                 amountDebt,
             );
 
             vaultId = await openVault(
-                makerAddresses,
                 proxy,
-                joinAddr,
-                tokenData,
+                ilkData.ilkLabel,
                 fetchAmountinUSDPrice(tokenData.symbol, '70000'),
                 amountDebt,
             );
@@ -159,19 +153,15 @@ describe('Mcd-Payback', function () {
             }
             const amountDebt = '30000';
             await openVault(
-                makerAddresses,
                 proxy,
-                joinAddr,
-                tokenData,
+                ilkData.ilkLabel,
                 fetchAmountinUSDPrice(tokenData.symbol, '70000'),
                 amountDebt,
             );
 
             vaultId = await openVault(
-                makerAddresses,
                 proxy,
-                joinAddr,
-                tokenData,
+                ilkData.ilkLabel,
                 fetchAmountinUSDPrice(tokenData.symbol, '70000'),
                 amountDebt,
             );

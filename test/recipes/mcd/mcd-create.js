@@ -130,7 +130,7 @@ describe('Mcd-Create', function () {
 
             await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
-            const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
+            const vaultsAfter = await getVaultsForUser(proxy.address);
             const vaultId = vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
 
             const ratioAfter = await getRatio(mcdView, vaultId);
@@ -199,7 +199,7 @@ describe('Mcd-Create', function () {
 
             await proxy['execute(address,bytes)'](RecipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
-            const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
+            const vaultsAfter = await getVaultsForUser(proxy.address);
             const vaultId = vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
 
             const ratioAfter = await getRatio(mcdView, vaultId);

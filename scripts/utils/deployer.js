@@ -38,7 +38,6 @@ const deploy = async (contractName, signer, action, gasPrice, nonce, ...args) =>
 
         let contract;
         if (args.length === 0) {
-            console.log("Pre deploy: ");
             contract = await Contract.deploy(options);
         } else {
             contract = await Contract.deploy(...args, options);

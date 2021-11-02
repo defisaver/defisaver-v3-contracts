@@ -52,7 +52,7 @@ describe('Mcd-Supply', function () {
                 return;
             }
 
-            const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
+            const vaultId = await openMcd(proxy, joinAddr);
             const amount = BigNumber.from(
                 hre.ethers.utils.parseUnits(amountFetchedFromUSD, tokenData.decimals),
             );

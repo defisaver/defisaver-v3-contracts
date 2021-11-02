@@ -168,11 +168,11 @@
   dependencies:
     "chalk" "^4.0.0"
 
-"@defisaver/sdk@github:DecenterApps/defisaver-sdk":
-  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#b9d4e290d132708dc41ca90b66c04bb79d1999aa"
-  "version" "0.0.27"
+"@defisaver/sdk@github:DecenterApps/defisaver-sdk#feature/strategies":
+  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#7141bb336a3a76bd15b973310f80c84024ef8053"
+  "version" "0.1.4"
   dependencies:
-    "@defisaver/tokens" "^1.3.53"
+    "@defisaver/tokens" "^1.3.58"
     "@ethersproject/address" "^5.0.10"
     "@ethersproject/solidity" "^5.0.9"
     "axios" "^0.21.1"
@@ -180,10 +180,10 @@
     "web3-eth-abi" "^1.3.0"
     "web3-utils" "^1.3.0"
 
-"@defisaver/tokens@^1.3.30", "@defisaver/tokens@^1.3.53":
-  "integrity" "sha512-YuepfFjSgPIwTLRIS2+K8KYWBZKvOpb8I/k2dAXs0BPTNlv5FCS47NmfQUYdaZxVXwCUrL/gh/6BdyjxCMLU0A=="
-  "resolved" "https://registry.npmjs.org/@defisaver/tokens/-/tokens-1.3.54.tgz"
-  "version" "1.3.54"
+"@defisaver/tokens@^1.3.30", "@defisaver/tokens@^1.3.58":
+  "integrity" "sha512-izDGzXT1bxBHTnIXwmxtQed4WlBGSAPLaCMXnbFQ4Eiq4V1B52qKAGltTYt0owvl9b117+CpUdGnMmVlhdZ8gg=="
+  "resolved" "https://registry.npmjs.org/@defisaver/tokens/-/tokens-1.3.62.tgz"
+  "version" "1.3.62"
   dependencies:
     "decimal.js" "^10.2.1"
     "react" "^16.8.0"

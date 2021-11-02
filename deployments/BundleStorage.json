@@ -1,5 +1,5 @@
 {
-	"contractName": "StrategyStorage",
+	"contractName": "BundleStorage",
 	"abi": [
 		{
 			"inputs": [],
@@ -19,7 +19,7 @@
 					"type": "bool"
 				}
 			],
-			"name": "NoAuthToCreateStrategy",
+			"name": "NoAuthToCreateBundle",
 			"type": "error"
 		},
 		{
@@ -47,7 +47,7 @@
 					"type": "uint256"
 				}
 			],
-			"name": "StrategyCreated",
+			"name": "BundleCreated",
 			"type": "event"
 		},
 		{
@@ -57,6 +57,25 @@
 				{
 					"internalType": "contract AdminVault",
 					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "bundles",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "creator",
 					"type": "address"
 				}
 			],
@@ -79,32 +98,12 @@
 		{
 			"inputs": [
 				{
-					"internalType": "string",
-					"name": "_name",
-					"type": "string"
-				},
-				{
-					"internalType": "bytes4[]",
-					"name": "_triggerIds",
-					"type": "bytes4[]"
-				},
-				{
-					"internalType": "bytes4[]",
-					"name": "_actionIds",
-					"type": "bytes4[]"
-				},
-				{
-					"internalType": "uint8[][]",
-					"name": "_paramMapping",
-					"type": "uint8[][]"
-				},
-				{
-					"internalType": "bool",
-					"name": "_continuous",
-					"type": "bool"
+					"internalType": "uint64[]",
+					"name": "_strategyIds",
+					"type": "uint64[]"
 				}
 			],
-			"name": "createStrategy",
+			"name": "createBundle",
 			"outputs": [
 				{
 					"internalType": "uint256",
@@ -113,6 +112,50 @@
 				}
 			],
 			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_bundleId",
+					"type": "uint256"
+				}
+			],
+			"name": "getBundle",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "creator",
+							"type": "address"
+						},
+						{
+							"internalType": "uint64[]",
+							"name": "strategyIds",
+							"type": "uint64[]"
+						}
+					],
+					"internalType": "struct StrategyModel.StrategyBundle",
+					"name": "",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "getBundleCount",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
 			"type": "function"
 		},
 		{
@@ -128,42 +171,22 @@
 					"type": "uint256"
 				}
 			],
-			"name": "getPaginatedStrategies",
+			"name": "getPaginatedBundles",
 			"outputs": [
 				{
 					"components": [
-						{
-							"internalType": "string",
-							"name": "name",
-							"type": "string"
-						},
 						{
 							"internalType": "address",
 							"name": "creator",
 							"type": "address"
 						},
 						{
-							"internalType": "bytes4[]",
-							"name": "triggerIds",
-							"type": "bytes4[]"
-						},
-						{
-							"internalType": "bytes4[]",
-							"name": "actionIds",
-							"type": "bytes4[]"
-						},
-						{
-							"internalType": "uint8[][]",
-							"name": "paramMapping",
-							"type": "uint8[][]"
-						},
-						{
-							"internalType": "bool",
-							"name": "continuous",
-							"type": "bool"
+							"internalType": "uint64[]",
+							"name": "strategyIds",
+							"type": "uint64[]"
 						}
 					],
-					"internalType": "struct StrategyModel.Strategy[]",
+					"internalType": "struct StrategyModel.StrategyBundle[]",
 					"name": "",
 					"type": "tuple[]"
 				}
@@ -175,56 +198,16 @@
 			"inputs": [
 				{
 					"internalType": "uint256",
-					"name": "_strategyId",
+					"name": "_bundleId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_strategyIndex",
 					"type": "uint256"
 				}
 			],
-			"name": "getStrategy",
-			"outputs": [
-				{
-					"components": [
-						{
-							"internalType": "string",
-							"name": "name",
-							"type": "string"
-						},
-						{
-							"internalType": "address",
-							"name": "creator",
-							"type": "address"
-						},
-						{
-							"internalType": "bytes4[]",
-							"name": "triggerIds",
-							"type": "bytes4[]"
-						},
-						{
-							"internalType": "bytes4[]",
-							"name": "actionIds",
-							"type": "bytes4[]"
-						},
-						{
-							"internalType": "uint8[][]",
-							"name": "paramMapping",
-							"type": "uint8[][]"
-						},
-						{
-							"internalType": "bool",
-							"name": "continuous",
-							"type": "bool"
-						}
-					],
-					"internalType": "struct StrategyModel.Strategy",
-					"name": "",
-					"type": "tuple"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "getStrategyCount",
+			"name": "getStrategyId",
 			"outputs": [
 				{
 					"internalType": "uint256",
@@ -249,35 +232,6 @@
 				{
 					"internalType": "bool",
 					"name": "",
-					"type": "bool"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"name": "strategies",
-			"outputs": [
-				{
-					"internalType": "string",
-					"name": "name",
-					"type": "string"
-				},
-				{
-					"internalType": "address",
-					"name": "creator",
-					"type": "address"
-				},
-				{
-					"internalType": "bool",
-					"name": "continuous",
 					"type": "bool"
 				}
 			],
