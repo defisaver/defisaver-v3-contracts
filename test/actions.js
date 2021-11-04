@@ -1316,6 +1316,32 @@ const curveClaimFees = async (
     return proxy['execute(address,bytes)'](curveClaimFeesAddr, functionData, { gasLimit: 3000000 });
 };
 
+const unsubscribeMcdSubscription = async (
+    proxy,
+    cdpId,
+) => {
+    const unsubscribeAddr = await getAddrFromRegistry('Unsubscribe');
+
+    const unsubscribeAction = new dfs.actions.basic.UnsubscribeMcdAction(cdpId);
+
+    const functionData = unsubscribeAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](unsubscribeAddr, functionData, { gasLimit: 3000000 });
+};
+
+const unsubscribeGeneralSubscription = async (
+    proxy,
+    protocol,
+) => {
+    const unsubscribeAddr = await getAddrFromRegistry('Unsubscribe');
+
+    const unsubscribeAction = new dfs.actions.basic.UnsubscribeGeneralAction(protocol);
+
+    const functionData = unsubscribeAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](unsubscribeAddr, functionData, { gasLimit: 3000000 });
+};
+
 module.exports = {
     sell,
     buy,
@@ -1398,4 +1424,6 @@ module.exports = {
     balancerClaim,
 
     changeProxyOwner,
+    unsubscribeMcdSubscription,
+    unsubscribeGeneralSubscription,
 };
