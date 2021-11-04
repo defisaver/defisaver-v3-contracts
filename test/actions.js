@@ -1316,30 +1316,30 @@ const curveClaimFees = async (
     return proxy['execute(address,bytes)'](curveClaimFeesAddr, functionData, { gasLimit: 3000000 });
 };
 
-const unsubscribeMcdSubscription = async (
+const automationV2McdUnsub = async (
     proxy,
     cdpId,
 ) => {
-    const unsubscribeAddr = await getAddrFromRegistry('Unsubscribe');
+    const automationV2UnsubAddr = await getAddrFromRegistry('AutomationV2Unsub');
 
-    const unsubscribeAction = new dfs.actions.basic.UnsubscribeMcdAction(cdpId);
+    const automationV2UnsubAction = new dfs.actions.basic.AutomationV2McdUnsub(cdpId);
 
-    const functionData = unsubscribeAction.encodeForDsProxyCall()[1];
+    const functionData = automationV2UnsubAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](unsubscribeAddr, functionData, { gasLimit: 3000000 });
+    return proxy['execute(address,bytes)'](automationV2UnsubAddr, functionData, { gasLimit: 3000000 });
 };
 
-const unsubscribeGeneralSubscription = async (
+const automationV2CompAaveUnsub = async (
     proxy,
     protocol,
 ) => {
-    const unsubscribeAddr = await getAddrFromRegistry('Unsubscribe');
+    const automationV2UnsubAddr = await getAddrFromRegistry('AutomationV2Unsub');
 
-    const unsubscribeAction = new dfs.actions.basic.UnsubscribeGeneralAction(protocol);
+    const automationV2UnsubAction = new dfs.actions.basic.AutomationV2CompAaveUnsub(protocol);
 
-    const functionData = unsubscribeAction.encodeForDsProxyCall()[1];
+    const functionData = automationV2UnsubAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](unsubscribeAddr, functionData, { gasLimit: 3000000 });
+    return proxy['execute(address,bytes)'](automationV2UnsubAddr, functionData, { gasLimit: 3000000 });
 };
 
 module.exports = {
@@ -1424,6 +1424,6 @@ module.exports = {
     balancerClaim,
 
     changeProxyOwner,
-    unsubscribeMcdSubscription,
-    unsubscribeGeneralSubscription,
+    automationV2McdUnsub,
+    automationV2CompAaveUnsub,
 };

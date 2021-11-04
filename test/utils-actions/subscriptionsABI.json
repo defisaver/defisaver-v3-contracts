@@ -1,4 +1,0 @@
-[
-    {"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"subscribersPos","outputs":[{"name":"arrPos","type":"uint256"},{"name":"subscribed","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},
-    {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"subscribersPos","outputs":[{"internalType":"uint256","name":"arrPos","type":"uint256"},{"internalType":"bool","name":"subscribed","type":"bool"}],"stateMutability":"view","type":"function"}
-]

@@ -7,7 +7,7 @@ import "../ActionBase.sol";
 import "./helpers/SubscriptionsMainnetAddresses.sol";
 import "../../interfaces/ISubscriptions.sol";
 
-contract Unsubscribe is ActionBase, SubscriptionsMainnetAddresses {
+contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
 
     enum Protocols {
         MCD,
@@ -42,14 +42,14 @@ contract Unsubscribe is ActionBase, SubscriptionsMainnetAddresses {
             _returnValues
         ));
 
-        _unsubscribe(params);
+        _automationV2Unsub(params);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
-        _unsubscribe(params);
+        _automationV2Unsub(params);
     }
 
     /// @inheritdoc ActionBase
@@ -60,7 +60,7 @@ contract Unsubscribe is ActionBase, SubscriptionsMainnetAddresses {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Unsubscribes proxy from automation
-    function _unsubscribe(Params memory _params) internal {
+    function _automationV2Unsub(Params memory _params) internal {
         ( uint256 cdpId, Protocols protocol ) = ( _params.cdpId, _params.protocol );
 
         if (protocol == Protocols.MCD) {

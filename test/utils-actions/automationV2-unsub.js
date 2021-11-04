@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const hre = require('hardhat');
-const { unsubscribeMcdSubscription, unsubscribeGeneralSubscription } = require('../actions');
+const { automationV2McdUnsub, automationV2CompAaveUnsub } = require('../actions');
 const {
     getProxy,
     redeploy,
@@ -8,9 +8,9 @@ const {
     stopImpersonatingAccount,
 } = require('../utils');
 
-const subscriptionsABI = require('./subscriptionsABI');
+const ISubscriptionsABI = require('../../artifacts/contracts/interfaces/ISubscriptions.sol/ISubscriptions.json').abi;
 
-describe('Subscriptions-Unsubscribe', function () {
+describe('AutomationV2-Unsubscribe', function () {
     this.timeout(1000000);
 
     before(async () => {
@@ -19,7 +19,7 @@ describe('Subscriptions-Unsubscribe', function () {
             await hre.ethers.provider.getBlockNumber(),
             `This test should be ran at block number ${blockNum}`,
         ).to.eq(blockNum);
-        await redeploy('Unsubscribe');
+        await redeploy('AutomationV2Unsub');
     });
 
     it('... should unsubscribe Mcd subscription', async () => {
@@ -35,7 +35,7 @@ describe('Subscriptions-Unsubscribe', function () {
 
         const mcdSubscriptions = new hre.ethers.Contract(
             mcdSubscriptionsAddr,
-            subscriptionsABI,
+            ISubscriptionsABI,
             ownerAcc,
         );
 
@@ -45,7 +45,7 @@ describe('Subscriptions-Unsubscribe', function () {
             'The proxy isn\'t subscribed.',
         ).to.be.true;
 
-        await unsubscribeMcdSubscription(impersonatedProxy, cdpId);
+        await automationV2McdUnsub(impersonatedProxy, cdpId);
 
         // eslint-disable-next-line no-unused-expressions
         expect(
@@ -68,7 +68,7 @@ describe('Subscriptions-Unsubscribe', function () {
 
         const compoundSubscriptions = new hre.ethers.Contract(
             compoundSubscriptionsAddr,
-            subscriptionsABI,
+            ISubscriptionsABI,
             ownerAcc,
         );
 
@@ -78,7 +78,7 @@ describe('Subscriptions-Unsubscribe', function () {
             'The proxy isn\'t subscribed.',
         ).to.be.true;
 
-        await unsubscribeGeneralSubscription(impersonatedProxy, '1');
+        await automationV2CompAaveUnsub(impersonatedProxy, '1');
 
         // eslint-disable-next-line no-unused-expressions
         expect(
@@ -101,7 +101,7 @@ describe('Subscriptions-Unsubscribe', function () {
 
         const aaveSubscriptions = new hre.ethers.Contract(
             aaveSubscriptionsAddr,
-            subscriptionsABI,
+            ISubscriptionsABI,
             ownerAcc,
         );
 
@@ -111,7 +111,7 @@ describe('Subscriptions-Unsubscribe', function () {
             'The proxy isn\'t subscribed.',
         ).to.be.true;
 
-        await unsubscribeGeneralSubscription(impersonatedProxy, '2');
+        await automationV2CompAaveUnsub(impersonatedProxy, '2');
 
         // eslint-disable-next-line no-unused-expressions
         expect(
