@@ -1316,26 +1316,14 @@ const curveClaimFees = async (
     return proxy['execute(address,bytes)'](curveClaimFeesAddr, functionData, { gasLimit: 3000000 });
 };
 
-const automationV2McdUnsub = async (
-    proxy,
-    cdpId,
-) => {
-    const automationV2UnsubAddr = await getAddrFromRegistry('AutomationV2Unsub');
-
-    const automationV2UnsubAction = new dfs.actions.basic.AutomationV2McdUnsub(cdpId);
-
-    const functionData = automationV2UnsubAction.encodeForDsProxyCall()[1];
-
-    return proxy['execute(address,bytes)'](automationV2UnsubAddr, functionData, { gasLimit: 3000000 });
-};
-
-const automationV2CompAaveUnsub = async (
+const automationV2Unsub = async (
     proxy,
     protocol,
+    cdpId = 0,
 ) => {
     const automationV2UnsubAddr = await getAddrFromRegistry('AutomationV2Unsub');
 
-    const automationV2UnsubAction = new dfs.actions.basic.AutomationV2CompAaveUnsub(protocol);
+    const automationV2UnsubAction = new dfs.actions.basic.AutomationV2Unsub(protocol, cdpId);
 
     const functionData = automationV2UnsubAction.encodeForDsProxyCall()[1];
 
@@ -1424,6 +1412,5 @@ module.exports = {
     balancerClaim,
 
     changeProxyOwner,
-    automationV2McdUnsub,
-    automationV2CompAaveUnsub,
+    automationV2Unsub,
 };
