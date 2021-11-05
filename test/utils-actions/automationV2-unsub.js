@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const hre = require('hardhat');
-const { automationV2McdUnsub, automationV2CompAaveUnsub } = require('../actions');
+const { automationV2Unsub } = require('../actions');
 const {
     getProxy,
     redeploy,
@@ -45,7 +45,7 @@ describe('AutomationV2-Unsubscribe', function () {
             'The proxy isn\'t subscribed.',
         ).to.be.true;
 
-        await automationV2McdUnsub(impersonatedProxy, cdpId);
+        await automationV2Unsub(impersonatedProxy, '0', cdpId);
 
         // eslint-disable-next-line no-unused-expressions
         expect(
@@ -78,7 +78,7 @@ describe('AutomationV2-Unsubscribe', function () {
             'The proxy isn\'t subscribed.',
         ).to.be.true;
 
-        await automationV2CompAaveUnsub(impersonatedProxy, '1');
+        await automationV2Unsub(impersonatedProxy, '1');
 
         // eslint-disable-next-line no-unused-expressions
         expect(
@@ -111,7 +111,7 @@ describe('AutomationV2-Unsubscribe', function () {
             'The proxy isn\'t subscribed.',
         ).to.be.true;
 
-        await automationV2CompAaveUnsub(impersonatedProxy, '2');
+        await automationV2Unsub(impersonatedProxy, '2');
 
         // eslint-disable-next-line no-unused-expressions
         expect(
