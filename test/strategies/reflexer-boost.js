@@ -114,7 +114,7 @@ describe('Reflexer-Boost-Strategy', function () {
 
         await createStrategy(proxy, ...callData, true);
 
-        const ratioOver = Float2BN('2.4');
+        const ratioOver = Float2BN('2.2');
         const targetRatio = Float2BN('2');
 
         // eslint-disable-next-line max-len

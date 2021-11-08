@@ -215,8 +215,13 @@ const subReflexerBoostStrategy = async (proxy, safeId, ratioOver, targetRatio) =
     const strategyId = await getLatestStrategyId();
     const triggerData = await createReflexerTrigger(safeId, ratioOver, RATIO_STATE_OVER);
     // eslint-disable-next-line max-len
-    const subId = await subToStrategy(proxy, strategyId, true, [safeIdEncoded, targetRatioEncoded],
-        [triggerData]);
+    const subId = await subToStrategy(
+        proxy,
+        strategyId,
+        true,
+        [safeIdEncoded, targetRatioEncoded],
+        [triggerData],
+    );
 
     return subId;
 };
@@ -227,8 +232,13 @@ const subReflexerRepayStrategy = async (proxy, safeId, ratioUnder, targetRatio) 
     const strategyId = await getLatestStrategyId();
     const triggerData = await createReflexerTrigger(safeId, ratioUnder, RATIO_STATE_UNDER);
     // eslint-disable-next-line max-len
-    const subId = await subToStrategy(proxy, strategyId, true, [safeIdEncoded, targetRatioEncoded],
-        [triggerData]);
+    const subId = await subToStrategy(
+        proxy,
+        strategyId,
+        true,
+        [safeIdEncoded, targetRatioEncoded],
+        [triggerData],
+    );
 
     return subId;
 };
@@ -781,7 +791,7 @@ const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, flAm
     console.log(`GasUsed callMcdCloseStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callReflexerBoostStrategy = async (botAcc, strategyExecutor, strategyId, boostAmount) => {
+const callReflexerBoostStrategy = async (botAcc, strategyExecutor, subId, boostAmount) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -822,8 +832,10 @@ const callReflexerBoostStrategy = async (botAcc, strategyExecutor, strategyId, b
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+
+    const strategyIndex = 0;
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, {
         gasLimit: 8000000,
     });
 
@@ -833,7 +845,7 @@ const callReflexerBoostStrategy = async (botAcc, strategyExecutor, strategyId, b
     console.log(`GasUsed callReflexerBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callReflexerRepayStrategy = async (botAcc, strategyExecutor, strategyId, repayAmount) => {
+const callReflexerRepayStrategy = async (botAcc, strategyExecutor, subId, repayAmount) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -874,8 +886,10 @@ const callReflexerRepayStrategy = async (botAcc, strategyExecutor, strategyId, r
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+
+    const strategyIndex = 0;
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, {
         gasLimit: 8000000,
     });
 

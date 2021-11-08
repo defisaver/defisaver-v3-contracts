@@ -9,7 +9,7 @@ import "../interfaces/ITrigger.sol";
 contract ReflexerRatioTrigger is ITrigger, AdminAuth, ReflexerRatioHelper {
 
     enum RatioState { OVER, UNDER }
-    
+
     struct SubParams {
         uint256 safeId;
         uint256 ratio;
@@ -18,13 +18,12 @@ contract ReflexerRatioTrigger is ITrigger, AdminAuth, ReflexerRatioHelper {
 
     function isTriggered(bytes memory _callData, bytes memory _subData)
         public
-        view
         override
         returns (bool)
-    {   
+    {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
-        uint256 currRatio = getRatio(triggerSubData.safeId); // GAS 50k
+        uint256 currRatio = getRatio(triggerSubData.safeId);
 
         if (RatioState(triggerSubData.state) == RatioState.OVER) {
             if (currRatio > triggerSubData.ratio) return true;

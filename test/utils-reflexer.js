@@ -37,7 +37,7 @@ const getSafeInfo = async (reflexerView, safeID) => {
 
 const getRatio = async (safeId) => {
     const reflexerRatioTrigger = await hre.ethers.getContractAt('ReflexerRatioTrigger', getAddrFromRegistry('ReflexerRatioTrigger'));
-    return reflexerRatioTrigger['getRatio(uint256)'](safeId);
+    return reflexerRatioTrigger.callStatic.getRatio(safeId);
 };
 
 module.exports = {
