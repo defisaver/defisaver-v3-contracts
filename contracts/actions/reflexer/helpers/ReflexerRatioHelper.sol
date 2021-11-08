@@ -27,7 +27,7 @@ contract ReflexerRatioHelper is DSMath, MainnetReflexerAddresses {
         IFSMWrapper fsm = IFSMWrapper(fsmAddr);
         (uint256 collPrice, bool valid) = fsm.getNextResultWithValidity();
 
-        uint256 redemptionPrice = 0;
+        uint256 redemptionPrice;
         if (valid) {
             redemptionPrice = IOracleRelayer(ORACLE_RELAYER_ADDRESS).redemptionPrice();
         }
