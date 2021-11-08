@@ -14,6 +14,7 @@ import "../../../utils/ReentrancyGuard.sol";
 import "../../ActionBase.sol";
 import "./DydxFlashLoanBase.sol";
 import "../../../interfaces/flashloan/IFlashLoanBase.sol";
+import "../helpers/FLHelper.sol";
 
 /// @title Action that gets and receives a FL from DyDx protocol
 contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard, IFlashLoanBase {
@@ -24,13 +25,13 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
     error OnlyDyDxCallerError();
     //FL taker must be this contract
     error SameCallerError();
+    string constant ERR_ONLY_DYDX_CALLER = "Caller not dydx";
+    string constant ERR_SAME_CALLER = "FL taker must be this contract";
+    string constant ERR_WRONG_PAYBACK_AMOUNT = "Wrong FL payback amount sent";
 
     uint256 public constant DYDX_DUST_FEE = 2;
 
-    address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-
-    FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(0x47f159C90850D5cE09E21F931d504536840f34b4);
+    FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
 
     bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
@@ -129,6 +130,7 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
             abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, amount)
         );
         // return FL (just send funds to this addr)
+        require(tokenAddr.getBalance(address(this)) == amount, ERR_WRONG_PAYBACK_AMOUNT);
         
         flFeeFaucet.my2Wei(tokenAddr); // get extra 2 wei for DyDx fee
     }

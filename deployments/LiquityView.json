@@ -81,6 +81,19 @@
 		},
 		{
 			"inputs": [],
+			"name": "LQTYFrontEndAddr",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
 			"name": "LQTYStaking",
 			"outputs": [
 				{
@@ -349,6 +362,40 @@
 			"inputs": [
 				{
 					"internalType": "address",
+					"name": "_of",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_acc",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_iterations",
+					"type": "uint256"
+				}
+			],
+			"name": "getDebtInFront",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "next",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "debt",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
 					"name": "_depositor",
 					"type": "address"
 				}
@@ -408,6 +455,45 @@
 					"internalType": "address",
 					"name": "lowerHint",
 					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_LUSDamount",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_price",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_maxIterations",
+					"type": "uint256"
+				}
+			],
+			"name": "getRedemptionHints",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "firstRedemptionHint",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "partialRedemptionHintNICR",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "truncatedLUSDamount",
+					"type": "uint256"
 				}
 			],
 			"stateMutability": "view",
@@ -540,6 +626,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"hardhat": {}
 	}
 }

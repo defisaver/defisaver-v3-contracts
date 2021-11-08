@@ -21,12 +21,12 @@ describe('FL-DyDx', function () {
     const FLASHLOAN_TOKENS = ['WETH', 'DAI', 'USDC'];
 
     before(async () => {
+        await redeploy('RecipeExecutor');
+
         RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
 
         dydxFl = await redeploy('FLDyDx');
         await redeploy('SendToken');
-        await redeploy('RecipeExecutor');
-
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
     });

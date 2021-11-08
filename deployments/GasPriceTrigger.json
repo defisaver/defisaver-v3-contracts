@@ -18,19 +18,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "ADMIN_VAULT_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "adminVault",
 			"outputs": [
 				{
@@ -123,7 +110,7 @@
 							"type": "uint256"
 						}
 					],
-					"internalType": "struct GasPriceTrigger.Params",
+					"internalType": "struct GasPriceTrigger.SubParams",
 					"name": "params",
 					"type": "tuple"
 				}

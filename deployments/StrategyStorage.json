@@ -52,19 +52,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "ADMIN_VAULT_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "adminVault",
 			"outputs": [
 				{
@@ -115,11 +102,6 @@
 					"internalType": "bool",
 					"name": "_continuous",
 					"type": "bool"
-				},
-				{
-					"internalType": "uint64[]",
-					"name": "_sibblingStrategies",
-					"type": "uint64[]"
 				}
 			],
 			"name": "createStrategy",
@@ -179,11 +161,6 @@
 							"internalType": "bool",
 							"name": "continuous",
 							"type": "bool"
-						},
-						{
-							"internalType": "uint64[]",
-							"name": "sibblingStrategies",
-							"type": "uint64[]"
 						}
 					],
 					"internalType": "struct StrategyModel.Strategy[]",
@@ -235,11 +212,6 @@
 							"internalType": "bool",
 							"name": "continuous",
 							"type": "bool"
-						},
-						{
-							"internalType": "uint64[]",
-							"name": "sibblingStrategies",
-							"type": "uint64[]"
 						}
 					],
 					"internalType": "struct StrategyModel.Strategy",

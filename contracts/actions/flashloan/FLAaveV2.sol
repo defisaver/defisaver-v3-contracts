@@ -10,27 +10,29 @@ import "../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../core/strategy/StrategyModel.sol";
 import "../../utils/TokenUtils.sol";
 import "../../utils/ReentrancyGuard.sol";
+import "./helpers/FLHelper.sol";
 import "../../interfaces/flashloan/IFlashLoanBase.sol";
+import "../../core/strategy/StrategyModel.sol";
+
 
 /// @title Action that gets and receives a FL from Aave V2
-contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, IFlashLoanBase {
+contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlashLoanBase {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
-
     //Caller not aave pool
     error OnlyAaveCallerError();
     //FL Taker must be this contract
     error SameCallerError();
 
-    address
-        public constant AAVE_LENDING_POOL = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
+    string constant ERR_ONLY_AAVE_CALLER = "Caller not aave pool";
+    string constant ERR_SAME_CALLER = "FL taker must be this contract";
+    string constant ERR_WRONG_PAYBACK_AMOUNT = "Wrong FL payback amount sent";
 
     ILendingPoolAddressesProviderV2
         public constant addressesProvider = ILendingPoolAddressesProviderV2(
-        0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5
+            AAVE_LENDING_POOL_ADDRESS_PROVIDER
     );
 
-    address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
     bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
@@ -50,7 +52,7 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, IFlashLoanBase 
                 IFLParamGetter(flData.flParamGetterAddr).getFlashLoanParams(flData.flParamGetterData);
         }
 
-        bytes memory recipeData = flData.recipeData; // TODO: Fix this
+        bytes memory recipeData = flData.recipeData;
         uint flAmount = _flAaveV2(flData, recipeData);
 
         return bytes32(flAmount);
@@ -118,12 +120,17 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, IFlashLoanBase 
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             recipeExecutor,
-            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes[],bytes4[],uint8[][]),bytes32)", currRecipe, bytes32(_amounts[0] + _fees[0]))
+            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, bytes32(_amounts[0] + _fees[0]))
         );
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
-            _assets[i].approveToken(address(AAVE_LENDING_POOL), _amounts[i] + _fees[i]);
+            uint256 paybackAmount = _amounts[i] + _fees[i];
+            
+            require(_assets[i].getBalance(address(this)) == paybackAmount, ERR_WRONG_PAYBACK_AMOUNT);
+
+            _assets[i].approveToken(address(AAVE_LENDING_POOL), paybackAmount);
+
         }
 
         return true;

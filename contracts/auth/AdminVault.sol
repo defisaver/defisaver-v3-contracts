@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity =0.8.4;
+import "./helpers/AuthHelper.sol";
 
 /// @title A stateful contract that holds and can change owner/admin
-contract AdminVault {
+contract AdminVault is AuthHelper {
     address public owner;
     address public admin;
 
@@ -11,7 +12,7 @@ contract AdminVault {
 
     constructor() {
         owner = msg.sender;
-        admin = 0x25eFA336886C74eA8E282ac466BdCd0199f85BB9;
+        admin = ADMIN_ADDR;
     }
 
     /// @notice Admin is able to change owner

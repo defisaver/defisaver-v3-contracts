@@ -38,16 +38,19 @@ contract SubStorage is StrategyModel, AdminAuth {
     /// @param _active If the strategy is turned on at the start
     /// @param _triggerData Subscription data for triggers
     /// @param _subData Subscription data for recipe
+    /// @param _isBundle If the subscription is for a bundle of recipes
     function subscribeToStrategy(
         uint64 _strategyId,
         bool _active,
         bytes[] memory _triggerData,
-        bytes32[] memory _subData
+        bytes32[] memory _subData,
+        bool _isBundle
     ) public returns (uint) {
         strategiesSubs.push(
             StrategySub({
                 strategyId: _strategyId,
                 active: _active,
+                isBundle: _isBundle,
                 userProxy: msg.sender, // TODO: should we check if the user is dsproxy?
                 triggerData: _triggerData,
                 subData: _subData

@@ -11,17 +11,19 @@ const {
     WETH_ADDRESS,
 } = require('../utils');
 
-const { fetchMakerAddresses, getVaultInfo } = require('../utils-mcd');
+const { getVaultInfo } = require('../utils-mcd');
 
 const { openVault, mcdMerge } = require('../actions.js');
 
 describe('Mcd-Merge', () => {
-    let makerAddresses; let senderAcc; let proxy; let mcdView;
+    let senderAcc; let proxy; let mcdView;
 
     before(async () => {
+        await redeploy('McdOpen');
         await redeploy('McdMerge');
-
-        makerAddresses = await fetchMakerAddresses();
+        await redeploy('DFSSell');
+        await redeploy('McdSupply');
+        await redeploy('McdGenerate');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -31,26 +33,23 @@ describe('Mcd-Merge', () => {
 
     for (let i = 0; i < ilks.length; ++i) {
         const ilkData = ilks[i];
-        const joinAddr = ilkData.join;
         const tokenData = getAssetInfo(ilkData.asset);
 
         it(`... should merge two ${ilkData.ilkLabel} Maker vaults`, async () => {
             if (tokenData.symbol === 'ETH') {
                 tokenData.address = WETH_ADDRESS;
             }
+
             const vaultId1 = await openVault(
-                makerAddresses,
                 proxy,
-                joinAddr,
-                tokenData,
+                ilkData.ilkLabel,
                 fetchAmountinUSDPrice(tokenData.symbol, '40000'),
                 (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 50).toString(),
             );
+
             const vaultId2 = await openVault(
-                makerAddresses,
                 proxy,
-                joinAddr,
-                tokenData,
+                ilkData.ilkLabel,
                 fetchAmountinUSDPrice(tokenData.symbol, '40000'),
                 (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 50).toString(),
             );

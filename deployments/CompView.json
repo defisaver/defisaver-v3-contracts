@@ -115,6 +115,21 @@
 							"internalType": "uint256",
 							"name": "price",
 							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "compBorrowSpeeds",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "compSupplySpeeds",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "borrowCap",
+							"type": "uint256"
 						}
 					],
 					"internalType": "struct CompView.TokenInfoFull[]",

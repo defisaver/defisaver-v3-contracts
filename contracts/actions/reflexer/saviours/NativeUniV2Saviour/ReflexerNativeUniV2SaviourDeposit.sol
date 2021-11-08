@@ -11,7 +11,6 @@ import "../../../../utils/TokenUtils.sol";
 contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 
-    address public constant UNIV2_RAI_WETH_ADDRESS = 0x8aE720a71622e824F576b4A8C03031066548A3B1;
     /// @param from - The address from which to pull LP tokens
     /// @param safeId - The ID of the SAFE to protect. This ID should be registered inside GebSafeManager
     /// @param lpTokenAmount - The amount of LP tokens to deposit

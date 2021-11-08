@@ -82,7 +82,7 @@ contract LiquityOpen is ActionBase, LiquityHelper {
             _params.lowerHint
         );
 
-        LUSDTokenAddr.withdrawTokens(_params.to, _params.lusdAmount);
+        LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, _params.lusdAmount);
 
         logger.Log(
             address(this),

@@ -1,0 +1,276 @@
+{
+	"contractName": "CurveView",
+	"abi": [
+		{
+			"inputs": [],
+			"name": "AddressProvider",
+			"outputs": [
+				{
+					"internalType": "contract IAddressProvider",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "FeeDistributor",
+			"outputs": [
+				{
+					"internalType": "contract IFeeDistributor",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "Minter",
+			"outputs": [
+				{
+					"internalType": "contract IMinter",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "VotingEscrow",
+			"outputs": [
+				{
+					"internalType": "contract IVotingEscrow",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_nCoins",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bool",
+					"name": "_useUnderlying",
+					"type": "bool"
+				}
+			],
+			"name": "curveDepositSig",
+			"outputs": [
+				{
+					"internalType": "bytes4",
+					"name": "",
+					"type": "bytes4"
+				}
+			],
+			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_nCoins",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bool",
+					"name": "_useUnderlying",
+					"type": "bool"
+				}
+			],
+			"name": "curveWithdrawImbalanceSig",
+			"outputs": [
+				{
+					"internalType": "bytes4",
+					"name": "",
+					"type": "bytes4"
+				}
+			],
+			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_nCoins",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bool",
+					"name": "_useUnderlying",
+					"type": "bool"
+				}
+			],
+			"name": "curveWithdrawSig",
+			"outputs": [
+				{
+					"internalType": "bytes4",
+					"name": "",
+					"type": "bytes4"
+				}
+			],
+			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_gaugeAddr",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				}
+			],
+			"name": "gaugeBalance",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_lpToken",
+					"type": "address"
+				}
+			],
+			"name": "getPoolDataFromLpToken",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "virtualPrice",
+					"type": "uint256"
+				},
+				{
+					"internalType": "address",
+					"name": "pool",
+					"type": "address"
+				},
+				{
+					"internalType": "string",
+					"name": "poolName",
+					"type": "string"
+				},
+				{
+					"internalType": "address[8]",
+					"name": "tokens",
+					"type": "address[8]"
+				},
+				{
+					"internalType": "uint256[8]",
+					"name": "decimals",
+					"type": "uint256[8]"
+				},
+				{
+					"internalType": "uint256[8]",
+					"name": "balances",
+					"type": "uint256[8]"
+				},
+				{
+					"internalType": "address[8]",
+					"name": "underlyingTokens",
+					"type": "address[8]"
+				},
+				{
+					"internalType": "uint256[8]",
+					"name": "underlyingDecimals",
+					"type": "uint256[8]"
+				},
+				{
+					"internalType": "uint256[8]",
+					"name": "underlyingBalances",
+					"type": "uint256[8]"
+				},
+				{
+					"internalType": "address[10]",
+					"name": "gauges",
+					"type": "address[10]"
+				},
+				{
+					"internalType": "int128[10]",
+					"name": "gaugeTypes",
+					"type": "int128[10]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_user",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_startIndex",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_returnSize",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_loopLimit",
+					"type": "uint256"
+				}
+			],
+			"name": "getUserLP",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "lpToken",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "balance",
+							"type": "uint256"
+						}
+					],
+					"internalType": "struct CurveView.LpBalance[]",
+					"name": "lpBalances",
+					"type": "tuple[]"
+				},
+				{
+					"internalType": "uint256",
+					"name": "nextIndex",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		}
+	],
+	"networks": {
+		"local": {}
+	}
+}

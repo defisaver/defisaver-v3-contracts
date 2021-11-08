@@ -46,6 +46,16 @@ describe('Mcd-Repay', function () {
     let RecipeExecutorAddr;
 
     before(async () => {
+        await redeploy('McdOpen');
+        await redeploy('McdSupply');
+        await redeploy('RecipeExecutor');
+        await redeploy('SumInputs');
+        await redeploy('McdGenerate');
+        await redeploy('McdWithdraw');
+        await redeploy('McdPayback');
+        await redeploy('DFSSell');
+        await redeploy('FLDyDx');
+        await redeploy('FLAaveV2');
         uniWrapper = await redeploy('UniswapWrapperV3');
         mcdView = await redeploy('McdView');
         RecipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
@@ -77,10 +87,8 @@ describe('Mcd-Repay', function () {
         it(`... should call a repay ${repayAmount} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
             // create a vault
             vaultId = await openVault(
-                makerAddresses,
                 proxy,
-                joinAddr,
-                tokenData,
+                ilkData.ilkLabel,
                 fetchAmountinUSDPrice(tokenData.symbol, '40000'),
                 (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 400).toString(),
             );
@@ -139,10 +147,8 @@ describe('Mcd-Repay', function () {
         it(`... should call a FL repay ${repayAmount} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
             // create a vault
             vaultId = await openVault(
-                makerAddresses,
                 proxy,
-                joinAddr,
-                tokenData,
+                ilkData.ilkLabel,
                 fetchAmountinUSDPrice(tokenData.symbol, '40000'),
                 (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 500).toString(),
             );

@@ -32,7 +32,6 @@ contract McdPayback is ActionBase, McdHelper {
         bytes32[] memory _returnValues
     ) public payable override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
-
         inputData.vaultId = _parseParamUint(
             inputData.vaultId,
             _paramMapping[0],
@@ -85,6 +84,7 @@ contract McdPayback is ActionBase, McdHelper {
         DAI_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         DAI_ADDR.approveToken(DAI_JOIN_ADDR, _inputData.amount);
         IDaiJoin(DAI_JOIN_ADDR).join(urn, _inputData.amount);
+
         // decrease the vault debt
         mcdManager.frob(_inputData.vaultId, 0, normalizePaybackAmount(address(vat), urn, ilk));
 

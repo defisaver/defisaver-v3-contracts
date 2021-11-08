@@ -1,7 +1,7 @@
 const dfs = require('@defisaver/sdk');
 const hre = require('hardhat');
 
-const { getAssetInfo } = require('@defisaver/tokens');
+const { getAssetInfo, ilks } = require('@defisaver/tokens');
 
 const {
     approve,
@@ -17,7 +17,7 @@ const {
     fetchAmountinUSDPrice,
 } = require('./utils');
 
-const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
+const { getVaultsForUser, MCD_MANAGER_ADDR, canGenerateDebt } = require('./utils-mcd');
 
 const { getSecondTokenAmount } = require('./utils-uni');
 
@@ -73,7 +73,7 @@ const buy = async (proxy, sellAddr, buyAddr,
     await proxy['execute(address,bytes)'](dfsBuyAddr, functionData, { gasLimit: 3000000 });
 };
 
-const openMcd = async (proxy, makerAddresses, joinAddr) => {
+const openMcd = async (proxy, joinAddr) => {
     const mcdOpenAddr = await getAddrFromRegistry('McdOpen');
 
     const openMyVault = new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR);
@@ -81,7 +81,7 @@ const openMcd = async (proxy, makerAddresses, joinAddr) => {
 
     await proxy['execute(address,bytes)'](mcdOpenAddr, functionData, { gasLimit: 3000000 });
 
-    const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
+    const vaultsAfter = await getVaultsForUser(proxy.address);
 
     return vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
 };
@@ -343,16 +343,30 @@ const generateMcd = async (proxy, vaultId, amount, to) => {
     await proxy['execute(address,bytes)'](mcdGenerateAddr, functionData, { gasLimit: 3000000 });
 };
 
-const openVault = async (makerAddresses, proxy, joinAddr, tokenData, collAmount, daiAmount) => {
-    const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
+const openVault = async (proxy, collType, collAmount, daiAmount) => {
+    const ilkObj = ilks.find((i) => i.ilkLabel === collType);
+
+    let asset = ilkObj.asset;
+    if (asset === 'ETH') asset = 'WETH';
+    const tokenData = getAssetInfo(asset);
+
+    const vaultId = await openMcd(proxy, ilkObj.join);
     const from = proxy.signer.address;
     const to = proxy.signer.address;
 
     const amountDai = hre.ethers.utils.parseUnits(daiAmount, 18);
     const amountColl = hre.ethers.utils.parseUnits(collAmount, tokenData.decimals);
 
-    await supplyMcd(proxy, vaultId, amountColl, tokenData.address, joinAddr, from);
+    const hasMoreDebt = await canGenerateDebt(ilkObj);
+
+    if (!hasMoreDebt) {
+        console.log('Cant open a vault not debt ceiling reached');
+        return -1;
+    }
+
+    await supplyMcd(proxy, vaultId, amountColl, tokenData.address, ilkObj.join, from);
     await generateMcd(proxy, vaultId, amountDai, to);
+
     return vaultId;
 };
 
@@ -450,11 +464,8 @@ const uniWithdraw = async (proxy, addrTokenA, addrTokenB, lpAddr, liquidity, to,
 const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) => {
     const compClaimAddr = await getAddrFromRegistry('CompClaim');
 
-    const claimCompAction = new dfs.Action(
-        'CompClaim',
-        '0x0',
-        ['address[]', 'address[]', 'address', 'address'],
-        [cSupplyAddresses, cBorrowAddresses, from, to],
+    const claimCompAction = new dfs.actions.compound.CompoundClaimAction(
+        cSupplyAddresses, cBorrowAddresses, from, to,
     );
 
     const functionData = claimCompAction.encodeForDsProxyCall()[1];
@@ -466,12 +477,8 @@ const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) =>
 
 const mcdGive = async (proxy, vaultId, newOwner, createProxy) => {
     const mcdGiveAddr = await getAddrFromRegistry('McdGive');
-
-    const mcdGiveAction = new dfs.Action(
-        'McdGive',
-        '0x0',
-        ['uint256', 'address', 'bool', 'address'],
-        [vaultId, newOwner.address, createProxy, MCD_MANAGER_ADDR],
+    const mcdGiveAction = new dfs.actions.maker.MakerGiveAction(
+        vaultId, newOwner.address, createProxy, MCD_MANAGER_ADDR,
     );
 
     const functionData = mcdGiveAction.encodeForDsProxyCall()[1];
@@ -483,12 +490,8 @@ const mcdGive = async (proxy, vaultId, newOwner, createProxy) => {
 
 const mcdMerge = async (proxy, srcVaultId, destVaultId) => {
     const mcdMergeAddr = await getAddrFromRegistry('McdMerge');
-
-    const mcdMergeAction = new dfs.Action(
-        'McdMerge',
-        '0x0',
-        ['uint256', 'uint256', 'address'],
-        [srcVaultId, destVaultId, MCD_MANAGER_ADDR],
+    const mcdMergeAction = new dfs.actions.maker.MakerMergeAction(
+        srcVaultId, destVaultId, MCD_MANAGER_ADDR,
     );
 
     const functionData = mcdMergeAction.encodeForDsProxyCall()[1];
@@ -1073,6 +1076,7 @@ const reflexerSaviourWithdraw = async (proxy, to, safeId, lpTokenAmount) => {
     const functionData = reflexerSaviourWithdrawAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](reflexerSaviourWithdrawAddress, functionData, { gasLimit: 3000000 });
 };
+
 const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, owner, to) => {
     const claimInstMakerAddress = await getAddrFromRegistry('ClaimInstMaker');
     const claimInstMakerAction = new dfs.actions.insta.ClaimInstMakerAction(
@@ -1080,6 +1084,216 @@ const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, o
     );
     const functionData = claimInstMakerAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](claimInstMakerAddress, functionData);
+};
+
+const pullTokensInstDSA = async (proxy, dsaAddress, tokens, amounts, to) => {
+    const instPulLTokenAddress = await getAddrFromRegistry('InstPullTokens');
+    const instPullTokenAction = new dfs.actions.insta.InstPullTokensAction(
+        dsaAddress, tokens, amounts, to,
+    );
+    const functionData = instPullTokenAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](instPulLTokenAddress, functionData);
+};
+
+const balancerSupply = async (proxy, poolId, from, to, tokens, maxAmountsIn, userData) => {
+    const balancerSupplyAddress = await getAddrFromRegistry('BalancerV2Supply');
+    const balancerSupplyAction = new dfs.actions.balancer.BalancerV2SupplyAction(
+        poolId, from, to, tokens, maxAmountsIn, userData,
+    );
+    const functionData = balancerSupplyAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](balancerSupplyAddress, functionData);
+};
+
+const balancerClaim = async (proxy, liquidityProvider, to, weeks, balances, merkleProofs) => {
+    const balancerClaimAddress = await getAddrFromRegistry('BalancerV2Claim');
+    const balancerClaimAction = new dfs.actions.balancer.BalancerV2ClaimAction(
+        liquidityProvider, to, weeks, balances, merkleProofs,
+    );
+    const functionData = balancerClaimAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](balancerClaimAddress, functionData);
+};
+
+const balancerWithdraw = async (
+    proxy,
+    poolId,
+    from,
+    to,
+    lpTokenAmount,
+    tokens,
+    minAmountsOut,
+    userData,
+) => {
+    const balancerWithdrawAddress = await getAddrFromRegistry('BalancerV2Withdraw');
+    const balancerWithdrawAction = new dfs.actions.balancer.BalancerV2WithdrawAction(
+        poolId,
+        from,
+        to,
+        lpTokenAmount,
+        tokens,
+        minAmountsOut,
+        userData,
+    );
+    const functionData = balancerWithdrawAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](balancerWithdrawAddress, functionData);
+};
+
+const changeProxyOwner = async (proxy, newOwner) => {
+    const changeProxyOwnerAddress = await getAddrFromRegistry('ChangeProxyOwner');
+    const changeProxyOwnerAction = new dfs.actions.basic.ChangeProxyOwnerAction(
+        newOwner,
+    );
+    const functionData = changeProxyOwnerAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](changeProxyOwnerAddress, functionData);
+};
+
+const curveDeposit = async (
+    proxy,
+    sender,
+    receiver,
+    depositTarget,
+    lpToken,
+    minMintAmount,
+    amounts,
+    tokens,
+    useUnderlying,
+) => {
+    const curveDepositAddr = await getAddrFromRegistry('CurveDeposit');
+    const curveViewAddr = await getAddrFromRegistry('CurveView');
+    const curveView = await hre.ethers.getContractAt('CurveView', curveViewAddr);
+    const sig = await curveView['curveDepositSig(uint256,bool)'](tokens.length, useUnderlying);
+
+    const curveDepositAction = new dfs.actions.curve.CurveDepositAction(
+        sender,
+        receiver,
+        depositTarget,
+        lpToken,
+        sig,
+        minMintAmount,
+        amounts,
+        tokens,
+        useUnderlying,
+    );
+
+    const functionData = curveDepositAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](curveDepositAddr, functionData, { gasLimit: 3000000 });
+};
+
+const curveWithdraw = async (
+    proxy,
+    sender,
+    receiver,
+    pool,
+    lpToken,
+    burnAmount,
+    minAmounts,
+    tokens,
+    withdrawExact,
+    useUnderlying,
+) => {
+    const curveWithdrawAddr = await getAddrFromRegistry('CurveWithdraw');
+    const curveViewAddr = await getAddrFromRegistry('CurveView');
+    const curveView = await hre.ethers.getContractAt('CurveView', curveViewAddr);
+    let sig;
+    if (withdrawExact) {
+        sig = await curveView.curveWithdrawImbalanceSig(tokens.length, useUnderlying);
+    } else {
+        sig = await curveView.curveWithdrawSig(tokens.length, useUnderlying);
+    }
+
+    const curveWithdrawAction = new dfs.actions.curve.CurveWithdrawAction(
+        sender,
+        receiver,
+        pool,
+        lpToken,
+        sig,
+        burnAmount,
+        minAmounts,
+        tokens,
+        withdrawExact,
+        useUnderlying,
+    );
+
+    const functionData = curveWithdrawAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](curveWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
+
+const curveGaugeDeposit = async (
+    proxy,
+    gaugeAddr,
+    lpToken,
+    sender,
+    onBehalfOf,
+    amount,
+) => {
+    const curveGaugeDepositAddr = await getAddrFromRegistry('CurveGaugeDeposit');
+
+    const curveGaugeDepositAction = new dfs.actions.curve.CurveGaugeDepositAction(
+        gaugeAddr,
+        lpToken,
+        sender,
+        onBehalfOf,
+        amount,
+    );
+
+    const functionData = curveGaugeDepositAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](curveGaugeDepositAddr, functionData, { gasLimit: 3000000 });
+};
+
+const curveGaugeWithdraw = async (
+    proxy,
+    gaugeAddr,
+    lpToken,
+    receiver,
+    amount,
+) => {
+    const curveGaugeWithdrawAddr = await getAddrFromRegistry('CurveGaugeWithdraw');
+
+    const curveGaugeWithdrawAction = new dfs.actions.curve.CurveGaugeWithdrawAction(
+        gaugeAddr,
+        lpToken,
+        receiver,
+        amount,
+    );
+
+    const functionData = curveGaugeWithdrawAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](curveGaugeWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
+
+const curveMintCrv = async (
+    proxy,
+    gaugeAddrs,
+    receiver,
+) => {
+    const curveMintCrvAddr = await getAddrFromRegistry('CurveMintCrv');
+
+    const curveMintCrvAction = new dfs.actions.curve.CurveMintCrvAction(
+        gaugeAddrs,
+        receiver,
+    );
+
+    const functionData = curveMintCrvAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](curveMintCrvAddr, functionData, { gasLimit: 3000000 });
+};
+
+const curveClaimFees = async (
+    proxy,
+    claimFor,
+    receiver,
+) => {
+    const curveClaimFeesAddr = await getAddrFromRegistry('CurveClaimFees');
+
+    const curveClaimFeesAction = new dfs.actions.curve.CurveClaimFeesAction(
+        claimFor,
+        receiver,
+    );
+
+    const functionData = curveClaimFeesAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](curveClaimFeesAddr, functionData, { gasLimit: 3000000 });
 };
 
 module.exports = {
@@ -1145,6 +1359,21 @@ module.exports = {
 
     lidoStake,
 
+    curveDeposit,
+    curveWithdraw,
+
+    curveGaugeDeposit,
+    curveGaugeWithdraw,
+    curveMintCrv,
+    curveClaimFees,
+
     buyTokenIfNeeded,
     claimInstMaker,
+    pullTokensInstDSA,
+
+    balancerSupply,
+    balancerWithdraw,
+    balancerClaim,
+
+    changeProxyOwner,
 };

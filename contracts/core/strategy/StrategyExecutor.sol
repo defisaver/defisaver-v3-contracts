@@ -20,7 +20,6 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
 
     bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));
     bytes4 constant SUB_STORAGE_ID = bytes4(keccak256("SubStorage"));
-    bytes4 constant STRATEGY_STORAGE_ID = bytes4(keccak256("StrategyStorage"));
 
     bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
@@ -34,6 +33,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
     /// @param _actionsCallData All input data needed to execute actions
     function executeStrategy(
         uint256 _subId,
+        uint256 _strategyIndex, // need to specify because if sub is part of a bundle
         bytes[] calldata _triggerCallData,
         bytes[] calldata _actionsCallData
     ) public {
@@ -51,7 +51,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         }
 
         // execute actions
-        callActions(_subId, _actionsCallData, _triggerCallData, sub.userProxy);
+        callActions(_subId, _actionsCallData, _triggerCallData, sub.userProxy, _strategyIndex);
     }
 
     /// @notice Checks if msg.sender has auth, reverts if not
@@ -60,7 +60,6 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         return BotAuth(registry.getAddr(BOT_AUTH_ID)).isApproved(_subId, msg.sender);
     }
 
-    
 
     /// @notice Checks triggers and execute all the actions in order
     /// @param _subId Strategy data we have in storage
@@ -69,7 +68,8 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         uint256 _subId,
         bytes[] calldata _actionsCallData,
         bytes[] calldata _triggerCallData,
-        address _proxy
+        address _proxy,
+        uint256 _strategyIndex
     ) internal {
         address RecipeExecutorAddr = registry.getAddr(RECIPE_EXECUTOR_ID);
 
@@ -79,10 +79,11 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
             _proxy,
             RecipeExecutorAddr,
             abi.encodeWithSignature(
-                "executeRecipeFromStrategy(uint256,bytes[],bytes[])",
+                "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256)",
                 _subId,
                 _actionsCallData,
-                _triggerCallData
+                _triggerCallData,
+                _strategyIndex
             )
         );
     }

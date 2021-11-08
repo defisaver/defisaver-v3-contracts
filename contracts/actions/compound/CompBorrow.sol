@@ -62,7 +62,6 @@ contract CompBorrow is ActionBase, CompHelper {
         address _to
     ) internal returns (uint256) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
-
         // if the tokens are borrowed we need to enter the market
         enterMarket(_cTokenAddr);
 
@@ -74,7 +73,6 @@ contract CompBorrow is ActionBase, CompHelper {
         if (tokenAddr == TokenUtils.WETH_ADDR) {
             TokenUtils.depositWeth(_amount);
         }
-
         tokenAddr.withdrawTokens(_to, _amount);
 
         logger.Log(address(this), msg.sender, "CompBorrow", abi.encode(tokenAddr, _amount, _to));

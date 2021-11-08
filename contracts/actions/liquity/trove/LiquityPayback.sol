@@ -53,7 +53,7 @@ contract LiquityPayback is ActionBase, LiquityHelper {
 
     /// @notice Repays LUSD tokens to the trove
     function _liquityPayback(Params memory _params) internal returns (uint256) {
-        LUSDTokenAddr.pullTokensIfNeeded(_params.from, _params.lusdAmount);
+        LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
 
         BorrowerOperations.repayLUSD(_params.lusdAmount, _params.upperHint, _params.lowerHint);
 

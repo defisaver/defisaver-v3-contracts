@@ -4,6 +4,11 @@ pragma solidity =0.8.4;
 
 /// @title StrategyModel - contract that implements the structs used in the core system
 contract StrategyModel {
+    struct StrategyBundle {
+        address creator;
+        uint64[] strategyIds;
+    }
+
     /// @dev Template/Class which defines a Strategy
     struct Strategy {
         string name;
@@ -12,7 +17,6 @@ contract StrategyModel {
         bytes4[] actionIds;
         uint8[][] paramMapping;
         bool continuous; // if the action is repeated (continous) or one time
-        uint64[] sibblingStrategies;
     }
 
     struct Recipe {
@@ -27,6 +31,7 @@ contract StrategyModel {
     struct StrategySub {
         uint64 strategyId;
         bool active;
+        bool isBundle; // if true, id points to a bundle id
         address userProxy;
         bytes[] triggerData;
         bytes32[] subData;

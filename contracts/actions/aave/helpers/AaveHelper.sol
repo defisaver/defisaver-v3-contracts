@@ -4,9 +4,11 @@ pragma solidity =0.8.4;
 import "../../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
 import "../../../interfaces/aaveV2/IAaveIncentivesController.sol";
+import "./MainnetAaveAddresses.sol";
+import "../../../interfaces/aaveV2/IStakedToken.sol";
 
 /// @title Utility functions and data used in AaveV2 actions
-contract AaveHelper {
+contract AaveHelper is MainnetAaveAddresses {
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
     uint256 public constant STABLE_ID = 1;
@@ -14,9 +16,10 @@ contract AaveHelper {
 
     bytes32 public constant DATA_PROVIDER_ID =
         0x0100000000000000000000000000000000000000000000000000000000000000;
-
-    address constant public STAKED_CONTROLLER_ADDR = 0xd784927Ff2f95ba542BfC824c8a8a98F3495f6b5;
+    
     IAaveIncentivesController constant public AaveIncentivesController = IAaveIncentivesController(STAKED_CONTROLLER_ADDR);
+
+    IStakedToken constant public StakedToken = IStakedToken(STAKED_TOKEN_ADDR);
 
     /// @notice Enable/Disable a token as collateral for the specified Aave market
     function enableAsCollateral(

@@ -51,7 +51,7 @@ contract LiquityClose is ActionBase, LiquityHelper {
         uint256 netDebt = TroveManager.getTroveDebt(address(this)) - LUSD_GAS_COMPENSATION;
         uint256 coll = TroveManager.getTroveColl(address(this));
 
-        LUSDTokenAddr.pullTokensIfNeeded(_from, netDebt);
+        LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_from, netDebt);
 
         BorrowerOperations.closeTrove();
 

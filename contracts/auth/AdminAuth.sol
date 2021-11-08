@@ -4,14 +4,12 @@ pragma solidity =0.8.4;
 
 import "../interfaces/IDFSRegistry.sol";
 import "../utils/SafeERC20.sol";
-
 import "./AdminVault.sol";
+import "./helpers/AuthHelper.sol";
 
 /// @title AdminAuth Handles owner/admin privileges over smart contracts
-contract AdminAuth {
+contract AdminAuth is AuthHelper {
     using SafeERC20 for IERC20;
-
-    address public constant ADMIN_VAULT_ADDR = 0xCCf3d848e08b94478Ed8f46fFead3008faF581fD;
 
     AdminVault public constant adminVault = AdminVault(ADMIN_VAULT_ADDR);
 

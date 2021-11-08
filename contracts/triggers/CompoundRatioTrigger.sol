@@ -16,7 +16,7 @@ contract CompoundRatioTrigger is ITrigger, AdminAuth, CompRatioHelper {
         uint8 state;
     }
 
-    function isTriggered(bytes memory _callData, bytes memory _subData)
+    function isTriggered(bytes memory, bytes memory _subData)
         public
         view
         override

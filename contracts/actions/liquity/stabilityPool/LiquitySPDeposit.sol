@@ -52,16 +52,16 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
     /// @notice Deposits LUSD to the stability pool
     function _liquitySPDeposit(Params memory _params) internal returns (uint256) {
         if (_params.lusdAmount == type(uint256).max) {
-            _params.lusdAmount = LUSDTokenAddr.getBalance(_params.from);
+            _params.lusdAmount = LUSD_TOKEN_ADDRESS.getBalance(_params.from);
         }
 
         uint256 ethGain = StabilityPool.getDepositorETHGain(address(this));
-        uint256 lqtyBefore = LQTYTokenAddr.getBalance(address(this));
+        uint256 lqtyBefore = LQTY_TOKEN_ADDRESS.getBalance(address(this));
 
-        LUSDTokenAddr.pullTokensIfNeeded(_params.from, _params.lusdAmount);
-        StabilityPool.provideToSP(_params.lusdAmount, LQTYFrontEndAddr);
+        LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
+        StabilityPool.provideToSP(_params.lusdAmount, LQTY_FRONT_END_ADDRESS);
 
-        uint256 lqtyGain = LQTYTokenAddr.getBalance(address(this)).sub(lqtyBefore);
+        uint256 lqtyGain = LQTY_TOKEN_ADDRESS.getBalance(address(this)).sub(lqtyBefore);
 
         withdrawStabilityGains(ethGain, lqtyGain, _params.wethTo, _params.lqtyTo);
 

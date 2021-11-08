@@ -4,7 +4,6 @@ pragma solidity =0.8.4;
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
-
 /// @title Borrow a token a from an Aave market
 contract AaveBorrow is ActionBase, AaveHelper {
     using TokenUtils for address;
@@ -69,7 +68,6 @@ contract AaveBorrow is ActionBase, AaveHelper {
         address _onBehalf
     ) internal returns (uint256) {
         ILendingPoolV2 lendingPool = getLendingPool(_market);
-
         // defaults to onBehalf of proxy
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);

@@ -45,19 +45,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "ADMIN_VAULT_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "REGISTRY_ADDR",
 			"outputs": [
 				{
@@ -106,6 +93,11 @@
 				{
 					"internalType": "uint256",
 					"name": "_subId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_strategyIndex",
 					"type": "uint256"
 				},
 				{

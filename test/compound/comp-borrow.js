@@ -23,6 +23,7 @@ describe('Comp-Borrow', function () {
         proxy;
 
     before(async () => {
+        await redeploy('CompSupply');
         await redeploy('CompBorrow');
         await redeploy('DFSSell');
 

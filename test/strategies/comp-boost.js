@@ -125,7 +125,7 @@ describe('Compound-Boost-Strategy', function () {
 
         await createStrategy(proxy, ...callData, true);
 
-        targetRatio = hre.ethers.utils.parseUnits('2', '18');
+        targetRatio = hre.ethers.utils.parseUnits('2.1', '18');
         ratioOver = hre.ethers.utils.parseUnits('2.5', '18');
 
         strategyId = await subCompBoostStrategy(proxy, ratioOver, targetRatio);

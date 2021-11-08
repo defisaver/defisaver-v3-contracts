@@ -7,7 +7,7 @@ const ethers = require('ethers');
 const { write } = require('./writer');
 
 const getGasPrice = async (exGasPrice) => {
-    let defaultGasPrice = 100000000000;
+    let defaultGasPrice = 1000000000000;
     let newGasPrice = defaultGasPrice;
 
     if (exGasPrice.gt('0')) {
@@ -38,7 +38,6 @@ const deploy = async (contractName, signer, action, gasPrice, nonce, ...args) =>
 
         let contract;
         if (args.length === 0) {
-            console.log("Pre deploy: ");
             contract = await Contract.deploy(options);
         } else {
             contract = await Contract.deploy(...args, options);
