@@ -56,6 +56,20 @@ const getVaultInfo = async (mcdView, vaultId, ilk) => {
     };
 };
 
+const getNextEthPrice = async () => {
+    try {
+        const pipAddr = '0x81FE72B5A8d1A857d176C3E7d5Bd2679A9B85763';
+        const priceStorage = await hre.ethers.provider.getStorageAt(pipAddr, 4);
+
+        const priceInBigNum = hre.ethers.BigNumber.from(`0x${priceStorage.slice(-32)}`);
+
+        return priceInBigNum.toString();
+    } catch (err) {
+        console.log(err);
+        return 0;
+    }
+};
+
 module.exports = {
     fetchMakerAddresses,
     getVaultsForUser,
@@ -63,5 +77,6 @@ module.exports = {
     getVaultInfoRaw,
     getVaultInfo,
     canGenerateDebt,
+    getNextEthPrice,
     MCD_MANAGER_ADDR,
 };

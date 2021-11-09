@@ -33,6 +33,7 @@ const {
     MAX_UINT128,
     nullAddress,
 } = require('./utils');
+const { getNextEthPrice } = require('./utils-mcd');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -424,7 +425,11 @@ const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, f
     actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
     actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
 
-    triggerCallData.push(abiCoder.encode(['uint256'], ['0'])); // next price
+    const nextPrice = await getNextEthPrice();
+
+    console.log(nextPrice);
+
+    triggerCallData.push(abiCoder.encode(['uint256'], [nextPrice])); // next price
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len

@@ -114,6 +114,21 @@ const addBotCaller = async (botAddr) => {
     await stopImpersonatingAccount(OWNER_ACC);
 };
 
+const setMCDPriceVerifier = async (triggerAddr) => {
+    const oldOwner = '0x0528A32fda5beDf89Ba9ad67296db83c9452F28C';
+    await impersonateAccount(oldOwner);
+
+    const signer = await hre.ethers.provider.getSigner(oldOwner);
+
+    let mcdPriceVerifier = await hre.ethers.getContractAt('IMCDPriceVerifier', '0xeAa474cbFFA87Ae0F1a6f68a3aBA6C77C656F72c');
+
+    mcdPriceVerifier = mcdPriceVerifier.connect(signer);
+
+    await mcdPriceVerifier.setAuthorized(triggerAddr, true);
+
+    await stopImpersonatingAccount(oldOwner);
+};
+
 module.exports = {
     subToStrategy,
     createStrategy,
@@ -121,4 +136,5 @@ module.exports = {
     getLatestStrategyId,
     getLatestSubId,
     addBotCaller,
+    setMCDPriceVerifier,
 };

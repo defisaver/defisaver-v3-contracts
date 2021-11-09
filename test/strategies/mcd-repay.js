@@ -13,9 +13,14 @@ const {
     WETH_ADDRESS,
 } = require('../utils');
 
-const { createStrategy, createBundle, addBotCaller } = require('../utils-strategies');
+const {
+    createStrategy,
+    createBundle,
+    addBotCaller,
+    setMCDPriceVerifier,
+} = require('../utils-strategies');
 
-const { getRatio } = require('../utils-mcd');
+const { getRatio, getNextEthPrice } = require('../utils-mcd');
 
 const { subMcdRepayStrategy, callMcdRepayStrategy, callFLMcdRepayStrategy } = require('../strategies');
 
@@ -32,6 +37,7 @@ describe('Mcd-Repay-Strategy', function () {
     let subId;
     let vaultId;
     let mcdView;
+    let mcdRatioTriggerAddr;
 
     const ethJoin = ilks[0].join;
 
@@ -41,7 +47,7 @@ describe('Mcd-Repay-Strategy', function () {
 
         await redeploy('BotAuth');
         await redeploy('ProxyAuth');
-        await redeploy('McdRatioTrigger');
+        mcdRatioTriggerAddr = (await redeploy('McdRatioTrigger')).address;
         await redeploy('McdWithdraw');
         await redeploy('DFSSell');
         await redeploy('McdPayback');
@@ -67,6 +73,8 @@ describe('Mcd-Repay-Strategy', function () {
         flDyDx = await redeploy('FLDyDx');
 
         await addBotCaller(botAcc.address);
+
+        await setMCDPriceVerifier(mcdRatioTriggerAddr);
 
         proxy = await getProxy(senderAcc.address);
     });
