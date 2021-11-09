@@ -790,7 +790,7 @@ const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, flAm
 const callLiquityBoostStrategy = async (
     botAcc,
     strategyExecutor,
-    strategyId,
+    subId,
     boostAmount,
     proxyAddr,
 ) => {
@@ -846,8 +846,9 @@ const callLiquityBoostStrategy = async (
 
     const strategyExecutorByBot = await strategyExecutor.connect(botAcc);
 
+    const strategyId = 0;
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyId, triggerCallData, actionsCallData, {
         gasLimit: 8000000,
     });
 
@@ -860,7 +861,7 @@ const callLiquityBoostStrategy = async (
 const callLiquityRepayStrategy = async (
     botAcc,
     strategyExecutor,
-    strategyId,
+    subId,
     repayAmount,
     proxyAddr,
 ) => {
@@ -915,8 +916,9 @@ const callLiquityRepayStrategy = async (
 
     const strategyExecutorByBot = await strategyExecutor.connect(botAcc);
 
+    const strategyId = 0;
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(strategyId, triggerCallData, actionsCallData, {
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyId, triggerCallData, actionsCallData, {
         gasLimit: 8000000,
     });
 
