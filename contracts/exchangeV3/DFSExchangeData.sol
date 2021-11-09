@@ -29,6 +29,7 @@ contract DFSExchangeData {
         address wrapper;
         bytes wrapperData;
         OffchainData offchainData;
+        bool fallbackOnchain;
     }
 
     function packExchangeData(ExchangeData memory _exData) public pure returns(bytes memory) {

@@ -51,7 +51,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
         }
 
         // fallback to desired wrapper if 0x failed
-        if (!offChainSwapSuccess) {
+        if (!offChainSwapSuccess && exData.fallbackOnchain) {
             onChainSwap(exData, ExchangeActionType.SELL);
             wrapper = exData.wrapper;
         }

@@ -320,8 +320,32 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, u
         wrapper,
         path,
         [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
+        true,
     ];
 };
+const formatExchangeObjForOffchain = (
+    srcAddr,
+    destAddr,
+    amount,
+    wrapper,
+    exchangeAddr,
+    allowanceTarget,
+    price,
+    protocolFee,
+    callData,
+) => [
+    srcAddr,
+    destAddr,
+    amount,
+    0,
+    0,
+    0,
+    nullAddress,
+    wrapper,
+    [],
+    [wrapper, exchangeAddr, allowanceTarget, price, protocolFee, callData],
+    false,
+];
 
 const isEth = (tokenAddr) => {
     if (tokenAddr.toLowerCase() === ETH_ADDR.toLowerCase()
@@ -353,6 +377,21 @@ const setNewExchangeWrapper = async (acc, newAddr) => {
     const registryByOwner = registry.connect(signer);
 
     await registryByOwner.addWrapper(newAddr, { gasLimit: 300000 });
+    await stopImpersonatingAccount(exchangeOwnerAddr);
+};
+
+const addToZRXAllowlist = async (acc, newAddr) => {
+    const exchangeOwnerAddr = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
+    await sendEther(acc, exchangeOwnerAddr, '1');
+    await impersonateAccount(exchangeOwnerAddr);
+
+    const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
+
+    const registryInstance = await hre.ethers.getContractFactory('ZrxAllowlist');
+    const registry = await registryInstance.attach('0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F');
+    const registryByOwner = registry.connect(signer);
+
+    await registryByOwner.setAllowlistAddr(newAddr, true);
     await stopImpersonatingAccount(exchangeOwnerAddr);
 };
 
@@ -438,8 +477,10 @@ module.exports = {
     getChainLinkPrice,
     getLocalTokenPrice,
     calcGasToUSD,
+    formatExchangeObjForOffchain,
     AVG_GAS_PRICE,
     getAllowance,
+    addToZRXAllowlist,
     standardAmounts,
     nullAddress,
     dydxTokens,
