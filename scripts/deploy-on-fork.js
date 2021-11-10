@@ -8,17 +8,21 @@ const { changeConstantInFiles } = require('./utils/utils');
 
 const { redeploy, OWNER_ACC } = require('../test/utils');
 
+const { topUp, createFork } = require('./utils/fork.js');
+
 const MAINNET_VAULT = '0xCCf3d848e08b94478Ed8f46fFead3008faF581fD';
-const MAINNET_REGISTRY = '0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C';
+const MAINNET_REGISTRY = '0xD5cec8F03f803A74B60A7603Ed13556279376b09';
 
 async function main() {
-    const signer = await hre.ethers.provider.getSigner(OWNER_ACC);
+    // await createFork();
+    await topUp(OWNER_ACC, process.env.FORK_ID);
 
+    const signer = await hre.ethers.provider.getSigner(OWNER_ACC);
     const adminVault = await deployAsOwner('AdminVault', signer);
 
     await changeConstantInFiles(
         './contracts',
-        ['AdminAuth'],
+        ['MainnetAuthAddresses'],
         'ADMIN_VAULT_ADDR',
         adminVault.address,
     );
@@ -29,35 +33,46 @@ async function main() {
 
     await changeConstantInFiles(
         './contracts',
-        ['ActionBase', 'RecipeExecutor'],
+        ['MainnetActionsUtilAddresses'],
         'REGISTRY_ADDR',
         reg.address,
     );
 
     await run('compile');
 
+    console.log('HERE');
+
+    // core
     await redeploy('RecipeExecutor', reg.address);
+    await redeploy('StrategyStorage', reg.address);
+    await redeploy('SubStorage', reg.address);
+    await redeploy('BundleStorage', reg.address);
+    await redeploy('SubProxy', reg.address);
+    await redeploy('StrategyProxy', reg.address);
+    await redeploy('StrategyExecutor', reg.address);
 
     // actions
-    await redeploy('McdSupply', reg.address);
-    await redeploy('McdWithdraw', reg.address);
-    await redeploy('McdGenerate', reg.address);
-    await redeploy('McdPayback', reg.address);
-    await redeploy('McdOpen', reg.address);
-    await redeploy('McdGive', reg.address);
-    await redeploy('McdMerge', reg.address);
+    // await redeploy('McdSupply', reg.address);
+    // await redeploy('McdWithdraw', reg.address);
+    // await redeploy('McdGenerate', reg.address);
+    // await redeploy('McdPayback', reg.address);
+    // await redeploy('McdOpen', reg.address);
+    // await redeploy('McdGive', reg.address);
+    // await redeploy('McdMerge', reg.address);
 
     // switch back admin auth addr
-    await changeConstantInFiles('./contracts', ['AdminAuth'], 'ADMIN_VAULT_ADDR', MAINNET_VAULT);
+    await changeConstantInFiles('./contracts', ['MainnetAuthAddresses'], 'ADMIN_VAULT_ADDR', MAINNET_VAULT);
 
     await changeConstantInFiles(
         './contracts',
-        ['ActionBase', 'RecipeExecutor'],
+        ['MainnetActionsUtilAddresses'],
         'REGISTRY_ADDR',
         MAINNET_REGISTRY,
     );
 
     await run('compile');
+
+    process.exit(0);
 }
 
 start(main);

@@ -210,9 +210,9 @@ const getProxy = async (acc) => {
 };
 
 const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
-    // if (regAddr === REGISTRY_ADDR) {
-    await impersonateAccount(OWNER_ACC);
-    // }
+    if (regAddr === REGISTRY_ADDR) {
+        await impersonateAccount(OWNER_ACC);
+    }
 
     const signer = await hre.ethers.provider.getSigner(OWNER_ACC);
 
@@ -231,9 +231,9 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
         await registry.approveContractChange(id);
     }
 
-    // if (regAddr === REGISTRY_ADDR) {
-    await stopImpersonatingAccount(OWNER_ACC);
-    // }
+    if (regAddr === REGISTRY_ADDR) {
+        await stopImpersonatingAccount(OWNER_ACC);
+    }
     return c;
 };
 
