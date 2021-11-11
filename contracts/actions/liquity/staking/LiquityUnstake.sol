@@ -56,7 +56,7 @@ contract LiquityUnstake is ActionBase, LiquityHelper {
         _params.lqtyAmount = staked > _params.lqtyAmount ? _params.lqtyAmount : staked;
 
         LQTYStaking.unstake(_params.lqtyAmount);
-        LQTYTokenAddr.withdrawTokens(_params.to, _params.lqtyAmount);
+        LQTY_TOKEN_ADDRESS.withdrawTokens(_params.to, _params.lqtyAmount);
 
         withdrawStaking(ethGain, lusdGain, _params.wethTo, _params.lusdTo);
 

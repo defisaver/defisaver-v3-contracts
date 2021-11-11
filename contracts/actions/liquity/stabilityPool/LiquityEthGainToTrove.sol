@@ -48,11 +48,11 @@ contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
     /// @notice Withdraws ETH gains to the users Trove
     function _liquityEthGainToTrove(Params memory _params) internal returns (uint256) {
         uint256 ethGain = StabilityPool.getDepositorETHGain(address(this));
-        uint256 lqtyBefore = LQTYTokenAddr.getBalance(address(this));
+        uint256 lqtyBefore = LQTY_TOKEN_ADDRESS.getBalance(address(this));
         
         StabilityPool.withdrawETHGainToTrove(_params.upperHint, _params.lowerHint);
 
-        uint256 lqtyGain = LQTYTokenAddr.getBalance(address(this)).sub(lqtyBefore);
+        uint256 lqtyGain = LQTY_TOKEN_ADDRESS.getBalance(address(this)).sub(lqtyBefore);
 
         withdrawStabilityGains(0, lqtyGain, address(0), _params.lqtyTo);
 

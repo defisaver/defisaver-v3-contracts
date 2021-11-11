@@ -67,7 +67,7 @@ contract LiquityBorrow is ActionBase, LiquityHelper {
             params.lowerHint
         );
 
-        LUSDTokenAddr.withdrawTokens(params.to, params.lusdAmount);
+        LUSD_TOKEN_ADDRESS.withdrawTokens(params.to, params.lusdAmount);
 
         logger.Log(
             address(this),

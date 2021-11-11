@@ -66,11 +66,11 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
     /// @notice Redeems ETH(wrapped) using LUSD with the target price of LUSD = 1$
     function _liquityRedeem(Params memory _params) internal returns (uint256) {
         if (_params.lusdAmount == type(uint256).max) {
-            _params.lusdAmount = LUSDTokenAddr.getBalance(_params.from);
+            _params.lusdAmount = LUSD_TOKEN_ADDRESS.getBalance(_params.from);
         }
-        LUSDTokenAddr.pullTokensIfNeeded(_params.from, _params.lusdAmount);
+        LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
 
-        uint256 lusdBefore = LUSDTokenAddr.getBalance(address(this));
+        uint256 lusdBefore = LUSD_TOKEN_ADDRESS.getBalance(address(this));
         uint256 ethBefore = address(this).balance;
 
         TroveManager.redeemCollateral(
@@ -83,7 +83,7 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
             _params.maxFeePercentage
         );
 
-        uint256 lusdAmountUsed = lusdBefore - (LUSDTokenAddr.getBalance(address(this)));   // It isn't guaranteed that the whole requested LUSD amount will be used
+        uint256 lusdAmountUsed = lusdBefore - (LUSD_TOKEN_ADDRESS.getBalance(address(this)));   // It isn't guaranteed that the whole requested LUSD amount will be used
         uint256 lusdToReturn = _params.lusdAmount - lusdAmountUsed;
         uint256 ethRedeemed = address(this).balance -ethBefore;
 

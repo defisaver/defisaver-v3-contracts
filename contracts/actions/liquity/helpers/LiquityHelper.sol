@@ -18,14 +18,14 @@ contract LiquityHelper is MainnetLiquityAddresses {
 
     uint constant public LUSD_GAS_COMPENSATION = 200e18;
 
-    IPriceFeed constant public PriceFeed = IPriceFeed(PriceFeedAddr);
-    IBorrowerOperations constant public BorrowerOperations = IBorrowerOperations(BorrowerOperationsAddr);
-    ITroveManager constant public TroveManager = ITroveManager(TroveManagerAddr);
-    ISortedTroves constant public SortedTroves = ISortedTroves(SortedTrovesAddr);
-    IHintHelpers constant public HintHelpers = IHintHelpers(HintHelpersAddr);
-    ICollSurplusPool constant public CollSurplusPool = ICollSurplusPool(CollSurplusPoolAddr);
-    IStabilityPool constant public StabilityPool = IStabilityPool(StabilityPoolAddr);
-    ILQTYStaking constant public LQTYStaking = ILQTYStaking(LQTYStakingAddr);
+    IPriceFeed constant public PriceFeed = IPriceFeed(PRICE_FEED_ADDRESS);
+    IBorrowerOperations constant public BorrowerOperations = IBorrowerOperations(BORROWER_OPERATIONS_ADDRESS);
+    ITroveManager constant public TroveManager = ITroveManager(TROVE_MANAGER_ADDRESS);
+    ISortedTroves constant public SortedTroves = ISortedTroves(SORTED_TROVES_ADDRESS);
+    IHintHelpers constant public HintHelpers = IHintHelpers(HINT_HELPERS_ADDRESS);
+    ICollSurplusPool constant public CollSurplusPool = ICollSurplusPool(COLL_SURPLUS_POOL_ADDRESS);
+    IStabilityPool constant public StabilityPool = IStabilityPool(STABILITY_POOL_ADDRESS);
+    ILQTYStaking constant public LQTYStaking = ILQTYStaking(LQTY_STAKING_ADDRESS);
 
     function withdrawStaking(uint256 _ethGain, uint256 _lusdGain, address _wethTo, address _lusdTo) internal {
         if (_ethGain > 0) {
@@ -33,7 +33,7 @@ contract LiquityHelper is MainnetLiquityAddresses {
             TokenUtils.WETH_ADDR.withdrawTokens(_wethTo, _ethGain);
         }
         if (_lusdGain > 0) {
-            LUSDTokenAddr.withdrawTokens(_lusdTo, _lusdGain);
+            LUSD_TOKEN_ADDRESS.withdrawTokens(_lusdTo, _lusdGain);
         }
     }
     
@@ -43,7 +43,7 @@ contract LiquityHelper is MainnetLiquityAddresses {
             TokenUtils.WETH_ADDR.withdrawTokens(_wethTo, _ethGain);
         }      
         if (_lqtyGain > 0) {
-            LQTYTokenAddr.withdrawTokens(_lqtyTo, _lqtyGain);
+            LQTY_TOKEN_ADDRESS.withdrawTokens(_lqtyTo, _lqtyGain);
         }
     }
 }
