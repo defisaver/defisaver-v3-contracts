@@ -8,14 +8,13 @@ const { changeConstantInFiles } = require('./utils/utils');
 
 const { redeploy, OWNER_ACC } = require('../test/utils');
 
-const { topUp, createFork } = require('./utils/fork.js');
+const { topUp } = require('./utils/fork.js');
 
 const MAINNET_VAULT = '0xCCf3d848e08b94478Ed8f46fFead3008faF581fD';
 const MAINNET_REGISTRY = '0xD5cec8F03f803A74B60A7603Ed13556279376b09';
 
 async function main() {
-    // await createFork();
-    await topUp(OWNER_ACC, process.env.FORK_ID);
+    await topUp(OWNER_ACC);
 
     const signer = await hre.ethers.provider.getSigner(OWNER_ACC);
     const adminVault = await deployAsOwner('AdminVault', signer);
@@ -39,8 +38,6 @@ async function main() {
     );
 
     await run('compile');
-
-    console.log('HERE');
 
     // core
     await redeploy('RecipeExecutor', reg.address);

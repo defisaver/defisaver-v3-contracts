@@ -13,13 +13,13 @@ const createFork = async () => {
 
         const forkRes = await axios.post('https://api.tenderly.co/api/v1/account/defisaver-v2/project/strategies/fork', body, { headers });
 
-        console.log(forkRes.data.simulation_fork.id);
+        return forkRes.data.simulation_fork.id;
     } catch (err) {
         console.log(err);
     }
 };
 
-const topUp = async (account, forkId) => {
+const topUp = async (account) => {
     const headers = {
         'Content-Type': 'application/json',
         'X-Access-Key': process.env.TENDERLY_ACCESS_KEY,
@@ -27,7 +27,7 @@ const topUp = async (account, forkId) => {
 
     const body = { accounts: [account] };
 
-    await axios.post(`https://api.tenderly.co/api/v1/account/defisaver-v2/project/strategies/fork/${forkId}/balance`, body, { headers });
+    await axios.post(`https://api.tenderly.co/api/v1/account/defisaver-v2/project/strategies/fork/${process.env.FORK_ID}/balance`, body, { headers });
 };
 
 module.exports = {
