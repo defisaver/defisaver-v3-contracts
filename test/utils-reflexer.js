@@ -1,4 +1,5 @@
 const hre = require('hardhat');
+const { getAddrFromRegistry } = require('./utils');
 
 const REFLEXER_SAFE_MANAGER_ADDR = '0xEfe0B4cA532769a3AE758fD82E1426a03A94F185';
 const ADAPTER_ADDRESS = '0x2D3cD7b81c93f188F3CB8aD87c8Acc73d6226e3A';
@@ -34,11 +35,17 @@ const getSafeInfo = async (reflexerView, safeID) => {
     return info;
 };
 
+const getRatio = async (safeId) => {
+    const reflexerRatioTrigger = await hre.ethers.getContractAt('ReflexerRatioTrigger', getAddrFromRegistry('ReflexerRatioTrigger'));
+    return reflexerRatioTrigger.callStatic.getRatio(safeId);
+};
+
 module.exports = {
     lastSafeID,
     safeCount,
     ownsSafe,
     getSafeInfo,
+    getRatio,
     REFLEXER_SAFE_MANAGER_ADDR,
     ADAPTER_ADDRESS,
     NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS,
