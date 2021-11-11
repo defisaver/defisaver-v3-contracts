@@ -18,6 +18,7 @@ const {
     createTimestampTrigger,
     createGasPriceTrigger,
     createCompTrigger,
+    createReflexerTrigger,
 } = require('./triggers');
 
 const {
@@ -34,6 +35,8 @@ const {
     nullAddress,
 } = require('./utils');
 const { getNextEthPrice } = require('./utils-mcd');
+
+const { ADAPTER_ADDRESS } = require('./utils-reflexer');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -203,6 +206,40 @@ const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrB
     // eslint-disable-next-line max-len
     const subId = await subToStrategy(proxy, strategyId, true, [tokenAddrSellEncoded, tokenAddrBuyEncoded, amountEncoded],
         [triggerData]);
+
+    return subId;
+};
+
+const subReflexerBoostStrategy = async (proxy, safeId, ratioOver, targetRatio) => {
+    const safeIdEncoded = abiCoder.encode(['uint256'], [safeId.toString()]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const strategyId = await getLatestStrategyId();
+    const triggerData = await createReflexerTrigger(safeId, ratioOver, RATIO_STATE_OVER);
+    // eslint-disable-next-line max-len
+    const subId = await subToStrategy(
+        proxy,
+        strategyId,
+        true,
+        [safeIdEncoded, targetRatioEncoded],
+        [triggerData],
+    );
+
+    return subId;
+};
+
+const subReflexerRepayStrategy = async (proxy, safeId, ratioUnder, targetRatio) => {
+    const safeIdEncoded = abiCoder.encode(['uint256'], [safeId.toString()]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const strategyId = await getLatestStrategyId();
+    const triggerData = await createReflexerTrigger(safeId, ratioUnder, RATIO_STATE_UNDER);
+    // eslint-disable-next-line max-len
+    const subId = await subToStrategy(
+        proxy,
+        strategyId,
+        true,
+        [safeIdEncoded, targetRatioEncoded],
+        [triggerData],
+    );
 
     return subId;
 };
@@ -759,6 +796,114 @@ const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, flAm
     console.log(`GasUsed callMcdCloseStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
+const callReflexerBoostStrategy = async (botAcc, strategyExecutor, subId, boostAmount) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const reflexerGenerateAction = new dfs.actions.reflexer.ReflexerGenerateAction(
+        '0', // safeId
+        boostAmount,
+        placeHolderAddr,
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            getAssetInfo('RAI').address,
+            WETH_ADDRESS,
+            '0',
+            UNISWAP_WRAPPER,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const boostGasCost = 800000; // 800k gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        boostGasCost, WETH_ADDRESS, '0',
+    );
+
+    const reflexerSupplyAction = new dfs.actions.reflexer.ReflexerSupplyAction(
+        '0', // safeId
+        '0', // amount
+        ADAPTER_ADDRESS,
+        placeHolderAddr,
+    );
+
+    actionsCallData.push(reflexerGenerateAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(reflexerSupplyAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+
+    const strategyIndex = 0;
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callReflexerBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
+const callReflexerRepayStrategy = async (botAcc, strategyExecutor, subId, repayAmount) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const reflexerWithdrawAction = new dfs.actions.reflexer.ReflexerWithdrawAction(
+        '0', // safeId
+        repayAmount,
+        ADAPTER_ADDRESS,
+        placeHolderAddr,
+    );
+
+    const repayGasCost = 800000; // 800k gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        repayGasCost, WETH_ADDRESS, '0',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            WETH_ADDRESS,
+            getAssetInfo('RAI').address,
+            '0',
+            UNISWAP_WRAPPER,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const reflexerPaybackAction = new dfs.actions.reflexer.ReflexerPaybackAction(
+        '0', // safeId
+        '0',
+        placeHolderAddr,
+    );
+
+    actionsCallData.push(reflexerWithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(reflexerPaybackAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+
+    const strategyIndex = 0;
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callReflexerRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
 module.exports = {
     subDcaStrategy,
     callDcaStrategy,
@@ -780,4 +925,8 @@ module.exports = {
     callCompBoostStrategy,
     subCompRepayStrategy,
     callCompRepayStrategy,
+    subReflexerBoostStrategy,
+    callReflexerBoostStrategy,
+    subReflexerRepayStrategy,
+    callReflexerRepayStrategy,
 };
