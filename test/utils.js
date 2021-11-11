@@ -120,6 +120,7 @@ const coinGeckoHelper = {
     KNCL: 'kyber-network',
     LQTY: 'liquity',
     TORN: 'tornado-cash',
+    RAI: 'rai',
 };
 
 const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {

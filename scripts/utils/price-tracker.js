@@ -11,7 +11,7 @@ const req = CoinGeckoClient.simple.price({
         + 'renbtc,0x,kyber-network,decentraland,paxos-standard,compound-governance-token,'
         + 'loopring,chainlink,tether,true-usd,balancer,'
         + 'gemini-dollar,yearn-finance,liquity-usd,kyber-network-crystal,liquity'
-        + 'tornado-cash',
+        + 'tornado-cash,rai',
     vs_currencies: 'usd',
 });
 
