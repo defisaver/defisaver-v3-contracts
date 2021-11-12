@@ -25,6 +25,7 @@ describe('Mcd-Boost-Strategy', function () {
     let botAcc;
     let strategyExecutor;
     let subId;
+    let strategySub;
     let vaultId;
     let mcdView;
     let flDyDx;
@@ -193,14 +194,54 @@ describe('Mcd-Boost-Strategy', function () {
 
         const bundleId = 0;
 
-        subId = await subMcdBoostStrategy(proxy, bundleId, vaultId, rationOver, targetRatio, true);
+        ({ subId, strategySub } = await subMcdBoostStrategy(
+            proxy,
+            bundleId,
+            vaultId,
+            rationOver,
+            targetRatio,
+            true,
+        ));
+    });
+
+    it('... should sub to boost bundle', async () => {
+        vaultId = await openVault(
+            proxy,
+            'ETH-A',
+            fetchAmountinUSDPrice('WETH', '30000'),
+            fetchAmountinUSDPrice('DAI', '12000'),
+        );
+
+        console.log('VaultId: ', vaultId);
+
+        const rationOver = hre.ethers.utils.parseUnits('1.7', '18');
+        const targetRatio = hre.ethers.utils.parseUnits('2', '18');
+
+        const bundleId = 0;
+
+        ({ subId, strategySub } = await subMcdBoostStrategy(
+            proxy,
+            bundleId,
+            vaultId,
+            rationOver,
+            targetRatio,
+            true,
+        ));
     });
 
     it('... should trigger a maker boost strategy', async () => {
         const ratioBefore = await getRatio(mcdView, vaultId);
         const boostAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('DAI', '2000'), '18');
 
-        await callMcdBoostStrategy(botAcc, strategyExecutor, 0, subId, ethJoin, boostAmount);
+        await callMcdBoostStrategy(
+            botAcc,
+            strategyExecutor,
+            0,
+            subId,
+            ethJoin,
+            boostAmount,
+            strategySub,
+        );
 
         const ratioAfter = await getRatio(mcdView, vaultId);
 
@@ -216,7 +257,7 @@ describe('Mcd-Boost-Strategy', function () {
         const boostAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('DAI', '400'), '18');
 
         // eslint-disable-next-line max-len
-        await callFLMcdBoostStrategy(botAcc, strategyExecutor, 1, flDyDx.address, subId, ethJoin, boostAmount);
+        await callFLMcdBoostStrategy(botAcc, strategyExecutor, 1, flDyDx.address, subId, ethJoin, boostAmount, strategySub);
 
         const ratioAfter = await getRatio(mcdView, vaultId);
 

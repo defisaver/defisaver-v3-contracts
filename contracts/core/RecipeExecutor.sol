@@ -25,6 +25,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
     bytes4 constant BUNDLE_STORAGE_ID = bytes4(keccak256("BundleStorage"));
 
     error TriggerNotActiveError();
+    error SubscriptionHashMismatch();
 
     /// @notice Called directly through DsProxy to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
@@ -41,29 +42,36 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         uint256 _subId,
         bytes[] calldata _actionCallData,
         bytes[] calldata _triggerCallData,
-        uint256 _strategyIndex
+        uint256 _strategyIndex,
+        StrategySub memory _sub
     ) public payable {
 
         // TODO: can hardcode in prod to save gas
         address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
-             
-        StrategySub memory sub = SubStorage(subStorageAddr).getSub(_subId);
+
         Strategy memory strategy;
 
         { // to handle stack too deep
-            uint256 strategyId = sub.strategyId;
+
+            SubApproval memory subApproval = SubStorage(subStorageAddr).getSub(_subId);
+            bytes32 keccakCheck = keccak256(abi.encode(_sub));
+            if ( keccakCheck != subApproval.strategySubHash) {
+                revert SubscriptionHashMismatch();
+            }
+            
+            uint256 strategyId = _sub.strategyId;
             address bundleStorageAddr = registry.getAddr(BUNDLE_STORAGE_ID);
             address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
 
-            if (sub.isBundle) {
-                strategyId = BundleStorage(bundleStorageAddr).getStrategyId(sub.strategyId, _strategyIndex);
+            if (_sub.isBundle) {
+                strategyId = BundleStorage(bundleStorageAddr).getStrategyId(_sub.strategyId, _strategyIndex);
             }
 
             strategy = StrategyStorage(strategyStorageAddr).getStrategy(strategyId);
         }
 
         // check if all the triggers are true
-        bool triggered = checkTriggers(strategy, sub, _triggerCallData, _subId, subStorageAddr);
+        bool triggered = checkTriggers(strategy, _sub, _triggerCallData, _subId, subStorageAddr);
 
         if (!triggered) {
             revert TriggerNotActiveError();
@@ -71,13 +79,14 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
 
         // if this is a one time strategy
         if (!strategy.continuous) {
-            SubStorage(subStorageAddr).deactivateSub(_subId);
+            _sub.active = false;
+            SubStorage(subStorageAddr).updateSubData(_subId, _sub);
         }
 
         Recipe memory currRecipe = Recipe({
             name: strategy.name,
             callData: _actionCallData,
-            subData: sub.subData,
+            subData: _sub.subData,
             actionIds: strategy.actionIds,
             paramMapping: strategy.paramMapping
         });
@@ -108,11 +117,8 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
             if (!isTriggered) return false;
 
             if (ITrigger(triggerAddr).isChangeable()) {
-                SubStorage(_storageAddr).updateSubTriggerData(
-                    _subId,
-                    ITrigger(triggerAddr).changedSubData(_sub.triggerData[i]),
-                    i
-                );
+                _sub.triggerData[i] = ITrigger(triggerAddr).changedSubData(_sub.triggerData[i]);
+                SubStorage(_storageAddr).updateSubData(_subId, _sub);
             }
         }
 

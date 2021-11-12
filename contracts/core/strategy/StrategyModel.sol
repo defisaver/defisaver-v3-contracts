@@ -28,6 +28,12 @@ contract StrategyModel {
     }
 
     /// @dev Instance of a strategy, user supplied data
+    struct SubApproval {
+        address userProxy;
+        uint256 lastUpdateBlock;    // used to fetch event quicker, adds 20k gas on subscribe and updateSubData
+        bytes32 strategySubHash;
+    }
+
     struct StrategySub {
         uint64 strategyId;
         bool active;

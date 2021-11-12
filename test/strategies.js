@@ -179,11 +179,12 @@ const subMcdBoostStrategy = async (proxy, bundleId, vaultId, rationUnder, target
     // const strategyId = await getLatestStrategyId();
 
     const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_OVER);
-    // eslint-disable-next-line max-len
-    const subId = await subToStrategy(proxy, bundleId, true, [vaultIdEncoded, targetRatioEncoded],
-        [triggerData], isBundle);
 
-    return subId;
+    const strategySub = [bundleId, true, isBundle, proxy.address, [triggerData], [vaultIdEncoded, targetRatioEncoded]];
+    // eslint-disable-next-line max-len
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
 };
 
 const subMcdCloseStrategy = async (vaultId, proxy, recipient, targetPrice, tokenAddress) => {
@@ -226,12 +227,11 @@ const subReflexerBoostStrategy = async (proxy, safeId, ratioOver, targetRatio) =
     const strategyId = await getLatestStrategyId();
     const triggerData = await createReflexerTrigger(safeId, ratioOver, RATIO_STATE_OVER);
     // eslint-disable-next-line max-len
+
+    const strategySub = [strategyId, true, false, proxy.address, [triggerData], [safeIdEncoded, targetRatioEncoded]];
     const subId = await subToStrategy(
         proxy,
-        strategyId,
-        true,
-        [safeIdEncoded, targetRatioEncoded],
-        [triggerData],
+        strategySub,
     );
 
     return subId;
@@ -610,7 +610,7 @@ const callCompBoostStrategy = async (botAcc, strategyExecutor, strategyId, boost
 };
 
 // eslint-disable-next-line max-len
-const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, ethJoin, boostAmount) => {
+const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, ethJoin, boostAmount, strategySub) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -661,7 +661,7 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, {
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
         gasLimit: 8000000,
     });
 
@@ -672,7 +672,7 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
 };
 
 // eslint-disable-next-line max-len
-const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, flLoanAddr, subId, ethJoin, boostAmount) => {
+const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, flLoanAddr, subId, ethJoin, boostAmount, strategySub) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -719,7 +719,7 @@ const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, f
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, {
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
         gasLimit: 8000000,
     });
 
@@ -829,7 +829,7 @@ const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, flAm
     console.log(`GasUsed callMcdCloseStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callReflexerBoostStrategy = async (botAcc, strategyExecutor, subId, boostAmount) => {
+const callReflexerBoostStrategy = async (botAcc, strategyExecutor, subId, boostAmount, strategySub) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -873,7 +873,7 @@ const callReflexerBoostStrategy = async (botAcc, strategyExecutor, subId, boostA
 
     const strategyIndex = 0;
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, {
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
         gasLimit: 8000000,
     });
 

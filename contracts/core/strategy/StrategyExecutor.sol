@@ -35,11 +35,14 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         uint256 _subId,
         uint256 _strategyIndex, // need to specify because if sub is part of a bundle
         bytes[] calldata _triggerCallData,
-        bytes[] calldata _actionsCallData
+        bytes[] calldata _actionsCallData,
+        StrategySub memory _sub
     ) public {
-        StrategySub memory sub = SubStorage(registry.getAddr(SUB_STORAGE_ID)).getSub(_subId);
+        SubApproval memory subApproval = SubStorage(registry.getAddr(SUB_STORAGE_ID)).getSub(_subId);
 
-        if (!sub.active) {
+        bytes32 keccakCheck = keccak256(abi.encode(_sub));
+
+        if (keccakCheck != subApproval.strategySubHash) {
             revert SubNotActiveError(_subId);
         }
 
@@ -51,7 +54,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         }
 
         // execute actions
-        callActions(_subId, _actionsCallData, _triggerCallData, sub.userProxy, _strategyIndex);
+        callActions(_subId, _actionsCallData, _triggerCallData, _strategyIndex,_sub);
     }
 
     /// @notice Checks if msg.sender has auth, reverts if not
@@ -68,22 +71,23 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         uint256 _subId,
         bytes[] calldata _actionsCallData,
         bytes[] calldata _triggerCallData,
-        address _proxy,
-        uint256 _strategyIndex
+        uint256 _strategyIndex,
+        StrategySub memory _sub
     ) internal {
         address RecipeExecutorAddr = registry.getAddr(RECIPE_EXECUTOR_ID);
 
         address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
 
         ProxyAuth(proxyAuthAddr).callExecute{value: msg.value}(
-            _proxy,
+            _sub.userProxy,
             RecipeExecutorAddr,
             abi.encodeWithSignature(
-                "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256)",
+                "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bool,address,bytes[],bytes32[]))",
                 _subId,
                 _actionsCallData,
                 _triggerCallData,
-                _strategyIndex
+                _strategyIndex,
+                _sub
             )
         );
     }
