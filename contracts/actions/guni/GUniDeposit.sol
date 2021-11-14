@@ -7,7 +7,6 @@ import "./../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../DS/DSMath.sol";
 import "./helpers/GUniHelper.sol";
-import "hardhat/console.sol";
 
 /// @title Action that adds liquidity to G-UNI pool of interest (mints G-UNI LP tokens)
 contract GUniDeposit is ActionBase, DSMath, GUniHelper {
@@ -90,8 +89,7 @@ contract GUniDeposit is ActionBase, DSMath, GUniHelper {
         
         _inputData.token0.withdrawTokens(_inputData.from, sub(_inputData.token0.getBalance(address(this)), token0BalanceBefore));
         _inputData.token1.withdrawTokens(_inputData.from, sub(_inputData.token1.getBalance(address(this)), token1BalanceBefore));
-        console.log(amount0);
-        console.log(amount1);
+
         logger.Log(address(this), msg.sender, "GUniDeposit", abi.encode(_inputData, mintAmount, amount0, amount1));
 
         return mintAmount;
