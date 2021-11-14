@@ -60,14 +60,14 @@ contract GUniWithdraw is ActionBase, DSMath, GUniHelper {
     function gUniWithdraw(Params memory _inputData) internal returns (uint128) {
         require (_inputData.to != address(0x0), "Can not send to burn address");
 
-        uint256 amountToBurn = _inputData.pool.pullTokensIfNeeded(_inputData.from, _inputData.burnAmount);
+        _inputData.burnAmount = _inputData.pool.pullTokensIfNeeded(_inputData.from, _inputData.burnAmount);
 
-        _inputData.pool.approveToken(G_UNI_ROUTER_02_ADDRESS, amountToBurn);
+        _inputData.pool.approveToken(G_UNI_ROUTER_02_ADDRESS, _inputData.burnAmount);
 
-        (uint256 amount0, uint256 amount1, uint128 liquidityBurnt) = gUniRouter.removeLiquidity(_inputData.pool, amountToBurn, _inputData.amount0Min, _inputData.amount1Min, _inputData.to);
+        (uint256 amount0, uint256 amount1, uint128 liquidityBurnt) = gUniRouter.removeLiquidity(_inputData.pool, _inputData.burnAmount, _inputData.amount0Min, _inputData.amount1Min, _inputData.to);
         /// @dev amountToBurn will always be burnt, so no need to send back any leftovers 
 
-        logger.Log(address(this), msg.sender, "GUniWithdraw", abi.encode(_inputData, amount0, amount1, liquidityBurnt, amountToBurn));
+        logger.Log(address(this), msg.sender, "GUniWithdraw", abi.encode(_inputData, amount0, amount1, liquidityBurnt));
         
         return liquidityBurnt;
     }
