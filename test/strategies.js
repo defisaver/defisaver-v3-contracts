@@ -19,6 +19,7 @@ const {
     createGasPriceTrigger,
     createCompTrigger,
     createReflexerTrigger,
+    createLiquityTrigger,
 } = require('./triggers');
 
 const {
@@ -33,10 +34,19 @@ const {
     UNISWAP_WRAPPER,
     MAX_UINT128,
     nullAddress,
+    fetchAmountinUSDPrice,
+    Float2BN,
+    getLocalTokenPrice,
+    BN2Float,
 } = require('./utils');
 const { getNextEthPrice } = require('./utils-mcd');
 
 const { ADAPTER_ADDRESS } = require('./utils-reflexer');
+
+const {
+    getTroveInfo,
+    findInsertPosition,
+} = require('./utils-liquity');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -240,6 +250,29 @@ const subReflexerRepayStrategy = async (proxy, safeId, ratioUnder, targetRatio) 
         [safeIdEncoded, targetRatioEncoded],
         [triggerData],
     );
+
+    return subId;
+};
+
+const subLiquityBoostStrategy = async (proxy, maxFeePercentage, ratioOver, targetRatio) => {
+    const maxFeePercentageEncoded = abiCoder.encode(['uint256'], [maxFeePercentage.toString()]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const strategyId = await getLatestStrategyId();
+    const triggerData = await createLiquityTrigger(proxy.address, ratioOver, RATIO_STATE_OVER);
+    // eslint-disable-next-line max-len
+    const subId = await subToStrategy(proxy, strategyId, true, [maxFeePercentageEncoded, targetRatioEncoded],
+        [triggerData]);
+
+    return subId;
+};
+
+const subLiquityRepayStrategy = async (proxy, ratioUnder, targetRatio) => {
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const strategyId = await getLatestStrategyId();
+    const triggerData = await createLiquityTrigger(proxy.address, ratioUnder, RATIO_STATE_UNDER);
+    // eslint-disable-next-line max-len
+    const subId = await subToStrategy(proxy, strategyId, true, [targetRatioEncoded],
+        [triggerData]);
 
     return subId;
 };
@@ -904,6 +937,147 @@ const callReflexerRepayStrategy = async (botAcc, strategyExecutor, subId, repayA
     console.log(`GasUsed callReflexerRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
+const callLiquityBoostStrategy = async (
+    botAcc,
+    strategyExecutor,
+    subId,
+    boostAmount,
+    proxyAddr,
+) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const { collAmount, debtAmount } = await getTroveInfo(proxyAddr);
+
+    const newDebtAmount = debtAmount.add(boostAmount);
+    let { upperHint, lowerHint } = await findInsertPosition(collAmount, newDebtAmount);
+
+    const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
+        '0', // &maxFeePercentage
+        boostAmount,
+        placeHolderAddr,
+        upperHint,
+        lowerHint,
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            getAssetInfo('LUSD').address,
+            getAssetInfo('WETH').address,
+            '0',
+            UNISWAP_WRAPPER,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const boostGasCost = 1200000; // 1.2 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        boostGasCost, WETH_ADDRESS, '0',
+    );
+
+    const supplyDollarValue = BN2Float(boostAmount) * getLocalTokenPrice('LUSD');
+    const newCollAmount = collAmount.add(Float2BN(fetchAmountinUSDPrice('WETH', supplyDollarValue)));
+    ({ upperHint, lowerHint } = await findInsertPosition(newCollAmount, newDebtAmount));
+
+    const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
+        '0',
+        placeHolderAddr,
+        upperHint,
+        lowerHint,
+    );
+
+    actionsCallData.push(liquityBorrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquitySupplyAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const strategyExecutorByBot = await strategyExecutor.connect(botAcc);
+
+    const strategyId = 0;
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyId, triggerCallData, actionsCallData, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callLiquityBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
+const callLiquityRepayStrategy = async (
+    botAcc,
+    strategyExecutor,
+    subId,
+    repayAmount,
+    proxyAddr,
+) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const { collAmount, debtAmount } = await getTroveInfo(proxyAddr);
+
+    const newCollAmount = collAmount.sub(repayAmount);
+    let { upperHint, lowerHint } = await findInsertPosition(newCollAmount, debtAmount);
+
+    const liquityWithdrawAction = new dfs.actions.liquity.LiquityWithdrawAction(
+        repayAmount,
+        placeHolderAddr,
+        upperHint,
+        lowerHint,
+    );
+
+    const repayGasCost = 1200000; // 1.2 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        repayGasCost, WETH_ADDRESS, '0',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            getAssetInfo('WETH').address,
+            getAssetInfo('LUSD').address,
+            '0',
+            UNISWAP_WRAPPER,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const repayDollarValue = BN2Float(repayAmount) * getLocalTokenPrice('WETH');
+    const newDebtAmount = debtAmount.sub(Float2BN(fetchAmountinUSDPrice('LUSD', repayDollarValue)));
+    ({ upperHint, lowerHint } = await findInsertPosition(newCollAmount, newDebtAmount));
+
+    const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
+        '0',
+        placeHolderAddr,
+        upperHint,
+        lowerHint,
+    );
+
+    actionsCallData.push(liquityWithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityPaybackAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const strategyExecutorByBot = await strategyExecutor.connect(botAcc);
+
+    const strategyId = 0;
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyId, triggerCallData, actionsCallData, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callLiquityRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
 module.exports = {
     subDcaStrategy,
     callDcaStrategy,
@@ -929,4 +1103,8 @@ module.exports = {
     callReflexerBoostStrategy,
     subReflexerRepayStrategy,
     callReflexerRepayStrategy,
+    subLiquityBoostStrategy,
+    subLiquityRepayStrategy,
+    callLiquityBoostStrategy,
+    callLiquityRepayStrategy,
 };

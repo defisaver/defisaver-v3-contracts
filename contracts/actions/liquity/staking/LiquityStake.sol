@@ -50,13 +50,13 @@ contract LiquityStake is ActionBase, LiquityHelper {
     /// @notice Stakes LQTY tokens
     function _liquityStake(Params memory _params) internal returns (uint256) {
         if (_params.lqtyAmount == type(uint256).max) {
-            _params.lqtyAmount = LQTYTokenAddr.getBalance(_params.from);
+            _params.lqtyAmount = LQTY_TOKEN_ADDRESS.getBalance(_params.from);
         }
 
         uint256 ethGain = LQTYStaking.getPendingETHGain(address(this));
         uint256 lusdGain = LQTYStaking.getPendingLUSDGain(address(this));
 
-        LQTYTokenAddr.pullTokensIfNeeded(_params.from, _params.lqtyAmount);
+        LQTY_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lqtyAmount);
         LQTYStaking.stake(_params.lqtyAmount);
 
         withdrawStaking(ethGain, lusdGain, _params.wethTo, _params.lusdTo);

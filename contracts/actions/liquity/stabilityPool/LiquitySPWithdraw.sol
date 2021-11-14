@@ -52,16 +52,16 @@ contract LiquitySPWithdraw is ActionBase, LiquityHelper {
     /// @notice Withdraws LUSD from the user's stability pool deposit
     function _liquitySPWithdraw(Params memory _params) internal returns (uint256) {
         uint256 ethGain = StabilityPool.getDepositorETHGain(address(this));
-        uint256 lqtyBefore = LQTYTokenAddr.getBalance(address(this));
+        uint256 lqtyBefore = LQTY_TOKEN_ADDRESS.getBalance(address(this));
 
         uint256 deposit = StabilityPool.getCompoundedLUSDDeposit(address(this));
         _params.lusdAmount = deposit > _params.lusdAmount ? _params.lusdAmount : deposit;
 
         StabilityPool.withdrawFromSP(_params.lusdAmount);
         // Amount goes through min(amount, depositedAmount)
-        LUSDTokenAddr.withdrawTokens(_params.to, _params.lusdAmount);
+        LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, _params.lusdAmount);
 
-        uint256 lqtyGain = LQTYTokenAddr.getBalance(address(this)).sub(lqtyBefore);
+        uint256 lqtyGain = LQTY_TOKEN_ADDRESS.getBalance(address(this)).sub(lqtyBefore);
 
         withdrawStabilityGains(ethGain, lqtyGain, _params.wethTo, _params.lqtyTo);
 
