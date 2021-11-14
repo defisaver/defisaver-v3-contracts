@@ -166,11 +166,6 @@
 						},
 						{
 							"internalType": "bool",
-							"name": "active",
-							"type": "bool"
-						},
-						{
-							"internalType": "bool",
 							"name": "isBundle",
 							"type": "bool"
 						},
@@ -282,6 +277,38 @@
 					"internalType": "uint256",
 					"name": "_strategyIndex",
 					"type": "uint256"
+				},
+				{
+					"components": [
+						{
+							"internalType": "uint64",
+							"name": "strategyId",
+							"type": "uint64"
+						},
+						{
+							"internalType": "bool",
+							"name": "isBundle",
+							"type": "bool"
+						},
+						{
+							"internalType": "address",
+							"name": "userProxy",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
+						},
+						{
+							"internalType": "bytes32[]",
+							"name": "subData",
+							"type": "bytes32[]"
+						}
+					],
+					"internalType": "struct StrategyModel.StrategySub",
+					"name": "_sub",
+					"type": "tuple"
 				}
 			],
 			"name": "executeRecipeFromStrategy",

@@ -27,16 +27,17 @@ contract StrategyModel {
         uint8[][] paramMapping;
     }
 
-    /// @dev Instance of a strategy, user supplied data
-    struct SubApproval {
-        address userProxy;
-        uint256 lastUpdateBlock;    // used to fetch event quicker, adds 20k gas on subscribe and updateSubData
+    /// @dev Actual data of the sub we store on-chain
+    /// @dev In order to save on gas we store a keccak256(StrategySub) and verify later on
+    struct StoredSubData {
+        bytes20 userProxy; // address but put in bytes20 for gas savings
+        bool isEnabled;
         bytes32 strategySubHash;
     }
 
+    /// @dev Instance of a strategy, user supplied data
     struct StrategySub {
         uint64 strategyId;
-        bool active;
         bool isBundle; // if true, id points to a bundle id
         address userProxy;
         bytes[] triggerData;

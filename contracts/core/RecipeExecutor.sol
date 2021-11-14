@@ -25,7 +25,6 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
     bytes4 constant BUNDLE_STORAGE_ID = bytes4(keccak256("BundleStorage"));
 
     error TriggerNotActiveError();
-    error SubscriptionHashMismatch();
 
     /// @notice Called directly through DsProxy to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
@@ -53,11 +52,8 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
 
         { // to handle stack too deep
 
-            SubApproval memory subApproval = SubStorage(subStorageAddr).getSub(_subId);
-            bytes32 keccakCheck = keccak256(abi.encode(_sub));
-            if ( keccakCheck != subApproval.strategySubHash) {
-                revert SubscriptionHashMismatch();
-            }
+            StoredSubData memory storedSubData = SubStorage(subStorageAddr).getSub(_subId);
+            bytes32 subDataHash = keccak256(abi.encode(_sub));
             
             uint256 strategyId = _sub.strategyId;
             address bundleStorageAddr = registry.getAddr(BUNDLE_STORAGE_ID);
@@ -79,8 +75,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
 
         // if this is a one time strategy
         if (!strategy.continuous) {
-            _sub.active = false;
-            SubStorage(subStorageAddr).updateSubData(_subId, _sub);
+            SubStorage(subStorageAddr).deactivateSub(_subId);
         }
 
         Recipe memory currRecipe = Recipe({

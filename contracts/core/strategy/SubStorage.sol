@@ -20,27 +20,27 @@ contract SubStorage is StrategyModel, AdminAuth {
     event RemoveSub(uint256);
 
     modifier onlySubOwner(uint256 _subId) {
-        if (strategiesSubs[_subId].userProxy == address(0)) {
+        if (address(strategiesSubs[_subId].userProxy) == address(0)) {
             revert NonexistantSubError(_subId);
         }
 
-        if (strategiesSubs[_subId].userProxy != msg.sender) {
+        if (address(strategiesSubs[_subId].userProxy) != msg.sender) {
             revert SenderNotSubOwnerError(msg.sender, _subId);
         }
         _;
     }
 
     /// @dev The order of strategies might change as they are deleted
-    SubApproval[] public strategiesSubs;
+    StoredSubData[] public strategiesSubs;
 
     /// @notice Creates a new strategy with an existing template
     function subscribeToStrategy(
         StrategySub memory _sub
-    ) public returns (uint) {
+    ) public returns (uint256) {
         strategiesSubs.push(
-            SubApproval(
-                msg.sender,
-                block.number,
+            StoredSubData(
+                bytes20(msg.sender),
+                true,
                 keccak256(abi.encode(_sub))
             )            
         );
@@ -59,47 +59,31 @@ contract SubStorage is StrategyModel, AdminAuth {
         uint256 _subId,
         StrategySub calldata _sub
     ) public onlySubOwner(_subId) {
-        SubApproval storage subApproval = strategiesSubs[_subId];
-        subApproval.lastUpdateBlock = block.number;
-        subApproval.strategySubHash = keccak256(abi.encode(_sub));
+        StoredSubData storage storedSubData = strategiesSubs[_subId];
+        storedSubData.strategySubHash = keccak256(abi.encode(_sub));
 
         emit UpdateData(_subId, _sub);
     }
 
-    // /// @notice Updates the users strategy trigger data
-    // /// @dev Only callable by proxy who created the strategy
-    // /// @param _subId Id of the subscription to update
-    // /// @param _triggerData Subscription data for triggers
-    // function updateSubTriggerData(
-    //     uint256 _subId,
-    //     bytes memory _triggerData,
-    //     uint256 _triggerNum
-    // ) public onlySubOwner(_subId) {
-    //     StrategySub storage sub = strategiesSubs[_subId];
-        
-    //     sub.triggerData[_triggerNum] = _triggerData;
-    //     emit UpdateData(_subId);
-    // }
+    function activateSub(
+        uint _subId
+    ) public onlySubOwner(_subId) {
+        StoredSubData storage sub = strategiesSubs[_subId];
 
-    // function activateSub(
-    //     uint _subId
-    // ) public onlySubOwner(_subId) {
-    //     StrategySub storage sub = strategiesSubs[_subId];
+        sub.isEnabled = true;
 
-    //     sub.active = true;
+        emit ActivateSub(_subId);
+    }
 
-    //     emit ActivateSub(_subId);
-    // }
+    function deactivateSub(
+        uint _subId
+    ) public onlySubOwner(_subId) {
+        StoredSubData storage sub = strategiesSubs[_subId];
 
-    // function deactivateSub(
-    //     uint _subId
-    // ) public onlySubOwner(_subId) {
-    //     StrategySub storage sub = strategiesSubs[_subId];
+        sub.isEnabled = false;
 
-    //     sub.active = false;
-
-    //     emit DeactivateSub(_subId);
-    // }
+        emit DeactivateSub(_subId);
+    }
 
     /// @notice Unsubscribe an existing subscription
     /// @dev Only callable by proxy who created the subsctiption
@@ -116,7 +100,7 @@ contract SubStorage is StrategyModel, AdminAuth {
 
     ///////////////////// VIEW ONLY FUNCTIONS ////////////////////////////
 
-    function getSub(uint _subId) public view returns (SubApproval memory) {
+    function getSub(uint _subId) public view returns (StoredSubData memory) {
         return strategiesSubs[_subId];
     }
 

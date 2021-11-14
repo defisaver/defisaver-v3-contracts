@@ -25,24 +25,30 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
 
     error BotNotApprovedError(address, uint256);
     error SubNotActiveError(uint256);
+    error SubDatHashMismatch(uint256, bytes32, bytes32);
 
     /// @notice Checks all the triggers and executes actions
     /// @dev Only authorized callers can execute it
     /// @param _subId Id of the subscription
+    /// @param _strategyIndex Which strategy in a bundle, need to specify because if sub is part of a bundle
     /// @param _triggerCallData All input data needed to execute triggers
     /// @param _actionsCallData All input data needed to execute actions
     function executeStrategy(
         uint256 _subId,
-        uint256 _strategyIndex, // need to specify because if sub is part of a bundle
+        uint256 _strategyIndex,
         bytes[] calldata _triggerCallData,
         bytes[] calldata _actionsCallData,
         StrategySub memory _sub
     ) public {
-        SubApproval memory subApproval = SubStorage(registry.getAddr(SUB_STORAGE_ID)).getSub(_subId);
+        StoredSubData memory storedSubData = SubStorage(registry.getAddr(SUB_STORAGE_ID)).getSub(_subId);
 
-        bytes32 keccakCheck = keccak256(abi.encode(_sub));
+        bytes32 subDataHash = keccak256(abi.encode(_sub));
 
-        if (keccakCheck != subApproval.strategySubHash) {
+        if (subDataHash != storedSubData.strategySubHash) {
+            revert SubDatHashMismatch(_subId, subDataHash, storedSubData.strategySubHash);
+        }
+
+        if (!storedSubData.isEnabled) {
             revert SubNotActiveError(_subId);
         }
 
@@ -54,7 +60,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         }
 
         // execute actions
-        callActions(_subId, _actionsCallData, _triggerCallData, _strategyIndex,_sub);
+        callActions(_subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub);
     }
 
     /// @notice Checks if msg.sender has auth, reverts if not
@@ -82,7 +88,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
             _sub.userProxy,
             RecipeExecutorAddr,
             abi.encodeWithSignature(
-                "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bool,address,bytes[],bytes32[]))",
+                "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,address,bytes[],bytes32[]))",
                 _subId,
                 _actionsCallData,
                 _triggerCallData,

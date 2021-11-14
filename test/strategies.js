@@ -176,11 +176,10 @@ const subMcdBoostStrategy = async (proxy, bundleId, vaultId, rationUnder, target
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
 
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
-    // const strategyId = await getLatestStrategyId();
 
     const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_OVER);
 
-    const strategySub = [bundleId, true, isBundle, proxy.address, [triggerData], [vaultIdEncoded, targetRatioEncoded]];
+    const strategySub = [bundleId, isBundle, proxy.address, [triggerData], [vaultIdEncoded, targetRatioEncoded]];
     // eslint-disable-next-line max-len
     const subId = await subToStrategy(proxy, strategySub);
 
@@ -215,8 +214,8 @@ const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrB
     const triggerData = await createChainLinkPriceTrigger(tokenAddrSell, targetPrice, RATIO_STATE_OVER);
 
     // eslint-disable-next-line max-len
-    const subId = await subToStrategy(proxy, strategyId, true, [tokenAddrSellEncoded, tokenAddrBuyEncoded, amountEncoded],
-        [triggerData]);
+    const subId = await subToStrategy(proxy, [strategyId, [tokenAddrSellEncoded, tokenAddrBuyEncoded, amountEncoded],
+        [triggerData]]);
 
     return subId;
 };
@@ -228,7 +227,7 @@ const subReflexerBoostStrategy = async (proxy, safeId, ratioOver, targetRatio) =
     const triggerData = await createReflexerTrigger(safeId, ratioOver, RATIO_STATE_OVER);
     // eslint-disable-next-line max-len
 
-    const strategySub = [strategyId, true, false, proxy.address, [triggerData], [safeIdEncoded, targetRatioEncoded]];
+    const strategySub = [strategyId, false, proxy.address, [triggerData], [safeIdEncoded, targetRatioEncoded]];
     const subId = await subToStrategy(
         proxy,
         strategySub,

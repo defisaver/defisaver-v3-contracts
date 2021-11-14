@@ -41,21 +41,21 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission {
         SubStorage(subStorageAddr).updateSubData(_subId, _sub);
     }
 
-    // function activateSub(
-    //     uint _subId
-    // ) public {
-    //     address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
+    function activateSub(
+        uint _subId
+    ) public {
+        address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
 
-    //     SubStorage(subStorageAddr).activateSub(_subId);
-    // }
+        SubStorage(subStorageAddr).activateSub(_subId);
+    }
 
-    // function deactivateSub(
-    //     uint _subId
-    // ) public {
-    //     address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
+    function deactivateSub(
+        uint _subId
+    ) public {
+        address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
 
-    //     SubStorage(subStorageAddr).deactivateSub(_subId);
-    // }
+        SubStorage(subStorageAddr).deactivateSub(_subId);
+    }
 
     function removeSub(uint256 _subId) public {
         address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
