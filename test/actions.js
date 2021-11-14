@@ -22,6 +22,7 @@ const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
 const { getSecondTokenAmount } = require('./utils-uni');
 
 const { getHints, LiquityActionIds } = require('./utils-liquity');
+const { getAddr } = require('@defisaver/sdk/src/addresses');
 
 const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0) => {
     const dfsSellAddr = await getAddrFromRegistry('DFSSell');
@@ -1330,6 +1331,27 @@ const automationV2Unsub = async (
     return proxy['execute(address,bytes)'](automationV2UnsubAddr, functionData, { gasLimit: 3000000 });
 };
 
+const gUniDeposit = async (poolAddr, token0, token1, amount0Max, amount1Max, from, proxy) => {
+    const gUniDepositAddr = await getAddrFromRegistry('GUniDeposit');
+
+    const gUniAction = new dfs.actions.guni.GUniDeposit(
+        poolAddr, token0, token1, amount0Max, amount1Max, 0, 0, from, from,
+    );
+
+    const functionData = gUniAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](gUniDepositAddr, functionData, { gasLimit: 3000000 });
+};
+
+const gUniWithdraw = async (poolAddr, burnAmount, from, proxy) => {
+    const gUniWithdrawAddr = await getAddrFromRegistry('GUniWithdraw');
+
+    const gUniAction = new dfs.actions.guni.GUniWithdraw(
+        poolAddr, burnAmount, 0, 0, from, from,
+    );
+
+    const functionData = gUniAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](gUniWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
 module.exports = {
     sell,
     buy,
@@ -1413,4 +1435,7 @@ module.exports = {
 
     changeProxyOwner,
     automationV2Unsub,
+
+    gUniDeposit,
+    gUniWithdraw,
 };
