@@ -4,11 +4,11 @@ const {
     redeploy,
     setNewExchangeWrapper,
     WETH_ADDRESS,
-    DAI_ADDR,
+    UNI_ADDR,
 } = require('../utils');
 
 describe('Dfs-Prices', function () {
-    this.timeout(40000);
+    this.timeout(140000);
 
     let senderAcc; let uniWrapper; let
         kyberWrapper; let uniV3Wrapper; let dfsPrices;
@@ -29,10 +29,11 @@ describe('Dfs-Prices', function () {
 
     it('... should check best price from DFSPrices contract', async () => {
         const abiCoder = new hre.ethers.utils.AbiCoder();
+        const REN_ADDR = '0x408e41876cccdc0f92210600ef50372656052a38';
 
         const amount = hre.ethers.utils.parseUnits('0.3', 18);
-        const srcToken = WETH_ADDRESS;
-        const destToken = DAI_ADDR;
+        const srcToken = UNI_ADDR;
+        const destToken = REN_ADDR;
         const exchangeType = 1; // BUY
 
         const firstPath = srcToken;
@@ -47,7 +48,9 @@ describe('Dfs-Prices', function () {
             [],
         );
 
-        const path = abiCoder.encode(['address[]'], [[firstPath, secondPath]]);
+        console.log(`Kyber buy expected rate -> ${kyberRes.toString() / 1e18}`);
+
+        const path = abiCoder.encode(['address[]'], [[secondPath, firstPath]]);
         const uniRes = await dfsPrices.callStatic.getExpectedRate(
             uniWrapper.address,
             srcToken,
@@ -57,8 +60,9 @@ describe('Dfs-Prices', function () {
             path,
         );
 
-        const uniV3fee = 3000;
-        const additionalData = hre.ethers.utils.solidityPack(['address', 'uint24', 'address'], [secondPath, uniV3fee, firstPath]);
+        console.log(`UniV2 buy expected rate -> ${uniRes.toString() / 1e18}`);
+
+        const additionalData = hre.ethers.utils.solidityPack(['address', 'uint24', 'address', 'uint24', 'address'], [REN_ADDR, 3000, WETH_ADDRESS, 10000, UNI_ADDR]);
         const uniV3Res = await dfsPrices.callStatic.getExpectedRate(
             uniV3Wrapper.address,
             srcToken,
@@ -68,8 +72,6 @@ describe('Dfs-Prices', function () {
             additionalData,
         );
 
-        console.log(`Kyber buy expected rate -> ${kyberRes.toString() / 1e18}`);
-        console.log(`UniV2 buy expected rate -> ${uniRes.toString() / 1e18}`);
         console.log(`UniV3 buy expected rate -> ${uniV3Res.toString() / 1e18}`);
     });
 });
