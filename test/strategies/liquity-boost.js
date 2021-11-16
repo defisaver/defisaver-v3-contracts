@@ -30,8 +30,9 @@ describe('Liquity-Boost-Strategy', function () {
     let proxyAddr;
     let botAcc;
     let strategyExecutor;
-    let strategyId;
+    let subId;
     let liquityView;
+    let strategySub;
 
     const maxFeePercentage = Float2BN('5', 16);
     const collAmount = Float2BN(fetchAmountinUSDPrice('WETH', '30000'));
@@ -74,7 +75,7 @@ describe('Liquity-Boost-Strategy', function () {
         );
     });
 
-    it('... should make a new Liquity Boost strategy', async () => {
+    it('... should make a new Liquity Boost strategy and subscribe twice', async () => {
         const liquityBoostStrategy = new dfs.Strategy('LiquityBoostStrategy');
         liquityBoostStrategy.addSubSlot('&maxFeePercentage', 'uint256');
         liquityBoostStrategy.addSubSlot('&targetRatio', 'uint256');
@@ -125,7 +126,9 @@ describe('Liquity-Boost-Strategy', function () {
         const targetRatio = Float2BN('2');
 
         // eslint-disable-next-line max-len
-        strategyId = await subLiquityBoostStrategy(proxy, maxFeePercentage, ratioOver, targetRatio);
+        ({ subId, strategySub } = await subLiquityBoostStrategy(proxy, 0, false, maxFeePercentage, ratioOver, targetRatio));
+        // eslint-disable-next-line max-len
+        ({ subId, strategySub } = await subLiquityBoostStrategy(proxy, 0, false, maxFeePercentage, ratioOver, targetRatio));
     });
 
     it('... should trigger a Liquity Boost strategy', async () => {
@@ -133,7 +136,7 @@ describe('Liquity-Boost-Strategy', function () {
         const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', '5000'));
 
         // eslint-disable-next-line max-len
-        await callLiquityBoostStrategy(botAcc, strategyExecutor, strategyId, boostAmount, proxyAddr);
+        await callLiquityBoostStrategy(botAcc, strategyExecutor, subId, boostAmount, proxyAddr, strategySub);
 
         const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 
