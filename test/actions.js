@@ -89,7 +89,6 @@ const openMcd = async (proxy, makerAddresses, joinAddr) => {
 
 const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
     const tokenBalance = await balanceOf(tokenAddr, from);
-
     if (tokenBalance.lt(amount)) {
         if (isEth(tokenAddr)) {
             await depositToWeth(amount.toString());
@@ -106,9 +105,7 @@ const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
         }
     }
     const mcdSupplyAddr = await getAddrFromRegistry('McdSupply');
-
     await approve(tokenAddr, proxy.address);
-
     const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
         vaultId,
         amount,
@@ -348,7 +345,6 @@ const openVault = async (makerAddresses, proxy, joinAddr, tokenData, collAmount,
     const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
     const from = proxy.signer.address;
     const to = proxy.signer.address;
-
     const amountDai = hre.ethers.utils.parseUnits(daiAmount, 18);
     const amountColl = hre.ethers.utils.parseUnits(collAmount, tokenData.decimals);
 
@@ -998,7 +994,9 @@ const dydxWithdraw = async (proxy, tokenAddr, amount, to) => {
     return proxy['execute(address,bytes)'](dydxWithdrawAddr, functionData, { gasLimit: 3000000 });
 };
 
-const buyTokenIfNeeded = async (tokenAddr, senderAcc, proxy, standardAmount) => {
+const buyTokenIfNeeded = async (
+    tokenAddr, senderAcc, proxy, standardAmount, wrapper = UNISWAP_WRAPPER,
+) => {
     const tokenBalance = await balanceOf(tokenAddr, senderAcc.address);
     if (tokenBalance.lt(standardAmount)) {
         if (isEth(tokenAddr)) {
@@ -1009,7 +1007,7 @@ const buyTokenIfNeeded = async (tokenAddr, senderAcc, proxy, standardAmount) => 
                 WETH_ADDRESS,
                 tokenAddr,
                 hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
-                UNISWAP_WRAPPER,
+                wrapper,
                 senderAcc.address,
                 senderAcc.address,
             );

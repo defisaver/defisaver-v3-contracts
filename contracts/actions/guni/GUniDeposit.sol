@@ -7,6 +7,7 @@ import "./../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../DS/DSMath.sol";
 import "./helpers/GUniHelper.sol";
+import "hardhat/console.sol";
 
 /// @title Action that adds liquidity to G-UNI pool of interest (mints G-UNI LP tokens)
 contract GUniDeposit is ActionBase, DSMath, GUniHelper {
@@ -46,8 +47,9 @@ contract GUniDeposit is ActionBase, DSMath, GUniHelper {
         inputData.amount1Max = _parseParamUint(inputData.amount1Max, _paramMapping[1], _subData, _returnValues);
         inputData.amount0Min = _parseParamUint(inputData.amount0Min, _paramMapping[2], _subData, _returnValues);
         inputData.amount1Min = _parseParamUint(inputData.amount1Min, _paramMapping[3], _subData, _returnValues);
-
+        console.log("HERE");
         uint256 mintedAmount = gUniDeposit(inputData);
+        console.log(mintedAmount);
         return bytes32(mintedAmount);
     }
 
@@ -68,12 +70,10 @@ contract GUniDeposit is ActionBase, DSMath, GUniHelper {
     function gUniDeposit(Params memory _inputData) internal returns (uint256){
         require (_inputData.to != address(0x0), "Can not send to burn address");
 
-        uint256 token0BalanceBefore = _inputData.token0.getBalance((address(this)));
-        uint256 token1BalanceBefore = _inputData.token1.getBalance((address(this)));
-
         _inputData.amount0Max = _inputData.token0.pullTokensIfNeeded(_inputData.from, _inputData.amount0Max);
         _inputData.amount1Max = _inputData.token1.pullTokensIfNeeded(_inputData.from, _inputData.amount1Max);
-
+        console.log(_inputData.amount0Max);
+        console.log(_inputData.amount1Max);
         _inputData.token0.approveToken(G_UNI_ROUTER_02_ADDRESS, _inputData.amount0Max);
         _inputData.token1.approveToken(G_UNI_ROUTER_02_ADDRESS, _inputData.amount1Max);
 
@@ -86,9 +86,13 @@ contract GUniDeposit is ActionBase, DSMath, GUniHelper {
             _inputData.amount1Min,
             _inputData.to
         );
-        
-        _inputData.token0.withdrawTokens(_inputData.from, sub(_inputData.token0.getBalance(address(this)), token0BalanceBefore));
-        _inputData.token1.withdrawTokens(_inputData.from, sub(_inputData.token1.getBalance(address(this)), token1BalanceBefore));
+        console.log(mintAmount);
+        console.log(_inputData.token0.getBalance(address(this)));
+        console.log(_inputData.token1.getBalance(address(this)));
+        console.log(amount0);
+        console.log(amount1);
+        _inputData.token0.withdrawTokens(_inputData.from, sub(_inputData.amount0Max, amount0));
+        _inputData.token1.withdrawTokens(_inputData.from, sub(_inputData.amount1Max, amount1));
 
         logger.Log(address(this), msg.sender, "GUniDeposit", abi.encode(_inputData, mintAmount, amount0, amount1));
 

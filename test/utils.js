@@ -256,6 +256,9 @@ const balanceOf = async (tokenAddr, addr) => {
 };
 
 const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee) => {
+    console.log("FORMAT EXHCNAGE");
+    console.log(wrapper);
+    console.log(amount);
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
     let firstPath = srcAddr;

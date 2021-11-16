@@ -14,6 +14,7 @@ import "./DFSExchangeHelper.sol";
 import "./SaverExchangeRegistry.sol";
 import "../interfaces/exchange/IOffchainWrapper.sol";
 import "./helpers/ExchangeHelper.sol";
+import "hardhat/console.sol";
 
 contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, ExchangeHelper {
     using SafeERC20 for IERC20;
@@ -152,7 +153,12 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
 
         IERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
 
+
         if (_type == ExchangeActionType.SELL) {
+            console.log(_exData.wrapper);
+            console.log(_exData.srcAddr);
+            console.log(_exData.destAddr);
+            console.log(_exData.srcAmount);
             swappedTokens = IExchangeV3(_exData.wrapper).sell(
                 _exData.srcAddr,
                 _exData.destAddr,
