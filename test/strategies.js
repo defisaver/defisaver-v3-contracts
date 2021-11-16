@@ -123,22 +123,19 @@ const subMcdRepayStrategy = async (proxy, id, vaultId, rationUnder, targetRatio,
 
     const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_UNDER);
 
-    const poolPacked = hre.ethers.utils.solidityPack(['uint64', 'uint64', 'bytes20'], [vaultId, rationUnder, proxy.address]);
-
     // eslint-disable-next-line max-len
     const subId = await subToStrategy(
         proxy,
-        id,
-        true,
-        [
-            vaultIdEncoded,
-            targetRatioEncoded,
-        ],
-        [
-            triggerData,
-        ],
-        poolPacked,
-        isBundle,
+        [id,
+            isBundle,
+            proxy.address,
+            [
+                vaultIdEncoded,
+                targetRatioEncoded,
+            ],
+            [
+                triggerData,
+            ]],
     );
 
     return subId;
@@ -389,7 +386,7 @@ const callUniV3CollectStrategy = async (botAcc, strategyExecutor, subId, nftOwne
 };
 
 // eslint-disable-next-line max-len
-const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, ethJoin, repayAmount) => {
+const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, ethJoin, repayAmount, strategySub) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -440,7 +437,7 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, {
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
         gasLimit: 8000000,
     });
 
@@ -451,7 +448,7 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
 };
 
 // eslint-disable-next-line max-len
-const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, flAddr, subId, ethJoin, repayAmount) => {
+const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, flAddr, subId, ethJoin, repayAmount, strategySub) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -502,7 +499,7 @@ const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, f
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, {
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
         gasLimit: 8000000,
     });
 

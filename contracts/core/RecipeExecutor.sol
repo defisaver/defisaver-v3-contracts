@@ -45,22 +45,18 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         StrategySub memory _sub
     ) public payable {
 
-        // TODO: can hardcode in prod to save gas
+        // TODO: can be hardcoded in prod to save gas
         address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
 
         Strategy memory strategy;
 
         { // to handle stack too deep
-
-            StoredSubData memory storedSubData = SubStorage(subStorageAddr).getSub(_subId);
-            bytes32 subDataHash = keccak256(abi.encode(_sub));
-            
-            uint256 strategyId = _sub.strategyId;
+            uint256 strategyId = _sub.id;
             address bundleStorageAddr = registry.getAddr(BUNDLE_STORAGE_ID);
             address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
 
             if (_sub.isBundle) {
-                strategyId = BundleStorage(bundleStorageAddr).getStrategyId(_sub.strategyId, _strategyIndex);
+                strategyId = BundleStorage(bundleStorageAddr).getStrategyId(_sub.id, _strategyIndex);
             }
 
             strategy = StrategyStorage(strategyStorageAddr).getStrategy(strategyId);

@@ -48,6 +48,8 @@ contract CurveWithdraw is ActionBase, CurveHelper {
         }
 
         _curveWithdraw(params);
+
+        return bytes32(0);
     }
 
     /// @inheritdoc ActionBase

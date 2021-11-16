@@ -3,8 +3,7 @@
 pragma solidity =0.8.4;
 pragma experimental ABIEncoderV2;
 
-interface IMerkleReedem{
-
+interface IMerkleRedeem{
     struct Claim {
         uint256 week;
         uint256 balance;

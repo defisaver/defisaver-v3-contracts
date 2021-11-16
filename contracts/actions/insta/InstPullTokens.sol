@@ -67,13 +67,13 @@ contract InstPullTokens is ActionBase {
         uint256 numOfTokens = _inputData.tokens.length;
 
         string[] memory _targetNames = new string[](numOfTokens);
-        bytes[] memory _datas = new bytes[](numOfTokens);
+        bytes[] memory _data = new bytes[](numOfTokens);
         address _origin = address(this);
 
         // connects dsaAccount with BASIC connector and transfers all tokens
         for (uint256 i = 0; i < numOfTokens; i++){
             _targetNames[i] = "BASIC-A";
-            _datas[i] = abi.encodeWithSignature(
+            _data[i] = abi.encodeWithSignature(
                 "withdraw(address,uint256,address,uint256,uint256)",
                 _inputData.tokens[i],
                 _inputData.amounts[i],
@@ -83,7 +83,7 @@ contract InstPullTokens is ActionBase {
             );
         }
 
-        return abi.encodeWithSignature("cast(string[],bytes[],address)", _targetNames, _datas, _origin);
+        return abi.encodeWithSignature("cast(string[],bytes[],address)", _targetNames, _data, _origin);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

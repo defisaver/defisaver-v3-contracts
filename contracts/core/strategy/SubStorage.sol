@@ -9,7 +9,7 @@ import "./StrategyModel.sol";
 
 /// @title Storage of users subscriptions to strategies
 contract SubStorage is StrategyModel, AdminAuth {
-    error NonexistantSubError(uint256);
+    error NonexistentSubError(uint256);
     error SenderNotSubOwnerError(address, uint256);
     error UserPositionsEmpty();
 
@@ -21,7 +21,7 @@ contract SubStorage is StrategyModel, AdminAuth {
 
     modifier onlySubOwner(uint256 _subId) {
         if (address(strategiesSubs[_subId].userProxy) == address(0)) {
-            revert NonexistantSubError(_subId);
+            revert NonexistentSubError(_subId);
         }
 
         if (address(strategiesSubs[_subId].userProxy) != msg.sender) {
@@ -86,7 +86,7 @@ contract SubStorage is StrategyModel, AdminAuth {
     }
 
     /// @notice Unsubscribe an existing subscription
-    /// @dev Only callable by proxy who created the subsctiption
+    /// @dev Only callable by proxy who created the subscription
     /// @param _subId Subscription id
     function removeSub(uint256 _subId) public onlySubOwner(_subId) {
         uint lastSub = strategiesSubs.length - 1;
@@ -107,21 +107,4 @@ contract SubStorage is StrategyModel, AdminAuth {
     function getSubsCount() public view returns (uint256) {
         return strategiesSubs.length;
     }
-
-    // function getPaginatedSubs(uint _page, uint _perPage) public view returns (StrategySub[] memory) {
-    //     StrategySub[] memory subsPerPage = new StrategySub[](_perPage);
-
-    //     uint start = _page * _perPage;
-    //     uint end = start + _perPage;
-
-    //     end = (end > subsPerPage.length) ? subsPerPage.length : end;
-
-    //     uint count = 0;
-    //     for (uint i = start; i < end; i++) {
-    //         subsPerPage[count] = strategiesSubs[i];
-    //         count++;
-    //     }
-
-    //     return subsPerPage;
-    // }
 }

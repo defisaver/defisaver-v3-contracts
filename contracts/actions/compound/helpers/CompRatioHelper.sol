@@ -13,7 +13,7 @@ contract CompRatioHelper is Exponential, DSMath {
     // solhint-disable-next-line const-name-snakecase
     IComptroller public constant comp = IComptroller(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
 
-    /// @notice Calcualted the ratio of debt / adjusted collateral
+    /// @notice Calculated the ratio of debt / adjusted collateral
     /// @param _user Address of the user
     function getSafetyRatio(address _user) public view returns (uint) {
         // For each asset the account is in

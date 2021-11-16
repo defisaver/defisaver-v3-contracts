@@ -4,6 +4,7 @@ pragma solidity =0.8.4;
 
 import "../../../interfaces/balancer/IVault.sol";
 import "./MainnetBalancerV2Addresses.sol";
+
 /// @title Utility functions and data used in Balancer actions
 contract BalancerV2Helper is MainnetBalancerV2Addresses{
     IVault public constant vault = IVault(VAULT_ADDR);
