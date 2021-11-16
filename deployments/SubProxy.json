@@ -143,29 +143,36 @@
 		{
 			"inputs": [
 				{
-					"internalType": "uint64",
-					"name": "_strategyId",
-					"type": "uint64"
-				},
-				{
-					"internalType": "bool",
-					"name": "_active",
-					"type": "bool"
-				},
-				{
-					"internalType": "bytes[]",
-					"name": "_triggerData",
-					"type": "bytes[]"
-				},
-				{
-					"internalType": "bytes32[]",
-					"name": "_subData",
-					"type": "bytes32[]"
-				},
-				{
-					"internalType": "bool",
-					"name": "_isBundle",
-					"type": "bool"
+					"components": [
+						{
+							"internalType": "uint64",
+							"name": "strategyId",
+							"type": "uint64"
+						},
+						{
+							"internalType": "bool",
+							"name": "isBundle",
+							"type": "bool"
+						},
+						{
+							"internalType": "address",
+							"name": "userProxy",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
+						},
+						{
+							"internalType": "bytes32[]",
+							"name": "subData",
+							"type": "bytes32[]"
+						}
+					],
+					"internalType": "struct StrategyModel.StrategySub",
+					"name": "_sub",
+					"type": "tuple"
 				}
 			],
 			"name": "subscribeToStrategy",
@@ -181,14 +188,36 @@
 					"type": "uint256"
 				},
 				{
-					"internalType": "bytes[]",
-					"name": "_triggerData",
-					"type": "bytes[]"
-				},
-				{
-					"internalType": "bytes32[]",
-					"name": "_subData",
-					"type": "bytes32[]"
+					"components": [
+						{
+							"internalType": "uint64",
+							"name": "strategyId",
+							"type": "uint64"
+						},
+						{
+							"internalType": "bool",
+							"name": "isBundle",
+							"type": "bool"
+						},
+						{
+							"internalType": "address",
+							"name": "userProxy",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
+						},
+						{
+							"internalType": "bytes32[]",
+							"name": "subData",
+							"type": "bytes32[]"
+						}
+					],
+					"internalType": "struct StrategyModel.StrategySub",
+					"name": "_sub",
+					"type": "tuple"
 				}
 			],
 			"name": "updateSubData",

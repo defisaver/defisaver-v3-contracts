@@ -38,6 +38,27 @@
 					"internalType": "uint256",
 					"name": "",
 					"type": "uint256"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"name": "SubDatHashMismatch",
+			"type": "error"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
 				}
 			],
 			"name": "SubNotActiveError",
@@ -109,6 +130,38 @@
 					"internalType": "bytes[]",
 					"name": "_actionsCallData",
 					"type": "bytes[]"
+				},
+				{
+					"components": [
+						{
+							"internalType": "uint64",
+							"name": "strategyId",
+							"type": "uint64"
+						},
+						{
+							"internalType": "bool",
+							"name": "isBundle",
+							"type": "bool"
+						},
+						{
+							"internalType": "address",
+							"name": "userProxy",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "triggerData",
+							"type": "bytes[]"
+						},
+						{
+							"internalType": "bytes32[]",
+							"name": "subData",
+							"type": "bytes32[]"
+						}
+					],
+					"internalType": "struct StrategyModel.StrategySub",
+					"name": "_sub",
+					"type": "tuple"
 				}
 			],
 			"name": "executeStrategy",

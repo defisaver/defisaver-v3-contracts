@@ -130,7 +130,7 @@ contract UniCreatePoolV3 is ActionBase, UniV3Helper {
     }
 
     /// @dev mints new NFT that represents a position with selected parameters
-    /// @return tokenId of new NFT, how much liquidity it now has and amount of tokens that were transfered to uniswap pool
+    /// @return tokenId of new NFT, how much liquidity it now has and amount of tokens that were transferred to uniswap pool
     function _uniMint(Params memory _inputData)
         internal
         returns (
