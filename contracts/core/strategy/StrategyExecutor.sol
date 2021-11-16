@@ -89,7 +89,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
             _userProxy,
             RecipeExecutorAddr,
             abi.encodeWithSignature(
-                "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,address,bytes[],bytes32[]))",
+                "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bytes[],bytes32[]))",
                 _subId,
                 _actionsCallData,
                 _triggerCallData,
