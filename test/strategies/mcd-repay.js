@@ -204,7 +204,7 @@ describe('Mcd-Repay-Strategy', function () {
 
         console.log('Vault id: ', vaultId);
 
-        const ratioUnder = hre.ethers.utils.parseUnits('23.0', '18');
+        const ratioUnder = hre.ethers.utils.parseUnits('3', '18');
         const targetRatio = hre.ethers.utils.parseUnits('3.2', '18');
 
         const bundleId = 0;
@@ -215,10 +215,10 @@ describe('Mcd-Repay-Strategy', function () {
 
     it('... should trigger a maker repay strategy', async () => {
         const ratioBefore = await getRatio(mcdView, vaultId);
-        const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '1200'), '18');
+        const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '800'), '18');
 
         await callMcdRepayStrategy(
-            botAcc, strategyExecutor, 0, subId, ethJoin, repayAmount, strategySub,
+            botAcc, strategyExecutor, 0, subId, strategySub, ethJoin, repayAmount,
         );
 
         const ratioAfter = await getRatio(mcdView, vaultId);
@@ -232,12 +232,11 @@ describe('Mcd-Repay-Strategy', function () {
 
     it('... should trigger a maker FL repay strategy', async () => {
         const ratioBefore = await getRatio(mcdView, vaultId);
-        console.log(ratioBefore);
         const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '1000'), '18');
 
         // eslint-disable-next-line max-len
         await callFLMcdRepayStrategy(
-            botAcc, strategyExecutor, 1, flDyDx.address, subId, ethJoin, repayAmount, strategySub,
+            botAcc, strategyExecutor, 1, subId, strategySub, flDyDx.address, ethJoin, repayAmount,
         );
 
         const ratioAfter = await getRatio(mcdView, vaultId);

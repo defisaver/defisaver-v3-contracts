@@ -29,6 +29,7 @@ describe('Limit-Order-Strategy', function () {
     let botAcc;
     let strategyExecutor;
     let subId;
+    let strategySub;
     let amount;
 
     before(async () => {
@@ -99,14 +100,14 @@ describe('Limit-Order-Strategy', function () {
 
         amount = hre.ethers.utils.parseUnits('1', 18); // Sell 1 eth
 
-        subId = await subLimitOrderStrategy(
+        ({ subId, strategySub } = await subLimitOrderStrategy(
             proxy,
             senderAcc,
             tokenAddrSell,
             tokenAddrBuy,
             amount,
             targetPrice,
-        );
+        ));
     });
 
     it('... should trigger a limit order strategy', async () => {
@@ -117,7 +118,7 @@ describe('Limit-Order-Strategy', function () {
         const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
         const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
 
-        await callLimitOrderStrategy(botAcc, senderAcc, strategyExecutor, subId);
+        await callLimitOrderStrategy(botAcc, senderAcc, strategyExecutor, subId, strategySub);
 
         const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
         const wethBalanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
@@ -129,7 +130,7 @@ describe('Limit-Order-Strategy', function () {
     it('... should fail to trigger the same strategy again as its one time', async () => {
         try {
             await depositToWeth(amount.toString());
-            await callLimitOrderStrategy(botAcc, senderAcc, strategyExecutor, subId);
+            await callLimitOrderStrategy(botAcc, senderAcc, strategyExecutor, subId, strategySub);
         } catch (err) {
             expect(err.toString()).to.have.string('SubNotActiveError');
         }

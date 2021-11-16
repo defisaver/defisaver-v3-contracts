@@ -39,6 +39,7 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
     let dydxFlAddr;
     let subStorage;
     let subId;
+    let strategySub;
     let flAmount;
 
     before(async () => {
@@ -156,13 +157,13 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         const currPrice = await getChainLinkPrice(ETH_ADDR);
 
         const targetPrice = currPrice - 100; // Target is smaller so we can execute it
-        subId = await subMcdCloseStrategy(
+        ({ subId, strategySub } = await subMcdCloseStrategy(
             vaultId,
             proxy,
             senderAcc.address,
             targetPrice,
             WETH_ADDRESS,
-        );
+        ));
         console.log(subId);
         console.log(await subStorage.getSub(subId));
     });
@@ -171,7 +172,7 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
         console.log(`Dai before closing : ${daiBalanceBefore.toString()}`);
         await callMcdCloseStrategy(
-            proxy, botAcc, strategyExecutor, subId, flAmount, ethJoin, dydxFlAddr,
+            proxy, botAcc, strategyExecutor, subId, strategySub, flAmount, ethJoin, dydxFlAddr,
         );
         const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
         console.log(`Dai after closing : ${daiBalanceAfter.toString()}`);
@@ -180,7 +181,7 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
     it('... should fail to trigger the same strategy again as its one time', async () => {
         try {
             await callMcdCloseStrategy(
-                proxy, botAcc, strategyExecutor, subId, flAmount, ethJoin, dydxFlAddr,
+                proxy, botAcc, strategyExecutor, subId, strategySub, flAmount, ethJoin, dydxFlAddr,
             );
         } catch (err) {
             expect(err.toString()).to.have.string('SubNotActiveError');

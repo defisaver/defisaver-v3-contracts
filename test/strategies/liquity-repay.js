@@ -124,9 +124,9 @@ describe('Liquity-Repay-Strategy', function () {
         const targetRatio = Float2BN('3');
 
         // eslint-disable-next-line max-len
-        ({ subId, strategySub } = await subLiquityRepayStrategy(proxy, 0, false, ratioUnder, targetRatio));
+        ({ subId, strategySub } = await subLiquityRepayStrategy(proxy, ratioUnder, targetRatio));
         // eslint-disable-next-line max-len
-        ({ subId, strategySub } = await subLiquityRepayStrategy(proxy, 0, false, ratioUnder, targetRatio));
+        ({ subId, strategySub } = await subLiquityRepayStrategy(proxy, ratioUnder, targetRatio));
     });
 
     it('... should trigger a Liquity Repay strategy', async () => {
@@ -134,7 +134,7 @@ describe('Liquity-Repay-Strategy', function () {
         const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', '3500'));
 
         // eslint-disable-next-line max-len
-        await callLiquityRepayStrategy(botAcc, strategyExecutor, subId, repayAmount, proxyAddr, strategySub);
+        await callLiquityRepayStrategy(botAcc, strategyExecutor, subId, strategySub, repayAmount, proxyAddr);
 
         const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 

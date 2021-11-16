@@ -238,9 +238,9 @@ describe('Mcd-Boost-Strategy', function () {
             strategyExecutor,
             0,
             subId,
+            strategySub,
             ethJoin,
             boostAmount,
-            strategySub,
         );
 
         const ratioAfter = await getRatio(mcdView, vaultId);
@@ -257,7 +257,7 @@ describe('Mcd-Boost-Strategy', function () {
         const boostAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('DAI', '400'), '18');
 
         // eslint-disable-next-line max-len
-        await callFLMcdBoostStrategy(botAcc, strategyExecutor, 1, flDyDx.address, subId, ethJoin, boostAmount, strategySub);
+        await callFLMcdBoostStrategy(botAcc, strategyExecutor, 1, subId, strategySub, flDyDx.address, ethJoin, boostAmount);
 
         const ratioAfter = await getRatio(mcdView, vaultId);
 

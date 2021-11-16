@@ -126,9 +126,9 @@ describe('Liquity-Boost-Strategy', function () {
         const targetRatio = Float2BN('2');
 
         // eslint-disable-next-line max-len
-        ({ subId, strategySub } = await subLiquityBoostStrategy(proxy, 0, false, maxFeePercentage, ratioOver, targetRatio));
+        ({ subId, strategySub } = await subLiquityBoostStrategy(proxy, maxFeePercentage, ratioOver, targetRatio));
         // eslint-disable-next-line max-len
-        ({ subId, strategySub } = await subLiquityBoostStrategy(proxy, 0, false, maxFeePercentage, ratioOver, targetRatio));
+        ({ subId, strategySub } = await subLiquityBoostStrategy(proxy, maxFeePercentage, ratioOver, targetRatio));
     });
 
     it('... should trigger a Liquity Boost strategy', async () => {
@@ -136,7 +136,7 @@ describe('Liquity-Boost-Strategy', function () {
         const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', '5000'));
 
         // eslint-disable-next-line max-len
-        await callLiquityBoostStrategy(botAcc, strategyExecutor, subId, boostAmount, proxyAddr, strategySub);
+        await callLiquityBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr);
 
         const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 
