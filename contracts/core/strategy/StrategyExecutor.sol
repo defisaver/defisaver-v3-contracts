@@ -60,7 +60,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         }
 
         // execute actions
-        callActions(_subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub);
+        callActions(_subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub, address(storedSubData.userProxy));
     }
 
     /// @notice Checks if msg.sender has auth, reverts if not
@@ -78,14 +78,15 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         bytes[] calldata _actionsCallData,
         bytes[] calldata _triggerCallData,
         uint256 _strategyIndex,
-        StrategySub memory _sub
+        StrategySub memory _sub,
+        address _userProxy
     ) internal {
         address RecipeExecutorAddr = registry.getAddr(RECIPE_EXECUTOR_ID);
 
         address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
 
         ProxyAuth(proxyAuthAddr).callExecute{value: msg.value}(
-            _sub.userProxy,
+            _userProxy,
             RecipeExecutorAddr,
             abi.encodeWithSignature(
                 "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,address,bytes[],bytes32[]))",
