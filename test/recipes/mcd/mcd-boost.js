@@ -28,9 +28,10 @@ const {
 } = require('../../utils-mcd');
 
 const {
-    openVault,
+    openVaultForExactAmountInDecimals,
     gUniDeposit,
     buyTokenIfNeeded,
+    openVault,
 } = require('../../actions.js');
 
 describe('Mcd-Boost', function () {
@@ -69,7 +70,7 @@ describe('Mcd-Boost', function () {
 
         await setNewExchangeWrapper(senderAcc, uniWrapper.address);
     });
-/*
+
     for (let i = 0; i < 1; ++i) {
         const ilkData = ilks[i];
         const joinAddr = ilkData.join;
@@ -218,18 +219,15 @@ describe('Mcd-Boost', function () {
             expect(info2.debt).to.be.gt(info.debt);
         });
     }
-    */
+
     it('... should call a boost for GUNIV3DAIUSDC1-A vault', async () => {
         const GUNIV3DAIUSDC = '0xabddafb225e10b90d798bb8a886238fb835e2053';
         const joinAddr = '0xbFD445A97e7459b0eBb34cfbd3245750Dba4d7a4';
-        console.log("UNI WRAPPER :");
-        console.log(uniWrapper.address);
 
         const daiAmount = hre.ethers.utils.parseUnits('20000', 18);
         const usdtAmount = hre.ethers.utils.parseUnits('20000', 6);
         await buyTokenIfNeeded(DAI_ADDR, senderAcc, proxy, daiAmount, uniWrapper.address);
         await buyTokenIfNeeded(USDC_ADDR, senderAcc, proxy, usdtAmount, uniWrapper.address);
-        console.log("BOUGHT");
         await approve(DAI_ADDR, proxy.address);
         await approve(USDC_ADDR, proxy.address);
         await gUniDeposit(
@@ -241,32 +239,25 @@ describe('Mcd-Boost', function () {
             senderAcc.address,
             proxy,
         );
-        console.log("DEPOSITED");
         const poolTokensBalanceAfter = await balanceOf(GUNIV3DAIUSDC, senderAcc.address);
 
         await approve(GUNIV3DAIUSDC, proxy.address);
 
-        const vaultId = await openVault(
+        const vaultId = await openVaultForExactAmountInDecimals(
             makerAddresses,
             proxy,
             joinAddr,
             { address: GUNIV3DAIUSDC, decimals: 18 },
-            (poolTokensBalanceAfter.toString() / 1e18).toString(),
+            poolTokensBalanceAfter.toString(),
             (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString(),
         );
-        console.log("OPEN VAULT")
-        console.log(vaultId);
         const ratioBefore = await getRatio(mcdView, vaultId);
         const info = await getVaultInfo(mcdView, vaultId, '0x47554e49563344414955534443312d4100000000000000000000000000000000');
         console.log(`Ratio before: ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} GUNIV3DAIUSDC1, debt: ${info.debt.toFixed(2)} Dai)`);
 
         const from = proxy.address;
         const to = proxy.address;
-        const collToken = GUNIV3DAIUSDC;
         const fromToken = makerAddresses.MCD_DAI;
-
-        console.log("TESIS");
-        console.log(uniWrapper.address);
 
         const mcdGenerateAction = new dfs.actions.maker.MakerGenerateAction(
             vaultId,

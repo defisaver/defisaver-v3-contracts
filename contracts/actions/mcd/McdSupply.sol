@@ -9,7 +9,6 @@ import "../../interfaces/mcd//IJoin.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
-import "hardhat/console.sol";
 
 /// @title Supply collateral to a Maker vault
 contract McdSupply is ActionBase, McdHelper {
@@ -29,9 +28,9 @@ contract McdSupply is ActionBase, McdHelper {
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
         joinAddr = _parseParamAddr(joinAddr, _paramMapping[2], _subData, _returnValues);
         from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
-        console.log("HERHREHRER");
+
         uint256 returnAmount = _mcdSupply(vaultId, amount, joinAddr, from, mcdManager);
-        console.log(returnAmount);
+
         return bytes32(returnAmount);
     }
 

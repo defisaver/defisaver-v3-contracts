@@ -9,7 +9,6 @@ import "../../interfaces/exchange/IUniswapRouter.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 import "./helpers/WrapperHelper.sol";
-import "hardhat/console.sol";
 
 /// @title DFS exchange wrapper for UniswapV2
 contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
@@ -25,14 +24,13 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     /// @param _srcAmount From amount
     /// @return uint Destination amount
     function sell(address _srcAddr, address, uint _srcAmount, bytes memory _additionalData) external override returns (uint) {
-        console.log("HRERERERERSADADSDAD");
         uint[] memory amounts;
         address[] memory path = abi.decode(_additionalData, (address[]));
 
         IERC20(_srcAddr).safeApprove(address(router), _srcAmount);
 
         amounts = router.swapExactTokensForTokens(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
-        console.log(amounts[amounts.length - 1]);
+
         return amounts[amounts.length - 1];
     }
 

@@ -352,6 +352,21 @@ const openVault = async (makerAddresses, proxy, joinAddr, tokenData, collAmount,
     await generateMcd(proxy, vaultId, amountDai, to);
     return vaultId;
 };
+const openVaultForExactAmountInDecimals = async (
+    makerAddresses, proxy, joinAddr, tokenData, collAmount, daiAmount,
+) => {
+    const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
+    const from = proxy.signer.address;
+    const to = proxy.signer.address;
+    const amountDai = hre.ethers.utils.parseUnits(daiAmount, 18);
+    console.log("OPEN MCD");
+    await supplyMcd(proxy, vaultId, collAmount, tokenData.address, joinAddr, from);
+    console.log("SUPPLY");
+    await generateMcd(proxy, vaultId, amountDai, to);
+    console.log("generate");
+
+    return vaultId;
+};
 
 const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, from, to) => {
     const uniSupplyAddr = await getAddrFromRegistry('UniSupply');
@@ -1006,7 +1021,7 @@ const buyTokenIfNeeded = async (
                 proxy,
                 WETH_ADDRESS,
                 tokenAddr,
-                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
+                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '30000'), 18),
                 wrapper,
                 senderAcc.address,
                 senderAcc.address,
@@ -1362,6 +1377,7 @@ module.exports = {
     openVault,
     mcdGive,
     mcdMerge,
+    openVaultForExactAmountInDecimals,
 
     supplyAave,
     withdrawAave,
