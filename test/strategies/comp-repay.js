@@ -33,7 +33,8 @@ describe('Compound-Repay-Strategy', function () {
     let proxy;
     let botAcc;
     let strategyExecutor;
-    let strategyId;
+    let subId;
+    let strategySub;
     let uniWrapper;
     let compView;
     let ratioUnder;
@@ -121,7 +122,7 @@ describe('Compound-Repay-Strategy', function () {
         targetRatio = hre.ethers.utils.parseUnits('4', '18');
         ratioUnder = hre.ethers.utils.parseUnits('3', '18');
 
-        strategyId = await subCompRepayStrategy(proxy, ratioUnder, targetRatio);
+        ({ subId, strategySub } = await subCompRepayStrategy(proxy, ratioUnder, targetRatio));
         // sub strategy
     });
 
@@ -130,7 +131,7 @@ describe('Compound-Repay-Strategy', function () {
         console.log(ratioBefore.toString());
         expect(ratioBefore).to.be.lt(ratioUnder);
         const repayAmount = hre.ethers.utils.parseUnits('1.5', 18);
-        await callCompRepayStrategy(botAcc, strategyExecutor, strategyId, repayAmount);
+        await callCompRepayStrategy(botAcc, strategyExecutor, subId, strategySub, repayAmount);
 
         const ratioAfter = await getCompRatio(compView, proxy.address);
         console.log(ratioAfter.toString());

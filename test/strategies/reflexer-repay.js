@@ -30,7 +30,8 @@ describe('Reflexer-Repay-Strategy', function () {
     let proxyAddr;
     let botAcc;
     let strategyExecutor;
-    let strategyId;
+    let subId;
+    let strategySub;
     let safeId;
 
     const collAmount = Float2BN(fetchAmountinUSDPrice('WETH', '30000'));
@@ -116,11 +117,11 @@ describe('Reflexer-Repay-Strategy', function () {
 
         await createStrategy(proxy, ...callData, true);
 
-        const ratioUnder = Float2BN('2.5');
+        const ratioUnder = Float2BN('2.8');
         const targetRatio = Float2BN('3');
 
         // eslint-disable-next-line max-len
-        strategyId = await subReflexerRepayStrategy(proxy, safeId, ratioUnder, targetRatio);
+        ({ subId, strategySub} = await subReflexerRepayStrategy(proxy, safeId, ratioUnder, targetRatio));
     });
 
     it('... should trigger a Reflexer Repay strategy', async () => {
@@ -128,7 +129,7 @@ describe('Reflexer-Repay-Strategy', function () {
         const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', '5000'));
 
         // eslint-disable-next-line max-len
-        await callReflexerRepayStrategy(botAcc, strategyExecutor, strategyId, repayAmount, proxyAddr);
+        await callReflexerRepayStrategy(botAcc, strategyExecutor, subId, strategySub, repayAmount, proxyAddr);
 
         const ratioAfter = await getRatio(safeId);
 

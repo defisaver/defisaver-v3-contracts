@@ -30,7 +30,8 @@ describe('Reflexer-Boost-Strategy', function () {
     let proxyAddr;
     let botAcc;
     let strategyExecutor;
-    let strategyId;
+    let subId;
+    let strategySub;
     let safeId;
 
     const collAmount = Float2BN(fetchAmountinUSDPrice('WETH', '30000'));
@@ -118,7 +119,7 @@ describe('Reflexer-Boost-Strategy', function () {
         const targetRatio = Float2BN('2');
 
         // eslint-disable-next-line max-len
-        strategyId = await subReflexerBoostStrategy(proxy, safeId, ratioOver, targetRatio);
+        ({ subId, strategySub } = await subReflexerBoostStrategy(proxy, safeId, ratioOver, targetRatio));
     });
 
     it('... should trigger a Reflexer Boost strategy', async () => {
@@ -126,7 +127,7 @@ describe('Reflexer-Boost-Strategy', function () {
         const boostAmount = Float2BN(fetchAmountinUSDPrice('RAI', '5000'));
 
         // eslint-disable-next-line max-len
-        await callReflexerBoostStrategy(botAcc, strategyExecutor, strategyId, boostAmount, proxyAddr);
+        await callReflexerBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr);
 
         const ratioAfter = await getRatio(safeId);
 

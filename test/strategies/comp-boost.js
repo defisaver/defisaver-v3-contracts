@@ -33,7 +33,8 @@ describe('Compound-Boost-Strategy', function () {
     let proxy;
     let botAcc;
     let strategyExecutor;
-    let strategyId;
+    let subId;
+    let strategySub;
     let uniWrapper;
     let compView;
     let ratioOver;
@@ -128,7 +129,7 @@ describe('Compound-Boost-Strategy', function () {
         targetRatio = hre.ethers.utils.parseUnits('2.1', '18');
         ratioOver = hre.ethers.utils.parseUnits('2.5', '18');
 
-        strategyId = await subCompBoostStrategy(proxy, ratioOver, targetRatio);
+        ({ subId, strategySub } = await subCompBoostStrategy(proxy, ratioOver, targetRatio));
         // sub strategy
     });
 
@@ -137,7 +138,7 @@ describe('Compound-Boost-Strategy', function () {
         console.log(ratioBefore.toString());
         expect(ratioBefore).to.be.gt(ratioOver);
         const boostAmount = hre.ethers.utils.parseUnits('12000', 18);
-        await callCompBoostStrategy(botAcc, strategyExecutor, strategyId, boostAmount);
+        await callCompBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount);
 
         const ratioAfter = await getCompRatio(compView, proxy.address);
         console.log(ratioAfter.toString());

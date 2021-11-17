@@ -25,21 +25,30 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
 
     error BotNotApprovedError(address, uint256);
     error SubNotActiveError(uint256);
+    error SubDatHashMismatch(uint256, bytes32, bytes32);
 
     /// @notice Checks all the triggers and executes actions
     /// @dev Only authorized callers can execute it
     /// @param _subId Id of the subscription
+    /// @param _strategyIndex Which strategy in a bundle, need to specify because if sub is part of a bundle
     /// @param _triggerCallData All input data needed to execute triggers
     /// @param _actionsCallData All input data needed to execute actions
     function executeStrategy(
         uint256 _subId,
-        uint256 _strategyIndex, // need to specify because if sub is part of a bundle
+        uint256 _strategyIndex,
         bytes[] calldata _triggerCallData,
-        bytes[] calldata _actionsCallData
+        bytes[] calldata _actionsCallData,
+        StrategySub memory _sub
     ) public {
-        StrategySub memory sub = SubStorage(registry.getAddr(SUB_STORAGE_ID)).getSub(_subId);
+        StoredSubData memory storedSubData = SubStorage(registry.getAddr(SUB_STORAGE_ID)).getSub(_subId);
 
-        if (!sub.active) {
+        bytes32 subDataHash = keccak256(abi.encode(_sub));
+
+        if (subDataHash != storedSubData.strategySubHash) {
+            revert SubDatHashMismatch(_subId, subDataHash, storedSubData.strategySubHash);
+        }
+
+        if (!storedSubData.isEnabled) {
             revert SubNotActiveError(_subId);
         }
 
@@ -51,7 +60,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         }
 
         // execute actions
-        callActions(_subId, _actionsCallData, _triggerCallData, sub.userProxy, _strategyIndex);
+        callActions(_subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub, address(storedSubData.userProxy));
     }
 
     /// @notice Checks if msg.sender has auth, reverts if not
@@ -68,22 +77,24 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         uint256 _subId,
         bytes[] calldata _actionsCallData,
         bytes[] calldata _triggerCallData,
-        address _proxy,
-        uint256 _strategyIndex
+        uint256 _strategyIndex,
+        StrategySub memory _sub,
+        address _userProxy
     ) internal {
         address RecipeExecutorAddr = registry.getAddr(RECIPE_EXECUTOR_ID);
 
         address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
 
         ProxyAuth(proxyAuthAddr).callExecute{value: msg.value}(
-            _proxy,
+            _userProxy,
             RecipeExecutorAddr,
             abi.encodeWithSignature(
-                "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256)",
+                "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bytes[],bytes32[]))",
                 _subId,
                 _actionsCallData,
                 _triggerCallData,
-                _strategyIndex
+                _strategyIndex,
+                _sub
             )
         );
     }

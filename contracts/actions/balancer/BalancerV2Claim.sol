@@ -5,13 +5,14 @@ pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
-import "../../interfaces/balancer/IMerkleReedem.sol";
+import "../../interfaces/balancer/IMerkleRedeem.sol";
 import "./helpers/BalancerV2Helper.sol";
 
 /// @title Claim BAL tokens
 contract BalancerV2Claim is ActionBase, BalancerV2Helper {
     using TokenUtils for address;
-    IMerkleReedem public constant merkleReedemer = IMerkleReedem(MERKLE_REEDEM_ADDR);
+
+    IMerkleRedeem public constant merkleRedeemer = IMerkleRedeem(MERKLE_REDEEM_ADDR);
 
     /// @param liquidityProvider - The address of the liquidity provider that the tokens are claimed for
     /// @param to - The address to which to send Balancer tokens to
@@ -58,10 +59,10 @@ contract BalancerV2Claim is ActionBase, BalancerV2Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
     function claim(Params memory _inputData) internal returns (uint256 balClaimedAmount) {
         require(_inputData.to != address(0), ADDR_MUST_NOT_BE_ZERO);
-        IMerkleReedem.Claim[] memory claims = packClaims(_inputData.week, _inputData.balances, _inputData.merkleProofs);
+        IMerkleRedeem.Claim[] memory claims = packClaims(_inputData.week, _inputData.balances, _inputData.merkleProofs);
         
         balClaimedAmount = balToken.getBalance(_inputData.liquidityProvider);
-        merkleReedemer.claimWeeks(_inputData.liquidityProvider, claims);
+        merkleRedeemer.claimWeeks(_inputData.liquidityProvider, claims);
         balClaimedAmount = balToken.getBalance(_inputData.liquidityProvider) - balClaimedAmount;
         
         /// @dev if _to isn't the same as _lp, liquidityProvider needs to approve DSProxy to pull BAL tokens
@@ -79,12 +80,15 @@ contract BalancerV2Claim is ActionBase, BalancerV2Helper {
     }
 
     /// @dev Decoding Claims[] from _callData returns stack too deep error, so packing must be done onchain
-    function packClaims(uint256[] memory _weeks, uint256[] memory _balances, bytes32[][] memory _merkleProofs) internal pure returns (IMerkleReedem.Claim[] memory){
-        require (_weeks.length == _balances.length && _weeks.length == _merkleProofs.length);
-        IMerkleReedem.Claim[] memory claims = new IMerkleReedem.Claim[](_weeks.length);
+    function packClaims(uint256[] memory _weeks, uint256[] memory _balances, bytes32[][] memory _merkleProofs) internal pure returns (IMerkleRedeem.Claim[] memory){
+        require(_weeks.length == _balances.length && _weeks.length == _merkleProofs.length);
+
+        IMerkleRedeem.Claim[] memory claims = new IMerkleRedeem.Claim[](_weeks.length);
+
         for (uint256 i = 0; i < _weeks.length; i++){
-            claims[i] = IMerkleReedem.Claim(_weeks[i], _balances[i], _merkleProofs[i]);
+            claims[i] = IMerkleRedeem.Claim(_weeks[i], _balances[i], _merkleProofs[i]);
         }
+
         return claims;
     }
 
