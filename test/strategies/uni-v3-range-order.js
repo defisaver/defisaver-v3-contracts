@@ -27,7 +27,8 @@ describe('Uni-v3-range-order strat', function () {
     let proxy;
     let botAcc;
     let strategyExecutor;
-    let strategyId;
+    let subId;
+    let strategySub;
     let positionManager;
     let subStorage;
     const uniPair = {
@@ -104,10 +105,11 @@ describe('Uni-v3-range-order strat', function () {
         // One trigger and recipe consisting of one action
 
         positionManager.approve(proxy.address, tokenId);
-        strategyId = await subUniV3RangeOrderStrategy(proxy, tokenId, 0, senderAcc.address);
+        // eslint-disable-next-line max-len
+        ({ subId, strategySub } = await subUniV3RangeOrderStrategy(proxy, tokenId, 0, senderAcc.address));
         // user subscribes to strategy and fills three slots
-        expect(strategyId).to.be.eq('0');
-        console.log(await subStorage.getSub(strategyId));
+        expect(subId).to.be.eq('0');
+        console.log(await subStorage.getSub(subId));
     });
 
     it('... should trigger and execute uniswap v3 range order strategy', async () => {
@@ -119,7 +121,8 @@ describe('Uni-v3-range-order strat', function () {
         await callUniV3RangeOrderStrategy(
             botAcc,
             strategyExecutor,
-            strategyId,
+            subId,
+            strategySub,
             liquidity,
             senderAcc.address,
             senderAcc.address,

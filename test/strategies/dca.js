@@ -13,6 +13,7 @@ const {
     timeTravel,
     WETH_ADDRESS,
     DAI_ADDR,
+    Float2BN,
 } = require('../utils');
 
 const { subDcaStrategy, callDcaStrategy } = require('../strategies');
@@ -33,6 +34,7 @@ describe('DCA Strategy', function () {
     let botAcc;
     let strategyExecutor;
     let subId;
+    let strategySub;
     let amount;
     let subStorage;
     let lastTimestamp;
@@ -41,12 +43,8 @@ describe('DCA Strategy', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
-        const timestamp = await hre.ethers;
-
-        console.log(timestamp);
-
+        await redeploy('ProxyAuth');
         await redeploy('BotAuth');
-        // await redeploy('ProxyAuth');
         await redeploy('StrategyStorage');
         subStorage = await redeploy('SubStorage');
         await redeploy('RecipeExecutor');
@@ -112,7 +110,7 @@ describe('DCA Strategy', function () {
 
         amount = hre.ethers.utils.parseUnits('1', 18); // Sell 1 eth
 
-        subId = await subDcaStrategy(
+        ({ subId, strategySub } = await subDcaStrategy(
             proxy,
             tokenAddrSell,
             tokenAddrBuy,
@@ -120,7 +118,7 @@ describe('DCA Strategy', function () {
             interval,
             lastTimestamp,
             senderAcc.address,
-        );
+        ));
     });
 
     it('... should trigger DCA strategy', async () => {
@@ -133,7 +131,14 @@ describe('DCA Strategy', function () {
 
         const newTimestamp = lastTimestamp + TWO_DAYS;
 
-        await callDcaStrategy(botAcc, strategyExecutor, subId, subStorage.address, newTimestamp);
+        // eslint-disable-next-line max-len
+        await callDcaStrategy(botAcc, strategyExecutor, subId, strategySub, subStorage.address, newTimestamp);
+
+        const eventFilter = subStorage.filters.UpdateData(Float2BN(subId));
+        const event = (await subStorage.queryFilter(eventFilter)).at(-1);
+
+        const abiCoder = hre.ethers.utils.defaultAbiCoder;
+        strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], event.data)[0];
 
         const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
         const wethBalanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
@@ -153,7 +158,8 @@ describe('DCA Strategy', function () {
 
         const newTimestamp = lastTimestamp + TWO_DAYS;
 
-        await callDcaStrategy(botAcc, strategyExecutor, subId, subStorage.address, newTimestamp);
+        // eslint-disable-next-line max-len
+        await callDcaStrategy(botAcc, strategyExecutor, subId, strategySub, subStorage.address, newTimestamp);
 
         const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
         const wethBalanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);

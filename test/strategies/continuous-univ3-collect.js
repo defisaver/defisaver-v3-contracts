@@ -10,6 +10,7 @@ const {
     redeploy,
     fetchAmountinUSDPrice,
     UNIV3POSITIONMANAGER_ADDR,
+    Float2BN,
 } = require('../utils');
 
 const { createStrategy, addBotCaller } = require('../utils-strategies');
@@ -25,7 +26,8 @@ describe('Uni-v3-range-order strat', function () {
     let proxy;
     let botAcc;
     let strategyExecutor;
-    let strategyId;
+    let subId;
+    let strategySub;
     let positionManager;
     let subStorage;
     const uniPair = {
@@ -104,12 +106,13 @@ describe('Uni-v3-range-order strat', function () {
         const timestamp = '13352450';
         const maxGasPrice = '20000000000';
         const interval = '2';
-        strategyId = await subUniContinuousCollectStrategy(
+
+        ({ subId, strategySub } = await subUniContinuousCollectStrategy(
             proxy, tokenId, senderAcc.address, timestamp, maxGasPrice, interval,
-        );
+        ));
         // user subscribes to strategy and fills three slots
-        expect(strategyId).to.be.eq('0');
-        const subInfo = await subStorage.getSub(strategyId);
+        expect(subId).to.be.eq('0');
+        const subInfo = await subStorage.getSub(subId);
         console.log(subInfo);
     });
 
@@ -117,28 +120,43 @@ describe('Uni-v3-range-order strat', function () {
         await callUniV3CollectStrategy(
             botAcc,
             strategyExecutor,
-            strategyId,
+            subId,
+            strategySub,
             proxy.address,
             subStorage.address,
             '1630056291',
         );
+
+        const eventFilter = subStorage.filters.UpdateData(Float2BN(subId));
+        const event = (await subStorage.queryFilter(eventFilter)).at(-1);
+
+        const abiCoder = hre.ethers.utils.defaultAbiCoder;
+        strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], event.data)[0];
     });
     it('... should trigger and execute uniswap v3 collect strategy again', async () => {
         await callUniV3CollectStrategy(
             botAcc,
             strategyExecutor,
-            strategyId,
+            subId,
+            strategySub,
             proxy.address,
             subStorage.address,
             '1850056291',
         );
+
+        const eventFilter = subStorage.filters.UpdateData(Float2BN(subId));
+        const event = (await subStorage.queryFilter(eventFilter)).at(-1);
+
+        const abiCoder = hre.ethers.utils.defaultAbiCoder;
+        strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], event.data)[0];
     });
     it('... should fail to trigger and execute uniswap v3 collect strategy', async () => {
         try {
             await callUniV3CollectStrategy(
                 botAcc,
                 strategyExecutor,
-                strategyId,
+                subId,
+                strategySub,
                 proxy.address,
                 subStorage.address,
                 '1850056291',

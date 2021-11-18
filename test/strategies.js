@@ -53,7 +53,7 @@ const abiCoder = new hre.ethers.utils.AbiCoder();
 // eslint-disable-next-line max-len
 const subUniContinuousCollectStrategy = async (proxy, tokenId, recipient, timestamp, maxGasPrice, interval) => {
     const bundleId = 0;
-    const isBundle = true;
+    const isBundle = false;
 
     const tokenIdEncoded = abiCoder.encode(['uint256'], [tokenId.toString()]);
     const recipientEncoded = abiCoder.encode(['address'], [recipient]);
@@ -76,7 +76,7 @@ const subDcaStrategy = async (
     eoa,
 ) => {
     const bundleId = 0;
-    const isBundle = true;
+    const isBundle = false;
 
     const tokenAddrSellEncoded = abiCoder.encode(['address'], [tokenAddrSell]);
     const tokenAddrBuyEncoded = abiCoder.encode(['address'], [tokenAddrBuy]);
@@ -109,7 +109,7 @@ const subDcaStrategy = async (
 
 const subUniV3RangeOrderStrategy = async (proxy, tokenId, state, recipient) => {
     const bundleId = 0;
-    const isBundle = true;
+    const isBundle = false;
 
     const tokenIdEncoded = abiCoder.encode(['uint256'], [tokenId.toString()]);
     const recipientEncoded = abiCoder.encode(['address'], [recipient]);
