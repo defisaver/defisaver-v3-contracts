@@ -22,6 +22,8 @@ const {
     buyTokenIfNeeded,
 } = require('../actions.js');
 // FORK ON BLOCK NUMBER 13629046 OR ANY THAT HAS ENOUGH LIMIT ON GUNI-A
+// 13631179.
+// 13629043
 describe('Mcd-Open', () => {
     let makerAddresses; let senderAcc; let proxy; let mcdView;
 
@@ -38,15 +40,24 @@ describe('Mcd-Open', () => {
     it('... should create leveraged GUNI mcd vault', async () => {
         const joinAddr = '0xbFD445A97e7459b0eBb34cfbd3245750Dba4d7a4';
         const mcdManagerAddr = '0x5ef30b9986345249bc32d8928B7ee64DE9435E39';
-        await buyTokenIfNeeded(DAI_ADDR, senderAcc, proxy, hre.ethers.utils.parseUnits('50000', 18));
+        await buyTokenIfNeeded(DAI_ADDR, senderAcc, proxy, hre.ethers.utils.parseUnits('30000', 18));
+
         await approve(DAI_ADDR, proxy.address);
+
         const mcdopenWindedAddress = await getAddrFromRegistry('McdWindGUni');
         const daiBalance = await balanceOf(DAI_ADDR, senderAcc.address);
+        console.log(daiBalance.toString());
+        console.log((daiBalance.div(10).mul(9)).toString());
         const mcdopenWindedAction = new dfs.actions.maker.MakerWindGUniAction(
-            daiBalance, senderAcc.address, daiBalance, 0, 0, mcdManagerAddr, joinAddr,
+            daiBalance,
+            senderAcc.address,
+            daiBalance.div(100).mul(95),
+            0, 0, mcdManagerAddr, joinAddr,
         );
         const functionData = mcdopenWindedAction.encodeForDsProxyCall()[1];
+
         await proxy['execute(address,bytes)'](mcdopenWindedAddress, functionData, { gasLimit: 3000000 });
+
         const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
 
         const vaultId = vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();

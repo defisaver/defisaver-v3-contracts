@@ -16,7 +16,7 @@ contract McdUnwindGUni is ActionBase, DSMath,  McdHelper{
         uint256 minWalletDai;
         address mcdManager;
         uint256 vaultId;
-        address sendDaiTo;
+        address to;
     }
 
     /// @inheritdoc ActionBase
@@ -54,7 +54,9 @@ contract McdUnwindGUni is ActionBase, DSMath,  McdHelper{
         IGUniLev(GUNI_LEV_ADDR).unwind(_inputData.minWalletDai);
         vat.nope(GUNI_LEV_ADDR);
 
-        DAI_ADDR.withdrawTokens(_inputData.sendDaiTo, DAI_ADDR.getBalance(address(this)));
+        address USDC_ADDR = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+        USDC_ADDR.withdrawTokens(_inputData.to , USDC_ADDR.getBalance(address(this)));
+        DAI_ADDR.withdrawTokens(_inputData.to, DAI_ADDR.getBalance(address(this)));
     }
 
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
