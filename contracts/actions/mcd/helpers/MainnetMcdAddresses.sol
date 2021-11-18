@@ -9,4 +9,6 @@ contract MainnetMcdAddresses {
     address internal constant JUG_ADDRESS = 0x19c0976f590D67707E62397C87829d896Dc0f1F1;
     address internal constant SPOTTER_ADDRESS = 0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3;
     address internal constant PROXY_REGISTRY_ADDR = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
+    address public constant GUNI_LEV_ADDR = 0xf30cE3B3564D0D12b1B240013299c7f12Fd5bd0f;
+    address public constant GUNI_DAIUSDC_POOL_ADDR = 0xAbDDAfB225e10B90D798bB8A886238Fb835e2053;
 }

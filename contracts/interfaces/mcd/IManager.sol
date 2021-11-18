@@ -5,6 +5,7 @@ pragma solidity =0.7.6;
 abstract contract IManager {
     function last(address) virtual public returns (uint);
     function cdpCan(address, uint, address) virtual public view returns (uint);
+    function urnCan(address, address) virtual public view returns (uint);
     function ilks(uint) virtual public view returns (bytes32);
     function owns(uint) virtual public view returns (address);
     function urns(uint) virtual public view returns (address);

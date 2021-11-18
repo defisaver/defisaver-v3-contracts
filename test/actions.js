@@ -1021,7 +1021,7 @@ const buyTokenIfNeeded = async (
                 proxy,
                 WETH_ADDRESS,
                 tokenAddr,
-                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '30000'), 18),
+                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '55000'), 18),
                 wrapper,
                 senderAcc.address,
                 senderAcc.address,
