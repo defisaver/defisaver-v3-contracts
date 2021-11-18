@@ -56,13 +56,4 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission {
 
         SubStorage(subStorageAddr).deactivateSub(_subId);
     }
-
-    function removeSub(uint256 _subId) public {
-        address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
-
-        SubStorage(subStorageAddr).removeSub(_subId);
-
-        // TODO: can we figure out if this is the last subscription for user and remove auth?
-        // removePermission(proxyAuthAddr);
-    }
 }
