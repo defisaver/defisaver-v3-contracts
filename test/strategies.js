@@ -1151,6 +1151,7 @@ const callLiquityFLRepayStrategy = async (
     strategySub,
     repayAmount,
     proxyAddr,
+    flAddr,
 ) => {
     const triggerCallData = [];
     const actionsCallData = [];
@@ -1189,7 +1190,7 @@ const callLiquityFLRepayStrategy = async (
     ({ upperHint, lowerHint } = await findInsertPosition(newCollAmount, newDebtAmount));
     const liquityWithdrawAction = new dfs.actions.liquity.LiquityWithdrawAction(
         '0',
-        placeHolderAddr,
+        flAddr,
         upperHint,
         lowerHint,
     );

@@ -22,7 +22,7 @@ const { subLiquityBoostStrategy, callLiquityBoostStrategy, callLiquityFLBoostStr
 
 const { liquityOpen } = require('../actions');
 
-describe('Liquity-Boost-Strategy', function () {
+describe('Liquity-Boost-Bundle', function () {
     this.timeout(1200000);
 
     let balancerFL;
