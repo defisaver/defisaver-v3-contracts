@@ -1,7 +1,7 @@
 const axios = require('axios');
 const hre = require('hardhat');
 
-const makerVersion = '1.1.3';
+const makerVersion = '1.9.9';
 
 const MCD_MANAGER_ADDR = '0x5ef30b9986345249bc32d8928B7ee64DE9435E39';
 
