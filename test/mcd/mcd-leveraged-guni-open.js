@@ -23,7 +23,9 @@ const {
 // FORK ON BLOCK NUMBER 13629046 OR ANY THAT HAS ENOUGH LIMIT ON GUNI-A
 // 13629078
 // 13631178
-describe('Mcd-Open', () => {
+describe('Mcd-create fully leveraged GUNI vault', () => {
+    const guniLevAddr = '0xf30cE3B3564D0D12b1B240013299c7f12Fd5bd0f';
+
     let makerAddresses; let senderAcc; let proxy; let mcdView;
 
     before(async () => {
@@ -43,7 +45,7 @@ describe('Mcd-Open', () => {
         const mcdopenWindedAddress = await getAddrFromRegistry('McdWindGUni');
         const daiBalance = await balanceOf(DAI_ADDR, senderAcc.address);
         const mcdopenWindedAction = new dfs.actions.maker.MakerWindGUniAction(
-            daiBalance, senderAcc.address, daiBalance, 0, 0, mcdManagerAddr, joinAddr,
+            daiBalance, senderAcc.address, daiBalance, 0, 0, mcdManagerAddr, joinAddr, guniLevAddr,
         );
         const functionData = mcdopenWindedAction.encodeForDsProxyCall()[1];
         await proxy['execute(address,bytes)'](mcdopenWindedAddress, functionData, { gasLimit: 3000000 });

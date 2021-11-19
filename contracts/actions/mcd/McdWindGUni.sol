@@ -9,9 +9,18 @@ import "../../DS/DSMath.sol";
 import "./helpers/McdHelper.sol";
 import "../../interfaces/mcd/IGUniLev.sol";
 
+/// @title Fully leverage a GUNI DAI/USDC vault
 contract McdWindGUni is ActionBase, DSMath,  McdHelper{
     using TokenUtils for address;
 
+    /// @param daiAmount amount of dai to pull to dsproxy
+    /// @param from address from which to pull dai
+    /// @param principal principal for sending to GUniLev contract for leveraging
+    /// @param minWalletDai minimum amount of usdc+dai to be sent back after leveraging
+    /// @param vaultId vaultId (0 if one doesnt exist, to open new one)
+    /// @param mcdManager mcdManager address
+    /// @param joinAddr Join addr
+    /// @param gUniLevAddr GUniLev contract address
     struct Params {
         uint256 daiAmount;
         address from;
@@ -20,6 +29,7 @@ contract McdWindGUni is ActionBase, DSMath,  McdHelper{
         uint256 vaultId;
         address mcdManager;
         address joinAddr;
+        address gUniLevAddr;
     }
 
     /// @inheritdoc ActionBase
@@ -52,11 +62,11 @@ contract McdWindGUni is ActionBase, DSMath,  McdHelper{
 
     function openLeveragedPosition(Params memory _inputData) internal returns (uint256) {
         _inputData.daiAmount = DAI_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.daiAmount);
+        DAI_ADDR.approveToken(_inputData.gUniLevAddr, _inputData.daiAmount);
 
-        vat.hope(GUNI_LEV_ADDR);
-        DAI_ADDR.approveToken(GUNI_LEV_ADDR, _inputData.daiAmount);
-        IGUniLev(GUNI_LEV_ADDR).wind(_inputData.principal, _inputData.minWalletDai);
-        vat.nope(GUNI_LEV_ADDR);
+        vat.hope(_inputData.gUniLevAddr);
+        IGUniLev(_inputData.gUniLevAddr).wind(_inputData.principal, _inputData.minWalletDai);
+        vat.nope(_inputData.gUniLevAddr);
 
         IJoin join = IJoin(_inputData.joinAddr);
         bytes32 ilk = join.ilk();
@@ -64,10 +74,11 @@ contract McdWindGUni is ActionBase, DSMath,  McdHelper{
         if (_inputData.vaultId == 0){
         _inputData.vaultId = IManager(_inputData.mcdManager).open(ilk, address(this));
         }
+
         vat.hope(_inputData.mcdManager);
         IManager(_inputData.mcdManager).enter(address(this), _inputData.vaultId);
-        
-        address USDC_ADDR = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+        vat.nope(_inputData.mcdManager);
+
         USDC_ADDR.withdrawTokens(_inputData.from , USDC_ADDR.getBalance(address(this)));
         DAI_ADDR.withdrawTokens(_inputData.from, DAI_ADDR.getBalance(address(this)));
 

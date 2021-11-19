@@ -24,9 +24,11 @@ const {
 // FORK ON BLOCK NUMBER 13629046 OR ANY THAT HAS ENOUGH LIMIT ON GUNI-A
 // 13631179.
 // 13629043
-describe('Mcd-Open', () => {
+describe('Mcd create GUNI vault, leverage fully and then deleverage', () => {
     let makerAddresses; let senderAcc; let proxy; let mcdView;
-
+    const joinAddr = '0xbFD445A97e7459b0eBb34cfbd3245750Dba4d7a4';
+    const mcdManagerAddr = '0x5ef30b9986345249bc32d8928B7ee64DE9435E39';
+    const guniLevAddr = '0xf30cE3B3564D0D12b1B240013299c7f12Fd5bd0f';
     before(async () => {
         await redeploy('McdWindGUni');
         await redeploy('McdUnwindGUni');
@@ -37,9 +39,7 @@ describe('Mcd-Open', () => {
         proxy = await getProxy(senderAcc.address);
     });
 
-    it('... should create leveraged GUNI mcd vault', async () => {
-        const joinAddr = '0xbFD445A97e7459b0eBb34cfbd3245750Dba4d7a4';
-        const mcdManagerAddr = '0x5ef30b9986345249bc32d8928B7ee64DE9435E39';
+    it('... should create leveraged GUNI mcd vault and then close it', async () => {
         await buyTokenIfNeeded(DAI_ADDR, senderAcc, proxy, hre.ethers.utils.parseUnits('30000', 18));
 
         await approve(DAI_ADDR, proxy.address);
@@ -52,7 +52,7 @@ describe('Mcd-Open', () => {
             daiBalance,
             senderAcc.address,
             daiBalance.div(100).mul(95),
-            0, 0, mcdManagerAddr, joinAddr,
+            0, 0, mcdManagerAddr, joinAddr, guniLevAddr,
         );
         const functionData = mcdopenWindedAction.encodeForDsProxyCall()[1];
 
@@ -67,7 +67,7 @@ describe('Mcd-Open', () => {
 
         const mcdUnwindAddress = await getAddrFromRegistry('McdUnwindGUni');
         const mcdUnwindAction = new dfs.actions.maker.MakerUnwindGUniAction(
-            0, mcdManagerAddr, vaultId, senderAcc.address,
+            0, mcdManagerAddr, vaultId, guniLevAddr, senderAcc.address,
         );
         const functionDataSecond = mcdUnwindAction.encodeForDsProxyCall()[1];
         console.log(`DAI BEFORE UNWINDING SENDERACC ${await balanceOf(DAI_ADDR, senderAcc.address)}`);

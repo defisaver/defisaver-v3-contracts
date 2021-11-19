@@ -9,13 +9,20 @@ import "../../DS/DSMath.sol";
 import "./helpers/McdHelper.sol";
 import "../../interfaces/mcd/IGUniLev.sol";
 
+/// @title Fully deleverage a GUNI vault
 contract McdUnwindGUni is ActionBase, DSMath,  McdHelper{
     using TokenUtils for address;
 
+    /// @param minWalletDai minimum amount of tokens you want to receive after deleverage
+    /// @param mcdManager mcdManager address
+    /// @param vaultId id of the leveraged vault
+    /// @param gUniLevAddr GUniLev contract address
+    /// @param to Address to receive all tokens after deleverage
     struct Params {
         uint256 minWalletDai;
         address mcdManager;
         uint256 vaultId;
+        address gUniLevAddr;
         address to;
     }
 
@@ -48,13 +55,14 @@ contract McdUnwindGUni is ActionBase, DSMath,  McdHelper{
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function closeLeveragedPosition(Params memory _inputData) internal {
+        vat.hope(_inputData.mcdManager);
         IManager(_inputData.mcdManager).quit(_inputData.vaultId, address(this));
+        vat.nope(_inputData.mcdManager);
 
-        vat.hope(GUNI_LEV_ADDR);
-        IGUniLev(GUNI_LEV_ADDR).unwind(_inputData.minWalletDai);
-        vat.nope(GUNI_LEV_ADDR);
+        vat.hope(_inputData.gUniLevAddr);
+        IGUniLev(_inputData.gUniLevAddr).unwind(_inputData.minWalletDai);
+        vat.nope(_inputData.gUniLevAddr);
 
-        address USDC_ADDR = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
         USDC_ADDR.withdrawTokens(_inputData.to , USDC_ADDR.getBalance(address(this)));
         DAI_ADDR.withdrawTokens(_inputData.to, DAI_ADDR.getBalance(address(this)));
     }
