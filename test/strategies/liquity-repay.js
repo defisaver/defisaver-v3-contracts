@@ -18,11 +18,11 @@ const { createStrategy, addBotCaller, createBundle } = require('../utils-strateg
 
 const { getRatio } = require('../utils-liquity.js');
 
-const { subLiquityRepayStrategy, callLiquityRepayStrategy } = require('../strategies');
+const { subLiquityRepayStrategy, callLiquityRepayStrategy, callLiquityFLRepayStrategy } = require('../strategies');
 
 const { liquityOpen } = require('../actions');
 
-describe('Liquity-Repay-Strategy', function () {
+describe('Liquity-Repay-Bundle', function () {
     this.timeout(1200000);
 
     let balancerFL;
@@ -136,6 +136,8 @@ describe('Liquity-Repay-Strategy', function () {
         proxyAddr = proxy.address;
         botAcc = (await hre.ethers.getSigners())[1];
 
+        balancerFL = await redeploy('FLBalancer');
+
         await redeploy('BotAuth');
         await redeploy('ProxyAuth');
         await redeploy('DFSSell');
@@ -169,7 +171,7 @@ describe('Liquity-Repay-Strategy', function () {
         );
     });
 
-    it('... should make a new Liquity Repay strategy and subcsribe twice', async () => {
+    it('... should make a new Liquity Repay bundle and subscribe', async () => {
         const liquityRepayStrategy = createLiquityRepayStrategy();
         const liquityFLRepayStrategy = createLiquityFLRepayStrategy();
 
@@ -206,7 +208,7 @@ describe('Liquity-Repay-Strategy', function () {
         const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', '1000'));
 
         // eslint-disable-next-line max-len
-        await callLiquityRepayStrategy(botAcc, strategyExecutor, subId, strategySub, repayAmount, proxyAddr);
+        await callLiquityFLRepayStrategy(botAcc, strategyExecutor, subId, strategySub, repayAmount, proxyAddr, balancerFL.address);
 
         const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 
