@@ -207,7 +207,7 @@ const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrB
 
 const subReflexerBoostStrategy = async (proxy, safeId, ratioOver, targetRatio) => {
     const bundleId = 0;
-    const isBundle = false;
+    const isBundle = true;
 
     const safeIdEncoded = abiCoder.encode(['uint256'], [safeId.toString()]);
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
@@ -221,7 +221,7 @@ const subReflexerBoostStrategy = async (proxy, safeId, ratioOver, targetRatio) =
 
 const subReflexerRepayStrategy = async (proxy, safeId, ratioUnder, targetRatio) => {
     const bundleId = 0;
-    const isBundle = false;
+    const isBundle = true;
 
     const safeIdEncoded = abiCoder.encode(['uint256'], [safeId.toString()]);
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
@@ -872,6 +872,64 @@ const callReflexerBoostStrategy = async (botAcc, strategyExecutor, subId, strate
     console.log(`GasUsed callReflexerBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
+const callReflexerFLBoostStrategy = async (botAcc, strategyExecutor, subId, strategySub, boostAmount, flAddr) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const AAVE_NO_DEBT_MODE = 0;
+    const flAction = new dfs.actions.flashloan.AaveV2FlashLoanAction([boostAmount], [getAssetInfo('RAI').address], [AAVE_NO_DEBT_MODE], nullAddress);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            getAssetInfo('RAI').address,
+            WETH_ADDRESS,
+            '0',
+            UNISWAP_WRAPPER,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const boostGasCost = 800000; // 800k gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        boostGasCost, WETH_ADDRESS, '0',
+    );
+
+    const reflexerSupplyAction = new dfs.actions.reflexer.ReflexerSupplyAction(
+        '0', // safeId
+        '0', // amount
+        ADAPTER_ADDRESS,
+        placeHolderAddr,
+    );
+
+    const reflexerGenerateAction = new dfs.actions.reflexer.ReflexerGenerateAction(
+        '0', // safeId
+        '0',
+        flAddr,
+    );
+
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(reflexerSupplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(reflexerGenerateAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+
+    const strategyIndex = 1;
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callReflexerFLBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
 const callReflexerRepayStrategy = async (botAcc, strategyExecutor, subId, strategySub, repayAmount) => {
     const triggerCallData = [];
     const actionsCallData = [];
@@ -924,6 +982,63 @@ const callReflexerRepayStrategy = async (botAcc, strategyExecutor, subId, strate
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
     console.log(`GasUsed callReflexerRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
+const callReflexerFLRepayStrategy = async (botAcc, strategyExecutor, subId, strategySub, repayAmount, flAddr) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction([getAssetInfo('WETH').address], [repayAmount]);
+
+    const repayGasCost = 800000; // 800k gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        repayGasCost, WETH_ADDRESS, '0',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            WETH_ADDRESS,
+            getAssetInfo('RAI').address,
+            '0',
+            UNISWAP_WRAPPER,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const reflexerPaybackAction = new dfs.actions.reflexer.ReflexerPaybackAction(
+        '0', // safeId
+        '0',
+        placeHolderAddr,
+    );
+
+    const reflexerWithdrawAction = new dfs.actions.reflexer.ReflexerWithdrawAction(
+        '0', // safeId
+        '0',
+        ADAPTER_ADDRESS,
+        flAddr,
+    );
+
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(reflexerPaybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(reflexerWithdrawAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+
+    const strategyIndex = 1;
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callReflexerFLRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 const callLiquityBoostStrategy = async (
@@ -1240,8 +1355,10 @@ module.exports = {
     callCompRepayStrategy,
     subReflexerBoostStrategy,
     callReflexerBoostStrategy,
+    callReflexerFLBoostStrategy,
     subReflexerRepayStrategy,
     callReflexerRepayStrategy,
+    callReflexerFLRepayStrategy,
     subLiquityBoostStrategy,
     subLiquityRepayStrategy,
     callLiquityBoostStrategy,
