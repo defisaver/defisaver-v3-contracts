@@ -48,6 +48,7 @@ contract GUniDeposit is ActionBase, DSMath, GUniHelper {
         inputData.amount1Min = _parseParamUint(inputData.amount1Min, _paramMapping[3], _subData, _returnValues);
 
         uint256 mintedAmount = gUniDeposit(inputData);
+
         return bytes32(mintedAmount);
     }
 
@@ -68,9 +69,6 @@ contract GUniDeposit is ActionBase, DSMath, GUniHelper {
     function gUniDeposit(Params memory _inputData) internal returns (uint256){
         require (_inputData.to != address(0x0), "Can not send to burn address");
 
-        uint256 token0BalanceBefore = _inputData.token0.getBalance((address(this)));
-        uint256 token1BalanceBefore = _inputData.token1.getBalance((address(this)));
-
         _inputData.amount0Max = _inputData.token0.pullTokensIfNeeded(_inputData.from, _inputData.amount0Max);
         _inputData.amount1Max = _inputData.token1.pullTokensIfNeeded(_inputData.from, _inputData.amount1Max);
 
@@ -86,9 +84,8 @@ contract GUniDeposit is ActionBase, DSMath, GUniHelper {
             _inputData.amount1Min,
             _inputData.to
         );
-        
-        _inputData.token0.withdrawTokens(_inputData.from, sub(_inputData.token0.getBalance(address(this)), token0BalanceBefore));
-        _inputData.token1.withdrawTokens(_inputData.from, sub(_inputData.token1.getBalance(address(this)), token1BalanceBefore));
+        _inputData.token0.withdrawTokens(_inputData.from, sub(_inputData.amount0Max, amount0));
+        _inputData.token1.withdrawTokens(_inputData.from, sub(_inputData.amount1Max, amount1));
 
         logger.Log(address(this), msg.sender, "GUniDeposit", abi.encode(_inputData, mintAmount, amount0, amount1));
 
