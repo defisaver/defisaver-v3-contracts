@@ -60,7 +60,7 @@ contract BundleStorage is StrategyModel, AdminAuth {
         uint start = _page * _perPage;
         uint end = start + _perPage;
 
-        end = (end > bundlesPerPage.length) ? bundlesPerPage.length : end;
+        end = (end > bundles.length) ? bundles.length : end;
 
         uint count = 0;
         for (uint i = start; i < end; i++) {

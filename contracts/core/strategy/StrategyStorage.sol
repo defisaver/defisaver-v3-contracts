@@ -64,7 +64,7 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         uint start = _page * _perPage;
         uint end = start + _perPage;
 
-        end = (end > strategiesPerPage.length) ? strategiesPerPage.length : end;
+        end = (end > strategies.length) ? strategies.length : end;
 
         uint count = 0;
         for (uint i = start; i < end; i++) {

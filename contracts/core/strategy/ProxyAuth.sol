@@ -8,20 +8,19 @@ import "./../helpers/CoreHelper.sol";
 
 /// @title ProxyAuth Gets DSProxy auth from users and is callable by the Executor
 contract ProxyAuth is AdminAuth, CoreHelper {
-
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     bytes4 constant STRATEGY_EXECUTOR_ID = bytes4(keccak256("StrategyExecutor"));
-    string public constant ERR_SENDER_NOT_EXECUTOR = "Sender not executor addr";
 
-    error SenderNotExecutorError();
+    error SenderNotExecutorError(address, address);
 
     modifier onlyExecutor {
         address executorAddr = registry.getAddr(STRATEGY_EXECUTOR_ID);
 
         if (msg.sender != executorAddr){
-            revert SenderNotExecutorError();
+            revert SenderNotExecutorError(msg.sender, executorAddr);
         }
+
         _;
     }
 
@@ -37,5 +36,4 @@ contract ProxyAuth is AdminAuth, CoreHelper {
     ) public payable onlyExecutor {
         IDSProxy(_proxyAddr).execute{value: msg.value}(_contractAddr, _data);
     }
-
 }
