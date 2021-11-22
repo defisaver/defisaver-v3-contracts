@@ -232,6 +232,12 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
         await registry.approveContractChange(id);
     }
 
+    // for strategy deployment set open to public for easier testing
+    if (name === 'StrategyStorage' || name === 'BundleStorage') {
+        const storageContract = c.connect(signer);
+        await storageContract.changeEditPermission(true);
+    }
+
     if (regAddr === REGISTRY_ADDR) {
         await stopImpersonatingAccount(OWNER_ACC);
     }

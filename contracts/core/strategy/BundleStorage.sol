@@ -22,11 +22,6 @@ contract BundleStorage is StrategyModel, AdminAuth {
         _;
     }
 
-    // TODO: REMOVE ONLY USED FOR TESTING
-    constructor() {
-        openToPublic = true;
-    }
-
     function createBundle(
         uint64[] memory _strategyIds
     ) public onlyAuthCreators returns (uint256) {

@@ -22,11 +22,6 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         _;
     }
 
-    // TODO: REMOVE ONLY USED FOR TESTING
-    constructor() {
-        openToPublic = true;
-    }
-
     function createStrategy(
         string memory _name,
         bytes4[] memory _triggerIds,
