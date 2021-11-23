@@ -5,9 +5,6 @@ pragma experimental ABIEncoderV2;
 
 contract DFSExchangeData {
 
-    // first is empty to keep the legacy order in place
-    enum ExchangeType { _, OASIS, KYBER, UNISWAP, ZEROX }
-
     enum ExchangeActionType { SELL, BUY }
 
     struct OffchainData {

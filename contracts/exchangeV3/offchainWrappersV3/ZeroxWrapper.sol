@@ -9,7 +9,7 @@ import "../../auth/AdminAuth.sol";
 import "../DFSExchangeHelper.sol";
 import "../../interfaces/exchange/IOffchainWrapper.sol";
 
-contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath {
+contract OffchainExchangeAggregatingWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath {
 
     using TokenUtils for address;
 
