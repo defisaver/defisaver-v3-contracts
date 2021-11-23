@@ -30,7 +30,7 @@ describe('Uni-v3-range-order strat', function () {
     let strategySub;
     let positionManager;
     let subStorage;
-    let recipeExecutor;
+    let strategyTriggerView;
     const uniPair = {
         tokenA: 'DAI',
         tokenB: 'WETH',
@@ -54,13 +54,13 @@ describe('Uni-v3-range-order strat', function () {
         subStorage = await redeploy('SubStorage');
         await redeploy('SubProxy');
         await redeploy('StrategyProxy');
-        recipeExecutor = await redeploy('RecipeExecutor');
+        await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');
         await redeploy('UniMintV3');
         await redeploy('UniCollectV3');
         strategyExecutor = await redeploy('StrategyExecutor');
         positionManager = await hre.ethers.getContractAt('IUniswapV3NonfungiblePositionManager', UNIV3POSITIONMANAGER_ADDR);
-
+        strategyTriggerView = await redeploy('StrategyTriggerView');
         await addBotCaller(botAcc.address);
 
         proxy = await getProxy(senderAcc.address);
@@ -108,7 +108,7 @@ describe('Uni-v3-range-order strat', function () {
         console.log(timestamp);
         timestamp -= 2;
         const maxGasPrice = '20000000000';
-        const interval = '3';
+        const interval = '4';
 
         ({ subId, strategySub } = await subUniContinuousCollectStrategy(
             proxy, tokenId, senderAcc.address, timestamp, maxGasPrice, interval,
@@ -124,7 +124,7 @@ describe('Uni-v3-range-order strat', function () {
         const triggerCallData = [];
         triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
         triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
-        console.log(await recipeExecutor.callStatic.offchainCheckTriggers(
+        console.log(await strategyTriggerView.callStatic.checkTriggers(
             strategySub, 0, triggerCallData,
         ));
         await callUniV3CollectStrategy(
@@ -146,7 +146,7 @@ describe('Uni-v3-range-order strat', function () {
         const triggerCallData = [];
         triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
         triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
-        console.log(await recipeExecutor.callStatic.offchainCheckTriggers(
+        console.log(await strategyTriggerView.callStatic.checkTriggers(
             strategySub, 0, triggerCallData,
         ));
         await callUniV3CollectStrategy(
@@ -170,7 +170,7 @@ describe('Uni-v3-range-order strat', function () {
         const triggerCallData = [];
         triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
         triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
-        console.log(await recipeExecutor.callStatic.offchainCheckTriggers(
+        console.log(await strategyTriggerView.callStatic.checkTriggers(
             strategySub, 0, triggerCallData,
         ));
 
@@ -186,7 +186,7 @@ describe('Uni-v3-range-order strat', function () {
             );
         } catch (err) {
             console.log(err);
-            expect(err.toString()).to.have.string('TriggerNotActiveError');
+            expect(err.toString()).to.have.string('reverted');
         }
     });
 });
