@@ -39,9 +39,11 @@ const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramM
 
     const StrategyProxy = await hre.ethers.getContractFactory('StrategyProxy');
 
+    const strategy = [strategyName, proxy.address, triggerIds, actionIds, paramMapping, continuous];
+
     const functionData = StrategyProxy.interface.encodeFunctionData(
         'createStrategy',
-        [strategyName, triggerIds, actionIds, paramMapping, continuous],
+        [strategy],
     );
 
     console.log('Create strategy');
@@ -54,6 +56,7 @@ const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramM
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
     console.log(`GasUsed createStrategy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+    return strategy;
 };
 
 const createBundle = async (proxy, strategyIds) => {

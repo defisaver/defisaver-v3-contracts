@@ -13,13 +13,17 @@ contract StrategyModel {
         uint64[] strategyIds;
     }
 
+    struct ApprovedStrategy {
+        bytes32 hashcheck;
+    }
+
     /// @dev Template/Class which defines a Strategy
     /// @param name Name of the strategy useful for logging what strategy is executing
     /// @param creator Address of the user which created the strategy
     /// @param triggerIds Array of identifiers for trigger - bytes4(keccak256(TriggerName))
     /// @param actionIds Array of identifiers for actions - bytes4(keccak256(ActionName))
     /// @param paramMapping Describes how inputs to functions are piped from return/subbed values
-    /// @param continuous If the action is repeated (continuos) or one time
+    /// @param continuous If the action is repeated (continuous) or one time
     struct Strategy {
         string name;
         address creator;
@@ -64,5 +68,14 @@ contract StrategyModel {
         bool isBundle;
         bytes[] triggerData;
         bytes32[] subData;
+    }
+
+    struct AutomationPayload{
+        uint256 _subId;
+        uint256 _strategyIndex;
+        bytes[] _actionCallData;
+        bytes[] _triggerCallData;
+        StrategySub _sub;
+        Strategy _strategy;
     }
 }

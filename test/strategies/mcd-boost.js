@@ -20,6 +20,9 @@ const { openVault } = require('../actions');
 describe('Mcd-Boost-Strategy', function () {
     this.timeout(320000);
 
+    let boostStrategy;
+    let flBoostStrategy;
+
     let senderAcc;
     let proxy;
     let botAcc;
@@ -170,11 +173,11 @@ describe('Mcd-Boost-Strategy', function () {
     });
 
     it('... should create 2 boost strategies and create a bundle', async () => {
-        const boostStrategy = createMcdBoostStrategy();
-        const flBoostStrategy = createFlMcdBoostStrategy();
+        const boostStrategyEncoded = createMcdBoostStrategy();
+        const flBoostStrategyEncoded = createFlMcdBoostStrategy();
 
-        await createStrategy(proxy, ...boostStrategy, true);
-        await createStrategy(proxy, ...flBoostStrategy, true);
+        boostStrategy = await createStrategy(proxy, ...boostStrategyEncoded, true);
+        flBoostStrategy = await createStrategy(proxy, ...flBoostStrategyEncoded, true);
 
         await createBundle(proxy, [0, 1]);
     });
@@ -236,9 +239,10 @@ describe('Mcd-Boost-Strategy', function () {
         await callMcdBoostStrategy(
             botAcc,
             strategyExecutor,
-            0,
             subId,
+            0,
             strategySub,
+            boostStrategy,
             ethJoin,
             boostAmount,
         );
@@ -257,7 +261,17 @@ describe('Mcd-Boost-Strategy', function () {
         const boostAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('DAI', '400'), '18');
 
         // eslint-disable-next-line max-len
-        await callFLMcdBoostStrategy(botAcc, strategyExecutor, 1, subId, strategySub, flDyDx.address, ethJoin, boostAmount);
+        await callFLMcdBoostStrategy(
+            botAcc,
+            strategyExecutor,
+            subId,
+            1,
+            strategySub,
+            flBoostStrategy,
+            flDyDx.address,
+            ethJoin,
+            boostAmount,
+        );
 
         const ratioAfter = await getRatio(mcdView, vaultId);
 

@@ -18,24 +18,21 @@ contract StrategyTriggerView is StrategyModel {
         
     function checkTriggers(
         StrategySub memory _sub,
+        Strategy memory _strategy,
         uint256 _strategyIndex,
         bytes[] calldata _triggerCallData
     ) public returns (bool) {
-        Strategy memory strategy;
 
         { // to handle stack too deep
             uint256 strategyId = _sub.id;
             address bundleStorageAddr = registry.getAddr(BUNDLE_STORAGE_ID);
-            address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
 
             if (_sub.isBundle) {
                 strategyId = BundleStorage(bundleStorageAddr).getStrategyId(_sub.id, _strategyIndex);
             }
-
-            strategy = StrategyStorage(strategyStorageAddr).getStrategy(strategyId);
         }
 
-        bytes4[] memory triggerIds = strategy.triggerIds;
+        bytes4[] memory triggerIds = _strategy.triggerIds;
 
         bool isTriggered;
         address triggerAddr;

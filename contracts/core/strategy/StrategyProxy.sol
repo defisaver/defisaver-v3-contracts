@@ -20,15 +20,11 @@ contract StrategyProxy is StrategyModel, AdminAuth, ProxyPermission {
     bytes4 constant BUNDLE_STORAGE_ID = bytes4(keccak256("BundleStorage"));
 
     function createStrategy(
-        string memory _name,
-        bytes4[] memory _triggerIds,
-        bytes4[] memory _actionIds,
-        uint8[][] memory _paramMapping,
-        bool continuous
+        Strategy calldata _strategy
     ) public {
         address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
 
-        StrategyStorage(strategyStorageAddr).createStrategy(_name, _triggerIds, _actionIds, _paramMapping, continuous);
+        StrategyStorage(strategyStorageAddr).createStrategy(_strategy);
     }
 
     function createBundle(

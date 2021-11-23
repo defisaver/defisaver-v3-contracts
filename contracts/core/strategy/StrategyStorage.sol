@@ -8,11 +8,11 @@ import "../../auth/AdminAuth.sol";
 /// @title StrategyStorage - Record of all the Strategies created
 contract StrategyStorage is StrategyModel, AdminAuth {
 
-    Strategy[] public strategies;
+    ApprovedStrategy[] public strategies;
     bool public openToPublic = false;
 
     error NoAuthToCreateStrategy(address,bool);
-    event StrategyCreated(uint256 indexed);
+    event StrategyCreated(uint256 indexed, address indexed, bytes32 indexed, Strategy);
 
     modifier onlyAuthCreators {
         if (adminVault.owner() != msg.sender && openToPublic == false) {
@@ -23,26 +23,21 @@ contract StrategyStorage is StrategyModel, AdminAuth {
     }
 
     function createStrategy(
-        string memory _name,
-        bytes4[] memory _triggerIds,
-        bytes4[] memory _actionIds,
-        uint8[][] memory _paramMapping,
-        bool _continuous
+        Strategy calldata _strategy
     ) public onlyAuthCreators returns (uint256) {
+        require(msg.sender == _strategy.creator, "Creator not sender");
+
+        bytes32 strategyHash = keccak256(abi.encode(_strategy));
         strategies.push(
-            Strategy({
-                name: _name,
-                creator: msg.sender,
-                triggerIds: _triggerIds,
-                actionIds: _actionIds,
-                paramMapping: _paramMapping,
-                continuous : _continuous
+            ApprovedStrategy({
+                hashcheck: strategyHash
             })
         );
 
-        emit StrategyCreated(strategies.length - 1);
+        uint256 currentId = strategies.length -1;
+        emit StrategyCreated(currentId, msg.sender, strategyHash, _strategy);
 
-        return strategies.length - 1;
+        return currentId;
     }
 
     function changeEditPermission(bool _openToPublic) public onlyOwner {
@@ -51,15 +46,15 @@ contract StrategyStorage is StrategyModel, AdminAuth {
 
     ////////////////////////////// VIEW METHODS /////////////////////////////////
 
-    function getStrategy(uint _strategyId) public view returns (Strategy memory) {
+    function getStrategy(uint _strategyId) public view returns (ApprovedStrategy memory) {
         return strategies[_strategyId];
     }
     function getStrategyCount() public view returns (uint256) {
         return strategies.length;
     }
 
-    function getPaginatedStrategies(uint _page, uint _perPage) public view returns (Strategy[] memory) {
-        Strategy[] memory strategiesPerPage = new Strategy[](_perPage);
+    function getPaginatedStrategies(uint _page, uint _perPage) public view returns (ApprovedStrategy[] memory) {
+        ApprovedStrategy[] memory strategiesPerPage = new ApprovedStrategy[](_perPage);
 
         uint start = _page * _perPage;
         uint end = start + _perPage;
@@ -74,5 +69,5 @@ contract StrategyStorage is StrategyModel, AdminAuth {
 
         return strategiesPerPage;
     }
-
+    // editing a strategy?
 }

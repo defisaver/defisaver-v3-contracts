@@ -597,7 +597,16 @@ const callCompBoostStrategy = async (botAcc, strategyExecutor, subId, strategySu
 };
 
 // eslint-disable-next-line max-len
-const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, ethJoin, boostAmount) => {
+const callMcdBoostStrategy = async (
+    botAcc,
+    strategyExecutor,
+    subId,
+    strategyIndex,
+    strategySub,
+    strategy,
+    ethJoin,
+    boostAmount,
+) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -647,8 +656,10 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+
+    const automationPayload = [subId, strategyIndex, actionsCallData, triggerCallData, strategySub, strategy];
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
+    const receipt = await strategyExecutorByBot.executeStrategy(automationPayload, {
         gasLimit: 8000000,
     });
 
@@ -659,7 +670,16 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
 };
 
 // eslint-disable-next-line max-len
-const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, flLoanAddr, ethJoin, boostAmount) => {
+const callFLMcdBoostStrategy = async (
+    botAcc, strategyExecutor,
+    subId,
+    strategyIndex,
+    strategySub,
+    strategy,
+    flLoanAddr,
+    ethJoin,
+    boostAmount,
+) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -705,8 +725,10 @@ const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, s
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+
+    const automationPayload = [subId, strategyIndex, actionsCallData, triggerCallData, strategySub, strategy];
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
+    const receipt = await strategyExecutorByBot.executeStrategy(automationPayload, {
         gasLimit: 8000000,
     });
 

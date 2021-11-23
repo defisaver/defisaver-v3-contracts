@@ -35,51 +35,38 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
 
 
     /// @notice Called through the Strategy contract to execute a recipe
-    /// @param _subId Id of the subscription we want to execute
-    /// @param _actionCallData All the data related to the strategies Recipe
     function executeRecipeFromStrategy(
-        uint256 _subId,
-        bytes[] calldata _actionCallData,
-        bytes[] calldata _triggerCallData,
-        uint256 _strategyIndex,
-        StrategySub memory _sub
+        AutomationPayload memory _payload
     ) public payable {
 
         // TODO: can be hardcoded in prod to save gas
         address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
 
-        Strategy memory strategy;
+        uint256 strategyId = _payload._sub.id;
 
-        { // to handle stack too deep
-            uint256 strategyId = _sub.id;
+        if (_payload._sub.isBundle) {
             address bundleStorageAddr = registry.getAddr(BUNDLE_STORAGE_ID);
-            address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
-
-            if (_sub.isBundle) {
-                strategyId = BundleStorage(bundleStorageAddr).getStrategyId(_sub.id, _strategyIndex);
-            }
-
-            strategy = StrategyStorage(strategyStorageAddr).getStrategy(strategyId);
+            strategyId = BundleStorage(bundleStorageAddr).getStrategyId(_payload._sub.id, _payload._strategyIndex);
         }
 
         // check if all the triggers are true
-        bool triggered = checkTriggers(strategy, _sub, _triggerCallData, _subId, subStorageAddr);
+        bool triggered = checkTriggers(_payload, subStorageAddr);
 
         if (!triggered) {
             revert TriggerNotActiveError();
         }
 
         // if this is a one time strategy
-        if (!strategy.continuous) {
-            SubStorage(subStorageAddr).deactivateSub(_subId);
+        if (!_payload._strategy.continuous) {
+            SubStorage(subStorageAddr).deactivateSub(_payload._subId);
         }
 
         Recipe memory currRecipe = Recipe({
-            name: strategy.name,
-            callData: _actionCallData,
-            subData: _sub.subData,
-            actionIds: strategy.actionIds,
-            paramMapping: strategy.paramMapping
+            name: _payload._strategy.name,
+            callData: _payload._actionCallData,
+            subData: _payload._sub.subData,
+            actionIds: _payload._strategy.actionIds,
+            paramMapping: _payload._strategy.paramMapping
         });
 
         _executeActions(currRecipe);
@@ -87,13 +74,10 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
 
     /// @notice Checks if all the triggers are true
     function checkTriggers(
-        Strategy memory strategy,
-        StrategySub memory _sub,
-        bytes[] calldata _triggerCallData,
-        uint256 _subId,
+        AutomationPayload memory _payload,
         address _storageAddr
     ) public returns (bool) {
-        bytes4[] memory triggerIds = strategy.triggerIds;
+        bytes4[] memory triggerIds = _payload._strategy.triggerIds;
 
         bool isTriggered;
         address triggerAddr;
@@ -101,15 +85,15 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         for (uint256 i = 0; i < triggerIds.length; i++) {
             triggerAddr = registry.getAddr(triggerIds[i]);
             isTriggered = ITrigger(triggerAddr).isTriggered(
-                _triggerCallData[i],
-                _sub.triggerData[i]
+                _payload._triggerCallData[i],
+                _payload._sub.triggerData[i]
             );
 
             if (!isTriggered) return false;
 
             if (ITrigger(triggerAddr).isChangeable()) {
-                _sub.triggerData[i] = ITrigger(triggerAddr).changedSubData(_sub.triggerData[i]);
-                SubStorage(_storageAddr).updateSubData(_subId, _sub);
+                _payload._sub.triggerData[i] = ITrigger(triggerAddr).changedSubData(_payload._sub.triggerData[i]);
+                SubStorage(_storageAddr).updateSubData(_payload._subId, _payload._sub);
             }
         }
 
@@ -125,7 +109,25 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         returnValues[0] = _flAmount; // set the flash loan action as first return value
         // skips the first actions as it was the fl action
         for (uint256 i = 1; i < _currRecipe.actionIds.length; ++i) {
-            returnValues[i] = _executeAction(_currRecipe, i, returnValues);
+            address actionAddr = registry.getAddr(_currRecipe.actionIds[i]);
+            returnValues[i] = IDSProxy(address(this)).execute(
+                actionAddr,
+                abi.encodeWithSignature(
+                    "executeAction(bytes,bytes32[],uint8[],bytes32[])",
+                    _currRecipe.callData[i],
+                    _currRecipe.subData,
+                    _currRecipe.paramMapping[i],
+                    returnValues
+                )
+            );
+            // manual inline
+            // average gas savings 40k
+            // 2925210 -> 2885101 liquityBoost FL
+            // 1357169 -> 1318372 liquityRepay FL
+            // 1267848 -> 1226615 mcdBoost FL
+            // 1255905 -> 1214669 mcdRepay FL
+            // 1260107 -> 1219582 reflexerBoost FL
+            // 1057958 -> 1016921 reflexerRepay FL
         }
     }
 
@@ -142,6 +144,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         } else {
             for (uint256 i = 0; i < _currRecipe.actionIds.length; ++i) {
                 returnValues[i] = _executeAction(_currRecipe, i, returnValues);
+                // manualy inlinig here doesn't make a difference
             }
         }
 
