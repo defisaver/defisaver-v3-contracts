@@ -4,6 +4,7 @@ const hre = require('hardhat');
 const {
     impersonateAccount,
     stopImpersonatingAccount,
+    getNameId,
     OWNER_ACC,
 } = require('../utils');
 
@@ -20,9 +21,9 @@ describe('DFS-Registry', function () {
     const contractAddr2 = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
     const contractAddr3 = '0x71C8dc1d6315a48850E88530d18d3a97505d2065';
 
-    const id1 = hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(contractAddr1));
-    const id2 = hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(contractAddr2));
-    const id3 = hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(contractAddr3));
+    const id1 = getNameId('Contract1');
+    const id2 = getNameId('Contract2');
+    const id3 = getNameId('Contract3');
 
     before(async () => {
         this.timeout(40000);

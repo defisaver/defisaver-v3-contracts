@@ -129,6 +129,15 @@ const setMCDPriceVerifier = async (triggerAddr) => {
     await stopImpersonatingAccount(oldOwner);
 };
 
+const getSubHash = (subData) => {
+    const abiCoder = new hre.ethers.utils.AbiCoder();
+
+    const encodedSubData = abiCoder.encode(['(uint256,bool,bytes[],bytes32[])'], [subData]);
+    const subDataHash = hre.ethers.utils.keccak256(encodedSubData);
+
+    return subDataHash;
+};
+
 module.exports = {
     subToStrategy,
     createStrategy,
@@ -137,4 +146,5 @@ module.exports = {
     getLatestSubId,
     addBotCaller,
     setMCDPriceVerifier,
+    getSubHash,
 };
