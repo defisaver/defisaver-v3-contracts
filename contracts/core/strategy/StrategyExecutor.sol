@@ -81,13 +81,13 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         StrategySub memory _sub,
         address _userProxy
     ) internal {
-        address RecipeExecutorAddr = registry.getAddr(RECIPE_EXECUTOR_ID);
+        address recipeExecutorAddr = registry.getAddr(RECIPE_EXECUTOR_ID);
 
         address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
 
         ProxyAuth(proxyAuthAddr).callExecute{value: msg.value}(
             _userProxy,
-            RecipeExecutorAddr,
+            recipeExecutorAddr,
             abi.encodeWithSignature(
                 "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bytes[],bytes32[]))",
                 _subId,

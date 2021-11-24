@@ -5,6 +5,9 @@ pragma solidity =0.8.4;
 import "../../auth/AdminAuth.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../utils/DefisaverLogger.sol";
+import "../DFSRegistry.sol";
+import "./BundleStorage.sol";
+import "./StrategyStorage.sol";
 import "./StrategyModel.sol";
 
 /// @title Storage of users subscriptions to strategies
@@ -12,11 +15,18 @@ contract SubStorage is StrategyModel, AdminAuth {
     error NonexistentSubError(uint256);
     error SenderNotSubOwnerError(address, uint256);
     error UserPositionsEmpty();
+    error SubIdOutOfRange(uint256, bool);
 
     event Subscribe(uint256 indexed, address indexed, bytes32 indexed, StrategySub);
     event UpdateData(uint256 indexed, bytes32 indexed, StrategySub);
     event ActivateSub(uint256 indexed);
     event DeactivateSub(uint256 indexed);
+
+    address public constant REGISTRY_ADDR = 0xD5cec8F03f803A74B60A7603Ed13556279376b09;
+    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+
+    bytes4 constant BUNDLE_STORAGE_ID = bytes4(keccak256("BundleStorage"));
+    bytes4 constant STRATEGY_STORAGE_ID = bytes4(keccak256("StrategyStorage"));
 
     modifier onlySubOwner(uint256 _subId) {
         if (address(strategiesSubs[_subId].userProxy) == address(0)) {
@@ -29,13 +39,28 @@ contract SubStorage is StrategyModel, AdminAuth {
         _;
     }
 
+    // TODO: hard code addr to save gas later on
+    modifier isValidId(uint256 _subId, bool _isBundle) {
+        if (_isBundle) {
+            if (_subId > BundleStorage(registry.getAddr(BUNDLE_STORAGE_ID)).getBundleCount()) {
+                revert SubIdOutOfRange(_subId, _isBundle);
+            }
+        } else {
+            if (_subId > StrategyStorage(registry.getAddr(STRATEGY_STORAGE_ID)).getStrategyCount()) {
+                revert SubIdOutOfRange(_subId, _isBundle);
+            }
+        }
+
+        _;
+    }
+
     /// @dev The order of strategies might change as they are deleted
     StoredSubData[] public strategiesSubs;
 
     /// @notice Creates a new strategy with an existing template
     function subscribeToStrategy(
         StrategySub memory _sub
-    ) public returns (uint256) {
+    ) public isValidId(_sub.id, _sub.isBundle) returns (uint256) {
 
         bytes32 subStorageHash = keccak256(abi.encode(_sub));
 
@@ -60,7 +85,7 @@ contract SubStorage is StrategyModel, AdminAuth {
     function updateSubData(
         uint256 _subId,
         StrategySub calldata _sub
-    ) public onlySubOwner(_subId) {
+    ) public onlySubOwner(_subId) isValidId(_sub.id, _sub.isBundle)  {
         StoredSubData storage storedSubData = strategiesSubs[_subId];
 
         bytes32 subStorageHash = keccak256(abi.encode(_sub));
