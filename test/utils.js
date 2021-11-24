@@ -210,7 +210,7 @@ const getProxy = async (acc) => {
     return dsProxy;
 };
 
-const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
+const redeploy = async (name, regAddr = REGISTRY_ADDR, existingAddr = '') => {
     if (regAddr === REGISTRY_ADDR) {
         await impersonateAccount(OWNER_ACC);
     }
@@ -222,7 +222,12 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
 
     registry = registry.connect(signer);
 
-    const c = await deployAsOwner(name);
+    let c = await deployAsOwner(name);
+
+    if (existingAddr !== '') {
+        c = { address: existingAddr };
+    }
+
     const id = getNameId(name);
 
     if (!(await registry.isRegistered(id))) {
