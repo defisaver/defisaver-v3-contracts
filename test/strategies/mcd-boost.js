@@ -215,7 +215,7 @@ describe('Mcd-Boost-Strategy', function () {
         console.log('VaultId: ', vaultId);
 
         const rationOver = hre.ethers.utils.parseUnits('1.7', '18');
-        const targetRatio = hre.ethers.utils.parseUnits('2', '18');
+        const targetRatio = hre.ethers.utils.parseUnits('2.0', '18');
 
         const bundleId = 0;
 
@@ -239,19 +239,21 @@ describe('Mcd-Boost-Strategy', function () {
         console.log(await strategyTriggerView.callStatic.checkTriggers(
             strategySub, triggerCallData,
         ));
-        // This is tested with commented out onchain checking next price
         /*
+        // This is tested with commented out onchain checking next price
         triggerCallData = [];
         triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['5000000000000000000000000000000', '1'])); // check next ratio
         console.log(await strategyTriggerView.callStatic.checkTriggers(
             strategySub, triggerCallData,
         ));
+
         triggerCallData = [];
         triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['5000000000000000000000000000000', '2'])); // check both ratios
         console.log(await strategyTriggerView.callStatic.checkTriggers(
             strategySub, triggerCallData,
         ));
         */
+
         await callMcdBoostStrategy(
             botAcc,
             strategyExecutor,

@@ -44,35 +44,19 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 checkedRatio;
-        if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.CURR_RATIO){
+        bool shouldTriggerCurr;
+        bool shouldTriggerNext;
+
+        if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.CURR_RATIO || RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS){
             checkedRatio = getRatio(triggerSubData.vaultId, 0); // GAS 50k
-            
-        } else if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.NEXT_RATIO){
-            checkedRatio = getRatio(triggerSubData.vaultId, triggerCallData.nextPrice);
-
-        } else if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS){
-            uint256 ratioWithCurrPrice = getRatio(triggerSubData.vaultId, 0);
-            uint256 ratioWithNextPrice = getRatio(triggerSubData.vaultId, triggerCallData.nextPrice);
-            
-            if (RatioState(triggerSubData.state) == RatioState.OVER) {
-                if (ratioWithCurrPrice > ratioWithNextPrice){
-                    checkedRatio = ratioWithCurrPrice;
-                }else{
-                    checkedRatio = ratioWithNextPrice;
-                }
-
-            } else {
-                if (ratioWithCurrPrice > ratioWithNextPrice){
-                    checkedRatio = ratioWithNextPrice;
-                }else{
-                    checkedRatio = ratioWithCurrPrice;
-                }
-
-            }
+            shouldTriggerCurr = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
         }
 
-        // check next price validity if it's sent
-        if (triggerCallData.nextPrice != 0) {
+        if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.NEXT_RATIO || RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS){
+            checkedRatio = getRatio(triggerSubData.vaultId, triggerCallData.nextPrice); // GAS 50k
+            
+            shouldTriggerNext = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
+
             if (
                 !IMCDPriceVerifier(MCD_PRICE_VERIFIER).verifyVaultNextPrice(
                     triggerCallData.nextPrice,
@@ -83,12 +67,15 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper {
             }
         }
 
-        if (RatioState(triggerSubData.state) == RatioState.OVER) {
-            if (checkedRatio > triggerSubData.ratio) return true;
+        return shouldTriggerCurr || shouldTriggerNext;
+    }
+    
+    function shouldTrigger(uint8 state, uint256 checkedRatio, uint256 subbedToRatio) internal pure returns (bool){
+        if (RatioState(state) == RatioState.OVER) {
+            if (checkedRatio > subbedToRatio) return true;
         }
-
-        if (RatioState(triggerSubData.state) == RatioState.UNDER) {
-            if (checkedRatio < triggerSubData.ratio) return true;
+        if (RatioState(state) == RatioState.UNDER) {
+            if (checkedRatio < subbedToRatio) return true;
         }
 
         return false;
