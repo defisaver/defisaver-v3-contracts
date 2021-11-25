@@ -29,7 +29,7 @@ describe('Mcd-Boost-Strategy', function () {
     let vaultId;
     let mcdView;
     let flDyDx;
-
+    let strategyTriggerView;
     const ethJoin = ilks[0].join;
 
     const createMcdBoostStrategy = () => {
@@ -163,7 +163,7 @@ describe('Mcd-Boost-Strategy', function () {
         await redeploy('McdGenerate');
         await redeploy('McdPayback');
         await redeploy('McdOpen');
-
+        strategyTriggerView = await redeploy('StrategyTriggerView');
         await addBotCaller(botAcc.address);
 
         proxy = await getProxy(senderAcc.address);
@@ -233,6 +233,25 @@ describe('Mcd-Boost-Strategy', function () {
         const ratioBefore = await getRatio(mcdView, vaultId);
         const boostAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('DAI', '2000'), '18');
 
+        const abiCoder = hre.ethers.utils.defaultAbiCoder;
+        const triggerCallData = [];
+        triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0'])); // check curr ratio
+        console.log(await strategyTriggerView.callStatic.checkTriggers(
+            strategySub, triggerCallData,
+        ));
+        // This is tested with commented out onchain checking next price
+        /*
+        triggerCallData = [];
+        triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['5000000000000000000000000000000', '1'])); // check next ratio
+        console.log(await strategyTriggerView.callStatic.checkTriggers(
+            strategySub, triggerCallData,
+        ));
+        triggerCallData = [];
+        triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['5000000000000000000000000000000', '2'])); // check both ratios
+        console.log(await strategyTriggerView.callStatic.checkTriggers(
+            strategySub, triggerCallData,
+        ));
+        */
         await callMcdBoostStrategy(
             botAcc,
             strategyExecutor,

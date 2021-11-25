@@ -422,7 +422,7 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
     // actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
 
     const nextPrice = 0;
-    triggerCallData.push(abiCoder.encode(['uint256'], [nextPrice])); // next price
+    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
@@ -475,7 +475,7 @@ const callMcdRepayFromYearnStrategy = async (botAcc, strategyExecutor, strategyI
     actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
 
     const nextPrice = 0;
-    triggerCallData.push(abiCoder.encode(['uint256'], [nextPrice])); // next price
+    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
@@ -536,7 +536,7 @@ const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, s
     // const nextPrice = await getNextEthPrice();
     const nextPrice = 0;
 
-    triggerCallData.push(abiCoder.encode(['uint256'], [nextPrice])); // next price
+    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
@@ -696,7 +696,7 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
     actionsCallData.push(mcdSupplyAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
 
-    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
@@ -754,7 +754,7 @@ const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, s
     actionsCallData.push(mcdSupplyAction.encodeForRecipe()[0]);
     actionsCallData.push(generateAction.encodeForRecipe()[0]);
 
-    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
@@ -858,7 +858,8 @@ const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, stra
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     const strategyIndex = 0;
-    const triggerCallData = [[]];
+    const triggerCallData = [];
+    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
     // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
         gasLimit: 8000000,
