@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.4;
+pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
 import "../../interfaces/IDSProxy.sol";
@@ -54,8 +54,9 @@ contract SubStorage is StrategyModel, AdminAuth {
         _;
     }
 
+    uint256 internal _subCount;
     /// @dev The order of strategies might change as they are deleted
-    StoredSubData[] public strategiesSubs;
+    mapping(uint256 => StoredSubData) public strategiesSubs;
 
     /// @notice Creates a new strategy with an existing template
     function subscribeToStrategy(
@@ -63,20 +64,17 @@ contract SubStorage is StrategyModel, AdminAuth {
     ) public isValidId(_sub.id, _sub.isBundle) returns (uint256) {
 
         bytes32 subStorageHash = keccak256(abi.encode(_sub));
+        uint256 subCount = _subCount;
 
-        strategiesSubs.push(
-            StoredSubData(
-                bytes20(msg.sender),
-                true,
-                subStorageHash
-            )            
+        strategiesSubs[_subCount++] = StoredSubData(
+            bytes20(msg.sender),
+            true,
+            subStorageHash
         );
 
-        uint256 currentId = strategiesSubs.length - 1;
+        emit Subscribe(subCount, msg.sender, subStorageHash, _sub);
 
-        emit Subscribe(currentId, msg.sender, subStorageHash, _sub);
-
-        return currentId;
+        return subCount;
     }
 
     /// @notice Updates the users strategy
@@ -122,6 +120,6 @@ contract SubStorage is StrategyModel, AdminAuth {
     }
 
     function getSubsCount() public view returns (uint256) {
-        return strategiesSubs.length;
+        return _subCount;
     }
 }

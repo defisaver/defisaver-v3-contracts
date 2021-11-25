@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.4;
+pragma solidity =0.8.10;
 
 contract MainnetCoreAddresses {
     address internal constant DEFI_SAVER_LOGGER_ADDR = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;

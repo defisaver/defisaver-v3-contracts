@@ -134,11 +134,11 @@ async function verifyContract(contractAddress, contractName) {
     params.append('codeformat', 'solidity-single-file"');
     let solVersion;
     switch (hardhatSettings.solidity.version) {
-    case ('0.8.4'):
-        solVersion = 'v0.8.4+commit.7338295f';
+    case ('=0.8.10'):
+        solVersion = 'v=0.8.10+commit.7338295f';
         break;
     default:
-        solVersion = 'v0.8.4+commit.7338295f';
+        solVersion = 'v=0.8.10+commit.7338295f';
     }
     params.append('compilerversion', solVersion);
     params.append('optimizationUsed', hardhatSettings.solidity.settings.optimizer.enabled ? 1 : 0);

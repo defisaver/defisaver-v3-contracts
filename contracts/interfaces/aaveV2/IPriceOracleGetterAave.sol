@@ -1,7 +1,7 @@
 
 // SPDX-License-Identifier: agpl-3.0
 
-pragma solidity =0.8.4;
+pragma solidity =0.8.10;
 
 abstract contract IPriceOracleGetterAave {
     function getAssetPrice(address _asset) external virtual view returns (uint256);

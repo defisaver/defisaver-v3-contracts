@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.4;
+pragma solidity =0.8.10;
 import "./helpers/AuthHelper.sol";
 
 /// @title A stateful contract that holds and can change owner/admin

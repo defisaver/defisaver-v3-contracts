@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.4;
+pragma solidity =0.8.10;
 
 abstract contract IMCDPriceVerifier {
     function verifyVaultNextPrice(uint _nextPrice, uint _cdpId) public view virtual returns(bool);
