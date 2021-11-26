@@ -330,6 +330,30 @@ const depositToWeth = async (amount) => {
     await weth.deposit({ value: amount });
 };
 
+const formatExchangeObjForOffchain = (
+    srcAddr,
+    destAddr,
+    amount,
+    wrapper,
+    exchangeAddr,
+    allowanceTarget,
+    price,
+    protocolFee,
+    callData,
+    offset,
+) => [
+    srcAddr,
+    destAddr,
+    amount,
+    0,
+    0,
+    0,
+    nullAddress,
+    wrapper,
+    offset,
+    [wrapper, exchangeAddr, allowanceTarget, price, protocolFee, callData],
+];
+
 const timeTravel = async (timeIncrease) => {
     await hre.network.provider.request({
         method: 'evm_increaseTime',
@@ -337,12 +361,27 @@ const timeTravel = async (timeIncrease) => {
         id: new Date().getTime(),
     });
 };
+const addToZRXAllowlist = async (acc, newAddr) => {
+    const exchangeOwnerAddr = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
+    await sendEther(acc, exchangeOwnerAddr, '1');
+    await impersonateAccount(exchangeOwnerAddr);
+
+    const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
+
+    const registryInstance = await hre.ethers.getContractFactory('ZrxAllowlist');
+    const registry = await registryInstance.attach('0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F');
+    const registryByOwner = await registry.connect(signer);
+
+    await registryByOwner.setAllowlistAddr(newAddr, true);
+    await stopImpersonatingAccount(exchangeOwnerAddr);
+};
 
 const BN2Float = (bn, decimals) => hre.ethers.utils.formatUnits(bn, decimals);
 
 const Float2BN = (string, decimals) => hre.ethers.utils.parseUnits(string, decimals);
 
 module.exports = {
+    addToZRXAllowlist,
     getAddrFromRegistry,
     getProxy,
     getProxyWithSigner,
@@ -351,6 +390,7 @@ module.exports = {
     approve,
     balanceOf,
     formatExchangeObj,
+    formatExchangeObjForOffchain,
     isEth,
     sendEther,
     impersonateAccount,
