@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.4;
+pragma solidity =0.8.10;
 
 import "./StrategyModel.sol";
 import "../../auth/AdminAuth.sol";
@@ -25,12 +25,11 @@ contract BundleStorage is StrategyModel, AdminAuth {
     function createBundle(
         uint64[] memory _strategyIds
     ) public onlyAuthCreators returns (uint256) {
-        bundles.push(
-            StrategyBundle({
-                creator: msg.sender,
-                strategyIds: _strategyIds
-            })
-        );
+
+        bundles.push(StrategyBundle({
+            creator: msg.sender,
+            strategyIds: _strategyIds
+        }));
 
         emit BundleCreated(bundles.length - 1);
 
@@ -56,7 +55,6 @@ contract BundleStorage is StrategyModel, AdminAuth {
 
     function getPaginatedBundles(uint _page, uint _perPage) public view returns (StrategyBundle[] memory) {
         StrategyBundle[] memory bundlesPerPage = new StrategyBundle[](_perPage);
-
         uint start = _page * _perPage;
         uint end = start + _perPage;
 

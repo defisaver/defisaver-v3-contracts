@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.4;
+pragma solidity =0.8.10;
 
 /// @title StrategyModel - contract that implements the structs used in the core system
 contract StrategyModel {

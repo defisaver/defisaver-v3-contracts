@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.4;
+pragma solidity =0.8.10;
 
 import "./StrategyModel.sol";
 import "../../auth/AdminAuth.sol";
@@ -29,16 +29,14 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         uint8[][] memory _paramMapping,
         bool _continuous
     ) public onlyAuthCreators returns (uint256) {
-        strategies.push(
-            Strategy({
+        strategies.push(Strategy({
                 name: _name,
                 creator: msg.sender,
                 triggerIds: _triggerIds,
                 actionIds: _actionIds,
                 paramMapping: _paramMapping,
                 continuous : _continuous
-            })
-        );
+        }));
 
         emit StrategyCreated(strategies.length - 1);
 
