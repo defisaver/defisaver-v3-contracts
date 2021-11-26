@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "../DS/DSMath.sol";
 import "../interfaces/IWETH.sol";
 import "../interfaces/exchange/IExchangeV3.sol";
-import "../utils/ExchangeAggregatorsAllowlist.sol";
+import "../utils/ZrxAllowlist.sol";
 import "./DFSExchangeData.sol";
 import "../utils/Discount.sol";
 import "../utils/FeeRecipient.sol";
@@ -22,7 +22,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
     string public constant ERR_SLIPPAGE_HIT = "Slippage hit";
     string public constant ERR_DEST_AMOUNT_MISSING = "Dest amount missing";
     string public constant ERR_WRAPPER_INVALID = "Wrapper invalid";
-    
+    string public constant ERR_NOT_ZEROX_EXCHANGE = "Zerox exchange invalid";
     FeeRecipient public constant feeRecipient =
         FeeRecipient(FEE_RECIPIENT_ADDRESS);
 
@@ -118,7 +118,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
         private
         returns (bool success, uint256)
     {
-        if (!ExchangeAggregatorsAllowlist(EXCHANGE_AGGREGATOR_ALLOWLIST_ADDR).isAllowedAddr(_exData.offchainData.exchangeAddr)) {
+        if (!ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.offchainData.exchangeAddr)) {
             return (false, 0);
         }
 
