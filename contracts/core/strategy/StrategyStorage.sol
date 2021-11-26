@@ -8,8 +8,7 @@ import "../../auth/AdminAuth.sol";
 /// @title StrategyStorage - Record of all the Strategies created
 contract StrategyStorage is StrategyModel, AdminAuth {
 
-    uint256 public _strategyCount;
-    mapping(uint256 => Strategy) public strategies;
+    Strategy[] public strategies;
     bool public openToPublic = false;
 
     error NoAuthToCreateStrategy(address,bool);
@@ -30,20 +29,18 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         uint8[][] memory _paramMapping,
         bool _continuous
     ) public onlyAuthCreators returns (uint256) {
-        uint256 strategyCount = _strategyCount;
-
-        strategies[_strategyCount++] = Strategy({
+        strategies.push(Strategy({
                 name: _name,
                 creator: msg.sender,
                 triggerIds: _triggerIds,
                 actionIds: _actionIds,
                 paramMapping: _paramMapping,
                 continuous : _continuous
-        });
+        }));
 
-        emit StrategyCreated(strategyCount);
+        emit StrategyCreated(strategies.length - 1);
 
-        return strategyCount;
+        return strategies.length - 1;
     }
 
     function changeEditPermission(bool _openToPublic) public onlyOwner {
@@ -56,17 +53,16 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         return strategies[_strategyId];
     }
     function getStrategyCount() public view returns (uint256) {
-        return _strategyCount;
+        return strategies.length;
     }
 
     function getPaginatedStrategies(uint _page, uint _perPage) public view returns (Strategy[] memory) {
         Strategy[] memory strategiesPerPage = new Strategy[](_perPage);
 
-        uint256 strategyCount = _strategyCount;
         uint start = _page * _perPage;
         uint end = start + _perPage;
 
-        end = (end > strategyCount) ? strategyCount : end;
+        end = (end > strategies.length) ? strategies.length : end;
 
         uint count = 0;
         for (uint i = start; i < end; i++) {

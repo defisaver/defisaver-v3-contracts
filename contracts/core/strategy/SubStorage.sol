@@ -54,9 +54,7 @@ contract SubStorage is StrategyModel, AdminAuth {
         _;
     }
 
-    uint256 internal _subCount;
-    /// @dev The order of strategies might change as they are deleted
-    mapping(uint256 => StoredSubData) public strategiesSubs;
+    StoredSubData[] public strategiesSubs;
 
     /// @notice Creates a new strategy with an existing template
     function subscribeToStrategy(
@@ -64,17 +62,18 @@ contract SubStorage is StrategyModel, AdminAuth {
     ) public isValidId(_sub.id, _sub.isBundle) returns (uint256) {
 
         bytes32 subStorageHash = keccak256(abi.encode(_sub));
-        uint256 subCount = _subCount;
 
-        strategiesSubs[_subCount++] = StoredSubData(
+        strategiesSubs.push(StoredSubData(
             bytes20(msg.sender),
             true,
             subStorageHash
-        );
+        ));
 
-        emit Subscribe(subCount, msg.sender, subStorageHash, _sub);
+        uint256 currentId = strategiesSubs.length - 1;
 
-        return subCount;
+        emit Subscribe(currentId, msg.sender, subStorageHash, _sub);
+
+        return currentId;
     }
 
     /// @notice Updates the users strategy
@@ -120,6 +119,6 @@ contract SubStorage is StrategyModel, AdminAuth {
     }
 
     function getSubsCount() public view returns (uint256) {
-        return _subCount;
+        return strategiesSubs.length;
     }
 }

@@ -8,8 +8,7 @@ import "../../auth/AdminAuth.sol";
 /// @title BundleStorage - Record of all the Bundles created
 contract BundleStorage is StrategyModel, AdminAuth {
 
-    uint256 _bundleCount;
-    mapping(uint256 => StrategyBundle) public bundles;
+    StrategyBundle[] public bundles;
     bool public openToPublic = false;
 
     error NoAuthToCreateBundle(address,bool);
@@ -26,16 +25,15 @@ contract BundleStorage is StrategyModel, AdminAuth {
     function createBundle(
         uint64[] memory _strategyIds
     ) public onlyAuthCreators returns (uint256) {
-        uint256 bundleCount = _bundleCount;
 
-        bundles[_bundleCount++] = StrategyBundle({
+        bundles.push(StrategyBundle({
             creator: msg.sender,
             strategyIds: _strategyIds
-        });
+        }));
 
-        emit BundleCreated(bundleCount);
+        emit BundleCreated(bundles.length - 1);
 
-        return bundleCount;
+        return bundles.length - 1;
     }
 
     function changeEditPermission(bool _openToPublic) public onlyOwner {
@@ -52,16 +50,15 @@ contract BundleStorage is StrategyModel, AdminAuth {
         return bundles[_bundleId];
     }
     function getBundleCount() public view returns (uint256) {
-        return _bundleCount;
+        return bundles.length;
     }
 
     function getPaginatedBundles(uint _page, uint _perPage) public view returns (StrategyBundle[] memory) {
         StrategyBundle[] memory bundlesPerPage = new StrategyBundle[](_perPage);
-        uint256 bundleCount = _bundleCount;
         uint start = _page * _perPage;
         uint end = start + _perPage;
 
-        end = (end > bundleCount) ? bundleCount : end;
+        end = (end > bundles.length) ? bundles.length : end;
 
         uint count = 0;
         for (uint i = start; i < end; i++) {
