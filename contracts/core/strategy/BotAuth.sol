@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.4;
+pragma solidity =0.8.10;
 import "../../auth/AdminAuth.sol";
 
 /// @title Handles authorization of who can call the execution of strategies

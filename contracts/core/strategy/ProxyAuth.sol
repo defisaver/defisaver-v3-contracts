@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.4;
+pragma solidity =0.8.10;
 
 import "../../interfaces/IDFSRegistry.sol";
 import "../../interfaces/IDSProxy.sol";

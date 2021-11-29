@@ -9,7 +9,7 @@
     "state-visibility": "off",
     "no-inline-assembly": "off",
     "avoid-low-level-calls": "off",
-    "compiler-version": ["error", "=0.8.4"],
+    "compiler-version": ["error", "=0.8.10"],
     "var-name-mixedcase": "off",
     "func-visibility": ["warn",{"ignoreConstructors":true}],
     "reason-string": ["warn",{"maxLength":60}]

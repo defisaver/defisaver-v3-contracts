@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.4;
+pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
 import "../../interfaces/IDSProxy.sol";
@@ -54,7 +54,6 @@ contract SubStorage is StrategyModel, AdminAuth {
         _;
     }
 
-    /// @dev The order of strategies might change as they are deleted
     StoredSubData[] public strategiesSubs;
 
     /// @notice Creates a new strategy with an existing template
@@ -64,13 +63,11 @@ contract SubStorage is StrategyModel, AdminAuth {
 
         bytes32 subStorageHash = keccak256(abi.encode(_sub));
 
-        strategiesSubs.push(
-            StoredSubData(
-                bytes20(msg.sender),
-                true,
-                subStorageHash
-            )            
-        );
+        strategiesSubs.push(StoredSubData(
+            bytes20(msg.sender),
+            true,
+            subStorageHash
+        ));
 
         uint256 currentId = strategiesSubs.length - 1;
 

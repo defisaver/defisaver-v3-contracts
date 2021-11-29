@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.4;
+pragma solidity =0.8.10;
 
 import "../interfaces/ILendingPool.sol";
 import "../auth/ProxyPermission.sol";
@@ -56,14 +56,14 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
             address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
 
             if (_sub.isBundle) {
-                strategyId = BundleStorage(bundleStorageAddr).getStrategyId(_sub.id, _strategyIndex);
+                strategyId = BundleStorage(bundleStorageAddr).getStrategyId(strategyId, _strategyIndex);
             }
 
             strategy = StrategyStorage(strategyStorageAddr).getStrategy(strategyId);
         }
 
         // check if all the triggers are true
-        bool triggered = checkTriggers(strategy, _sub, _triggerCallData, _subId, subStorageAddr);
+        bool triggered = _checkTriggers(strategy, _sub, _triggerCallData, _subId, subStorageAddr);
 
         if (!triggered) {
             revert TriggerNotActiveError();
@@ -86,13 +86,13 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
     }
 
     /// @notice Checks if all the triggers are true
-    function checkTriggers(
+    function _checkTriggers(
         Strategy memory strategy,
         StrategySub memory _sub,
         bytes[] calldata _triggerCallData,
         uint256 _subId,
         address _storageAddr
-    ) public returns (bool) {
+    ) internal returns (bool) {     // saves less than 20 gas
         bytes4[] memory triggerIds = strategy.triggerIds;
 
         bool isTriggered;
@@ -114,6 +114,22 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         }
 
         return true;
+    }
+
+    function checkTriggers(
+        Strategy memory _strategy,
+        StrategySub memory _sub,
+        bytes[] calldata _triggerCallData,
+        uint256 _subId,
+        address _storageAddr
+    ) public returns (bool) {
+        return _checkTriggers(
+            _strategy,
+            _sub,
+            _triggerCallData,
+            _subId,
+            _storageAddr
+        );
     }
 
     /// @notice This is the callback function that FL actions call

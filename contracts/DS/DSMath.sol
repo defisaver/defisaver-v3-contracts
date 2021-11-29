@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.4;
+pragma solidity =0.8.10;
 
 contract DSMath {
     function add(uint256 x, uint256 y) internal pure returns (uint256 z) {
