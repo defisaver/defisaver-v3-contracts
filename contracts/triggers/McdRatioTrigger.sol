@@ -15,11 +15,19 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper {
         UNDER
     }
 
+    enum RatioCheck {
+        CURR_RATIO,
+        NEXT_RATIO,
+        BOTH_RATIOS
+    }
+
     error WrongNextPrice(uint256);
 
     struct CallParams {
         uint256 nextPrice;
+        uint8 ratioCheck;
     }
+
     struct SubParams {
         uint256 vaultId;
         uint256 ratio;
@@ -35,10 +43,20 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper {
         CallParams memory triggerCallData = parseCallInputs(_callData);
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
-        uint256 currRatio = getRatio(triggerSubData.vaultId, triggerCallData.nextPrice); // GAS 50k
+        uint256 checkedRatio;
+        bool shouldTriggerCurr;
+        bool shouldTriggerNext;
 
-        // check next price validity if it's sent
-        if (triggerCallData.nextPrice != 0) {
+        if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.CURR_RATIO || RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS){
+            checkedRatio = getRatio(triggerSubData.vaultId, 0); // GAS 50k
+            shouldTriggerCurr = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
+        }
+
+        if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.NEXT_RATIO || RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS){
+            checkedRatio = getRatio(triggerSubData.vaultId, triggerCallData.nextPrice); // GAS 50k
+            
+            shouldTriggerNext = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
+
             if (
                 !IMCDPriceVerifier(MCD_PRICE_VERIFIER).verifyVaultNextPrice(
                     triggerCallData.nextPrice,
@@ -49,12 +67,15 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper {
             }
         }
 
-        if (RatioState(triggerSubData.state) == RatioState.OVER) {
-            if (currRatio > triggerSubData.ratio) return true;
+        return shouldTriggerCurr || shouldTriggerNext;
+    }
+    
+    function shouldTrigger(uint8 state, uint256 checkedRatio, uint256 subbedToRatio) internal pure returns (bool){
+        if (RatioState(state) == RatioState.OVER) {
+            if (checkedRatio > subbedToRatio) return true;
         }
-
-        if (RatioState(triggerSubData.state) == RatioState.UNDER) {
-            if (currRatio < triggerSubData.ratio) return true;
+        if (RatioState(state) == RatioState.UNDER) {
+            if (checkedRatio < subbedToRatio) return true;
         }
 
         return false;
