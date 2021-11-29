@@ -8,6 +8,7 @@ contract BotAuth is AdminAuth {
     mapping(address => bool) public approvedCallers;
 
     /// @notice Checks if the caller is approved for the specific subscription
+    /// @dev First param is subId but it's not used in this implementation 
     /// @dev Currently auth callers are approved for all strategies
     /// @param _caller Address of the caller
     function isApproved(uint256, address _caller) public view returns (bool) {

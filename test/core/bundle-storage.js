@@ -9,12 +9,20 @@ const {
 } = require('../utils');
 
 describe('Bundle Storage', () => {
-    let bundleStorage; let owner; let bundleStorageFromOwner; let senderAcc;
+    let bundleStorage; let strategyStorage; let owner; let bundleStorageFromOwner; let senderAcc;
 
     before(async () => {
+        strategyStorage = await redeploy('StrategyStorage');
         bundleStorage = await redeploy('BundleStorage');
 
         senderAcc = (await hre.ethers.getSigners())[0];
+
+        // create some dummy strategies
+        await strategyStorage.createStrategy('TestStrategy', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
+        await strategyStorage.createStrategy('TestStrategy1', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
+        await strategyStorage.createStrategy('TestStrategy2', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
+        await strategyStorage.createStrategy('TestStrategy3', ['0x11223344', '0x66223344'], ['0x44556677'], [[0, 1, 2]], true);
+        await strategyStorage.createStrategy('TestStrategy4', ['0x11223344', '0x55223344'], ['0x44556677'], [[0, 1, 2]], true);
 
         owner = await hre.ethers.provider.getSigner(OWNER_ACC);
     });
@@ -40,6 +48,7 @@ describe('Bundle Storage', () => {
     it('...should fail to change edit permission from non owner acc', async () => {
         try {
             await bundleStorage.changeEditPermission(false);
+            expect(true).to.be.equal(false);
         } catch (err) {
             expect(err.toString()).to.have.string('SenderNotOwner()');
         }
@@ -48,17 +57,48 @@ describe('Bundle Storage', () => {
     it('...should fail to reg. a new bundle from non owner acc', async () => {
         try {
             await bundleStorage.createBundle([0, 1, 2]);
+            expect(true).to.be.equal(false);
         } catch (err) {
             expect(err.toString()).to.have.string('NoAuthToCreateBundle');
         }
+    });
+
+    it('...should fail to registry a bundle because triggerIds are not the same', async () => {
+        try {
+            // set permission to open to test trigger validation
+            await impersonateAccount(OWNER_ACC);
+            bundleStorageFromOwner = bundleStorage.connect(owner);
+            await bundleStorageFromOwner.changeEditPermission(true);
+            await stopImpersonatingAccount(OWNER_ACC);
+
+            await bundleStorage.createBundle([3, 4]);
+            expect(true).to.be.equal(false);
+        } catch (err) {
+            expect(err.toString()).to.have.string('DiffTriggersInBundle');
+        }
+    });
+
+    it('...should fail to registry a bundle because triggerIds are diff. length', async () => {
+        try {
+            await bundleStorage.createBundle([2, 3]);
+            expect(true).to.be.equal(false);
+        } catch (err) {
+            expect(err.toString()).to.have.string('DiffTriggersInBundle');
+        }
+
+        // set permission to only owner after trigger validation tested
+        await impersonateAccount(OWNER_ACC);
+        bundleStorageFromOwner = bundleStorage.connect(owner);
+        await bundleStorageFromOwner.changeEditPermission(false);
+        await stopImpersonatingAccount(OWNER_ACC);
     });
 
     it('...should reg. bundles from owner acc', async () => {
         await impersonateAccount(OWNER_ACC);
 
         await bundleStorageFromOwner.createBundle([0, 1, 2]);
-        await bundleStorageFromOwner.createBundle([2, 5, 2]);
-        await bundleStorageFromOwner.createBundle([6, 10, 1]);
+        await bundleStorageFromOwner.createBundle([2, 1]);
+        await bundleStorageFromOwner.createBundle([1, 2]);
 
         await stopImpersonatingAccount(OWNER_ACC);
 
@@ -81,7 +121,7 @@ describe('Bundle Storage', () => {
     it('...should fetch strategy id from a bundle', async () => {
         const strategyId = await bundleStorage.getStrategyId(2, 1);
 
-        expect(strategyId.toString()).to.be.eql('5');
+        expect(strategyId.toString()).to.be.eql('1');
     });
 
     it('...should fetch getPaginatedBundles', async () => {
