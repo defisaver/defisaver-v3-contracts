@@ -65,72 +65,74 @@ describe('Bundle Storage', () => {
 
     it('...should fail to registry a bundle because triggerIds are not the same', async () => {
         try {
+            // set permission to open to test trigger validation
             await impersonateAccount(OWNER_ACC);
             bundleStorageFromOwner = bundleStorage.connect(owner);
+            await bundleStorageFromOwner.changeEditPermission(true);
+            await stopImpersonatingAccount(OWNER_ACC);
 
-            await bundleStorageFromOwner.createBundle([3, 4]);
+            await bundleStorage.createBundle([3, 4]);
             expect(true).to.be.equal(false);
         } catch (err) {
             expect(err.toString()).to.have.string('DiffTriggersInBundle');
         }
-
-        await stopImpersonatingAccount(OWNER_ACC);
     });
 
     it('...should fail to registry a bundle because triggerIds are diff. length', async () => {
         try {
-            await impersonateAccount(OWNER_ACC);
-            bundleStorageFromOwner = bundleStorage.connect(owner);
-
-            await bundleStorageFromOwner.createBundle([2, 3]);
+            await bundleStorage.createBundle([2, 3]);
             expect(true).to.be.equal(false);
         } catch (err) {
             expect(err.toString()).to.have.string('DiffTriggersInBundle');
         }
 
+        // set permission to only owner after trigger validation tested
+        await impersonateAccount(OWNER_ACC);
+        bundleStorageFromOwner = bundleStorage.connect(owner);
+        await bundleStorageFromOwner.changeEditPermission(false);
         await stopImpersonatingAccount(OWNER_ACC);
     });
 
-    // it('...should reg. bundles from owner acc', async () => {
-    //     await impersonateAccount(OWNER_ACC);
+    it('...should reg. bundles from owner acc', async () => {
+        await impersonateAccount(OWNER_ACC);
 
-    //     await bundleStorageFromOwner.createBundle([0, 1, 2]);
-    //     await bundleStorageFromOwner.createBundle([2, 1]);
-    //     await bundleStorageFromOwner.createBundle([1, 2, 3]);
+        await bundleStorageFromOwner.createBundle([0, 1, 2]);
+        await bundleStorageFromOwner.createBundle([2, 1]);
+        await bundleStorageFromOwner.createBundle([1, 2]);
 
-    //     await stopImpersonatingAccount(OWNER_ACC);
+        await stopImpersonatingAccount(OWNER_ACC);
 
-    //     const numBundles = await bundleStorageFromOwner.getBundleCount();
+        const numBundles = await bundleStorageFromOwner.getBundleCount();
 
-    //     expect(numBundles).to.be.eq(5);
-    // });
+        expect(numBundles).to.be.eq(4);
+    });
 
-    // // view testing
+    // view testing
 
-    // it('...should fetch a bundle by id', async () => {
-    //     const bundleData = await bundleStorage.getBundle(0);
+    it('...should fetch a bundle by id', async () => {
+        const bundleData = await bundleStorage.getBundle(0);
 
-    //     expect(bundleData.creator).to.be.eq(senderAcc.address);
-    //     const ids = bundleData.strategyIds.map((id) => id.toString());
+        expect(bundleData.creator).to.be.eq(senderAcc.address);
+        const ids = bundleData.strategyIds.map((id) => id.toString());
 
-    //     expect(ids).to.be.eql(['0', '1', '2']);
-    // });
+        expect(ids).to.be.eql(['0', '1', '2']);
+    });
 
-    // it('...should fetch strategy id from a bundle', async () => {
-    //     const strategyId = await bundleStorage.getStrategyId(2, 1);
+    it('...should fetch strategy id from a bundle', async () => {
+        const strategyId = await bundleStorage.getStrategyId(2, 1);
 
-    //     expect(strategyId.toString()).to.be.eql('1');
-    // });
+        expect(strategyId.toString()).to.be.eql('1');
+    });
 
-    // it('...should fetch getPaginatedBundles', async () => {
-    //     const bundles1 = await bundleStorageFromOwner.getPaginatedBundles(0, 2);
+    it('...should fetch getPaginatedBundles', async () => {
+        const bundles1 = await bundleStorageFromOwner.getPaginatedBundles(0, 2);
 
-    //     expect(bundles1[0].creator).to.be.eq(senderAcc.address);
-    //     expect(bundles1[1].creator).to.be.eq(OWNER_ACC);
+        expect(bundles1[0].creator).to.be.eq(senderAcc.address);
+        expect(bundles1[1].creator).to.be.eq(OWNER_ACC);
 
-    //     const bundles2 = await bundleStorageFromOwner.getPaginatedBundles(1, 2);
+        const bundles2 = await bundleStorageFromOwner.getPaginatedBundles(1, 2);
 
-    //     expect(bundles2[0].creator).to.be.eq(OWNER_ACC);
-    //     expect(bundles2[1].creator).to.be.eq(OWNER_ACC);
-    // });
+        expect(bundles2[0].creator).to.be.eq(OWNER_ACC);
+        expect(bundles2[1].creator).to.be.eq(OWNER_ACC);
+    });
 });
