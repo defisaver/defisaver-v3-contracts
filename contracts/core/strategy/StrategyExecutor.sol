@@ -20,19 +20,19 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
 
     bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));
     bytes4 constant SUB_STORAGE_ID = bytes4(keccak256("SubStorage"));
-
     bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
-    error BotNotApprovedError(address, uint256);
-    error SubNotActiveError(uint256);
+    error BotNotApproved(address, uint256);
+    error SubNotEnabled(uint256);
     error SubDatHashMismatch(uint256, bytes32, bytes32);
 
     /// @notice Checks all the triggers and executes actions
     /// @dev Only authorized callers can execute it
     /// @param _subId Id of the subscription
-    /// @param _strategyIndex Which strategy in a bundle, need to specify because if sub is part of a bundle
+    /// @param _strategyIndex Which strategy in a bundle, need to specify because when sub is part of a bundle
     /// @param _triggerCallData All input data needed to execute triggers
     /// @param _actionsCallData All input data needed to execute actions
+    /// @param _sub StrategySub struct needed because on-chain we store only the hash
     function executeStrategy(
         uint256 _subId,
         uint256 _strategyIndex,
@@ -40,23 +40,23 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         bytes[] calldata _actionsCallData,
         StrategySub memory _sub
     ) public {
+        // check bot auth
+        if (!checkCallerAuth(_subId)) {
+            revert BotNotApproved(msg.sender, _subId);
+        }
+
         StoredSubData memory storedSubData = SubStorage(registry.getAddr(SUB_STORAGE_ID)).getSub(_subId);
 
         bytes32 subDataHash = keccak256(abi.encode(_sub));
 
+        // data sent from the caller must match the stored hash of the data
         if (subDataHash != storedSubData.strategySubHash) {
             revert SubDatHashMismatch(_subId, subDataHash, storedSubData.strategySubHash);
         }
 
+        // subscription must be enabled
         if (!storedSubData.isEnabled) {
-            revert SubNotActiveError(_subId);
-        }
-
-        // check bot auth
-        bool botHasAuth = checkCallerAuth(_subId);
-
-        if (!botHasAuth) {
-            revert BotNotApprovedError(msg.sender, _subId);
+            revert SubNotEnabled(_subId);
         }
 
         // execute actions
@@ -65,14 +65,18 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
 
     /// @notice Checks if msg.sender has auth, reverts if not
     /// @param _subId Id of the strategy
-    function checkCallerAuth(uint256 _subId) public view returns (bool) {
+    function checkCallerAuth(uint256 _subId) internal view returns (bool) {
         return BotAuth(registry.getAddr(BOT_AUTH_ID)).isApproved(_subId, msg.sender);
     }
 
 
-    /// @notice Checks triggers and execute all the actions in order
+    /// @notice Calls ProxyAuth which has the auth from the DSProxy which will call RecipeExecutor
     /// @param _subId Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
+    /// @param _actionsCallData All input data needed to check triggers
+    /// @param _strategyIndex Which strategy in a bundle, need to specify because when sub is part of a bundle
+    /// @param _sub StrategySub struct needed because on-chain we store only the hash
+    /// @param _userProxy DSProxy address of the user we are executing the strategy for
     function callActions(
         uint256 _subId,
         bytes[] calldata _actionsCallData,
@@ -81,8 +85,8 @@ contract StrategyExecutor is StrategyModel, AdminAuth {
         StrategySub memory _sub,
         address _userProxy
     ) internal {
+        // TODO: hard code to save on gas
         address recipeExecutorAddr = registry.getAddr(RECIPE_EXECUTOR_ID);
-
         address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
 
         ProxyAuth(proxyAuthAddr).callExecute{value: msg.value}(
