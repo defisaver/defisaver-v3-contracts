@@ -340,7 +340,6 @@ const formatExchangeObjForOffchain = (
     price,
     protocolFee,
     callData,
-    offset,
 ) => [
     srcAddr,
     destAddr,
@@ -350,7 +349,7 @@ const formatExchangeObjForOffchain = (
     0,
     nullAddress,
     wrapper,
-    offset,
+    [],
     [wrapper, exchangeAddr, allowanceTarget, price, protocolFee, callData],
 ];
 

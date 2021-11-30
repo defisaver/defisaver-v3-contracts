@@ -31,7 +31,6 @@ describe('Dfs-Sell', function () {
 
     let senderAcc; let proxy; let uniWrapper; let
         kyberWrapper; let uniV3Wrapper; let paraswapWrapper;
-    let offchainWrapper;
 
     const trades = [
         {
@@ -121,9 +120,8 @@ describe('Dfs-Sell', function () {
         let offset = callData.toString().indexOf(amountInHex);
         console.log(offset);
         offset = offset / 2 - 1;
-        // offset = hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [offset]);
         console.log(offset);
-        const offsetInHex = hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [offset]);
+        const paraswapSpecialCalldata = hre.ethers.utils.defaultAbiCoder.encode(['(bytes,uint256)'], [[callData, offset]]);
 
         const exchangeObject = formatExchangeObjForOffchain(
             sellAssetInfo.address,
@@ -134,8 +132,7 @@ describe('Dfs-Sell', function () {
             allowanceTarget,
             price,
             protocolFee,
-            callData,
-            offsetInHex,
+            paraswapSpecialCalldata,
         );
 
         await addToZRXAllowlist(senderAcc, priceObject.contractAddress);

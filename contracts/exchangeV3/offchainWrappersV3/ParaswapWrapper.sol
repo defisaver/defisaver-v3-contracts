@@ -9,6 +9,7 @@ import "../../auth/AdminAuth.sol";
 import "../DFSExchangeHelper.sol";
 import "../../interfaces/exchange/IOffchainWrapper.sol";
 
+/// @title Wrapper contract which will be used if offchain exchange used is Paraswap
 contract ParaswapWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath {
 
     using TokenUtils for address;
@@ -19,30 +20,35 @@ contract ParaswapWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMa
 
     using SafeERC20 for IERC20;
 
-    /// @notice Takes order from Scp and returns bool indicating if it is successful
+    /// @notice offchainData.callData should be this struct encoded
+    struct ParaswapCalldata{
+        bytes realCalldata;
+        uint256 offset;
+    }
+
+    /// @notice Takes order from Paraswap and returns bool indicating if it is successful
     /// @param _exData Exchange data
     /// @param _type Action type (buy or sell)
     function takeOrder(
         ExchangeData memory _exData,
         ExchangeActionType _type
     ) override public payable returns (bool success, uint256) {
-        // check that contract have enough balance for exchange and protocol fee
+        // check that contract have enough balance for exchange
         require(_exData.srcAddr.getBalance(address(this)) >= _exData.srcAmount, ERR_SRC_AMOUNT);
-        require(TokenUtils.ETH_ADDR.getBalance(address(this)) >= _exData.offchainData.protocolFee, ERR_PROTOCOL_FEE);
 
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
 
-        uint256 offset = abi.decode(_exData.wrapperData, (uint256));
+        ParaswapCalldata memory paraswapCalldata = abi.decode(_exData.offchainData.callData, (ParaswapCalldata));
         // write in the exact amount we are selling/buying in an order
         if (_type == ExchangeActionType.SELL) {
-            writeUint256(_exData.offchainData.callData, offset, _exData.srcAmount);
+            writeUint256(paraswapCalldata.realCalldata, paraswapCalldata.offset, _exData.srcAmount);
         } else {
             uint srcAmount = wdiv(_exData.destAmount, _exData.offchainData.price) + 1; // + 1 so we round up
-            writeUint256(_exData.offchainData.callData, offset, srcAmount);
+            writeUint256(paraswapCalldata.realCalldata, paraswapCalldata.offset, srcAmount);
         }
 
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
-        (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(_exData.offchainData.callData);
+        (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(paraswapCalldata.realCalldata);
         uint256 tokensSwapped = 0;
 
         if (success) {
