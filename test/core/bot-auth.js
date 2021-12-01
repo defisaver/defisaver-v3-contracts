@@ -51,6 +51,7 @@ describe('BotAuth', () => {
         try {
             botAuth = botAuth.connect(senderAcc);
             await botAuth.addCaller(botAcc1.address);
+            expect(true).to.be.equal(false);
         } catch (err) {
             expect(err.toString()).to.have.string('SenderNotOwner()');
         }
@@ -59,6 +60,7 @@ describe('BotAuth', () => {
     it('...should fail to remove new acc. because sender not owner', async () => {
         try {
             await botAuth.removeCaller(botAcc1.address);
+            expect(true).to.be.equal(false);
         } catch (err) {
             expect(err.toString()).to.have.string('SenderNotOwner()');
         }

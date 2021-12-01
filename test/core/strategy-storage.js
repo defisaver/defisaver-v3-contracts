@@ -8,7 +8,7 @@ const {
     OWNER_ACC,
 } = require('../utils');
 
-describe('Strategy Storage', () => {
+describe('StrategyStorage', () => {
     let strategyStorage; let owner; let strategyStorageFromOwner; let senderAcc;
 
     before(async () => {
@@ -40,6 +40,7 @@ describe('Strategy Storage', () => {
     it('...should fail to change edit permission from non owner acc', async () => {
         try {
             await strategyStorage.changeEditPermission(false);
+            expect(true).to.be.equal(false);
         } catch (err) {
             expect(err.toString()).to.have.string('SenderNotOwner()');
         }
@@ -48,6 +49,7 @@ describe('Strategy Storage', () => {
     it('...should fail to reg. a new strategy from non owner acc', async () => {
         try {
             await strategyStorage.createStrategy('TestStrategy', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
+            expect(true).to.be.equal(false);
         } catch (err) {
             expect(err.toString()).to.have.string('NoAuthToCreateStrategy');
         }

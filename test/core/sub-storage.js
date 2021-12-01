@@ -7,7 +7,7 @@ const {
 
 const { getSubHash } = require('../utils-strategies');
 
-describe('Sub Storage', () => {
+describe('SubStorage', () => {
     let subStorage; let senderAcc2; let strategyStorage;
 
     before(async () => {

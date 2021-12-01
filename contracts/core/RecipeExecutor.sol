@@ -24,7 +24,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
     bytes4 constant SUB_STORAGE_ID = bytes4(keccak256("SubStorage"));
     bytes4 constant BUNDLE_STORAGE_ID = bytes4(keccak256("BundleStorage"));
 
-    error TriggerNotActiveError();
+    error TriggerNotActiveError(uint256);
 
     /// @notice Called directly through DsProxy to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
@@ -34,7 +34,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
     }
 
 
-    /// @notice Called through the Strategy contract to execute a recipe
+    /// @notice Called by users DSProxy through the Strategy contract to execute a recipe
     /// @param _subId Id of the subscription we want to execute
     /// @param _actionCallData All the data related to the strategies Recipe
     function executeRecipeFromStrategy(
@@ -63,10 +63,11 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         }
 
         // check if all the triggers are true
-        bool triggered = _checkTriggers(strategy, _sub, _triggerCallData, _subId, subStorageAddr);
+        (bool triggered, uint256 errIndex) 
+            = _checkTriggers(strategy, _sub, _triggerCallData, _subId, subStorageAddr);
 
         if (!triggered) {
-            revert TriggerNotActiveError();
+            revert TriggerNotActiveError(errIndex);
         }
 
         // if this is a one time strategy
@@ -92,7 +93,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
         bytes[] calldata _triggerCallData,
         uint256 _subId,
         address _storageAddr
-    ) internal returns (bool) {     // saves less than 20 gas
+    ) internal returns (bool, uint256) {     // saves less than 20 gas
         bytes4[] memory triggerIds = strategy.triggerIds;
 
         bool isTriggered;
@@ -105,7 +106,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
                 _sub.triggerData[i]
             );
 
-            if (!isTriggered) return false;
+            if (!isTriggered) return (false, i);
 
             if (ITrigger(triggerAddr).isChangeable()) {
                 _sub.triggerData[i] = ITrigger(triggerAddr).changedSubData(_sub.triggerData[i]);
@@ -113,23 +114,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth {
             }
         }
 
-        return true;
-    }
-
-    function checkTriggers(
-        Strategy memory _strategy,
-        StrategySub memory _sub,
-        bytes[] calldata _triggerCallData,
-        uint256 _subId,
-        address _storageAddr
-    ) public returns (bool) {
-        return _checkTriggers(
-            _strategy,
-            _sub,
-            _triggerCallData,
-            _subId,
-            _storageAddr
-        );
+        return (true, 0);
     }
 
     /// @notice This is the callback function that FL actions call

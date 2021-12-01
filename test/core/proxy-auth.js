@@ -51,6 +51,7 @@ describe('ProxyAuth', () => {
             const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2)).encodeForDsProxyCall();
 
             await proxyAuth.callExecute(proxy2.address, sumInputs.address, encodedCall[1]);
+            expect(true).to.be.equal(false);
         } catch (err) {
             // can't map error as the DSProxy throws
             console.log(err);
@@ -65,6 +66,7 @@ describe('ProxyAuth', () => {
             const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2)).encodeForDsProxyCall();
 
             await proxyAuth.callExecute(proxy.address, sumInputs.address, encodedCall[1]);
+            expect(true).to.be.equal(false);
         } catch (err) {
             expect(err.toString()).to.have.string('SenderNotExecutorError');
         }
