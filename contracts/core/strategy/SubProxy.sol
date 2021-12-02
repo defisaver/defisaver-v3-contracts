@@ -12,8 +12,6 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    // TODO: Switch to constant hardcoded addresses for gas saving
-    bytes4 constant PROXY_AUTH_ID = bytes4(keccak256("ProxyAuth"));
     bytes4 constant SUB_STORAGE_ID = bytes4(keccak256("SubStorage"));
 
     /// @notice Gives DSProxy permission if needed and registers a new sub
@@ -21,10 +19,9 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     function subscribeToStrategy(
         StrategySub calldata _sub
     ) public {
-        address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
         address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
 
-        givePermission(proxyAuthAddr);
+        givePermission(PROXY_AUTH_ADDR);
 
         SubStorage(subStorageAddr).subscribeToStrategy(_sub);
     }

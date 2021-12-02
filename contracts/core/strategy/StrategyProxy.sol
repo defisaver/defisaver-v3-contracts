@@ -13,7 +13,6 @@ contract StrategyProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper 
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    bytes4 constant PROXY_AUTH_ID = bytes4(keccak256("ProxyAuth"));
     bytes4 constant STRATEGY_STORAGE_ID = bytes4(keccak256("StrategyStorage"));
     bytes4 constant BUNDLE_STORAGE_ID = bytes4(keccak256("BundleStorage"));
 

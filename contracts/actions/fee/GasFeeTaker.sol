@@ -37,7 +37,6 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
         }
 
         // cap at 20% of the max amount
-        // TODO: should this be changeable
         if (txCost >= (inputData.availableAmount / 5)) {
             txCost = inputData.availableAmount / 5;
         }

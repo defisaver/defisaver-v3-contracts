@@ -39,7 +39,6 @@ contract SubStorage is StrategyModel, AdminAuth, CoreHelper {
         _;
     }
 
-    // TODO: hard code addr to save gas later on
     /// @notice Checks if the id is valid (points to a stored bundle/sub)
     modifier isValidId(uint256 _id, bool _isBundle) {
         if (_isBundle) {

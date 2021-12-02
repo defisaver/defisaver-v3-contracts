@@ -44,7 +44,6 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
         StrategySub memory _sub
     ) public payable {
 
-        // TODO: can be hardcoded in prod to save gas
         address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
 
         Strategy memory strategy;

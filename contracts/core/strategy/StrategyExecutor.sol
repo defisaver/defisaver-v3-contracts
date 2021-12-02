@@ -11,8 +11,6 @@ import "../strategy/SubStorage.sol";
 
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
-    bytes4 constant PROXY_AUTH_ID = bytes4(keccak256("ProxyAuth"));
-
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));
@@ -82,11 +80,9 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
         StrategySub memory _sub,
         address _userProxy
     ) internal {
-        // TODO: hard code to save on gas
         address recipeExecutorAddr = registry.getAddr(RECIPE_EXECUTOR_ID);
-        address proxyAuthAddr = registry.getAddr(PROXY_AUTH_ID);
 
-        ProxyAuth(proxyAuthAddr).callExecute{value: msg.value}(
+        ProxyAuth(PROXY_AUTH_ADDR).callExecute{value: msg.value}(
             _userProxy,
             recipeExecutorAddr,
             abi.encodeWithSignature(
