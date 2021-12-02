@@ -28,12 +28,12 @@ contract ProxyAuth is AdminAuth, CoreHelper {
     /// @dev Contract gets the authority from the user to call it, only callable by Executor
     /// @param _proxyAddr Address of the users DSProxy
     /// @param _contractAddr Address of the contract which to execute
-    /// @param _data Call data of the function to be called
+    /// @param _callData Call data of the function to be called
     function callExecute(
         address _proxyAddr,
         address _contractAddr,
-        bytes memory _data
+        bytes memory _callData
     ) public payable onlyExecutor {
-        IDSProxy(_proxyAddr).execute{value: msg.value}(_contractAddr, _data);
+        IDSProxy(_proxyAddr).execute{value: msg.value}(_contractAddr, _callData);
     }
 }

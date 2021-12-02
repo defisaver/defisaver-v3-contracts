@@ -8,17 +8,22 @@ import "./helpers/CoreHelper.sol";
 
 /// @title Stores all the important DFS addresses and can be changed (timelock)
 contract DFSRegistry is AdminAuth, CoreHelper {
-    DefisaverLogger public constant logger = DefisaverLogger(
-        DEFI_SAVER_LOGGER_ADDR
-    );
-    error EntryAlreadyExistsError();
-    error EntryNonExistentError();
-    error EntryNotInChangeError();
-    error WaitPeriodShortError();
-    error ChangeNotReadyError();
-    error EmptyPrevAddrError();
-    error AlreadyInContractChangeError();
-    error AlreadyInWaitPeriodChangeError();
+    error EntryAlreadyExistsError(bytes4);
+    error EntryNonExistentError(bytes4);
+    error EntryNotInChangeError(bytes4);
+    error ChangeNotReadyError(uint256,uint256);
+    error EmptyPrevAddrError(bytes4);
+    error AlreadyInContractChangeError(bytes4);
+    error AlreadyInWaitPeriodChangeError(bytes4);
+
+    event AddNewContract(address,bytes4,address,uint256);
+    event RevertToPreviousAddress(address,bytes4,address,address);
+    event StartContractChange(address,bytes4,address,address);
+    event ApproveContractChange(address,bytes4,address,address);
+    event CancelContractChange(address,bytes4,address,address);
+    event StartWaitPeriodChange(address,bytes4,uint256);
+    event ApproveWaitPeriodChange(address,bytes4,uint256,uint256);
+    event CancelWaitPeriodChange(address,bytes4,uint256,uint256);
 
     struct Entry {
         address contractAddr;
@@ -60,7 +65,7 @@ contract DFSRegistry is AdminAuth, CoreHelper {
         uint256 _waitPeriod
     ) public onlyOwner {
         if (entries[_id].exists){
-            revert EntryAlreadyExistsError();
+            revert EntryAlreadyExistsError(_id);
         }
 
         entries[_id] = Entry({
@@ -75,12 +80,7 @@ contract DFSRegistry is AdminAuth, CoreHelper {
         // Remember tha address so we can revert back to old addr if needed
         previousAddresses[_id] = _contractAddr;
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "AddNewContract",
-            abi.encode(_id, _contractAddr, _waitPeriod)
-        );
+        emit AddNewContract(msg.sender, _id, _contractAddr, _waitPeriod);
     }
 
     /// @notice Reverts to the previous address immediately
@@ -88,21 +88,16 @@ contract DFSRegistry is AdminAuth, CoreHelper {
     /// @param _id Id of contract
     function revertToPreviousAddress(bytes4 _id) public onlyOwner {
         if (!(entries[_id].exists)){
-            revert EntryNonExistentError();
+            revert EntryNonExistentError(_id);
         }
         if (previousAddresses[_id] == address(0)){
-            revert EmptyPrevAddrError();
+            revert EmptyPrevAddrError(_id);
         }
 
         address currentAddr = entries[_id].contractAddr;
         entries[_id].contractAddr = previousAddresses[_id];
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "RevertToPreviousAddress",
-            abi.encode(_id, currentAddr, previousAddresses[_id])
-        );
+        emit RevertToPreviousAddress(msg.sender, _id, currentAddr, previousAddresses[_id]);
     }
 
     /// @notice Starts an address change for an existing entry
@@ -111,10 +106,10 @@ contract DFSRegistry is AdminAuth, CoreHelper {
     /// @param _newContractAddr Address of the new contract
     function startContractChange(bytes4 _id, address _newContractAddr) public onlyOwner {
         if (!entries[_id].exists){
-            revert EntryNonExistentError();
+            revert EntryNonExistentError(_id);
         }
         if (entries[_id].inWaitPeriodChange){
-            revert AlreadyInWaitPeriodChangeError();
+            revert AlreadyInWaitPeriodChangeError(_id);
         }
 
         entries[_id].changeStartTime = block.timestamp; // solhint-disable-line
@@ -122,25 +117,20 @@ contract DFSRegistry is AdminAuth, CoreHelper {
 
         pendingAddresses[_id] = _newContractAddr;
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "StartContractChange",
-            abi.encode(_id, entries[_id].contractAddr, _newContractAddr)
-        );
+        emit StartContractChange(msg.sender, _id, entries[_id].contractAddr, _newContractAddr);
     }
 
     /// @notice Changes new contract address, correct time must have passed
     /// @param _id Id of contract
     function approveContractChange(bytes4 _id) public onlyOwner {
         if (!entries[_id].exists){
-            revert EntryNonExistentError();
+            revert EntryNonExistentError(_id);
         }
         if (!entries[_id].inContractChange){
-            revert EntryNotInChangeError();
+            revert EntryNotInChangeError(_id);
         }
         if (block.timestamp < (entries[_id].changeStartTime + entries[_id].waitPeriod)){// solhint-disable-line
-            revert ChangeNotReadyError();
+            revert ChangeNotReadyError(block.timestamp, (entries[_id].changeStartTime + entries[_id].waitPeriod));
         }
 
         address oldContractAddr = entries[_id].contractAddr;
@@ -151,22 +141,17 @@ contract DFSRegistry is AdminAuth, CoreHelper {
         pendingAddresses[_id] = address(0);
         previousAddresses[_id] = oldContractAddr;
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "ApproveContractChange",
-            abi.encode(_id, oldContractAddr, entries[_id].contractAddr)
-        );
+        emit ApproveContractChange(msg.sender, _id, oldContractAddr, entries[_id].contractAddr);
     }
 
     /// @notice Cancel pending change
     /// @param _id Id of contract
     function cancelContractChange(bytes4 _id) public onlyOwner {
         if (!entries[_id].exists){
-            revert EntryNonExistentError();
+            revert EntryNonExistentError(_id);
         }
         if (!entries[_id].inContractChange){
-            revert EntryNotInChangeError();
+            revert EntryNotInChangeError(_id);
         }
 
         address oldContractAddr = pendingAddresses[_id];
@@ -175,12 +160,7 @@ contract DFSRegistry is AdminAuth, CoreHelper {
         entries[_id].inContractChange = false;
         entries[_id].changeStartTime = 0;
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "CancelContractChange",
-            abi.encode(_id, oldContractAddr, entries[_id].contractAddr)
-        );
+        emit CancelContractChange(msg.sender, _id, oldContractAddr, entries[_id].contractAddr);
     }
 
     /// @notice Starts the change for waitPeriod
@@ -188,10 +168,10 @@ contract DFSRegistry is AdminAuth, CoreHelper {
     /// @param _newWaitPeriod New wait time
     function startWaitPeriodChange(bytes4 _id, uint256 _newWaitPeriod) public onlyOwner {
         if (!entries[_id].exists){
-            revert EntryNonExistentError();
+            revert EntryNonExistentError(_id);
         }
         if (entries[_id].inContractChange){
-            revert AlreadyInContractChangeError();
+            revert AlreadyInContractChangeError(_id);
         }
 
         pendingWaitTimes[_id] = _newWaitPeriod;
@@ -199,25 +179,20 @@ contract DFSRegistry is AdminAuth, CoreHelper {
         entries[_id].changeStartTime = block.timestamp; // solhint-disable-line
         entries[_id].inWaitPeriodChange = true;
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "StartWaitPeriodChange",
-            abi.encode(_id, _newWaitPeriod)
-        );
+        emit StartWaitPeriodChange(msg.sender, _id, _newWaitPeriod);
     }
 
     /// @notice Changes new wait period, correct time must have passed
     /// @param _id Id of contract
     function approveWaitPeriodChange(bytes4 _id) public onlyOwner {
         if (!entries[_id].exists){
-            revert EntryNonExistentError();
+            revert EntryNonExistentError(_id);
         }
         if (!entries[_id].inWaitPeriodChange){
-            revert EntryNotInChangeError();
+            revert EntryNotInChangeError(_id);
         }
         if (block.timestamp < (entries[_id].changeStartTime + entries[_id].waitPeriod)){ // solhint-disable-line
-            revert ChangeNotReadyError();
+            revert ChangeNotReadyError(block.timestamp, (entries[_id].changeStartTime + entries[_id].waitPeriod));
         }
 
         uint256 oldWaitTime = entries[_id].waitPeriod;
@@ -228,22 +203,17 @@ contract DFSRegistry is AdminAuth, CoreHelper {
 
         pendingWaitTimes[_id] = 0;
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "ApproveWaitPeriodChange",
-            abi.encode(_id, oldWaitTime, entries[_id].waitPeriod)
-        );
+        emit ApproveWaitPeriodChange(msg.sender, _id, oldWaitTime, entries[_id].waitPeriod);
     }
 
     /// @notice Cancel wait period change
     /// @param _id Id of contract
     function cancelWaitPeriodChange(bytes4 _id) public onlyOwner {
         if (!entries[_id].exists){
-            revert EntryNonExistentError();
+            revert EntryNonExistentError(_id);
         }
         if (!entries[_id].inWaitPeriodChange){
-            revert EntryNotInChangeError();
+            revert EntryNotInChangeError(_id);
         }
 
         uint256 oldWaitPeriod = pendingWaitTimes[_id];
@@ -252,11 +222,6 @@ contract DFSRegistry is AdminAuth, CoreHelper {
         entries[_id].inWaitPeriodChange = false;
         entries[_id].changeStartTime = 0;
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "CancelWaitPeriodChange",
-            abi.encode(_id, oldWaitPeriod, entries[_id].waitPeriod)
-        );
+        emit CancelWaitPeriodChange(msg.sender, _id, oldWaitPeriod, entries[_id].waitPeriod);
     }
 }

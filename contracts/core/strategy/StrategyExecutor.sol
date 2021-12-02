@@ -3,19 +3,16 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../interfaces/IDSProxy.sol";
 import "./StrategyModel.sol";
 import "./BotAuth.sol";
 import "../DFSRegistry.sol";
 import "./ProxyAuth.sol";
 import "../strategy/SubStorage.sol";
-import "../strategy/StrategyStorage.sol";
 
 /// @title Main entry point for executing automated strategies
-contract StrategyExecutor is StrategyModel, AdminAuth {
+contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
     bytes4 constant PROXY_AUTH_ID = bytes4(keccak256("ProxyAuth"));
 
-    address public constant REGISTRY_ADDR = 0xD5cec8F03f803A74B60A7603Ed13556279376b09;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));

@@ -3,15 +3,13 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../interfaces/IDSProxy.sol";
-import "../../utils/DefisaverLogger.sol";
 import "../DFSRegistry.sol";
 import "./BundleStorage.sol";
 import "./StrategyStorage.sol";
 import "./StrategyModel.sol";
 
-/// @title Storage of users subscriptions to strategies
-contract SubStorage is StrategyModel, AdminAuth {
+/// @title Storage of users subscriptions to strategies/bundles
+contract SubStorage is StrategyModel, AdminAuth, CoreHelper {
     error NonexistentSubError(uint256);
     error SenderNotSubOwnerError(address, uint256);
     error UserPositionsEmpty();
@@ -22,12 +20,14 @@ contract SubStorage is StrategyModel, AdminAuth {
     event ActivateSub(uint256 indexed);
     event DeactivateSub(uint256 indexed);
 
-    address public constant REGISTRY_ADDR = 0xD5cec8F03f803A74B60A7603Ed13556279376b09;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes4 constant BUNDLE_STORAGE_ID = bytes4(keccak256("BundleStorage"));
     bytes4 constant STRATEGY_STORAGE_ID = bytes4(keccak256("StrategyStorage"));
 
+    StoredSubData[] public strategiesSubs;
+
+    /// @notice Checks if subId is init. and if the sender is the owner
     modifier onlySubOwner(uint256 _subId) {
         if (address(strategiesSubs[_subId].userProxy) == address(0)) {
             revert NonexistentSubError(_subId);
@@ -40,23 +40,24 @@ contract SubStorage is StrategyModel, AdminAuth {
     }
 
     // TODO: hard code addr to save gas later on
-    modifier isValidId(uint256 _subId, bool _isBundle) {
+    /// @notice Checks if the id is valid (points to a stored bundle/sub)
+    modifier isValidId(uint256 _id, bool _isBundle) {
         if (_isBundle) {
-            if (_subId > BundleStorage(registry.getAddr(BUNDLE_STORAGE_ID)).getBundleCount()) {
-                revert SubIdOutOfRange(_subId, _isBundle);
+            if (_id > BundleStorage(registry.getAddr(BUNDLE_STORAGE_ID)).getBundleCount()) {
+                revert SubIdOutOfRange(_id, _isBundle);
             }
         } else {
-            if (_subId > StrategyStorage(registry.getAddr(STRATEGY_STORAGE_ID)).getStrategyCount()) {
-                revert SubIdOutOfRange(_subId, _isBundle);
+            if (_id > StrategyStorage(registry.getAddr(STRATEGY_STORAGE_ID)).getStrategyCount()) {
+                revert SubIdOutOfRange(_id, _isBundle);
             }
         }
 
         _;
     }
 
-    StoredSubData[] public strategiesSubs;
-
-    /// @notice Creates a new strategy with an existing template
+    /// @notice Adds users info and records StoredSubData, logs StrategySub
+    /// @dev To save on gas we don't store the whole struct but rather the hash of the struct
+    /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
     function subscribeToStrategy(
         StrategySub memory _sub
     ) public isValidId(_sub.id, _sub.isBundle) returns (uint256) {
@@ -76,9 +77,10 @@ contract SubStorage is StrategyModel, AdminAuth {
         return currentId;
     }
 
-    /// @notice Updates the users strategy
-    /// @dev Only callable by proxy who created the strategy
+    /// @notice Updates the users subscription data
+    /// @dev Only callable by proxy who created the sub.
     /// @param _subId Id of the subscription to update
+    /// @param _sub Subscription struct of the user (needs whole struct so we can hash it)
     function updateSubData(
         uint256 _subId,
         StrategySub calldata _sub
@@ -92,6 +94,9 @@ contract SubStorage is StrategyModel, AdminAuth {
         emit UpdateData(_subId, subStorageHash, _sub);
     }
 
+    /// @notice Enables the subscription for execution if disabled
+    /// @dev Must own the sub. to be able to enable it
+    /// @param _subId Id of subscription to enable
     function activateSub(
         uint _subId
     ) public onlySubOwner(_subId) {
@@ -102,6 +107,9 @@ contract SubStorage is StrategyModel, AdminAuth {
         emit ActivateSub(_subId);
     }
 
+    /// @notice Disables the subscription (will not be able to execute the strategy for the user)
+    /// @dev Must own the sub. to be able to disable it
+    /// @param _subId Id of subscription to disable
     function deactivateSub(
         uint _subId
     ) public onlySubOwner(_subId) {

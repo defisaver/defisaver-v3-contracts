@@ -22,6 +22,13 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         _;
     }
 
+    /// @notice Creates a new strategy and writes the data in an array
+    /// @dev Can only be called by auth addresses if it's not open to public
+    /// @param _name Name of the strategy useful for logging what strategy is executing
+    /// @param _triggerIds Array of identifiers for trigger - bytes4(keccak256(TriggerName))
+    /// @param _actionIds Array of identifiers for actions - bytes4(keccak256(ActionName))
+    /// @param _paramMapping Describes how inputs to functions are piped from return/subbed values
+    /// @param _continuous If the action is repeated (continuos) or one time
     function createStrategy(
         string memory _name,
         bytes4[] memory _triggerIds,
@@ -43,6 +50,9 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         return strategies.length - 1;
     }
 
+    /// @notice Switch to determine if bundles can be created by anyone
+    /// @dev Callable only by the owner
+    /// @param _openToPublic Flag if true anyone can create bundles
     function changeEditPermission(bool _openToPublic) public onlyOwner {
         openToPublic = _openToPublic;
     }
