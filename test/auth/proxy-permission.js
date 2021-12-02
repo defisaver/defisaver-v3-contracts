@@ -1,10 +1,11 @@
-// const { expect } = require('chai');
+const { expect } = require('chai');
 const hre = require('hardhat');
 
 const { deployContract } = require('../../scripts/utils/deployer');
 
 const {
     getProxy,
+    getProxyAuth,
 } = require('../utils');
 
 describe('Proxy-Permission', () => {
@@ -29,7 +30,8 @@ describe('Proxy-Permission', () => {
 
         await proxy['execute(address,bytes)'](proxyPermission.address, functionData, { gasLimit: 1500000 });
 
-        // TODO: check permission
+        const hasPermission = await getProxyAuth(proxy.address, ownerAcc2.address);
+        expect(hasPermission).to.be.equal(true);
     });
 
     it('... should through DSProxy remove contract permission', async () => {
@@ -41,6 +43,7 @@ describe('Proxy-Permission', () => {
 
         await proxy['execute(address,bytes)'](proxyPermission.address, functionData, { gasLimit: 1500000 });
 
-        // TODO: check permission
+        const hasPermission = await getProxyAuth(proxy.address, ownerAcc2.address);
+        expect(hasPermission).to.be.equal(false);
     });
 });

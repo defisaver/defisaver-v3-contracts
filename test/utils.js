@@ -353,6 +353,17 @@ const convertToWeth = (tokenAddr) => {
     return tokenAddr;
 };
 
+const getProxyAuth = async (proxyAddr, addrWithAuth) => {
+    const dsAuth = await hre.ethers.getContractAt('DSAuth', proxyAddr);
+    const authorityAddr = await dsAuth.authority();
+    const dsGuard = await hre.ethers.getContractAt('DSAuthority', authorityAddr);
+    const selector = '0x1cff79cd'; // execute selector
+
+    const hasPermission = await dsGuard.canCall(addrWithAuth, proxyAddr, selector);
+
+    return hasPermission;
+};
+
 const setNewExchangeWrapper = async (acc, newAddr) => {
     const exchangeOwnerAddr = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
     await sendEther(acc, exchangeOwnerAddr, '1');
@@ -442,16 +453,17 @@ module.exports = {
     fetchStandardAmounts,
     setNewExchangeWrapper,
     fetchAmountinUSDPrice,
-    BN2Float,
-    Float2BN,
     getGasUsed,
     getNameId,
     redeployRegistry,
     getChainLinkPrice,
     getLocalTokenPrice,
     calcGasToUSD,
-    AVG_GAS_PRICE,
+    getProxyAuth,
     getAllowance,
+    BN2Float,
+    Float2BN,
+    AVG_GAS_PRICE,
     standardAmounts,
     nullAddress,
     dydxTokens,

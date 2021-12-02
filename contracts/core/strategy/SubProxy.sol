@@ -4,8 +4,6 @@ pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
 import "../../auth/ProxyPermission.sol";
-import "../../DS/DSGuard.sol";
-import "../../DS/DSAuth.sol";
 import "./SubStorage.sol";
 import "../DFSRegistry.sol";
 

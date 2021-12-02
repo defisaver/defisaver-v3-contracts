@@ -40,6 +40,7 @@ describe('Admin-Vault', () => {
     it('... should fail to change the owner address if not called by admin', async () => {
         try {
             await adminVault.changeAdmin(newOwner.address);
+            expect(true).to.be(false);
         } catch (err) {
             expect(err.toString()).to.have.string('SenderNotAdmin');
         }
@@ -60,8 +61,8 @@ describe('Admin-Vault', () => {
     it('... should fail to change the admin address if not called by admin', async () => {
         try {
             await adminVault.changeAdmin(notOwner.address);
-            // eslint-disable-next-line no-unused-expressions
-            expect(true).to.be.false;
+
+            expect(true).to.be(false);
         } catch (err) {
             expect(err.toString()).to.have.string('SenderNotAdmin');
         }
