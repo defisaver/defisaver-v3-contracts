@@ -72,8 +72,6 @@ contract RariWithdraw is ActionBase, DSMath {
 
         // pull tokens if they're not on proxy
         _inputData.poolTokenAddress.pullTokensIfNeeded(_inputData.from, _inputData.poolTokensAmountToPull);
-        // approve fundManager to burn as many tokens as needed
-        _inputData.poolTokenAddress.approveToken(address(fundManager), type(uint256).max);
 
         tokensWithdrawn = fundManager.withdraw(IERC20(_inputData.stablecoinAddress).symbol(), _inputData.stablecoinAmountToWithdraw);
         
@@ -81,8 +79,6 @@ contract RariWithdraw is ActionBase, DSMath {
         _inputData.poolTokenAddress.withdrawTokens(_inputData.from, poolTokensAfterWithdraw);
 
         _inputData.stablecoinAddress.withdrawTokens(_inputData.to, tokensWithdrawn);
-        // remove approval for unburned tokens
-        _inputData.poolTokenAddress.approveToken(address(fundManager), 0);
     }
 
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {

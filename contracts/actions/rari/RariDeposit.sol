@@ -67,13 +67,13 @@ contract RariDeposit is ActionBase, DSMath {
 
         _inputData.stablecoinAddress.approveToken(address(rariFundManager), _inputData.amount);
 
-        uint256 rsptBalanceBefore = poolToken.getBalance(_inputData.to);
+        uint256 poolTokenBalanceBefore = poolToken.getBalance(_inputData.to);
 
         rariFundManager.depositTo(_inputData.to, IERC20(_inputData.stablecoinAddress).symbol(), _inputData.amount);
 
-        uint256 rsptBalanceAfter = poolToken.getBalance(_inputData.to);
+        uint256 poolTokenBalanceAfter = poolToken.getBalance(_inputData.to);
 
-        rsptReceived = sub(rsptBalanceAfter, rsptBalanceBefore);
+        rsptReceived = sub(poolTokenBalanceAfter, poolTokenBalanceBefore);
     }
 
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
