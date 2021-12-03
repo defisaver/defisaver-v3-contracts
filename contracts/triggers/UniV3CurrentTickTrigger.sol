@@ -7,21 +7,25 @@ import "../interfaces/ITrigger.sol";
 import "../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 import "../interfaces/uniswap/v3/IUniswapV3Factory.sol";
 import "../interfaces/uniswap/v3/IUniswapV3Pool.sol";
+import "./helpers/TriggerHelper.sol";
 
-contract UniV3CurrentTickTrigger is ITrigger, AdminAuth {
+/// @title Trigger contract that triggers if the current tick is outside of the positions range on the side that we want it to be
+contract UniV3CurrentTickTrigger is ITrigger, AdminAuth, TriggerHelper {
 
     IUniswapV3NonfungiblePositionManager public constant positionManager =
-        IUniswapV3NonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
+        IUniswapV3NonfungiblePositionManager(UNISWAP_V3_NONFUNGIBLE_POSITION_MANAGER);
     IUniswapV3Factory public constant uniswapFactory = 
-        IUniswapV3Factory(0x1F98431c8aD98523631AE4a59f267346ea31F984);
+        IUniswapV3Factory(UNISWAP_V3_FACTORY);
     
     enum TickState {UNDER, OVER}
 
+    /// @param tokenId id of the Uni V3 NFT that represents users LP position
+    /// @param state represents if we want the current tick to be under or over the current positions tick range
     struct SubParams {
         uint256 tokenId;
         uint8 state;
     }
-
+    /// @dev function that checks positions upper and lower tick, and current tick of the pool and triggers if it's in a correct state
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerSubData = parseInputs(_subData);
 

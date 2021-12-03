@@ -6,17 +6,21 @@ import "../auth/AdminAuth.sol";
 import "../actions/liquity/helpers/LiquityRatioHelper.sol";
 import "../interfaces/ITrigger.sol";
 
+/// @title Trigger contract that verifies if current Liquity position ratio went over/under the subbed ratio
 contract LiquityRatioTrigger is ITrigger, AdminAuth, LiquityRatioHelper {
 
     enum RatioState { OVER, UNDER }
 
+    /// @param troveOwner address of the user whose position we check
+    /// @param ratio ratio that represents the triggerable point
+    /// @param state represents if we want the current state to be higher or lower than ratio param
     struct SubParams {
         address troveOwner;
         uint256 ratio;
         uint8 state;
     }
-
-    function isTriggered(bytes memory _callData, bytes memory _subData)
+    /// @dev checks current ratio of a Liquity trove and triggers if it's in a correct state
+    function isTriggered(bytes memory, bytes memory _subData)
         public
         view
         override

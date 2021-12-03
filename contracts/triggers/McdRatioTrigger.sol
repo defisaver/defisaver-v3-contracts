@@ -9,10 +9,11 @@ import "../interfaces/IMCDPriceVerifier.sol";
 import "../utils/TempStorage.sol";
 import "../core/helpers/CoreHelper.sol";
 import "../core/DFSRegistry.sol";
+import "./helpers/TriggerHelper.sol";
 
-contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper {
-    address public constant MCD_PRICE_VERIFIER = 0xeAa474cbFFA87Ae0F1a6f68a3aBA6C77C656F72c;
 
+/// @title Trigger contract that verifies if current MCD vault ratio is higher or lower than wanted
+contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, TriggerHelper {
     bytes4 constant TEMP_STORAGE_ID = bytes4(keccak256("TempStorage"));
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
@@ -29,12 +30,17 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper {
         NEXT_RATIO,
         BOTH_RATIOS
     }
-
+    
+    /// @param nextPrice price that OSM returns as next price value
+    /// @param ratioCheck returns if we want the trigger to look at the current asset price, nextPrice param or both
     struct CallParams {
         uint256 nextPrice;
         uint8 ratioCheck;
     }
 
+    /// @param vaultId id of the vault whose ratio we check
+    /// @param ratio ratio that represents the triggerable point
+    /// @param state represents if we want current ratio to be higher or lower than ratio param
     struct SubParams {
         uint256 vaultId;
         uint256 ratio;
@@ -52,7 +58,7 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper {
         uint256 checkedRatio;
         bool shouldTriggerCurr;
         bool shouldTriggerNext;
-
+    
         if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.CURR_RATIO || RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS){
             checkedRatio = getRatio(triggerSubData.vaultId, 0);
             shouldTriggerCurr = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
@@ -62,7 +68,7 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper {
             checkedRatio = getRatio(triggerSubData.vaultId, triggerCallData.nextPrice);
             
             shouldTriggerNext = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
-
+            /// @dev if we don't have access to the next price on-chain this returns true, if we do this compares the nextPrice param we sent
             if (
                 !IMCDPriceVerifier(MCD_PRICE_VERIFIER).verifyVaultNextPrice(
                     triggerCallData.nextPrice,
@@ -73,6 +79,7 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper {
             }
         }
 
+        /// @dev this later helps us check if boost/repay are done correctly in MCDRatioCheckerAction
         address tempStorageAddr = registry.getAddr(TEMP_STORAGE_ID);
         TempStorage(tempStorageAddr).set("MCD_RATIO", bytes32(checkedRatio));
 

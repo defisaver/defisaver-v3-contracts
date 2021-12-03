@@ -6,16 +6,21 @@ import "../auth/AdminAuth.sol";
 import "../actions/compound/helpers/CompRatioHelper.sol";
 import "../interfaces/ITrigger.sol";
 
+/// @title Trigger contract that verifies if the Compound position went over/under the subbed ratio
 contract CompoundRatioTrigger is ITrigger, AdminAuth, CompRatioHelper {
 
     enum RatioState { OVER, UNDER }
-
+    
+    /// @param user address of the user whose position we check
+    /// @param ratio ratio that represents the triggerable point
+    /// @param state represents if we want the current state to be higher or lower than ratio param
     struct SubParams {
         address user;
         uint256 ratio;
         uint8 state;
     }
-
+    
+    /// @dev checks current safety ratio of a Compound position and triggers if it's in a correct state
     function isTriggered(bytes memory, bytes memory _subData)
         public
         view

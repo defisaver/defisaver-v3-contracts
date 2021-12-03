@@ -7,8 +7,10 @@ import "../interfaces/ITrigger.sol";
 import "../interfaces/chainlink/IFeedRegistry.sol";
 import "../utils/Denominations.sol";
 import "../utils/TokenUtils.sol";
+import "./helpers/TriggerHelper.sol";
 
-contract ChainLinkPriceTrigger is ITrigger, AdminAuth {
+/// @title Trigger contract that verifies if current token price is over/under the price specified during subscription
+contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper {
     using TokenUtils for address;
 
     enum PriceState {
@@ -16,6 +18,9 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth {
         UNDER
     }
 
+    /// @param tokenAddr address of the token which price we trigger with
+    /// @param price price in USD of the token that represents the triggerable point
+    /// @param state represents if we want the current price to be higher or lower than price param
     struct SubParams {
         address tokenAddr;
         uint256 price;
@@ -23,8 +28,9 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth {
     }
 
     IFeedRegistry public constant feedRegistry =
-        IFeedRegistry(0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf);
+        IFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
+    /// @dev checks chainlink oracle for current price and triggers if it's in a correct state
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
@@ -41,6 +47,7 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth {
         return false;
     }
 
+    /// @dev helper function that returns latest token price in USD
     function getPrice(address _tokenAddr) public view returns (uint256) {
         if (_tokenAddr == TokenUtils.WETH_ADDR) {
             _tokenAddr = TokenUtils.ETH_ADDR;
