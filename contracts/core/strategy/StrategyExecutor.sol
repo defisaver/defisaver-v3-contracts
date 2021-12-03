@@ -68,10 +68,10 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
     /// @notice Calls ProxyAuth which has the auth from the DSProxy which will call RecipeExecutor
     /// @param _subId Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
-    /// @param _actionsCallData All input data needed to check triggers
+    /// @param _triggerCallData All input data needed to check triggers
     /// @param _strategyIndex Which strategy in a bundle, need to specify because when sub is part of a bundle
     /// @param _sub StrategySub struct needed because on-chain we store only the hash
-    /// @param _userProxy DSProxy address of the user we are executing the strategy for
+    /// @param _userProxy StrategySub struct needed because on-chain we store only the hash
     function callActions(
         uint256 _subId,
         bytes[] calldata _actionsCallData,

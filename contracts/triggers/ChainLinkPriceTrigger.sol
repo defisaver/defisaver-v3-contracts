@@ -46,7 +46,6 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth {
             _tokenAddr = TokenUtils.ETH_ADDR;
         }
 
-        // TODO: diff. denominations?
         (, int256 price, , , ) = feedRegistry.latestRoundData(_tokenAddr, Denominations.USD);
 
         return uint256(price);

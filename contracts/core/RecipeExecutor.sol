@@ -13,7 +13,7 @@ import "./strategy/SubStorage.sol";
 import "../interfaces/flashloan/IFlashLoanBase.sol";
 import "../interfaces/ITrigger.sol";
 
-/// @title Handles FL taking and executes actions
+/// @title Entry point into executing recipes/checking triggers directly and as part of a strategy
 contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper {
     address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
 
@@ -33,9 +33,12 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
     }
 
 
-    /// @notice Called by users DSProxy through the Strategy contract to execute a recipe
+    /// @notice Called by users DSProxy through the ProxyAuth to execute a recipe & check triggers
     /// @param _subId Id of the subscription we want to execute
-    /// @param _actionCallData All the data related to the strategies Recipe
+    /// @param _actionCallData All input data needed to execute actions
+    /// @param _triggerCallData All input data needed to check triggers
+    /// @param _strategyIndex Which strategy in a bundle, need to specify because when sub is part of a bundle
+    /// @param _sub All the data related to the strategies Recipe
     function executeRecipeFromStrategy(
         uint256 _subId,
         bytes[] calldata _actionCallData,
@@ -53,6 +56,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
             address bundleStorageAddr = registry.getAddr(BUNDLE_STORAGE_ID);
             address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
 
+            // fetch strategy if inside of bundle
             if (_sub.isBundle) {
                 strategyId = BundleStorage(bundleStorageAddr).getStrategyId(strategyId, _strategyIndex);
             }
@@ -73,6 +77,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
             SubStorage(subStorageAddr).deactivateSub(_subId);
         }
 
+        // format recipe from strategy
         Recipe memory currRecipe = Recipe({
             name: strategy.name,
             callData: _actionCallData,
@@ -91,13 +96,14 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
         bytes[] calldata _triggerCallData,
         uint256 _subId,
         address _storageAddr
-    ) internal returns (bool, uint256) {     // saves less than 20 gas
+    ) internal returns (bool, uint256) {
         bytes4[] memory triggerIds = strategy.triggerIds;
 
         bool isTriggered;
         address triggerAddr;
+        uint256 i;
 
-        for (uint256 i = 0; i < triggerIds.length; i++) {
+        for (i = 0; i < triggerIds.length; i++) {
             triggerAddr = registry.getAddr(triggerIds[i]);
             isTriggered = ITrigger(triggerAddr).isTriggered(
                 _triggerCallData[i],
@@ -106,13 +112,14 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
 
             if (!isTriggered) return (false, i);
 
+            // after execution triggers flag-ed changeable can update their value
             if (ITrigger(triggerAddr).isChangeable()) {
                 _sub.triggerData[i] = ITrigger(triggerAddr).changedSubData(_sub.triggerData[i]);
                 SubStorage(_storageAddr).updateSubData(_subId, _sub);
             }
         }
 
-        return (true, 0);
+        return (true, i);
     }
 
     /// @notice This is the callback function that FL actions call
@@ -122,6 +129,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
     function _executeActionsFromFL(Recipe calldata _currRecipe, bytes32 _flAmount) public payable {
         bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
         returnValues[0] = _flAmount; // set the flash loan action as first return value
+
         // skips the first actions as it was the fl action
         for (uint256 i = 1; i < _currRecipe.actionIds.length; ++i) {
             returnValues[i] = _executeAction(_currRecipe, i, returnValues);
@@ -130,7 +138,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
 
     /// @notice Runs all actions from the recipe
     /// @dev FL action must be first and is parsed separately, execution will go to _executeActionsFromFL
-    /// @param _currRecipe to be executed
+    /// @param _currRecipe Recipe to be executed
     function _executeActions(Recipe memory _currRecipe) internal {
         address firstActionAddr = registry.getAddr(_currRecipe.actionIds[0]);
 
@@ -159,6 +167,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
     ) internal returns (bytes32 response) {
 
         address actionAddr = registry.getAddr(_currRecipe.actionIds[_index]);
+
         response = IDSProxy(address(this)).execute(
             actionAddr,
             abi.encodeWithSignature(
@@ -172,7 +181,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
     }
 
     /// @notice Prepares and executes a flash loan action
-    /// @dev It adds to the last input value of the FL, the recipe data so it can be passed on
+    /// @dev It adds to the first input value of the FL, the recipe data so it can be passed on
     /// @param _currRecipe Recipe to be executed
     /// @param _flActionAddr Address of the flash loan action
     /// @param _returnValues An empty array of return values, because it"s the first action
@@ -183,6 +192,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
     ) internal {
         givePermission(_flActionAddr);
 
+        // encode data for FL
         bytes memory recipeData = abi.encode(_currRecipe, address(this));
         IFlashLoanBase.FlashLoanParams memory params = abi.decode(
             _currRecipe.callData[0],

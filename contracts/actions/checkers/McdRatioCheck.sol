@@ -5,19 +5,32 @@ pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "../mcd/helpers/McdRatioHelper.sol";
+import "../../utils/TempStorage.sol";
+import "../../core/helpers/CoreHelper.sol";
 
 /// @title Checks if ratio is in target range
 contract McdRatioCheck is ActionBase, McdRatioHelper {
+    bytes4 constant TEMP_STORAGE_ID = bytes4(keccak256("TempStorage"));
 
-    // TODO: Maybe not be a constant?
-    /// @dev 20% offset acceptable, used for testing
-    uint256 internal constant RATIO_OFFSET = 500000000000000000;
+    /// @dev 2% offset acceptable
+    uint256 internal constant RATIO_OFFSET = 20000000000000000;
+
+    enum RatioState {
+        SHOULD_BE_LOWER,
+        SHOULD_BE_HIGHER
+    }
 
     struct Params {
+        RatioState ratioState;
+        bool checkTarget;
         uint256 ratioTarget;
         uint256 vaultId;
         uint256 nextPrice;
     }
+
+    error RatioOutsideTargetRange(uint256, uint256);
+    error RatioHigherThanBefore(uint256, uint256);
+    error RatioLowerThanBefore(uint256, uint256);
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -28,13 +41,32 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.ratioTarget = _parseParamUint(inputData.ratioTarget, _paramMapping[0], _subData, _returnValues);
-        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[1], _subData, _returnValues);
-        inputData.nextPrice = _parseParamUint(inputData.nextPrice, _paramMapping[2], _subData, _returnValues);
+        uint256 ratioState = _parseParamUint(uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues);
+        inputData.ratioTarget = _parseParamUint(inputData.ratioTarget, _paramMapping[1], _subData, _returnValues);
+        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[2], _subData, _returnValues);
+        inputData.nextPrice = _parseParamUint(inputData.nextPrice, _paramMapping[3], _subData, _returnValues);
 
         uint256 currRatio = getRatio(inputData.vaultId, inputData.nextPrice);
 
-        require(inAcceptableRange(currRatio, inputData.ratioTarget), "Ratio in non acceptable range");
+        address tempStorageAddr = registry.getAddr(TEMP_STORAGE_ID);
+        uint256 beforeRatio = uint256(TempStorage(tempStorageAddr).get("MCD_RATIO"));
+
+        // ratio should be lower
+        if (ratioState == 0 && beforeRatio < currRatio) {
+            revert RatioHigherThanBefore(beforeRatio, currRatio);
+        }
+
+        // ratio should be higher
+        if (ratioState == 1 && beforeRatio > currRatio) {
+            revert RatioLowerThanBefore(beforeRatio, currRatio);
+        }
+
+        // if ratio target is sent check on it
+        if (inputData.checkTarget) {
+            if(!inAcceptableRange(currRatio, inputData.ratioTarget)) {
+                revert RatioOutsideTargetRange(currRatio, inputData.ratioTarget);
+            }
+        }
 
         logger.Log(address(this), msg.sender, "McdRatioCheck", abi.encode(inputData, currRatio));
 
