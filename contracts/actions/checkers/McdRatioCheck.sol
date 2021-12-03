@@ -29,8 +29,8 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
     }
 
     error RatioOutsideTargetRange(uint256, uint256);
-    error RatioHigherThanBefore(uint256, uint256);
-    error RatioLowerThanBefore(uint256, uint256);
+    error RatioNotHigherThanBefore(uint256, uint256);
+    error RatioNotLowerThanBefore(uint256, uint256);
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -52,13 +52,13 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
         uint256 beforeRatio = uint256(TempStorage(tempStorageAddr).get("MCD_RATIO"));
 
         // ratio should be lower
-        if (ratioState == 0 && beforeRatio < currRatio) {
-            revert RatioHigherThanBefore(beforeRatio, currRatio);
+        if (RatioState(ratioState) == RatioState.SHOULD_BE_LOWER && currRatio >= beforeRatio) {
+            revert RatioNotLowerThanBefore(beforeRatio, currRatio);
         }
 
         // ratio should be higher
-        if (ratioState == 1 && beforeRatio > currRatio) {
-            revert RatioLowerThanBefore(beforeRatio, currRatio);
+        if (RatioState(ratioState) == RatioState.SHOULD_BE_HIGHER && currRatio <= beforeRatio) {
+            revert RatioNotHigherThanBefore(beforeRatio, currRatio);
         }
 
         // if ratio target is sent check on it
