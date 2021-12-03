@@ -6,16 +6,20 @@ import "../auth/AdminAuth.sol";
 import "../actions/reflexer/helpers/ReflexerRatioHelper.sol";
 import "../interfaces/ITrigger.sol";
 
+/// @title Trigger contract that verifies if the Reflexer position went over/under the subbed ratio
 contract ReflexerRatioTrigger is ITrigger, AdminAuth, ReflexerRatioHelper {
 
     enum RatioState { OVER, UNDER }
 
+    /// @param safeId Reflexer vault Id that we want to check
+    /// @param ratio ratio that represents the triggerable point
+    /// @param state represents if we want the current state to be higher or lower than ratio param
     struct SubParams {
         uint256 safeId;
         uint256 ratio;
         uint8 state;
     }
-
+    /// @dev checks current safety ratio of a Liquity position and triggers if it's in a correct state
     function isTriggered(bytes memory _callData, bytes memory _subData)
         public
         override

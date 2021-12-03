@@ -6,7 +6,9 @@ import "../auth/AdminAuth.sol";
 import "../interfaces/ITrigger.sol";
 import "../interfaces/IERC20.sol";
 
+/// @title Trigger contract that verifies if the current gas price of tx is lower than the max allowed gas price
 contract GasPriceTrigger is ITrigger, AdminAuth {
+
     struct SubParams {
         uint256 maxGasPrice;
     }

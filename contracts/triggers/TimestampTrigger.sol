@@ -7,7 +7,12 @@ import "../interfaces/ITrigger.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/strategy/ISubStorage.sol";
 
+/// @title Trigger contract that verifies if current timestamp is higher than the one in sub data,
+/// and also helps change the timestamp for next execution
 contract TimestampTrigger is ITrigger, AdminAuth {
+
+    /// @param timestamp the next timestamp in which it should trigger
+    /// @param interval how much to increase the next timestamp after executing strategy
     struct SubParams {
         uint256 timestamp;
         uint256 interval;
