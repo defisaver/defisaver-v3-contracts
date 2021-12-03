@@ -19,8 +19,8 @@ contract LiquityRatioTrigger is ITrigger, AdminAuth, LiquityRatioHelper {
         uint256 ratio;
         uint8 state;
     }
-    /// @dev checks current ratio of a Liquity trove and triggers if it's in a correc state
-    function isTriggered(bytes memory _callData, bytes memory _subData)
+    /// @dev checks current ratio of a Liquity trove and triggers if it's in a correct state
+    function isTriggered(bytes memory, bytes memory _subData)
         public
         view
         override

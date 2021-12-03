@@ -20,7 +20,7 @@ contract ReflexerRatioTrigger is ITrigger, AdminAuth, ReflexerRatioHelper {
         uint8 state;
     }
     /// @dev checks current safety ratio of a Liquity position and triggers if it's in a correct state
-    function isTriggered(bytes memory _callData, bytes memory _subData)
+    function isTriggered(bytes memory, bytes memory _subData)
         public
         override
         returns (bool)

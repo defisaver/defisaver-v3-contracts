@@ -13,7 +13,7 @@ import "./helpers/TriggerHelper.sol";
 contract UniV3CurrentTickTrigger is ITrigger, AdminAuth, TriggerHelper {
 
     IUniswapV3NonfungiblePositionManager public constant positionManager =
-        IUniswapV3NonfungiblePositionManager(UNISWAP_V3_NONFUNGIBLE_POSITION_MANAER);
+        IUniswapV3NonfungiblePositionManager(UNISWAP_V3_NONFUNGIBLE_POSITION_MANAGER);
     IUniswapV3Factory public constant uniswapFactory = 
         IUniswapV3Factory(UNISWAP_V3_FACTORY);
     
