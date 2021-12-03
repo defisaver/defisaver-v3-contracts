@@ -55,6 +55,7 @@ describe('Mcd-Repay-Strategy', function () {
         await redeploy('StrategyStorage');
         await redeploy('SubStorage');
         await redeploy('BundleStorage');
+        await redeploy('TempStorage');
 
         mcdView = await redeploy('McdView');
 
@@ -119,17 +120,19 @@ describe('Mcd-Repay-Strategy', function () {
             '%mcdManager',
         );
 
-        // const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
-        //     '&targetRatio',
-        //     '&vaultId',
-        //     '%nextPrice',
-        // );
+        const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+            '%ratioState',
+            '%checkTarget',
+            '&targetRatio', // targetRatio
+            '&vaultId', // vaultId
+            '%nextPrice', // nextPrice
+        );
 
         repayStrategy.addAction(withdrawAction);
         repayStrategy.addAction(feeTakingAction);
         repayStrategy.addAction(sellAction);
         repayStrategy.addAction(mcdPaybackAction);
-        // repayStrategy.addAction(mcdRatioCheckAction);
+        repayStrategy.addAction(mcdRatioCheckAction);
 
         return repayStrategy.encodeForDsProxyCall();
     };
@@ -175,11 +178,20 @@ describe('Mcd-Repay-Strategy', function () {
             '%mcdManager',
         );
 
+        const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+            '%ratioState',
+            '%checkTarget',
+            '&targetRatio', // targetRatio
+            '&vaultId', // vaultId
+            '%nextPrice', // nextPrice
+        );
+
         repayStrategy.addAction(flAction);
         repayStrategy.addAction(sellAction);
         repayStrategy.addAction(feeTakingAction);
         repayStrategy.addAction(mcdPaybackAction);
         repayStrategy.addAction(withdrawAction);
+        repayStrategy.addAction(mcdRatioCheckAction);
 
         return repayStrategy.encodeForDsProxyCall();
     };

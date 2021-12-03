@@ -409,17 +409,19 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
         MCD_MANAGER_ADDR,
     );
 
-    // const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
-    //     '0', // targetRatio
-    //     '0', // vaultId
-    //     '0', // nextPrice
-    // );
+    const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+        '1', // ratioState - SHOULD_BE_HIGHER
+        false, // if exact triggerRatio should be checked
+        '0', // targetRatio
+        '0', // vaultId
+        '0', // nextPrice
+    );
 
     actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
-    // actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
+    actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
 
     const nextPrice = 0;
     triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
@@ -527,11 +529,20 @@ const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, s
         MCD_MANAGER_ADDR,
     );
 
+    const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+        '1', // ratioState - SHOULD_BE_HIGHER
+        false, // if exact triggerRatio should be checked
+        '0', // targetRatio
+        '0', // vaultId
+        '0', // nextPrice
+    );
+
     actionsCallData.push(flAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
     actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
 
     // const nextPrice = await getNextEthPrice();
     const nextPrice = 0;
@@ -685,6 +696,8 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
     );
 
     const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+        '0', // ratioState - SHOULD_BE_LOWER
+        false,
         '0', // targetRatio
         '0', // vaultId
         '0', // nextPrice
@@ -748,11 +761,20 @@ const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, s
         MCD_MANAGER_ADDR,
     );
 
+    const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+        '0', // ratioState - SHOULD_BE_LOWER
+        false, // if exact triggerRatio should be checked
+        '0', // targetRatio
+        '0', // vaultId
+        '0', // nextPrice
+    );
+
     actionsCallData.push(flAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdSupplyAction.encodeForRecipe()[0]);
     actionsCallData.push(generateAction.encodeForRecipe()[0]);
+    actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
 
     triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
 

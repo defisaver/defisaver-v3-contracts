@@ -71,6 +71,8 @@ describe('Mcd-Boost-Strategy', function () {
         );
 
         const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+            '%ratioState',
+            '%checkTarget',
             '&targetRatio', // targetRatio
             '&vaultId', // vaultId
             '%nextPrice', // nextPrice
@@ -125,11 +127,20 @@ describe('Mcd-Boost-Strategy', function () {
             '%managerAddr',
         );
 
+        const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+            '%ratioState',
+            '%checkTarget',
+            '&targetRatio', // targetRatio
+            '&vaultId', // vaultId
+            '%nextPrice', // nextPrice
+        );
+
         mcdBoostStrategy.addAction(flAction);
         mcdBoostStrategy.addAction(sellAction);
         mcdBoostStrategy.addAction(feeTakingAction);
         mcdBoostStrategy.addAction(mcdSupplyAction);
         mcdBoostStrategy.addAction(generateAction);
+        mcdBoostStrategy.addAction(mcdRatioCheckAction);
 
         return mcdBoostStrategy.encodeForDsProxyCall();
     };
@@ -147,6 +158,7 @@ describe('Mcd-Boost-Strategy', function () {
         await redeploy('StrategyStorage');
         await redeploy('SubStorage');
         await redeploy('BundleStorage');
+        await redeploy('TempStorage');
 
         mcdView = await redeploy('McdView');
 
