@@ -95,10 +95,11 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
             if (isReturnInjection(_mapType)) {
                 _param = address(bytes20((_returnValues[getReturnIndex(_mapType)])));
             } else {
+                /// @dev The last two values are specially reserved for proxy addr and owner addr
                 if (_mapType == 254) return address(this); //DSProxy address
-                if (_mapType == 255) return DSProxy(payable(address(this))).owner();
+                if (_mapType == 255) return DSProxy(payable(address(this))).owner(); // owner of DSProxy
+
                 _param = address(uint160(uint256(_subData[getSubIndex(_mapType)])));
-                // _param = address(bytes20(_subData[getSubIndex(_mapType)]));
             }
         }
 

@@ -26,6 +26,9 @@ block number the fork starts from. If it starts from an old state some tests mig
 ### Running strategy core tests
 `npm run test local ./run-core-tests.js`
 
+Before running tests from the latest fork block it's necessary to update the prices used in integrations tests.
+
+`node scripts/utils/price-tracker.js`
 
 ## How to deploy on a tenderly fork
 

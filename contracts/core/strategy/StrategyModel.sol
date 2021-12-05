@@ -6,7 +6,7 @@ pragma solidity =0.8.10;
 contract StrategyModel {
     
     /// @dev Group of strategies bundled together so user can sub to multiple strategies at once
-    /// @param creator Address of the user which created the bundle
+    /// @param creator Address of the user who created the bundle
     /// @param strategyIds Array of strategy ids stored in StrategyStorage
     struct StrategyBundle {
         address creator;
