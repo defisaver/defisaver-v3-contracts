@@ -11,15 +11,21 @@ You will also need to create a .env file as in the .env.example and fill it in w
 
 All of the tests are ran from the forked state of the mainnet. In the hardhat config you can change the 
 block number the fork starts from. If it starts from an old state some tests might not work.
+1. Compile all contracts at start:
 
-1. You first need to start a hardhat node from the forked mainnet with the following command:
+`npx hardhat compile`
+
+2. You need to start a hardhat node from the forked mainnet with the following command:
 
 `npx hardhat node --max-memory 8192  --fork ETHEREUM_NODE_URL`
 
-
-2. After that you can run the tests, for example:
+3. After that you can run the tests, for example:
 
 `npm run test local ./mcd/mcd-supply.js`
+
+### Running strategy core tests
+`npm run test local ./run-core-tests.js`
+
 
 ## How to deploy on a tenderly fork
 
