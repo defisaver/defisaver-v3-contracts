@@ -61,7 +61,7 @@ describe('Rari deposit', function () {
         await rariWithdraw(
             rariUsdcFundManager,
             rsptAddress,
-            0,
+            poolTokensChange,
             proxy.address,
             USDC_ADDR,
             usdcAmount,
@@ -114,7 +114,7 @@ describe('Rari deposit', function () {
         await rariWithdraw(
             rariDaiFundManager,
             rdptAddress,
-            0,
+            poolTokensChange,
             proxy.address,
             DAI_ADDR,
             daiAmount,
