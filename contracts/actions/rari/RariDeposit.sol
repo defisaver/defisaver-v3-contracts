@@ -75,7 +75,7 @@ contract RariDeposit is ActionBase, DSMath {
             uint256 poolTokenBalanceAfter = _inputData.poolTokenAddress.getBalance(_inputData.to);
             rsptReceived = sub(poolTokenBalanceAfter, poolTokenBalanceBefore);
         }
-        
+        /// @dev rsptReceived will be 0 if action was called directly, money deposited can be recevied with _inputData.amount
         logger.Log(address(this), msg.sender, "RariDeposit", abi.encode(_inputData, rsptReceived));
     }
 
