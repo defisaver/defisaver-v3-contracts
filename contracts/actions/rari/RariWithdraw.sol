@@ -33,19 +33,19 @@ contract RariWithdraw is ActionBase, DSMath {
         Params memory inputData = parseInputs(_callData);
 
         inputData.poolTokensAmountToPull = _parseParamUint(
-                    inputData.poolTokensAmountToPull,
-                    _paramMapping[0],
-                    _subData,
-                    _returnValues
-                );
+            inputData.poolTokensAmountToPull,
+            _paramMapping[0],
+            _subData,
+            _returnValues
+        );
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
 
         inputData.stablecoinAmountToWithdraw = _parseParamUint(
-                    inputData.stablecoinAmountToWithdraw,
-                    _paramMapping[2],
-                    _subData,
-                    _returnValues
-                );
+            inputData.stablecoinAmountToWithdraw,
+            _paramMapping[2],
+            _subData,
+            _returnValues
+        );
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[3], _subData, _returnValues);
 
         uint256 tokensWithdrawn = _rariWithdraw(inputData);
@@ -55,7 +55,7 @@ contract RariWithdraw is ActionBase, DSMath {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-        
+
         _rariWithdraw(inputData);
     }
 
@@ -71,17 +71,32 @@ contract RariWithdraw is ActionBase, DSMath {
         IFundManager fundManager = IFundManager(_inputData.fundManager);
 
         // pull tokens if they're not on proxy
-        _inputData.poolTokenAddress.pullTokensIfNeeded(_inputData.from, _inputData.poolTokensAmountToPull);
+        _inputData.poolTokensAmountToPull = _inputData.poolTokenAddress.pullTokensIfNeeded(
+            _inputData.from,
+            _inputData.poolTokensAmountToPull
+        );
 
         uint256 poolTokensBeforeWithdraw = _inputData.poolTokenAddress.getBalance(address(this));
-        tokensWithdrawn = fundManager.withdraw(IERC20(_inputData.stablecoinAddress).symbol(), _inputData.stablecoinAmountToWithdraw);
-        
+        tokensWithdrawn = fundManager.withdraw(
+            IERC20(_inputData.stablecoinAddress).symbol(),
+            _inputData.stablecoinAmountToWithdraw
+        );
         uint256 poolTokensAfterWithdraw = _inputData.poolTokenAddress.getBalance(address(this));
-        _inputData.poolTokenAddress.withdrawTokens(_inputData.from, sub(_inputData.poolTokensAmountToPull, sub(poolTokensBeforeWithdraw, poolTokensAfterWithdraw)));
+
+        uint256 poolTokensBurnt = sub(poolTokensBeforeWithdraw, poolTokensAfterWithdraw);
+        _inputData.poolTokenAddress.withdrawTokens(
+            _inputData.from,
+            sub(_inputData.poolTokensAmountToPull, poolTokensBurnt)
+        );
 
         _inputData.stablecoinAddress.withdrawTokens(_inputData.to, tokensWithdrawn);
-        
-        logger.Log(address(this), msg.sender, "RariWithdraw", abi.encode(_inputData, tokensWithdrawn));
+
+        logger.Log(
+            address(this),
+            msg.sender,
+            "RariWithdraw",
+            abi.encode(_inputData, tokensWithdrawn)
+        );
     }
 
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {

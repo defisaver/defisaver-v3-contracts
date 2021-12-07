@@ -32,11 +32,11 @@ contract RariDeposit is ActionBase, DSMath {
         Params memory inputData = parseInputs(_callData);
 
         inputData.amount = _parseParamUint(
-                    inputData.amount,
-                    _paramMapping[0],
-                    _subData,
-                    _returnValues
-                );
+            inputData.amount,
+            _paramMapping[0],
+            _subData,
+            _returnValues
+        );
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
@@ -56,22 +56,31 @@ contract RariDeposit is ActionBase, DSMath {
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
-    function _rariDeposit(Params memory _inputData, bool isActionDirect) internal returns (uint256 rsptReceived) {
+    function _rariDeposit(Params memory _inputData, bool isActionDirect)
+        internal
+        returns (uint256 rsptReceived)
+    {
         require(_inputData.to != address(0), "Can't send to burn address");
         IFundManager rariFundManager = IFundManager(_inputData.fundManager);
 
-        _inputData.amount =
-            _inputData.stablecoinAddress.pullTokensIfNeeded(_inputData.from, _inputData.amount);
+        _inputData.amount = _inputData.stablecoinAddress.pullTokensIfNeeded(
+            _inputData.from,
+            _inputData.amount
+        );
 
         _inputData.stablecoinAddress.approveToken(address(rariFundManager), _inputData.amount);
         uint256 poolTokenBalanceBefore;
 
-        if (!isActionDirect){
+        if (!isActionDirect) {
             poolTokenBalanceBefore = _inputData.poolTokenAddress.getBalance(_inputData.to);
         }
-        rariFundManager.depositTo(_inputData.to, IERC20(_inputData.stablecoinAddress).symbol(), _inputData.amount);
+        rariFundManager.depositTo(
+            _inputData.to,
+            IERC20(_inputData.stablecoinAddress).symbol(),
+            _inputData.amount
+        );
 
-        if (!isActionDirect){
+        if (!isActionDirect) {
             uint256 poolTokenBalanceAfter = _inputData.poolTokenAddress.getBalance(_inputData.to);
             rsptReceived = sub(poolTokenBalanceAfter, poolTokenBalanceBefore);
         }

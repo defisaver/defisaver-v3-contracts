@@ -133,4 +133,59 @@ describe('Rari deposit', function () {
         console.log(`DAI received from withdrawing: ${daiReceivedFromWithdraw.toString()}`);
         expect(daiReceivedFromWithdraw).to.be.eq(daiBalanceChange);
     }).timeout(1000000);
+
+    it('... Try to supply 10k USDC to proxy and withdraw 10k USDC - Rari stable pool', async () => {
+        const usdcAmount = hre.ethers.utils.parseUnits('10000', 6);
+        await buyTokenIfNeeded(USDC_ADDR, senderAcc, proxy, usdcAmount);
+
+        await approve(USDC_ADDR, proxy.address);
+
+        const rariUsdcFundManager = '0xC6BF8C8A55f77686720E0a88e2Fd1fEEF58ddf4a';
+        const rsptAddress = '0x016bf078ABcaCB987f0589a6d3BEAdD4316922B0';
+
+        const poolTokensBalanceBefore = await balanceOf(rsptAddress, proxy.address);
+
+        const usdcBalanceBefore = await balanceOf(USDC_ADDR, senderAcc.address);
+        console.log('Starting deposit');
+        await rariDeposit(
+            rariUsdcFundManager,
+            USDC_ADDR,
+            rsptAddress,
+            usdcAmount,
+            senderAcc.address,
+            proxy.address,
+            proxy,
+        );
+        const poolTokensAfterDeposit = await balanceOf(rsptAddress, proxy.address);
+
+        const usdcBalanceAfter = await balanceOf(USDC_ADDR, senderAcc.address);
+        const usdcBalanceChange = usdcBalanceBefore.sub(usdcBalanceAfter);
+
+        const poolTokensChange = poolTokensAfterDeposit.sub(poolTokensBalanceBefore);
+        console.log(`Received rspt tokens for usdc: ${poolTokensChange.toString()}`);
+        console.log(`Sent USDC to rsp: ${usdcBalanceChange.toString()}`);
+
+        await approve(rsptAddress, proxy.address);
+        const withdrawalAmount = hre.ethers.utils.parseUnits('10000.0001', 6);
+
+        await rariWithdraw(
+            rariUsdcFundManager,
+            rsptAddress,
+            hre.ethers.constants.MaxUint256,
+            proxy.address,
+            USDC_ADDR,
+            withdrawalAmount,
+            senderAcc.address,
+            proxy,
+        );
+        const poolTokensAfterWithdraw = await balanceOf(rsptAddress, proxy.address);
+        const poolTokensBurnt = poolTokensAfterDeposit.sub(poolTokensAfterWithdraw);
+
+        const usdcTokensAfterWithdraw = await balanceOf(USDC_ADDR, senderAcc.address);
+        const usdcReceivedFromWithdraw = usdcTokensAfterWithdraw.sub(usdcBalanceAfter);
+        console.log(`RSPT burnt: ${poolTokensBurnt.toString()}`);
+
+        console.log(`USDC received from withdrawing: ${usdcReceivedFromWithdraw.toString()}`);
+        expect(usdcReceivedFromWithdraw).to.be.eq(withdrawalAmount);
+    }).timeout(1000000);
 });
