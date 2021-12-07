@@ -1365,6 +1365,85 @@ const gUniWithdraw = async (poolAddr, burnAmount, from, proxy) => {
     const functionData = gUniAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](gUniWithdrawAddr, functionData, { gasLimit: 3000000 });
 };
+
+const mStableDeposit = async (
+    proxy,
+    bAsset,
+    mAsset,
+    saveAddress,
+    vaultAddress,
+    from,
+    to,
+    amount,
+    minOut,
+    unstake,
+) => {
+    const mStableAddr = await getAddrFromRegistry('MStableDeposit');
+
+    const mStableAction = new dfs.actions.mstable.MStableDepositAction(
+        bAsset,
+        mAsset,
+        saveAddress,
+        vaultAddress,
+        from,
+        to,
+        amount,
+        minOut,
+        unstake,
+    );
+
+    const functionData = mStableAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 });
+};
+
+const mStableWithdraw = async (
+    proxy,
+    bAsset,
+    mAsset,
+    saveAddress,
+    vaultAddress,
+    to,
+    amount,
+    minOut,
+    unstake,
+) => {
+    const mStableAddr = await getAddrFromRegistry('MStableWithdraw');
+
+    const mStableAction = new dfs.actions.mstable.MStableWithdrawAction(
+        bAsset,
+        mAsset,
+        saveAddress,
+        vaultAddress,
+        to,
+        amount,
+        minOut,
+        unstake,
+    );
+
+    const functionData = mStableAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 });
+};
+
+const mStableClaim = async (
+    proxy,
+    vaultAddress,
+    to,
+    first,
+    last,
+) => {
+    const mStableAddr = await getAddrFromRegistry('MStableClaim');
+
+    const mStableAction = new dfs.actions.mstable.MStableClaimAction(
+        vaultAddress,
+        to,
+        first,
+        last,
+    );
+
+    const functionData = mStableAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 });
+};
+
 module.exports = {
     sell,
     buy,
@@ -1452,4 +1531,8 @@ module.exports = {
 
     gUniDeposit,
     gUniWithdraw,
+
+    mStableDeposit,
+    mStableWithdraw,
+    mStableClaim,
 };
