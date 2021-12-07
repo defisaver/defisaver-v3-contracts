@@ -27,9 +27,11 @@ describe('mStable-Deposit', () => {
 
     let senderAcc;
     let proxy;
+    let view;
 
     before(async () => {
         await redeploy('MStableDeposit');
+        view = await redeploy('MStableView');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -49,7 +51,7 @@ describe('mStable-Deposit', () => {
             const stableCoinAddr = getAssetInfo(stableCoin).address;
 
             await buyCoinAndSave(senderAcc, stableCoinAddr, saveAmount, true);
-            expect(await balanceOf(imUSDVault, proxy.address)).to.be.gt(0, 'mStable Save to Vault failed');
+            expect(await view['rawBalanceOf(address,address)'](imUSDVault, proxy.address)).to.be.gt(0, 'mStable Save to Vault failed');
         }),
     );
 });

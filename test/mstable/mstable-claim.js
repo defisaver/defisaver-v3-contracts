@@ -48,7 +48,7 @@ describe('mStable-Claim', () => {
             const stableCoinAddr = getAssetInfo(stableCoin).address;
 
             await buyCoinAndSave(senderAcc, stableCoinAddr, saveAmount, true);
-            expect(await balanceOf(imUSDVault, proxy.address)).to.be.gt(0, 'mStable Save to Vault failed');
+            expect(await view['rawBalanceOf(address,address)'](imUSDVault, proxy.address)).to.be.gt(0, 'mStable Save to Vault failed');
 
             await timeTravel(365 * 24 * 2600);
             // updates user reward data

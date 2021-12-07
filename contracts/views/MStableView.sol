@@ -21,6 +21,10 @@ contract MStableView {
         return ImAsset(_mAsset).getRedeemOutput(_output, _mAssetQuantity);
     }
     
+    function rawBalanceOf(address _vault, address _account) external view returns (uint256) {
+        return IBoostedVaultWithLockup(_vault).rawBalanceOf(_account);
+    }
+
     function unclaimedRewards(address _vault, address _account)
     public view returns (
         uint256 amount,

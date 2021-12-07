@@ -2,6 +2,9 @@
 pragma solidity =0.7.6;
 
 interface IBoostedVaultWithLockup {
+
+    function rawBalanceOf(address) external view returns (uint256);
+
     /**
      * @dev Stakes a given amount of the StakingToken for the sender
      * @param _amount Units of StakingToken
