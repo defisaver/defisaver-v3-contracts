@@ -73,10 +73,11 @@ contract RariWithdraw is ActionBase, DSMath {
         // pull tokens if they're not on proxy
         _inputData.poolTokenAddress.pullTokensIfNeeded(_inputData.from, _inputData.poolTokensAmountToPull);
 
+        uint256 poolTokensBeforeWithdraw = _inputData.poolTokenAddress.getBalance(address(this));
         tokensWithdrawn = fundManager.withdraw(IERC20(_inputData.stablecoinAddress).symbol(), _inputData.stablecoinAmountToWithdraw);
         
         uint256 poolTokensAfterWithdraw = _inputData.poolTokenAddress.getBalance(address(this));
-        _inputData.poolTokenAddress.withdrawTokens(_inputData.from, sub(_inputData.poolTokensAmountToPull, poolTokensAfterWithdraw));
+        _inputData.poolTokenAddress.withdrawTokens(_inputData.from, sub(_inputData.poolTokensAmountToPull, sub(poolTokensBeforeWithdraw, poolTokensAfterWithdraw)));
 
         _inputData.stablecoinAddress.withdrawTokens(_inputData.to, tokensWithdrawn);
     }

@@ -16,6 +16,7 @@ contract RariDeposit is ActionBase, DSMath {
     struct Params {
         address fundManager;
         address stablecoinAddress;
+        address poolTokenAddress;
         uint256 amount;
         address from;
         address to;
@@ -39,15 +40,14 @@ contract RariDeposit is ActionBase, DSMath {
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        uint256 rsptReceived = _rariDeposit(inputData);
+        uint256 rsptReceived = _rariDeposit(inputData, false);
         return bytes32(rsptReceived);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-        
-        _rariDeposit(inputData);
+        _rariDeposit(inputData, true);
     }
 
     /// @inheritdoc ActionBase
@@ -56,24 +56,25 @@ contract RariDeposit is ActionBase, DSMath {
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
-    function _rariDeposit(Params memory _inputData) internal returns (uint256 rsptReceived) {
+    function _rariDeposit(Params memory _inputData, bool isActionDirect) internal returns (uint256 rsptReceived) {
         require(_inputData.to != address(0), "Can't send to burn address");
         IFundManager rariFundManager = IFundManager(_inputData.fundManager);
-
-        address poolToken = rariFundManager.rariFundToken();
 
         _inputData.amount =
             _inputData.stablecoinAddress.pullTokensIfNeeded(_inputData.from, _inputData.amount);
 
         _inputData.stablecoinAddress.approveToken(address(rariFundManager), _inputData.amount);
+        uint256 poolTokenBalanceBefore;
 
-        uint256 poolTokenBalanceBefore = poolToken.getBalance(_inputData.to);
-
+        if (!isActionDirect){
+            poolTokenBalanceBefore = _inputData.poolTokenAddress.getBalance(_inputData.to);
+        }
         rariFundManager.depositTo(_inputData.to, IERC20(_inputData.stablecoinAddress).symbol(), _inputData.amount);
 
-        uint256 poolTokenBalanceAfter = poolToken.getBalance(_inputData.to);
-
-        rsptReceived = sub(poolTokenBalanceAfter, poolTokenBalanceBefore);
+        if (!isActionDirect){
+            uint256 poolTokenBalanceAfter = _inputData.poolTokenAddress.getBalance(_inputData.to);
+            rsptReceived = sub(poolTokenBalanceAfter, poolTokenBalanceBefore);
+        }
     }
 
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {

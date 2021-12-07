@@ -41,6 +41,7 @@ describe('Rari deposit', function () {
         await rariDeposit(
             rariUsdcFundManager,
             USDC_ADDR,
+            rsptAddress,
             usdcBalanceBefore,
             senderAcc.address,
             senderAcc.address,
@@ -74,6 +75,7 @@ describe('Rari deposit', function () {
         await rariDeposit(
             rariDaiFundManager,
             DAI_ADDR,
+            rdptAddress,
             daiBalanceBefore,
             senderAcc.address,
             senderAcc.address,

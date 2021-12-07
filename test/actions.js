@@ -1362,10 +1362,10 @@ const gUniWithdraw = async (poolAddr, burnAmount, from, proxy) => {
     return proxy['execute(address,bytes)'](gUniWithdrawAddr, functionData, { gasLimit: 3000000 });
 };
 
-const rariDeposit = async (fundManager, token, amount, from, to, proxy) => {
+const rariDeposit = async (fundManager, token, poolToken, amount, from, to, proxy) => {
     const rariDepositAddr = await getAddrFromRegistry('RariDeposit');
     const rariDepositAction = new dfs.actions.rari.RariDepositAction(
-        fundManager, token, amount, from, to,
+        fundManager, token, poolToken, amount, from, to,
     );
 
     const functionData = rariDepositAction.encodeForDsProxyCall()[1];
