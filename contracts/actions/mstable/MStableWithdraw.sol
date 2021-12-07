@@ -12,14 +12,14 @@ contract MStableWithdraw is ActionBase {
     using TokenUtils for address;
 
     struct Params {
-        address bAsset;
-        address mAsset;
-        address saveAddress;
-        address vaultAddress;
-        address to;
-        uint256 amount;
-        uint256 minOut;
-        bool unstake;
+        address bAsset;         // base asset to withdraw
+        address mAsset;         // the corresponding meta asset
+        address saveAddress;    // save contract address for the mAsset (imAsset address)
+        address vaultAddress;   // vault contract address for the imAsset (imAssetVault address), unused if unstake == false
+        address to;             // address that will receive the bAsset
+        uint256 amount;         // amount of (unstake ? imAssetVault : imAsset) to redeem
+        uint256 minOut;         // minimum amount of bAsset to accept
+        bool unstake;           // unstake flag
     }
 
     function executeAction(
@@ -47,12 +47,13 @@ contract MStableWithdraw is ActionBase {
         _mStableWithdraw(params);
     }
 
+    /// @notice Action that withdraws the base asset from the Savings Contract, or if unstaking, from the Savings Vault
     function _mStableWithdraw(Params memory _params) internal returns (uint256 withdrawn) {
         // _params.to = 0 will revert
         // _params.amount = 0 will revert
         if (_params.unstake) {
             if (_params.amount == type(uint256).max) {
-                _params.amount = IBoostedVaultWithLockup(_params.vaultAddress).earned(address(this));
+                _params.amount = _params.vaultAddress.getBalance(address(this));
             }
             IBoostedVaultWithLockup(_params.vaultAddress).withdraw(_params.amount);
         } else {

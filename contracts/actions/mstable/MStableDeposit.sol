@@ -12,15 +12,15 @@ contract MStableDeposit is ActionBase {
     using TokenUtils for address;
 
     struct Params {
-        address bAsset;
-        address mAsset;
-        address saveAddress;
-        address vaultAddress;
-        address from;
-        address to;
-        uint256 amount;
-        uint256 minOut;
-        bool stake;
+        address bAsset;         // base asset to deposit
+        address mAsset;         // the corresponding meta asset
+        address saveAddress;    // save contract address for the mAsset (imAsset address)
+        address vaultAddress;   // vault contract address for the imAsset (imAssetVault address), unused if stake == false
+        address from;           // address from where to pull the bAsset
+        address to;             // address that will receive the (stake ? imAssetVault : imAsset)
+        uint256 amount;         // amount of bAsset to deposit
+        uint256 minOut;         // minimum amount of mAsset to accept
+        bool stake;             // stake flag
     }
 
     function executeAction(
@@ -49,6 +49,7 @@ contract MStableDeposit is ActionBase {
         _mStableDeposit(params);
     }
 
+    /// @notice Action that deposits the base asset into the mStable Savings Contract and optionally stakes the received imAsset into the Savings Vault
     function _mStableDeposit(Params memory _params) internal returns (uint256 credits) {
         // _params.to = 0 will revert
         // _params.amount = 0 will revert

@@ -13,8 +13,8 @@ contract MStableClaim is ActionBase, MainnetMStableAddresses {
     using SafeMath for uint256;
 
     struct Params {
-        address vaultAddress;
-        address to;
+        address vaultAddress;   // vault contract address for the imAsset (imAssetVault address)
+        address to;             // address that will receive the claimed MTA rewards
         uint256 first;
         uint256 last;
     }
@@ -38,6 +38,7 @@ contract MStableClaim is ActionBase, MainnetMStableAddresses {
         _mStableClaim(params);
     }
 
+    /// @notice Action that claims staking rewards from the Savings Vault
     function _mStableClaim(Params memory _params) internal returns (uint256 claimed) {
         claimed = MTA.getBalance(address(this));
         IBoostedVaultWithLockup(_params.vaultAddress).claimRewards(_params.first, _params.last);
