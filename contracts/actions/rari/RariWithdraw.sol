@@ -80,6 +80,8 @@ contract RariWithdraw is ActionBase, DSMath {
         _inputData.poolTokenAddress.withdrawTokens(_inputData.from, sub(_inputData.poolTokensAmountToPull, sub(poolTokensBeforeWithdraw, poolTokensAfterWithdraw)));
 
         _inputData.stablecoinAddress.withdrawTokens(_inputData.to, tokensWithdrawn);
+        
+        logger.Log(address(this), msg.sender, "RariWithdraw", abi.encode(_inputData, tokensWithdrawn));
     }
 
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {

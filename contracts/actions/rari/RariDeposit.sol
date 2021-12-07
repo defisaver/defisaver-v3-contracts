@@ -75,6 +75,8 @@ contract RariDeposit is ActionBase, DSMath {
             uint256 poolTokenBalanceAfter = _inputData.poolTokenAddress.getBalance(_inputData.to);
             rsptReceived = sub(poolTokenBalanceAfter, poolTokenBalanceBefore);
         }
+        
+        logger.Log(address(this), msg.sender, "RariDeposit", abi.encode(_inputData, rsptReceived));
     }
 
     function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
