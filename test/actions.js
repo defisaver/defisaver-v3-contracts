@@ -22,7 +22,6 @@ const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
 const { getSecondTokenAmount } = require('./utils-uni');
 
 const { getHints, LiquityActionIds } = require('./utils-liquity');
-const { getAddr } = require('@defisaver/sdk/src/addresses');
 
 const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0) => {
     const dfsSellAddr = await getAddrFromRegistry('DFSSell');
@@ -359,11 +358,8 @@ const openVaultForExactAmountInDecimals = async (
     const from = proxy.signer.address;
     const to = proxy.signer.address;
     const amountDai = hre.ethers.utils.parseUnits(daiAmount, 18);
-    console.log("OPEN MCD");
     await supplyMcd(proxy, vaultId, collAmount, tokenData.address, joinAddr, from);
-    console.log("SUPPLY");
     await generateMcd(proxy, vaultId, amountDai, to);
-    console.log("generate");
 
     return vaultId;
 };
@@ -1365,6 +1361,42 @@ const gUniWithdraw = async (poolAddr, burnAmount, from, proxy) => {
     const functionData = gUniAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](gUniWithdrawAddr, functionData, { gasLimit: 3000000 });
 };
+
+const rariDeposit = async (fundManager, token, poolToken, amount, from, to, proxy) => {
+    const rariDepositAddr = await getAddrFromRegistry('RariDeposit');
+    const rariDepositAction = new dfs.actions.rari.RariDepositAction(
+        fundManager, token, poolToken, amount, from, to,
+    );
+
+    const functionData = rariDepositAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](rariDepositAddr, functionData, { gasLimit: 3000000 });
+};
+
+const rariWithdraw = async (
+    fundManager,
+    poolTokenAddress,
+    poolTokensAmountToPull,
+    from,
+    stablecoinAddress,
+    stablecoinAmountToWithdraw,
+    to,
+    proxy,
+) => {
+    const rariWithdrawAddr = await getAddrFromRegistry('RariWithdraw');
+    const rariWithdrawAction = new dfs.actions.rari.RariWithdrawAction(
+        fundManager,
+        poolTokenAddress,
+        poolTokensAmountToPull,
+        from,
+        stablecoinAddress,
+        stablecoinAmountToWithdraw,
+        to,
+    );
+
+    const functionData = rariWithdrawAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](rariWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
+
 module.exports = {
     sell,
     buy,
@@ -1452,4 +1484,7 @@ module.exports = {
 
     gUniDeposit,
     gUniWithdraw,
+
+    rariDeposit,
+    rariWithdraw,
 };
