@@ -52,7 +52,7 @@ const dydxTokens = ['WETH', 'USDC', 'DAI'];
 
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
 const MIN_VAULT_DAI_AMOUNT = '15010'; // TODO: can we fetch this dynamically
-const MIN_VAULT_RAI_AMOUNT = '1000'; // TODO: can we fetch this dynamically
+const MIN_VAULT_RAI_AMOUNT = '5000'; // TODO: can we fetch this dynamically
 
 const AVG_GAS_PRICE = 100; // gwei
 
@@ -394,6 +394,7 @@ const timeTravel = async (timeIncrease) => {
 };
 
 const getGasUsed = async (receipt) => {
+    console.log(receipt);
     const parsed = await receipt.wait();
 
     return parsed.gasUsed.toString();

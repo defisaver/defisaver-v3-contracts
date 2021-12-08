@@ -51,6 +51,7 @@ describe('Uni-Supply-V3', () => {
     ];
 
     before(async () => {
+        await redeploy('DFSSell');
         await redeploy('UniMintV3');
         await redeploy('UniSupplyV3');
         await redeploy('UniWithdrawV3');
