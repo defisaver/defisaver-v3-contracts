@@ -35,7 +35,7 @@ describe('Rari deposit', function () {
         const rariUsdcFundManager = '0xC6BF8C8A55f77686720E0a88e2Fd1fEEF58ddf4a';
         const rsptAddress = '0x016bf078ABcaCB987f0589a6d3BEAdD4316922B0';
 
-        const poolTokensBalanceBefore = await balanceOf(rsptAddress, proxy.address);
+        const poolTokensBalanceBefore = await balanceOf(rsptAddress, senderAcc.address);
 
         const usdcBalanceBefore = await balanceOf(USDC_ADDR, senderAcc.address);
         console.log('Starting deposit');
@@ -45,10 +45,10 @@ describe('Rari deposit', function () {
             rsptAddress,
             usdcAmount,
             senderAcc.address,
-            proxy.address,
+            senderAcc.address,
             proxy,
         );
-        const poolTokensAfterDeposit = await balanceOf(rsptAddress, proxy.address);
+        const poolTokensAfterDeposit = await balanceOf(rsptAddress, senderAcc.address);
 
         const usdcBalanceAfter = await balanceOf(USDC_ADDR, senderAcc.address);
         const usdcBalanceChange = usdcBalanceBefore.sub(usdcBalanceAfter);
@@ -63,13 +63,13 @@ describe('Rari deposit', function () {
             rariUsdcFundManager,
             rsptAddress,
             poolTokensChange,
-            proxy.address,
+            senderAcc.address,
             USDC_ADDR,
             usdcAmount,
             senderAcc.address,
             proxy,
         );
-        const poolTokensAfterWithdraw = await balanceOf(rsptAddress, proxy.address);
+        const poolTokensAfterWithdraw = await balanceOf(rsptAddress, senderAcc.address);
         const poolTokensBurnt = poolTokensAfterDeposit.sub(poolTokensAfterWithdraw);
 
         const usdcTokensAfterWithdraw = await balanceOf(USDC_ADDR, senderAcc.address);
@@ -110,8 +110,6 @@ describe('Rari deposit', function () {
         const poolTokensChange = poolTokensAfterDeposit.sub(poolTokensBalanceBefore);
         console.log(`Received rdpt tokens for dai: ${poolTokensChange.toString()}`);
         console.log(`Sent DAI to rsp: ${daiBalanceChange.toString()}`);
-
-        await approve(rdptAddress, proxy.address);
 
         await rariWithdraw(
             rariDaiFundManager,
@@ -165,7 +163,6 @@ describe('Rari deposit', function () {
         console.log(`Received rspt tokens for usdc: ${poolTokensChange.toString()}`);
         console.log(`Sent USDC to rsp: ${usdcBalanceChange.toString()}`);
 
-        await approve(rsptAddress, proxy.address);
         const withdrawalAmount = hre.ethers.utils.parseUnits('10000.0001', 6);
 
         await rariWithdraw(
