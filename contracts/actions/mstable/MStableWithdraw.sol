@@ -16,6 +16,7 @@ contract MStableWithdraw is ActionBase {
         address mAsset;         // the corresponding meta asset
         address saveAddress;    // save contract address for the mAsset (imAsset address)
         address vaultAddress;   // vault contract address for the imAsset (imAssetVault address), unused if unstake == false
+        address from;           // address from where to pull the imAsset, unused if unstake == true
         address to;             // address that will receive the bAsset
         uint256 amount;         // amount of (unstake ? imAssetVault : imAsset) to redeem
         uint256 minOut;         // minimum amount of bAsset to accept
@@ -33,10 +34,11 @@ contract MStableWithdraw is ActionBase {
         params.mAsset = _parseParamAddr(params.mAsset, _paramMapping[1], _subData, _returnValues);
         params.saveAddress = _parseParamAddr(params.saveAddress, _paramMapping[2], _subData, _returnValues);
         params.vaultAddress = _parseParamAddr(params.vaultAddress, _paramMapping[3], _subData, _returnValues);
-        params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[5], _subData, _returnValues);
-        params.minOut = _parseParamUint(params.minOut, _paramMapping[6], _subData, _returnValues);
-        params.unstake = _parseParamUint(params.unstake ? 1 : 0, _paramMapping[7], _subData, _returnValues) == 0 ? false : true;
+        params.from = _parseParamAddr(params.from, _paramMapping[4], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[5], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[6], _subData, _returnValues);
+        params.minOut = _parseParamUint(params.minOut, _paramMapping[7], _subData, _returnValues);
+        params.unstake = _parseParamUint(params.unstake ? 1 : 0, _paramMapping[8], _subData, _returnValues) == 0 ? false : true;
         
         uint256 withdrawn = _mStableWithdraw(params);
         return bytes32(withdrawn);
@@ -53,13 +55,14 @@ contract MStableWithdraw is ActionBase {
         // _params.amount = 0 will revert
         if (_params.unstake) {
             if (_params.amount == type(uint256).max) {
-                _params.amount = _params.vaultAddress.getBalance(address(this));
+                _params.amount = IBoostedVaultWithLockup(_params.vaultAddress).rawBalanceOf(address(this));
             }
             IBoostedVaultWithLockup(_params.vaultAddress).withdraw(_params.amount);
         } else {
             if (_params.amount == type(uint256).max) {
-                _params.amount = _params.saveAddress.getBalance(address(this));
+                _params.amount = _params.saveAddress.getBalance(_params.from);
             }
+            _params.saveAddress.pullTokensIfNeeded(_params.from, _params.amount);
         }
 
         uint256 mAssetRedeemedAmount = ISavingsContractV2(_params.saveAddress).redeemCredits(_params.amount);
