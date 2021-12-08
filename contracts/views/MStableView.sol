@@ -40,8 +40,4 @@ contract MStableView {
     ) {
         return IBoostedVaultWithLockup(_vault).earned(_account);
     }
-
-    function pokeBoost(address _vault, address _account) external {
-        IBoostedVaultWithLockup(_vault).pokeBoost(_account);
-    }
 }

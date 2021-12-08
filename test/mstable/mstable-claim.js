@@ -31,6 +31,7 @@ describe('mStable-Claim', () => {
     ];
 
     let view;
+    let vault;
     let senderAcc;
     let proxy;
 
@@ -38,6 +39,7 @@ describe('mStable-Claim', () => {
         await redeploy('MStableDeposit');
         await redeploy('MStableClaim');
         view = await redeploy('MStableView');
+        vault = await hre.ethers.getContractAt('IBoostedVaultWithLockup', imUSDVault);
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -52,7 +54,7 @@ describe('mStable-Claim', () => {
 
             await timeTravel(365 * 24 * 2600);
             // updates user reward data
-            await view['pokeBoost(address,address)'](imUSDVault, proxy.address);
+            await vault['pokeBoost(address)'](proxy.address);
 
             const { amount, first, last } = await view['unclaimedRewards(address,address)'](imUSDVault, proxy.address);
 
