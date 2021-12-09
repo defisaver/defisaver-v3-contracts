@@ -8,9 +8,10 @@ const {
     approve,
     DAI_ADDR,
     USDT_ADDR,
+    setBalance,
 } = require('../utils');
 
-const { gUniDeposit, buyTokenIfNeeded } = require('../actions.js');
+const { gUniDeposit } = require('../actions.js');
 
 describe('GUNI deposit', function () {
     this.timeout(80000);
@@ -29,8 +30,8 @@ describe('GUNI deposit', function () {
         const daiUSDTpoolAddress = '0xd58c89181360dd9166881fce2bc7c9baae2d5f31';
         const daiAmount = hre.ethers.utils.parseUnits('10000', 18);
         const usdtAmount = hre.ethers.utils.parseUnits('10000', 6);
-        await buyTokenIfNeeded(DAI_ADDR, senderAcc, proxy, daiAmount);
-        await buyTokenIfNeeded(USDT_ADDR, senderAcc, proxy, usdtAmount);
+        await setBalance(DAI_ADDR, senderAcc.address, daiAmount);
+        await setBalance(USDT_ADDR, senderAcc.address, usdtAmount);
 
         await approve(DAI_ADDR, proxy.address);
         await approve(USDT_ADDR, proxy.address);

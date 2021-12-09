@@ -19,6 +19,7 @@ const {
     DAI_ADDR,
     USDC_ADDR,
     balanceOf,
+    setBalance,
 } = require('../../utils');
 
 const {
@@ -30,7 +31,6 @@ const {
 
 const {
     openVault,
-    buyTokenIfNeeded,
     gUniDeposit,
     openVaultForExactAmountInDecimals,
 } = require('../../actions.js');
@@ -206,9 +206,9 @@ describe('Mcd-Repay', function () {
 
         const daiAmount = hre.ethers.utils.parseUnits('28000', 18);
         const usdtAmount = hre.ethers.utils.parseUnits('28000', 6);
-        await buyTokenIfNeeded(DAI_ADDR, senderAcc, proxy, daiAmount, uniWrapper.address);
 
-        await buyTokenIfNeeded(USDC_ADDR, senderAcc, proxy, usdtAmount, uniWrapper.address);
+        await setBalance(DAI_ADDR, senderAcc.address, daiAmount);
+        await setBalance(USDC_ADDR, senderAcc.address, usdtAmount);
 
         await approve(DAI_ADDR, proxy.address);
         await approve(USDC_ADDR, proxy.address);
