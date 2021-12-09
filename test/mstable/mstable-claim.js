@@ -1,4 +1,3 @@
-require('dotenv-safe').config();
 const { expect } = require('chai');
 const hre = require('hardhat');
 
