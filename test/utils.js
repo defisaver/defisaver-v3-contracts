@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
 const hre = require('hardhat');
 const fs = require('fs');
+const storageSlots = require('./storageSlots.json');
 
 const { deployAsOwner } = require('../scripts/utils/deployer');
 
@@ -116,6 +117,11 @@ const coinGeckoHelper = {
 };
 
 async function findBalancesSlot(tokenAddress) {
+    const slotObj = storageSlots[tokenAddress];
+    if (slotObj) {
+        return { isVyper: slotObj.isVyper, num: slotObj.num };
+    }
+
     const encode = (types, values) => hre.ethers.utils.defaultAbiCoder.encode(types, values);
     const account = hre.ethers.constants.AddressZero;
     const probeA = encode(['uint'], [1]);
@@ -151,7 +157,13 @@ async function findBalancesSlot(tokenAddress) {
                 probedSlot,
                 prev,
             ]);
-            if (balance.eq(hre.ethers.BigNumber.from(probe))) { return { isVyper: false, num: i }; }
+            if (balance.eq(hre.ethers.BigNumber.from(probe))) {
+                const result = { isVyper: false, num: i };
+                storageSlots[tokenAddress] = result;
+                // file path needs to be from top level folder
+                fs.writeFileSync('test/storageSlots.json', JSON.stringify(storageSlots));
+                return result;
+            }
         }
         {
             let probedSlot = hre.ethers.utils.keccak256(
@@ -179,7 +191,13 @@ async function findBalancesSlot(tokenAddress) {
                 probedSlot,
                 prev,
             ]);
-            if (balance.eq(hre.ethers.BigNumber.from(probe))) { return { isVyper: true, num: i }; }
+            if (balance.eq(hre.ethers.BigNumber.from(probe))) {
+                const result = { isVyper: true, num: i };
+                storageSlots[tokenAddress] = result;
+                // file path needs to be from top level folder
+                fs.writeFileSync('test/storageSlots.json', JSON.stringify(storageSlots));
+                return result;
+            }
         }
     }
     console.log('Balance slot not found');
@@ -195,7 +213,6 @@ const setStorageAt = async (address, index, value) => {
 
 const setBalance = async (tokenAddr, userAddr, value) => {
     const slotInfo = await findBalancesSlot(tokenAddr);
-    console.log(`SLOT FOUND ${slotInfo.num}`);
     let index;
     if (slotInfo.isVyper) {
         index = hre.ethers.utils.solidityKeccak256(
