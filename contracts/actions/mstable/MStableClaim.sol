@@ -3,12 +3,12 @@ pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "contracts/interfaces/mstable/IBoostedVaultWithLockup.sol";
-import "./helpers/MainnetMStableAddresses.sol";
+import "./helpers/MStableHelper.sol";
 import "contracts/utils/TokenUtils.sol";
 import "contracts/utils/SafeMath.sol";
 import "../ActionBase.sol";
 
-contract MStableClaim is ActionBase, MainnetMStableAddresses {
+contract MStableClaim is ActionBase, MStableHelper {
     using TokenUtils for address;
     using SafeMath for uint256;
 
