@@ -1,3 +1,4 @@
+require('dotenv-safe').config();
 const { expect } = require('chai');
 const hre = require('hardhat');
 
@@ -8,6 +9,8 @@ const {
     redeploy,
     balanceOf,
     timeTravel,
+    takeSnapshot,
+    revertToSnapshot,
 } = require('../utils');
 
 const {
@@ -47,6 +50,8 @@ describe('mStable-Claim', () => {
 
     stables.forEach(
         async (stableCoin) => it(`... should deposit $${saveAmount} worth of ${stableCoin} into Savings Vault Contract then claim rewards`, async () => {
+            const snapshotId = await takeSnapshot();
+
             const stableCoinAddr = getAssetInfo(stableCoin).address;
 
             await buyCoinAndSave(senderAcc, stableCoinAddr, saveAmount, true);
@@ -65,6 +70,8 @@ describe('mStable-Claim', () => {
 
             expect(mtaReward).to.be.gte(0, 'Claim failed');
             expect(amount).to.be.gt(0, 'View contract not working');
+
+            await revertToSnapshot(snapshotId);
         }),
     );
 });

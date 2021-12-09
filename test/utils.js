@@ -379,6 +379,15 @@ const BN2Float = (bn, decimals) => hre.ethers.utils.formatUnits(bn, decimals);
 
 const Float2BN = (string, decimals) => hre.ethers.utils.parseUnits(string, decimals);
 
+const takeSnapshot = async () => hre.network.provider.request({
+    method: 'evm_snapshot',
+});
+
+const revertToSnapshot = async (snapshotId) => hre.network.provider.request({
+    method: 'evm_revert',
+    params: [snapshotId],
+});
+
 module.exports = {
     addToZRXAllowlist,
     getAddrFromRegistry,
@@ -442,4 +451,6 @@ module.exports = {
     AWBTC_ADDR,
     WBTC_ADDR,
     WSTETH_ADDRESS,
+    takeSnapshot,
+    revertToSnapshot,
 };
