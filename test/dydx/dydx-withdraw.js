@@ -9,12 +9,12 @@ const {
     dydxTokens,
     balanceOf,
     fetchAmountinUSDPrice,
+    setBalance,
 } = require('../utils');
 
 const {
     dydxSupply,
     dydxWithdraw,
-    buyTokenIfNeeded,
 } = require('../actions.js');
 
 describe('DyDx-Withdraw', function () {
@@ -43,7 +43,8 @@ describe('DyDx-Withdraw', function () {
 
         it(`... should withdraw ${fetchedAmountWithUSD} of ${dydxTokens[i]}`, async () => {
             // supply first
-            await buyTokenIfNeeded(tokenAddr, senderAcc, proxy, standardAmount);
+            await setBalance(tokenAddr, senderAcc.address, standardAmount);
+
             await dydxSupply(proxy, tokenAddr, standardAmount, senderAcc.address);
 
             const supplyBefore = await dydxView.getSupplyBalance(senderAcc.address, tokenAddr);
@@ -61,7 +62,7 @@ describe('DyDx-Withdraw', function () {
 
         it(`... should withdraw max.uint amount ${dydxTokens[i]}`, async () => {
             // supply first
-            await buyTokenIfNeeded(tokenAddr, senderAcc, proxy, standardAmount);
+            await setBalance(tokenAddr, senderAcc.address, standardAmount);
             await dydxSupply(proxy, tokenAddr, standardAmount, senderAcc.address);
 
             const amount = hre.ethers.constants.MaxUint256;
