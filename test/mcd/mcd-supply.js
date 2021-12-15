@@ -31,6 +31,7 @@ describe('Mcd-Supply', function () {
     before(async () => {
         await redeploy('McdSupply');
         await redeploy('DFSSell');
+        await redeploy('McdOpen');
         makerAddresses = await fetchMakerAddresses();
 
         mcdView = await redeploy('McdView');

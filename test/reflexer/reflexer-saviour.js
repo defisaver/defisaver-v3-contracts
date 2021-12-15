@@ -60,7 +60,7 @@ describe('Reflexer-Saviour', () => {
         const safeHandler = await safeManager.safes(safeID);
 
         const amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
-        const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18);
+        const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '20000'), 18);
         await depositToWeth(amountWETH.toString());
 
         const from = senderAcc.address;

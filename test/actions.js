@@ -15,6 +15,7 @@ const {
     depositToWeth,
     MAX_UINT128,
     fetchAmountinUSDPrice,
+    getGasUsed,
 } = require('./utils');
 
 const { getVaultsForUser, MCD_MANAGER_ADDR, canGenerateDebt } = require('./utils-mcd');
@@ -79,7 +80,9 @@ const openMcd = async (proxy, joinAddr) => {
     const openMyVault = new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR);
     const functionData = openMyVault.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdOpenAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](mcdOpenAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed openMcd; ${gasUsed}`);
 
     const vaultsAfter = await getVaultsForUser(proxy.address);
 
@@ -117,7 +120,11 @@ const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
     );
     const functionData = mcdSupplyAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdSupplyAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](mcdSupplyAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed supplyMcd; ${gasUsed}`);
+    return receipt;
 };
 
 const paybackMcd = async (proxy, vaultId, amount, from, daiAddr) => {
@@ -133,7 +140,11 @@ const paybackMcd = async (proxy, vaultId, amount, from, daiAddr) => {
     );
     const functionData = mcdPaybackAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdPaybackAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](mcdPaybackAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed paybackMcd; ${gasUsed}`);
+    return receipt;
 };
 
 const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to) => {
@@ -148,7 +159,11 @@ const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to) => {
     );
     const functionData = mcdWithdrawAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](mcdWithdrawAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed withdrawMcd; ${gasUsed}`);
+    return receipt;
 };
 
 const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
@@ -182,7 +197,11 @@ const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
     );
     const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](aaveSupplyAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](aaveSupplyAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveSupply; ${gasUsed}`);
+    return receipt;
 };
 
 const withdrawAave = async (proxy, market, tokenAddr, amount, to) => {
@@ -196,7 +215,10 @@ const withdrawAave = async (proxy, market, tokenAddr, amount, to) => {
     );
     const functionData = aaveWithdrawAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](aaveWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](aaveWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed AaveWithdraw; ${gasUsed}`);
+    return receipt;
 };
 
 const borrowAave = async (proxy, market, tokenAddr, amount, rateMode, to) => {
@@ -212,7 +234,10 @@ const borrowAave = async (proxy, market, tokenAddr, amount, rateMode, to) => {
     );
     const functionData = aaveBorrowAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](aaveBorrowAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](aaveBorrowAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed borrowAave; ${gasUsed}`);
+    return receipt;
 };
 
 const paybackAave = async (proxy, market, tokenAddr, amount, rateMode, from) => {
@@ -234,7 +259,10 @@ const paybackAave = async (proxy, market, tokenAddr, amount, rateMode, from) => 
     );
     const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, { gasLimit: 4000000 });
+    const receipt = await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, { gasLimit: 4000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed paybackAave; ${gasUsed}`);
+    return receipt;
 };
 
 const claimStkAave = async (proxy, assets, amount, to) => {
@@ -247,7 +275,10 @@ const claimStkAave = async (proxy, assets, amount, to) => {
     );
     const functionData = aaveClaimStkAaveAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](aaveClaimStkAaveAddr, functionData, { gasLimit: 4000000 });
+    const receipt = await proxy['execute(address,bytes)'](aaveClaimStkAaveAddr, functionData, { gasLimit: 4000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed claimStkAave; ${gasUsed}`);
+    return receipt;
 };
 
 const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
@@ -282,7 +313,10 @@ const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
 
     const functionData = compSupplyAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](compSupplyAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](compSupplyAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed supplyComp; ${gasUsed}`);
+    return receipt;
 };
 
 const withdrawComp = async (proxy, cTokenAddr, amount, to) => {
@@ -295,7 +329,10 @@ const withdrawComp = async (proxy, cTokenAddr, amount, to) => {
     );
     const functionData = compWithdrawAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](compWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](compWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed withdrawComp; ${gasUsed}`);
+    return receipt;
 };
 
 const borrowComp = async (proxy, cTokenAddr, amount, to) => {
@@ -304,7 +341,10 @@ const borrowComp = async (proxy, cTokenAddr, amount, to) => {
     const compBorrowAction = new dfs.actions.compound.CompoundBorrowAction(cTokenAddr, amount, to);
     const functionData = compBorrowAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](compBorrowAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](compBorrowAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed borrowComp; ${gasUsed}`);
+    return receipt;
 };
 
 const paybackComp = async (proxy, cTokenAddr, amount, from) => {
@@ -326,7 +366,10 @@ const paybackComp = async (proxy, cTokenAddr, amount, from) => {
     );
     const functionData = compPaybackAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](compPaybackAddr, functionData, { gasLimit: 4000000 });
+    const receipt = await proxy['execute(address,bytes)'](compPaybackAddr, functionData, { gasLimit: 4000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed paybackComp; ${gasUsed}`);
+    return receipt;
 };
 
 const generateMcd = async (proxy, vaultId, amount, to) => {
@@ -340,7 +383,10 @@ const generateMcd = async (proxy, vaultId, amount, to) => {
     );
     const functionData = mcdGenerateAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdGenerateAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](mcdGenerateAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed generateMcd; ${gasUsed}`);
+    return receipt;
 };
 
 const openVault = async (proxy, collType, collAmount, daiAmount) => {
@@ -436,9 +482,12 @@ const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, 
 
     const functionData = uniSupplyAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](uniSupplyAddr, functionData, {
+    const receipt = await proxy['execute(address,bytes)'](uniSupplyAddr, functionData, {
         gasLimit: 3000000,
     });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed uniSupply; ${gasUsed}`);
+    return receipt;
 };
 
 const uniWithdraw = async (proxy, addrTokenA, addrTokenB, lpAddr, liquidity, to, from) => {
@@ -456,9 +505,13 @@ const uniWithdraw = async (proxy, addrTokenA, addrTokenB, lpAddr, liquidity, to,
 
     const functionData = uniWithdrawAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](uniWithdrawAddr, functionData, {
+    const receipt = await proxy['execute(address,bytes)'](uniWithdrawAddr, functionData, {
         gasLimit: 3000000,
     });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed uniWithdraw; ${gasUsed}`);
+    return receipt;
 };
 
 const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) => {
@@ -470,9 +523,12 @@ const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) =>
 
     const functionData = claimCompAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](compClaimAddr, functionData, {
+    const receipt = await proxy['execute(address,bytes)'](compClaimAddr, functionData, {
         gasLimit: 3000000,
     });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed claimComp; ${gasUsed}`);
+    return receipt;
 };
 
 const mcdGive = async (proxy, vaultId, newOwner, createProxy) => {
@@ -483,9 +539,12 @@ const mcdGive = async (proxy, vaultId, newOwner, createProxy) => {
 
     const functionData = mcdGiveAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdGiveAddr, functionData, {
+    const receipt = await proxy['execute(address,bytes)'](mcdGiveAddr, functionData, {
         gasLimit: 3000000,
     });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed mcdGive; ${gasUsed}`);
+    return receipt;
 };
 
 const mcdMerge = async (proxy, srcVaultId, destVaultId) => {
@@ -496,9 +555,12 @@ const mcdMerge = async (proxy, srcVaultId, destVaultId) => {
 
     const functionData = mcdMergeAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](mcdMergeAddr, functionData, {
+    const receipt = await proxy['execute(address,bytes)'](mcdMergeAddr, functionData, {
         gasLimit: 3000000,
     });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed mcdMerge; ${gasUsed}`);
+    return receipt;
 };
 
 const reflexerOpen = async (proxy, adapterAddr) => {
@@ -507,7 +569,10 @@ const reflexerOpen = async (proxy, adapterAddr) => {
     const openMySafe = new dfs.actions.reflexer.ReflexerOpenSafeAction(adapterAddr);
     const functionData = openMySafe.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](reflexerOpenAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](reflexerOpenAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed reflexerOpen; ${gasUsed}`);
+    return receipt;
 };
 
 const reflexerSupply = async (proxy, safeId, amount, adapterAddr, from) => {
@@ -524,7 +589,10 @@ const reflexerSupply = async (proxy, safeId, amount, adapterAddr, from) => {
 
     const functionData = supplyMySafe.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](reflexerSupplyAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](reflexerSupplyAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed reflexerSupply; ${gasUsed}`);
+    return receipt;
 };
 
 const reflexerPayback = async (proxy, safeId, amount, from, raiAddr) => {
@@ -539,7 +607,10 @@ const reflexerPayback = async (proxy, safeId, amount, from, raiAddr) => {
     );
     const functionData = reflexerPaybackAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](reflexerPaybackAddress, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](reflexerPaybackAddress, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed reflexerPayback; ${gasUsed}`);
+    return receipt;
 };
 
 const reflexerWithdraw = async (proxy, safeId, amount, adapterAddr, to) => {
@@ -553,7 +624,10 @@ const reflexerWithdraw = async (proxy, safeId, amount, adapterAddr, to) => {
     );
     const functionData = reflexerWithdrawAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](reflexerWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](reflexerWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed reflexerWithdraw; ${gasUsed}`);
+    return receipt;
 };
 
 const reflexerGenerate = async (proxy, safeId, amount, to) => {
@@ -566,7 +640,10 @@ const reflexerGenerate = async (proxy, safeId, amount, to) => {
     );
     const functionData = reflexerGenerateAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](reflexerGenerateAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](reflexerGenerateAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed reflexerGenerate; ${gasUsed}`);
+    return receipt;
 };
 
 const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from, to) => {
@@ -582,7 +659,10 @@ const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from
 
     const functionData = liquityOpenAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityOpenAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](liquityOpenAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed liquityOpen; ${gasUsed}`);
+    return receipt;
 };
 
 const liquityBorrow = async (proxy, maxFeePercentage, LUSDAmount, to) => {
@@ -598,7 +678,10 @@ const liquityBorrow = async (proxy, maxFeePercentage, LUSDAmount, to) => {
 
     const functionData = liquityBorrowAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityBorrowAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](liquityBorrowAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed liquityBorrow; ${gasUsed}`);
+    return receipt;
 };
 
 const liquityPayback = async (proxy, LUSDAmount, from) => {
@@ -614,7 +697,10 @@ const liquityPayback = async (proxy, LUSDAmount, from) => {
 
     const functionData = liquityPaybackAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityPaybackAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](liquityPaybackAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed liqPayback; ${gasUsed}`);
+    return receipt;
 };
 
 const liquitySupply = async (proxy, collAmount, from) => {
@@ -630,7 +716,10 @@ const liquitySupply = async (proxy, collAmount, from) => {
 
     const functionData = liquitySupplyAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquitySupplyAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](liquitySupplyAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed liqSupply; ${gasUsed}`);
+    return receipt;
 };
 
 const liquityWithdraw = async (proxy, collAmount, to) => {
@@ -646,7 +735,10 @@ const liquityWithdraw = async (proxy, collAmount, to) => {
 
     const functionData = liquityWithdrawAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](liquityWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed liqWithdraw; ${gasUsed}`);
+    return receipt;
 };
 
 const liquityClose = async (proxy, from, to) => {
@@ -658,7 +750,10 @@ const liquityClose = async (proxy, from, to) => {
 
     const functionData = LiquityCloseAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityCloseAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](liquityCloseAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed LiquityClose; ${gasUsed}`);
+    return receipt;
 };
 
 const liquityRedeem = async (proxy, lusdAmount, from, to, maxFeePercentage) => {
@@ -686,7 +781,10 @@ const liquityRedeem = async (proxy, lusdAmount, from, to, maxFeePercentage) => {
 
     const functionData = liquityRedeemAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityRedeemAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](liquityRedeemAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed LiquityRedeem; ${gasUsed}`);
+    return receipt;
 };
 
 const liquityStake = async (proxy, lqtyAmount, from, wethTo, lusdTo) => {
@@ -698,7 +796,10 @@ const liquityStake = async (proxy, lqtyAmount, from, wethTo, lusdTo) => {
 
     const functionData = LiquityStakeAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityStakeAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](liquityStakeAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed LiquityStake; ${gasUsed}`);
+    return receipt;
 };
 
 const liquityUnstake = async (proxy, lqtyAmount, to, wethTo, lusdTo) => {
@@ -710,7 +811,10 @@ const liquityUnstake = async (proxy, lqtyAmount, to, wethTo, lusdTo) => {
 
     const functionData = LiquityUnstakeAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityUnstakeAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](liquityUnstakeAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed LiquityUnstake; ${gasUsed}`);
+    return receipt;
 };
 
 const liquitySPDeposit = async (proxy, LUSDAmount, from, wethTo, lqtyTo) => {
@@ -722,7 +826,10 @@ const liquitySPDeposit = async (proxy, LUSDAmount, from, wethTo, lqtyTo) => {
 
     const functionData = liquitySPDepositAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquitySPDepositAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](liquitySPDepositAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed LiquitySPDeposit; ${gasUsed}`);
+    return receipt;
 };
 
 const liquitySPWithdraw = async (proxy, LUSDAmount, to, wethTo, lqtyTo) => {
@@ -734,7 +841,10 @@ const liquitySPWithdraw = async (proxy, LUSDAmount, to, wethTo, lqtyTo) => {
 
     const functionData = liquitySPWithdrawAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquitySPWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](liquitySPWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed LiquitySPWithdraw; ${gasUsed}`);
+    return receipt;
 };
 
 const liquityEthGainToTrove = async (proxy, lqtyTo) => {
@@ -754,7 +864,10 @@ const liquityEthGainToTrove = async (proxy, lqtyTo) => {
 
     const functionData = liquityEthGainToTroveAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityEthGainToTroveAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](liquityEthGainToTroveAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed LiquityEthGainToTrove; ${gasUsed}`);
+    return receipt;
 };
 
 const uniV3CreatePool = async (proxy, token0, token1, fee, tickLower, tickUpper, amount0Desired,
@@ -815,7 +928,10 @@ const uniV3CreatePool = async (proxy, token0, token1, fee, tickLower, tickUpper,
     await approve(token1, proxy.address);
 
     const functionData = uniCreatePoolAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](uniCreatePoolAddress, functionData);
+    const receipt = await proxy['execute(address,bytes)'](uniCreatePoolAddress, functionData);
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed UniCreatePoolV3; ${gasUsed}`);
+    return receipt;
 };
 
 const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amount0Desired,
@@ -875,7 +991,10 @@ const uniV3Mint = async (proxy, token0, token1, fee, tickLower, tickUpper, amoun
 
     const functionData = uniMintV3Action.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](uniMintV3Address, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](uniMintV3Address, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed UniMintV3; ${gasUsed}`);
+    return receipt;
 };
 
 const uniV3Supply = async (proxy, tokenId, amount0Desired,
@@ -936,7 +1055,10 @@ const uniV3Supply = async (proxy, tokenId, amount0Desired,
     await approve(token1, proxy.address);
 
     const functionData = uniSupplyV3Action.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](uniSupplyV3Address, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](uniSupplyV3Address, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed UniSupplyV3; ${gasUsed}`);
+    return receipt;
 };
 
 const uniV3Withdraw = async (proxy, tokenId, liquidity, recipient) => {
@@ -954,7 +1076,10 @@ const uniV3Withdraw = async (proxy, tokenId, liquidity, recipient) => {
         recipient,
     );
     const functionData = uniWithdrawV3Action.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](uniWithdrawV3Address, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](uniWithdrawV3Address, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed UniWithdrawV3; ${gasUsed}`);
+    return receipt;
 };
 
 const uniV3Collect = async (proxy, tokenId, recipient, amount0Max, amount1Max) => {
@@ -968,7 +1093,10 @@ const uniV3Collect = async (proxy, tokenId, recipient, amount0Max, amount1Max) =
     );
     const functionData = uniCollectV3Action.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](uniCollectV3Address, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](uniCollectV3Address, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed UniCollectV3; ${gasUsed}`);
+    return receipt;
 };
 
 const dydxSupply = async (proxy, tokenAddr, amount, from) => {
@@ -983,7 +1111,10 @@ const dydxSupply = async (proxy, tokenAddr, amount, from) => {
     );
     const functionData = dydxSupplyAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](dydxSupplyAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](dydxSupplyAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed DyDxSupply; ${gasUsed}`);
+    return receipt;
 };
 
 const dydxWithdraw = async (proxy, tokenAddr, amount, to) => {
@@ -996,7 +1127,10 @@ const dydxWithdraw = async (proxy, tokenAddr, amount, to) => {
     );
     const functionData = dydxWithdrawAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](dydxWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](dydxWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed DyDxWithdraw; ${gasUsed}`);
+    return receipt;
 };
 
 const buyTokenIfNeeded = async (tokenAddr, senderAcc, proxy, standardAmount) => {
@@ -1027,7 +1161,10 @@ const yearnSupply = async (token, amount, from, to, proxy) => {
         to,
     );
     const functionData = yearnSupplyAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](yearnSupplyAddress, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](yearnSupplyAddress, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed YearnSupply; ${gasUsed}`);
+    return receipt;
 };
 
 const yearnWithdraw = async (token, amount, from, to, proxy) => {
@@ -1039,7 +1176,10 @@ const yearnWithdraw = async (token, amount, from, to, proxy) => {
         to,
     );
     const functionData = yearnWithdrawAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](yearnWithdrawAddress, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](yearnWithdrawAddress, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed YearnWithdraw; ${gasUsed}`);
+    return receipt;
 };
 
 const lidoStake = async (amount, from, to, proxy) => {
@@ -1050,7 +1190,10 @@ const lidoStake = async (amount, from, to, proxy) => {
         to,
     );
     const functionData = lidoStakeAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](lidoStakeAddress, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](lidoStakeAddress, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed LidoStake; ${gasUsed}`);
+    return receipt;
 };
 
 const reflexerSaviourDeposit = async (proxy, from, safeId, lpTokenAmount) => {
@@ -1062,7 +1205,10 @@ const reflexerSaviourDeposit = async (proxy, from, safeId, lpTokenAmount) => {
         lpTokenAmount,
     );
     const functionData = reflexerSaviourDepositAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](reflexerSaviourDepositAddress, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](reflexerSaviourDepositAddress, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed ReflexerNativeUniV2SaviourDeposit; ${gasUsed}`);
+    return receipt;
 };
 
 const reflexerSaviourWithdraw = async (proxy, to, safeId, lpTokenAmount) => {
@@ -1074,7 +1220,10 @@ const reflexerSaviourWithdraw = async (proxy, to, safeId, lpTokenAmount) => {
         lpTokenAmount,
     );
     const functionData = reflexerSaviourWithdrawAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](reflexerSaviourWithdrawAddress, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](reflexerSaviourWithdrawAddress, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed ReflexerNativeUniV2SaviourWithdraw; ${gasUsed}`);
+    return receipt;
 };
 
 const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, owner, to) => {
@@ -1083,7 +1232,10 @@ const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, o
         index, vaultId, reward, networth, merkle, owner, to,
     );
     const functionData = claimInstMakerAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](claimInstMakerAddress, functionData);
+    const receipt = await proxy['execute(address,bytes)'](claimInstMakerAddress, functionData);
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed ClaimInstMaker; ${gasUsed}`);
+    return receipt;
 };
 
 const pullTokensInstDSA = async (proxy, dsaAddress, tokens, amounts, to) => {
@@ -1092,7 +1244,10 @@ const pullTokensInstDSA = async (proxy, dsaAddress, tokens, amounts, to) => {
         dsaAddress, tokens, amounts, to,
     );
     const functionData = instPullTokenAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](instPulLTokenAddress, functionData);
+    const receipt = await proxy['execute(address,bytes)'](instPulLTokenAddress, functionData);
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed InstPullTokens; ${gasUsed}`);
+    return receipt;
 };
 
 const balancerSupply = async (proxy, poolId, from, to, tokens, maxAmountsIn, userData) => {
@@ -1101,7 +1256,10 @@ const balancerSupply = async (proxy, poolId, from, to, tokens, maxAmountsIn, use
         poolId, from, to, tokens, maxAmountsIn, userData,
     );
     const functionData = balancerSupplyAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](balancerSupplyAddress, functionData);
+    const receipt = await proxy['execute(address,bytes)'](balancerSupplyAddress, functionData);
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed BalancerV2Supply; ${gasUsed}`);
+    return receipt;
 };
 
 const balancerClaim = async (proxy, liquidityProvider, to, weeks, balances, merkleProofs) => {
@@ -1110,7 +1268,10 @@ const balancerClaim = async (proxy, liquidityProvider, to, weeks, balances, merk
         liquidityProvider, to, weeks, balances, merkleProofs,
     );
     const functionData = balancerClaimAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](balancerClaimAddress, functionData);
+    const receipt = await proxy['execute(address,bytes)'](balancerClaimAddress, functionData);
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed BalancerV2Claim; ${gasUsed}`);
+    return receipt;
 };
 
 const balancerWithdraw = async (
@@ -1134,7 +1295,10 @@ const balancerWithdraw = async (
         userData,
     );
     const functionData = balancerWithdrawAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](balancerWithdrawAddress, functionData);
+    const receipt = await proxy['execute(address,bytes)'](balancerWithdrawAddress, functionData);
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed BalancerV2Withdraw; ${gasUsed}`);
+    return receipt;
 };
 
 const changeProxyOwner = async (proxy, newOwner) => {
@@ -1143,7 +1307,10 @@ const changeProxyOwner = async (proxy, newOwner) => {
         newOwner,
     );
     const functionData = changeProxyOwnerAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](changeProxyOwnerAddress, functionData);
+    const receipt = await proxy['execute(address,bytes)'](changeProxyOwnerAddress, functionData);
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed ChangeProxyOwner; ${gasUsed}`);
+    return receipt;
 };
 
 const curveDeposit = async (
@@ -1176,7 +1343,10 @@ const curveDeposit = async (
 
     const functionData = curveDepositAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](curveDepositAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](curveDepositAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed CurveDeposit; ${gasUsed}`);
+    return receipt;
 };
 
 const curveWithdraw = async (
@@ -1215,7 +1385,10 @@ const curveWithdraw = async (
     );
 
     const functionData = curveWithdrawAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](curveWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](curveWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed CurveWithdraw; ${gasUsed}`);
+    return receipt;
 };
 
 const curveGaugeDeposit = async (
@@ -1238,7 +1411,10 @@ const curveGaugeDeposit = async (
 
     const functionData = curveGaugeDepositAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](curveGaugeDepositAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](curveGaugeDepositAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed CurveGaugeDeposit; ${gasUsed}`);
+    return receipt;
 };
 
 const curveGaugeWithdraw = async (
@@ -1259,7 +1435,10 @@ const curveGaugeWithdraw = async (
 
     const functionData = curveGaugeWithdrawAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](curveGaugeWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](curveGaugeWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed CurveGaugeWithdraw; ${gasUsed}`);
+    return receipt;
 };
 
 const curveMintCrv = async (
@@ -1276,7 +1455,10 @@ const curveMintCrv = async (
 
     const functionData = curveMintCrvAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](curveMintCrvAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](curveMintCrvAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed CurveMintCrv; ${gasUsed}`);
+    return receipt;
 };
 
 const curveClaimFees = async (
@@ -1293,7 +1475,10 @@ const curveClaimFees = async (
 
     const functionData = curveClaimFeesAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](curveClaimFeesAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](curveClaimFeesAddr, functionData, { gasLimit: 3000000 });
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed curveClaimFees; ${gasUsed}`);
+    return receipt;
 };
 
 module.exports = {

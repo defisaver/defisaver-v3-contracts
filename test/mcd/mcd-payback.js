@@ -29,6 +29,7 @@ describe('Mcd-Payback', function () {
     let makerAddresses; let senderAcc; let proxy;
 
     before(async () => {
+        await redeploy('McdOpen');
         await redeploy('McdSupply');
         await redeploy('McdGenerate');
         await redeploy('McdPayback');

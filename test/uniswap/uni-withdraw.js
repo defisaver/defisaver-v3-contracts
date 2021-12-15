@@ -29,7 +29,9 @@ describe('Uni-Withdraw', function () {
     ];
 
     before(async () => {
+        await redeploy('UniSupply');
         await redeploy('UniWithdraw');
+        await redeploy('DFSSell');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
