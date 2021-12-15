@@ -100,7 +100,7 @@ const coinGeckoHelper = {
     WBTC: 'wrapped-bitcoin',
     RENBTC: 'renbtc',
     ZRX: '0x',
-    KNC: 'kyber-network',
+    KNCL: 'kyber-network',
     MANA: 'decentraland',
     PAXUSD: 'paxos-standard',
     COMP: 'compound-governance-token',
@@ -212,6 +212,17 @@ const setStorageAt = async (address, index, value) => {
 };
 
 const setBalance = async (tokenAddr, userAddr, value) => {
+    try {
+        let tokenContract = await hre.ethers.getContractAt('IProxyERC20', tokenAddr);
+        const newTokenAddr = await tokenContract.callStatic.target();
+
+        tokenContract = await hre.ethers.getContractAt('IProxyERC20', newTokenAddr);
+        const tokenState = await tokenContract.callStatic.tokenState();
+        // eslint-disable-next-line no-param-reassign
+        tokenAddr = tokenState;
+    } catch (error) {
+        console.log();
+    }
     const slotInfo = await findBalancesSlot(tokenAddr);
     let index;
     if (slotInfo.isVyper) {
@@ -498,14 +509,19 @@ const BN2Float = (bn, decimals) => hre.ethers.utils.formatUnits(bn, decimals);
 
 const Float2BN = (string, decimals) => hre.ethers.utils.parseUnits(string, decimals);
 
-const takeSnapshot = async () => hre.network.provider.request({
-    method: 'evm_snapshot',
-});
+const takeSnapshot = async () => {
+    const snapshot = await hre.network.provider.request({
+        method: 'evm_snapshot',
+    });
+    return snapshot;
+};
 
-const revertToSnapshot = async (snapshotId) => hre.network.provider.request({
-    method: 'evm_revert',
-    params: [snapshotId],
-});
+const revertToSnapshot = async (snapshotId) => {
+    await hre.network.provider.request({
+        method: 'evm_revert',
+        params: [snapshotId],
+    });
+};
 
 module.exports = {
     addToZRXAllowlist,

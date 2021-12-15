@@ -15,6 +15,7 @@ const {
     depositToWeth,
     MAX_UINT128,
     fetchAmountinUSDPrice,
+    setBalance,
 } = require('./utils');
 
 const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
@@ -149,25 +150,8 @@ const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to) => {
 };
 
 const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
-    const tokenBalance = await balanceOf(tokenAddr, from);
-
-    if (tokenBalance.lt(amount)) {
-        if (isEth(tokenAddr)) {
-            await depositToWeth(amount.toString());
-        } else {
-            await sell(
-                proxy,
-                WETH_ADDRESS,
-                tokenAddr,
-                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
-                UNISWAP_WRAPPER,
-                from,
-                from,
-            );
-        }
-    }
+    await setBalance(tokenAddr, from, amount);
     const aaveSupplyAddr = await getAddrFromRegistry('AaveSupply');
-
     await approve(tokenAddr, proxy.address);
 
     const aaveSupplyAction = new dfs.actions.aave.AaveSupplyAction(
@@ -1440,7 +1424,7 @@ const mStableClaim = async (
 
     const functionData = mStableAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 });
-}
+};
 
 const rariDeposit = async (fundManager, token, poolToken, amount, from, to, proxy) => {
     const rariDepositAddr = await getAddrFromRegistry('RariDeposit');

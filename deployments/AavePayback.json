@@ -16,19 +16,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "ADMIN_VAULT_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "AaveIncentivesController",
 			"outputs": [
 				{
@@ -94,19 +81,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "REGISTRY_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "RETURN_MAX_INDEX_VALUE",
 			"outputs": [
 				{
@@ -146,19 +120,6 @@
 		},
 		{
 			"inputs": [],
-			"name": "STAKED_CONTROLLER_ADDR",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
 			"name": "SUB_MAX_INDEX_VALUE",
 			"outputs": [
 				{
@@ -178,6 +139,19 @@
 					"internalType": "uint8",
 					"name": "",
 					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "StakedToken",
+			"outputs": [
+				{
+					"internalType": "contract IStakedToken",
+					"name": "",
+					"type": "address"
 				}
 			],
 			"stateMutability": "view",
