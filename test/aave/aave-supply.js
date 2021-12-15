@@ -11,7 +11,6 @@ describe('Aave-Supply', function () {
         await redeploy('AaveSupply');
     });
     it('... should run full aave supply test', async () => {
-        const snapshot = await takeSnapshot();
-        await aaveSupplyTest(aaveV2assetsDefaultMarket.length, snapshot);
+        await aaveSupplyTest(aaveV2assetsDefaultMarket.length);
     });
 });

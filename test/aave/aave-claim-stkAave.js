@@ -12,7 +12,6 @@ describe('Aave-claim staked aave test', function () {
         await redeploy('AaveView');
     });
     it('... should run full aave claim staked aave test', async () => {
-        const snapshot = await takeSnapshot();
-        await aaveClaimStkAaveTest(snapshot);
+        await aaveClaimStkAaveTest();
     });
 });
