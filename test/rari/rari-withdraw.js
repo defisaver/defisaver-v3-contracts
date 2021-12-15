@@ -8,9 +8,10 @@ const {
     approve,
     USDC_ADDR,
     DAI_ADDR,
+    setBalance,
 } = require('../utils');
 
-const { buyTokenIfNeeded, rariDeposit, rariWithdraw } = require('../actions.js');
+const { rariDeposit, rariWithdraw } = require('../actions.js');
 
 describe('Rari deposit', function () {
     this.timeout(80000);
@@ -28,7 +29,7 @@ describe('Rari deposit', function () {
 
     it('... Try to supply 10k USDC and withdraw 10k USDC - Rari stable pool', async () => {
         const usdcAmount = hre.ethers.utils.parseUnits('10000', 6);
-        await buyTokenIfNeeded(USDC_ADDR, senderAcc, proxy, usdcAmount);
+        await setBalance(USDC_ADDR, senderAcc.address, usdcAmount);
 
         await approve(USDC_ADDR, proxy.address);
 
@@ -82,7 +83,7 @@ describe('Rari deposit', function () {
 
     it('... Try to supply 10k DAI and withdraw 10k DAI - Rari DAI pool', async () => {
         const daiAmount = hre.ethers.utils.parseUnits('10000', 18);
-        await buyTokenIfNeeded(DAI_ADDR, senderAcc, proxy, daiAmount);
+        await setBalance(DAI_ADDR, senderAcc.address, daiAmount);
 
         await approve(DAI_ADDR, proxy.address);
 
@@ -134,7 +135,7 @@ describe('Rari deposit', function () {
 
     it('... Try to supply 10k USDC to proxy and withdraw 10k USDC - Rari stable pool', async () => {
         const usdcAmount = hre.ethers.utils.parseUnits('10000', 6);
-        await buyTokenIfNeeded(USDC_ADDR, senderAcc, proxy, usdcAmount);
+        await setBalance(USDC_ADDR, senderAcc.address, usdcAmount);
 
         await approve(USDC_ADDR, proxy.address);
 

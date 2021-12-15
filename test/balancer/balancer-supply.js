@@ -10,8 +10,9 @@ const {
     fetchAmountinUSDPrice,
     approve,
     balanceOf,
+    setBalance,
 } = require('../utils');
-const { balancerSupply, buyTokenIfNeeded } = require('../actions.js');
+const { balancerSupply } = require('../actions.js');
 
 describe('Balancer-Supply', function () {
     this.timeout(80000);
@@ -68,10 +69,9 @@ describe('Balancer-Supply', function () {
                 proxyBalanceAmounts.push(
                     await balanceOf(balancerPairs[i].tokens[j], proxy.address),
                 );
-                await buyTokenIfNeeded(
+                await setBalance(
                     balancerPairs[i].tokens[j],
-                    senderAcc,
-                    proxy,
+                    senderAcc.address,
                     balancerPairs[i].amountsIn[j],
                 );
                 await approve(balancerPairs[i].tokens[j], proxy.address);
@@ -106,10 +106,9 @@ describe('Balancer-Supply', function () {
                 proxyBalanceAmounts.push(
                     await balanceOf(balancerPairs[i].tokens[j], proxy.address),
                 );
-                await buyTokenIfNeeded(
+                await setBalance(
                     balancerPairs[i].tokens[j],
-                    senderAcc,
-                    proxy,
+                    senderAcc.address,
                     balancerPairs[i].amountsIn[j],
                 );
                 await approve(balancerPairs[i].tokens[j], proxy.address);

@@ -18,6 +18,7 @@ const {
     DAI_ADDR,
     balanceOf,
     approve,
+    setBalance,
 } = require('../../utils');
 
 const {
@@ -30,7 +31,6 @@ const {
 const {
     openVaultForExactAmountInDecimals,
     gUniDeposit,
-    buyTokenIfNeeded,
     openVault,
 } = require('../../actions.js');
 
@@ -226,8 +226,9 @@ describe('Mcd-Boost', function () {
 
         const daiAmount = hre.ethers.utils.parseUnits('20000', 18);
         const usdtAmount = hre.ethers.utils.parseUnits('20000', 6);
-        await buyTokenIfNeeded(DAI_ADDR, senderAcc, proxy, daiAmount, uniWrapper.address);
-        await buyTokenIfNeeded(USDC_ADDR, senderAcc, proxy, usdtAmount, uniWrapper.address);
+        await setBalance(DAI_ADDR, senderAcc.address, daiAmount);
+        await setBalance(USDC_ADDR, senderAcc.address, usdtAmount);
+
         await approve(DAI_ADDR, proxy.address);
         await approve(USDC_ADDR, proxy.address);
         await gUniDeposit(

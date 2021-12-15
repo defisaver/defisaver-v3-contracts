@@ -1,5 +1,7 @@
+/* eslint-disable no-await-in-loop */
 const hre = require('hardhat');
 const fs = require('fs');
+const storageSlots = require('./storageSlots.json');
 
 const { deployAsOwner } = require('../scripts/utils/deployer');
 
@@ -112,6 +114,123 @@ const coinGeckoHelper = {
     LUSD: 'liquity-usd',
     LQTY: 'liquity',
     TORN: 'tornado-cash',
+};
+
+async function findBalancesSlot(tokenAddress) {
+    const slotObj = storageSlots[tokenAddress];
+    if (slotObj) {
+        return { isVyper: slotObj.isVyper, num: slotObj.num };
+    }
+
+    const encode = (types, values) => hre.ethers.utils.defaultAbiCoder.encode(types, values);
+    const account = hre.ethers.constants.AddressZero;
+    const probeA = encode(['uint'], [1]);
+    const probeB = encode(['uint'], [2]);
+    const token = await hre.ethers.getContractAt(
+        'IERC20',
+        tokenAddress,
+    );
+    for (let i = 0; i < 100; i++) {
+        {
+            let probedSlot = hre.ethers.utils.keccak256(
+                encode(['address', 'uint'], [account, i]),
+            );
+            // remove padding for JSON RPC
+            while (probedSlot.startsWith('0x0')) { probedSlot = `0x${probedSlot.slice(3)}`; }
+            const prev = await hre.ethers.provider.send(
+                'eth_getStorageAt',
+                [tokenAddress, probedSlot, 'latest'],
+            );
+            // make sure the probe will change the slot value
+            const probe = prev === probeA ? probeB : probeA;
+
+            await hre.ethers.provider.send('hardhat_setStorageAt', [
+                tokenAddress,
+                probedSlot,
+                probe,
+            ]);
+
+            const balance = await token.balanceOf(account);
+            // reset to previous value
+            await hre.ethers.provider.send('hardhat_setStorageAt', [
+                tokenAddress,
+                probedSlot,
+                prev,
+            ]);
+            if (balance.eq(hre.ethers.BigNumber.from(probe))) {
+                const result = { isVyper: false, num: i };
+                storageSlots[tokenAddress] = result;
+                // file path needs to be from top level folder
+                fs.writeFileSync('test/storageSlots.json', JSON.stringify(storageSlots));
+                return result;
+            }
+        }
+        {
+            let probedSlot = hre.ethers.utils.keccak256(
+                encode(['uint', 'address'], [i, account]),
+            );
+            // remove padding for JSON RPC
+            while (probedSlot.startsWith('0x0')) { probedSlot = `0x${probedSlot.slice(3)}`; }
+            const prev = await hre.ethers.provider.send(
+                'eth_getStorageAt',
+                [tokenAddress, probedSlot, 'latest'],
+            );
+            // make sure the probe will change the slot value
+            const probe = prev === probeA ? probeB : probeA;
+
+            await hre.ethers.provider.send('hardhat_setStorageAt', [
+                tokenAddress,
+                probedSlot,
+                probe,
+            ]);
+
+            const balance = await token.balanceOf(account);
+            // reset to previous value
+            await hre.ethers.provider.send('hardhat_setStorageAt', [
+                tokenAddress,
+                probedSlot,
+                prev,
+            ]);
+            if (balance.eq(hre.ethers.BigNumber.from(probe))) {
+                const result = { isVyper: true, num: i };
+                storageSlots[tokenAddress] = result;
+                // file path needs to be from top level folder
+                fs.writeFileSync('test/storageSlots.json', JSON.stringify(storageSlots));
+                return result;
+            }
+        }
+    }
+    console.log('Balance slot not found');
+    return 0;
+}
+
+const toBytes32 = (bn) => hre.ethers.utils.hexlify(hre.ethers.utils.zeroPad(bn.toHexString(), 32));
+
+const setStorageAt = async (address, index, value) => {
+    await hre.ethers.provider.send('hardhat_setStorageAt', [address, index, value]);
+    await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
+};
+
+const setBalance = async (tokenAddr, userAddr, value) => {
+    const slotInfo = await findBalancesSlot(tokenAddr);
+    let index;
+    if (slotInfo.isVyper) {
+        index = hre.ethers.utils.solidityKeccak256(
+            ['uint256', 'uint256'],
+            [slotInfo.num, userAddr], // key, slot
+        );
+    } else {
+        index = hre.ethers.utils.solidityKeccak256(
+            ['uint256', 'uint256'],
+            [userAddr, slotInfo.num], // key, slot
+        );
+    }
+
+    await setStorageAt(
+        tokenAddr,
+        index.toString(),
+        toBytes32(value).toString(),
+    );
 };
 
 const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {
@@ -451,6 +570,7 @@ module.exports = {
     AWBTC_ADDR,
     WBTC_ADDR,
     WSTETH_ADDRESS,
+    setBalance,
     takeSnapshot,
     revertToSnapshot,
 };

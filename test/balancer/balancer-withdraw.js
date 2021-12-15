@@ -10,8 +10,9 @@ const {
     fetchAmountinUSDPrice,
     approve,
     balanceOf,
+    setBalance,
 } = require('../utils');
-const { balancerSupply, buyTokenIfNeeded, balancerWithdraw } = require('../actions.js');
+const { balancerSupply, balancerWithdraw } = require('../actions.js');
 
 describe('Balancer-Withdraw', function () {
     this.timeout(80000);
@@ -69,10 +70,9 @@ describe('Balancer-Withdraw', function () {
                 proxyBalanceAmounts.push(
                     await balanceOf(balancerPairs[i].tokens[j], proxy.address),
                 );
-                await buyTokenIfNeeded(
+                await setBalance(
                     balancerPairs[i].tokens[j],
-                    senderAcc,
-                    proxy,
+                    senderAcc.address,
                     balancerPairs[i].amountsIn[j],
                 );
                 await approve(balancerPairs[i].tokens[j], proxy.address);
@@ -111,6 +111,7 @@ describe('Balancer-Withdraw', function () {
             // exit a WeightedPool by removing tokens in return for an exact amount of BPT
             userData = hre.ethers.utils.defaultAbiCoder.encode(['uint256', 'uint256'], [1, lpTokenDiff]);
             await approve(balancerPairs[i].poolAddress, proxy.address);
+            console.log("START WITHDRAWING");
             await balancerWithdraw(
                 proxy,
                 balancerPairs[i].poolId,
