@@ -6,6 +6,7 @@ require('@tenderly/hardhat-tenderly');
 require('@nomiclabs/hardhat-ethers');
 // require("hardhat-gas-reporter");
 require('hardhat-log-remover');
+require('@primitivefi/hardhat-dodoc');
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
