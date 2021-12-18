@@ -211,6 +211,10 @@ const setStorageAt = async (address, index, value) => {
     await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
 };
 
+const mineBlock = async () => {
+    await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
+};
+
 const setBalance = async (tokenAddr, userAddr, value) => {
     try {
         let tokenContract = await hre.ethers.getContractAt('IProxyERC20', tokenAddr);
@@ -339,6 +343,11 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
     if (regAddr === REGISTRY_ADDR) {
         await stopImpersonatingAccount(OWNER_ACC);
     }
+    await hre.tenderly.persistArtifacts({
+        name,
+        address: c.address,
+    });
+
     return c;
 };
 
@@ -522,6 +531,21 @@ const revertToSnapshot = async (snapshotId) => {
         params: [snapshotId],
     });
 };
+async function setForkForTesting() {
+    const senderAcc = (await hre.ethers.getSigners())[0];
+    await hre.network.provider.send('hardhat_setBalance', [
+        senderAcc.address,
+        '0x204FCE5E3E25026110000000',
+    ]);
+    await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
+        '0x1', // 1 wei
+    ]);
+}
+const getGasUsed = async (receipt) => {
+    const parsed = await receipt.wait();
+
+    return parsed.gasUsed.toString();
+};
 
 module.exports = {
     addToZRXAllowlist,
@@ -589,4 +613,7 @@ module.exports = {
     setBalance,
     takeSnapshot,
     revertToSnapshot,
+    getGasUsed,
+    mineBlock,
+    setForkForTesting,
 };

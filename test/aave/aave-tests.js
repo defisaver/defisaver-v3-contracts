@@ -23,6 +23,7 @@ const {
     getAddrFromRegistry,
     revertToSnapshot,
     takeSnapshot,
+    redeploy,
 } = require('../utils');
 
 const {
@@ -498,7 +499,18 @@ const aaveClaimStkAaveTest = async () => {
     });
 };
 
+const aaveDeployContracts = async () => {
+    await redeploy('AaveWithdraw');
+    await redeploy('AaveBorrow');
+    await redeploy('AaveSupply');
+    await redeploy('AavePayback');
+    await redeploy('AaveClaimStkAave');
+    await redeploy('AaveView');
+};
+
 const aaveFullTest = async (testLength) => {
+    await aaveDeployContracts();
+
     await aaveSupplyTest(testLength);
 
     await aaveBorrowTest(testLength);
@@ -517,4 +529,5 @@ module.exports = {
     aavePaybackTest,
     aaveClaimStkAaveTest,
     aaveFullTest,
+    aaveDeployContracts,
 };

@@ -2,7 +2,6 @@ const dfs = require('@defisaver/sdk');
 const hre = require('hardhat');
 
 const { getAssetInfo } = require('@defisaver/tokens');
-
 const {
     approve,
     getAddrFromRegistry,
@@ -16,14 +15,182 @@ const {
     MAX_UINT128,
     fetchAmountinUSDPrice,
     setBalance,
+    getGasUsed,
+    mineBlock,
 } = require('./utils');
-
 const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
-
 const { getSecondTokenAmount } = require('./utils-uni');
-
 const { getHints, LiquityActionIds } = require('./utils-liquity');
+const { execShellCommand } = require('../scripts/hardhat-tasks-functions');
 
+const executeAction = async (actionName, functionData, proxy) => {
+    await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
+        '0x1', // 1 wei
+    ]);
+    const actionAddr = await getAddrFromRegistry(actionName);
+    let receipt;
+    try {
+        mineBlock();
+        receipt = await proxy['execute(address,bytes)'](actionAddr, functionData, { gasLimit: 3000000 });
+        const gasUsed = await getGasUsed(receipt);
+        // console.log(`Gas used by ${actionName} action; ${gasUsed}`);
+        return receipt;
+    } catch (error) {
+        console.log(error);
+        const blockNum = await hre.ethers.provider.getBlockNumber();
+        const block = await hre.ethers.provider.getBlockWithTransactions(blockNum);
+        const txHash = block.transactions[0].hash;
+        await execShellCommand(`tenderly export ${txHash}`);
+        return error;
+    }
+};
+/*
+     ___           ___   ____    ____  _______
+    /   \         /   \  \   \  /   / |   ____|
+   /  ^  \       /  ^  \  \   \/   /  |  |__
+  /  /_\  \     /  /_\  \  \      /   |   __|
+ /  _____  \   /  _____  \  \    /    |  |____
+/__/     \__\ /__/     \__\  \__/     |_______|
+*/
+const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
+    await setBalance(tokenAddr, from, amount);
+    await approve(tokenAddr, proxy.address);
+    const aaveSupplyAction = new dfs.actions.aave.AaveSupplyAction(
+        market,
+        tokenAddr,
+        amount,
+        from,
+        nullAddress,
+    );
+    const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('AaveSupply', functionData, proxy);
+    return tx;
+};
+const withdrawAave = async (proxy, market, tokenAddr, amount, to) => {
+    const aaveWithdrawAction = new dfs.actions.aave.AaveWithdrawAction(
+        market,
+        tokenAddr,
+        amount,
+        to,
+    );
+    const functionData = aaveWithdrawAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('AaveWithdraw', functionData, proxy);
+    return tx;
+};
+const borrowAave = async (proxy, market, tokenAddr, amount, rateMode, to) => {
+    const aaveBorrowAction = new dfs.actions.aave.AaveBorrowAction(
+        market,
+        tokenAddr,
+        amount,
+        rateMode,
+        to,
+        nullAddress,
+    );
+    const functionData = aaveBorrowAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('AaveBorrow', functionData, proxy);
+    return tx;
+};
+const paybackAave = async (proxy, market, tokenAddr, amount, rateMode, from) => {
+    if (isEth(tokenAddr)) {
+        await depositToWeth(amount.toString());
+    }
+    await approve(tokenAddr, proxy.address);
+    const aavePaybackAction = new dfs.actions.aave.AavePaybackAction(
+        market,
+        tokenAddr,
+        amount,
+        rateMode,
+        from,
+        nullAddress,
+    );
+    const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('AavePayback', functionData, proxy);
+    return tx;
+};
+const claimStkAave = async (proxy, assets, amount, to) => {
+    const aaveClaimStkAaveAction = new dfs.actions.aave.AaveClaimStkAaveAction(
+        assets,
+        amount,
+        to,
+    );
+    const functionData = aaveClaimStkAaveAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('AaveClaimStkAave', functionData, proxy);
+    return tx;
+};
+/*
+.______       _______  _______  __       __________   ___  _______ .______
+|   _  \     |   ____||   ____||  |     |   ____\  \ /  / |   ____||   _  \
+|  |_)  |    |  |__   |  |__   |  |     |  |__   \  V  /  |  |__   |  |_)  |
+|      /     |   __|  |   __|  |  |     |   __|   >   <   |   __|  |      /
+|  |\  \----.|  |____ |  |     |  `----.|  |____ /  .  \  |  |____ |  |\  \----.
+| _| `._____||_______||__|     |_______||_______/__/ \__\ |_______|| _| `._____|
+*/
+const reflexerOpen = async (proxy, adapterAddr) => {
+    const openMySafe = new dfs.actions.reflexer.ReflexerOpenSafeAction(adapterAddr);
+    const functionData = openMySafe.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('ReflexerOpen', functionData, proxy);
+    return tx;
+};
+const reflexerSupply = async (proxy, safeId, amount, adapterAddr, from) => {
+    await approve(WETH_ADDRESS, proxy.address);
+    const supplyMySafe = new dfs.actions.reflexer.ReflexerSupplyAction(
+        safeId,
+        amount,
+        adapterAddr,
+        from,
+    );
+
+    const functionData = supplyMySafe.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('ReflexerSupply', functionData, proxy);
+    return tx;
+};
+const reflexerPayback = async (proxy, safeId, amount, from, raiAddr) => {
+    await approve(raiAddr, proxy.address);
+
+    const reflexerPaybackAction = new dfs.actions.reflexer.ReflexerPaybackAction(
+        safeId,
+        amount,
+        from,
+    );
+    const functionData = reflexerPaybackAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('ReflexerPayback', functionData, proxy);
+    return tx;
+};
+const reflexerWithdraw = async (proxy, safeId, amount, adapterAddr, to) => {
+    const reflexerWithdrawAction = new dfs.actions.reflexer.ReflexerWithdrawAction(
+        safeId,
+        amount,
+        adapterAddr,
+        to,
+    );
+    const functionData = reflexerWithdrawAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('ReflexerWithdraw', functionData, proxy);
+    return tx;
+};
+const reflexerGenerate = async (proxy, safeId, amount, to) => {
+    const reflexerGenerateAction = new dfs.actions.reflexer.ReflexerGenerateAction(
+        safeId,
+        amount,
+        to,
+    );
+    const functionData = reflexerGenerateAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('ReflexerGenerate', functionData, proxy);
+    return tx;
+};
+/*
+*
+*
+*
+*/
 const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0) => {
     const dfsSellAddr = await getAddrFromRegistry('DFSSell');
 
@@ -147,88 +314,6 @@ const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to) => {
     const functionData = mcdWithdrawAction.encodeForDsProxyCall()[1];
 
     await proxy['execute(address,bytes)'](mcdWithdrawAddr, functionData, { gasLimit: 3000000 });
-};
-
-const supplyAave = async (proxy, market, amount, tokenAddr, from) => {
-    await setBalance(tokenAddr, from, amount);
-    const aaveSupplyAddr = await getAddrFromRegistry('AaveSupply');
-    await approve(tokenAddr, proxy.address);
-
-    const aaveSupplyAction = new dfs.actions.aave.AaveSupplyAction(
-        market,
-        tokenAddr,
-        amount,
-        from,
-        nullAddress,
-    );
-    const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
-
-    await proxy['execute(address,bytes)'](aaveSupplyAddr, functionData, { gasLimit: 3000000 });
-};
-
-const withdrawAave = async (proxy, market, tokenAddr, amount, to) => {
-    const aaveWithdrawAddr = await getAddrFromRegistry('AaveWithdraw');
-
-    const aaveWithdrawAction = new dfs.actions.aave.AaveWithdrawAction(
-        market,
-        tokenAddr,
-        amount,
-        to,
-    );
-    const functionData = aaveWithdrawAction.encodeForDsProxyCall()[1];
-
-    await proxy['execute(address,bytes)'](aaveWithdrawAddr, functionData, { gasLimit: 3000000 });
-};
-
-const borrowAave = async (proxy, market, tokenAddr, amount, rateMode, to) => {
-    const aaveBorrowAddr = await getAddrFromRegistry('AaveBorrow');
-
-    const aaveBorrowAction = new dfs.actions.aave.AaveBorrowAction(
-        market,
-        tokenAddr,
-        amount,
-        rateMode,
-        to,
-        nullAddress,
-    );
-    const functionData = aaveBorrowAction.encodeForDsProxyCall()[1];
-
-    await proxy['execute(address,bytes)'](aaveBorrowAddr, functionData, { gasLimit: 3000000 });
-};
-
-const paybackAave = async (proxy, market, tokenAddr, amount, rateMode, from) => {
-    const aavePaybackAddr = await getAddrFromRegistry('AavePayback');
-
-    if (isEth(tokenAddr)) {
-        await depositToWeth(amount.toString());
-    }
-
-    await approve(tokenAddr, proxy.address);
-
-    const aavePaybackAction = new dfs.actions.aave.AavePaybackAction(
-        market,
-        tokenAddr,
-        amount,
-        rateMode,
-        from,
-        nullAddress,
-    );
-    const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
-
-    await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, { gasLimit: 4000000 });
-};
-
-const claimStkAave = async (proxy, assets, amount, to) => {
-    const aaveClaimStkAaveAddr = await getAddrFromRegistry('AaveClaimStkAave');
-
-    const aaveClaimStkAaveAction = new dfs.actions.aave.AaveClaimStkAaveAction(
-        assets,
-        amount,
-        to,
-    );
-    const functionData = aaveClaimStkAaveAction.encodeForDsProxyCall()[1];
-
-    await proxy['execute(address,bytes)'](aaveClaimStkAaveAddr, functionData, { gasLimit: 4000000 });
 };
 
 const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
@@ -488,74 +573,6 @@ const mcdMerge = async (proxy, srcVaultId, destVaultId) => {
     await proxy['execute(address,bytes)'](mcdMergeAddr, functionData, {
         gasLimit: 3000000,
     });
-};
-
-const reflexerOpen = async (proxy, adapterAddr) => {
-    const reflexerOpenAddr = await getAddrFromRegistry('ReflexerOpen');
-
-    const openMySafe = new dfs.actions.reflexer.ReflexerOpenSafeAction(adapterAddr);
-    const functionData = openMySafe.encodeForDsProxyCall()[1];
-
-    return proxy['execute(address,bytes)'](reflexerOpenAddr, functionData, { gasLimit: 3000000 });
-};
-
-const reflexerSupply = async (proxy, safeId, amount, adapterAddr, from) => {
-    await approve(WETH_ADDRESS, proxy.address);
-
-    const reflexerSupplyAddr = await getAddrFromRegistry('ReflexerSupply');
-
-    const supplyMySafe = new dfs.actions.reflexer.ReflexerSupplyAction(
-        safeId,
-        amount,
-        adapterAddr,
-        from,
-    );
-
-    const functionData = supplyMySafe.encodeForDsProxyCall()[1];
-
-    return proxy['execute(address,bytes)'](reflexerSupplyAddr, functionData, { gasLimit: 3000000 });
-};
-
-const reflexerPayback = async (proxy, safeId, amount, from, raiAddr) => {
-    const reflexerPaybackAddress = await getAddrFromRegistry('ReflexerPayback');
-
-    await approve(raiAddr, proxy.address);
-
-    const reflexerPaybackAction = new dfs.actions.reflexer.ReflexerPaybackAction(
-        safeId,
-        amount,
-        from,
-    );
-    const functionData = reflexerPaybackAction.encodeForDsProxyCall()[1];
-
-    return proxy['execute(address,bytes)'](reflexerPaybackAddress, functionData, { gasLimit: 3000000 });
-};
-
-const reflexerWithdraw = async (proxy, safeId, amount, adapterAddr, to) => {
-    const reflexerWithdrawAddr = await getAddrFromRegistry('ReflexerWithdraw');
-
-    const reflexerWithdrawAction = new dfs.actions.reflexer.ReflexerWithdrawAction(
-        safeId,
-        amount,
-        adapterAddr,
-        to,
-    );
-    const functionData = reflexerWithdrawAction.encodeForDsProxyCall()[1];
-
-    return proxy['execute(address,bytes)'](reflexerWithdrawAddr, functionData, { gasLimit: 3000000 });
-};
-
-const reflexerGenerate = async (proxy, safeId, amount, to) => {
-    const reflexerGenerateAddr = await getAddrFromRegistry('ReflexerGenerate');
-
-    const reflexerGenerateAction = new dfs.actions.reflexer.ReflexerGenerateAction(
-        safeId,
-        amount,
-        to,
-    );
-    const functionData = reflexerGenerateAction.encodeForDsProxyCall()[1];
-
-    return proxy['execute(address,bytes)'](reflexerGenerateAddr, functionData, { gasLimit: 3000000 });
 };
 
 const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from, to) => {

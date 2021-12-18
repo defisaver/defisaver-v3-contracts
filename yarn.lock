@@ -748,7 +748,7 @@
     "@nodelib/fs.scandir" "2.1.3"
     "fastq" "^1.6.0"
 
-"@nomiclabs/hardhat-ethers@^2.0.0":
+"@nomiclabs/hardhat-ethers@^2.0.0", "@nomiclabs/hardhat-ethers@^2.0.1":
   "integrity" "sha512-uTFHDhhvJ+UjfvvMeQxD3ZALuzuI3FXzTYT1Z5N3ebyZL5z4Ogwt55GB0R9tdKY0p5HhDhBjU/gsCjUEwIVoaw=="
   "resolved" "https://registry.npmjs.org/@nomiclabs/hardhat-ethers/-/hardhat-ethers-2.0.1.tgz"
   "version" "2.0.1"
@@ -913,11 +913,13 @@
     "defer-to-connect" "^1.0.1"
 
 "@tenderly/hardhat-tenderly@^1.1.0-beta.2":
-  "integrity" "sha512-B1KU0e+17KKstFLgyN1jy6ynNTZoHaVCy+1Wkx7WFnMJTfXQZEijmIyw48dLjUKvbaKWvgP7dE3VSoQnfKwo8g=="
-  "resolved" "https://registry.npmjs.org/@tenderly/hardhat-tenderly/-/hardhat-tenderly-1.1.0-beta.4.tgz"
-  "version" "1.1.0-beta.4"
+  "integrity" "sha512-ppXvp2/CGI/1iAGZvCpHk7vBmlvUJerMcVtiXtCRZtXFO1vDs2SJ+RKaW5bI+eFFkLWx75aZVc/lxTx2vIzPsg=="
+  "resolved" "https://registry.npmjs.org/@tenderly/hardhat-tenderly/-/hardhat-tenderly-1.1.0-beta.8.tgz"
+  "version" "1.1.0-beta.8"
   dependencies:
-    "axios" "^0.20.0"
+    "@nomiclabs/hardhat-ethers" "^2.0.1"
+    "axios" "^0.21.1"
+    "ethers" "^5.0.24"
     "fs-extra" "^9.0.1"
     "js-yaml" "^3.14.0"
 
@@ -1561,26 +1563,12 @@
   "resolved" "https://registry.npmjs.org/aws4/-/aws4-1.11.0.tgz"
   "version" "1.11.0"
 
-"axios@^0.20.0":
-  "integrity" "sha512-ANA4rr2BDcmmAQLOKft2fufrtuvlqR+cXNNinUmvfeSNCOF98PZL+7M/v1zIdGo7OLjEA9J2gXJL+j4zGsl0bA=="
-  "resolved" "https://registry.npmjs.org/axios/-/axios-0.20.0.tgz"
-  "version" "0.20.0"
+"axios@^0.21.0", "axios@^0.21.1":
+  "integrity" "sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg=="
+  "resolved" "https://registry.npmjs.org/axios/-/axios-0.21.4.tgz"
+  "version" "0.21.4"
   dependencies:
-    "follow-redirects" "^1.10.0"
-
-"axios@^0.21.0":
-  "integrity" "sha512-fmkJBknJKoZwem3/IKSSLpkdNXZeBu5Q7GA/aRsr2btgrptmSCxi2oFjZHqGdK9DoTil9PIHlPIZw2EcRJXRvw=="
-  "resolved" "https://registry.npmjs.org/axios/-/axios-0.21.0.tgz"
-  "version" "0.21.0"
-  dependencies:
-    "follow-redirects" "^1.10.0"
-
-"axios@^0.21.1":
-  "integrity" "sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA=="
-  "resolved" "https://registry.npmjs.org/axios/-/axios-0.21.1.tgz"
-  "version" "0.21.1"
-  dependencies:
-    "follow-redirects" "^1.10.0"
+    "follow-redirects" "^1.14.0"
 
 "babel-code-frame@^6.26.0":
   "integrity" "sha1-Y/1D99weO7fONZR9uP42mj9Yx0s="
@@ -4585,7 +4573,7 @@
     "uuid" "2.0.1"
     "xmlhttprequest" "1.8.0"
 
-"ethers@^5.0.0", "ethers@^5.0.1", "ethers@^5.4.5":
+"ethers@^5.0.0", "ethers@^5.0.1", "ethers@^5.0.24", "ethers@^5.4.5":
   "integrity" "sha512-F7LXARyB/Px3AQC6/QKedWZ8eqCkgOLORqL4B/F0Mag/K+qJSFGqsR36EaOZ6fKg3ZonI+pdbhb4A8Knt/43jQ=="
   "resolved" "https://registry.npmjs.org/ethers/-/ethers-5.4.6.tgz"
   "version" "5.4.6"
@@ -5037,10 +5025,10 @@
   "resolved" "https://registry.npmjs.org/flow-stoplight/-/flow-stoplight-1.0.0.tgz"
   "version" "1.0.0"
 
-"follow-redirects@^1.10.0", "follow-redirects@^1.12.1":
-  "integrity" "sha512-aq6gF1BEKje4a9i9+5jimNFIpq4Q1WiwBToeRK5NvZBd/TRsmW8BsJfOEGkr76TbOyPVD3OVDN910EcUNtRYEA=="
-  "resolved" "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.13.0.tgz"
-  "version" "1.13.0"
+"follow-redirects@^1.12.1", "follow-redirects@^1.14.0":
+  "integrity" "sha512-wtphSXy7d4/OR+MvIFbCVBDzZ5520qV8XfPklSN5QtxuMUJZ+b0Wnst1e1lCDocfzuCkHqj8k0FpZqO+UIaKNA=="
+  "resolved" "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.14.5.tgz"
+  "version" "1.14.5"
 
 "for-each@^0.3.3":
   "integrity" "sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw=="

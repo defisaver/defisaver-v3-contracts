@@ -1,5 +1,5 @@
 const {
-    redeploy, takeSnapshot,
+    redeploy,
 } = require('../utils');
 const { aaveClaimStkAaveTest } = require('./aave-tests');
 

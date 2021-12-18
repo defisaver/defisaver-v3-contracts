@@ -1,5 +1,5 @@
 const {
-    redeploy, takeSnapshot,
+    redeploy,
 } = require('../utils');
 const { aaveV2assetsDefaultMarket } = require('../utils-aave');
 const { aaveSupplyTest } = require('./aave-tests');
