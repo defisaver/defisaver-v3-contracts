@@ -239,7 +239,7 @@ describe('Dfs-Sell', function () {
         const buyBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
 
         // eslint-disable-next-line max-len
-        const amount = hre.ethers.utils.parseUnits('3000', getAssetInfo('DAI').decimals);
+        const amount = hre.ethers.utils.parseUnits('1000', getAssetInfo('DAI').decimals);
 
         const dfsSellAddr = await getAddrFromRegistry('DFSSell');
 
