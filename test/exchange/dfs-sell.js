@@ -17,6 +17,9 @@ const {
     getAddrFromRegistry,
     formatExchangeObjForOffchain,
     addToZRXAllowlist,
+    formatExchangeObj,
+    ETH_ADDR,
+    DAI_ADDR,
 } = require('../utils');
 
 const {
@@ -70,6 +73,7 @@ describe('Dfs-Sell', function () {
 
         await setNewExchangeWrapper(senderAcc, paraswapWrapper.address);
     });
+
     it('... should try to sell WETH for DAI with offchain calldata (Paraswap)', async () => {
         const sellAssetInfo = getAssetInfo('WETH');
         const buyAssetInfo = getAssetInfo('USDC');
@@ -201,4 +205,62 @@ describe('Dfs-Sell', function () {
             expect(buyBalanceBefore).is.lt(buyBalanceAfter);
         });
     }
+
+    it('... should sell ETH to Dai and use direct wrapping in the action', async () => {
+        const buyBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
+
+        // eslint-disable-next-line max-len
+        const amount = hre.ethers.utils.parseUnits('1', getAssetInfo('WETH').decimals);
+
+        const dfsSellAddr = await getAddrFromRegistry('DFSSell');
+
+        const exchangeObject = formatExchangeObj(
+            ETH_ADDR,
+            DAI_ADDR,
+            amount.toString(),
+            uniWrapper.address,
+            0,
+            0,
+        );
+
+        // eslint-disable-next-line max-len
+        const sellAction = new dfs.actions.basic.SellAction(exchangeObject, senderAcc.address, senderAcc.address);
+
+        const functionData = sellAction.encodeForDsProxyCall()[1];
+
+        await proxy['execute(address,bytes)'](dfsSellAddr, functionData, { value: amount, gasLimit: 3000000 });
+
+        const buyBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
+
+        expect(buyBalanceBefore).is.lt(buyBalanceAfter);
+    });
+
+    it('... should sell Dai to Eth and use direct unwrapping in the action', async () => {
+        const buyBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
+
+        // eslint-disable-next-line max-len
+        const amount = hre.ethers.utils.parseUnits('3000', getAssetInfo('DAI').decimals);
+
+        const dfsSellAddr = await getAddrFromRegistry('DFSSell');
+
+        const exchangeObject = formatExchangeObj(
+            DAI_ADDR,
+            ETH_ADDR,
+            amount.toString(),
+            uniWrapper.address,
+            0,
+            0,
+        );
+
+        // eslint-disable-next-line max-len
+        const sellAction = new dfs.actions.basic.SellAction(exchangeObject, senderAcc.address, senderAcc.address);
+
+        const functionData = sellAction.encodeForDsProxyCall()[1];
+
+        await proxy['execute(address,bytes)'](dfsSellAddr, functionData, { gasLimit: 3000000 });
+
+        const buyBalanceAfter = await balanceOf(ETH_ADDR, senderAcc.address);
+
+        expect(buyBalanceBefore).is.lt(buyBalanceAfter);
+    });
 });

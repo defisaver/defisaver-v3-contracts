@@ -7,13 +7,15 @@ import "../../interfaces/IDSProxy.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../ActionBase.sol";
 
+import "hardhat/console.sol";
+
 /// @title A exchange sell action through the dfs exchange
+/// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
 contract DFSSell is ActionBase, DFSExchangeCore {
 
     using TokenUtils for address;
 
     uint internal constant RECIPE_FEE = 400;
-    uint internal constant DIRECT_FEE = 800;
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -55,7 +57,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
     function executeActionDirect(bytes[] memory _callData) public override payable   {
         (ExchangeData memory exchangeData, address from, address to) = parseInputs(_callData);
 
-        _dfsSell(exchangeData, from, to, DIRECT_FEE);
+        _dfsSell(exchangeData, from, to, 0);
     }
 
     /// @inheritdoc ActionBase
@@ -82,14 +84,34 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
 
-        _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
+        // Wrap eth if sent directly
+        if (_exchangeData.srcAddr == TokenUtils.ETH_ADDR) {
+            TokenUtils.depositWeth(_exchangeData.srcAmount);
+            _exchangeData.srcAddr = TokenUtils.WETH_ADDR;
+        } else {
+            _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
+        }
+
+        // We always swap with weth, convert token addr when eth sent for unwrapping later
+        bool isEthDest;
+        if (_exchangeData.destAddr == TokenUtils.ETH_ADDR) {
+            _exchangeData.destAddr = TokenUtils.WETH_ADDR;
+            isEthDest = true;
+        } 
 
         _exchangeData.user = getUserAddress();
         _exchangeData.dfsFeeDivider = _fee;
 
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
 
-        _exchangeData.destAddr.withdrawTokens(_to, exchangedAmount);
+        if (isEthDest) {
+            TokenUtils.withdrawWeth(exchangedAmount);
+
+            (bool success, ) = _to.call{value: exchangedAmount}("");
+            require(success, "Eth send failed");
+        } else {
+             _exchangeData.destAddr.withdrawTokens(_to, exchangedAmount);
+        }
 
         logger.Log(
             address(this),
