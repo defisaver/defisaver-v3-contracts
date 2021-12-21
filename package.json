@@ -65,5 +65,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "coingecko-api": "^1.0.10"
   }
 }

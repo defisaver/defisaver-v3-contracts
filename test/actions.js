@@ -15,7 +15,7 @@ const {
     MAX_UINT128,
     fetchAmountinUSDPrice,
     setBalance,
-    getGasUsed,
+    // getGasUsed,
     mineBlock,
 } = require('./utils');
 const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
@@ -32,7 +32,7 @@ const executeAction = async (actionName, functionData, proxy) => {
     try {
         mineBlock();
         receipt = await proxy['execute(address,bytes)'](actionAddr, functionData, { gasLimit: 3000000 });
-        const gasUsed = await getGasUsed(receipt);
+        // const gasUsed = await getGasUsed(receipt);
         // console.log(`Gas used by ${actionName} action; ${gasUsed}`);
         return receipt;
     } catch (error) {
@@ -41,7 +41,7 @@ const executeAction = async (actionName, functionData, proxy) => {
         const block = await hre.ethers.provider.getBlockWithTransactions(blockNum);
         const txHash = block.transactions[0].hash;
         await execShellCommand(`tenderly export ${txHash}`);
-        return error;
+        throw error;
     }
 };
 /*
@@ -187,6 +187,138 @@ const reflexerGenerate = async (proxy, safeId, amount, to) => {
     return tx;
 };
 /*
+.______        ___       __          ___      .__   __.   ______  _______ .______
+|   _  \      /   \     |  |        /   \     |  \ |  |  /      ||   ____||   _  \
+|  |_)  |    /  ^  \    |  |       /  ^  \    |   \|  | |  ,----'|  |__   |  |_)  |
+|   _  <    /  /_\  \   |  |      /  /_\  \   |  . `  | |  |     |   __|  |      /
+|  |_)  |  /  _____  \  |  `----./  _____  \  |  |\   | |  `----.|  |____ |  |\  \----.
+|______/  /__/     \__\ |_______/__/     \__\ |__| \__|  \______||_______|| _| `._____|
+*/
+
+const balancerSupply = async (proxy, poolId, from, to, tokens, maxAmountsIn, userData) => {
+    const balancerSupplyAction = new dfs.actions.balancer.BalancerV2SupplyAction(
+        poolId, from, to, tokens, maxAmountsIn, userData,
+    );
+    const functionData = balancerSupplyAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('BalancerV2Supply', functionData, proxy);
+    return tx;
+};
+const balancerClaim = async (proxy, liquidityProvider, to, weeks, balances, merkleProofs) => {
+    const balancerClaimAction = new dfs.actions.balancer.BalancerV2ClaimAction(
+        liquidityProvider, to, weeks, balances, merkleProofs,
+    );
+    const functionData = balancerClaimAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('BalancerV2Claim', functionData, proxy);
+    return tx;
+};
+const balancerWithdraw = async (
+    proxy,
+    poolId,
+    from,
+    to,
+    lpTokenAmount,
+    tokens,
+    minAmountsOut,
+    userData,
+) => {
+    const balancerWithdrawAction = new dfs.actions.balancer.BalancerV2WithdrawAction(
+        poolId,
+        from,
+        to,
+        lpTokenAmount,
+        tokens,
+        minAmountsOut,
+        userData,
+    );
+    const functionData = balancerWithdrawAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('BalancerV2Withdraw', functionData, proxy);
+    return tx;
+};
+/*
+  ______   ______   .___  ___. .______     ______    __    __  .__   __.  _______
+ /      | /  __  \  |   \/   | |   _  \   /  __  \  |  |  |  | |  \ |  | |       \
+|  ,----'|  |  |  | |  \  /  | |  |_)  | |  |  |  | |  |  |  | |   \|  | |  .--.  |
+|  |     |  |  |  | |  |\/|  | |   ___/  |  |  |  | |  |  |  | |  . `  | |  |  |  |
+|  `----.|  `--'  | |  |  |  | |  |      |  `--'  | |  `--'  | |  |\   | |  '--'  |
+ \______| \______/  |__|  |__| | _|       \______/   \______/  |__| \__| |_______/
+*/
+const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
+    await setBalance(tokenAddr, from, amount);
+    await approve(tokenAddr, proxy.address);
+    if (tokenAddr.toLowerCase() === '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9'.toLowerCase()) {
+        // eslint-disable-next-line no-use-before-define
+        await sell(
+            proxy,
+            WETH_ADDRESS,
+            tokenAddr,
+            hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
+            UNISWAP_WRAPPER,
+            from,
+            from,
+        );
+    }
+
+    const compSupplyAction = new dfs.actions.compound.CompoundSupplyAction(
+        cTokenAddr,
+        amount,
+        from,
+        true,
+    );
+
+    const functionData = compSupplyAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('CompSupply', functionData, proxy);
+    return tx;
+};
+const withdrawComp = async (proxy, cTokenAddr, amount, to) => {
+    const compWithdrawAction = new dfs.actions.compound.CompoundWithdrawAction(
+        cTokenAddr,
+        amount,
+        to,
+    );
+    const functionData = compWithdrawAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('CompWithdraw', functionData, proxy);
+    return tx;
+};
+const borrowComp = async (proxy, cTokenAddr, amount, to) => {
+    const compBorrowAction = new dfs.actions.compound.CompoundBorrowAction(cTokenAddr, amount, to);
+    const functionData = compBorrowAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('CompBorrow', functionData, proxy);
+    return tx;
+};
+const paybackComp = async (proxy, cTokenAddr, amount, from) => {
+    if (cTokenAddr.toLowerCase() === getAssetInfo('cETH').address.toLowerCase()) {
+        const wethBalance = await balanceOf(WETH_ADDRESS, from);
+        if (wethBalance.lt(amount)) {
+            await depositToWeth(amount.toString());
+        }
+    }
+
+    await approve(cTokenAddr, proxy.address);
+
+    const compPaybackAction = new dfs.actions.compound.CompoundPaybackAction(
+        cTokenAddr,
+        amount,
+        from,
+    );
+    const functionData = compPaybackAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('CompPayback', functionData, proxy);
+    return tx;
+};
+const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) => {
+    const claimCompAction = new dfs.Action(
+        'CompClaim',
+        '0x0',
+        ['address[]', 'address[]', 'address', 'address'],
+        [cSupplyAddresses, cBorrowAddresses, from, to],
+    );
+
+    const functionData = claimCompAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('CompClaim', functionData, proxy);
+    return tx;
+};
+/*
+*
 *
 *
 *
@@ -316,85 +448,6 @@ const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to) => {
     await proxy['execute(address,bytes)'](mcdWithdrawAddr, functionData, { gasLimit: 3000000 });
 };
 
-const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
-    const tokenBalance = await balanceOf(tokenAddr, from);
-
-    if (tokenBalance.lt(amount)) {
-        if (isEth(tokenAddr)) {
-            await depositToWeth(amount.toString());
-        } else {
-            await sell(
-                proxy,
-                WETH_ADDRESS,
-                tokenAddr,
-                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
-                UNISWAP_WRAPPER,
-                from,
-                from,
-            );
-        }
-    }
-
-    const compSupplyAddr = await getAddrFromRegistry('CompSupply');
-
-    await approve(tokenAddr, proxy.address);
-
-    const compSupplyAction = new dfs.actions.compound.CompoundSupplyAction(
-        cTokenAddr,
-        amount,
-        from,
-        true,
-    );
-
-    const functionData = compSupplyAction.encodeForDsProxyCall()[1];
-
-    await proxy['execute(address,bytes)'](compSupplyAddr, functionData, { gasLimit: 3000000 });
-};
-
-const withdrawComp = async (proxy, cTokenAddr, amount, to) => {
-    const compWithdrawAddr = await getAddrFromRegistry('CompWithdraw');
-
-    const compWithdrawAction = new dfs.actions.compound.CompoundWithdrawAction(
-        cTokenAddr,
-        amount,
-        to,
-    );
-    const functionData = compWithdrawAction.encodeForDsProxyCall()[1];
-
-    await proxy['execute(address,bytes)'](compWithdrawAddr, functionData, { gasLimit: 3000000 });
-};
-
-const borrowComp = async (proxy, cTokenAddr, amount, to) => {
-    const compBorrowAddr = await getAddrFromRegistry('CompBorrow');
-
-    const compBorrowAction = new dfs.actions.compound.CompoundBorrowAction(cTokenAddr, amount, to);
-    const functionData = compBorrowAction.encodeForDsProxyCall()[1];
-
-    await proxy['execute(address,bytes)'](compBorrowAddr, functionData, { gasLimit: 3000000 });
-};
-
-const paybackComp = async (proxy, cTokenAddr, amount, from) => {
-    const compPaybackAddr = await getAddrFromRegistry('CompPayback');
-
-    if (cTokenAddr.toLowerCase() === getAssetInfo('cETH').address.toLowerCase()) {
-        const wethBalance = await balanceOf(WETH_ADDRESS, from);
-        if (wethBalance.lt(amount)) {
-            await depositToWeth(amount.toString());
-        }
-    }
-
-    await approve(cTokenAddr, proxy.address);
-
-    const compPaybackAction = new dfs.actions.compound.CompoundPaybackAction(
-        cTokenAddr,
-        amount,
-        from,
-    );
-    const functionData = compPaybackAction.encodeForDsProxyCall()[1];
-
-    await proxy['execute(address,bytes)'](compPaybackAddr, functionData, { gasLimit: 4000000 });
-};
-
 const generateMcd = async (proxy, vaultId, amount, to) => {
     const mcdGenerateAddr = await getAddrFromRegistry('McdGenerate');
 
@@ -520,23 +573,6 @@ const uniWithdraw = async (proxy, addrTokenA, addrTokenB, lpAddr, liquidity, to,
     const functionData = uniWithdrawAction.encodeForDsProxyCall()[1];
 
     await proxy['execute(address,bytes)'](uniWithdrawAddr, functionData, {
-        gasLimit: 3000000,
-    });
-};
-
-const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) => {
-    const compClaimAddr = await getAddrFromRegistry('CompClaim');
-
-    const claimCompAction = new dfs.Action(
-        'CompClaim',
-        '0x0',
-        ['address[]', 'address[]', 'address', 'address'],
-        [cSupplyAddresses, cBorrowAddresses, from, to],
-    );
-
-    const functionData = claimCompAction.encodeForDsProxyCall()[1];
-
-    await proxy['execute(address,bytes)'](compClaimAddr, functionData, {
         gasLimit: 3000000,
     });
 };
@@ -1124,48 +1160,6 @@ const pullTokensInstDSA = async (proxy, dsaAddress, tokens, amounts, to) => {
     );
     const functionData = instPullTokenAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](instPulLTokenAddress, functionData);
-};
-
-const balancerSupply = async (proxy, poolId, from, to, tokens, maxAmountsIn, userData) => {
-    const balancerSupplyAddress = await getAddrFromRegistry('BalancerV2Supply');
-    const balancerSupplyAction = new dfs.actions.balancer.BalancerV2SupplyAction(
-        poolId, from, to, tokens, maxAmountsIn, userData,
-    );
-    const functionData = balancerSupplyAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](balancerSupplyAddress, functionData);
-};
-
-const balancerClaim = async (proxy, liquidityProvider, to, weeks, balances, merkleProofs) => {
-    const balancerClaimAddress = await getAddrFromRegistry('BalancerV2Claim');
-    const balancerClaimAction = new dfs.actions.balancer.BalancerV2ClaimAction(
-        liquidityProvider, to, weeks, balances, merkleProofs,
-    );
-    const functionData = balancerClaimAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](balancerClaimAddress, functionData);
-};
-
-const balancerWithdraw = async (
-    proxy,
-    poolId,
-    from,
-    to,
-    lpTokenAmount,
-    tokens,
-    minAmountsOut,
-    userData,
-) => {
-    const balancerWithdrawAddress = await getAddrFromRegistry('BalancerV2Withdraw');
-    const balancerWithdrawAction = new dfs.actions.balancer.BalancerV2WithdrawAction(
-        poolId,
-        from,
-        to,
-        lpTokenAmount,
-        tokens,
-        minAmountsOut,
-        userData,
-    );
-    const functionData = balancerWithdrawAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](balancerWithdrawAddress, functionData);
 };
 
 const changeProxyOwner = async (proxy, newOwner) => {

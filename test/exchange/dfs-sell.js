@@ -88,6 +88,7 @@ describe('Dfs-Sell', function () {
             + '&excludeContractMethods=simpleSwap'
             + `&userAddress=${paraswapWrapper.address}`,
         };
+        console.log(options.baseURL + options.url);
         const priceObject = await axios(options).then((response) => response.data.priceRoute);
         console.log(priceObject);
         const secondOptions = {
@@ -106,8 +107,9 @@ describe('Dfs-Sell', function () {
                 txOrigin: senderAcc.address,
             },
         };
+        console.log(secondOptions.data);
         const resultObject = await axios(secondOptions).then((response) => response.data);
-
+        console.log(resultObject);
         // THIS IS CHANGEABLE WITH API INFORMATION
         const allowanceTarget = priceObject.tokenTransferProxy;
         const price = 1; // just for testing, anything bigger than 0 triggers offchain if
@@ -148,7 +150,7 @@ describe('Dfs-Sell', function () {
 
         expect(buyBalanceBefore).is.lt(buyBalanceAfter);
     });
-
+/*
     for (let i = 0; i < trades.length; ++i) {
         const trade = trades[i];
 
@@ -201,4 +203,5 @@ describe('Dfs-Sell', function () {
             expect(buyBalanceBefore).is.lt(buyBalanceAfter);
         });
     }
+*/
 });

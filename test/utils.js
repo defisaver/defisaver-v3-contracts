@@ -2,6 +2,7 @@
 const hre = require('hardhat');
 const fs = require('fs');
 const storageSlots = require('./storageSlots.json');
+require('dotenv-safe').config();
 
 const { deployAsOwner } = require('../scripts/utils/deployer');
 
@@ -49,7 +50,7 @@ const dydxTokens = ['WETH', 'USDC', 'DAI'];
 
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
 const MIN_VAULT_DAI_AMOUNT = '15010'; // TODO: can we fetch this dynamically
-const MIN_VAULT_RAI_AMOUNT = '1000'; // TODO: can we fetch this dynamically
+const MIN_VAULT_RAI_AMOUNT = '3000'; // TODO: can we fetch this dynamically
 
 const standardAmounts = {
     ETH: '4',
@@ -114,6 +115,7 @@ const coinGeckoHelper = {
     LUSD: 'liquity-usd',
     LQTY: 'liquity',
     TORN: 'tornado-cash',
+    SUSHI: 'sushi',
 };
 
 async function findBalancesSlot(tokenAddress) {
@@ -317,8 +319,7 @@ const getProxy = async (acc) => {
 
     return dsProxy;
 };
-
-const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
+const redeploy = async (name, regAddr = REGISTRY_ADDR, saveOnTenderly = false) => {
     if (regAddr === REGISTRY_ADDR) {
         await impersonateAccount(OWNER_ACC);
     }
@@ -343,10 +344,12 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
     if (regAddr === REGISTRY_ADDR) {
         await stopImpersonatingAccount(OWNER_ACC);
     }
-    await hre.tenderly.persistArtifacts({
-        name,
-        address: c.address,
-    });
+    if (saveOnTenderly) {
+        await hre.tenderly.persistArtifacts({
+            name,
+            address: c.address,
+        });
+    }
 
     return c;
 };
@@ -537,6 +540,10 @@ async function setForkForTesting() {
         senderAcc.address,
         '0x204FCE5E3E25026110000000',
     ]);
+    /*
+    const balance = await balanceOf(ETH_ADDR, senderAcc.address);
+    console.log(balance.toString());
+    */
     await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
         '0x1', // 1 wei
     ]);
@@ -545,6 +552,24 @@ const getGasUsed = async (receipt) => {
     const parsed = await receipt.wait();
 
     return parsed.gasUsed.toString();
+};
+
+const resetForkToBlock = async (block) => {
+    await hre.network.provider.request({
+        method: 'hardhat_reset',
+        params: [
+            {
+                forking: {
+                    jsonRpcUrl: process.env.ETHEREUM_NODE,
+                    blockNumber: block,
+                },
+            },
+        ],
+    });
+
+    const blockNum = await hre.ethers.provider.getBlockNumber();
+    console.log(blockNum);
+    await setForkForTesting();
 };
 
 module.exports = {
@@ -616,4 +641,5 @@ module.exports = {
     getGasUsed,
     mineBlock,
     setForkForTesting,
+    resetForkToBlock,
 };
