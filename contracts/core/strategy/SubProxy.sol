@@ -12,8 +12,6 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    bytes4 constant SUB_STORAGE_ID = bytes4(keccak256("SubStorage"));
-
     /// @notice Gives DSProxy permission if needed and registers a new sub
     /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
     function subscribeToStrategy(

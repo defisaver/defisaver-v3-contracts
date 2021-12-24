@@ -19,10 +19,6 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    bytes4 constant STRATEGY_STORAGE_ID = bytes4(keccak256("StrategyStorage"));
-    bytes4 constant SUB_STORAGE_ID = bytes4(keccak256("SubStorage"));
-    bytes4 constant BUNDLE_STORAGE_ID = bytes4(keccak256("BundleStorage"));
-
     error TriggerNotActiveError(uint256);
 
     /// @notice Called directly through DsProxy to execute a recipe

@@ -7,15 +7,10 @@ import "../core/strategy/StrategyStorage.sol";
 import "../interfaces/ITrigger.sol";
 
 
+contract StrategyTriggerView is StrategyModel, CoreHelper {
 
-contract StrategyTriggerView is StrategyModel {
-    address public constant REGISTRY_ADDR = 0xD5cec8F03f803A74B60A7603Ed13556279376b09;
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    bytes4 constant STRATEGY_STORAGE_ID = bytes4(keccak256("StrategyStorage"));
-    bytes4 constant SUB_STORAGE_ID = bytes4(keccak256("SubStorage"));
-    bytes4 constant BUNDLE_STORAGE_ID = bytes4(keccak256("BundleStorage"));
-        
     function checkTriggers(
         StrategySub memory _sub,
         bytes[] calldata _triggerCallData

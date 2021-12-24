@@ -10,12 +10,10 @@ import "./StrategyStorage.sol";
 /// @title BundleStorage - Record of all the Bundles created
 contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
 
+    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+
     StrategyBundle[] public bundles;
     bool public openToPublic = false;
-
-    bytes4 constant STRATEGY_STORAGE_ID = bytes4(keccak256("StrategyStorage"));
-
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     error NoAuthToCreateBundle(address,bool);
     error DiffTriggersInBundle(uint64[]);

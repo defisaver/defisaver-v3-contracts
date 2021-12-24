@@ -11,10 +11,10 @@ import "../strategy/SubStorage.sol";
 
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
+
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));
-    bytes4 constant SUB_STORAGE_ID = bytes4(keccak256("SubStorage"));
     bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     error BotNotApproved(address, uint256);

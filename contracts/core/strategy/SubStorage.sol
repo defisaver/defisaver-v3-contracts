@@ -21,9 +21,6 @@ contract SubStorage is StrategyModel, AdminAuth, CoreHelper {
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    bytes4 constant BUNDLE_STORAGE_ID = bytes4(keccak256("BundleStorage"));
-    bytes4 constant STRATEGY_STORAGE_ID = bytes4(keccak256("StrategyStorage"));
-
     StoredSubData[] public strategiesSubs;
 
     /// @notice Checks if subId is init. and if the sender is the owner
