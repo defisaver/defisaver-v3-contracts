@@ -37,11 +37,11 @@ contract SubStorage is StrategyModel, AdminAuth, CoreHelper {
     /// @notice Checks if the id is valid (points to a stored bundle/sub)
     modifier isValidId(uint256 _id, bool _isBundle) {
         if (_isBundle) {
-            if (_id > BundleStorage(registry.getAddr(BUNDLE_STORAGE_ID)).getBundleCount()) {
+            if (_id > (BundleStorage(registry.getAddr(BUNDLE_STORAGE_ID)).getBundleCount() - 1)) {
                 revert SubIdOutOfRange(_id, _isBundle);
             }
         } else {
-            if (_id > StrategyStorage(registry.getAddr(STRATEGY_STORAGE_ID)).getStrategyCount()) {
+            if (_id > (StrategyStorage(registry.getAddr(STRATEGY_STORAGE_ID)).getStrategyCount() - 1)) {
                 revert SubIdOutOfRange(_id, _isBundle);
             }
         }
