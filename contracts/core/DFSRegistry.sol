@@ -77,9 +77,6 @@ contract DFSRegistry is AdminAuth, CoreHelper {
             exists: true
         });
 
-        // Remember tha address so we can revert back to old addr if needed
-        previousAddresses[_id] = _contractAddr;
-
         emit AddNewContract(msg.sender, _id, _contractAddr, _waitPeriod);
     }
 
