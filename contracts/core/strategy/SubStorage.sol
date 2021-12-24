@@ -10,7 +10,6 @@ import "./StrategyModel.sol";
 
 /// @title Storage of users subscriptions to strategies/bundles
 contract SubStorage is StrategyModel, AdminAuth, CoreHelper {
-    error NonexistentSubError(uint256);
     error SenderNotSubOwnerError(address, uint256);
     error UserPositionsEmpty();
     error SubIdOutOfRange(uint256, bool);
@@ -29,10 +28,6 @@ contract SubStorage is StrategyModel, AdminAuth, CoreHelper {
 
     /// @notice Checks if subId is init. and if the sender is the owner
     modifier onlySubOwner(uint256 _subId) {
-        if (address(strategiesSubs[_subId].userProxy) == address(0)) {
-            revert NonexistentSubError(_subId);
-        }
-
         if (address(strategiesSubs[_subId].userProxy) != msg.sender) {
             revert SenderNotSubOwnerError(msg.sender, _subId);
         }
