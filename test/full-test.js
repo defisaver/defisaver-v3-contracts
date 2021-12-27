@@ -8,6 +8,8 @@ const { balancerFullTest } = require('./balancer/balancer-tests');
 const { compoundFullTest } = require('./compound/comp-tests');
 const { mcdFullTest } = require('./mcd/mcd-tests');
 const { guniFullTest } = require('./guni/guni-tests');
+const { rariDeposit } = require('./actions');
+const { rariFullTest } = require('./rari/rari-tests');
 
 const aaveTestLength = 2;
 const compTestLength = 2;
@@ -28,6 +30,7 @@ describe('Run all DeFi Saver tests', async function () {
         await balancerFullTest();
         await mcdFullTest(mcdTestLenght);
         await guniFullTest();
+        await rariFullTest();
         */
     });
 });

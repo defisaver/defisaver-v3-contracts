@@ -142,6 +142,7 @@ const guniDeployContracts = async () => {
     await redeploy('GUniWithdraw');
 };
 const guniFullTest = async () => {
+    await guniDeployContracts();
     await guniDepositTest();
     await guniWithdrawTest();
 };
