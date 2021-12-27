@@ -20,6 +20,8 @@ contract ReflexerRatioHelper is DSMath, MainnetReflexerAddresses {
         bytes32 collType = ISAFEManager(SAFE_MANAGER_ADDRESS).collateralTypes(_safeId);
 
         (uint256 collAmount, uint256 debtAmount) = ISAFEEngine(SAFE_ENGINE_ADDRESS).safes(collType, safeAddr);
+
+        if (debtAmount == 0) return 0;
         
         (address fsmAddr, uint256 safetyCRatio) =
             IOracleRelayer(ORACLE_RELAYER_ADDRESS).collateralTypes(collType);

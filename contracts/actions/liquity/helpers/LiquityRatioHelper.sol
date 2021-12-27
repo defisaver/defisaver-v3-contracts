@@ -12,7 +12,7 @@ contract LiquityRatioHelper is DSMath, MainnetLiquityAddresses {
 
     /// @notice Gets Trove CR
     /// @param _troveOwner Address of the trove owner
-    function getRatio(address _troveOwner) public view returns (uint256 ratio, bool isActive) {
+    function getRatio(address _troveOwner) public returns (uint256 ratio, bool isActive) {
         ITroveManager TroveManager = ITroveManager(TROVE_MANAGER_ADDRESS);
         IPriceFeed PriceFeed = IPriceFeed(PRICE_FEED_ADDRESS);
 
@@ -24,7 +24,7 @@ contract LiquityRatioHelper is DSMath, MainnetLiquityAddresses {
         if (debtAmount == 0) return (ratio, isActive);
 
         uint256 collAmount = TroveManager.getTroveColl(_troveOwner);
-        uint256 collPrice = PriceFeed.lastGoodPrice();
+        uint256 collPrice = PriceFeed.fetchPrice();
 
         ratio = wdiv(wmul(collAmount, collPrice), debtAmount);
     }

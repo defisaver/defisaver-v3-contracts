@@ -20,7 +20,6 @@ contract CompRatioHelper is Exponential, DSMath {
         address[] memory assets = comp.getAssetsIn(_user);
         address oracleAddr = comp.oracle();
 
-
         uint sumCollateral = 0;
         uint sumBorrow = 0;
 
@@ -55,7 +54,7 @@ contract CompRatioHelper is Exponential, DSMath {
             }
         }
 
-        if (sumBorrow == 0) return type(uint256).max;
+        if (sumBorrow == 0) return 0;
 
         uint borrowPowerUsed = (sumBorrow * 10**18) / sumCollateral;
         return wdiv(1e18, borrowPowerUsed);
