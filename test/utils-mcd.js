@@ -13,7 +13,7 @@ const canGenerateDebt = async (ilkInfo) => {
     const debtCeiling = Math.round(ilkData.line / 1e45);
     const debt = (ilkData.Art / 1e18) * (ilkData.rate / 1e27);
 
-    return debtCeiling > (debt + 10000);
+    return debtCeiling > (debt + 50000);
 };
 
 const fetchMakerAddresses = async (version = makerVersion, params = {}) => {

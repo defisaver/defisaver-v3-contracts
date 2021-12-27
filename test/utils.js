@@ -49,7 +49,7 @@ const DFS_REG_CONTROLLER = '0xF8f8B3C98Cf2E63Df3041b73f80F362a4cf3A576';
 const dydxTokens = ['WETH', 'USDC', 'DAI'];
 
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
-const MIN_VAULT_DAI_AMOUNT = '15010'; // TODO: can we fetch this dynamically
+const MIN_VAULT_DAI_AMOUNT = '45010'; // TODO: can we fetch this dynamically
 const MIN_VAULT_RAI_AMOUNT = '3000'; // TODO: can we fetch this dynamically
 
 const standardAmounts = {
@@ -116,8 +116,8 @@ const coinGeckoHelper = {
     LQTY: 'liquity',
     TORN: 'tornado-cash',
     SUSHI: 'sushi',
+    MATIC: 'matic-network',
 };
-
 async function findBalancesSlot(tokenAddress) {
     const slotObj = storageSlots[tokenAddress];
     if (slotObj) {
@@ -319,7 +319,7 @@ const getProxy = async (acc) => {
 
     return dsProxy;
 };
-const redeploy = async (name, regAddr = REGISTRY_ADDR, saveOnTenderly = false) => {
+const redeploy = async (name, regAddr = REGISTRY_ADDR, saveOnTenderly = true) => {
     if (regAddr === REGISTRY_ADDR) {
         await impersonateAccount(OWNER_ACC);
     }
@@ -394,6 +394,12 @@ const balanceOf = async (tokenAddr, addr) => {
     } else {
         balance = await tokenContract.balanceOf(addr);
     }
+    return balance;
+};
+const balanceOfOnTokenInBlock = async (tokenAddr, addr, block) => {
+    const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
+    let balance = '';
+    balance = await tokenContract.balanceOf(addr, { blockTag: block });
     return balance;
 };
 
@@ -555,17 +561,30 @@ const getGasUsed = async (receipt) => {
 };
 
 const resetForkToBlock = async (block) => {
-    await hre.network.provider.request({
-        method: 'hardhat_reset',
-        params: [
-            {
-                forking: {
-                    jsonRpcUrl: process.env.ETHEREUM_NODE,
-                    blockNumber: block,
+    if (block) {
+        await hre.network.provider.request({
+            method: 'hardhat_reset',
+            params: [
+                {
+                    forking: {
+                        jsonRpcUrl: process.env.ETHEREUM_NODE,
+                        blockNumber: block,
+                    },
                 },
-            },
-        ],
-    });
+            ],
+        });
+    } else {
+        await hre.network.provider.request({
+            method: 'hardhat_reset',
+            params: [
+                {
+                    forking: {
+                        jsonRpcUrl: process.env.ETHEREUM_NODE,
+                    },
+                },
+            ],
+        });
+    }
 
     const blockNum = await hre.ethers.provider.getBlockNumber();
     console.log(blockNum);
@@ -642,4 +661,5 @@ module.exports = {
     mineBlock,
     setForkForTesting,
     resetForkToBlock,
+    balanceOfOnTokenInBlock,
 };
