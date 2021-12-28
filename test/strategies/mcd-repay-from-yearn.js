@@ -136,8 +136,8 @@ describe('Mcd-Repay-Strategy', function () {
         vaultId = await openVault(
             proxy,
             'ETH-A',
-            fetchAmountinUSDPrice('WETH', '25000'),
-            fetchAmountinUSDPrice('DAI', '12000'),
+            fetchAmountinUSDPrice('WETH', '40000'),
+            fetchAmountinUSDPrice('DAI', '18000'),
         );
 
         console.log('Vault id: ', vaultId);

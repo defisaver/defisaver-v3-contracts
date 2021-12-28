@@ -79,8 +79,8 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
 
     it('... should make a new strategy that closes CDP when price hits a point, transfers ETH to DAI, repays debt, transfers all remaining DAI to user', async () => {
         const tokenData = getAssetInfo('WETH');
-        const vaultColl = fetchAmountinUSDPrice('WETH', '30000');
-        const amountDai = fetchAmountinUSDPrice('DAI', '12000');
+        const vaultColl = fetchAmountinUSDPrice('WETH', '40000');
+        const amountDai = fetchAmountinUSDPrice('DAI', '18000');
         vaultId = await openVault(
             proxy,
             'ETH-A',
@@ -184,7 +184,7 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
                 proxy, botAcc, strategyExecutor, subId, strategySub, flAmount, ethJoin, dydxFlAddr,
             );
         } catch (err) {
-            expect(err.toString()).to.have.string('SubNotActiveError');
+            expect(err.toString()).to.have.string('SubNotEnabled');
         }
     });
 });

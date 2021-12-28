@@ -378,6 +378,12 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
     const triggerCallData = [];
     const actionsCallData = [];
 
+    const ratioAction = new dfs.actions.maker.MakerRatioAction(
+        '0',
+        '0',
+        MCD_MANAGER_ADDR,
+    );
+
     const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
         '0',
         repayAmount,
@@ -415,8 +421,10 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
         '0', // targetRatio
         '0', // vaultId
         '0', // nextPrice
+        '0', // returnValueIndex
     );
 
+    actionsCallData.push(ratioAction.encodeForRecipe()[0]);
     actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
@@ -498,6 +506,12 @@ const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, s
 
     const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction(repayAmount, WETH_ADDRESS);
 
+    const ratioAction = new dfs.actions.maker.MakerRatioAction(
+        '0',
+        '0',
+        MCD_MANAGER_ADDR,
+    );
+
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             WETH_ADDRESS,
@@ -535,9 +549,11 @@ const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, s
         '0', // targetRatio
         '0', // vaultId
         '0', // nextPrice
+        '1', // returnValueIndex
     );
 
     actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(ratioAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
@@ -664,6 +680,12 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
     const triggerCallData = [];
     const actionsCallData = [];
 
+    const ratioAction = new dfs.actions.maker.MakerRatioAction(
+        '0',
+        '0',
+        MCD_MANAGER_ADDR,
+    );
+
     const generateAction = new dfs.actions.maker.MakerGenerateAction(
         '0',
         boostAmount,
@@ -701,8 +723,10 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
         '0', // targetRatio
         '0', // vaultId
         '0', // nextPrice
+        '0', // returnValueIndex
     );
 
+    actionsCallData.push(ratioAction.encodeForRecipe()[0]);
     actionsCallData.push(generateAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
@@ -727,6 +751,12 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
 const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, flLoanAddr, ethJoin, boostAmount) => {
     const triggerCallData = [];
     const actionsCallData = [];
+
+    const ratioAction = new dfs.actions.maker.MakerRatioAction(
+        '0',
+        '0',
+        MCD_MANAGER_ADDR,
+    );
 
     const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction(boostAmount, DAI_ADDR);
 
@@ -767,9 +797,11 @@ const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, s
         '0', // targetRatio
         '0', // vaultId
         '0', // nextPrice
+        '0', // returnValueIndex
     );
 
     actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(ratioAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdSupplyAction.encodeForRecipe()[0]);

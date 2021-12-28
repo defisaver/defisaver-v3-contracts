@@ -394,7 +394,6 @@ const timeTravel = async (timeIncrease) => {
 };
 
 const getGasUsed = async (receipt) => {
-    console.log(receipt);
     const parsed = await receipt.wait();
 
     return parsed.gasUsed.toString();

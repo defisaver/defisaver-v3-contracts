@@ -5,13 +5,10 @@ pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "../mcd/helpers/McdRatioHelper.sol";
-import "../../utils/TempStorage.sol";
 import "../../core/helpers/CoreHelper.sol";
 
 /// @title Checks if ratio is in target range
 contract McdRatioCheck is ActionBase, McdRatioHelper {
-    bytes4 constant TEMP_STORAGE_ID = bytes4(keccak256("TempStorage"));
-
     /// @dev 2% offset acceptable
     uint256 internal constant RATIO_OFFSET = 20000000000000000;
 
@@ -26,6 +23,7 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
         uint256 ratioTarget;
         uint256 vaultId;
         uint256 nextPrice;
+        uint256 startRatioIndex; // index in returnValues where ratio before actions is stored
     }
 
     error RatioOutsideTargetRange(uint256, uint256);
@@ -45,11 +43,10 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
         inputData.ratioTarget = _parseParamUint(inputData.ratioTarget, _paramMapping[1], _subData, _returnValues);
         inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[2], _subData, _returnValues);
         inputData.nextPrice = _parseParamUint(inputData.nextPrice, _paramMapping[3], _subData, _returnValues);
+        inputData.startRatioIndex = _parseParamUint(inputData.startRatioIndex, _paramMapping[4], _subData, _returnValues);
 
         uint256 currRatio = getRatio(inputData.vaultId, inputData.nextPrice);
-
-        address tempStorageAddr = registry.getAddr(TEMP_STORAGE_ID);
-        uint256 beforeRatio = uint256(TempStorage(tempStorageAddr).get("MCD_RATIO"));
+        uint256 beforeRatio = uint256(_returnValues[inputData.startRatioIndex]);
 
         // ratio should be lower
         if (RatioState(ratioState) == RatioState.SHOULD_BE_LOWER && currRatio >= beforeRatio) {
