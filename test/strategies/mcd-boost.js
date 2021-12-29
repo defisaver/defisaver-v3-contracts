@@ -43,7 +43,6 @@ describe('Mcd-Boost-Strategy', function () {
         const ratioAction = new dfs.actions.maker.MakerRatioAction(
             '&vaultId',
             '%nextPrice',
-            '%mcdManager',
         );
 
         const generateAction = new dfs.actions.maker.MakerGenerateAction(
@@ -82,6 +81,7 @@ describe('Mcd-Boost-Strategy', function () {
             '&targetRatio', // targetRatio
             '&vaultId', // vaultId
             '%nextPrice', // nextPrice
+            '%ratioActionPositionInRecipe',
         );
 
         mcdBoostStrategy.addAction(ratioAction);
@@ -107,7 +107,6 @@ describe('Mcd-Boost-Strategy', function () {
         const ratioAction = new dfs.actions.maker.MakerRatioAction(
             '&vaultId',
             '%nextPrice',
-            '%mcdManager',
         );
 
         const sellAction = new dfs.actions.basic.SellAction(
@@ -146,6 +145,7 @@ describe('Mcd-Boost-Strategy', function () {
             '&targetRatio', // targetRatio
             '&vaultId', // vaultId
             '%nextPrice', // nextPrice
+            '%ratioActionPositionInRecipe',
         );
 
         mcdBoostStrategy.addAction(flAction);
@@ -188,6 +188,7 @@ describe('Mcd-Boost-Strategy', function () {
         await redeploy('McdGenerate');
         await redeploy('McdPayback');
         await redeploy('McdOpen');
+        await redeploy('McdRatio');
         strategyTriggerView = await redeploy('StrategyTriggerView');
         await addBotCaller(botAcc.address);
 
@@ -267,13 +268,21 @@ describe('Mcd-Boost-Strategy', function () {
         /*
         // This is tested with commented out onchain checking next price
         triggerCallData = [];
-        triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['5000000000000000000000000000000', '1'])); // check next ratio
+        triggerCallData.push(
+            abiCoder.encode(['uint256', 'uint8'],
+            ['5000000000000000000000000000000',
+            '1']
+        )); // check next ratio
         console.log(await strategyTriggerView.callStatic.checkTriggers(
             strategySub, triggerCallData,
         ));
 
         triggerCallData = [];
-        triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['5000000000000000000000000000000', '2'])); // check both ratios
+        triggerCallData.push(
+            abiCoder.encode(['uint256', 'uint8'],
+            ['5000000000000000000000000000000',
+            '2']
+        )); // check both ratios
         console.log(await strategyTriggerView.callStatic.checkTriggers(
             strategySub, triggerCallData,
         ));

@@ -20,7 +20,7 @@ const {
     setMCDPriceVerifier,
 } = require('../utils-strategies');
 
-const { getRatio, getNextEthPrice } = require('../utils-mcd');
+const { getRatio } = require('../utils-mcd');
 
 const { subMcdRepayStrategy, callMcdRepayStrategy, callFLMcdRepayStrategy } = require('../strategies');
 
@@ -93,7 +93,6 @@ describe('Mcd-Repay-Strategy', function () {
         const ratioAction = new dfs.actions.maker.MakerRatioAction(
             '&vaultId',
             '%nextPrice',
-            '%mcdManager',
         );
 
         const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
@@ -132,7 +131,7 @@ describe('Mcd-Repay-Strategy', function () {
             '&targetRatio', // targetRatio
             '&vaultId', // vaultId
             '%nextPrice', // nextPrice
-            '%returnValueOfBefore',
+            '%ratioActionPositionInRecipe',
         );
 
         repayStrategy.addAction(ratioAction);
@@ -159,7 +158,6 @@ describe('Mcd-Repay-Strategy', function () {
         const ratioAction = new dfs.actions.maker.MakerRatioAction(
             '&vaultId',
             '%nextPrice',
-            '%mcdManager',
         );
 
         const sellAction = new dfs.actions.basic.SellAction(
@@ -198,7 +196,7 @@ describe('Mcd-Repay-Strategy', function () {
             '&targetRatio', // targetRatio
             '&vaultId', // vaultId
             '%nextPrice', // nextPrice
-            '%returnValueOfBefore',
+            '%ratioActionPositionInRecipe',
         );
 
         repayStrategy.addAction(flAction);

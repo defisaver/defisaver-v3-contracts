@@ -11,7 +11,6 @@ contract McdRatio is ActionBase, McdRatioHelper {
     struct Params {
         uint256 vaultId;
         uint256 nextPrice;
-        address mcdManager;
     }
 
     /// @inheritdoc ActionBase
@@ -25,7 +24,6 @@ contract McdRatio is ActionBase, McdRatioHelper {
 
         inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
         inputData.nextPrice = _parseParamUint(inputData.nextPrice, _paramMapping[1], _subData, _returnValues);
-        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[2], _subData, _returnValues);
 
         uint256 ratio = getRatio(inputData.vaultId, inputData.nextPrice);
 

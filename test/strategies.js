@@ -38,7 +38,6 @@ const {
     getLocalTokenPrice,
     BN2Float,
 } = require('./utils');
-const { getNextEthPrice } = require('./utils-mcd');
 
 const { ADAPTER_ADDRESS } = require('./utils-reflexer');
 
@@ -381,7 +380,6 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
     const ratioAction = new dfs.actions.maker.MakerRatioAction(
         '0',
         '0',
-        MCD_MANAGER_ADDR,
     );
 
     const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
@@ -509,7 +507,6 @@ const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, s
     const ratioAction = new dfs.actions.maker.MakerRatioAction(
         '0',
         '0',
-        MCD_MANAGER_ADDR,
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -683,7 +680,6 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
     const ratioAction = new dfs.actions.maker.MakerRatioAction(
         '0',
         '0',
-        MCD_MANAGER_ADDR,
     );
 
     const generateAction = new dfs.actions.maker.MakerGenerateAction(
@@ -755,7 +751,6 @@ const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, s
     const ratioAction = new dfs.actions.maker.MakerRatioAction(
         '0',
         '0',
-        MCD_MANAGER_ADDR,
     );
 
     const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction(boostAmount, DAI_ADDR);
@@ -797,7 +792,7 @@ const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, s
         '0', // targetRatio
         '0', // vaultId
         '0', // nextPrice
-        '0', // returnValueIndex
+        '1', // returnValueIndex
     );
 
     actionsCallData.push(flAction.encodeForRecipe()[0]);
