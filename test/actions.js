@@ -566,8 +566,6 @@ const gUniWithdraw = async (poolAddr, burnAmount, from, proxy) => {
  \______/  |__| \__| |__| |_______/        \__/  \__/ /__/     \__\ | _|
 */
 const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, from, to) => {
-    const uniSupplyAddr = await getAddrFromRegistry('UniSupply');
-
     const amountA = hre.ethers.utils.parseUnits(amount, tokenADecimals);
     const amountB = await getSecondTokenAmount(addrTokenA, addrTokenB, amountA);
 
@@ -578,36 +576,12 @@ const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, 
     const tokenBalanceA = await balanceOf(addrTokenA, from);
     const tokenBalanceB = await balanceOf(addrTokenB, from);
 
-    if (isEth(addrTokenA)) {
-        await depositToWeth(amountA);
-    }
-
-    if (isEth(addrTokenB)) {
-        await depositToWeth(amountB);
-    }
-
     if (tokenBalanceA.lt(amountA)) {
-        await sell(
-            proxy,
-            WETH_ADDRESS,
-            addrTokenA,
-            hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
-            UNISWAP_WRAPPER,
-            from,
-            from,
-        );
+        setBalance(addrTokenA, from, amountA);
     }
 
     if (tokenBalanceB.lt(amountB)) {
-        await sell(
-            proxy,
-            WETH_ADDRESS,
-            addrTokenB,
-            hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
-            UNISWAP_WRAPPER,
-            from,
-            from,
-        );
+        setBalance(addrTokenB, from, amountB);
     }
 
     const deadline = Date.now() + Date.now();
@@ -631,14 +605,11 @@ const uniSupply = async (proxy, addrTokenA, tokenADecimals, addrTokenB, amount, 
 
     const functionData = uniSupplyAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](uniSupplyAddr, functionData, {
-        gasLimit: 3000000,
-    });
+    const tx = await executeAction('UniSupply', functionData, proxy);
+    return tx;
 };
 
 const uniWithdraw = async (proxy, addrTokenA, addrTokenB, lpAddr, liquidity, to, from) => {
-    const uniWithdrawAddr = await getAddrFromRegistry('UniWithdraw');
-
     const amountAMin = 0;
     const amountBMin = 0;
     const deadline = Date.now() + Date.now();
@@ -651,9 +622,8 @@ const uniWithdraw = async (proxy, addrTokenA, addrTokenB, lpAddr, liquidity, to,
 
     const functionData = uniWithdrawAction.encodeForDsProxyCall()[1];
 
-    await proxy['execute(address,bytes)'](uniWithdrawAddr, functionData, {
-        gasLimit: 3000000,
-    });
+    const tx = await executeAction('UniWithdraw', functionData, proxy);
+    return tx;
 };
 
 const uniV3CreatePool = async (
@@ -669,7 +639,6 @@ const uniV3CreatePool = async (
     from,
     sqrtPriceX96,
 ) => {
-    const uniCreatePoolAddress = await getAddrFromRegistry('UniCreatePoolV3');
     const amount0Min = 0;
     const amount1Min = 0;
     // buy tokens
@@ -725,7 +694,8 @@ const uniV3CreatePool = async (
     await approve(token1, proxy.address);
 
     const functionData = uniCreatePoolAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](uniCreatePoolAddress, functionData);
+    const tx = await executeAction('UniCreatePoolV3', functionData, proxy);
+    return tx;
 };
 
 const uniV3Mint = async (
@@ -740,7 +710,6 @@ const uniV3Mint = async (
     recipient,
     from,
 ) => {
-    const uniMintV3Address = await getAddrFromRegistry('UniMintV3');
     const amount0Min = 0;
     const amount1Min = 0;
     // buy tokens
@@ -796,7 +765,8 @@ const uniV3Mint = async (
 
     const functionData = uniMintV3Action.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](uniMintV3Address, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('UniMintV3', functionData, proxy);
+    return tx;
 };
 
 const uniV3Supply = async (
@@ -808,8 +778,6 @@ const uniV3Supply = async (
     token0,
     token1,
 ) => {
-    const uniSupplyV3Address = await getAddrFromRegistry('UniSupplyV3');
-
     const amount0Min = 0;
     const amount1Min = 0;
 
@@ -864,11 +832,11 @@ const uniV3Supply = async (
     await approve(token1, proxy.address);
 
     const functionData = uniSupplyV3Action.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](uniSupplyV3Address, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('UniSupplyV3', functionData, proxy);
+    return tx;
 };
 
 const uniV3Withdraw = async (proxy, tokenId, liquidity, recipient) => {
-    const uniWithdrawV3Address = await getAddrFromRegistry('UniWithdrawV3');
     const deadline = Date.now() + Date.now();
     const uniWithdrawV3Action = new dfs.actions.uniswapV3.UniswapV3WithdrawAction(
         tokenId,
@@ -882,13 +850,10 @@ const uniV3Withdraw = async (proxy, tokenId, liquidity, recipient) => {
         recipient,
     );
     const functionData = uniWithdrawV3Action.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](uniWithdrawV3Address, functionData, {
-        gasLimit: 3000000,
-    });
+    const tx = await executeAction('UniWithdrawV3', functionData, proxy);
+    return tx;
 };
-
 const uniV3Collect = async (proxy, tokenId, recipient, amount0Max, amount1Max) => {
-    const uniCollectV3Address = await getAddrFromRegistry('UniCollectV3');
     const uniCollectV3Action = new dfs.actions.uniswapV3.UniswapV3CollectAction(
         tokenId,
         recipient,
@@ -898,18 +863,30 @@ const uniV3Collect = async (proxy, tokenId, recipient, amount0Max, amount1Max) =
     );
     const functionData = uniCollectV3Action.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](uniCollectV3Address, functionData, {
-        gasLimit: 3000000,
-    });
+    const tx = await executeAction('UniCollectV3', functionData, proxy);
+    return tx;
 };
 /*
-*
-*
-*
-*
-*
-*
-*
+____    ____  _______     ___      .______      .__   __.
+\   \  /   / |   ____|   /   \     |   _  \     |  \ |  |
+ \   \/   /  |  |__     /  ^  \    |  |_)  |    |   \|  |
+  \_    _/   |   __|   /  /_\  \   |      /     |  . `  |
+    |  |     |  |____ /  _____  \  |  |\  \----.|  |\   |
+    |__|     |_______/__/     \__\ | _| `._____||__| \__|
+*/
+const yearnSupply = async (token, amount, from, to, proxy) => {
+    const yearnSupplyAction = new dfs.actions.yearn.YearnSupplyAction(token, amount, from, to);
+    const functionData = yearnSupplyAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('YearnSupply', functionData, proxy);
+    return tx;
+};
+const yearnWithdraw = async (token, amount, from, to, proxy) => {
+    const yearnWithdrawAction = new dfs.actions.yearn.YearnWithdrawAction(token, amount, from, to);
+    const functionData = yearnWithdrawAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('YearnWithdraw', functionData, proxy);
+    return tx;
+};
+/*
 *
 *
 *
@@ -1223,22 +1200,6 @@ const buyTokenIfNeeded = async (
             );
         }
     }
-};
-
-const yearnSupply = async (token, amount, from, to, proxy) => {
-    const yearnSupplyAddress = await getAddrFromRegistry('YearnSupply');
-    const yearnSupplyAction = new dfs.actions.yearn.YearnSupplyAction(token, amount, from, to);
-    const functionData = yearnSupplyAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](yearnSupplyAddress, functionData, { gasLimit: 3000000 });
-};
-
-const yearnWithdraw = async (token, amount, from, to, proxy) => {
-    const yearnWithdrawAddress = await getAddrFromRegistry('YearnWithdraw');
-    const yearnWithdrawAction = new dfs.actions.yearn.YearnWithdrawAction(token, amount, from, to);
-    const functionData = yearnWithdrawAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](yearnWithdrawAddress, functionData, {
-        gasLimit: 3000000,
-    });
 };
 
 const lidoStake = async (amount, from, to, proxy) => {

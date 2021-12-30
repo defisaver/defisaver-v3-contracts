@@ -262,7 +262,6 @@ const mcdMergeTest = async (mcdTestLength) => {
         let mcdViewAddr;
         before(async () => {
             makerAddresses = await fetchMakerAddresses();
-
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
 
@@ -347,7 +346,6 @@ const mcdPaybackTest = async (mcdTestLength) => {
 
         before(async () => {
             makerAddresses = await fetchMakerAddresses();
-
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
@@ -651,11 +649,11 @@ const mcdDeployContracts = async () => {
     await redeploy('McdOpen');
     await redeploy('McdSupply');
     await redeploy('McdGenerate');
-    await redeploy('McdView');
     await redeploy('McdGive');
     await redeploy('McdMerge');
     await redeploy('McdPayback');
     await redeploy('McdWithdraw');
+    await redeploy('McdView');
 };
 
 const mcdFullTest = async (mcdTestLength) => {

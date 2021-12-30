@@ -43,7 +43,6 @@ const aaveSupplyTest = async (testLength) => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-
             dataProvider = await getAaveDataProvider();
         });
 
@@ -221,7 +220,6 @@ const aaveWithdrawTest = async (testLength) => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-
             dataProvider = await getAaveDataProvider();
         });
 
@@ -448,7 +446,6 @@ const aaveClaimStkAaveTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             proxyAddr = proxy.address;
-
             dataProvider = await getAaveDataProvider();
             aTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
             snapshot = await takeSnapshot();

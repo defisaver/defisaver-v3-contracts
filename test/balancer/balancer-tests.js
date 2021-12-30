@@ -388,6 +388,9 @@ const balancerClaimTest = async () => {
             const balBalanceAfter = await balanceOf(BAL_ADDR, proxy.address);
             expect(balBalanceBefore).to.be.eq(balBalanceAfter.sub(balanceChangeAmount));
         }).timeout(50000);
+        after(async () => {
+            await resetForkToBlock();
+        });
     });
 };
 
@@ -399,7 +402,7 @@ const balancerFullTest = async () => {
     await balancerDeployContracts();
     await balancerSupplyTest();
     await balancerWithdrawTest();
-    // await balancerClaimTest();
+    await balancerClaimTest();
 };
 
 module.exports = {

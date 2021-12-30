@@ -9,6 +9,7 @@ const {
     DAI_ADDR,
     USDT_ADDR,
     setBalance,
+    ETH_ADDR,
 } = require('../utils');
 
 const { gUniDeposit, gUniWithdraw } = require('../actions.js');
@@ -138,6 +139,8 @@ const guniWithdrawTest = async () => {
     });
 };
 const guniDeployContracts = async () => {
+    const balance = await balanceOf(ETH_ADDR, ((await hre.ethers.getSigners())[0]).address);
+    console.log(balance.toString());
     await redeploy('GUniDeposit');
     await redeploy('GUniWithdraw');
 };

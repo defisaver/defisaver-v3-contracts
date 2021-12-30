@@ -7,11 +7,11 @@ const { mcdMergeTest } = require('./mcd-tests');
 
 describe('Mcd-Merge', () => {
     before(async () => {
-        await redeploy('McdOpen');
         await redeploy('McdSupply');
         await redeploy('McdGenerate');
         await redeploy('McdMerge');
-        await redeploy('McdView');
+        const mcdView = await redeploy('McdView');
+        console.log(mcdView);
     });
 
     it('... should merge two Maker vaults', async () => {

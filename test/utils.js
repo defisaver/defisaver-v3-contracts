@@ -319,7 +319,7 @@ const getProxy = async (acc) => {
 
     return dsProxy;
 };
-const redeploy = async (name, regAddr = REGISTRY_ADDR, saveOnTenderly = true) => {
+const redeploy = async (name, regAddr = REGISTRY_ADDR, saveOnTenderly = false) => {
     if (regAddr === REGISTRY_ADDR) {
         await impersonateAccount(OWNER_ACC);
     }
@@ -338,6 +338,7 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR, saveOnTenderly = true) =>
         await registry.addNewContract(id, c.address, 0, { gasLimit: 2000000 });
     } else {
         await registry.startContractChange(id, c.address);
+
         await registry.approveContractChange(id);
     }
 
@@ -544,12 +545,12 @@ async function setForkForTesting() {
     const senderAcc = (await hre.ethers.getSigners())[0];
     await hre.network.provider.send('hardhat_setBalance', [
         senderAcc.address,
-        '0x204FCE5E3E25026110000000',
+        '0xC9F2C9CD04674EDEA40000000',
     ]);
-    /*
-    const balance = await balanceOf(ETH_ADDR, senderAcc.address);
-    console.log(balance.toString());
-    */
+    await hre.network.provider.send('hardhat_setBalance', [
+        OWNER_ACC,
+        '0xC9F2C9CD04674EDEA40000000',
+    ]);
     await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
         '0x1', // 1 wei
     ]);
@@ -585,9 +586,6 @@ const resetForkToBlock = async (block) => {
             ],
         });
     }
-
-    const blockNum = await hre.ethers.provider.getBlockNumber();
-    console.log(blockNum);
     await setForkForTesting();
 };
 
