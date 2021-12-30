@@ -379,7 +379,6 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
 
     const ratioAction = new dfs.actions.maker.MakerRatioAction(
         '0',
-        '0',
     );
 
     const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
@@ -418,7 +417,6 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
         false, // if exact triggerRatio should be checked
         '0', // targetRatio
         '0', // vaultId
-        '0', // nextPrice
         '0', // returnValueIndex
     );
 
@@ -506,7 +504,6 @@ const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, s
 
     const ratioAction = new dfs.actions.maker.MakerRatioAction(
         '0',
-        '0',
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -545,7 +542,6 @@ const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, s
         false, // if exact triggerRatio should be checked
         '0', // targetRatio
         '0', // vaultId
-        '0', // nextPrice
         '1', // returnValueIndex
     );
 
@@ -679,7 +675,6 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
 
     const ratioAction = new dfs.actions.maker.MakerRatioAction(
         '0',
-        '0',
     );
 
     const generateAction = new dfs.actions.maker.MakerGenerateAction(
@@ -718,7 +713,6 @@ const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
         false,
         '0', // targetRatio
         '0', // vaultId
-        '0', // nextPrice
         '0', // returnValueIndex
     );
 
@@ -749,7 +743,6 @@ const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, s
     const actionsCallData = [];
 
     const ratioAction = new dfs.actions.maker.MakerRatioAction(
-        '0',
         '0',
     );
 
@@ -791,7 +784,6 @@ const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, s
         false, // if exact triggerRatio should be checked
         '0', // targetRatio
         '0', // vaultId
-        '0', // nextPrice
         '1', // returnValueIndex
     );
 

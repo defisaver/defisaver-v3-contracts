@@ -42,7 +42,6 @@ describe('Mcd-Boost-Strategy', function () {
 
         const ratioAction = new dfs.actions.maker.MakerRatioAction(
             '&vaultId',
-            '%nextPrice',
         );
 
         const generateAction = new dfs.actions.maker.MakerGenerateAction(
@@ -80,7 +79,6 @@ describe('Mcd-Boost-Strategy', function () {
             '%checkTarget',
             '&targetRatio', // targetRatio
             '&vaultId', // vaultId
-            '%nextPrice', // nextPrice
             '%ratioActionPositionInRecipe',
         );
 
@@ -106,7 +104,6 @@ describe('Mcd-Boost-Strategy', function () {
 
         const ratioAction = new dfs.actions.maker.MakerRatioAction(
             '&vaultId',
-            '%nextPrice',
         );
 
         const sellAction = new dfs.actions.basic.SellAction(
@@ -144,7 +141,6 @@ describe('Mcd-Boost-Strategy', function () {
             '%checkTarget',
             '&targetRatio', // targetRatio
             '&vaultId', // vaultId
-            '%nextPrice', // nextPrice
             '%ratioActionPositionInRecipe',
         );
 

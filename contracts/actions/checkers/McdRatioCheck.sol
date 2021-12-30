@@ -22,7 +22,6 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
         bool checkTarget;
         uint256 ratioTarget;
         uint256 vaultId;
-        uint256 nextPrice;
         uint256 startRatioIndex; // index in returnValues where ratio before actions is stored
     }
 
@@ -42,10 +41,9 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
         uint256 ratioState = _parseParamUint(uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues);
         inputData.ratioTarget = _parseParamUint(inputData.ratioTarget, _paramMapping[1], _subData, _returnValues);
         inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[2], _subData, _returnValues);
-        inputData.nextPrice = _parseParamUint(inputData.nextPrice, _paramMapping[3], _subData, _returnValues);
-        inputData.startRatioIndex = _parseParamUint(inputData.startRatioIndex, _paramMapping[4], _subData, _returnValues);
+        inputData.startRatioIndex = _parseParamUint(inputData.startRatioIndex, _paramMapping[3], _subData, _returnValues);
 
-        uint256 currRatio = getRatio(inputData.vaultId, inputData.nextPrice);
+        uint256 currRatio = getRatio(inputData.vaultId, 0);
         uint256 beforeRatio = uint256(_returnValues[inputData.startRatioIndex]);
 
         // ratio should be lower

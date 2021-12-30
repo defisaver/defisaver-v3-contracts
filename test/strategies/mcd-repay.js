@@ -92,7 +92,6 @@ describe('Mcd-Repay-Strategy', function () {
 
         const ratioAction = new dfs.actions.maker.MakerRatioAction(
             '&vaultId',
-            '%nextPrice',
         );
 
         const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
@@ -130,7 +129,6 @@ describe('Mcd-Repay-Strategy', function () {
             '%checkTarget',
             '&targetRatio', // targetRatio
             '&vaultId', // vaultId
-            '%nextPrice', // nextPrice
             '%ratioActionPositionInRecipe',
         );
 
@@ -157,7 +155,6 @@ describe('Mcd-Repay-Strategy', function () {
 
         const ratioAction = new dfs.actions.maker.MakerRatioAction(
             '&vaultId',
-            '%nextPrice',
         );
 
         const sellAction = new dfs.actions.basic.SellAction(
@@ -195,7 +192,6 @@ describe('Mcd-Repay-Strategy', function () {
             '%checkTarget',
             '&targetRatio', // targetRatio
             '&vaultId', // vaultId
-            '%nextPrice', // nextPrice
             '%ratioActionPositionInRecipe',
         );
 
