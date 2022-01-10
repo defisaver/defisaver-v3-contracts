@@ -61,12 +61,12 @@ contract StrategyModel {
     }
 
     /// @dev Instance of a strategy, user supplied data
-    /// @param id Id of the strategy or bundle, depending on the isBundle bool
+    /// @param strategyOrBundleId Id of the strategy or bundle, depending on the isBundle bool
     /// @param isBundle If true the id points to bundle, if false points directly to strategyId
     /// @param triggerData User supplied data needed for checking trigger conditions
     /// @param subData User supplied data used in recipe
     struct StrategySub {
-        uint64 id;
+        uint64 strategyOrBundleId;
         bool isBundle;
         bytes[] triggerData;
         bytes32[] subData;

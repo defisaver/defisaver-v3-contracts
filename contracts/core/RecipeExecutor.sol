@@ -48,7 +48,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
         Strategy memory strategy;
 
         { // to handle stack too deep
-            uint256 strategyId = _sub.id;
+            uint256 strategyId = _sub.strategyOrBundleId;
             address bundleStorageAddr = registry.getAddr(BUNDLE_STORAGE_ID);
             address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
 
