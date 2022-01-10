@@ -32,8 +32,10 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
 
         uint256 txCost = calcGasCost(inputData.gasUsed, inputData.feeToken);
 
-        if (inputData.availableAmount == type(uint256).max) {
-            inputData.availableAmount =  inputData.feeToken.getBalance(address(this));
+        /// @dev This means inputData.availableAmount is not being piped into
+        /// @dev To stop sender from sending any value here, if not piped take proxy balance
+        if (_paramMapping[1] == 0) {
+            inputData.availableAmount = inputData.feeToken.getBalance(address(this));
         }
 
         // cap at 20% of the max amount
