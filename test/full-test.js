@@ -13,16 +13,18 @@ const { uniFullTest } = require('./uniswap/uni-tests');
 const { uniV3FullTest, univ3CreatePoolTest } = require('./uniswap/v3/univ3-tests');
 const { authFullTest } = require('./auth/auth-tests');
 const { instaFullTest } = require('./insta/insta-tests');
+const { dfsRegistryControllerTest } = require('./utils-test/utils-tests');
 
 const aaveTestLength = 2;
 const compTestLength = 2;
 const mcdTestLenght = 2;
 const yearnTestLength = 2;
 
-const hardcodedBlockTests = async () => {
+const specialTests = async () => {
     await balancerClaimTest();
     await univ3CreatePoolTest();
     // await instaFullTest();
+    await dfsRegistryControllerTest();
 };
 
 describe('Run all DeFi Saver tests', async function () {
@@ -43,6 +45,6 @@ describe('Run all DeFi Saver tests', async function () {
         await uniV3FullTest();
         await authFullTest();
 
-        await hardcodedBlockTests();
+        await specialTests();
     });
 });
