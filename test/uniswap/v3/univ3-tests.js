@@ -541,7 +541,7 @@ const uniV3FullTest = async () => {
     await uniV3WithdrawTest();
     await uniV3CollectTest();
 
-    await univ3CreatePoolTest();
+    // await univ3CreatePoolTest();
 };
 
 module.exports = {

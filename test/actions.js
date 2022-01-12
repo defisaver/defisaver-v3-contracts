@@ -893,8 +893,6 @@ const yearnWithdraw = async (token, amount, from, to, proxy) => {
 *
 */
 const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from, to) => {
-    const liquityOpenAddr = await getAddrFromRegistry('LiquityOpen');
-
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
         LiquityActionIds.Open,
@@ -914,13 +912,11 @@ const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from
     );
 
     const functionData = liquityOpenAction.encodeForDsProxyCall()[1];
-
-    return proxy['execute(address,bytes)'](liquityOpenAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('LiquityOpen', functionData, proxy);
+    return tx;
 };
 
 const liquityBorrow = async (proxy, maxFeePercentage, LUSDAmount, to) => {
-    const liquityBorrowAddr = await getAddrFromRegistry('LiquityBorrow');
-
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
         LiquityActionIds.Borrow,
@@ -939,12 +935,11 @@ const liquityBorrow = async (proxy, maxFeePercentage, LUSDAmount, to) => {
 
     const functionData = liquityBorrowAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityBorrowAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('LiquityBorrow', functionData, proxy);
+    return tx;
 };
 
 const liquityPayback = async (proxy, LUSDAmount, from) => {
-    const liquityPaybackAddr = await getAddrFromRegistry('LiquityPayback');
-
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
         LiquityActionIds.Payback,
@@ -962,12 +957,11 @@ const liquityPayback = async (proxy, LUSDAmount, from) => {
 
     const functionData = liquityPaybackAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityPaybackAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('LiquityPayback', functionData, proxy);
+    return tx;
 };
 
 const liquitySupply = async (proxy, collAmount, from) => {
-    const liquitySupplyAddr = await getAddrFromRegistry('LiquitySupply');
-
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
         LiquityActionIds.Supply,
@@ -984,13 +978,11 @@ const liquitySupply = async (proxy, collAmount, from) => {
     );
 
     const functionData = liquitySupplyAction.encodeForDsProxyCall()[1];
-
-    return proxy['execute(address,bytes)'](liquitySupplyAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('LiquitySupply', functionData, proxy);
+    return tx;
 };
 
 const liquityWithdraw = async (proxy, collAmount, to) => {
-    const liquityWithdrawAddr = await getAddrFromRegistry('LiquityWithdraw');
-
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
         LiquityActionIds.Withdraw,
@@ -1008,25 +1000,21 @@ const liquityWithdraw = async (proxy, collAmount, to) => {
 
     const functionData = liquityWithdrawAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityWithdrawAddr, functionData, {
-        gasLimit: 3000000,
-    });
+    const tx = await executeAction('LiquityWithdraw', functionData, proxy);
+    return tx;
 };
 
 const liquityClose = async (proxy, from, to) => {
-    const liquityCloseAddr = await getAddrFromRegistry('LiquityClose');
-
     const LiquityCloseAction = new dfs.actions.liquity.LiquityCloseAction(from, to);
 
     const functionData = LiquityCloseAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityCloseAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('LiquityClose', functionData, proxy);
+    return tx;
 };
 
 const liquityRedeem = async (proxy, lusdAmount, from, to, maxFeePercentage) => {
     const maxIterations = 0;
-    const liquityRedeemAddr = await getAddrFromRegistry('LiquityRedeem');
-
     const liquityViewAddr = await getAddrFromRegistry('LiquityView');
     const liquityView = await hre.ethers.getContractAt('LiquityView', liquityViewAddr);
     const { collPrice } = await liquityView['getTroveInfo(address)'](proxy.address);
@@ -1062,12 +1050,11 @@ const liquityRedeem = async (proxy, lusdAmount, from, to, maxFeePercentage) => {
 
     const functionData = liquityRedeemAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityRedeemAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('LiquityRedeem', functionData, proxy);
+    return tx;
 };
 
 const liquityStake = async (proxy, lqtyAmount, from, wethTo, lusdTo) => {
-    const liquityStakeAddr = await getAddrFromRegistry('LiquityStake');
-
     const LiquityStakeAction = new dfs.actions.liquity.LiquityStakeAction(
         lqtyAmount,
         from,
@@ -1077,12 +1064,11 @@ const liquityStake = async (proxy, lqtyAmount, from, wethTo, lusdTo) => {
 
     const functionData = LiquityStakeAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityStakeAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('LiquityStake', functionData, proxy);
+    return tx;
 };
 
 const liquityUnstake = async (proxy, lqtyAmount, to, wethTo, lusdTo) => {
-    const liquityUnstakeAddr = await getAddrFromRegistry('LiquityUnstake');
-
     const LiquityUnstakeAction = new dfs.actions.liquity.LiquityUnstakeAction(
         lqtyAmount,
         to,
@@ -1092,12 +1078,11 @@ const liquityUnstake = async (proxy, lqtyAmount, to, wethTo, lusdTo) => {
 
     const functionData = LiquityUnstakeAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityUnstakeAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('LiquityUnstake', functionData, proxy);
+    return tx;
 };
 
 const liquitySPDeposit = async (proxy, LUSDAmount, from, wethTo, lqtyTo) => {
-    const liquitySPDepositAddr = await getAddrFromRegistry('LiquitySPDeposit');
-
     const liquitySPDepositAction = new dfs.actions.liquity.LiquitySPDepositAction(
         LUSDAmount,
         from,
@@ -1107,14 +1092,11 @@ const liquitySPDeposit = async (proxy, LUSDAmount, from, wethTo, lqtyTo) => {
 
     const functionData = liquitySPDepositAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquitySPDepositAddr, functionData, {
-        gasLimit: 3000000,
-    });
+    const tx = await executeAction('LiquitySPDeposit', functionData, proxy);
+    return tx;
 };
 
 const liquitySPWithdraw = async (proxy, LUSDAmount, to, wethTo, lqtyTo) => {
-    const liquitySPWithdrawAddr = await getAddrFromRegistry('LiquitySPWithdraw');
-
     const liquitySPWithdrawAction = new dfs.actions.liquity.LiquitySPWithdrawAction(
         LUSDAmount,
         to,
@@ -1124,14 +1106,11 @@ const liquitySPWithdraw = async (proxy, LUSDAmount, to, wethTo, lqtyTo) => {
 
     const functionData = liquitySPWithdrawAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquitySPWithdrawAddr, functionData, {
-        gasLimit: 3000000,
-    });
+    const tx = await executeAction('LiquitySPWithdraw', functionData, proxy);
+    return tx;
 };
 
 const liquityEthGainToTrove = async (proxy, lqtyTo) => {
-    const liquityEthGainToTroveAddr = await getAddrFromRegistry('LiquityEthGainToTrove');
-
     const liquityViewAddr = await getAddrFromRegistry('LiquityView');
     const liquityView = await hre.ethers.getContractAt('LiquityView', liquityViewAddr);
 
@@ -1152,29 +1131,26 @@ const liquityEthGainToTrove = async (proxy, lqtyTo) => {
 
     const functionData = liquityEthGainToTroveAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](liquityEthGainToTroveAddr, functionData, {
-        gasLimit: 3000000,
-    });
+    const tx = await executeAction('LiquityEthGainToTrove', functionData, proxy);
+    return tx;
 };
 
 const dydxSupply = async (proxy, tokenAddr, amount, from) => {
     await approve(tokenAddr, proxy.address);
 
-    const dydxSupplyAddr = await getAddrFromRegistry('DyDxSupply');
-
     const dydxSupplyAction = new dfs.actions.dydx.DyDxSupplyAction(tokenAddr, amount, from);
     const functionData = dydxSupplyAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](dydxSupplyAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('DyDxSupply', functionData, proxy);
+    return tx;
 };
 
 const dydxWithdraw = async (proxy, tokenAddr, amount, to) => {
-    const dydxWithdrawAddr = await getAddrFromRegistry('DyDxWithdraw');
-
     const dydxWithdrawAction = new dfs.actions.dydx.DyDxWithdrawAction(tokenAddr, amount, to);
     const functionData = dydxWithdrawAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](dydxWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('DyDxWithdraw', functionData, proxy);
+    return tx;
 };
 
 const buyTokenIfNeeded = async (
@@ -1203,29 +1179,26 @@ const buyTokenIfNeeded = async (
 };
 
 const lidoStake = async (amount, from, to, proxy) => {
-    const lidoStakeAddress = await getAddrFromRegistry('LidoStake');
     const lidoStakeAction = new dfs.actions.lido.LidoStakeAction(amount, from, to);
     const functionData = lidoStakeAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](lidoStakeAddress, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('LidoStake', functionData, proxy);
+    return tx;
 };
 const lidoUnwrap = async (amount, from, to, proxy) => {
-    const lidoUnwrapAddress = await getAddrFromRegistry('LidoUnwrap');
     const lidoUnwrapAction = new dfs.actions.lido.LidoUnwrapAction(amount, from, to);
     const functionData = lidoUnwrapAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](lidoUnwrapAddress, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('LidoUnwrap', functionData, proxy);
+    return tx;
 };
 
 const lidoWrap = async (amount, from, to, useEth, proxy) => {
-    const lidoWrapAddress = await getAddrFromRegistry('LidoWrap');
     const lidoWrapAction = new dfs.actions.lido.LidoWrapAction(amount, from, to, useEth);
     const functionData = lidoWrapAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](lidoWrapAddress, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('LidoWrap', functionData, proxy);
+    return tx;
 };
 
 const reflexerSaviourDeposit = async (proxy, from, safeId, lpTokenAmount) => {
-    const reflexerSaviourDepositAddress = await getAddrFromRegistry(
-        'ReflexerNativeUniV2SaviourDeposit',
-    );
     // eslint-disable-next-line max-len
     const reflexerSaviourDepositAction = new dfs.actions.reflexer.ReflexerNativeUniV2SaviourDepositAction(
         from,
@@ -1233,15 +1206,11 @@ const reflexerSaviourDeposit = async (proxy, from, safeId, lpTokenAmount) => {
         lpTokenAmount,
     );
     const functionData = reflexerSaviourDepositAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](reflexerSaviourDepositAddress, functionData, {
-        gasLimit: 3000000,
-    });
+    const tx = await executeAction('ReflexerNativeUniV2SaviourDeposit', functionData, proxy);
+    return tx;
 };
 
 const reflexerSaviourWithdraw = async (proxy, to, safeId, lpTokenAmount) => {
-    const reflexerSaviourWithdrawAddress = await getAddrFromRegistry(
-        'ReflexerNativeUniV2SaviourWithdraw',
-    );
     // eslint-disable-next-line max-len
     const reflexerSaviourWithdrawAction = new dfs.actions.reflexer.ReflexerNativeUniV2SaviourWithdrawAction(
         to,
@@ -1249,13 +1218,11 @@ const reflexerSaviourWithdraw = async (proxy, to, safeId, lpTokenAmount) => {
         lpTokenAmount,
     );
     const functionData = reflexerSaviourWithdrawAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](reflexerSaviourWithdrawAddress, functionData, {
-        gasLimit: 3000000,
-    });
+    const tx = await executeAction('ReflexerNativeUniV2SaviourWithdraw', functionData, proxy);
+    return tx;
 };
 
 const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, owner, to) => {
-    const claimInstMakerAddress = await getAddrFromRegistry('ClaimInstMaker');
     const claimInstMakerAction = new dfs.actions.insta.ClaimInstMakerAction(
         index,
         vaultId,
@@ -1266,11 +1233,11 @@ const claimInstMaker = async (proxy, index, vaultId, reward, networth, merkle, o
         to,
     );
     const functionData = claimInstMakerAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](claimInstMakerAddress, functionData);
+    const tx = await executeAction('ClaimInstMaker', functionData, proxy);
+    return tx;
 };
 
 const pullTokensInstDSA = async (proxy, dsaAddress, tokens, amounts, to) => {
-    const instPulLTokenAddress = await getAddrFromRegistry('InstPullTokens');
     const instPullTokenAction = new dfs.actions.insta.InstPullTokensAction(
         dsaAddress,
         tokens,
@@ -1278,14 +1245,15 @@ const pullTokensInstDSA = async (proxy, dsaAddress, tokens, amounts, to) => {
         to,
     );
     const functionData = instPullTokenAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](instPulLTokenAddress, functionData);
+    const tx = await executeAction('InstPullTokens', functionData, proxy);
+    return tx;
 };
 
 const changeProxyOwner = async (proxy, newOwner) => {
-    const changeProxyOwnerAddress = await getAddrFromRegistry('ChangeProxyOwner');
     const changeProxyOwnerAction = new dfs.actions.basic.ChangeProxyOwnerAction(newOwner);
     const functionData = changeProxyOwnerAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](changeProxyOwnerAddress, functionData);
+    const tx = await executeAction('ChangeProxyOwner', functionData, proxy);
+    return tx;
 };
 
 const curveDeposit = async (
@@ -1299,7 +1267,6 @@ const curveDeposit = async (
     tokens,
     useUnderlying,
 ) => {
-    const curveDepositAddr = await getAddrFromRegistry('CurveDeposit');
     const curveViewAddr = await getAddrFromRegistry('CurveView');
     const curveView = await hre.ethers.getContractAt('CurveView', curveViewAddr);
     const sig = await curveView['curveDepositSig(uint256,bool)'](tokens.length, useUnderlying);
@@ -1318,7 +1285,8 @@ const curveDeposit = async (
 
     const functionData = curveDepositAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](curveDepositAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('CurveDeposit', functionData, proxy);
+    return tx;
 };
 
 const curveWithdraw = async (
@@ -1333,7 +1301,6 @@ const curveWithdraw = async (
     withdrawExact,
     useUnderlying,
 ) => {
-    const curveWithdrawAddr = await getAddrFromRegistry('CurveWithdraw');
     const curveViewAddr = await getAddrFromRegistry('CurveView');
     const curveView = await hre.ethers.getContractAt('CurveView', curveViewAddr);
     let sig;
@@ -1357,12 +1324,11 @@ const curveWithdraw = async (
     );
 
     const functionData = curveWithdrawAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](curveWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('CurveWithdraw', functionData, proxy);
+    return tx;
 };
 
 const curveGaugeDeposit = async (proxy, gaugeAddr, lpToken, sender, onBehalfOf, amount) => {
-    const curveGaugeDepositAddr = await getAddrFromRegistry('CurveGaugeDeposit');
-
     const curveGaugeDepositAction = new dfs.actions.curve.CurveGaugeDepositAction(
         gaugeAddr,
         lpToken,
@@ -1373,14 +1339,11 @@ const curveGaugeDeposit = async (proxy, gaugeAddr, lpToken, sender, onBehalfOf, 
 
     const functionData = curveGaugeDepositAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](curveGaugeDepositAddr, functionData, {
-        gasLimit: 3000000,
-    });
+    const tx = await executeAction('CurveGaugeDeposit', functionData, proxy);
+    return tx;
 };
 
 const curveGaugeWithdraw = async (proxy, gaugeAddr, lpToken, receiver, amount) => {
-    const curveGaugeWithdrawAddr = await getAddrFromRegistry('CurveGaugeWithdraw');
-
     const curveGaugeWithdrawAction = new dfs.actions.curve.CurveGaugeWithdrawAction(
         gaugeAddr,
         lpToken,
@@ -1390,41 +1353,35 @@ const curveGaugeWithdraw = async (proxy, gaugeAddr, lpToken, receiver, amount) =
 
     const functionData = curveGaugeWithdrawAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](curveGaugeWithdrawAddr, functionData, {
-        gasLimit: 3000000,
-    });
+    const tx = await executeAction('CurveGaugeWithdraw', functionData, proxy);
+    return tx;
 };
 
 const curveMintCrv = async (proxy, gaugeAddrs, receiver) => {
-    const curveMintCrvAddr = await getAddrFromRegistry('CurveMintCrv');
-
     const curveMintCrvAction = new dfs.actions.curve.CurveMintCrvAction(gaugeAddrs, receiver);
 
     const functionData = curveMintCrvAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](curveMintCrvAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('CurveMintCrv', functionData, proxy);
+    return tx;
 };
 
 const curveClaimFees = async (proxy, claimFor, receiver) => {
-    const curveClaimFeesAddr = await getAddrFromRegistry('CurveClaimFees');
-
     const curveClaimFeesAction = new dfs.actions.curve.CurveClaimFeesAction(claimFor, receiver);
 
     const functionData = curveClaimFeesAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](curveClaimFeesAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('CurveClaimFees', functionData, proxy);
+    return tx;
 };
 
 const automationV2Unsub = async (proxy, protocol, cdpId = 0) => {
-    const automationV2UnsubAddr = await getAddrFromRegistry('AutomationV2Unsub');
-
     const automationV2UnsubAction = new dfs.actions.basic.AutomationV2Unsub(protocol, cdpId);
 
     const functionData = automationV2UnsubAction.encodeForDsProxyCall()[1];
 
-    return proxy['execute(address,bytes)'](automationV2UnsubAddr, functionData, {
-        gasLimit: 3000000,
-    });
+    const tx = await executeAction('AutomationV2Unsub', functionData, proxy);
+    return tx;
 };
 
 const mStableDeposit = async (
@@ -1439,8 +1396,6 @@ const mStableDeposit = async (
     minOut,
     unstake,
 ) => {
-    const mStableAddr = await getAddrFromRegistry('MStableDeposit');
-
     const mStableAction = new dfs.actions.mstable.MStableDepositAction(
         bAsset,
         mAsset,
@@ -1454,7 +1409,8 @@ const mStableDeposit = async (
     );
 
     const functionData = mStableAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('MStableDeposit', functionData, proxy);
+    return tx;
 };
 
 const mStableWithdraw = async (
@@ -1469,8 +1425,6 @@ const mStableWithdraw = async (
     minOut,
     unstake,
 ) => {
-    const mStableAddr = await getAddrFromRegistry('MStableWithdraw');
-
     const mStableAction = new dfs.actions.mstable.MStableWithdrawAction(
         bAsset,
         mAsset,
@@ -1484,20 +1438,19 @@ const mStableWithdraw = async (
     );
 
     const functionData = mStableAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('MStableWithdraw', functionData, proxy);
+    return tx;
 };
 
 const mStableClaim = async (proxy, vaultAddress, to, first, last) => {
-    const mStableAddr = await getAddrFromRegistry('MStableClaim');
-
     const mStableAction = new dfs.actions.mstable.MStableClaimAction(vaultAddress, to, first, last);
 
     const functionData = mStableAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('MStableClaim', functionData, proxy);
+    return tx;
 };
 
 const rariDeposit = async (fundManager, token, poolToken, amount, from, to, proxy) => {
-    const rariDepositAddr = await getAddrFromRegistry('RariDeposit');
     const rariDepositAction = new dfs.actions.rari.RariDepositAction(
         fundManager,
         token,
@@ -1508,7 +1461,8 @@ const rariDeposit = async (fundManager, token, poolToken, amount, from, to, prox
     );
 
     const functionData = rariDepositAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](rariDepositAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('RariDeposit', functionData, proxy);
+    return tx;
 };
 
 const rariWithdraw = async (
@@ -1521,7 +1475,6 @@ const rariWithdraw = async (
     to,
     proxy,
 ) => {
-    const rariWithdrawAddr = await getAddrFromRegistry('RariWithdraw');
     const rariWithdrawAction = new dfs.actions.rari.RariWithdrawAction(
         fundManager,
         poolTokenAddress,
@@ -1533,7 +1486,8 @@ const rariWithdraw = async (
     );
 
     const functionData = rariWithdrawAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](rariWithdrawAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('RariWithdraw', functionData, proxy);
+    return tx;
 };
 
 module.exports = {
