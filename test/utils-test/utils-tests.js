@@ -340,7 +340,6 @@ const utilsTestsFullTest = async () => {
     await deployUtilsTestsContracts();
     await botRefillTest();
     await feeReceiverTest();
-    // await dfsRegistryControllerTest();
 };
 module.exports = {
     utilsTestsFullTest,
