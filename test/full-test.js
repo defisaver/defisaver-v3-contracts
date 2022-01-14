@@ -14,7 +14,9 @@ const { uniV3FullTest, univ3CreatePoolTest } = require('./uniswap/v3/univ3-tests
 const { authFullTest } = require('./auth/auth-tests');
 const { instaFullTest } = require('./insta/insta-tests');
 const { dfsRegistryControllerTest, utilsTestsFullTest } = require('./utils-test/utils-tests');
-const { utilsActionsFullTest, automationV2UnsubTest } = require('./utils-actions/utils-actions-tests');
+const { utilsActionsFullTest, automationV2UnsubTest, changeOwnerTest } = require('./utils-actions/utils-actions-tests');
+const { fullFLTest } = require('./flashloan/fl-tests');
+const { dfsExchangeFullTest } = require('./exchange/exchange-tests');
 
 const aaveTestLength = 2;
 const compTestLength = 2;
@@ -23,6 +25,7 @@ const yearnTestLength = 2;
 
 const specialTests = async () => {
     await dfsRegistryControllerTest();
+    await changeOwnerTest();
     await balancerClaimTest();
     await univ3CreatePoolTest();
     await instaFullTest();
@@ -48,6 +51,8 @@ describe('Run all DeFi Saver tests', async function () {
         await authFullTest();
         await utilsActionsFullTest();
         await utilsTestsFullTest();
+        await fullFLTest();
+        await dfsExchangeFullTest();
 
         await specialTests();
     });

@@ -13,13 +13,13 @@ const {
     sendEther,
     nullAddress,
 } = require('../../utils');
+const { executeAction } = require('../../actions');
 
 describe('Inst Compound position shift', function () {
     this.timeout(80000);
 
     let proxy;
     let ownerAcc;
-    let taskExecutorAddr;
     let dydxFlAddr;
 
     /// @notice run on block number #13229894
@@ -34,7 +34,6 @@ describe('Inst Compound position shift', function () {
         await redeploy('CompPayback');
         await redeploy('CompSupply');
         await redeploy('CompWithdraw');
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
         dydxFlAddr = await getAddrFromRegistry('FLDyDx');
     });
     it('... Migrate Comp position from INST (COLL : COMP, UNI | DEBT : DAI, USDC)', async () => {
@@ -146,7 +145,7 @@ describe('Inst Compound position shift', function () {
         const cCompDSABalanceBefore = await balanceOf(CCOMP_ADDR, dsaAddress);
         const cUNIDSABalanceBefore = await balanceOf(CUNI_ADDR, dsaAddress);
 
-        await impersonatedProxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 10000000 });
+        await executeAction('TaskExecutor', functionData[1], impersonatedProxy);
 
         const cCompProxyBalanceAfter = await balanceOf(CCOMP_ADDR, proxy.address);
         const cUNIProxyBalanceAfter = await balanceOf(CUNI_ADDR, proxy.address);

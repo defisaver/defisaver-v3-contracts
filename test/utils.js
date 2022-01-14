@@ -145,7 +145,6 @@ async function findBalancesSlot(tokenAddress) {
             );
             // make sure the probe will change the slot value
             const probe = prev === probeA ? probeB : probeA;
-
             await hre.ethers.provider.send('hardhat_setStorageAt', [
                 tokenAddress,
                 probedSlot,
@@ -242,7 +241,7 @@ const setBalance = async (tokenAddr, userAddr, value) => {
             [userAddr, slotInfo.num], // key, slot
         );
     }
-
+    while (index.startsWith('0x0')) { index = `0x${index.slice(3)}`; }
     await setStorageAt(
         tokenAddr,
         index.toString(),
@@ -319,7 +318,7 @@ const getProxy = async (acc) => {
 
     return dsProxy;
 };
-const redeploy = async (name, regAddr = REGISTRY_ADDR, saveOnTenderly = false) => {
+const redeploy = async (name, regAddr = REGISTRY_ADDR, saveOnTenderly = true) => {
     if (regAddr === REGISTRY_ADDR) {
         await impersonateAccount(OWNER_ACC);
     }

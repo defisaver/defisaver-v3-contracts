@@ -1,5 +1,6 @@
 const { expect } = require('chai');
 const hre = require('hardhat');
+const { executeAction } = require('../actions.js');
 
 const {
     impersonateAccount,
@@ -150,12 +151,9 @@ const adminVaultTest = async () => {
 const proxyPermissionTest = async () => {
     describe('Proxy-Permission', () => {
         let ownerAcc1; let ownerAcc2; let
-            proxy; let proxyPermission;
+            proxy;
 
         before(async () => {
-            const proxyPermissionAddr = await getAddrFromRegistry('ProxyPermission');
-            proxyPermission = await hre.ethers.getContractAt('ProxyPermission', proxyPermissionAddr);
-
             ownerAcc1 = (await hre.ethers.getSigners())[0];
             ownerAcc2 = (await hre.ethers.getSigners())[1];
 
@@ -168,9 +166,7 @@ const proxyPermissionTest = async () => {
                 'givePermission',
                 [ownerAcc2.address],
             );
-
-            await proxy['execute(address,bytes)'](proxyPermission.address, functionData, { gasLimit: 1500000 });
-
+            await executeAction('ProxyPermission', functionData, proxy);
             // TODO: check permission
         });
 
@@ -181,7 +177,7 @@ const proxyPermissionTest = async () => {
                 [ownerAcc2.address],
             );
 
-            await proxy['execute(address,bytes)'](proxyPermission.address, functionData, { gasLimit: 1500000 });
+            await executeAction('ProxyPermission', functionData, proxy);
 
             // TODO: check permission
         });

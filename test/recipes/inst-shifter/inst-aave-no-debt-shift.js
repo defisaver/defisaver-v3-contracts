@@ -4,7 +4,6 @@ const hre = require('hardhat');
 const dfs = require('@defisaver/sdk');
 
 const {
-    getAddrFromRegistry,
     getProxy,
     redeploy,
     WETH_ADDRESS,
@@ -16,6 +15,7 @@ const {
     ADAI_ADDR,
     UNI_ADDR,
 } = require('../../utils');
+const { executeAction } = require('../../actions');
 
 describe('Inst Aave debtless position shift', function () {
     this.timeout(80000);
@@ -24,13 +24,11 @@ describe('Inst Aave debtless position shift', function () {
     let ownerAcc;
     let dsaContract;
     let dsaAddress;
-    let taskExecutorAddr;
 
     /// @notice run on block number 12805354
 
     const OWNER_ACC = '0x6F6c0194A67c2727c61370e76042B3D92F3AC35E';
     before(async () => {
-        taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
         await redeploy('InstPullTokens');
         await redeploy('AaveCollateralSwitch');
 
@@ -78,7 +76,7 @@ describe('Inst Aave debtless position shift', function () {
         const aWethBalanceBefore = await balanceOf(AWETH_ADDR, proxy.address);
         const aDaiBalanceBefore = await balanceOf(ADAI_ADDR, proxy.address);
 
-        await impersonatedProxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
+        await executeAction('TaskExecutor', functionData[1], impersonatedProxy);
 
         const aUniBalanceAfter = await balanceOf(AUNI_ADDR, proxy.address);
         const aWethBalanceAfter = await balanceOf(AWETH_ADDR, proxy.address);

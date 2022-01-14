@@ -26,7 +26,7 @@ const {
 } = require('../utils');
 
 const { fetchMakerAddresses } = require('../utils-mcd');
-const { changeProxyOwner, automationV2Unsub } = require('../actions');
+const { changeProxyOwner, automationV2Unsub, executeAction } = require('../actions');
 
 const wrapEthTest = async () => {
     describe('Wrap-Eth', function () {
@@ -49,10 +49,8 @@ const wrapEthTest = async () => {
             await setNewExchangeWrapper(senderAcc, uniWrapperAddr);
         });
         it('... should wrap native Eth to Weth direct action', async () => {
-            const wrapEthAddr = await getAddrFromRegistry('WrapEth');
-
             const amount = hre.ethers.utils.parseUnits('2', 18);
-
+            const wrapEthAddr = await getAddrFromRegistry('WrapEth');
             const wrapEthAction = new dfs.actions.basic.WrapEthAction(amount);
             const functionData = wrapEthAction.encodeForDsProxyCall()[1];
 
@@ -63,7 +61,6 @@ const wrapEthTest = async () => {
                 value: amount,
                 gasLimit: 3000000,
             });
-
             const wethBalanceAfter = await balanceOf(WETH_ADDRESS, proxy.address);
             console.log(`Weth proxy after: ${wethBalanceAfter / 1e18}`);
 
@@ -106,12 +103,10 @@ const unwrapEthTest = async () => {
         this.timeout(80000);
 
         let senderAcc; let proxy; let
-            uniWrapperAddr; let taskExecutorAddr;
+            uniWrapperAddr;
 
         before(async () => {
             uniWrapperAddr = await getAddrFromRegistry('UniswapWrapperV3');
-
-            taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
 
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
@@ -119,8 +114,6 @@ const unwrapEthTest = async () => {
             await setNewExchangeWrapper(senderAcc, uniWrapperAddr);
         });
         it('... should unwrap native WEth to Eth direct action', async () => {
-            const unwrapEthAddr = await getAddrFromRegistry('UnwrapEth');
-
             const amount = hre.ethers.utils.parseUnits('2', 18);
             await depositToWeth(amount);
 
@@ -134,7 +127,7 @@ const unwrapEthTest = async () => {
             const ethBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
             console.log(`Eth proxy before: ${ethBalanceBefore / 1e18}`);
 
-            await proxy['execute(address,bytes)'](unwrapEthAddr, functionData, { gasLimit: 3000000 });
+            await executeAction('UnwrapEth', functionData, proxy);
 
             const ethBalanceAfter = await balanceOf(ETH_ADDR, senderAcc.address);
             console.log(`Eth proxy after: ${ethBalanceAfter / 1e18}`);
@@ -157,7 +150,7 @@ const unwrapEthTest = async () => {
             const ethBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
             console.log(`Eth proxy before: ${ethBalanceBefore / 1e18}`);
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], { gasLimit: 3000000 });
+            await executeAction('TaskExecutor', functionData[1], proxy);
 
             const ethBalanceAfter = await balanceOf(ETH_ADDR, senderAcc.address);
             console.log(`Eth proxy after: ${ethBalanceAfter / 1e18}`);
@@ -191,7 +184,7 @@ const sumInputsTest = async () => {
             ]);
             const functionData = testSumInputs.encodeForDsProxyCall()[1];
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData);
+            await executeAction('TaskExecutor', functionData, proxy);
 
             expect(await balanceOf(WETH_ADDRESS, proxy.address)).to.be.eq(hre.ethers.utils.parseUnits('9', 18));
         });
@@ -237,7 +230,7 @@ const subInputsTest = async () => {
             ]);
             const functionData = testSubInputs.encodeForDsProxyCall()[1];
 
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData);
+            await executeAction('TaskExecutor', functionData, proxy);
 
             expect(await balanceOf(WETH_ADDRESS, proxy.address)).to.be.eq(hre.ethers.utils.parseUnits('7', 18));
         });
@@ -282,26 +275,22 @@ const sendTokenTest = async () => {
                 value: hre.ethers.utils.parseUnits('4', 18),
                 gasLimit: 3000000,
             });
-            const sendTokenAddr = await getAddrFromRegistry('SendToken');
             const sendTokenAction = new dfs.actions.basic.SendTokenAction(
                 WETH_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('3', 18),
             );
             const sendTokenData = sendTokenAction.encodeForDsProxyCall()[1];
 
-            await proxy['execute(address,bytes)'](sendTokenAddr, sendTokenData);
-
+            await executeAction('SendToken', sendTokenData, proxy);
             expect(await balanceOf(WETH_ADDRESS, senderAcc.address)).to.be.eq(hre.ethers.utils.parseUnits('3', 18));
         });
 
         it('... should send tokens direct action uint256.max', async () => {
-            const sendTokenAddr = await getAddrFromRegistry('SendToken');
             const sendTokenAction = new dfs.actions.basic.SendTokenAction(
                 WETH_ADDRESS, senderAcc.address, hre.ethers.constants.MaxUint256,
             );
             const sendTokenData = sendTokenAction.encodeForDsProxyCall()[1];
 
-            await proxy['execute(address,bytes)'](sendTokenAddr, sendTokenData);
-
+            await executeAction('SendToken', sendTokenData, proxy);
             expect(await balanceOf(WETH_ADDRESS, senderAcc.address)).to.be.eq(hre.ethers.utils.parseUnits('4', 18));
         });
     });
@@ -324,25 +313,22 @@ const pullTokenTest = async () => {
 
             await depositToWeth(hre.ethers.utils.parseUnits('10', 18));
             await approve(WETH_ADDRESS, proxy.address);
-            const pullTokenAddr = await getAddrFromRegistry('PullToken');
             const pullTokenAction = new dfs.actions.basic.PullTokenAction(
                 WETH_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('3', 18),
             );
             const pullTokenData = pullTokenAction.encodeForDsProxyCall()[1];
 
-            await proxy['execute(address,bytes)'](pullTokenAddr, pullTokenData);
-
+            await executeAction('PullToken', pullTokenData, proxy);
             expect(await balanceOf(WETH_ADDRESS, proxy.address)).to.be.eq(hre.ethers.utils.parseUnits('3', 18));
         });
 
         it('... should pull tokens uint256.max direct action', async () => {
-            const pullTokenAddr = await getAddrFromRegistry('PullToken');
             const pullTokenAction = new dfs.actions.basic.PullTokenAction(
                 WETH_ADDRESS, senderAcc.address, hre.ethers.constants.MaxUint256,
             );
             const pullTokenData = pullTokenAction.encodeForDsProxyCall()[1];
 
-            await proxy['execute(address,bytes)'](pullTokenAddr, pullTokenData);
+            await executeAction('PullToken', pullTokenData, proxy);
 
             expect(await balanceOf(WETH_ADDRESS, proxy.address)).to.be.eq(hre.ethers.utils.parseUnits('10', 18));
         });
@@ -400,6 +386,7 @@ const changeOwnerTest = async () => {
             const changedOwner = await proxy.owner();
 
             expect(changedOwner).to.be.eq(newOwner);
+            await resetForkToBlock();
         });
     });
 };
@@ -539,7 +526,6 @@ const utilsActionsFullTest = async () => {
     await subInputsTest();
     await sendTokenTest();
     await pullTokenTest();
-    await changeOwnerTest();
 };
 
 module.exports = {

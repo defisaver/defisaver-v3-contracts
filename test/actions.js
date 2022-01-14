@@ -48,8 +48,6 @@ const executeAction = async (actionName, functionData, proxy) => {
 };
 
 const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0) => {
-    const dfsSellAddr = await getAddrFromRegistry('DFSSell');
-
     const exchangeObject = formatExchangeObj(
         sellAddr,
         buyAddr,
@@ -68,7 +66,8 @@ const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee
     }
     await approve(sellAddr, proxy.address);
 
-    await proxy['execute(address,bytes)'](dfsSellAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('DFSSell', functionData, proxy);
+    return tx;
 };
 
 const buy = async (
@@ -82,8 +81,6 @@ const buy = async (
     to,
     uniV3fee = 0,
 ) => {
-    const dfsBuyAddr = await getAddrFromRegistry('DFSBuy');
-
     const exchangeObject = formatExchangeObj(
         sellAddr,
         buyAddr,
@@ -103,7 +100,8 @@ const buy = async (
 
     await approve(sellAddr, proxy.address);
 
-    await proxy['execute(address,bytes)'](dfsBuyAddr, functionData, { gasLimit: 3000000 });
+    const tx = await executeAction('DFSBuy', functionData, proxy);
+    return tx;
 };
 /*
      ___           ___   ____    ____  _______
@@ -1491,6 +1489,7 @@ const rariWithdraw = async (
 };
 
 module.exports = {
+    executeAction,
     sell,
     buy,
 
