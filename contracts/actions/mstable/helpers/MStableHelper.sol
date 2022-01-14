@@ -2,10 +2,10 @@
 pragma solidity =0.7.6;
 
 import "./MainnetMStableAddresses.sol";
-import "contracts/interfaces/mstable/ImAsset.sol";
-import "contracts/interfaces/mstable/IBoostedVaultWithLockup.sol";
-import "contracts/interfaces/mstable/ISavingsContractV2.sol";
-import "contracts/utils/TokenUtils.sol";
+import "../../../interfaces/mstable/ImAsset.sol";
+import "../../../interfaces/mstable/IBoostedVaultWithLockup.sol";
+import "../../../interfaces/mstable/ISavingsContractV2.sol";
+import "../../../utils/TokenUtils.sol";
 
 contract MStableHelper is MainnetMStableAddresses {
     using TokenUtils for address;

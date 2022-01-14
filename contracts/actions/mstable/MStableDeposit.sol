@@ -2,7 +2,7 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "contracts/utils/TokenUtils.sol";
+import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/MStableHelper.sol";
 
