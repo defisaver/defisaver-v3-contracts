@@ -1372,7 +1372,7 @@ const mStableDeposit = async (
     to,
     amount,
     minOut,
-    unstake,
+    assetPair,
 ) => {
     const mStableAddr = await getAddrFromRegistry('MStableDeposit');
 
@@ -1385,11 +1385,12 @@ const mStableDeposit = async (
         to,
         amount,
         minOut,
-        unstake,
+        assetPair,
     );
 
     const functionData = mStableAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await (await proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 })).wait();
+    return receipt;
 };
 
 const mStableWithdraw = async (
@@ -1402,7 +1403,7 @@ const mStableWithdraw = async (
     to,
     amount,
     minOut,
-    unstake,
+    assetPair,
 ) => {
     const mStableAddr = await getAddrFromRegistry('MStableWithdraw');
 
@@ -1415,11 +1416,12 @@ const mStableWithdraw = async (
         to,
         amount,
         minOut,
-        unstake,
+        assetPair,
     );
 
     const functionData = mStableAction.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 });
+    const receipt = await (await proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 })).wait();
+    return receipt;
 };
 
 const mStableClaim = async (
@@ -1440,7 +1442,7 @@ const mStableClaim = async (
 
     const functionData = mStableAction.encodeForDsProxyCall()[1];
     return proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 });
-}
+};
 
 const rariDeposit = async (fundManager, token, poolToken, amount, from, to, proxy) => {
     const rariDepositAddr = await getAddrFromRegistry('RariDeposit');

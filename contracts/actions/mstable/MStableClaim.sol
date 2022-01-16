@@ -2,10 +2,10 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "contracts/interfaces/mstable/IBoostedVaultWithLockup.sol";
+import "../../interfaces/mstable/IBoostedVaultWithLockup.sol";
 import "./helpers/MStableHelper.sol";
-import "contracts/utils/TokenUtils.sol";
-import "contracts/utils/SafeMath.sol";
+import "../../utils/TokenUtils.sol";
+import "../../utils/SafeMath.sol";
 import "../ActionBase.sol";
 
 contract MStableClaim is ActionBase, MStableHelper {

@@ -114,6 +114,8 @@ const coinGeckoHelper = {
     LUSD: 'liquity-usd',
     LQTY: 'liquity',
     TORN: 'tornado-cash',
+    mUSD: 'musd',
+    imUSD: 'imusd',
 };
 
 async function findBalancesSlot(tokenAddress) {

@@ -7,31 +7,26 @@ const {
     getProxy,
     redeploy,
     balanceOf,
+    setBalance,
+    Float2BN,
+    approve,
+    fetchAmountinUSDPrice,
 } = require('../utils');
 
 const {
-    mStableWithdraw,
-} = require('../actions.js');
-
-const {
-    buyCoinAndSave,
     mUSD,
     imUSD,
     imUSDVault,
+    AssetPair,
 } = require('../utils-mstable');
 
+const { mStableDeposit, mStableWithdraw } = require('../actions');
+
 describe('mStable-Withdraw', () => {
-    const saveAmount = '10000';
+    const saveDollarValue = '10000';
 
-    const stables = [
-        'DAI',
-        'USDT',
-        'USDC',
-        'sUSD',
-    ];
-
-    let senderAcc;
-    let proxy;
+    let senderAcc; let senderAddr;
+    let proxy; let proxyAddr;
     let view;
 
     before(async () => {
@@ -40,54 +35,120 @@ describe('mStable-Withdraw', () => {
         view = await redeploy('MStableView');
 
         senderAcc = (await hre.ethers.getSigners())[0];
+        senderAddr = senderAcc.address;
         proxy = await getProxy(senderAcc.address);
+        proxyAddr = proxy.address;
     });
 
-    stables.forEach(
-        async (stableCoin) => it(`... should deposit $${saveAmount} worth of ${stableCoin} into Savings Contract then withdraw`, async () => {
-            const stableCoinAddr = getAssetInfo(stableCoin).address;
+    const stablecoinDepositTests = (stablecoin) => [
+        {
+            entryAsset: getAssetInfo(stablecoin),
+            exitAsset: getAssetInfo('mUSD'),
+            assetPair: AssetPair.BASSET_MASSET,
+            toExpect: async (exitAsset, userAddr) => balanceOf(exitAsset.address, userAddr),
+        },
+        {
+            entryAsset: getAssetInfo(stablecoin),
+            exitAsset: getAssetInfo('imUSD'),
+            assetPair: AssetPair.BASSET_IMASSET,
+            toExpect: async (exitAsset, userAddr) => balanceOf(exitAsset.address, userAddr),
+        },
+        {
+            entryAsset: getAssetInfo(stablecoin),
+            exitAsset: {
+                address: '0x78BefCa7de27d07DC6e71da295Cc2946681A6c7B',
+                symbol: 'imUSDVault',
+            },
+            assetPair: AssetPair.BASSET_IMASSETVAULT,
+            toExpect: async (exitAsset, userAddr) => view['rawBalanceOf(address,address)'](exitAsset.address, userAddr),
+        },
+    ];
 
-            await buyCoinAndSave(senderAcc, stableCoinAddr, saveAmount, false);
-            expect(await balanceOf(imUSD, proxy.address)).to.be.gt(0, 'mStable Save failed');
+    const stables = [
+        'DAI',
+        'USDC',
+        'USDT',
+    ];
 
-            await mStableWithdraw(
+    const tests = [
+        ...stables.map((stablecoin) => stablecoinDepositTests(stablecoin)).reduce(
+            (running, testGroup) => [...running, ...testGroup],
+        ),
+        {
+            entryAsset: getAssetInfo('mUSD'),
+            exitAsset: getAssetInfo('imUSD'),
+            assetPair: AssetPair.MASSET_IMASSET,
+            toExpect: async (exitAsset, userAddr) => balanceOf(exitAsset.address, userAddr),
+        },
+        {
+            entryAsset: getAssetInfo('mUSD'),
+            exitAsset: {
+                address: '0x78BefCa7de27d07DC6e71da295Cc2946681A6c7B',
+                symbol: 'imUSDVault',
+            },
+            assetPair: AssetPair.MASSET_IMASSETVAULT,
+            toExpect: async (exitAsset, userAddr) => view['rawBalanceOf(address,address)'](exitAsset.address, userAddr),
+        },
+        {
+            entryAsset: getAssetInfo('imUSD'),
+            exitAsset: {
+                address: '0x78BefCa7de27d07DC6e71da295Cc2946681A6c7B',
+                symbol: 'imUSDVault',
+            },
+            assetPair: AssetPair.IMASSET_IMASSETVAULT,
+            toExpect: async (exitAsset, userAddr) => view['rawBalanceOf(address,address)'](exitAsset.address, userAddr),
+        },
+    ];
+
+    tests.forEach(async (_test) => {
+        const amount = Float2BN(
+            fetchAmountinUSDPrice(
+                _test.entryAsset.symbol,
+                saveDollarValue,
+            ), _test.entryAsset.decimals,
+        );
+
+        it(`... should deposit ${_test.entryAsset.symbol} and get ${_test.exitAsset.symbol} then withdraw`, async () => {
+            const isVaultOperation = (
+                _test.exitAsset.address.toLowerCase() === imUSDVault.toLowerCase()
+            );
+            const recipient = isVaultOperation ? proxyAddr : senderAddr;
+            const balanceBefore = await _test.toExpect(_test.exitAsset, recipient);
+
+            await setBalance(_test.entryAsset.address, senderAddr, amount);
+            await approve(_test.entryAsset.address, proxyAddr);
+            await mStableDeposit(
                 proxy,
-                stableCoinAddr,
+                _test.entryAsset.address,
                 mUSD,
                 imUSD,
                 imUSDVault,
-                proxy.address,
-                proxy.address,
-                hre.ethers.constants.MaxUint256,
+                senderAddr,
+                recipient,
+                amount,
                 0,
-                false,
+                _test.assetPair,
             );
 
-            expect(await balanceOf(stableCoinAddr, proxy.address)).to.be.gt(0, 'mStable Withdraw failed');
-        }),
-    );
+            let balanceAfter = await _test.toExpect(_test.exitAsset, recipient);
+            expect(balanceAfter).to.be.gt(balanceBefore);
 
-    stables.forEach(
-        async (stableCoin) => it(`... should deposit $${saveAmount} worth of ${stableCoin} into Savings Vault Contract then withdraw`, async () => {
-            const stableCoinAddr = getAssetInfo(stableCoin).address;
-
-            await buyCoinAndSave(senderAcc, stableCoinAddr, saveAmount, true);
-            expect(await view['rawBalanceOf(address,address)'](imUSDVault, proxy.address)).to.be.gt(0, 'mStable Save to Vault failed');
-
+            if (!isVaultOperation) await approve(_test.exitAsset.address, proxyAddr);
             await mStableWithdraw(
                 proxy,
-                stableCoinAddr,
+                _test.entryAsset.address,
                 mUSD,
                 imUSD,
                 imUSDVault,
-                proxy.address,
-                proxy.address,
-                hre.ethers.constants.MaxUint256,
+                recipient,
+                senderAddr,
+                balanceAfter,
                 0,
-                true,
+                _test.assetPair,
             );
 
-            expect(await balanceOf(stableCoinAddr, proxy.address)).to.be.gt(0, 'mStable Withdraw from Vault failed');
-        }),
-    );
+            balanceAfter = await _test.toExpect(_test.exitAsset, recipient);
+            expect(balanceAfter).to.be.eq(balanceBefore);
+        });
+    });
 });
