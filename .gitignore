@@ -112,3 +112,5 @@ dist
 
 # Flattened solidity contracts
 contracts/flattened/
+
+deployments/

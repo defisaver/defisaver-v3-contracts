@@ -20,6 +20,7 @@ const {
     WETH_ADDRESS,
     setBalance,
     fetchAmountinUSDPrice,
+    resetForkToBlock,
 } = require('../utils');
 
 const {
@@ -55,6 +56,7 @@ const dfsSellTest = async () => {
         ];
 
         before(async () => {
+            await resetForkToBlock();
             await redeploy('DFSSell');
 
             uniWrapper = await redeploy('UniswapWrapperV3');

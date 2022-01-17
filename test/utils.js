@@ -318,7 +318,7 @@ const getProxy = async (acc) => {
 
     return dsProxy;
 };
-const redeploy = async (name, regAddr = REGISTRY_ADDR, saveOnTenderly = true) => {
+const redeploy = async (name, regAddr = REGISTRY_ADDR, saveOnTenderly = false) => {
     if (regAddr === REGISTRY_ADDR) {
         await impersonateAccount(OWNER_ACC);
     }

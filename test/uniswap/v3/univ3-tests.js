@@ -26,7 +26,7 @@ const {
 } = require('../../actions.js');
 
 const univ3CreatePoolTest = async () => {
-    describe('Uni-Mint-V3', () => {
+    describe('Uni-Create-V3', () => {
         let senderAcc;
         let proxy;
         let positionManager;
