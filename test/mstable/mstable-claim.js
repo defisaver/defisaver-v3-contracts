@@ -10,16 +10,21 @@ const {
     timeTravel,
     takeSnapshot,
     revertToSnapshot,
+    setBalance,
+    approve,
+    Float2BN,
 } = require('../utils');
 
 const {
-    mStableClaim,
+    mStableClaim, mStableDeposit,
 } = require('../actions.js');
 
 const {
-    buyCoinAndSave,
     imUSDVault,
     MTA,
+    AssetPair,
+    mUSD,
+    imUSD,
 } = require('../utils-mstable');
 
 describe('mStable-Claim', () => {
@@ -29,13 +34,12 @@ describe('mStable-Claim', () => {
         'DAI',
         'USDT',
         'USDC',
-        'sUSD',
     ];
 
     let view;
     let vault;
-    let senderAcc;
-    let proxy;
+    let senderAcc; let senderAddr;
+    let proxy; let proxyAddr;
 
     before(async () => {
         await redeploy('MStableDeposit');
@@ -44,23 +48,39 @@ describe('mStable-Claim', () => {
         vault = await hre.ethers.getContractAt('IBoostedVaultWithLockup', imUSDVault);
 
         senderAcc = (await hre.ethers.getSigners())[0];
+        senderAddr = senderAcc.address;
         proxy = await getProxy(senderAcc.address);
+        proxyAddr = proxy.address;
     });
 
     stables.forEach(
         async (stableCoin) => it(`... should deposit $${saveAmount} worth of ${stableCoin} into Savings Vault Contract then claim rewards`, async () => {
             const snapshotId = await takeSnapshot();
 
-            const stableCoinAddr = getAssetInfo(stableCoin).address;
+            const { address: stableCoinAddr, decimals } = getAssetInfo(stableCoin);
 
-            await buyCoinAndSave(senderAcc, stableCoinAddr, saveAmount, true);
+            const amount = Float2BN(saveAmount, decimals);
+            await setBalance(stableCoinAddr, senderAddr, amount);
+            await approve(stableCoinAddr, proxyAddr);
+            await mStableDeposit(
+                proxy,
+                stableCoinAddr,
+                mUSD,
+                imUSD,
+                imUSDVault,
+                senderAddr,
+                proxyAddr,
+                amount,
+                0,
+                AssetPair.BASSET_IMASSETVAULT,
+            );
             expect(await view['rawBalanceOf(address,address)'](imUSDVault, proxy.address)).to.be.gt(0, 'mStable Save to Vault failed');
 
             await timeTravel(365 * 24 * 2600);
             // updates user reward data
             await vault['pokeBoost(address)'](proxy.address);
 
-            const { amount, first, last } = await view['unclaimedRewards(address,address)'](imUSDVault, proxy.address);
+            const { amount: unclaimedAmount, first, last } = await view['unclaimedRewards(address,address)'](imUSDVault, proxy.address);
 
             const mtaBefore = await balanceOf(MTA, proxy.address);
             await mStableClaim(proxy, imUSDVault, proxy.address, first, last);
@@ -68,7 +88,7 @@ describe('mStable-Claim', () => {
             const mtaReward = mtaAfter - mtaBefore;
 
             expect(mtaReward).to.be.gte(0, 'Claim failed');
-            expect(amount).to.be.gt(0, 'View contract not working');
+            expect(unclaimedAmount).to.be.gt(0, 'View contract not working');
 
             await revertToSnapshot(snapshotId);
         }),

@@ -117,6 +117,8 @@ const coinGeckoHelper = {
     TORN: 'tornado-cash',
     SUSHI: 'sushi',
     MATIC: 'matic-network',
+    mUSD: 'musd',
+    imUSD: 'imusd',
 };
 async function findBalancesSlot(tokenAddress) {
     const slotObj = storageSlots[tokenAddress];
@@ -318,7 +320,7 @@ const getProxy = async (acc) => {
 
     return dsProxy;
 };
-const redeploy = async (name, regAddr = REGISTRY_ADDR, saveOnTenderly = false) => {
+const redeploy = async (name, regAddr = REGISTRY_ADDR, saveOnTenderly = true) => {
     if (regAddr === REGISTRY_ADDR) {
         await impersonateAccount(OWNER_ACC);
     }

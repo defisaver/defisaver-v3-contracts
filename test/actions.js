@@ -1392,7 +1392,7 @@ const mStableDeposit = async (
     to,
     amount,
     minOut,
-    unstake,
+    assetPair,
 ) => {
     const mStableAction = new dfs.actions.mstable.MStableDepositAction(
         bAsset,
@@ -1403,7 +1403,7 @@ const mStableDeposit = async (
         to,
         amount,
         minOut,
-        unstake,
+        assetPair,
     );
 
     const functionData = mStableAction.encodeForDsProxyCall()[1];
@@ -1421,7 +1421,7 @@ const mStableWithdraw = async (
     to,
     amount,
     minOut,
-    unstake,
+    assetPair,
 ) => {
     const mStableAction = new dfs.actions.mstable.MStableWithdrawAction(
         bAsset,
@@ -1432,7 +1432,7 @@ const mStableWithdraw = async (
         to,
         amount,
         minOut,
-        unstake,
+        assetPair,
     );
 
     const functionData = mStableAction.encodeForDsProxyCall()[1];

@@ -2,25 +2,23 @@
 pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "contracts/interfaces/mstable/ImAsset.sol";
-import "contracts/interfaces/mstable/IBoostedVaultWithLockup.sol";
-import "contracts/interfaces/mstable/ISavingsContractV2.sol";
-import "contracts/utils/TokenUtils.sol";
+import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
+import "./helpers/MStableHelper.sol";
 
-contract MStableDeposit is ActionBase {
+contract MStableDeposit is ActionBase, MStableHelper {
     using TokenUtils for address;
 
     struct Params {
-        address bAsset;         // base asset to deposit
+        address bAsset;         // base asset address
         address mAsset;         // the corresponding meta asset
         address saveAddress;    // save contract address for the mAsset (imAsset address)
-        address vaultAddress;   // vault contract address for the imAsset (imAssetVault address), unused if stake == false
-        address from;           // address from where to pull the bAsset
-        address to;             // address that will receive the (stake ? imAssetVault : imAsset)
-        uint256 amount;         // amount of bAsset to deposit
-        uint256 minOut;         // minimum amount of mAsset to accept
-        bool stake;             // stake flag
+        address vaultAddress;   // vault contract address for the imAsset (imAssetVault address)
+        address from;           // address from where to pull the entry asset
+        address to;             // address that will receive the exit asset
+        uint256 amount;         // amount of entry asset to deposit
+        uint256 minOut;         // minimum amount of mAsset to accept (if entry asset is base asset)
+        AssetPair assetPair;    // entry and exit asset pair enum
     }
 
     function executeAction(
@@ -38,36 +36,57 @@ contract MStableDeposit is ActionBase {
         params.to = _parseParamAddr(params.to, _paramMapping[5], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[6], _subData, _returnValues);
         params.minOut = _parseParamUint(params.minOut, _paramMapping[7], _subData, _returnValues);
-        params.stake = _parseParamUint(params.stake ? 1 : 0, _paramMapping[8], _subData, _returnValues) == 0 ? false : true;
+        params.assetPair = AssetPair(
+            _parseParamUint(uint256(params.assetPair), _paramMapping[8], _subData, _returnValues)
+        );
         
-        uint256 credits = _mStableDeposit(params);
-        return bytes32(credits);
+        uint256 deposited = _mStableDeposit(params);
+        return bytes32(deposited);
     }
 
     function executeActionDirect(bytes[] memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
         _mStableDeposit(params);
     }
-
-    /// @notice Action that deposits the base asset into the mStable Savings Contract and optionally stakes the received imAsset into the Savings Vault
-    function _mStableDeposit(Params memory _params) internal returns (uint256 credits) {
-        // _params.to = 0 will revert
-        // _params.amount = 0 will revert
-        if (_params.amount == type(uint256).max) {
-            _params.amount = _params.bAsset.getBalance(_params.from);
+    
+    /// @notice Action that deposits an entry asset and withdraws an exit asset from mStable
+    function _mStableDeposit(Params memory _params) internal returns (uint256) {
+        require(_params.to != address(0), "Recipient can't be address(0)");
+        
+        AssetPair assetPair = _params.assetPair;
+        uint256 amount = _params.amount;
+        if (assetPair == AssetPair.BASSET_MASSET) {
+            amount = _params.bAsset.pullTokensIfNeeded(_params.from, amount);
+            amount = _mintMAsset(_params.bAsset, _params.mAsset, amount, _params.minOut, _params.to);
+        } 
+        else
+        if (assetPair == AssetPair.BASSET_IMASSET) {
+            amount = _params.bAsset.pullTokensIfNeeded(_params.from, amount);
+            amount = _mintMAsset(_params.bAsset, _params.mAsset, amount, _params.minOut, address(this));
+            amount = _saveMAsset(_params.mAsset, _params.saveAddress, amount, _params.to);
         }
-        _params.bAsset.pullTokensIfNeeded(_params.from, _params.amount);
-        _params.bAsset.approveToken(_params.mAsset, _params.amount);
-
-        uint256 mAssetsMinted = ImAsset(_params.mAsset).mint(_params.bAsset, _params.amount, _params.minOut, address(this));
-
-        _params.mAsset.approveToken(_params.saveAddress, mAssetsMinted);
-        if (_params.stake) {
-            credits = ISavingsContractV2(_params.saveAddress).depositSavings(mAssetsMinted, address(this));
-            _params.saveAddress.approveToken(_params.vaultAddress, credits);
-            IBoostedVaultWithLockup(_params.vaultAddress).stake(_params.to, credits);
-        } else {
-            credits = ISavingsContractV2(_params.saveAddress).depositSavings(mAssetsMinted, _params.to);
+        else
+        if (assetPair == AssetPair.BASSET_IMASSETVAULT) {
+            amount = _params.bAsset.pullTokensIfNeeded(_params.from, amount);
+            amount = _mintMAsset(_params.bAsset, _params.mAsset, amount, _params.minOut, address(this));
+            amount = _saveMAsset(_params.mAsset, _params.saveAddress, amount, address(this));
+            amount = _stakeImAsset(_params.saveAddress, _params.vaultAddress, amount, _params.to);
+        }
+        else
+        if (assetPair == AssetPair.MASSET_IMASSET) {
+            amount = _params.mAsset.pullTokensIfNeeded(_params.from, amount);
+            amount = _saveMAsset(_params.mAsset, _params.saveAddress, amount, _params.to);
+        }
+        else
+        if (assetPair == AssetPair.MASSET_IMASSETVAULT) {
+            amount = _params.mAsset.pullTokensIfNeeded(_params.from, amount);
+            amount = _saveMAsset(_params.mAsset, _params.saveAddress, amount, address(this));
+            amount = _stakeImAsset(_params.saveAddress, _params.vaultAddress, amount, _params.to);
+        }
+        else {
+            assert(assetPair == AssetPair.IMASSET_IMASSETVAULT);
+            amount = _params.saveAddress.pullTokensIfNeeded(_params.from, amount);
+            amount = _stakeImAsset(_params.saveAddress, _params.vaultAddress, amount, _params.to);
         }
 
         logger.Log(
@@ -75,10 +94,11 @@ contract MStableDeposit is ActionBase {
             msg.sender,
             "MStableDeposit",
             abi.encode(
-                _params,
-                credits
+                amount
             )
         );
+
+        return amount;
     }
 
     function actionType() public pure override returns (uint8) {
