@@ -64,6 +64,35 @@ const deploy = async (contractName, signer, action, gasPrice, nonce, ...args) =>
     }
 };
 
+const deployAndReturnGasUsed = async (contractName, signer, action, gasPrice, nonce, ...args) => {
+    try {
+        const Contract = await hre.ethers.getContractFactory(contractName, signer);
+
+        let options = { gasPrice, nonce, gasLimit: DEPLOYMENT_GAS_LIMIT };
+
+        if (nonce === -1) {
+            options = { gasPrice, gasLimit: DEPLOYMENT_GAS_LIMIT };
+        }
+
+        let contract;
+        if (args.length === 0) {
+            contract = await Contract.deploy(options);
+        } else {
+            contract = await Contract.deploy(...args, options);
+        }
+
+        await contract.deployed();
+        const tx = await contract.deployTransaction.wait(1);
+
+        console.log(`${contractName} Gas used: ${tx.gasUsed}`);
+
+        return parseFloat(tx.gasUsed);
+    } catch (e) {
+        console.log(e);
+        return null;
+    }
+};
+
 // eslint-disable-next-line max-len
 const deployWithResend = (contractName, signer, action, exGasPrice, nonce, ...args) => new Promise((resolve) => {
     getGasPrice(exGasPrice).then((gasPrice) => {
@@ -105,6 +134,21 @@ const deployContract = async (contractName, ...args) => {
     );
 };
 
+const deployContractAndReturnGasUsed = async (contractName, ...args) => {
+    const signers = await hre.ethers.getSigners();
+    const address = await signers[0].getAddress();
+    const nonce = await hre.ethers.provider.getTransactionCount(address);
+
+    return deployAndReturnGasUsed(
+        contractName,
+        signers[0],
+        'Deploying',
+        1000000000000,
+        nonce,
+        ...args,
+    );
+};
+
 const deployAsOwner = async (contractName, signer, ...args) => deployWithResend(
     contractName,
     signer,
@@ -119,4 +163,5 @@ module.exports = {
     deployWithResend,
     deployContract,
     deployAsOwner,
+    deployContractAndReturnGasUsed,
 };
