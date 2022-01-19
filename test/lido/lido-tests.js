@@ -42,7 +42,7 @@ const lidoStakeTest = async () => {
             const wethChange = wethBalanceBefore.sub(wethBalanceAfter);
             const stEthChange = stEthBalanceAfter.sub(stEthBalanceBefore);
             const difference = wethChange.sub(stEthChange);
-            expect(difference.toNumber()).to.be.within(0, 2);
+            expect(difference.toNumber()).to.be.within(0, 3);
         }).timeout(50000);
     });
 };
@@ -77,7 +77,7 @@ const lidoWrapTest = async () => {
             const stEthChange = stEthBalanceAfter.sub(stEthBalanceBefore);
             console.log(`Received ${stEthChange.toString()} StETH`);
             const difference = wethChange.sub(stEthChange);
-            expect(difference.toNumber()).to.be.within(0, 2);
+            expect(difference.toNumber()).to.be.within(0, 3);
 
             await approve(STETH_ADDRESS, proxy.address);
             const wStEthBalanceBefore = await balanceOf(WSTETH_ADDRESS, senderAcc.address);
@@ -107,7 +107,7 @@ const lidoWrapTest = async () => {
             const stEthChange = stEthBalanceAfter.sub(stEthBalanceBefore);
             console.log(`Received ${stEthChange.toString()} StETH`);
             const difference = wethChange.sub(stEthChange);
-            expect(difference.toNumber()).to.be.within(0, 2);
+            expect(difference.toNumber()).to.be.within(0, 3);
 
             await approve(STETH_ADDRESS, proxy.address);
             const wStEthBalanceBefore = await balanceOf(WSTETH_ADDRESS, senderAcc.address);
