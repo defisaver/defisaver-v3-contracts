@@ -36,6 +36,9 @@ const {
 
 const BigNumber = hre.ethers.BigNumber;
 
+const SUPPLY_AMOUNT_IN_USD = '150000';
+const GENERATE_AMOUNT_IN_USD = '50000';
+
 describe('Mcd-Create', function () {
     this.timeout(80000);
 
@@ -91,14 +94,14 @@ describe('Mcd-Create', function () {
                 return;
             }
 
-            const amount = MIN_VAULT_DAI_AMOUNT;
+            const amount = GENERATE_AMOUNT_IN_USD;
 
             const daiAmount = hre.ethers.utils.parseUnits(amount, 18);
 
             const tokenBalance = await balanceOf(tokenAddr, senderAcc.address);
 
             const collAmount = BigNumber.from(hre.ethers.utils.parseUnits(
-                fetchAmountinUSDPrice('WETH', '30000'), tokenData.decimals,
+                fetchAmountinUSDPrice('WETH', SUPPLY_AMOUNT_IN_USD), tokenData.decimals,
             ));
 
             if (tokenBalance.lt(collAmount)) {

@@ -13,7 +13,6 @@ const {
     nullAddress,
     UNISWAP_WRAPPER,
     WETH_ADDRESS,
-    MIN_VAULT_DAI_AMOUNT,
     fetchAmountinUSDPrice,
     approve,
     DAI_ADDR,
@@ -39,6 +38,9 @@ const {
 const McdPaybackAction = dfs.actions.maker.MakerPaybackAction;
 const McdWithdrawAction = dfs.actions.maker.MakerWithdrawAction;
 const SellAction = dfs.actions.basic.SellAction;
+
+const SUPPLY_AMOUNT_IN_USD = '150000';
+const GENERATE_AMOUNT_IN_USD = '50000';
 
 describe('Mcd-Repay', function () {
     this.timeout(80000);
@@ -88,8 +90,8 @@ describe('Mcd-Repay', function () {
                 proxy,
                 joinAddr,
                 tokenData,
-                fetchAmountinUSDPrice(tokenData.symbol, '40000'),
-                (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 400).toString(),
+                fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
+                (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 400).toString(),
             );
 
             repayAmount = hre.ethers.utils.parseUnits(repayAmount, tokenData.decimals);
@@ -150,8 +152,8 @@ describe('Mcd-Repay', function () {
                 proxy,
                 joinAddr,
                 tokenData,
-                fetchAmountinUSDPrice(tokenData.symbol, '40000'),
-                (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 500).toString(),
+                fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
+                (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 500).toString(),
             );
 
             const flAmount = hre.ethers.utils.parseUnits('0.2', 18);
@@ -232,7 +234,7 @@ describe('Mcd-Repay', function () {
             joinAddr,
             { address: GUNIV3DAIUSDC, decimals: 18 },
             poolTokensBalanceAfter.toString(),
-            (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString(),
+            (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 200).toString(),
         );
 
         const ratioBefore = await getRatio(mcdView, vaultId);

@@ -6,6 +6,8 @@ require('dotenv-safe').config();
 
 const { deployAsOwner } = require('../scripts/utils/deployer');
 
+const config = require('../hardhat.config.js');
+
 const REGISTRY_ADDR = '0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C';
 
 const nullAddress = '0x0000000000000000000000000000000000000000';
@@ -119,6 +121,7 @@ const coinGeckoHelper = {
     MATIC: 'matic-network',
     mUSD: 'musd',
     imUSD: 'imusd',
+    USDP: 'paxos-standard',
 };
 async function findBalancesSlot(tokenAddress) {
     const slotObj = storageSlots[tokenAddress];
@@ -320,7 +323,14 @@ const getProxy = async (acc) => {
 
     return dsProxy;
 };
-const redeploy = async (name, regAddr = REGISTRY_ADDR, saveOnTenderly = true) => {
+const redeploy = async (name, regAddr = REGISTRY_ADDR, saveOnTenderly = config.saveOnTenderly) => {
+    await hre.network.provider.send('hardhat_setBalance', [
+        OWNER_ACC,
+        '0xC9F2C9CD04674EDEA40000000',
+    ]);
+    await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
+        '0x1', // 1 wei
+    ]);
     if (regAddr === REGISTRY_ADDR) {
         await impersonateAccount(OWNER_ACC);
     }

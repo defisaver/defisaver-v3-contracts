@@ -12,6 +12,7 @@ const {
     balanceOf,
     sendEther,
     nullAddress,
+    resetForkToBlock,
 } = require('../../utils');
 const { executeAction } = require('../../actions');
 
@@ -25,6 +26,7 @@ describe('Inst Compound position shift', function () {
     /// @notice run on block number #13229894
 
     before(async () => {
+        await resetForkToBlock(13229894);
         await redeploy('InstPullTokens');
         await redeploy('CompCollateralSwitch');
         await redeploy('TokenBalance');

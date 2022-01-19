@@ -402,7 +402,7 @@ const balancerFullTest = async () => {
     await balancerDeployContracts();
     await balancerSupplyTest();
     await balancerWithdrawTest();
-    // await balancerClaimTest();
+    await balancerClaimTest();
 };
 
 module.exports = {

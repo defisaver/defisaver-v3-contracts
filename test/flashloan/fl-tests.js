@@ -1,6 +1,7 @@
 /* eslint-disable no-mixed-operators */
 const { getAssetInfo } = require('@defisaver/tokens');
 const hre = require('hardhat');
+const Dec = require('decimal.js');
 
 const dfs = require('@defisaver/sdk');
 
@@ -49,17 +50,17 @@ const aaveFlTest = async () => {
                 if (assetInfo.symbol === 'ETH') {
                     assetInfo.address = WETH_ADDRESS;
                 }
-                const amount = fetchAmountinUSDPrice(tokenSymbol, '1000');
+                const amount = fetchAmountinUSDPrice(tokenSymbol, '5000');
                 const loanAmount = hre.ethers.utils.parseUnits(
                     amount,
                     assetInfo.decimals,
                 );
-                const feeAmount = (
-                    amount
-                    * AAVE_FL_FEE
-                    * (10 ** assetInfo.decimals)
-                    / 100
-                ).toFixed(0);
+                const feeAmount = new Dec(amount)
+                    .mul(AAVE_FL_FEE)
+                    .mul(10 ** assetInfo.decimals)
+                    .div(100)
+                    .toFixed(0)
+                    .toString();
 
                 console.log(loanAmount.toString(), feeAmount.toString());
 

@@ -28,6 +28,8 @@ const {
     MCD_MANAGER_ADDR,
 } = require('../../utils-mcd');
 
+const SUPPLY_AMOUNT_IN_USD = '150000';
+const GENERATE_AMOUNT_IN_USD = '50000';
 const {
     openVaultForExactAmountInDecimals,
     gUniDeposit,
@@ -90,8 +92,8 @@ describe('Mcd-Boost', function () {
                 proxy,
                 joinAddr,
                 tokenData,
-                fetchAmountinUSDPrice(tokenData.symbol, '30000'),
-                (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString(),
+                fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
+                fetchAmountinUSDPrice('DAI', GENERATE_AMOUNT_IN_USD),
             );
 
             boostAmount = hre.ethers.utils.parseUnits(boostAmount, 18);

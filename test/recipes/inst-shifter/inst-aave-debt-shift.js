@@ -21,6 +21,7 @@ const {
     WBTC_ADDR,
     balanceOf,
     DAI_ADDR,
+    resetForkToBlock,
 } = require('../../utils');
 const { executeAction } = require('../../actions');
 
@@ -34,6 +35,7 @@ describe('Inst Aave position shift', function () {
 
     /// @notice run on block number 13172393
     before(async () => {
+        await resetForkToBlock(13172393);
         await redeploy('InstPullTokens');
         await redeploy('AaveCollateralSwitch');
         await redeploy('TokenBalance');

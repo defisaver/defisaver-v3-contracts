@@ -32,7 +32,7 @@ const executeAction = async (actionName, functionData, proxy) => {
     try {
         mineBlock();
         receipt = await proxy['execute(address,bytes)'](actionAddr, functionData, {
-            gasLimit: 3000000,
+            gasLimit: 10000000,
         });
         // const gasUsed = await getGasUsed(receipt);
         // console.log(`Gas used by ${actionName} action; ${gasUsed}`);
@@ -518,7 +518,8 @@ const openVaultForExactAmountInDecimals = async (
     const from = proxy.signer.address;
     const to = proxy.signer.address;
     const amountDai = hre.ethers.utils.parseUnits(daiAmount, 18);
-    await supplyMcd(proxy, vaultId, collAmount, tokenData.address, joinAddr, from);
+    const collAmountParsed = hre.ethers.utils.parseUnits(collAmount, 1);
+    await supplyMcd(proxy, vaultId, collAmountParsed, tokenData.address, joinAddr, from);
     await generateMcd(proxy, vaultId, amountDai, to);
 
     return vaultId;

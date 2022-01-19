@@ -526,6 +526,8 @@ const utilsActionsFullTest = async () => {
     await subInputsTest();
     await sendTokenTest();
     await pullTokenTest();
+    await changeOwnerTest();
+    await automationV2UnsubTest();
 };
 
 module.exports = {

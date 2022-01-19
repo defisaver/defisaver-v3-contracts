@@ -62,9 +62,10 @@ describe('Compound: Boost', function () {
         if (supplyBalance.lt(assetAmountInWei('5', 'ETH'))) {
             console.log('Supplying 5 ETH');
             const initialCollAmount = assetAmountInWei('5', 'ETH');
+            const initialCollAmountParsed = hre.ethers.utils.parseUnits(initialCollAmount, 1);
             await approve(getAssetInfo('WETH').address, proxy.address);
             await depositToWeth(initialCollAmount);
-            await supplyComp(proxy, getAssetInfo('cETH').address, getAssetInfo('WETH').address, initialCollAmount, senderAcc.address);
+            await supplyComp(proxy, getAssetInfo('cETH').address, getAssetInfo('WETH').address, initialCollAmountParsed, senderAcc.address);
         }
     });
 

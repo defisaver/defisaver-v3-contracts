@@ -15,7 +15,6 @@ const {
     balanceOf,
     nullAddress,
     WETH_ADDRESS,
-    MIN_VAULT_DAI_AMOUNT,
     fetchAmountinUSDPrice,
 } = require('../../utils');
 
@@ -28,6 +27,9 @@ const {
 const {
     openVault,
 } = require('../../actions.js');
+
+const SUPPLY_AMOUNT_IN_USD = '150000';
+const GENERATE_AMOUNT_IN_USD = '50000';
 
 describe('Mcd-Close', function () {
     this.timeout(80000);
@@ -76,10 +78,9 @@ describe('Mcd-Close', function () {
                 return;
             }
 
-            const vaultColl = fetchAmountinUSDPrice('WETH', '30000');
+            const vaultColl = fetchAmountinUSDPrice('WETH', SUPPLY_AMOUNT_IN_USD);
 
-            const amountDai = (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString();
-
+            const amountDai = (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 200).toString();
             const vaultId = await openVault(
                 makerAddresses,
                 proxy,
@@ -135,8 +136,8 @@ describe('Mcd-Close', function () {
                 return;
             }
 
-            const amountDai = (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString();
-            const amountColl = fetchAmountinUSDPrice(tokenData.symbol, '30000');
+            const amountDai = (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 200).toString();
+            const amountColl = fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD);
 
             const vaultId = await openVault(
                 makerAddresses,

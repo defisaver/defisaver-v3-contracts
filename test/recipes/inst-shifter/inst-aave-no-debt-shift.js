@@ -14,6 +14,7 @@ const {
     AWETH_ADDR,
     ADAI_ADDR,
     UNI_ADDR,
+    resetForkToBlock,
 } = require('../../utils');
 const { executeAction } = require('../../actions');
 
@@ -29,6 +30,8 @@ describe('Inst Aave debtless position shift', function () {
 
     const OWNER_ACC = '0x6F6c0194A67c2727c61370e76042B3D92F3AC35E';
     before(async () => {
+        await resetForkToBlock(12805354);
+
         await redeploy('InstPullTokens');
         await redeploy('AaveCollateralSwitch');
 

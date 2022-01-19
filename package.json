@@ -67,6 +67,7 @@
     }
   },
   "dependencies": {
-    "coingecko-api": "^1.0.10"
+    "coingecko-api": "^1.0.10",
+    "decimal.js": "^10.3.1"
   }
 }
