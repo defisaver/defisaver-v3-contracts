@@ -91,7 +91,6 @@ const openMcd = async (proxy, joinAddr) => {
 
 const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
     const tokenBalance = await balanceOf(tokenAddr, from);
-
     if (tokenBalance.lt(amount)) {
         if (isEth(tokenAddr)) {
             await depositToWeth(amount.toString());
@@ -108,9 +107,7 @@ const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
         }
     }
     const mcdSupplyAddr = await getAddrFromRegistry('McdSupply');
-
     await approve(tokenAddr, proxy.address);
-
     const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
         vaultId,
         amount,
@@ -399,7 +396,6 @@ const openVault = async (proxy, collType, collAmount, daiAmount) => {
     const vaultId = await openMcd(proxy, ilkObj.join);
     const from = proxy.signer.address;
     const to = proxy.signer.address;
-
     const amountDai = hre.ethers.utils.parseUnits(daiAmount, 18);
     const amountColl = hre.ethers.utils.parseUnits(collAmount, tokenData.decimals);
 
@@ -411,6 +407,18 @@ const openVault = async (proxy, collType, collAmount, daiAmount) => {
     }
 
     await supplyMcd(proxy, vaultId, amountColl, tokenData.address, ilkObj.join, from);
+    await generateMcd(proxy, vaultId, amountDai, to);
+
+    return vaultId;
+};
+const openVaultForExactAmountInDecimals = async (
+    makerAddresses, proxy, joinAddr, tokenData, collAmount, daiAmount,
+) => {
+    const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
+    const from = proxy.signer.address;
+    const to = proxy.signer.address;
+    const amountDai = hre.ethers.utils.parseUnits(daiAmount, 18);
+    await supplyMcd(proxy, vaultId, collAmount, tokenData.address, joinAddr, from);
     await generateMcd(proxy, vaultId, amountDai, to);
 
     return vaultId;
@@ -1133,7 +1141,9 @@ const dydxWithdraw = async (proxy, tokenAddr, amount, to) => {
     return receipt;
 };
 
-const buyTokenIfNeeded = async (tokenAddr, senderAcc, proxy, standardAmount) => {
+const buyTokenIfNeeded = async (
+    tokenAddr, senderAcc, proxy, standardAmount, wrapper = UNISWAP_WRAPPER,
+) => {
     const tokenBalance = await balanceOf(tokenAddr, senderAcc.address);
     if (tokenBalance.lt(standardAmount)) {
         if (isEth(tokenAddr)) {
@@ -1143,8 +1153,8 @@ const buyTokenIfNeeded = async (tokenAddr, senderAcc, proxy, standardAmount) => 
                 proxy,
                 WETH_ADDRESS,
                 tokenAddr,
-                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
-                UNISWAP_WRAPPER,
+                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '55000'), 18),
+                wrapper,
                 senderAcc.address,
                 senderAcc.address,
             );
@@ -1194,6 +1204,28 @@ const lidoStake = async (amount, from, to, proxy) => {
     const gasUsed = await getGasUsed(receipt);
     console.log(`GasUsed LidoStake; ${gasUsed}`);
     return receipt;
+};
+const lidoUnwrap = async (amount, from, to, proxy) => {
+    const lidoUnwrapAddress = await getAddrFromRegistry('LidoUnwrap');
+    const lidoUnwrapAction = new dfs.actions.lido.LidoUnwrapAction(
+        amount,
+        from,
+        to,
+    );
+    const functionData = lidoUnwrapAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](lidoUnwrapAddress, functionData, { gasLimit: 3000000 });
+};
+
+const lidoWrap = async (amount, from, to, useEth, proxy) => {
+    const lidoWrapAddress = await getAddrFromRegistry('LidoWrap');
+    const lidoWrapAction = new dfs.actions.lido.LidoWrapAction(
+        amount,
+        from,
+        to,
+        useEth,
+    );
+    const functionData = lidoWrapAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](lidoWrapAddress, functionData, { gasLimit: 3000000 });
 };
 
 const reflexerSaviourDeposit = async (proxy, from, safeId, lpTokenAmount) => {
@@ -1481,6 +1513,159 @@ const curveClaimFees = async (
     return receipt;
 };
 
+const automationV2Unsub = async (
+    proxy,
+    protocol,
+    cdpId = 0,
+) => {
+    const automationV2UnsubAddr = await getAddrFromRegistry('AutomationV2Unsub');
+
+    const automationV2UnsubAction = new dfs.actions.basic.AutomationV2Unsub(protocol, cdpId);
+
+    const functionData = automationV2UnsubAction.encodeForDsProxyCall()[1];
+
+    return proxy['execute(address,bytes)'](automationV2UnsubAddr, functionData, { gasLimit: 3000000 });
+};
+
+const gUniDeposit = async (poolAddr, token0, token1, amount0Max, amount1Max, from, proxy) => {
+    const gUniDepositAddr = await getAddrFromRegistry('GUniDeposit');
+
+    const gUniAction = new dfs.actions.guni.GUniDeposit(
+        poolAddr, token0, token1, amount0Max, amount1Max, 0, 0, from, from,
+    );
+
+    const functionData = gUniAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](gUniDepositAddr, functionData, { gasLimit: 3000000 });
+};
+
+const gUniWithdraw = async (poolAddr, burnAmount, from, proxy) => {
+    const gUniWithdrawAddr = await getAddrFromRegistry('GUniWithdraw');
+
+    const gUniAction = new dfs.actions.guni.GUniWithdraw(
+        poolAddr, burnAmount, 0, 0, from, from,
+    );
+
+    const functionData = gUniAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](gUniWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
+
+const mStableDeposit = async (
+    proxy,
+    bAsset,
+    mAsset,
+    saveAddress,
+    vaultAddress,
+    from,
+    to,
+    amount,
+    minOut,
+    assetPair,
+) => {
+    const mStableAddr = await getAddrFromRegistry('MStableDeposit');
+
+    const mStableAction = new dfs.actions.mstable.MStableDepositAction(
+        bAsset,
+        mAsset,
+        saveAddress,
+        vaultAddress,
+        from,
+        to,
+        amount,
+        minOut,
+        assetPair,
+    );
+
+    const functionData = mStableAction.encodeForDsProxyCall()[1];
+    const receipt = await (await proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 })).wait();
+    return receipt;
+};
+
+const mStableWithdraw = async (
+    proxy,
+    bAsset,
+    mAsset,
+    saveAddress,
+    vaultAddress,
+    from,
+    to,
+    amount,
+    minOut,
+    assetPair,
+) => {
+    const mStableAddr = await getAddrFromRegistry('MStableWithdraw');
+
+    const mStableAction = new dfs.actions.mstable.MStableWithdrawAction(
+        bAsset,
+        mAsset,
+        saveAddress,
+        vaultAddress,
+        from,
+        to,
+        amount,
+        minOut,
+        assetPair,
+    );
+
+    const functionData = mStableAction.encodeForDsProxyCall()[1];
+    const receipt = await (await proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 })).wait();
+    return receipt;
+};
+
+const mStableClaim = async (
+    proxy,
+    vaultAddress,
+    to,
+    first,
+    last,
+) => {
+    const mStableAddr = await getAddrFromRegistry('MStableClaim');
+
+    const mStableAction = new dfs.actions.mstable.MStableClaimAction(
+        vaultAddress,
+        to,
+        first,
+        last,
+    );
+
+    const functionData = mStableAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 });
+};
+
+const rariDeposit = async (fundManager, token, poolToken, amount, from, to, proxy) => {
+    const rariDepositAddr = await getAddrFromRegistry('RariDeposit');
+    const rariDepositAction = new dfs.actions.rari.RariDepositAction(
+        fundManager, token, poolToken, amount, from, to,
+    );
+
+    const functionData = rariDepositAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](rariDepositAddr, functionData, { gasLimit: 3000000 });
+};
+
+const rariWithdraw = async (
+    fundManager,
+    poolTokenAddress,
+    poolTokensAmountToPull,
+    from,
+    stablecoinAddress,
+    stablecoinAmountToWithdraw,
+    to,
+    proxy,
+) => {
+    const rariWithdrawAddr = await getAddrFromRegistry('RariWithdraw');
+    const rariWithdrawAction = new dfs.actions.rari.RariWithdrawAction(
+        fundManager,
+        poolTokenAddress,
+        poolTokensAmountToPull,
+        from,
+        stablecoinAddress,
+        stablecoinAmountToWithdraw,
+        to,
+    );
+
+    const functionData = rariWithdrawAction.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](rariWithdrawAddr, functionData, { gasLimit: 3000000 });
+};
+
 module.exports = {
     sell,
     buy,
@@ -1493,6 +1678,7 @@ module.exports = {
     openVault,
     mcdGive,
     mcdMerge,
+    openVaultForExactAmountInDecimals,
 
     supplyAave,
     withdrawAave,
@@ -1543,6 +1729,8 @@ module.exports = {
     yearnWithdraw,
 
     lidoStake,
+    lidoWrap,
+    lidoUnwrap,
 
     curveDeposit,
     curveWithdraw,
@@ -1561,4 +1749,15 @@ module.exports = {
     balancerClaim,
 
     changeProxyOwner,
+    automationV2Unsub,
+
+    gUniDeposit,
+    gUniWithdraw,
+
+    mStableDeposit,
+    mStableWithdraw,
+    mStableClaim,
+
+    rariDeposit,
+    rariWithdraw,
 };

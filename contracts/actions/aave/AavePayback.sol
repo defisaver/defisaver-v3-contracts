@@ -78,7 +78,6 @@ contract AavePayback is ActionBase, AaveHelper {
         uint256 maxDebt = getWholeDebt(_market, _tokenAddr, _rateMode, _onBehalf);
         _amount = _amount > maxDebt ? maxDebt : _amount;
 
-
         _tokenAddr.pullTokensIfNeeded(_from, _amount);
         _tokenAddr.approveToken(address(lendingPool), _amount);
 

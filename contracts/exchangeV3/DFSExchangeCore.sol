@@ -38,12 +38,14 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
         uint256 destBalanceBefore = exData.destAddr.getBalance(address(this));
 
         // Takes DFS exchange fee
-        exData.srcAmount = exData.srcAmount - getFee(
-            exData.srcAmount,
-            exData.user,
-            exData.srcAddr,
-            exData.dfsFeeDivider
-        );
+        if (exData.dfsFeeDivider != 0) {
+            exData.srcAmount = sub(exData.srcAmount, getFee(
+                exData.srcAmount,
+                exData.user,
+                exData.srcAddr,
+                exData.dfsFeeDivider
+            ));
+        }
 
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
@@ -86,12 +88,14 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
         uint256 destBalanceBefore = exData.destAddr.getBalance(address(this));
 
         // Takes DFS exchange fee
-        exData.srcAmount = exData.srcAmount - getFee(
-            exData.srcAmount,
-            exData.user,
-            exData.srcAddr,
-            exData.dfsFeeDivider
-        );
+        if (exData.dfsFeeDivider != 0) {
+            exData.srcAmount = sub(exData.srcAmount, getFee(
+                exData.srcAmount,
+                exData.user,
+                exData.srcAddr,
+                exData.dfsFeeDivider
+            ));
+        }
 
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
