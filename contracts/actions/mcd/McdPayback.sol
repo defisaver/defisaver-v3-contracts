@@ -53,6 +53,12 @@ contract McdPayback is ActionBase, McdHelper {
 
         _mcdPayback(inputData);
 
+        emit ActionEvent(
+            msg.sender,
+            "McdPayback",
+            abi.encode(inputData)  // removed debt from being logged
+        );
+
         return bytes32(inputData.amount);
     }
 
@@ -61,6 +67,12 @@ contract McdPayback is ActionBase, McdHelper {
         Params memory inputData = parseInputs(_callData);
 
         _mcdPayback(inputData);
+
+        logger.logActionEvent(
+            msg.sender,
+            "McdPayback",
+            abi.encode(inputData)  // removed debt from being logged
+        );
     }
 
     /// @inheritdoc ActionBase
@@ -87,13 +99,6 @@ contract McdPayback is ActionBase, McdHelper {
 
         // decrease the vault debt
         mcdManager.frob(_inputData.vaultId, 0, normalizePaybackAmount(address(vat), urn, ilk));
-
-        logger.Log(
-            address(this),
-            msg.sender,
-            "McdPayback",
-            abi.encode(_inputData, debt)
-        );
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

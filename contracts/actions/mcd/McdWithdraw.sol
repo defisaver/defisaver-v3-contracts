@@ -37,6 +37,12 @@ contract McdWithdraw is ActionBase, McdHelper {
 
         inputData.amount = _mcdWithdraw(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager);
 
+        emit ActionEvent(
+            msg.sender,
+            "McdWithdraw",
+            abi.encode(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager)
+        );
+
         return bytes32(inputData.amount);
     }
 
@@ -44,7 +50,13 @@ contract McdWithdraw is ActionBase, McdHelper {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
-        _mcdWithdraw(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager);
+        inputData.amount = _mcdWithdraw(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager);
+
+        logger.logActionEvent(
+            msg.sender,
+            "McdWithdraw",
+            abi.encode(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager)
+        );
     }
 
     /// @inheritdoc ActionBase
@@ -86,13 +98,6 @@ contract McdWithdraw is ActionBase, McdHelper {
 
         // send the tokens _to address if needed
         getTokenFromJoin(_joinAddr).withdrawTokens(_to, _amount);
-
-        logger.Log(
-            address(this),
-            msg.sender,
-            "McdWithdraw",
-            abi.encode(_vaultId, _amount, _joinAddr, _to, _mcdManager)
-        );
 
         return _amount;
     }

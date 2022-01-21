@@ -37,6 +37,12 @@ contract McdGive is ActionBase {
 
         inputData.newOwner = _mcdGive(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager);
 
+        emit ActionEvent(
+            msg.sender,
+            "McdGive",
+            abi.encode(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager)
+        );
+
         return bytes32(bytes20(inputData.newOwner));
     }
 
@@ -44,7 +50,13 @@ contract McdGive is ActionBase {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
-        _mcdGive(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager);
+        inputData.newOwner =_mcdGive(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager);
+
+        logger.logActionEvent(
+            msg.sender,
+            "McdGive",
+            abi.encode(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager)
+        );
     }
 
     /// @inheritdoc ActionBase
@@ -83,13 +95,6 @@ contract McdGive is ActionBase {
         }
 
         IManager(_mcdManager).give(_vaultId, newOwner);
-
-        logger.Log(
-            address(this),
-            msg.sender,
-            "McdGive",
-            abi.encode(_vaultId, _newOwner, _createProxy, _mcdManager)
-        );
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

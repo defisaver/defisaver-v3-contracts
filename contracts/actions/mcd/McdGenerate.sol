@@ -39,6 +39,12 @@ contract McdGenerate is ActionBase, McdHelper {
 
         inputData.amount = _mcdGenerate(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager);
 
+        emit ActionEvent(
+            msg.sender,
+            "McdGenerate",
+            abi.encode(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager)
+        );
+
         return bytes32(inputData.amount);
     }
 
@@ -46,7 +52,13 @@ contract McdGenerate is ActionBase, McdHelper {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
-        _mcdGenerate(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager);
+        inputData.amount = _mcdGenerate(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager);
+
+        logger.logActionEvent(
+            msg.sender,
+            "McdGenerate",
+            abi.encode(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager)
+        );
     }
 
     /// @inheritdoc ActionBase
@@ -87,13 +99,6 @@ contract McdGenerate is ActionBase, McdHelper {
 
         // exit dai from join and send _to if needed
         IDaiJoin(DAI_JOIN_ADDR).exit(_to, _amount);
-
-        logger.Log(
-            address(this),
-            msg.sender,
-            "McdGenerate",
-            abi.encode(_vaultId, _amount, _to, _mcdManager)
-        );
 
         return _amount;
     }

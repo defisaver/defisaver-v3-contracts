@@ -8,6 +8,12 @@ import "./utils/helpers/ActionsUtilHelper.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
 abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
+    event ActionEvent(
+        address indexed caller,
+        string indexed logName,
+        bytes data
+    );
+
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     DefisaverLogger public constant logger = DefisaverLogger(

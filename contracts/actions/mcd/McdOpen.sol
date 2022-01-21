@@ -27,6 +27,12 @@ contract McdOpen is ActionBase {
 
         uint256 newVaultId = _mcdOpen(inputData.joinAddr, inputData.mcdManager);
 
+        emit ActionEvent(
+            msg.sender,
+            "McdOpen",
+            abi.encode(newVaultId, inputData.joinAddr, inputData.mcdManager)
+        );
+
         return bytes32(newVaultId);
     }
 
@@ -34,7 +40,13 @@ contract McdOpen is ActionBase {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
-        _mcdOpen(inputData.joinAddr, inputData.mcdManager);
+        uint256 newVaultId = _mcdOpen(inputData.joinAddr, inputData.mcdManager);
+
+        logger.logActionEvent(
+            msg.sender,
+            "McdOpen",
+            abi.encode(newVaultId, inputData.joinAddr, inputData.mcdManager)
+        );
     }
 
     /// @inheritdoc ActionBase
@@ -50,13 +62,6 @@ contract McdOpen is ActionBase {
     function _mcdOpen(address _joinAddr, address _mcdManager) internal returns (uint256 vaultId) {
         bytes32 ilk = IJoin(_joinAddr).ilk();
         vaultId = IManager(_mcdManager).open(ilk, address(this));
-
-        logger.Log(
-            address(this),
-            msg.sender,
-            "McdOpen",
-            abi.encode(vaultId, _joinAddr, _mcdManager)
-        );
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

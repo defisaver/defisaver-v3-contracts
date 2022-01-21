@@ -37,6 +37,12 @@ contract McdSupply is ActionBase, McdHelper {
 
         uint256 returnAmount = _mcdSupply(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.from, inputData.mcdManager);
 
+        emit ActionEvent(
+            msg.sender,
+            "McdSupply",
+            abi.encode(inputData.vaultId, returnAmount, inputData.joinAddr, inputData.from, inputData.mcdManager)
+        );
+
         return bytes32(returnAmount);
     }
 
@@ -44,7 +50,13 @@ contract McdSupply is ActionBase, McdHelper {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
-        _mcdSupply(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.from, inputData.mcdManager);
+        uint256 returnAmount = _mcdSupply(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.from, inputData.mcdManager);
+
+        logger.logActionEvent(
+            msg.sender,
+            "McdSupply",
+            abi.encode(inputData.vaultId, returnAmount, inputData.joinAddr, inputData.from, inputData.mcdManager)
+        );
     }
 
     /// @inheritdoc ActionBase
@@ -91,13 +103,6 @@ contract McdSupply is ActionBase, McdHelper {
             address(this),
             convertAmount,
             0
-        );
-
-        logger.Log(
-            address(this),
-            msg.sender,
-            "McdSupply",
-            abi.encode(_vaultId, _amount, _joinAddr, _from, _mcdManager)
         );
 
         return _amount;
