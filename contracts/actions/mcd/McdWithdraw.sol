@@ -38,7 +38,6 @@ contract McdWithdraw is ActionBase, McdHelper {
         inputData.amount = _mcdWithdraw(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager);
 
         emit ActionEvent(
-            msg.sender,
             "McdWithdraw",
             abi.encode(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager)
         );
@@ -52,8 +51,7 @@ contract McdWithdraw is ActionBase, McdHelper {
 
         inputData.amount = _mcdWithdraw(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager);
 
-        logger.logActionEvent(
-            msg.sender,
+        logger.logActionDirectEvent(
             "McdWithdraw",
             abi.encode(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager)
         );

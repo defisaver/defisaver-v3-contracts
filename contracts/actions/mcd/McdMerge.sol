@@ -33,7 +33,6 @@ contract McdMerge is ActionBase, McdHelper {
         _mcdMerge(inputData.srcVaultId, inputData.destVaultId, inputData.mcdManager);
 
         emit ActionEvent(
-            msg.sender,
             "McdMerge",
             abi.encode(inputData.srcVaultId, inputData.destVaultId, inputData.mcdManager)
         );
@@ -46,8 +45,7 @@ contract McdMerge is ActionBase, McdHelper {
 
         _mcdMerge(inputData.srcVaultId, inputData.destVaultId, inputData.mcdManager);
 
-        logger.logActionEvent(
-            msg.sender,
+        logger.logActionDirectEvent(
             "McdMerge",
             abi.encode(inputData.srcVaultId, inputData.destVaultId, inputData.mcdManager)
         );

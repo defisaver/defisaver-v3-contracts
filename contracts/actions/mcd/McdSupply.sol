@@ -38,7 +38,6 @@ contract McdSupply is ActionBase, McdHelper {
         uint256 returnAmount = _mcdSupply(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.from, inputData.mcdManager);
 
         emit ActionEvent(
-            msg.sender,
             "McdSupply",
             abi.encode(inputData.vaultId, returnAmount, inputData.joinAddr, inputData.from, inputData.mcdManager)
         );
@@ -52,8 +51,7 @@ contract McdSupply is ActionBase, McdHelper {
 
         uint256 returnAmount = _mcdSupply(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.from, inputData.mcdManager);
 
-        logger.logActionEvent(
-            msg.sender,
+        logger.logActionDirectEvent(
             "McdSupply",
             abi.encode(inputData.vaultId, returnAmount, inputData.joinAddr, inputData.from, inputData.mcdManager)
         );

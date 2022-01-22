@@ -54,7 +54,6 @@ contract McdPayback is ActionBase, McdHelper {
         _mcdPayback(inputData);
 
         emit ActionEvent(
-            msg.sender,
             "McdPayback",
             abi.encode(inputData)  // removed debt from being logged
         );
@@ -68,8 +67,7 @@ contract McdPayback is ActionBase, McdHelper {
 
         _mcdPayback(inputData);
 
-        logger.logActionEvent(
-            msg.sender,
+        logger.logActionDirectEvent(
             "McdPayback",
             abi.encode(inputData)  // removed debt from being logged
         );

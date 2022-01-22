@@ -40,7 +40,6 @@ contract McdGenerate is ActionBase, McdHelper {
         inputData.amount = _mcdGenerate(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager);
 
         emit ActionEvent(
-            msg.sender,
             "McdGenerate",
             abi.encode(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager)
         );
@@ -54,8 +53,7 @@ contract McdGenerate is ActionBase, McdHelper {
 
         inputData.amount = _mcdGenerate(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager);
 
-        logger.logActionEvent(
-            msg.sender,
+        logger.logActionDirectEvent(
             "McdGenerate",
             abi.encode(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager)
         );

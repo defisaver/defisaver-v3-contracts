@@ -149,7 +149,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
         }
 
         /// log the recipe name
-        DefisaverLogger(DEFISAVER_LOGGER).logRecipeEvent(msg.sender, _currRecipe.name);
+        DefisaverLogger(DEFISAVER_LOGGER).logRecipeEvent(_currRecipe.name);
     }
 
     /// @notice Gets the action address and executes it

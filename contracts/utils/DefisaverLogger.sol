@@ -26,24 +26,22 @@ contract DefisaverLogger {
         string indexed logName
     );
 
-    event ActionEvent(
+    event ActionDirectEvent(
         address indexed caller,
         string indexed logName,
         bytes data
     );
 
     function logRecipeEvent(
-        address _caller,
         string memory _logName
     ) public {
-        emit RecipeEvent(_caller, _logName);
+        emit RecipeEvent(msg.sender, _logName);
     }
 
-    function logActionEvent(
-        address _caller,
+    function logActionDirectEvent(
         string memory _logName,
         bytes memory _data
     ) public {
-        emit ActionEvent(_caller, _logName, _data);
+        emit ActionDirectEvent(msg.sender, _logName, _data);
     }
 }

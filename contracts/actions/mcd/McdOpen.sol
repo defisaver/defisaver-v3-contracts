@@ -28,7 +28,6 @@ contract McdOpen is ActionBase {
         uint256 newVaultId = _mcdOpen(inputData.joinAddr, inputData.mcdManager);
 
         emit ActionEvent(
-            msg.sender,
             "McdOpen",
             abi.encode(newVaultId, inputData.joinAddr, inputData.mcdManager)
         );
@@ -42,8 +41,7 @@ contract McdOpen is ActionBase {
 
         uint256 newVaultId = _mcdOpen(inputData.joinAddr, inputData.mcdManager);
 
-        logger.logActionEvent(
-            msg.sender,
+        logger.logActionDirectEvent(
             "McdOpen",
             abi.encode(newVaultId, inputData.joinAddr, inputData.mcdManager)
         );

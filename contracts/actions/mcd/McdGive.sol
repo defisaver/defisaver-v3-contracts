@@ -38,7 +38,6 @@ contract McdGive is ActionBase {
         inputData.newOwner = _mcdGive(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager);
 
         emit ActionEvent(
-            msg.sender,
             "McdGive",
             abi.encode(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager)
         );
@@ -52,8 +51,7 @@ contract McdGive is ActionBase {
 
         inputData.newOwner =_mcdGive(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager);
 
-        logger.logActionEvent(
-            msg.sender,
+        logger.logActionDirectEvent(
             "McdGive",
             abi.encode(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager)
         );

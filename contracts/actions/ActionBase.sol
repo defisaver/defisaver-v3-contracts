@@ -9,7 +9,6 @@ import "./utils/helpers/ActionsUtilHelper.sol";
 /// @title Implements Action interface and common helpers for passing inputs
 abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
     event ActionEvent(
-        address indexed caller,
         string indexed logName,
         bytes data
     );
