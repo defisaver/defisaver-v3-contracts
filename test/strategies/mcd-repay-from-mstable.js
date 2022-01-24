@@ -8,8 +8,6 @@ const {
     redeploy,
     fetchAmountinUSDPrice,
     approve,
-    YEARN_REGISTRY_ADDRESS,
-    balanceOf,
     DAI_ADDR,
     setBalance,
 } = require('../utils');
@@ -20,13 +18,20 @@ const {
     setMCDPriceVerifier,
 } = require('../utils-strategies');
 
+const {
+    mUSD,
+    imUSD,
+    imUSDVault,
+    AssetPair,
+} = require('../utils-mstable');
+
 const { getRatio } = require('../utils-mcd');
 
-const { subMcdRepayStrategy, callMcdRepayFromYearnStrategy } = require('../strategies');
+const { subMcdRepayStrategy, callMcdRepayFromMstableStrategy } = require('../strategies');
 
-const { openVault, yearnSupply } = require('../actions');
+const { openVault, mStableDeposit } = require('../actions');
 
-describe('Mcd-Repay-Yearn-Strategy', function () {
+describe('Mcd-Repay-Mstable-Strategy', function () {
     this.timeout(1200000);
 
     let senderAcc;
@@ -38,7 +43,7 @@ describe('Mcd-Repay-Yearn-Strategy', function () {
     let mcdView;
     let mcdRatioTriggerAddr;
     let strategySub;
-    let yearnRegistry;
+    // let mstableView;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -67,18 +72,19 @@ describe('Mcd-Repay-Yearn-Strategy', function () {
         await redeploy('McdGenerate');
         await redeploy('McdPayback');
         await redeploy('McdOpen');
-        await redeploy('YearnSupply');
-        await redeploy('YearnWithdraw');
+        await redeploy('MStableDeposit');
+        await redeploy('MStableWithdraw');
+
+        // mstableView = await redeploy('MStableView');
         await addBotCaller(botAcc.address);
 
         await setMCDPriceVerifier(mcdRatioTriggerAddr);
-        yearnRegistry = await hre.ethers.getContractAt('IYearnRegistry', YEARN_REGISTRY_ADDRESS);
 
         proxy = await getProxy(senderAcc.address);
     });
 
     const createRepayStrategy = () => {
-        const repayStrategy = new dfs.Strategy('McdYearnRepayStrategy');
+        const repayStrategy = new dfs.Strategy('McdMstableRepayStrategy');
 
         repayStrategy.addSubSlot('&vaultId', 'uint256');
         repayStrategy.addSubSlot('&targetRatio', 'uint256');
@@ -86,12 +92,19 @@ describe('Mcd-Repay-Yearn-Strategy', function () {
         const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
         repayStrategy.addTrigger(mcdRatioTrigger);
 
-        const yearnWithdrawAction = new dfs.actions.yearn.YearnWithdrawAction(
-            '%yDaiAddr',
-            '%amount',
-            '&eoa',
+        const mstableWithdrawAction = new dfs.actions.mstable.MStableWithdrawAction(
+            '%bAsset',
+            '%mAsset',
+            '%saveAddress',
+            '%vaultAddress',
             '&proxy',
+            '&proxy',
+            '%amount',
+            '%minOut',
+            '%assetPair',
         );
+
+        // TODO: Must pipe dai into next action?
 
         const feeTakingAction = new dfs.actions.basic.GasFeeAction(
             '0', '%daiAddr', '$1',
@@ -104,14 +117,14 @@ describe('Mcd-Repay-Yearn-Strategy', function () {
             '%mcdManager',
         );
 
-        repayStrategy.addAction(yearnWithdrawAction);
+        repayStrategy.addAction(mstableWithdrawAction);
         repayStrategy.addAction(feeTakingAction);
         repayStrategy.addAction(mcdPaybackAction);
 
         return repayStrategy.encodeForDsProxyCall();
     };
 
-    it('... should create repay strategy using yearn funds', async () => {
+    it('... should create repay strategy using mstable funds', async () => {
         const repayStrategyEncoded = createRepayStrategy();
 
         await createStrategy(proxy, ...repayStrategyEncoded, true);
@@ -128,18 +141,23 @@ describe('Mcd-Repay-Yearn-Strategy', function () {
 
         console.log('Vault id: ', vaultId);
 
-        // Deposit money to yearn
-        const daiAmount = hre.ethers.utils.parseUnits('100000', 18);
+        // Deposit money to mstable
+        const daiAmount = hre.ethers.utils.parseUnits('10000', 18);
 
         await setBalance(DAI_ADDR, senderAcc.address, daiAmount);
         await approve(DAI_ADDR, proxy.address);
 
-        await yearnSupply(
-            DAI_ADDR,
-            daiAmount,
-            senderAcc.address,
-            senderAcc.address,
+        await mStableDeposit(
             proxy,
+            DAI_ADDR,
+            mUSD,
+            imUSD,
+            imUSDVault,
+            senderAcc.address,
+            proxy.address,
+            daiAmount,
+            0,
+            AssetPair.BASSET_IMASSETVAULT,
         );
 
         const ratioUnder = hre.ethers.utils.parseUnits('3', '18');
@@ -152,17 +170,20 @@ describe('Mcd-Repay-Yearn-Strategy', function () {
     });
 
     it('... should trigger a maker repay strategy', async () => {
-        const yToken = await yearnRegistry.latestVault(DAI_ADDR);
-        const yTokenBalanceBefore = await balanceOf(yToken, senderAcc.address);
-        console.log(yTokenBalanceBefore.toString());
-
-        await approve(yToken, proxy.address);
-
         const ratioBefore = await getRatio(mcdView, vaultId);
-        const repayAmount = hre.ethers.utils.parseUnits('5000', 18);
 
-        await callMcdRepayFromYearnStrategy(
-            botAcc, strategyExecutor, 0, subId, strategySub, yToken, repayAmount,
+        // TODO: calc. dynamicly
+        // around 5k dai
+        const repayAmount = '43862160000170780360530';
+
+        // eslint-disable-next-line max-len
+        // const balanceInVault = (await mstableView.rawBalanceOf(imUSDVault, proxy.address)).div(2);
+
+        // console.log(balanceInVault.toString());
+
+        await callMcdRepayFromMstableStrategy(
+            // eslint-disable-next-line max-len
+            botAcc, strategyExecutor, 0, subId, strategySub, repayAmount,
         );
 
         const ratioAfter = await getRatio(mcdView, vaultId);

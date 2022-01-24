@@ -349,6 +349,17 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR, existingAddr = '') => {
         c = { address: existingAddr };
     }
 
+    // Handle mStable diff. action instead of name
+    if (name === 'MStableDeposit') {
+        // eslint-disable-next-line no-param-reassign
+        name = 'MStableDepositNew';
+    }
+
+    if (name === 'MStableWithdraw') {
+        // eslint-disable-next-line no-param-reassign
+        name = 'MStableWithdrawNew';
+    }
+
     const id = getNameId(name);
 
     if (!(await registry.isRegistered(id))) {
