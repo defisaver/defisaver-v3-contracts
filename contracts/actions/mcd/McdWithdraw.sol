@@ -35,26 +35,16 @@ contract McdWithdraw is ActionBase, McdHelper {
         inputData.joinAddr = _parseParamAddr(inputData.joinAddr, _paramMapping[2], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[3], _subData, _returnValues);
 
-        inputData.amount = _mcdWithdraw(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager);
-
-        emit ActionEvent(
-            "McdWithdraw",
-            abi.encode(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager)
-        );
-
-        return bytes32(inputData.amount);
+        (uint256 withdrawnAmount, bytes memory logData) = _mcdWithdraw(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager);
+        emit ActionEvent("McdWithdraw", logData);
+        return bytes32(withdrawnAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        inputData.amount = _mcdWithdraw(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager);
-
-        logger.logActionDirectEvent(
-            "McdWithdraw",
-            abi.encode(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager)
-        );
+        (, bytes memory logData) = _mcdWithdraw(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager);
+        logger.logActionDirectEvent("McdWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -76,7 +66,7 @@ contract McdWithdraw is ActionBase, McdHelper {
         address _joinAddr,
         address _to,
         address _mcdManager
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         IManager mcdManager = IManager(_mcdManager);
 
         // if amount type(uint).max _amount is whole collateral amount
@@ -97,7 +87,8 @@ contract McdWithdraw is ActionBase, McdHelper {
         // send the tokens _to address if needed
         getTokenFromJoin(_joinAddr).withdrawTokens(_to, _amount);
 
-        return _amount;
+        bytes memory logData = abi.encode(_vaultId, _amount, _joinAddr, _to, _mcdManager);
+        return (_amount, logData);
     }
 
     /// @notice Returns all the collateral of the vault, formatted in the correct decimal
