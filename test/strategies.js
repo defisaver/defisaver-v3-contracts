@@ -126,6 +126,7 @@ const subMcdRepayStrategy = async (proxy, bundleId, vaultId, rationUnder, target
 
     const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_UNDER);
     const strategySub = [bundleId, isBundle, [triggerData], [vaultIdEncoded, targetRatioEncoded]];
+
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };
@@ -347,13 +348,7 @@ const callUniV3CollectStrategy = async (botAcc, strategyExecutor, subId, strateg
         MAX_UINT128,
         nftOwner,
     );
-    // const timestampTriggerData = await createTimestampTrigger('0', '0');
-    // const changeTriggerDataAction = new dfs.actions.basic.ChangeTriggerDataAction(
-    //     subStorageAddr,
-    //     subId,
-    //     timestampTriggerData,
-    //     0,
-    // );
+
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
     actionsCallData.push(collectAction.encodeForRecipe()[0]);
@@ -442,30 +437,19 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
     console.log(`GasUsed callMcdRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callMcdRepayFromYearnStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, yWEThAddr, repayAmount) => {
+const callMcdRepayFromYearnStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, yDaiAddr, repayAmount) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
     const withdrawAction = new dfs.actions.yearn.YearnWithdrawAction(
-        yWEThAddr,
+        yDaiAddr,
         repayAmount,
         placeHolderAddr,
         placeHolderAddr,
     );
     const repayGasCost = 1200000; // 1.2 mil gas
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        repayGasCost, WETH_ADDRESS, 0,
-    );
-
-    const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            WETH_ADDRESS,
-            DAI_ADDR,
-            0,
-            UNISWAP_WRAPPER,
-        ),
-        placeHolderAddr,
-        placeHolderAddr,
+        repayGasCost, DAI_ADDR, 0,
     );
 
     const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
@@ -477,7 +461,6 @@ const callMcdRepayFromYearnStrategy = async (botAcc, strategyExecutor, strategyI
 
     actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
-    actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
 
     const nextPrice = 0;
