@@ -40,6 +40,10 @@ describe('Mcd-Boost-Strategy', function () {
         const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
         mcdBoostStrategy.addTrigger(mcdRatioTrigger);
 
+        const ratioAction = new dfs.actions.maker.MakerRatioAction(
+            '&vaultId',
+        );
+
         const generateAction = new dfs.actions.maker.MakerGenerateAction(
             '&vaultId',
             '%generateAmount',
@@ -51,7 +55,7 @@ describe('Mcd-Boost-Strategy', function () {
             formatExchangeObj(
                 '%daiAddr',
                 '%wethAddr',
-                '$1',
+                '$2',
                 '%wrapper',
             ),
             '&proxy',
@@ -59,12 +63,12 @@ describe('Mcd-Boost-Strategy', function () {
         );
 
         const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '0', '%wethAddr', '$2',
+            '0', '%wethAddr', '$3',
         );
 
         const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
             '&vaultId', // vaultId
-            '$3', // amount
+            '$4', // amount
             '%ethJoin',
             '&proxy', // proxy
             '%mcdManager',
@@ -75,9 +79,10 @@ describe('Mcd-Boost-Strategy', function () {
             '%checkTarget',
             '&targetRatio', // targetRatio
             '&vaultId', // vaultId
-            '%nextPrice', // nextPrice
+            '%ratioActionPositionInRecipe',
         );
 
+        mcdBoostStrategy.addAction(ratioAction);
         mcdBoostStrategy.addAction(generateAction);
         mcdBoostStrategy.addAction(sellAction);
         mcdBoostStrategy.addAction(feeTakingAction);
@@ -97,6 +102,10 @@ describe('Mcd-Boost-Strategy', function () {
 
         const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction('%amount', DAI_ADDR);
 
+        const ratioAction = new dfs.actions.maker.MakerRatioAction(
+            '&vaultId',
+        );
+
         const sellAction = new dfs.actions.basic.SellAction(
             formatExchangeObj(
                 '%daiAddr',
@@ -109,12 +118,12 @@ describe('Mcd-Boost-Strategy', function () {
         );
 
         const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '0', '%wethAddr', '$2',
+            '0', '%wethAddr', '$3',
         );
 
         const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
             '&vaultId', // vaultId
-            '$3', // amount
+            '$4', // amount
             '%ethJoin',
             '&proxy', // proxy
             '%mcdManager',
@@ -132,10 +141,11 @@ describe('Mcd-Boost-Strategy', function () {
             '%checkTarget',
             '&targetRatio', // targetRatio
             '&vaultId', // vaultId
-            '%nextPrice', // nextPrice
+            '%ratioActionPositionInRecipe',
         );
 
         mcdBoostStrategy.addAction(flAction);
+        mcdBoostStrategy.addAction(ratioAction);
         mcdBoostStrategy.addAction(sellAction);
         mcdBoostStrategy.addAction(feeTakingAction);
         mcdBoostStrategy.addAction(mcdSupplyAction);
@@ -158,7 +168,6 @@ describe('Mcd-Boost-Strategy', function () {
         await redeploy('StrategyStorage');
         await redeploy('SubStorage');
         await redeploy('BundleStorage');
-        await redeploy('TempStorage');
 
         mcdView = await redeploy('McdView');
 
@@ -175,6 +184,7 @@ describe('Mcd-Boost-Strategy', function () {
         await redeploy('McdGenerate');
         await redeploy('McdPayback');
         await redeploy('McdOpen');
+        await redeploy('McdRatio');
         strategyTriggerView = await redeploy('StrategyTriggerView');
         await addBotCaller(botAcc.address);
 
@@ -195,8 +205,8 @@ describe('Mcd-Boost-Strategy', function () {
         vaultId = await openVault(
             proxy,
             'ETH-A',
-            fetchAmountinUSDPrice('WETH', '30000'),
-            fetchAmountinUSDPrice('DAI', '12000'),
+            fetchAmountinUSDPrice('WETH', '40000'),
+            fetchAmountinUSDPrice('DAI', '18000'),
         );
 
         console.log('VaultId: ', vaultId);
@@ -220,8 +230,8 @@ describe('Mcd-Boost-Strategy', function () {
         vaultId = await openVault(
             proxy,
             'ETH-A',
-            fetchAmountinUSDPrice('WETH', '30000'),
-            fetchAmountinUSDPrice('DAI', '12000'),
+            fetchAmountinUSDPrice('WETH', '40000'),
+            fetchAmountinUSDPrice('DAI', '18000'),
         );
 
         console.log('VaultId: ', vaultId);
@@ -254,13 +264,21 @@ describe('Mcd-Boost-Strategy', function () {
         /*
         // This is tested with commented out onchain checking next price
         triggerCallData = [];
-        triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['5000000000000000000000000000000', '1'])); // check next ratio
+        triggerCallData.push(
+            abiCoder.encode(['uint256', 'uint8'],
+            ['5000000000000000000000000000000',
+            '1']
+        )); // check next ratio
         console.log(await strategyTriggerView.callStatic.checkTriggers(
             strategySub, triggerCallData,
         ));
 
         triggerCallData = [];
-        triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['5000000000000000000000000000000', '2'])); // check both ratios
+        triggerCallData.push(
+            abiCoder.encode(['uint256', 'uint8'],
+            ['5000000000000000000000000000000',
+            '2']
+        )); // check both ratios
         console.log(await strategyTriggerView.callStatic.checkTriggers(
             strategySub, triggerCallData,
         ));

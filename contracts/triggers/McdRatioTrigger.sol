@@ -6,7 +6,6 @@ import "../auth/AdminAuth.sol";
 import "../actions/mcd/helpers/McdRatioHelper.sol";
 import "../interfaces/ITrigger.sol";
 import "../interfaces/IMCDPriceVerifier.sol";
-import "../utils/TempStorage.sol";
 import "../core/helpers/CoreHelper.sol";
 import "../core/DFSRegistry.sol";
 import "./helpers/TriggerHelper.sol";
@@ -14,8 +13,6 @@ import "./helpers/TriggerHelper.sol";
 
 /// @title Trigger contract that verifies if current MCD vault ratio is higher or lower than wanted
 contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, TriggerHelper {
-    bytes4 constant TEMP_STORAGE_ID = bytes4(keccak256("TempStorage"));
-
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     error WrongNextPrice(uint256);
@@ -78,10 +75,6 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
                 revert WrongNextPrice(triggerCallData.nextPrice);
             }
         }
-
-        /// @dev this later helps us check if boost/repay are done correctly in MCDRatioCheckerAction
-        address tempStorageAddr = registry.getAddr(TEMP_STORAGE_ID);
-        TempStorage(tempStorageAddr).set("MCD_RATIO", bytes32(checkedRatio));
 
         return shouldTriggerCurr || shouldTriggerNext;
     }

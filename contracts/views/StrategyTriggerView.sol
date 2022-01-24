@@ -18,12 +18,12 @@ contract StrategyTriggerView is StrategyModel, CoreHelper {
         Strategy memory strategy;
 
         { // to handle stack too deep
-            uint256 strategyId = _sub.id;
+            uint256 strategyId = _sub.strategyOrBundleId;
             address bundleStorageAddr = registry.getAddr(BUNDLE_STORAGE_ID);
             address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
 
             if (_sub.isBundle) {
-                strategyId = BundleStorage(bundleStorageAddr).getStrategyId(_sub.id, 0);
+                strategyId = BundleStorage(bundleStorageAddr).getStrategyId(_sub.strategyOrBundleId, 0);
             }
 
             strategy = StrategyStorage(strategyStorageAddr).getStrategy(strategyId);

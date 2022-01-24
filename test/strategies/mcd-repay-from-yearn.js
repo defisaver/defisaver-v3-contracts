@@ -7,12 +7,11 @@ const {
     getProxy,
     redeploy,
     fetchAmountinUSDPrice,
-    formatExchangeObj,
-    WETH_ADDRESS,
-    depositToWeth,
     approve,
     YEARN_REGISTRY_ADDRESS,
     balanceOf,
+    DAI_ADDR,
+    setBalance,
 } = require('../utils');
 
 const {
@@ -27,8 +26,8 @@ const { subMcdRepayStrategy, callMcdRepayFromYearnStrategy } = require('../strat
 
 const { openVault, yearnSupply } = require('../actions');
 
-describe('Mcd-Repay-Strategy', function () {
-    this.timeout(120000);
+describe('Mcd-Repay-Yearn-Strategy', function () {
+    this.timeout(1200000);
 
     let senderAcc;
     let proxy;
@@ -48,9 +47,7 @@ describe('Mcd-Repay-Strategy', function () {
         await redeploy('BotAuth');
         await redeploy('ProxyAuth');
         mcdRatioTriggerAddr = (await redeploy('McdRatioTrigger')).address;
-        await redeploy('McdWithdraw');
         await redeploy('DFSSell');
-        await redeploy('McdPayback');
         await redeploy('StrategyStorage');
         await redeploy('SubStorage');
         await redeploy('BundleStorage');
@@ -81,7 +78,7 @@ describe('Mcd-Repay-Strategy', function () {
     });
 
     const createRepayStrategy = () => {
-        const repayStrategy = new dfs.Strategy('McdRepayStrategy');
+        const repayStrategy = new dfs.Strategy('McdYearnRepayStrategy');
 
         repayStrategy.addSubSlot('&vaultId', 'uint256');
         repayStrategy.addSubSlot('&targetRatio', 'uint256');
@@ -90,37 +87,25 @@ describe('Mcd-Repay-Strategy', function () {
         repayStrategy.addTrigger(mcdRatioTrigger);
 
         const yearnWithdrawAction = new dfs.actions.yearn.YearnWithdrawAction(
-            '%yWETHAddr',
+            '%yDaiAddr',
             '%amount',
             '&eoa',
             '&proxy',
         );
 
         const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '0', '%wethAddr', '$1',
-        );
-
-        const sellAction = new dfs.actions.basic.SellAction(
-            formatExchangeObj(
-                '%wethAddr',
-                '%daiAddr',
-                '$2',
-                '%exchangeWrapper',
-            ),
-            '&proxy',
-            '&proxy',
+            '0', '%daiAddr', '$1',
         );
 
         const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
             '&vaultId',
-            '$3',
+            '$2',
             '&proxy',
             '%mcdManager',
         );
 
         repayStrategy.addAction(yearnWithdrawAction);
         repayStrategy.addAction(feeTakingAction);
-        repayStrategy.addAction(sellAction);
         repayStrategy.addAction(mcdPaybackAction);
 
         return repayStrategy.encodeForDsProxyCall();
@@ -133,14 +118,29 @@ describe('Mcd-Repay-Strategy', function () {
     });
 
     it('... should sub the user to a repay bundle ', async () => {
+        // create vault
         vaultId = await openVault(
             proxy,
             'ETH-A',
-            fetchAmountinUSDPrice('WETH', '25000'),
-            fetchAmountinUSDPrice('DAI', '12000'),
+            fetchAmountinUSDPrice('WETH', '50000'),
+            fetchAmountinUSDPrice('DAI', '25000'),
         );
 
         console.log('Vault id: ', vaultId);
+
+        // Deposit money to yearn
+        const daiAmount = hre.ethers.utils.parseUnits('100000', 18);
+
+        await setBalance(DAI_ADDR, senderAcc.address, daiAmount);
+        await approve(DAI_ADDR, proxy.address);
+
+        await yearnSupply(
+            DAI_ADDR,
+            daiAmount,
+            senderAcc.address,
+            senderAcc.address,
+            proxy,
+        );
 
         const ratioUnder = hre.ethers.utils.parseUnits('3', '18');
         const targetRatio = hre.ethers.utils.parseUnits('3.2', '18');
@@ -152,20 +152,14 @@ describe('Mcd-Repay-Strategy', function () {
     });
 
     it('... should trigger a maker repay strategy', async () => {
-        await depositToWeth(hre.ethers.utils.parseUnits('1', 18));
-
-        await approve(WETH_ADDRESS, proxy.address);
-
-        await yearnSupply(WETH_ADDRESS, hre.ethers.utils.parseUnits('1', 18), senderAcc.address, senderAcc.address, proxy);
-
-        const yToken = await yearnRegistry.latestVault(WETH_ADDRESS);
+        const yToken = await yearnRegistry.latestVault(DAI_ADDR);
         const yTokenBalanceBefore = await balanceOf(yToken, senderAcc.address);
         console.log(yTokenBalanceBefore.toString());
 
         await approve(yToken, proxy.address);
 
         const ratioBefore = await getRatio(mcdView, vaultId);
-        const repayAmount = yTokenBalanceBefore.mul(5).div(100);
+        const repayAmount = hre.ethers.utils.parseUnits('5000', 18);
 
         await callMcdRepayFromYearnStrategy(
             botAcc, strategyExecutor, 0, subId, strategySub, yToken, repayAmount,

@@ -20,7 +20,7 @@ const {
     setMCDPriceVerifier,
 } = require('../utils-strategies');
 
-const { getRatio, getNextEthPrice } = require('../utils-mcd');
+const { getRatio } = require('../utils-mcd');
 
 const { subMcdRepayStrategy, callMcdRepayStrategy, callFLMcdRepayStrategy } = require('../strategies');
 
@@ -55,7 +55,6 @@ describe('Mcd-Repay-Strategy', function () {
         await redeploy('StrategyStorage');
         await redeploy('SubStorage');
         await redeploy('BundleStorage');
-        await redeploy('TempStorage');
 
         mcdView = await redeploy('McdView');
 
@@ -72,6 +71,7 @@ describe('Mcd-Repay-Strategy', function () {
         await redeploy('McdGenerate');
         await redeploy('McdPayback');
         await redeploy('McdOpen');
+        await redeploy('McdRatio');
         flDyDx = await redeploy('FLDyDx');
 
         await addBotCaller(botAcc.address);
@@ -90,6 +90,10 @@ describe('Mcd-Repay-Strategy', function () {
         const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
         repayStrategy.addTrigger(mcdRatioTrigger);
 
+        const ratioAction = new dfs.actions.maker.MakerRatioAction(
+            '&vaultId',
+        );
+
         const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
             '&vaultId',
             '%withdrawAmount',
@@ -99,14 +103,14 @@ describe('Mcd-Repay-Strategy', function () {
         );
 
         const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '0', '%wethAddr', '$1',
+            '0', '%wethAddr', '$2',
         );
 
         const sellAction = new dfs.actions.basic.SellAction(
             formatExchangeObj(
                 '%wethAddr',
                 '%daiAddr',
-                '$2',
+                '$3',
                 '%exchangeWrapper',
             ),
             '&proxy',
@@ -115,7 +119,7 @@ describe('Mcd-Repay-Strategy', function () {
 
         const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
             '&vaultId',
-            '$3',
+            '$4',
             '&proxy',
             '%mcdManager',
         );
@@ -125,9 +129,10 @@ describe('Mcd-Repay-Strategy', function () {
             '%checkTarget',
             '&targetRatio', // targetRatio
             '&vaultId', // vaultId
-            '%nextPrice', // nextPrice
+            '%ratioActionPositionInRecipe',
         );
 
+        repayStrategy.addAction(ratioAction);
         repayStrategy.addAction(withdrawAction);
         repayStrategy.addAction(feeTakingAction);
         repayStrategy.addAction(sellAction);
@@ -148,6 +153,10 @@ describe('Mcd-Repay-Strategy', function () {
 
         const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction('%amount', WETH_ADDRESS);
 
+        const ratioAction = new dfs.actions.maker.MakerRatioAction(
+            '&vaultId',
+        );
+
         const sellAction = new dfs.actions.basic.SellAction(
             formatExchangeObj(
                 '%wethAddr',
@@ -160,12 +169,12 @@ describe('Mcd-Repay-Strategy', function () {
         );
 
         const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '0', '%daiAddr', '$2',
+            '0', '%daiAddr', '$3',
         );
 
         const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
             '&vaultId',
-            '$3',
+            '$4',
             '&proxy',
             '%mcdManager',
         );
@@ -183,10 +192,11 @@ describe('Mcd-Repay-Strategy', function () {
             '%checkTarget',
             '&targetRatio', // targetRatio
             '&vaultId', // vaultId
-            '%nextPrice', // nextPrice
+            '%ratioActionPositionInRecipe',
         );
 
         repayStrategy.addAction(flAction);
+        repayStrategy.addAction(ratioAction);
         repayStrategy.addAction(sellAction);
         repayStrategy.addAction(feeTakingAction);
         repayStrategy.addAction(mcdPaybackAction);
@@ -210,8 +220,8 @@ describe('Mcd-Repay-Strategy', function () {
         vaultId = await openVault(
             proxy,
             'ETH-A',
-            fetchAmountinUSDPrice('WETH', '25000'),
-            fetchAmountinUSDPrice('DAI', '12000'),
+            fetchAmountinUSDPrice('WETH', '40000'),
+            fetchAmountinUSDPrice('DAI', '18000'),
         );
 
         console.log('Vault id: ', vaultId);

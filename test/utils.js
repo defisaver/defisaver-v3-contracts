@@ -1,5 +1,7 @@
+/* eslint-disable no-await-in-loop */
 const hre = require('hardhat');
 const fs = require('fs');
+const storageSlots = require('./storageSlots.json');
 
 const { deployContract, deployAsOwner } = require('../scripts/utils/deployer');
 const { changeConstantInFiles } = require('../scripts/utils/utils');
@@ -22,6 +24,7 @@ const UNIV3POSITIONMANAGER_ADDR = '0xC36442b4a4522E871399CD717aBDD847Ab11FE88';
 const AAVE_MARKET = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
 const YEARN_REGISTRY_ADDRESS = '0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804';
 const STETH_ADDRESS = '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84';
+const WSTETH_ADDRESS = '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0';
 const UNIV2_ROUTER_ADDRESS = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
 const FEED_REGISTRY_ADDRESS = '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf';
 const USD_DENOMINATION = '0x0000000000000000000000000000000000000348';
@@ -42,6 +45,9 @@ const BUSD_ADDR = '0x4fabb145d64652a948d72533023f6e7a623c7c53';
 
 const OWNER_ACC = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
 const ADMIN_ACC = '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9';
+
+const rariDaiFundManager = '0xB465BAF04C087Ce3ed1C266F96CA43f4847D9635';
+const rdptAddress = '0x0833cfcb11A5ba89FbAF73a407831c98aD2D7648';
 
 const MAX_UINT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 const MAX_UINT128 = '340282366920938463463374607431768211455';
@@ -120,7 +126,125 @@ const coinGeckoHelper = {
     KNCL: 'kyber-network',
     LQTY: 'liquity',
     TORN: 'tornado-cash',
-    RAI: 'rai',
+    mUSD: 'musd',
+    imUSD: 'imusd',
+};
+
+async function findBalancesSlot(tokenAddress) {
+    const slotObj = storageSlots[tokenAddress];
+    if (slotObj) {
+        return { isVyper: slotObj.isVyper, num: slotObj.num };
+    }
+
+    const encode = (types, values) => hre.ethers.utils.defaultAbiCoder.encode(types, values);
+    const account = hre.ethers.constants.AddressZero;
+    const probeA = encode(['uint'], [1]);
+    const probeB = encode(['uint'], [2]);
+    const token = await hre.ethers.getContractAt(
+        'IERC20',
+        tokenAddress,
+    );
+    for (let i = 0; i < 100; i++) {
+        {
+            let probedSlot = hre.ethers.utils.keccak256(
+                encode(['address', 'uint'], [account, i]),
+            );
+            // remove padding for JSON RPC
+            while (probedSlot.startsWith('0x0')) { probedSlot = `0x${probedSlot.slice(3)}`; }
+            const prev = await hre.ethers.provider.send(
+                'eth_getStorageAt',
+                [tokenAddress, probedSlot, 'latest'],
+            );
+            // make sure the probe will change the slot value
+            const probe = prev === probeA ? probeB : probeA;
+
+            await hre.ethers.provider.send('hardhat_setStorageAt', [
+                tokenAddress,
+                probedSlot,
+                probe,
+            ]);
+
+            const balance = await token.balanceOf(account);
+            // reset to previous value
+            await hre.ethers.provider.send('hardhat_setStorageAt', [
+                tokenAddress,
+                probedSlot,
+                prev,
+            ]);
+            if (balance.eq(hre.ethers.BigNumber.from(probe))) {
+                const result = { isVyper: false, num: i };
+                storageSlots[tokenAddress] = result;
+                // file path needs to be from top level folder
+                fs.writeFileSync('test/storageSlots.json', JSON.stringify(storageSlots));
+                return result;
+            }
+        }
+        {
+            let probedSlot = hre.ethers.utils.keccak256(
+                encode(['uint', 'address'], [i, account]),
+            );
+            // remove padding for JSON RPC
+            while (probedSlot.startsWith('0x0')) { probedSlot = `0x${probedSlot.slice(3)}`; }
+            const prev = await hre.ethers.provider.send(
+                'eth_getStorageAt',
+                [tokenAddress, probedSlot, 'latest'],
+            );
+            // make sure the probe will change the slot value
+            const probe = prev === probeA ? probeB : probeA;
+
+            await hre.ethers.provider.send('hardhat_setStorageAt', [
+                tokenAddress,
+                probedSlot,
+                probe,
+            ]);
+
+            const balance = await token.balanceOf(account);
+            // reset to previous value
+            await hre.ethers.provider.send('hardhat_setStorageAt', [
+                tokenAddress,
+                probedSlot,
+                prev,
+            ]);
+            if (balance.eq(hre.ethers.BigNumber.from(probe))) {
+                const result = { isVyper: true, num: i };
+                storageSlots[tokenAddress] = result;
+                // file path needs to be from top level folder
+                fs.writeFileSync('test/storageSlots.json', JSON.stringify(storageSlots));
+                return result;
+            }
+        }
+    }
+    console.log('Balance slot not found');
+    return 0;
+}
+
+const toBytes32 = (bn) => hre.ethers.utils.hexlify(hre.ethers.utils.zeroPad(bn.toHexString(), 32));
+
+const setStorageAt = async (address, index, value) => {
+    await hre.ethers.provider.send('hardhat_setStorageAt', [address, index, value]);
+    await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
+};
+
+const setBalance = async (tokenAddr, userAddr, value) => {
+    const slotInfo = await findBalancesSlot(tokenAddr);
+    let index;
+    if (slotInfo.isVyper) {
+        index = hre.ethers.utils.solidityKeccak256(
+            ['uint256', 'uint256'],
+            [slotInfo.num, userAddr], // key, slot
+        );
+    } else {
+        index = hre.ethers.utils.solidityKeccak256(
+            ['uint256', 'uint256'],
+            [userAddr, slotInfo.num], // key, slot
+        );
+    }
+
+    await setStorageAt(
+        tokenAddr,
+        index.toString(),
+        toBytes32(value).toString(),
+    );
 };
 
 const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {
@@ -226,6 +350,17 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR, existingAddr = '') => {
 
     if (existingAddr !== '') {
         c = { address: existingAddr };
+    }
+
+    // Handle mStable diff. action instead of name
+    if (name === 'MStableDeposit') {
+        // eslint-disable-next-line no-param-reassign
+        name = 'MStableDepositNew';
+    }
+
+    if (name === 'MStableWithdraw') {
+        // eslint-disable-next-line no-param-reassign
+        name = 'MStableWithdrawNew';
     }
 
     const id = getNameId(name);
@@ -385,6 +520,29 @@ const depositToWeth = async (amount) => {
     await weth.deposit({ value: amount });
 };
 
+const formatExchangeObjForOffchain = (
+    srcAddr,
+    destAddr,
+    amount,
+    wrapper,
+    exchangeAddr,
+    allowanceTarget,
+    price,
+    protocolFee,
+    callData,
+) => [
+    srcAddr,
+    destAddr,
+    amount,
+    0,
+    0,
+    0,
+    nullAddress,
+    wrapper,
+    [],
+    [wrapper, exchangeAddr, allowanceTarget, price, protocolFee, callData],
+];
+
 const timeTravel = async (timeIncrease) => {
     await hre.network.provider.request({
         method: 'evm_increaseTime',
@@ -392,9 +550,22 @@ const timeTravel = async (timeIncrease) => {
         id: new Date().getTime(),
     });
 };
+const addToZRXAllowlist = async (acc, newAddr) => {
+    const exchangeOwnerAddr = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
+    await sendEther(acc, exchangeOwnerAddr, '1');
+    await impersonateAccount(exchangeOwnerAddr);
+
+    const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
+
+    const registryInstance = await hre.ethers.getContractFactory('ZrxAllowlist');
+    const registry = await registryInstance.attach('0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F');
+    const registryByOwner = await registry.connect(signer);
+
+    await registryByOwner.setAllowlistAddr(newAddr, true);
+    await stopImpersonatingAccount(exchangeOwnerAddr);
+};
 
 const getGasUsed = async (receipt) => {
-    console.log(receipt);
     const parsed = await receipt.wait();
 
     return parsed.gasUsed.toString();
@@ -435,7 +606,17 @@ const BN2Float = hre.ethers.utils.formatUnits;
 
 const Float2BN = hre.ethers.utils.parseUnits;
 
+const takeSnapshot = async () => hre.network.provider.request({
+    method: 'evm_snapshot',
+});
+
+const revertToSnapshot = async (snapshotId) => hre.network.provider.request({
+    method: 'evm_revert',
+    params: [snapshotId],
+});
+
 module.exports = {
+    addToZRXAllowlist,
     getAddrFromRegistry,
     getProxy,
     getProxyWithSigner,
@@ -444,6 +625,7 @@ module.exports = {
     approve,
     balanceOf,
     formatExchangeObj,
+    formatExchangeObjForOffchain,
     isEth,
     sendEther,
     impersonateAccount,
@@ -504,4 +686,10 @@ module.exports = {
     BUSD_ADDR,
     AWBTC_ADDR,
     WBTC_ADDR,
+    WSTETH_ADDRESS,
+    rariDaiFundManager,
+    rdptAddress,
+    setBalance,
+    takeSnapshot,
+    revertToSnapshot,
 };

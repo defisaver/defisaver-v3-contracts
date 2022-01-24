@@ -1,0 +1,101 @@
+{
+	"contractName": "DFSPrices",
+	"abi": [
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_amount",
+					"type": "uint256"
+				},
+				{
+					"internalType": "address",
+					"name": "_srcToken",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_destToken",
+					"type": "address"
+				},
+				{
+					"internalType": "enum DFSPrices.ActionType",
+					"name": "_type",
+					"type": "uint8"
+				},
+				{
+					"internalType": "address[]",
+					"name": "_wrappers",
+					"type": "address[]"
+				},
+				{
+					"internalType": "bytes[]",
+					"name": "_additionalData",
+					"type": "bytes[]"
+				}
+			],
+			"name": "getBestPrice",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_wrapper",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_srcToken",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_destToken",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_amount",
+					"type": "uint256"
+				},
+				{
+					"internalType": "enum DFSPrices.ActionType",
+					"name": "_type",
+					"type": "uint8"
+				},
+				{
+					"internalType": "bytes",
+					"name": "_additionalData",
+					"type": "bytes"
+				}
+			],
+			"name": "getExpectedRate",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		}
+	],
+	"networks": {
+		"local": {}
+	}
+}

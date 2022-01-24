@@ -3,6 +3,9 @@
 pragma solidity =0.8.10;
 
 interface IERC20 {
+    function name() external view returns (string memory);
+    function symbol() external view returns (string memory);
+    function decimals() external view returns (uint256 digits);
     function totalSupply() external view returns (uint256 supply);
 
     function balanceOf(address _owner) external view returns (uint256 balance);
@@ -18,8 +21,6 @@ interface IERC20 {
     function approve(address _spender, uint256 _value) external returns (bool success);
 
     function allowance(address _owner, address _spender) external view returns (uint256 remaining);
-
-    function decimals() external view returns (uint256 digits);
 
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 }

@@ -7,12 +7,13 @@ import "../../exchangeV3/DFSExchangeCore.sol";
 import "../ActionBase.sol";
 
 /// @title A exchange sell action through the dfs exchange
+/// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
 contract DFSSell is ActionBase, DFSExchangeCore {
 
     using TokenUtils for address;
 
-    uint internal constant RECIPE_FEE = 400;
-    uint internal constant DIRECT_FEE = 800;
+    uint256 internal constant RECIPE_FEE = 400;
+
     struct Params {
         ExchangeData exchangeData;
         address from;
@@ -58,7 +59,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public override payable   {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, DIRECT_FEE);
+        (, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, 0);
         logger.logActionDirectEvent("DFSSell", logData);
     }
 
@@ -85,7 +86,21 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
-        _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
+
+        // Wrap eth if sent directly
+        if (_exchangeData.srcAddr == TokenUtils.ETH_ADDR) {
+            TokenUtils.depositWeth(_exchangeData.srcAmount);
+            _exchangeData.srcAddr = TokenUtils.WETH_ADDR;
+        } else {
+            _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
+        }
+
+        // We always swap with weth, convert token addr when eth sent for unwrapping later
+        bool isEthDest;
+        if (_exchangeData.destAddr == TokenUtils.ETH_ADDR) {
+            _exchangeData.destAddr = TokenUtils.WETH_ADDR;
+            isEthDest = true;
+        } 
 
         _exchangeData.user = getUserAddress();
         _exchangeData.dfsFeeDivider = _fee;
@@ -93,7 +108,14 @@ contract DFSSell is ActionBase, DFSExchangeCore {
 
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
 
-        _exchangeData.destAddr.withdrawTokens(_to, exchangedAmount);
+        if (isEthDest) {
+            TokenUtils.withdrawWeth(exchangedAmount);
+
+            (bool success, ) = _to.call{value: exchangedAmount}("");
+            require(success, "Eth send failed");
+        } else {
+             _exchangeData.destAddr.withdrawTokens(_to, exchangedAmount);
+        }
 
         bytes memory logData = abi.encode(
             wrapper,
