@@ -40,6 +40,8 @@ const {
     UNISWAP_WRAPPER,
     MAX_UINT128,
     nullAddress,
+    rariDaiFundManager,
+    rdptAddress,
     fetchAmountinUSDPrice,
     Float2BN,
     getLocalTokenPrice,
@@ -522,6 +524,51 @@ const callMcdRepayFromMstableStrategy = async (botAcc, strategyExecutor, strateg
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
 
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callMcdRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
+const callMcdRepayFromRariStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, poolAmount, repayAmount) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const rariWithdrawAction = new dfs.actions.rari.RariWithdrawAction(
+        rariDaiFundManager,
+        rdptAddress,
+        poolAmount,
+        placeHolderAddr,
+        DAI_ADDR,
+        repayAmount,
+        placeHolderAddr,
+    );
+
+    const repayGasCost = 1200000; // 1.2 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        repayGasCost, DAI_ADDR, 0,
+    );
+
+    const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
+        0,
+        0,
+        placeHolderAddr,
+        MCD_MANAGER_ADDR,
+    );
+
+    actionsCallData.push(rariWithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
+
+    const nextPrice = 0;
+    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
         gasLimit: 8000000,
@@ -1499,4 +1546,5 @@ module.exports = {
     callLiquityFLRepayStrategy,
     callMcdRepayFromYearnStrategy,
     callMcdRepayFromMstableStrategy,
+    callMcdRepayFromRariStrategy,
 };
