@@ -42,15 +42,16 @@ contract BalancerV2Withdraw is ActionBase, BalancerV2Helper{
             inputData.minAmountsOut[i] = _parseParamUint(inputData.minAmountsOut[i], _paramMapping[3+i], _subData, _returnValues);
         }
 
-        uint256 poolLPTokensSent = _balancerWithdraw(inputData);
+        (uint256 poolLPTokensSent, bytes memory logData) = _balancerWithdraw(inputData);
+        emit ActionEvent("BalancerV2Withdraw", logData);
         return bytes32(poolLPTokensSent);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _balancerWithdraw(inputData);
+        (, bytes memory logData) = _balancerWithdraw(inputData);
+        logger.logActionDirectEvent("BalancerV2Withdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -60,7 +61,7 @@ contract BalancerV2Withdraw is ActionBase, BalancerV2Helper{
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _balancerWithdraw(Params memory _inputData) internal returns (uint256 poolLPTokensSent){
+    function _balancerWithdraw(Params memory _inputData) internal returns (uint256 poolLPTokensSent, bytes memory logData){
         require(_inputData.to != address(0), ADDR_MUST_NOT_BE_ZERO);
         address poolAddress = _getPoolAddress(_inputData.poolId);
         uint256 poolLPTokensBefore = poolAddress.getBalance(address(this));
@@ -87,12 +88,7 @@ contract BalancerV2Withdraw is ActionBase, BalancerV2Helper{
             poolLPTokensSent
         );
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "BalancerV2Withdraw",
-            abi.encode(_inputData, poolLPTokensSent)
-        );
+        logData = abi.encode(_inputData, poolLPTokensSent);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

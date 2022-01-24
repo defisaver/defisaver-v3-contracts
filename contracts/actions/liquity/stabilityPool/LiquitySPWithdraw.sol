@@ -31,15 +31,16 @@ contract LiquitySPWithdraw is ActionBase, LiquityHelper {
         params.wethTo = _parseParamAddr(params.wethTo, _paramMapping[2], _subData, _returnValues);
         params.lqtyTo = _parseParamAddr(params.lqtyTo, _paramMapping[3], _subData, _returnValues);
 
-        params.lusdAmount = _liquitySPWithdraw(params);
-        return bytes32(params.lusdAmount);
+        (uint256 withdrawnAmount, bytes memory logData) = _liquitySPWithdraw(params);
+        emit ActionEvent("LiquitySPWithdraw", logData);
+        return bytes32(withdrawnAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-
-        _liquitySPWithdraw(params);
+        (, bytes memory logData) = _liquitySPWithdraw(params);
+        logger.logActionDirectEvent("LiquitySPWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -50,7 +51,7 @@ contract LiquitySPWithdraw is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Withdraws LUSD from the user's stability pool deposit
-    function _liquitySPWithdraw(Params memory _params) internal returns (uint256) {
+    function _liquitySPWithdraw(Params memory _params) internal returns (uint256, bytes memory) {
         uint256 ethGain = StabilityPool.getDepositorETHGain(address(this));
         uint256 lqtyBefore = LQTY_TOKEN_ADDRESS.getBalance(address(this));
 
@@ -65,18 +66,8 @@ contract LiquitySPWithdraw is ActionBase, LiquityHelper {
 
         withdrawStabilityGains(ethGain, lqtyGain, _params.wethTo, _params.lqtyTo);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "LiquitySPWithdraw",
-            abi.encode(
-                _params,
-                ethGain,
-                lqtyGain
-            )
-        );
-
-        return _params.lusdAmount;
+        bytes memory logData = abi.encode(_params, ethGain, lqtyGain);
+        return (_params.lusdAmount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

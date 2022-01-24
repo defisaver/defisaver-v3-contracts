@@ -100,7 +100,7 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
 
         solo.operate(accountInfos, operations);
 
-        logger.Log(address(this), msg.sender, "FLDyDx", abi.encode(_amount, _token));
+        emit ActionEvent("FLDyDx", abi.encode(_amount, _token));
 
         return _amount;
     }

@@ -32,16 +32,16 @@ contract AaveWithdraw is ActionBase, AaveHelper {
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
 
-        uint256 withdrawAmount = _withdraw(params.market, params.tokenAddr, params.amount, params.to);
-
-        return bytes32(withdrawAmount);
+        (uint256 withdrawnAmount, bytes memory logData) = _withdraw(params.market, params.tokenAddr, params.amount, params.to);
+        emit ActionEvent("AaveWithdraw", logData);
+        return bytes32(withdrawnAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-
-        _withdraw(params.market, params.tokenAddr, params.amount, params.to);
+        (, bytes memory logData) = _withdraw(params.market, params.tokenAddr, params.amount, params.to);
+        logger.logActionDirectEvent("AaveWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -61,7 +61,7 @@ contract AaveWithdraw is ActionBase, AaveHelper {
         address _tokenAddr,
         uint256 _amount,
         address _to
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         ILendingPoolV2 lendingPool = getLendingPool(_market);
         uint256 tokenBefore;
 
@@ -78,14 +78,8 @@ contract AaveWithdraw is ActionBase, AaveHelper {
             _amount = _tokenAddr.getBalance(_to) - tokenBefore;
         }
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "AaveWithdraw",
-            abi.encode(_market, _tokenAddr, _amount, _to)
-        );
-
-        return _amount;
+        bytes memory logData = abi.encode(_market, _tokenAddr, _amount, _to);
+        return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

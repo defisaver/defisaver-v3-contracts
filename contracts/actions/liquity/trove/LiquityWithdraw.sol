@@ -33,15 +33,17 @@ contract LiquityWithdraw is ActionBase, LiquityHelper {
         );
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
 
-        params.collAmount = _liquityWithdraw(params);
-        return bytes32(params.collAmount);
+        (uint256 withdrawnAmount, bytes memory logData) = _liquityWithdraw(params);
+        emit ActionEvent("LiquityWithdraw", logData);
+        return bytes32(withdrawnAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
-        _liquityWithdraw(params);
+        (, bytes memory logData) = _liquityWithdraw(params);
+        logger.logActionDirectEvent("LiquityWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -52,20 +54,14 @@ contract LiquityWithdraw is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Withdraws collateral from the trove
-    function _liquityWithdraw(Params memory _params) internal returns (uint256) {
+    function _liquityWithdraw(Params memory _params) internal returns (uint256, bytes memory) {
         BorrowerOperations.withdrawColl(_params.collAmount, _params.upperHint, _params.lowerHint);
 
         TokenUtils.depositWeth(_params.collAmount);
         TokenUtils.WETH_ADDR.withdrawTokens(_params.to, _params.collAmount);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "LiquityWithdraw",
-            abi.encode(_params.collAmount, _params.to)
-        );
-
-        return _params.collAmount;
+        bytes memory logData = abi.encode(_params.collAmount, _params.to);
+        return (_params.collAmount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

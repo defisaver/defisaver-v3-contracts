@@ -61,15 +61,7 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, Balance
             _taskData
         );
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "FLBalancer",
-            abi.encode(
-                _params
-            )
-        );
-
+        emit ActionEvent("FLBalancer", abi.encode(_params));
         return _params.amounts[0];
     }
 

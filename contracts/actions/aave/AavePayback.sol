@@ -35,16 +35,16 @@ contract AavePayback is ActionBase, AaveHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[4], _subData, _returnValues);
         params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[5], _subData, _returnValues);
 
-        uint256 paybackAmount = _payback(params.market, params.tokenAddr, params.amount, params.rateMode, params.from, params.onBehalf);
-
+        (uint256 paybackAmount, bytes memory logData) = _payback(params.market, params.tokenAddr, params.amount, params.rateMode, params.from, params.onBehalf);
+        emit ActionEvent("AavePayback", logData);
         return bytes32(paybackAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-
-        _payback(params.market, params.tokenAddr, params.amount, params.rateMode, params.from, params.onBehalf);
+        (, bytes memory logData) = _payback(params.market, params.tokenAddr, params.amount, params.rateMode, params.from, params.onBehalf);
+        logger.logActionDirectEvent("AavePayback", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -69,7 +69,7 @@ contract AavePayback is ActionBase, AaveHelper {
         uint256 _rateMode,
         address _from,
         address _onBehalf
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         // default to onBehalf of proxy
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
@@ -91,14 +91,15 @@ contract AavePayback is ActionBase, AaveHelper {
         // send back any leftover tokens that weren't used in the repay
         _tokenAddr.withdrawTokens(_from, tokensAfter);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "AavePayback",
-            abi.encode(_market, _tokenAddr, _amount, _rateMode, _from, _onBehalf)
+        bytes memory logData = abi.encode(
+            _market,
+            _tokenAddr,
+            _amount,
+            _rateMode,
+            _from,
+            _onBehalf
         );
-
-        return (tokensBefore - tokensAfter);
+        return (tokensBefore - tokensAfter, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

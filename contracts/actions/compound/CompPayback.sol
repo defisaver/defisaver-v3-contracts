@@ -33,16 +33,16 @@ contract CompPayback is ActionBase, CompHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
         params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
 
-        uint256 withdrawAmount = _payback(params.cTokenAddr, params.amount, params.from, params.onBehalf);
-
+        (uint256 withdrawAmount, bytes memory logData) = _payback(params.cTokenAddr, params.amount, params.from, params.onBehalf);
+        emit ActionEvent("CompPayback", logData);
         return bytes32(withdrawAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-
-        _payback(params.cTokenAddr, params.amount, params.from, params.onBehalf);
+        (, bytes memory logData) = _payback(params.cTokenAddr, params.amount, params.from, params.onBehalf);
+        logger.logActionDirectEvent("CompPayback", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -63,7 +63,7 @@ contract CompPayback is ActionBase, CompHelper {
         uint256 _amount,
         address _from,
         address _onBehalf
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
         // default to onBehalf of proxy
@@ -87,9 +87,8 @@ contract CompPayback is ActionBase, CompHelper {
             ICToken(_cTokenAddr).repayBorrowBehalf{value: _amount}(_onBehalf); // reverts on fail
         }
 
-        logger.Log(address(this), msg.sender, "CompPayback", abi.encode(tokenAddr, _amount, _from, _onBehalf));
-
-        return _amount;
+        bytes memory logData = abi.encode(tokenAddr, _amount, _from, _onBehalf);
+        return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

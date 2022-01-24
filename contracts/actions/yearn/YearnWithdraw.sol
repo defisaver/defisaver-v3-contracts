@@ -39,15 +39,16 @@ contract YearnWithdraw is ActionBase {
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        uint256 amountReceived = _yearnWithdraw(inputData);
+        (uint256 amountReceived, bytes memory logData) = _yearnWithdraw(inputData);
+        emit ActionEvent("YearnWithdraw", logData);
         return (bytes32(amountReceived));
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _yearnWithdraw(inputData);
+        (, bytes memory logData) = _yearnWithdraw(inputData);
+        logger.logActionDirectEvent("YearWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -59,7 +60,7 @@ contract YearnWithdraw is ActionBase {
 
     function _yearnWithdraw(Params memory _inputData)
         internal
-        returns (uint256 tokenAmountReceived)
+        returns (uint256 tokenAmountReceived, bytes memory logData)
     {
         IYVault vault = IYVault(_inputData.yToken);
 
@@ -77,12 +78,7 @@ contract YearnWithdraw is ActionBase {
 
         underlyingToken.withdrawTokens(_inputData.to, tokenAmountReceived);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "YearnWithdraw",
-            abi.encode(_inputData, tokenAmountReceived)
-        );
+        logData = abi.encode(_inputData, tokenAmountReceived);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {

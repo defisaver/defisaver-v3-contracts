@@ -36,16 +36,17 @@ contract UniMintV3 is ActionBase, UniV3Helper{
 
         uniData.amount0Desired = _parseParamUint(uniData.amount0Desired, _paramMapping[0], _subData, _returnValues);
         uniData.amount1Desired = _parseParamUint(uniData.amount1Desired, _paramMapping[1], _subData, _returnValues);
-        uint256 tokenId = _uniCreatePosition(uniData);
 
+        (uint256 tokenId, bytes memory logData) = _uniCreatePosition(uniData);
+        emit ActionEvent("UniMintV3", logData);
         return bytes32(tokenId);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory uniData = parseInputs(_callData);
-        _uniCreatePosition(uniData);
-        
+        (, bytes memory logData) = _uniCreatePosition(uniData);
+        logger.logActionDirectEvent("UniMintV3", logData);
     }
     
     /// @inheritdoc ActionBase
@@ -55,7 +56,7 @@ contract UniMintV3 is ActionBase, UniV3Helper{
     
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _uniCreatePosition(Params memory _uniData) internal returns (uint256 tokenId){
+    function _uniCreatePosition(Params memory _uniData) internal returns (uint256 tokenId, bytes memory logData){
             // fetch tokens from address;
             uint amount0Pulled = _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);        
             uint amount1Pulled = _uniData.token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
@@ -76,12 +77,7 @@ contract UniMintV3 is ActionBase, UniV3Helper{
             _uniData.token0.withdrawTokens(_uniData.from, _uniData.amount0Desired - amount0);
             _uniData.token1.withdrawTokens(_uniData.from, _uniData.amount1Desired - amount1);
             
-            logger.Log(
-                address(this),
-                msg.sender,
-                "UniMintV3",
-                abi.encode(_uniData, tokenId, liquidity, amount0, amount1)
-            );
+            logData = abi.encode(_uniData, tokenId, liquidity, amount0, amount1);
     }
 
     /// @dev mints new NFT that represents a position with selected parameters

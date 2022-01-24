@@ -29,16 +29,16 @@ contract DyDxSupply is ActionBase, DyDxHelper {
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
 
-        uint256 supplyAmount = _supply(params.tokenAddr, params.amount, params.from);
-
-        return bytes32(supplyAmount);
+        (uint256 suppliedAmount, bytes memory logData) = _supply(params.tokenAddr, params.amount, params.from);
+        emit ActionEvent("DyDxSupply", logData);
+        return bytes32(suppliedAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-
-        _supply(params.tokenAddr, params.amount, params.from);
+        (, bytes memory logData) = _supply(params.tokenAddr, params.amount, params.from);
+        logger.logActionDirectEvent("DyDxSupply", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -57,7 +57,7 @@ contract DyDxSupply is ActionBase, DyDxHelper {
         address _tokenAddr,
         uint256 _amount,
         address _from
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
 
         // if amount is set to max, take the whole _from balance
         if (_amount == type(uint256).max) {
@@ -93,14 +93,8 @@ contract DyDxSupply is ActionBase, DyDxHelper {
 
         soloMargin.operate(accounts, actions);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "DyDxSupply",
-            abi.encode(_tokenAddr, _amount, _from)
-        );
-
-        return _amount;
+        bytes memory logData = abi.encode(_tokenAddr, _amount, _from);
+        return (_amount, logData);
     }
 
   function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

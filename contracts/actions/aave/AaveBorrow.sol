@@ -33,16 +33,16 @@ contract AaveBorrow is ActionBase, AaveHelper {
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
         params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[5], _subData, _returnValues);
 
-        uint256 borrowAmount = _borrow(params.market, params.tokenAddr, params.amount, params.rateMode, params.to, params.onBehalf);
-
+        (uint256 borrowAmount, bytes memory logData) = _borrow(params.market, params.tokenAddr, params.amount, params.rateMode, params.to, params.onBehalf);
+        emit ActionEvent("AaveBorrow", logData);
         return bytes32(borrowAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-
-        _borrow(params.market, params.tokenAddr, params.amount, params.rateMode, params.to, params.onBehalf);
+        (, bytes memory logData) = _borrow(params.market, params.tokenAddr, params.amount, params.rateMode, params.to, params.onBehalf);
+        logger.logActionDirectEvent("AaveBorrow", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -66,7 +66,7 @@ contract AaveBorrow is ActionBase, AaveHelper {
         uint256 _rateMode,
         address _to,
         address _onBehalf
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         ILendingPoolV2 lendingPool = getLendingPool(_market);
         // defaults to onBehalf of proxy
         if (_onBehalf == address(0)) {
@@ -77,14 +77,15 @@ contract AaveBorrow is ActionBase, AaveHelper {
 
         _amount = _tokenAddr.withdrawTokens(_to, _amount);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "AaveBorrow",
-            abi.encode(_market, _tokenAddr, _amount, _rateMode, _to, _onBehalf)
+        bytes memory logData = abi.encode(
+            _market,
+            _tokenAddr,
+            _amount,
+            _rateMode,
+            _to,
+            _onBehalf
         );
-
-        return _amount;
+        return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

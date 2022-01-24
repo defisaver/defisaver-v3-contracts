@@ -35,15 +35,16 @@ contract BalancerV2Supply is ActionBase, BalancerV2Helper {
             inputData.maxAmountsIn[i] = _parseParamUint(inputData.maxAmountsIn[i], _paramMapping[2+i], _subData, _returnValues);
         }
 
-        uint256 poolLPTokensReceived = _balancerSupply(inputData);
+        (uint256 poolLPTokensReceived, bytes memory logData) = _balancerSupply(inputData);
+        emit ActionEvent("BalancerV2Supply", logData);
         return bytes32(poolLPTokensReceived);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _balancerSupply(inputData);
+        (, bytes memory logData) = _balancerSupply(inputData);
+        logger.logActionDirectEvent("BalancerV2Supply", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -53,7 +54,7 @@ contract BalancerV2Supply is ActionBase, BalancerV2Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _balancerSupply(Params memory _inputData) internal returns (uint256 poolLPTokensReceived) {
+    function _balancerSupply(Params memory _inputData) internal returns (uint256 poolLPTokensReceived, bytes memory logData) {
         require(_inputData.to != address(0), ADDR_MUST_NOT_BE_ZERO);
         address poolAddress = _getPoolAddress(_inputData.poolId);
         uint256 poolLPTokensBefore = poolAddress.getBalance(_inputData.to);
@@ -81,12 +82,7 @@ contract BalancerV2Supply is ActionBase, BalancerV2Helper {
         uint256 poolLPTokensAfter = poolAddress.getBalance(_inputData.to);
         poolLPTokensReceived = poolLPTokensAfter - poolLPTokensBefore;
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "BalancerV2Supply",
-            abi.encode(_inputData, tokenBalances, poolLPTokensReceived)
-        );
+        logData = abi.encode(_inputData, tokenBalances, poolLPTokensReceived);
     }
 
     function _prepareTokensForPoolJoin(Params memory _inputData) internal {
