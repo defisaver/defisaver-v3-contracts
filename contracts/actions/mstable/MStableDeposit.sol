@@ -40,17 +40,19 @@ contract MStableDeposit is ActionBase, MStableHelper {
             _parseParamUint(uint256(params.assetPair), _paramMapping[8], _subData, _returnValues)
         );
         
-        uint256 deposited = _mStableDeposit(params);
+        (uint256 deposited, bytes memory logData) = _mStableDeposit(params);
+        emit ActionEvent("MStableDeposit", logData);
         return bytes32(deposited);
     }
 
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        _mStableDeposit(params);
+        (, bytes memory logData) = _mStableDeposit(params);
+        logger.logActionDirectEvent("MStableDeposit", logData);
     }
     
     /// @notice Action that deposits an entry asset and withdraws an exit asset from mStable
-    function _mStableDeposit(Params memory _params) internal returns (uint256) {
+    function _mStableDeposit(Params memory _params) internal returns (uint256, bytes memory) {
         require(_params.to != address(0), "Recipient can't be address(0)");
         
         AssetPair assetPair = _params.assetPair;
@@ -89,16 +91,8 @@ contract MStableDeposit is ActionBase, MStableHelper {
             amount = _stakeImAsset(_params.saveAddress, _params.vaultAddress, amount, _params.to);
         }
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "MStableDeposit",
-            abi.encode(
-                amount
-            )
-        );
-
-        return amount;
+        bytes memory logData = abi.encode(amount);
+        return (amount, logData);
     }
 
     function actionType() public pure override returns (uint8) {

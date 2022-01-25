@@ -48,7 +48,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-        (uint256 received, bytes memory logData) = _curveDeposit(params);
+        (, bytes memory logData) = _curveDeposit(params);
         logger.logActionDirectEvent("CurveDeposit", logData);
     }
 

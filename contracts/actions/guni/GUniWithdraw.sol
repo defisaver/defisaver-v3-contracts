@@ -38,16 +38,16 @@ contract GUniWithdraw is ActionBase, DSMath, GUniHelper {
 
         inputData.burnAmount = _parseParamUint(inputData.burnAmount, _paramMapping[0], _subData, _returnValues);
 
-        uint256 liquidityBurnt = gUniWithdraw(inputData);
-
+        (uint256 liquidityBurnt, bytes memory logData) = gUniWithdraw(inputData);
+        emit ActionEvent("GUniWithdraw", logData);
         return bytes32(liquidityBurnt);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        gUniWithdraw(inputData);
+        (, bytes memory logData) = gUniWithdraw(inputData);
+        logger.logActionDirectEvent("GUniWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -57,7 +57,7 @@ contract GUniWithdraw is ActionBase, DSMath, GUniHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function gUniWithdraw(Params memory _inputData) internal returns (uint128) {
+    function gUniWithdraw(Params memory _inputData) internal returns (uint128, bytes memory) {
         require (_inputData.to != address(0x0), "Can not send to burn address");
 
         _inputData.burnAmount = _inputData.pool.pullTokensIfNeeded(_inputData.from, _inputData.burnAmount);
@@ -67,9 +67,8 @@ contract GUniWithdraw is ActionBase, DSMath, GUniHelper {
         (uint256 amount0, uint256 amount1, uint128 liquidityBurnt) = gUniRouter.removeLiquidity(_inputData.pool, _inputData.burnAmount, _inputData.amount0Min, _inputData.amount1Min, _inputData.to);
         /// @dev amountToBurn will always be burnt, so no need to send back any leftovers 
 
-        logger.Log(address(this), msg.sender, "GUniWithdraw", abi.encode(_inputData, amount0, amount1, liquidityBurnt));
-        
-        return liquidityBurnt;
+        bytes memory logData = abi.encode(_inputData, amount0, amount1, liquidityBurnt);
+        return (liquidityBurnt, logData);
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
