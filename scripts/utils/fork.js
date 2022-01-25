@@ -25,7 +25,7 @@ const topUp = async (account) => {
         'X-Access-Key': process.env.TENDERLY_ACCESS_KEY,
     };
 
-    const body = { accounts: [account] };
+    const body = { accounts: [account], amount: 100000 };
 
     await axios.post(`https://api.tenderly.co/api/v1/account/defisaver-v2/project/strategies/fork/${process.env.FORK_ID}/balance`, body, { headers });
 };

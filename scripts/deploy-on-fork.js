@@ -34,7 +34,7 @@ async function main() {
 
     await changeConstantInFiles(
         './contracts',
-        ['MainnetActionsUtilAddresses'],
+        ['MainnetActionsUtilAddresses', 'MainnetCoreAddresses'],
         'REGISTRY_ADDR',
         reg.address,
     );
@@ -91,7 +91,7 @@ async function main() {
 
     await changeConstantInFiles(
         './contracts',
-        ['MainnetActionsUtilAddresses'],
+        ['MainnetActionsUtilAddresses', 'MainnetCoreAddresses'],
         'REGISTRY_ADDR',
         MAINNET_REGISTRY,
     );
@@ -100,6 +100,7 @@ async function main() {
 
     console.log('Contract addresses');
     console.log(`
+        DFSRegistry: ${reg.address}
         SubStorage: ${subStorage.address}
         BundleStorage: ${bundleStorage.address}
         StrategyStorage: ${strategyStorage.address}
