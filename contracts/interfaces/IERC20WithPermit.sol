@@ -2,7 +2,7 @@
 
 pragma solidity =0.7.6;
 
-interface IERC20W2612 {
+interface IERC20WithPermit {
     function name() external view returns (string memory);
     function symbol() external view returns (string memory);
     function decimals() external view returns (uint256 digits);

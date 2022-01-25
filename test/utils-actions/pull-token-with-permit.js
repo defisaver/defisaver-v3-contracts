@@ -12,7 +12,7 @@ const {
     DAI_ADDR,
 } = require('../utils');
 
-describe('Pull-Token', function () {
+describe('Pull-Token-Permit', function () {
     this.timeout(80000);
 
     let senderAcc; let proxy;
@@ -23,9 +23,10 @@ describe('Pull-Token', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
     });
-    it('... should pull aDAI with permit - direct action', async () => {
+    it('... should pull 1000 aDAI with permit - direct action', async () => {
         const amount = hre.ethers.utils.parseUnits('1000', 18);
-        const deadline = '1743034755';
+        // this will work for years, current timestamp = 1743034755
+        const deadline = '91743034755';
 
         const domain = {
             name: 'Aave interest bearing DAI',
@@ -42,7 +43,7 @@ describe('Pull-Token', function () {
                 { name: 'deadline', type: 'uint256' },
             ],
         };
-        const aDaiContract = await hre.ethers.getContractAt('IERC20W2612', ADAI_ADDR);
+        const aDaiContract = await hre.ethers.getContractAt('IERC20WithPermit', ADAI_ADDR);
         // eslint-disable-next-line no-underscore-dangle
         const nonce = await aDaiContract._nonces(senderAcc.address);
         const value = {
@@ -50,7 +51,7 @@ describe('Pull-Token', function () {
             spender: proxy.address,
             value: amount,
             nonce,
-            deadline: '1743034755',
+            deadline,
         };
         // eslint-disable-next-line no-underscore-dangle
         const rawSignature = await senderAcc._signer._signTypedData(domain, types, value);
@@ -78,7 +79,7 @@ describe('Pull-Token', function () {
 
         expect(proxyBalanceAfter).to.be.gt(proxyBalanceBefore);
     });
-    it('... should pull DAI with permit direct action', async () => {
+    it('... should pull 1000 DAI with permit - direct action', async () => {
         const amount = hre.ethers.utils.parseUnits('1000', 18);
         const deadline = 0;
 
@@ -97,7 +98,7 @@ describe('Pull-Token', function () {
                 { name: 'allowed', type: 'bool' },
             ],
         };
-        const daiContract = await hre.ethers.getContractAt('IERC20W2612', DAI_ADDR);
+        const daiContract = await hre.ethers.getContractAt('IERC20WithPermit', DAI_ADDR);
         const nonce = await daiContract.nonces(senderAcc.address);
         const value = {
             holder: senderAcc.address,

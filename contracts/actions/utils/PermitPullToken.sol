@@ -6,12 +6,24 @@ pragma experimental ABIEncoderV2;
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
-import "../../interfaces/IERC20W2612.sol";
+import "../../interfaces/IERC20WithPermit.sol";
 
-/// @title Helper action to pull a token from the specified address
+/// @title Helper action to pull a token from the specified address without the need for approval tx beforehand
+/// @notice only available for tokens that implement permit function (EIP2612)
+/// @notice only available where the address from which we pull tokens is EOA
 contract PermitPullToken is ActionBase {
+
+    address public constant DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+
     using TokenUtils for address;
 
+    /// @param tokenAddr address of the token to pull
+    /// @param from address from which we're pulling the token (must be EOA)
+    /// @param amount amound of tokens we're pulling to proxy
+    /// @param deadline timestamp until which approval is valid
+    /// @param v part of ECDSA signature
+    /// @param r part of ECDSA signature
+    /// @param s part of ECDSA signature
     struct Params {
         address tokenAddr;
         address from;
@@ -52,11 +64,12 @@ contract PermitPullToken is ActionBase {
 
     /// @notice Pulls a token from the specified addr, doesn't work with ETH
     /// @dev If amount is type(uint).max it will send _inputData.from token balance
+    /// @dev If tokenAddr is DAI it will use different type of permit
     function _pullToken(Params memory _inputParams) internal returns (uint256 amountPulled) {
-        address DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+        
         if (_inputParams.tokenAddr == DAI_ADDR) {
-            uint256 nonce = IERC20W2612(DAI_ADDR).nonces(_inputParams.from);
-            IERC20W2612(DAI_ADDR).permit(
+            uint256 nonce = IERC20WithPermit(DAI_ADDR).nonces(_inputParams.from);
+            IERC20WithPermit(DAI_ADDR).permit(
                 _inputParams.from,
                 address(this),
                 nonce,
@@ -67,7 +80,7 @@ contract PermitPullToken is ActionBase {
                 _inputParams.s
             );
         } else {
-            IERC20W2612(_inputParams.tokenAddr).permit(
+            IERC20WithPermit(_inputParams.tokenAddr).permit(
                 _inputParams.from,
                 address(this),
                 _inputParams.amount,
