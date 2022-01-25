@@ -10,6 +10,8 @@ const { redeploy, OWNER_ACC } = require('../test/utils');
 
 const { topUp } = require('./utils/fork.js');
 
+const { createYearnRepayStrategy, createRariRepayStrategy, createMstableRepayStrategy } = require('../test/strategies');
+
 const MAINNET_VAULT = '0xCCf3d848e08b94478Ed8f46fFead3008faF581fD';
 const MAINNET_REGISTRY = '0xD5cec8F03f803A74B60A7603Ed13556279376b09';
 
@@ -41,9 +43,9 @@ async function main() {
 
     // core
     await redeploy('RecipeExecutor', reg.address);
-    await redeploy('StrategyStorage', reg.address);
-    await redeploy('SubStorage', reg.address);
-    await redeploy('BundleStorage', reg.address);
+    const strategyStorage = await redeploy('StrategyStorage', reg.address);
+    const subStorage = await redeploy('SubStorage', reg.address);
+    const bundleStorage = await redeploy('BundleStorage', reg.address);
     await redeploy('SubProxy', reg.address);
     await redeploy('StrategyProxy', reg.address);
     await redeploy('StrategyExecutor', reg.address);
@@ -57,6 +59,8 @@ async function main() {
 
     // exchange
     await redeploy('DFSSell', reg.address);
+
+    const strategyTriggerView = await redeploy('StrategyTriggerView', reg.address);
 
     // mstable
     await redeploy('MStableDeposit', reg.address);
@@ -73,7 +77,14 @@ async function main() {
     await redeploy('McdView', reg.address);
     await redeploy('McdRatioTrigger', reg.address);
 
-    // create strategies
+    // SS style strategies
+    await strategyStorage.createStrategy(...(createYearnRepayStrategy()), true);
+    await strategyStorage.createStrategy(...(createMstableRepayStrategy()), true);
+    await strategyStorage.createStrategy(...(createRariRepayStrategy()), true);
+
+    const strategyCount = await strategyStorage.getStrategyCount();
+
+    console.log(`Created ${strategyCount.toString()} new strategies`);
 
     // switch back admin auth addr
     await changeConstantInFiles('./contracts', ['MainnetAuthAddresses'], 'ADMIN_VAULT_ADDR', MAINNET_VAULT);
@@ -86,6 +97,14 @@ async function main() {
     );
 
     await run('compile');
+
+    console.log('Contract addresses');
+    console.log(`
+        SubStorage: ${subStorage.address}
+        BundleStorage: ${bundleStorage.address}
+        StrategyStorage: ${strategyStorage.address}
+        StrategyTriggerView: ${strategyTriggerView.address}
+    `);
 
     process.exit(0);
 }
