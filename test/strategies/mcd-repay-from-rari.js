@@ -1,8 +1,6 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const dfs = require('@defisaver/sdk');
-
 const {
     getProxy,
     redeploy,
@@ -23,7 +21,9 @@ const {
 
 const { getRatio } = require('../utils-mcd');
 
-const { subMcdRepayStrategy, callMcdRepayFromRariStrategy } = require('../strategies');
+const { callMcdRepayFromRariStrategy } = require('../strategy-calls');
+const { subMcdRepayStrategy } = require('../strategy-subs');
+const { createRariRepayStrategy } = require('../strategies');
 
 const { openVault, rariDeposit } = require('../actions');
 
@@ -60,7 +60,6 @@ describe('Mcd-Repay-Rari-Strategy', function () {
         await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');
         await redeploy('McdRatioCheck');
-        await redeploy('GasFeeTaker');
         strategyExecutor = await redeploy('StrategyExecutor');
 
         await redeploy('McdSupply');
@@ -79,47 +78,8 @@ describe('Mcd-Repay-Rari-Strategy', function () {
         proxy = await getProxy(senderAcc.address);
     });
 
-    const createRepayStrategy = () => {
-        const repayStrategy = new dfs.Strategy('McdRariRepayStrategy');
-
-        repayStrategy.addSubSlot('&vaultId', 'uint256');
-        repayStrategy.addSubSlot('&targetRatio', 'uint256');
-
-        const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
-        repayStrategy.addTrigger(mcdRatioTrigger);
-
-        // TODO: enforce Dai?
-
-        const rariWithdrawAction = new dfs.actions.rari.RariWithdrawAction(
-            '%fundManager',
-            '%poolTokenAddress',
-            '%poolTokensAmountToPull',
-            '&proxy',
-            '%stablecoinAddress',
-            '%stablecoinAmountToWithdraw',
-            '&proxy',
-        );
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '0', '%daiAddr', '$1',
-        );
-
-        const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
-            '&vaultId',
-            '$2',
-            '&proxy',
-            '%mcdManager',
-        );
-
-        repayStrategy.addAction(rariWithdrawAction);
-        repayStrategy.addAction(feeTakingAction);
-        repayStrategy.addAction(mcdPaybackAction);
-
-        return repayStrategy.encodeForDsProxyCall();
-    };
-
     it('... should create repay strategy using rari funds', async () => {
-        const repayStrategyEncoded = createRepayStrategy();
+        const repayStrategyEncoded = createRariRepayStrategy();
 
         await createStrategy(proxy, ...repayStrategyEncoded, true);
     });

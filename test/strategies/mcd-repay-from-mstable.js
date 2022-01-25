@@ -1,8 +1,6 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const dfs = require('@defisaver/sdk');
-
 const {
     getProxy,
     redeploy,
@@ -27,7 +25,9 @@ const {
 
 const { getRatio } = require('../utils-mcd');
 
-const { subMcdRepayStrategy, callMcdRepayFromMstableStrategy } = require('../strategies');
+const { callMcdRepayFromMstableStrategy } = require('../strategy-calls');
+const { subMcdRepayStrategy } = require('../strategy-subs');
+const { createMstableRepayStrategy } = require('../strategies');
 
 const { openVault, mStableDeposit } = require('../actions');
 
@@ -63,7 +63,6 @@ describe('Mcd-Repay-Mstable-Strategy', function () {
         await redeploy('StrategyProxy');
         await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');
-        await redeploy('McdRatioCheck');
         await redeploy('GasFeeTaker');
         strategyExecutor = await redeploy('StrategyExecutor');
 
@@ -83,49 +82,8 @@ describe('Mcd-Repay-Mstable-Strategy', function () {
         proxy = await getProxy(senderAcc.address);
     });
 
-    const createRepayStrategy = () => {
-        const repayStrategy = new dfs.Strategy('McdMstableRepayStrategy');
-
-        repayStrategy.addSubSlot('&vaultId', 'uint256');
-        repayStrategy.addSubSlot('&targetRatio', 'uint256');
-
-        const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
-        repayStrategy.addTrigger(mcdRatioTrigger);
-
-        const mstableWithdrawAction = new dfs.actions.mstable.MStableWithdrawAction(
-            '%bAsset',
-            '%mAsset',
-            '%saveAddress',
-            '%vaultAddress',
-            '&proxy',
-            '&proxy',
-            '%amount',
-            '%minOut',
-            '%assetPair',
-        );
-
-        // TODO: Must pipe dai into next action?
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '0', '%daiAddr', '$1',
-        );
-
-        const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
-            '&vaultId',
-            '$2',
-            '&proxy',
-            '%mcdManager',
-        );
-
-        repayStrategy.addAction(mstableWithdrawAction);
-        repayStrategy.addAction(feeTakingAction);
-        repayStrategy.addAction(mcdPaybackAction);
-
-        return repayStrategy.encodeForDsProxyCall();
-    };
-
     it('... should create repay strategy using mstable funds', async () => {
-        const repayStrategyEncoded = createRepayStrategy();
+        const repayStrategyEncoded = createMstableRepayStrategy();
 
         await createStrategy(proxy, ...repayStrategyEncoded, true);
     });

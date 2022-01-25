@@ -1,16 +1,12 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const dfs = require('@defisaver/sdk');
-
-const { getAssetInfo, ilks } = require('@defisaver/tokens');
+const { ilks } = require('@defisaver/tokens');
 
 const {
     getProxy,
     redeploy,
     fetchAmountinUSDPrice,
-    formatExchangeObj,
-    nullAddress,
     getAddrFromRegistry,
     WETH_ADDRESS,
     ETH_ADDR,
@@ -21,18 +17,17 @@ const {
 
 const { createStrategy, addBotCaller } = require('../utils-strategies');
 
-const { subMcdCloseStrategy, callMcdCloseStrategy } = require('../strategies');
+const { subMcdCloseStrategy } = require('../strategy-calls');
+const { callMcdCloseStrategy } = require('../strategy-subs');
+const { createMcdCloseStrategy } = require('../strategies');
 
 const { openVault } = require('../actions');
-
-const { fetchMakerAddresses } = require('../utils-mcd');
 
 describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to recipient)', function () {
     this.timeout(120000);
     const ethJoin = ilks[0].join;
     let senderAcc;
     let proxy;
-    let makerAddresses;
     let botAcc;
     let strategyExecutor;
     let vaultId;
@@ -73,12 +68,9 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         await addBotCaller(botAcc.address);
         dydxFlAddr = await getAddrFromRegistry('FLDyDx');
         proxy = await getProxy(senderAcc.address);
-
-        makerAddresses = await fetchMakerAddresses();
     });
 
     it('... should make a new strategy that closes CDP when price hits a point, transfers ETH to DAI, repays debt, transfers all remaining DAI to user', async () => {
-        const tokenData = getAssetInfo('WETH');
         const vaultColl = fetchAmountinUSDPrice('WETH', '40000');
         const amountDai = fetchAmountinUSDPrice('DAI', '18000');
         vaultId = await openVault(
@@ -93,66 +85,8 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         flAmount = (parseFloat(amountDai) + 1).toString();
         flAmount = hre.ethers.utils.parseUnits(flAmount, 18);
 
-        const mcdCloseStrategy = new dfs.Strategy('MakerCloseStrategy');
-        mcdCloseStrategy.addSubSlot('&vaultId', 'uint256');
-        mcdCloseStrategy.addSubSlot('&recipient', 'address');
-
-        const chainLinkPriceTrigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
-        mcdCloseStrategy.addTrigger(chainLinkPriceTrigger);
-        console.log(flAmount.toString());
-        mcdCloseStrategy.addAction(
-            new dfs.actions.flashloan.DyDxFlashLoanAction(
-                '%loanAmount',
-                '%daiAddr',
-                nullAddress,
-                [],
-            ),
-        );
-        mcdCloseStrategy.addAction(
-            new dfs.actions.maker.MakerPaybackAction(
-                '&vaultId',
-                '%daiAmountToPayback(maxUint)',
-                '&proxy',
-                '%mcdManager',
-            ),
-        );
-        mcdCloseStrategy.addAction(
-            new dfs.actions.maker.MakerWithdrawAction(
-                '&vaultId',
-                '%ethAmountToWithdraw(maxUint)',
-                '%ethJoin',
-                '&proxy',
-                '%mcdManager',
-            ),
-        );
-        mcdCloseStrategy.addAction(
-            new dfs.actions.basic.SellAction(
-                formatExchangeObj(
-                    '%wethAddr',
-                    '%daiAddr',
-                    '%amountToSell(maxUint)',
-                    '%exchangeWrapper',
-                ),
-                '&proxy',
-                '&proxy',
-            ),
-        );
-        mcdCloseStrategy.addAction(
-            new dfs.actions.basic.SendTokenAction(
-                '%daiAddr',
-                '%dydxFlAddr',
-                '%amountToPayback',
-            ),
-        );
-        mcdCloseStrategy.addAction(
-            new dfs.actions.basic.SendTokenAction(
-                '%daiAddr',
-                '&recipient',
-                '%amountToRecipient(maxUint)',
-            ),
-        );
-        const callData = mcdCloseStrategy.encodeForDsProxyCall();
-        await createStrategy(proxy, ...callData, false);
+        const strategyData = createMcdCloseStrategy();
+        await createStrategy(proxy, ...strategyData, false);
 
         const currPrice = await getChainLinkPrice(ETH_ADDR);
 

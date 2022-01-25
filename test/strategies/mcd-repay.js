@@ -1,16 +1,12 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const dfs = require('@defisaver/sdk');
-
 const { ilks } = require('@defisaver/tokens');
 
 const {
     getProxy,
     redeploy,
     fetchAmountinUSDPrice,
-    formatExchangeObj,
-    WETH_ADDRESS,
 } = require('../utils');
 
 const {
@@ -22,7 +18,9 @@ const {
 
 const { getRatio } = require('../utils-mcd');
 
-const { subMcdRepayStrategy, callMcdRepayStrategy, callFLMcdRepayStrategy } = require('../strategies');
+const { callMcdRepayStrategy, callFLMcdRepayStrategy } = require('../strategy-calls');
+const { subMcdRepayStrategy } = require('../strategy-subs');
+const { createRepayStrategy, createFLRepayStrategy } = require('../strategies');
 
 const { openVault } = require('../actions');
 
@@ -80,131 +78,6 @@ describe('Mcd-Repay-Strategy', function () {
 
         proxy = await getProxy(senderAcc.address);
     });
-
-    const createRepayStrategy = () => {
-        const repayStrategy = new dfs.Strategy('McdRepayStrategy');
-
-        repayStrategy.addSubSlot('&vaultId', 'uint256');
-        repayStrategy.addSubSlot('&targetRatio', 'uint256');
-
-        const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
-        repayStrategy.addTrigger(mcdRatioTrigger);
-
-        const ratioAction = new dfs.actions.maker.MakerRatioAction(
-            '&vaultId',
-        );
-
-        const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
-            '&vaultId',
-            '%withdrawAmount',
-            '%ethJoin',
-            '&proxy',
-            '%mcdManager',
-        );
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '0', '%wethAddr', '$2',
-        );
-
-        const sellAction = new dfs.actions.basic.SellAction(
-            formatExchangeObj(
-                '%wethAddr',
-                '%daiAddr',
-                '$3',
-                '%exchangeWrapper',
-            ),
-            '&proxy',
-            '&proxy',
-        );
-
-        const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
-            '&vaultId',
-            '$4',
-            '&proxy',
-            '%mcdManager',
-        );
-
-        const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
-            '%ratioState',
-            '%checkTarget',
-            '&targetRatio', // targetRatio
-            '&vaultId', // vaultId
-            '%ratioActionPositionInRecipe',
-        );
-
-        repayStrategy.addAction(ratioAction);
-        repayStrategy.addAction(withdrawAction);
-        repayStrategy.addAction(feeTakingAction);
-        repayStrategy.addAction(sellAction);
-        repayStrategy.addAction(mcdPaybackAction);
-        repayStrategy.addAction(mcdRatioCheckAction);
-
-        return repayStrategy.encodeForDsProxyCall();
-    };
-
-    const createFLRepayStrategy = () => {
-        const repayStrategy = new dfs.Strategy('MakerFLRepayStrategy');
-
-        repayStrategy.addSubSlot('&vaultId', 'uint256');
-        repayStrategy.addSubSlot('&targetRatio', 'uint256');
-
-        const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
-        repayStrategy.addTrigger(mcdRatioTrigger);
-
-        const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction('%amount', WETH_ADDRESS);
-
-        const ratioAction = new dfs.actions.maker.MakerRatioAction(
-            '&vaultId',
-        );
-
-        const sellAction = new dfs.actions.basic.SellAction(
-            formatExchangeObj(
-                '%wethAddr',
-                '%daiAddr',
-                '$1',
-                '%exchangeWrapper',
-            ),
-            '&proxy',
-            '&proxy',
-        );
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '0', '%daiAddr', '$3',
-        );
-
-        const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
-            '&vaultId',
-            '$4',
-            '&proxy',
-            '%mcdManager',
-        );
-
-        const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
-            '&vaultId',
-            '$1',
-            '%ethJoin',
-            '%flAddr',
-            '%mcdManager',
-        );
-
-        const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
-            '%ratioState',
-            '%checkTarget',
-            '&targetRatio', // targetRatio
-            '&vaultId', // vaultId
-            '%ratioActionPositionInRecipe',
-        );
-
-        repayStrategy.addAction(flAction);
-        repayStrategy.addAction(ratioAction);
-        repayStrategy.addAction(sellAction);
-        repayStrategy.addAction(feeTakingAction);
-        repayStrategy.addAction(mcdPaybackAction);
-        repayStrategy.addAction(withdrawAction);
-        repayStrategy.addAction(mcdRatioCheckAction);
-
-        return repayStrategy.encodeForDsProxyCall();
-    };
 
     it('... should create 2 repay strategies and create a bundle', async () => {
         const repayStrategyEncoded = createRepayStrategy();

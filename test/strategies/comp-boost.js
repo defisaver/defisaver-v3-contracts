@@ -1,15 +1,12 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const dfs = require('@defisaver/sdk');
-
 const { getAssetInfo, assetAmountInWei } = require('@defisaver/tokens');
 
 const {
     getProxy,
     redeploy,
     approve,
-    formatExchangeObj,
     fetchAmountinUSDPrice,
     depositToWeth,
     setNewExchangeWrapper,
@@ -22,7 +19,9 @@ const {
 
 const { createStrategy, addBotCaller } = require('../utils-strategies.js');
 
-const { subCompBoostStrategy, callCompBoostStrategy } = require('../strategies');
+const { callCompBoostStrategy } = require('../strategy-calls');
+const { subCompBoostStrategy } = require('../strategy-subs');
+const { createBoostStrategy } = require('../strategies');
 
 const { supplyComp, borrowComp } = require('../actions.js');
 
@@ -84,47 +83,8 @@ describe('Compound-Boost-Strategy', function () {
     });
 
     it('... should make a new Comp Boost strategy', async () => {
-        const compBoostStrategy = new dfs.Strategy('CompBoostStrategy');
-        compBoostStrategy.addSubSlot('&targetRatio', 'uint256');
-
-        const compRatioTrigger = new dfs.triggers.CompoundRatioTrigger('0', '0', '0');
-        compBoostStrategy.addTrigger(compRatioTrigger);
-
-        const compBorrowAction = new dfs.actions.compound.CompoundBorrowAction(
-            '%assetToBorrow',
-            '%amountToBorrw',
-            '&proxy',
-        );
-
-        const sellAction = new dfs.actions.basic.SellAction(
-            formatExchangeObj(
-                '%assetBorrowed',
-                '%assetWanted',
-                '$1',
-                '%wrapper',
-            ),
-            '&proxy',
-            '&proxy',
-        );
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '0', '%wethAddr', '$2',
-        );
-
-        const compSupplyAction = new dfs.actions.compound.CompoundSupplyAction(
-            'cAssetToSupply',
-            '$3',
-            '&proxy',
-            true,
-        );
-        compBoostStrategy.addAction(compBorrowAction);
-        compBoostStrategy.addAction(sellAction);
-        compBoostStrategy.addAction(feeTakingAction);
-        compBoostStrategy.addAction(compSupplyAction);
-
-        const callData = compBoostStrategy.encodeForDsProxyCall();
-
-        await createStrategy(proxy, ...callData, true);
+        const strategyData = createBoostStrategy();
+        await createStrategy(proxy, ...strategyData, true);
 
         targetRatio = hre.ethers.utils.parseUnits('2.1', '18');
         ratioOver = hre.ethers.utils.parseUnits('2.5', '18');

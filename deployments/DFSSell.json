@@ -602,6 +602,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"fork": {}
 	}
 }

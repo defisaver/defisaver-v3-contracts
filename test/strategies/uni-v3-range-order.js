@@ -1,8 +1,6 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const dfs = require('@defisaver/sdk');
-
 const { getAssetInfo } = require('@defisaver/tokens');
 
 const {
@@ -16,7 +14,9 @@ const {
 
 const { createStrategy, addBotCaller } = require('../utils-strategies');
 
-const { callUniV3RangeOrderStrategy, subUniV3RangeOrderStrategy } = require('../strategies');
+const { callUniV3RangeOrderStrategy } = require('../strategy-calls');
+const { subUniV3RangeOrderStrategy } = require('../strategy-subs');
+const { createUniV3RangeOrderStrategy } = require('../strategies');
 
 const { uniV3Mint } = require('../actions');
 
@@ -80,27 +80,8 @@ describe('Uni-v3-range-order strat', function () {
         console.log(`Liquidity after minting : ${position.liquidity.toString()}`);
         // mint univ3 NFT - nftOwner is senderAcc.address
 
-        const rangeOrderStrategy = new dfs.Strategy('UniV3RangeOrderStrategy');
-        rangeOrderStrategy.addSubSlot('&tokenId', 'uint256');
-        rangeOrderStrategy.addSubSlot('&recipient', 'address');
-
-        const univ3TickTrigger = new dfs.triggers.UniV3CurrentTickTrigger('0', '0');
-        rangeOrderStrategy.addTrigger(univ3TickTrigger);
-
-        const withdrawAction = new dfs.actions.uniswapV3.UniswapV3WithdrawAction(
-            '&tokenId',
-            '%liquidityAmount',
-            '%amount0Min',
-            '%amount1Min',
-            '%deadline',
-            '&recipient',
-            '%amount0Max',
-            '%amount1Max',
-            '%nftOwner',
-        );
-        rangeOrderStrategy.addAction(withdrawAction);
-        const callData = rangeOrderStrategy.encodeForDsProxyCall();
-        await createStrategy(proxy, ...callData, false);
+        const strategyData = createUniV3RangeOrderStrategy();
+        await createStrategy(proxy, ...strategyData, false);
         // Created strategy with three slots for user input when they subscribe
         // One trigger and recipe consisting of one action
 

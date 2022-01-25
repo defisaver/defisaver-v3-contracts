@@ -1,8 +1,6 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const dfs = require('@defisaver/sdk');
-
 const { getAssetInfo } = require('@defisaver/tokens');
 
 const {
@@ -15,11 +13,13 @@ const {
 
 const { createStrategy, addBotCaller } = require('../utils-strategies');
 
-const { subUniContinuousCollectStrategy, callUniV3CollectStrategy } = require('../strategies');
+const { callUniV3CollectStrategy } = require('../strategy-calls');
+const { subUniContinuousCollectStrategy } = require('../strategy-subs');
+const { createContinuousUniV3CollectStrategy } = require('../strategies');
 
 const { uniV3Mint } = require('../actions');
 
-describe('Uni-v3-range-order strat', function () {
+describe('Uni-v3-range-order strategy', function () {
     this.timeout(120000);
 
     let senderAcc;
@@ -80,26 +80,8 @@ describe('Uni-v3-range-order strat', function () {
         console.log(`Liquidity after minting : ${position.liquidity.toString()}`);
         // mint univ3 NFT - nftOwner is senderAcc.address
 
-        const continuousUniV3Strat = new dfs.Strategy('Continuous-UniV3-Collect-Strategy');
-        continuousUniV3Strat.addSubSlot('&tokenId', 'uint256');
-        continuousUniV3Strat.addSubSlot('&recipient', 'address');
-
-        const timestampTrigger = new dfs.triggers.TimestampTrigger('0');
-        continuousUniV3Strat.addTrigger(timestampTrigger);
-
-        const gasTrigger = new dfs.triggers.GasPriceTrigger('0');
-        continuousUniV3Strat.addTrigger(gasTrigger);
-
-        const collectAction = new dfs.actions.uniswapV3.UniswapV3CollectAction(
-            '&tokenId',
-            '&recipient',
-            '%amount0Max',
-            '%amount1Max',
-            '%nftOwner',
-        );
-        continuousUniV3Strat.addAction(collectAction);
-        const callData = continuousUniV3Strat.encodeForDsProxyCall();
-        await createStrategy(proxy, ...callData, true);
+        const strategyData = createContinuousUniV3CollectStrategy();
+        await createStrategy(proxy, ...strategyData, true);
         // Created strategy with three slots for user input when they subscribe
         // One trigger and recipe consisting of one action
 

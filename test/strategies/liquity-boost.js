@@ -1,13 +1,10 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const dfs = require('@defisaver/sdk');
-
 const {
     getProxy,
     redeploy,
     fetchAmountinUSDPrice,
-    formatExchangeObj,
     Float2BN,
     depositToWeth,
     send,
@@ -18,7 +15,9 @@ const { createStrategy, addBotCaller, createBundle } = require('../utils-strateg
 
 const { getRatio } = require('../utils-liquity.js');
 
-const { subLiquityBoostStrategy, callLiquityBoostStrategy, callLiquityFLBoostStrategy } = require('../strategies');
+const { callLiquityBoostStrategy, callLiquityFLBoostStrategy } = require('../strategy-calls');
+const { subLiquityBoostStrategy } = require('../strategy-subs');
+const { createLiquityBoostStrategy, createLiquityFLBoostStrategy } = require('../strategies');
 
 const { liquityOpen } = require('../actions');
 
@@ -38,101 +37,6 @@ describe('Liquity-Boost-Bundle', function () {
 
     const maxFeePercentage = Float2BN('5', 16);
     const collAmount = Float2BN(fetchAmountinUSDPrice('WETH', '30000'));
-
-    const createLiquityBoostStrategy = () => {
-        const liquityBoostStrategy = new dfs.Strategy('LiquityBoostStrategy');
-        liquityBoostStrategy.addSubSlot('&maxFeePercentage', 'uint256');
-        liquityBoostStrategy.addSubSlot('&targetRatio', 'uint256');
-
-        const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
-        liquityBoostStrategy.addTrigger(liquityRatioTrigger);
-
-        const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
-            '&maxFeePercentage',
-            '%boostAmount',
-            '&proxy',
-            '%upperHint',
-            '%lowerHint',
-        );
-
-        const sellAction = new dfs.actions.basic.SellAction(
-            formatExchangeObj(
-                '%lusdAddr',
-                '%wethAddr',
-                '$1',
-                '%wrapper',
-            ),
-            '&proxy',
-            '&proxy',
-        );
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '%boostGasCost', '%wethAddr', '$2',
-        );
-
-        const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
-            '$3',
-            '&proxy',
-            '%upperHint',
-            '%lowerHint',
-        );
-
-        liquityBoostStrategy.addAction(liquityBorrowAction);
-        liquityBoostStrategy.addAction(sellAction);
-        liquityBoostStrategy.addAction(feeTakingAction);
-        liquityBoostStrategy.addAction(liquitySupplyAction);
-
-        return liquityBoostStrategy.encodeForDsProxyCall();
-    };
-
-    const createLiquityFLBoostStrategy = () => {
-        const liquityFLBoostStrategy = new dfs.Strategy('LiquityFLBoostStrategy');
-        liquityFLBoostStrategy.addSubSlot('&maxFeePercentage', 'uint256');
-        liquityFLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
-
-        const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
-        liquityFLBoostStrategy.addTrigger(liquityRatioTrigger);
-
-        const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%lusdAddr'], ['%boostAmount']);
-
-        const sellAction = new dfs.actions.basic.SellAction(
-            formatExchangeObj(
-                '%lusdAddr',
-                '%wethAddr',
-                '$1',
-                '%wrapper',
-            ),
-            '&proxy',
-            '&proxy',
-        );
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '%boostGasCost', '%wethAddr', '$2',
-        );
-
-        const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
-            '$3',
-            '&proxy',
-            '%upperHint',
-            '%lowerHint',
-        );
-
-        const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
-            '&maxFeePercentage',
-            '$1',
-            '%FLAddr',
-            '%upperHint',
-            '%lowerHint',
-        );
-
-        liquityFLBoostStrategy.addAction(flAction);
-        liquityFLBoostStrategy.addAction(sellAction);
-        liquityFLBoostStrategy.addAction(feeTakingAction);
-        liquityFLBoostStrategy.addAction(liquitySupplyAction);
-        liquityFLBoostStrategy.addAction(liquityBorrowAction);
-
-        return liquityFLBoostStrategy.encodeForDsProxyCall();
-    };
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];

@@ -1,12 +1,9 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const dfs = require('@defisaver/sdk');
-
 const {
     getProxy,
     redeploy,
-    formatExchangeObj,
     getChainLinkPrice,
     depositToWeth,
     approve,
@@ -14,10 +11,11 @@ const {
     ETH_ADDR,
     WETH_ADDRESS,
     DAI_ADDR,
-    nullAddress,
 } = require('../utils');
 
-const { subLimitOrderStrategy, callLimitOrderStrategy } = require('../strategies');
+const { callLimitOrderStrategy } = require('../strategy-calls');
+const { subLimitOrderStrategy } = require('../strategy-subs');
+const { createLimitOrderStrategy } = require('../strategies');
 
 const { createStrategy, addBotCaller } = require('../utils-strategies.js');
 
@@ -55,41 +53,8 @@ describe('Limit-Order-Strategy', function () {
     });
 
     it('... should make a new Limit order strategy', async () => {
-        const limitOrderStrategy = new dfs.Strategy('LimitOrderStrategy');
-
-        const chainLinkPriceTrigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
-        limitOrderStrategy.addTrigger(chainLinkPriceTrigger);
-
-        limitOrderStrategy.addSubSlot('&tokenAddrSell', 'address');
-        limitOrderStrategy.addSubSlot('&tokenAddrBuy', 'address');
-        limitOrderStrategy.addSubSlot('&amount', 'uint256');
-
-        const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-            WETH_ADDRESS, '&eoa', '&amount',
-        );
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '0', '%wethAddr', '$1',
-        );
-
-        const sellAction = new dfs.actions.basic.SellAction(
-            formatExchangeObj(
-                '&tokenAddrSell',
-                '&tokenAddrBuy',
-                '$2',
-                '%exchangeWrapper',
-            ),
-            '&proxy',
-            '&eoa',
-        );
-
-        limitOrderStrategy.addAction(pullTokenAction);
-        limitOrderStrategy.addAction(feeTakingAction);
-        limitOrderStrategy.addAction(sellAction);
-
-        const callData = limitOrderStrategy.encodeForDsProxyCall();
-
-        await createStrategy(proxy, ...callData, false);
+        const strategyData = createLimitOrderStrategy();
+        await createStrategy(proxy, ...strategyData, false);
 
         const currPrice = await getChainLinkPrice(ETH_ADDR);
 

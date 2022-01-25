@@ -1,8 +1,6 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const dfs = require('@defisaver/sdk');
-
 const {
     getProxy,
     redeploy,
@@ -22,7 +20,9 @@ const {
 
 const { getRatio } = require('../utils-mcd');
 
-const { subMcdRepayStrategy, callMcdRepayFromYearnStrategy } = require('../strategies');
+const { callMcdRepayFromYearnStrategy } = require('../strategy-calls');
+const { subMcdRepayStrategy } = require('../strategy-subs');
+const { createYearnRepayStrategy } = require('../strategies');
 
 const { openVault, yearnSupply } = require('../actions');
 
@@ -57,7 +57,6 @@ describe('Mcd-Repay-Yearn-Strategy', function () {
         await redeploy('SubProxy');
         await redeploy('StrategyProxy');
         await redeploy('RecipeExecutor');
-        await redeploy('GasFeeTaker');
         await redeploy('McdRatioCheck');
         await redeploy('GasFeeTaker');
         strategyExecutor = await redeploy('StrategyExecutor');
@@ -77,42 +76,8 @@ describe('Mcd-Repay-Yearn-Strategy', function () {
         proxy = await getProxy(senderAcc.address);
     });
 
-    const createRepayStrategy = () => {
-        const repayStrategy = new dfs.Strategy('McdYearnRepayStrategy');
-
-        repayStrategy.addSubSlot('&vaultId', 'uint256');
-        repayStrategy.addSubSlot('&targetRatio', 'uint256');
-
-        const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
-        repayStrategy.addTrigger(mcdRatioTrigger);
-
-        const yearnWithdrawAction = new dfs.actions.yearn.YearnWithdrawAction(
-            '%yDaiAddr',
-            '%amount',
-            '&eoa',
-            '&proxy',
-        );
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '0', '%daiAddr', '$1',
-        );
-
-        const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
-            '&vaultId',
-            '$2',
-            '&proxy',
-            '%mcdManager',
-        );
-
-        repayStrategy.addAction(yearnWithdrawAction);
-        repayStrategy.addAction(feeTakingAction);
-        repayStrategy.addAction(mcdPaybackAction);
-
-        return repayStrategy.encodeForDsProxyCall();
-    };
-
     it('... should create repay strategy using yearn funds', async () => {
-        const repayStrategyEncoded = createRepayStrategy();
+        const repayStrategyEncoded = createYearnRepayStrategy();
 
         await createStrategy(proxy, ...repayStrategyEncoded, true);
     });

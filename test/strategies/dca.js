@@ -1,12 +1,9 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const dfs = require('@defisaver/sdk');
-
 const {
     getProxy,
     redeploy,
-    formatExchangeObj,
     depositToWeth,
     approve,
     balanceOf,
@@ -16,7 +13,9 @@ const {
     Float2BN,
 } = require('../utils');
 
-const { subDcaStrategy, callDcaStrategy } = require('../strategies');
+const { callDcaStrategy } = require('../strategy-calls');
+const { subDcaStrategy } = require('../strategy-subs');
+const { createDCAStrategy } = require('../strategies');
 
 const { createStrategy, addBotCaller } = require('../utils-strategies.js');
 
@@ -63,44 +62,8 @@ describe('DCA Strategy', function () {
     });
 
     it('... should make a new DCA Strategy for selling eth into dai', async () => {
-        const dcaStrategy = new dfs.Strategy('DCAStrategy');
-        dcaStrategy.addSubSlot('&tokenAddrSell', 'address');
-        dcaStrategy.addSubSlot('&tokenAddrBuy', 'address');
-        dcaStrategy.addSubSlot('&amount', 'uint256');
-        dcaStrategy.addSubSlot('&interval', 'uint256');
-        dcaStrategy.addSubSlot('&lastTimestamp', 'uint256');
-        dcaStrategy.addSubSlot('&proxy', 'address');
-        dcaStrategy.addSubSlot('&eoa', 'address');
-
-        const timestampTrigger = new dfs.triggers.TimestampTrigger('0');
-        dcaStrategy.addTrigger(timestampTrigger);
-
-        const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-            '&tokenAddrSell', '&eoa', '&amount',
-        );
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '0', '&tokenAddrSell', '$1',
-        );
-
-        const sellAction = new dfs.actions.basic.SellAction(
-            formatExchangeObj(
-                '&tokenAddrSell',
-                '&tokenAddrBuy',
-                '$2',
-                '%exchangeWrapper',
-            ),
-            '&proxy',
-            '&eoa',
-        );
-
-        dcaStrategy.addAction(pullTokenAction);
-        dcaStrategy.addAction(feeTakingAction);
-        dcaStrategy.addAction(sellAction);
-
-        const callData = dcaStrategy.encodeForDsProxyCall();
-
-        await createStrategy(proxy, ...callData, true);
+        const strategyData = createDCAStrategy();
+        await createStrategy(proxy, ...strategyData, true);
 
         const tokenAddrSell = WETH_ADDRESS;
         const tokenAddrBuy = DAI_ADDR;
