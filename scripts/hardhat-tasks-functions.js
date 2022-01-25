@@ -258,4 +258,5 @@ module.exports = {
     findPathByContractName,
     encryptPrivateKey,
     changeNetworkNameForAddresses,
+    execShellCommand,
 };

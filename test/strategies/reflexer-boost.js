@@ -1,23 +1,21 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const dfs = require('@defisaver/sdk');
-
 const {
     getProxy,
     redeploy,
     fetchAmountinUSDPrice,
-    formatExchangeObj,
     Float2BN,
     depositToWeth,
     send,
     WETH_ADDRESS,
-    nullAddress,
 } = require('../utils');
 
 const { createStrategy, addBotCaller, createBundle } = require('../utils-strategies.js');
 
-const { subReflexerBoostStrategy, callReflexerBoostStrategy, callReflexerFLBoostStrategy } = require('../strategies');
+const { callReflexerBoostStrategy, callReflexerFLBoostStrategy } = require('../strategy-calls');
+const { subReflexerBoostStrategy } = require('../strategy-subs');
+const { createReflexerBoostStrategy, createReflexerFLBoostStrategy } = require('../strategies');
 
 const { reflexerOpen, reflexerSupply, reflexerGenerate } = require('../actions');
 
@@ -39,97 +37,6 @@ describe('Reflexer-Boost-Bundle', function () {
 
     const collAmount = Float2BN(fetchAmountinUSDPrice('WETH', '30000'));
     const debtAmount = Float2BN(fetchAmountinUSDPrice('RAI', '12000'));
-
-    const createReflexerBoostStrategy = () => {
-        const reflexerBoostStrategy = new dfs.Strategy('ReflexerBoostStrategy');
-        reflexerBoostStrategy.addSubSlot('&safeId', 'uint256');
-        reflexerBoostStrategy.addSubSlot('&targetRatio', 'uint256');
-
-        const reflexerRatioTrigger = new dfs.triggers.ReflexerRatioTrigger('0', '0', '0');
-        reflexerBoostStrategy.addTrigger(reflexerRatioTrigger);
-
-        const reflexerGenerateAction = new dfs.actions.reflexer.ReflexerGenerateAction(
-            '&safeId',
-            '%boostAmount',
-            '&proxy',
-        );
-
-        const sellAction = new dfs.actions.basic.SellAction(
-            formatExchangeObj(
-                '%raiAddr',
-                '%wethAddr',
-                '$1',
-                '%wrapper',
-            ),
-            '&proxy',
-            '&proxy',
-        );
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '%boostGasCost', '%wethAddr', '$2',
-        );
-
-        const reflexerSupplyAction = new dfs.actions.reflexer.ReflexerSupplyAction(
-            '&safeId',
-            '$3',
-            '%adapterAddr',
-            '&proxy',
-        );
-
-        reflexerBoostStrategy.addAction(reflexerGenerateAction);
-        reflexerBoostStrategy.addAction(sellAction);
-        reflexerBoostStrategy.addAction(feeTakingAction);
-        reflexerBoostStrategy.addAction(reflexerSupplyAction);
-
-        return reflexerBoostStrategy.encodeForDsProxyCall();
-    };
-
-    const createReflexerFLBoostStrategy = () => {
-        const reflexerFLBoostStrategy = new dfs.Strategy('ReflexerFLBoostStrategy');
-        reflexerFLBoostStrategy.addSubSlot('&safeId', 'uint256');
-        reflexerFLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
-
-        const reflexerRatioTrigger = new dfs.triggers.ReflexerRatioTrigger('0', '0', '0');
-        reflexerFLBoostStrategy.addTrigger(reflexerRatioTrigger);
-
-        const flAction = new dfs.actions.flashloan.AaveV2FlashLoanAction(['%boostAmount'], ['%raiAddr'], ['%AAVE_NO_DEBT_MODE'], nullAddress);
-
-        const sellAction = new dfs.actions.basic.SellAction(
-            formatExchangeObj(
-                '%raiAddr',
-                '%wethAddr',
-                '$1',
-                '%wrapper',
-            ),
-            '&proxy',
-            '&proxy',
-        );
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '%boostGasCost', '%wethAddr', '$2',
-        );
-
-        const reflexerSupplyAction = new dfs.actions.reflexer.ReflexerSupplyAction(
-            '&safeId',
-            '$3',
-            '%adapterAddr',
-            '&proxy',
-        );
-
-        const reflexerGenerateAction = new dfs.actions.reflexer.ReflexerGenerateAction(
-            '&safeId',
-            '$1',
-            '%FLAddr',
-        );
-
-        reflexerFLBoostStrategy.addAction(flAction);
-        reflexerFLBoostStrategy.addAction(sellAction);
-        reflexerFLBoostStrategy.addAction(feeTakingAction);
-        reflexerFLBoostStrategy.addAction(reflexerSupplyAction);
-        reflexerFLBoostStrategy.addAction(reflexerGenerateAction);
-
-        return reflexerFLBoostStrategy.encodeForDsProxyCall();
-    };
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];

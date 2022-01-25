@@ -13,7 +13,8 @@ const { createBundle, createStrategy, addBotCaller } = require('../utils-strateg
 
 const { getRatio } = require('../utils-mcd.js');
 
-const { subMcdBoostStrategy, callMcdBoostStrategy, callFLMcdBoostStrategy } = require('../strategies');
+const { callMcdBoostStrategy, callFLMcdBoostStrategy } = require('../strategy-calls');
+const { subMcdBoostStrategy } = require('../strategy-subs');
 
 const { openVault } = require('../actions');
 

@@ -1,13 +1,10 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const dfs = require('@defisaver/sdk');
-
 const {
     getProxy,
     redeploy,
     fetchAmountinUSDPrice,
-    formatExchangeObj,
     Float2BN,
     depositToWeth,
     send,
@@ -18,7 +15,9 @@ const { createStrategy, addBotCaller, createBundle } = require('../utils-strateg
 
 const { getRatio } = require('../utils-liquity.js');
 
-const { subLiquityRepayStrategy, callLiquityRepayStrategy, callLiquityFLRepayStrategy } = require('../strategies');
+const { callLiquityRepayStrategy, callLiquityFLRepayStrategy } = require('../strategy-calls');
+const { subLiquityRepayStrategy } = require('../strategy-subs');
+const { createLiquityRepayStrategy, createLiquityFLRepayStrategy } = require('../strategies');
 
 const { liquityOpen } = require('../actions');
 
@@ -38,97 +37,6 @@ describe('Liquity-Repay-Bundle', function () {
 
     const maxFeePercentage = Float2BN('5', 16);
     const collAmount = Float2BN(fetchAmountinUSDPrice('WETH', '30000'));
-
-    const createLiquityRepayStrategy = () => {
-        const liquityRepayStrategy = new dfs.Strategy('LiquityRepayStrategy');
-        liquityRepayStrategy.addSubSlot('&targetRatio', 'uint256');
-
-        const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
-        liquityRepayStrategy.addTrigger(liquityRatioTrigger);
-
-        const liquityWithdrawAction = new dfs.actions.liquity.LiquityWithdrawAction(
-            '%withdrawAmount',
-            '&proxy',
-            '%upperHint',
-            '%lowerHint',
-        );
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '%repayGasCost', '%wethAddr', '$1',
-        );
-
-        const sellAction = new dfs.actions.basic.SellAction(
-            formatExchangeObj(
-                '%wethAddr',
-                '%lusdAddr',
-                '$2',
-                '%wrapper',
-            ),
-            '&proxy',
-            '&proxy',
-        );
-
-        const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
-            '$3',
-            '&proxy',
-            '%upperHint',
-            '%lowerHint',
-        );
-
-        liquityRepayStrategy.addAction(liquityWithdrawAction);
-        liquityRepayStrategy.addAction(feeTakingAction);
-        liquityRepayStrategy.addAction(sellAction);
-        liquityRepayStrategy.addAction(liquityPaybackAction);
-
-        return liquityRepayStrategy.encodeForDsProxyCall();
-    };
-
-    const createLiquityFLRepayStrategy = () => {
-        const liquityFLRepayStrategy = new dfs.Strategy('LiquityFLRepayStrategy');
-        liquityFLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
-
-        const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
-        liquityFLRepayStrategy.addTrigger(liquityRatioTrigger);
-
-        const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%wethAddr'], ['%repayAmount']);
-
-        const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-            '%repayGasCost', '%wethAddr', '$1',
-        );
-
-        const sellAction = new dfs.actions.basic.SellAction(
-            formatExchangeObj(
-                '%wethAddr',
-                '%lusdAddr',
-                '$2',
-                '%wrapper',
-            ),
-            '&proxy',
-            '&proxy',
-        );
-
-        const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
-            '$3',
-            '&proxy',
-            '%upperHint',
-            '%lowerHint',
-        );
-
-        const liquityWithdrawAction = new dfs.actions.liquity.LiquityWithdrawAction(
-            '$1',
-            '%FLAddr',
-            '%upperHint',
-            '%lowerHint',
-        );
-
-        liquityFLRepayStrategy.addAction(flAction);
-        liquityFLRepayStrategy.addAction(feeTakingAction);
-        liquityFLRepayStrategy.addAction(sellAction);
-        liquityFLRepayStrategy.addAction(liquityPaybackAction);
-        liquityFLRepayStrategy.addAction(liquityWithdrawAction);
-
-        return liquityFLRepayStrategy.encodeForDsProxyCall();
-    };
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];

@@ -48,14 +48,32 @@ async function main() {
     await redeploy('StrategyProxy', reg.address);
     await redeploy('StrategyExecutor', reg.address);
 
-    // actions
-    // await redeploy('McdSupply', reg.address);
-    // await redeploy('McdWithdraw', reg.address);
-    // await redeploy('McdGenerate', reg.address);
-    // await redeploy('McdPayback', reg.address);
-    // await redeploy('McdOpen', reg.address);
-    // await redeploy('McdGive', reg.address);
-    // await redeploy('McdMerge', reg.address);
+    // mcd actions
+    await redeploy('McdSupply', reg.address);
+    await redeploy('McdWithdraw', reg.address);
+    await redeploy('McdGenerate', reg.address);
+    await redeploy('McdPayback', reg.address);
+    await redeploy('McdOpen', reg.address);
+
+    // exchange
+    await redeploy('DFSSell', reg.address);
+
+    // mstable
+    await redeploy('MStableDeposit', reg.address);
+    await redeploy('MStableWithdraw', reg.address);
+
+    // rari
+    await redeploy('RariDeposit', reg.address);
+    await redeploy('RariWithdraw', reg.address);
+
+    // yearn
+    await redeploy('YearnSupply', reg.address);
+    await redeploy('YearnWithdraw', reg.address);
+
+    await redeploy('McdView', reg.address);
+    await redeploy('McdRatioTrigger', reg.address);
+
+    // create strategies
 
     // switch back admin auth addr
     await changeConstantInFiles('./contracts', ['MainnetAuthAddresses'], 'ADMIN_VAULT_ADDR', MAINNET_VAULT);
