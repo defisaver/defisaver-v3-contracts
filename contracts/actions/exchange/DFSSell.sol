@@ -51,7 +51,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 exchangedAmount, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, DIRECT_FEE);
+        (uint256 exchangedAmount, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, RECIPE_FEE);
         emit ActionEvent("DFSSell", logData);
         return bytes32(exchangedAmount);
     }

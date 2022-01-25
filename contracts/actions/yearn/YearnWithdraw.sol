@@ -48,7 +48,7 @@ contract YearnWithdraw is ActionBase {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
         (, bytes memory logData) = _yearnWithdraw(inputData);
-        logger.logActionDirectEvent("YearWithdraw", logData);
+        logger.logActionDirectEvent("YearnWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase

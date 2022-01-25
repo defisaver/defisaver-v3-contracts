@@ -35,7 +35,14 @@ contract AavePayback is ActionBase, AaveHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[4], _subData, _returnValues);
         params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[5], _subData, _returnValues);
 
-        (uint256 paybackAmount, bytes memory logData) = _payback(params.market, params.tokenAddr, params.amount, params.rateMode, params.from, params.onBehalf);
+        (uint256 paybackAmount, bytes memory logData) = _payback(
+            params.market,
+            params.tokenAddr,
+            params.amount,
+            params.rateMode,
+            params.from,
+            params.onBehalf
+        );
         emit ActionEvent("AavePayback", logData);
         return bytes32(paybackAmount);
     }
@@ -43,7 +50,14 @@ contract AavePayback is ActionBase, AaveHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _payback(params.market, params.tokenAddr, params.amount, params.rateMode, params.from, params.onBehalf);
+        (, bytes memory logData) = _payback(
+            params.market,
+            params.tokenAddr,
+            params.amount,
+            params.rateMode,
+            params.from,
+            params.onBehalf
+        );
         logger.logActionDirectEvent("AavePayback", logData);
     }
 

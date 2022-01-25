@@ -50,7 +50,7 @@ contract DFSBuy is ActionBase, DFSExchangeCore {
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 exchangedAmount, bytes memory logData) = _dfsBuy(params.exchangeData, params.from, params.to, DIRECT_FEE);
+        (uint256 exchangedAmount, bytes memory logData) = _dfsBuy(params.exchangeData, params.from, params.to, RECIPE_FEE);
         emit ActionEvent("DFSBuy", logData);
         return bytes32(exchangedAmount);
     }
