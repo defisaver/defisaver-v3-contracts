@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 const hre = require('hardhat');
+const fs = require('fs');
 const { deployAsOwner } = require('./utils/deployer');
 const { start } = require('./utils/starter');
 
@@ -97,6 +98,16 @@ async function main() {
     );
 
     await run('compile');
+
+    const importantAddr = {
+        DFSRegistry: reg.address,
+        SubStorage: subStorage.address,
+        BundleStorage: bundleStorage.address,
+        StrategyStorage: strategyStorage.address,
+        StrategyTriggerView: strategyTriggerView.address,
+    };
+
+    fs.writeFileSync('forked-addr.json', JSON.stringify(importantAddr));
 
     console.log('Contract addresses');
     console.log(`

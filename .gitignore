@@ -114,3 +114,5 @@ dist
 
 # Flattened solidity contracts
 contracts/flattened/
+
+forked-addr.json

@@ -390,13 +390,21 @@ const send = async (tokenAddr, to, amount) => {
     await tokenContract.transfer(to, amount);
 };
 
-const approve = async (tokenAddr, to) => {
+const approve = async (tokenAddr, to, signer) => {
     const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
 
-    const allowance = await tokenContract.allowance(tokenContract.signer.address, to);
+    const from = signer ? signer.address : tokenContract.signer.address;
+
+    const allowance = await tokenContract.allowance(from, to);
 
     if (allowance.toString() === '0') {
-        await tokenContract.approve(to, hre.ethers.constants.MaxUint256, { gasLimit: 1000000 });
+        if (signer) {
+            const tokenContractSigner = tokenContract.connect(signer);
+            // eslint-disable-next-line max-len
+            await tokenContractSigner.approve(to, hre.ethers.constants.MaxUint256, { gasLimit: 1000000 });
+        } else {
+            await tokenContract.approve(to, hre.ethers.constants.MaxUint256, { gasLimit: 1000000 });
+        }
     }
 };
 
@@ -514,10 +522,15 @@ const setNewExchangeWrapper = async (acc, newAddr) => {
     await stopImpersonatingAccount(exchangeOwnerAddr);
 };
 
-const depositToWeth = async (amount) => {
+const depositToWeth = async (amount, signer) => {
     const weth = await hre.ethers.getContractAt('IWETH', WETH_ADDRESS);
 
-    await weth.deposit({ value: amount });
+    if (signer) {
+        const wethWithSigner = weth.connect(signer);
+        await wethWithSigner.deposit({ value: amount });
+    } else {
+        await weth.deposit({ value: amount });
+    }
 };
 
 const formatExchangeObjForOffchain = (

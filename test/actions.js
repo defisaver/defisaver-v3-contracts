@@ -26,7 +26,7 @@ const { getSecondTokenAmount } = require('./utils-uni');
 const { getHints, LiquityActionIds } = require('./utils-liquity');
 
 // eslint-disable-next-line max-len
-const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0, regAddr = REGISTRY_ADDR) => {
+const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0, regAddr = REGISTRY_ADDR, signer) => {
     const dfsSellAddr = await getAddrFromRegistry('DFSSell', regAddr);
 
     const exchangeObject = formatExchangeObj(
@@ -43,9 +43,9 @@ const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee
     const functionData = sellAction.encodeForDsProxyCall()[1];
 
     if (isEth(sellAddr)) {
-        await depositToWeth(sellAmount.toString());
+        await depositToWeth(sellAmount.toString(), signer);
     }
-    await approve(sellAddr, proxy.address);
+    await approve(sellAddr, proxy.address, signer);
 
     await proxy['execute(address,bytes)'](dfsSellAddr, functionData, { gasLimit: 3000000 });
 };
@@ -91,7 +91,8 @@ const openMcd = async (proxy, joinAddr) => {
     return vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
 };
 
-const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
+// eslint-disable-next-line max-len
+const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from, regAddr = REGISTRY_ADDR) => {
     const tokenBalance = await balanceOf(tokenAddr, from);
     if (tokenBalance.lt(amount)) {
         if (isEth(tokenAddr)) {
@@ -105,10 +106,12 @@ const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
                 UNISWAP_WRAPPER,
                 from,
                 from,
+                0,
+                regAddr,
             );
         }
     }
-    const mcdSupplyAddr = await getAddrFromRegistry('McdSupply');
+    const mcdSupplyAddr = await getAddrFromRegistry('McdSupply', regAddr);
     await approve(tokenAddr, proxy.address);
     const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
         vaultId,
@@ -146,8 +149,8 @@ const paybackMcd = async (proxy, vaultId, amount, from, daiAddr) => {
     return receipt;
 };
 
-const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to) => {
-    const mcdWithdrawAddr = await getAddrFromRegistry('McdWithdraw');
+const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to, regAddr = REGISTRY_ADDR) => {
+    const mcdWithdrawAddr = await getAddrFromRegistry('McdWithdraw', regAddr);
 
     const mcdWithdrawAction = new dfs.actions.maker.MakerWithdrawAction(
         vaultId,

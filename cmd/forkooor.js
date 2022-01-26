@@ -44,6 +44,8 @@ const {
     yearnSupply,
     rariDeposit,
     mStableDeposit,
+    supplyMcd,
+    withdrawMcd,
 } = require('../test/actions');
 
 const {
@@ -56,9 +58,17 @@ const {
 const { subMcdRepayStrategy } = require('../test/strategy-subs');
 
 program.version('0.0.1');
+let forkedAddresses = '';
+try {
+    // eslint-disable-next-line global-require
+    forkedAddresses = require('../forked-addr.json');
+} catch (err) {
+    console.log('No forked registry set, please run deploy');
+}
 
-// TODO: inject this
-const REGISTRY_ADDR = '0x4B6C6CC2384e08c073C97e262B7046d2ef42E836';
+const REGISTRY_ADDR = forkedAddresses.DFSRegistry;
+
+console.log(REGISTRY_ADDR);
 
 function setEnv(key, value) {
     const pathToEnv = path.join(__dirname, '/../.env');
@@ -76,9 +86,17 @@ function setEnv(key, value) {
 }
 
 // TODO: support more than dai?
-const supplyInSS = async (protocol, daiAmount) => {
-    const senderAcc = (await hre.ethers.getSigners())[0];
-    const proxy = await getProxy(senderAcc.address);
+const supplyInSS = async (protocol, daiAmount, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     // very rough estimate takes 1000 eth pre dai price
     const ethEstimate = daiAmount / 1000;
@@ -93,6 +111,7 @@ const supplyInSS = async (protocol, daiAmount) => {
             senderAcc.address,
             0,
             REGISTRY_ADDR,
+            senderAcc,
         );
     } catch (err) {
         console.log('Buying dai failed');
@@ -100,7 +119,7 @@ const supplyInSS = async (protocol, daiAmount) => {
 
     const daiAmountWei = hre.ethers.utils.parseUnits(daiAmount.toString(), 18);
 
-    await approve(DAI_ADDR, proxy.address);
+    await approve(DAI_ADDR, proxy.address, senderAcc);
 
     try {
         if (protocol === 'yearn') {
@@ -145,9 +164,17 @@ const supplyInSS = async (protocol, daiAmount) => {
     }
 };
 
-const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio) => {
-    const senderAcc = (await hre.ethers.getSigners())[0];
-    const proxy = await getProxy(senderAcc.address);
+const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const ratioUnderWei = hre.ethers.utils.parseUnits(minRatio, '16');
     const targetRatioWei = hre.ethers.utils.parseUnits(targetRatio, '16');
@@ -170,12 +197,19 @@ const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio)
 };
 
 // eslint-disable-next-line consistent-return
-const createMcdVault = async (type, coll, debt) => {
-    const senderAcc = (await hre.ethers.getSigners())[0];
+const createMcdVault = async (type, coll, debt, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
 
     await topUp(senderAcc.address);
 
-    const proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const ilkObj = ilks.find((i) => i.ilkLabel === type);
 
@@ -187,7 +221,7 @@ const createMcdVault = async (type, coll, debt) => {
     const amountDai = hre.ethers.utils.parseUnits(debt, 18);
 
     if (asset === 'WETH') {
-        await depositToWeth(amountColl);
+        await depositToWeth(amountColl, senderAcc);
     } else {
         try {
             await sell(
@@ -200,13 +234,14 @@ const createMcdVault = async (type, coll, debt) => {
                 senderAcc.address,
                 0,
                 REGISTRY_ADDR,
+                senderAcc,
             );
         } catch (err) {
             console.log(`Buying ${tokenData.name} failed`);
         }
     }
 
-    await approve(tokenData.address, proxy.address);
+    await approve(tokenData.address, proxy.address, senderAcc);
 
     const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor', REGISTRY_ADDR);
 
@@ -245,23 +280,36 @@ const getBalanceCall = async (account, tokenLabel) => {
     console.log(`Balance: ${balance.toString()} | ${hre.ethers.utils.formatUnits(balance, token.decimals)}`);
 };
 
-const getCdp = async (cdpId) => {
+const getCdp = async (cdpId, type) => {
     const mcdViewAddr = await getAddrFromRegistry('McdView', REGISTRY_ADDR);
     const mcdView = await hre.ethers.getContractAt('McdView', mcdViewAddr);
     const ratio = await getRatio(mcdView, cdpId);
-    // const cdpState = await getVaultInfo(mcdView, cdpId);
-
     console.log(`Vault id: #${cdpId} has ratio ${ratio}%`);
-    // console.log(`Coll: ${cdpState.coll}`);
-    // console.log(`Debt: ${cdpState.debt}`);
+
+    if (type) {
+        const ilkObj = ilks.find((i) => i.ilkLabel === type);
+        const cdpState = await getVaultInfo(mcdView, cdpId, ilkObj.ilkBytes);
+
+        console.log(`Coll: ${cdpState.coll}`);
+        console.log(`Debt: ${cdpState.debt}`);
+    }
 };
 
-const callSell = async (srcTokenLabel, destTokenLabel, srcAmount) => {
+const callSell = async (srcTokenLabel, destTokenLabel, srcAmount, sender) => {
     const srcToken = getAssetInfo(srcTokenLabel);
     const destToken = getAssetInfo(destTokenLabel);
-    const senderAcc = (await hre.ethers.getSigners())[0];
+
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
     await topUp(senderAcc.address);
-    const proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     try {
         await sell(
@@ -274,6 +322,7 @@ const callSell = async (srcTokenLabel, destTokenLabel, srcAmount) => {
             senderAcc.address,
             0,
             REGISTRY_ADDR,
+            senderAcc,
         );
 
         console.log(`${srcAmount} ${srcTokenLabel} -> ${destTokenLabel}`);
@@ -290,7 +339,104 @@ const callSell = async (srcTokenLabel, destTokenLabel, srcAmount) => {
     }
 };
 
+const supplyCdp = async (type, cdpId, amount, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const ilkObj = ilks.find((i) => i.ilkLabel === type);
+
+    let asset = ilkObj.asset;
+    if (asset === 'ETH') asset = 'WETH';
+    const tokenData = getAssetInfo(asset);
+
+    const amountInWei = hre.ethers.BigNumber.from(
+        hre.ethers.utils.parseUnits(amount.toString(), tokenData.decimals),
+    );
+
+    try {
+        await supplyMcd(
+            proxy,
+            cdpId,
+            amountInWei,
+            tokenData.address,
+            ilkObj.join,
+            senderAcc.address,
+            REGISTRY_ADDR,
+        );
+
+        console.log(`Supplied to cdp ${cdpId}`);
+        await getCdp(cdpId, type);
+    } catch (err) {
+        console.log(err);
+        console.log('Failed to supply to cdp');
+    }
+};
+
+const withdrawCdp = async (type, cdpId, amount, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const ilkObj = ilks.find((i) => i.ilkLabel === type);
+
+    let asset = ilkObj.asset;
+    if (asset === 'ETH') asset = 'WETH';
+    const tokenData = getAssetInfo(asset);
+
+    const amountInWei = hre.ethers.BigNumber.from(
+        hre.ethers.utils.parseUnits(amount.toString(), tokenData.decimals),
+    );
+
+    try {
+        await withdrawMcd(
+            proxy,
+            cdpId,
+            amountInWei,
+            ilkObj.join,
+            senderAcc.address,
+            REGISTRY_ADDR,
+        );
+
+        console.log(`Withdraw from cdp ${cdpId}`);
+        await getCdp(cdpId, type);
+    } catch (err) {
+        console.log(err);
+        console.log('Failed to withdraw from cdp');
+    }
+};
+
 (async () => {
+    program
+        .command('new-fork')
+        .description('Creates a new tenderly fork')
+        .action(async () => {
+            const forkId = await createFork();
+
+            console.log(`Fork id: ${forkId}   |   Rpc url https://rpc.tenderly.co/fork/${forkId}`);
+
+            setEnv('FORK_ID', forkId);
+
+            process.exit(0);
+        });
+
     program
         .command('deploy ')
         .description('Deploys the whole system to the fork and builds strategies')
@@ -308,39 +454,50 @@ const callSell = async (srcTokenLabel, destTokenLabel, srcAmount) => {
         });
 
     program
-        .command('new-fork')
-        .description('Creates a new tenderly fork')
-        .action(async () => {
-            const forkId = await createFork();
-
-            console.log(`Fork id: ${forkId}   |   Rpc url https://rpc.tenderly.co/fork/${forkId}`);
-
-            setEnv('FORK_ID', forkId);
-
-            process.exit(0);
-        });
-
-    program
-        .command('create-vault <type> <coll> <debt>')
+        .command('create-vault <type> <coll> <debt> [senderAddr]')
         .description('Creates a Mcd Vault')
-        .action(async (type, coll, debt) => {
-            await createMcdVault(type, coll, debt);
+        .action(async (type, coll, debt, senderAddr) => {
+            await createMcdVault(type, coll, debt, senderAddr);
             process.exit(0);
         });
 
     program
-        .command('deposit-in-ss <protocol> <amount>')
+        .command('deposit-in-ss <protocol> <amount> [senderAddr]')
         .description('Deposits dai in smart savings')
-        .action(async (protocol, amount) => {
-            await supplyInSS(protocol, amount);
+        .action(async (protocol, amount, senderAddr) => {
+            await supplyInSS(protocol, amount, senderAddr);
             process.exit(0);
         });
 
     program
-        .command('sub-ss <protocol> <vaultId> <minRatio> <targetRatio>')
+        .command('sub-ss <protocol> <vaultId> <minRatio> <targetRatio> [senderAddr]')
         .description('Subscribes to a Smart Savings strategy')
-        .action(async (protocol, vaultId, minRatio, targetRatio) => {
-            await smartSavingsStrategySub(protocol, vaultId, minRatio, targetRatio);
+        .action(async (protocol, vaultId, minRatio, targetRatio, senderAddr) => {
+            await smartSavingsStrategySub(protocol, vaultId, minRatio, targetRatio, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('sell <srcTokenLabel> <destTokenLabel> <srcAmount> [senderAddr]')
+        .description('Calls sell operation to get tokens other than eth')
+        .action(async (srcTokenLabel, destTokenLabel, srcAmount, senderAddr) => {
+            await callSell(srcTokenLabel, destTokenLabel, srcAmount, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('mcd-supply <type> <cdpId> <amount> [senderAddr]')
+        .description('Supplies coll to cdp')
+        .action(async (type, cdpId, amount, senderAddr) => {
+            await supplyCdp(type, cdpId, amount, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('mcd-withdraw <type> <cdpId> <amount> [senderAddr]')
+        .description('Withdraw coll from cdp')
+        .action(async (type, cdpId, amount, senderAddr) => {
+            await withdrawCdp(type, cdpId, amount, senderAddr);
             process.exit(0);
         });
 
@@ -370,18 +527,10 @@ const callSell = async (srcTokenLabel, destTokenLabel, srcAmount) => {
         });
 
     program
-        .command('get-cdp <cdpId>')
+        .command('get-cdp <cdpId> [type]')
         .description('Returns data about a cdp')
-        .action(async (cdpId) => {
-            await getCdp(cdpId);
-            process.exit(0);
-        });
-
-    program
-        .command('sell <srcTokenLabel> <destTokenLabel> <srcAmount>')
-        .description('Calls sell operation to get tokens other than eth')
-        .action(async (srcTokenLabel, destTokenLabel, srcAmount) => {
-            await callSell(srcTokenLabel, destTokenLabel, srcAmount);
+        .action(async (cdpId, type) => {
+            await getCdp(cdpId, type);
             process.exit(0);
         });
 
