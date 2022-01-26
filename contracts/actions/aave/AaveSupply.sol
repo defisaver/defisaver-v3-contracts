@@ -34,16 +34,16 @@ contract AaveSupply is ActionBase, AaveHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
 
-        uint256 supplyAmount = _supply(params.market, params.tokenAddr, params.amount, params.from, params.onBehalf, params.enableAsColl);
-
+        (uint256 supplyAmount, bytes memory logData) = _supply(params.market, params.tokenAddr, params.amount, params.from, params.onBehalf, params.enableAsColl);
+        emit ActionEvent("AaveSupply", logData);
         return bytes32(supplyAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-
-        _supply(params.market, params.tokenAddr, params.amount, params.from, params.onBehalf, params.enableAsColl);
+        (, bytes memory logData) = _supply(params.market, params.tokenAddr, params.amount, params.from, params.onBehalf, params.enableAsColl);
+        logger.logActionDirectEvent("AaveSupply", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -68,7 +68,7 @@ contract AaveSupply is ActionBase, AaveHelper {
         address _from,
         address _onBehalf,
         bool _enableAsColl
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         ILendingPoolV2 lendingPool = getLendingPool(_market);
 
         // if amount is set to max, take the whole _from balance
@@ -94,14 +94,15 @@ contract AaveSupply is ActionBase, AaveHelper {
             enableAsCollateral(_market, _tokenAddr, true);
         }
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "AaveSupply",
-            abi.encode(_market, _tokenAddr, _amount, _from, _onBehalf, _enableAsColl)
+        bytes memory logData = abi.encode(
+            _market,
+            _tokenAddr,
+            _amount,
+            _from,
+            _onBehalf,
+            _enableAsColl
         );
-
-        return _amount;
+        return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

@@ -27,16 +27,16 @@ contract InstPullTokens is ActionBase {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        _pullTokens(inputData);
-
+        bytes memory logData = _pullTokens(inputData);
+        emit ActionEvent("InstPullTokens", logData);
         return bytes32(0);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _pullTokens(inputData);
+        bytes memory logData = _pullTokens(inputData);
+        logger.logActionDirectEvent("InstPullTokens", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -46,19 +46,14 @@ contract InstPullTokens is ActionBase {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _pullTokens(Params memory _inputData) internal {
+    function _pullTokens(Params memory _inputData) internal returns (bytes memory logData) {
         require (_inputData.to != address(0), "Receiver address can't be burn address");
         bytes memory spellData = _createSpell(_inputData);
         (bool success, ) = _inputData.dsaAddress.call(spellData);
 
         require(success, "Withdrawing tokens from DSA failed");
     
-        logger.Log(
-            address(this),
-            msg.sender,
-            "InstPullTokens",
-            abi.encode(_inputData)
-        );
+        logData = abi.encode(_inputData);
     }
 
     function _createSpell(Params memory _inputData) internal view returns (bytes memory) {

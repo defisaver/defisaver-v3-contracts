@@ -3,20 +3,27 @@
 pragma solidity =0.8.10;
 
 contract DefisaverLogger {
-    event LogEvent(
-        address indexed contractAddress,
+    event RecipeEvent(
+        address indexed caller,
+        string indexed logName
+    );
+
+    event ActionDirectEvent(
         address indexed caller,
         string indexed logName,
         bytes data
     );
 
-    // solhint-disable-next-line func-name-mixedcase
-    function Log(
-        address _contract,
-        address _caller,
+    function logRecipeEvent(
+        string memory _logName
+    ) public {
+        emit RecipeEvent(msg.sender, _logName);
+    }
+
+    function logActionDirectEvent(
         string memory _logName,
         bytes memory _data
     ) public {
-        emit LogEvent(_contract, _caller, _logName, _data);
+        emit ActionDirectEvent(msg.sender, _logName, _data);
     }
 }

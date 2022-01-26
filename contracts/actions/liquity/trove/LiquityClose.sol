@@ -26,7 +26,8 @@ contract LiquityClose is ActionBase, LiquityHelper {
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[0], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[1], _subData, _returnValues);
 
-        uint256 coll = _liquityClose(inputData.from, inputData.to);
+        (uint256 coll, bytes memory logData) = _liquityClose(inputData.from, inputData.to);
+        emit ActionEvent("LiquityClose", logData);
         return bytes32(coll);
     }
 
@@ -34,7 +35,8 @@ contract LiquityClose is ActionBase, LiquityHelper {
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory inputData = parseInputs(_callData);
 
-        _liquityClose(inputData.from, inputData.to);
+        (, bytes memory logData) = _liquityClose(inputData.from, inputData.to);
+        logger.logActionDirectEvent("LiquityClose", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -47,9 +49,9 @@ contract LiquityClose is ActionBase, LiquityHelper {
     /// @notice Closes the trove
     /// @param _from Address where to pull the LUSD tokens from
     /// @param _to Address that will receive the collateral
-    function _liquityClose(address _from, address _to) internal returns (uint256) {
+    function _liquityClose(address _from, address _to) internal returns (uint256 coll, bytes memory logData) {
         uint256 netDebt = TroveManager.getTroveDebt(address(this)) - LUSD_GAS_COMPENSATION;
-        uint256 coll = TroveManager.getTroveColl(address(this));
+        coll = TroveManager.getTroveColl(address(this));
 
         LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_from, netDebt);
 
@@ -58,9 +60,7 @@ contract LiquityClose is ActionBase, LiquityHelper {
         TokenUtils.depositWeth(coll);
         TokenUtils.WETH_ADDR.withdrawTokens(_to, coll);
 
-        logger.Log(address(this), msg.sender, "LiquityClose", abi.encode(_from, _to, netDebt, coll));
-
-        return uint256(coll);
+        logData = abi.encode(_from, _to, netDebt, coll);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

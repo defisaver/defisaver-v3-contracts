@@ -65,8 +65,8 @@ contract UniCreatePoolV3 is ActionBase, UniV3Helper {
 
         _createPool(inputData);
 
-        uint256 tokenId = _uniCreatePosition(inputData);
-
+        (uint256 tokenId, bytes memory logData) = _uniCreatePosition(inputData);
+        emit ActionEvent("UniCreatePoolV3", logData);
         return bytes32(tokenId);
     }
 
@@ -75,7 +75,8 @@ contract UniCreatePoolV3 is ActionBase, UniV3Helper {
         Params memory inputData = parseInputs(_callData);
 
         _createPool(inputData);
-        _uniCreatePosition(inputData);
+        (, bytes memory logData) = _uniCreatePosition(inputData);
+        logger.logActionDirectEvent("UniCreatePoolV3", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -94,7 +95,7 @@ contract UniCreatePoolV3 is ActionBase, UniV3Helper {
         );
     }
 
-    function _uniCreatePosition(Params memory _inputData) internal returns (uint256 tokenId) {
+    function _uniCreatePosition(Params memory _inputData) internal returns (uint256 tokenId, bytes memory logData) {
         // fetch tokens from address;
         uint256 amount0Pulled = _inputData.token0.pullTokensIfNeeded(
             _inputData.from,
@@ -121,12 +122,7 @@ contract UniCreatePoolV3 is ActionBase, UniV3Helper {
         _inputData.token0.withdrawTokens(_inputData.from, _inputData.amount0Desired - amount0);
         _inputData.token1.withdrawTokens(_inputData.from, _inputData.amount1Desired - amount1);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "UniCreatePoolV3",
-            abi.encode(_inputData, tokenId, liquidity, amount0, amount1)
-        );
+        logData = abi.encode(_inputData, tokenId, liquidity, amount0, amount1);
     }
 
     /// @dev mints new NFT that represents a position with selected parameters

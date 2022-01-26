@@ -31,16 +31,16 @@ contract ReflexerWithdraw is ActionBase, ReflexerHelper {
         inputData.adapterAddr = _parseParamAddr(inputData.adapterAddr, _paramMapping[2], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[3], _subData, _returnValues);
 
-        inputData.amount = _reflexerWithdraw(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.to);
-
-        return bytes32(inputData.amount);
+        (uint256 withdrawnAmount, bytes memory logData) = _reflexerWithdraw(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.to);
+        emit ActionEvent("ReflexerWithdraw", logData);
+        return bytes32(withdrawnAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _reflexerWithdraw(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.to);
+        (, bytes memory logData) = _reflexerWithdraw(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.to);
+        logger.logActionDirectEvent("ReflexerWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -60,7 +60,7 @@ contract ReflexerWithdraw is ActionBase, ReflexerHelper {
         uint256 _amount,
         address _adapterAddr,
         address _to
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         // if amount type(uint).max _amount is whole collateral amount
         if (_amount == type(uint256).max) {
             _amount = getAllColl(_safeId);
@@ -76,14 +76,8 @@ contract ReflexerWithdraw is ActionBase, ReflexerHelper {
         // send the tokens _to address if needed
         getTokenFromAdapter(_adapterAddr).withdrawTokens(_to, _amount);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "ReflexerWithdraw",
-            abi.encode(_safeId, _amount, _adapterAddr, _to)
-        );
-
-        return _amount;
+        bytes memory logData = abi.encode(_safeId, _amount, _adapterAddr, _to);
+        return (_amount, logData);
     }
 
     /// @notice Returns all the collateral of the safe, formatted in the correct decimal

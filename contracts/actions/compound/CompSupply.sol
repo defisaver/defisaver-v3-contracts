@@ -32,16 +32,16 @@ contract CompSupply is ActionBase, CompHelper {
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
 
-        uint256 withdrawAmount = _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
-
+        (uint256 withdrawAmount, bytes memory logData) = _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
+        emit ActionEvent("CompSupply", logData);
         return bytes32(withdrawAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-
-        _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
+        (, bytes memory logData) = _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
+        logger.logActionDirectEvent("CompSupply", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -62,7 +62,7 @@ contract CompSupply is ActionBase, CompHelper {
         uint256 _amount,
         address _from,
         bool _enableAsColl
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
         // if amount type(uint256).max, pull current _from balance
@@ -88,14 +88,9 @@ contract CompSupply is ActionBase, CompHelper {
             TokenUtils.withdrawWeth(_amount);
             ICToken(_cTokenAddr).mint{value: _amount}(); // reverts on fail
         }
-        logger.Log(
-            address(this),
-            msg.sender,
-            "CompSupply",
-            abi.encode(tokenAddr, _amount, _from, _enableAsColl)
-        );
 
-        return _amount;
+        bytes memory logData = abi.encode(tokenAddr, _amount, _from, _enableAsColl);
+        return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

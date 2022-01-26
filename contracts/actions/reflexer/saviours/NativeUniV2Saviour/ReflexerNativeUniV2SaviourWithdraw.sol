@@ -33,15 +33,16 @@ contract ReflexerNativeUniV2SaviourWithdraw is ActionBase, ReflexerHelper {
             _returnValues
         );
 
-        _reflexerSaviourWithdraw(inputData);
+        bytes memory logData = _reflexerSaviourWithdraw(inputData);
+        emit ActionEvent("ReflexerNativeUniV2SaviourWithdraw", logData);
         return bytes32(inputData.lpTokenAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _reflexerSaviourWithdraw(inputData);
+        bytes memory logData = _reflexerSaviourWithdraw(inputData);
+        logger.logActionDirectEvent("ReflexerNativeUniV2SaviourWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -51,7 +52,7 @@ contract ReflexerNativeUniV2SaviourWithdraw is ActionBase, ReflexerHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _reflexerSaviourWithdraw(Params memory _inputData) internal {
+    function _reflexerSaviourWithdraw(Params memory _inputData) internal returns (bytes memory logData) {
         require(_inputData.to != address(0), "Can't send to 0x0");
         ISAFESaviour(NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS).withdraw(
             _inputData.safeId,
@@ -59,12 +60,7 @@ contract ReflexerNativeUniV2SaviourWithdraw is ActionBase, ReflexerHelper {
             _inputData.to
         );
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "ReflexerNativeUniV2SaviourWithdraw",
-            abi.encode(_inputData)
-        );
+        logData = abi.encode(_inputData);
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {

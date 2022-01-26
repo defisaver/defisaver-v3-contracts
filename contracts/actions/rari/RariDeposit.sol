@@ -40,14 +40,16 @@ contract RariDeposit is ActionBase, DSMath {
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        uint256 rsptReceived = _rariDeposit(inputData, false);
+        (uint256 rsptReceived, bytes memory logData) = _rariDeposit(inputData, true);
+        emit ActionEvent("RariDeposit", logData);
         return bytes32(rsptReceived);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-        _rariDeposit(inputData, true);
+        (, bytes memory logData) = _rariDeposit(inputData, true);
+        logger.logActionDirectEvent("RariDeposit", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -58,7 +60,7 @@ contract RariDeposit is ActionBase, DSMath {
     //////////////////////////// ACTION LOGIC ////////////////////////////
     function _rariDeposit(Params memory _inputData, bool isActionDirect)
         internal
-        returns (uint256 rsptReceived)
+        returns (uint256 rsptReceived, bytes memory logData)
     {
         require(_inputData.to != address(0), "Can't send to burn address");
         IFundManager rariFundManager = IFundManager(_inputData.fundManager);
@@ -85,7 +87,7 @@ contract RariDeposit is ActionBase, DSMath {
             rsptReceived = sub(poolTokenBalanceAfter, poolTokenBalanceBefore);
         }
         /// @dev rsptReceived will be 0 if action was called directly, money deposited can be recevied with _inputData.amount
-        logger.Log(address(this), msg.sender, "RariDeposit", abi.encode(_inputData, rsptReceived));
+        logData = abi.encode(_inputData, rsptReceived);
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {

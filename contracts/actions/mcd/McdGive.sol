@@ -35,16 +35,16 @@ contract McdGive is ActionBase {
         inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
         inputData.newOwner = _parseParamAddr(inputData.newOwner, _paramMapping[1], _subData, _returnValues);
 
-        inputData.newOwner = _mcdGive(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager);
-
-        return bytes32(bytes20(inputData.newOwner));
+        (address newOwner, bytes memory logData) = _mcdGive(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager);
+        emit ActionEvent("McdGive", logData);
+        return bytes32(bytes20(newOwner));
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _mcdGive(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager);
+        (, bytes memory logData) = _mcdGive(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager);
+        logger.logActionDirectEvent("McdGive", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -65,7 +65,7 @@ contract McdGive is ActionBase {
         address _newOwner,
         bool _createProxy,
         address _mcdManager
-    ) internal returns (address newOwner) {
+    ) internal returns (address newOwner, bytes memory logData) {
         newOwner = _newOwner;
 
         if (_createProxy) {
@@ -83,13 +83,7 @@ contract McdGive is ActionBase {
         }
 
         IManager(_mcdManager).give(_vaultId, newOwner);
-
-        logger.Log(
-            address(this),
-            msg.sender,
-            "McdGive",
-            abi.encode(_vaultId, _newOwner, _createProxy, _mcdManager)
-        );
+        logData = abi.encode(_vaultId, newOwner, _createProxy, _mcdManager);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

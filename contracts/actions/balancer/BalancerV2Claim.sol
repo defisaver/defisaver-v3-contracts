@@ -40,15 +40,16 @@ contract BalancerV2Claim is ActionBase, BalancerV2Helper {
         inputData.liquidityProvider = _parseParamAddr(inputData.liquidityProvider, _paramMapping[0], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[1], _subData, _returnValues);
         
-        uint256 balClaimedAmount = claim(inputData);
+        (uint256 balClaimedAmount, bytes memory logData) = claim(inputData);
+        emit ActionEvent("BalancerV2Claim", logData);
         return bytes32(balClaimedAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
-        Params memory inputData = parseInputs(_callData);
-        
-        claim(inputData);
+        Params memory inputData = parseInputs(_callData);        
+        (, bytes memory logData) = claim(inputData);
+        logger.logActionDirectEvent("BalancerV2Claim", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -57,7 +58,7 @@ contract BalancerV2Claim is ActionBase, BalancerV2Helper {
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
-    function claim(Params memory _inputData) internal returns (uint256 balClaimedAmount) {
+    function claim(Params memory _inputData) internal returns (uint256 balClaimedAmount, bytes memory logData) {
         require(_inputData.to != address(0), ADDR_MUST_NOT_BE_ZERO);
         IMerkleRedeem.Claim[] memory claims = packClaims(_inputData.week, _inputData.balances, _inputData.merkleProofs);
         
@@ -71,12 +72,7 @@ contract BalancerV2Claim is ActionBase, BalancerV2Helper {
             balToken.withdrawTokens(_inputData.to, balClaimedAmount);
         }
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "BalancerV2Claim",
-            abi.encode(_inputData, balClaimedAmount)
-        );
+        logData = abi.encode(_inputData, balClaimedAmount);
     }
 
     /// @dev Decoding Claims[] from _callData returns stack too deep error, so packing must be done onchain

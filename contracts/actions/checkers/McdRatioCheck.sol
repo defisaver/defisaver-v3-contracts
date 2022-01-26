@@ -63,8 +63,7 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
             }
         }
 
-        logger.Log(address(this), msg.sender, "McdRatioCheck", abi.encode(inputData, currRatio));
-
+        emit ActionEvent("McdRatioCheck", abi.encode(inputData, currRatio));
         return bytes32(inputData.ratioTarget);
     }
 

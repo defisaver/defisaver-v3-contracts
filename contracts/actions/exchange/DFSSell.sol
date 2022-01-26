@@ -51,16 +51,16 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        uint256 exchangedAmount = _dfsSell(params.exchangeData, params.from, params.to, RECIPE_FEE);
-
+        (uint256 exchangedAmount, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, RECIPE_FEE);
+        emit ActionEvent("DFSSell", logData);
         return bytes32(exchangedAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public override payable   {
         Params memory params = parseInputs(_callData);
-
-        _dfsSell(params.exchangeData, params.from, params.to, 0);
+        (, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, 0);
+        logger.logActionDirectEvent("DFSSell", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -81,7 +81,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         address _from,
         address _to,
         uint _fee
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
          // if we set srcAmount to max, take the whole proxy balance
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
@@ -117,21 +117,15 @@ contract DFSSell is ActionBase, DFSExchangeCore {
              _exchangeData.destAddr.withdrawTokens(_to, exchangedAmount);
         }
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "DFSSell",
-            abi.encode(
-                wrapper,
-                _exchangeData.srcAddr,
-                _exchangeData.destAddr,
-                _exchangeData.srcAmount,
-                exchangedAmount,
-                _fee
-            )
+        bytes memory logData = abi.encode(
+            wrapper,
+            _exchangeData.srcAddr,
+            _exchangeData.destAddr,
+            _exchangeData.srcAmount,
+            exchangedAmount,
+            _fee
         );
-
-        return exchangedAmount;
+        return (exchangedAmount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

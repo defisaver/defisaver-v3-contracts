@@ -29,17 +29,19 @@ contract MStableClaim is ActionBase, MStableHelper {
         params.vaultAddress = _parseParamAddr(params.vaultAddress, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         
-        uint256 claimed = _mStableClaim(params);
+        (uint256 claimed, bytes memory logData) = _mStableClaim(params);
+        emit ActionEvent("MStableClaim", logData);
         return bytes32(claimed);
     }
 
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        _mStableClaim(params);
+        (, bytes memory logData) = _mStableClaim(params);
+        logger.logActionDirectEvent("MStableClaim", logData);
     }
 
     /// @notice Action that claims staking rewards from the Savings Vault
-    function _mStableClaim(Params memory _params) internal returns (uint256 claimed) {
+    function _mStableClaim(Params memory _params) internal returns (uint256 claimed, bytes memory logData) {
         claimed = MTA.getBalance(address(this));
         IBoostedVaultWithLockup(_params.vaultAddress).claimRewards(_params.first, _params.last);
 
@@ -47,15 +49,7 @@ contract MStableClaim is ActionBase, MStableHelper {
         
         MTA.withdrawTokens(_params.to, claimed);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "MStableClaim",
-            abi.encode(
-                _params,
-                claimed
-            )
-        );
+        logData = abi.encode(_params, claimed);
     }
 
     function actionType() public pure override returns (uint8) {

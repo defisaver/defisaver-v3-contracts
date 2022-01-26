@@ -33,16 +33,16 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
         inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        inputData.amount = _reflexerGenerate(inputData.safeId, inputData.amount, inputData.to);
-
-        return bytes32(inputData.amount);
+        (uint256 borrowedAmount, bytes memory logData) = _reflexerGenerate(inputData.safeId, inputData.amount, inputData.to);
+        emit ActionEvent("ReflexerGenerate", logData);
+        return bytes32(borrowedAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _reflexerGenerate(inputData.safeId, inputData.amount, inputData.to);
+        (, bytes memory logData) = _reflexerGenerate(inputData.safeId, inputData.amount, inputData.to);
+        logger.logActionDirectEvent("ReflexerGenerate", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -60,7 +60,7 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
         uint256 _safeId,
         uint256 _amount,
         address _to
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         address safe = safeManager.safes(_safeId);
         bytes32 collType = safeManager.collateralTypes(_safeId);
 
@@ -80,14 +80,8 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
         // exit rai from adapter and send _to if needed
         ICoinJoin(RAI_ADAPTER_ADDRESS).exit(_to, _amount);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "ReflexerGenerate",
-            abi.encode(_safeId, _amount, _to)
-        );
-
-        return _amount;
+        bytes memory logData = abi.encode(_safeId, _amount, _to);
+        return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

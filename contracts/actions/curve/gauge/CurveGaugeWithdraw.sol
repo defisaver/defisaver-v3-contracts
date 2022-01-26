@@ -28,14 +28,16 @@ contract CurveGaugeWithdraw is ActionBase, CurveHelper {
         params.receiver = _parseParamAddr(params.receiver, _paramMapping[0], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
 
-        uint256 withdrawn = _curveGaugeWithdraw(params);
+        (uint256 withdrawn, bytes memory logData) = _curveGaugeWithdraw(params);
+        emit ActionEvent("CurveGaugeWithdraw", logData);
         return bytes32(withdrawn);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-        _curveGaugeWithdraw(params);
+        (, bytes memory logData) = _curveGaugeWithdraw(params);
+        logger.logActionDirectEvent("CurveGaugeWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -44,7 +46,7 @@ contract CurveGaugeWithdraw is ActionBase, CurveHelper {
     }
 
     /// @notice Withdraws LP tokens from Liquidity Gauge
-       function _curveGaugeWithdraw(Params memory _params) internal returns (uint256) {
+       function _curveGaugeWithdraw(Params memory _params) internal returns (uint256, bytes memory) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
         
         if (_params.amount == type(uint256).max) {
@@ -54,16 +56,8 @@ contract CurveGaugeWithdraw is ActionBase, CurveHelper {
         ILiquidityGauge(_params.gaugeAddr).withdraw(_params.amount);
         _params.lpToken.withdrawTokens(_params.receiver, _params.amount);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "CurveGaugeWithdraw",
-            abi.encode(
-                _params
-            )
-        );
-
-        return _params.amount;
+        bytes memory logData =  abi.encode(_params);
+        return (_params.amount, logData);
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {

@@ -49,15 +49,17 @@ contract LiquityOpen is ActionBase, LiquityHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        uint256 troveOwner = _liquityOpen(params);
-        return bytes32(troveOwner);
+        (uint256 collSupplied, bytes memory logData) = _liquityOpen(params);
+        emit ActionEvent("LiquityOpen", logData);
+        return bytes32(collSupplied);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
-        _liquityOpen(params);
+        (, bytes memory logData) = _liquityOpen(params);
+        logger.logActionDirectEvent("LiquityOpen", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -68,7 +70,7 @@ contract LiquityOpen is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Opens up a trove
-    function _liquityOpen(Params memory _params) internal returns (uint256) {
+    function _liquityOpen(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.collAmount == type(uint256).max) {
             _params.collAmount = TokenUtils.WETH_ADDR.getBalance(_params.from);
         }
@@ -84,20 +86,14 @@ contract LiquityOpen is ActionBase, LiquityHelper {
 
         LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, _params.lusdAmount);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "LiquityOpen",
-            abi.encode(
-                _params.maxFeePercentage,
-                _params.collAmount,
-                _params.lusdAmount,
-                _params.from,
-                _params.to
-            )
+        bytes memory logData = abi.encode(
+            _params.maxFeePercentage,
+            _params.collAmount,
+            _params.lusdAmount,
+            _params.from,
+            _params.to
         );
-
-        return _params.collAmount;
+        return (_params.collAmount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

@@ -31,16 +31,16 @@ contract CompClaim is ActionBase, CompHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
 
-        uint256 compClaimed = _claim(params.cTokensSupply, params.cTokensBorrow, params.from, params.to);
-
+        (uint256 compClaimed, bytes memory logData) = _claim(params.cTokensSupply, params.cTokensBorrow, params.from, params.to);
+        emit ActionEvent("CompClaim", logData);
         return bytes32(compClaimed);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-
-        _claim(params.cTokensSupply, params.cTokensBorrow, params.from, params.to);
+        (, bytes memory logData) = _claim(params.cTokensSupply, params.cTokensBorrow, params.from, params.to);
+        logger.logActionDirectEvent("CompClaim", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -61,7 +61,7 @@ contract CompClaim is ActionBase, CompHelper {
         address[] memory _cTokensBorrow,
         address _from,
         address _to
-    ) internal returns (uint256) {
+    ) internal returns (uint256 compClaimed, bytes memory logData) {
         address[] memory users = new address[](1);
         users[0] = _from;
 
@@ -72,15 +72,13 @@ contract CompClaim is ActionBase, CompHelper {
 
         uint256 compBalanceAfter = COMP_ADDR.getBalance(_from);
 
-        uint256 compClaimed = compBalanceAfter - compBalanceBefore;
+        compClaimed = compBalanceAfter - compBalanceBefore;
 
         if (_from == address(this)) {
             COMP_ADDR.withdrawTokens(_to, compClaimed);
         }
 
-        logger.Log(address(this), msg.sender, "CompClaim", abi.encode(_from, _to, compClaimed));
-
-        return compClaimed;
+        logData = abi.encode(_from, _to, compClaimed);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

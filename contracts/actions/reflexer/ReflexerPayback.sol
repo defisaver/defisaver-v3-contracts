@@ -31,16 +31,16 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
         inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[2], _subData, _returnValues);
 
-        inputData.amount = _reflexerPayback(inputData.safeId, inputData.amount, inputData.from);
-
-        return bytes32(inputData.amount);
+        (uint256 repayAmount, bytes memory logData) = _reflexerPayback(inputData.safeId, inputData.amount, inputData.from);
+        emit ActionEvent("ReflexerPayback", logData);
+        return bytes32(repayAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _reflexerPayback(inputData.safeId, inputData.amount, inputData.from);
+        (, bytes memory logData) = _reflexerPayback(inputData.safeId, inputData.amount, inputData.from);
+        logger.logActionDirectEvent("ReflexerPayback", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -58,7 +58,7 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
         uint256 _safeId,
         uint256 _amount,
         address _from
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         address safe = safeManager.safes(_safeId);
         bytes32 collType = safeManager.collateralTypes(_safeId);
 
@@ -78,14 +78,8 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
         // decrease the safe debt
         safeManager.modifySAFECollateralization(_safeId, 0, paybackAmount);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "ReflexerPayback",
-            abi.encode(_safeId, _amount, _from)
-        );
-
-        return _amount;
+        bytes memory logData = abi.encode(_safeId, _amount, _from);
+        return (_amount, logData);
     }
 
     /// @notice Gets repaid delta debt generated (rate adjusted debt)

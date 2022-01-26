@@ -45,15 +45,16 @@ contract UniSupplyV3 is ActionBase, UniV3Helper{
         uniData.amount0Desired = _parseParamUint(uniData.amount0Desired, _paramMapping[1], _subData, _returnValues);
         uniData.amount1Desired = _parseParamUint(uniData.amount1Desired, _paramMapping[2], _subData, _returnValues);
 
-        uint128 liquidity = _uniSupplyPosition(uniData);
+        (uint128 liquidity, bytes memory logData) = _uniSupplyPosition(uniData);
+        emit ActionEvent("UniSupplyV3", logData);
         return bytes32(uint256(liquidity));
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory uniData = parseInputs(_callData);
-        _uniSupplyPosition(uniData);
-        
+        (, bytes memory logData) = _uniSupplyPosition(uniData);
+        logger.logActionDirectEvent("UniSupplyV3", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -65,7 +66,7 @@ contract UniSupplyV3 is ActionBase, UniV3Helper{
 
     function _uniSupplyPosition(Params memory _uniData)
         internal
-        returns(uint128 liquidity)
+        returns(uint128 liquidity, bytes memory logData)
     {  
         // fetch tokens from address
         uint amount0Pulled = _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);
@@ -86,13 +87,7 @@ contract UniSupplyV3 is ActionBase, UniV3Helper{
         _uniData.token0.withdrawTokens(_uniData.from, _uniData.amount0Desired - amount0);
         _uniData.token1.withdrawTokens(_uniData.from, _uniData.amount1Desired - amount1);
 
-        logger.Log(
-                address(this),
-                msg.sender,
-                "UniSupplyV3",
-                abi.encode(_uniData, liquidity, amount0, amount1)
-            );
-
+        logData = abi.encode(_uniData, liquidity, amount0, amount1);
     }    
     /// @dev increases liquidity by token amounts desired
     /// @return liquidity new liquidity amount

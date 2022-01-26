@@ -23,16 +23,16 @@ contract ReflexerOpen is ActionBase, ReflexerHelper {
 
         inputData.adapterAddr = _parseParamAddr(inputData.adapterAddr, _paramMapping[0], _subData, _returnValues);
 
-        uint256 newSafeId = _reflexerOpen(inputData.adapterAddr);
-
+        (uint256 newSafeId, bytes memory logData) = _reflexerOpen(inputData.adapterAddr);
+        emit ActionEvent("ReflexerOpen", logData);
         return bytes32(newSafeId);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _reflexerOpen(inputData.adapterAddr);
+        (, bytes memory logData) = _reflexerOpen(inputData.adapterAddr);
+        logger.logActionDirectEvent("ReflexerOpen", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -44,11 +44,10 @@ contract ReflexerOpen is ActionBase, ReflexerHelper {
 
     /// @notice Opens up an empty safe
     /// @param _adapterAddr Adapter address of the Reflexer collateral
-    function _reflexerOpen(address _adapterAddr) internal returns (uint256 safeId) {
+    function _reflexerOpen(address _adapterAddr) internal returns (uint256 safeId, bytes memory logData) {
         bytes32 collType = IBasicTokenAdapters(_adapterAddr).collateralType();
         safeId = safeManager.openSAFE(collType, address(this));
-
-        logger.Log(address(this), msg.sender, "ReflexerOpen", abi.encode(safeId, _adapterAddr));
+        logData = abi.encode(safeId, _adapterAddr);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
