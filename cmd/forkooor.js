@@ -63,26 +63,20 @@ try {
     // eslint-disable-next-line global-require
     forkedAddresses = require('../forked-addr.json');
 } catch (err) {
-    console.log('No forked registry set, please run deploy');
+    console.log('No forked registry set yet, please run deploy');
 }
 
 const REGISTRY_ADDR = forkedAddresses.DFSRegistry;
 
-console.log(REGISTRY_ADDR);
-
 function setEnv(key, value) {
     const pathToEnv = path.join(__dirname, '/../.env');
-    fs.readFile(pathToEnv, 'utf8', (err, data) => {
-        const result = parse(data);
-        result[key] = value;
 
-        // eslint-disable-next-line consistent-return
-        fs.writeFile(pathToEnv, stringify(result), (err2) => {
-            if (err) {
-                return console.log(err2);
-            }
-        });
-    });
+    const data = fs.readFileSync(pathToEnv, 'utf8');
+    const result = parse(data);
+    result[key] = value;
+
+    // eslint-disable-next-line consistent-return
+    fs.writeFileSync(pathToEnv, stringify(result));
 }
 
 // TODO: support more than dai?

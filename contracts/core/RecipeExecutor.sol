@@ -15,7 +15,7 @@ import "../interfaces/ITrigger.sol";
 
 /// @title Entry point into executing recipes/checking triggers directly and as part of a strategy
 contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper {
-    address public constant DEFISAVER_LOGGER = 0x5c55B921f590a89C1Ebe84dF170E655a82b62126;
+    address public constant DEFISAVER_LOGGER = 0xcE7a977Cac4a481bc84AC06b2Da0df614e621cf3;
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
