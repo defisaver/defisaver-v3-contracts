@@ -9,6 +9,7 @@ const {
     nullAddress,
     WETH_ADDRESS,
     UNISWAP_WRAPPER,
+    REGISTRY_ADDR,
     balanceOf,
     formatExchangeObj,
     isEth,
@@ -24,8 +25,9 @@ const { getSecondTokenAmount } = require('./utils-uni');
 
 const { getHints, LiquityActionIds } = require('./utils-liquity');
 
-const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0) => {
-    const dfsSellAddr = await getAddrFromRegistry('DFSSell');
+// eslint-disable-next-line max-len
+const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0, regAddr = REGISTRY_ADDR) => {
+    const dfsSellAddr = await getAddrFromRegistry('DFSSell', regAddr);
 
     const exchangeObject = formatExchangeObj(
         sellAddr,
@@ -1162,8 +1164,8 @@ const buyTokenIfNeeded = async (
     }
 };
 
-const yearnSupply = async (token, amount, from, to, proxy) => {
-    const yearnSupplyAddress = await getAddrFromRegistry('YearnSupply');
+const yearnSupply = async (token, amount, from, to, proxy, regAddr = REGISTRY_ADDR) => {
+    const yearnSupplyAddress = await getAddrFromRegistry('YearnSupply', regAddr);
     const yearnSupplyAction = new dfs.actions.yearn.YearnSupplyAction(
         token,
         amount,
@@ -1560,8 +1562,9 @@ const mStableDeposit = async (
     amount,
     minOut,
     assetPair,
+    regAddr = REGISTRY_ADDR,
 ) => {
-    const mStableAddr = await getAddrFromRegistry('MStableDepositNew');
+    const mStableAddr = await getAddrFromRegistry('MStableDepositNew', regAddr);
 
     const mStableAction = new dfs.actions.mstable.MStableDepositAction(
         bAsset,
@@ -1631,8 +1634,9 @@ const mStableClaim = async (
     return proxy['execute(address,bytes)'](mStableAddr, functionData, { gasLimit: 3000000 });
 };
 
-const rariDeposit = async (fundManager, token, poolToken, amount, from, to, proxy) => {
-    const rariDepositAddr = await getAddrFromRegistry('RariDeposit');
+// eslint-disable-next-line max-len
+const rariDeposit = async (fundManager, token, poolToken, amount, from, to, proxy, regAddr = REGISTRY_ADDR) => {
+    const rariDepositAddr = await getAddrFromRegistry('RariDeposit', regAddr);
     const rariDepositAction = new dfs.actions.rari.RariDepositAction(
         fundManager, token, poolToken, amount, from, to,
     );

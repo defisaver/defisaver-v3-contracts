@@ -7,6 +7,7 @@ const {
     calcGasToUSD,
     OWNER_ACC,
     AVG_GAS_PRICE,
+    REGISTRY_ADDR,
 } = require('./utils');
 
 const getLatestStrategyId = async () => {
@@ -21,8 +22,8 @@ const getLatestStrategyId = async () => {
     return latestStrategyId;
 };
 
-const getLatestSubId = async () => {
-    const subStorageAddr = await getAddrFromRegistry('SubStorage');
+const getLatestSubId = async (regAddr = REGISTRY_ADDR) => {
+    const subStorageAddr = await getAddrFromRegistry('SubStorage', regAddr);
 
     const subStorageInstance = await hre.ethers.getContractFactory('SubStorage');
     const subStorage = await subStorageInstance.attach(subStorageAddr);
@@ -76,8 +77,8 @@ const createBundle = async (proxy, strategyIds) => {
     console.log(`GasUsed createBundle; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const subToStrategy = async (proxy, strategySub) => {
-    const SubProxyAddr = await getAddrFromRegistry('SubProxy');
+const subToStrategy = async (proxy, strategySub, regAddr = REGISTRY_ADDR) => {
+    const SubProxyAddr = await getAddrFromRegistry('SubProxy', regAddr);
 
     const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
     const functionData = SubProxyProxy.interface.encodeFunctionData(
@@ -93,7 +94,7 @@ const subToStrategy = async (proxy, strategySub) => {
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
     console.log(`GasUsed subToStrategy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 
-    const latestStrategyId = await getLatestSubId();
+    const latestStrategyId = await getLatestSubId(regAddr);
 
     return latestStrategyId;
 };

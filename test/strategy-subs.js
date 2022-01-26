@@ -17,6 +17,7 @@ const {
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
 } = require('./triggers');
+const { REGISTRY_ADDR } = require('./utils');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -92,14 +93,14 @@ const subUniV3RangeOrderStrategy = async (proxy, tokenId, state, recipient) => {
     return { subId, strategySub };
 };
 
-const subMcdRepayStrategy = async (proxy, bundleId, vaultId, rationUnder, targetRatio, isBundle) => {
+const subMcdRepayStrategy = async (proxy, bundleId, vaultId, rationUnder, targetRatio, isBundle, regAddr = REGISTRY_ADDR) => {
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
 
     const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_UNDER);
     const strategySub = [bundleId, isBundle, [triggerData], [vaultIdEncoded, targetRatioEncoded]];
 
-    const subId = await subToStrategy(proxy, strategySub);
+    const subId = await subToStrategy(proxy, strategySub, regAddr);
 
     return { subId, strategySub };
 };
