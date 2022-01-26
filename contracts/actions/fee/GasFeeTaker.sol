@@ -47,8 +47,7 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
 
         inputData.feeToken.withdrawTokens(feeRecipient.getFeeAddr(), txCost);
 
-        logger.Log(address(this), msg.sender, "GasFeeTaker", abi.encode(inputData, amountLeft));
-
+        emit ActionEvent("GasFeeTaker", abi.encode(inputData, amountLeft));
         return bytes32(amountLeft);
     }
 

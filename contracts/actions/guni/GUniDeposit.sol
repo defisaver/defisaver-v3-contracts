@@ -47,16 +47,16 @@ contract GUniDeposit is ActionBase, DSMath, GUniHelper {
         inputData.amount0Min = _parseParamUint(inputData.amount0Min, _paramMapping[2], _subData, _returnValues);
         inputData.amount1Min = _parseParamUint(inputData.amount1Min, _paramMapping[3], _subData, _returnValues);
 
-        uint256 mintedAmount = gUniDeposit(inputData);
-
+        (uint256 mintedAmount, bytes memory logData) = gUniDeposit(inputData);
+        emit ActionEvent("GUniDeposit", logData);
         return bytes32(mintedAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        gUniDeposit(inputData);
+        (, bytes memory logData) = gUniDeposit(inputData);
+        logger.logActionDirectEvent("GUniDeposit", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -66,7 +66,7 @@ contract GUniDeposit is ActionBase, DSMath, GUniHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function gUniDeposit(Params memory _inputData) internal returns (uint256){
+    function gUniDeposit(Params memory _inputData) internal returns (uint256, bytes memory){
         require (_inputData.to != address(0x0), "Can not send to burn address");
 
         _inputData.amount0Max = _inputData.token0.pullTokensIfNeeded(_inputData.from, _inputData.amount0Max);
@@ -87,9 +87,8 @@ contract GUniDeposit is ActionBase, DSMath, GUniHelper {
         _inputData.token0.withdrawTokens(_inputData.from, sub(_inputData.amount0Max, amount0));
         _inputData.token1.withdrawTokens(_inputData.from, sub(_inputData.amount1Max, amount1));
 
-        logger.Log(address(this), msg.sender, "GUniDeposit", abi.encode(_inputData, mintAmount, amount0, amount1));
-
-        return mintAmount;
+        bytes memory logData = abi.encode(_inputData, mintAmount, amount0, amount1);
+        return (mintAmount, logData);
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {

@@ -33,16 +33,16 @@ contract CompBorrow is ActionBase, CompHelper {
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
-        uint256 withdrawAmount = _borrow(params.cTokenAddr, params.amount, params.to);
-
+        (uint256 withdrawAmount, bytes memory logData) = _borrow(params.cTokenAddr, params.amount, params.to);
+        emit ActionEvent("CompBorrow", logData);
         return bytes32(withdrawAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-
-        _borrow(params.cTokenAddr, params.amount, params.to);
+        (, bytes memory logData) = _borrow(params.cTokenAddr, params.amount, params.to);
+        logger.logActionDirectEvent("CompBorrow", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -60,7 +60,7 @@ contract CompBorrow is ActionBase, CompHelper {
         address _cTokenAddr,
         uint256 _amount,
         address _to
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
         // if the tokens are borrowed we need to enter the market
         enterMarket(_cTokenAddr);
@@ -75,9 +75,8 @@ contract CompBorrow is ActionBase, CompHelper {
         }
         tokenAddr.withdrawTokens(_to, _amount);
 
-        logger.Log(address(this), msg.sender, "CompBorrow", abi.encode(tokenAddr, _amount, _to));
-
-        return _amount;
+        bytes memory logData = abi.encode(tokenAddr, _amount, _to);
+        return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

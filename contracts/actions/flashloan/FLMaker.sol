@@ -67,15 +67,7 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
             _taskData
         );
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "FLMaker",
-            abi.encode(
-                _amount
-            )
-        );
-
+        emit ActionEvent("FLMaker", abi.encode(_amount));
         return _amount;
     }
 

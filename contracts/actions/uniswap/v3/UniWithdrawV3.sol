@@ -40,15 +40,16 @@ contract UniWithdrawV3 is ActionBase, UniV3Helper{
         uniData.tokenId = _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
         uniData.liquidity = uint128(_parseParamUint(uniData.liquidity, _paramMapping[1], _subData, _returnValues));
 
-        (uint256 amount0, ) = _uniWithdrawFromPosition(uniData);
+        (uint256 amount0, , bytes memory logData) = _uniWithdrawFromPosition(uniData);
+        emit ActionEvent("UniWithdrawV3", logData);
         return bytes32(amount0);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory uniData = parseInputs(_callData);
-        _uniWithdrawFromPosition(uniData);
-        
+        (, , bytes memory logData) = _uniWithdrawFromPosition(uniData);
+        logger.logActionDirectEvent("UniWithdrawV3", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -61,20 +62,14 @@ contract UniWithdrawV3 is ActionBase, UniV3Helper{
     /// @return amount0 amounts of token0 and token1 collected and sent to the recipient
     function _uniWithdrawFromPosition(Params memory _uniData)
         internal
-        returns(uint256 amount0, uint256 amount1)
+        returns(uint256 amount0, uint256 amount1, bytes memory logData)
     {
         //amount0 and amount1 now transfer to tokensOwed on position
         _uniWithdraw(_uniData);
 
         (amount0, amount1) = _uniCollect(_uniData);
     
-        logger.Log(
-                address(this),
-                msg.sender,
-                "UniWithdrawV3",
-                abi.encode(_uniData, amount0, amount1)
-            );
-
+        logData = abi.encode(_uniData, amount0, amount1);
     }
 
     /// @dev Burns liquidity stated, amount0Min and amount1Min are the least you get for burning that liquidity (else reverted),

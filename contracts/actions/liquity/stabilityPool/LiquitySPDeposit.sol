@@ -31,15 +31,16 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
         params.wethTo = _parseParamAddr(params.wethTo, _paramMapping[2], _subData, _returnValues);
         params.lqtyTo = _parseParamAddr(params.lqtyTo, _paramMapping[3], _subData, _returnValues);
 
-        params.lusdAmount = _liquitySPDeposit(params);
-        return bytes32(params.lusdAmount);
+        (uint256 depositedAmount, bytes memory logData) = _liquitySPDeposit(params);
+        emit ActionEvent("LiquitySPDeposit", logData);
+        return bytes32(depositedAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-
-        _liquitySPDeposit(params);
+        (, bytes memory logData) = _liquitySPDeposit(params);
+        logger.logActionDirectEvent("LiquitySPDeposit", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -50,7 +51,7 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Deposits LUSD to the stability pool
-    function _liquitySPDeposit(Params memory _params) internal returns (uint256) {
+    function _liquitySPDeposit(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.lusdAmount == type(uint256).max) {
             _params.lusdAmount = LUSD_TOKEN_ADDRESS.getBalance(_params.from);
         }
@@ -65,18 +66,8 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
 
         withdrawStabilityGains(ethGain, lqtyGain, _params.wethTo, _params.lqtyTo);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "LiquitySPDeposit",
-            abi.encode(
-                _params,
-                ethGain,
-                lqtyGain
-            )
-        );
-
-        return _params.lusdAmount;
+        bytes memory logData = abi.encode(_params, ethGain, lqtyGain);
+        return (_params.lusdAmount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

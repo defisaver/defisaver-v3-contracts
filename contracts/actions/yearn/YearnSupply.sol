@@ -40,15 +40,16 @@ contract YearnSupply is ActionBase, YearnHelper {
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        uint256 yAmountReceived = _yearnSupply(inputData);
+        (uint256 yAmountReceived, bytes memory logData) = _yearnSupply(inputData);
+        emit ActionEvent("YearnSupply", logData);
         return bytes32(yAmountReceived);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _yearnSupply(inputData);
+        (, bytes memory logData) = _yearnSupply(inputData);
+        logger.logActionDirectEvent("YearnSupply", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -58,7 +59,7 @@ contract YearnSupply is ActionBase, YearnHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _yearnSupply(Params memory _inputData) internal returns (uint256 yTokenAmount) {
+    function _yearnSupply(Params memory _inputData) internal returns (uint256 yTokenAmount, bytes memory logData) {
         IYVault vault = IYVault(yearnRegistry.latestVault(_inputData.token));
 
         uint256 amountPulled =
@@ -73,7 +74,7 @@ contract YearnSupply is ActionBase, YearnHelper {
 
         address(vault).withdrawTokens(_inputData.to, yTokenAmount);
 
-        logger.Log(address(this), msg.sender, "YearnSupply", abi.encode(_inputData, yTokenAmount));
+        logData = abi.encode(_inputData, yTokenAmount);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {

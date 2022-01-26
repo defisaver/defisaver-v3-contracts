@@ -33,15 +33,17 @@ contract LiquityPayback is ActionBase, LiquityHelper {
         );
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
 
-        params.lusdAmount = _liquityPayback(params);
-        return bytes32(params.lusdAmount);
+        (uint256 repayAmount, bytes memory logData) = _liquityPayback(params);
+        emit ActionEvent("LiquityPayback", logData);
+        return bytes32(repayAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
-        _liquityPayback(params);
+        (, bytes memory logData) = _liquityPayback(params);
+        logger.logActionDirectEvent("LiquityPayback", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -52,19 +54,13 @@ contract LiquityPayback is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Repays LUSD tokens to the trove
-    function _liquityPayback(Params memory _params) internal returns (uint256) {
+    function _liquityPayback(Params memory _params) internal returns (uint256, bytes memory) {
         LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
 
         BorrowerOperations.repayLUSD(_params.lusdAmount, _params.upperHint, _params.lowerHint);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "LiquityPayback",
-            abi.encode(_params.lusdAmount, _params.from)
-        );
-
-        return _params.lusdAmount;
+        bytes memory logData = abi.encode(_params.lusdAmount, _params.from);
+        return (_params.lusdAmount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

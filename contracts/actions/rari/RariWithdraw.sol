@@ -48,15 +48,16 @@ contract RariWithdraw is ActionBase, DSMath {
         );
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[3], _subData, _returnValues);
 
-        uint256 tokensWithdrawn = _rariWithdraw(inputData);
+        (uint256 tokensWithdrawn, bytes memory logData) = _rariWithdraw(inputData);
+        emit ActionEvent("RariWithdraw", logData);
         return bytes32(tokensWithdrawn);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _rariWithdraw(inputData);
+        (, bytes memory logData) = _rariWithdraw(inputData);
+        logger.logActionDirectEvent("RariWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -65,7 +66,7 @@ contract RariWithdraw is ActionBase, DSMath {
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
-    function _rariWithdraw(Params memory _inputData) internal returns (uint256 tokensWithdrawn) {
+    function _rariWithdraw(Params memory _inputData) internal returns (uint256 tokensWithdrawn, bytes memory logData) {
         require(_inputData.to != address(0), "Can't send to burn address");
 
         IFundManager fundManager = IFundManager(_inputData.fundManager);
@@ -91,12 +92,7 @@ contract RariWithdraw is ActionBase, DSMath {
 
         _inputData.stablecoinAddress.withdrawTokens(_inputData.to, tokensWithdrawn);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "RariWithdraw",
-            abi.encode(_inputData, tokensWithdrawn)
-        );
+        logData = abi.encode(_inputData, tokensWithdrawn);
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {

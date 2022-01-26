@@ -30,16 +30,16 @@ contract ReflexerSupply is ActionBase, ReflexerHelper {
         inputData.adapterAddr = _parseParamAddr(inputData.adapterAddr, _paramMapping[2], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[3], _subData, _returnValues);
 
-        uint256 returnAmount = _reflexerSupply(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.from);
-
+        (uint256 returnAmount, bytes memory logData) = _reflexerSupply(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.from);
+        emit ActionEvent("ReflexerSupply", logData);
         return bytes32(returnAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _reflexerSupply(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.from);
+        (, bytes memory logData) = _reflexerSupply(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.from);
+        logger.logActionDirectEvent("ReflexerSupply", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -59,7 +59,7 @@ contract ReflexerSupply is ActionBase, ReflexerHelper {
         uint256 _amount,
         address _adapterAddr,
         address _from
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         address tokenAddr = getTokenFromAdapter(_adapterAddr);
 
         // if amount type(uint).max, pull current _from  balance
@@ -84,14 +84,8 @@ contract ReflexerSupply is ActionBase, ReflexerHelper {
             0
         );
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "ReflexerSupply",
-            abi.encode(_safeId, _amount, _adapterAddr, _from)
-        );
-
-        return _amount;
+        bytes memory logData = abi.encode(_safeId, _amount, _adapterAddr, _from);
+        return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

@@ -40,21 +40,23 @@ contract MStableWithdraw is ActionBase, MStableHelper {
             _parseParamUint(uint256(params.assetPair), _paramMapping[8], _subData, _returnValues)
         );
         
-        uint256 withdrawn = _mStableWithdraw(params);
+        (uint256 withdrawn, bytes memory logData) = _mStableWithdraw(params);
+        emit ActionEvent("MStableWithdraw", logData);
         return bytes32(withdrawn);
     }
 
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        _mStableWithdraw(params);
+        (, bytes memory logData) = _mStableWithdraw(params);
+        logger.logActionDirectEvent("MStableWithdraw", logData);
     }
 
     /// @notice Action that withdraws the base asset from the Savings Contract, or if unstaking, from the Savings Vault
-    function _mStableWithdraw(Params memory _params) internal returns (uint256 withdrawn) {
+    function _mStableWithdraw(Params memory _params) internal returns (uint256 amount, bytes memory logData) {
         require(_params.to != address(0), "Recipient can't be address(0)");
 
         AssetPair assetPair = _params.assetPair;
-        uint256 amount = _params.amount;
+        amount = _params.amount;
         if (assetPair == AssetPair.IMASSET_IMASSETVAULT) {
             amount = _vaultBalance(_params.vaultAddress, address(this), amount);
             amount = _unstakeImAsset(_params.vaultAddress, amount);
@@ -92,17 +94,7 @@ contract MStableWithdraw is ActionBase, MStableHelper {
             amount = _redeemMAsset(_params.bAsset, _params.mAsset, amount, _params.minOut, _params.to);
         }
 
-
-        logger.Log(
-            address(this),
-            msg.sender,
-            "MStableWithdraw",
-            abi.encode(
-                amount
-            )
-        );
-
-        return amount;
+        logData = abi.encode(amount);
     }
 
     function actionType() public pure override returns (uint8) {

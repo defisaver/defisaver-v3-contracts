@@ -30,16 +30,16 @@ contract McdMerge is ActionBase, McdHelper {
         inputData.srcVaultId = _parseParamUint(inputData.srcVaultId, _paramMapping[0], _subData, _returnValues);
         inputData.destVaultId = _parseParamUint(inputData.destVaultId, _paramMapping[1], _subData, _returnValues);
 
-        _mcdMerge(inputData.srcVaultId, inputData.destVaultId, inputData.mcdManager);
-
+        bytes memory logData = _mcdMerge(inputData.srcVaultId, inputData.destVaultId, inputData.mcdManager);
+        emit ActionEvent("McdMerge", logData);
         return bytes32(inputData.destVaultId);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _mcdMerge(inputData.srcVaultId, inputData.destVaultId, inputData.mcdManager);
+        bytes memory logData = _mcdMerge(inputData.srcVaultId, inputData.destVaultId, inputData.mcdManager);
+        logger.logActionDirectEvent("McdMerge", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -58,16 +58,9 @@ contract McdMerge is ActionBase, McdHelper {
         uint256 _srcVaultId,
         uint256 _destVaultId,
         address _mcdManager
-    ) internal {
-
+    ) internal returns (bytes memory logData) {
         IManager(_mcdManager).shift(_srcVaultId, _destVaultId);
-
-        logger.Log(
-            address(this),
-            msg.sender,
-            "McdMerge",
-            abi.encode(_srcVaultId, _destVaultId, _mcdManager)
-        );
+        logData = abi.encode(_srcVaultId, _destVaultId, _mcdManager);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

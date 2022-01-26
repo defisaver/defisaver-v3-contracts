@@ -47,16 +47,16 @@ contract CurveWithdraw is ActionBase, CurveHelper {
             params.withdrawAmounts[i] = _parseParamUint(params.withdrawAmounts[i], _paramMapping[3 + i], _subData, _returnValues);
         }
 
-        _curveWithdraw(params);
-
+        bytes memory logData = _curveWithdraw(params);
+        emit ActionEvent("CurveWithdraw", logData);
         return bytes32(0);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-
-        _curveWithdraw(params);
+        bytes memory logData = _curveWithdraw(params);
+        logger.logActionDirectEvent("CurveWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -67,7 +67,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Withdraws user deposited tokens from depositTarget
-    function _curveWithdraw(Params memory _params) internal {
+    function _curveWithdraw(Params memory _params) internal returns (bytes memory logData) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
         
         _params.lpToken.pullTokensIfNeeded(_params.sender, _params.burnAmount);
@@ -93,14 +93,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
             tokenAddr.withdrawTokens(_params.receiver, balanceDelta);
         }
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "CurveWithdraw",
-            abi.encode(
-                _params
-            )
-        );
+        logData = abi.encode(_params);
     }
 
     /// @notice Constructs payload for external contract call

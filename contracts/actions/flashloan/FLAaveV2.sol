@@ -83,9 +83,7 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlas
             AAVE_REFERRAL_CODE
         );
 
-        logger.Log(
-            address(this),
-            msg.sender,
+        emit ActionEvent(
             "FLAaveV2",
             abi.encode(_flData.tokens, _flData.amounts, _flData.modes, _flData.onBehalfOf)
         );

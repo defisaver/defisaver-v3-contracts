@@ -37,16 +37,16 @@ contract McdGenerate is ActionBase, McdHelper {
         inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        inputData.amount = _mcdGenerate(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager);
-
-        return bytes32(inputData.amount);
+        (uint256 borrowedAmount, bytes memory logData) = _mcdGenerate(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager);
+        emit ActionEvent("McdGenerate", logData);
+        return bytes32(borrowedAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _mcdGenerate(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager);
+        (, bytes memory logData) = _mcdGenerate(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager);
+        logger.logActionDirectEvent("McdGenerate", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -66,7 +66,7 @@ contract McdGenerate is ActionBase, McdHelper {
         uint256 _amount,
         address _to,
         address _mcdManager
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         IManager mcdManager = IManager(_mcdManager);
 
         uint256 rate = IJug(JUG_ADDRESS).drip(mcdManager.ilks(_vaultId));
@@ -88,14 +88,8 @@ contract McdGenerate is ActionBase, McdHelper {
         // exit dai from join and send _to if needed
         IDaiJoin(DAI_JOIN_ADDR).exit(_to, _amount);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "McdGenerate",
-            abi.encode(_vaultId, _amount, _to, _mcdManager)
-        );
-
-        return _amount;
+        bytes memory logData = abi.encode(_vaultId, _amount, _to, _mcdManager);
+        return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

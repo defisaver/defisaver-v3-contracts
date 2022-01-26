@@ -45,7 +45,8 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
             _returnValues
         );
 
-        uint256 ethRedeemed = _liquityRedeem(params);
+        (uint256 ethRedeemed, bytes memory logData) = _liquityRedeem(params);
+        emit ActionEvent("LiquityRedeem", logData);
         return bytes32(ethRedeemed);
     }
 
@@ -53,7 +54,8 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
-        _liquityRedeem(params);
+        (, bytes memory logData) = _liquityRedeem(params);
+        logger.logActionDirectEvent("LiquityRedeem", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -64,7 +66,7 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Redeems ETH(wrapped) using LUSD with the target price of LUSD = 1$
-    function _liquityRedeem(Params memory _params) internal returns (uint256) {
+    function _liquityRedeem(Params memory _params) internal returns (uint256 ethRedeemed, bytes memory logData) {
         if (_params.lusdAmount == type(uint256).max) {
             _params.lusdAmount = LUSD_TOKEN_ADDRESS.getBalance(_params.from);
         }
@@ -85,24 +87,17 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
 
         uint256 lusdAmountUsed = lusdBefore - (LUSD_TOKEN_ADDRESS.getBalance(address(this)));   // It isn't guaranteed that the whole requested LUSD amount will be used
         uint256 lusdToReturn = _params.lusdAmount - lusdAmountUsed;
-        uint256 ethRedeemed = address(this).balance -ethBefore;
+        ethRedeemed = address(this).balance -ethBefore;
 
         withdrawStaking(ethRedeemed, lusdToReturn, _params.to, _params.from);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "LiquityRedeem",
-            abi.encode(
-                lusdAmountUsed,
-                ethRedeemed,
-                _params.maxFeePercentage,
-                _params.from,
-                _params.to
-            )
+        logData = abi.encode(
+            lusdAmountUsed,
+            ethRedeemed,
+            _params.maxFeePercentage,
+            _params.from,
+            _params.to
         );
-
-        return ethRedeemed;
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

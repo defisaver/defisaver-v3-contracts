@@ -42,14 +42,16 @@ contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
             _returnValues
         ));
 
-        _automationV2Unsub(params);
+        bytes memory logData = _automationV2Unsub(params);
+        emit ActionEvent("Unsubscribe", logData);
     }
+
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-
-        _automationV2Unsub(params);
+        bytes memory logData = _automationV2Unsub(params);
+        logger.logActionDirectEvent("Unsubscribe", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -60,7 +62,7 @@ contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Unsubscribes proxy from automation
-    function _automationV2Unsub(Params memory _params) internal {
+    function _automationV2Unsub(Params memory _params) internal returns (bytes memory logData) {
         ( uint256 cdpId, Protocols protocol ) = ( _params.cdpId, _params.protocol );
 
         if (protocol == Protocols.MCD) {
@@ -71,14 +73,7 @@ contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
             ISubscriptions(AAVE_SUB_ADDRESS).unsubscribe();
         } else revert("Invalid protocol argument");
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "Unsubscribe",
-            abi.encode(
-                _params
-            )
-        );
+        logData = abi.encode(_params);
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {

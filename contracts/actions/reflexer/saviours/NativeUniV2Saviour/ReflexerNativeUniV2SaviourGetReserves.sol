@@ -25,15 +25,16 @@ contract ReflexerNativeUniV2SaviourGetReserves is ActionBase, ReflexerHelper {
         Params memory inputData = parseInputs(_callData);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[0], _subData, _returnValues);
 
-        _reflexerSaviourGetReserves(inputData);
+        (bytes memory logData) = _reflexerSaviourGetReserves(inputData);
+        emit ActionEvent("ReflexerNativeUniV2SaviourGetReserves", logData);
         return bytes32(inputData.safeId);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _reflexerSaviourGetReserves(inputData);
+        bytes memory logData = _reflexerSaviourGetReserves(inputData);
+        logger.logActionDirectEvent("ReflexerNativeUniV2SaviourGetReserves", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -43,19 +44,14 @@ contract ReflexerNativeUniV2SaviourGetReserves is ActionBase, ReflexerHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _reflexerSaviourGetReserves(Params memory _inputData) internal {
+    function _reflexerSaviourGetReserves(Params memory _inputData) internal returns (bytes memory logData) {
         require(_inputData.to != address(0), "Can't send to 0x0");
         ISAFESaviour(NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS).getReserves(
             _inputData.safeId,
             _inputData.to
         );
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "ReflexerNativeUniV2SaviourGetReserves",
-            abi.encode(_inputData)
-        );
+        logData = abi.encode(_inputData);
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {

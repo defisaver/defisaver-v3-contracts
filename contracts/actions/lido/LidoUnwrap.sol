@@ -40,15 +40,16 @@ contract LidoUnwrap is ActionBase, DSMath, LidoHelper {
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
         
-        uint256 stEthReceivedAmount = _lidoUnwrap(inputData);
+        (uint256 stEthReceivedAmount, bytes memory logData) = _lidoUnwrap(inputData);
+        emit ActionEvent("LidoUnwrap", logData);
         return bytes32(stEthReceivedAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _lidoUnwrap(inputData);
+        (, bytes memory logData) = _lidoUnwrap(inputData);
+        logger.logActionDirectEvent("LidoUnwrap", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -58,7 +59,7 @@ contract LidoUnwrap is ActionBase, DSMath, LidoHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _lidoUnwrap(Params memory _inputData) internal returns (uint256 stEthReceivedAmount) {
+    function _lidoUnwrap(Params memory _inputData) internal returns (uint256 stEthReceivedAmount, bytes memory logData) {
         require(_inputData.to != address(0), "Can't send to burn address");
         require(_inputData.amount > 0, "Amount to unwrap can't be 0");
 
@@ -69,7 +70,7 @@ contract LidoUnwrap is ActionBase, DSMath, LidoHelper {
         
         lidoStEth.withdrawTokens(_inputData.to, stEthReceivedAmount);
 
-        logger.Log(address(this), msg.sender, "LidoUnwrap", abi.encode(_inputData, stEthReceivedAmount));
+        logData = abi.encode(_inputData, stEthReceivedAmount);
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {

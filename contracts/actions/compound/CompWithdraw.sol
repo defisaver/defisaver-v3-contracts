@@ -33,16 +33,16 @@ contract CompWithdraw is ActionBase, CompHelper {
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
-        uint256 withdrawAmount = _withdraw(params.cTokenAddr, params.amount, params.to);
-
+        (uint256 withdrawAmount, bytes memory logData) = _withdraw(params.cTokenAddr, params.amount, params.to);
+        emit ActionEvent("CompWithdraw", logData);
         return bytes32(withdrawAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-
-        _withdraw(params.cTokenAddr, params.amount, params.to);
+        (, bytes memory logData) = _withdraw(params.cTokenAddr, params.amount, params.to);
+        logger.logActionDirectEvent("CompWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -61,7 +61,7 @@ contract CompWithdraw is ActionBase, CompHelper {
         address _cTokenAddr,
         uint256 _amount,
         address _to
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
         // because comp returns native eth we need to check the balance of that
@@ -97,9 +97,8 @@ contract CompWithdraw is ActionBase, CompHelper {
         // If tokens needs to be send to the _to address
         tokenAddr.withdrawTokens(_to, _amount);
 
-        logger.Log(address(this), msg.sender, "CompWithdraw", abi.encode(tokenAddr, _amount, _to));
-
-        return _amount;
+        bytes memory logData = abi.encode(tokenAddr, _amount, _to);
+        return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

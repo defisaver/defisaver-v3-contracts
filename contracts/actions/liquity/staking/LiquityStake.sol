@@ -29,15 +29,16 @@ contract LiquityStake is ActionBase, LiquityHelper {
         params.wethTo = _parseParamAddr(params.wethTo, _paramMapping[2], _subData, _returnValues);
         params.lusdTo = _parseParamAddr(params.lusdTo, _paramMapping[3], _subData, _returnValues);
 
-        params.lqtyAmount = _liquityStake(params);
-        return bytes32(params.lqtyAmount);
+        (uint256 stakedAmount, bytes memory logData) = _liquityStake(params);
+        emit ActionEvent("LiquityStake", logData);
+        return bytes32(stakedAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-
-        _liquityStake(params);
+        (, bytes memory logData) = _liquityStake(params);
+        logger.logActionDirectEvent("LiquityStake", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -48,7 +49,7 @@ contract LiquityStake is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Stakes LQTY tokens
-    function _liquityStake(Params memory _params) internal returns (uint256) {
+    function _liquityStake(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.lqtyAmount == type(uint256).max) {
             _params.lqtyAmount = LQTY_TOKEN_ADDRESS.getBalance(_params.from);
         }
@@ -61,18 +62,8 @@ contract LiquityStake is ActionBase, LiquityHelper {
 
         withdrawStaking(ethGain, lusdGain, _params.wethTo, _params.lusdTo);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "LiquityStake",
-            abi.encode(
-                _params,
-                ethGain,
-                lusdGain
-            )
-        );
-
-        return _params.lqtyAmount;
+        bytes memory logData = abi.encode(_params, ethGain, lusdGain);
+        return (_params.lqtyAmount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
