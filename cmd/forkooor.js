@@ -55,7 +55,10 @@ const {
     AssetPair,
 } = require('../test/utils-mstable');
 
+const { getSubHash } = require('../test/utils-strategies');
+
 const { subMcdRepayStrategy } = require('../test/strategy-subs');
+const { createMcdTrigger, RATIO_STATE_UNDER } = require('../test/triggers');
 
 program.version('0.0.1');
 let forkedAddresses = '';
@@ -67,6 +70,7 @@ try {
 }
 
 const REGISTRY_ADDR = forkedAddresses.DFSRegistry;
+const abiCoder = new hre.ethers.utils.AbiCoder();
 
 function setEnv(key, value) {
     const pathToEnv = path.join(__dirname, '/../.env');
@@ -188,6 +192,136 @@ const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio,
     );
 
     console.log(`Subscribed to ${protocol} strategy with sub id #${subId}`);
+};
+
+const updateSmartSavingsStrategySub = async (subId, vaultId, minRatio, targetRatio, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
+    const subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
+
+    const subStorageAddr = await getAddrFromRegistry('SubStorage', REGISTRY_ADDR);
+    const subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+
+    const triggerData = await createMcdTrigger(
+        vaultId.toString(),
+        minRatio.toString(),
+        RATIO_STATE_UNDER,
+    );
+
+    const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+
+    const strategySub = [vaultIdEncoded, targetRatioEncoded];
+
+    const isBundle = false; // TODO: change later
+    const updatedSubData = [subId, isBundle, [triggerData], strategySub];
+
+    const hashToSet = getSubHash(updatedSubData);
+
+    const functionData = subProxy.interface.encodeFunctionData('updateSubData', [subId, updatedSubData]);
+
+    try {
+        await proxy['execute(address,bytes)'](subProxy.address, functionData, {
+            gasLimit: 5000000,
+        });
+    } catch (err) {
+        console.log('Updated failed');
+        return;
+    }
+
+    const storedSub = await subStorage.getSub(subId);
+
+    if (storedSub.strategySubHash !== hashToSet) {
+        console.log('Updated failed!');
+    } else {
+        console.log(`Updated sub id ${subId}, hash: ${hashToSet}`);
+    }
+};
+
+const activateSub = async (subId, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
+    const subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
+
+    const subStorageAddr = await getAddrFromRegistry('SubStorage', REGISTRY_ADDR);
+    const subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+
+    const functionData = subProxy.interface.encodeFunctionData('activateSub', [subId]);
+
+    try {
+        await proxy['execute(address,bytes)'](subProxy.address, functionData, {
+            gasLimit: 5000000,
+        });
+    } catch (err) {
+        console.log('Activate sub failed');
+        return;
+    }
+
+    const storedSub = await subStorage.getSub(subId);
+
+    if (!storedSub.isEnabled) {
+        console.log('Activate sub failed');
+    } else {
+        console.log(`Sub id ${subId} activated!`);
+    }
+};
+
+const deactivateSub = async (subId, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
+    const subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
+
+    const subStorageAddr = await getAddrFromRegistry('SubStorage', REGISTRY_ADDR);
+    const subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+
+    const functionData = subProxy.interface.encodeFunctionData('deactivateSub', [subId]);
+
+    try {
+        await proxy['execute(address,bytes)'](subProxy.address, functionData, {
+            gasLimit: 5000000,
+        });
+    } catch (err) {
+        console.log('Deactivate sub failed');
+        return;
+    }
+
+    const storedSub = await subStorage.getSub(subId);
+
+    if (storedSub.isEnabled) {
+        console.log('Deactivate sub failed!');
+    } else {
+        console.log(`Sub id ${subId} deactivated!`);
+    }
 };
 
 // eslint-disable-next-line consistent-return
@@ -467,7 +601,32 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
         .command('sub-ss <protocol> <vaultId> <minRatio> <targetRatio> [senderAddr]')
         .description('Subscribes to a Smart Savings strategy')
         .action(async (protocol, vaultId, minRatio, targetRatio, senderAddr) => {
+            // eslint-disable-next-line max-len
             await smartSavingsStrategySub(protocol, vaultId, minRatio, targetRatio, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('update-ss <subId> <vaultId> <minRatio> <targetRatio> [senderAddr]')
+        .description('Updates to a Smart Savings strategy')
+        .action(async (subId, vaultId, minRatio, targetRatio, senderAddr) => {
+            await updateSmartSavingsStrategySub(subId, vaultId, minRatio, targetRatio, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('activate-sub <subId> [senderAddr]')
+        .description('Activates subscription for the user')
+        .action(async (subId, senderAddr) => {
+            await activateSub(subId, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('deactivate-sub <subId> [senderAddr]')
+        .description('Deactivates subscription for the user')
+        .action(async (subId, senderAddr) => {
+            await deactivateSub(subId, senderAddr);
             process.exit(0);
         });
 

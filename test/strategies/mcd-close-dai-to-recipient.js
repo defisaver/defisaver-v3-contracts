@@ -17,8 +17,8 @@ const {
 
 const { createStrategy, addBotCaller } = require('../utils-strategies');
 
-const { subMcdCloseStrategy } = require('../strategy-calls');
-const { callMcdCloseStrategy } = require('../strategy-subs');
+const { subMcdCloseStrategy } = require('../strategy-subs');
+const { callMcdCloseStrategy } = require('../strategy-calls');
 const { createMcdCloseStrategy } = require('../strategies');
 
 const { openVault } = require('../actions');
