@@ -10,20 +10,24 @@ const {
     balanceOf,
     DAI_ADDR,
     rariDaiFundManager,
+    rariUsdcFundManager,
     rdptAddress,
+    rsptAddress,
+    USDC_ADDR,
 } = require('../utils');
 
 const {
     createStrategy,
     addBotCaller,
     setMCDPriceVerifier,
+    createBundle,
 } = require('../utils-strategies');
 
 const { getRatio } = require('../utils-mcd');
 
-const { callMcdRepayFromRariStrategy } = require('../strategy-calls');
+const { callMcdRepayFromRariStrategy, callMcdRepayFromRariStrategyWithExchange } = require('../strategy-calls');
 const { subMcdRepayStrategy } = require('../strategy-subs');
-const { createRariRepayStrategy } = require('../strategies');
+const { createRariRepayStrategy, createRariRepayStrategyWithExchange } = require('../strategies');
 
 const { openVault, rariDeposit } = require('../actions');
 
@@ -80,8 +84,12 @@ describe('Mcd-Repay-Rari-Strategy', function () {
 
     it('... should create repay strategy using rari funds', async () => {
         const repayStrategyEncoded = createRariRepayStrategy();
+        const repayStrategyWithExchangeEncoded = createRariRepayStrategyWithExchange();
 
         await createStrategy(proxy, ...repayStrategyEncoded, true);
+        await createStrategy(proxy, ...repayStrategyWithExchangeEncoded, true);
+
+        await createBundle(proxy, [0, 1]);
     });
 
     it('... should sub the user to a repay bundle ', async () => {
@@ -89,8 +97,8 @@ describe('Mcd-Repay-Rari-Strategy', function () {
         vaultId = await openVault(
             proxy,
             'ETH-A',
-            fetchAmountinUSDPrice('WETH', '50000'),
-            fetchAmountinUSDPrice('DAI', '25000'),
+            fetchAmountinUSDPrice('WETH', '60000'),
+            fetchAmountinUSDPrice('DAI', '30000'),
         );
 
         console.log('Vault id: ', vaultId);
@@ -109,16 +117,32 @@ describe('Mcd-Repay-Rari-Strategy', function () {
             proxy,
         );
 
+        // Deposit some usdc in yearn
+        const usdcAmount = hre.ethers.utils.parseUnits('5000', 6);
+
+        await setBalance(USDC_ADDR, senderAcc.address, usdcAmount);
+        await approve(USDC_ADDR, proxy.address);
+
+        await rariDeposit(
+            rariUsdcFundManager,
+            USDC_ADDR,
+            rsptAddress,
+            usdcAmount,
+            senderAcc.address,
+            proxy.address,
+            proxy,
+        );
+
         const ratioUnder = hre.ethers.utils.parseUnits('3', '18');
         const targetRatio = hre.ethers.utils.parseUnits('3.2', '18');
 
         const bundleId = 0;
         ({ subId, strategySub } = await subMcdRepayStrategy(
-            proxy, bundleId, vaultId, ratioUnder, targetRatio, false,
+            proxy, bundleId, vaultId, ratioUnder, targetRatio, true,
         ));
     });
 
-    it('... should trigger a maker repay strategy', async () => {
+    it('... should trigger a maker repay from rari strategy', async () => {
         const ratioBefore = await getRatio(mcdView, vaultId);
 
         const repayAmount = hre.ethers.utils.parseUnits('5000', 18);
@@ -127,6 +151,26 @@ describe('Mcd-Repay-Rari-Strategy', function () {
         await callMcdRepayFromRariStrategy(
             // eslint-disable-next-line max-len
             botAcc, strategyExecutor, 0, subId, strategySub, poolAmount, repayAmount,
+        );
+
+        const ratioAfter = await getRatio(mcdView, vaultId);
+
+        console.log(
+            `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+        );
+
+        expect(ratioAfter).to.be.gt(ratioBefore);
+    });
+
+    it('... should trigger a maker repay from rari with exchange strategy', async () => {
+        const ratioBefore = await getRatio(mcdView, vaultId);
+
+        const repayAmount = hre.ethers.utils.parseUnits('5000', 6);
+        const poolAmount = await balanceOf(rsptAddress, proxy.address);
+
+        await callMcdRepayFromRariStrategyWithExchange(
+            // eslint-disable-next-line max-len
+            botAcc, strategyExecutor, 1, subId, strategySub, poolAmount, repayAmount,
         );
 
         const ratioAfter = await getRatio(mcdView, vaultId);

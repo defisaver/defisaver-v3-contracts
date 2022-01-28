@@ -11,7 +11,14 @@ const { redeploy, OWNER_ACC } = require('../test/utils');
 
 const { topUp } = require('./utils/fork.js');
 
-const { createYearnRepayStrategy, createRariRepayStrategy, createMstableRepayStrategy } = require('../test/strategies');
+const {
+    createYearnRepayStrategy,
+    createYearnRepayStrategyWithExchange,
+    createRariRepayStrategy,
+    createRariRepayStrategyWithExchange,
+    createMstableRepayStrategy,
+    createMstableRepayStrategyWithExchange,
+} = require('../test/strategies');
 
 const MAINNET_VAULT = '0xCCf3d848e08b94478Ed8f46fFead3008faF581fD';
 const MAINNET_REGISTRY = '0xD5cec8F03f803A74B60A7603Ed13556279376b09';
@@ -80,8 +87,18 @@ async function main() {
 
     // SS style strategies
     await strategyStorage.createStrategy(...(createYearnRepayStrategy()), true);
+    await strategyStorage.createStrategy(...(createYearnRepayStrategyWithExchange()), true);
+
     await strategyStorage.createStrategy(...(createMstableRepayStrategy()), true);
+    await strategyStorage.createStrategy(...(createMstableRepayStrategyWithExchange()), true);
+
     await strategyStorage.createStrategy(...(createRariRepayStrategy()), true);
+    await strategyStorage.createStrategy(...(createRariRepayStrategyWithExchange()), true);
+
+    // bundles
+    await bundleStorage.createBundle([0, 1]); // 0 bundle YEARN
+    await bundleStorage.createBundle([2, 3]); // 1 bundle MSTABLE
+    await bundleStorage.createBundle([4, 5]); // 2 bundle RARI
 
     const strategyCount = await strategyStorage.getStrategyCount();
 

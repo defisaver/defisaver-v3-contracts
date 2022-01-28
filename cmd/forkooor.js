@@ -188,10 +188,10 @@ const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio,
     }
 
     const { subId } = await subMcdRepayStrategy(
-        proxy, bundleId, vaultId, ratioUnderWei, targetRatioWei, false, REGISTRY_ADDR,
+        proxy, bundleId, vaultId, ratioUnderWei, targetRatioWei, true, REGISTRY_ADDR,
     );
 
-    console.log(`Subscribed to ${protocol} strategy with sub id #${subId}`);
+    console.log(`Subscribed to ${protocol} bundle with sub id #${subId}`);
 };
 
 const updateSmartSavingsStrategySub = async (subId, vaultId, minRatio, targetRatio, sender) => {
@@ -223,7 +223,7 @@ const updateSmartSavingsStrategySub = async (subId, vaultId, minRatio, targetRat
 
     const strategySub = [vaultIdEncoded, targetRatioEncoded];
 
-    const isBundle = false; // TODO: change later
+    const isBundle = true;
     const updatedSubData = [subId, isBundle, [triggerData], strategySub];
 
     const hashToSet = getSubHash(updatedSubData);

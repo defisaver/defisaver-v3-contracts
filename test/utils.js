@@ -49,6 +49,9 @@ const ADMIN_ACC = '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9';
 const rariDaiFundManager = '0xB465BAF04C087Ce3ed1C266F96CA43f4847D9635';
 const rdptAddress = '0x0833cfcb11A5ba89FbAF73a407831c98aD2D7648';
 
+const rariUsdcFundManager = '0xC6BF8C8A55f77686720E0a88e2Fd1fEEF58ddf4a';
+const rsptAddress = '0x016bf078ABcaCB987f0589a6d3BEAdD4316922B0';
+
 const MAX_UINT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 const MAX_UINT128 = '340282366920938463463374607431768211455';
 
@@ -702,6 +705,8 @@ module.exports = {
     WSTETH_ADDRESS,
     rariDaiFundManager,
     rdptAddress,
+    rariUsdcFundManager,
+    rsptAddress,
     setBalance,
     takeSnapshot,
     revertToSnapshot,
