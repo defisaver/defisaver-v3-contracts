@@ -3,11 +3,9 @@
 pragma solidity =0.8.10;
 
 import "../auth/AdminAuth.sol";
-import "../utils/DefisaverLogger.sol";
-import "./helpers/CoreHelper.sol";
 
 /// @title Stores all the important DFS addresses and can be changed (timelock)
-contract DFSRegistry is AdminAuth, CoreHelper {
+contract DFSRegistry is AdminAuth {
     error EntryAlreadyExistsError(bytes4);
     error EntryNonExistentError(bytes4);
     error EntryNotInChangeError(bytes4);

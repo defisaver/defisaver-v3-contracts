@@ -17,6 +17,13 @@ module.exports = {
             url: 'http://127.0.0.1:8545',
             timeout: 1000000,
             gasPrice: 170000000000,
+            name: 'mainnet',
+        },
+        localOptimism: {
+            url: 'http://127.0.0.1:8545',
+            timeout: 1000000,
+            gasPrice: 1883022292,
+            name: 'optimism',
         },
         fork: {
             url: `https://rpc.tenderly.co/fork/${process.env.FORK_ID}`,
@@ -71,6 +78,7 @@ module.exports = {
     wethAddress: {
         Mainnet: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         Arbitrum: '0x0',
+        Optimism: '0x4200000000000000000000000000000000000006',
     },
 };
 

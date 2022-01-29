@@ -7,7 +7,7 @@ const {
     getProxy,
     redeploy,
     balanceOf,
-    WETH_ADDRESS,
+    getWeth,
 } = require('../utils');
 
 describe('Send-Token', function () {
@@ -33,12 +33,12 @@ describe('Send-Token', function () {
 
         const sendTokenAddr = await getAddrFromRegistry('SendToken');
         const sendTokenAction = new dfs.actions.basic.SendTokenAction(
-            WETH_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('3', 18),
+            getWeth(), senderAcc.address, hre.ethers.utils.parseUnits('3', 18),
         );
         const sendTokenData = sendTokenAction.encodeForDsProxyCall()[1];
-        const balanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
+        const balanceBefore = await balanceOf(getWeth(), senderAcc.address);
         await proxy['execute(address,bytes)'](sendTokenAddr, sendTokenData);
-        const balanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
+        const balanceAfter = await balanceOf(getWeth(), senderAcc.address);
         const balanceDiff = balanceAfter.sub(balanceBefore);
         expect(balanceDiff).to.be.eq(hre.ethers.utils.parseUnits('3', 18));
     });
@@ -46,14 +46,14 @@ describe('Send-Token', function () {
     it('... should send tokens direct action uint256.max', async () => {
         const sendTokenAddr = await getAddrFromRegistry('SendToken');
         const sendTokenAction = new dfs.actions.basic.SendTokenAction(
-            WETH_ADDRESS, senderAcc.address, hre.ethers.constants.MaxUint256,
+            getWeth(), senderAcc.address, hre.ethers.constants.MaxUint256,
         );
         const sendTokenData = sendTokenAction.encodeForDsProxyCall()[1];
-        const proxyBalanceAtStart = await balanceOf(WETH_ADDRESS, proxy.address);
-        const balanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
+        const proxyBalanceAtStart = await balanceOf(getWeth(), proxy.address);
+        const balanceBefore = await balanceOf(getWeth(), senderAcc.address);
 
         await proxy['execute(address,bytes)'](sendTokenAddr, sendTokenData);
-        const balanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
+        const balanceAfter = await balanceOf(getWeth(), senderAcc.address);
         const balanceDiff = balanceAfter.sub(balanceBefore);
 
         expect(balanceDiff).to.be.eq(proxyBalanceAtStart);

@@ -6,6 +6,7 @@ import "./StrategyModel.sol";
 import "../../auth/AdminAuth.sol";
 import "../DFSRegistry.sol";
 import "./StrategyStorage.sol";
+import "../helpers/CoreHelper.sol";
 
 /// @title BundleStorage - Record of all the Bundles created
 contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {

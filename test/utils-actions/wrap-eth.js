@@ -9,7 +9,7 @@ const {
     redeploy,
     balanceOf,
     formatExchangeObj,
-    WETH_ADDRESS,
+    getWeth,
     setNewExchangeWrapper,
 } = require('../utils');
 
@@ -47,7 +47,7 @@ describe('Wrap-Eth', function () {
         const wrapEthAction = new dfs.actions.basic.WrapEthAction(amount);
         const functionData = wrapEthAction.encodeForDsProxyCall()[1];
 
-        const wethBalanceBefore = await balanceOf(WETH_ADDRESS, proxy.address);
+        const wethBalanceBefore = await balanceOf(getWeth(), proxy.address);
         console.log(`Weth proxy before: ${wethBalanceBefore / 1e18}`);
 
         await proxy['execute(address,bytes)'](wrapEthAddr, functionData, {
@@ -55,7 +55,7 @@ describe('Wrap-Eth', function () {
             gasLimit: 3000000,
         });
 
-        const wethBalanceAfter = await balanceOf(WETH_ADDRESS, proxy.address);
+        const wethBalanceAfter = await balanceOf(getWeth(), proxy.address);
         console.log(`Weth proxy after: ${wethBalanceAfter / 1e18}`);
 
         expect(wethBalanceAfter / 1e18).to.be.eq(wethBalanceBefore / 1e18 + amount / 1e18);
@@ -65,7 +65,7 @@ describe('Wrap-Eth', function () {
         const amount = hre.ethers.utils.parseUnits('2', 18);
 
         const exchangeOrder = formatExchangeObj(
-            WETH_ADDRESS,
+            getWeth(),
             makerAddresses.MCD_DAI,
             amount,
             uniWrapper.address,
