@@ -20,7 +20,7 @@ const {
 } = require('./utils');
 const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
 const { getSecondTokenAmount } = require('./utils-uni');
-const { getHints, LiquityActionIds } = require('./utils-liquity');
+const { LiquityActionIds, getHints, getRedemptionHints } = require('./utils-liquity');
 const { execShellCommand } = require('../scripts/hardhat-tasks-functions');
 
 const executeAction = async (actionName, functionData, proxy) => {
@@ -1013,27 +1013,13 @@ const liquityClose = async (proxy, from, to) => {
 };
 
 const liquityRedeem = async (proxy, lusdAmount, from, to, maxFeePercentage) => {
-    const maxIterations = 0;
-    const liquityViewAddr = await getAddrFromRegistry('LiquityView');
-    const liquityView = await hre.ethers.getContractAt('LiquityView', liquityViewAddr);
-    const { collPrice } = await liquityView['getTroveInfo(address)'](proxy.address);
     const {
         firstRedemptionHint,
         partialRedemptionHintNICR,
         truncatedLUSDamount,
-    } = await liquityView['getRedemptionHints(uint256,uint256,uint256)'](
-        lusdAmount,
-        collPrice,
-        maxIterations,
-    );
-    const { hintAddress } = await liquityView['getApproxHint(uint256,uint256,uint256)'](
-        partialRedemptionHintNICR,
-        200,
-        42,
-    );
-    const { upperHint, lowerHint } = await liquityView[
-        'findInsertPosition(uint256,address,address)'
-    ](partialRedemptionHintNICR, hintAddress, hintAddress);
+        upperHint,
+        lowerHint,
+    } = await getRedemptionHints(lusdAmount, from);
 
     const liquityRedeemAction = new dfs.actions.liquity.LiquityRedeemAction(
         truncatedLUSDamount,
@@ -1043,7 +1029,7 @@ const liquityRedeem = async (proxy, lusdAmount, from, to, maxFeePercentage) => {
         upperHint,
         lowerHint,
         partialRedemptionHintNICR,
-        maxIterations,
+        0,
         maxFeePercentage,
     );
 
