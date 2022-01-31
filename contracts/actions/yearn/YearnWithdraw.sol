@@ -68,7 +68,7 @@ contract YearnWithdraw is ActionBase, DSMath {
 
         uint256 amountPulled =
             _inputData.yToken.pullTokensIfNeeded(_inputData.from, _inputData.yAmount);
-        _inputData.yToken.approveToken(address(vault), amountPulled);
+       
         _inputData.yAmount = amountPulled;
 
         address underlyingToken = vault.token();
