@@ -34,6 +34,7 @@ contract McdGive is ActionBase {
 
         inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
         inputData.newOwner = _parseParamAddr(inputData.newOwner, _paramMapping[1], _subData, _returnValues);
+        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[2], _subData, _returnValues);
 
         (address newOwner, bytes memory logData) = _mcdGive(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager);
         emit ActionEvent("McdGive", logData);

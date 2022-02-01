@@ -17,7 +17,8 @@ const {
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
 } = require('./triggers');
-const { REGISTRY_ADDR } = require('./utils');
+const { REGISTRY_ADDR, DAI_ADDR } = require('./utils');
+const { MCD_MANAGER_ADDR } = require('./utils-mcd');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -99,6 +100,20 @@ const subMcdRepayStrategy = async (proxy, bundleId, vaultId, rationUnder, target
 
     const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_UNDER);
     const strategySub = [bundleId, isBundle, [triggerData], [vaultIdEncoded, targetRatioEncoded]];
+
+    const subId = await subToStrategy(proxy, strategySub, regAddr);
+
+    return { subId, strategySub };
+};
+
+const subRepayFromSavingsStrategy = async (proxy, bundleId, vaultId, rationUnder, targetRatio, isBundle, regAddr = REGISTRY_ADDR) => {
+    const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const daiAddrEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const mcdManagerAddrEncoded = abiCoder.encode(['address'], [MCD_MANAGER_ADDR]);
+
+    const triggerData = await createMcdTrigger(vaultId, rationUnder, RATIO_STATE_UNDER);
+    const strategySub = [bundleId, isBundle, [triggerData], [vaultIdEncoded, targetRatioEncoded, daiAddrEncoded, mcdManagerAddrEncoded]];
 
     const subId = await subToStrategy(proxy, strategySub, regAddr);
 
@@ -235,6 +250,7 @@ const subLiquityRepayStrategy = async (proxy, ratioUnder, targetRatio) => {
 module.exports = {
     subDcaStrategy,
     subMcdRepayStrategy,
+    subRepayFromSavingsStrategy,
     subMcdBoostStrategy,
     subLimitOrderStrategy,
     subUniV3RangeOrderStrategy,

@@ -24,7 +24,7 @@ const {
 const { getRatio } = require('../utils-mcd');
 
 const { callMcdRepayFromYearnStrategy, callMcdRepayFromYearnWithExchangeStrategy } = require('../strategy-calls');
-const { subMcdRepayStrategy } = require('../strategy-subs');
+const { subRepayFromSavingsStrategy } = require('../strategy-subs');
 const { createYearnRepayStrategy, createYearnRepayStrategyWithExchange } = require('../strategies');
 
 const { openVault, yearnSupply } = require('../actions');
@@ -132,13 +132,15 @@ describe('Mcd-Repay-Yearn-Strategy', function () {
         const targetRatio = hre.ethers.utils.parseUnits('3.2', '18');
 
         const bundleId = 0;
-        ({ subId, strategySub } = await subMcdRepayStrategy(
+        ({ subId, strategySub } = await subRepayFromSavingsStrategy(
             proxy, bundleId, vaultId, ratioUnder, targetRatio, true,
         ));
     });
 
     it('... should trigger a maker repay strategy from yearn', async () => {
         const yToken = await yearnRegistry.latestVault(DAI_ADDR);
+
+        console.log(yToken);
         const yTokenBalanceBefore = await balanceOf(yToken, senderAcc.address);
         console.log(yTokenBalanceBefore.toString());
 

@@ -29,6 +29,7 @@ contract McdMerge is ActionBase, McdHelper {
 
         inputData.srcVaultId = _parseParamUint(inputData.srcVaultId, _paramMapping[0], _subData, _returnValues);
         inputData.destVaultId = _parseParamUint(inputData.destVaultId, _paramMapping[1], _subData, _returnValues);
+        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[2], _subData, _returnValues);
 
         bytes memory logData = _mcdMerge(inputData.srcVaultId, inputData.destVaultId, inputData.mcdManager);
         emit ActionEvent("McdMerge", logData);

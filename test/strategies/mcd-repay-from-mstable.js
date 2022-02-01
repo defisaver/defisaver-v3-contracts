@@ -28,7 +28,7 @@ const {
 const { getRatio } = require('../utils-mcd');
 
 const { callMcdRepayFromMstableStrategy, callMcdRepayFromMstableWithExchangeStrategy } = require('../strategy-calls');
-const { subMcdRepayStrategy } = require('../strategy-subs');
+const { subRepayFromSavingsStrategy } = require('../strategy-subs');
 const { createMstableRepayStrategy, createMstableRepayStrategyWithExchange } = require('../strategies');
 
 const { openVault, mStableDeposit } = require('../actions');
@@ -146,7 +146,7 @@ describe('Mcd-Repay-Mstable-Strategy', function () {
         const targetRatio = hre.ethers.utils.parseUnits('3.2', '18');
 
         const bundleId = 0;
-        ({ subId, strategySub } = await subMcdRepayStrategy(
+        ({ subId, strategySub } = await subRepayFromSavingsStrategy(
             proxy, bundleId, vaultId, ratioUnder, targetRatio, true,
         ));
     });

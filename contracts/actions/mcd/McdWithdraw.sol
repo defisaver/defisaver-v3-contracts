@@ -34,6 +34,7 @@ contract McdWithdraw is ActionBase, McdHelper {
         inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
         inputData.joinAddr = _parseParamAddr(inputData.joinAddr, _paramMapping[2], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[3], _subData, _returnValues);
+        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[4], _subData, _returnValues);
 
         (uint256 withdrawnAmount, bytes memory logData) = _mcdWithdraw(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.to, inputData.mcdManager);
         emit ActionEvent("McdWithdraw", logData);

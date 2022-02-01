@@ -50,6 +50,12 @@ contract McdPayback is ActionBase, McdHelper {
             _subData,
             _returnValues
         );
+        inputData.mcdManager = _parseParamAddr(
+            inputData.mcdManager,
+            _paramMapping[3],
+            _subData,
+            _returnValues
+        );
 
         bytes memory logData = _mcdPayback(inputData);
         emit ActionEvent("McdPayback", logData);

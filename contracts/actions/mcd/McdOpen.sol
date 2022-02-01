@@ -24,6 +24,8 @@ contract McdOpen is ActionBase {
         Params memory inputData = parseInputs(_callData);
 
         inputData.joinAddr = _parseParamAddr(inputData.joinAddr, _paramMapping[0], _subData, _returnValues);
+        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[1], _subData, _returnValues);
+
 
         (uint256 newVaultId, bytes memory logData) = _mcdOpen(inputData.joinAddr, inputData.mcdManager);
         emit ActionEvent("McdOpen", logData);

@@ -158,11 +158,11 @@ const createRariRepayStrategy = () => {
 
     repayStrategy.addSubSlot('&vaultId', 'uint256');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&daiAddr', 'address');
+    repayStrategy.addSubSlot('&mcdManager', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     repayStrategy.addTrigger(mcdRatioTrigger);
-
-    // TODO: enforce Dai?
 
     const rariWithdrawAction = new dfs.actions.rari.RariWithdrawAction(
         '%fundManager',
@@ -175,14 +175,14 @@ const createRariRepayStrategy = () => {
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '%daiAddr', '$1',
+        '0', '&daiAddr', '$1',
     );
 
     const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
         '&vaultId',
         '$2',
         '&proxy',
-        '%mcdManager',
+        '&mcdManager',
     );
 
     repayStrategy.addAction(rariWithdrawAction);
@@ -197,6 +197,8 @@ const createRariRepayStrategyWithExchange = () => {
 
     repayStrategy.addSubSlot('&vaultId', 'uint256');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&daiAddr', 'address');
+    repayStrategy.addSubSlot('&mcdManager', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     repayStrategy.addTrigger(mcdRatioTrigger);
@@ -214,7 +216,7 @@ const createRariRepayStrategyWithExchange = () => {
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%usdcAddr',
-            '%daiAddr',
+            '&daiAddr',
             '$1',
             '%wrapper',
         ),
@@ -223,14 +225,14 @@ const createRariRepayStrategyWithExchange = () => {
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '%daiAddr', '$2',
+        '0', '&daiAddr', '$2',
     );
 
     const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
         '&vaultId',
         '$3',
         '&proxy',
-        '%mcdManager',
+        '&mcdManager',
     );
 
     repayStrategy.addAction(rariWithdrawAction);
@@ -246,6 +248,8 @@ const createMstableRepayStrategy = () => {
 
     repayStrategy.addSubSlot('&vaultId', 'uint256');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&daiAddr', 'address');
+    repayStrategy.addSubSlot('&mcdManager', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     repayStrategy.addTrigger(mcdRatioTrigger);
@@ -262,17 +266,15 @@ const createMstableRepayStrategy = () => {
         '%assetPair',
     );
 
-    // TODO: Must pipe dai into next action?
-
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '%daiAddr', '$1',
+        '0', '&daiAddr', '$1',
     );
 
     const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
         '&vaultId',
         '$2',
         '&proxy',
-        '%mcdManager',
+        '&mcdManager',
     );
 
     repayStrategy.addAction(mstableWithdrawAction);
@@ -287,6 +289,8 @@ const createMstableRepayStrategyWithExchange = () => {
 
     repayStrategy.addSubSlot('&vaultId', 'uint256');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&daiAddr', 'address');
+    repayStrategy.addSubSlot('&mcdManager', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     repayStrategy.addTrigger(mcdRatioTrigger);
@@ -306,7 +310,7 @@ const createMstableRepayStrategyWithExchange = () => {
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%wethAddr',
-            '%daiAddr',
+            '&daiAddr',
             '$1',
             '%wrapper',
         ),
@@ -315,14 +319,14 @@ const createMstableRepayStrategyWithExchange = () => {
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '%daiAddr', '$2',
+        '0', '&daiAddr', '$2',
     );
 
     const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
         '&vaultId',
         '$3',
         '&proxy',
-        '%mcdManager',
+        '&mcdManager',
     );
 
     repayStrategy.addAction(mstableWithdrawAction);
@@ -338,6 +342,8 @@ const createYearnRepayStrategy = () => {
 
     repayStrategy.addSubSlot('&vaultId', 'uint256');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&daiAddr', 'address');
+    repayStrategy.addSubSlot('&mcdManager', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     repayStrategy.addTrigger(mcdRatioTrigger);
@@ -350,14 +356,14 @@ const createYearnRepayStrategy = () => {
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '%daiAddr', '$1',
+        '0', '&daiAddr', '$1',
     );
 
     const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
         '&vaultId',
         '$2',
         '&proxy',
-        '%mcdManager',
+        '&mcdManager',
     );
 
     repayStrategy.addAction(yearnWithdrawAction);
@@ -372,6 +378,8 @@ const createYearnRepayStrategyWithExchange = () => {
 
     repayStrategy.addSubSlot('&vaultId', 'uint256');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&daiAddr', 'address');
+    repayStrategy.addSubSlot('&mcdManager', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     repayStrategy.addTrigger(mcdRatioTrigger);
@@ -386,7 +394,7 @@ const createYearnRepayStrategyWithExchange = () => {
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%wethAddr',
-            '%daiAddr',
+            '&daiAddr',
             '$1',
             '%wrapper',
         ),
@@ -395,14 +403,14 @@ const createYearnRepayStrategyWithExchange = () => {
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '%daiAddr', '$2',
+        '0', '&daiAddr', '$2',
     );
 
     const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
         '&vaultId',
         '$3',
         '&proxy',
-        '%mcdManager',
+        '&mcdManager',
     );
 
     repayStrategy.addAction(yearnWithdrawAction);

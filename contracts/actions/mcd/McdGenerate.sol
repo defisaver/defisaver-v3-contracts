@@ -36,6 +36,7 @@ contract McdGenerate is ActionBase, McdHelper {
         inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
         inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
+        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[3], _subData, _returnValues);
 
         (uint256 borrowedAmount, bytes memory logData) = _mcdGenerate(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager);
         emit ActionEvent("McdGenerate", logData);

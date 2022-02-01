@@ -34,6 +34,7 @@ contract McdSupply is ActionBase, McdHelper {
         inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
         inputData.joinAddr = _parseParamAddr(inputData.joinAddr, _paramMapping[2], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[3], _subData, _returnValues);
+        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[4], _subData, _returnValues);
 
         (uint256 returnAmount, bytes memory logData) = _mcdSupply(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.from, inputData.mcdManager);
         emit ActionEvent("McdSupply", logData);
