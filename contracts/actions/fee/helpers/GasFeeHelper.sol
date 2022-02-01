@@ -19,6 +19,9 @@ contract GasFeeHelper is DSMath {
 
     uint256 public constant SANITY_GAS_PRICE = 1000 gwei;
 
+    /// @dev Divider for input amount, 5 bps
+    uint256 public constant MAX_DFS_FEE = 2000;
+
     function calcGasCost(uint256 _gasUsed, address _feeToken) public view returns (uint256 txCost) {
         uint256 gasPrice = tx.gasprice;
 
