@@ -142,7 +142,10 @@ async function verifyContract(contractAddress, contractName) {
         },
     };
     const params = new URLSearchParams();
-    params.append('apikey', process.env.ETHERSCAN_API_KEY);
+
+    const apiKey = process.env.ETHERSCAN_API_KEY;
+
+    params.append('apikey', apiKey);
     params.append('module', 'contract');
     params.append('action', 'verifysourcecode');
     params.append('contractaddress', contractAddress);
@@ -166,15 +169,14 @@ async function verifyContract(contractAddress, contractName) {
     params.append('licenseType', 3);
 
     const blockExplorer = hre.network.config.blockExplorer;
-    // TODO: different API keys needed, different urls for arbi / L1
     let url = `https://api.${blockExplorer}.io/api`;
     let demo = `https://${blockExplorer}.io/sourcecode-demo.html`;
-    if (!(network !== 'mainnet' || network !== 'arbitrum')) {
+    if (!(network === 'mainnet' || network === 'arbitrum')) {
         url = `https://api-${network}.${blockExplorer}.io/api`;
         demo = `https://${network}.${blockExplorer}.io/sourcecode-demo.html`;
     }
     const tx = await axios.post(url, params, config);
-    console.log(`Check how verification is going at ${demo} with API key ${process.env.ETHERSCAN_API_KEY} and receipt GUID ${tx.data.result}`);
+    console.log(`Check how verification is going at ${demo} with API key ${apiKey} and receipt GUID ${tx.data.result}`);
 }
 
 async function flatten(filePath) {
