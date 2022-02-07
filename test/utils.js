@@ -2,8 +2,11 @@
 const hre = require('hardhat');
 const fs = require('fs');
 const storageSlots = require('./storageSlots.json');
+require('dotenv-safe').config();
 
 const { deployAsOwner } = require('../scripts/utils/deployer');
+
+const config = require('../hardhat.config.js');
 
 const REGISTRY_ADDR = '0xD6049E1F5F3EfF1F921f5532aF1A1632bA23929C';
 
@@ -48,8 +51,8 @@ const DFS_REG_CONTROLLER = '0xF8f8B3C98Cf2E63Df3041b73f80F362a4cf3A576';
 const dydxTokens = ['WETH', 'USDC', 'DAI'];
 
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
-const MIN_VAULT_DAI_AMOUNT = '15010'; // TODO: can we fetch this dynamically
-const MIN_VAULT_RAI_AMOUNT = '1000'; // TODO: can we fetch this dynamically
+const MIN_VAULT_DAI_AMOUNT = '45010'; // TODO: can we fetch this dynamically
+const MIN_VAULT_RAI_AMOUNT = '3000'; // TODO: can we fetch this dynamically
 
 const standardAmounts = {
     ETH: '4',
@@ -100,7 +103,7 @@ const coinGeckoHelper = {
     WBTC: 'wrapped-bitcoin',
     RENBTC: 'renbtc',
     ZRX: '0x',
-    KNC: 'kyber-network',
+    KNCL: 'kyber-network',
     MANA: 'decentraland',
     PAXUSD: 'paxos-standard',
     COMP: 'compound-governance-token',
@@ -114,10 +117,12 @@ const coinGeckoHelper = {
     LUSD: 'liquity-usd',
     LQTY: 'liquity',
     TORN: 'tornado-cash',
+    SUSHI: 'sushi',
+    MATIC: 'matic-network',
     mUSD: 'musd',
     imUSD: 'imusd',
+    USDP: 'paxos-standard',
 };
-
 async function findBalancesSlot(tokenAddress) {
     const slotObj = storageSlots[tokenAddress];
     if (slotObj) {
@@ -145,7 +150,6 @@ async function findBalancesSlot(tokenAddress) {
             );
             // make sure the probe will change the slot value
             const probe = prev === probeA ? probeB : probeA;
-
             await hre.ethers.provider.send('hardhat_setStorageAt', [
                 tokenAddress,
                 probedSlot,
@@ -213,7 +217,22 @@ const setStorageAt = async (address, index, value) => {
     await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
 };
 
+const mineBlock = async () => {
+    await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
+};
+
 const setBalance = async (tokenAddr, userAddr, value) => {
+    try {
+        let tokenContract = await hre.ethers.getContractAt('IProxyERC20', tokenAddr);
+        const newTokenAddr = await tokenContract.callStatic.target();
+
+        tokenContract = await hre.ethers.getContractAt('IProxyERC20', newTokenAddr);
+        const tokenState = await tokenContract.callStatic.tokenState();
+        // eslint-disable-next-line no-param-reassign
+        tokenAddr = tokenState;
+    } catch (error) {
+        console.log();
+    }
     const slotInfo = await findBalancesSlot(tokenAddr);
     let index;
     if (slotInfo.isVyper) {
@@ -227,7 +246,7 @@ const setBalance = async (tokenAddr, userAddr, value) => {
             [userAddr, slotInfo.num], // key, slot
         );
     }
-
+    while (index.startsWith('0x0')) { index = `0x${index.slice(3)}`; }
     await setStorageAt(
         tokenAddr,
         index.toString(),
@@ -304,8 +323,14 @@ const getProxy = async (acc) => {
 
     return dsProxy;
 };
-
-const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
+const redeploy = async (name, regAddr = REGISTRY_ADDR, saveOnTenderly = config.saveOnTenderly) => {
+    await hre.network.provider.send('hardhat_setBalance', [
+        OWNER_ACC,
+        '0xC9F2C9CD04674EDEA40000000',
+    ]);
+    await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
+        '0x1', // 1 wei
+    ]);
     if (regAddr === REGISTRY_ADDR) {
         await impersonateAccount(OWNER_ACC);
     }
@@ -324,12 +349,20 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR) => {
         await registry.addNewContract(id, c.address, 0, { gasLimit: 2000000 });
     } else {
         await registry.startContractChange(id, c.address);
+
         await registry.approveContractChange(id);
     }
 
     if (regAddr === REGISTRY_ADDR) {
         await stopImpersonatingAccount(OWNER_ACC);
     }
+    if (saveOnTenderly) {
+        await hre.tenderly.persistArtifacts({
+            name,
+            address: c.address,
+        });
+    }
+
     return c;
 };
 
@@ -373,6 +406,12 @@ const balanceOf = async (tokenAddr, addr) => {
     } else {
         balance = await tokenContract.balanceOf(addr);
     }
+    return balance;
+};
+const balanceOfOnTokenInBlock = async (tokenAddr, addr, block) => {
+    const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
+    let balance = '';
+    balance = await tokenContract.balanceOf(addr, { blockTag: block });
     return balance;
 };
 
@@ -500,14 +539,66 @@ const BN2Float = (bn, decimals) => hre.ethers.utils.formatUnits(bn, decimals);
 
 const Float2BN = (string, decimals) => hre.ethers.utils.parseUnits(string, decimals);
 
-const takeSnapshot = async () => hre.network.provider.request({
-    method: 'evm_snapshot',
-});
+const takeSnapshot = async () => {
+    const snapshot = await hre.network.provider.request({
+        method: 'evm_snapshot',
+    });
+    return snapshot;
+};
 
-const revertToSnapshot = async (snapshotId) => hre.network.provider.request({
-    method: 'evm_revert',
-    params: [snapshotId],
-});
+const revertToSnapshot = async (snapshotId) => {
+    await hre.network.provider.request({
+        method: 'evm_revert',
+        params: [snapshotId],
+    });
+};
+async function setForkForTesting() {
+    const senderAcc = (await hre.ethers.getSigners())[0];
+    await hre.network.provider.send('hardhat_setBalance', [
+        senderAcc.address,
+        '0xC9F2C9CD04674EDEA40000000',
+    ]);
+    await hre.network.provider.send('hardhat_setBalance', [
+        OWNER_ACC,
+        '0xC9F2C9CD04674EDEA40000000',
+    ]);
+    await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
+        '0x1', // 1 wei
+    ]);
+}
+const getGasUsed = async (receipt) => {
+    const parsed = await receipt.wait();
+
+    return parsed.gasUsed.toString();
+};
+
+const resetForkToBlock = async (block) => {
+    if (block) {
+        await hre.network.provider.request({
+            method: 'hardhat_reset',
+            params: [
+                {
+                    forking: {
+                        jsonRpcUrl: process.env.ETHEREUM_NODE,
+                        blockNumber: block,
+                    },
+                },
+            ],
+        });
+    } else {
+        await hre.network.provider.request({
+            method: 'hardhat_reset',
+            params: [
+                {
+                    forking: {
+                        jsonRpcUrl: process.env.ETHEREUM_NODE,
+                    },
+                },
+            ],
+        });
+    }
+    await setForkForTesting();
+};
 
 module.exports = {
     addToZRXAllowlist,
@@ -575,4 +666,9 @@ module.exports = {
     setBalance,
     takeSnapshot,
     revertToSnapshot,
+    getGasUsed,
+    mineBlock,
+    setForkForTesting,
+    resetForkToBlock,
+    balanceOfOnTokenInBlock,
 };
