@@ -16,6 +16,7 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
         uint256 gasUsed;
         address feeToken;
         uint256 availableAmount;
+        uint256 dfsFeeDivider;
     }
 
     /// @inheritdoc ActionBase
@@ -29,6 +30,7 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
 
         inputData.feeToken = _parseParamAddr(inputData.feeToken, _paramMapping[0], _subData, _returnValues);
         inputData.availableAmount = _parseParamUint(inputData.availableAmount, _paramMapping[1], _subData, _returnValues);
+        inputData.dfsFeeDivider = _parseParamUint(inputData.dfsFeeDivider, _paramMapping[2], _subData, _returnValues);
 
         uint256 txCost = calcGasCost(inputData.gasUsed, inputData.feeToken);
 
@@ -42,6 +44,14 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
         if (txCost >= (inputData.availableAmount / 5)) {
             txCost = inputData.availableAmount / 5;
         }
+
+        /// @dev If divider is lower the fee is greater, should be max 5 bps
+        if (inputData.dfsFeeDivider < MAX_DFS_FEE) {
+            inputData.dfsFeeDivider = MAX_DFS_FEE;
+        }
+
+        // add amount we take for dfs fee as well
+        txCost += inputData.availableAmount / inputData.dfsFeeDivider;
 
         uint256 amountLeft = sub(inputData.availableAmount, txCost);
 
