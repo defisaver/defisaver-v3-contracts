@@ -45,7 +45,7 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
             txCost = inputData.availableAmount / 5;
         }
 
-        /// @dev If divder is lower the fee is greater, should be max 5 bps
+        /// @dev If divider is lower the fee is greater, should be max 5 bps
         if (inputData.dfsFeeDivider < MAX_DFS_FEE) {
             inputData.dfsFeeDivider = MAX_DFS_FEE;
         }
