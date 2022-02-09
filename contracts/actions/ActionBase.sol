@@ -4,6 +4,7 @@ pragma solidity =0.8.10;
 import "../auth/AdminAuth.sol";
 import "../core/DFSRegistry.sol";
 import "../DS/DSProxy.sol";
+import "../utils/DefisaverLogger.sol";
 import "./utils/helpers/ActionsUtilHelper.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs

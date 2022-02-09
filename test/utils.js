@@ -6,6 +6,21 @@ const storageSlots = require('./storageSlots.json');
 const { deployContract, deployAsOwner } = require('../scripts/utils/deployer');
 const { changeConstantInFiles } = require('../scripts/utils/utils');
 
+const addrs = {
+    mainnet: {
+        PROXY_REGISTRY: '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4',
+        REGISTRY_ADDR: '0xD5cec8F03f803A74B60A7603Ed13556279376b09',
+        OWNER_ACC: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
+        WETH_ADDRESS: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    },
+    optimism: {
+        PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
+        REGISTRY_ADDR: '0xA1A445d1d8F97cBf380E98759230FcC0f2E23fc1',
+        OWNER_ACC: '0x322d58b9E75a6918f7e7849AEe0fF09369977e08',
+        WETH_ADDRESS: '0x4200000000000000000000000000000000000006',
+    },
+};
+
 let REGISTRY_ADDR = '0xD5cec8F03f803A74B60A7603Ed13556279376b09';
 
 const nullAddress = '0x0000000000000000000000000000000000000000';
@@ -58,6 +73,8 @@ const MAX_UINT128 = '340282366920938463463374607431768211455';
 const DFS_REG_CONTROLLER = '0xF8f8B3C98Cf2E63Df3041b73f80F362a4cf3A576';
 
 const dydxTokens = ['WETH', 'USDC', 'DAI'];
+
+const network = hre.network.config.name;
 
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
 const MIN_VAULT_DAI_AMOUNT = '15010'; // TODO: can we fetch this dynamically
@@ -132,6 +149,8 @@ const coinGeckoHelper = {
     mUSD: 'musd',
     imUSD: 'imusd',
 };
+
+const getOwnerAddr = () => addrs[network].OWNER_ACC;
 
 async function findBalancesSlot(tokenAddress) {
     const slotObj = storageSlots[tokenAddress];
@@ -295,7 +314,7 @@ const getNameId = (name) => {
     return hash.substr(0, 10);
 };
 
-const getAddrFromRegistry = async (name, regAddr = REGISTRY_ADDR) => {
+const getAddrFromRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR) => {
     const registryInstance = await hre.ethers.getContractFactory('DFSRegistry');
     const registry = await registryInstance.attach(regAddr);
 
@@ -307,7 +326,7 @@ const getAddrFromRegistry = async (name, regAddr = REGISTRY_ADDR) => {
 
 const getProxyWithSigner = async (signer, addr) => {
     const proxyRegistry = await
-    hre.ethers.getContractAt('IProxyRegistry', '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4');
+    hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
 
     let proxyAddr = await proxyRegistry.proxies(addr);
 
@@ -323,7 +342,7 @@ const getProxyWithSigner = async (signer, addr) => {
 
 const getProxy = async (acc) => {
     const proxyRegistry = await
-    hre.ethers.getContractAt('IProxyRegistry', '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4');
+    hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
 
     let proxyAddr = await proxyRegistry.proxies(acc);
 
@@ -337,12 +356,12 @@ const getProxy = async (acc) => {
     return dsProxy;
 };
 
-const redeploy = async (name, regAddr = REGISTRY_ADDR, existingAddr = '') => {
-    if (regAddr === REGISTRY_ADDR) {
-        await impersonateAccount(OWNER_ACC);
+const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, existingAddr = '') => {
+    if (regAddr === addrs[network].REGISTRY_ADDR) {
+        await impersonateAccount(getOwnerAddr());
     }
 
-    const signer = await hre.ethers.provider.getSigner(OWNER_ACC);
+    const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
 
     const registryInstance = await hre.ethers.getContractFactory('DFSRegistry', signer);
     let registry = await registryInstance.attach(regAddr);
@@ -371,8 +390,8 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR, existingAddr = '') => {
     if (!(await registry.isRegistered(id))) {
         await registry.addNewContract(id, c.address, 0, { gasLimit: 2000000 });
     } else {
-        await registry.startContractChange(id, c.address);
-        await registry.approveContractChange(id);
+        await registry.startContractChange(id, c.address, { gasLimit: 2000000 });
+        await registry.approveContractChange(id, { gasLimit: 2000000 });
     }
 
     // for strategy deployment set open to public for easier testing
@@ -381,8 +400,8 @@ const redeploy = async (name, regAddr = REGISTRY_ADDR, existingAddr = '') => {
         await storageContract.changeEditPermission(true);
     }
 
-    if (regAddr === REGISTRY_ADDR) {
-        await stopImpersonatingAccount(OWNER_ACC);
+    if (regAddr === addrs[network].REGISTRY_ADDR) {
+        await stopImpersonatingAccount(getOwnerAddr());
     }
     return c;
 };
@@ -446,11 +465,11 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, u
     let secondPath = destAddr;
 
     if (srcAddr.toLowerCase() === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
-        firstPath = WETH_ADDRESS;
+        firstPath = addrs[network].WETH_ADDRESS;
     }
 
     if (destAddr.toLowerCase() === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
-        secondPath = WETH_ADDRESS;
+        secondPath = addrs[network].WETH_ADDRESS;
     }
 
     // quick fix if we use strategy placeholder value
@@ -483,7 +502,7 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, u
 
 const isEth = (tokenAddr) => {
     if (tokenAddr.toLowerCase() === ETH_ADDR.toLowerCase()
-    || tokenAddr.toLowerCase() === WETH_ADDRESS.toLowerCase()
+    || tokenAddr.toLowerCase() === addrs[network].WETH_ADDRESS.toLowerCase()
     ) {
         return true;
     }
@@ -493,7 +512,7 @@ const isEth = (tokenAddr) => {
 
 const convertToWeth = (tokenAddr) => {
     if (isEth(tokenAddr)) {
-        return WETH_ADDRESS;
+        return addrs[network].WETH_ADDRESS;
     }
 
     return tokenAddr;
@@ -526,7 +545,7 @@ const setNewExchangeWrapper = async (acc, newAddr) => {
 };
 
 const depositToWeth = async (amount, signer) => {
-    const weth = await hre.ethers.getContractAt('IWETH', WETH_ADDRESS);
+    const weth = await hre.ethers.getContractAt('IWETH', addrs[network].WETH_ADDRESS);
 
     if (signer) {
         const wethWithSigner = weth.connect(signer);
@@ -631,6 +650,8 @@ const revertToSnapshot = async (snapshotId) => hre.network.provider.request({
     params: [snapshotId],
 });
 
+const getWeth = () => addrs[network].WETH_ADDRESS;
+
 module.exports = {
     addToZRXAllowlist,
     getAddrFromRegistry,
@@ -662,6 +683,8 @@ module.exports = {
     getAllowance,
     BN2Float,
     Float2BN,
+    getOwnerAddr,
+    getWeth,
     AVG_GAS_PRICE,
     standardAmounts,
     nullAddress,
