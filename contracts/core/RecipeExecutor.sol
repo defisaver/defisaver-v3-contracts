@@ -19,6 +19,11 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
 
     error TriggerNotActiveError(uint256);
 
+    // hardcoded for gas savings
+    address internal SUB_STORAGE_ADDR = 0x0a5e900E8261F826484BD96F0da564C5bB365Ffa;
+    address internal BUNDLE_STORAGE_ADDR = 0x56eB74B9963BCbd6877ab4Bf8e68daBbEe13B2Bb;
+    address internal STRATEGY_STORAGE_ADDR = 0x172f1dB6c58C524A1Ab616a1E65c19B5DF5545ae;
+
     /// @notice Called directly through DsProxy to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
     /// @param _currRecipe Recipe to be executed
@@ -40,27 +45,22 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
         uint256 _strategyIndex,
         StrategySub memory _sub
     ) public payable {
-
-        address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
-
         Strategy memory strategy;
 
         { // to handle stack too deep
             uint256 strategyId = _sub.strategyOrBundleId;
-            address bundleStorageAddr = registry.getAddr(BUNDLE_STORAGE_ID);
-            address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
 
             // fetch strategy if inside of bundle
             if (_sub.isBundle) {
-                strategyId = BundleStorage(bundleStorageAddr).getStrategyId(strategyId, _strategyIndex);
+                strategyId = BundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(strategyId, _strategyIndex);
             }
 
-            strategy = StrategyStorage(strategyStorageAddr).getStrategy(strategyId);
+            strategy = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
         }
 
         // check if all the triggers are true
         (bool triggered, uint256 errIndex) 
-            = _checkTriggers(strategy, _sub, _triggerCallData, _subId, subStorageAddr);
+            = _checkTriggers(strategy, _sub, _triggerCallData, _subId, SUB_STORAGE_ADDR);
 
         if (!triggered) {
             revert TriggerNotActiveError(errIndex);
@@ -68,7 +68,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
 
         // if this is a one time strategy
         if (!strategy.continuous) {
-            SubStorage(subStorageAddr).deactivateSub(_subId);
+            SubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
         }
 
         // format recipe from strategy

@@ -12,16 +12,17 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
+    // hardcoded for gas savings
+    address internal SUB_STORAGE_ADDR = 0x0a5e900E8261F826484BD96F0da564C5bB365Ffa;
+
     /// @notice Gives DSProxy permission if needed and registers a new sub
     /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
     function subscribeToStrategy(
         StrategySub calldata _sub
     ) public {
-        address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
-
         givePermission(PROXY_AUTH_ADDR);
 
-        SubStorage(subStorageAddr).subscribeToStrategy(_sub);
+        SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(_sub);
     }
 
     /// @notice Calls SubStorage to update the users subscription data
@@ -31,9 +32,7 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         uint256 _subId,
         StrategySub calldata _sub
     ) public {
-        address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
-
-        SubStorage(subStorageAddr).updateSubData(_subId, _sub);
+        SubStorage(SUB_STORAGE_ADDR).updateSubData(_subId, _sub);
     }
 
     /// @notice Enables the subscription for execution if disabled
@@ -42,9 +41,7 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     function activateSub(
         uint _subId
     ) public {
-        address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
-
-        SubStorage(subStorageAddr).activateSub(_subId);
+        SubStorage(SUB_STORAGE_ADDR).activateSub(_subId);
     }
 
     /// @notice Disables the subscription (will not be able to execute the strategy for the user)
@@ -53,8 +50,6 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     function deactivateSub(
         uint _subId
     ) public {
-        address subStorageAddr = registry.getAddr(SUB_STORAGE_ID);
-
-        SubStorage(subStorageAddr).deactivateSub(_subId);
+        SubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
     }
 }
