@@ -685,6 +685,7 @@ module.exports = {
     Float2BN,
     getOwnerAddr,
     getWeth,
+    addrs,
     AVG_GAS_PRICE,
     standardAmounts,
     nullAddress,
