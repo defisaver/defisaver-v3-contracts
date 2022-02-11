@@ -28,6 +28,7 @@ module.exports = {
         fork: {
             url: `https://rpc.tenderly.co/fork/${process.env.FORK_ID}`,
             timeout: 1000000,
+            name: 'mainnet',
         },
         hardhat: {
             forking: {
