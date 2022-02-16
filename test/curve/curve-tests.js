@@ -1,6 +1,7 @@
 const { expect } = require('chai');
 const hre = require('hardhat');
 
+const { getAssetInfo } = require('@defisaver/tokens');
 const {
     balanceOf,
     getProxy,
@@ -643,10 +644,10 @@ const curveClaimFeesTest = async () => {
 
         const claimFor = '0x7563839e02004d3f419ff78df4256e9c5dd713ed';
         const WEEK = 3600 * 24 * 7;
+        const crv3crvToken = getAssetInfo('3Crv').address;
 
         let senderAcc;
         let proxy;
-        let curveView; let crv3crvToken;
         let feesRewarded;
 
         before(async () => {
@@ -656,8 +657,6 @@ const curveClaimFeesTest = async () => {
             proxy = await getProxy(senderAcc.address);
 
             await redeploy('CurveClaimFees');
-            curveView = await redeploy('CurveView');
-            crv3crvToken = await curveView['CRV_3CRV_TOKEN_ADDR()']();
         });
 
         after(async () => {
