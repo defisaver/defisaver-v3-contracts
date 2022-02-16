@@ -99,11 +99,13 @@ const subToStrategy = async (proxy, strategySub, regAddr = REGISTRY_ADDR) => {
     return latestStrategyId;
 };
 
-const addBotCaller = async (botAddr) => {
-    await impersonateAccount(OWNER_ACC);
+const addBotCaller = async (botAddr, regAddr = REGISTRY_ADDR) => {
+    if (regAddr === REGISTRY_ADDR) {
+        await impersonateAccount(OWNER_ACC);
+    }
 
     const signer = await hre.ethers.provider.getSigner(OWNER_ACC);
-    const botAuthAddr = await getAddrFromRegistry('BotAuth');
+    const botAuthAddr = await getAddrFromRegistry('BotAuth', regAddr);
 
     const botAuthInstance = await hre.ethers.getContractFactory('BotAuth', signer);
     let botAuth = await botAuthInstance.attach(botAuthAddr);
@@ -112,7 +114,9 @@ const addBotCaller = async (botAddr) => {
 
     await botAuth.addCaller(botAddr);
 
-    await stopImpersonatingAccount(OWNER_ACC);
+    if (regAddr === REGISTRY_ADDR) {
+        await stopImpersonatingAccount(OWNER_ACC);
+    }
 };
 
 const setMCDPriceVerifier = async (triggerAddr) => {

@@ -12,9 +12,6 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    // hardcoded for gas savings
-    address internal SUB_STORAGE_ADDR = 0x0a5e900E8261F826484BD96F0da564C5bB365Ffa;
-
     /// @notice Gives DSProxy permission if needed and registers a new sub
     /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
     function subscribeToStrategy(
