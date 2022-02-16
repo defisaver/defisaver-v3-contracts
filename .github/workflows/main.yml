@@ -1,0 +1,53 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Test
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on pull request events but only for the main branch
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  test:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    environment: test
+    env:
+        ETHEREUM_NODE: ${{ secrets.ETHEREUM_NODE }}
+        ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+        PRIV_KEY_MAINNET: ${{ secrets.PRIV_KEY_MAINNET }}
+        REDEPLOY_TIME_IN_MINUTES: ${{ secrets.REDEPLOY_TIME_IN_MINUTES }}
+        FORK_ID: ${{ secrets.FORK_ID }}
+        TENDERLY_USERNAME: ${{ secrets.TENDERLY_USERNAME }}
+        TENDERLY_PROJECT: ${{ secrets.TENDERLY_PROJECT }}
+        KOVAN_ETHEREUM_NODE: ${{ secrets.KOVAN_ETHEREUM_NODE }}
+        PRIV_KEY_KOVAN: ${{ secrets.PRIV_KEY_KOVAN }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      
+      - run: npm ci
+      
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npx hardhat compile
+      
+      # update asset prices
+      - run: node scripts/utils/price-tracker.js
+      
+      - name: Test
+        run: node test/run-tests.js 3
