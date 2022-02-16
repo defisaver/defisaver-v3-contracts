@@ -131,6 +131,7 @@ async function main() {
     await redeploy('YearnWithdraw', reg.address);
 
     await redeploy('McdView', reg.address);
+    const yearnView = await redeploy('YearnView', reg.address);
     await redeploy('McdRatioTrigger', reg.address);
 
     // SS style strategies
@@ -203,6 +204,7 @@ async function main() {
         BundleStorage: bundleStorage.address,
         StrategyStorage: strategyStorage.address,
         StrategyTriggerView: strategyTriggerView.address,
+        YearnView: yearnView.address,
     };
 
     fs.writeFileSync('forked-addr.json', JSON.stringify(importantAddr));
@@ -214,6 +216,7 @@ async function main() {
         BundleStorage: ${bundleStorage.address}
         StrategyStorage: ${strategyStorage.address}
         StrategyTriggerView: ${strategyTriggerView.address}
+        YearnView: ${yearnView.address}
     `);
 
     process.exit(0);
