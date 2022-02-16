@@ -20,8 +20,16 @@ const {
     createMstableRepayStrategyWithExchange,
 } = require('../test/strategies');
 
+const { addBotCaller } = require('../test/utils-strategies');
+
 const MAINNET_VAULT = '0xCCf3d848e08b94478Ed8f46fFead3008faF581fD';
 const MAINNET_REGISTRY = '0x287778F121F134C66212FB16c9b53eC991D32f5b';
+
+const SUB_STORAGE_ADDR = '0x0a5e900E8261F826484BD96F0da564C5bB365Ffa';
+const BUNDLE_STORAGE_ADDR = '0x56eB74B9963BCbd6877ab4Bf8e68daBbEe13B2Bb';
+const STRATEGY_STORAGE_ADDR = '0x172f1dB6c58C524A1Ab616a1E65c19B5DF5545ae';
+
+const PROXY_AUTH_ADDR = '0xD489FfAEEB46b2d7E377850d45E1F8cA3350fc82';
 
 async function main() {
     await topUp(OWNER_ACC);
@@ -54,6 +62,42 @@ async function main() {
     const strategyStorage = await redeploy('StrategyStorage', reg.address);
     const subStorage = await redeploy('SubStorage', reg.address);
     const bundleStorage = await redeploy('BundleStorage', reg.address);
+    const proxyAuth = await redeploy('ProxyAuth', reg.address);
+
+    await changeConstantInFiles(
+        './contracts',
+        ['MainnetCoreAddresses'],
+        'PROXY_AUTH_ADDR',
+        proxyAuth.address,
+
+    );
+
+    await changeConstantInFiles(
+        './contracts',
+        ['MainnetCoreAddresses'],
+        'SUB_STORAGE_ADDR',
+        subStorage.address,
+
+    );
+
+    await changeConstantInFiles(
+        './contracts',
+        ['MainnetCoreAddresses'],
+        'BUNDLE_STORAGE_ADDR',
+        bundleStorage.address,
+
+    );
+
+    await changeConstantInFiles(
+        './contracts',
+        ['MainnetCoreAddresses'],
+        'STRATEGY_STORAGE_ADDR',
+        strategyStorage.address,
+
+    );
+
+    await run('compile');
+
     await redeploy('SubProxy', reg.address);
     await redeploy('StrategyProxy', reg.address);
     await redeploy('StrategyExecutor', reg.address);
@@ -64,6 +108,10 @@ async function main() {
     await redeploy('McdGenerate', reg.address);
     await redeploy('McdPayback', reg.address);
     await redeploy('McdOpen', reg.address);
+    await redeploy('BotAuth', reg.address);
+
+    await addBotCaller('0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4', reg.address);
+    await addBotCaller('0x4E4cF1Cc07C7A1bA00740434004163ac2821efa7', reg.address);
 
     // exchange
     await redeploy('DFSSell', reg.address);
@@ -86,6 +134,7 @@ async function main() {
     await redeploy('McdRatioTrigger', reg.address);
 
     // SS style strategies
+    console.log(...(createYearnRepayStrategy()));
     await strategyStorage.createStrategy(...(createYearnRepayStrategy()), true);
     await strategyStorage.createStrategy(...(createYearnRepayStrategyWithExchange()), true);
 
@@ -112,6 +161,38 @@ async function main() {
         ['MainnetActionsUtilAddresses', 'MainnetCoreAddresses'],
         'REGISTRY_ADDR',
         MAINNET_REGISTRY,
+    );
+
+    await changeConstantInFiles(
+        './contracts',
+        ['MainnetCoreAddresses'],
+        'SUB_STORAGE_ADDR',
+        SUB_STORAGE_ADDR,
+
+    );
+
+    await changeConstantInFiles(
+        './contracts',
+        ['MainnetCoreAddresses'],
+        'BUNDLE_STORAGE_ADDR',
+        BUNDLE_STORAGE_ADDR,
+
+    );
+
+    await changeConstantInFiles(
+        './contracts',
+        ['MainnetCoreAddresses'],
+        'STRATEGY_STORAGE_ADDR',
+        STRATEGY_STORAGE_ADDR,
+
+    );
+
+    await changeConstantInFiles(
+        './contracts',
+        ['MainnetCoreAddresses'],
+        'PROXY_AUTH_ADDR',
+        PROXY_AUTH_ADDR,
+
     );
 
     await run('compile');

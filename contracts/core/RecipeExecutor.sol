@@ -19,11 +19,6 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
 
     error TriggerNotActiveError(uint256);
 
-    // hardcoded for gas savings
-    address internal SUB_STORAGE_ADDR = 0x0a5e900E8261F826484BD96F0da564C5bB365Ffa;
-    address internal BUNDLE_STORAGE_ADDR = 0x56eB74B9963BCbd6877ab4Bf8e68daBbEe13B2Bb;
-    address internal STRATEGY_STORAGE_ADDR = 0x172f1dB6c58C524A1Ab616a1E65c19B5DF5545ae;
-
     /// @notice Called directly through DsProxy to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
     /// @param _currRecipe Recipe to be executed
