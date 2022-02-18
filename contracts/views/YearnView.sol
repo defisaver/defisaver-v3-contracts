@@ -23,7 +23,6 @@ contract YearnView is YearnHelper, DSMath  {
 
         uint256 strategyDebtSum = 0;
 
-        // TODO: should 20 be hardcoded?
         for(uint256 i = 0; i < 20; ++i) {
             address strategyAddr = IYVault(_vault).withdrawalQueue(i);
             (,,,,,,uint totalDebt,,) = IYVault(_vault).strategies(strategyAddr);
