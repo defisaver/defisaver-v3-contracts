@@ -12,7 +12,7 @@ contract StrategyStorage is StrategyModel, AdminAuth {
     bool public openToPublic = false;
 
     error NoAuthToCreateStrategy(address,bool);
-    event StrategyCreated(uint256 indexed);
+    event StrategyCreated(uint256 indexed strategyId);
 
     modifier onlyAuthCreators {
         if (adminVault.owner() != msg.sender && openToPublic == false) {

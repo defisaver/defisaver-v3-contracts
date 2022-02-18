@@ -14,10 +14,10 @@ contract SubStorage is StrategyModel, AdminAuth, CoreHelper {
     error UserPositionsEmpty();
     error SubIdOutOfRange(uint256, bool);
 
-    event Subscribe(uint256 indexed, address indexed, bytes32 indexed, StrategySub);
-    event UpdateData(uint256 indexed, bytes32 indexed, StrategySub);
-    event ActivateSub(uint256 indexed);
-    event DeactivateSub(uint256 indexed);
+    event Subscribe(uint256 indexed subId, address indexed proxy, bytes32 indexed subHash, StrategySub subStruct);
+    event UpdateData(uint256 indexed subId, bytes32 indexed subHash, StrategySub subStruct);
+    event ActivateSub(uint256 indexed subId);
+    event DeactivateSub(uint256 indexed subId);
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 

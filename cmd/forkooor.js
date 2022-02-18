@@ -57,7 +57,7 @@ const {
 
 const { getSubHash } = require('../test/utils-strategies');
 
-const { subMcdRepayStrategy } = require('../test/strategy-subs');
+const { subRepayFromSavingsStrategy } = require('../test/strategy-subs');
 const { createMcdTrigger, RATIO_STATE_UNDER } = require('../test/triggers');
 
 program.version('0.0.1');
@@ -125,7 +125,7 @@ const supplyInSS = async (protocol, daiAmount, sender) => {
                 DAI_ADDR,
                 daiAmountWei,
                 senderAcc.address,
-                senderAcc.address,
+                proxy.address,
                 proxy,
                 REGISTRY_ADDR,
             );
@@ -187,7 +187,7 @@ const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio,
         bundleId = 2;
     }
 
-    const { subId } = await subMcdRepayStrategy(
+    const { subId } = await subRepayFromSavingsStrategy(
         proxy, bundleId, vaultId, ratioUnderWei, targetRatioWei, true, REGISTRY_ADDR,
     );
 

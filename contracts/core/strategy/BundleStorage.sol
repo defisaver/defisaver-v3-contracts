@@ -19,7 +19,7 @@ contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
     error NoAuthToCreateBundle(address,bool);
     error DiffTriggersInBundle(uint64[]);
 
-    event BundleCreated(uint256);
+    event BundleCreated(uint256 indexed bundleId);
 
     modifier onlyAuthCreators {
         if (adminVault.owner() != msg.sender && openToPublic == false) {

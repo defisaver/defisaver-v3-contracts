@@ -58,7 +58,6 @@ async function main() {
     await run('compile');
 
     // core
-    await redeploy('RecipeExecutor', reg.address);
     const strategyStorage = await redeploy('StrategyStorage', reg.address);
     const subStorage = await redeploy('SubStorage', reg.address);
     const bundleStorage = await redeploy('BundleStorage', reg.address);
@@ -98,9 +97,10 @@ async function main() {
 
     await run('compile');
 
+    await redeploy('RecipeExecutor', reg.address);
     await redeploy('SubProxy', reg.address);
     await redeploy('StrategyProxy', reg.address);
-    await redeploy('StrategyExecutor', reg.address);
+    const strategyExecutor = await redeploy('StrategyExecutor', reg.address);
 
     // mcd actions
     await redeploy('McdSupply', reg.address);
@@ -109,6 +109,7 @@ async function main() {
     await redeploy('McdPayback', reg.address);
     await redeploy('McdOpen', reg.address);
     await redeploy('BotAuth', reg.address);
+    await redeploy('GasFeeTaker', reg.address);
 
     await addBotCaller('0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4', reg.address);
     await addBotCaller('0x4E4cF1Cc07C7A1bA00740434004163ac2821efa7', reg.address);
@@ -204,6 +205,7 @@ async function main() {
         BundleStorage: bundleStorage.address,
         StrategyStorage: strategyStorage.address,
         StrategyTriggerView: strategyTriggerView.address,
+        StrategyExecutor: strategyExecutor.address,
         YearnView: yearnView.address,
     };
 
@@ -217,6 +219,7 @@ async function main() {
         StrategyStorage: ${strategyStorage.address}
         StrategyTriggerView: ${strategyTriggerView.address}
         YearnView: ${yearnView.address}
+        StrategyExecutor: ${strategyExecutor.address}
     `);
 
     process.exit(0);

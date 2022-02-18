@@ -11,6 +11,7 @@ require('hardhat-log-remover');
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
+    saveOnTenderly: true,
     defaultNetwork: 'fork',
     networks: {
         local: {
