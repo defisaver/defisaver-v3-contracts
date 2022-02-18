@@ -132,6 +132,8 @@ async function main() {
     await redeploy('YearnWithdraw', reg.address);
 
     await redeploy('McdView', reg.address);
+    const rariView = await redeploy('RariView', reg.address);
+
     const yearnView = await redeploy('YearnView', reg.address);
     await redeploy('McdRatioTrigger', reg.address);
 
@@ -207,6 +209,7 @@ async function main() {
         StrategyTriggerView: strategyTriggerView.address,
         StrategyExecutor: strategyExecutor.address,
         YearnView: yearnView.address,
+        RariView: rariView.address,
     };
 
     fs.writeFileSync('forked-addr.json', JSON.stringify(importantAddr));
@@ -220,6 +223,7 @@ async function main() {
         StrategyTriggerView: ${strategyTriggerView.address}
         YearnView: ${yearnView.address}
         StrategyExecutor: ${strategyExecutor.address}
+        RariView: ${rariView.address},
     `);
 
     process.exit(0);
