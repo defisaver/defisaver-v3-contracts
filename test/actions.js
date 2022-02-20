@@ -1567,7 +1567,7 @@ const mStableDeposit = async (
     assetPair,
     regAddr = REGISTRY_ADDR,
 ) => {
-    const mStableAddr = await getAddrFromRegistry('MStableDepositNew', regAddr);
+    const mStableAddr = await getAddrFromRegistry('MStableDeposit', regAddr);
 
     const mStableAction = new dfs.actions.mstable.MStableDepositAction(
         bAsset,
@@ -1598,7 +1598,7 @@ const mStableWithdraw = async (
     minOut,
     assetPair,
 ) => {
-    const mStableAddr = await getAddrFromRegistry('MStableWithdrawNew');
+    const mStableAddr = await getAddrFromRegistry('MStableWithdraw');
 
     const mStableAction = new dfs.actions.mstable.MStableWithdrawAction(
         bAsset,

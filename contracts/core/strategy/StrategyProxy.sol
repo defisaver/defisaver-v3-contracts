@@ -26,9 +26,7 @@ contract StrategyProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper 
         uint8[][] memory _paramMapping,
         bool _continuous
     ) public {
-        address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
-
-        StrategyStorage(strategyStorageAddr).createStrategy(_name, _triggerIds, _actionIds, _paramMapping, _continuous);
+        StrategyStorage(STRATEGY_STORAGE_ADDR).createStrategy(_name, _triggerIds, _actionIds, _paramMapping, _continuous);
     }
 
     /// @notice Calls bundle storage through dsproxy to create new bundle
@@ -36,8 +34,6 @@ contract StrategyProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper 
     function createBundle(
         uint64[] memory _strategyIds
     ) public {
-        address bundleStorageAddr = registry.getAddr(BUNDLE_STORAGE_ID);
-
-        BundleStorage(bundleStorageAddr).createBundle(_strategyIds);
+        BundleStorage(BUNDLE_STORAGE_ADDR).createBundle(_strategyIds);
     }  
 }

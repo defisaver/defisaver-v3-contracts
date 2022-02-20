@@ -14,14 +14,14 @@ contract DFSRegistry is AdminAuth {
     error AlreadyInContractChangeError(bytes4);
     error AlreadyInWaitPeriodChangeError(bytes4);
 
-    event AddNewContract(address sender, bytes4 id, address currAddr, uint256 waitPeriod);
-    event RevertToPreviousAddress(address sender, bytes4 id, address currAddr, address prevAddr);
-    event StartContractChange(address sender, bytes4 id, address currAddr, address newAddr);
-    event ApproveContractChange(address sender, bytes4 id, address oldAddr, address currAddr);
-    event CancelContractChange(address sender, bytes4 id, address oldAddr, address newAddr);
-    event StartWaitPeriodChange(address sender, bytes4 id, uint256 waitPeriod);
-    event ApproveWaitPeriodChange(address sender, bytes4 id, uint256 oldWaitPeriod, uint256 newWaitPeriod);
-    event CancelWaitPeriodChange(address sender, bytes4 id, uint256 oldWaitPeriod, uint256 newWaitPeriod);
+    event AddNewContract(address,bytes4,address,uint256);
+    event RevertToPreviousAddress(address,bytes4,address,address);
+    event StartContractChange(address,bytes4,address,address);
+    event ApproveContractChange(address,bytes4,address,address);
+    event CancelContractChange(address,bytes4,address,address);
+    event StartWaitPeriodChange(address,bytes4,uint256);
+    event ApproveWaitPeriodChange(address,bytes4,uint256,uint256);
+    event CancelWaitPeriodChange(address,bytes4,uint256,uint256);
 
     struct Entry {
         address contractAddr;

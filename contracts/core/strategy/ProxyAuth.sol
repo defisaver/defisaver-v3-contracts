@@ -10,7 +10,8 @@ import "./../helpers/CoreHelper.sol";
 contract ProxyAuth is AdminAuth, CoreHelper {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
-    bytes4 constant STRATEGY_EXECUTOR_ID = bytes4(keccak256("StrategyExecutor"));
+    /// @dev The id is on purpose not the same as contract name for easier deployment
+    bytes4 constant STRATEGY_EXECUTOR_ID = bytes4(keccak256("StrategyExecutorID"));
 
     error SenderNotExecutorError(address, address);
 

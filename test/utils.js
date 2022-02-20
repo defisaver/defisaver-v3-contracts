@@ -318,6 +318,27 @@ const getAddrFromRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR)
     const registryInstance = await hre.ethers.getContractFactory('DFSRegistry');
     const registry = await registryInstance.attach(regAddr);
 
+    // TODO: remove this after change has passed
+    if (name === 'StrategyProxy') {
+        return '0x0822902D30CC9c77404e6eB140dC1E98aF5b559A';
+    } if (name === 'StrategyStorage') {
+        return '0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933';
+    } if (name === 'BundleStorage') {
+        return '0x223c6aDE533851Df03219f6E3D8B763Bd47f84cf';
+    } if (name === 'SubStorage') {
+        return '0x1612fc28Ee0AB882eC99842Cde0Fc77ff0691e90';
+    } if (name === 'SubProxy') {
+        return '0x0Ae88A825380Bf312Da6Aa5fD7A14E410E4678ae';
+    } if (name === 'ProxyAuth') {
+        return '0x149667b6FAe2c63D1B4317C716b0D0e4d3E2bD70';
+    } if (name === 'RecipeExecutor') {
+        return '0x1D6DEdb49AF91A11B5C5F34954FD3E8cC4f03A86';
+    } if (name === 'StrategyExecutor') {
+        return '0x252025dF8680C275D0bA80D084e5967D8BD26caf';
+    } if (name === 'StrategyTriggerView') {
+        return '0x7e048c89D7e6adA900AE53daBA742e6CCCFC54f6';
+    }
+
     const addr = await registry.getAddr(
         getNameId(name),
     );
@@ -383,6 +404,11 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, existingAd
     if (name === 'MStableWithdraw') {
         // eslint-disable-next-line no-param-reassign
         name = 'MStableWithdrawNew';
+    }
+
+    if (name === 'StrategyExecutor') {
+        // eslint-disable-next-line no-param-reassign
+        name = 'StrategyExecutorID';
     }
 
     const id = getNameId(name);
@@ -652,6 +678,29 @@ const revertToSnapshot = async (snapshotId) => hre.network.provider.request({
 
 const getWeth = () => addrs[network].WETH_ADDRESS;
 
+const openStrategyAndBundleStorage = async () => {
+    const strategySubAddr = getAddrFromRegistry('StrategyStorage');
+    const bundleSubAddr = getAddrFromRegistry('BundleStorage');
+
+    // TODO: This will change to OWNER_ADDR soon
+    const currOwnerAddr = '0x76720aC2574631530eC8163e4085d6F98513fb27';
+
+    const ownerSigner = await hre.ethers.provider.getSigner(currOwnerAddr);
+
+    await impersonateAccount(currOwnerAddr);
+
+    let strategyStorage = await hre.ethers.getContractAt('StrategyStorage', strategySubAddr);
+    let bundleStorage = await hre.ethers.getContractAt('BundleStorage', bundleSubAddr);
+
+    strategyStorage = strategyStorage.connect(ownerSigner);
+    bundleStorage = bundleStorage.connect(ownerSigner);
+
+    await strategyStorage.changeEditPermission(true);
+    await bundleStorage.changeEditPermission(true);
+
+    await stopImpersonatingAccount(currOwnerAddr);
+};
+
 module.exports = {
     addToZRXAllowlist,
     getAddrFromRegistry,
@@ -681,6 +730,7 @@ module.exports = {
     calcGasToUSD,
     getProxyAuth,
     getAllowance,
+    openStrategyAndBundleStorage,
     BN2Float,
     Float2BN,
     getOwnerAddr,

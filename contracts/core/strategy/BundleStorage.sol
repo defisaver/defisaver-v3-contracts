@@ -33,13 +33,12 @@ contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
     /// @dev If the caller is not owner we do additional checks, we skip those checks for gas savings
     modifier sameTriggers(uint64[] memory _strategyIds) {
         if (msg.sender != adminVault.owner()) {
-            address strategyStorageAddr = registry.getAddr(STRATEGY_STORAGE_ID);
-            Strategy memory firstStrategy = StrategyStorage(strategyStorageAddr).getStrategy(_strategyIds[0]);
+            Strategy memory firstStrategy = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(_strategyIds[0]);
 
             bytes32 firstStrategyTriggerHash = keccak256(abi.encode(firstStrategy.triggerIds));
 
             for (uint256 i = 1; i < _strategyIds.length; ++i) {
-                Strategy memory s = StrategyStorage(strategyStorageAddr).getStrategy(_strategyIds[i]);
+                Strategy memory s = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(_strategyIds[i]);
 
                 if (firstStrategyTriggerHash != keccak256(abi.encode(s.triggerIds))) {
                     revert DiffTriggersInBundle(_strategyIds);

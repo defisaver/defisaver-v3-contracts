@@ -8,6 +8,7 @@ const {
     approve,
     setBalance,
     balanceOf,
+    getAddrFromRegistry,
     DAI_ADDR,
     rariDaiFundManager,
     rariUsdcFundManager,
@@ -17,17 +18,14 @@ const {
 } = require('../utils');
 
 const {
-    createStrategy,
     addBotCaller,
     setMCDPriceVerifier,
-    createBundle,
 } = require('../utils-strategies');
 
 const { getRatio } = require('../utils-mcd');
 
 const { callMcdRepayFromRariStrategy, callMcdRepayFromRariStrategyWithExchange } = require('../strategy-calls');
 const { subRepayFromSavingsStrategy } = require('../strategy-subs');
-const { createRariRepayStrategy, createRariRepayStrategyWithExchange } = require('../strategies');
 
 const { openVault, rariDeposit } = require('../actions');
 
@@ -49,47 +47,16 @@ describe('Mcd-Repay-Rari-Strategy', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
-        await redeploy('BotAuth');
-        await redeploy('ProxyAuth');
-        mcdRatioTriggerAddr = (await redeploy('McdRatioTrigger')).address;
-        await redeploy('DFSSell');
-        await redeploy('StrategyStorage');
-        await redeploy('SubStorage');
-        await redeploy('BundleStorage');
-
         mcdView = await redeploy('McdView');
 
-        await redeploy('SubProxy');
-        await redeploy('StrategyProxy');
-        await redeploy('RecipeExecutor');
-        await redeploy('GasFeeTaker');
-        await redeploy('McdRatioCheck');
-        strategyExecutor = await redeploy('StrategyExecutor');
-
-        await redeploy('McdSupply');
-        await redeploy('McdWithdraw');
-        await redeploy('McdGenerate');
-        await redeploy('McdPayback');
-        await redeploy('McdOpen');
-        await redeploy('RariDeposit');
-        await redeploy('RariWithdraw');
-
-        // rariView = await redeploy('rariView');
+        mcdRatioTriggerAddr = getAddrFromRegistry('McdRatioTrigger');
+        const strategyExecutorAddr = getAddrFromRegistry('StrategyExecutor');
+        strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', strategyExecutorAddr);
         await addBotCaller(botAcc.address);
 
         await setMCDPriceVerifier(mcdRatioTriggerAddr);
 
         proxy = await getProxy(senderAcc.address);
-    });
-
-    it('... should create repay strategy using rari funds', async () => {
-        const repayStrategyEncoded = createRariRepayStrategy();
-        const repayStrategyWithExchangeEncoded = createRariRepayStrategyWithExchange();
-
-        await createStrategy(proxy, ...repayStrategyEncoded, true);
-        await createStrategy(proxy, ...repayStrategyWithExchangeEncoded, true);
-
-        await createBundle(proxy, [0, 1]);
     });
 
     it('... should sub the user to a repay bundle ', async () => {
@@ -136,7 +103,7 @@ describe('Mcd-Repay-Rari-Strategy', function () {
         const ratioUnder = hre.ethers.utils.parseUnits('3', '18');
         const targetRatio = hre.ethers.utils.parseUnits('3.2', '18');
 
-        const bundleId = 0;
+        const bundleId = 2;
         ({ subId, strategySub } = await subRepayFromSavingsStrategy(
             proxy, bundleId, vaultId, ratioUnder, targetRatio, true,
         ));

@@ -6,10 +6,6 @@ import "../DFSRegistry.sol";
 
 /// @title StrategyModel - contract that implements the structs used in the core system
 contract StrategyModel {
-
-    bytes4 constant STRATEGY_STORAGE_ID = bytes4(keccak256("StrategyStorage"));
-    bytes4 constant SUB_STORAGE_ID = bytes4(keccak256("SubStorage"));
-    bytes4 constant BUNDLE_STORAGE_ID = bytes4(keccak256("BundleStorage"));
         
     /// @dev Group of strategies bundled together so user can sub to multiple strategies at once
     /// @param creator Address of the user who created the bundle

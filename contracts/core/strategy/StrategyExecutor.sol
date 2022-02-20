@@ -15,7 +15,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));
-    bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
+    address constant internal RECIPE_EXECUTOR_ADDR = 0x1D6DEdb49AF91A11B5C5F34954FD3E8cC4f03A86;
 
     error BotNotApproved(address, uint256);
     error SubNotEnabled(uint256);
@@ -40,7 +40,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
             revert BotNotApproved(msg.sender, _subId);
         }
 
-        StoredSubData memory storedSubData = SubStorage(registry.getAddr(SUB_STORAGE_ID)).getSub(_subId);
+        StoredSubData memory storedSubData = SubStorage(SUB_STORAGE_ADDR).getSub(_subId);
 
         bytes32 subDataHash = keccak256(abi.encode(_sub));
 
@@ -80,11 +80,9 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
         StrategySub memory _sub,
         address _userProxy
     ) internal {
-        address recipeExecutorAddr = registry.getAddr(RECIPE_EXECUTOR_ID);
-
         ProxyAuth(PROXY_AUTH_ADDR).callExecute{value: msg.value}(
             _userProxy,
-            recipeExecutorAddr,
+            RECIPE_EXECUTOR_ADDR,
             abi.encodeWithSignature(
                 "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bytes[],bytes32[]))",
                 _subId,

@@ -6,16 +6,15 @@ const {
     redeploy,
     fetchAmountinUSDPrice,
     approve,
+    getAddrFromRegistry,
     DAI_ADDR,
     setBalance,
     USDC_ADDR,
 } = require('../utils');
 
 const {
-    createStrategy,
     addBotCaller,
     setMCDPriceVerifier,
-    createBundle,
 } = require('../utils-strategies');
 
 const {
@@ -29,7 +28,6 @@ const { getRatio } = require('../utils-mcd');
 
 const { callMcdRepayFromMstableStrategy, callMcdRepayFromMstableWithExchangeStrategy } = require('../strategy-calls');
 const { subRepayFromSavingsStrategy } = require('../strategy-subs');
-const { createMstableRepayStrategy, createMstableRepayStrategyWithExchange } = require('../strategies');
 
 const { openVault, mStableDeposit } = require('../actions');
 
@@ -51,46 +49,16 @@ describe('Mcd-Repay-Mstable-Strategy', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
-        await redeploy('BotAuth');
-        await redeploy('ProxyAuth');
-        mcdRatioTriggerAddr = (await redeploy('McdRatioTrigger')).address;
-        await redeploy('DFSSell');
-        await redeploy('StrategyStorage');
-        await redeploy('SubStorage');
-        await redeploy('BundleStorage');
-
         mcdView = await redeploy('McdView');
 
-        await redeploy('SubProxy');
-        await redeploy('StrategyProxy');
-        await redeploy('RecipeExecutor');
-        await redeploy('GasFeeTaker');
-        strategyExecutor = await redeploy('StrategyExecutor');
-
-        await redeploy('McdSupply');
-        await redeploy('McdWithdraw');
-        await redeploy('McdGenerate');
-        await redeploy('McdPayback');
-        await redeploy('McdOpen');
-        await redeploy('MStableDeposit');
-        await redeploy('MStableWithdraw');
-
-        // mstableView = await redeploy('MStableView');
+        mcdRatioTriggerAddr = getAddrFromRegistry('McdRatioTrigger');
+        const strategyExecutorAddr = getAddrFromRegistry('StrategyExecutor');
+        strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', strategyExecutorAddr);
         await addBotCaller(botAcc.address);
 
         await setMCDPriceVerifier(mcdRatioTriggerAddr);
 
         proxy = await getProxy(senderAcc.address);
-    });
-
-    it('... should create repay strategy using mstable funds', async () => {
-        const repayStrategyEncoded = createMstableRepayStrategy();
-        const repayStrategyWithExchangeEncoded = createMstableRepayStrategyWithExchange();
-
-        await createStrategy(proxy, ...repayStrategyEncoded, true);
-        await createStrategy(proxy, ...repayStrategyWithExchangeEncoded, true);
-
-        await createBundle(proxy, [0, 1]);
     });
 
     it('... should sub the user to a repay bundle ', async () => {
@@ -145,7 +113,7 @@ describe('Mcd-Repay-Mstable-Strategy', function () {
         const ratioUnder = hre.ethers.utils.parseUnits('3', '18');
         const targetRatio = hre.ethers.utils.parseUnits('3.2', '18');
 
-        const bundleId = 0;
+        const bundleId = 1;
         ({ subId, strategySub } = await subRepayFromSavingsStrategy(
             proxy, bundleId, vaultId, ratioUnder, targetRatio, true,
         ));

@@ -48,6 +48,8 @@ const {
     withdrawMcd,
 } = require('../test/actions');
 
+const { deployContract } = require('../scripts/utils/deployer');
+
 const {
     mUSD,
     imUSD,
@@ -61,15 +63,15 @@ const { subRepayFromSavingsStrategy } = require('../test/strategy-subs');
 const { createMcdTrigger, RATIO_STATE_UNDER } = require('../test/triggers');
 
 program.version('0.0.1');
-let forkedAddresses = '';
+// let forkedAddresses = '';
 try {
     // eslint-disable-next-line global-require
-    forkedAddresses = require('../forked-addr.json');
+    // forkedAddresses = require('../forked-addr.json');
 } catch (err) {
     console.log('No forked registry set yet, please run deploy');
 }
 
-const REGISTRY_ADDR = forkedAddresses.DFSRegistry;
+const REGISTRY_ADDR = '0x287778F121F134C66212FB16c9b53eC991D32f5b'; // forkedAddresses.DFSRegistry;
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
 function setEnv(key, value) {
@@ -409,8 +411,7 @@ const getBalanceCall = async (account, tokenLabel) => {
 };
 
 const getCdp = async (cdpId, type) => {
-    const mcdViewAddr = await getAddrFromRegistry('McdView', REGISTRY_ADDR);
-    const mcdView = await hre.ethers.getContractAt('McdView', mcdViewAddr);
+    const mcdView = await deployContract('McdView');
     const ratio = await getRatio(mcdView, cdpId);
     console.log(`Vault id: #${cdpId} has ratio ${ratio}%`);
 

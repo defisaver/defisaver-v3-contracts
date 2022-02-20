@@ -12,20 +12,18 @@ const {
     setBalance,
     depositToWeth,
     WETH_ADDRESS,
+    getAddrFromRegistry,
 } = require('../utils');
 
 const {
-    createStrategy,
     addBotCaller,
     setMCDPriceVerifier,
-    createBundle,
 } = require('../utils-strategies');
 
 const { getRatio } = require('../utils-mcd');
 
 const { callMcdRepayFromYearnStrategy, callMcdRepayFromYearnWithExchangeStrategy } = require('../strategy-calls');
 const { subRepayFromSavingsStrategy } = require('../strategy-subs');
-const { createYearnRepayStrategy, createYearnRepayStrategyWithExchange } = require('../strategies');
 
 const { openVault, yearnSupply } = require('../actions');
 
@@ -40,53 +38,24 @@ describe('Mcd-Repay-Yearn-Strategy', function () {
     let vaultId;
     let mcdView;
     let mcdRatioTriggerAddr;
-    let strategySub;
     let yearnRegistry;
+    let strategySub;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
-        await redeploy('BotAuth');
-        await redeploy('ProxyAuth');
-        mcdRatioTriggerAddr = (await redeploy('McdRatioTrigger')).address;
-        await redeploy('DFSSell');
-        await redeploy('StrategyStorage');
-        await redeploy('SubStorage');
-        await redeploy('BundleStorage');
-
+        mcdRatioTriggerAddr = getAddrFromRegistry('McdRatioTrigger');
         mcdView = await redeploy('McdView');
+        const strategyExecutorAddr = getAddrFromRegistry('StrategyExecutor');
+        strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', strategyExecutorAddr);
 
-        await redeploy('SubProxy');
-        await redeploy('StrategyProxy');
-        await redeploy('RecipeExecutor');
-        await redeploy('McdRatioCheck');
-        await redeploy('GasFeeTaker');
-        strategyExecutor = await redeploy('StrategyExecutor');
-
-        await redeploy('McdSupply');
-        await redeploy('McdWithdraw');
-        await redeploy('McdGenerate');
-        await redeploy('McdPayback');
-        await redeploy('McdOpen');
-        await redeploy('YearnSupply');
-        await redeploy('YearnWithdraw');
         await addBotCaller(botAcc.address);
 
         await setMCDPriceVerifier(mcdRatioTriggerAddr);
         yearnRegistry = await hre.ethers.getContractAt('IYearnRegistry', YEARN_REGISTRY_ADDRESS);
 
         proxy = await getProxy(senderAcc.address);
-    });
-
-    it('... should create repay strategy using yearn funds', async () => {
-        const repayStrategyEncoded = createYearnRepayStrategy();
-        const repayWithExchangeEncoded = createYearnRepayStrategyWithExchange();
-
-        await createStrategy(proxy, ...repayStrategyEncoded, true);
-        await createStrategy(proxy, ...repayWithExchangeEncoded, true);
-
-        await createBundle(proxy, [0, 1]);
     });
 
     it('... should sub the user to a repay bundle ', async () => {
