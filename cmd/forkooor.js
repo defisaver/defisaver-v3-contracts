@@ -57,7 +57,7 @@ const {
     AssetPair,
 } = require('../test/utils-mstable');
 
-const { getSubHash } = require('../test/utils-strategies');
+const { getSubHash, addBotCaller } = require('../test/utils-strategies');
 
 const { subRepayFromSavingsStrategy } = require('../test/strategy-subs');
 const { createMcdTrigger, RATIO_STATE_UNDER } = require('../test/triggers');
@@ -685,6 +685,16 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
         .description('Returns data about a cdp')
         .action(async (cdpId, type) => {
             await getCdp(cdpId, type);
+            process.exit(0);
+        });
+
+    program
+        .command('set-bot-auth <botAddr>')
+        .description('Gives an address the authority to call a contract')
+        .action(async (botAddr) => {
+            await addBotCaller(botAddr, REGISTRY_ADDR, true);
+
+            console.log(`Bot auth given to ${botAddr}`);
             process.exit(0);
         });
 

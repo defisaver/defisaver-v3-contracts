@@ -99,8 +99,8 @@ const subToStrategy = async (proxy, strategySub, regAddr = REGISTRY_ADDR) => {
     return latestStrategyId;
 };
 
-const addBotCaller = async (botAddr, regAddr = REGISTRY_ADDR) => {
-    if (regAddr === REGISTRY_ADDR) {
+const addBotCaller = async (botAddr, regAddr = REGISTRY_ADDR, isFork = false) => {
+    if (regAddr === REGISTRY_ADDR && !isFork) {
         await impersonateAccount(OWNER_ACC);
     }
 
@@ -114,7 +114,7 @@ const addBotCaller = async (botAddr, regAddr = REGISTRY_ADDR) => {
 
     await botAuth.addCaller(botAddr);
 
-    if (regAddr === REGISTRY_ADDR) {
+    if (regAddr === REGISTRY_ADDR && !isFork) {
         await stopImpersonatingAccount(OWNER_ACC);
     }
 };

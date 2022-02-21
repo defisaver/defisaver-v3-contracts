@@ -25,11 +25,12 @@ const { addBotCaller } = require('../test/utils-strategies');
 const MAINNET_VAULT = '0xCCf3d848e08b94478Ed8f46fFead3008faF581fD';
 const MAINNET_REGISTRY = '0x287778F121F134C66212FB16c9b53eC991D32f5b';
 
-const SUB_STORAGE_ADDR = '0x0a5e900E8261F826484BD96F0da564C5bB365Ffa';
-const BUNDLE_STORAGE_ADDR = '0x56eB74B9963BCbd6877ab4Bf8e68daBbEe13B2Bb';
-const STRATEGY_STORAGE_ADDR = '0x172f1dB6c58C524A1Ab616a1E65c19B5DF5545ae';
+const SUB_STORAGE_ADDR = '0x1612fc28Ee0AB882eC99842Cde0Fc77ff0691e90';
+const BUNDLE_STORAGE_ADDR = '0x223c6aDE533851Df03219f6E3D8B763Bd47f84cf';
+const STRATEGY_STORAGE_ADDR = '0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933';
+const RECIPE_EXECUTOR_ADDR = '0x1D6DEdb49AF91A11B5C5F34954FD3E8cC4f03A86';
 
-const PROXY_AUTH_ADDR = '0xD489FfAEEB46b2d7E377850d45E1F8cA3350fc82';
+const PROXY_AUTH_ADDR = '0x149667b6FAe2c63D1B4317C716b0D0e4d3E2bD70';
 
 async function main() {
     await topUp(OWNER_ACC);
@@ -59,8 +60,27 @@ async function main() {
 
     // core
     const strategyStorage = await redeploy('StrategyStorage', reg.address);
-    const subStorage = await redeploy('SubStorage', reg.address);
+
+    await changeConstantInFiles(
+        './contracts',
+        ['MainnetCoreAddresses'],
+        'STRATEGY_STORAGE_ADDR',
+        strategyStorage.address,
+    );
+    await run('compile');
+
     const bundleStorage = await redeploy('BundleStorage', reg.address);
+
+    await changeConstantInFiles(
+        './contracts',
+        ['MainnetCoreAddresses'],
+        'BUNDLE_STORAGE_ADDR',
+        bundleStorage.address,
+    );
+    await run('compile');
+
+    const subStorage = await redeploy('SubStorage', reg.address);
+
     const proxyAuth = await redeploy('ProxyAuth', reg.address);
 
     await changeConstantInFiles(
@@ -70,36 +90,26 @@ async function main() {
         proxyAuth.address,
 
     );
-
     await changeConstantInFiles(
         './contracts',
         ['MainnetCoreAddresses'],
         'SUB_STORAGE_ADDR',
-        subStorage.address,
-
-    );
-
-    await changeConstantInFiles(
-        './contracts',
-        ['MainnetCoreAddresses'],
-        'BUNDLE_STORAGE_ADDR',
         bundleStorage.address,
-
     );
-
-    await changeConstantInFiles(
-        './contracts',
-        ['MainnetCoreAddresses'],
-        'STRATEGY_STORAGE_ADDR',
-        strategyStorage.address,
-
-    );
-
     await run('compile');
 
-    await redeploy('RecipeExecutor', reg.address);
+    const recipeExecutor = await redeploy('RecipeExecutor', reg.address);
     await redeploy('SubProxy', reg.address);
     await redeploy('StrategyProxy', reg.address);
+
+    await changeConstantInFiles(
+        './contracts',
+        ['StrategyExecutor'],
+        'RECIPE_EXECUTOR_ADDR',
+        bundleStorage.address,
+    );
+    await run('compile');
+
     const strategyExecutor = await redeploy('StrategyExecutor', reg.address);
 
     // mcd actions
@@ -197,6 +207,13 @@ async function main() {
         'PROXY_AUTH_ADDR',
         PROXY_AUTH_ADDR,
 
+    );
+
+    await changeConstantInFiles(
+        './contracts',
+        ['StrategyExecutor'],
+        'RECIPE_EXECUTOR_ADDR',
+        RECIPE_EXECUTOR_ADDR,
     );
 
     await run('compile');
