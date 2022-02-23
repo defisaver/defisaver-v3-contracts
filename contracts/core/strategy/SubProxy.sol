@@ -41,6 +41,18 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId);
     }
 
+
+    /// @notice Updates subscription and enables the subscription for execution
+    /// @dev Must own the sub. to be able to enable it
+    /// @param _sub Subscription struct of the user (needs whole struct so we can hash it)
+    function updateAndActivateSub(
+        uint _subId,
+        StrategySub calldata _sub
+    ) public {
+        SubStorage(SUB_STORAGE_ADDR).updateSubData(_subId, _sub);
+        SubStorage(SUB_STORAGE_ADDR).activateSub(_subId);
+    }
+
     /// @notice Disables the subscription (will not be able to execute the strategy for the user)
     /// @dev Must own the sub. to be able to disable it
     /// @param _subId Id of subscription to disable

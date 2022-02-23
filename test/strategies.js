@@ -1027,6 +1027,129 @@ const createBoostStrategy = () => {
     return compBoostStrategy.encodeForDsProxyCall();
 };
 
+const createMcdBoostStrategy = () => {
+    const mcdBoostStrategy = new dfs.Strategy('MakerBoostStrategy');
+    mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
+    mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
+    mcdBoostStrategy.addTrigger(mcdRatioTrigger);
+
+    const ratioAction = new dfs.actions.maker.MakerRatioAction(
+        '&vaultId',
+    );
+
+    const generateAction = new dfs.actions.maker.MakerGenerateAction(
+        '&vaultId',
+        '%generateAmount',
+        '&proxy',
+        '%managerAddr',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%daiAddr',
+            '%wethAddr',
+            '$2',
+            '%wrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', '%wethAddr', '$3',
+    );
+
+    const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
+        '&vaultId', // vaultId
+        '$4', // amount
+        '%ethJoin',
+        '&proxy', // proxy
+        '%mcdManager',
+    );
+
+    const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+        '%ratioState',
+        '%checkTarget',
+        '&targetRatio', // targetRatio
+        '&vaultId', // vaultId
+        '%ratioActionPositionInRecipe',
+    );
+
+    mcdBoostStrategy.addAction(ratioAction);
+    mcdBoostStrategy.addAction(generateAction);
+    mcdBoostStrategy.addAction(sellAction);
+    mcdBoostStrategy.addAction(feeTakingAction);
+    mcdBoostStrategy.addAction(mcdSupplyAction);
+    mcdBoostStrategy.addAction(mcdRatioCheckAction);
+
+    return mcdBoostStrategy.encodeForDsProxyCall();
+};
+
+const createFlMcdBoostStrategy = () => {
+    const mcdBoostStrategy = new dfs.Strategy('MakerFLBoostStrategy');
+    mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
+    mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
+    mcdBoostStrategy.addTrigger(mcdRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction('%amount', '%daiAddr');
+
+    const ratioAction = new dfs.actions.maker.MakerRatioAction(
+        '&vaultId',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%daiAddr',
+            '%wethAddr',
+            '$1',
+            '%wrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', '%wethAddr', '$3',
+    );
+
+    const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
+        '&vaultId', // vaultId
+        '$4', // amount
+        '%ethJoin',
+        '&proxy', // proxy
+        '%mcdManager',
+    );
+
+    const generateAction = new dfs.actions.maker.MakerGenerateAction(
+        '&vaultId',
+        '$1',
+        '%FLAddr',
+        '%managerAddr',
+    );
+
+    const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+        '%ratioState',
+        '%checkTarget',
+        '&targetRatio', // targetRatio
+        '&vaultId', // vaultId
+        '%ratioActionPositionInRecipe',
+    );
+
+    mcdBoostStrategy.addAction(flAction);
+    mcdBoostStrategy.addAction(ratioAction);
+    mcdBoostStrategy.addAction(sellAction);
+    mcdBoostStrategy.addAction(feeTakingAction);
+    mcdBoostStrategy.addAction(mcdSupplyAction);
+    mcdBoostStrategy.addAction(generateAction);
+    mcdBoostStrategy.addAction(mcdRatioCheckAction);
+
+    return mcdBoostStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
@@ -1051,4 +1174,6 @@ module.exports = {
     createContinuousUniV3CollectStrategy,
     createCompRepayStrategy,
     createBoostStrategy,
+    createMcdBoostStrategy,
+    createFlMcdBoostStrategy,
 };

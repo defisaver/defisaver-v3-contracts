@@ -5,6 +5,7 @@ const {
     getProxy,
     redeploy,
     fetchAmountinUSDPrice,
+    openStrategyAndBundleStorage,
     Float2BN,
     depositToWeth,
     send,
@@ -47,15 +48,7 @@ describe('Reflexer-Repay-Bundle', function () {
 
         balancerFL = await redeploy('FLBalancer');
 
-        await redeploy('BotAuth');
-        await redeploy('ProxyAuth');
         await redeploy('DFSSell');
-        await redeploy('StrategyStorage');
-        await redeploy('BundleStorage');
-        await redeploy('SubStorage');
-        await redeploy('SubProxy');
-        await redeploy('StrategyProxy');
-        await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');
         strategyExecutor = await redeploy('StrategyExecutor');
 
@@ -81,16 +74,18 @@ describe('Reflexer-Repay-Bundle', function () {
         const reflexerRepayStrategy = createReflexerRepayStrategy();
         const reflexerFLRepayStrategy = createReflexerFLRepayStrategy();
 
-        await createStrategy(proxy, ...reflexerRepayStrategy, true);
-        await createStrategy(proxy, ...reflexerFLRepayStrategy, true);
+        await openStrategyAndBundleStorage();
 
-        await createBundle(proxy, [0, 1]);
+        const strategyId1 = await createStrategy(proxy, ...reflexerRepayStrategy, true);
+        const strategyId2 = await createStrategy(proxy, ...reflexerFLRepayStrategy, true);
+
+        const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
 
         const ratioUnder = Float2BN('2.8');
         const targetRatio = Float2BN('3');
 
         // eslint-disable-next-line max-len
-        ({ subId, strategySub } = await subReflexerRepayStrategy(proxy, safeId, ratioUnder, targetRatio));
+        ({ subId, strategySub } = await subReflexerRepayStrategy(proxy, safeId, ratioUnder, targetRatio, bundleId));
     });
 
     it('... should trigger a Reflexer Repay strategy', async () => {

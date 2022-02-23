@@ -7,6 +7,7 @@ const {
     getProxy,
     redeploy,
     fetchAmountinUSDPrice,
+    openStrategyAndBundleStorage,
 } = require('../utils');
 
 const {
@@ -37,6 +38,7 @@ describe('Mcd-Repay-Strategy', function () {
     let mcdView;
     let mcdRatioTriggerAddr;
     let strategySub;
+    let bundleId;
 
     const ethJoin = ilks[0].join;
 
@@ -44,24 +46,14 @@ describe('Mcd-Repay-Strategy', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
-        await redeploy('BotAuth');
-        await redeploy('ProxyAuth');
         mcdRatioTriggerAddr = (await redeploy('McdRatioTrigger')).address;
-        await redeploy('McdWithdraw');
         await redeploy('DFSSell');
         await redeploy('McdPayback');
-        await redeploy('StrategyStorage');
-        await redeploy('SubStorage');
-        await redeploy('BundleStorage');
 
         mcdView = await redeploy('McdView');
 
-        await redeploy('SubProxy');
-        await redeploy('StrategyProxy');
-        await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');
         await redeploy('McdRatioCheck');
-        await redeploy('GasFeeTaker');
         strategyExecutor = await redeploy('StrategyExecutor');
 
         await redeploy('McdSupply');
@@ -83,10 +75,12 @@ describe('Mcd-Repay-Strategy', function () {
         const repayStrategyEncoded = createRepayStrategy();
         const flRepayStrategyEncoded = createFLRepayStrategy();
 
-        await createStrategy(proxy, ...repayStrategyEncoded, true);
-        await createStrategy(proxy, ...flRepayStrategyEncoded, true);
+        await openStrategyAndBundleStorage();
 
-        await createBundle(proxy, [0, 1]);
+        const strategyId1 = await createStrategy(proxy, ...repayStrategyEncoded, true);
+        const strategyId2 = await createStrategy(proxy, ...flRepayStrategyEncoded, true);
+
+        bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
     });
 
     it('... should sub the user to a repay bundle ', async () => {
@@ -102,7 +96,6 @@ describe('Mcd-Repay-Strategy', function () {
         const ratioUnder = hre.ethers.utils.parseUnits('3', '18');
         const targetRatio = hre.ethers.utils.parseUnits('3.2', '18');
 
-        const bundleId = 0;
         ({ subId, strategySub } = await subMcdRepayStrategy(
             proxy, bundleId, vaultId, ratioUnder, targetRatio, true,
         ));

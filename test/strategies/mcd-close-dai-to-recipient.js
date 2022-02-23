@@ -13,6 +13,7 @@ const {
     getChainLinkPrice,
     DAI_ADDR,
     balanceOf,
+    openStrategyAndBundleStorage,
 } = require('../utils');
 
 const { createStrategy, addBotCaller } = require('../utils-strategies');
@@ -41,24 +42,17 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
-        await redeploy('FLDyDx');
         await redeploy('SendToken');
-        await redeploy('BotAuth');
-        await redeploy('ProxyAuth');
         await redeploy('McdRatioTrigger');
-        await redeploy('McdWithdraw');
         await redeploy('DFSSell');
-        await redeploy('McdPayback');
-        await redeploy('StrategyStorage');
-        subStorage = await redeploy('SubStorage');
         await redeploy('McdView');
-        await redeploy('SubProxy');
-        await redeploy('StrategyProxy');
-        await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');
         await redeploy('McdRatioCheck');
         strategyExecutor = await redeploy('StrategyExecutor');
-        await redeploy('FLDyDx');
+
+        const subStorageAddr = getAddrFromRegistry('SubStorage');
+        subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+
         await redeploy('McdSupply');
         await redeploy('McdWithdraw');
         await redeploy('McdGenerate');
@@ -85,8 +79,10 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         flAmount = (parseFloat(amountDai) + 1).toString();
         flAmount = hre.ethers.utils.parseUnits(flAmount, 18);
 
+        await openStrategyAndBundleStorage();
+
         const strategyData = createMcdCloseStrategy();
-        await createStrategy(proxy, ...strategyData, false);
+        const strategyId = await createStrategy(proxy, ...strategyData, false);
 
         const currPrice = await getChainLinkPrice(ETH_ADDR);
 
@@ -97,6 +93,7 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
             senderAcc.address,
             targetPrice,
             WETH_ADDRESS,
+            strategyId,
         ));
         console.log(subId);
         console.log(await subStorage.getSub(subId));

@@ -150,6 +150,14 @@ const coinGeckoHelper = {
     imUSD: 'imusd',
 };
 
+const timeTravel = async (timeIncrease) => {
+    await hre.network.provider.request({
+        method: 'evm_increaseTime',
+        params: [timeIncrease],
+        id: new Date().getTime(),
+    });
+};
+
 const getOwnerAddr = () => addrs[network].OWNER_ACC;
 
 async function findBalancesSlot(tokenAddress) {
@@ -417,6 +425,13 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, existingAd
         await registry.addNewContract(id, c.address, 0, { gasLimit: 2000000 });
     } else {
         await registry.startContractChange(id, c.address, { gasLimit: 2000000 });
+
+        const entryData = await registry.entries(id);
+
+        if (parseInt(entryData.waitPeriod, 10) > 0) {
+            await timeTravel(parseInt(entryData.waitPeriod, 10) + 10);
+        }
+
         await registry.approveContractChange(id, { gasLimit: 2000000 });
     }
 
@@ -604,13 +619,6 @@ const formatExchangeObjForOffchain = (
     [wrapper, exchangeAddr, allowanceTarget, price, protocolFee, callData],
 ];
 
-const timeTravel = async (timeIncrease) => {
-    await hre.network.provider.request({
-        method: 'evm_increaseTime',
-        params: [timeIncrease],
-        id: new Date().getTime(),
-    });
-};
 const addToZRXAllowlist = async (acc, newAddr) => {
     const exchangeOwnerAddr = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
     await sendEther(acc, exchangeOwnerAddr, '1');

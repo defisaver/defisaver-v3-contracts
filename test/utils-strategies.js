@@ -10,6 +10,18 @@ const {
     REGISTRY_ADDR,
 } = require('./utils');
 
+const getLatestBundleId = async () => {
+    const bundleStorageAddr = await getAddrFromRegistry('BundleStorage');
+
+    const bundleStorageInstance = await hre.ethers.getContractFactory('BundleStorage');
+    const bundleStorage = await bundleStorageInstance.attach(bundleStorageAddr);
+
+    let latestBundleId = await bundleStorage.getBundleCount();
+    latestBundleId = (latestBundleId - 1).toString();
+
+    return latestBundleId;
+};
+
 const getLatestStrategyId = async () => {
     const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
 
@@ -55,6 +67,10 @@ const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramM
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
     console.log(`GasUsed createStrategy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const strategyId = await getLatestStrategyId();
+
+    return strategyId;
 };
 
 const createBundle = async (proxy, strategyIds) => {
@@ -75,6 +91,10 @@ const createBundle = async (proxy, strategyIds) => {
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
     console.log(`GasUsed createBundle; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestBundleId = await getLatestBundleId();
+
+    return latestBundleId;
 };
 
 const subToStrategy = async (proxy, strategySub, regAddr = REGISTRY_ADDR) => {
@@ -148,6 +168,7 @@ module.exports = {
     createStrategy,
     createBundle,
     getLatestStrategyId,
+    getLatestBundleId,
     getLatestSubId,
     addBotCaller,
     setMCDPriceVerifier,

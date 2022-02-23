@@ -10,6 +10,8 @@ const {
     fetchAmountinUSDPrice,
     depositToWeth,
     setNewExchangeWrapper,
+    getAddrFromRegistry,
+    openStrategyAndBundleStorage,
 } = require('../utils');
 
 const {
@@ -38,27 +40,24 @@ describe('Compound-Repay-Strategy', function () {
     let compView;
     let ratioUnder;
     let targetRatio;
+    let strategyId;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
-        await redeploy('RecipeExecutor');
+
         await redeploy('DFSSell');
         compView = await redeploy('CompView');
         uniWrapper = await redeploy('UniswapWrapperV3');
-        await redeploy('BotAuth');
-        await redeploy('ProxyAuth');
-        await redeploy('StrategyStorage');
-        await redeploy('SubStorage');
-        await redeploy('SubProxy');
-        await redeploy('StrategyProxy');
         await redeploy('GasFeeTaker');
         await redeploy('CompSupply');
         await redeploy('CompBorrow');
         await redeploy('CompPayback');
         await redeploy('CompWithdraw');
         await redeploy('CompoundRatioTrigger');
-        strategyExecutor = await redeploy('StrategyExecutor');
+
+        const strategyExecutorAddr = getAddrFromRegistry('StrategyExecutor');
+        strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', strategyExecutorAddr);
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -82,13 +81,19 @@ describe('Compound-Repay-Strategy', function () {
 
     it('... should make a new Comp Repay strategy', async () => {
         const strategyData = createCompRepayStrategy();
-        await createStrategy(proxy, ...strategyData, true);
+        await openStrategyAndBundleStorage();
 
-        targetRatio = hre.ethers.utils.parseUnits('4', '18');
+        strategyId = await createStrategy(proxy, ...strategyData, true);
+
+        targetRatio = hre.ethers.utils.parseUnits('3.8', '18');
         ratioUnder = hre.ethers.utils.parseUnits('3', '18');
 
-        ({ subId, strategySub } = await subCompRepayStrategy(proxy, ratioUnder, targetRatio));
-        // sub strategy
+        ({ subId, strategySub } = await subCompRepayStrategy(
+            proxy,
+            ratioUnder,
+            targetRatio,
+            strategyId,
+        ));
     });
 
     it('... should trigger a Comp boost strategy', async () => {

@@ -5,6 +5,7 @@ const {
     getProxy,
     redeploy,
     fetchAmountinUSDPrice,
+    openStrategyAndBundleStorage,
     Float2BN,
     depositToWeth,
     send,
@@ -45,15 +46,7 @@ describe('Liquity-Boost-Bundle', function () {
         botAcc = (await hre.ethers.getSigners())[1];
 
         balancerFL = await redeploy('FLBalancer');
-        await redeploy('BotAuth');
-        await redeploy('ProxyAuth');
         await redeploy('DFSSell');
-        await redeploy('StrategyStorage');
-        await redeploy('BundleStorage');
-        await redeploy('SubStorage');
-        await redeploy('SubProxy');
-        await redeploy('StrategyProxy');
-        await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');
         strategyExecutor = await redeploy('StrategyExecutor');
 
@@ -82,20 +75,26 @@ describe('Liquity-Boost-Bundle', function () {
         const liquityBoostStrategy = createLiquityBoostStrategy();
         const liquityFLBoostStrategy = createLiquityFLBoostStrategy();
 
-        await createStrategy(proxy, ...liquityBoostStrategy, true);
-        await createStrategy(proxy, ...liquityFLBoostStrategy, true);
+        await openStrategyAndBundleStorage();
 
-        await createBundle(proxy, [0, 1]);
+        const strategyId1 = await createStrategy(proxy, ...liquityBoostStrategy, true);
+        const strategyId2 = await createStrategy(proxy, ...liquityFLBoostStrategy, true);
 
-        const ratioOver = Float2BN('2');
+        const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+
+        const ratioOver = Float2BN('1.8');
         const targetRatio = Float2BN('1.5');
 
+        console.log(bundleId);
+
         // eslint-disable-next-line max-len
-        ({ subId, strategySub } = await subLiquityBoostStrategy(proxy, maxFeePercentage, ratioOver, targetRatio));
+        ({ subId, strategySub } = await subLiquityBoostStrategy(proxy, maxFeePercentage, ratioOver, targetRatio, bundleId));
     });
 
     it('... should trigger a Liquity Boost strategy', async () => {
         const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
+
+        console.log(ratioBefore.toString());
         const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', '5000'));
 
         // eslint-disable-next-line max-len

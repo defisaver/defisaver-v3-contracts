@@ -46,8 +46,8 @@ const subDcaStrategy = async (
     interval,
     lastTimestamp,
     eoa,
+    strategyId,
 ) => {
-    const bundleId = 0;
     const isBundle = false;
 
     const tokenAddrSellEncoded = abiCoder.encode(['address'], [tokenAddrSell]);
@@ -61,7 +61,7 @@ const subDcaStrategy = async (
     const triggerData = await createTimestampTrigger(lastTimestamp, interval);
 
     const strategySub = [
-        bundleId,
+        strategyId,
         isBundle,
         [triggerData],
         [
@@ -79,15 +79,14 @@ const subDcaStrategy = async (
     return { subId, strategySub };
 };
 
-const subUniV3RangeOrderStrategy = async (proxy, tokenId, state, recipient) => {
-    const bundleId = 0;
+const subUniV3RangeOrderStrategy = async (proxy, tokenId, state, recipient, strategyId) => {
     const isBundle = false;
 
     const tokenIdEncoded = abiCoder.encode(['uint256'], [tokenId.toString()]);
     const recipientEncoded = abiCoder.encode(['address'], [recipient]);
 
     const triggerData = await createUniV3RangeOrderTrigger(tokenId, state);
-    const strategySub = [bundleId, isBundle, [triggerData], [tokenIdEncoded, recipientEncoded]];
+    const strategySub = [strategyId, isBundle, [triggerData], [tokenIdEncoded, recipientEncoded]];
     // eslint-disable-next-line max-len
     const subId = await subToStrategy(proxy, strategySub);
 
@@ -120,29 +119,27 @@ const subRepayFromSavingsStrategy = async (proxy, bundleId, vaultId, rationUnder
     return { subId, strategySub };
 };
 
-const subCompBoostStrategy = async (proxy, ratioOver, targetRatio) => {
-    const bundleId = 0;
+const subCompBoostStrategy = async (proxy, ratioOver, targetRatio, strategyId) => {
     const isBundle = false;
 
     const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
     const triggerData = await createCompTrigger(proxy.address, ratioOver, RATIO_STATE_OVER);
 
-    const strategySub = [bundleId, isBundle, [triggerData], [proxyAddrEncoded, targetRatioEncoded]];
+    const strategySub = [strategyId, isBundle, [triggerData], [proxyAddrEncoded, targetRatioEncoded]];
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };
 };
 
-const subCompRepayStrategy = async (proxy, ratioUnder, targetRatio) => {
-    const bundleId = 0;
+const subCompRepayStrategy = async (proxy, ratioUnder, targetRatio, strategyId) => {
     const isBundle = false;
 
     const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
     const triggerData = await createCompTrigger(proxy.address, ratioUnder, RATIO_STATE_UNDER);
 
-    const strategySub = [bundleId, isBundle, [triggerData], [proxyAddrEncoded, targetRatioEncoded]];
+    const strategySub = [strategyId, isBundle, [triggerData], [proxyAddrEncoded, targetRatioEncoded]];
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };
@@ -159,8 +156,7 @@ const subMcdBoostStrategy = async (proxy, bundleId, vaultId, rationUnder, target
     return { subId, strategySub };
 };
 
-const subMcdCloseStrategy = async (vaultId, proxy, recipient, targetPrice, tokenAddress) => {
-    const bundleId = 0;
+const subMcdCloseStrategy = async (vaultId, proxy, recipient, targetPrice, tokenAddress, strategyId) => {
     const isBundle = false;
 
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
@@ -169,15 +165,14 @@ const subMcdCloseStrategy = async (vaultId, proxy, recipient, targetPrice, token
     const triggerData = await createChainLinkPriceTrigger(
         tokenAddress, targetPrice, RATIO_STATE_OVER,
     );
-    const strategySub = [bundleId, isBundle, [triggerData], [vaultIdEncoded, recipientEncoded]];
+    const strategySub = [strategyId, isBundle, [triggerData], [vaultIdEncoded, recipientEncoded]];
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };
 };
 
 // eslint-disable-next-line max-len
-const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrBuy, amount, targetPrice) => {
-    const bundleId = 0;
+const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrBuy, amount, targetPrice, strategyId) => {
     const isBundle = false;
 
     const tokenAddrSellEncoded = abiCoder.encode(['address'], [tokenAddrSell]);
@@ -186,14 +181,13 @@ const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrB
 
     // eslint-disable-next-line max-len
     const triggerData = await createChainLinkPriceTrigger(tokenAddrSell, targetPrice, RATIO_STATE_OVER);
-    const strategySub = [bundleId, isBundle, [triggerData], [tokenAddrSellEncoded, tokenAddrBuyEncoded, amountEncoded]];
+    const strategySub = [strategyId, isBundle, [triggerData], [tokenAddrSellEncoded, tokenAddrBuyEncoded, amountEncoded]];
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };
 };
 
-const subReflexerBoostStrategy = async (proxy, safeId, ratioOver, targetRatio) => {
-    const bundleId = 0;
+const subReflexerBoostStrategy = async (proxy, safeId, ratioOver, targetRatio, bundleId) => {
     const isBundle = true;
 
     const safeIdEncoded = abiCoder.encode(['uint256'], [safeId.toString()]);
@@ -206,8 +200,7 @@ const subReflexerBoostStrategy = async (proxy, safeId, ratioOver, targetRatio) =
     return { subId, strategySub };
 };
 
-const subReflexerRepayStrategy = async (proxy, safeId, ratioUnder, targetRatio) => {
-    const bundleId = 0;
+const subReflexerRepayStrategy = async (proxy, safeId, ratioUnder, targetRatio, bundleId) => {
     const isBundle = true;
 
     const safeIdEncoded = abiCoder.encode(['uint256'], [safeId.toString()]);
@@ -220,8 +213,7 @@ const subReflexerRepayStrategy = async (proxy, safeId, ratioUnder, targetRatio) 
     return { subId, strategySub };
 };
 
-const subLiquityBoostStrategy = async (proxy, maxFeePercentage, ratioOver, targetRatio) => {
-    const bundleId = 0;
+const subLiquityBoostStrategy = async (proxy, maxFeePercentage, ratioOver, targetRatio, bundleId) => {
     const isBundle = true;
 
     const maxFeePercentageEncoded = abiCoder.encode(['uint256'], [maxFeePercentage.toString()]);
@@ -234,8 +226,7 @@ const subLiquityBoostStrategy = async (proxy, maxFeePercentage, ratioOver, targe
     return { subId, strategySub };
 };
 
-const subLiquityRepayStrategy = async (proxy, ratioUnder, targetRatio) => {
-    const bundleId = 0;
+const subLiquityRepayStrategy = async (proxy, ratioUnder, targetRatio, bundleId) => {
     const isBundle = true;
 
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);

@@ -214,6 +214,6 @@
 		}
 	],
 	"networks": {
-		"localOptimism": {}
+		"local": {}
 	}
 }

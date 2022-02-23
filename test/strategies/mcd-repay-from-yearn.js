@@ -102,7 +102,7 @@ describe('Mcd-Repay-Yearn-Strategy', function () {
 
         const bundleId = 0;
         ({ subId, strategySub } = await subRepayFromSavingsStrategy(
-            proxy, bundleId, vaultId, ratioUnder, targetRatio, true,
+            proxy, bundleId, vaultId, ratioUnder, targetRatio, true, bundleId,
         ));
     });
 

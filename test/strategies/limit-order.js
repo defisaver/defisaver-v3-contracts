@@ -8,6 +8,7 @@ const {
     depositToWeth,
     approve,
     balanceOf,
+    openStrategyAndBundleStorage,
     ETH_ADDR,
     WETH_ADDRESS,
     DAI_ADDR,
@@ -34,17 +35,11 @@ describe('Limit-Order-Strategy', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
-        await redeploy('BotAuth');
-        await redeploy('ProxyAuth');
-        await redeploy('StrategyStorage');
-        await redeploy('SubStorage');
-        await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');
         await redeploy('DFSSell');
         await redeploy('ChainLinkPriceTrigger');
-        await redeploy('SubProxy');
-        await redeploy('StrategyProxy');
         await redeploy('PullToken');
+
         strategyExecutor = await redeploy('StrategyExecutor');
 
         await addBotCaller(botAcc.address);
@@ -54,7 +49,9 @@ describe('Limit-Order-Strategy', function () {
 
     it('... should make a new Limit order strategy', async () => {
         const strategyData = createLimitOrderStrategy();
-        await createStrategy(proxy, ...strategyData, false);
+        await openStrategyAndBundleStorage();
+
+        const strategyId = await createStrategy(proxy, ...strategyData, false);
 
         const currPrice = await getChainLinkPrice(ETH_ADDR);
 
@@ -72,6 +69,7 @@ describe('Limit-Order-Strategy', function () {
             tokenAddrBuy,
             amount,
             targetPrice,
+            strategyId,
         ));
     });
 
@@ -97,7 +95,7 @@ describe('Limit-Order-Strategy', function () {
             await depositToWeth(amount.toString());
             await callLimitOrderStrategy(botAcc, senderAcc, strategyExecutor, subId, strategySub);
         } catch (err) {
-            expect(err.toString()).to.have.string('SubNotActiveError');
+            expect(err.toString()).to.have.string('SubNotEnabled');
         }
     });
 });

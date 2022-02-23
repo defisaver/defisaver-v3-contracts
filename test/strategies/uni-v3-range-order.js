@@ -10,6 +10,8 @@ const {
     UNIV3POSITIONMANAGER_ADDR,
     balanceOf,
     DAI_ADDR,
+    getAddrFromRegistry,
+    openStrategyAndBundleStorage,
 } = require('../utils');
 
 const { createStrategy, addBotCaller } = require('../utils-strategies');
@@ -45,18 +47,16 @@ describe('Uni-v3-range-order strat', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
-        await redeploy('BotAuth');
-        await redeploy('ProxyAuth');
         await redeploy('UniV3CurrentTickTrigger');
         await redeploy('DFSSell');
-        await redeploy('StrategyStorage');
-        subStorage = await redeploy('SubStorage');
-        await redeploy('SubProxy');
-        await redeploy('StrategyProxy');
-        await redeploy('RecipeExecutor');
+
+        const subStorageAddr = getAddrFromRegistry('SubStorage');
+        subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+
         await redeploy('GasFeeTaker');
         await redeploy('UniMintV3');
         await redeploy('UniWithdrawV3');
+
         strategyExecutor = await redeploy('StrategyExecutor');
         positionManager = await hre.ethers.getContractAt('IUniswapV3NonfungiblePositionManager', UNIV3POSITIONMANAGER_ADDR);
 
@@ -80,16 +80,17 @@ describe('Uni-v3-range-order strat', function () {
         console.log(`Liquidity after minting : ${position.liquidity.toString()}`);
         // mint univ3 NFT - nftOwner is senderAcc.address
 
+        await openStrategyAndBundleStorage();
+
         const strategyData = createUniV3RangeOrderStrategy();
-        await createStrategy(proxy, ...strategyData, false);
+        const strategyId = await createStrategy(proxy, ...strategyData, false);
         // Created strategy with three slots for user input when they subscribe
         // One trigger and recipe consisting of one action
 
         positionManager.approve(proxy.address, tokenId);
         // eslint-disable-next-line max-len
-        ({ subId, strategySub } = await subUniV3RangeOrderStrategy(proxy, tokenId, 0, senderAcc.address));
+        ({ subId, strategySub } = await subUniV3RangeOrderStrategy(proxy, tokenId, 0, senderAcc.address, strategyId));
         // user subscribes to strategy and fills three slots
-        expect(subId).to.be.eq('0');
         console.log(await subStorage.getSub(subId));
     });
 

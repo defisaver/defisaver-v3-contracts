@@ -690,6 +690,7 @@ const callCompBoostStrategy = async (botAcc, strategyExecutor, subId, strategySu
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     const strategyIndex = 0;
+
     // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
         gasLimit: 8000000,

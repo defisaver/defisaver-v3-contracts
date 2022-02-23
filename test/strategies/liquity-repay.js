@@ -5,6 +5,7 @@ const {
     getProxy,
     redeploy,
     fetchAmountinUSDPrice,
+    openStrategyAndBundleStorage,
     Float2BN,
     depositToWeth,
     send,
@@ -83,16 +84,18 @@ describe('Liquity-Repay-Bundle', function () {
         const liquityRepayStrategy = createLiquityRepayStrategy();
         const liquityFLRepayStrategy = createLiquityFLRepayStrategy();
 
-        await createStrategy(proxy, ...liquityRepayStrategy, true);
-        await createStrategy(proxy, ...liquityFLRepayStrategy, true);
+        await openStrategyAndBundleStorage();
 
-        await createBundle(proxy, [0, 1]);
+        const strategyId1 = await createStrategy(proxy, ...liquityRepayStrategy, true);
+        const strategyId2 = await createStrategy(proxy, ...liquityFLRepayStrategy, true);
+
+        const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
 
         const ratioUnder = Float2BN('3');
         const targetRatio = Float2BN('3');
 
         // eslint-disable-next-line max-len
-        ({ subId, strategySub } = await subLiquityRepayStrategy(proxy, ratioUnder, targetRatio));
+        ({ subId, strategySub } = await subLiquityRepayStrategy(proxy, ratioUnder, targetRatio, bundleId));
     });
 
     it('... should trigger a Liquity Repay strategy', async () => {

@@ -6,10 +6,12 @@ const { getAssetInfo, assetAmountInWei } = require('@defisaver/tokens');
 const {
     getProxy,
     redeploy,
+    getAddrFromRegistry,
     approve,
     fetchAmountinUSDPrice,
     depositToWeth,
     setNewExchangeWrapper,
+    openStrategyAndBundleStorage,
 } = require('../utils');
 
 const {
@@ -38,29 +40,25 @@ describe('Compound-Boost-Strategy', function () {
     let compView;
     let ratioOver;
     let targetRatio;
+    let strategyId;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
-        await redeploy('RecipeExecutor');
+        compView = await redeploy('CompView');
+
         await redeploy('DFSSell');
         await redeploy('FLDyDx');
         await redeploy('FLAaveV2');
-        compView = await redeploy('CompView');
-        await redeploy('BotAuth');
-        await redeploy('ProxyAuth');
-        await redeploy('StrategyStorage');
-        await redeploy('SubStorage');
-        await redeploy('SubProxy');
-        await redeploy('StrategyProxy');
-        await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');
         await redeploy('CompSupply');
         await redeploy('CompBorrow');
         await redeploy('CompoundRatioTrigger');
-        strategyExecutor = await redeploy('StrategyExecutor');
         uniWrapper = await redeploy('UniswapWrapperV3');
+
+        const strategyExecutorAddr = getAddrFromRegistry('StrategyExecutor');
+        strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', strategyExecutorAddr);
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -83,14 +81,19 @@ describe('Compound-Boost-Strategy', function () {
     });
 
     it('... should make a new Comp Boost strategy', async () => {
+        await openStrategyAndBundleStorage();
         const strategyData = createBoostStrategy();
-        await createStrategy(proxy, ...strategyData, true);
+        strategyId = await createStrategy(proxy, ...strategyData, true);
 
         targetRatio = hre.ethers.utils.parseUnits('2.1', '18');
         ratioOver = hre.ethers.utils.parseUnits('2.5', '18');
 
-        ({ subId, strategySub } = await subCompBoostStrategy(proxy, ratioOver, targetRatio));
-        // sub strategy
+        ({ subId, strategySub } = await subCompBoostStrategy(
+            proxy,
+            ratioOver,
+            targetRatio,
+            strategyId,
+        ));
     });
 
     it('... should trigger a Comp boost strategy', async () => {

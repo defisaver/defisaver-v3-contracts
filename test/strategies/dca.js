@@ -8,9 +8,10 @@ const {
     approve,
     balanceOf,
     timeTravel,
+    openStrategyAndBundleStorage,
+    getAddrFromRegistry,
     WETH_ADDRESS,
     DAI_ADDR,
-    Float2BN,
 } = require('../utils');
 
 const { callDcaStrategy } = require('../strategy-calls');
@@ -37,24 +38,22 @@ describe('DCA Strategy', function () {
     let amount;
     let subStorage;
     let lastTimestamp;
+    let subStorageAddr;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
-        await redeploy('ProxyAuth');
-        await redeploy('BotAuth');
-        await redeploy('StrategyStorage');
-        subStorage = await redeploy('SubStorage');
-        await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');
         await redeploy('DFSSell');
-        await redeploy('SubProxy');
         await redeploy('TimestampTrigger');
-        await redeploy('StrategyProxy');
         await redeploy('PullToken');
 
-        strategyExecutor = await redeploy('StrategyExecutor');
+        subStorageAddr = getAddrFromRegistry('SubStorage');
+        subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+
+        const strategyExecutorAddr = getAddrFromRegistry('StrategyExecutor');
+        strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', strategyExecutorAddr);
 
         await addBotCaller(botAcc.address);
 
@@ -63,7 +62,9 @@ describe('DCA Strategy', function () {
 
     it('... should make a new DCA Strategy for selling eth into dai', async () => {
         const strategyData = createDCAStrategy();
-        await createStrategy(proxy, ...strategyData, true);
+        await openStrategyAndBundleStorage();
+
+        const strategyId = await createStrategy(proxy, ...strategyData, true);
 
         const tokenAddrSell = WETH_ADDRESS;
         const tokenAddrBuy = DAI_ADDR;
@@ -81,6 +82,7 @@ describe('DCA Strategy', function () {
             interval,
             lastTimestamp,
             senderAcc.address,
+            strategyId,
         ));
     });
 
@@ -97,11 +99,17 @@ describe('DCA Strategy', function () {
         // eslint-disable-next-line max-len
         await callDcaStrategy(botAcc, strategyExecutor, subId, strategySub, subStorage.address, newTimestamp);
 
-        const eventFilter = subStorage.filters.UpdateData(Float2BN(subId));
-        const event = (await subStorage.queryFilter(eventFilter)).at(-1);
+        const events = (await subStorage.queryFilter({
+            address: subStorageAddr,
+            topics: [
+                hre.ethers.utils.id('UpdateData(uint256,bytes32,(uint64,bool,bytes[],bytes32[]))'),
+            ],
+        }));
+
+        const lastEvent = events.at(-1);
 
         const abiCoder = hre.ethers.utils.defaultAbiCoder;
-        strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], event.data)[0];
+        strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], lastEvent.data)[0];
 
         const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
         const wethBalanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
