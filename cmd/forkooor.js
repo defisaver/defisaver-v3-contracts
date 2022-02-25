@@ -556,12 +556,25 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
     program
         .command('new-fork')
         .description('Creates a new tenderly fork')
-        .action(async () => {
+        .option('-b, --bots <botAddr...>', 'bot addresses', [])
+        .action(async (options) => {
             const forkId = await createFork();
 
             console.log(`Fork id: ${forkId}   |   Rpc url https://rpc.tenderly.co/fork/${forkId}`);
 
             setEnv('FORK_ID', forkId);
+
+            if (options.bots.length > 0) {
+                // setting this so we can do topUp and addBotCaller from this script
+                process.env.FORK_ID = forkId;
+                for (let i = 0; i < options.bots.length; i++) {
+                    const botAddr = options.bots[i];
+                    // eslint-disable-next-line no-await-in-loop
+                    await topUp(botAddr);
+                    // eslint-disable-next-line no-await-in-loop
+                    await addBotCaller(botAddr, REGISTRY_ADDR, true);
+                }
+            }
 
             process.exit(0);
         });
