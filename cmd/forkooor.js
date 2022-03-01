@@ -117,6 +117,8 @@ const supplyInSS = async (protocol, daiAmount, sender) => {
         console.log('Buying dai failed');
     }
 
+    const bal = await balanceOf(DAI_ADDR, senderAcc.address);
+    console.log(`Users balance ${bal.toString()}`);
     const daiAmountWei = hre.ethers.utils.parseUnits(daiAmount.toString(), 18);
 
     await approve(DAI_ADDR, proxy.address, senderAcc);
@@ -214,14 +216,17 @@ const updateSmartSavingsStrategySub = async (subId, vaultId, minRatio, targetRat
     const subStorageAddr = await getAddrFromRegistry('SubStorage', REGISTRY_ADDR);
     const subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
 
+    const ratioUnderWei = hre.ethers.utils.parseUnits(minRatio, '16');
+    const targetRatioWei = hre.ethers.utils.parseUnits(targetRatio, '16');
+
     const triggerData = await createMcdTrigger(
         vaultId.toString(),
-        minRatio.toString(),
+        ratioUnderWei.toString(),
         RATIO_STATE_UNDER,
     );
 
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
-    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatioWei.toString()]);
 
     const strategySub = [vaultIdEncoded, targetRatioEncoded];
 
