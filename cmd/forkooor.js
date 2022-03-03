@@ -25,7 +25,6 @@ const {
     approve,
     depositToWeth,
     balanceOf,
-    MCD_MANAGER_ADDR,
     WETH_ADDRESS,
     UNISWAP_WRAPPER,
     DAI_ADDR,
@@ -37,6 +36,7 @@ const {
     getVaultsForUser,
     getRatio,
     getVaultInfo,
+    MCD_MANAGER_ADDR,
 } = require('../test/utils-mcd');
 
 const {
