@@ -235,8 +235,10 @@ const updateSmartSavingsStrategySub = async (protocol, subId, vaultId, minRatio,
 
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatioWei.toString()]);
+    const daiAddrEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const mcdManagerAddrEncoded = abiCoder.encode(['address'], [MCD_MANAGER_ADDR]);
 
-    const strategySub = [vaultIdEncoded, targetRatioEncoded];
+    const strategySub = [vaultIdEncoded, targetRatioEncoded, daiAddrEncoded, mcdManagerAddrEncoded];
 
     const isBundle = true;
     const updatedSubData = [bundleId, isBundle, [triggerData], strategySub];
