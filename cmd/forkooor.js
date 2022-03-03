@@ -196,8 +196,16 @@ const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio,
     console.log(`Subscribed to ${protocol} bundle with sub id #${subId}`);
 };
 
-const updateSmartSavingsStrategySub = async (subId, vaultId, minRatio, targetRatio, sender) => {
+// eslint-disable-next-line max-len
+const updateSmartSavingsStrategySub = async (protocol, subId, vaultId, minRatio, targetRatio, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
+
+    let bundleId = 0;
+    if (protocol === 'mstable') {
+        bundleId = 1;
+    } else if (protocol === 'rari') {
+        bundleId = 2;
+    }
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
@@ -226,7 +234,7 @@ const updateSmartSavingsStrategySub = async (subId, vaultId, minRatio, targetRat
     const strategySub = [vaultIdEncoded, targetRatioEncoded];
 
     const isBundle = true;
-    const updatedSubData = [subId, isBundle, [triggerData], strategySub];
+    const updatedSubData = [bundleId, isBundle, [triggerData], strategySub];
 
     const hashToSet = getSubHash(updatedSubData);
 
@@ -608,10 +616,11 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
         });
 
     program
-        .command('update-ss <subId> <vaultId> <minRatio> <targetRatio> [senderAddr]')
+        .command('update-ss <protocol> <subId> <vaultId> <minRatio> <targetRatio> [senderAddr]')
         .description('Updates to a Smart Savings strategy')
-        .action(async (subId, vaultId, minRatio, targetRatio, senderAddr) => {
-            await updateSmartSavingsStrategySub(subId, vaultId, minRatio, targetRatio, senderAddr);
+        .action(async (protocol, subId, vaultId, minRatio, targetRatio, senderAddr) => {
+            // eslint-disable-next-line max-len
+            await updateSmartSavingsStrategySub(protocol, subId, vaultId, minRatio, targetRatio, senderAddr);
             process.exit(0);
         });
 

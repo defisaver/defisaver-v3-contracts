@@ -5,17 +5,23 @@ const {
     redeploy,
     impersonateAccount,
     stopImpersonatingAccount,
+    getAddrFromRegistry,
     OWNER_ACC,
+    openStrategyAndBundleStorage,
 } = require('../utils');
 
 describe('Bundle Storage', () => {
     let bundleStorage; let strategyStorage; let owner; let bundleStorageFromOwner; let senderAcc;
 
     before(async () => {
-        strategyStorage = await redeploy('StrategyStorage');
+        const strategyStorageAddr = getAddrFromRegistry('StrategyStorage');
+        strategyStorage = await hre.ethers.getContractAt('StrategyStorage', strategyStorageAddr);
+
         bundleStorage = await redeploy('BundleStorage');
 
         senderAcc = (await hre.ethers.getSigners())[0];
+
+        await openStrategyAndBundleStorage();
 
         // create some dummy strategies
         await strategyStorage.createStrategy('TestStrategy', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
@@ -66,10 +72,7 @@ describe('Bundle Storage', () => {
     it('...should fail to registry a bundle because triggerIds are not the same', async () => {
         try {
             // set permission to open to test trigger validation
-            await impersonateAccount(OWNER_ACC);
-            bundleStorageFromOwner = bundleStorage.connect(owner);
-            await bundleStorageFromOwner.changeEditPermission(true);
-            await stopImpersonatingAccount(OWNER_ACC);
+            await openStrategyAndBundleStorage();
 
             await bundleStorage.createBundle([3, 4]);
             expect(true).to.be.equal(false);
