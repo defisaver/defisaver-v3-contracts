@@ -117,6 +117,8 @@ const supplyInSS = async (protocol, daiAmount, sender) => {
         console.log('Buying dai failed');
     }
 
+    const bal = await balanceOf(DAI_ADDR, senderAcc.address);
+    console.log(`Users balance ${bal.toString()}`);
     const daiAmountWei = hre.ethers.utils.parseUnits(daiAmount.toString(), 18);
 
     await approve(DAI_ADDR, proxy.address, senderAcc);
@@ -222,14 +224,17 @@ const updateSmartSavingsStrategySub = async (protocol, subId, vaultId, minRatio,
     const subStorageAddr = await getAddrFromRegistry('SubStorage', REGISTRY_ADDR);
     const subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
 
+    const ratioUnderWei = hre.ethers.utils.parseUnits(minRatio, '16');
+    const targetRatioWei = hre.ethers.utils.parseUnits(targetRatio, '16');
+
     const triggerData = await createMcdTrigger(
         vaultId.toString(),
-        minRatio.toString(),
+        ratioUnderWei.toString(),
         RATIO_STATE_UNDER,
     );
 
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
-    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatioWei.toString()]);
 
     const strategySub = [vaultIdEncoded, targetRatioEncoded];
 
@@ -564,12 +569,25 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
     program
         .command('new-fork')
         .description('Creates a new tenderly fork')
-        .action(async () => {
+        .option('-b, --bots <botAddr...>', 'bot addresses', [])
+        .action(async (options) => {
             const forkId = await createFork();
 
             console.log(`Fork id: ${forkId}   |   Rpc url https://rpc.tenderly.co/fork/${forkId}`);
 
             setEnv('FORK_ID', forkId);
+
+            if (options.bots.length > 0) {
+                // setting this so we can do topUp and addBotCaller from this script
+                process.env.FORK_ID = forkId;
+                for (let i = 0; i < options.bots.length; i++) {
+                    const botAddr = options.bots[i];
+                    // eslint-disable-next-line no-await-in-loop
+                    await topUp(botAddr);
+                    // eslint-disable-next-line no-await-in-loop
+                    await addBotCaller(botAddr, REGISTRY_ADDR, true);
+                }
+            }
 
             process.exit(0);
         });
