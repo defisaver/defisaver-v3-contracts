@@ -6,21 +6,27 @@ const {
     redeploy,
     fetchAmountinUSDPrice,
     approve,
-    YEARN_REGISTRY_ADDRESS,
+    redeployCore,
     balanceOf,
-    DAI_ADDR,
     setBalance,
     depositToWeth,
-    WETH_ADDRESS,
     getAddrFromRegistry,
+    openStrategyAndBundleStorage,
+    YEARN_REGISTRY_ADDRESS,
+    WETH_ADDRESS,
+    DAI_ADDR,
 } = require('../utils');
 
 const {
+    createStrategy,
+    createBundle,
     addBotCaller,
     setMCDPriceVerifier,
 } = require('../utils-strategies');
 
 const { getRatio } = require('../utils-mcd');
+
+const { createYearnRepayStrategy, createYearnRepayStrategyWithExchange } = require('../strategies');
 
 const { callMcdRepayFromYearnStrategy, callMcdRepayFromYearnWithExchangeStrategy } = require('../strategy-calls');
 const { subRepayFromSavingsStrategy } = require('../strategy-subs');
@@ -44,11 +50,10 @@ describe('Mcd-Repay-Yearn-Strategy', function () {
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
+        strategyExecutor = await redeployCore();
 
         mcdRatioTriggerAddr = getAddrFromRegistry('McdRatioTrigger');
         mcdView = await redeploy('McdView');
-        const strategyExecutorAddr = getAddrFromRegistry('StrategyExecutor');
-        strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', strategyExecutorAddr);
 
         await addBotCaller(botAcc.address);
 
@@ -59,6 +64,16 @@ describe('Mcd-Repay-Yearn-Strategy', function () {
     });
 
     it('... should sub the user to a repay bundle ', async () => {
+        const repayStrategyEncoded = createYearnRepayStrategy();
+        const flRepayStrategyEncoded = createYearnRepayStrategyWithExchange();
+
+        await openStrategyAndBundleStorage();
+
+        const strategyId1 = await createStrategy(proxy, ...repayStrategyEncoded, true);
+        const strategyId2 = await createStrategy(proxy, ...flRepayStrategyEncoded, true);
+
+        const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+
         // create vault
         vaultId = await openVault(
             proxy,
@@ -100,9 +115,8 @@ describe('Mcd-Repay-Yearn-Strategy', function () {
         const ratioUnder = hre.ethers.utils.parseUnits('3', '18');
         const targetRatio = hre.ethers.utils.parseUnits('3.2', '18');
 
-        const bundleId = 0;
         ({ subId, strategySub } = await subRepayFromSavingsStrategy(
-            proxy, bundleId, vaultId, ratioUnder, targetRatio, true, bundleId,
+            proxy, bundleId, vaultId, ratioUnder, targetRatio, true,
         ));
     });
 

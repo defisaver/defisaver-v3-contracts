@@ -6,9 +6,10 @@ const {
     redeploy,
     fetchAmountinUSDPrice,
     openStrategyAndBundleStorage,
-    Float2BN,
+    redeployCore,
     depositToWeth,
     send,
+    Float2BN,
     WETH_ADDRESS,
 } = require('../utils');
 
@@ -45,19 +46,12 @@ describe('Liquity-Repay-Bundle', function () {
         proxyAddr = proxy.address;
         botAcc = (await hre.ethers.getSigners())[1];
 
+        strategyExecutor = await redeployCore();
+
         balancerFL = await redeploy('FLBalancer');
 
-        await redeploy('BotAuth');
-        await redeploy('ProxyAuth');
         await redeploy('DFSSell');
-        await redeploy('StrategyStorage');
-        await redeploy('BundleStorage');
-        await redeploy('SubStorage');
-        await redeploy('SubProxy');
-        await redeploy('StrategyProxy');
-        await redeploy('RecipeExecutor');
         await redeploy('GasFeeTaker');
-        strategyExecutor = await redeploy('StrategyExecutor');
 
         liquityView = await redeploy('LiquityView');
         await redeploy('LiquityOpen');

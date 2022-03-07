@@ -8,12 +8,13 @@ const {
     redeploy,
     fetchAmountinUSDPrice,
     getAddrFromRegistry,
-    WETH_ADDRESS,
-    ETH_ADDR,
+    redeployCore,
     getChainLinkPrice,
-    DAI_ADDR,
     balanceOf,
     openStrategyAndBundleStorage,
+    WETH_ADDRESS,
+    ETH_ADDR,
+    DAI_ADDR,
 } = require('../utils');
 
 const { createStrategy, addBotCaller } = require('../utils-strategies');
@@ -42,13 +43,14 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
+        strategyExecutor = await redeployCore();
+
         await redeploy('SendToken');
         await redeploy('McdRatioTrigger');
         await redeploy('DFSSell');
         await redeploy('McdView');
         await redeploy('GasFeeTaker');
         await redeploy('McdRatioCheck');
-        strategyExecutor = await redeploy('StrategyExecutor');
 
         const subStorageAddr = getAddrFromRegistry('SubStorage');
         subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);

@@ -6,10 +6,11 @@ const {
     redeploy,
     fetchAmountinUSDPrice,
     openStrategyAndBundleStorage,
-    Float2BN,
     depositToWeth,
+    redeployCore,
     send,
     WETH_ADDRESS,
+    Float2BN,
 } = require('../utils');
 
 const { createStrategy, addBotCaller, createBundle } = require('../utils-strategies.js');
@@ -37,8 +38,8 @@ describe('Reflexer-Repay-Bundle', function () {
     let strategySub;
     let safeId;
 
-    const collAmount = Float2BN(fetchAmountinUSDPrice('WETH', '30000'));
-    const debtAmount = Float2BN(fetchAmountinUSDPrice('RAI', '12000'));
+    const collAmount = Float2BN(fetchAmountinUSDPrice('WETH', '30000').toString());
+    const debtAmount = Float2BN(fetchAmountinUSDPrice('RAI', '12000').toString());
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -48,9 +49,10 @@ describe('Reflexer-Repay-Bundle', function () {
 
         balancerFL = await redeploy('FLBalancer');
 
+        strategyExecutor = await redeployCore();
+
         await redeploy('DFSSell');
         await redeploy('GasFeeTaker');
-        strategyExecutor = await redeploy('StrategyExecutor');
 
         await redeploy('ReflexerOpen');
         await redeploy('ReflexerSupply');
@@ -66,6 +68,7 @@ describe('Reflexer-Repay-Bundle', function () {
 
         await reflexerOpen(proxy, ADAPTER_ADDRESS);
         safeId = await lastSafeID(proxy.address);
+
         await reflexerSupply(proxy, safeId, collAmount, ADAPTER_ADDRESS, proxyAddr);
         await reflexerGenerate(proxy, safeId, debtAmount, proxyAddr);
     });
@@ -90,7 +93,7 @@ describe('Reflexer-Repay-Bundle', function () {
 
     it('... should trigger a Reflexer Repay strategy', async () => {
         const ratioBefore = await getRatio(safeId);
-        const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', '1000'));
+        const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', '1000').toString());
 
         // eslint-disable-next-line max-len
         await callReflexerRepayStrategy(botAcc, strategyExecutor, subId, strategySub, repayAmount);
@@ -106,7 +109,7 @@ describe('Reflexer-Repay-Bundle', function () {
 
     it('... should trigger a Reflexer FL Repay strategy', async () => {
         const ratioBefore = await getRatio(safeId);
-        const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', '1000'));
+        const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', '1000').toString());
 
         // eslint-disable-next-line max-len
         await callReflexerFLRepayStrategy(botAcc, strategyExecutor, subId, strategySub, repayAmount, balancerFL.address);

@@ -5,11 +5,12 @@ const {
     getProxy,
     redeploy,
     fetchAmountinUSDPrice,
-    Float2BN,
+    redeployCore,
     depositToWeth,
     send,
-    WETH_ADDRESS,
     openStrategyAndBundleStorage,
+    WETH_ADDRESS,
+    Float2BN,
 } = require('../utils');
 
 const { createStrategy, addBotCaller, createBundle } = require('../utils-strategies.js');
@@ -45,11 +46,12 @@ describe('Reflexer-Boost-Bundle', function () {
         proxyAddr = proxy.address;
         botAcc = (await hre.ethers.getSigners())[1];
 
+        strategyExecutor = await redeployCore();
+
         aaveFL = await redeploy('FLAaveV2');
 
         await redeploy('DFSSell');
         await redeploy('GasFeeTaker');
-        strategyExecutor = await redeploy('StrategyExecutor');
 
         await redeploy('ReflexerOpen');
         await redeploy('ReflexerSupply');

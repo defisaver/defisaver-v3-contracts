@@ -73,55 +73,55 @@ describe('Liquity-Boost-Bundle', function () {
 
     it('... should make a Liquity Boost bundle and subscribe', async () => {
         const liquityBoostStrategy = createLiquityBoostStrategy();
-        const liquityFLBoostStrategy = createLiquityFLBoostStrategy();
+        // const liquityFLBoostStrategy = createLiquityFLBoostStrategy();
 
-        await openStrategyAndBundleStorage();
+        // await openStrategyAndBundleStorage();
 
-        const strategyId1 = await createStrategy(proxy, ...liquityBoostStrategy, true);
-        const strategyId2 = await createStrategy(proxy, ...liquityFLBoostStrategy, true);
+        // const strategyId1 = await createStrategy(proxy, ...liquityBoostStrategy, true);
+        // const strategyId2 = await createStrategy(proxy, ...liquityFLBoostStrategy, true);
 
-        const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+        // const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
 
-        const ratioOver = Float2BN('1.8');
-        const targetRatio = Float2BN('1.5');
+        // const ratioOver = Float2BN('1.8');
+        // const targetRatio = Float2BN('1.5');
 
-        console.log(bundleId);
+        // console.log(bundleId);
 
-        // eslint-disable-next-line max-len
-        ({ subId, strategySub } = await subLiquityBoostStrategy(proxy, maxFeePercentage, ratioOver, targetRatio, bundleId));
+        // // eslint-disable-next-line max-len
+        // ({ subId, strategySub } = await subLiquityBoostStrategy(proxy, maxFeePercentage, ratioOver, targetRatio, bundleId));
     });
 
-    it('... should trigger a Liquity Boost strategy', async () => {
-        const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
+    // it('... should trigger a Liquity Boost strategy', async () => {
+    //     const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
 
-        console.log(ratioBefore.toString());
-        const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', '5000'));
+    //     console.log(ratioBefore.toString());
+    //     const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', '5000'));
 
-        // eslint-disable-next-line max-len
-        await callLiquityBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr);
+    //     // eslint-disable-next-line max-len
+    //     await callLiquityBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr);
 
-        const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
+    //     const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 
-        console.log(
-            `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
-        );
+    //     console.log(
+    //         `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+    //     );
 
-        expect(ratioBefore).to.be.gt(ratioAfter);
-    });
+    //     expect(ratioBefore).to.be.gt(ratioAfter);
+    // });
 
-    it('... should trigger a Liquity FL Boost strategy', async () => {
-        const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
-        const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', '5000'));
+    // it('... should trigger a Liquity FL Boost strategy', async () => {
+    //     const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
+    //     const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', '5000'));
 
-        // eslint-disable-next-line max-len
-        await callLiquityFLBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr, balancerFL.address);
+    //     // eslint-disable-next-line max-len
+    //     await callLiquityFLBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr, balancerFL.address);
 
-        const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
+    //     const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 
-        console.log(
-            `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
-        );
+    //     console.log(
+    //         `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+    //     );
 
-        expect(ratioBefore).to.be.gt(ratioAfter);
-    });
+    //     expect(ratioBefore).to.be.gt(ratioAfter);
+    // });
 });

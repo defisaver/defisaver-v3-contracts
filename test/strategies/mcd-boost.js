@@ -8,6 +8,7 @@ const {
     redeploy,
     fetchAmountinUSDPrice,
     openStrategyAndBundleStorage,
+    redeployCore,
 } = require('../utils');
 
 const { createBundle, createStrategy, addBotCaller } = require('../utils-strategies.js');
@@ -40,6 +41,8 @@ describe('Mcd-Boost-Strategy', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
+        strategyExecutor = await redeployCore();
+
         await redeploy('McdRatioTrigger');
         await redeploy('McdWithdraw');
         await redeploy('DFSSell');
@@ -48,7 +51,6 @@ describe('Mcd-Boost-Strategy', function () {
 
         await redeploy('GasFeeTaker');
         await redeploy('McdRatioCheck');
-        strategyExecutor = await redeploy('StrategyExecutor');
 
         flDyDx = await redeploy('FLDyDx');
         await redeploy('McdSupply');

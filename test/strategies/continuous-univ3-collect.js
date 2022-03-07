@@ -9,6 +9,7 @@ const {
     fetchAmountinUSDPrice,
     openStrategyAndBundleStorage,
     getAddrFromRegistry,
+    redeployCore,
     UNIV3POSITIONMANAGER_ADDR,
     Float2BN,
 } = require('../utils');
@@ -47,6 +48,8 @@ describe('Uni-v3-range-order strategy', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
+        strategyExecutor = await redeployCore();
+
         await redeploy('TimestampTrigger');
         await redeploy('GasPriceTrigger');
         await redeploy('DFSSell');
@@ -57,9 +60,6 @@ describe('Uni-v3-range-order strategy', function () {
 
         const subStorageAddr = getAddrFromRegistry('SubStorage');
         subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
-
-        const strategyExecutorAddr = getAddrFromRegistry('StrategyExecutor');
-        strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', strategyExecutorAddr);
 
         positionManager = await hre.ethers.getContractAt('IUniswapV3NonfungiblePositionManager', UNIV3POSITIONMANAGER_ADDR);
         strategyTriggerView = await redeploy('StrategyTriggerView');
@@ -85,7 +85,7 @@ describe('Uni-v3-range-order strategy', function () {
         const strategyData = createContinuousUniV3CollectStrategy();
         await openStrategyAndBundleStorage();
 
-        await createStrategy(proxy, ...strategyData, true);
+        const strategyId = await createStrategy(proxy, ...strategyData, true);
         // Created strategy with three slots for user input when they subscribe
         // One trigger and recipe consisting of one action
 
@@ -97,21 +97,12 @@ describe('Uni-v3-range-order strategy', function () {
         const interval = '4';
 
         ({ subId, strategySub } = await subUniContinuousCollectStrategy(
-            proxy, tokenId, senderAcc.address, timestamp, maxGasPrice, interval,
+            proxy, strategyId, tokenId, senderAcc.address, timestamp, maxGasPrice, interval,
         ));
-        // user subscribes to strategy and fills three slots
-        const subInfo = await subStorage.getSub(subId);
-        console.log(subInfo);
     });
 
     it('... should trigger and execute uniswap v3 collect strategy', async () => {
         const abiCoder = hre.ethers.utils.defaultAbiCoder;
-        const triggerCallData = [];
-        // triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
-        // triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
-        // console.log(await strategyTriggerView.callStatic.checkTriggers(
-        //     strategySub, triggerCallData,
-        // ));
         await callUniV3CollectStrategy(
             botAcc,
             strategyExecutor,
@@ -121,10 +112,17 @@ describe('Uni-v3-range-order strategy', function () {
             subStorage.address,
             '1630056291',
         );
-        // const eventFilter = subStorage.filters.UpdateData(Float2BN(subId));
-        // const eventArray = await subStorage.queryFilter(eventFilter);
-        // const event = eventArray[eventArray.length - 1];
-        // strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], event.data)[0];
+
+        const events = (await subStorage.queryFilter({
+            address: subStorage.address,
+            topics: [
+                hre.ethers.utils.id('UpdateData(uint256,bytes32,(uint64,bool,bytes[],bytes32[]))'),
+                hre.ethers.utils.hexZeroPad(hre.ethers.utils.hexlify(parseInt(subId, 16)), 32),
+            ],
+        }));
+
+        const lastEvent = events.at(-1);
+        strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], lastEvent.data)[0];
     });
     it('... should trigger and execute uniswap v3 collect strategy again', async () => {
         const abiCoder = hre.ethers.utils.defaultAbiCoder;
@@ -144,21 +142,19 @@ describe('Uni-v3-range-order strategy', function () {
             '1850056291',
         );
 
-        const eventFilter = subStorage.filters.UpdateData(Float2BN(subId));
-        const eventArray = await subStorage.queryFilter(eventFilter);
-        const event = eventArray[eventArray.length - 1];
+        const events = (await subStorage.queryFilter({
+            address: subStorage.address,
+            topics: [
+                hre.ethers.utils.id('UpdateData(uint256,bytes32,(uint64,bool,bytes[],bytes32[]))'),
+                hre.ethers.utils.hexZeroPad(hre.ethers.utils.hexlify(parseInt(subId, 16)), 32),
+            ],
+        }));
 
-        strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], event.data)[0];
+        const lastEvent = events.at(-1);
+        strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], lastEvent.data)[0];
     });
-    it('... should fail to trigger and execute uniswap v3 collect strategy', async () => {
-        const abiCoder = hre.ethers.utils.defaultAbiCoder;
-        const triggerCallData = [];
-        triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
-        triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
-        console.log(await strategyTriggerView.callStatic.checkTriggers(
-            strategySub, 0, triggerCallData,
-        ));
 
+    it('... should fail to trigger and execute uniswap v3 collect strategy', async () => {
         try {
             await callUniV3CollectStrategy(
                 botAcc,
@@ -170,7 +166,6 @@ describe('Uni-v3-range-order strategy', function () {
                 '1850056291',
             );
         } catch (err) {
-            console.log(err);
             expect(err.toString()).to.have.string('reverted');
         }
     });

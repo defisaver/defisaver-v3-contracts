@@ -10,6 +10,7 @@ const {
     timeTravel,
     openStrategyAndBundleStorage,
     getAddrFromRegistry,
+    redeployCore,
     WETH_ADDRESS,
     DAI_ADDR,
 } = require('../utils');
@@ -44,6 +45,8 @@ describe('DCA Strategy', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
+        strategyExecutor = await redeployCore();
+
         await redeploy('GasFeeTaker');
         await redeploy('DFSSell');
         await redeploy('TimestampTrigger');
@@ -51,9 +54,6 @@ describe('DCA Strategy', function () {
 
         subStorageAddr = getAddrFromRegistry('SubStorage');
         subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
-
-        const strategyExecutorAddr = getAddrFromRegistry('StrategyExecutor');
-        strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', strategyExecutorAddr);
 
         await addBotCaller(botAcc.address);
 

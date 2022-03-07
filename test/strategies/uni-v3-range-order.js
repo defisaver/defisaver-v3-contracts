@@ -12,6 +12,7 @@ const {
     DAI_ADDR,
     getAddrFromRegistry,
     openStrategyAndBundleStorage,
+    redeployCore,
 } = require('../utils');
 
 const { createStrategy, addBotCaller } = require('../utils-strategies');
@@ -47,6 +48,8 @@ describe('Uni-v3-range-order strat', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
+        strategyExecutor = await redeployCore();
+
         await redeploy('UniV3CurrentTickTrigger');
         await redeploy('DFSSell');
 
@@ -57,7 +60,6 @@ describe('Uni-v3-range-order strat', function () {
         await redeploy('UniMintV3');
         await redeploy('UniWithdrawV3');
 
-        strategyExecutor = await redeploy('StrategyExecutor');
         positionManager = await hre.ethers.getContractAt('IUniswapV3NonfungiblePositionManager', UNIV3POSITIONMANAGER_ADDR);
 
         await addBotCaller(botAcc.address);

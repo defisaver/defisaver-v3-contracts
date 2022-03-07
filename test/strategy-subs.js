@@ -23,8 +23,7 @@ const { MCD_MANAGER_ADDR } = require('./utils-mcd');
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
 // eslint-disable-next-line max-len
-const subUniContinuousCollectStrategy = async (proxy, tokenId, recipient, timestamp, maxGasPrice, interval) => {
-    const bundleId = 0;
+const subUniContinuousCollectStrategy = async (proxy, strategyId, tokenId, recipient, timestamp, maxGasPrice, interval) => {
     const isBundle = false;
 
     const tokenIdEncoded = abiCoder.encode(['uint256'], [tokenId.toString()]);
@@ -32,7 +31,7 @@ const subUniContinuousCollectStrategy = async (proxy, tokenId, recipient, timest
 
     const timestampTriggerData = await createTimestampTrigger(timestamp, interval);
     const gasTriggerData = await createGasPriceTrigger(maxGasPrice);
-    const strategySub = [bundleId, isBundle, [timestampTriggerData, gasTriggerData], [tokenIdEncoded, recipientEncoded]];
+    const strategySub = [strategyId, isBundle, [timestampTriggerData, gasTriggerData], [tokenIdEncoded, recipientEncoded]];
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };

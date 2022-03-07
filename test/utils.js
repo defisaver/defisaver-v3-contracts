@@ -6,10 +6,17 @@ const storageSlots = require('./storageSlots.json');
 const { deployContract, deployAsOwner } = require('../scripts/utils/deployer');
 const { changeConstantInFiles } = require('../scripts/utils/utils');
 
+const strategyStorageBytecode = require('../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
+const subStorageBytecode = require('../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
+const bundleStorageBytecode = require('../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
+const recipeExecutorBytecode = require('../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
+const proxyAuthBytecode = require('../artifacts/contracts/core/strategy/ProxyAuth.sol/ProxyAuth.json').deployedBytecode;
+
 const addrs = {
     mainnet: {
         PROXY_REGISTRY: '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4',
         REGISTRY_ADDR: '0x287778F121F134C66212FB16c9b53eC991D32f5b',
+        PROXY_AUTH_ADDR: '0x149667b6FAe2c63D1B4317C716b0D0e4d3E2bD70',
         OWNER_ACC: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
         WETH_ADDRESS: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     },
@@ -148,6 +155,7 @@ const coinGeckoHelper = {
     TORN: 'tornado-cash',
     mUSD: 'musd',
     imUSD: 'imusd',
+    RAI: 'rai',
 };
 
 const timeTravel = async (timeIncrease) => {
@@ -326,27 +334,6 @@ const getAddrFromRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR)
     const registryInstance = await hre.ethers.getContractFactory('DFSRegistry');
     const registry = await registryInstance.attach(regAddr);
 
-    // TODO: remove this after change has passed
-    if (name === 'StrategyProxy') {
-        return '0x0822902D30CC9c77404e6eB140dC1E98aF5b559A';
-    } if (name === 'StrategyStorage') {
-        return '0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933';
-    } if (name === 'BundleStorage') {
-        return '0x223c6aDE533851Df03219f6E3D8B763Bd47f84cf';
-    } if (name === 'SubStorage') {
-        return '0x1612fc28Ee0AB882eC99842Cde0Fc77ff0691e90';
-    } if (name === 'SubProxy') {
-        return '0x0Ae88A825380Bf312Da6Aa5fD7A14E410E4678ae';
-    } if (name === 'ProxyAuth') {
-        return '0x149667b6FAe2c63D1B4317C716b0D0e4d3E2bD70';
-    } if (name === 'RecipeExecutor') {
-        return '0x1D6DEdb49AF91A11B5C5F34954FD3E8cC4f03A86';
-    } if (name === 'StrategyExecutor') {
-        return '0x252025dF8680C275D0bA80D084e5967D8BD26caf';
-    } if (name === 'StrategyTriggerView') {
-        return '0x7e048c89D7e6adA900AE53daBA742e6CCCFC54f6';
-    }
-
     const addr = await registry.getAddr(
         getNameId(name),
     );
@@ -403,16 +390,16 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, existingAd
         c = { address: existingAddr };
     }
 
-    // Handle mStable diff. action instead of name
-    if (name === 'MStableDeposit') {
-        // eslint-disable-next-line no-param-reassign
-        name = 'MStableDepositNew';
-    }
+    // // Handle mStable diff. action instead of name
+    // if (name === 'MStableDeposit') {
+    //     // eslint-disable-next-line no-param-reassign
+    //     name = 'MStableDepositNew';
+    // }
 
-    if (name === 'MStableWithdraw') {
-        // eslint-disable-next-line no-param-reassign
-        name = 'MStableWithdrawNew';
-    }
+    // if (name === 'MStableWithdraw') {
+    //     // eslint-disable-next-line no-param-reassign
+    //     name = 'MStableWithdrawNew';
+    // }
 
     if (name === 'StrategyExecutor') {
         // eslint-disable-next-line no-param-reassign
@@ -445,6 +432,32 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, existingAd
         await stopImpersonatingAccount(getOwnerAddr());
     }
     return c;
+};
+
+const setCode = async (addr, code) => {
+    await hre.network.provider.send('hardhat_setCode', [addr, code]);
+};
+
+const redeployCore = async () => {
+    const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage', addrs[network].REGISTRY_ADDR);
+    await setCode(strategyStorageAddr, strategyStorageBytecode);
+
+    const subStorageAddr = await getAddrFromRegistry('SubStorage', addrs[network].REGISTRY_ADDR);
+    await setCode(subStorageAddr, subStorageBytecode);
+
+    const bundleStorageAddr = await getAddrFromRegistry('BundleStorage', addrs[network].REGISTRY_ADDR);
+    await setCode(bundleStorageAddr, bundleStorageBytecode);
+
+    const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor', addrs[network].REGISTRY_ADDR);
+    await setCode(recipeExecutorAddr, recipeExecutorBytecode);
+
+    await setCode(addrs[network].PROXY_AUTH_ADDR, proxyAuthBytecode);
+
+    await redeploy('SubProxy', addrs[network].REGISTRY_ADDR);
+    await redeploy('StrategyProxy', addrs[network].REGISTRY_ADDR);
+    const strategyExecutor = await redeploy('StrategyExecutor', addrs[network].REGISTRY_ADDR);
+
+    return strategyExecutor;
 };
 
 const send = async (tokenAddr, to, amount) => {
@@ -690,12 +703,9 @@ const openStrategyAndBundleStorage = async () => {
     const strategySubAddr = getAddrFromRegistry('StrategyStorage');
     const bundleSubAddr = getAddrFromRegistry('BundleStorage');
 
-    // TODO: This will change to OWNER_ADDR soon
-    const currOwnerAddr = '0x76720aC2574631530eC8163e4085d6F98513fb27';
+    const ownerSigner = await hre.ethers.provider.getSigner(getOwnerAddr());
 
-    const ownerSigner = await hre.ethers.provider.getSigner(currOwnerAddr);
-
-    await impersonateAccount(currOwnerAddr);
+    await impersonateAccount(getOwnerAddr());
 
     let strategyStorage = await hre.ethers.getContractAt('StrategyStorage', strategySubAddr);
     let bundleStorage = await hre.ethers.getContractAt('BundleStorage', bundleSubAddr);
@@ -706,7 +716,7 @@ const openStrategyAndBundleStorage = async () => {
     await strategyStorage.changeEditPermission(true);
     await bundleStorage.changeEditPermission(true);
 
-    await stopImpersonatingAccount(currOwnerAddr);
+    await stopImpersonatingAccount(getOwnerAddr());
 };
 
 module.exports = {
@@ -739,10 +749,11 @@ module.exports = {
     getProxyAuth,
     getAllowance,
     openStrategyAndBundleStorage,
-    BN2Float,
-    Float2BN,
+    redeployCore,
     getOwnerAddr,
     getWeth,
+    BN2Float,
+    Float2BN,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,

@@ -9,6 +9,7 @@ const {
     approve,
     balanceOf,
     openStrategyAndBundleStorage,
+    redeployCore,
     ETH_ADDR,
     WETH_ADDRESS,
     DAI_ADDR,
@@ -35,12 +36,12 @@ describe('Limit-Order-Strategy', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         botAcc = (await hre.ethers.getSigners())[1];
 
+        strategyExecutor = await redeployCore();
+
         await redeploy('GasFeeTaker');
         await redeploy('DFSSell');
         await redeploy('ChainLinkPriceTrigger');
         await redeploy('PullToken');
-
-        strategyExecutor = await redeploy('StrategyExecutor');
 
         await addBotCaller(botAcc.address);
 
