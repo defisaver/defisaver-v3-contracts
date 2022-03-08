@@ -89,78 +89,6 @@
             "18"
         ]
     },
-    "ren": {
-        "swapAddr": "0x93054188d876f558f4a66B2EF1d97d16eDf0895B",
-        "lpTokenAddr": "0x49849C98ae39Fff122806C06791Fa73784FB3675",
-        "depositAddr": null,
-        "gaugeAddr": "0xB1F2cdeC61db658F091671F5f199635aEF202CAC",
-        "stakingRewardsAddr": null,
-        "adapterAddr": "0x73aB2Bd10aD10F7174a1AD5AFAe3ce3D991C5047",
-        "coins": [
-            "0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D",
-            "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
-        ],
-        "decimals": [
-            "8",
-            "8"
-        ],
-        "underlyingCoins": [
-            "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
-        ],
-        "underlyingDecimals": [
-            "8"
-        ]
-    },
-    "sbtc": {
-        "swapAddr": "0x7fC77b5c7614E1533320Ea6DDc2Eb61fa00A9714",
-        "lpTokenAddr": "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3",
-        "depositAddr": null,
-        "gaugeAddr": "0x705350c4BcD35c9441419DdD5d2f097d7a55410F",
-        "stakingRewardsAddr": "0x13C1542A468319688B89E323fe9A3Be3A90EBb27",
-        "adapterAddr": "0xAEade605D01FE9a8e9C4B3AA0130A90d62167029",
-        "coins": [
-            "0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D",
-            "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
-            "0xfE18be6b3Bd88A2D2A7f928d00292E7a9963CfC6"
-        ],
-        "decimals": [
-            "8",
-            "8",
-            "18"
-        ],
-        "underlyingCoins": [
-            "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
-            "0xfE18be6b3Bd88A2D2A7f928d00292E7a9963CfC6"
-        ],
-        "underlyingDecimals": [
-            "8",
-            "18"
-        ]
-    },
-    "hbtc": {
-        "swapAddr": "0x4CA9b3063Ec5866A4B82E437059D2C43d1be596F",
-        "lpTokenAddr": "0xb19059ebb43466C323583928285a49f558E572Fd",
-        "depositAddr": null,
-        "gaugeAddr": "0x4c18E409Dc8619bFb6a1cB56D114C3f592E0aE79",
-        "stakingRewardsAddr": null,
-        "adapterAddr": null,
-        "coins": [
-            "0x0316EB71485b0Ab14103307bf65a021042c6d380",
-            "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
-        ],
-        "decimals": [
-            "18",
-            "8"
-        ],
-        "underlyingCoins": [
-            "0x0316EB71485b0Ab14103307bf65a021042c6d380",
-            "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
-        ],
-        "underlyingDecimals": [
-            "18",
-            "8"
-        ]
-    },
     "3pool": {
         "swapAddr": "0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7",
         "lpTokenAddr": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
@@ -184,34 +112,6 @@
             "0xdAC17F958D2ee523a2206206994597C13D831ec7"
         ],
         "underlyingDecimals": [
-            "18",
-            "6",
-            "6"
-        ]
-    },
-    "gusd": {
-        "swapAddr": "0x4f062658EaAF2C1ccf8C8e36D6824CDf41167956",
-        "lpTokenAddr": "0xD2967f45c4f384DEEa880F807Be904762a3DeA07",
-        "depositAddr": "0x64448B78561690B70E17CBE8029a3e5c1bB7136e",
-        "gaugeAddr": "0xC5cfaDA84E902aD92DD40194f0883ad49639b023",
-        "stakingRewardsAddr": null,
-        "adapterAddr": null,
-        "coins": [
-            "0x056Fd409E1d7A124BD7017459dFEa2F387b6d5Cd",
-            "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
-        ],
-        "decimals": [
-            "2",
-            "18"
-        ],
-        "underlyingCoins": [
-            "0x056Fd409E1d7A124BD7017459dFEa2F387b6d5Cd",
-            "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-            "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-            "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-        ],
-        "underlyingDecimals": [
-            "2",
             "18",
             "6",
             "6"
@@ -248,7 +148,7 @@
     "pbtc": {
         "swapAddr": "0x7F55DDe206dbAD629C080068923b36fe9D6bDBeF",
         "lpTokenAddr": "0xDE5331AC4B3630f94853Ff322B66407e0D6331E8",
-        "depositAddr": "0x11F419AdAbbFF8d595E7d5b223eee3863Bb3902C",
+        "depositAddr": null,
         "gaugeAddr": "0xd7d147c6Bb90A718c3De8C0568F9B560C79fa416",
         "stakingRewardsAddr": null,
         "adapterAddr": null,
@@ -276,7 +176,7 @@
     "bbtc": {
         "swapAddr": "0x071c661B4DeefB59E2a3DdB20Db036821eeE8F4b",
         "lpTokenAddr": "0x410e3E86ef427e30B9235497143881f717d93c2A",
-        "depositAddr": "0xC45b2EEe6e09cA176Ca3bB5f7eEe7C47bF93c756",
+        "depositAddr": null,
         "gaugeAddr": "0xdFc7AdFa664b08767b735dE28f9E84cd30492aeE",
         "stakingRewardsAddr": null,
         "adapterAddr": null,
@@ -377,35 +277,6 @@
             "18"
         ]
     },
-    "aave": {
-        "swapAddr": "0xDeBF20617708857ebe4F679508E7b7863a8A8EeE",
-        "lpTokenAddr": "0xFd2a8fA60Abd58Efe3EeE34dd494cD491dC14900",
-        "depositAddr": null,
-        "gaugeAddr": "0xd662908ADA2Ea1916B3318327A97eB18aD588b5d",
-        "stakingRewardsAddr": null,
-        "adapterAddr": null,
-        "useUnderlying": true,
-        "coins": [
-            "0x028171bCA77440897B824Ca71D1c56caC55b68A3",
-            "0xBcca60bB61934080951369a648Fb03DF4F96263C",
-            "0x3Ed3B47Dd13EC9a98b44e6204A523E766B225811"
-        ],
-        "decimals": [
-            "18",
-            "6",
-            "6"
-        ],
-        "underlyingCoins": [
-            "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-            "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-            "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-        ],
-        "underlyingDecimals": [
-            "18",
-            "6",
-            "6"
-        ]
-    },
     "steth": {
         "swapAddr": "0xDC24316b9AE028F1497c275EB9192a3Ea0f67022",
         "lpTokenAddr": "0x06325440D014e39736583c165C2963BA99fAf14E",
@@ -424,31 +295,6 @@
         "underlyingCoins": [
             "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
             "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"
-        ],
-        "underlyingDecimals": [
-            "18",
-            "18"
-        ]
-    },
-    "saave": {
-        "swapAddr": "0xEB16Ae0052ed37f479f7fe63849198Df1765a733",
-        "lpTokenAddr": "0x02d341CcB60fAaf662bC0554d13778015d1b285C",
-        "depositAddr": null,
-        "gaugeAddr": "0x462253b8F74B72304c145DB0e4Eebd326B22ca39",
-        "stakingRewardsAddr": null,
-        "adapterAddr": null,
-        "useUnderlying": true,
-        "coins": [
-            "0x028171bCA77440897B824Ca71D1c56caC55b68A3",
-            "0x6C5024Cd4F8A59110119C56f8933403A539555EB"
-        ],
-        "decimals": [
-            "18",
-            "18"
-        ],
-        "underlyingCoins": [
-            "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-            "0x57Ab1ec28D129707052df4dF418D58a2D46d5f51"
         ],
         "underlyingDecimals": [
             "18",
@@ -482,7 +328,7 @@
     "frax": {
         "swapAddr": "0xd632f22692FaC7611d2AA1C0D552930D43CAEd3B",
         "lpTokenAddr": "0xd632f22692FaC7611d2AA1C0D552930D43CAEd3B",
-        "depositAddr": "0xA79828DF1850E8a3A3064576f380D90aECDD3359",
+        "depositAddr": null,
         "gaugeAddr": "0x72e158d38dbd50a483501c24f792bdaaa3e7d55c",
         "stakingRewardsAddr": null,
         "adapterAddr": null,
@@ -510,7 +356,7 @@
     "lusd": {
         "swapAddr": "0xEd279fDD11cA84bEef15AF5D39BB4d4bEE23F0cA",
         "lpTokenAddr": "0xEd279fDD11cA84bEef15AF5D39BB4d4bEE23F0cA",
-        "depositAddr": "0xA79828DF1850E8a3A3064576f380D90aECDD3359",
+        "depositAddr": null,
         "gaugeAddr": "0x9b8519a9a00100720ccdc8a120fbed319ca47a14",
         "stakingRewardsAddr": null,
         "adapterAddr": null,
@@ -538,7 +384,7 @@
     "busdv2": {
         "swapAddr": "0x4807862AA8b2bF68830e4C8dc86D0e9A998e085a",
         "lpTokenAddr": "0x4807862AA8b2bF68830e4C8dc86D0e9A998e085a",
-        "depositAddr": "0xA79828DF1850E8a3A3064576f380D90aECDD3359",
+        "depositAddr": null,
         "gaugeAddr": "0xd4b22fedca85e684919955061fdf353b9d38389b",
         "stakingRewardsAddr": null,
         "adapterAddr": null,
@@ -560,98 +406,6 @@
             "18",
             "18",
             "6",
-            "6"
-        ]
-    },
-    "tricrypto": {
-        "swapAddr": "0x80466c64868E1ab14a1Ddf27A676C3fcBE638Fe5",
-        "lpTokenAddr": "0xcA3d75aC011BF5aD07a98d02f18225F9bD9A6BDF",
-        "depositAddr": "0x331aF2E331bd619DefAa5DAc6c038f53FCF9F785",
-        "gaugeAddr": "0x6955a55416a06839309018A8B0cB72c4DDC11f15",
-        "stakingRewardsAddr": null,
-        "adapterAddr": null,
-        "coins": [
-            "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-            "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
-            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-        ],
-        "decimals": [
-            "6",
-            "8",
-            "18"
-        ],
-        "underlyingCoins": [
-            "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-            "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
-            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-        ],
-        "underlyingDecimals": [
-            "6",
-            "8",
-            "18"
-        ]
-    },
-    "mim": {
-        "swapAddr": "0x5a6A4D54456819380173272A5E8E9B9904BdF41B",
-        "lpTokenAddr": "0x5a6A4D54456819380173272A5E8E9B9904BdF41B",
-        "depositAddr": "0xA79828DF1850E8a3A3064576f380D90aECDD3359",
-        "gaugeAddr": "0xd8b712d29381748dB89c36BCa0138d7c75866ddF",
-        "stakingRewardsAddr": null,
-        "adapterAddr": null,
-        "coins": [],
-        "decimals": [],
-        "underlyingCoins": [],
-        "underlyingDecimals": []
-    },
-    "tricrypto2": {
-        "swapAddr": "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46",
-        "lpTokenAddr": "0xc4AD29ba4B3c580e6D59105FFf484999997675Ff",
-        "depositAddr": "0x3993d34e7e99Abf6B6f367309975d1360222D446",
-        "gaugeAddr": "0xDeFd8FdD20e0f34115C7018CCfb655796F6B2168",
-        "stakingRewardsAddr": null,
-        "adapterAddr": null,
-        "coins": [
-            "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-            "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
-            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-        ],
-        "decimals": [
-            "6",
-            "8",
-            "18"
-        ],
-        "underlyingCoins": [
-            "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-            "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
-            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-        ],
-        "underlyingDecimals": [
-            "6",
-            "8",
-            "18"
-        ]
-    },
-    "eurt": {
-        "swapAddr": "0xfd5db7463a3ab53fd211b4af195c5bccc1a03890",
-        "lpTokenAddr": "0xfd5db7463a3ab53fd211b4af195c5bccc1a03890",
-        "depositAddr": null,
-        "gaugeAddr": "0xe8060Ad8971450E624d5289A10017dD30F5dA85F",
-        "stakingRewardsAddr": null,
-        "adapterAddr": null,
-        "coins": [
-            "0xC581b735A1688071A1746c968e0798D642EDE491",
-            "0xD71eCFF9342A5Ced620049e616c5035F1dB98620"
-        ],
-        "decimals": [
-            "18",
-            "6"
-        ],
-        "underlyingCoins": [
-            "0xC581b735A1688071A1746c968e0798D642EDE491",
-            "0xD71eCFF9342A5Ced620049e616c5035F1dB98620"
-        ],
-        "underlyingDecimals": [
-            "18",
             "6"
         ]
     }

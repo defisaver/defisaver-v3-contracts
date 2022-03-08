@@ -4,8 +4,22 @@ require('@nomiclabs/hardhat-waffle');
 require('@nomiclabs/hardhat-etherscan');
 require('@tenderly/hardhat-tenderly');
 require('@nomiclabs/hardhat-ethers');
+require('@tenderly/hardhat-tenderly');
 // require("hardhat-gas-reporter");
 require('hardhat-log-remover');
+
+const Dec = require('decimal.js');
+
+Dec.set({
+    precision: 50,
+    rounding: 4,
+    toExpNeg: -7,
+    toExpPos: 21,
+    maxE: 9e15,
+    minE: -9e15,
+    modulo: 1,
+    crypto: false,
+});
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -13,6 +27,7 @@ require('hardhat-log-remover');
 module.exports = {
     saveOnTenderly: true,
     defaultNetwork: 'fork',
+    lightTesting: true,
     networks: {
         local: {
             url: 'http://127.0.0.1:8545',

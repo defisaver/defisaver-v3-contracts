@@ -168,9 +168,15 @@
   dependencies:
     "chalk" "^4.0.0"
 
+<<<<<<< HEAD
 "@defisaver/sdk@github:DecenterApps/defisaver-sdk#feature/strategies":
   "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#6b506f3155a8f4380db7bc84b4eafb5555b15f6e"
   "version" "0.1.13"
+=======
+"@defisaver/sdk@github:DecenterApps/defisaver-sdk":
+  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#2a3b1bfc30e069af6f9d42b47779503c82f72892"
+  "version" "0.1.12"
+>>>>>>> main
   dependencies:
     "@defisaver/tokens" "^1.3.64"
     "@ethersproject/address" "^5.0.10"
@@ -270,6 +276,7 @@
     "patch-package" "^6.2.2"
     "postinstall-postinstall" "^2.1.0"
 
+<<<<<<< HEAD
 "@ethereumjs/block@^3.5.0", "@ethereumjs/block@^3.6.0", "@ethereumjs/block@^3.6.1":
   "integrity" "sha512-o5d/zpGl4SdVfdTfrsq9ZgYMXddc0ucKMiFW5OphBCX+ep4xzYnSjboFcZXT2V/tcSBr84VrKWWp21CGVb3DGw=="
   "resolved" "https://registry.npmjs.org/@ethereumjs/block/-/block-3.6.1.tgz"
@@ -281,6 +288,19 @@
     "merkle-patricia-tree" "^4.2.3"
 
 "@ethereumjs/blockchain@^5.5.0", "@ethereumjs/blockchain@^5.5.1":
+=======
+"@ethereumjs/block@^3.5.0", "@ethereumjs/block@^3.6.0":
+  "integrity" "sha512-dqLo1LtsLG+Oelu5S5tWUDG0pah3QUwV5TJZy2cm19BXDr4ka/S9XBSgao0i09gTcuPlovlHgcs6d7EZ37urjQ=="
+  "resolved" "https://registry.npmjs.org/@ethereumjs/block/-/block-3.6.0.tgz"
+  "version" "3.6.0"
+  dependencies:
+    "@ethereumjs/common" "^2.6.0"
+    "@ethereumjs/tx" "^3.4.0"
+    "ethereumjs-util" "^7.1.3"
+    "merkle-patricia-tree" "^4.2.2"
+
+"@ethereumjs/blockchain@^5.5.0":
+>>>>>>> main
   "integrity" "sha512-JS2jeKxl3tlaa5oXrZ8mGoVBCz6YqsGG350XVNtHAtNZXKk7pU3rH4xzF2ru42fksMMqzFLzKh9l4EQzmNWDqA=="
   "resolved" "https://registry.npmjs.org/@ethereumjs/blockchain/-/blockchain-5.5.1.tgz"
   "version" "5.5.1"
@@ -294,6 +314,7 @@
     "lru-cache" "^5.1.1"
     "semaphore-async-await" "^1.5.1"
 
+<<<<<<< HEAD
 "@ethereumjs/common@^2.6.0", "@ethereumjs/common@^2.6.1", "@ethereumjs/common@^2.6.2":
   "integrity" "sha512-vDwye5v0SVeuDky4MtKsu+ogkH2oFUV8pBKzH/eNBzT8oI91pKa8WyzDuYuxOQsgNgv5R34LfFDh2aaw3H4HbQ=="
   "resolved" "https://registry.npmjs.org/@ethereumjs/common/-/common-2.6.2.tgz"
@@ -301,6 +322,15 @@
   dependencies:
     "crc-32" "^1.2.0"
     "ethereumjs-util" "^7.1.4"
+=======
+"@ethereumjs/common@^2.6.0":
+  "integrity" "sha512-Cq2qS0FTu6O2VU1sgg+WyU9Ps0M6j/BEMHN+hRaECXCV/r0aI78u4N6p52QW/BDVhwWZpCdrvG8X7NJdzlpNUA=="
+  "resolved" "https://registry.npmjs.org/@ethereumjs/common/-/common-2.6.0.tgz"
+  "version" "2.6.0"
+  dependencies:
+    "crc-32" "^1.2.0"
+    "ethereumjs-util" "^7.1.3"
+>>>>>>> main
 
 "@ethereumjs/ethash@^1.1.0":
   "integrity" "sha512-/U7UOKW6BzpA+Vt+kISAoeDie1vAvY4Zy2KF5JJb+So7+1yKmJeJEHOGSnQIj330e9Zyl3L5Nae6VZyh2TJnAA=="
@@ -313,6 +343,7 @@
     "ethereumjs-util" "^7.1.1"
     "miller-rabin" "^4.0.0"
 
+<<<<<<< HEAD
 "@ethereumjs/tx@^3.4.0", "@ethereumjs/tx@^3.5.0":
   "integrity" "sha512-/+ZNbnJhQhXC83Xuvy6I9k4jT5sXiV0tMR9C+AzSSpcCV64+NB8dTE1m3x98RYMqb8+TLYWA+HML4F5lfXTlJw=="
   "resolved" "https://registry.npmjs.org/@ethereumjs/tx/-/tx-3.5.0.tgz"
@@ -337,6 +368,32 @@
     "functional-red-black-tree" "^1.0.1"
     "mcl-wasm" "^0.7.1"
     "merkle-patricia-tree" "^4.2.3"
+=======
+"@ethereumjs/tx@^3.4.0":
+  "integrity" "sha512-WWUwg1PdjHKZZxPPo274ZuPsJCWV3SqATrEKQP1n2DrVYVP1aZIYpo/mFaA0BDoE0tIQmBeimRCEA0Lgil+yYw=="
+  "resolved" "https://registry.npmjs.org/@ethereumjs/tx/-/tx-3.4.0.tgz"
+  "version" "3.4.0"
+  dependencies:
+    "@ethereumjs/common" "^2.6.0"
+    "ethereumjs-util" "^7.1.3"
+
+"@ethereumjs/vm@^5.6.0":
+  "integrity" "sha512-J2m/OgjjiGdWF2P9bj/4LnZQ1zRoZhY8mRNVw/N3tXliGI8ai1sI1mlDPkLpeUUM4vq54gH6n0ZlSpz8U/qlYQ=="
+  "resolved" "https://registry.npmjs.org/@ethereumjs/vm/-/vm-5.6.0.tgz"
+  "version" "5.6.0"
+  dependencies:
+    "@ethereumjs/block" "^3.6.0"
+    "@ethereumjs/blockchain" "^5.5.0"
+    "@ethereumjs/common" "^2.6.0"
+    "@ethereumjs/tx" "^3.4.0"
+    "async-eventemitter" "^0.2.4"
+    "core-js-pure" "^3.0.1"
+    "debug" "^2.2.0"
+    "ethereumjs-util" "^7.1.3"
+    "functional-red-black-tree" "^1.0.1"
+    "mcl-wasm" "^0.7.1"
+    "merkle-patricia-tree" "^4.2.2"
+>>>>>>> main
     "rustbn.js" "~0.2.0"
 
 "@ethersproject/abi@^5.0.0-beta.146", "@ethersproject/abi@^5.0.1", "@ethersproject/abi@^5.0.2", "@ethersproject/abi@^5.1.2", "@ethersproject/abi@^5.4.0", "@ethersproject/abi@5.4.1":
@@ -758,7 +815,7 @@
     "@nodelib/fs.scandir" "2.1.3"
     "fastq" "^1.6.0"
 
-"@nomiclabs/hardhat-ethers@^2.0.0":
+"@nomiclabs/hardhat-ethers@^2.0.0", "@nomiclabs/hardhat-ethers@^2.0.1":
   "integrity" "sha512-uTFHDhhvJ+UjfvvMeQxD3ZALuzuI3FXzTYT1Z5N3ebyZL5z4Ogwt55GB0R9tdKY0p5HhDhBjU/gsCjUEwIVoaw=="
   "resolved" "https://registry.npmjs.org/@nomiclabs/hardhat-ethers/-/hardhat-ethers-2.0.1.tgz"
   "version" "2.0.1"
@@ -893,6 +950,7 @@
   "resolved" "https://registry.npmjs.org/@sindresorhus/is/-/is-0.14.0.tgz"
   "version" "0.14.0"
 
+<<<<<<< HEAD
 "@solidity-parser/parser@^0.13.2":
   "integrity" "sha512-RwHnpRnfrnD2MSPveYoPh8nhofEvX7fgjHk1Oq+NNvCcLx4r1js91CO9o+F/F3fBzOCyvm8kKRTriFICX/odWw=="
   "resolved" "https://registry.npmjs.org/@solidity-parser/parser/-/parser-0.13.2.tgz"
@@ -904,6 +962,12 @@
   "integrity" "sha512-eLjj2L6AuQjBB6s/ibwCAc0DwrR5Ge+ys+wgWo+bviU7fV2nTMQhU63CGaDKXg9iTmMxwhkyoggdIR7ZGRfMgw=="
   "resolved" "https://registry.npmjs.org/@solidity-parser/parser/-/parser-0.14.1.tgz"
   "version" "0.14.1"
+=======
+"@solidity-parser/parser@^0.14.0":
+  "integrity" "sha512-cX0JJRcmPtNUJpzD2K7FdA7qQsTOk1UZnFx2k7qAg9ZRvuaH5NBe5IEdBMXGlmf2+FmjhqbygJ26H8l2SV7aKQ=="
+  "resolved" "https://registry.npmjs.org/@solidity-parser/parser/-/parser-0.14.0.tgz"
+  "version" "0.14.0"
+>>>>>>> main
   dependencies:
     "antlr4ts" "^0.5.0-alpha.4"
 
@@ -932,11 +996,13 @@
     "defer-to-connect" "^1.0.1"
 
 "@tenderly/hardhat-tenderly@^1.1.0-beta.2":
-  "integrity" "sha512-B1KU0e+17KKstFLgyN1jy6ynNTZoHaVCy+1Wkx7WFnMJTfXQZEijmIyw48dLjUKvbaKWvgP7dE3VSoQnfKwo8g=="
-  "resolved" "https://registry.npmjs.org/@tenderly/hardhat-tenderly/-/hardhat-tenderly-1.1.0-beta.4.tgz"
-  "version" "1.1.0-beta.4"
+  "integrity" "sha512-ppXvp2/CGI/1iAGZvCpHk7vBmlvUJerMcVtiXtCRZtXFO1vDs2SJ+RKaW5bI+eFFkLWx75aZVc/lxTx2vIzPsg=="
+  "resolved" "https://registry.npmjs.org/@tenderly/hardhat-tenderly/-/hardhat-tenderly-1.1.0-beta.8.tgz"
+  "version" "1.1.0-beta.8"
   dependencies:
-    "axios" "^0.20.0"
+    "@nomiclabs/hardhat-ethers" "^2.0.1"
+    "axios" "^0.21.1"
+    "ethers" "^5.0.24"
     "fs-extra" "^9.0.1"
     "js-yaml" "^3.14.0"
 
@@ -1401,10 +1467,17 @@
   "resolved" "https://registry.npmjs.org/antlr4ts/-/antlr4ts-0.5.0-alpha.4.tgz"
   "version" "0.5.0-alpha.4"
 
+<<<<<<< HEAD
 "anymatch@~3.1.1", "anymatch@~3.1.2":
   "integrity" "sha512-P43ePfOAIupkguHUycrc4qJ9kz8ZiuOUijaETwX7THt0Y/GNK7v0aa8rY816xWjZ7rJdA5XdMcpVFTKMq+RvWg=="
   "resolved" "https://registry.npmjs.org/anymatch/-/anymatch-3.1.2.tgz"
   "version" "3.1.2"
+=======
+"anymatch@~3.1.1":
+  "integrity" "sha512-mM8522psRCqzV+6LhomX5wgp25YVibjh8Wj23I5RPkPppSVSjyKD2A2mBJmWGa+KN7f2D6LNh9jkBCeyLktzjg=="
+  "resolved" "https://registry.npmjs.org/anymatch/-/anymatch-3.1.1.tgz"
+  "version" "3.1.1"
+>>>>>>> main
   dependencies:
     "normalize-path" "^3.0.0"
     "picomatch" "^2.0.4"
@@ -1601,26 +1674,12 @@
   "resolved" "https://registry.npmjs.org/aws4/-/aws4-1.11.0.tgz"
   "version" "1.11.0"
 
-"axios@^0.20.0":
-  "integrity" "sha512-ANA4rr2BDcmmAQLOKft2fufrtuvlqR+cXNNinUmvfeSNCOF98PZL+7M/v1zIdGo7OLjEA9J2gXJL+j4zGsl0bA=="
-  "resolved" "https://registry.npmjs.org/axios/-/axios-0.20.0.tgz"
-  "version" "0.20.0"
+"axios@^0.21.0", "axios@^0.21.1":
+  "integrity" "sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg=="
+  "resolved" "https://registry.npmjs.org/axios/-/axios-0.21.4.tgz"
+  "version" "0.21.4"
   dependencies:
-    "follow-redirects" "^1.10.0"
-
-"axios@^0.21.0":
-  "integrity" "sha512-fmkJBknJKoZwem3/IKSSLpkdNXZeBu5Q7GA/aRsr2btgrptmSCxi2oFjZHqGdK9DoTil9PIHlPIZw2EcRJXRvw=="
-  "resolved" "https://registry.npmjs.org/axios/-/axios-0.21.0.tgz"
-  "version" "0.21.0"
-  dependencies:
-    "follow-redirects" "^1.10.0"
-
-"axios@^0.21.1":
-  "integrity" "sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA=="
-  "resolved" "https://registry.npmjs.org/axios/-/axios-0.21.1.tgz"
-  "version" "0.21.1"
-  dependencies:
-    "follow-redirects" "^1.10.0"
+    "follow-redirects" "^1.14.0"
 
 "babel-code-frame@^6.26.0":
   "integrity" "sha1-Y/1D99weO7fONZR9uP42mj9Yx0s="
@@ -3061,9 +3120,15 @@
   "version" "0.1.1"
 
 "core-js-pure@^3.0.1":
+<<<<<<< HEAD
   "integrity" "sha512-12VZfFIu+wyVbBebyHmRTuEE/tZrB4tJToWcwAMcsp3h4+sHR+fMJWbKpYiCRWlhFBq+KNyO8rIV9rTkeVmznQ=="
   "resolved" "https://registry.npmjs.org/core-js-pure/-/core-js-pure-3.21.1.tgz"
   "version" "3.21.1"
+=======
+  "integrity" "sha512-qsrbIwWSEEYOM7z616jAVgwhuDDtPLwZSpUsU3vyUkHYqKTf/uwOJBZg2V7lMurYWkpVlaVOxBrfX0Q3ppvjfg=="
+  "resolved" "https://registry.npmjs.org/core-js-pure/-/core-js-pure-3.20.0.tgz"
+  "version" "3.20.0"
+>>>>>>> main
 
 "core-js@^2.4.0", "core-js@^2.5.0":
   "integrity" "sha512-5wjnpaT/3dV+XB4borEsnAYQchn00XSgTAWKDkEqv+K8KevjbzmofK6hfJ9TZIlpj2N0xQpazy7PiRQiWHqzWg=="
@@ -3333,6 +3398,7 @@
   "resolved" "https://registry.npmjs.org/decamelize/-/decamelize-1.2.0.tgz"
   "version" "1.2.0"
 
+<<<<<<< HEAD
 "decamelize@^4.0.0":
   "integrity" "sha512-9iE1PgSik9HeIIw2JO94IidnE3eBoQrFJ3w7sFuzSX4DpmZ3v5sZpUiV5Swcf6mQEF+Y0ru8Neo+p+nyh2J+hQ=="
   "resolved" "https://registry.npmjs.org/decamelize/-/decamelize-4.0.0.tgz"
@@ -3342,6 +3408,12 @@
   "integrity" "sha512-KaL7+6Fw6i5A2XSnsbhm/6B+NuEA7TZ4vqxnd5tXz9sbKtrN9Srj8ab4vKVdK8YAqZO9P1kg45Y6YLoduPf+kw=="
   "resolved" "https://registry.npmjs.org/decimal.js/-/decimal.js-10.2.1.tgz"
   "version" "10.2.1"
+=======
+"decimal.js@^10.2.1", "decimal.js@^10.3.1":
+  "integrity" "sha512-V0pfhfr8suzyPGOx3nmq4aHqabehUZn6Ch9kyFpV79TGDTWFmHqUqXdabR7QHqxzrYolF4+tVmJhUG4OURg5dQ=="
+  "resolved" "https://registry.npmjs.org/decimal.js/-/decimal.js-10.3.1.tgz"
+  "version" "10.3.1"
+>>>>>>> main
 
 "decode-uri-component@^0.2.0":
   "integrity" "sha1-6zkTMzRYd1y4TNGh+uBiEGu4dUU="
@@ -4530,9 +4602,15 @@
     "rlp" "^2.2.4"
 
 "ethereumjs-util@^7.1.1":
+<<<<<<< HEAD
   "integrity" "sha512-p6KmuPCX4mZIqsQzXfmSx9Y0l2hqf+VkAiwSisW3UKUFdk8ZkAt+AYaor83z2nSi6CU2zSsXMlD80hAbNEGM0A=="
   "resolved" "https://registry.npmjs.org/ethereumjs-util/-/ethereumjs-util-7.1.4.tgz"
   "version" "7.1.4"
+=======
+  "integrity" "sha512-y+82tEbyASO0K0X1/SRhbJJoAlfcvq8JbrG4a5cjrOks7HS/36efU/0j2flxCPOUM++HFahk33kr/ZxyC4vNuw=="
+  "resolved" "https://registry.npmjs.org/ethereumjs-util/-/ethereumjs-util-7.1.3.tgz"
+  "version" "7.1.3"
+>>>>>>> main
   dependencies:
     "@types/bn.js" "^5.1.0"
     "bn.js" "^5.1.2"
@@ -4540,10 +4618,17 @@
     "ethereum-cryptography" "^0.1.3"
     "rlp" "^2.2.4"
 
+<<<<<<< HEAD
 "ethereumjs-util@^7.1.3":
   "integrity" "sha512-p6KmuPCX4mZIqsQzXfmSx9Y0l2hqf+VkAiwSisW3UKUFdk8ZkAt+AYaor83z2nSi6CU2zSsXMlD80hAbNEGM0A=="
   "resolved" "https://registry.npmjs.org/ethereumjs-util/-/ethereumjs-util-7.1.4.tgz"
   "version" "7.1.4"
+=======
+"ethereumjs-util@^7.1.2":
+  "integrity" "sha512-y+82tEbyASO0K0X1/SRhbJJoAlfcvq8JbrG4a5cjrOks7HS/36efU/0j2flxCPOUM++HFahk33kr/ZxyC4vNuw=="
+  "resolved" "https://registry.npmjs.org/ethereumjs-util/-/ethereumjs-util-7.1.3.tgz"
+  "version" "7.1.3"
+>>>>>>> main
   dependencies:
     "@types/bn.js" "^5.1.0"
     "bn.js" "^5.1.2"
@@ -4551,10 +4636,17 @@
     "ethereum-cryptography" "^0.1.3"
     "rlp" "^2.2.4"
 
+<<<<<<< HEAD
 "ethereumjs-util@^7.1.4":
   "integrity" "sha512-p6KmuPCX4mZIqsQzXfmSx9Y0l2hqf+VkAiwSisW3UKUFdk8ZkAt+AYaor83z2nSi6CU2zSsXMlD80hAbNEGM0A=="
   "resolved" "https://registry.npmjs.org/ethereumjs-util/-/ethereumjs-util-7.1.4.tgz"
   "version" "7.1.4"
+=======
+"ethereumjs-util@^7.1.3":
+  "integrity" "sha512-y+82tEbyASO0K0X1/SRhbJJoAlfcvq8JbrG4a5cjrOks7HS/36efU/0j2flxCPOUM++HFahk33kr/ZxyC4vNuw=="
+  "resolved" "https://registry.npmjs.org/ethereumjs-util/-/ethereumjs-util-7.1.3.tgz"
+  "version" "7.1.3"
+>>>>>>> main
   dependencies:
     "@types/bn.js" "^5.1.0"
     "bn.js" "^5.1.2"
@@ -4692,7 +4784,11 @@
     "uuid" "2.0.1"
     "xmlhttprequest" "1.8.0"
 
+<<<<<<< HEAD
 "ethers@^5.0.0", "ethers@^5.0.1", "ethers@^5.4.0":
+=======
+"ethers@^5.0.0", "ethers@^5.0.1", "ethers@^5.0.24", "ethers@^5.4.5":
+>>>>>>> main
   "integrity" "sha512-F7LXARyB/Px3AQC6/QKedWZ8eqCkgOLORqL4B/F0Mag/K+qJSFGqsR36EaOZ6fKg3ZonI+pdbhb4A8Knt/43jQ=="
   "resolved" "https://registry.npmjs.org/ethers/-/ethers-5.4.6.tgz"
   "version" "5.4.6"
@@ -5157,10 +5253,17 @@
   "resolved" "https://registry.npmjs.org/flow-stoplight/-/flow-stoplight-1.0.0.tgz"
   "version" "1.0.0"
 
+<<<<<<< HEAD
 "follow-redirects@^1.10.0", "follow-redirects@^1.12.1":
   "integrity" "sha512-aq6gF1BEKje4a9i9+5jimNFIpq4Q1WiwBToeRK5NvZBd/TRsmW8BsJfOEGkr76TbOyPVD3OVDN910EcUNtRYEA=="
   "resolved" "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.13.0.tgz"
   "version" "1.13.0"
+=======
+"follow-redirects@^1.12.1", "follow-redirects@^1.14.0":
+  "integrity" "sha512-wtphSXy7d4/OR+MvIFbCVBDzZ5520qV8XfPklSN5QtxuMUJZ+b0Wnst1e1lCDocfzuCkHqj8k0FpZqO+UIaKNA=="
+  "resolved" "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.14.5.tgz"
+  "version" "1.14.5"
+>>>>>>> main
 
 "for-each@~0.3.3":
   "integrity" "sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw=="
@@ -5749,10 +5852,17 @@
   "resolved" "https://registry.npmjs.org/hardhat-log-remover/-/hardhat-log-remover-2.0.0.tgz"
   "version" "2.0.0"
 
+<<<<<<< HEAD
 "hardhat@^2.0.0", "hardhat@^2.0.2", "hardhat@^2.0.3", "hardhat@^2.0.4", "hardhat@^2.9.0":
   "integrity" "sha512-jF8UlisdQ07ldCqaRU+rEB6lzAJzWS5Gg4KT2pUyqat0hJc7jfccE8ITRvAGP8ksC6DZ+kRpDfUSgoLsPFynaA=="
   "resolved" "https://registry.npmjs.org/hardhat/-/hardhat-2.9.0.tgz"
   "version" "2.9.0"
+=======
+"hardhat@^2.0.0", "hardhat@^2.0.2", "hardhat@^2.0.3", "hardhat@^2.0.4", "hardhat@^2.8.0":
+  "integrity" "sha512-A2L5F+B7HgdvfcuEWBXyokzP3biSlu4UeIvNR/lgSC0Og/2kbP9cjMMkIH42V1W8nQEZk70VuryhVKX2uHwSYw=="
+  "resolved" "https://registry.npmjs.org/hardhat/-/hardhat-2.8.0.tgz"
+  "version" "2.8.0"
+>>>>>>> main
   dependencies:
     "@ethereumjs/block" "^3.6.0"
     "@ethereumjs/blockchain" "^5.5.0"
@@ -5762,7 +5872,11 @@
     "@ethersproject/abi" "^5.1.2"
     "@metamask/eth-sig-util" "^4.0.0"
     "@sentry/node" "^5.18.1"
+<<<<<<< HEAD
     "@solidity-parser/parser" "^0.14.1"
+=======
+    "@solidity-parser/parser" "^0.14.0"
+>>>>>>> main
     "@types/bn.js" "^5.1.0"
     "@types/lru-cache" "^5.1.0"
     "abort-controller" "^3.0.0"
@@ -5799,7 +5913,10 @@
     "stacktrace-parser" "^0.1.10"
     "true-case-path" "^2.2.1"
     "tsort" "0.0.1"
+<<<<<<< HEAD
     "undici" "^4.14.1"
+=======
+>>>>>>> main
     "uuid" "^8.3.2"
     "ws" "^7.4.6"
 
@@ -7384,6 +7501,7 @@
     "rlp" "^2.0.0"
     "semaphore" ">=1.0.1"
 
+<<<<<<< HEAD
 "merkle-patricia-tree@^4.2.2", "merkle-patricia-tree@^4.2.3":
   "integrity" "sha512-S4xevdXl5KvdBGgUxhQcxoep0onqXiIhzfwZp4M78kIuJH3Pu9o9IUgqhzSFOR2ykLO6t265026Xb6PY0q2UFQ=="
   "resolved" "https://registry.npmjs.org/merkle-patricia-tree/-/merkle-patricia-tree-4.2.3.tgz"
@@ -7391,6 +7509,15 @@
   dependencies:
     "@types/levelup" "^4.3.0"
     "ethereumjs-util" "^7.1.4"
+=======
+"merkle-patricia-tree@^4.2.0", "merkle-patricia-tree@^4.2.2":
+  "integrity" "sha512-eqZYNTshcYx9aESkSPr71EqwsR/QmpnObDEV4iLxkt/x/IoLYZYjJvKY72voP/27Vy61iMOrfOG6jrn7ttXD+Q=="
+  "resolved" "https://registry.npmjs.org/merkle-patricia-tree/-/merkle-patricia-tree-4.2.2.tgz"
+  "version" "4.2.2"
+  dependencies:
+    "@types/levelup" "^4.3.0"
+    "ethereumjs-util" "^7.1.2"
+>>>>>>> main
     "level-mem" "^5.0.1"
     "level-ws" "^2.0.0"
     "readable-stream" "^3.6.0"
