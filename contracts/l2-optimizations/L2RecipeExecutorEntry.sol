@@ -7,7 +7,7 @@ import "../core/RecipeExecutor.sol";
 import "../core/strategy/StrategyModel.sol";
 import "./CookBook.sol";
 
-contract L2RecipeExecutorEntry is L2StrategyModel, StrategyModel, CoreHelper, RecipeExecutor {
+contract L2RecipeExecutorEntry is L2StrategyModel, StrategyModel, CoreHelper {
     DFSRegistry internal constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes4 constant internal RECIPE_EXECUTOR_ID = 0x4c69ee1e;
