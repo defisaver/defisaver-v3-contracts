@@ -5,10 +5,12 @@ pragma experimental ABIEncoderV2;
 
 import "../../interfaces/mcd/IJoin.sol";
 import "../../interfaces/mcd/IManager.sol";
+import "../../interfaces/mcd/ICdpRegistry.sol";
+import "./helpers/McdHelper.sol";
 import "../ActionBase.sol";
 
 /// @title Open a new Maker vault
-contract McdOpen is ActionBase {
+contract McdOpen is ActionBase, McdHelper {
     /// @inheritdoc ActionBase
     function executeAction(
         bytes[] memory _callData,
@@ -44,7 +46,12 @@ contract McdOpen is ActionBase {
     /// @param _mcdManager The manager address we are using
     function _mcdOpen(address _joinAddr, address _mcdManager) internal returns (uint256 vaultId) {
         bytes32 ilk = IJoin(_joinAddr).ilk();
-        vaultId = IManager(_mcdManager).open(ilk, address(this));
+
+        if (_mcdManager == CROPPER) {
+            vaultId = ICdpRegistry(CDP_REGISTRY).open(ilk, address(this));
+        } else {
+            vaultId = IManager(_mcdManager).open(ilk, address(this));
+        }
 
         logger.Log(
             address(this),

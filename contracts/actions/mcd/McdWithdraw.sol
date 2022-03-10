@@ -6,6 +6,9 @@ pragma experimental ABIEncoderV2;
 import "../../interfaces/mcd/IManager.sol";
 import "../../interfaces/mcd/IVat.sol";
 import "../../interfaces/mcd/IJoin.sol";
+import "../../interfaces/mcd/ICropJoin.sol";
+import "../../interfaces/mcd/ICropper.sol";
+import "../../interfaces/mcd/ICdpRegistry.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
@@ -29,7 +32,7 @@ contract McdWithdraw is ActionBase, McdHelper {
         joinAddr = _parseParamAddr(joinAddr, _paramMapping[2], _subData, _returnValues);
         to = _parseParamAddr(to, _paramMapping[3], _subData, _returnValues);
 
-        amount = _mcdWithdraw(vaultId, amount, joinAddr, to, mcdManager);
+        amount = _mcdWithdraw(vaultId, amount, joinAddr, to, mcdManager, false);
 
         return bytes32(amount);
     }
@@ -39,7 +42,7 @@ contract McdWithdraw is ActionBase, McdHelper {
         (uint256 vaultId, uint256 amount, address joinAddr, address to, address mcdManager) =
             parseInputs(_callData);
 
-        _mcdWithdraw(vaultId, amount, joinAddr, to, mcdManager);
+        _mcdWithdraw(vaultId, amount, joinAddr, to, mcdManager, true);
     }
 
     /// @inheritdoc ActionBase
@@ -55,29 +58,43 @@ contract McdWithdraw is ActionBase, McdHelper {
     /// @param _joinAddr Join address of the maker collateral
     /// @param _to Address where to send the collateral we withdrew
     /// @param _mcdManager The manager address we are using [mcd, b.protocol]
+    /// @param _isDirect If the action is called directly through DSProxy or part of a recipe
     function _mcdWithdraw(
         uint256 _vaultId,
         uint256 _amount,
         address _joinAddr,
         address _to,
-        address _mcdManager
+        address _mcdManager,
+        bool _isDirect
     ) internal returns (uint256) {
-        IManager mcdManager = IManager(_mcdManager);
-
         // if amount type(uint).max _amount is whole collateral amount
         if (_amount == type(uint256).max) {
-            _amount = getAllColl(mcdManager, _joinAddr, _vaultId);
+            _amount = getAllColl(IManager(_mcdManager), _joinAddr, _vaultId);
         }
 
         // convert to 18 decimals for maker frob if needed
         uint256 frobAmount = convertTo18(_joinAddr, _amount);
 
-        // withdraw from vault and move to proxy balance
-        mcdManager.frob(_vaultId, -toPositiveInt(frobAmount), 0);
-        mcdManager.flux(_vaultId, address(this), frobAmount);
+         if (_mcdManager == CROPPER) {
+            address bonusTokenAddr;
+            uint256 bonusBeforeBalance;
 
-        // withdraw the tokens from Join
-        IJoin(_joinAddr).exit(address(this), _amount);
+            if (_isDirect) {
+                bonusTokenAddr = address(ICropJoin(_joinAddr).bonus());
+                bonusBeforeBalance = IERC20(bonusTokenAddr).balanceOf(address(this));
+            }
+
+            _cropperWithdraw(_vaultId, _joinAddr, _amount, frobAmount);
+
+            if (_isDirect) {
+                uint256 amount = IERC20(bonusTokenAddr).balanceOf(address(this)) - bonusBeforeBalance;
+                address proxyOwner = DSProxy(uint160(address(this))).owner();
+
+                bonusTokenAddr.withdrawTokens(proxyOwner, amount);
+            }
+        } else {
+            _mcdManagerWithdraw(_mcdManager, _vaultId, _joinAddr, _amount, frobAmount);
+        }
 
         // send the tokens _to address if needed
         getTokenFromJoin(_joinAddr).withdrawTokens(_to, _amount);
@@ -90,6 +107,39 @@ contract McdWithdraw is ActionBase, McdHelper {
         );
 
         return _amount;
+    }
+
+    function _mcdManagerWithdraw(
+        address _mcdManager,
+        uint256 _vaultId,
+        address _joinAddr,
+        uint256 _amount,
+        uint256 _frobAmount
+    ) internal {
+        IManager mcdManager = IManager(_mcdManager);
+
+        // withdraw from vault and move to proxy balance
+        mcdManager.frob(_vaultId, -toPositiveInt(_frobAmount), 0);
+        mcdManager.flux(_vaultId, address(this), _frobAmount);
+
+        // withdraw the tokens from Join
+        IJoin(_joinAddr).exit(address(this), _amount);
+    }
+
+    function _cropperWithdraw(
+        uint256 _vaultId,
+        address _joinAddr,
+        uint256 _amount,
+        uint256 _frobAmount
+    ) internal {
+        bytes32 ilk = ICdpRegistry(CDP_REGISTRY).ilks(_vaultId);
+        address urn = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
+        
+        ICropper(CROPPER).frob(ilk, urn, urn, urn, -toPositiveInt(_frobAmount), 0);
+        // Exits token amount to proxy address as a token
+        ICropper(CROPPER).exit(_joinAddr, address(this), _amount);
+
+
     }
 
     /// @notice Returns all the collateral of the vault, formatted in the correct decimal

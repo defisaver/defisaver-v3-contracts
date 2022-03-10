@@ -8,6 +8,7 @@ import "../../../interfaces/mcd/IManager.sol";
 import "../../../interfaces/mcd/IJoin.sol";
 import "../../../interfaces/mcd/IVat.sol";
 import "../../../utils/TokenUtils.sol";
+import "../../../interfaces/mcd/ICdpRegistry.sol";
 import "./MainnetMcdAddresses.sol";
 
 /// @title Helper methods for MCDSaverProxy
@@ -104,12 +105,28 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
         return address(IJoin(_joinAddr).gem());
     }
 
+    function getUrnAndIlk(address _mcdManager, uint256 _vaultId) public view returns (address urn, bytes32 ilk) {
+        if (_mcdManager == CROPPER) {
+            urn = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
+            ilk = ICdpRegistry(CDP_REGISTRY).ilks(_vaultId);
+        } else {
+            urn = IManager(_mcdManager).urns(_vaultId);
+            ilk = IManager(_mcdManager).ilks(_vaultId);
+        }
+    }
+
     /// @notice Gets CDP info (collateral, debt)
     /// @param _manager Manager contract
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
     function getCdpInfo(IManager _manager, uint _cdpId, bytes32 _ilk) public view returns (uint, uint) {
-        address urn = _manager.urns(_cdpId);
+        address urn;
+
+        if (address(_manager) == CROPPER) {
+            urn = ICdpRegistry(CDP_REGISTRY).owns(_cdpId);
+        } else {
+            urn = _manager.urns(_cdpId);
+        }
 
         (uint collateral, uint debt) = vat.urns(_ilk, urn);
         (,uint rate,,,) = vat.ilks(_ilk);
@@ -121,7 +138,15 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
     /// @param _manager Manager contract
     /// @param _cdpId Id of the CDP
     function getOwner(IManager _manager, uint _cdpId) public view returns (address) {
-        DSProxy proxy = DSProxy(uint160(_manager.owns(_cdpId)));
+        address owner;
+
+        if (address(_manager) == CROPPER) {
+            owner = ICdpRegistry(CDP_REGISTRY).owns(_cdpId);
+        } else {
+            owner = _manager.owns(_cdpId);
+        }
+
+        DSProxy proxy = DSProxy(uint160(owner));
 
         return proxy.owner();
     }
