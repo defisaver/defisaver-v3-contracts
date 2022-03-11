@@ -11,4 +11,5 @@ contract MainnetFLAddresses {
     address internal constant AAVE_LENDING_POOL_ADDRESS_PROVIDER = 0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5;
     address internal constant DSS_FLASH_ADDR = 0x1EB4CF3A948E7D72A198fe073cCb8C7a948cD853;
     address internal constant DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+    address internal constant ST_ETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
 }
