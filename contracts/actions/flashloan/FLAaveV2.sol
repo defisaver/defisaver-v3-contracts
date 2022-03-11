@@ -13,6 +13,7 @@ import "../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../core/StrategyData.sol";
 import "../../utils/TokenUtils.sol";
 import "../../utils/ReentrancyGuard.sol";
+import "../../utils/FLFeeFaucet.sol";
 import "./helpers/FLHelper.sol";
 
 /// @title Action that gets and receives a FL from Aave V2
@@ -33,6 +34,8 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard, FLHelper
 
     /// @dev Function sig of TaskExecutor._executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
+
+    FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
 
     bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
 
@@ -130,9 +133,16 @@ contract FLAaveV2 is ActionBase, StrategyData, DSMath, ReentrancyGuard, FLHelper
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
             uint256 paybackAmount = add(_amounts[i],_fees[i]);
-            
-            require(_assets[i].getBalance(address(this)) == paybackAmount, ERR_WRONG_PAYBACK_AMOUNT);
 
+            bool correctAmount = _assets[i].getBalance(address(this)) == paybackAmount;
+
+            if (_assets[i] == ST_ETH_ADDR && !correctAmount) {
+                flFeeFaucet.my2Wei(ST_ETH_ADDR);
+                correctAmount = true;
+            }
+
+            require(correctAmount, ERR_WRONG_PAYBACK_AMOUNT);
+            
             _assets[i].approveToken(address(AAVE_LENDING_POOL), paybackAmount);
 
         }
