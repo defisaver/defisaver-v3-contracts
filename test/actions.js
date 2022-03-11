@@ -1360,6 +1360,50 @@ const curveClaimFees = async (proxy, claimFor, receiver) => {
     return tx;
 };
 
+const curveStethPoolDeposit = async (
+    proxy,
+    from,
+    to,
+    amounts,
+    minMintAmount,
+) => {
+    const curveStethPoolDepositAction = new dfs.actions.curve.CurveStethPoolDepositAction(
+        from,
+        to,
+        amounts,
+        minMintAmount,
+    );
+
+    const functionData = curveStethPoolDepositAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('CurveStethPoolDeposit', functionData, proxy);
+    const receipt = await tx.wait();
+    console.log(`Gas used: ${receipt.gasUsed}`);
+    return tx;
+};
+
+const curveStethPoolWithdraw = async (
+    proxy,
+    from,
+    to,
+    amounts,
+    minBurnAmount,
+) => {
+    const curveStethPoolWithdrawAction = new dfs.actions.curve.CurveStethPoolWithdrawAction(
+        from,
+        to,
+        amounts,
+        minBurnAmount,
+    );
+
+    const functionData = curveStethPoolWithdrawAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('CurveStethPoolWithdraw', functionData, proxy);
+    const receipt = await tx.wait();
+    console.log(`Gas used: ${receipt.gasUsed}`);
+    return tx;
+};
+
 const automationV2Unsub = async (proxy, protocol, cdpId = 0) => {
     const automationV2UnsubAction = new dfs.actions.basic.AutomationV2Unsub(protocol, cdpId);
 
@@ -1549,6 +1593,9 @@ module.exports = {
     curveGaugeWithdraw,
     curveMintCrv,
     curveClaimFees,
+
+    curveStethPoolDeposit,
+    curveStethPoolWithdraw,
 
     buyTokenIfNeeded,
     claimInstMaker,
