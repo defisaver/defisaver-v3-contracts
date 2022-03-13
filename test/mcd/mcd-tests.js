@@ -26,6 +26,7 @@ const {
     MIN_VAULT_DAI_AMOUNT,
     DAI_ADDR,
     UNISWAP_WRAPPER,
+    MAX_UINT,
 } = require('../utils');
 const {
     getVaultsForUser,
@@ -48,12 +49,17 @@ const mcdOpenTest = async (mcdTestLength) => {
         let makerAddresses;
         let senderAcc;
         let proxy;
+        let mcdView;
+        let mcdViewAddr;
 
         before(async () => {
             makerAddresses = await fetchMakerAddresses();
 
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
+
+            mcdViewAddr = await getAddrFromRegistry('McdView');
+            mcdView = await hre.ethers.getContractAt('McdView', mcdViewAddr);
         });
 
         for (let i = 0; i < mcdTestLength; ++i) {
@@ -79,6 +85,10 @@ const mcdOpenTest = async (mcdTestLength) => {
             await castSpell('0xEEC1e1aef39309998d14615a177d989F37342cf1');
 
             const vaultId = await openMcd(proxy, makerAddresses, cropData.joinAddr, CROPPER_ADDR);
+
+            const vaultInfo = await mcdView.getCropJoinCdps([cropData.ilk], proxy.address);
+
+            console.log(vaultInfo);
 
             expect(parseFloat(vaultId)).to.be.gt(0);
         });
@@ -693,6 +703,17 @@ const mcdPaybackTest = async (mcdTestLength) => {
 
             const infoAfter = await getVaultInfo(mcdView, vaultId, cropJoinIlks[0], CROPPER_ADDR);
             expect(infoBefore.debt - parseFloat(paybackAmount)).to.be.closeTo(infoAfter.debt, 0.01);
+        });
+
+        it('... should payback uint.max Dai in CropJoin vault', async () => {
+            const vaultId = await openMcd(proxy, makerAddresses, cropData.joinAddr, CROPPER_ADDR);
+            const from = senderAcc.address;
+
+            await paybackMcd(proxy, vaultId, MAX_UINT, from, DAI_ADDR, CROPPER_ADDR);
+
+            const infoAfter = await getVaultInfo(mcdView, vaultId, cropJoinIlks[0], CROPPER_ADDR);
+
+            expect(infoAfter.debt).to.be.eq(0);
         });
     });
 };
