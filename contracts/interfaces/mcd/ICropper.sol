@@ -3,6 +3,7 @@
 pragma solidity =0.7.6;
 
 interface ICropper {
+    function proxy(address) view external returns (address);
     function getOrCreateProxy(address) external returns (address);
     function join(address, address, uint256) external;
     function exit(address, address, uint256) external;

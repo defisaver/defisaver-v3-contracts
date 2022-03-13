@@ -13,9 +13,10 @@ describe('Mcd-Withdraw', function () {
         await redeploy('McdOpen');
         await redeploy('McdGenerate');
         await redeploy('McdSupply');
+        await redeploy('McdView');
     });
 
     it('... should withdraw  vault', async () => {
-        await mcdWithdrawTest(ilks.length);
+        await mcdWithdrawTest(1);
     });
 });

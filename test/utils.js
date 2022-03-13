@@ -517,7 +517,7 @@ const timeTravel = async (timeIncrease) => {
     await hre.network.provider.request({
         method: 'evm_increaseTime',
         params: [timeIncrease],
-        id: new Date().getTime(),
+        id: (await hre.ethers.provider.getBlock('latest')).timestamp,
     });
 };
 const addToZRXAllowlist = async (acc, newAddr) => {

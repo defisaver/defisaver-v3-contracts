@@ -37,7 +37,7 @@ contract McdSupply is ActionBase, McdHelper {
         joinAddr = _parseParamAddr(joinAddr, _paramMapping[2], _subData, _returnValues);
         from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
 
-        uint256 returnAmount = _mcdSupply(vaultId, amount, joinAddr, from, mcdManager, false);
+        uint256 returnAmount = _mcdSupply(vaultId, amount, joinAddr, from, mcdManager);
 
         return bytes32(returnAmount);
     }
@@ -52,7 +52,7 @@ contract McdSupply is ActionBase, McdHelper {
             address mcdManager
         ) = parseInputs(_callData);
 
-        _mcdSupply(vaultId, amount, joinAddr, from, mcdManager, true);
+        _mcdSupply(vaultId, amount, joinAddr, from, mcdManager);
     }
 
     /// @inheritdoc ActionBase
@@ -68,14 +68,12 @@ contract McdSupply is ActionBase, McdHelper {
     /// @param _joinAddr Join address of the maker collateral
     /// @param _from Address where to pull the collateral from
     /// @param _mcdManager The manager address we are using [mcd, b.protocol]
-    /// @param _isDirect If the action is called directly through DSProxy or part of a recipe
     function _mcdSupply(
         uint256 _vaultId,
         uint256 _amount,
         address _joinAddr,
         address _from,
-        address _mcdManager,
-        bool _isDirect
+        address _mcdManager
     ) internal returns (uint256) {
         address tokenAddr = getTokenFromJoin(_joinAddr);
 
@@ -86,29 +84,14 @@ contract McdSupply is ActionBase, McdHelper {
 
         // Pull the underlying token and join the maker join pool
         tokenAddr.pullTokensIfNeeded(_from, _amount);
-        tokenAddr.approveToken(_joinAddr, _amount);
 
         // format the amount we need for frob
         int256 vatAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
 
-        if (_mcdManager == CROPPER) {
-            address bonusTokenAddr;
-            uint256 bonusBeforeBalance;
-            if (_isDirect) {
-                bonusTokenAddr = address(ICropJoin(_joinAddr).bonus());
-                bonusBeforeBalance = IERC20(bonusTokenAddr).balanceOf(address(this));
-            }
-
-            _cropperSupply(_vaultId, _joinAddr, _amount, vatAmount);
-
-            if (_isDirect) {
-                uint256 amount = IERC20(bonusTokenAddr).balanceOf(address(this)) - bonusBeforeBalance;
-                address proxyOwner = DSProxy(uint160(address(this))).owner();
-
-                bonusTokenAddr.withdrawTokens(proxyOwner, amount);
-            }
+        if (_mcdManager == CROPPER) {         
+            _cropperSupply(_vaultId, tokenAddr, _joinAddr, _amount, vatAmount);
         } else {
-            _mcdManagerSupply(_mcdManager, _vaultId, _joinAddr, _amount, vatAmount);
+            _mcdManagerSupply(_mcdManager, _vaultId, tokenAddr, _joinAddr, _amount, vatAmount);
         }
 
         logger.Log(
@@ -123,28 +106,31 @@ contract McdSupply is ActionBase, McdHelper {
 
     function _cropperSupply(
         uint256 _vaultId,
+        address _tokenAddr,
         address _joinAddr,
         uint256 _amount,
         int256 _vatAmount
     ) internal {
         bytes32 ilk = ICdpRegistry(CDP_REGISTRY).ilks(_vaultId);
-        address urn = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
+        address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
 
-        ICropper(CROPPER).join(_joinAddr, urn, _amount);
-        ICropper(CROPPER).frob(ilk, urn, urn, urn, _vatAmount, 0);
+        _tokenAddr.approveToken(CROPPER, _amount);
 
-        // TODO: handle bonus
+        ICropper(CROPPER).join(_joinAddr, owner, _amount);
+        ICropper(CROPPER).frob(ilk, owner, owner, owner, _vatAmount, 0);
     }
 
     function _mcdManagerSupply(
         address _mcdManager,
         uint256 _vaultId,
+        address _tokenAddr,
         address _joinAddr,
         uint256 _amount,
         int256 _vatAmount
     ) internal {
         IManager mcdManager = IManager(_mcdManager);
 
+        _tokenAddr.approveToken(_joinAddr, _amount);
         IJoin(_joinAddr).join(address(this), _amount);
 
         // Supply to the vault balance

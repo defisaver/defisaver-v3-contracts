@@ -10,10 +10,11 @@ describe('Mcd-Generate', function () {
     before(async () => {
         await redeploy('McdOpen');
         await redeploy('McdSupply');
+        await redeploy('McdView');
         await redeploy('McdGenerate');
     });
 
     it('... should do full Maker Generate test', async () => {
-        await mcdGenerateTest(ilks.length);
+        await mcdGenerateTest(1);
     });
 });

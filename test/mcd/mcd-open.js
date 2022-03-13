@@ -10,6 +10,6 @@ describe('Mcd-Open', () => {
     });
 
     it('... should test Maker Open', async () => {
-        await mcdOpenTest(ilks.length);
+        await mcdOpenTest(1);
     });
 });

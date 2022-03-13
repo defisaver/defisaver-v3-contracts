@@ -70,8 +70,7 @@ contract McdGenerate is ActionBase, McdHelper {
         uint256 daiVatBalance = vat.dai(urn);
 
         if (_mcdManager == CROPPER) {
-            _cropperGenerate(urn, ilk, _amount, rate, daiVatBalance);
-
+            _cropperGenerate(_vaultId, ilk, _amount, rate, daiVatBalance);
         } else {
             _mcdManagerGenerate(mcdManager, _vaultId, _amount, rate, daiVatBalance);
         }
@@ -110,13 +109,15 @@ contract McdGenerate is ActionBase, McdHelper {
     }
 
     function _cropperGenerate(
-        address _urn,
+        uint256 _vaultId,
         bytes32 _ilk,
         uint256 _amount,
         uint256 _rate,
         uint256 _daiVatBalance
     ) internal {
-        ICropper(CROPPER).frob(_ilk, _urn, _urn, _urn, 0,normalizeDrawAmount(_amount, _rate, _daiVatBalance));
+        address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
+
+        ICropper(CROPPER).frob(_ilk, owner, owner, owner, 0,normalizeDrawAmount(_amount, _rate, _daiVatBalance));
     }
 
     function parseInputs(bytes[] memory _callData)

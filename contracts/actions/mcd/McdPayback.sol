@@ -48,12 +48,7 @@ contract McdPayback is ActionBase, McdHelper {
             _subData,
             _returnValues
         );
-        inputData.from = _parseParamAddr(
-            inputData.from,
-            _paramMapping[2],
-            _subData,
-            _returnValues
-        );
+        inputData.from = _parseParamAddr(inputData.from, _paramMapping[2], _subData, _returnValues);
 
         _mcdPayback(inputData);
 
@@ -79,27 +74,27 @@ contract McdPayback is ActionBase, McdHelper {
         IManager mcdManager = IManager(_inputData.mcdManager);
 
         (address urn, bytes32 ilk) = getUrnAndIlk(_inputData.mcdManager, _inputData.vaultId);
-        
+
         // if _amount is higher than current debt, repay all debt
         uint256 debt = getAllDebt(address(vat), urn, urn, ilk);
         _inputData.amount = _inputData.amount > debt ? debt : _inputData.amount;
         // pull Dai from user and join the maker pool
         DAI_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         DAI_ADDR.approveToken(DAI_JOIN_ADDR, _inputData.amount);
-        IDaiJoin(DAI_JOIN_ADDR).join(urn, _inputData.amount);
 
         if (_inputData.mcdManager == CROPPER) {
-             _cropperPayback(urn, ilk);
+            address owner = ICdpRegistry(CDP_REGISTRY).owns(_inputData.vaultId);
+
+            IDaiJoin(DAI_JOIN_ADDR).join(owner, _inputData.amount);
+
+            _cropperPayback(owner, urn, ilk);
         } else {
+            IDaiJoin(DAI_JOIN_ADDR).join(urn, _inputData.amount);
+
             _mcdManagerPayback(mcdManager, _inputData.vaultId, urn, ilk);
         }
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "McdPayback",
-            abi.encode(_inputData, debt)
-        );
+        logger.Log(address(this), msg.sender, "McdPayback", abi.encode(_inputData, debt));
     }
 
     function _mcdManagerPayback(
@@ -108,18 +103,34 @@ contract McdPayback is ActionBase, McdHelper {
         address _urn,
         bytes32 _ilk
     ) internal {
-        _mcdManager.frob(_vaultId, 0, normalizePaybackAmount(address(vat), _urn, _ilk));
+        uint256 daiVatBalance = vat.dai(_urn);
+
+        _mcdManager.frob(
+            _vaultId,
+            0,
+            normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk)
+        );
     }
 
     function _cropperPayback(
+        address _owner,
         address _urn,
         bytes32 _ilk
     ) internal {
-        // Allows cropper to access to proxy's DAI balance in the vat
+        uint256 daiVatBalance = vat.dai(_owner);
+
+        // Allows cropper to access to proxy"s DAI balance in the vat
         vat.hope(CROPPER);
         // Paybacks debt to the CDP
-        ICropper(CROPPER).frob(_ilk, _urn, _urn, _urn, 0, normalizePaybackAmount(address(vat), _urn, _ilk));
-        // Denies cropper to access to proxy's DAI balance in the vat after execution
+        ICropper(CROPPER).frob(
+            _ilk,
+            _owner,
+            _owner,
+            _owner,
+            0,
+            normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk)
+        );
+        // Denies cropper to access to proxy"s DAI balance in the vat after execution
         vat.nope(CROPPER);
     }
 

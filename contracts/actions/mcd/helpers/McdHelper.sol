@@ -7,6 +7,7 @@ import "../../../DS/DSProxy.sol";
 import "../../../interfaces/mcd/IManager.sol";
 import "../../../interfaces/mcd/IJoin.sol";
 import "../../../interfaces/mcd/IVat.sol";
+import "../../../interfaces/mcd/ICropper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../../interfaces/mcd/ICdpRegistry.sol";
 import "./MainnetMcdAddresses.sol";
@@ -50,15 +51,15 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
 
     /// @notice Gets Dai amount in Vat which can be added to Cdp
     /// @param _vat Address of Vat contract
+    /// @param _daiBalance Amount of dai in vat contract for that urn
     /// @param _urn Urn of the Cdp
     /// @param _ilk Ilk of the Cdp
-    function normalizePaybackAmount(address _vat, address _urn, bytes32 _ilk) internal view returns (int amount) {
-        uint dai = IVat(_vat).dai(_urn);
+    function normalizePaybackAmount(address _vat, uint256 _daiBalance, address _urn, bytes32 _ilk) internal view returns (int amount) {
 
         (, uint rate,,,) = IVat(_vat).ilks(_ilk);
         (, uint art) = IVat(_vat).urns(_ilk, _urn);
 
-        amount = toPositiveInt(dai / rate);
+        amount = toPositiveInt(_daiBalance / rate);
         amount = uint(amount) <= art ? - amount : - toPositiveInt(art);
     }
 
@@ -107,7 +108,8 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
 
     function getUrnAndIlk(address _mcdManager, uint256 _vaultId) public view returns (address urn, bytes32 ilk) {
         if (_mcdManager == CROPPER) {
-            urn = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
+            address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
+            urn = ICropper(CROPPER).proxy(owner);
             ilk = ICdpRegistry(CDP_REGISTRY).ilks(_vaultId);
         } else {
             urn = IManager(_mcdManager).urns(_vaultId);
@@ -123,7 +125,8 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
         address urn;
 
         if (address(_manager) == CROPPER) {
-            urn = ICdpRegistry(CDP_REGISTRY).owns(_cdpId);
+            address owner = ICdpRegistry(CDP_REGISTRY).owns(_cdpId);
+            urn = ICropper(CROPPER).proxy(owner);
         } else {
             urn = _manager.urns(_cdpId);
         }
