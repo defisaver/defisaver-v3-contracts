@@ -6,12 +6,10 @@ pragma experimental ABIEncoderV2;
 import "../../../interfaces/curve/stethPool/ICurveStethPool.sol";
 import "../helpers/CurveHelper.sol";
 import "../../../utils/TokenUtils.sol";
-import "../../../utils/SafeMath.sol";
 import "../../ActionBase.sol";
 
 contract CurveStethPoolDeposit is ActionBase {
     using TokenUtils for address;
-    using SafeMath for uint256;
 
     address constant internal CURVE_STETH_POOL_ADDR = 0xDC24316b9AE028F1497c275EB9192a3Ea0f67022;
     address constant internal STE_CRV_ADDR = 0x06325440D014e39736583c165C2963BA99fAf14E;
