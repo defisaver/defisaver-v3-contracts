@@ -769,6 +769,30 @@ const curveStethPoolDepositTest = async () => {
             console.log(`Minted ${BN2Float(lpMinted)} steCrv`);
             expect(lpMinted).to.be.gt('0');
         });
+
+        it('... should deposit maxUint stEth and Eth into Curve stEth pool', async () => {
+            const amount = Float2BN(ethAmountHalf);
+
+            await setBalance(WETH_ADDRESS, senderAddr, amount);
+            await approve(WETH_ADDRESS, proxyAddr);
+            await setBalance(STETH_ADDRESS, senderAddr, amount);
+            await approve(STETH_ADDRESS, proxyAddr);
+
+            const tokensBefore = await balanceOf(STE_CRV_ADDR, senderAddr);
+            await curveStethPoolDeposit(
+                proxy,
+                senderAddr,
+                senderAddr,
+                [hre.ethers.constants.MaxUint256, hre.ethers.constants.MaxUint256],
+                '0',
+            );
+
+            const tokensAfter = await balanceOf(STE_CRV_ADDR, senderAddr);
+            const lpMinted = tokensAfter.sub(tokensBefore);
+
+            console.log(`Minted ${BN2Float(lpMinted)} steCrv`);
+            expect(lpMinted).to.be.gt('0');
+        });
     });
 };
 
