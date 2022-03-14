@@ -19,6 +19,12 @@ const addrs = {
         OWNER_ACC: '0x322d58b9E75a6918f7e7849AEe0fF09369977e08',
         WETH_ADDRESS: '0x4200000000000000000000000000000000000006',
     },
+    kovan: {
+        PROXY_REGISTRY: '0xF9722E05B68E5ad5D6E1674C4d6BfE11791a1E33',
+    },
+    kovanOptimism: {
+        PROXY_REGISTRY: '0x1fA11C699629E43005fd64f4DA36d9Eb30333ef9',
+    },
 };
 
 let REGISTRY_ADDR = '0x287778F121F134C66212FB16c9b53eC991D32f5b';
@@ -372,7 +378,6 @@ const getProxyWithSigner = async (signer, addr) => {
 const getProxy = async (acc) => {
     const proxyRegistry = await
     hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
-
     let proxyAddr = await proxyRegistry.proxies(acc);
 
     if (proxyAddr === nullAddress) {

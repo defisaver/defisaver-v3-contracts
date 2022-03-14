@@ -738,4 +738,12 @@ interface IPoolV3 {
     address onBehalfOf,
     uint16 referralCode
   ) external;
+
+  /**
+   * @notice Returns the address of the underlying asset of a reserve by the reserve id as stored in the DataTypes.ReserveData struct
+   * @param id The id of the reserve as stored in the DataTypes.ReserveData struct
+   * @return The address of the reserve associated with id
+   **/
+  function getReserveAddressById(uint16 id) external view returns (address);
+
 }

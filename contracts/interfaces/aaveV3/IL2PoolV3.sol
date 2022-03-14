@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0
+import "./IPoolV3.sol";
+
 pragma solidity 0.8.10;
 
 /**
@@ -6,7 +8,7 @@ pragma solidity 0.8.10;
  * @author Aave
  * @notice Defines the basic extension interface for an L2 Aave Pool.
  **/
-interface IL2PoolV3 {
+interface IL2PoolV3 is IPoolV3{
   /**
    * @notice Calldata efficient wrapper of the supply function on behalf of the caller
    * @param args Arguments for the supply function packed in one bytes32
