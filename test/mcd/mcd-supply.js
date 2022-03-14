@@ -13,6 +13,6 @@ describe('Mcd-Supply', function () {
         await redeploy('McdView');
     });
     it('... should test fully Mcd Supply', async () => {
-        await mcdSupplyTest(1);
+        await mcdSupplyTest(ilks.length);
     });
 });

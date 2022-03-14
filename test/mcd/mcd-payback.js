@@ -18,6 +18,6 @@ describe('Mcd-Payback', function () {
     });
 
     it('... should payback DAI for vault', async () => {
-        await mcdPaybackTest(1);
+        await mcdPaybackTest(ilks.length);
     });
 });

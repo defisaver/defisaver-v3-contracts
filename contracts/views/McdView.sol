@@ -50,13 +50,7 @@ contract McdView is DSMath, McdHelper {
     /// @notice Gets Vaults ratio
     /// @param _vaultId Id of the Vault
     function getRatio(address _managerAddr, uint256 _vaultId) public view returns (uint256) {
-        bytes32 ilk;
-
-        if (_managerAddr == CROPPER) {
-            ilk = ICdpRegistry(CDP_REGISTRY).ilks(_vaultId);
-        } else {
-            ilk = IManager(_managerAddr).ilks(_vaultId);
-        }
+        bytes32 ilk = IManager(_managerAddr).ilks(_vaultId);
 
         uint256 price = getPrice(ilk);
 

@@ -83,15 +83,9 @@ contract McdPayback is ActionBase, McdHelper {
         DAI_ADDR.approveToken(DAI_JOIN_ADDR, _inputData.amount);
 
         if (_inputData.mcdManager == CROPPER) {
-            address owner = ICdpRegistry(CDP_REGISTRY).owns(_inputData.vaultId);
-
-            IDaiJoin(DAI_JOIN_ADDR).join(owner, _inputData.amount);
-
-            _cropperPayback(owner, urn, ilk);
+            _cropperPayback(_inputData.vaultId, urn, ilk, _inputData.amount);
         } else {
-            IDaiJoin(DAI_JOIN_ADDR).join(urn, _inputData.amount);
-
-            _mcdManagerPayback(mcdManager, _inputData.vaultId, urn, ilk);
+            _mcdManagerPayback(mcdManager, _inputData.vaultId, urn, ilk, _inputData.amount);
         }
 
         logger.Log(address(this), msg.sender, "McdPayback", abi.encode(_inputData, debt));
@@ -101,8 +95,11 @@ contract McdPayback is ActionBase, McdHelper {
         IManager _mcdManager,
         uint256 _vaultId,
         address _urn,
-        bytes32 _ilk
+        bytes32 _ilk,
+        uint256 _amount
     ) internal {
+        IDaiJoin(DAI_JOIN_ADDR).join(_urn, _amount);
+
         uint256 daiVatBalance = vat.dai(_urn);
 
         _mcdManager.frob(
@@ -113,20 +110,24 @@ contract McdPayback is ActionBase, McdHelper {
     }
 
     function _cropperPayback(
-        address _owner,
+        uint256 _vaultId,
         address _urn,
-        bytes32 _ilk
+        bytes32 _ilk,
+        uint256 _amount
     ) internal {
-        uint256 daiVatBalance = vat.dai(_owner);
+        address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
+        IDaiJoin(DAI_JOIN_ADDR).join(owner, _amount);
+
+        uint256 daiVatBalance = vat.dai(owner);
 
         // Allows cropper to access to proxy"s DAI balance in the vat
         vat.hope(CROPPER);
         // Paybacks debt to the CDP
         ICropper(CROPPER).frob(
             _ilk,
-            _owner,
-            _owner,
-            _owner,
+            owner,
+            owner,
+            owner,
             0,
             normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk)
         );

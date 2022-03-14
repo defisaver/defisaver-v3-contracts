@@ -17,6 +17,6 @@ describe('Mcd-Withdraw', function () {
     });
 
     it('... should withdraw  vault', async () => {
-        await mcdWithdrawTest(1);
+        await mcdWithdrawTest(ilks.length);
     });
 });

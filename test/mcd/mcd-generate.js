@@ -15,6 +15,6 @@ describe('Mcd-Generate', function () {
     });
 
     it('... should do full Maker Generate test', async () => {
-        await mcdGenerateTest(1);
+        await mcdGenerateTest(ilks.length);
     });
 });
