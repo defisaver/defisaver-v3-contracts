@@ -7,7 +7,9 @@ import "../../../DS/DSProxy.sol";
 import "../../../interfaces/mcd/IManager.sol";
 import "../../../interfaces/mcd/IJoin.sol";
 import "../../../interfaces/mcd/IVat.sol";
+import "../../../interfaces/mcd/ICropper.sol";
 import "../../../utils/TokenUtils.sol";
+import "../../../interfaces/mcd/ICdpRegistry.sol";
 import "./MainnetMcdAddresses.sol";
 
 /// @title Helper methods for MCDSaverProxy
@@ -49,15 +51,15 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
 
     /// @notice Gets Dai amount in Vat which can be added to Cdp
     /// @param _vat Address of Vat contract
+    /// @param _daiBalance Amount of dai in vat contract for that urn
     /// @param _urn Urn of the Cdp
     /// @param _ilk Ilk of the Cdp
-    function normalizePaybackAmount(address _vat, address _urn, bytes32 _ilk) internal view returns (int amount) {
-        uint dai = IVat(_vat).dai(_urn);
+    function normalizePaybackAmount(address _vat, uint256 _daiBalance, address _urn, bytes32 _ilk) internal view returns (int amount) {
 
         (, uint rate,,,) = IVat(_vat).ilks(_ilk);
         (, uint art) = IVat(_vat).urns(_ilk, _urn);
 
-        amount = toPositiveInt(dai / rate);
+        amount = toPositiveInt(_daiBalance / rate);
         amount = uint(amount) <= art ? - amount : - toPositiveInt(art);
     }
 
@@ -104,12 +106,30 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
         return address(IJoin(_joinAddr).gem());
     }
 
+    function getUrnAndIlk(address _mcdManager, uint256 _vaultId) public view returns (address urn, bytes32 ilk) {
+        if (_mcdManager == CROPPER) {
+            address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
+            urn = ICropper(CROPPER).proxy(owner);
+            ilk = ICdpRegistry(CDP_REGISTRY).ilks(_vaultId);
+        } else {
+            urn = IManager(_mcdManager).urns(_vaultId);
+            ilk = IManager(_mcdManager).ilks(_vaultId);
+        }
+    }
+
     /// @notice Gets CDP info (collateral, debt)
     /// @param _manager Manager contract
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
     function getCdpInfo(IManager _manager, uint _cdpId, bytes32 _ilk) public view returns (uint, uint) {
-        address urn = _manager.urns(_cdpId);
+        address urn;
+
+        if (address(_manager) == CROPPER) {
+            address owner = ICdpRegistry(CDP_REGISTRY).owns(_cdpId);
+            urn = ICropper(CROPPER).proxy(owner);
+        } else {
+            urn = _manager.urns(_cdpId);
+        }
 
         (uint collateral, uint debt) = vat.urns(_ilk, urn);
         (,uint rate,,,) = vat.ilks(_ilk);
@@ -121,7 +141,15 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
     /// @param _manager Manager contract
     /// @param _cdpId Id of the CDP
     function getOwner(IManager _manager, uint _cdpId) public view returns (address) {
-        DSProxy proxy = DSProxy(uint160(_manager.owns(_cdpId)));
+        address owner;
+
+        if (address(_manager) == CROPPER) {
+            owner = ICdpRegistry(CDP_REGISTRY).owns(_cdpId);
+        } else {
+            owner = _manager.owns(_cdpId);
+        }
+
+        DSProxy proxy = DSProxy(uint160(owner));
 
         return proxy.owner();
     }

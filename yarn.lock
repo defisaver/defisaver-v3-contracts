@@ -168,11 +168,11 @@
   dependencies:
     "chalk" "^4.0.0"
 
-"@defisaver/sdk@github:DecenterApps/defisaver-sdk":
-  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#2a3b1bfc30e069af6f9d42b47779503c82f72892"
-  "version" "0.1.12"
+"@defisaver/sdk@github:DecenterApps/defisaver-sdk#feature/mcd-crop-join":
+  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#465c9d7ac886b566f6e956041bd2c5a66cc57f35"
+  "version" "0.1.18"
   dependencies:
-    "@defisaver/tokens" "^1.3.64"
+    "@defisaver/tokens" "^1.4.2"
     "@ethersproject/address" "^5.0.10"
     "@ethersproject/solidity" "^5.0.9"
     "axios" "^0.21.1"
@@ -180,14 +180,12 @@
     "web3-eth-abi" "^1.3.0"
     "web3-utils" "^1.3.0"
 
-"@defisaver/tokens@^1.3.30", "@defisaver/tokens@^1.3.64":
-  "integrity" "sha512-Z7mWVMp6S55QZcZ9FIxR8OnDLGuVqgVcCWyjfuEKxyh2WH+2Q3iybeL3J728rLpAICOcARm5Ue1cOoK08+UZBw=="
-  "resolved" "https://registry.npmjs.org/@defisaver/tokens/-/tokens-1.3.73.tgz"
-  "version" "1.3.73"
+"@defisaver/tokens@^1.3.30", "@defisaver/tokens@^1.4.2":
+  "integrity" "sha512-ERQAQ+xVKIRCYpNz6sCuRft42kzud3O+jwBdSsqN9RBdLOhM5w4dIGW4CE6MLf4CwNlNAf+ihovrxhr/tp/r3w=="
+  "resolved" "https://registry.npmjs.org/@defisaver/tokens/-/tokens-1.4.4.tgz"
+  "version" "1.4.4"
   dependencies:
     "decimal.js" "^10.2.1"
-    "react" "^16.8.0"
-    "uuid" "^8.3.2"
 
 "@ensdomains/ens@^0.4.4":
   "integrity" "sha512-JSvpj1iNMFjK6K+uVl4unqMoa9rf5jopb8cya5UGBWz23Nw8hSNT7efgUx4BTlAPAgpNlEioUfeTyQ6J9ZvTVw=="
@@ -6442,7 +6440,7 @@
   "resolved" "https://registry.npmjs.org/js-sha3/-/js-sha3-0.8.0.tgz"
   "version" "0.8.0"
 
-"js-tokens@^3.0.0 || ^4.0.0", "js-tokens@^4.0.0":
+"js-tokens@^3.0.0 || ^4.0.0":
   "integrity" "sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ=="
   "resolved" "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz"
   "version" "4.0.0"
@@ -6451,6 +6449,11 @@
   "integrity" "sha1-mGbfOVECEw449/mWvOtlRDIJwls="
   "resolved" "https://registry.npmjs.org/js-tokens/-/js-tokens-3.0.2.tgz"
   "version" "3.0.2"
+
+"js-tokens@^4.0.0":
+  "integrity" "sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ=="
+  "resolved" "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz"
+  "version" "4.0.0"
 
 "js-yaml@^3.12.0", "js-yaml@^3.13.0", "js-yaml@^3.13.1", "js-yaml@^3.14.0", "js-yaml@3.x":
   "integrity" "sha512-/4IbIeHcD9VMHFqDR/gQ7EdZdLimOvW2DdcxFjdyyZ9NsbS+ccrXqVWDtab/lRl5AlUqmpBx8EhPaWR+OtY17A=="
@@ -7030,13 +7033,6 @@
   "version" "3.0.0"
 
 "loose-envify@^1.0.0":
-  "integrity" "sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q=="
-  "resolved" "https://registry.npmjs.org/loose-envify/-/loose-envify-1.4.0.tgz"
-  "version" "1.4.0"
-  dependencies:
-    "js-tokens" "^3.0.0 || ^4.0.0"
-
-"loose-envify@^1.1.0", "loose-envify@^1.4.0":
   "integrity" "sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q=="
   "resolved" "https://registry.npmjs.org/loose-envify/-/loose-envify-1.4.0.tgz"
   "version" "1.4.0"
@@ -8359,15 +8355,6 @@
   dependencies:
     "asap" "~2.0.6"
 
-"prop-types@^15.6.2":
-  "integrity" "sha512-8QQikdH7//R2vurIJSutZ1smHYTcLpRWEOlHnzcWHmBYrOGUysKwSsrC89BCiFj3CbrfJ/nXFdJepOVrY1GCHQ=="
-  "resolved" "https://registry.npmjs.org/prop-types/-/prop-types-15.7.2.tgz"
-  "version" "15.7.2"
-  dependencies:
-    "loose-envify" "^1.4.0"
-    "object-assign" "^4.1.1"
-    "react-is" "^16.8.1"
-
 "proxy-addr@~2.0.5":
   "integrity" "sha512-dh/frvCBVmSsDYzw6n926jv974gddhkFPfiN8hPOi30Wax25QZyZEGveluCgliBnqmuM+UJmBErbAUFIoDbjOw=="
   "resolved" "https://registry.npmjs.org/proxy-addr/-/proxy-addr-2.0.6.tgz"
@@ -8552,20 +8539,6 @@
     "http-errors" "1.7.2"
     "iconv-lite" "0.4.24"
     "unpipe" "1.0.0"
-
-"react-is@^16.8.1":
-  "integrity" "sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ=="
-  "resolved" "https://registry.npmjs.org/react-is/-/react-is-16.13.1.tgz"
-  "version" "16.13.1"
-
-"react@^16.8.0":
-  "integrity" "sha512-0X2CImDkJGApiAlcf0ODKIneSwBPhqJawOa5wCtKbu7ZECrmS26NvtSILynQ66cgkT/RJ4LidJOc3bUESwmU8g=="
-  "resolved" "https://registry.npmjs.org/react/-/react-16.14.0.tgz"
-  "version" "16.14.0"
-  dependencies:
-    "loose-envify" "^1.1.0"
-    "object-assign" "^4.1.1"
-    "prop-types" "^15.6.2"
 
 "read-pkg-up@^1.0.1":
   "integrity" "sha1-nWPBMnbAZZGNV/ACpX9AobZD+wI="

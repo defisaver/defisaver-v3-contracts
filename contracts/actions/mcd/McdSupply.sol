@@ -4,8 +4,11 @@ pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../../interfaces/mcd/IManager.sol";
-import "../../interfaces/mcd//IVat.sol";
-import "../../interfaces/mcd//IJoin.sol";
+import "../../interfaces/mcd/IVat.sol";
+import "../../interfaces/mcd/IJoin.sol";
+import "../../interfaces/mcd/ICropJoin.sol";
+import "../../interfaces/mcd/ICropper.sol";
+import "../../interfaces/mcd/ICdpRegistry.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
@@ -21,8 +24,13 @@ contract McdSupply is ActionBase, McdHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable override returns (bytes32) {
-        (uint256 vaultId, uint256 amount, address joinAddr, address from, address mcdManager) =
-            parseInputs(_callData);
+        (
+            uint256 vaultId,
+            uint256 amount,
+            address joinAddr,
+            address from,
+            address mcdManager
+        ) = parseInputs(_callData);
 
         vaultId = _parseParamUint(vaultId, _paramMapping[0], _subData, _returnValues);
         amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
@@ -36,8 +44,13 @@ contract McdSupply is ActionBase, McdHelper {
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes[] memory _callData) public payable override {
-        (uint256 vaultId, uint256 amount, address joinAddr, address from, address mcdManager) =
-            parseInputs(_callData);
+        (
+            uint256 vaultId,
+            uint256 amount,
+            address joinAddr,
+            address from,
+            address mcdManager
+        ) = parseInputs(_callData);
 
         _mcdSupply(vaultId, amount, joinAddr, from, mcdManager);
     }
@@ -63,7 +76,6 @@ contract McdSupply is ActionBase, McdHelper {
         address _mcdManager
     ) internal returns (uint256) {
         address tokenAddr = getTokenFromJoin(_joinAddr);
-        IManager mcdManager = IManager(_mcdManager);
 
         // if amount type(uint).max, pull current _from balance
         if (_amount == type(uint256).max) {
@@ -72,21 +84,15 @@ contract McdSupply is ActionBase, McdHelper {
 
         // Pull the underlying token and join the maker join pool
         tokenAddr.pullTokensIfNeeded(_from, _amount);
-        tokenAddr.approveToken(_joinAddr, _amount);
-        IJoin(_joinAddr).join(address(this), _amount);
 
         // format the amount we need for frob
-        int256 convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
+        int256 vatAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
 
-        // Supply to the vault balance
-        vat.frob(
-            mcdManager.ilks(_vaultId),
-            mcdManager.urns(_vaultId),
-            address(this),
-            address(this),
-            convertAmount,
-            0
-        );
+        if (_mcdManager == CROPPER) {         
+            _cropperSupply(_vaultId, tokenAddr, _joinAddr, _amount, vatAmount);
+        } else {
+            _mcdManagerSupply(_mcdManager, _vaultId, tokenAddr, _joinAddr, _amount, vatAmount);
+        }
 
         logger.Log(
             address(this),
@@ -96,6 +102,46 @@ contract McdSupply is ActionBase, McdHelper {
         );
 
         return _amount;
+    }
+
+    function _cropperSupply(
+        uint256 _vaultId,
+        address _tokenAddr,
+        address _joinAddr,
+        uint256 _amount,
+        int256 _vatAmount
+    ) internal {
+        bytes32 ilk = ICdpRegistry(CDP_REGISTRY).ilks(_vaultId);
+        address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
+
+        _tokenAddr.approveToken(CROPPER, _amount);
+
+        ICropper(CROPPER).join(_joinAddr, owner, _amount);
+        ICropper(CROPPER).frob(ilk, owner, owner, owner, _vatAmount, 0);
+    }
+
+    function _mcdManagerSupply(
+        address _mcdManager,
+        uint256 _vaultId,
+        address _tokenAddr,
+        address _joinAddr,
+        uint256 _amount,
+        int256 _vatAmount
+    ) internal {
+        IManager mcdManager = IManager(_mcdManager);
+
+        _tokenAddr.approveToken(_joinAddr, _amount);
+        IJoin(_joinAddr).join(address(this), _amount);
+
+        // Supply to the vault balance
+        vat.frob(
+            mcdManager.ilks(_vaultId),
+            mcdManager.urns(_vaultId),
+            address(this),
+            address(this),
+            _vatAmount,
+            0
+        );
     }
 
     function parseInputs(bytes[] memory _callData)

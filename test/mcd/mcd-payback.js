@@ -14,6 +14,7 @@ describe('Mcd-Payback', function () {
         await redeploy('McdSupply');
         await redeploy('McdGenerate');
         await redeploy('McdPayback');
+        await redeploy('McdView');
     });
 
     it('... should payback DAI for vault', async () => {

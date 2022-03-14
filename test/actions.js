@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const dfs = require('@defisaver/sdk');
 const hre = require('hardhat');
 
@@ -18,7 +19,7 @@ const {
     // getGasUsed,
     mineBlock,
 } = require('./utils');
-const { getVaultsForUser, MCD_MANAGER_ADDR } = require('./utils-mcd');
+const { getVaultsForUser, getCropJoinVaultIds, MCD_MANAGER_ADDR } = require('./utils-mcd');
 const { getSecondTokenAmount } = require('./utils-uni');
 const { LiquityActionIds, getHints, getRedemptionHints } = require('./utils-liquity');
 const { execShellCommand } = require('../scripts/hardhat-tasks-functions');
@@ -389,17 +390,28 @@ const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) =>
 |  |  |  |  /  _____  \  |  .  \  |  |____ |  |\  \----.
 |__|  |__| /__/     \__\ |__|\__\ |_______|| _| `._____|
 */
-const openMcd = async (proxy, makerAddresses, joinAddr) => {
-    const openMyVault = new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR);
+const openMcd = async (proxy, makerAddresses, joinAddr, mcdManager = MCD_MANAGER_ADDR) => {
+    const openMyVault = new dfs.actions.maker.MakerOpenVaultAction(joinAddr, mcdManager);
     const functionData = openMyVault.encodeForDsProxyCall()[1];
 
-    await executeAction('McdOpen', functionData, proxy);
+    if (mcdManager === MCD_MANAGER_ADDR) {
+        await executeAction('McdOpen', functionData, proxy);
 
-    const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
+        const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
 
-    return vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
+        return vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
+    // eslint-disable-next-line no-else-return
+    } else {
+        let vaultIds = await getCropJoinVaultIds(proxy.address);
+
+        if (vaultIds.length === 0) {
+            await executeAction('McdOpen', functionData, proxy);
+            vaultIds = await getCropJoinVaultIds(proxy.address);
+        }
+        return vaultIds[vaultIds.length - 1].toString();
+    }
 };
-const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
+const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from, mcdManager = MCD_MANAGER_ADDR) => {
     // AAVE & renBTC
     if (
         tokenAddr.toLowerCase() === '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9'.toLowerCase()
@@ -423,52 +435,64 @@ const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from) => {
         amount,
         joinAddr,
         from,
-        MCD_MANAGER_ADDR,
+        mcdManager,
     );
     const functionData = mcdSupplyAction.encodeForDsProxyCall()[1];
 
     const tx = await executeAction('McdSupply', functionData, proxy);
     return tx;
 };
-const generateMcd = async (proxy, vaultId, amount, to) => {
+const generateMcd = async (proxy, vaultId, amount, to, mcdManager = MCD_MANAGER_ADDR) => {
     const mcdGenerateAction = new dfs.actions.maker.MakerGenerateAction(
         vaultId,
         amount,
         to,
-        MCD_MANAGER_ADDR,
+        mcdManager,
     );
     const functionData = mcdGenerateAction.encodeForDsProxyCall()[1];
 
     const tx = await executeAction('McdGenerate', functionData, proxy);
     return tx;
 };
-const paybackMcd = async (proxy, vaultId, amount, from, daiAddr) => {
+const paybackMcd = async (proxy, vaultId, amount, from, daiAddr, mcdManager = MCD_MANAGER_ADDR) => {
     await approve(daiAddr, proxy.address);
 
     const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
         vaultId,
         amount,
         from,
-        MCD_MANAGER_ADDR,
+        mcdManager,
     );
     const functionData = mcdPaybackAction.encodeForDsProxyCall()[1];
 
     const tx = await executeAction('McdPayback', functionData, proxy);
     return tx;
 };
-const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to) => {
+const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to, mcdManager = MCD_MANAGER_ADDR) => {
     const mcdWithdrawAction = new dfs.actions.maker.MakerWithdrawAction(
         vaultId,
         amount,
         joinAddr,
         to,
-        MCD_MANAGER_ADDR,
+        mcdManager,
     );
     const functionData = mcdWithdrawAction.encodeForDsProxyCall()[1];
 
     const tx = await executeAction('McdWithdraw', functionData, proxy);
     return tx;
 };
+const claimMcd = async (proxy, vaultId, joinAddr, to) => {
+    const mcdClaimAction = new dfs.actions.maker.MakerClaimAction(
+        vaultId,
+        joinAddr,
+        to,
+    );
+    const functionData = mcdClaimAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('McdClaim', functionData, proxy);
+    return tx;
+};
+
 const mcdGive = async (proxy, vaultId, newOwner, createProxy) => {
     const mcdGiveAction = new dfs.Action(
         'McdGive',
@@ -1486,6 +1510,7 @@ module.exports = {
     paybackMcd,
     withdrawMcd,
     openVault,
+    claimMcd,
     mcdGive,
     mcdMerge,
     openVaultForExactAmountInDecimals,
