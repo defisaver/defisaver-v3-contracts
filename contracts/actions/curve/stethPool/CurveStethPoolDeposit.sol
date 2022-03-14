@@ -18,8 +18,8 @@ contract CurveStethPoolDeposit is ActionBase {
     address constant internal STETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
 
     struct Params {
-        address from;         // address where to pull tokens from
-        address to;       // address that will receive the LP tokens
+        address from;           // address where to pull tokens from
+        address to;             // address that will receive the LP tokens
         uint256[2] amounts;     // amount of each token to deposit
         uint256 minMintAmount;  // minimum amount of LP tokens to accept
     }
@@ -58,12 +58,15 @@ contract CurveStethPoolDeposit is ActionBase {
     function _curveDeposit(Params memory _params) internal returns (uint256 receivedLp) {
         require(_params.to != address(0), "to cant be 0x0");
 
-        TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.amounts[0]);
-        TokenUtils.withdrawWeth(_params.amounts[0]);
-
-        STETH_ADDR.pullTokensIfNeeded(_params.from, _params.amounts[1]);
-        STETH_ADDR.approveToken(CURVE_STETH_POOL_ADDR, _params.amounts[1]);
-
+        if (_params.amounts[0] != 0) {
+            _params.amounts[0] = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.amounts[0]);
+            TokenUtils.withdrawWeth(_params.amounts[0]);
+        }
+        if (_params.amounts[1] != 0) {
+            _params.amounts[1] = STETH_ADDR.pullTokensIfNeeded(_params.from, _params.amounts[1]);
+            STETH_ADDR.approveToken(CURVE_STETH_POOL_ADDR, _params.amounts[1]);
+        }
+    
         receivedLp = ICurveStethPool(CURVE_STETH_POOL_ADDR).add_liquidity{
             value: _params.amounts[0]
         }(_params.amounts, _params.minMintAmount);
@@ -74,7 +77,7 @@ contract CurveStethPoolDeposit is ActionBase {
             address(this),
             msg.sender,
             "CurveStethPoolDeposit",
-            abi.encode(receivedLp)
+            abi.encode(_params.amounts[0], _params.amounts[1], receivedLp)
         );
     }
 

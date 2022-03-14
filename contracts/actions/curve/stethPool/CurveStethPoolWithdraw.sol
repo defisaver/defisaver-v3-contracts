@@ -18,8 +18,8 @@ contract CurveStethPoolWithdraw is ActionBase {
     address constant internal STETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
 
     struct Params {
-        address from;         // address where to pull lp tokens from
-        address to;       // address that will receive withdrawn tokens
+        address from;           // address where to pull lp tokens from
+        address to;             // address that will receive withdrawn tokens
         uint256[2] amounts;     // amount of each token to withdraw
         uint256 maxBurnAmount;  // max amount of LP tokens to burn
     }
@@ -66,8 +66,11 @@ contract CurveStethPoolWithdraw is ActionBase {
             _params.maxBurnAmount
         );
 
-        TokenUtils.depositWeth(_params.amounts[0]);
-        TokenUtils.WETH_ADDR.withdrawTokens(_params.to, _params.amounts[0]);
+        if (_params.amounts[0] != 0) {
+            TokenUtils.depositWeth(_params.amounts[0]);
+            TokenUtils.WETH_ADDR.withdrawTokens(_params.to, _params.amounts[0]);
+        }
+        
         STETH_ADDR.withdrawTokens(_params.to, _params.amounts[1]);
         // return unburned lp tokens to from
         STE_CRV_ADDR.withdrawTokens(_params.from, _params.maxBurnAmount.sub(burnedLp));
