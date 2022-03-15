@@ -65,6 +65,12 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
             checkedRatio = getRatio(triggerSubData.vaultId, triggerCallData.nextPrice);
             
             shouldTriggerNext = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
+
+            // must convert back to wad
+            if (triggerCallData.nextPrice != 0) {
+                triggerCallData.nextPrice = triggerCallData.nextPrice / 1e9;
+            }
+
             /// @dev if we don't have access to the next price on-chain this returns true, if we do this compares the nextPrice param we sent
             if (
                 !IMCDPriceVerifier(MCD_PRICE_VERIFIER).verifyVaultNextPrice(
