@@ -94,7 +94,7 @@ const getRedemptionHints = async (lusdAmount, from) => {
 
     const liquityView = await hre.ethers.getContractAt('LiquityView', getAddrFromRegistry('LiquityView'));
     const priceFeed = await hre.ethers.getContractAt('IPriceFeed', '0x4c517D4e2C851CA76d7eC94B805269Df0f2201De');
-    const collPrice = await priceFeed.fetchPrice();
+    const collPrice = await priceFeed.callStatic.fetchPrice();
 
     if (lusdAmount === hre.ethers.constants.MaxUint256) {
         const lusdAddr = getAssetInfo('LUSD').address;

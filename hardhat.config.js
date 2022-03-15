@@ -21,6 +21,10 @@ Dec.set({
     crypto: false,
 });
 
+const MAX_NODE_COUNT = 22;
+const testNetworks = Object.fromEntries([...Array(MAX_NODE_COUNT).keys()].map((c, i) => [
+    `local${i}`, { url: `http://127.0.0.1:${8545 + i}`, timeout: 10000000 },
+]));
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
@@ -29,6 +33,7 @@ module.exports = {
     defaultNetwork: 'fork',
     lightTesting: true,
     networks: {
+        ...testNetworks,
         local: {
             url: 'http://127.0.0.1:8545',
             timeout: 1000000,
