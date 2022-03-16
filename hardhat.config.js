@@ -23,7 +23,7 @@ Dec.set({
 
 const MAX_NODE_COUNT = 22;
 const testNetworks = Object.fromEntries([...Array(MAX_NODE_COUNT).keys()].map((c, i) => [
-    `local${i}`, { url: `http://127.0.0.1:${8545 + i}`, timeout: 10000000 },
+    `local${i}`, { url: `http://127.0.0.1:${8545 + i}`, timeout: 10000000, name: 'mainnet' },
 ]));
 /**
  * @type import('hardhat/config').HardhatUserConfig

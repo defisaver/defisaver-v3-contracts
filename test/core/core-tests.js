@@ -42,6 +42,7 @@ const dfsRegistryTest = async () => {
                 try {
                     await registry2.addNewContract(id1, contractAddr1, 0);
                 } catch (err) {
+                    console.log(err.toString());
                     expect(err.toString()).to.have.string('msg.sender not owner');
                 }
             });

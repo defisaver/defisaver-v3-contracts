@@ -9,8 +9,6 @@ describe('Unwrap-Eth', function () {
     before(async () => {
         await redeploy('WrapEth');
         await redeploy('UnwrapEth');
-        await redeploy('DFSSell');
-        await redeploy('UniswapWrapperV3');
         await redeploy('RecipeExecutor');
     });
     it('... should unwrap native WEth to Eth direct action', async () => {

@@ -6,7 +6,7 @@ describe('AutomationV2-Unsubscribe', function () {
     before(async () => {
     });
 
-    it('... should unsubscribe Aave subscription', async () => {
+    it('... should unsubscribe old automation subscription', async () => {
         await automationV2UnsubTest();
     });
 });

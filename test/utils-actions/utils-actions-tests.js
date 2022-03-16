@@ -102,16 +102,11 @@ const unwrapEthTest = async () => {
     describe('Unwrap-Eth', function () {
         this.timeout(80000);
 
-        let senderAcc; let proxy; let
-            uniWrapperAddr;
+        let senderAcc; let proxy;
 
         before(async () => {
-            uniWrapperAddr = await getAddrFromRegistry('UniswapWrapperV3');
-
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-
-            await setNewExchangeWrapper(senderAcc, uniWrapperAddr);
         });
         it('... should unwrap native WEth to Eth direct action', async () => {
             const amount = hre.ethers.utils.parseUnits('2', 18);
@@ -395,8 +390,9 @@ const automationV2UnsubTest = async () => {
         this.timeout(1000000);
 
         before(async () => {
-            await resetForkToBlock(13530577);
-            const blockNum = 13530577;
+            const blockNum = 14368070;
+
+            await resetForkToBlock(blockNum);
             expect(
                 await hre.ethers.provider.getBlockNumber(),
                 `This test should be ran at block number ${blockNum}`,
@@ -406,13 +402,13 @@ const automationV2UnsubTest = async () => {
 
         it('... should unsubscribe Mcd subscription', async () => {
             const mcdSubscriptionsAddr = '0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a';
-            const OWNER_ACC = '0xC48d4d15c2aE6037E9E9E4E79fC989feFAF4d6Fc';
-            const cdpId = 12190;
+            const CDP_OWNER_ACC = '0x8eceBBF3fA6d894476Cd9DD34D6A53DdD185233e';
+            const cdpId = 20648;
 
-            await impersonateAccount(OWNER_ACC);
+            await impersonateAccount(CDP_OWNER_ACC);
 
-            const ownerAcc = hre.ethers.provider.getSigner(OWNER_ACC);
-            const ownerProxy = await getProxy(OWNER_ACC);
+            const ownerAcc = hre.ethers.provider.getSigner(CDP_OWNER_ACC);
+            const ownerProxy = await getProxy(CDP_OWNER_ACC);
             const impersonatedProxy = ownerProxy.connect(ownerAcc);
 
             const mcdSubscriptions = new hre.ethers.Contract(
@@ -435,17 +431,17 @@ const automationV2UnsubTest = async () => {
                 'Couldn\'t unsubscribe the proxy.',
             ).to.be.false;
 
-            await stopImpersonatingAccount(OWNER_ACC);
+            await stopImpersonatingAccount(CDP_OWNER_ACC);
         });
 
         it('... should unsubscribe Compound subscription', async () => {
             const compoundSubscriptionsAddr = '0x52015EFFD577E08f498a0CCc11905925D58D6207';
-            const OWNER_ACC = '0x18625142e5E576C524329B2568884099E4D9caC1';
+            const COMPOUND_OWNER_ACC = '0xe10eB997d51C2AFCd3e0F80e0a984949b2ed3349';
 
-            await impersonateAccount(OWNER_ACC);
+            await impersonateAccount(COMPOUND_OWNER_ACC);
 
-            const ownerAcc = hre.ethers.provider.getSigner(OWNER_ACC);
-            const ownerProxy = await getProxy(OWNER_ACC);
+            const ownerAcc = hre.ethers.provider.getSigner(COMPOUND_OWNER_ACC);
+            const ownerProxy = await getProxy(COMPOUND_OWNER_ACC);
             const impersonatedProxy = ownerProxy.connect(ownerAcc);
 
             const compoundSubscriptions = new hre.ethers.Contract(
@@ -468,17 +464,17 @@ const automationV2UnsubTest = async () => {
                 'Couldn\'t unsubscribe the proxy.',
             ).to.be.false;
 
-            await stopImpersonatingAccount(OWNER_ACC);
+            await stopImpersonatingAccount(COMPOUND_OWNER_ACC);
         });
 
         it('... should unsubscribe Aave subscription', async () => {
             const aaveSubscriptionsAddr = '0x6B25043BF08182d8e86056C6548847aF607cd7CD';
-            const OWNER_ACC = '0x01d31Ad58827df47Fae2642AFFB5dE41b0891d93';
+            const AAVE_OWNER_ACC = '0x160FF555a7836d8bC027eDA92Fb524BecE5C9B88';
 
-            await impersonateAccount(OWNER_ACC);
+            await impersonateAccount(AAVE_OWNER_ACC);
 
-            const ownerAcc = hre.ethers.provider.getSigner(OWNER_ACC);
-            const ownerProxy = await getProxy(OWNER_ACC);
+            const ownerAcc = hre.ethers.provider.getSigner(AAVE_OWNER_ACC);
+            const ownerProxy = await getProxy(AAVE_OWNER_ACC);
             const impersonatedProxy = ownerProxy.connect(ownerAcc);
 
             const aaveSubscriptions = new hre.ethers.Contract(
@@ -501,7 +497,7 @@ const automationV2UnsubTest = async () => {
                 'Couldn\'t unsubscribe the proxy.',
             ).to.be.false;
 
-            await stopImpersonatingAccount(OWNER_ACC);
+            await stopImpersonatingAccount(AAVE_OWNER_ACC);
         });
     });
 };

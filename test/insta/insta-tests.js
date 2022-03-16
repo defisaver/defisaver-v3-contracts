@@ -7,9 +7,9 @@ const {
     impersonateAccount,
     stopImpersonatingAccount,
     balanceOf,
-    resetForkToBlock,
+    setBalance,
 } = require('../utils');
-const { pullTokensInstDSA } = require('../actions.js');
+const { pullTokensInstDSA } = require('../actions');
 const {
     AUNI_ADDR,
     AWETH_ADDR,
@@ -18,17 +18,14 @@ const {
 
 const instaPullTokensTest = async () => {
     describe('Pull tokens from DSA', function () {
-        this.timeout(80000);
+        this.timeout(150000);
 
         let proxy;
         let ownerAcc;
         let dsaContract;
         let dsaAddress;
-        /// @notice run on block number 12805354
         const OWNER_ACC = '0x6F6c0194A67c2727c61370e76042B3D92F3AC35E';
         before(async () => {
-            // TODO: 
-            // await resetForkToBlock(12805354);
             await redeploy('InstPullTokens');
             dsaAddress = '0xe9BEE24323AaAd3792836005a1Cb566C72B3FaD3';
             dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress);
@@ -36,17 +33,25 @@ const instaPullTokensTest = async () => {
 
         it('... pull aUni, aWETH, aDAI tokens from dsa', async () => {
             await impersonateAccount(OWNER_ACC);
+
+            const amount = hre.ethers.utils.parseUnits('1000', 18);
+
+            await setBalance(AUNI_ADDR, dsaAddress, amount);
+            await setBalance(AWETH_ADDR, dsaAddress, amount);
+            await setBalance(ADAI_ADDR, dsaAddress, amount);
+
             ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
             const dsaContractImpersonated = dsaContract.connect(ownerAcc);
+
+            proxy = await getProxy(OWNER_ACC);
 
             const ABI = [
                 'function add(address)',
             ];
             const iface = new hre.ethers.utils.Interface(ABI);
-            const data = iface.encodeFunctionData('add', [OWNER_ACC]);
+            const data = iface.encodeFunctionData('add', [proxy.address]);
 
-            dsaContractImpersonated.cast(['AUTHORITY-A'], [data], OWNER_ACC);
-            proxy = await getProxy(OWNER_ACC);
+            await dsaContractImpersonated.cast(['AUTHORITY-A'], [data], OWNER_ACC);
             const impersonatedProxy = proxy.connect(ownerAcc);
 
             const aUniBalanceBefore = await balanceOf(AUNI_ADDR, OWNER_ACC);

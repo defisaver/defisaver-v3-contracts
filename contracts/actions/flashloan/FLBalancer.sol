@@ -65,7 +65,7 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, Balance
         return _params.amounts[0];
     }
 
-    /// @notice Balancer FL callback function that formats and calls back TaskExecutor
+    /// @notice Balancer FL callback function that formats and calls back RecipeExecutor
     function receiveFlashLoan(
         address[] memory _tokens,
         uint256[] memory _amounts,

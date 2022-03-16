@@ -279,8 +279,8 @@ const setBalance = async (tokenAddr, userAddr, value) => {
         const tokenState = await tokenContract.callStatic.tokenState();
         // eslint-disable-next-line no-param-reassign
         tokenAddr = tokenState;
+    // eslint-disable-next-line no-empty
     } catch (error) {
-        console.log();
     }
     const slotInfo = await findBalancesSlot(tokenAddr);
     let index;

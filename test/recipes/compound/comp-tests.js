@@ -43,7 +43,7 @@ const compBoostRecipeTest = async () => {
         before(async () => {
             await redeploy('CompSupply');
             await redeploy('CompBorrow');
-            await redeploy('TaskExecutor');
+            await redeploy('RecipeExecutor');
             await redeploy('DFSSell');
             await redeploy('FLDyDx');
             await redeploy('FLAaveV2');
@@ -110,7 +110,7 @@ const compBoostRecipeTest = async () => {
 
                     const functionData = recipe.encodeForDsProxyCall();
 
-                    await executeAction('TaskExecutor', functionData[1], proxy);
+                    await executeAction('RecipeExecutor', functionData[1], proxy);
 
                     const collBalanceAfter = await balanceOf(collAddress, senderAcc.address);
                     const debtBalanceAfter = await balanceOf(
@@ -189,7 +189,7 @@ const compBoostRecipeTest = async () => {
 
             const functionData = recipe.encodeForDsProxyCall();
 
-            await executeAction('TaskExecutor', functionData[1], proxy);
+            await executeAction('RecipeExecutor', functionData[1], proxy);
             const collBalanceAfter = await balanceOf(collAddress, senderAcc.address);
             const debtBalanceAfter = await balanceOf(
                 getAssetInfo(debtAsset).address,
@@ -260,7 +260,7 @@ const compBoostRecipeTest = async () => {
 
             const functionData = recipe.encodeForDsProxyCall();
 
-            await executeAction('TaskExecutor', functionData[1], proxy);
+            await executeAction('RecipeExecutor', functionData[1], proxy);
             const collBalanceAfter = await balanceOf(collAddress, senderAcc.address);
             const debtBalanceAfter = await balanceOf(
                 getAssetInfo(debtAsset).address,
@@ -294,7 +294,7 @@ const compCreateRecipeTest = async () => {
         before(async () => {
             await redeploy('CompSupply');
             await redeploy('CompBorrow');
-            await redeploy('TaskExecutor');
+            await redeploy('RecipeExecutor');
             await redeploy('FLDyDx');
             await redeploy('DFSSell');
 
@@ -346,7 +346,7 @@ const compCreateRecipeTest = async () => {
 
                     const functionData = recipe.encodeForDsProxyCall();
 
-                    await executeAction('TaskExecutor', functionData[1], proxy);
+                    await executeAction('RecipeExecutor', functionData[1], proxy);
 
                     const collBalanceAfter = await balanceOf(collAddress, senderAcc.address);
                     const debtBalanceAfter = await balanceOf(
@@ -432,7 +432,7 @@ const compCreateRecipeTest = async () => {
 
             const functionData = recipe.encodeForDsProxyCall();
 
-            await executeAction('TaskExecutor', functionData[1], proxy);
+            await executeAction('RecipeExecutor', functionData[1], proxy);
 
             const collBalanceAfter = await balanceOf(collAddress, senderAcc.address);
             const debtBalanceAfter = await balanceOf(

@@ -9,7 +9,7 @@ describe('FL-DyDx', function () {
     before(async () => {
         await redeploy('FLDyDx');
         await redeploy('SendToken');
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
     });
 
     it('... should get DyDx flash loan', async () => {

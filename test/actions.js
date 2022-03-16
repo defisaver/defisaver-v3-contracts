@@ -494,7 +494,7 @@ const openVault = async (proxy, collType, collAmount, daiAmount) => {
 const openVaultForExactAmountInDecimals = async (
     makerAddresses, proxy, joinAddr, tokenData, collAmount, daiAmount,
 ) => {
-    const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
+    const vaultId = await openMcd(proxy, joinAddr);
     const from = proxy.signer.address;
     const to = proxy.signer.address;
     const amountDai = hre.ethers.utils.parseUnits(daiAmount, 18);

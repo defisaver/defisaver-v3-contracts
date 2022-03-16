@@ -9,7 +9,7 @@ describe('FL-Balancer', function () {
     before(async () => {
         await redeploy('FLBalancer');
         await redeploy('SendToken');
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
     });
 
     it('... should get a Balancer flash loan', async () => {

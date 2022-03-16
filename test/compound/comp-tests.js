@@ -1,7 +1,11 @@
 /* eslint-disable no-await-in-loop */
-const { getAssetInfo, compoundCollateralAssets } = require('@defisaver/tokens');
+const { assets, getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const hre = require('hardhat');
+
+// eslint-disable-next-line max-len
+const compoundCollateralAssets = assets.filter((a) => a.compoundCollateral).map((a) => getAssetInfo(a.symbol));
+
 const {
     supplyComp, withdrawComp, borrowComp, paybackComp, claimComp,
 } = require('../actions');

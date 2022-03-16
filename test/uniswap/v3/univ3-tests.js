@@ -23,7 +23,7 @@ const {
     uniV3Supply,
     uniV3Withdraw,
     uniV3Collect,
-} = require('../../actions.js');
+} = require('../../actions');
 
 const univ3CreatePoolTest = async () => {
     describe('Uni-Create-V3', () => {
@@ -50,7 +50,7 @@ const univ3CreatePoolTest = async () => {
         };
 
         before(async () => {
-            await resetForkToBlock(13369651);
+            await resetForkToBlock(14368070);
             await redeploy('UniCreatePoolV3');
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
@@ -316,14 +316,14 @@ const uniV3SupplyTest = async () => {
             await expect(uniV3Mint(proxy, tokenDataA.address,
                 tokenDataB.address, uniPairs[i].fee, uniPairs[i].tickLower,
                 uniPairs[i].tickUpper, amount0, amount1, to, from))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
 
             const lastPositionIndex = numberOfPositionsBefore.toNumber();
             const tokenId = await positionManager.tokenOfOwnerByIndex(to, lastPositionIndex);
 
             await expect(uniV3Supply(proxy, tokenId.toNumber(), amount0, amount1,
                 from, tokenDataA.address, tokenDataB.address))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
         }).timeout(50000);
     });
 };
@@ -422,21 +422,21 @@ const uniV3WithdrawTest = async () => {
             await expect(uniV3Mint(proxy, tokenDataA.address,
                 tokenDataB.address, uniPairs[i].fee, uniPairs[i].tickLower,
                 uniPairs[i].tickUpper, amount0, amount1, to, from))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
 
             const lastPositionIndex = numberOfPositionsBefore.toNumber();
             const tokenId = await positionManager.tokenOfOwnerByIndex(to, lastPositionIndex);
 
             await expect(uniV3Supply(proxy, tokenId.toNumber(), amount0, amount1,
                 from, tokenDataA.address, tokenDataB.address))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
 
             await positionManager.approve(proxy.address, tokenId);
             const position = await positionManager.positions(tokenId);
             const liquidityAfterSupply = position.liquidity;
 
             await expect(uniV3Withdraw(proxy, tokenId.toNumber(), liquidityAfterSupply, to))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
         }).timeout(50000);
     });
 };
@@ -513,13 +513,13 @@ const uniV3CollectTest = async () => {
             await expect(uniV3Mint(proxy, tokenDataA.address,
                 tokenDataB.address, uniPairs[i].fee, uniPairs[i].tickLower,
                 uniPairs[i].tickUpper, amount0, amount1, to, from))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
             const lastPositionIndex = numberOfPositionsBefore.toNumber();
             await depositToWeth(hre.ethers.utils.parseUnits('20', 18));
             const tokenId = await positionManager.tokenOfOwnerByIndex(to, lastPositionIndex);
             await positionManager.approve(proxy.address, tokenId);
             await expect(uniV3Collect(proxy, tokenId, to, MAX_UINT128, MAX_UINT128))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
             const position = await positionManager.positions(tokenId);
             expect(position.tokensOwed0.add(position.tokensOwed1)).to.be.eq(0);
         }).timeout(50000);

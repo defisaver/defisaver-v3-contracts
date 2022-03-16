@@ -71,7 +71,7 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
         return _amount;
     }
 
-    /// @notice ERC3156 callback function that formats and calls back TaskExecutor
+    /// @notice ERC3156 callback function that formats and calls back RecipeExecutor
     function onFlashLoan(
         address _initiator,
         address _token,
