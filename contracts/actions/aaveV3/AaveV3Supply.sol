@@ -4,10 +4,10 @@ pragma solidity =0.8.10;
 
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
-import "./helpers/L2AaveV3Helper.sol";
+import "./helpers/AaveV3Helper.sol";
 
 /// @title Supply a token to an Aave market
-contract AaveV3Supply is ActionBase, L2AaveV3Helper {
+contract AaveV3Supply is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
     struct Params {
@@ -41,8 +41,13 @@ contract AaveV3Supply is ActionBase, L2AaveV3Helper {
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes calldata _callData) public payable override {
-        
-        Params memory params = decodeInputs(_callData);
+        Params memory params = parseInputs(_callData);
+        (, bytes memory logData) = _supply(params.market, params.amount, params.from, params.assetId, params.enableAsColl, params.onBehalf);
+        logger.logActionDirectEvent("AaveV3Supply", logData);
+    }
+
+    function executeActionDirectL2() public payable {
+        Params memory params = decodeInputs(msg.data[4:]);
         (, bytes memory logData) = _supply(params.market, params.amount, params.from, params.assetId, params.enableAsColl, params.onBehalf);
         logger.logActionDirectEvent("AaveV3Supply", logData);
     }
@@ -59,7 +64,7 @@ contract AaveV3Supply is ActionBase, L2AaveV3Helper {
     /// @param _market Address provider for specific market
     /// @param _amount Amount of tokens to be deposited
     /// @param _from Where are we pulling the supply tokens amount from
-    /// @param _assetId The address of the token to be deposited
+    /// @param _assetId The id of the token to be deposited
     /// @param _enableAsColl If the supply asset should be collateral
     /// @param _onBehalf For what user we are supplying the tokens, defaults to proxy
     function _supply(
@@ -71,10 +76,10 @@ contract AaveV3Supply is ActionBase, L2AaveV3Helper {
         address _onBehalf
     ) internal returns (uint256, bytes memory) {
         IPoolV3 lendingPool = getLendingPool(_market);
-        address _tokenAddr = lendingPool.getReserveAddressById(_assetId);
+        address tokenAddr = lendingPool.getReserveAddressById(_assetId);
         // if amount is set to max, take the whole _from balance
         if (_amount == type(uint256).max) {
-            _amount = _tokenAddr.getBalance(_from);
+            _amount = tokenAddr.getBalance(_from);
         }
 
         // default to onBehalf of proxy
@@ -83,19 +88,19 @@ contract AaveV3Supply is ActionBase, L2AaveV3Helper {
         }
 
         // pull tokens to proxy so we can supply
-        _tokenAddr.pullTokensIfNeeded(_from, _amount);
+        tokenAddr.pullTokensIfNeeded(_from, _amount);
 
         // approve aave pool to pull tokens
-        _tokenAddr.approveToken(address(lendingPool), _amount);
+        tokenAddr.approveToken(address(lendingPool), _amount);
         // deposit in behalf of the proxy
-        lendingPool.supply(_tokenAddr, _amount, _onBehalf, 0);
+        lendingPool.supply(tokenAddr, _amount, _onBehalf, 0);
         if (_enableAsColl) {
             // enableAsCollateral(_market, _tokenAddr, true);
-            lendingPool.setUserUseReserveAsCollateral(_tokenAddr, true);
+            lendingPool.setUserUseReserveAsCollateral(tokenAddr, true);
         }
         bytes memory logData = abi.encode(
             _market,
-            _tokenAddr,
+            tokenAddr,
             _amount,
             _from,
             _onBehalf,
@@ -116,44 +121,21 @@ contract AaveV3Supply is ActionBase, L2AaveV3Helper {
         encodedInput = bytes.concat(encodedInput, bytes32(params.amount));
 
         encodedInput = bytes.concat(encodedInput, bytes20(params.from));
-
+        encodedInput = bytes.concat(encodedInput, boolToBytes(params.enableAsColl));
         encodedInput = bytes.concat(encodedInput, boolToBytes(params.useOnBehalf));
 
         if (params.useOnBehalf) {
             encodedInput = bytes.concat(encodedInput, bytes20(params.onBehalf));
         }
-        encodedInput = bytes.concat(encodedInput, boolToBytes(params.enableAsColl));
     }
 
     function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        encodedInput = encodedInput[64:];
         params.market = address(bytes20(encodedInput[0:20]));
         params.assetId = uint16(bytes2(encodedInput[20:22]));
         params.amount = uint256(bytes32(encodedInput[22:54]));
         params.from = address(bytes20(encodedInput[54:74]));
-        params.useOnBehalf = bytesToBool(bytes1(encodedInput[74:75]));
-
-        if (params.useOnBehalf) {
-            params.onBehalf = address(bytes20(encodedInput[75:95]));
-            params.enableAsColl = bytesToBool(bytes1(encodedInput[95:96]));
-        } else {
-            params.onBehalf = address(0);
-            params.enableAsColl = bytesToBool(bytes1(encodedInput[75:76]));
-        }
-    }
-
-    function boolToBytes(bool x) internal pure returns (bytes1 r) {
-       if (x) {
-           r = bytes1(uint8(1));
-       } else {
-           r = bytes1(uint8(0));
-       }
-    }
-
-    function bytesToBool(bytes1 x) internal pure returns (bool r) {
-        if (uint8(x) == 0) {
-            return false;
-        }
-        return true;
+        params.enableAsColl = bytesToBool(bytes1(encodedInput[74:75]));
+        params.useOnBehalf = bytesToBool(bytes1(encodedInput[75:76]));
+        params.onBehalf = (params.useOnBehalf ? address(bytes20(encodedInput[76:96])) : address(0));
     }
 }

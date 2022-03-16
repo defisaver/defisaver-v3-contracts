@@ -13,7 +13,7 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
 
     struct Params {
         address market;
-        address tokenAddr;
+        uint16 assetId;
         uint256 amount;
         address to;
     }
@@ -28,11 +28,10 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
         Params memory params = parseInputs(_callData);
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
-        params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 withdrawnAmount, bytes memory logData) = _withdraw(params.market, params.tokenAddr, params.amount, params.to);
+        (uint256 withdrawnAmount, bytes memory logData) = _withdraw(params.market, params.assetId, params.amount, params.to);
         emit ActionEvent("AaveV3Withdraw", logData);
         return bytes32(withdrawnAmount);
     }
@@ -40,8 +39,14 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _withdraw(params.market, params.tokenAddr, params.amount, params.to);
+        (, bytes memory logData) = _withdraw(params.market, params.assetId, params.amount, params.to);
         logger.logActionDirectEvent("AaveV3Withdraw", logData);
+    }
+
+    function executeActionDirectL2() public payable {
+        Params memory params = decodeInputs(msg.data[4:]);
+        (, bytes memory logData) = _withdraw(params.market, params.assetId, params.amount, params.to);
+        logger.logActionDirectEvent("AaveV3Supply", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -53,36 +58,52 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
 
     /// @notice User withdraws tokens from the Aave protocol
     /// @param _market Address provider for specific market
-    /// @param _tokenAddr The address of the token to be withdrawn
+    /// @param _assetId The id of the token to be deposited
     /// @param _amount Amount of tokens to be withdrawn -> send type(uint).max for whole amount
     /// @param _to Where the withdrawn tokens will be sent
     function _withdraw(
         address _market,
-        address _tokenAddr,
+        uint16 _assetId,
         uint256 _amount,
         address _to
     ) internal returns (uint256, bytes memory) {
         IPoolV3 lendingPool = getLendingPool(_market);
+        address tokenAddr = lendingPool.getReserveAddressById(_assetId);
+
         uint256 tokenBefore;
 
         // only need to remember this is _amount is max, no need to waste gas otherwise
         if (_amount == type(uint256).max) {
-            tokenBefore = _tokenAddr.getBalance(_to);
+            tokenBefore = tokenAddr.getBalance(_to);
         }
 
         // withdraw underlying tokens from aave and send _to address
-        lendingPool.withdraw(_tokenAddr, _amount, _to);
+        lendingPool.withdraw(tokenAddr, _amount, _to);
 
         // if the input amount is max calc. what was the exact _amount
         if (_amount == type(uint256).max) {
-            _amount = _tokenAddr.getBalance(_to) - tokenBefore;
+            _amount = tokenAddr.getBalance(_to) - tokenBefore;
         }
 
-        bytes memory logData = abi.encode(_market, _tokenAddr, _amount, _to);
+        bytes memory logData = abi.encode(_market, tokenAddr, _amount, _to);
         return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
+    }
+
+    function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
+        encodedInput = bytes.concat(encodedInput, bytes20(params.market));
+        encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
+        encodedInput = bytes.concat(encodedInput, bytes32(params.amount));
+        encodedInput = bytes.concat(encodedInput, bytes20(params.to));
+    }
+
+    function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
+        params.market = address(bytes20(encodedInput[0:20]));
+        params.assetId = uint16(bytes2(encodedInput[20:22]));
+        params.amount = uint256(bytes32(encodedInput[22:54]));
+        params.to = address(bytes20(encodedInput[54:74]));
     }
 }
