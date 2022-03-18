@@ -9,10 +9,14 @@ import "../interfaces/mcd/IManager.sol";
 import "../interfaces/mcd/ICropper.sol";
 import "../interfaces/mcd/ISpotter.sol";
 import "../interfaces/mcd/IVat.sol";
+import "../interfaces/IDSProxy.sol";
 
 /// @title Getter contract for Vault info from Maker protocol
 contract McdView is DSMath, McdHelper {
     address public constant VAT_ADDRESS = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;
+
+    address public constant MCD_MANAGER = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
+
     ISpotter public constant spotter = ISpotter(SPOTTER_ADDRESS);
 
     /// @notice Gets Vault info (collateral, debt)
@@ -36,6 +40,34 @@ contract McdView is DSMath, McdHelper {
         (, uint256 rate, , , ) = vat.ilks(_ilk);
 
         return (collateral, rmul(debt, rate));
+    }
+
+    function getCdpInfo(uint _cdpId) external view
+        returns (address urn, address owner, address userAddr, bytes32 ilk, uint collateral, uint debt) {
+
+        IManager manager = IManager(MCD_MANAGER);
+        owner = manager.owns(_cdpId);
+
+        if (owner != CDP_REGISTRY) {
+            ilk = manager.ilks(_cdpId);
+            urn = manager.urns(_cdpId);
+            owner = manager.owns(_cdpId);
+        } else {
+            owner = ICdpRegistry(CDP_REGISTRY).owns(_cdpId);
+            urn = ICropper(CROPPER).proxy(owner);
+            ilk = ICdpRegistry(CDP_REGISTRY).ilks(_cdpId);
+        }
+
+         try this._getProxyOwner(owner) returns (address user) {
+                userAddr = user;
+            } catch {}
+
+        (collateral, debt) = vat.urns(ilk, urn);
+    }
+
+    function _getProxyOwner(address owner) external view returns (address userAddr) {
+        IDSProxy proxy = IDSProxy(owner);
+        userAddr = proxy.owner();
     }
 
     /// @notice Gets a price of the asset
