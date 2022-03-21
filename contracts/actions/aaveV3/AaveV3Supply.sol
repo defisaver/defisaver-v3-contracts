@@ -43,13 +43,13 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
     function executeActionDirect(bytes calldata _callData) public payable override {
         Params memory params = parseInputs(_callData);
         (, bytes memory logData) = _supply(params.market, params.amount, params.from, params.assetId, params.enableAsColl, params.onBehalf);
-        logger.logActionDirectEvent("AaveV3Supply", logData);
+        //logger.logActionDirectEvent("AaveV3Supply", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
         (, bytes memory logData) = _supply(params.market, params.amount, params.from, params.assetId, params.enableAsColl, params.onBehalf);
-        logger.logActionDirectEvent("AaveV3Supply", logData);
+        //logger.logActionDirectEvent("AaveV3Supply", logData);
     }
 
     /// @inheritdoc ActionBase

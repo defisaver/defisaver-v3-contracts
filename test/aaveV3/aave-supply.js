@@ -1,13 +1,12 @@
 const { expect } = require('chai');
 const dfs = require('@defisaver/sdk');
 
-const { getAssetInfo } = require('@defisaver/tokens');
 const hre = require('hardhat');
 
 const {
-    getProxy, balanceOf, setBalance, approve, nullAddress, getGasUsed,
-} = require('../../utils');
-const { deployContract } = require('../../../scripts/utils/deployer');
+    getProxy, balanceOf, setBalance, approve, getGasUsed,
+} = require('../utils');
+const { deployContract } = require('../../scripts/utils/deployer');
 
 describe('Aave-Supply-L2', function () {
     this.timeout(150000);
@@ -20,9 +19,9 @@ describe('Aave-Supply-L2', function () {
         aaveContract = await deployContract('AaveV3Supply');
     });
 
-    it('... should supply to Aave V3 on kovan optimism', async () => {
-        const WETH_ADDRESS = '0x0AB1917A0cf92cdcf7F7b637EaC3A46BBBE41409';
-        const aWETH = '0x27271c499C0545592dB80eBc60fE888c8f15dc79';
+    it('... should supply WETH to Aave V3 optimism', async () => {
+        const WETH_ADDRESS = '0x4200000000000000000000000000000000000006';
+        const aWETH = '0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8';
 
         const amount = hre.ethers.utils.parseUnits('10', 18);
         await setBalance(WETH_ADDRESS, senderAcc.address, amount);
@@ -32,28 +31,17 @@ describe('Aave-Supply-L2', function () {
 
         await approve(WETH_ADDRESS, proxy.address);
 
-        const AAVE_MARKET_KOVAN_OPTIMISM = '0xFc7215C9498Fc12b22Bc0ed335871Db4315f03d3';
+        const AAVE_MARKET_OPTIMISM = '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb';
 
         aaveContract = await aaveContract.connect(senderAcc);
 
-        const pool = await hre.ethers.getContractAt('IPoolV3', '0x3Ee0444c892aAD6B225Ef20551116f79C52554AA');
+        const pool = await hre.ethers.getContractAt('IL2PoolV3', '0x794a61358D6845594F94dc1DB02A252b5b4814aD');
 
         const reserveData = await pool.getReserveData(WETH_ADDRESS);
         console.log(reserveData.id);
 
-        const encodedArgs = await aaveContract.encodeInputs([
-            AAVE_MARKET_KOVAN_OPTIMISM,
-            amount,
-            senderAcc.address,
-            reserveData.id,
-            true,
-            false,
-            nullAddress,
-        ]);
-
-        console.log(encodedArgs);
         const aaveSupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-            encodedArgs,
+            AAVE_MARKET_OPTIMISM, amount, senderAcc.address, reserveData.id, true, false,
         );
         const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
         console.log(functionData);

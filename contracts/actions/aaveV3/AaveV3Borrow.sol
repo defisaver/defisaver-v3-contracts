@@ -4,7 +4,6 @@ pragma solidity =0.8.10;
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
-
 /// @title Borrow a token a from an Aave market
 contract AaveV3Borrow is ActionBase, AaveV3Helper {
     using TokenUtils for address;
@@ -42,13 +41,13 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
         (, bytes memory logData) = _borrow(params.market, params.assetId, params.amount, params.rateMode, params.to, params.onBehalf);
-        logger.logActionDirectEvent("AaveV3Borrow", logData);
+        //logger.logActionDirectEvent("AaveV3Borrow", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
         (, bytes memory logData) = _borrow(params.market, params.assetId, params.amount, params.rateMode, params.to, params.onBehalf);
-        logger.logActionDirectEvent("AaveV3Borrow", logData);
+        //logger.logActionDirectEvent("AaveV3Borrow", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -76,14 +75,11 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
         IPoolV3 lendingPool = getLendingPool(_market);
 
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);
-
         // defaults to onBehalf of proxy
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }
-
-        lendingPool.borrow(tokenAddr, _amount, _rateMode, AAVE_REFERRAL_CODE, _onBehalf);
-
+        lendingPool.borrow(tokenAddr, _amount, _rateMode, 0, _onBehalf);
         _amount = tokenAddr.withdrawTokens(_to, _amount);
 
         bytes memory logData = abi.encode(
