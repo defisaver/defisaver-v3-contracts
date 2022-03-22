@@ -42,4 +42,16 @@ contract AaveV3Helper is MainnetAaveV3Addresses {
         }
         return true;
     }
+    
+    function getWholeDebt(address _market, address _tokenAddr, uint _borrowType, address _debtOwner) internal view returns (uint256) {
+        IAaveProtocolDataProvider dataProvider = getDataProvider(_market);
+        (, uint256 borrowsStable, uint256 borrowsVariable, , , , , , ) =
+            dataProvider.getUserReserveData(_tokenAddr, _debtOwner);
+
+        if (_borrowType == STABLE_ID) {
+            return borrowsStable;
+        } else if (_borrowType == VARIABLE_ID) {
+            return borrowsVariable;
+        }
+    }
 }

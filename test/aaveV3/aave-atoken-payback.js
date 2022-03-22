@@ -20,7 +20,7 @@ describe('AaveV3-Payback-L2', function () {
         proxy = await getProxy(senderAcc.address);
         aaveSupplyContract = await redeploy('AaveV3Supply');
         aaveBorrowContract = await redeploy('AaveV3Borrow');
-        aavePaybackContract = await redeploy('AaveV3Payback');
+        aavePaybackContract = await redeploy('AaveV3ATokenPayback');
     });
 
     it('... should supply WETH and borrow DAI then repay the debt to Aave V3 on optimism', async () => {
@@ -75,14 +75,17 @@ describe('AaveV3-Payback-L2', function () {
         const daiBalanceAfter = await balanceOf(OPITMISM_DAI, senderAcc.address);
         console.log(daiBalanceAfter.toString());
 
-        const aavePaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-            AAVE_MARKET_OPTIMISM, amountDai, senderAcc.address, 2, reserveDataDAI.id, false,
+        await setBalance(reserveDataDAI.aTokenAddress, senderAcc.address, amountDai);
+        await approve(reserveDataDAI.aTokenAddress, proxy.address);
+
+        const aavePaybackAction = new dfs.actions.aaveV3.AaveV3ATokenAPaybackAction(
+            AAVE_MARKET_OPTIMISM, amountDai, senderAcc.address, 2, reserveDataDAI.id,
         );
         functionData = aavePaybackAction.encodeForDsProxyCall()[1];
         const daiVariableTokenDebt = '0x8619d80FB0141ba7F184CbF22fd724116D9f7ffC';
         const debtAmountBefore = await balanceOf(daiVariableTokenDebt, proxy.address);
         console.log(`DEBT BEFORE ${debtAmountBefore.toString()}`);
-        await approve(OPITMISM_DAI, proxy.address);
+        //await approve(OPITMISM_DAI, proxy.address);
 
         const receiptPayback = await proxy['execute(address,bytes)'](aavePaybackContract.address, functionData, { gasLimit: 3000000 });
         const daiBalanceAfterPayback = await balanceOf(OPITMISM_DAI, senderAcc.address);

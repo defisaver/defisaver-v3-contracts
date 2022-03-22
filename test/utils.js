@@ -283,6 +283,13 @@ const setBalance = async (tokenAddr, userAddr, value) => {
     );
 };
 
+const gibETH = async (userAddr) => {
+    await hre.ethers.provider.send('hardhat_setBalance', [
+        userAddr,
+        '0x52B7D2DCC80CD2E4000000',
+    ]);
+};
+
 const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {
     const data = JSON.parse(fs.readFileSync('test/prices.json', 'utf8'));
     const tokenNames = Object.keys(data);
@@ -396,6 +403,7 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, existingAd
     }
 
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
+    await gibETH(getOwnerAddr());
 
     const registryInstance = await hre.ethers.getContractFactory('DFSRegistry', signer);
     let registry = await registryInstance.attach(regAddr);
@@ -797,4 +805,5 @@ module.exports = {
     setBalance,
     takeSnapshot,
     revertToSnapshot,
+    gibETH,
 };

@@ -1,21 +1,23 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity =0.8.10;
-/*
+
 import "../../interfaces/IWETH.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
+import "../../interfaces/aave/IAToken.sol";
 
 /// @title Payback a token a user borrowed from an Aave market
 contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
     using TokenUtils for address;
+
     struct Params {
         address market;
-        address aTokenAddress;
         uint256 amount;
         address from;
         uint8 rateMode;
+        uint16 assetId;
     }
 
     /// @inheritdoc ActionBase
@@ -32,10 +34,10 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
 
         (uint256 paybackAmount, bytes memory logData) = _paybackWithATokens(
             params.market,
-            params.aTokenAddress,
+            params.assetId,
             params.amount,
-            params.from,
-            params.rateMode        
+            params.rateMode,  
+            params.from      
         );
         emit ActionEvent("AaveV3ATokenPayback", logData);
         return bytes32(paybackAmount);
@@ -46,24 +48,24 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
         Params memory params = parseInputs(_callData);
         (, bytes memory logData) = _paybackWithATokens(
             params.market,
-            params.aTokenAddress,
+            params.assetId,
             params.amount,
-            params.from,
-            params.rateMode
+            params.rateMode,  
+            params.from      
         );
-        logger.logActionDirectEvent("AaveV3ATokenPayback", logData);
+        //logger.logActionDirectEvent("AaveV3ATokenPayback", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
         (, bytes memory logData) = _paybackWithATokens(
             params.market,
-            params.aTokenAddress,
+            params.assetId,
             params.amount,
-            params.from,
-            params.rateMode
-        );        
-        logger.logActionDirectEvent("AaveV3Payback", logData);
+            params.rateMode,  
+            params.from      
+        );
+        //logger.logActionDirectEvent("AaveV3Payback", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -76,41 +78,45 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
     /// @notice User paybacks tokens to the Aave protocol
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     /// @param _market Address provider for specific market
-    /// @param _aTokenAddress Address of the aToken being used to repay the debt
+    /// @param _assetId The id of the token to be deposited
     /// @param _amount Amount of tokens to be payed back
     /// @param _rateMode Type of borrow debt [Stable: 1, Variable: 2]
     /// @param _from Where are we pulling the payback tokens amount from
     function _paybackWithATokens(
         address _market,
-        address _aTokenAddress,
+        uint16 _assetId,
         uint256 _amount,
-        address _from,
-        uint256 _rateMode
+        uint256 _rateMode,
+        address _from
     ) internal returns (uint256, bytes memory) {
         IPoolV3 lendingPool = getLendingPool(_market);
 
-        uint256 maxDebt = getWholeDebt(_market, tokenAddr, _rateMode, _onBehalf);
+        address tokenAddr = lendingPool.getReserveAddressById(_assetId);
+
+        uint256 maxDebt = getWholeDebt(_market, tokenAddr, _rateMode, address(this));
         _amount = _amount > maxDebt ? maxDebt : _amount;
+        
+        DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(tokenAddr);
+        address aTokenAddr = reserveData.aTokenAddress;
 
-        tokenAddr.pullTokensIfNeeded(_from, _amount);
-        tokenAddr.approveToken(address(lendingPool), _amount);
+        aTokenAddr.pullTokensIfNeeded(_from, _amount);
+        //aTokenAddr.approveToken(address(lendingPool), _amount);
 
-        uint256 tokensBefore = tokenAddr.getBalance(address(this));
+        uint256 tokensBefore = aTokenAddr.getBalance(address(this));
 
-        lendingPool.repay(tokenAddr, _amount, _rateMode, _onBehalf);
+        lendingPool.repayWithATokens(tokenAddr, _amount, _rateMode);
 
-        uint256 tokensAfter = tokenAddr.getBalance(address(this));
+        uint256 tokensAfter = aTokenAddr.getBalance(address(this));
 
         // send back any leftover tokens that weren't used in the repay
-        tokenAddr.withdrawTokens(_from, tokensAfter);
+        aTokenAddr.withdrawTokens(_from, tokensAfter);
 
         bytes memory logData = abi.encode(
             _market,
             tokenAddr,
             _amount,
             _rateMode,
-            _from,
-            _onBehalf
+            _from
         );
         return (tokensBefore - tokensAfter, logData);
     }
@@ -120,36 +126,7 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
     }
 
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
-        encodedInput = bytes.concat(encodedInput, bytes20(params.market));
-        encodedInput = bytes.concat(encodedInput, bytes32(params.amount));
-        encodedInput = bytes.concat(encodedInput, bytes20(params.from));
-        encodedInput = bytes.concat(encodedInput, bytes1(params.rateMode));
-        encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
-        encodedInput = bytes.concat(encodedInput, bytes1(boolToBytes(params.useOnBehalf)));
-        if (params.useOnBehalf){
-            encodedInput = bytes.concat(encodedInput, bytes20(params.onBehalf));
-        }
     }
     function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        params.market = address(bytes20(encodedInput[0:20]));
-        params.amount = uint256(bytes32(encodedInput[20:52]));
-        params.from = address(bytes20(encodedInput[52:72]));
-        params.rateMode = uint8(bytes1(encodedInput[72:73]));
-        params.assetId = uint16(bytes2(encodedInput[73:75]));
-        params.useOnBehalf = bytesToBool(bytes1(encodedInput[75:76]));
-        params.onBehalf = (params.useOnBehalf ? address(bytes20(encodedInput[76:96])) : address(0));
-    }
-
-    function getWholeDebt(address _market, address _tokenAddr, uint _borrowType, address _debtOwner) internal view returns (uint256) {
-        IAaveProtocolDataProvider dataProvider = getDataProvider(_market);
-        (, uint256 borrowsStable, uint256 borrowsVariable, , , , , , ) =
-            dataProvider.getUserReserveData(_tokenAddr, _debtOwner);
-
-        if (_borrowType == STABLE_ID) {
-            return borrowsStable;
-        } else if (_borrowType == VARIABLE_ID) {
-            return borrowsVariable;
-        }
     }
 }
-*/
