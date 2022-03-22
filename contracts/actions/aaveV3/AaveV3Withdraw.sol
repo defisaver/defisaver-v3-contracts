@@ -102,6 +102,7 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     }
 
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
+        encodedInput = bytes.concat(this.executeActionDirectL2.selector);
         encodedInput = bytes.concat(encodedInput, bytes20(params.market));
         encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
         encodedInput = bytes.concat(encodedInput, bytes32(params.amount));

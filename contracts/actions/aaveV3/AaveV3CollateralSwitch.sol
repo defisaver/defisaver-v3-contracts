@@ -34,6 +34,7 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
 
         _switchAsCollateral(inputData);
     }
+    
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {
@@ -51,5 +52,12 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
+    }
+
+    function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
+        encodedInput = bytes.concat(this.executeActionDirectL2.selector);
+    }
+
+    function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
     }
 }

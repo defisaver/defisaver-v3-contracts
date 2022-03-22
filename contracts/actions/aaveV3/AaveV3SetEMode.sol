@@ -73,6 +73,7 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
     }
     
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
+        encodedInput = bytes.concat(this.executeActionDirectL2.selector);
         encodedInput = bytes.concat(encodedInput, bytes20(params.market));
         encodedInput = bytes.concat(encodedInput, bytes1(params.categoryId));
     }

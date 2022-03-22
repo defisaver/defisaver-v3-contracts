@@ -25,6 +25,8 @@ const { getSecondTokenAmount } = require('./utils-uni');
 
 const { getHints, LiquityActionIds } = require('./utils-liquity');
 
+const abiCoder = new hre.ethers.utils.AbiCoder();
+
 // eslint-disable-next-line max-len
 const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0, regAddr = REGISTRY_ADDR, signer) => {
     const dfsSellAddr = await getAddrFromRegistry('DFSSell', regAddr);
@@ -1673,6 +1675,44 @@ const rariWithdraw = async (
     return proxy['execute(address,bytes)'](rariWithdrawAddr, functionData, { gasLimit: 3000000 });
 };
 
+const aaveV3Supply = async (
+    proxy, market, amount, tokenAddr, assetId, from,
+) => {
+    const aaveSupplyAddr = await getAddrFromRegistry('AaveV3Supply');
+
+    const aaveSupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        market, amount, from, assetId, true, false,
+    );
+
+    await approve(tokenAddr, proxy.address);
+    const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](aaveSupplyAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3Supply: ${gasUsed}`);
+    return receipt;
+};
+const aaveV3SupplyCalldataOptimised = async (
+    proxy, market, amount, tokenAddr, assetId, from,
+) => {
+    const aaveSupplyAddr = await getAddrFromRegistry('AaveV3Supply');
+    let contract = await hre.ethers.getContractAt('AaveV3Supply', aaveSupplyAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+
+    const encodedInput = await contract.encodeInputs(
+        [market, amount, from, assetId, true, false, nullAddress],
+    );
+
+    await approve(tokenAddr, proxy.address);
+
+    const receipt = await proxy['execute(address,bytes)'](aaveSupplyAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3SupplyCalldataOptimised: ${gasUsed}`);
+    return receipt;
+};
+
 module.exports = {
     sell,
     buy,
@@ -1767,4 +1807,7 @@ module.exports = {
 
     rariDeposit,
     rariWithdraw,
+
+    aaveV3Supply,
+    aaveV3SupplyCalldataOptimised,
 };

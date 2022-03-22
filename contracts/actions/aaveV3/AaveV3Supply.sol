@@ -5,6 +5,7 @@ pragma solidity =0.8.10;
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
+import "hardhat/console.sol";
 
 /// @title Supply a token to an Aave market
 contract AaveV3Supply is ActionBase, AaveV3Helper {
@@ -47,6 +48,8 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
     }
 
     function executeActionDirectL2() public payable {
+        console.log("HERE");
+        console.logBytes(msg.data);
         Params memory params = decodeInputs(msg.data[4:]);
         (, bytes memory logData) = _supply(params.market, params.amount, params.from, params.assetId, params.enableAsColl, params.onBehalf);
         //logger.logActionDirectEvent("AaveV3Supply", logData);
@@ -114,6 +117,8 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
     }
     
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
+        encodedInput = bytes.concat(this.executeActionDirectL2.selector);
+        
         encodedInput = bytes.concat(encodedInput, bytes20(params.market));
 
         encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
