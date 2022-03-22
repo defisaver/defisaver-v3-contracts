@@ -30,7 +30,7 @@ const addrs = {
 const REGISTRY_ADDR = '0x287778F121F134C66212FB16c9b53eC991D32f5b';
 require('dotenv-safe').config();
 
-const config = require('../hardhat.config.js');
+const config = require('../hardhat.config');
 
 const nullAddress = '0x0000000000000000000000000000000000000000';
 const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
@@ -161,14 +161,6 @@ const coinGeckoHelper = {
     SUSHI: 'sushi',
 };
 
-const timeTravel = async (timeIncrease) => {
-    await hre.network.provider.request({
-        method: 'evm_increaseTime',
-        params: [timeIncrease],
-        id: new Date().getTime(),
-    });
-};
-
 const getOwnerAddr = () => addrs[network].OWNER_ACC;
 
 async function findBalancesSlot(tokenAddress) {
@@ -260,6 +252,14 @@ async function findBalancesSlot(tokenAddress) {
 }
 
 const toBytes32 = (bn) => hre.ethers.utils.hexlify(hre.ethers.utils.zeroPad(bn.toHexString(), 32));
+
+const timeTravel = async (timeIncrease) => {
+    await hre.network.provider.request({
+        method: 'evm_increaseTime',
+        params: [timeIncrease],
+        id: (await hre.ethers.provider.getBlock('latest')).timestamp,
+    });
+};
 
 const setStorageAt = async (address, index, value) => {
     await hre.ethers.provider.send('hardhat_setStorageAt', [address, index, value]);

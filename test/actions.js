@@ -20,7 +20,13 @@ const {
     // getGasUsed,
     mineBlock,
 } = require('./utils');
-const { getVaultsForUser, canGenerateDebt, MCD_MANAGER_ADDR } = require('./utils-mcd');
+
+const {
+    getVaultsForUser,
+    canGenerateDebt,
+    getCropJoinVaultIds,
+    MCD_MANAGER_ADDR,
+} = require('./utils-mcd');
 const { getSecondTokenAmount } = require('./utils-uni');
 const { LiquityActionIds, getHints, getRedemptionHints } = require('./utils-liquity');
 const { execShellCommand } = require('../scripts/hardhat-tasks-functions');
@@ -107,14 +113,14 @@ const buy = async (
     return tx;
 };
 
-const paybackMcd = async (proxy, vaultId, amount, from, daiAddr) => {
+const paybackMcd = async (proxy, vaultId, amount, from, daiAddr, mcdManager = MCD_MANAGER_ADDR) => {
     await approve(daiAddr, proxy.address);
 
     const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
         vaultId,
         amount,
         from,
-        MCD_MANAGER_ADDR,
+        mcdManager,
     );
     const functionData = mcdPaybackAction.encodeForDsProxyCall()[1];
 
@@ -411,17 +417,28 @@ const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) =>
 |  |  |  |  /  _____  \  |  .  \  |  |____ |  |\  \----.
 |__|  |__| /__/     \__\ |__|\__\ |_______|| _| `._____|
 */
-const openMcd = async (proxy, joinAddr) => {
-    const openMyVault = new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR);
+const openMcd = async (proxy, joinAddr, mcdManager = MCD_MANAGER_ADDR) => {
+    const openMyVault = new dfs.actions.maker.MakerOpenVaultAction(joinAddr, mcdManager);
     const functionData = openMyVault.encodeForDsProxyCall()[1];
 
-    await executeAction('McdOpen', functionData, proxy);
+    if (mcdManager === MCD_MANAGER_ADDR) {
+        await executeAction('McdOpen', functionData, proxy);
 
-    const vaultsAfter = await getVaultsForUser(proxy.address);
+        const vaultsAfter = await getVaultsForUser(proxy.address);
 
-    return vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
+        return vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
+    // eslint-disable-next-line no-else-return
+    } else {
+        let vaultIds = await getCropJoinVaultIds(proxy.address);
+
+        if (vaultIds.length === 0) {
+            await executeAction('McdOpen', functionData, proxy);
+            vaultIds = await getCropJoinVaultIds(proxy.address);
+        }
+        return vaultIds[vaultIds.length - 1].toString();
+    }
 };
-const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from, regAddr = REGISTRY_ADDR) => {
+const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from, regAddr = REGISTRY_ADDR, mcdManager = MCD_MANAGER_ADDR) => {
     // AAVE & renBTC
     if (
         tokenAddr.toLowerCase() === '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9'.toLowerCase()
@@ -445,19 +462,19 @@ const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from, regA
         amount,
         joinAddr,
         from,
-        MCD_MANAGER_ADDR,
+        mcdManager,
     );
     const functionData = mcdSupplyAction.encodeForDsProxyCall()[1];
 
     const tx = await executeAction('McdSupply', functionData, proxy, regAddr);
     return tx;
 };
-const generateMcd = async (proxy, vaultId, amount, to) => {
+const generateMcd = async (proxy, vaultId, amount, to, mcdManager = MCD_MANAGER_ADDR) => {
     const mcdGenerateAction = new dfs.actions.maker.MakerGenerateAction(
         vaultId,
         amount,
         to,
-        MCD_MANAGER_ADDR,
+        mcdManager,
     );
     const functionData = mcdGenerateAction.encodeForDsProxyCall()[1];
 
@@ -504,17 +521,29 @@ const openVaultForExactAmountInDecimals = async (
     return vaultId;
 };
 
-const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to, regAddr = REGISTRY_ADDR) => {
+const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to, regAddr = REGISTRY_ADDR, mcdManager = MCD_MANAGER_ADDR) => {
     const mcdWithdrawAction = new dfs.actions.maker.MakerWithdrawAction(
         vaultId,
         amount,
         joinAddr,
         to,
-        MCD_MANAGER_ADDR,
+        mcdManager,
     );
     const functionData = mcdWithdrawAction.encodeForDsProxyCall()[1];
 
     const tx = await executeAction('McdWithdraw', functionData, proxy, regAddr);
+    return tx;
+};
+
+const claimMcd = async (proxy, vaultId, joinAddr, to) => {
+    const mcdClaimAction = new dfs.actions.maker.MakerClaimAction(
+        vaultId,
+        joinAddr,
+        to,
+    );
+    const functionData = mcdClaimAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('McdClaim', functionData, proxy);
     return tx;
 };
 
@@ -1362,6 +1391,50 @@ const curveClaimFees = async (proxy, claimFor, receiver) => {
     return tx;
 };
 
+const curveStethPoolDeposit = async (
+    proxy,
+    from,
+    to,
+    amounts,
+    minMintAmount,
+) => {
+    const curveStethPoolDepositAction = new dfs.actions.curve.CurveStethPoolDepositAction(
+        from,
+        to,
+        amounts,
+        minMintAmount,
+    );
+
+    const functionData = curveStethPoolDepositAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('CurveStethPoolDeposit', functionData, proxy);
+    const receipt = await tx.wait();
+    console.log(`Gas used: ${receipt.gasUsed}`);
+    return tx;
+};
+
+const curveStethPoolWithdraw = async (
+    proxy,
+    from,
+    to,
+    amounts,
+    minBurnAmount,
+) => {
+    const curveStethPoolWithdrawAction = new dfs.actions.curve.CurveStethPoolWithdrawAction(
+        from,
+        to,
+        amounts,
+        minBurnAmount,
+    );
+
+    const functionData = curveStethPoolWithdrawAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('CurveStethPoolWithdraw', functionData, proxy);
+    const receipt = await tx.wait();
+    console.log(`Gas used: ${receipt.gasUsed}`);
+    return tx;
+};
+
 const automationV2Unsub = async (proxy, protocol, cdpId = 0) => {
     const automationV2UnsubAction = new dfs.actions.basic.AutomationV2Unsub(protocol, cdpId);
 
@@ -1488,6 +1561,7 @@ module.exports = {
     paybackMcd,
     withdrawMcd,
     openVault,
+    claimMcd,
     mcdGive,
     mcdMerge,
     openVaultForExactAmountInDecimals,
@@ -1551,6 +1625,9 @@ module.exports = {
     curveGaugeWithdraw,
     curveMintCrv,
     curveClaimFees,
+
+    curveStethPoolDeposit,
+    curveStethPoolWithdraw,
 
     buyTokenIfNeeded,
     pullTokensInstDSA,

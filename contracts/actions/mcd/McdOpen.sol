@@ -4,10 +4,12 @@ pragma solidity =0.8.10;
 
 import "../../interfaces/mcd/IJoin.sol";
 import "../../interfaces/mcd/IManager.sol";
+import "../../interfaces/mcd/ICdpRegistry.sol";
+import "./helpers/McdHelper.sol";
 import "../ActionBase.sol";
 
 /// @title Open a new Maker vault
-contract McdOpen is ActionBase {
+contract McdOpen is ActionBase, McdHelper {
 
     struct Params {
         address joinAddr;
@@ -25,7 +27,6 @@ contract McdOpen is ActionBase {
 
         inputData.joinAddr = _parseParamAddr(inputData.joinAddr, _paramMapping[0], _subData, _returnValues);
         inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[1], _subData, _returnValues);
-
 
         (uint256 newVaultId, bytes memory logData) = _mcdOpen(inputData.joinAddr, inputData.mcdManager);
         emit ActionEvent("McdOpen", logData);
@@ -51,8 +52,15 @@ contract McdOpen is ActionBase {
     /// @param _mcdManager The manager address we are using
     function _mcdOpen(address _joinAddr, address _mcdManager) internal returns (uint256 vaultId, bytes memory logData) {
         bytes32 ilk = IJoin(_joinAddr).ilk();
-        vaultId = IManager(_mcdManager).open(ilk, address(this));
+
+        if (_mcdManager == CROPPER) {
+            vaultId = ICdpRegistry(CDP_REGISTRY).open(ilk, address(this));
+        } else {
+            vaultId = IManager(_mcdManager).open(ilk, address(this));
+        }
+                
         logData = abi.encode(vaultId, _joinAddr, _mcdManager);
+
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

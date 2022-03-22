@@ -14,6 +14,7 @@ const {
     resetForkToBlock,
     timeTravel,
     BN2Float,
+    STETH_ADDRESS,
 } = require('../utils');
 
 const {
@@ -22,6 +23,8 @@ const {
     curveGaugeDeposit,
     curveGaugeWithdraw,
     curveClaimFees,
+    curveStethPoolDeposit,
+    curveStethPoolWithdraw,
 } = require('../actions.js');
 
 const poolData = require('./poolData');
@@ -678,6 +681,226 @@ const curveClaimFeesTest = async () => {
     });
 };
 
+const curveStethPoolDepositTest = async () => {
+    const STE_CRV_ADDR = '0x06325440D014e39736583c165C2963BA99fAf14E';
+
+    describe('Curve-Steth-Pool-Deposit', function () {
+        this.timeout(1000000);
+        const ethAmount = '10';
+        const ethAmountHalf = '5';
+
+        let senderAcc; let senderAddr;
+        let proxy; let proxyAddr;
+
+        before(async () => {
+            await resetForkToBlock(13000000);
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            senderAddr = senderAcc.address;
+            proxy = await getProxy(senderAcc.address);
+            proxyAddr = proxy.address;
+
+            await redeploy('CurveStethPoolDeposit');
+        });
+
+        it(`... should deposit ${ethAmount} Eth into Curve stEth pool`, async () => {
+            const amount = Float2BN(ethAmount);
+
+            await setBalance(WETH_ADDRESS, senderAddr, amount);
+            await approve(WETH_ADDRESS, proxyAddr);
+
+            const tokensBefore = await balanceOf(STE_CRV_ADDR, senderAddr);
+            await curveStethPoolDeposit(
+                proxy,
+                senderAddr,
+                senderAddr,
+                [amount, '0'],
+                '0',
+            );
+
+            const tokensAfter = await balanceOf(STE_CRV_ADDR, senderAddr);
+            const lpMinted = tokensAfter.sub(tokensBefore);
+
+            console.log(`Minted ${BN2Float(lpMinted)} steCrv`);
+            expect(lpMinted).to.be.gt('0');
+        });
+
+        it(`... should deposit ${ethAmount} stEth into Curve stEth pool`, async () => {
+            const amount = Float2BN(ethAmount);
+
+            await setBalance(STETH_ADDRESS, senderAddr, amount);
+            await approve(STETH_ADDRESS, proxyAddr);
+
+            const tokensBefore = await balanceOf(STE_CRV_ADDR, senderAddr);
+            await curveStethPoolDeposit(
+                proxy,
+                senderAddr,
+                senderAddr,
+                ['0', amount],
+                '0',
+            );
+
+            const tokensAfter = await balanceOf(STE_CRV_ADDR, senderAddr);
+            const lpMinted = tokensAfter.sub(tokensBefore);
+
+            console.log(`Minted ${BN2Float(lpMinted)} steCrv`);
+            expect(lpMinted).to.be.gt('0');
+        });
+
+        it(`... should deposit ${ethAmountHalf} stEth and ${ethAmountHalf} Eth into Curve stEth pool`, async () => {
+            const amount = Float2BN(ethAmountHalf);
+
+            await setBalance(WETH_ADDRESS, senderAddr, amount);
+            await approve(WETH_ADDRESS, proxyAddr);
+            await setBalance(STETH_ADDRESS, senderAddr, amount);
+            await approve(STETH_ADDRESS, proxyAddr);
+
+            const tokensBefore = await balanceOf(STE_CRV_ADDR, senderAddr);
+            await curveStethPoolDeposit(
+                proxy,
+                senderAddr,
+                senderAddr,
+                [amount, amount],
+                '0',
+            );
+
+            const tokensAfter = await balanceOf(STE_CRV_ADDR, senderAddr);
+            const lpMinted = tokensAfter.sub(tokensBefore);
+
+            console.log(`Minted ${BN2Float(lpMinted)} steCrv`);
+            expect(lpMinted).to.be.gt('0');
+        });
+
+        it('... should deposit maxUint stEth and Eth into Curve stEth pool', async () => {
+            const amount = Float2BN(ethAmountHalf);
+
+            await setBalance(WETH_ADDRESS, senderAddr, amount);
+            await approve(WETH_ADDRESS, proxyAddr);
+            await setBalance(STETH_ADDRESS, senderAddr, amount);
+            await approve(STETH_ADDRESS, proxyAddr);
+
+            const tokensBefore = await balanceOf(STE_CRV_ADDR, senderAddr);
+            await curveStethPoolDeposit(
+                proxy,
+                senderAddr,
+                senderAddr,
+                [hre.ethers.constants.MaxUint256, hre.ethers.constants.MaxUint256],
+                '0',
+            );
+
+            const tokensAfter = await balanceOf(STE_CRV_ADDR, senderAddr);
+            const lpMinted = tokensAfter.sub(tokensBefore);
+
+            console.log(`Minted ${BN2Float(lpMinted)} steCrv`);
+            expect(lpMinted).to.be.gt('0');
+        });
+    });
+};
+
+const curveStethPoolWithdrawTest = async () => {
+    const STE_CRV_ADDR = '0x06325440D014e39736583c165C2963BA99fAf14E';
+
+    describe('Curve-Steth-Pool-Withdraw', function () {
+        this.timeout(1000000);
+        const amount = '10';
+        const amountHalf = '5';
+
+        let senderAcc; let senderAddr;
+        let proxy; let proxyAddr;
+
+        before(async () => {
+            await resetForkToBlock(13000000);
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            senderAddr = senderAcc.address;
+            proxy = await getProxy(senderAcc.address);
+            proxyAddr = proxy.address;
+
+            await redeploy('CurveStethPoolWithdraw');
+        });
+
+        it(`... should burn ${amount} steCrv and withdraw ${amount} Eth`, async () => {
+            const maxBurnAmount = Float2BN(amount);
+
+            await setBalance(STE_CRV_ADDR, senderAddr, maxBurnAmount);
+            await approve(STE_CRV_ADDR, proxyAddr);
+
+            const wethBefore = await balanceOf(WETH_ADDRESS, senderAddr);
+
+            await curveStethPoolWithdraw(
+                proxy,
+                senderAddr,
+                senderAddr,
+                [maxBurnAmount, '0'],
+                maxBurnAmount,
+            );
+
+            const wethAfter = await balanceOf(WETH_ADDRESS, senderAddr);
+
+            const tokensAfter = await balanceOf(STE_CRV_ADDR, senderAddr);
+            const lpBurned = maxBurnAmount.sub(tokensAfter);
+            const wethWithdrawn = wethAfter.sub(wethBefore);
+            expect(+BN2Float(wethWithdrawn)).to.be.closeTo(+BN2Float(maxBurnAmount), 0.01);
+            console.log(`Withdrawn ${BN2Float(wethWithdrawn)} WETH burning ${BN2Float(lpBurned)} steCrv`);
+        });
+
+        it(`... should burn ${amount} steCrv and withdraw ${amount} stEth`, async () => {
+            const maxBurnAmount = Float2BN(amount);
+
+            await setBalance(STE_CRV_ADDR, senderAddr, maxBurnAmount);
+            await approve(STE_CRV_ADDR, proxyAddr);
+
+            const stethBefore = await balanceOf(STETH_ADDRESS, senderAddr);
+
+            await curveStethPoolWithdraw(
+                proxy,
+                senderAddr,
+                senderAddr,
+                ['0', maxBurnAmount],
+                maxBurnAmount,
+            );
+
+            const stethAfter = await balanceOf(STETH_ADDRESS, senderAddr);
+
+            const tokensAfter = await balanceOf(STE_CRV_ADDR, senderAddr);
+            const lpBurned = maxBurnAmount.sub(tokensAfter);
+            const stethWithdrawn = stethAfter.sub(stethBefore);
+            expect(+BN2Float(stethWithdrawn)).to.be.closeTo(+BN2Float(maxBurnAmount), 0.01);
+            console.log(`Withdrawn ${BN2Float(stethWithdrawn)} stEth burning ${BN2Float(lpBurned)} steCrv`);
+        });
+
+        it(`... should burn ${amount} steCrv and withdraw ${amountHalf} Eth and ${amountHalf} stEth`, async () => {
+            const maxBurnAmount = Float2BN(amount);
+            const withdrawAmount = Float2BN(amountHalf);
+
+            await setBalance(STE_CRV_ADDR, senderAddr, maxBurnAmount);
+            await approve(STE_CRV_ADDR, proxyAddr);
+
+            const wethBefore = await balanceOf(WETH_ADDRESS, senderAddr);
+            const stethBefore = await balanceOf(STETH_ADDRESS, senderAddr);
+
+            await curveStethPoolWithdraw(
+                proxy,
+                senderAddr,
+                senderAddr,
+                [withdrawAmount, withdrawAmount],
+                maxBurnAmount,
+            );
+
+            const wethAfter = await balanceOf(WETH_ADDRESS, senderAddr);
+            const stethAfter = await balanceOf(STETH_ADDRESS, senderAddr);
+
+            const tokensAfter = await balanceOf(STE_CRV_ADDR, senderAddr);
+            const lpBurned = maxBurnAmount.sub(tokensAfter);
+            const wethWithdrawn = wethAfter.sub(wethBefore);
+            const stethWithdrawn = stethAfter.sub(stethBefore);
+            expect(+BN2Float(wethWithdrawn)).to.be.closeTo(+BN2Float(withdrawAmount), 0.01);
+            expect(+BN2Float(stethWithdrawn)).to.be.closeTo(+BN2Float(withdrawAmount), 0.01);
+            console.log(`Withdrawn ${BN2Float(wethWithdrawn)} WETH and ${BN2Float(stethWithdrawn)} stEth burning ${BN2Float(lpBurned)} steCrv`);
+        });
+    });
+};
+
 const curveFullTest = async (testLength) => {
     await curveDepositTest(testLength);
     await curveWithdrawTest(testLength);
@@ -697,4 +920,7 @@ module.exports = {
     curveGaugeDepositTest,
     curveGaugeWithdrawTest,
     curveClaimFeesTest,
+
+    curveStethPoolDepositTest,
+    curveStethPoolWithdrawTest,
 };

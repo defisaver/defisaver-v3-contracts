@@ -3,8 +3,11 @@
 pragma solidity =0.8.10;
 
 import "../../interfaces/mcd/IManager.sol";
-import "../../interfaces/mcd//IVat.sol";
-import "../../interfaces/mcd//IJoin.sol";
+import "../../interfaces/mcd/IVat.sol";
+import "../../interfaces/mcd/IJoin.sol";
+import "../../interfaces/mcd/ICropJoin.sol";
+import "../../interfaces/mcd/ICropper.sol";
+import "../../interfaces/mcd/ICdpRegistry.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
@@ -69,7 +72,6 @@ contract McdSupply is ActionBase, McdHelper {
         address _mcdManager
     ) internal returns (uint256, bytes memory) {
         address tokenAddr = getTokenFromJoin(_joinAddr);
-        IManager mcdManager = IManager(_mcdManager);
 
         // if amount type(uint).max, pull current _from balance
         if (_amount == type(uint256).max) {
@@ -78,11 +80,48 @@ contract McdSupply is ActionBase, McdHelper {
 
         // Pull the underlying token and join the maker join pool
         tokenAddr.pullTokensIfNeeded(_from, _amount);
-        tokenAddr.approveToken(_joinAddr, _amount);
-        IJoin(_joinAddr).join(address(this), _amount);
 
         // format the amount we need for frob
-        int256 convertAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
+        int256 vatAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
+
+        if (_mcdManager == CROPPER) {         
+            _cropperSupply(_vaultId, tokenAddr, _joinAddr, _amount, vatAmount);
+        } else {
+            _mcdManagerSupply(_mcdManager, _vaultId, tokenAddr, _joinAddr, _amount, vatAmount);
+        }
+
+        bytes memory logData = abi.encode(_vaultId, _amount, _joinAddr, _from, _mcdManager);
+        return (_amount, logData);
+    }
+
+    function _cropperSupply(
+        uint256 _vaultId,
+        address _tokenAddr,
+        address _joinAddr,
+        uint256 _amount,
+        int256 _vatAmount
+    ) internal {
+        bytes32 ilk = ICdpRegistry(CDP_REGISTRY).ilks(_vaultId);
+        address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
+
+        _tokenAddr.approveToken(CROPPER, _amount);
+
+        ICropper(CROPPER).join(_joinAddr, owner, _amount);
+        ICropper(CROPPER).frob(ilk, owner, owner, owner, _vatAmount, 0);
+    }
+
+    function _mcdManagerSupply(
+        address _mcdManager,
+        uint256 _vaultId,
+        address _tokenAddr,
+        address _joinAddr,
+        uint256 _amount,
+        int256 _vatAmount
+    ) internal {
+        IManager mcdManager = IManager(_mcdManager);
+
+        _tokenAddr.approveToken(_joinAddr, _amount);
+        IJoin(_joinAddr).join(address(this), _amount);
 
         // Supply to the vault balance
         vat.frob(
@@ -90,11 +129,9 @@ contract McdSupply is ActionBase, McdHelper {
             mcdManager.urns(_vaultId),
             address(this),
             address(this),
-            convertAmount,
+            _vatAmount,
             0
         );
-        bytes memory logData = abi.encode(_vaultId, _amount, _joinAddr, _from, _mcdManager);
-        return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

@@ -10,6 +10,7 @@ describe('Mcd-Generate', function () {
     before(async () => {
         await redeploy('McdOpen');
         await redeploy('McdSupply');
+        await redeploy('McdView');
         await redeploy('McdGenerate');
     });
 
