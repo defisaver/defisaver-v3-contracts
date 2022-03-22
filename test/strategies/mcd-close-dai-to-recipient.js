@@ -32,7 +32,7 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
     let botAcc;
     let strategyExecutor;
     let vaultId;
-    let dydxFlAddr;
+    let makerFlAddr;
     let subStorage;
     let subId;
     let strategySub;
@@ -60,7 +60,7 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         await redeploy('McdOpen');
         await redeploy('ChainLinkPriceTrigger');
         await addBotCaller(botAcc.address);
-        dydxFlAddr = await getAddrFromRegistry('FLDyDx');
+        makerFlAddr = await getAddrFromRegistry('FLMaker');
         proxy = await getProxy(senderAcc.address);
     });
 
@@ -82,6 +82,8 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         await openStrategyAndBundleStorage();
 
         const strategyData = createMcdCloseStrategy();
+
+        console.log(strategyData);
         const strategyId = await createStrategy(proxy, ...strategyData, false);
 
         const currPrice = await getChainLinkPrice(ETH_ADDR);
@@ -90,7 +92,6 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         ({ subId, strategySub } = await subMcdCloseStrategy(
             vaultId,
             proxy,
-            senderAcc.address,
             targetPrice,
             WETH_ADDRESS,
             strategyId,
@@ -103,7 +104,7 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
         console.log(`Dai before closing : ${daiBalanceBefore.toString()}`);
         await callMcdCloseStrategy(
-            proxy, botAcc, strategyExecutor, subId, strategySub, flAmount, ethJoin, dydxFlAddr,
+            proxy, botAcc, strategyExecutor, subId, strategySub, flAmount, ethJoin, makerFlAddr,
         );
         const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
         console.log(`Dai after closing : ${daiBalanceAfter.toString()}`);
@@ -112,7 +113,7 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
     it('... should fail to trigger the same strategy again as its one time', async () => {
         try {
             await callMcdCloseStrategy(
-                proxy, botAcc, strategyExecutor, subId, strategySub, flAmount, ethJoin, dydxFlAddr,
+                proxy, botAcc, strategyExecutor, subId, strategySub, flAmount, ethJoin, makerFlAddr,
             );
         } catch (err) {
             expect(err.toString()).to.have.string('SubNotEnabled');

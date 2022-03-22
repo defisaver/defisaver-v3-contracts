@@ -690,8 +690,7 @@ const openStrategyAndBundleStorage = async () => {
     const strategySubAddr = getAddrFromRegistry('StrategyStorage');
     const bundleSubAddr = getAddrFromRegistry('BundleStorage');
 
-    // TODO: This will change to OWNER_ADDR soon
-    const currOwnerAddr = '0x76720aC2574631530eC8163e4085d6F98513fb27';
+    const currOwnerAddr = getOwnerAddr();
 
     const ownerSigner = await hre.ethers.provider.getSigner(currOwnerAddr);
 
