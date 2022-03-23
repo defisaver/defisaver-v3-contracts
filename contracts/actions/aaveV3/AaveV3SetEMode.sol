@@ -6,7 +6,7 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
 
-/// @title Supply a token to an Aave market
+/// @title Set positions eMode on Aave v3
 contract AaveV3SetEMode is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 

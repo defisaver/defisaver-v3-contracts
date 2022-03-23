@@ -8,7 +8,7 @@ import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
 import "../../interfaces/aave/IAToken.sol";
 
-/// @title Payback a token a user borrowed from an Aave market
+/// @title Payback a token a user borrowed from an Aave market using aToken
 contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
@@ -66,7 +66,7 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
             params.rateMode,  
             params.from      
         );
-        //logger.logActionDirectEvent("AaveV3Payback", logData);
+        //logger.logActionDirectEvent("AaveV3ATokenPayback", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -127,7 +127,18 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
     }
 
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
+        encodedInput = bytes.concat(this.executeActionDirectL2.selector);
+        encodedInput = bytes.concat(encodedInput, bytes20(params.market));
+        encodedInput = bytes.concat(encodedInput, bytes32(params.amount));
+        encodedInput = bytes.concat(encodedInput, bytes20(params.from));
+        encodedInput = bytes.concat(encodedInput, bytes1(params.rateMode));
+        encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
     }
     function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
+        params.market = address(bytes20(encodedInput[0:20]));
+        params.amount = uint256(bytes32(encodedInput[20:52]));
+        params.from = address(bytes20(encodedInput[52:72]));
+        params.rateMode = uint8(bytes1(encodedInput[72:73]));
+        params.assetId = uint16(bytes2(encodedInput[73:75]));
     }
 }

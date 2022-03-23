@@ -1,72 +1,89 @@
 const { expect } = require('chai');
-const dfs = require('@defisaver/sdk');
 
 const hre = require('hardhat');
 
 const {
-    getProxy, balanceOf, setBalance, approve, getGasUsed,
+    getProxy, balanceOf, setBalance, redeploy, takeSnapshot, revertToSnapshot,
 } = require('../utils');
-const { deployContract } = require('../../scripts/utils/deployer');
+const { aaveV3Supply, aaveV3Withdraw, aaveV3WithdrawCalldataOptimised } = require('../actions');
 
 describe('Aave-Supply-L2', function () {
     this.timeout(150000);
+    const WETH_ADDRESS = '0x4200000000000000000000000000000000000006';
+    const aWETH = '0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8';
+    const AAVE_MARKET_OPTIMISM = '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb';
+    const AAVE_OPTIMISM_POOL = '0x794a61358D6845594F94dc1DB02A252b5b4814aD';
 
-    let senderAcc; let proxy; let aaveContract; let aaveWithdrawContract;
+    let senderAcc; let proxy; let pool; let snapshotId;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
-        aaveContract = await deployContract('AaveV3Supply');
-        aaveWithdrawContract = await deployContract('AaveV3Withdraw');
+        await redeploy('AaveV3Supply');
+        await redeploy('AaveV3Withdraw');
+        pool = await hre.ethers.getContractAt('IL2PoolV3', AAVE_OPTIMISM_POOL);
+    });
+
+    beforeEach(async () => {
+        snapshotId = await takeSnapshot();
+    });
+
+    afterEach(async () => {
+        await revertToSnapshot(snapshotId);
     });
 
     it('... should supply WETH to Aave V3 optimism', async () => {
-        const WETH_ADDRESS = '0x4200000000000000000000000000000000000006';
-        const aWETH = '0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8';
-
         const amount = hre.ethers.utils.parseUnits('10', 18);
         await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
         const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
-        console.log(wethBalanceBefore.toString());
-
-        await approve(WETH_ADDRESS, proxy.address);
-
-        const AAVE_MARKET_OPTIMISM = '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb';
-
-        aaveContract = await aaveContract.connect(senderAcc);
-
-        const pool = await hre.ethers.getContractAt('IL2PoolV3', '0x794a61358D6845594F94dc1DB02A252b5b4814aD');
+        console.log(`WETH on eoa: ${wethBalanceBefore.toString()}`);
 
         const reserveData = await pool.getReserveData(WETH_ADDRESS);
-        console.log(reserveData.id);
-
-        const aaveSupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-            AAVE_MARKET_OPTIMISM, amount, senderAcc.address, reserveData.id, true, false,
-        );
-        const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
-        console.log(functionData);
+        const assetId = reserveData.id;
+        const from = senderAcc.address;
+        const to = senderAcc.address;
 
         const balanceBefore = await balanceOf(aWETH, proxy.address);
-        console.log(balanceBefore.toString());
-        const receipt = await proxy['execute(address,bytes)'](aaveContract.address, functionData, { gasLimit: 3000000 });
+        console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+        await aaveV3Supply(proxy, AAVE_MARKET_OPTIMISM, amount, WETH_ADDRESS, assetId, from);
 
-        const gasUsed = await getGasUsed(receipt);
-        console.log(`GasUsed aaveSupply; ${gasUsed}`);
-        console.log(receipt);
         const balanceAfter = await balanceOf(aWETH, proxy.address);
-        console.log(balanceAfter.toString());
+        console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+        // ----------------------------------------------------------------
 
         const wethBalanceBeforeWithdraw = await balanceOf(WETH_ADDRESS, senderAcc.address);
-        console.log(wethBalanceBeforeWithdraw.toString());
-        const aaveWithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-            AAVE_MARKET_OPTIMISM, reserveData.id, balanceAfter, senderAcc.address,
-        );
-        const withdrawFunctionData = aaveWithdrawAction.encodeForDsProxyCall()[1];
-        await approve(aWETH, proxy.address);
+        console.log(`WETH on EOA before withdraw:${wethBalanceBeforeWithdraw.toString()}`);
+        await aaveV3Withdraw(proxy, AAVE_MARKET_OPTIMISM, assetId, amount, to);
 
-        const receiptWithdraw = await proxy['execute(address,bytes)'](aaveWithdrawContract.address, withdrawFunctionData, { gasLimit: 3000000 });
         const wethBalanceAfterWithdraw = await balanceOf(WETH_ADDRESS, senderAcc.address);
-        console.log(wethBalanceAfterWithdraw.toString());
+        console.log(`WETH on EOA after withdraw:${wethBalanceAfterWithdraw.toString()}`);
+    });
+    it('... should supply WETH to Aave V3 optimism using optimised calldata', async () => {
+        const amount = hre.ethers.utils.parseUnits('10', 18);
+        await setBalance(WETH_ADDRESS, senderAcc.address, amount);
+
+        const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
+        console.log(`WETH on eoa: ${wethBalanceBefore.toString()}`);
+
+        const reserveData = await pool.getReserveData(WETH_ADDRESS);
+        const assetId = reserveData.id;
+        const from = senderAcc.address;
+        const to = senderAcc.address;
+
+        const balanceBefore = await balanceOf(aWETH, proxy.address);
+        console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+        await aaveV3Supply(proxy, AAVE_MARKET_OPTIMISM, amount, WETH_ADDRESS, assetId, from);
+
+        const balanceAfter = await balanceOf(aWETH, proxy.address);
+        console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+        // ----------------------------------------------------------------
+
+        const wethBalanceBeforeWithdraw = await balanceOf(WETH_ADDRESS, senderAcc.address);
+        console.log(`WETH on EOA before withdraw:${wethBalanceBeforeWithdraw.toString()}`);
+        await aaveV3WithdrawCalldataOptimised(proxy, AAVE_MARKET_OPTIMISM, assetId, amount, to);
+
+        const wethBalanceAfterWithdraw = await balanceOf(WETH_ADDRESS, senderAcc.address);
+        console.log(`WETH on EOA after withdraw:${wethBalanceAfterWithdraw.toString()}`);
     });
 });

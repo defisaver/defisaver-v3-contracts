@@ -7,8 +7,6 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
 
-import "hardhat/console.sol";
-
 /// @title Withdraw a token from an Aave market
 contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     using TokenUtils for address;
@@ -48,7 +46,7 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
         (, bytes memory logData) = _withdraw(params.market, params.assetId, params.amount, params.to);
-        logger.logActionDirectEvent("AaveV3Supply", logData);
+        //logger.logActionDirectEvent("AaveV3Supply", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -69,7 +67,6 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
         uint256 _amount,
         address _to
     ) internal returns (uint256, bytes memory) {
-        console.log("HERE");
         IPoolV3 lendingPool = getLendingPool(_market);
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);
 
@@ -79,14 +76,8 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
         if (_amount == type(uint256).max) {
             tokenBefore = tokenAddr.getBalance(_to);
         }
-        console.log("HERE");
-        console.log(_amount);
-        console.log(_assetId);
-        console.log(_to);
-
         // withdraw underlying tokens from aave and send _to address
         lendingPool.withdraw(tokenAddr, _amount, _to);
-        console.log("HERE");
 
         // if the input amount is max calc. what was the exact _amount
         if (_amount == type(uint256).max) {

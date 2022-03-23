@@ -6,7 +6,6 @@ import "../../interfaces/IWETH.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
-import "hardhat/console.sol";
 
 /// @title Payback a token a user borrowed from an Aave market
 contract AaveV3Payback is ActionBase, AaveV3Helper {
@@ -50,7 +49,6 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        console.log("HERERE");
         (, bytes memory logData) = _payback(
             params.market,
             params.assetId,
@@ -72,7 +70,7 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
             params.from,
             params.onBehalf
         );        
-        logger.logActionDirectEvent("AaveV3Payback", logData);
+        //logger.logActionDirectEvent("AaveV3Payback", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -102,23 +100,14 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }
-        console.log(_market);
-        console.log(_assetId);
-        console.log(_amount);
-        console.log(_rateMode);
-        console.log(_from);
-        console.log(_onBehalf);
         IPoolV3 lendingPool = getLendingPool(_market);
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);
 
         uint256 maxDebt = getWholeDebt(_market, tokenAddr, _rateMode, _onBehalf);
         _amount = _amount > maxDebt ? maxDebt : _amount;
-        console.log(_amount);
-        console.log(maxDebt);
 
         tokenAddr.pullTokensIfNeeded(_from, _amount);
         tokenAddr.approveToken(address(lendingPool), _amount);
-        console.log("PULLED");
 
         uint256 tokensBefore = tokenAddr.getBalance(address(this));
 

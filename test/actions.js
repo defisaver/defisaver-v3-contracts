@@ -1712,6 +1712,169 @@ const aaveV3SupplyCalldataOptimised = async (
     console.log(`GasUsed aaveV3SupplyCalldataOptimised: ${gasUsed}`);
     return receipt;
 };
+const aaveV3Withdraw = async (
+    proxy, market, assetId, amount, to,
+) => {
+    const aaveWithdrawAddr = await getAddrFromRegistry('AaveV3Withdraw');
+
+    const aaveWithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        market, assetId, amount, to,
+    );
+    const functionData = aaveWithdrawAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](aaveWithdrawAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3Withdraw: ${gasUsed}`);
+    return receipt;
+};
+const aaveV3WithdrawCalldataOptimised = async (
+    proxy, market, assetId, amount, to,
+) => {
+    const aaveWithdrawAddr = await getAddrFromRegistry('AaveV3Withdraw');
+    let contract = await hre.ethers.getContractAt('AaveV3Withdraw', aaveWithdrawAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+
+    const encodedInput = await contract.encodeInputs(
+        [market, assetId, amount, to],
+    );
+    const receipt = await proxy['execute(address,bytes)'](aaveWithdrawAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3WithdrawCalldataOptimised: ${gasUsed}`);
+    return receipt;
+};
+const aaveV3Borrow = async (
+    proxy, market, amount, to, rateMode, assetId,
+) => {
+    const aaveBorrowAddr = await getAddrFromRegistry('AaveV3Borrow');
+
+    const aaveBorrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
+        market, amount, to, rateMode, assetId, false,
+    );
+    const functionData = aaveBorrowAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](aaveBorrowAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3Borrow: ${gasUsed}`);
+    return receipt;
+};
+const aaveV3BorrowCalldataOptimised = async (
+    proxy, market, amount, to, rateMode, assetId,
+) => {
+    const aaveBorrowAddr = await getAddrFromRegistry('AaveV3Borrow');
+    let contract = await hre.ethers.getContractAt('AaveV3Borrow', aaveBorrowAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+
+    const encodedInput = await contract.encodeInputs(
+        [market, amount, to, rateMode, assetId, false, nullAddress],
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](aaveBorrowAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3BorrowCalldataOptimised: ${gasUsed}`);
+    return receipt;
+};
+const aaveV3Payback = async (
+    proxy, market, amount, from, rateMode, assetId,
+) => {
+    const aavePaybackAddr = await getAddrFromRegistry('AaveV3Payback');
+
+    const aavePaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        market, amount, from, rateMode, assetId, false,
+    );
+    const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3Payback: ${gasUsed}`);
+    return receipt;
+};
+const aaveV3PaybackCalldataOptimised = async (
+    proxy, market, amount, from, rateMode, assetId,
+) => {
+    const aavePaybackAddr = await getAddrFromRegistry('AaveV3Payback');
+    let contract = await hre.ethers.getContractAt('AaveV3Payback', aavePaybackAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+
+    const encodedInput = await contract.encodeInputs(
+        [market, amount, from, rateMode, assetId, false, nullAddress],
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](aavePaybackAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3PaybackCalldataOptimised: ${gasUsed}`);
+    return receipt;
+};
+const aaveV3ATokenPayback = async (
+    proxy, market, amount, from, rateMode, assetId,
+) => {
+    const aavePaybackAddr = await getAddrFromRegistry('AaveV3ATokenPayback');
+
+    const aavePaybackAction = new dfs.actions.aaveV3.AaveV3ATokenPaybackAction(
+        market, amount, from, rateMode, assetId,
+    );
+    const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3ATokenPayback: ${gasUsed}`);
+    return receipt;
+};
+const aaveV3ATokenPaybackCalldataOptimised = async (
+    proxy, market, amount, from, rateMode, assetId,
+) => {
+    const aavePaybackAddr = await getAddrFromRegistry('AaveV3ATokenPayback');
+    let contract = await hre.ethers.getContractAt('AaveV3ATokenPayback', aavePaybackAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+
+    const encodedInput = await contract.encodeInputs(
+        [market, amount, from, rateMode, assetId],
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](aavePaybackAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3ATokenPaybackCalldataOptimised: ${gasUsed}`);
+    return receipt;
+};
+const aaveV3SetEMode = async (
+    proxy, market, categoryId,
+) => {
+    const aaveSetEModeAddr = await getAddrFromRegistry('AaveV3SetEMode');
+
+    const aaveSetEModeAction = new dfs.actions.aaveV3.AaveV3SetEModeAction(
+        market, categoryId,
+    );
+    const functionData = aaveSetEModeAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](aaveSetEModeAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3SetEMode: ${gasUsed}`);
+    return receipt;
+};
+const aaveV3SetEModeCalldataOptimised = async (
+    proxy, market, categoryId,
+) => {
+    const aaveSetEModeAddr = await getAddrFromRegistry('AaveV3SetEMode');
+    let contract = await hre.ethers.getContractAt('AaveV3SetEMode', aaveSetEModeAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+
+    const encodedInput = await contract.encodeInputs(
+        [market, categoryId],
+    );
+    const receipt = await proxy['execute(address,bytes)'](aaveSetEModeAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3SetEModeCalldataOptimised: ${gasUsed}`);
+    return receipt;
+};
 
 module.exports = {
     sell,
@@ -1810,4 +1973,14 @@ module.exports = {
 
     aaveV3Supply,
     aaveV3SupplyCalldataOptimised,
+    aaveV3Withdraw,
+    aaveV3WithdrawCalldataOptimised,
+    aaveV3Borrow,
+    aaveV3BorrowCalldataOptimised,
+    aaveV3Payback,
+    aaveV3PaybackCalldataOptimised,
+    aaveV3ATokenPayback,
+    aaveV3ATokenPaybackCalldataOptimised,
+    aaveV3SetEMode,
+    aaveV3SetEModeCalldataOptimised,
 };
