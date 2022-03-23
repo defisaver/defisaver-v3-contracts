@@ -23,6 +23,7 @@ const { callMcdCloseStrategy } = require('../strategy-calls');
 const { createMcdCloseStrategy } = require('../strategies');
 
 const { openVault } = require('../actions');
+const { RATIO_STATE_OVER } = require('../triggers');
 
 describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to recipient)', function () {
     this.timeout(120000);
@@ -82,8 +83,6 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
         await openStrategyAndBundleStorage();
 
         const strategyData = createMcdCloseStrategy();
-
-        console.log(strategyData);
         const strategyId = await createStrategy(proxy, ...strategyData, false);
 
         const currPrice = await getChainLinkPrice(ETH_ADDR);
@@ -94,6 +93,7 @@ describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to rec
             proxy,
             targetPrice,
             WETH_ADDRESS,
+            RATIO_STATE_OVER,
             strategyId,
         ));
         console.log(subId);

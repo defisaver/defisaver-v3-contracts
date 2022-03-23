@@ -25,11 +25,13 @@ const {
     approve,
     depositToWeth,
     balanceOf,
+    openStrategyAndBundleStorage,
     WETH_ADDRESS,
     UNISWAP_WRAPPER,
     DAI_ADDR,
     rariDaiFundManager,
     rdptAddress,
+    WBTC_ADDR,
 } = require('../test/utils');
 
 const {
@@ -57,9 +59,11 @@ const {
     AssetPair,
 } = require('../test/utils-mstable');
 
-const { getSubHash, addBotCaller } = require('../test/utils-strategies');
+const { getSubHash, addBotCaller, createStrategy } = require('../test/utils-strategies');
 
-const { subRepayFromSavingsStrategy } = require('../test/strategy-subs');
+const { createMcdCloseStrategy } = require('../test/strategies');
+
+const { subRepayFromSavingsStrategy, subMcdCloseStrategy } = require('../test/strategy-subs');
 const { createMcdTrigger, RATIO_STATE_UNDER } = require('../test/triggers');
 
 program.version('0.0.1');
@@ -196,6 +200,51 @@ const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio,
     );
 
     console.log(`Subscribed to ${protocol} bundle with sub id #${subId}`);
+};
+
+const mcdCloseStrategySub = async (vaultId, type, price, priceState, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await openStrategyAndBundleStorage(true);
+
+    const formattedPrice = (price * 1e8).toString();
+
+    let formattedPriceState;
+    if (priceState.toLowerCase() === 'over') {
+        formattedPriceState = 0;
+    } else if (priceState.toLowerCase() === 'under') {
+        formattedPriceState = 1;
+    }
+
+    const ilkObj = ilks.find((i) => i.ilkLabel === type);
+
+    // diff. chainlink price address for bitcoin
+    if (ilkObj.assetAddress.toLocaleLowerCase() === WBTC_ADDR.toLocaleLowerCase()) {
+        ilkObj.assetAddress = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
+    }
+
+    const strategyData = createMcdCloseStrategy();
+    const strategyId = await createStrategy(proxy, ...strategyData, false);
+
+    const { subId } = await subMcdCloseStrategy(
+        vaultId,
+        proxy,
+        formattedPrice,
+        ilkObj.assetAddress,
+        formattedPriceState,
+        strategyId,
+    );
+
+    console.log(`Subscribed to mcd close strategy with sub id #${subId}`);
 };
 
 // eslint-disable-next-line max-len
@@ -632,6 +681,15 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
         .action(async (protocol, vaultId, minRatio, targetRatio, senderAddr) => {
             // eslint-disable-next-line max-len
             await smartSavingsStrategySub(protocol, vaultId, minRatio, targetRatio, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('sub-mcd-close <vaultId> <type> <price> <priceState> [senderAddr]')
+        .description('Subscribes to a Mcd close to dai strategy')
+        .action(async (vaultId, type, price, priceState, senderAddr) => {
+            // eslint-disable-next-line max-len
+            await mcdCloseStrategySub(vaultId, type, price, priceState, senderAddr);
             process.exit(0);
         });
 

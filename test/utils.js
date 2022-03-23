@@ -686,7 +686,7 @@ const revertToSnapshot = async (snapshotId) => hre.network.provider.request({
 
 const getWeth = () => addrs[network].WETH_ADDRESS;
 
-const openStrategyAndBundleStorage = async () => {
+const openStrategyAndBundleStorage = async (isFork) => {
     const strategySubAddr = getAddrFromRegistry('StrategyStorage');
     const bundleSubAddr = getAddrFromRegistry('BundleStorage');
 
@@ -694,7 +694,9 @@ const openStrategyAndBundleStorage = async () => {
 
     const ownerSigner = await hre.ethers.provider.getSigner(currOwnerAddr);
 
-    await impersonateAccount(currOwnerAddr);
+    if (!isFork) {
+        await impersonateAccount(currOwnerAddr);
+    }
 
     let strategyStorage = await hre.ethers.getContractAt('StrategyStorage', strategySubAddr);
     let bundleStorage = await hre.ethers.getContractAt('BundleStorage', bundleSubAddr);
@@ -705,7 +707,9 @@ const openStrategyAndBundleStorage = async () => {
     await strategyStorage.changeEditPermission(true);
     await bundleStorage.changeEditPermission(true);
 
-    await stopImpersonatingAccount(currOwnerAddr);
+    if (!isFork) {
+        await stopImpersonatingAccount(currOwnerAddr);
+    }
 };
 
 module.exports = {
