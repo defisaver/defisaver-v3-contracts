@@ -708,13 +708,17 @@ const revertToSnapshot = async (snapshotId) => hre.network.provider.request({
 
 const getWeth = () => addrs[network].WETH_ADDRESS;
 
-const openStrategyAndBundleStorage = async () => {
+const openStrategyAndBundleStorage = async (isFork) => {
     const strategySubAddr = getAddrFromRegistry('StrategyStorage');
     const bundleSubAddr = getAddrFromRegistry('BundleStorage');
 
-    const ownerSigner = await hre.ethers.provider.getSigner(getOwnerAddr());
+    const currOwnerAddr = getOwnerAddr();
 
-    await impersonateAccount(getOwnerAddr());
+    const ownerSigner = await hre.ethers.provider.getSigner(currOwnerAddr);
+
+    if (!isFork) {
+        await impersonateAccount(currOwnerAddr);
+    }
 
     let strategyStorage = await hre.ethers.getContractAt('StrategyStorage', strategySubAddr);
     let bundleStorage = await hre.ethers.getContractAt('BundleStorage', bundleSubAddr);
@@ -725,7 +729,9 @@ const openStrategyAndBundleStorage = async () => {
     await strategyStorage.changeEditPermission(true);
     await bundleStorage.changeEditPermission(true);
 
-    await stopImpersonatingAccount(getOwnerAddr());
+    if (!isFork) {
+        await stopImpersonatingAccount(currOwnerAddr);
+    }
 };
 
 async function setForkForTesting() {

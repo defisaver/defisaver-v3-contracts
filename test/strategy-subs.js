@@ -155,16 +155,17 @@ const subMcdBoostStrategy = async (proxy, bundleId, vaultId, rationUnder, target
     return { subId, strategySub };
 };
 
-const subMcdCloseStrategy = async (vaultId, proxy, recipient, targetPrice, tokenAddress, strategyId) => {
+const subMcdCloseStrategy = async (vaultId, proxy, targetPrice, tokenAddress, tokenState, strategyId) => {
     const isBundle = false;
 
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
-    const recipientEncoded = abiCoder.encode(['address'], [recipient]);
+    const daiEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const mcdManagerEncoded = abiCoder.encode(['address'], [MCD_MANAGER_ADDR]);
 
     const triggerData = await createChainLinkPriceTrigger(
-        tokenAddress, targetPrice, RATIO_STATE_OVER,
+        tokenAddress, targetPrice, tokenState,
     );
-    const strategySub = [strategyId, isBundle, [triggerData], [vaultIdEncoded, recipientEncoded]];
+    const strategySub = [strategyId, isBundle, [triggerData], [vaultIdEncoded, daiEncoded, mcdManagerEncoded]];
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };
