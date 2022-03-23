@@ -1875,6 +1875,39 @@ const aaveV3SetEModeCalldataOptimised = async (
     console.log(`GasUsed aaveV3SetEModeCalldataOptimised: ${gasUsed}`);
     return receipt;
 };
+const aaveV3SwitchCollateral = async (
+    proxy, market, arrayLength, tokens, useAsCollateral,
+) => {
+    const aaveSwitchCollateralAddr = await getAddrFromRegistry('AaveV3CollateralSwitch');
+    const aaveSwithCollAction = new dfs.actions.aaveV3.AaveV3CollateralSwitchAction(
+        market, arrayLength, tokens, useAsCollateral,
+    );
+    const functionData = aaveSwithCollAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](aaveSwitchCollateralAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3SwitchCollateral: ${gasUsed}`);
+    return receipt;
+};
+const aaveV3SwitchCollateralCallDataOptimised = async (
+    proxy, market, arrayLength, tokens, useAsCollateral,
+) => {
+    const aaveSwitchCollateralAddr = await getAddrFromRegistry('AaveV3CollateralSwitch');
+    let contract = await hre.ethers.getContractAt('AaveV3CollateralSwitch', aaveSwitchCollateralAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+
+    const encodedInput = await contract.encodeInputs(
+        [market, arrayLength, tokens, useAsCollateral],
+    );
+    console.log(encodedInput);
+
+    const receipt = await proxy['execute(address,bytes)'](aaveSwitchCollateralAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3SwitchCollateralCallDataOptimised: ${gasUsed}`);
+    return receipt;
+};
 
 module.exports = {
     sell,
@@ -1983,4 +2016,6 @@ module.exports = {
     aaveV3ATokenPaybackCalldataOptimised,
     aaveV3SetEMode,
     aaveV3SetEModeCalldataOptimised,
+    aaveV3SwitchCollateral,
+    aaveV3SwitchCollateralCallDataOptimised,
 };
