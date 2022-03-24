@@ -1412,12 +1412,14 @@ const curveStethPoolWithdraw = async (
     to,
     amounts,
     minBurnAmount,
+    returnValue,
 ) => {
     const curveStethPoolWithdrawAction = new dfs.actions.curve.CurveStethPoolWithdrawAction(
         from,
         to,
         amounts,
         minBurnAmount,
+        returnValue,
     );
 
     const functionData = curveStethPoolWithdrawAction.encodeForDsProxyCall()[1];
