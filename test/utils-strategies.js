@@ -57,7 +57,7 @@ const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramM
         [strategyName, triggerIds, actionIds, paramMapping, continuous],
     );
 
-    console.log('Create strategy');
+    console.log('Create strategy: ', strategyProxyAddr);
 
     const receipt = await proxy['execute(address,bytes)'](strategyProxyAddr, functionData, {
         gasLimit: 5000000,
@@ -69,6 +69,8 @@ const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramM
     console.log(`GasUsed createStrategy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 
     const strategyId = await getLatestStrategyId();
+
+    console.log('strategyId: ', strategyId);
 
     return strategyId;
 };
@@ -114,9 +116,9 @@ const subToStrategy = async (proxy, strategySub, regAddr = REGISTRY_ADDR) => {
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
     console.log(`GasUsed subToStrategy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 
-    const latestStrategyId = await getLatestSubId(regAddr);
+    const latestSubId = await getLatestSubId(regAddr);
 
-    return latestStrategyId;
+    return latestSubId;
 };
 
 const addBotCaller = async (botAddr, regAddr = REGISTRY_ADDR, isFork = false) => {

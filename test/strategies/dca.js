@@ -19,7 +19,7 @@ const { callDcaStrategy } = require('../strategy-calls');
 const { subDcaStrategy } = require('../strategy-subs');
 const { createDCAStrategy } = require('../strategies');
 
-const { createStrategy, addBotCaller } = require('../utils-strategies.js');
+const { createStrategy, addBotCaller } = require('../utils-strategies');
 
 const TWO_DAYS = 2 * 24 * 60 * 60;
 const START_TIMESTAMP = 1630489138;
