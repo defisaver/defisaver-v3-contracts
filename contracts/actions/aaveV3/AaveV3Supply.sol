@@ -60,7 +60,7 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice User deposits tokens to the Aave protocol
-    /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
+    /// @dev User needs to approve the DSProxy to pull the tokens being supplied
     /// @param _market Address provider for specific market
     /// @param _amount Amount of tokens to be deposited
     /// @param _from Where are we pulling the supply tokens amount from

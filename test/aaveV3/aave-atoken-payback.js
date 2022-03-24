@@ -78,7 +78,7 @@ describe('AaveV3-Payback-L2', function () {
         const aDaiBalanceBefore = await balanceOf(aDAI, senderAcc.address);
         console.log(`aDAI on EOA before ATokenPayback: ${aDaiBalanceBefore.toString()}`);
         await aaveV3ATokenPayback(
-            proxy, AAVE_MARKET_OPTIMISM, paybackAmount, from, 2, reserveDataDAI.id,
+            proxy, AAVE_MARKET_OPTIMISM, paybackAmount, from, 2, reserveDataDAI.id, aDAI,
         );
 
         const aDaiBalanceAfter = await balanceOf(aDAI, senderAcc.address);
@@ -131,7 +131,7 @@ describe('AaveV3-Payback-L2', function () {
         const aDaiBalanceBefore = await balanceOf(aDAI, senderAcc.address);
         console.log(`aDAI on EOA before ATokenPayback: ${aDaiBalanceBefore.toString()}`);
         await aaveV3ATokenPaybackCalldataOptimised(
-            proxy, AAVE_MARKET_OPTIMISM, paybackAmount, from, 2, reserveDataDAI.id,
+            proxy, AAVE_MARKET_OPTIMISM, paybackAmount, from, 2, reserveDataDAI.id, aDAI,
         );
 
         const aDaiBalanceAfter = await balanceOf(aDAI, senderAcc.address);

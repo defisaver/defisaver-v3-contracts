@@ -8,7 +8,7 @@ import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
 import "../../interfaces/aave/IAToken.sol";
 
-/// @title Payback a token a user borrowed from an Aave market using aToken
+/// @title Allows user to repay with aTokens of the underlying debt asset eg. Pay DAI debt using aDAI tokens.
 contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
@@ -76,13 +76,13 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User paybacks tokens to the Aave protocol
-    /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
+    /// @notice Allows user to repay with aTokens of the underlying debt asset eg. Pay DAI debt using aDAI tokens.
+    /// @dev User needs to approve the DSProxy to pull aTokens
     /// @param _market Address provider for specific market
-    /// @param _assetId The id of the token to be deposited
-    /// @param _amount Amount of tokens to be payed back
+    /// @param _assetId The id of the underlying asset to be repaid
+    /// @param _amount Amount of tokens to be payed back (uint.max for full debt)
     /// @param _rateMode Type of borrow debt [Stable: 1, Variable: 2]
-    /// @param _from Where are we pulling the payback tokens amount from
+    /// @param _from Where are we pulling the payback aTokens from
     function _paybackWithATokens(
         address _market,
         uint16 _assetId,
@@ -100,17 +100,9 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
         DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(tokenAddr);
         address aTokenAddr = reserveData.aTokenAddress;
 
-        aTokenAddr.pullTokensIfNeeded(_from, _amount);
-        //aTokenAddr.approveToken(address(lendingPool), _amount);
-
-        uint256 tokensBefore = aTokenAddr.getBalance(address(this));
+        _amount = aTokenAddr.pullTokensIfNeeded(_from, _amount);
 
         lendingPool.repayWithATokens(tokenAddr, _amount, _rateMode);
-
-        uint256 tokensAfter = aTokenAddr.getBalance(address(this));
-
-        // send back any leftover tokens that weren't used in the repay
-        aTokenAddr.withdrawTokens(_from, tokensAfter);
 
         bytes memory logData = abi.encode(
             _market,
@@ -119,7 +111,7 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
             _rateMode,
             _from
         );
-        return (tokensBefore - tokensAfter, logData);
+        return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

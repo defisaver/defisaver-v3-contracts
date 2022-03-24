@@ -5,7 +5,7 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
 
-/// @title Borrow a token a from an Aave market
+/// @title Borrow a token from AaveV3 market
 contract AaveV3Borrow is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
@@ -60,11 +60,11 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
 
     /// @notice User borrows tokens from the Aave protocol
     /// @param _market Address provider for specific market
-    /// @param _assetId The id of the token to be deposited
+    /// @param _assetId The id of the token to be borrowed
     /// @param _amount Amount of tokens to be borrowed
-    /// @param _rateMode Send 1 for stable rate and 2 for variable
+    /// @param _rateMode Type of borrow debt [Stable: 1, Variable: 2]
     /// @param _to The address we are sending the borrowed tokens to
-    /// @param _onBehalf From what user we are borrow the tokens, defaults to proxy
+    /// @param _onBehalf On whose behalf we borrow the tokens, defaults to proxy
     function _borrow(
         address _market,
         uint16 _assetId,
