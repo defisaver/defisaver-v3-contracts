@@ -914,6 +914,11 @@ const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, stra
         placeHolderAddr,
         placeHolderAddr,
     );
+
+    const closeGasCost = 1_200_000;
+    const gasFee = new dfs.actions.basic.GasFeeAction(
+        closeGasCost, placeHolderAddr, 0,
+    );
     const sendFirst = new dfs.actions.basic.SendTokenAction(
         placeHolderAddr,
         makerFlAddr,
@@ -928,6 +933,7 @@ const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, stra
     actionsCallData.push(paybackAction.encodeForRecipe()[0]);
     actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(gasFee.encodeForRecipe()[0]);
     actionsCallData.push(sendFirst.encodeForRecipe()[0]);
     actionsCallData.push(sendSecond.encodeForRecipe()[0]);
 
