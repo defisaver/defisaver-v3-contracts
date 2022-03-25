@@ -310,8 +310,7 @@ const mcdCloseStrategySub = async (vaultId, type, price, priceState, sender) => 
         ilkObj.assetAddress = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
     }
 
-    const strategyData = createMcdCloseStrategy();
-    const strategyId = await createStrategy(proxy, ...strategyData, false);
+    const strategyId = 7;
 
     const { subId } = await subMcdCloseStrategy(
         vaultId,
@@ -529,6 +528,7 @@ const createMcdVault = async (type, coll, debt, sender) => {
         await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
         const vaultsAfter = await getVaultsForUser(proxy.address);
+        console.log(vaultsAfter);
 
         console.log(`Vault #${vaultsAfter.ids[vaultsAfter.ids.length - 1].toString()} created`);
     } catch (err) {
