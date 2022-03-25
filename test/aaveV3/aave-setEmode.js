@@ -7,7 +7,7 @@ const {
 } = require('../utils');
 const { aaveV3Supply, aaveV3SetEMode, aaveV3SetEModeCalldataOptimised } = require('../actions');
 
-describe('Aave-Supply-L2', function () {
+describe('Aave-Set-EMode-L2', function () {
     this.timeout(150000);
 
     let senderAcc; let proxy; let snapshotId; let pool;
@@ -31,7 +31,7 @@ describe('Aave-Supply-L2', function () {
         await revertToSnapshot(snapshotId);
     });
 
-    it('... should supply WETH to Aave V3 optimism', async () => {
+    it('... should change EMode on Aave V3 optimism', async () => {
         const amount = hre.ethers.utils.parseUnits('10', 18);
         await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -51,10 +51,13 @@ describe('Aave-Supply-L2', function () {
 
         let userEmode = await pool.getUserEMode(proxy.address);
         console.log(`Users emode before changing: ${userEmode}`);
+        expect(userEmode).to.be.eq(0);
 
         await aaveV3SetEMode(proxy, AAVE_MARKET_OPTIMISM, 1);
 
         userEmode = await pool.getUserEMode(proxy.address);
+
+        expect(userEmode).to.be.eq(1);
         console.log(`Users emode before changing: ${userEmode}`);
     });
     it('... should supply WETH to Aave V3 optimism with calldata optimised', async () => {
@@ -77,10 +80,12 @@ describe('Aave-Supply-L2', function () {
 
         let userEmode = await pool.getUserEMode(proxy.address);
         console.log(`Users emode before changing: ${userEmode}`);
+        expect(userEmode).to.be.eq(0);
 
         await aaveV3SetEModeCalldataOptimised(proxy, AAVE_MARKET_OPTIMISM, 1);
 
         userEmode = await pool.getUserEMode(proxy.address);
         console.log(`Users emode before changing: ${userEmode}`);
+        expect(userEmode).to.be.eq(1);
     });
 });

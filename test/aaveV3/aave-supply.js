@@ -48,6 +48,7 @@ describe('Aave-Supply-L2', function () {
 
         const balanceAfter = await balanceOf(aWETH, proxy.address);
         console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+        expect(balanceAfter).to.be.gt(balanceBefore);
     });
 
     it('... should supply WETH to Aave V3 optimism using optimised calldata', async () => {
@@ -70,5 +71,6 @@ describe('Aave-Supply-L2', function () {
 
         const balanceAfter = await balanceOf(aWETH, proxy.address);
         console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+        expect(balanceAfter).to.be.gt(balanceBefore);
     });
 });

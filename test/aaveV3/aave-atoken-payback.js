@@ -9,7 +9,7 @@ const {
     getProxy, balanceOf, setBalance, approve, redeploy, takeSnapshot, revertToSnapshot,
 } = require('../utils');
 
-describe('AaveV3-Payback-L2', function () {
+describe('AaveV3-ATokenPayback-L2', function () {
     this.timeout(150000);
 
     let senderAcc; let proxy; let pool; let snapshotId;
@@ -86,6 +86,7 @@ describe('AaveV3-Payback-L2', function () {
 
         const debtAmountAfter = await balanceOf(daiVariableTokenDebt, proxy.address);
         console.log(`Debt after payback ${debtAmountAfter.toString()}`);
+        expect(debtAmountAfter).to.be.lt(debtAmountBefore);
     });
 
     it('... should supply WETH and borrow DAI then repay part of debt using aDAI on Aave V3 on optimism using optimised calldata', async () => {
@@ -139,6 +140,8 @@ describe('AaveV3-Payback-L2', function () {
 
         const debtAmountAfter = await balanceOf(daiVariableTokenDebt, proxy.address);
         console.log(`Debt after payback ${debtAmountAfter.toString()}`);
+
+        expect(debtAmountAfter).to.be.lt(debtAmountBefore);
     });
     it('... should supply WETH and borrow DAI then repay ALL debt using aDAI on Aave V3 on optimism using optimised calldata', async () => {
         const amount = hre.ethers.utils.parseUnits('10', 18);
@@ -191,5 +194,8 @@ describe('AaveV3-Payback-L2', function () {
 
         const debtAmountAfter = await balanceOf(daiVariableTokenDebt, proxy.address);
         console.log(`Debt after payback ${debtAmountAfter.toString()}`);
+
+        expect(debtAmountAfter).to.be.lt(debtAmountBefore);
+        expect(debtAmountAfter).to.be.eq(0);
     });
 });

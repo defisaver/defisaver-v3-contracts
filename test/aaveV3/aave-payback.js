@@ -5,7 +5,9 @@ const hre = require('hardhat');
 const {
     getProxy, balanceOf, setBalance, approve, redeploy, gibETH, takeSnapshot, revertToSnapshot,
 } = require('../utils');
-const { aaveV3Supply, aaveV3Borrow, aaveV3Payback, aaveV3PaybackCalldataOptimised } = require('../actions');
+const {
+    aaveV3Supply, aaveV3Borrow, aaveV3Payback, aaveV3PaybackCalldataOptimised,
+} = require('../actions');
 
 describe('AaveV3-Payback-L2', function () {
     this.timeout(150000);
@@ -77,6 +79,7 @@ describe('AaveV3-Payback-L2', function () {
 
         const debtAmountAfter = await balanceOf(daiVariableTokenDebt, proxy.address);
         console.log(`Debt after payback ${debtAmountAfter.toString()}`);
+        expect(debtAmountAfter).to.be.lt(debtAmountBefore);
     });
     it('... should supply WETH and borrow DAI then repay the debt to Aave V3 on optimism using optimised calldata', async () => {
         const amount = hre.ethers.utils.parseUnits('10', 18);
@@ -121,6 +124,8 @@ describe('AaveV3-Payback-L2', function () {
 
         const debtAmountAfter = await balanceOf(daiVariableTokenDebt, proxy.address);
         console.log(`Debt after payback ${debtAmountAfter.toString()}`);
+
+        expect(debtAmountAfter).to.be.lt(debtAmountBefore);
     });
     it('... should supply WETH and borrow DAI then repay uint(-1) ALL debt to Aave V3 on optimism using optimised calldata', async () => {
         const amount = hre.ethers.utils.parseUnits('10', 18);
@@ -172,5 +177,8 @@ describe('AaveV3-Payback-L2', function () {
 
         const debtAmountAfter = await balanceOf(daiVariableTokenDebt, proxy.address);
         console.log(`Debt after payback ${debtAmountAfter.toString()}`);
+
+        expect(debtAmountAfter).to.be.lt(debtAmountBefore);
+        expect(debtAmountAfter).to.be.eq(0);
     });
 });

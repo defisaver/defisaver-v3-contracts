@@ -7,7 +7,7 @@ const {
 } = require('../utils');
 const { aaveV3Supply, aaveV3Borrow, aaveV3BorrowCalldataOptimised } = require('../actions');
 
-describe('Aave-Supply-L2', function () {
+describe('Aave-Borrow-L2', function () {
     this.timeout(150000);
 
     let senderAcc; let proxy; let pool; let snapshotId;
@@ -60,6 +60,7 @@ describe('Aave-Supply-L2', function () {
 
         const daiBalanceAfter = await balanceOf(OPTIMISM_DAI, senderAcc.address);
         console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
+        expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
     });
     it('... should supply WETH and borrow DAI on Aave V3 Optimism using optimised calldata', async () => {
         const amount = hre.ethers.utils.parseUnits('10', 18);
@@ -91,5 +92,6 @@ describe('Aave-Supply-L2', function () {
 
         const daiBalanceAfter = await balanceOf(OPTIMISM_DAI, senderAcc.address);
         console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
+        expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
     });
 });

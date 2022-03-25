@@ -7,7 +7,7 @@ const {
 } = require('../utils');
 const { aaveV3Supply, aaveV3SwitchCollateral, aaveV3SwitchCollateralCallDataOptimised } = require('../actions');
 
-describe('Aave-Supply-L2', function () {
+describe('Aave-Coll-Switch-L2', function () {
     this.timeout(150000);
 
     let senderAcc; let proxy; let pool; let snapshotId;

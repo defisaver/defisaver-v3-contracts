@@ -7,7 +7,7 @@ const {
 } = require('../utils');
 const { aaveV3Supply, aaveV3Withdraw, aaveV3WithdrawCalldataOptimised } = require('../actions');
 
-describe('Aave-Supply-L2', function () {
+describe('Aave-Withdraw-L2', function () {
     this.timeout(150000);
     const WETH_ADDRESS = '0x4200000000000000000000000000000000000006';
     const aWETH = '0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8';
@@ -32,7 +32,7 @@ describe('Aave-Supply-L2', function () {
         await revertToSnapshot(snapshotId);
     });
 
-    it('... should supply WETH to Aave V3 optimism', async () => {
+    it('... should supply WETH and then withdraw it on Aave V3 optimism', async () => {
         const amount = hre.ethers.utils.parseUnits('10', 18);
         await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -56,10 +56,15 @@ describe('Aave-Supply-L2', function () {
         console.log(`WETH on EOA before withdraw:${wethBalanceBeforeWithdraw.toString()}`);
         await aaveV3Withdraw(proxy, AAVE_MARKET_OPTIMISM, assetId, amount, to);
 
+        const awethEOAbalanceAfterWithdraw = await balanceOf(aWETH, proxy.address);
+        console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+
         const wethBalanceAfterWithdraw = await balanceOf(WETH_ADDRESS, senderAcc.address);
         console.log(`WETH on EOA after withdraw:${wethBalanceAfterWithdraw.toString()}`);
+        expect(wethBalanceAfterWithdraw).to.be.gt(wethBalanceBeforeWithdraw);
+        expect(awethEOAbalanceAfterWithdraw).to.be.lt(balanceAfter);
     });
-    it('... should supply WETH to Aave V3 optimism using optimised calldata', async () => {
+    it('... should supply WETH and then withdraw it on Aave V3 optimism using optimised calldata', async () => {
         const amount = hre.ethers.utils.parseUnits('10', 18);
         await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -83,7 +88,12 @@ describe('Aave-Supply-L2', function () {
         console.log(`WETH on EOA before withdraw:${wethBalanceBeforeWithdraw.toString()}`);
         await aaveV3WithdrawCalldataOptimised(proxy, AAVE_MARKET_OPTIMISM, assetId, amount, to);
 
+        const awethEOAbalanceAfterWithdraw = await balanceOf(aWETH, proxy.address);
+
         const wethBalanceAfterWithdraw = await balanceOf(WETH_ADDRESS, senderAcc.address);
         console.log(`WETH on EOA after withdraw:${wethBalanceAfterWithdraw.toString()}`);
+
+        expect(wethBalanceAfterWithdraw).to.be.gt(wethBalanceBeforeWithdraw);
+        expect(awethEOAbalanceAfterWithdraw).to.be.lt(balanceAfter);
     });
 });
