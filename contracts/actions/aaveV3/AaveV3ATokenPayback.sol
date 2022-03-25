@@ -37,8 +37,8 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
             params.market,
             params.assetId,
             params.amount,
-            params.rateMode,  
-            params.from      
+            params.rateMode,
+            params.from
         );
         emit ActionEvent("AaveV3ATokenPayback", logData);
         return bytes32(paybackAmount);
@@ -51,8 +51,8 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
             params.market,
             params.assetId,
             params.amount,
-            params.rateMode,  
-            params.from      
+            params.rateMode,
+            params.from
         );
         //logger.logActionDirectEvent("AaveV3ATokenPayback", logData);
     }
@@ -63,8 +63,8 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
             params.market,
             params.assetId,
             params.amount,
-            params.rateMode,  
-            params.from      
+            params.rateMode,
+            params.from
         );
         //logger.logActionDirectEvent("AaveV3ATokenPayback", logData);
     }
@@ -96,7 +96,7 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
 
         uint256 maxDebt = getWholeDebt(_market, tokenAddr, _rateMode, address(this));
         _amount = _amount > maxDebt ? maxDebt : _amount;
-        
+
         DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(tokenAddr);
         address aTokenAddr = reserveData.aTokenAddress;
 
@@ -104,13 +104,7 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
 
         lendingPool.repayWithATokens(tokenAddr, _amount, _rateMode);
 
-        bytes memory logData = abi.encode(
-            _market,
-            tokenAddr,
-            _amount,
-            _rateMode,
-            _from
-        );
+        bytes memory logData = abi.encode(_market, tokenAddr, _amount, _rateMode, _from);
         return (_amount, logData);
     }
 
@@ -126,6 +120,7 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
         encodedInput = bytes.concat(encodedInput, bytes1(params.rateMode));
         encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
     }
+
     function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
         params.market = address(bytes20(encodedInput[0:20]));
         params.amount = uint256(bytes32(encodedInput[20:52]));

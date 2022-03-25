@@ -32,9 +32,22 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
+        params.onBehalf = _parseParamAddr(
+            params.onBehalf,
+            _paramMapping[3],
+            _subData,
+            _returnValues
+        );
 
-        (uint256 supplyAmount, bytes memory logData) = _supply(params.market, params.amount, params.from, params.assetId, params.enableAsColl, params.onBehalf);
+        (uint256 supplyAmount, bytes memory logData) =
+            _supply(
+                params.market,
+                params.amount,
+                params.from,
+                params.assetId,
+                params.enableAsColl,
+                params.onBehalf
+            );
         emit ActionEvent("AaveV3Supply", logData);
         return bytes32(supplyAmount);
     }
@@ -42,13 +55,29 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes calldata _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _supply(params.market, params.amount, params.from, params.assetId, params.enableAsColl, params.onBehalf);
+        (, bytes memory logData) =
+            _supply(
+                params.market,
+                params.amount,
+                params.from,
+                params.assetId,
+                params.enableAsColl,
+                params.onBehalf
+            );
         //logger.logActionDirectEvent("AaveV3Supply", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
-        (, bytes memory logData) = _supply(params.market, params.amount, params.from, params.assetId, params.enableAsColl, params.onBehalf);
+        (, bytes memory logData) =
+            _supply(
+                params.market,
+                params.amount,
+                params.from,
+                params.assetId,
+                params.enableAsColl,
+                params.onBehalf
+            );
         //logger.logActionDirectEvent("AaveV3Supply", logData);
     }
 
@@ -77,6 +106,7 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
     ) internal returns (uint256, bytes memory) {
         IPoolV3 lendingPool = getLendingPool(_market);
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);
+
         // if amount is set to max, take the whole _from balance
         if (_amount == type(uint256).max) {
             _amount = tokenAddr.getBalance(_from);
@@ -92,34 +122,29 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
 
         // approve aave pool to pull tokens
         tokenAddr.approveToken(address(lendingPool), _amount);
-        // deposit in behalf of the proxy
-        lendingPool.supply(tokenAddr, _amount, _onBehalf, 0);
+
+        lendingPool.supply(tokenAddr, _amount, _onBehalf, AAVE_REFERRAL_CODE);
+
         if (_enableAsColl) {
-            // enableAsCollateral(_market, _tokenAddr, true);
             lendingPool.setUserUseReserveAsCollateral(tokenAddr, true);
         }
-        bytes memory logData = abi.encode(
-            _market,
-            tokenAddr,
-            _amount,
-            _from,
-            _onBehalf,
-            _enableAsColl
-        );
+
+        bytes memory logData =
+            abi.encode(_market, tokenAddr, _amount, _from, _onBehalf, _enableAsColl);
         return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
-    
+
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
-        
+
         encodedInput = bytes.concat(encodedInput, bytes20(params.market));
 
         encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
-        
+
         encodedInput = bytes.concat(encodedInput, bytes32(params.amount));
 
         encodedInput = bytes.concat(encodedInput, bytes20(params.from));

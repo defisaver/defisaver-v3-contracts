@@ -31,9 +31,21 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
+        params.onBehalf = _parseParamAddr(
+            params.onBehalf,
+            _paramMapping[3],
+            _subData,
+            _returnValues
+        );
 
-        (uint256 borrowAmount, bytes memory logData) = _borrow(params.market, params.assetId, params.amount, params.rateMode, params.to, params.onBehalf);
+        (uint256 borrowAmount, bytes memory logData) = _borrow(
+            params.market,
+            params.assetId,
+            params.amount,
+            params.rateMode,
+            params.to,
+            params.onBehalf
+        );
         emit ActionEvent("AaveV3Borrow", logData);
         return bytes32(borrowAmount);
     }
@@ -41,13 +53,27 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _borrow(params.market, params.assetId, params.amount, params.rateMode, params.to, params.onBehalf);
+        (, bytes memory logData) = _borrow(
+            params.market,
+            params.assetId,
+            params.amount,
+            params.rateMode,
+            params.to,
+            params.onBehalf
+        );
         //logger.logActionDirectEvent("AaveV3Borrow", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
-        (, bytes memory logData) = _borrow(params.market, params.assetId, params.amount, params.rateMode, params.to, params.onBehalf);
+        (, bytes memory logData) = _borrow(
+            params.market,
+            params.assetId,
+            params.amount,
+            params.rateMode,
+            params.to,
+            params.onBehalf
+        );
         //logger.logActionDirectEvent("AaveV3Borrow", logData);
     }
 
@@ -80,17 +106,10 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }
-        lendingPool.borrow(tokenAddr, _amount, _rateMode, 0, _onBehalf);
+        lendingPool.borrow(tokenAddr, _amount, _rateMode, AAVE_REFERRAL_CODE, _onBehalf);
         _amount = tokenAddr.withdrawTokens(_to, _amount);
 
-        bytes memory logData = abi.encode(
-            _market,
-            tokenAddr,
-            _amount,
-            _rateMode,
-            _to,
-            _onBehalf
-        );
+        bytes memory logData = abi.encode(_market, tokenAddr, _amount, _rateMode, _to, _onBehalf);
         return (_amount, logData);
     }
 
@@ -106,7 +125,7 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
         encodedInput = bytes.concat(encodedInput, bytes1(params.rateMode));
         encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
         encodedInput = bytes.concat(encodedInput, bytes1(boolToBytes(params.useOnBehalf)));
-        if (params.useOnBehalf){
+        if (params.useOnBehalf) {
             encodedInput = bytes.concat(encodedInput, bytes20(params.onBehalf));
         }
     }

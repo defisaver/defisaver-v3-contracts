@@ -36,14 +36,13 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
 
         (, bytes memory logData) = _switchAsCollateral(inputData);
         //logger.logActionDirectEvent("AaveV3CollateralSwitch", logData);
-
     }
+
     function executeActionDirectL2() public payable {
         Params memory inputData = decodeInputs(msg.data[4:]);
         (, bytes memory logData) = _switchAsCollateral(inputData);
         //logger.logActionDirectEvent("AaveV3CollateralSwitch", logData);
     }
-    
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {
@@ -52,15 +51,16 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _switchAsCollateral(Params memory _inputData) internal returns (uint256, bytes memory){
+    function _switchAsCollateral(Params memory _inputData)
+        internal
+        returns (uint256, bytes memory)
+    {
         IPoolV3 lendingPool = getLendingPool(_inputData.market);
-        for (uint256 i = 0; i < _inputData.arrayLength; i++){
+        for (uint256 i = 0; i < _inputData.arrayLength; i++) {
             address tokenAddr = lendingPool.getReserveAddressById(_inputData.assetIds[i]);
             lendingPool.setUserUseReserveAsCollateral(tokenAddr, _inputData.useAsCollateral[i]);
         }
-        bytes memory logData = abi.encode(
-            _inputData
-        );
+        bytes memory logData = abi.encode(_inputData);
         return (0, logData);
     }
 
@@ -72,7 +72,7 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
         encodedInput = bytes.concat(encodedInput, bytes20(params.market));
         encodedInput = bytes.concat(encodedInput, bytes1(params.arrayLength));
-        for (uint256 i = 0; i < params.arrayLength; i++){
+        for (uint256 i = 0; i < params.arrayLength; i++) {
             encodedInput = bytes.concat(encodedInput, bytes2(params.assetIds[i]));
             encodedInput = bytes.concat(encodedInput, boolToBytes(params.useAsCollateral[i]));
         }
@@ -83,9 +83,9 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
         params.arrayLength = uint8(bytes1(encodedInput[20:21]));
         uint16[] memory assetIds = new uint16[](params.arrayLength);
         bool[] memory useAsCollateral = new bool[](params.arrayLength);
-        for (uint256 i = 0; i < params.arrayLength; i++){
-            assetIds[i] = uint16(bytes2(encodedInput[ (21+i*3) : (23+i*2) ]));
-            useAsCollateral[i] = bytesToBool(bytes1(encodedInput[ (23+i*2): (24+i*2) ]));
+        for (uint256 i = 0; i < params.arrayLength; i++) {
+            assetIds[i] = uint16(bytes2(encodedInput[(21 + i * 3):(23 + i * 2)]));
+            useAsCollateral[i] = bytesToBool(bytes1(encodedInput[(23 + i * 2):(24 + i * 2)]));
         }
         params.assetIds = assetIds;
         params.useAsCollateral = useAsCollateral;

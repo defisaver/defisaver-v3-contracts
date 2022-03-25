@@ -10,6 +10,7 @@ import "./helpers/AaveV3Helper.sol";
 /// @title Payback a token a user borrowed from an Aave market
 contract AaveV3Payback is ActionBase, AaveV3Helper {
     using TokenUtils for address;
+
     struct Params {
         address market;
         uint256 amount;
@@ -32,7 +33,12 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
+        params.onBehalf = _parseParamAddr(
+            params.onBehalf,
+            _paramMapping[3],
+            _subData,
+            _returnValues
+        );
 
         (uint256 paybackAmount, bytes memory logData) = _payback(
             params.market,
@@ -69,7 +75,7 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
             params.rateMode,
             params.from,
             params.onBehalf
-        );        
+        );
         //logger.logActionDirectEvent("AaveV3Payback", logData);
     }
 
@@ -118,14 +124,7 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
         // send back any leftover tokens that weren't used in the repay
         tokenAddr.withdrawTokens(_from, tokensAfter);
 
-        bytes memory logData = abi.encode(
-            _market,
-            tokenAddr,
-            _amount,
-            _rateMode,
-            _from,
-            _onBehalf
-        );
+        bytes memory logData = abi.encode(_market, tokenAddr, _amount, _rateMode, _from, _onBehalf);
         return (tokensBefore - tokensAfter, logData);
     }
 
@@ -141,10 +140,11 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
         encodedInput = bytes.concat(encodedInput, bytes1(params.rateMode));
         encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
         encodedInput = bytes.concat(encodedInput, bytes1(boolToBytes(params.useOnBehalf)));
-        if (params.useOnBehalf){
+        if (params.useOnBehalf) {
             encodedInput = bytes.concat(encodedInput, bytes20(params.onBehalf));
         }
     }
+
     function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
         params.market = address(bytes20(encodedInput[0:20]));
         params.amount = uint256(bytes32(encodedInput[20:52]));
