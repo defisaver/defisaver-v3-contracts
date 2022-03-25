@@ -832,6 +832,7 @@ const curveStethPoolWithdrawTest = async () => {
                 senderAddr,
                 [maxBurnAmount, '0'],
                 maxBurnAmount,
+                0,
             );
 
             const wethAfter = await balanceOf(WETH_ADDRESS, senderAddr);
@@ -857,6 +858,7 @@ const curveStethPoolWithdrawTest = async () => {
                 senderAddr,
                 ['0', maxBurnAmount],
                 maxBurnAmount,
+                0,
             );
 
             const stethAfter = await balanceOf(STETH_ADDRESS, senderAddr);
@@ -884,6 +886,7 @@ const curveStethPoolWithdrawTest = async () => {
                 senderAddr,
                 [withdrawAmount, withdrawAmount],
                 maxBurnAmount,
+                0,
             );
 
             const wethAfter = await balanceOf(WETH_ADDRESS, senderAddr);
