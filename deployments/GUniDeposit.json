@@ -267,6 +267,6 @@
 		}
 	],
 	"networks": {
-		"local": {}
+		"local0": {}
 	}
 }
