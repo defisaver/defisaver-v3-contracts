@@ -4,12 +4,6 @@ pragma solidity 0.8.10;
 import {IPoolAddressesProvider} from "./IPoolAddressesProvider.sol";
 import {DataTypes} from "./DataTypes.sol";
 
-
-/**
- * @title IPool
- * @author Aave
- * @notice Defines the basic interface for an Aave Pool.
- **/
 interface IPoolV3 {
   /**
    * @dev Emitted on mintUnbacked()

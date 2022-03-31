@@ -3,11 +3,6 @@ import "./IPoolV3.sol";
 
 pragma solidity 0.8.10;
 
-/**
- * @title IL2Pool
- * @author Aave
- * @notice Defines the basic extension interface for an L2 Aave Pool.
- **/
 interface IL2PoolV3 is IPoolV3{
   /**
    * @notice Calldata efficient wrapper of the supply function on behalf of the caller
