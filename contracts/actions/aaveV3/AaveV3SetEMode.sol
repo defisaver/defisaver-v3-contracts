@@ -11,8 +11,9 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
     struct Params {
-        address market;
         uint8 categoryId;
+        bool useDefaultMarket;
+        address market;
     }
 
     /// @inheritdoc ActionBase
@@ -68,16 +69,27 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
     }
 
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
-        encodedInput = bytes.concat(encodedInput, bytes20(params.market));
         encodedInput = bytes.concat(encodedInput, bytes1(params.categoryId));
+        encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
+        if (!params.useDefaultMarket) {
+            encodedInput = bytes.concat(encodedInput, bytes20(params.market));
+        }
     }
 
     function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        params.market = address(bytes20(encodedInput[0:20]));
-        params.categoryId = uint8(bytes1(encodedInput[20:21]));
+        params.categoryId = uint8(bytes1(encodedInput[0:1]));
+        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[1:2]));
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        } else {
+            params.market = address(bytes20(encodedInput[2:22]));
+        }
     }
 }

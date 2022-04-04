@@ -30,7 +30,7 @@ contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {
 
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
-        
+
         (uint256 amountReceived, bytes memory logData) = _claimRewards(params);
 
         emit ActionEvent("AaveV3ClaimRewards", logData);
@@ -59,13 +59,16 @@ contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _claimRewards(Params memory params) internal returns (uint256 amountReceived, bytes memory) {
+    function _claimRewards(Params memory params)
+        internal
+        returns (uint256 amountReceived, bytes memory)
+    {
         IRewardsController rewardsController = IRewardsController(REWARDS_CONTROLLER_ADDRESS);
 
         uint256 balanceBefore = params.reward.getBalance(params.to);
 
         rewardsController.claimRewards(params.assets, params.amount, params.to, params.reward);
-    
+
         amountReceived = params.reward.getBalance(params.to) - balanceBefore;
 
         bytes memory logData = abi.encode(params, amountReceived);
@@ -89,7 +92,7 @@ contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {
 
         encodedInput = bytes.concat(encodedInput, bytes20(params.reward));
 
-        for (uint256 i = 0; i < params.assetsLength; i++){
+        for (uint256 i = 0; i < params.assetsLength; i++) {
             encodedInput = bytes.concat(encodedInput, bytes20(params.assets[i]));
         }
     }
@@ -104,8 +107,8 @@ contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {
         params.reward = address(bytes20(encodedInput[53:73]));
 
         address[] memory assets = new address[](params.assetsLength);
-        for (uint256 i = 0; i < params.assetsLength; i++){
-            assets[i] = address(bytes20(encodedInput[73+20*i : 93+20*i]));
+        for (uint256 i = 0; i < params.assetsLength; i++) {
+            assets[i] = address(bytes20(encodedInput[73 + 20 * i:93 + 20 * i]));
         }
         params.assets = assets;
     }

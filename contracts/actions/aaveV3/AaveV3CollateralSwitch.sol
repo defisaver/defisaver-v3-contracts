@@ -10,10 +10,11 @@ import "./helpers/AaveV3Helper.sol";
 contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
     using TokenUtils for address;
     struct Params {
-        address market;
         uint8 arrayLength;
+        bool useDefaultMarket;
         uint16[] assetIds;
         bool[] useAsCollateral;
+        address market;
     }
 
     /// @inheritdoc ActionBase
@@ -64,30 +65,48 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
         return (0, logData);
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
-        inputData = abi.decode(_callData, (Params));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
     }
 
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
-        encodedInput = bytes.concat(encodedInput, bytes20(params.market));
         encodedInput = bytes.concat(encodedInput, bytes1(params.arrayLength));
+        encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
         for (uint256 i = 0; i < params.arrayLength; i++) {
             encodedInput = bytes.concat(encodedInput, bytes2(params.assetIds[i]));
             encodedInput = bytes.concat(encodedInput, boolToBytes(params.useAsCollateral[i]));
         }
+        if (!params.useDefaultMarket) {
+            encodedInput = bytes.concat(encodedInput, bytes20(params.market));
+        }
     }
 
     function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        params.market = address(bytes20(encodedInput[0:20]));
-        params.arrayLength = uint8(bytes1(encodedInput[20:21]));
+        params.arrayLength = uint8(bytes1(encodedInput[0:1]));
+        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[1:2]));
         uint16[] memory assetIds = new uint16[](params.arrayLength);
         bool[] memory useAsCollateral = new bool[](params.arrayLength);
         for (uint256 i = 0; i < params.arrayLength; i++) {
-            assetIds[i] = uint16(bytes2(encodedInput[(21 + i * 3):(23 + i * 2)]));
-            useAsCollateral[i] = bytesToBool(bytes1(encodedInput[(23 + i * 2):(24 + i * 2)]));
+            assetIds[i] = uint16(bytes2(encodedInput[(2 + i * 3):(4 + i * 3)]));
+            useAsCollateral[i] = bytesToBool(bytes1(encodedInput[(4 + i * 3):(5 + i * 3)]));
         }
         params.assetIds = assetIds;
         params.useAsCollateral = useAsCollateral;
+
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        } else {
+            params.market = address(
+                bytes20(
+                    encodedInput[(5 + (params.arrayLength - 1) * 3):(25 +
+                        (params.arrayLength - 1) *
+                        3)]
+                )
+            );
+        }
     }
 }

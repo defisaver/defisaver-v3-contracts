@@ -11,12 +11,13 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
     struct Params {
-        address market;
         uint256 amount;
         address from;
         uint16 assetId;
         bool enableAsColl;
         bool useOnBehalf;
+        bool useDefaultMarket;
+        address market;
         address onBehalf;
     }
 
@@ -39,15 +40,14 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
             _returnValues
         );
 
-        (uint256 supplyAmount, bytes memory logData) =
-            _supply(
-                params.market,
-                params.amount,
-                params.from,
-                params.assetId,
-                params.enableAsColl,
-                params.onBehalf
-            );
+        (uint256 supplyAmount, bytes memory logData) = _supply(
+            params.market,
+            params.amount,
+            params.from,
+            params.assetId,
+            params.enableAsColl,
+            params.onBehalf
+        );
         emit ActionEvent("AaveV3Supply", logData);
         return bytes32(supplyAmount);
     }
@@ -55,29 +55,27 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes calldata _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) =
-            _supply(
-                params.market,
-                params.amount,
-                params.from,
-                params.assetId,
-                params.enableAsColl,
-                params.onBehalf
-            );
+        (, bytes memory logData) = _supply(
+            params.market,
+            params.amount,
+            params.from,
+            params.assetId,
+            params.enableAsColl,
+            params.onBehalf
+        );
         //logger.logActionDirectEvent("AaveV3Supply", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
-        (, bytes memory logData) =
-            _supply(
-                params.market,
-                params.amount,
-                params.from,
-                params.assetId,
-                params.enableAsColl,
-                params.onBehalf
-            );
+        (, bytes memory logData) = _supply(
+            params.market,
+            params.amount,
+            params.from,
+            params.assetId,
+            params.enableAsColl,
+            params.onBehalf
+        );
         //logger.logActionDirectEvent("AaveV3Supply", logData);
     }
 
@@ -129,40 +127,61 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
             lendingPool.setUserUseReserveAsCollateral(tokenAddr, true);
         }
 
-        bytes memory logData =
-            abi.encode(_market, tokenAddr, _amount, _from, _onBehalf, _enableAsColl);
+        bytes memory logData = abi.encode(
+            _market,
+            tokenAddr,
+            _amount,
+            _from,
+            _onBehalf,
+            _enableAsColl
+        );
         return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
+        if (!params.useOnBehalf) {
+            params.onBehalf = address(0);
+        }
     }
 
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
-
-        encodedInput = bytes.concat(encodedInput, bytes20(params.market));
-
-        encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
-
         encodedInput = bytes.concat(encodedInput, bytes32(params.amount));
-
         encodedInput = bytes.concat(encodedInput, bytes20(params.from));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(params.enableAsColl));
+        encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
+        encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
         encodedInput = bytes.concat(encodedInput, boolToBytes(params.useOnBehalf));
-
+        if (params.useDefaultMarket) {
+            encodedInput = bytes.concat(encodedInput, bytes20(params.market));
+        }
         if (params.useOnBehalf) {
             encodedInput = bytes.concat(encodedInput, bytes20(params.onBehalf));
         }
     }
 
     function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        params.market = address(bytes20(encodedInput[0:20]));
-        params.assetId = uint16(bytes2(encodedInput[20:22]));
-        params.amount = uint256(bytes32(encodedInput[22:54]));
-        params.from = address(bytes20(encodedInput[54:74]));
-        params.enableAsColl = bytesToBool(bytes1(encodedInput[74:75]));
-        params.useOnBehalf = bytesToBool(bytes1(encodedInput[75:76]));
-        params.onBehalf = (params.useOnBehalf ? address(bytes20(encodedInput[76:96])) : address(0));
+        params.amount = uint256(bytes32(encodedInput[0:32]));
+        params.from = address(bytes20(encodedInput[32:52]));
+        params.assetId = uint16(bytes2(encodedInput[52:54]));
+        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[54:55]));
+        params.useOnBehalf = bytesToBool(bytes1(encodedInput[55:56]));
+        uint256 mark = 56;
+
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        } else {
+            params.market = address(bytes20(encodedInput[mark:mark + 20]));
+            mark += 20;
+        }
+
+        if (params.useOnBehalf) {
+            params.onBehalf = address(bytes20(encodedInput[mark:mark + 20]));
+        } else {
+            params.onBehalf = address(0);
+        }
     }
 }

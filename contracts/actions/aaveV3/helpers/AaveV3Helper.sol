@@ -15,6 +15,7 @@ contract AaveV3Helper is OptimismAaveV3Addresses {
     uint256 public constant STABLE_ID = 1;
     uint256 public constant VARIABLE_ID = 2;
     
+    
     /// @notice Returns the lending pool contract of the specified market
     function getLendingPool(address _market) internal view returns (IL2PoolV3) {
         return IL2PoolV3(IPoolAddressesProvider(_market).getPool());

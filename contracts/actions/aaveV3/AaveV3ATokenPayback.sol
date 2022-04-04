@@ -13,11 +13,12 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
     struct Params {
-        address market;
         uint256 amount;
         address from;
         uint8 rateMode;
         uint16 assetId;
+        bool useDefaultMarket;
+        address market;
     }
 
     /// @inheritdoc ActionBase
@@ -110,22 +111,33 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
     }
 
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
-        encodedInput = bytes.concat(encodedInput, bytes20(params.market));
         encodedInput = bytes.concat(encodedInput, bytes32(params.amount));
         encodedInput = bytes.concat(encodedInput, bytes20(params.from));
         encodedInput = bytes.concat(encodedInput, bytes1(params.rateMode));
         encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
+        encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
+        if (!params.useDefaultMarket) {
+            encodedInput = bytes.concat(encodedInput, bytes20(params.market));
+        }
     }
 
     function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        params.market = address(bytes20(encodedInput[0:20]));
-        params.amount = uint256(bytes32(encodedInput[20:52]));
-        params.from = address(bytes20(encodedInput[52:72]));
-        params.rateMode = uint8(bytes1(encodedInput[72:73]));
-        params.assetId = uint16(bytes2(encodedInput[73:75]));
+        params.amount = uint256(bytes32(encodedInput[0:32]));
+        params.from = address(bytes20(encodedInput[32:52]));
+        params.rateMode = uint8(bytes1(encodedInput[52:53]));
+        params.assetId = uint16(bytes2(encodedInput[53:55]));
+        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[55:56]));
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        } else {
+            params.market = address(bytes20(encodedInput[56:76]));
+        }
     }
 }

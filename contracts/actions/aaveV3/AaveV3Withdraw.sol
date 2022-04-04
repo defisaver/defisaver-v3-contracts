@@ -12,10 +12,11 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
     struct Params {
-        address market;
         uint16 assetId;
+        bool useDefaultMarket;
         uint256 amount;
         address to;
+        address market;
     }
 
     /// @inheritdoc ActionBase
@@ -105,20 +106,31 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
     }
 
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
-        encodedInput = bytes.concat(encodedInput, bytes20(params.market));
         encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
+        encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
         encodedInput = bytes.concat(encodedInput, bytes32(params.amount));
         encodedInput = bytes.concat(encodedInput, bytes20(params.to));
+        if (!params.useDefaultMarket) {
+            encodedInput = bytes.concat(encodedInput, bytes20(params.market));
+        }
     }
 
     function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        params.market = address(bytes20(encodedInput[0:20]));
-        params.assetId = uint16(bytes2(encodedInput[20:22]));
-        params.amount = uint256(bytes32(encodedInput[22:54]));
-        params.to = address(bytes20(encodedInput[54:74]));
+        params.assetId = uint16(bytes2(encodedInput[0:2]));
+        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[2:3]));
+        params.amount = uint256(bytes32(encodedInput[3:35]));
+        params.to = address(bytes20(encodedInput[35:55]));
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        } else {
+            params.market = address(bytes20(encodedInput[55:75]));
+        }
     }
 }
