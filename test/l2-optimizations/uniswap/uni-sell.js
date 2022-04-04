@@ -124,11 +124,12 @@ describe('Uni-Sell-V3', function () {
             senderAddr,
             Float2BN(swapAmount),
             Float2BN(swapMinOut, 6),
+            NEXO_ADDR,
             false,
             path,
         ];
         const paramsCompressedPath = [
-            ...paramsUncompressedPath.slice(0, 4),
+            ...paramsUncompressedPath.slice(0, 5),
             true,
             await uniswapSell['compressPath(bytes)'](path),
         ];
