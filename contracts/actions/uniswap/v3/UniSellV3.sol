@@ -134,6 +134,7 @@ contract UniSellV3 is ActionBase, UniV3Helper, UniV3ExchangeHelper {
         }
     }
 
+    /// @notice Action that executes uniswap exactInput function via specified path
     function _sell(Params memory _params, uint256 _dfsFeeDivider) internal returns (uint256 amountOut, bytes memory logData) {
         address user = getUserAddress();
         address inputAsset = address(bytes20(_params.path));
