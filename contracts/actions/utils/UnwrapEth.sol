@@ -35,6 +35,11 @@ contract UnwrapEth is ActionBase {
 
         _unwrapEth(inputData.amount, inputData.to);
     }
+    function executeActionDirectL2() public payable {
+        Params memory params = decodeInputs(msg.data[4:]);
+
+        _unwrapEth(params.amount, params.to);
+    }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {
@@ -61,5 +66,14 @@ contract UnwrapEth is ActionBase {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
+    }
+    function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
+        encodedInput = bytes.concat(this.executeActionDirectL2.selector);
+        encodedInput = bytes.concat(encodedInput, bytes32(params.amount));
+        encodedInput = bytes.concat(encodedInput, bytes20(params.to));
+    }
+    function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params){
+        params.amount = uint256(bytes32(encodedInput[0:32]));
+        params.to = address(bytes20(encodedInput[32:52]));
     }
 }
