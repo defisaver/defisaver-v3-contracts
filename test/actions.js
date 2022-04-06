@@ -1679,7 +1679,7 @@ const aaveV3Supply = async (
     const aaveSupplyAddr = await getAddrFromRegistry('AaveV3Supply');
 
     const aaveSupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-        market, amount, from, tokenAddr, assetId, true, false,
+        amount, from, tokenAddr, assetId, true, true, false, nullAddress, nullAddress,
     );
 
     await approve(tokenAddr, proxy.address);
@@ -1700,11 +1700,11 @@ const aaveV3SupplyCalldataOptimised = async (
     contract = await contract.connect(signer);
 
     const encodedInput = await contract.encodeInputs(
-        [market, amount, from, assetId, true, false, nullAddress],
+        [amount, from, assetId, true, true, false, nullAddress, nullAddress],
     );
 
     const aaveSupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-        market, amount, from, tokenAddr, assetId, true, false,
+        amount, from, tokenAddr, assetId, true, true, false, nullAddress, nullAddress,
     );
 
     const functionData = aaveSupplyAction.encodeForL2DsProxyCall()[1];
@@ -1724,7 +1724,7 @@ const aaveV3Withdraw = async (
     const aaveWithdrawAddr = await getAddrFromRegistry('AaveV3Withdraw');
 
     const aaveWithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        market, assetId, amount, to,
+        assetId, true, amount, to, nullAddress,
     );
     const functionData = aaveWithdrawAction.encodeForDsProxyCall()[1];
     const receipt = await proxy['execute(address,bytes)'](aaveWithdrawAddr, functionData, { gasLimit: 3000000 });
@@ -1742,11 +1742,11 @@ const aaveV3WithdrawCalldataOptimised = async (
     contract = await contract.connect(signer);
 
     const encodedInput = await contract.encodeInputs(
-        [market, assetId, amount, to],
+        [assetId, true, amount, to, nullAddress],
     );
 
     const aaveWithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        market, assetId, amount, to,
+        assetId, true, amount, to, nullAddress,
     );
     const functionData = aaveWithdrawAction.encodeForL2DsProxyCall()[1];
     console.log(functionData.toLowerCase() === encodedInput);
@@ -1763,7 +1763,7 @@ const aaveV3Borrow = async (
     const aaveBorrowAddr = await getAddrFromRegistry('AaveV3Borrow');
 
     const aaveBorrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
-        market, amount, to, rateMode, assetId, false,
+        true, nullAddress, amount, to, rateMode, assetId, true, nullAddress,
     );
     const functionData = aaveBorrowAction.encodeForDsProxyCall()[1];
     const receipt = await proxy['execute(address,bytes)'](aaveBorrowAddr, functionData, { gasLimit: 3000000 });
@@ -1781,10 +1781,10 @@ const aaveV3BorrowCalldataOptimised = async (
     contract = await contract.connect(signer);
 
     const encodedInput = await contract.encodeInputs(
-        [market, amount, to, rateMode, assetId, false, nullAddress],
+        [amount, to, rateMode, assetId, true, true, nullAddress, nullAddress],
     );
     const aaveBorrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
-        market, amount, to, rateMode, assetId, false,
+        true, nullAddress, amount, to, rateMode, assetId, true, nullAddress,
     );
     const functionData = aaveBorrowAction.encodeForL2DsProxyCall()[1];
 
@@ -1802,7 +1802,7 @@ const aaveV3Payback = async (
     const aavePaybackAddr = await getAddrFromRegistry('AaveV3Payback');
 
     const aavePaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        market, amount, from, rateMode, tokenAddr, assetId, false,
+        true, nullAddress, amount, from, rateMode, tokenAddr, assetId, false, nullAddress,
     );
     const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
     const receipt = await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, { gasLimit: 3000000 });
@@ -1820,11 +1820,11 @@ const aaveV3PaybackCalldataOptimised = async (
     contract = await contract.connect(signer);
 
     const encodedInput = await contract.encodeInputs(
-        [market, amount, from, rateMode, assetId, false, nullAddress],
+        [amount, from, rateMode, assetId, true, false, nullAddress, nullAddress],
     );
 
     const aavePaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        market, amount, from, rateMode, tokenAddr, assetId, false,
+        true, nullAddress, amount, from, rateMode, tokenAddr, assetId, false, nullAddress,
     );
     const functionData = aavePaybackAction.encodeForL2DsProxyCall()[1];
     console.log(functionData.toLowerCase() === encodedInput);
@@ -1841,7 +1841,7 @@ const aaveV3ATokenPayback = async (
     const aavePaybackAddr = await getAddrFromRegistry('AaveV3ATokenPayback');
 
     const aavePaybackAction = new dfs.actions.aaveV3.AaveV3ATokenPaybackAction(
-        market, amount, from, rateMode, aTokenAddr, assetId,
+        true, nullAddress, amount, from, rateMode, aTokenAddr, assetId,
     );
     const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
     const receipt = await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, { gasLimit: 3000000 });
@@ -1859,11 +1859,11 @@ const aaveV3ATokenPaybackCalldataOptimised = async (
     contract = await contract.connect(signer);
 
     const encodedInput = await contract.encodeInputs(
-        [market, amount, from, rateMode, assetId],
+        [amount, from, rateMode, assetId, true, nullAddress],
     );
 
     const aavePaybackAction = new dfs.actions.aaveV3.AaveV3ATokenPaybackAction(
-        market, amount, from, rateMode, aTokenAddr, assetId,
+        true, nullAddress, amount, from, rateMode, aTokenAddr, assetId,
     );
     const functionData = aavePaybackAction.encodeForL2DsProxyCall()[1];
     console.log(functionData.toLowerCase() === encodedInput);
@@ -1880,7 +1880,7 @@ const aaveV3SetEMode = async (
     const aaveSetEModeAddr = await getAddrFromRegistry('AaveV3SetEMode');
 
     const aaveSetEModeAction = new dfs.actions.aaveV3.AaveV3SetEModeAction(
-        market, categoryId,
+        categoryId, true, nullAddress,
     );
     const functionData = aaveSetEModeAction.encodeForDsProxyCall()[1];
     const receipt = await proxy['execute(address,bytes)'](aaveSetEModeAddr, functionData, { gasLimit: 3000000 });
@@ -1898,10 +1898,10 @@ const aaveV3SetEModeCalldataOptimised = async (
     contract = await contract.connect(signer);
 
     const encodedInput = await contract.encodeInputs(
-        [market, categoryId],
+        [categoryId, true, nullAddress],
     );
     const aaveSetEModeAction = new dfs.actions.aaveV3.AaveV3SetEModeAction(
-        market, categoryId,
+        categoryId, true, nullAddress,
     );
     const functionData = aaveSetEModeAction.encodeForL2DsProxyCall()[1];
     console.log(functionData.toLowerCase() === encodedInput);
@@ -1917,7 +1917,7 @@ const aaveV3SwitchCollateral = async (
 ) => {
     const aaveSwitchCollateralAddr = await getAddrFromRegistry('AaveV3CollateralSwitch');
     const aaveSwithCollAction = new dfs.actions.aaveV3.AaveV3CollateralSwitchAction(
-        market, arrayLength, tokens, useAsCollateral,
+        true, nullAddress, arrayLength, tokens, useAsCollateral,
     );
     const functionData = aaveSwithCollAction.encodeForDsProxyCall()[1];
     const receipt = await proxy['execute(address,bytes)'](aaveSwitchCollateralAddr, functionData, { gasLimit: 3000000 });
@@ -1935,13 +1935,16 @@ const aaveV3SwitchCollateralCallDataOptimised = async (
     contract = await contract.connect(signer);
 
     const encodedInput = await contract.encodeInputs(
-        [market, arrayLength, tokens, useAsCollateral],
+        [arrayLength, true, tokens, useAsCollateral, nullAddress],
     );
 
     const aaveSwithCollAction = new dfs.actions.aaveV3.AaveV3CollateralSwitchAction(
-        market, arrayLength, tokens, useAsCollateral,
+        true, nullAddress, arrayLength, tokens, useAsCollateral,
     );
     const functionData = aaveSwithCollAction.encodeForL2DsProxyCall()[1];
+
+    console.log(encodedInput);
+    console.log(functionData);
     console.log(functionData.toLowerCase() === encodedInput);
 
     const receipt = await proxy['execute(address,bytes)'](aaveSwitchCollateralAddr, encodedInput, { gasLimit: 3000000 });

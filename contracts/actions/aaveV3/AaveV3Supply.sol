@@ -15,8 +15,8 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
         address from;
         uint16 assetId;
         bool enableAsColl;
-        bool useOnBehalf;
         bool useDefaultMarket;
+        bool useOnBehalf;
         address market;
         address onBehalf;
     }
@@ -30,9 +30,9 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
-        params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
+        params.market = _parseParamAddr(params.market, _paramMapping[2], _subData, _returnValues);
         params.onBehalf = _parseParamAddr(
             params.onBehalf,
             _paramMapping[3],
@@ -153,9 +153,10 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
         encodedInput = bytes.concat(encodedInput, bytes32(params.amount));
         encodedInput = bytes.concat(encodedInput, bytes20(params.from));
         encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
+        encodedInput = bytes.concat(encodedInput, boolToBytes(params.enableAsColl));
         encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
         encodedInput = bytes.concat(encodedInput, boolToBytes(params.useOnBehalf));
-        if (params.useDefaultMarket) {
+        if (!params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(params.market));
         }
         if (params.useOnBehalf) {
@@ -167,9 +168,10 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
         params.amount = uint256(bytes32(encodedInput[0:32]));
         params.from = address(bytes20(encodedInput[32:52]));
         params.assetId = uint16(bytes2(encodedInput[52:54]));
-        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[54:55]));
-        params.useOnBehalf = bytesToBool(bytes1(encodedInput[55:56]));
-        uint256 mark = 56;
+        params.enableAsColl = bytesToBool(bytes1(encodedInput[54:55]));
+        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[55:56]));
+        params.useOnBehalf = bytesToBool(bytes1(encodedInput[56:57]));
+        uint256 mark = 57;
 
         if (params.useDefaultMarket) {
             params.market = DEFAULT_AAVE_MARKET;

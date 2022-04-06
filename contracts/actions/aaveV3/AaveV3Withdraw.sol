@@ -28,9 +28,9 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
-        params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
+        params.market = _parseParamAddr(params.market, _paramMapping[2], _subData, _returnValues);
 
         (uint256 withdrawnAmount, bytes memory logData) = _withdraw(
             params.market,

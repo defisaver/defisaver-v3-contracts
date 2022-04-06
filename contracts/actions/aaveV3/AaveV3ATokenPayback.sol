@@ -30,9 +30,9 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
+        params.market = _parseParamAddr(params.market, _paramMapping[2], _subData, _returnValues);
 
         (uint256 paybackAmount, bytes memory logData) = _paybackWithATokens(
             params.market,

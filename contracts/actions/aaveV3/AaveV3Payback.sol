@@ -31,9 +31,9 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
-        params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
+        params.market = _parseParamAddr(params.market, _paramMapping[2], _subData, _returnValues);
         params.onBehalf = _parseParamAddr(
             params.onBehalf,
             _paramMapping[3],
@@ -147,7 +147,7 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
         encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
         encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
         encodedInput = bytes.concat(encodedInput, boolToBytes(params.useOnBehalf));
-        if (params.useDefaultMarket) {
+        if (!params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(params.market));
         }
         if (params.useOnBehalf) {
