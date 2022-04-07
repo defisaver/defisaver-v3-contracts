@@ -36,13 +36,13 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
         Params memory inputData = parseInputs(_callData);
 
         (, bytes memory logData) = _switchAsCollateral(inputData);
-        //logger.logActionDirectEvent("AaveV3CollateralSwitch", logData);
+        logger.logActionDirectEvent("AaveV3CollateralSwitch", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory inputData = decodeInputs(msg.data[4:]);
         (, bytes memory logData) = _switchAsCollateral(inputData);
-        //logger.logActionDirectEvent("AaveV3CollateralSwitch", logData);
+        logger.logActionDirectEvent("AaveV3CollateralSwitch", logData);
     }
 
     /// @inheritdoc ActionBase

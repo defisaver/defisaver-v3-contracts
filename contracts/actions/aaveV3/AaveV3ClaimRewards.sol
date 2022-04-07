@@ -42,14 +42,14 @@ contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {
         Params memory params = parseInputs(_callData);
 
         (, bytes memory logData) = _claimRewards(params);
-        //logger.logActionDirectEvent("AaveV3Supply", logData);
+        logger.logActionDirectEvent("AaveV3ClaimRewards", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
 
         (, bytes memory logData) = _claimRewards(params);
-        //logger.logActionDirectEvent("AaveV3Supply", logData);
+        logger.logActionDirectEvent("AaveV3ClaimRewards", logData);
     }
 
     /// @inheritdoc ActionBase

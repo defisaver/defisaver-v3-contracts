@@ -36,13 +36,13 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
     function executeActionDirect(bytes calldata _callData) public payable override {
         Params memory params = parseInputs(_callData);
         (, bytes memory logData) = _setEmode(params.market, params.categoryId);
-        //logger.logActionDirectEvent("AaveV3SetEMode", logData);
+        logger.logActionDirectEvent("AaveV3SetEMode", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
         (, bytes memory logData) = _setEmode(params.market, params.categoryId);
-        //logger.logActionDirectEvent("AaveV3SetEMode", logData);
+        logger.logActionDirectEvent("AaveV3SetEMode", logData);
     }
 
     /// @inheritdoc ActionBase

@@ -62,7 +62,7 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
             params.to,
             params.onBehalf
         );
-        //logger.logActionDirectEvent("AaveV3Borrow", logData);
+        logger.logActionDirectEvent("AaveV3Borrow", logData);
     }
 
     function executeActionDirectL2() public payable {
@@ -75,7 +75,7 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
             params.to,
             params.onBehalf
         );
-        //logger.logActionDirectEvent("AaveV3Borrow", logData);
+        logger.logActionDirectEvent("AaveV3Borrow", logData);
     }
 
     /// @inheritdoc ActionBase

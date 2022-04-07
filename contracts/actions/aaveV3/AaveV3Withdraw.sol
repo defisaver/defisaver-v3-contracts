@@ -51,7 +51,7 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
             params.amount,
             params.to
         );
-        //logger.logActionDirectEvent("AaveV3Withdraw", logData);
+        logger.logActionDirectEvent("AaveV3Withdraw", logData);
     }
 
     function executeActionDirectL2() public payable {
@@ -62,7 +62,7 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
             params.amount,
             params.to
         );
-        //logger.logActionDirectEvent("AaveV3Supply", logData);
+        logger.logActionDirectEvent("AaveV3Withdraw", logData);
     }
 
     /// @inheritdoc ActionBase

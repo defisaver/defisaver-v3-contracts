@@ -3,7 +3,7 @@ const { expect } = require('chai');
 const hre = require('hardhat');
 
 const {
-    getProxy, balanceOf, setBalance, approve, redeploy, gibETH, takeSnapshot, revertToSnapshot,
+    getProxy, balanceOf, setBalance, approve, redeploy, takeSnapshot, revertToSnapshot,
 } = require('../utils');
 const {
     aaveV3Supply, aaveV3Borrow, aaveV3Payback, aaveV3PaybackCalldataOptimised,
@@ -21,7 +21,6 @@ describe('AaveV3-Payback-L2', function () {
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
-        await gibETH(senderAcc.address);
         proxy = await getProxy(senderAcc.address);
         await redeploy('AaveV3Supply');
         await redeploy('AaveV3Borrow');

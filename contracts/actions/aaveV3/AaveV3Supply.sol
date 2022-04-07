@@ -63,7 +63,7 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
             params.enableAsColl,
             params.onBehalf
         );
-        //logger.logActionDirectEvent("AaveV3Supply", logData);
+        logger.logActionDirectEvent("AaveV3Supply", logData);
     }
 
     function executeActionDirectL2() public payable {
@@ -76,7 +76,7 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
             params.enableAsColl,
             params.onBehalf
         );
-        //logger.logActionDirectEvent("AaveV3Supply", logData);
+        logger.logActionDirectEvent("AaveV3Supply", logData);
     }
 
     /// @inheritdoc ActionBase

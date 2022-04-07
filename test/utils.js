@@ -283,13 +283,6 @@ const setBalance = async (tokenAddr, userAddr, value) => {
     );
 };
 
-const gibETH = async (userAddr) => {
-    await hre.ethers.provider.send('hardhat_setBalance', [
-        userAddr,
-        '0x52B7D2DCC80CD2E4000000',
-    ]);
-};
-
 const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {
     const data = JSON.parse(fs.readFileSync('test/prices.json', 'utf8'));
     const tokenNames = Object.keys(data);
@@ -397,13 +390,22 @@ const getProxy = async (acc) => {
     return dsProxy;
 };
 
+const sendEther = async (signer, toAddress, amount) => {
+    const valueAmount = hre.ethers.utils.parseUnits(amount, 18);
+    await signer.sendTransaction({
+        to: toAddress,
+        value: valueAmount,
+    });
+};
+
 const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, existingAddr = '') => {
     if (regAddr === addrs[network].REGISTRY_ADDR) {
         await impersonateAccount(getOwnerAddr());
     }
 
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
-    await gibETH(getOwnerAddr());
+    const ethSender = (await hre.ethers.getSigners())[0];
+    await sendEther(ethSender, getOwnerAddr(), '100');
 
     const registryInstance = await hre.ethers.getContractFactory('DFSRegistry', signer);
     let registry = await registryInstance.attach(regAddr);
@@ -482,14 +484,6 @@ const approve = async (tokenAddr, to, signer) => {
             await tokenContract.approve(to, hre.ethers.constants.MaxUint256, { gasLimit: 1000000 });
         }
     }
-};
-
-const sendEther = async (signer, toAddress, amount) => {
-    const valueAmount = hre.ethers.utils.parseUnits(amount, 18);
-    await signer.sendTransaction({
-        to: toAddress,
-        value: valueAmount,
-    });
 };
 
 const getAllowance = async (tokenAddr, from, to) => {
@@ -805,5 +799,4 @@ module.exports = {
     setBalance,
     takeSnapshot,
     revertToSnapshot,
-    gibETH,
 };
