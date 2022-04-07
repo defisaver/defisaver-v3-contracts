@@ -56,6 +56,9 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
         internal
         returns (uint256, bytes memory)
     {
+        require (_inputData.arrayLength == _inputData.assetIds.length);
+        require (_inputData.arrayLength == _inputData.useAsCollateral.length);
+
         IPoolV3 lendingPool = getLendingPool(_inputData.market);
         for (uint256 i = 0; i < _inputData.arrayLength; i++) {
             address tokenAddr = lendingPool.getReserveAddressById(_inputData.assetIds[i]);
@@ -73,6 +76,9 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
     }
 
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
+        require (uint256(params.arrayLength) == params.assetIds.length);
+        require (uint256(params.arrayLength) == params.useAsCollateral.length);
+
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
         encodedInput = bytes.concat(encodedInput, bytes1(params.arrayLength));
         encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));

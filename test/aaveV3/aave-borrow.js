@@ -4,6 +4,7 @@ const hre = require('hardhat');
 
 const {
     getProxy, balanceOf, setBalance, redeploy, takeSnapshot, revertToSnapshot,
+    addrs, AAVE_MARKET_OPTIMISM,
 } = require('../utils');
 const { aaveV3Supply, aaveV3Borrow, aaveV3BorrowCalldataOptimised } = require('../actions');
 
@@ -11,18 +12,23 @@ describe('Aave-Borrow-L2', function () {
     this.timeout(150000);
 
     let senderAcc; let proxy; let pool; let snapshotId;
-    const WETH_ADDRESS = '0x4200000000000000000000000000000000000006';
-    const aWETH = '0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8';
-    const AAVE_MARKET_OPTIMISM = '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb';
-    const OPTIMISM_DAI = '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1';
-    const AAVE_OPTIMISM_POOL = '0x794a61358D6845594F94dc1DB02A252b5b4814aD';
+
+    let WETH_ADDRESS; let aWETH; let DAI_ADDRESS;
+    const network = hre.network.config.name;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
         await redeploy('AaveV3Supply');
         await redeploy('AaveV3Borrow');
-        pool = await hre.ethers.getContractAt('IL2PoolV3', AAVE_OPTIMISM_POOL);
+        const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', AAVE_MARKET_OPTIMISM);
+        const poolAddres = await aaveMarketContract.getPool();
+
+        pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
+        WETH_ADDRESS = addrs[network].WETH_ADDRESS;
+        DAI_ADDRESS = addrs[network].DAI_ADDRESS;
+
+        aWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
     });
     beforeEach(async () => {
         snapshotId = await takeSnapshot();
@@ -51,14 +57,14 @@ describe('Aave-Borrow-L2', function () {
         const balanceAfter = await balanceOf(aWETH, proxy.address);
         console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
 
-        const reserveDataDAI = await pool.getReserveData(OPTIMISM_DAI);
+        const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
         const amountDai = hre.ethers.utils.parseUnits('1000', 18);
 
-        const daiBalanceBefore = await balanceOf(OPTIMISM_DAI, senderAcc.address);
+        const daiBalanceBefore = await balanceOf(DAI_ADDRESS, senderAcc.address);
         console.log(`DAI on EOA before borrow: ${daiBalanceBefore.toString()}`);
         await aaveV3Borrow(proxy, AAVE_MARKET_OPTIMISM, amountDai, to, 2, reserveDataDAI.id);
 
-        const daiBalanceAfter = await balanceOf(OPTIMISM_DAI, senderAcc.address);
+        const daiBalanceAfter = await balanceOf(DAI_ADDRESS, senderAcc.address);
         console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
         expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
     });
@@ -81,16 +87,16 @@ describe('Aave-Borrow-L2', function () {
         const balanceAfter = await balanceOf(aWETH, proxy.address);
         console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
 
-        const reserveDataDAI = await pool.getReserveData(OPTIMISM_DAI);
+        const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
         const amountDai = hre.ethers.utils.parseUnits('1000', 18);
 
-        const daiBalanceBefore = await balanceOf(OPTIMISM_DAI, senderAcc.address);
+        const daiBalanceBefore = await balanceOf(DAI_ADDRESS, senderAcc.address);
         console.log(`DAI on EOA before borrow: ${daiBalanceBefore.toString()}`);
         await aaveV3BorrowCalldataOptimised(
             proxy, AAVE_MARKET_OPTIMISM, amountDai, to, 2, reserveDataDAI.id,
         );
 
-        const daiBalanceAfter = await balanceOf(OPTIMISM_DAI, senderAcc.address);
+        const daiBalanceAfter = await balanceOf(DAI_ADDRESS, senderAcc.address);
         console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
         expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
     });

@@ -7,7 +7,7 @@ import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
 import "../../interfaces/aaveV3/IRewardsController.sol";
 
-/// @title Supply a token to an Aave market
+/// @title Claims single reward type specified by reward for the list of assets. Rewards are received by to address.
 contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
@@ -63,6 +63,8 @@ contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {
         internal
         returns (uint256 amountReceived, bytes memory)
     {
+        require(params.assetsLength == params.assets.length);
+
         IRewardsController rewardsController = IRewardsController(REWARDS_CONTROLLER_ADDRESS);
 
         uint256 balanceBefore = params.reward.getBalance(params.to);

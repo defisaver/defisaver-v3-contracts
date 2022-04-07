@@ -122,9 +122,6 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
 
         uint256 tokensAfter = tokenAddr.getBalance(address(this));
 
-        // send back any leftover tokens that weren't used in the repay
-        tokenAddr.withdrawTokens(_from, tokensAfter);
-
         bytes memory logData = abi.encode(_market, tokenAddr, _amount, _rateMode, _from, _onBehalf);
         return (tokensBefore - tokensAfter, logData);
     }

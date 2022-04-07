@@ -52,8 +52,7 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User deposits tokens to the Aave protocol
-    /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
+    /// @notice User sets EMode for Aave position on Proxy
     /// @param _market Address provider for specific market
     /// @param _categoryId eMode category id (0 - 255)
     function _setEmode(address _market, uint8 _categoryId)
