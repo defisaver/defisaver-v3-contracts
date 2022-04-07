@@ -1796,6 +1796,46 @@ const aaveV3BorrowCalldataOptimised = async (
     console.log(`GasUsed aaveV3BorrowCalldataOptimised: ${gasUsed}`);
     return receipt;
 };
+const aaveV3SwapBorrowRate = async (
+    proxy, asset, rateMode,
+) => {
+    const aaveSwapRateAddr = await getAddrFromRegistry('AaveV3SwapBorrowRateMode');
+
+    const aaveSwapRateAction = new dfs.actions.aaveV3.AaveV3SwapBorrowRateModeAction(
+        asset, rateMode, true, nullAddress,
+    );
+    const functionData = aaveSwapRateAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](aaveSwapRateAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3SwapRate: ${gasUsed}`);
+    return receipt;
+};
+const aaveV3SwapBorrowRateCalldataOptimised = async (
+    proxy, asset, rateMode,
+) => {
+    const aaveSwapRateAddr = await getAddrFromRegistry('AaveV3SwapBorrowRateMode');
+    let contract = await hre.ethers.getContractAt('AaveV3SwapBorrowRateMode', aaveSwapRateAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+
+    const encodedInput = await contract.encodeInputs(
+        [asset, rateMode, true, nullAddress],
+    );
+    const aaveSwapRateAction = new dfs.actions.aaveV3.AaveV3SwapBorrowRateModeAction(
+        asset, rateMode, true, nullAddress,
+    );
+    const functionData = aaveSwapRateAction.encodeForL2DsProxyCall()[1];
+
+    console.log(functionData.toLowerCase() === encodedInput);
+
+    const receipt = await proxy['execute(address,bytes)'](aaveSwapRateAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3SwapRateOptimised: ${gasUsed}`);
+    return receipt;
+};
+
 const aaveV3Payback = async (
     proxy, market, amount, from, rateMode, assetId, tokenAddr,
 ) => {
@@ -2063,4 +2103,6 @@ module.exports = {
     aaveV3SetEModeCalldataOptimised,
     aaveV3SwitchCollateral,
     aaveV3SwitchCollateralCallDataOptimised,
+    aaveV3SwapBorrowRate,
+    aaveV3SwapBorrowRateCalldataOptimised,
 };
