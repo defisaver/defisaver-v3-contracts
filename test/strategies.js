@@ -648,6 +648,11 @@ const createMcdCloseStrategy = () => {
         ),
     );
     mcdCloseStrategy.addAction(
+        new dfs.actions.basic.GasFeeAction(
+            '%repayGasCost', '&daiAddr', '$4', 0,
+        ),
+    );
+    mcdCloseStrategy.addAction(
         new dfs.actions.basic.SendTokenAction(
             '&daiAddr', // hardcoded only can borrow Dai
             '%makerFlAddr', // kept variable this can change (FL must be payed back to work)
