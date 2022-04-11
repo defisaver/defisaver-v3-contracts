@@ -415,9 +415,6 @@ const sendEther = async (signer, toAddress, amount) => {
     });
 };
 
-const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, existingAddr = '') => {
-    if (regAddr === addrs[network].REGISTRY_ADDR) {
-        await impersonateAccount(getOwnerAddr());
 // eslint-disable-next-line max-len
 const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTenderly = config.saveOnTenderly) => {
     await hre.network.provider.send('hardhat_setBalance', [
