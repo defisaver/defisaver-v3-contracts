@@ -116,3 +116,4 @@ dist
 contracts/flattened/
 
 forked-addr.json
+deployments/

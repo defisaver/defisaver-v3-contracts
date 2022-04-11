@@ -2,6 +2,11 @@
 	"contractName": "DFSPrices",
 	"abi": [
 		{
+			"inputs": [],
+			"name": "OutOfRangeSlicingError",
+			"type": "error"
+		},
+		{
 			"inputs": [
 				{
 					"internalType": "uint256",

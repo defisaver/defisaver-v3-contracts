@@ -44,6 +44,7 @@ function execShellCommand(cmd) {
             if (error) {
                 console.warn(error);
             }
+            console.log(stderr);
             resolve(stdout || stderr);
         });
     });

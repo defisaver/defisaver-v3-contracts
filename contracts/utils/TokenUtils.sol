@@ -53,7 +53,8 @@ library TokenUtils {
             if (_token != ETH_ADDR) {
                 IERC20(_token).safeTransfer(_to, _amount);
             } else {
-                payable(_to).transfer(_amount);
+                (bool success, ) = _to.call{value: _amount}("");
+                require(success, "Eth send fail");
             }
         }
 

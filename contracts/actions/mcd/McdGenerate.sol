@@ -7,6 +7,7 @@ import "../../interfaces/mcd/ISpotter.sol";
 import "../../interfaces/mcd/IVat.sol";
 import "../../interfaces/mcd/IDaiJoin.sol";
 import "../../interfaces/mcd/IJug.sol";
+import "../../interfaces/mcd/ICropper.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
@@ -70,16 +71,16 @@ contract McdGenerate is ActionBase, McdHelper {
     ) internal returns (uint256, bytes memory) {
         IManager mcdManager = IManager(_mcdManager);
 
-        uint256 rate = IJug(JUG_ADDRESS).drip(mcdManager.ilks(_vaultId));
-        uint256 daiVatBalance = vat.dai(mcdManager.urns(_vaultId));
+        (address urn, bytes32 ilk) = getUrnAndIlk(_mcdManager, _vaultId);
 
-        // Generate dai and move to proxy balance
-        mcdManager.frob(
-            _vaultId,
-            int256(0),
-            normalizeDrawAmount(_amount, rate, daiVatBalance)
-        );
-        mcdManager.move(_vaultId, address(this), toRad(_amount));
+        uint256 rate = IJug(JUG_ADDRESS).drip(ilk);
+        uint256 daiVatBalance = vat.dai(urn);
+
+        if (_mcdManager == CROPPER) {
+            _cropperGenerate(_vaultId, ilk, _amount, rate, daiVatBalance);
+        } else {
+            _mcdManagerGenerate(mcdManager, _vaultId, _amount, rate, daiVatBalance);
+        }
 
         // add auth so we can exit the dai
         if (vat.can(address(this), address(DAI_JOIN_ADDR)) == 0) {
@@ -91,6 +92,33 @@ contract McdGenerate is ActionBase, McdHelper {
 
         bytes memory logData = abi.encode(_vaultId, _amount, _to, _mcdManager);
         return (_amount, logData);
+    }
+
+    function _mcdManagerGenerate(
+        IManager _mcdManager,
+        uint256 _vaultId,
+        uint256 _amount,
+        uint256 _rate,
+        uint256 _daiVatBalance
+    ) internal {
+        _mcdManager.frob(
+            _vaultId,
+            int256(0),
+            normalizeDrawAmount(_amount, _rate, _daiVatBalance)
+        );
+        _mcdManager.move(_vaultId, address(this), toRad(_amount));
+    }
+
+    function _cropperGenerate(
+        uint256 _vaultId,
+        bytes32 _ilk,
+        uint256 _amount,
+        uint256 _rate,
+        uint256 _daiVatBalance
+    ) internal {
+        address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
+
+        ICropper(CROPPER).frob(_ilk, owner, owner, owner, 0,normalizeDrawAmount(_amount, _rate, _daiVatBalance));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

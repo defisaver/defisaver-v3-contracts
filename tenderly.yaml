@@ -1,7 +1,7 @@
 account_id: ""
 exports:
-  local:
-    project_slug: nenadp/defisaver
+  firstnetwork:
+    project_slug: defisaver-v2/solidity-team-forks
     rpc_address: 127.0.0.1:8545
     protocol: ""
     forked_network: Mainnet
@@ -15,4 +15,6 @@ exports:
       constantinople_block: 0
       petersburg_block: 0
       istanbul_block: 0
+      berlin_block: 0
+      london_block: 0
 project_slug: ""
