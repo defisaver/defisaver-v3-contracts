@@ -4,16 +4,36 @@ require('@nomiclabs/hardhat-waffle');
 require('@nomiclabs/hardhat-etherscan');
 require('@tenderly/hardhat-tenderly');
 require('@nomiclabs/hardhat-ethers');
+require('@tenderly/hardhat-tenderly');
 // require("hardhat-gas-reporter");
 require('hardhat-log-remover');
 
+const Dec = require('decimal.js');
+
+Dec.set({
+    precision: 50,
+    rounding: 4,
+    toExpNeg: -7,
+    toExpPos: 21,
+    maxE: 9e15,
+    minE: -9e15,
+    modulo: 1,
+    crypto: false,
+});
+
+const MAX_NODE_COUNT = 22;
+const testNetworks = Object.fromEntries([...Array(MAX_NODE_COUNT).keys()].map((c, i) => [
+    `local${i}`, { url: `http://127.0.0.1:${8545 + i}`, timeout: 10000000, name: 'mainnet' },
+]));
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
     saveOnTenderly: true,
     defaultNetwork: 'fork',
+    lightTesting: true,
     networks: {
+        ...testNetworks,
         local: {
             url: 'http://127.0.0.1:8545',
             timeout: 1000000,
@@ -29,6 +49,7 @@ module.exports = {
         fork: {
             url: `https://rpc.tenderly.co/fork/${process.env.FORK_ID}`,
             timeout: 1000000,
+            type: 'tenderly',
             name: 'mainnet',
         },
         hardhat: {

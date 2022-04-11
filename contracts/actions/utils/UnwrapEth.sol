@@ -5,7 +5,7 @@ pragma solidity =0.8.10;
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
-/// @title Helper action to wrap Ether to WETH9
+/// @title Helper action to un-wrap WETH9 to Eth
 contract UnwrapEth is ActionBase {
     using TokenUtils for address;
 

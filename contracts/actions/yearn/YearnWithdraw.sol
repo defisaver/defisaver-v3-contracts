@@ -66,7 +66,6 @@ contract YearnWithdraw is ActionBase {
 
         uint256 amountPulled =
             _inputData.yToken.pullTokensIfNeeded(_inputData.from, _inputData.yAmount);
-
         _inputData.yAmount = amountPulled;
 
         address underlyingToken = vault.token();

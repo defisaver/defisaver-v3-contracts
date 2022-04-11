@@ -25,18 +25,20 @@ const {
     approve,
     depositToWeth,
     balanceOf,
-    MCD_MANAGER_ADDR,
+    openStrategyAndBundleStorage,
     WETH_ADDRESS,
     UNISWAP_WRAPPER,
     DAI_ADDR,
     rariDaiFundManager,
     rdptAddress,
+    WBTC_ADDR,
 } = require('../test/utils');
 
 const {
     getVaultsForUser,
     getRatio,
     getVaultInfo,
+    MCD_MANAGER_ADDR,
 } = require('../test/utils-mcd');
 
 const {
@@ -57,10 +59,17 @@ const {
     AssetPair,
 } = require('../test/utils-mstable');
 
-const { getSubHash, addBotCaller } = require('../test/utils-strategies');
+const {
+    getSubHash,
+    addBotCaller,
+    createStrategy,
+    getLatestStrategyId,
+} = require('../test/utils-strategies');
 
-const { subRepayFromSavingsStrategy } = require('../test/strategy-subs');
-const { createMcdTrigger, RATIO_STATE_UNDER } = require('../test/triggers');
+const { createMcdCloseStrategy } = require('../test/strategies');
+
+const { subRepayFromSavingsStrategy, subMcdCloseStrategy } = require('../test/strategy-subs');
+const { createMcdTrigger, createChainLinkPriceTrigger, RATIO_STATE_UNDER } = require('../test/triggers');
 
 program.version('0.0.1');
 // let forkedAddresses = '';
@@ -110,13 +119,15 @@ const supplyInSS = async (protocol, daiAmount, sender) => {
             senderAcc.address,
             senderAcc.address,
             0,
-            REGISTRY_ADDR,
             senderAcc,
+            REGISTRY_ADDR,
         );
     } catch (err) {
         console.log('Buying dai failed');
     }
 
+    const bal = await balanceOf(DAI_ADDR, senderAcc.address);
+    console.log(`Users balance ${bal.toString()}`);
     const daiAmountWei = hre.ethers.utils.parseUnits(daiAmount.toString(), 18);
 
     await approve(DAI_ADDR, proxy.address, senderAcc);
@@ -164,6 +175,79 @@ const supplyInSS = async (protocol, daiAmount, sender) => {
     }
 };
 
+const updateMcdCloseStrategySub = async (subId, vaultId, type, price, priceState, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
+    const subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
+
+    const subStorageAddr = await getAddrFromRegistry('SubStorage', REGISTRY_ADDR);
+    const subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+
+    const formattedPrice = (price * 1e8).toString();
+
+    let formattedPriceState;
+    if (priceState.toLowerCase() === 'over') {
+        formattedPriceState = 0;
+    } else if (priceState.toLowerCase() === 'under') {
+        formattedPriceState = 1;
+    }
+
+    const ilkObj = ilks.find((i) => i.ilkLabel === type);
+
+    // diff. chainlink price address for bitcoin
+    if (ilkObj.assetAddress.toLocaleLowerCase() === WBTC_ADDR.toLocaleLowerCase()) {
+        ilkObj.assetAddress = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
+    }
+
+    const triggerData = await createChainLinkPriceTrigger(
+        ilkObj.assetAddress,
+        formattedPrice,
+        formattedPriceState,
+    );
+
+    const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
+    const daiEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const mcdManagerEncoded = abiCoder.encode(['address'], [MCD_MANAGER_ADDR]);
+
+    const strategyId = (await getLatestStrategyId());
+    const isBundle = false;
+
+    const strategySub = [vaultIdEncoded, daiEncoded, mcdManagerEncoded];
+
+    const updatedSubData = [strategyId, isBundle, [triggerData], strategySub];
+
+    const hashToSet = getSubHash(updatedSubData);
+
+    const functionData = subProxy.interface.encodeFunctionData('updateSubData', [subId, updatedSubData]);
+
+    try {
+        await proxy['execute(address,bytes)'](subProxy.address, functionData, {
+            gasLimit: 5000000,
+        });
+    } catch (err) {
+        console.log('Updated failed');
+        return;
+    }
+
+    const storedSub = await subStorage.getSub(subId);
+
+    if (storedSub.strategySubHash !== hashToSet) {
+        console.log('Updated failed!');
+    } else {
+        console.log(`Updated sub id ${subId}, hash: ${hashToSet}`);
+    }
+};
+
 const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
@@ -196,8 +280,61 @@ const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio,
     console.log(`Subscribed to ${protocol} bundle with sub id #${subId}`);
 };
 
-const updateSmartSavingsStrategySub = async (subId, vaultId, minRatio, targetRatio, sender) => {
+const mcdCloseStrategySub = async (vaultId, type, price, priceState, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await openStrategyAndBundleStorage(true);
+
+    const formattedPrice = (price * 1e8).toString();
+
+    let formattedPriceState;
+    if (priceState.toLowerCase() === 'over') {
+        formattedPriceState = 0;
+    } else if (priceState.toLowerCase() === 'under') {
+        formattedPriceState = 1;
+    }
+
+    const ilkObj = ilks.find((i) => i.ilkLabel === type);
+
+    // diff. chainlink price address for bitcoin
+    if (ilkObj.assetAddress.toLocaleLowerCase() === WBTC_ADDR.toLocaleLowerCase()) {
+        ilkObj.assetAddress = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
+    }
+
+    const strategyId = 7;
+
+    const { subId } = await subMcdCloseStrategy(
+        vaultId,
+        proxy,
+        formattedPrice,
+        ilkObj.assetAddress,
+        formattedPriceState,
+        strategyId,
+        REGISTRY_ADDR,
+    );
+
+    console.log(`Subscribed to mcd close strategy with sub id #${subId}`);
+};
+
+// eslint-disable-next-line max-len
+const updateSmartSavingsStrategySub = async (protocol, subId, vaultId, minRatio, targetRatio, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    let bundleId = 0;
+    if (protocol === 'mstable') {
+        bundleId = 1;
+    } else if (protocol === 'rari') {
+        bundleId = 2;
+    }
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
@@ -214,19 +351,24 @@ const updateSmartSavingsStrategySub = async (subId, vaultId, minRatio, targetRat
     const subStorageAddr = await getAddrFromRegistry('SubStorage', REGISTRY_ADDR);
     const subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
 
+    const ratioUnderWei = hre.ethers.utils.parseUnits(minRatio, '16');
+    const targetRatioWei = hre.ethers.utils.parseUnits(targetRatio, '16');
+
     const triggerData = await createMcdTrigger(
         vaultId.toString(),
-        minRatio.toString(),
+        ratioUnderWei.toString(),
         RATIO_STATE_UNDER,
     );
 
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
-    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatioWei.toString()]);
+    const daiAddrEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const mcdManagerAddrEncoded = abiCoder.encode(['address'], [MCD_MANAGER_ADDR]);
 
-    const strategySub = [vaultIdEncoded, targetRatioEncoded];
+    const strategySub = [vaultIdEncoded, targetRatioEncoded, daiAddrEncoded, mcdManagerAddrEncoded];
 
     const isBundle = true;
-    const updatedSubData = [subId, isBundle, [triggerData], strategySub];
+    const updatedSubData = [bundleId, isBundle, [triggerData], strategySub];
 
     const hashToSet = getSubHash(updatedSubData);
 
@@ -363,8 +505,8 @@ const createMcdVault = async (type, coll, debt, sender) => {
                 senderAcc.address,
                 senderAcc.address,
                 0,
-                REGISTRY_ADDR,
                 senderAcc,
+                REGISTRY_ADDR,
             );
         } catch (err) {
             console.log(`Buying ${tokenData.name} failed`);
@@ -387,6 +529,7 @@ const createMcdVault = async (type, coll, debt, sender) => {
         await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
 
         const vaultsAfter = await getVaultsForUser(proxy.address);
+        console.log(vaultsAfter);
 
         console.log(`Vault #${vaultsAfter.ids[vaultsAfter.ids.length - 1].toString()} created`);
     } catch (err) {
@@ -417,7 +560,7 @@ const getCdp = async (cdpId, type) => {
 
     if (type) {
         const ilkObj = ilks.find((i) => i.ilkLabel === type);
-        const cdpState = await getVaultInfo(mcdView, cdpId, ilkObj.ilkBytes);
+        const cdpState = await getVaultInfo(mcdView, cdpId, ilkObj.ilkBytes, MCD_MANAGER_ADDR);
 
         console.log(`Coll: ${cdpState.coll}`);
         console.log(`Debt: ${cdpState.debt}`);
@@ -450,8 +593,8 @@ const callSell = async (srcTokenLabel, destTokenLabel, srcAmount, sender) => {
             senderAcc.address,
             senderAcc.address,
             0,
-            REGISTRY_ADDR,
             senderAcc,
+            REGISTRY_ADDR,
         );
 
         console.log(`${srcAmount} ${srcTokenLabel} -> ${destTokenLabel}`);
@@ -621,10 +764,28 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
         });
 
     program
-        .command('update-ss <subId> <vaultId> <minRatio> <targetRatio> [senderAddr]')
+        .command('sub-mcd-close <vaultId> <type> <price> <priceState> [senderAddr]')
+        .description('Subscribes to a Mcd close to dai strategy')
+        .action(async (vaultId, type, price, priceState, senderAddr) => {
+            // eslint-disable-next-line max-len
+            await mcdCloseStrategySub(vaultId, type, price, priceState, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('update-mcd-close <subId> <vaultId> <type> <price> <priceState> [senderAddr]')
+        .description('Updates mcd close strategy')
+        .action(async (subId, vaultId, type, price, priceState, senderAddr) => {
+            await updateMcdCloseStrategySub(subId, vaultId, type, price, priceState, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('update-ss <protocol> <subId> <vaultId> <minRatio> <targetRatio> [senderAddr]')
         .description('Updates to a Smart Savings strategy')
-        .action(async (subId, vaultId, minRatio, targetRatio, senderAddr) => {
-            await updateSmartSavingsStrategySub(subId, vaultId, minRatio, targetRatio, senderAddr);
+        .action(async (protocol, subId, vaultId, minRatio, targetRatio, senderAddr) => {
+            // eslint-disable-next-line max-len
+            await updateSmartSavingsStrategySub(protocol, subId, vaultId, minRatio, targetRatio, senderAddr);
             process.exit(0);
         });
 

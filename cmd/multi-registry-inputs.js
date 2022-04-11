@@ -4,36 +4,36 @@ const SEVEN_DAYS_IN_SECONDS = 604800;
 const ONE_DAY_IN_SECONDS = 86400;
 
 const deploymentData = [
-    // {
-    //     id: getNameId('SubStorage'),
-    //     contractAddr: '0x1612fc28Ee0AB882eC99842Cde0Fc77ff0691e90',
-    //     time: SEVEN_DAYS_IN_SECONDS,
-    // },
-    // {
-    //     id: getNameId('StrategyStorage'),
-    //     contractAddr: '0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933',
-    //     time: SEVEN_DAYS_IN_SECONDS,
-    // },
-    // {
-    //     id: getNameId('BundleStorage'),
-    //     contractAddr: '0x223c6aDE533851Df03219f6E3D8B763Bd47f84cf',
-    //     time: SEVEN_DAYS_IN_SECONDS,
-    // },
-    // {
-    //     id: getNameId('StrategyExecutor'),
-    //     contractAddr: '0x252025dF8680C275D0bA80D084e5967D8BD26caf',
-    //     time: SEVEN_DAYS_IN_SECONDS,
-    // },
-    // {
-    //     id: getNameId('RecipeExecutor'),
-    //     contractAddr: '0x1D6DEdb49AF91A11B5C5F34954FD3E8cC4f03A86',
-    //     time: SEVEN_DAYS_IN_SECONDS,
-    // },
-    // {
-    //     id: getNameId('StrategyExecutorID'),
-    //     contractAddr: '0x252025dF8680C275D0bA80D084e5967D8BD26caf',
-    //     time: ONE_DAY_IN_SECONDS,
-    // },
+    {
+        id: getNameId('SubStorage'),
+        contractAddr: '0x1612fc28Ee0AB882eC99842Cde0Fc77ff0691e90',
+        time: SEVEN_DAYS_IN_SECONDS,
+    },
+    {
+        id: getNameId('StrategyStorage'),
+        contractAddr: '0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933',
+        time: SEVEN_DAYS_IN_SECONDS,
+    },
+    {
+        id: getNameId('BundleStorage'),
+        contractAddr: '0x223c6aDE533851Df03219f6E3D8B763Bd47f84cf',
+        time: SEVEN_DAYS_IN_SECONDS,
+    },
+    {
+        id: getNameId('StrategyExecutor'),
+        contractAddr: '0x252025dF8680C275D0bA80D084e5967D8BD26caf',
+        time: SEVEN_DAYS_IN_SECONDS,
+    },
+    {
+        id: getNameId('RecipeExecutor'),
+        contractAddr: '0x1D6DEdb49AF91A11B5C5F34954FD3E8cC4f03A86',
+        time: SEVEN_DAYS_IN_SECONDS,
+    },
+    {
+        id: getNameId('StrategyExecutorID'),
+        contractAddr: '0x252025dF8680C275D0bA80D084e5967D8BD26caf',
+        time: ONE_DAY_IN_SECONDS,
+    },
 ];
 
 const actionAddresses = {

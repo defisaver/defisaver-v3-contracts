@@ -604,61 +604,66 @@ const createReflexerFLBoostStrategy = () => {
 };
 
 const createMcdCloseStrategy = () => {
-    const mcdCloseStrategy = new dfs.Strategy('MakerCloseStrategy');
+    const mcdCloseStrategy = new dfs.Strategy('McdCloseToDaiStrategy');
     mcdCloseStrategy.addSubSlot('&vaultId', 'uint256');
-    mcdCloseStrategy.addSubSlot('&recipient', 'address');
+    mcdCloseStrategy.addSubSlot('&daiAddr', 'address');
+    mcdCloseStrategy.addSubSlot('&mcdManager', 'address');
 
     const chainLinkPriceTrigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
     mcdCloseStrategy.addTrigger(chainLinkPriceTrigger);
     mcdCloseStrategy.addAction(
-        new dfs.actions.flashloan.DyDxFlashLoanAction(
-            '%loanAmount',
-            '%daiAddr',
+        new dfs.actions.flashloan.MakerFlashLoanAction(
+            '%loanAmount', // cdp.debt + a bit extra to handle debt increasing
             nullAddress,
             [],
         ),
     );
     mcdCloseStrategy.addAction(
         new dfs.actions.maker.MakerPaybackAction(
-            '&vaultId',
-            '%daiAmountToPayback(maxUint)',
-            '&proxy',
-            '%mcdManager',
+            '&vaultId', // hardcoded vault from subData
+            '%daiAmountToPayback(maxUint)', // kept variable (can support partial close later)
+            '&proxy', // hardcoded so it's taken from proxy
+            '&mcdManager', // hardcoded so no outside manager addr can be injected
         ),
     );
     mcdCloseStrategy.addAction(
         new dfs.actions.maker.MakerWithdrawAction(
-            '&vaultId',
-            '%ethAmountToWithdraw(maxUint)',
-            '%ethJoin',
-            '&proxy',
-            '%mcdManager',
+            '&vaultId', // hardcoded vault from subData
+            '%ethAmountToWithdraw(maxUint)', // kept variable (can support partial close later)
+            '%ethJoin', // must stay variable as cdp can have diff. join addr
+            '&proxy', // hardcoded so funds are sent to users proxy
+            '&mcdManager', // hardcoded so no outside manager addr can be injected
         ),
     );
     mcdCloseStrategy.addAction(
         new dfs.actions.basic.SellAction(
             formatExchangeObj(
-                '%wethAddr',
-                '%daiAddr',
-                '%amountToSell(maxUint)',
-                '%exchangeWrapper',
+                '%wethAddr', // must be left variable diff. coll from cdps
+                '&daiAddr', // hardcoded always will be buying dai
+                '%amountToSell(maxUint)', // amount to sell is variable
+                '%exchangeWrapper', // exchange wrapper can change
             ),
-            '&proxy',
-            '&proxy',
+            '&proxy', // hardcoded take from user proxy
+            '&proxy', // hardcoded send to user proxy
+        ),
+    );
+    mcdCloseStrategy.addAction(
+        new dfs.actions.basic.GasFeeAction(
+            '%repayGasCost', '&daiAddr', '$4', 0,
         ),
     );
     mcdCloseStrategy.addAction(
         new dfs.actions.basic.SendTokenAction(
-            '%daiAddr',
-            '%dydxFlAddr',
-            '%amountToPayback',
+            '&daiAddr', // hardcoded only can borrow Dai
+            '%makerFlAddr', // kept variable this can change (FL must be payed back to work)
+            '$1', // hardcoded output from FL action
         ),
     );
     mcdCloseStrategy.addAction(
         new dfs.actions.basic.SendTokenAction(
-            '%daiAddr',
-            '&recipient',
-            '%amountToRecipient(maxUint)',
+            '&daiAddr', // hardcoded Dai is left in proxy
+            '&eoa', // hardcoded so only proxy owner receives amount
+            '%amountToRecipient(maxUint)', // kept variable (can support partial close later)
         ),
     );
     return mcdCloseStrategy.encodeForDsProxyCall();

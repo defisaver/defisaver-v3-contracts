@@ -883,11 +883,10 @@ const callLimitOrderStrategy = async (botAcc, senderAcc, strategyExecutor, subId
 };
 
 // eslint-disable-next-line max-len
-const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, strategySub, flAmount, ethJoin, dydxFlAddr) => {
+const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, strategySub, flAmount, ethJoin, makerFlAddr) => {
     const actionsCallData = [];
-    const flashLoanAction = new dfs.actions.flashloan.DyDxFlashLoanAction(
+    const flashLoanAction = new dfs.actions.flashloan.MakerFlashLoanAction(
         flAmount,
-        DAI_ADDR,
         nullAddress,
         [],
     );
@@ -895,32 +894,38 @@ const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, stra
         '0',
         hre.ethers.constants.MaxUint256,
         placeHolderAddr,
-        MCD_MANAGER_ADDR,
+        placeHolderAddr,
     );
     const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
         '0',
         hre.ethers.constants.MaxUint256,
         ethJoin,
         placeHolderAddr,
-        MCD_MANAGER_ADDR,
+        placeHolderAddr,
     );
+
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            WETH_ADDRESS, // can't be placeholder because of proper formatting of uni path
-            DAI_ADDR,
+            WETH_ADDRESS,
+            DAI_ADDR, // can't be placeholder because of proper formatting of uni path
             hre.ethers.constants.MaxUint256,
             UNISWAP_WRAPPER,
         ),
         placeHolderAddr,
         placeHolderAddr,
     );
+
+    const closeGasCost = 1_200_000;
+    const gasFee = new dfs.actions.basic.GasFeeAction(
+        closeGasCost, placeHolderAddr, 0,
+    );
     const sendFirst = new dfs.actions.basic.SendTokenAction(
-        DAI_ADDR,
-        dydxFlAddr,
-        flAmount,
+        placeHolderAddr,
+        makerFlAddr,
+        0,
     );
     const sendSecond = new dfs.actions.basic.SendTokenAction(
-        DAI_ADDR,
+        placeHolderAddr,
         placeHolderAddr,
         hre.ethers.constants.MaxUint256,
     );
@@ -928,6 +933,7 @@ const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, stra
     actionsCallData.push(paybackAction.encodeForRecipe()[0]);
     actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(gasFee.encodeForRecipe()[0]);
     actionsCallData.push(sendFirst.encodeForRecipe()[0]);
     actionsCallData.push(sendSecond.encodeForRecipe()[0]);
 

@@ -23,8 +23,7 @@ const { MCD_MANAGER_ADDR } = require('./utils-mcd');
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
 // eslint-disable-next-line max-len
-const subUniContinuousCollectStrategy = async (proxy, tokenId, recipient, timestamp, maxGasPrice, interval) => {
-    const bundleId = 0;
+const subUniContinuousCollectStrategy = async (proxy, strategyId, tokenId, recipient, timestamp, maxGasPrice, interval) => {
     const isBundle = false;
 
     const tokenIdEncoded = abiCoder.encode(['uint256'], [tokenId.toString()]);
@@ -32,7 +31,7 @@ const subUniContinuousCollectStrategy = async (proxy, tokenId, recipient, timest
 
     const timestampTriggerData = await createTimestampTrigger(timestamp, interval);
     const gasTriggerData = await createGasPriceTrigger(maxGasPrice);
-    const strategySub = [bundleId, isBundle, [timestampTriggerData, gasTriggerData], [tokenIdEncoded, recipientEncoded]];
+    const strategySub = [strategyId, isBundle, [timestampTriggerData, gasTriggerData], [tokenIdEncoded, recipientEncoded]];
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };
@@ -156,17 +155,18 @@ const subMcdBoostStrategy = async (proxy, bundleId, vaultId, rationUnder, target
     return { subId, strategySub };
 };
 
-const subMcdCloseStrategy = async (vaultId, proxy, recipient, targetPrice, tokenAddress, strategyId) => {
+const subMcdCloseStrategy = async (vaultId, proxy, targetPrice, tokenAddress, tokenState, strategyId, regAddr = REGISTRY_ADDR) => {
     const isBundle = false;
 
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
-    const recipientEncoded = abiCoder.encode(['address'], [recipient]);
+    const daiEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const mcdManagerEncoded = abiCoder.encode(['address'], [MCD_MANAGER_ADDR]);
 
     const triggerData = await createChainLinkPriceTrigger(
-        tokenAddress, targetPrice, RATIO_STATE_OVER,
+        tokenAddress, targetPrice, tokenState,
     );
-    const strategySub = [strategyId, isBundle, [triggerData], [vaultIdEncoded, recipientEncoded]];
-    const subId = await subToStrategy(proxy, strategySub);
+    const strategySub = [strategyId, isBundle, [triggerData], [vaultIdEncoded, daiEncoded, mcdManagerEncoded]];
+    const subId = await subToStrategy(proxy, strategySub, regAddr);
 
     return { subId, strategySub };
 };
