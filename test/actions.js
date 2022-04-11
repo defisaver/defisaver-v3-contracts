@@ -1694,11 +1694,11 @@ const aaveV3Supply = async (
 const aaveV3SupplyCalldataOptimised = async (
     proxy, market, amount, tokenAddr, assetId, from,
 ) => {
+    console.log(from);
     const aaveSupplyAddr = await getAddrFromRegistry('AaveV3Supply');
     let contract = await hre.ethers.getContractAt('AaveV3Supply', aaveSupplyAddr);
     const signer = (await hre.ethers.getSigners())[0];
     contract = await contract.connect(signer);
-
     const encodedInput = await contract.encodeInputs(
         [amount, from, assetId, true, true, false, nullAddress, nullAddress],
     );
