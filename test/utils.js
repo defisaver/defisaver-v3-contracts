@@ -352,6 +352,13 @@ const getAddrFromRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR)
     const registryInstance = await hre.ethers.getContractFactory('DFSRegistry');
     const registry = await registryInstance.attach(regAddr);
 
+    // TODO: Write in registry later
+    if (name === 'StrategyProxy') {
+        return '0x0822902D30CC9c77404e6eB140dC1E98aF5b559A';
+    } if (name === 'SubProxy') {
+        return '0xd18d4756bbf848674cc35f1a0B86afEF20787382';
+    }
+
     const addr = await registry.getAddr(
         getNameId(name),
     );

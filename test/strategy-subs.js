@@ -155,7 +155,7 @@ const subMcdBoostStrategy = async (proxy, bundleId, vaultId, rationUnder, target
     return { subId, strategySub };
 };
 
-const subMcdCloseStrategy = async (vaultId, proxy, targetPrice, tokenAddress, tokenState, strategyId) => {
+const subMcdCloseStrategy = async (vaultId, proxy, targetPrice, tokenAddress, tokenState, strategyId, regAddr = REGISTRY_ADDR) => {
     const isBundle = false;
 
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
@@ -166,7 +166,7 @@ const subMcdCloseStrategy = async (vaultId, proxy, targetPrice, tokenAddress, to
         tokenAddress, targetPrice, tokenState,
     );
     const strategySub = [strategyId, isBundle, [triggerData], [vaultIdEncoded, daiEncoded, mcdManagerEncoded]];
-    const subId = await subToStrategy(proxy, strategySub);
+    const subId = await subToStrategy(proxy, strategySub, regAddr);
 
     return { subId, strategySub };
 };

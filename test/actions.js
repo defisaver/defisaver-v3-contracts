@@ -32,9 +32,12 @@ const { LiquityActionIds, getHints, getRedemptionHints } = require('./utils-liqu
 const { execShellCommand } = require('../scripts/hardhat-tasks-functions');
 
 const executeAction = async (actionName, functionData, proxy, regAddr = REGISTRY_ADDR) => {
-    await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
-        '0x1', // 1 wei
-    ]);
+    if (hre.network.config.type !== 'tenderly') {
+        await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
+            '0x1', // 1 wei
+        ]);
+    }
+
     const actionAddr = await getAddrFromRegistry(actionName, regAddr);
     let receipt;
     try {
@@ -56,7 +59,7 @@ const executeAction = async (actionName, functionData, proxy, regAddr = REGISTRY
 };
 
 // eslint-disable-next-line max-len
-const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0, signer) => {
+const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0, signer, regAddr = REGISTRY_ADDR) => {
     const exchangeObject = formatExchangeObj(
         sellAddr,
         buyAddr,
@@ -73,9 +76,10 @@ const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee
     if (isEth(sellAddr)) {
         await depositToWeth(sellAmount.toString(), signer);
     }
+
     await approve(sellAddr, proxy.address, signer);
 
-    const tx = await executeAction('DFSSell', functionData, proxy);
+    const tx = await executeAction('DFSSell', functionData, proxy, regAddr);
     return tx;
 };
 
@@ -449,6 +453,17 @@ const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from, regA
             WETH_ADDRESS,
             tokenAddr,
             hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '1000000'), 18),
+            UNISWAP_WRAPPER,
+            from,
+            from,
+        );
+    } else if (hre.network.config.type === 'tenderly') {
+        await depositToWeth(hre.ethers.utils.parseUnits('30', 18));
+        await sell(
+            proxy,
+            WETH_ADDRESS,
+            tokenAddr,
+            hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '50000'), 18),
             UNISWAP_WRAPPER,
             from,
             from,

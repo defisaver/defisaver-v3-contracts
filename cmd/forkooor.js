@@ -119,8 +119,8 @@ const supplyInSS = async (protocol, daiAmount, sender) => {
             senderAcc.address,
             senderAcc.address,
             0,
-            REGISTRY_ADDR,
             senderAcc,
+            REGISTRY_ADDR,
         );
     } catch (err) {
         console.log('Buying dai failed');
@@ -320,6 +320,7 @@ const mcdCloseStrategySub = async (vaultId, type, price, priceState, sender) => 
         ilkObj.assetAddress,
         formattedPriceState,
         strategyId,
+        REGISTRY_ADDR,
     );
 
     console.log(`Subscribed to mcd close strategy with sub id #${subId}`);
@@ -505,8 +506,8 @@ const createMcdVault = async (type, coll, debt, sender) => {
                 senderAcc.address,
                 senderAcc.address,
                 0,
-                REGISTRY_ADDR,
                 senderAcc,
+                REGISTRY_ADDR,
             );
         } catch (err) {
             console.log(`Buying ${tokenData.name} failed`);
@@ -559,7 +560,7 @@ const getCdp = async (cdpId, type) => {
 
     if (type) {
         const ilkObj = ilks.find((i) => i.ilkLabel === type);
-        const cdpState = await getVaultInfo(mcdView, cdpId, ilkObj.ilkBytes);
+        const cdpState = await getVaultInfo(mcdView, cdpId, ilkObj.ilkBytes, MCD_MANAGER_ADDR);
 
         console.log(`Coll: ${cdpState.coll}`);
         console.log(`Debt: ${cdpState.debt}`);
@@ -592,8 +593,8 @@ const callSell = async (srcTokenLabel, destTokenLabel, srcAmount, sender) => {
             senderAcc.address,
             senderAcc.address,
             0,
-            REGISTRY_ADDR,
             senderAcc,
+            REGISTRY_ADDR,
         );
 
         console.log(`${srcAmount} ${srcTokenLabel} -> ${destTokenLabel}`);
