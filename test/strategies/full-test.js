@@ -9,11 +9,11 @@ const { uniStrategiesTest } = require('./uni/uni-tests');
 describe('Strategies full test', () => {
     it('... should do full Strategies test', async () => {
         await resetForkToBlock();
-        // await compoundStrategiesTest();
-        // wait liquityStrategiesTest();
+        await compoundStrategiesTest();
+        // await liquityStrategiesTest();
         await mcdStrategiesTest();
-        // await miscStrategiesTest();
-        // await reflexerStrategiesTest();
-        // await uniStrategiesTest();
+        await miscStrategiesTest();
+        await reflexerStrategiesTest();
+        await uniStrategiesTest();
     });
 });

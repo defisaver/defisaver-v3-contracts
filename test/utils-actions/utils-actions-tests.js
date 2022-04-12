@@ -10,19 +10,20 @@ const {
     redeploy,
     balanceOf,
     formatExchangeObj,
-    WETH_ADDRESS,
     setNewExchangeWrapper,
     sendEther,
-    ETH_ADDR,
     depositToWeth,
     send,
     approve,
     stopImpersonatingAccount,
-    DFS_REG_CONTROLLER,
-    ADMIN_ACC,
     impersonateAccount,
     setBalance,
     resetForkToBlock,
+    WETH_ADDRESS,
+    ETH_ADDR,
+    DFS_REG_CONTROLLER,
+    ADMIN_ACC,
+    DAI_ADDR,
 } = require('../utils');
 
 const { fetchMakerAddresses } = require('../utils-mcd');
@@ -290,6 +291,96 @@ const sendTokenTest = async () => {
         });
     });
 };
+
+const sendTokenAndUnwrapTest = async () => {
+    describe('Send-Token-And-Unwrap', function () {
+        this.timeout(80000);
+
+        let senderAcc; let proxy;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+        it('... should send tokens direct action', async () => {
+            // clean any WETH balance from earlier tests
+            await setBalance(WETH_ADDRESS, proxy.address, hre.ethers.utils.parseUnits('0', 18));
+
+            await depositToWeth(hre.ethers.utils.parseUnits('4', 18));
+            await send(WETH_ADDRESS, proxy.address, hre.ethers.utils.parseUnits('4', 18));
+
+            const sendTokenAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+                WETH_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('3', 18),
+            );
+            const sendTokenData = sendTokenAction.encodeForDsProxyCall()[1];
+
+            const ethBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
+            console.log(`Eth before closing : ${ethBalanceBefore.toString() / 1e18}`);
+
+            await executeAction('SendTokenAndUnwrap', sendTokenData, proxy);
+
+            const ethBalanceAfter = await balanceOf(ETH_ADDR, senderAcc.address);
+            console.log(`Eth after closing : ${ethBalanceAfter.toString() / 1e18}`);
+
+            expect(ethBalanceAfter / 1e18).to.be.closeTo((ethBalanceBefore / 1e18) + 3, 0.1);
+        });
+
+        it('... should send tokens direct action uint256.max', async () => {
+            const sendTokenAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+                WETH_ADDRESS, senderAcc.address, hre.ethers.constants.MaxUint256,
+            );
+            const sendTokenData = sendTokenAction.encodeForDsProxyCall()[1];
+
+            const ethBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
+            console.log(`Eth before closing : ${ethBalanceBefore.toString() / 1e18}`);
+
+            await executeAction('SendTokenAndUnwrap', sendTokenData, proxy);
+
+            const ethBalanceAfter = await balanceOf(ETH_ADDR, senderAcc.address);
+            console.log(`Eth after closing : ${ethBalanceAfter.toString() / 1e18}`);
+
+            expect(ethBalanceAfter / 1e18).to.be.gt(ethBalanceBefore / 1e18);
+        });
+
+        it('... should send DAI direct action', async () => {
+            await setBalance(DAI_ADDR, proxy.address, hre.ethers.utils.parseUnits('0', 18));
+            await setBalance(DAI_ADDR, proxy.address, hre.ethers.utils.parseUnits('1000', 18));
+
+            const sendTokenAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+                DAI_ADDR, senderAcc.address, hre.ethers.utils.parseUnits('300', 18),
+            );
+            const sendTokenData = sendTokenAction.encodeForDsProxyCall()[1];
+
+            const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
+            console.log(`Dai before closing : ${daiBalanceBefore.toString() / 1e18}`);
+
+            await executeAction('SendTokenAndUnwrap', sendTokenData, proxy);
+
+            const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
+            console.log(`Dai after closing : ${daiBalanceAfter.toString() / 1e18}`);
+
+            expect(daiBalanceAfter / 1e18).to.be.closeTo((daiBalanceBefore / 1e18) + 300, 0.00001);
+        });
+
+        it('... should send DAI direct action uint256.max', async () => {
+            const sendTokenAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+                DAI_ADDR, senderAcc.address, hre.ethers.constants.MaxUint256,
+            );
+            const sendTokenData = sendTokenAction.encodeForDsProxyCall()[1];
+
+            const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
+            console.log(`Dai before closing : ${daiBalanceBefore.toString() / 1e18}`);
+
+            await executeAction('SendTokenAndUnwrap', sendTokenData, proxy);
+
+            const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
+            console.log(`Dai after closing : ${daiBalanceAfter.toString() / 1e18}`);
+
+            expect(daiBalanceAfter / 1e18).to.be.closeTo((daiBalanceBefore / 1e18) + 700, 0.00001);
+        });
+    });
+};
+
 const pullTokenTest = async () => {
     describe('Pull-Token', function () {
         this.timeout(80000);
@@ -502,10 +593,11 @@ const automationV2UnsubTest = async () => {
     });
 };
 const deployUtilsActionsContracts = async () => {
+    await redeploy('SendTokenAndUnwrap');
     await redeploy('WrapEth');
+    await redeploy('UnwrapEth');
     await redeploy('DFSSell');
     await redeploy('RecipeExecutor');
-    await redeploy('UnwrapEth');
     await redeploy('PullToken');
     await redeploy('SumInputs');
     await redeploy('SubInputs');
@@ -516,6 +608,7 @@ const deployUtilsActionsContracts = async () => {
 
 const utilsActionsFullTest = async () => {
     await deployUtilsActionsContracts();
+    await sendTokenAndUnwrapTest();
     await wrapEthTest();
     await unwrapEthTest();
     await sumInputsTest();
@@ -536,4 +629,5 @@ module.exports = {
     pullTokenTest,
     automationV2UnsubTest,
     utilsActionsFullTest,
+    sendTokenAndUnwrapTest,
 };

@@ -7,6 +7,7 @@ describe('Send-Token', function () {
     this.timeout(80000);
 
     before(async () => {
+        await redeploy('SendToken');
         await redeploy('WrapEth');
     });
 

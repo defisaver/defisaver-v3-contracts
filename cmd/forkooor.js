@@ -62,13 +62,10 @@ const {
 const {
     getSubHash,
     addBotCaller,
-    createStrategy,
     getLatestStrategyId,
 } = require('../test/utils-strategies');
 
-const { createMcdCloseStrategy } = require('../test/strategies');
-
-const { subRepayFromSavingsStrategy, subMcdCloseStrategy } = require('../test/strategy-subs');
+const { subRepayFromSavingsStrategy, subMcdCloseStrategy, subMcdCloseToCollStrategy } = require('../test/strategy-subs');
 const { createMcdTrigger, createChainLinkPriceTrigger, RATIO_STATE_UNDER } = require('../test/triggers');
 
 program.version('0.0.1');
@@ -313,6 +310,51 @@ const mcdCloseStrategySub = async (vaultId, type, price, priceState, sender) => 
     const strategyId = 7;
 
     const { subId } = await subMcdCloseStrategy(
+        vaultId,
+        proxy,
+        formattedPrice,
+        ilkObj.assetAddress,
+        formattedPriceState,
+        strategyId,
+        REGISTRY_ADDR,
+    );
+
+    console.log(`Subscribed to mcd close strategy with sub id #${subId}`);
+};
+
+const mcdCloseToCollStrategySub = async (vaultId, type, price, priceState, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await openStrategyAndBundleStorage(true);
+
+    const formattedPrice = (price * 1e8).toString();
+
+    let formattedPriceState;
+    if (priceState.toLowerCase() === 'over') {
+        formattedPriceState = 0;
+    } else if (priceState.toLowerCase() === 'under') {
+        formattedPriceState = 1;
+    }
+
+    const ilkObj = ilks.find((i) => i.ilkLabel === type);
+
+    // diff. chainlink price address for bitcoin
+    if (ilkObj.assetAddress.toLocaleLowerCase() === WBTC_ADDR.toLocaleLowerCase()) {
+        ilkObj.assetAddress = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
+    }
+
+    const strategyId = 8;
+
+    const { subId } = await subMcdCloseToCollStrategy(
         vaultId,
         proxy,
         formattedPrice,
@@ -769,6 +811,15 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
         .action(async (vaultId, type, price, priceState, senderAddr) => {
             // eslint-disable-next-line max-len
             await mcdCloseStrategySub(vaultId, type, price, priceState, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('sub-mcd-close-to-coll <vaultId> <type> <price> <priceState> [senderAddr]')
+        .description('Subscribes to a Mcd close to coll strategy')
+        .action(async (vaultId, type, price, priceState, senderAddr) => {
+            // eslint-disable-next-line max-len
+            await mcdCloseToCollStrategySub(vaultId, type, price, priceState, senderAddr);
             process.exit(0);
         });
 

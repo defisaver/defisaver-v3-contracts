@@ -883,6 +883,82 @@ const callLimitOrderStrategy = async (botAcc, senderAcc, strategyExecutor, subId
 };
 
 // eslint-disable-next-line max-len
+const callMcdCloseToCollStrategy = async (proxy, botAcc, strategyExecutor, subId, strategySub, flAmount, sellAmount, ethJoin, makerFlAddr) => {
+    const actionsCallData = [];
+    const flashLoanAction = new dfs.actions.flashloan.MakerFlashLoanAction(
+        flAmount,
+        nullAddress,
+        [],
+    );
+    const paybackAction = new dfs.actions.maker.MakerPaybackAction(
+        '0',
+        hre.ethers.constants.MaxUint256,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+    const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
+        '0',
+        hre.ethers.constants.MaxUint256,
+        ethJoin,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            WETH_ADDRESS,
+            DAI_ADDR, // can't be placeholder because of proper formatting of uni path
+            sellAmount,
+            UNISWAP_WRAPPER,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const closeGasCost = 1_200_000;
+    const gasFee = new dfs.actions.basic.GasFeeAction(
+        closeGasCost, placeHolderAddr, 0,
+    );
+    const sendFirst = new dfs.actions.basic.SendTokenAction(
+        placeHolderAddr,
+        makerFlAddr,
+        0,
+    );
+    const sendSecond = new dfs.actions.basic.SendTokenAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        hre.ethers.constants.MaxUint256,
+    );
+    const sendColl = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        hre.ethers.constants.MaxUint256,
+    );
+    actionsCallData.push(flashLoanAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(gasFee.encodeForRecipe()[0]);
+    actionsCallData.push(sendFirst.encodeForRecipe()[0]);
+    actionsCallData.push(sendSecond.encodeForRecipe()[0]);
+    actionsCallData.push(sendColl.encodeForRecipe()[0]);
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    const strategyIndex = 0;
+    const triggerCallData = [];
+    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callMcdCloseStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
+// eslint-disable-next-line max-len
 const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, strategySub, flAmount, ethJoin, makerFlAddr) => {
     const actionsCallData = [];
     const flashLoanAction = new dfs.actions.flashloan.MakerFlashLoanAction(
@@ -1475,6 +1551,7 @@ module.exports = {
     callLimitOrderStrategy,
     callUniV3RangeOrderStrategy,
     callMcdCloseStrategy,
+    callMcdCloseToCollStrategy,
     callUniV3CollectStrategy,
     callCompBoostStrategy,
     callCompRepayStrategy,

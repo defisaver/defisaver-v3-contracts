@@ -669,6 +669,80 @@ const createMcdCloseStrategy = () => {
     return mcdCloseStrategy.encodeForDsProxyCall();
 };
 
+const createMcdCloseToCollStrategy = () => {
+    const mcdCloseStrategy = new dfs.Strategy('McdCloseToCollStrategy');
+    mcdCloseStrategy.addSubSlot('&vaultId', 'uint256');
+    mcdCloseStrategy.addSubSlot('&collAddr', 'address');
+    mcdCloseStrategy.addSubSlot('&daiAddr', 'address');
+    mcdCloseStrategy.addSubSlot('&mcdManager', 'address');
+
+    const chainLinkPriceTrigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
+    mcdCloseStrategy.addTrigger(chainLinkPriceTrigger);
+    mcdCloseStrategy.addAction(
+        new dfs.actions.flashloan.MakerFlashLoanAction(
+            '%loanAmount', // cdp.debt + a bit extra to handle debt increasing
+            nullAddress,
+            [],
+        ),
+    );
+    mcdCloseStrategy.addAction(
+        new dfs.actions.maker.MakerPaybackAction(
+            '&vaultId', // hardcoded vault from subData
+            '%daiAmountToPayback(maxUint)', // kept variable (can support partial close later)
+            '&proxy', // hardcoded so it's taken from proxy
+            '&mcdManager', // hardcoded so no outside manager addr can be injected
+        ),
+    );
+    mcdCloseStrategy.addAction(
+        new dfs.actions.maker.MakerWithdrawAction(
+            '&vaultId', // hardcoded vault from subData
+            '%ethAmountToWithdraw(maxUint)', // kept variable (can support partial close later)
+            '%ethJoin', // must stay variable as cdp can have diff. join addr
+            '&proxy', // hardcoded so funds are sent to users proxy
+            '&mcdManager', // hardcoded so no outside manager addr can be injected
+        ),
+    );
+    mcdCloseStrategy.addAction(
+        new dfs.actions.basic.SellAction(
+            formatExchangeObj(
+                '%wethAddr', // must be left variable diff. coll from cdps
+                '&daiAddr', // hardcoded always will be buying dai
+                '%amountToSell', // amount to sell is variable
+                '%exchangeWrapper', // exchange wrapper can change
+            ),
+            '&proxy', // hardcoded take from user proxy
+            '&proxy', // hardcoded send to user proxy
+        ),
+    );
+    mcdCloseStrategy.addAction(
+        new dfs.actions.basic.GasFeeAction(
+            '%repayGasCost', '&daiAddr', '$4', 0,
+        ),
+    );
+    mcdCloseStrategy.addAction(
+        new dfs.actions.basic.SendTokenAction(
+            '&daiAddr', // hardcoded only can borrow Dai
+            '%makerFlAddr', // kept variable this can change (FL must be payed back to work)
+            '$1', // hardcoded output from FL action
+        ),
+    );
+    mcdCloseStrategy.addAction(
+        new dfs.actions.basic.SendTokenAction(
+            '&daiAddr', // hardcoded Dai is left in proxy
+            '&eoa', // hardcoded so only proxy owner receives amount
+            '%amountToRecipient(maxUint)', // kept variable (can support partial close later)
+        ),
+    );
+    mcdCloseStrategy.addAction(
+        new dfs.actions.basic.SendTokenAndUnwrapAction(
+            '&collAddr', // hardcoded coll is left in proxy
+            '&eoa', // hardcoded so only proxy owner receives amount
+            '%amountToRecipient(maxUint)', // kept variable (can support partial close later)
+        ),
+    );
+    return mcdCloseStrategy.encodeForDsProxyCall();
+};
+
 const createLiquityRepayStrategy = () => {
     const liquityRepayStrategy = new dfs.Strategy('LiquityRepayStrategy');
     liquityRepayStrategy.addSubSlot('&targetRatio', 'uint256');
@@ -1181,4 +1255,5 @@ module.exports = {
     createBoostStrategy,
     createMcdBoostStrategy,
     createFlMcdBoostStrategy,
+    createMcdCloseToCollStrategy,
 };
