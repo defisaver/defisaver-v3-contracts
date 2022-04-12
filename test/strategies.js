@@ -716,7 +716,10 @@ const createMcdCloseToCollStrategy = () => {
     );
     mcdCloseStrategy.addAction(
         new dfs.actions.basic.GasFeeAction(
-            '%repayGasCost', '&daiAddr', '$4', 0,
+            '%repayGasCost', // variable backend calculated exact cost in simulation
+            '&daiAddr', // hardcoded fee always in Dai addr
+            '$4', // amount available is inputted from sell action
+            0, //  dfs fee divider, default is 2000 if sent 0
         ),
     );
     mcdCloseStrategy.addAction(
