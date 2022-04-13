@@ -3,15 +3,20 @@
 pragma solidity =0.8.10;
 
 import "../auth/AdminAuth.sol";
+import "../DS/DSMath.sol";
 import "../interfaces/ITrigger.sol";
 import "../interfaces/chainlink/IFeedRegistry.sol";
+import "../interfaces/lido/IWStEth.sol";
 import "../utils/Denominations.sol";
 import "../utils/TokenUtils.sol";
 import "./helpers/TriggerHelper.sol";
 
 /// @title Trigger contract that verifies if current token price is over/under the price specified during subscription
-contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper {
+contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
     using TokenUtils for address;
+
+    address internal constant WSTETH_ADDR = 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;
+    address internal constant STETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
 
     enum PriceState {
         OVER,
@@ -48,12 +53,22 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper {
     }
 
     /// @dev helper function that returns latest token price in USD
-    function getPrice(address _tokenAddr) public view returns (uint256) {
-        if (_tokenAddr == TokenUtils.WETH_ADDR) {
-            _tokenAddr = TokenUtils.ETH_ADDR;
+    function getPrice(address _inputTokenAddr) public view returns (uint256) {
+        address tokenAddr = _inputTokenAddr;
+    
+        if (_inputTokenAddr == TokenUtils.WETH_ADDR) {
+            tokenAddr = TokenUtils.ETH_ADDR;
         }
 
-        (, int256 price, , , ) = feedRegistry.latestRoundData(_tokenAddr, Denominations.USD);
+        if (_inputTokenAddr == WSTETH_ADDR) {
+            tokenAddr = STETH_ADDR;
+        }
+
+        (, int256 price, , , ) = feedRegistry.latestRoundData(tokenAddr, Denominations.USD);
+
+        if (_inputTokenAddr == WSTETH_ADDR) {
+            return wmul(uint256(price), IWStEth(WSTETH_ADDR).stEthPerToken());
+        }
 
         return uint256(price);
     }
