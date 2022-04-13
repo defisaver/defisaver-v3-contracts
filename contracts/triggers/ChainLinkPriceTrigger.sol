@@ -15,9 +15,6 @@ import "./helpers/TriggerHelper.sol";
 contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
     using TokenUtils for address;
 
-    address internal constant WSTETH_ADDR = 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;
-    address internal constant STETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
-
     enum PriceState {
         OVER,
         UNDER
