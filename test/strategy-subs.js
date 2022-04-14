@@ -180,7 +180,7 @@ const subMcdCloseToCollStrategy = async (vaultId, proxy, targetPrice, tokenAddre
     const mcdManagerEncoded = abiCoder.encode(['address'], [MCD_MANAGER_ADDR]);
 
     let chainlinkTokenAddr = tokenAddress;
-    if (tokenAddress === WBTC_ADDR) {
+    if (tokenAddress.toLowerCase() === WBTC_ADDR.toLowerCase()) {
         chainlinkTokenAddr = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
     }
 

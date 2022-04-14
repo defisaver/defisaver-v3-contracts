@@ -274,7 +274,7 @@ const updateMcdCloseToCollStrategySub = async (subId, vaultId, type, price, pric
 
     const ilkObj = ilks.find((i) => i.ilkLabel === type);
 
-    const collEncoded = abiCoder.encode(['address'], [ilkObj.assetAddress ]);
+    const collEncoded = abiCoder.encode(['address'], [ilkObj.assetAddress]);
 
     // diff. chainlink price address for bitcoin
     if (ilkObj.assetAddress.toLocaleLowerCase() === WBTC_ADDR.toLocaleLowerCase()) {
@@ -421,12 +421,6 @@ const mcdCloseToCollStrategySub = async (vaultId, type, price, priceState, sende
     }
 
     const ilkObj = ilks.find((i) => i.ilkLabel === type);
-
-    // diff. chainlink price address for bitcoin
-    if (ilkObj.assetAddress.toLocaleLowerCase() === WBTC_ADDR.toLocaleLowerCase()) {
-        ilkObj.assetAddress = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
-    }
-
     const strategyId = 8;
 
     const { subId } = await subMcdCloseToCollStrategy(
