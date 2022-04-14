@@ -10,8 +10,8 @@ import "./helpers/AaveV3Helper.sol";
 contract AaveV3SwapBorrowRateMode is ActionBase, AaveV3Helper {
     using TokenUtils for address;
     struct Params {
-        address asset;
         uint256 rateMode;
+        uint16 assetId;
         bool useDefaultMarket;
         address market;
     }
@@ -25,8 +25,7 @@ contract AaveV3SwapBorrowRateMode is ActionBase, AaveV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.asset = _parseParamAddr(inputData.asset, _paramMapping[0], _subData, _returnValues);
-        inputData.market = _parseParamAddr(inputData.market, _paramMapping[1], _subData, _returnValues);
+        inputData.market = _parseParamAddr(inputData.market, _paramMapping[0], _subData, _returnValues);
 
         (, bytes memory logData) = _swapBorrowRate(inputData);
 
@@ -61,8 +60,8 @@ contract AaveV3SwapBorrowRateMode is ActionBase, AaveV3Helper {
     {
 
         IPoolV3 lendingPool = getLendingPool(_inputData.market);
-        lendingPool.swapBorrowRateMode(_inputData.asset, _inputData.rateMode);
-
+        address tokenAddr = lendingPool.getReserveAddressById(_inputData.assetId);
+        lendingPool.swapBorrowRateMode(tokenAddr, _inputData.rateMode);
         bytes memory logData = abi.encode(_inputData);
         return (0, logData);
     }
@@ -76,8 +75,8 @@ contract AaveV3SwapBorrowRateMode is ActionBase, AaveV3Helper {
 
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
-        encodedInput = bytes.concat(encodedInput, bytes20(params.asset));
         encodedInput = bytes.concat(encodedInput, bytes32(params.rateMode));
+        encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
         encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
         if (!params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(params.market));
@@ -85,14 +84,14 @@ contract AaveV3SwapBorrowRateMode is ActionBase, AaveV3Helper {
     }
 
     function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        params.asset = address(bytes20(encodedInput[0:20]));
-        params.rateMode = uint256(bytes32(encodedInput[20:52]));
-        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[52:53]));
+        params.rateMode = uint256(bytes32(encodedInput[0:32]));
+        params.assetId = uint16(bytes2(encodedInput[32:34]));
+        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[34:35]));
 
         if (params.useDefaultMarket) {
             params.market = DEFAULT_AAVE_MARKET;
         } else {
-            params.market = address(bytes20(encodedInput[53:73]));
+            params.market = address(bytes20(encodedInput[35:55]));
         }
     }
 }

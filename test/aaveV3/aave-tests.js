@@ -2,6 +2,7 @@ const { expect } = require('chai');
 
 const hre = require('hardhat');
 
+const { configure } = require('@defisaver/sdk');
 const {
     getProxy,
     balanceOf, setBalance, redeploy,
@@ -17,6 +18,9 @@ const {
 
 const aaveV3SupplyTest = async () => {
     describe('Aave-Supply-L2', function () {
+        configure({
+            chainId: 10,
+        });
         this.timeout(150000);
 
         let senderAcc; let proxy; let pool; let snapshotId;
@@ -90,6 +94,9 @@ const aaveV3SupplyTest = async () => {
 
 const aaveV3BorrowTest = async () => {
     describe('Aave-Borrow-L2', function () {
+        configure({
+            chainId: 10,
+        });
         this.timeout(150000);
 
         let senderAcc; let proxy; let pool; let snapshotId;
@@ -186,6 +193,9 @@ const aaveV3WithdrawTest = async () => {
     describe('Aave-Withdraw-L2', function () {
         this.timeout(150000);
 
+        configure({
+            chainId: 10,
+        });
         let senderAcc; let proxy; let pool; let snapshotId;
         let WETH_ADDRESS; let aWETH;
         const network = hre.network.config.name;
@@ -281,6 +291,9 @@ const aaveV3PaybackTest = async () => {
     describe('AaveV3-Payback-L2', function () {
         this.timeout(150000);
 
+        configure({
+            chainId: 10,
+        });
         let senderAcc; let proxy; let pool; let snapshotId;
 
         let WETH_ADDRESS; let aWETH; let DAI_ADDRESS;
@@ -455,9 +468,12 @@ const aaveV3PaybackTest = async () => {
 };
 
 const aaveV3SwapBorrowRateTest = async () => {
-    describe('Aave-Borrow-L2', function () {
+    describe('Aave-Swap-Borrow-Rate-L2', function () {
         this.timeout(150000);
 
+        configure({
+            chainId: 10,
+        });
         let senderAcc; let proxy; let pool; let snapshotId;
 
         let WETH_ADDRESS; let aWETH; let DAI_ADDRESS;
@@ -507,7 +523,7 @@ const aaveV3SwapBorrowRateTest = async () => {
 
             const daiBalanceBefore = await balanceOf(DAI_ADDRESS, senderAcc.address);
             console.log(`DAI on EOA before borrow: ${daiBalanceBefore.toString()}`);
-            await aaveV3Borrow(proxy, AAVE_MARKET_OPTIMISM, amountDai, to, 2, reserveDataDAI.id);
+            await aaveV3Borrow(proxy, AAVE_MARKET_OPTIMISM, amountDai, to, 1, reserveDataDAI.id);
 
             const daiBalanceAfter = await balanceOf(DAI_ADDRESS, senderAcc.address);
             console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
@@ -521,7 +537,7 @@ const aaveV3SwapBorrowRateTest = async () => {
             console.log(`Variable debt before rate swap ${variableDaiDebtBefore.toString()}`);
             console.log(`Stable debt before rate swap ${stableDaiDebtBefore.toString()}`);
 
-            await aaveV3SwapBorrowRate(proxy, DAI_ADDRESS, 2);
+            await aaveV3SwapBorrowRate(proxy, reserveDataDAI.id, 1);
 
             const variableDaiDebtAfter = await balanceOf(variableRateDai, proxy.address);
             const stableDaiDebtAfter = await balanceOf(stableRateDai, proxy.address);
@@ -553,7 +569,7 @@ const aaveV3SwapBorrowRateTest = async () => {
 
             const daiBalanceBefore = await balanceOf(DAI_ADDRESS, senderAcc.address);
             console.log(`DAI on EOA before borrow: ${daiBalanceBefore.toString()}`);
-            await aaveV3Borrow(proxy, AAVE_MARKET_OPTIMISM, amountDai, to, 2, reserveDataDAI.id);
+            await aaveV3Borrow(proxy, AAVE_MARKET_OPTIMISM, amountDai, to, 1, reserveDataDAI.id);
 
             const daiBalanceAfter = await balanceOf(DAI_ADDRESS, senderAcc.address);
             console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
@@ -568,7 +584,7 @@ const aaveV3SwapBorrowRateTest = async () => {
             console.log(`Stable debt before rate swap ${stableDaiDebtBefore.toString()}`);
 
             await aaveV3SwapBorrowRateCalldataOptimised(
-                proxy, DAI_ADDRESS, hre.ethers.BigNumber.from(2),
+                proxy, reserveDataDAI.id, 1,
             );
 
             const variableDaiDebtAfter = await balanceOf(variableRateDai, proxy.address);
@@ -582,6 +598,9 @@ const aaveV3SetEModeTest = async () => {
     describe('Aave-Set-EMode-L2', function () {
         this.timeout(150000);
 
+        configure({
+            chainId: 10,
+        });
         let senderAcc; let proxy; let snapshotId; let pool;
         let WETH_ADDRESS; let aWETH;
         const network = hre.network.config.name;
@@ -668,6 +687,9 @@ const aaveV3CollSwitchTest = async () => {
     describe('Aave-Coll-Switch-L2', function () {
         this.timeout(150000);
 
+        configure({
+            chainId: 10,
+        });
         let senderAcc; let proxy; let pool; let snapshotId;
 
         let WETH_ADDRESS; let aWETH; let DAI_ADDRESS; let aDAI;
@@ -779,6 +801,9 @@ const aaveV3ATokenPaybackTest = async () => {
     describe('AaveV3-ATokenPayback-L2', function () {
         this.timeout(150000);
 
+        configure({
+            chainId: 10,
+        });
         let senderAcc; let proxy; let pool; let snapshotId;
 
         let WETH_ADDRESS; let aWETH; let DAI_ADDRESS;
