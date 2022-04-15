@@ -682,7 +682,7 @@ const updateSubDataTest = async () => {
             );
             strategySub[2] = [triggerData];
 
-            await updateSubData(proxy, subStorageAddr, subId, strategySub);
+            await updateSubData(proxy, subId, strategySub);
             const subHashAfter = await subStorage.getSub(subId);
 
             expect(subHashAfter.strategySubHash).to.not.have.string(subHashBefore.strategySubHash);

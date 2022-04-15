@@ -131,9 +131,8 @@ const paybackMcd = async (proxy, vaultId, amount, from, daiAddr, mcdManager = MC
     const tx = await executeAction('McdPayback', functionData, proxy);
     return tx;
 };
-const updateSubData = async (proxy, storageAddr, subId, sub) => {
+const updateSubData = async (proxy, subId, sub) => {
     const updateSubAction = new dfs.actions.basic.UpdateSubAction(
-        storageAddr,
         subId,
         sub,
     );

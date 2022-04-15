@@ -11,7 +11,6 @@ import "../../core/strategy/StrategyModel.sol";
 /// @dev user can only change his own subscriptions
 contract UpdateSub is ActionBase {
     struct Params {
-        address storageAddress;
         uint256 subId;
         StrategyModel.StrategySub sub;
     }
@@ -44,7 +43,7 @@ contract UpdateSub is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function updateSubData(Params memory _inputData) internal {
-        SubStorage(_inputData.storageAddress).updateSubData(_inputData.subId, _inputData.sub);
+        SubStorage(SUB_STORAGE_ADDR).updateSubData(_inputData.subId, _inputData.sub);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
