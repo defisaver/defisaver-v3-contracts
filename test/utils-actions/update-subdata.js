@@ -3,13 +3,13 @@ const {
 } = require('../utils');
 const { updateSubDataTest } = require('./utils-actions-tests');
 
-describe('Unwrap-Eth', function () {
+describe('Update-sub-data', function () {
     this.timeout(80000);
 
     before(async () => {
         await redeploy('UpdateSub');
     });
-    it('... should unwrap native WEth to Eth direct action', async () => {
+    it('... should update sub data for a users subscription', async () => {
         await updateSubDataTest();
     });
 });
