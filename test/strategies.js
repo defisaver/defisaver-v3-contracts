@@ -717,7 +717,7 @@ const createMcdCloseToCollStrategy = () => {
     mcdCloseStrategy.addAction(
         new dfs.actions.basic.GasFeeAction(
             '%repayGasCost', // variable backend calculated exact cost in simulation
-            '&collAddr', // hardcoded fee always in Dai addr
+            '&collAddr', // hardcoded fee always in coll addr
             0, // if not being piped into take proxy balance
             0, //  dfs fee divider, default is 2000 if sent 0
         ),
@@ -743,6 +743,9 @@ const createMcdCloseToCollStrategy = () => {
             '%amountToRecipient(maxUint)', // kept variable (can support partial close later)
         ),
     );
+
+    console.log(mcdCloseStrategy.encodeForDsProxyCall());
+
     return mcdCloseStrategy.encodeForDsProxyCall();
 };
 
@@ -891,25 +894,10 @@ const createLiquityFLBoostStrategy = () => {
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityFLBoostStrategy.addTrigger(liquityRatioTrigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%lusdAddr'], ['%boostAmount']);
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%wethAddr'], ['%flAmount']);
 
-    const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            '%lusdAddr',
-            '%wethAddr',
-            '$1',
-            '%wrapper',
-        ),
-        '&proxy',
-        '&proxy',
-    );
-
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '%boostGasCost', '%wethAddr', '$2',
-    );
-
-    const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
-        '$3',
+    const liquitySupplyFLAction = new dfs.actions.liquity.LiquitySupplyAction(
+        '$1',
         '&proxy',
         '%upperHint',
         '%lowerHint',
@@ -917,6 +905,35 @@ const createLiquityFLBoostStrategy = () => {
 
     const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
         '&maxFeePercentage',
+        '%boostAmount',
+        '&proxy',
+        '%upperHint',
+        '%lowerHint',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%lusdAddr',
+            '%wethAddr',
+            '$3',
+            '%wrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%boostGasCost', '%wethAddr', '$4',
+    );
+
+    const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
+        '$5',
+        '&proxy',
+        '%upperHint',
+        '%lowerHint',
+    );
+
+    const liquityWithdrawAction = new dfs.actions.liquity.LiquityWithdrawAction(
         '$1',
         '%FLAddr',
         '%upperHint',
@@ -924,10 +941,12 @@ const createLiquityFLBoostStrategy = () => {
     );
 
     liquityFLBoostStrategy.addAction(flAction);
+    liquityFLBoostStrategy.addAction(liquitySupplyFLAction);
+    liquityFLBoostStrategy.addAction(liquityBorrowAction);
     liquityFLBoostStrategy.addAction(sellAction);
     liquityFLBoostStrategy.addAction(feeTakingAction);
     liquityFLBoostStrategy.addAction(liquitySupplyAction);
-    liquityFLBoostStrategy.addAction(liquityBorrowAction);
+    liquityFLBoostStrategy.addAction(liquityWithdrawAction);
 
     return liquityFLBoostStrategy.encodeForDsProxyCall();
 };

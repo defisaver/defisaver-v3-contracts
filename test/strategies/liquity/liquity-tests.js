@@ -55,17 +55,17 @@ const liquityBoostStrategyTest = async () => {
         const collAmount = Float2BN(fetchAmountinUSDPrice('WETH', '30000'));
 
         before(async () => {
+            await resetForkToBlock(14430140);
+
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             proxyAddr = proxy.address;
             botAcc = (await hre.ethers.getSigners())[1];
 
-            await resetForkToBlock();
-
             balancerFL = await redeploy('FLBalancer');
             await redeploy('DFSSell');
             await redeploy('GasFeeTaker');
-            strategyExecutor = await redeploy('StrategyExecutor');
+            strategyExecutor = await redeployCore();
 
             liquityView = await redeploy('LiquityView');
             await redeploy('LiquityOpen');
@@ -111,7 +111,6 @@ const liquityBoostStrategyTest = async () => {
         it('... should trigger a Liquity Boost strategy', async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
 
-            console.log(ratioBefore.toString());
             const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', '5000'));
 
             // eslint-disable-next-line max-len
@@ -128,7 +127,7 @@ const liquityBoostStrategyTest = async () => {
 
         it('... should trigger a Liquity FL Boost strategy', async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
-            const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', '5000'));
+            const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', '2000'));
 
             // eslint-disable-next-line max-len
             await callLiquityFLBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr, balancerFL.address);
@@ -163,12 +162,14 @@ const liquityRepayStrategyTest = async () => {
         const collAmount = Float2BN(fetchAmountinUSDPrice('WETH', '30000'));
 
         before(async () => {
+            await resetForkToBlock(14430140);
+
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             proxyAddr = proxy.address;
             botAcc = (await hre.ethers.getSigners())[1];
 
-            await resetForkToBlock();
+            console.log(proxyAddr);
 
             strategyExecutor = await redeployCore();
 
@@ -187,6 +188,8 @@ const liquityRepayStrategyTest = async () => {
 
             await depositToWeth(collAmount);
             await send(WETH_ADDRESS, proxyAddr, collAmount);
+
+            console.log('val: ', Float2BN(fetchAmountinUSDPrice('LUSD', '12000')));
 
             await liquityOpen(
                 proxy,
