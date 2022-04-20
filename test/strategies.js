@@ -951,6 +951,67 @@ const createLiquityFLBoostStrategy = () => {
     return liquityFLBoostStrategy.encodeForDsProxyCall();
 };
 
+const createLiquityCloseToCollStrategy = () => {
+    const liquityCloseToCollStrategy = new dfs.Strategy('LiquityCloseToCollStrategy');
+    liquityCloseToCollStrategy.addSubSlot('&weth', 'address');
+    liquityCloseToCollStrategy.addSubSlot('&lusd', 'address');
+
+    const chainLinkPriceTrigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
+    liquityCloseToCollStrategy.addTrigger(chainLinkPriceTrigger);
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        '%loanAmount', // (trove.debt - 200 LUSD) in weth + a bit over to handle slippage
+        '&weth', // hardcoded only weth is used (currently must be set by backend)
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&weth',
+            '&lusd',
+            '$1',
+            '%wrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const liquityCloseAction = new dfs.actions.liquity.LiquityCloseAction(
+        '&proxy', // hardcoded take lusd from proxy
+        '&proxy', // hardcoded send to proxy
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', '&weth', '$3',
+    );
+
+    const sendFL = new dfs.actions.basic.SendTokenAction(
+        '&weth', // hardcoded only can send weth
+        '%balancerFlAddr', // kept variable this can change (FL must be payed back to work)
+        '$1', // hardcoded output from FL action
+    );
+
+    const sendWethToEoa = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&weth', // hardcoded only can send weth
+        '&eoa', // hardcoded send to eoa
+        '%max(uint)', // variable amount (proxy.balance)
+    );
+
+    const sendLUSDToEoa = new dfs.actions.basic.SendTokenAction(
+        '&lusd', // hardcoded only can send Lusd
+        '&eoa', // hardcoded send to eoa
+        '%max(uint)', // variable amount (proxy.balance)
+    );
+
+    liquityCloseToCollStrategy.addAction(flAction);
+    liquityCloseToCollStrategy.addAction(sellAction);
+    liquityCloseToCollStrategy.addAction(liquityCloseAction);
+    liquityCloseToCollStrategy.addAction(feeTakingAction);
+    liquityCloseToCollStrategy.addAction(sendFL);
+    liquityCloseToCollStrategy.addAction(sendWethToEoa);
+    liquityCloseToCollStrategy.addAction(sendLUSDToEoa);
+
+    return liquityCloseToCollStrategy.encodeForDsProxyCall();
+};
+
 const createLimitOrderStrategy = () => {
     const limitOrderStrategy = new dfs.Strategy('LimitOrderStrategy');
 
@@ -1270,6 +1331,7 @@ module.exports = {
     createLiquityFLRepayStrategy,
     createLiquityFLBoostStrategy,
     createLiquityBoostStrategy,
+    createLiquityCloseToCollStrategy,
     createLimitOrderStrategy,
     createDCAStrategy,
     createContinuousUniV3CollectStrategy,
