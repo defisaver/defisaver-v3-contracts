@@ -1585,7 +1585,6 @@ const convexDeposit = async (
     amount,
     option,
 ) => {
-    const actionAddr = await getAddrFromRegistry('ConvexDeposit');
     const action = new dfs.actions.convex.ConvexDepositAction(
         from,
         to,
@@ -1595,7 +1594,7 @@ const convexDeposit = async (
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](actionAddr, functionData, { gasLimit: 3000000 });
+    return executeAction('ConvexDeposit', functionData, proxy);
 };
 
 const convexWithdraw = async (
@@ -1606,7 +1605,6 @@ const convexWithdraw = async (
     amount,
     option,
 ) => {
-    const actionAddr = await getAddrFromRegistry('ConvexWithdraw');
     const action = new dfs.actions.convex.ConvexWithdrawAction(
         from,
         to,
@@ -1616,7 +1614,7 @@ const convexWithdraw = async (
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](actionAddr, functionData, { gasLimit: 3000000 });
+    return executeAction('ConvexWithdraw', functionData, proxy);
 };
 
 const convexClaim = async (
@@ -1625,7 +1623,6 @@ const convexClaim = async (
     to,
     rewardContract,
 ) => {
-    const actionAddr = await getAddrFromRegistry('ConvexClaim');
     const action = new dfs.actions.convex.ConvexClaimAction(
         from,
         to,
@@ -1633,7 +1630,7 @@ const convexClaim = async (
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
-    return proxy['execute(address,bytes)'](actionAddr, functionData, { gasLimit: 3000000 });
+    return executeAction('ConvexClaim', functionData, proxy);
 };
 
 module.exports = {

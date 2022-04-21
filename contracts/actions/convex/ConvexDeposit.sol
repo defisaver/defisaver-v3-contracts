@@ -70,7 +70,7 @@ contract ConvexDeposit is ConvexHelper, ActionBase {
             IBaseRewardPool(poolInfo.crvRewards).stakeFor(_params.to, _params.amount);
         } else
         if (_params.option == DepositOption.WRAP_AND_STAKE) {
-            bool stakeForProxy = _params.to == address(this) && _params.option != DepositOption.WRAP;
+            bool stakeForProxy = _params.to == address(this);
             
             _params.amount = poolInfo.lpToken.pullTokensIfNeeded(_params.from, _params.amount);
             poolInfo.lpToken.approveToken(BOOSTER_ADDR, _params.amount);
