@@ -1577,6 +1577,65 @@ const rariWithdraw = async (
     return tx;
 };
 
+const convexDeposit = async (
+    proxy,
+    from,
+    to,
+    poolId,
+    amount,
+    option,
+) => {
+    const actionAddr = await getAddrFromRegistry('ConvexDeposit');
+    const action = new dfs.actions.convex.ConvexDepositAction(
+        from,
+        to,
+        poolId,
+        amount,
+        option,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](actionAddr, functionData, { gasLimit: 3000000 });
+};
+
+const convexWithdraw = async (
+    proxy,
+    from,
+    to,
+    poolId,
+    amount,
+    option,
+) => {
+    const actionAddr = await getAddrFromRegistry('ConvexWithdraw');
+    const action = new dfs.actions.convex.ConvexWithdrawAction(
+        from,
+        to,
+        poolId,
+        amount,
+        option,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](actionAddr, functionData, { gasLimit: 3000000 });
+};
+
+const convexClaim = async (
+    proxy,
+    from,
+    to,
+    rewardContract,
+) => {
+    const actionAddr = await getAddrFromRegistry('ConvexClaim');
+    const action = new dfs.actions.convex.ConvexClaimAction(
+        from,
+        to,
+        rewardContract,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    return proxy['execute(address,bytes)'](actionAddr, functionData, { gasLimit: 3000000 });
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -1677,4 +1736,8 @@ module.exports = {
     rariWithdraw,
 
     updateSubData,
+
+    convexDeposit,
+    convexWithdraw,
+    convexClaim,
 };
