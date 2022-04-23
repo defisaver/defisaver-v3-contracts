@@ -63,9 +63,18 @@ const {
     getSubHash,
     addBotCaller,
     getLatestStrategyId,
+    createStrategy,
 } = require('../test/utils-strategies');
 
-const { subRepayFromSavingsStrategy, subMcdCloseStrategy, subMcdCloseToCollStrategy } = require('../test/strategy-subs');
+const { createLiquityCloseToCollStrategy } = require('../test/strategies');
+
+const {
+    subRepayFromSavingsStrategy,
+    subMcdCloseStrategy,
+    subMcdCloseToCollStrategy,
+    subLiquityCloseToCollStrategy,
+} = require('../test/strategy-subs');
+
 const { createMcdTrigger, createChainLinkPriceTrigger, RATIO_STATE_UNDER } = require('../test/triggers');
 
 program.version('0.0.1');
@@ -434,6 +443,47 @@ const mcdCloseToCollStrategySub = async (vaultId, type, price, priceState, sende
     );
 
     console.log(`Subscribed to mcd close strategy with sub id #${subId}`);
+};
+
+const liquityCloseToCollStrategySub = async (price, priceState, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await openStrategyAndBundleStorage(true);
+
+    // create
+    const liquityCloseToCollStrategy = createLiquityCloseToCollStrategy();
+
+    const strategyId = await createStrategy(proxy, ...liquityCloseToCollStrategy, false);
+
+    const formattedPrice = (price * 1e8).toString();
+
+    console.log('strategyId: ', strategyId);
+
+    let formattedPriceState;
+    if (priceState.toLowerCase() === 'over') {
+        formattedPriceState = 0;
+    } else if (priceState.toLowerCase() === 'under') {
+        formattedPriceState = 1;
+    }
+
+    const { subId } = await subLiquityCloseToCollStrategy(
+        proxy,
+        formattedPrice,
+        formattedPriceState,
+        10,
+        REGISTRY_ADDR,
+    );
+
+    console.log(`Subscribed to liquity close strategy with sub id #${subId}`);
 };
 
 // eslint-disable-next-line max-len
@@ -889,6 +939,15 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
         .action(async (vaultId, type, price, priceState, senderAddr) => {
             // eslint-disable-next-line max-len
             await mcdCloseToCollStrategySub(vaultId, type, price, priceState, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('sub-liquity-close-to-coll <price> <priceState> [senderAddr]')
+        .description('Subscribes to a Liquity to coll strategy')
+        .action(async (price, priceState, senderAddr) => {
+            // eslint-disable-next-line max-len
+            await liquityCloseToCollStrategySub(price, priceState, senderAddr);
             process.exit(0);
         });
 
