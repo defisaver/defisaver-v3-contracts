@@ -400,15 +400,18 @@ const getProxy = async (acc) => {
 
 // eslint-disable-next-line max-len
 const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTenderly = config.saveOnTenderly) => {
-    await hre.network.provider.send('hardhat_setBalance', [
-        OWNER_ACC,
-        '0xC9F2C9CD04674EDEA40000000',
-    ]);
-    await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
-        '0x1', // 1 wei
-    ]);
-    if (regAddr === REGISTRY_ADDR) {
-        await impersonateAccount(OWNER_ACC);
+    if (hre.network.config.type !== 'tenderly') {
+        await hre.network.provider.send('hardhat_setBalance', [
+            OWNER_ACC,
+            '0xC9F2C9CD04674EDEA40000000',
+        ]);
+        await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
+            '0x1', // 1 wei
+        ]);
+
+        if (regAddr === REGISTRY_ADDR) {
+            await impersonateAccount(OWNER_ACC);
+        }
     }
 
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
@@ -447,9 +450,12 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
         await storageContract.changeEditPermission(true);
     }
 
-    if (regAddr === addrs[network].REGISTRY_ADDR) {
-        await stopImpersonatingAccount(getOwnerAddr());
+    if (hre.network.config.type !== 'tenderly') {
+        if (regAddr === addrs[network].REGISTRY_ADDR) {
+            await stopImpersonatingAccount(getOwnerAddr());
+        }
     }
+
     if (saveOnTenderly) {
         await hre.tenderly.persistArtifacts({
             name,
