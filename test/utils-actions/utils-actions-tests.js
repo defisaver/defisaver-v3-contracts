@@ -34,7 +34,7 @@ const { fetchMakerAddresses } = require('../utils-mcd');
 const {
     changeProxyOwner, automationV2Unsub, executeAction, openVault, updateSubData,
 } = require('../actions');
-const { addBotCaller, createStrategy } = require('../utils-strategies');
+const { addBotCaller, createStrategy, subToStrategy } = require('../utils-strategies');
 const { createMcdCloseStrategy } = require('../strategies');
 const { subMcdCloseStrategy } = require('../strategy-subs');
 const { RATIO_STATE_OVER, createChainLinkPriceTrigger } = require('../triggers');
@@ -690,6 +690,80 @@ const updateSubDataTest = async () => {
     });
 };
 
+const toggleSubDataTest = async () => {
+    describe('Toggle Sub', function () {
+        this.timeout(1000000);
+
+        let senderAcc;
+        let proxy;
+        let subId;
+        let subStorageAddr;
+        let subStorage;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+
+            await redeployCore();
+
+            subStorageAddr = await getAddrFromRegistry('SubStorage');
+            subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+
+            proxy = await getProxy(senderAcc.address);
+        });
+
+        it('... should create a dummy strategy', async () => {
+            const abiCoder = new hre.ethers.utils.AbiCoder();
+
+            const dummyStrategy = new dfs.Strategy('DummyStrategy');
+
+            dummyStrategy.addSubSlot('&amount', 'uint256');
+
+            const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+                WETH_ADDRESS, '&eoa', '&amount',
+            );
+
+            dummyStrategy.addTrigger((new dfs.triggers.GasPriceTrigger(0)));
+            dummyStrategy.addAction(pullTokenAction);
+
+            const callData = dummyStrategy.encodeForDsProxyCall();
+
+            const strategyId = await createStrategy(proxy, ...callData, false);
+
+            const amountEncoded = abiCoder.encode(['uint256'], [0]);
+
+            const triggerData = abiCoder.encode(['uint256'], [0]);
+            const strategySub = [strategyId, false, [triggerData], [amountEncoded]];
+
+            subId = await subToStrategy(proxy, strategySub);
+
+            const storedSub = await subStorage.getSub(subId);
+            expect(storedSub.isEnabled).to.be.eq(true);
+        });
+
+        it('... should deactivate the strategy', async () => {
+            const disableSub = new dfs.actions.basic.ToggleSubAction(subId, false);
+
+            const functionData = disableSub.encodeForDsProxyCall()[1];
+
+            await executeAction('ToggleSub', functionData, proxy);
+
+            const storedSub = await subStorage.getSub(subId);
+            expect(storedSub.isEnabled).to.be.eq(false);
+        });
+
+        it('... should activate the strategy again', async () => {
+            const disableSub = new dfs.actions.basic.ToggleSubAction(subId, true);
+
+            const functionData = disableSub.encodeForDsProxyCall()[1];
+
+            await executeAction('ToggleSub', functionData, proxy);
+
+            const storedSub = await subStorage.getSub(subId);
+            expect(storedSub.isEnabled).to.be.eq(true);
+        });
+    });
+};
+
 const deployUtilsActionsContracts = async () => {
     await redeploy('SendTokenAndUnwrap');
     await redeploy('WrapEth');
@@ -703,10 +777,12 @@ const deployUtilsActionsContracts = async () => {
     await redeploy('UniswapWrapperV3');
     await redeploy('ChangeProxyOwner');
     await redeploy('UpdateSub');
+    await redeploy('ToggleSub');
 };
 
 const utilsActionsFullTest = async () => {
     await deployUtilsActionsContracts();
+    await toggleSubDataTest();
     await sendTokenAndUnwrapTest();
     await wrapEthTest();
     await unwrapEthTest();
@@ -714,9 +790,9 @@ const utilsActionsFullTest = async () => {
     await subInputsTest();
     await sendTokenTest();
     await pullTokenTest();
-    await changeOwnerTest();
-    await automationV2UnsubTest();
     await updateSubDataTest();
+    await automationV2UnsubTest();
+    await changeOwnerTest();
 };
 
 module.exports = {
@@ -731,4 +807,5 @@ module.exports = {
     utilsActionsFullTest,
     sendTokenAndUnwrapTest,
     updateSubDataTest,
+    toggleSubDataTest,
 };

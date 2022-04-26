@@ -17,7 +17,6 @@ const {
     balanceOf,
     depositToWeth,
     approve,
-    resetForkToBlock,
     placeHolderAddr,
     nullAddress,
     OWNER_ACC,
