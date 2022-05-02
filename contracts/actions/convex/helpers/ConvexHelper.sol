@@ -14,9 +14,9 @@ contract ConvexHelper is MainnetConvexAddresses {
     using SafeMath for uint256;
     using TokenUtils for address;
 
-    uint256 internal immutable CVX_REDUCTION_PER_CLIFF;
-    uint256 internal immutable CVX_TOTAL_CLIFFS;
-    uint256 internal immutable CVX_MAX_SUPPLY;
+    uint256 internal constant CVX_TOTAL_CLIFFS = 1000;
+    uint256 internal constant CVX_REDUCTION_PER_CLIFF = 1e23;
+    uint256 internal constant CVX_MAX_SUPPLY = 1e26;
 
     struct Reward {
         address token;
@@ -35,15 +35,8 @@ contract ConvexHelper is MainnetConvexAddresses {
         UNSTAKE_AND_UNWRAP
     }
 
-    constructor() {
-        IConvexToken CVX = IConvexToken(CVX_ADDR);
-        CVX_REDUCTION_PER_CLIFF = CVX.reductionPerCliff();
-        CVX_TOTAL_CLIFFS = CVX.totalCliffs();
-        CVX_MAX_SUPPLY = CVX.maxSupply();
-    }
-
     /// @dev taken from Cvx.mint()
-    function cvxMintAmount(uint256 _amount) public view returns (uint256) {
+    function _cvxMintAmount(uint256 _amount) internal view returns (uint256) {
         uint256 supply = IERC20(CVX_ADDR).totalSupply();
         
         //use current supply to gauge cliff
@@ -69,11 +62,16 @@ contract ConvexHelper is MainnetConvexAddresses {
         return _amount;
     }
 
-    function earnedRewards(address _account, address _rewardContract) public view returns (
+    /// @notice This function gets (base and extra) earned reward amounts
+    /// @return rewards - array of length 2 (for base rewards) + extraRewardsLength of tuples (token, earned)
+    /// @dev CRV and CVX are always base rewards and are located at indices 0 and 1 respectively
+    /// @dev some pools have CRV or CVX as extra rewards and their earned amounts are added to base rewards earned amounts
+    /// @dev in these cases the return array will have empty elements
+    function _earnedRewards(address _account, address _rewardContract) internal view returns (
         Reward[] memory rewards
     ) {
         uint256 crvEarned = IBaseRewardPool(_rewardContract).earned(_account);
-        uint256 cvxEarned = cvxMintAmount(crvEarned);
+        uint256 cvxEarned = _cvxMintAmount(crvEarned);
     
         uint256 extraRewardsLength = IBaseRewardPool(_rewardContract).extraRewardsLength();
         rewards = new Reward[](extraRewardsLength + 2);
@@ -99,20 +97,20 @@ contract ConvexHelper is MainnetConvexAddresses {
     }
 
     function _transferRewards(
-        address from,
-        address to,
-        Reward[] memory rewards
+        address _from,
+        address _to,
+        Reward[] memory _rewards
     ) internal returns (uint256) {
-        if (from != to) {
-            for (uint256 i = 0; i < rewards.length; i++) {
-                address token = rewards[i].token;
+        if (_from != _to) {
+            for (uint256 i = 0; i < _rewards.length; i++) {
+                address token = _rewards[i].token;
                 if (token == address(0)) break;
-                uint256 earned = rewards[i].earned;
-                earned = token.pullTokensIfNeeded(from,earned);
-                token.withdrawTokens(to, earned);
+                uint256 earned = _rewards[i].earned;
+                earned = token.pullTokensIfNeeded(_from,earned);
+                token.withdrawTokens(_to, earned);
             }
         }
 
-        return rewards[0].earned;
+        return _rewards[0].earned;
     }
 }

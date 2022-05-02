@@ -14,6 +14,7 @@ contract ConvexDeposit is ConvexHelper, ActionBase {
     /// otherwise LP tokens are pulled
     /// @param to address that will receive wrapped LP tokens if option is WRAP,
     /// otherwise it is the address for which to stake
+    /// @param poolId curve pool id according to Convex Booster contract
     struct Params {
         address from;
         address to;

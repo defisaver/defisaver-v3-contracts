@@ -48,9 +48,9 @@ contract ConvexClaim is ConvexHelper, ActionBase {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    /// @notice Acion that claims Convex rewards 
+    /// @notice Action that claims Convex rewards 
     function _claim(Params memory _params) internal returns (uint256 crvEarned, bytes memory logData) {
-        Reward[] memory rewards = earnedRewards(_params.from, _params.rewardContract);
+        Reward[] memory rewards = _earnedRewards(_params.from, _params.rewardContract);
         IBaseRewardPool(_params.rewardContract).getReward(_params.from, true);
 
         crvEarned = _transferRewards(_params.from, _params.to, rewards);

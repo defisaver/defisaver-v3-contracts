@@ -10,10 +10,8 @@ import "../ActionBase.sol";
 contract ConvexWithdraw is ConvexHelper, ActionBase {
     using TokenUtils for address;
 
-    error OnlyProxyUnstake();
-
     /// @param from address from which to pull wrapped LP tokens if option is UNWRAP,
-    /// otherwise it is the address for which to unstake and must be set to the proxy address
+    /// otherwise it is ignored and address(this) is used
     /// @param to address to which to withdraw wrapped LP tokens if option is UNSTAKE,
     /// otherwise LP tokens are withdrawn
     struct Params {
@@ -57,8 +55,6 @@ contract ConvexWithdraw is ConvexHelper, ActionBase {
 
     /// @notice Action that either withdraws(unwraps) Curve LP from convex, unstakes wrapped LP, or does both
     function _withdraw(Params memory _params) internal returns (uint256 transientAmount, bytes memory logData) {
-        if (_params.option != WithdrawOption.UNWRAP && _params.from != address(this)) revert OnlyProxyUnstake();
-
         IBooster.PoolInfo memory poolInfo = IBooster(BOOSTER_ADDR).poolInfo(_params.poolId);
         Reward[] memory rewards;
 
@@ -68,16 +64,19 @@ contract ConvexWithdraw is ConvexHelper, ActionBase {
             poolInfo.lpToken.withdrawTokens(_params.to, _params.amount);
         } else
         if (_params.option == WithdrawOption.UNSTAKE) {
+            // cant unstake on behalf of other address 
+            _params.from = address(this);
             // crvRewards implements balanceOf, but is not transferable, this is fine because from == address(this)
             _params.amount = poolInfo.crvRewards.pullTokensIfNeeded(_params.from, _params.amount);
-            rewards = earnedRewards(_params.from, poolInfo.crvRewards);
+            rewards = _earnedRewards(_params.from, poolInfo.crvRewards);
             IBaseRewardPool(poolInfo.crvRewards).withdraw(_params.amount, true);
             _transferRewards(_params.from, _params.to, rewards);
             poolInfo.token.withdrawTokens(_params.to, _params.amount);
         } else
         if (_params.option == WithdrawOption.UNSTAKE_AND_UNWRAP) {
+            _params.from = address(this);
             _params.amount = poolInfo.crvRewards.pullTokensIfNeeded(_params.from, _params.amount);
-            rewards = earnedRewards(_params.from, poolInfo.crvRewards);
+            rewards = _earnedRewards(_params.from, poolInfo.crvRewards);
             IBaseRewardPool(poolInfo.crvRewards).withdrawAndUnwrap(_params.amount, true);
             _transferRewards(_params.from, _params.to, rewards);
             poolInfo.lpToken.withdrawTokens(_params.to, _params.amount);
