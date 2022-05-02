@@ -43,6 +43,7 @@ contract AaveV3View is AaveV3Helper, DSMath {
         uint256 balance;
         uint256 borrowsStable;
         uint256 borrowsVariable;
+        uint256 stableBorrowRate;
         bool enabledAsCollateral;
     }
 
@@ -56,12 +57,15 @@ contract AaveV3View is AaveV3Helper, DSMath {
     struct TokenInfoFull {
         address aTokenAddress; //pool.config
         address underlyingTokenAddress; //pool.config
+        uint16 assetId;
         uint256 supplyRate; //pool.config
         uint256 borrowRateVariable; //pool.config
         uint256 borrowRateStable; //pool.config
         uint256 totalSupply; //total supply
         uint256 availableLiquidity; //reserveData.liq rate
         uint256 totalBorrow; // total supply of both debt assets
+        uint256 totalBorrowVar;
+        uint256 totalBorrowStab;
         uint256 collateralFactor; //pool.config
         uint256 liquidationRatio; //pool.config
         uint256 price; //oracle
@@ -165,6 +169,7 @@ contract AaveV3View is AaveV3Helper, DSMath {
             userTokens[i].balance = reserveData.aTokenAddress.getBalance(_user);
             userTokens[i].borrowsStable = reserveData.stableDebtTokenAddress.getBalance(_user);
             userTokens[i].borrowsVariable = reserveData.variableDebtTokenAddress.getBalance(_user);
+            userTokens[i].stableBorrowRate = reserveData.currentStableBorrowRate;
             DataTypes.UserConfigurationMap memory map = lendingPool.getUserConfiguration(_user);
             userTokens[i].enabledAsCollateral = isUsingAsCollateral(map, reserveData.id);
         }
@@ -218,13 +223,16 @@ contract AaveV3View is AaveV3Helper, DSMath {
         _tokenInfo = TokenInfoFull({
             aTokenAddress: reserveData.aTokenAddress,
             underlyingTokenAddress: _tokenAddr,
+            assetId: reserveData.id,
             supplyRate: reserveData.currentLiquidityRate,
             borrowRateVariable: reserveData.currentVariableBorrowRate,
             borrowRateStable: reserveData.currentStableBorrowRate,
             totalSupply: IERC20(reserveData.aTokenAddress).totalSupply(),
             availableLiquidity: reserveData.currentLiquidityRate,
             totalBorrow: totalVariableBorrow + totalStableBorrow,
-            collateralFactor: getReserveFactor(config),
+            totalBorrowVar: totalVariableBorrow,
+            totalBorrowStab: totalStableBorrow,
+            collateralFactor: getLtv(config),
             liquidationRatio: getLiquidationThreshold(config),
             price: getAssetPrice(_market, _tokenAddr),
             supplyCap: getSupplyCap(config),
@@ -317,6 +325,10 @@ contract AaveV3View is AaveV3Helper, DSMath {
         }
     }
 
+    function getLtv(DataTypes.ReserveConfigurationMap memory self) public view returns (uint256) {
+        return self.data & ~LTV_MASK;
+    }
+
     function getReserveFactor(DataTypes.ReserveConfigurationMap memory self)
         internal
         pure
@@ -400,4 +412,5 @@ contract AaveV3View is AaveV3Helper, DSMath {
     {
         return (self.data & ~BORROWABLE_IN_ISOLATION_MASK) != 0;
     }
+
 }
