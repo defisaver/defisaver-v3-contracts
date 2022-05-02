@@ -358,7 +358,6 @@ const getAddrFromRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR)
     } if (name === 'SubProxy') {
         return '0xd18d4756bbf848674cc35f1a0B86afEF20787382';
     }
-
     const addr = await registry.getAddr(
         getNameId(name),
     );
@@ -406,8 +405,8 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
     await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
         '0x1', // 1 wei
     ]);
-    if (regAddr === REGISTRY_ADDR) {
-        await impersonateAccount(OWNER_ACC);
+    if (regAddr === addrs[network].REGISTRY_ADDR) {
+        await impersonateAccount(getOwnerAddr());
     }
 
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
