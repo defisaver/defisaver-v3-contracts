@@ -84,40 +84,6 @@ const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee
     return tx;
 };
 
-const buy = async (
-    proxy,
-    sellAddr,
-    buyAddr,
-    sellAmount,
-    buyAmount,
-    wrapper,
-    from,
-    to,
-    uniV3fee = 0,
-) => {
-    const exchangeObject = formatExchangeObj(
-        sellAddr,
-        buyAddr,
-        sellAmount.toString(),
-        wrapper,
-        buyAmount,
-        uniV3fee,
-    );
-
-    const sellAction = new dfs.actions.basic.SellAction(exchangeObject, from, to);
-
-    const functionData = sellAction.encodeForDsProxyCall()[1];
-
-    if (isEth(sellAddr)) {
-        await depositToWeth(sellAmount.toString());
-    }
-
-    await approve(sellAddr, proxy.address);
-
-    const tx = await executeAction('DFSBuy', functionData, proxy);
-    return tx;
-};
-
 const paybackMcd = async (proxy, vaultId, amount, from, daiAddr, mcdManager = MCD_MANAGER_ADDR) => {
     await approve(daiAddr, proxy.address);
 
