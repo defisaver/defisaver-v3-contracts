@@ -58,7 +58,9 @@ const prefetchedHints = {
 const getHints = async (troveOwner, actionId, from, collAmount, LUSDamount) => {
     const blockNum = hre.ethers.provider.blockNumber;
     const paramsSerialized = JSON.stringify(
-        { blockNum, troveOwner, actionId, from, collAmount, LUSDamount },
+        {
+            blockNum, troveOwner, actionId, from, collAmount, LUSDamount,
+        },
     );
     const paramsEncoded = hre.ethers.utils.defaultAbiCoder.encode(
         ['string'],
@@ -74,7 +76,6 @@ const getHints = async (troveOwner, actionId, from, collAmount, LUSDamount) => {
     const approxHint = (await liquityView['getApproxHint(uint256,uint256,uint256)'](NICR, 20, 42)).hintAddress;
     hints = await liquityView['findInsertPosition(uint256,address,address)'](NICR, approxHint, approxHint);
 
-    console.log(blockNum, paramsHash, hints);
     return hints;
 };
 
