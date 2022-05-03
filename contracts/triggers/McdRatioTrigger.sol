@@ -58,12 +58,19 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
     
         if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.CURR_RATIO || RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS){
             checkedRatio = getRatio(triggerSubData.vaultId, 0);
+
+            // if cdp has 0 ratio don't trigger it
+            if (checkedRatio == 0) return false;
+
             shouldTriggerCurr = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
         }
 
         if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.NEXT_RATIO || RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS){
             checkedRatio = getRatio(triggerSubData.vaultId, triggerCallData.nextPrice);
             
+            // if cdp has 0 ratio don't trigger it
+            if (checkedRatio == 0) return false;
+
             shouldTriggerNext = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
 
             // must convert back to wad

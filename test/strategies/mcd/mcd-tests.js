@@ -47,6 +47,7 @@ const {
     createMstableRepayStrategy,
     createMstableRepayStrategyWithExchange,
     createMcdCloseStrategy,
+    createMcdCloseToCollStrategy,
 } = require('../../strategies');
 
 const {
@@ -61,6 +62,7 @@ const {
     callMcdRepayFromMstableStrategy,
     callMcdRepayFromMstableWithExchangeStrategy,
     callMcdCloseStrategy,
+    callMcdCloseToCollStrategy,
 } = require('../../strategy-calls');
 
 const {
@@ -68,6 +70,7 @@ const {
     subMcdRepayStrategy,
     subRepayFromSavingsStrategy,
     subMcdCloseStrategy,
+    subMcdCloseToCollStrategy,
 } = require('../../strategy-subs');
 
 const {
@@ -910,6 +913,145 @@ const mcdCloseToDaiStrategyTest = async () => {
     });
 };
 
+const mcdCloseToCollStrategyTest = async () => {
+    describe('Mcd-Close Strategy to collateral', function () {
+        this.timeout(320000);
+        const ethJoin = ilks[0].join;
+        let senderAcc;
+        let proxy;
+        let botAcc;
+        let strategyExecutor;
+        let vaultId;
+        let makerFlAddr;
+        let subStorage;
+        let subId;
+        let strategySub;
+        let flAmount;
+
+        const daiDebt = '18000';
+        const ethCollInDollars = '40000';
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            botAcc = (await hre.ethers.getSigners())[1];
+
+            strategyExecutor = await redeployCore();
+
+            await redeploy('SendToken');
+            await redeploy('SendTokenAndUnwrap');
+            await redeploy('DFSSell');
+            await redeploy('McdView');
+            await redeploy('GasFeeTaker');
+
+            const subStorageAddr = getAddrFromRegistry('SubStorage');
+            subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+
+            await redeploy('McdSupply');
+            await redeploy('McdWithdraw');
+            await redeploy('McdGenerate');
+            await redeploy('McdPayback');
+            await redeploy('McdOpen');
+            await redeploy('ChainLinkPriceTrigger');
+            await addBotCaller(botAcc.address);
+            makerFlAddr = await getAddrFromRegistry('FLMaker');
+            proxy = await getProxy(senderAcc.address);
+        });
+
+        it('... should make a new strategy for cdp close to coll', async () => {
+            const vaultColl = fetchAmountinUSDPrice('WETH', ethCollInDollars);
+            const amountDai = fetchAmountinUSDPrice('DAI', daiDebt);
+            vaultId = await openVault(
+                proxy,
+                'ETH-A',
+                vaultColl,
+                amountDai,
+            );
+            console.log(`VaultId: ${vaultId}`);
+            console.log(`Vault collateral${vaultColl}`);
+            console.log(`Vault debt${amountDai}`);
+            flAmount = (parseFloat(amountDai) + 1).toString();
+            flAmount = hre.ethers.utils.parseUnits(flAmount, 18);
+
+            await openStrategyAndBundleStorage();
+
+            const strategyData = createMcdCloseToCollStrategy();
+            console.log(strategyData);
+            const strategyId = await createStrategy(proxy, ...strategyData, false);
+
+            const currPrice = await getChainLinkPrice(ETH_ADDR);
+
+            const targetPrice = currPrice - 100; // Target is smaller so we can execute it
+            ({ subId, strategySub } = await subMcdCloseToCollStrategy(
+                vaultId,
+                proxy,
+                targetPrice,
+                WETH_ADDRESS,
+                RATIO_STATE_OVER,
+                strategyId,
+            ));
+            console.log(subId);
+            console.log(await subStorage.getSub(subId));
+        });
+
+        it('... should trigger a mcd close strategy', async () => {
+            const ethBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
+            console.log(`Eth before closing : ${ethBalanceBefore.toString() / 1e18}`);
+
+            const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
+            console.log(`Dai before closing : ${daiBalanceBefore.toString() / 1e18}`);
+
+            // enough eth to payback whole dai debt + 5% because of slippage
+            const debtEstimate = (parseInt(daiDebt, 10) * 1.05).toString();
+            const sellAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', debtEstimate), '18');
+
+            console.log(sellAmount);
+
+            await callMcdCloseToCollStrategy(
+                proxy,
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                flAmount,
+                sellAmount,
+                ethJoin,
+                makerFlAddr,
+            );
+
+            const ethBalanceAfter = await balanceOf(ETH_ADDR, senderAcc.address);
+            console.log(`Eth after closing : ${ethBalanceAfter.toString() / 1e18}`);
+
+            const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
+            console.log(`Dai after closing : ${daiBalanceAfter.toString() / 1e18}`);
+
+            expect(ethBalanceAfter).to.be.gt(ethBalanceBefore);
+            expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
+        });
+
+        it('... should fail to trigger the same strategy again as its one time', async () => {
+            try {
+                // enough eth to payback whole dai debt + 5% because of slippage
+                const debtEstimate = (parseInt(daiDebt, 10) * 1.05).toString();
+                const sellAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', debtEstimate), '18');
+
+                await callMcdCloseToCollStrategy(
+                    proxy,
+                    botAcc,
+                    strategyExecutor,
+                    subId,
+                    strategySub,
+                    flAmount,
+                    sellAmount,
+                    ethJoin,
+                    makerFlAddr,
+                );
+            } catch (err) {
+                expect(err.toString()).to.have.string('SubNotEnabled');
+            }
+        });
+    });
+};
+
 const mcdStrategiesTest = async () => {
     await mcdBoostStrategyTest();
     await mcdRepayStrategyTest();
@@ -917,6 +1059,7 @@ const mcdStrategiesTest = async () => {
     await mcdRepayFromYearnStrategyTest();
     await mcdRepayFromMStableStrategyTest();
     await mcdCloseToDaiStrategyTest();
+    await mcdCloseToCollStrategyTest();
 };
 module.exports = {
     mcdStrategiesTest,
@@ -926,4 +1069,5 @@ module.exports = {
     mcdRepayFromYearnStrategyTest,
     mcdRepayFromMStableStrategyTest,
     mcdCloseToDaiStrategyTest,
+    mcdCloseToCollStrategyTest,
 };

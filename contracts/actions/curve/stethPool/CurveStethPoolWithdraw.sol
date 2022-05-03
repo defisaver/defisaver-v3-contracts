@@ -17,11 +17,18 @@ contract CurveStethPoolWithdraw is ActionBase {
     address constant internal STE_CRV_ADDR = 0x06325440D014e39736583c165C2963BA99fAf14E;
     address constant internal STETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
 
+    enum ReturnValue {
+        WETH,
+        STETH,
+        LP
+    }
+
     struct Params {
         address from;           // address where to pull lp tokens from
         address to;             // address that will receive withdrawn tokens
         uint256[2] amounts;     // amount of each token to withdraw
         uint256 maxBurnAmount;  // max amount of LP tokens to burn
+        ReturnValue returnValue;
     }
 
     function executeAction(
@@ -80,6 +87,11 @@ contract CurveStethPoolWithdraw is ActionBase {
         STE_CRV_ADDR.withdrawTokens(_params.from, _params.maxBurnAmount.sub(burnedLp));
 
         logData = abi.encode(_params.amounts[0], _params.amounts[1], burnedLp);
+
+        if (_params.returnValue == ReturnValue.WETH) return (_params.amounts[0], logData);
+        if (_params.returnValue == ReturnValue.STETH) return (_params.amounts[1], logData);
+
+        return (burnedLp, logData);
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {

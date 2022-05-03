@@ -17,7 +17,15 @@ const {
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
 } = require('./triggers');
-const { REGISTRY_ADDR, DAI_ADDR } = require('./utils');
+
+const {
+    REGISTRY_ADDR,
+    DAI_ADDR,
+    WBTC_ADDR,
+    WETH_ADDRESS,
+    LUSD_ADDR,
+} = require('./utils');
+
 const { MCD_MANAGER_ADDR } = require('./utils-mcd');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
@@ -171,6 +179,43 @@ const subMcdCloseStrategy = async (vaultId, proxy, targetPrice, tokenAddress, to
     return { subId, strategySub };
 };
 
+const subMcdCloseToCollStrategy = async (vaultId, proxy, targetPrice, tokenAddress, tokenState, strategyId, regAddr = REGISTRY_ADDR) => {
+    const isBundle = false;
+
+    const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
+    const collEncoded = abiCoder.encode(['address'], [tokenAddress]);
+    const daiEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const mcdManagerEncoded = abiCoder.encode(['address'], [MCD_MANAGER_ADDR]);
+
+    let chainlinkTokenAddr = tokenAddress;
+    if (tokenAddress.toLowerCase() === WBTC_ADDR.toLowerCase()) {
+        chainlinkTokenAddr = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
+    }
+
+    const triggerData = await createChainLinkPriceTrigger(
+        chainlinkTokenAddr, targetPrice, tokenState,
+    );
+    const strategySub = [strategyId, isBundle, [triggerData], [vaultIdEncoded, collEncoded, daiEncoded, mcdManagerEncoded]];
+    const subId = await subToStrategy(proxy, strategySub, regAddr);
+
+    return { subId, strategySub };
+};
+
+const subLiquityCloseToCollStrategy = async (proxy, targetPrice, tokenState, strategyId, regAddr = REGISTRY_ADDR) => {
+    const isBundle = false;
+
+    const wethEncoded = abiCoder.encode(['address'], [WETH_ADDRESS]);
+    const lusdEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
+
+    const triggerData = await createChainLinkPriceTrigger(
+        WETH_ADDRESS, targetPrice, tokenState,
+    );
+    const strategySub = [strategyId, isBundle, [triggerData], [wethEncoded, lusdEncoded]];
+    const subId = await subToStrategy(proxy, strategySub, regAddr);
+
+    return { subId, strategySub };
+};
+
 // eslint-disable-next-line max-len
 const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrBuy, amount, targetPrice, strategyId) => {
     const isBundle = false;
@@ -241,8 +286,9 @@ const subLiquityRepayStrategy = async (proxy, ratioUnder, targetRatio, bundleId)
 module.exports = {
     subDcaStrategy,
     subMcdRepayStrategy,
-    subRepayFromSavingsStrategy,
     subMcdBoostStrategy,
+    subMcdCloseToCollStrategy,
+    subRepayFromSavingsStrategy,
     subLimitOrderStrategy,
     subUniV3RangeOrderStrategy,
     subMcdCloseStrategy,
@@ -253,4 +299,5 @@ module.exports = {
     subReflexerRepayStrategy,
     subLiquityBoostStrategy,
     subLiquityRepayStrategy,
+    subLiquityCloseToCollStrategy,
 };

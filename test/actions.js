@@ -132,6 +132,16 @@ const paybackMcd = async (proxy, vaultId, amount, from, daiAddr, mcdManager = MC
     const tx = await executeAction('McdPayback', functionData, proxy);
     return tx;
 };
+const updateSubData = async (proxy, subId, sub) => {
+    const updateSubAction = new dfs.actions.basic.UpdateSubAction(
+        subId,
+        sub,
+    );
+    const functionData = updateSubAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('UpdateSub', functionData, proxy);
+    return tx;
+};
 
 /*
      ___           ___   ____    ____  _______
@@ -1435,12 +1445,14 @@ const curveStethPoolWithdraw = async (
     to,
     amounts,
     minBurnAmount,
+    returnValue,
 ) => {
     const curveStethPoolWithdrawAction = new dfs.actions.curve.CurveStethPoolWithdrawAction(
         from,
         to,
         amounts,
         minBurnAmount,
+        returnValue,
     );
 
     const functionData = curveStethPoolWithdrawAction.encodeForDsProxyCall()[1];
@@ -2002,4 +2014,6 @@ module.exports = {
     aaveV3SwitchCollateralCallDataOptimised,
     aaveV3SwapBorrowRate,
     aaveV3SwapBorrowRateCalldataOptimised,
+
+    updateSubData,
 };

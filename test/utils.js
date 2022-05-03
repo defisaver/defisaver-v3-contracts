@@ -74,6 +74,7 @@ const ADAI_ADDR = '0x028171bca77440897b824ca71d1c56cac55b68a3';
 const UNI_ADDR = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984';
 const LINK_ADDR = '0x514910771af9ca656af840dff83e8264ecf986ca';
 const WBTC_ADDR = '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599';
+const LUSD_ADDR = '0x5f98805A4E8be255a32880FDeC7F6728C6568bA0';
 
 const USDT_ADDR = '0xdac17f958d2ee523a2206206994597c13d831ec7';
 const BUSD_ADDR = '0x4fabb145d64652a948d72533023f6e7a623c7c53';
@@ -465,9 +466,12 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
         await storageContract.changeEditPermission(true);
     }
 
-    if (regAddr === addrs[network].REGISTRY_ADDR) {
-        await stopImpersonatingAccount(getOwnerAddr());
+    if (hre.network.config.type !== 'tenderly') {
+        if (regAddr === addrs[network].REGISTRY_ADDR) {
+            await stopImpersonatingAccount(getOwnerAddr());
+        }
     }
+
     if (saveOnTenderly) {
         await hre.tenderly.persistArtifacts({
             name,
@@ -871,6 +875,7 @@ module.exports = {
     AWBTC_ADDR,
     WBTC_ADDR,
     WSTETH_ADDRESS,
+    LUSD_ADDR,
     rariDaiFundManager,
     rdptAddress,
     rariUsdcFundManager,
