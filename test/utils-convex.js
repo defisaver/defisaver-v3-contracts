@@ -1,6 +1,6 @@
+const { poolInfo } = require('@defisaver/sdk/src/utils/convex-utils');
 const hre = require('hardhat');
 const { getAddrFromRegistry } = require('./utils');
-const poolInfo = require('./convex/poolInfo.json');
 
 const noTest = [];
 poolInfo.forEach((e, i) => {

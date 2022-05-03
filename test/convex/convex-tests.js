@@ -9,7 +9,6 @@ const {
     redeploy,
     Float2BN,
     balanceOf,
-    approve,
     setBalance,
     resetForkToBlock,
     takeSnapshot,
@@ -41,7 +40,6 @@ const convexDepositTest = (testLength) => {
         let senderAcc;
         let senderAddr;
         let proxy;
-        let proxyAddr;
 
         let snapshot;
 
@@ -50,9 +48,7 @@ const convexDepositTest = (testLength) => {
 
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAddr = senderAcc.address;
-
             proxy = await getProxy(senderAddr);
-            proxyAddr = proxy.address;
 
             await redeploy('ConvexDeposit');
         });
@@ -67,17 +63,15 @@ const convexDepositTest = (testLength) => {
 
         it('... should wrap curve lp', async () => {
             await Promise.all(poolInfo.map(async (pool, i) => {
-                const pid = pool.pid;
-                if (noTest.includes(pid) || i >= testLength) {
+                if (noTest.includes(pool.pid) || i >= testLength) {
                     return;
                 }
                 await setBalance(pool.lpToken, senderAddr, amount);
-                await approve(pool.lpToken, proxyAddr);
                 await convexDeposit(
                     proxy,
                     senderAddr,
                     senderAddr,
-                    pid,
+                    pool.lpToken,
                     amount,
                     DepositOptions.WRAP,
                 );
@@ -87,17 +81,15 @@ const convexDepositTest = (testLength) => {
 
         it('... should stake wrapped curve lp', async () => {
             await Promise.all(poolInfo.map(async (pool, i) => {
-                const pid = pool.pid;
-                if (noTest.includes(pid) || i >= testLength) {
+                if (noTest.includes(pool.pid) || i >= testLength) {
                     return;
                 }
                 await setBalance(pool.token, senderAddr, amount);
-                await approve(pool.token, proxyAddr);
                 await convexDeposit(
                     proxy,
                     senderAddr,
                     senderAddr,
-                    pid,
+                    pool.lpToken,
                     amount,
                     DepositOptions.STAKE,
                 );
@@ -107,17 +99,15 @@ const convexDepositTest = (testLength) => {
 
         it('... should wrap and stake curve lp', async () => {
             await Promise.all(poolInfo.map(async (pool, i) => {
-                const pid = pool.pid;
-                if (noTest.includes(pid) || i >= testLength) {
+                if (noTest.includes(pool.pid) || i >= testLength) {
                     return;
                 }
                 await setBalance(pool.lpToken, senderAddr, amount);
-                await approve(pool.lpToken, proxyAddr);
                 await convexDeposit(
                     proxy,
                     senderAddr,
                     senderAddr,
-                    pid,
+                    pool.lpToken,
                     amount,
                     DepositOptions.WRAP_AND_STAKE,
                 );
@@ -172,29 +162,26 @@ const convexWithdrawTest = (testLength) => {
 
         it('... should unwrap curve lp', async () => {
             await Promise.all(poolInfo.map(async (pool, i) => {
-                const pid = pool.pid;
-                if (noTest.includes(pid) || i >= testLength) {
+                if (noTest.includes(pool.pid) || i >= testLength) {
                     return;
                 }
 
                 await setBalance(pool.lpToken, senderAddr, amount);
-                await approve(pool.lpToken, proxyAddr);
                 await convexDeposit(
                     proxy,
                     senderAddr,
                     senderAddr,
-                    pid,
+                    pool.lpToken,
                     amount,
                     DepositOptions.WRAP,
                 );
                 expect(await balanceOf(pool.token, senderAddr)).to.be.eq(amount);
 
-                await approve(pool.token, proxyAddr);
                 await convexWithdraw(
                     proxy,
                     senderAddr,
                     senderAddr,
-                    pid,
+                    pool.lpToken,
                     amount,
                     WithdrawOptions.UNWRAP,
                 );
@@ -205,17 +192,15 @@ const convexWithdrawTest = (testLength) => {
 
         it('... should unstake wrapped curve lp', async () => {
             await Promise.all(poolInfo.map(async (pool, i) => {
-                const pid = pool.pid;
-                if (noTest.includes(pid) || i >= testLength) {
+                if (noTest.includes(pool.pid) || i >= testLength) {
                     return;
                 }
                 await setBalance(pool.lpToken, senderAddr, amount);
-                await approve(pool.lpToken, proxyAddr);
                 await convexDeposit(
                     proxy,
                     senderAddr,
                     proxyAddr,
-                    pid,
+                    pool.lpToken,
                     amount,
                     DepositOptions.WRAP_AND_STAKE,
                 );
@@ -226,8 +211,8 @@ const convexWithdrawTest = (testLength) => {
 
             for (let i = 0; i < poolInfo.length; i++) {
                 const pool = poolInfo[i];
-                const pid = pool.pid;
-                if (noTest.includes(pid) || i >= testLength) {
+
+                if (noTest.includes(pool.pid) || i >= testLength) {
                     continue;
                 }
                 const rewards = await getRewards(proxyAddr, pool.crvRewards);
@@ -239,7 +224,7 @@ const convexWithdrawTest = (testLength) => {
                     proxy,
                     proxyAddr,
                     senderAddr,
-                    pid,
+                    pool.lpToken,
                     amount,
                     WithdrawOptions.UNSTAKE,
                 );
@@ -254,17 +239,15 @@ const convexWithdrawTest = (testLength) => {
 
         it('... should unstake and unwrap curve lp', async () => {
             await Promise.all(poolInfo.map(async (pool, i) => {
-                const pid = pool.pid;
-                if (noTest.includes(pid) || i >= testLength) {
+                if (noTest.includes(pool.pid) || i >= testLength) {
                     return;
                 }
                 await setBalance(pool.lpToken, senderAddr, amount);
-                await approve(pool.lpToken, proxyAddr);
                 await convexDeposit(
                     proxy,
                     senderAddr,
                     proxyAddr,
-                    pid,
+                    pool.lpToken,
                     amount,
                     DepositOptions.WRAP_AND_STAKE,
                 );
@@ -275,8 +258,8 @@ const convexWithdrawTest = (testLength) => {
 
             for (let i = 0; i < poolInfo.length; i++) {
                 const pool = poolInfo[i];
-                const pid = pool.pid;
-                if (noTest.includes(pid) || i >= testLength) {
+
+                if (noTest.includes(pool.pid) || i >= testLength) {
                     continue;
                 }
                 const rewards = await getRewards(proxyAddr, pool.crvRewards);
@@ -288,7 +271,7 @@ const convexWithdrawTest = (testLength) => {
                     proxy,
                     proxyAddr,
                     senderAddr,
-                    pid,
+                    pool.lpToken,
                     amount,
                     WithdrawOptions.UNSTAKE_AND_UNWRAP,
                 );
@@ -346,18 +329,16 @@ const convexClaimTest = (testLength) => {
 
         it('... should claim rewards for user and send to proxy', async () => {
             await Promise.all(poolInfo.map(async (pool, i) => {
-                const pid = pool.pid;
-                if (noTest.includes(pid) || i >= testLength) {
+                if (noTest.includes(pool.pid) || i >= testLength) {
                     return;
                 }
 
                 await setBalance(pool.token, senderAddr, amount);
-                await approve(pool.token, proxyAddr);
                 await convexDeposit(
                     proxy,
                     senderAddr,
                     senderAddr,
-                    pid,
+                    pool.lpToken,
                     amount,
                     DepositOptions.STAKE,
                 );
@@ -369,23 +350,20 @@ const convexClaimTest = (testLength) => {
 
             for (let i = 0; i < poolInfo.length; i++) {
                 const pool = poolInfo[i];
-                const pid = pool.pid;
-                if (noTest.includes(pid) || i >= testLength) {
+
+                if (noTest.includes(pool.pid) || i >= testLength) {
                     continue;
                 }
                 const rewards = await getRewards(senderAddr, pool.crvRewards);
                 const balancesB4 = await Promise.all(
                     rewards.map(async (e) => balanceOf(e.token, senderAddr)),
                 );
-                await Promise.all(
-                    rewards.map(async (e) => approve(e.token, proxyAddr)),
-                );
 
                 await convexClaim(
                     proxy,
                     senderAddr,
                     proxyAddr,
-                    pool.crvRewards,
+                    pool.lpToken,
                 );
 
                 await Promise.all(rewards.map(async (e, j) => expect(
@@ -396,18 +374,16 @@ const convexClaimTest = (testLength) => {
 
         it('... should claim rewards for proxy and send to user', async () => {
             await Promise.all(poolInfo.map(async (pool, i) => {
-                const pid = pool.pid;
-                if (noTest.includes(pid) || i >= testLength) {
+                if (noTest.includes(pool.pid) || i >= testLength) {
                     return;
                 }
 
                 await setBalance(pool.token, senderAddr, amount);
-                await approve(pool.token, proxyAddr);
                 await convexDeposit(
                     proxy,
                     senderAddr,
                     proxyAddr,
-                    pid,
+                    pool.lpToken,
                     amount,
                     DepositOptions.STAKE,
                 );
@@ -419,8 +395,8 @@ const convexClaimTest = (testLength) => {
 
             for (let i = 0; i < poolInfo.length; i++) {
                 const pool = poolInfo[i];
-                const pid = pool.pid;
-                if (noTest.includes(pid) || i >= testLength) {
+
+                if (noTest.includes(pool.pid) || i >= testLength) {
                     continue;
                 }
                 const rewards = await getRewards(senderAddr, pool.crvRewards);
@@ -432,7 +408,7 @@ const convexClaimTest = (testLength) => {
                     proxy,
                     proxyAddr,
                     senderAddr,
-                    pool.crvRewards,
+                    pool.lpToken,
                 );
 
                 await Promise.all(rewards.map(async (e, j) => expect(

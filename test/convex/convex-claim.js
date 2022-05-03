@@ -1,5 +1,5 @@
 const { convexClaimTest } = require('./convex-tests');
-const config = require('../../hardhat.config.js');
+const config = require('../../hardhat.config');
 
 (() => {
     let testLength;

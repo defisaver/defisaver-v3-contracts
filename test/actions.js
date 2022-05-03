@@ -1581,16 +1581,23 @@ const convexDeposit = async (
     proxy,
     from,
     to,
-    poolId,
+    curveLp,
     amount,
     option,
 ) => {
     const action = new dfs.actions.convex.ConvexDepositAction(
         from,
         to,
-        poolId,
+        curveLp,
         amount,
         option,
+    );
+
+    const assets = await action.getAssetsToApprove();
+    await Promise.all(
+        assets.map(
+            (e) => approve(e.asset, proxy.address),
+        ),
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
@@ -1601,16 +1608,23 @@ const convexWithdraw = async (
     proxy,
     from,
     to,
-    poolId,
+    curveLp,
     amount,
     option,
 ) => {
     const action = new dfs.actions.convex.ConvexWithdrawAction(
         from,
         to,
-        poolId,
+        curveLp,
         amount,
         option,
+    );
+
+    const assets = await action.getAssetsToApprove();
+    await Promise.all(
+        assets.map(
+            (e) => approve(e.asset, proxy.address),
+        ),
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
@@ -1621,12 +1635,19 @@ const convexClaim = async (
     proxy,
     from,
     to,
-    rewardContract,
+    curveLp,
 ) => {
     const action = new dfs.actions.convex.ConvexClaimAction(
         from,
         to,
-        rewardContract,
+        curveLp,
+    );
+
+    const assets = await action.getAssetsToApprove();
+    await Promise.all(
+        assets.map(
+            (e) => approve(e.asset, proxy.address),
+        ),
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
