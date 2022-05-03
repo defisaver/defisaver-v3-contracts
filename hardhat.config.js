@@ -38,7 +38,7 @@ module.exports = {
             url: 'http://127.0.0.1:8545',
             timeout: 1000000,
             gasPrice: 170000000000,
-            name: 'mainnet',
+            name: 'optimism',
         },
         localOptimism: {
             url: 'http://127.0.0.1:8545',

@@ -18,12 +18,20 @@ const addrs = {
         PROXY_AUTH_ADDR: '0x149667b6FAe2c63D1B4317C716b0D0e4d3E2bD70',
         OWNER_ACC: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
         WETH_ADDRESS: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        DAI_ADDRESS: '0x6b175474e89094c44da98b954eedeac495271d0f',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
         REGISTRY_ADDR: '0xA1A445d1d8F97cBf380E98759230FcC0f2E23fc1',
         OWNER_ACC: '0x322d58b9E75a6918f7e7849AEe0fF09369977e08',
         WETH_ADDRESS: '0x4200000000000000000000000000000000000006',
+        DAI_ADDRESS: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
+    },
+    kovan: {
+        PROXY_REGISTRY: '0xF9722E05B68E5ad5D6E1674C4d6BfE11791a1E33',
+    },
+    kovanOptimism: {
+        PROXY_REGISTRY: '0x1fA11C699629E43005fd64f4DA36d9Eb30333ef9',
     },
 };
 
@@ -52,6 +60,9 @@ const WSTETH_ADDRESS = '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0';
 const UNIV2_ROUTER_ADDRESS = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
 const FEED_REGISTRY_ADDRESS = '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf';
 const USD_DENOMINATION = '0x0000000000000000000000000000000000000348';
+
+// optimism aave V3
+const AAVE_MARKET_OPTIMISM = '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb';
 
 // Dfs sdk won't accept 0x0 and we need some rand addr for testing
 const placeHolderAddr = '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF';
@@ -385,7 +396,6 @@ const getProxyWithSigner = async (signer, addr) => {
 const getProxy = async (acc) => {
     const proxyRegistry = await
     hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
-
     let proxyAddr = await proxyRegistry.proxies(acc);
 
     if (proxyAddr === nullAddress) {
@@ -398,24 +408,30 @@ const getProxy = async (acc) => {
     return dsProxy;
 };
 
+const sendEther = async (signer, toAddress, amount) => {
+    const valueAmount = hre.ethers.utils.parseUnits(amount, 18);
+    await signer.sendTransaction({
+        to: toAddress,
+        value: valueAmount,
+    });
+};
+
 // eslint-disable-next-line max-len
 const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTenderly = config.saveOnTenderly) => {
-    if (hre.network.config.type !== 'tenderly') {
-        await hre.network.provider.send('hardhat_setBalance', [
-            OWNER_ACC,
-            '0xC9F2C9CD04674EDEA40000000',
-        ]);
-        await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
-            '0x1', // 1 wei
-        ]);
-
-        if (regAddr === REGISTRY_ADDR) {
-            await impersonateAccount(OWNER_ACC);
-        }
+    await hre.network.provider.send('hardhat_setBalance', [
+        getOwnerAddr(),
+        '0xC9F2C9CD04674EDEA40000000',
+    ]);
+    await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
+        '0x1', // 1 wei
+    ]);
+    if (regAddr === addrs[network].REGISTRY_ADDR) {
+        await impersonateAccount(getOwnerAddr());
     }
 
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
-
+    const ethSender = (await hre.ethers.getSigners())[0];
+    await sendEther(ethSender, getOwnerAddr(), '100');
     const registryInstance = await hre.ethers.getContractFactory('DFSRegistry', signer);
     let registry = await registryInstance.attach(regAddr);
 
@@ -514,14 +530,6 @@ const approve = async (tokenAddr, to, signer) => {
             await tokenContract.approve(to, hre.ethers.constants.MaxUint256, { gasLimit: 1000000 });
         }
     }
-};
-
-const sendEther = async (signer, toAddress, amount) => {
-    const valueAmount = hre.ethers.utils.parseUnits(amount, 18);
-    await signer.sendTransaction({
-        to: toAddress,
-        value: valueAmount,
-    });
 };
 
 const getAllowance = async (tokenAddr, from, to) => {
@@ -872,6 +880,7 @@ module.exports = {
     rdptAddress,
     rariUsdcFundManager,
     rsptAddress,
+    AAVE_MARKET_OPTIMISM,
     setBalance,
     takeSnapshot,
     revertToSnapshot,
