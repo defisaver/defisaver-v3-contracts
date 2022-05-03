@@ -1945,7 +1945,6 @@ const aaveV3SwitchCollateralCallDataOptimised = async (
 module.exports = {
     executeAction,
     sell,
-    buy,
 
     openMcd,
     supplyMcd,
