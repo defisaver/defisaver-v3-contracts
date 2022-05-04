@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.10;
 
-import "./helpers/QiDaoHelper.sol";
+import "../actions/qidao/helpers/QiDaoHelper.sol";
 
 contract QiDaoView is QiDaoHelper {
 }
