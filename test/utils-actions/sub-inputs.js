@@ -9,7 +9,7 @@ describe('Sub-Inputs', function () {
     before(async () => {
         await redeploy('PullToken');
         await redeploy('SubInputs');
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
     });
 
     it('... should revert in event of overflow', async () => {

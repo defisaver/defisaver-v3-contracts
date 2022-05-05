@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 
 abstract contract IDFSRegistry {
  
-    function getAddr(bytes32 _id) public view virtual returns (address);
+    function getAddr(bytes4 _id) public view virtual returns (address);
 
     function addNewContract(
         bytes32 _id,

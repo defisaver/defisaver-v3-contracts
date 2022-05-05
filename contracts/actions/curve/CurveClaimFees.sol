@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
@@ -15,8 +15,8 @@ contract CurveClaimFees is ActionBase, CurveHelper {
     }
 
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -24,15 +24,16 @@ contract CurveClaimFees is ActionBase, CurveHelper {
         params.claimFor = _parseParamAddr(params.claimFor, _paramMapping[0], _subData, _returnValues);
         params.receiver = _parseParamAddr(params.receiver, _paramMapping[1], _subData, _returnValues);
 
-        uint256 claimed = _curveClaimFees(params);
+        (uint256 claimed, bytes memory logData) = _curveClaimFees(params);
+        emit ActionEvent("CurveClaimFees", logData);
         return bytes32(claimed);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-
-        _curveClaimFees(params);
+        (, bytes memory logData) = _curveClaimFees(params);
+        logger.logActionDirectEvent("CurveClaimFees", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -42,28 +43,18 @@ contract CurveClaimFees is ActionBase, CurveHelper {
 
     /// @notice Claims 3Crv rewards from Fee Distributor
     /// @dev if _claimFor != _receiver the _claimFor address needs to approve the DSProxy to pull 3Crv token
-    function _curveClaimFees(Params memory _params) internal returns (uint256) {
-        uint256 claimed = FeeDistributor.claim(_params.claimFor);
+    function _curveClaimFees(Params memory _params) internal returns (uint256 claimed, bytes memory logData) {
+        claimed = FeeDistributor.claim(_params.claimFor);
 
         if (_params.claimFor != _params.receiver) {
             CRV_3CRV_TOKEN_ADDR.pullTokensIfNeeded(_params.claimFor, claimed);
             CRV_3CRV_TOKEN_ADDR.withdrawTokens(_params.receiver, claimed);
         }
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "CurveClaimFees",
-            abi.encode(
-               _params,
-                claimed
-            )
-        );
-
-        return claimed;
+        logData = abi.encode(_params, claimed);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

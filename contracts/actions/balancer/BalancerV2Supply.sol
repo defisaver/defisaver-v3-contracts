@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
-import "../../DS/DSMath.sol";
 import "./helpers/BalancerV2Helper.sol";
 
 /// @title Supply tokens to a Balancer V2 Pool for pool LP tokens in return
-contract BalancerV2Supply is ActionBase, DSMath, BalancerV2Helper {
+contract BalancerV2Supply is ActionBase, BalancerV2Helper {
     using TokenUtils for address;
 
     struct Params {
@@ -23,8 +22,8 @@ contract BalancerV2Supply is ActionBase, DSMath, BalancerV2Helper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -36,15 +35,16 @@ contract BalancerV2Supply is ActionBase, DSMath, BalancerV2Helper {
             inputData.maxAmountsIn[i] = _parseParamUint(inputData.maxAmountsIn[i], _paramMapping[2+i], _subData, _returnValues);
         }
 
-        uint256 poolLPTokensReceived = _balancerSupply(inputData);
+        (uint256 poolLPTokensReceived, bytes memory logData) = _balancerSupply(inputData);
+        emit ActionEvent("BalancerV2Supply", logData);
         return bytes32(poolLPTokensReceived);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _balancerSupply(inputData);
+        (, bytes memory logData) = _balancerSupply(inputData);
+        logger.logActionDirectEvent("BalancerV2Supply", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -54,7 +54,7 @@ contract BalancerV2Supply is ActionBase, DSMath, BalancerV2Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _balancerSupply(Params memory _inputData) internal returns (uint256 poolLPTokensReceived) {
+    function _balancerSupply(Params memory _inputData) internal returns (uint256 poolLPTokensReceived, bytes memory logData) {
         require(_inputData.to != address(0), ADDR_MUST_NOT_BE_ZERO);
         address poolAddress = _getPoolAddress(_inputData.poolId);
         uint256 poolLPTokensBefore = poolAddress.getBalance(_inputData.to);
@@ -74,23 +74,15 @@ contract BalancerV2Supply is ActionBase, DSMath, BalancerV2Helper {
         vault.joinPool(_inputData.poolId, address(this), _inputData.to, requestData);
 
         for (uint256 i = 0; i < tokenBalances.length; i++) {
-            tokenBalances[i] = sub(
-                address(_inputData.tokens[i]).getBalance(address(this)),
-                tokenBalances[i]
-            );
+            tokenBalances[i] = address(_inputData.tokens[i]).getBalance(address(this)) - tokenBalances[i];
             // sending leftovers back
             address(_inputData.tokens[i]).withdrawTokens(_inputData.from, tokenBalances[i]);
         }
 
         uint256 poolLPTokensAfter = poolAddress.getBalance(_inputData.to);
-        poolLPTokensReceived = sub(poolLPTokensAfter, poolLPTokensBefore);
+        poolLPTokensReceived = poolLPTokensAfter - poolLPTokensBefore;
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "BalancerV2Supply",
-            abi.encode(_inputData, tokenBalances, poolLPTokensReceived)
-        );
+        logData = abi.encode(_inputData, tokenBalances, poolLPTokensReceived);
     }
 
     function _prepareTokensForPoolJoin(Params memory _inputData) internal {
@@ -105,7 +97,7 @@ contract BalancerV2Supply is ActionBase, DSMath, BalancerV2Helper {
         }
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
-        inputData = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
+        inputData = abi.decode(_callData, (Params));
     }
 }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../../../interfaces/curve/stethPool/ICurveStethPool.sol";
@@ -23,8 +23,8 @@ contract CurveStethPoolDeposit is ActionBase {
     }
 
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -35,14 +35,18 @@ contract CurveStethPoolDeposit is ActionBase {
         params.amounts[1] = _parseParamUint(params.amounts[1], _paramMapping[3], _subData, _returnValues);
         params.minMintAmount = _parseParamUint(params.minMintAmount, _paramMapping[4], _subData, _returnValues);
 
-        uint256 receivedLp = _curveDeposit(params);
+        (uint256 receivedLp, bytes memory logData) = _curveDeposit(params);
+                
+        emit ActionEvent("CurveStethPoolDeposit", logData);
+
         return bytes32(receivedLp);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-        _curveDeposit(params);
+        (, bytes memory logData) = _curveDeposit(params);
+        logger.logActionDirectEvent("CurveStethPoolDeposit", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -53,7 +57,7 @@ contract CurveStethPoolDeposit is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Deposits tokens into curve steth pool
-    function _curveDeposit(Params memory _params) internal returns (uint256 receivedLp) {
+    function _curveDeposit(Params memory _params) internal returns (uint256 receivedLp, bytes memory logData) {
         require(_params.to != address(0), "to cant be 0x0");
 
         if (_params.amounts[0] != 0) {
@@ -71,15 +75,10 @@ contract CurveStethPoolDeposit is ActionBase {
 
         STE_CRV_ADDR.withdrawTokens(_params.to, receivedLp);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "CurveStethPoolDeposit",
-            abi.encode(_params.amounts[0], _params.amounts[1], receivedLp)
-        );
+        logData = abi.encode(_params.amounts[0], _params.amounts[1], receivedLp);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

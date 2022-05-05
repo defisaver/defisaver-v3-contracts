@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 
 import "../DS/DSGuard.sol";
 import "../DS/DSAuth.sol";
@@ -9,6 +9,8 @@ import "./helpers/AuthHelper.sol";
 
 /// @title ProxyPermission Proxy contract which works with DSProxy to give execute permission
 contract ProxyPermission is AuthHelper {
+
+    bytes4 public constant EXECUTE_SELECTOR = bytes4(keccak256("execute(address,bytes)"));
 
     /// @notice Called in the context of DSProxy to authorize an address
     /// @param _contractAddr Address which will be authorized
@@ -21,7 +23,9 @@ contract ProxyPermission is AuthHelper {
             DSAuth(address(this)).setAuthority(DSAuthority(address(guard)));
         }
 
-        guard.permit(_contractAddr, address(this), bytes4(keccak256("execute(address,bytes)")));
+        if (!guard.canCall(_contractAddr, address(this), EXECUTE_SELECTOR)) {
+            guard.permit(_contractAddr, address(this), EXECUTE_SELECTOR);
+        }
     }
 
     /// @notice Called in the context of DSProxy to remove authority of an address
@@ -35,10 +39,6 @@ contract ProxyPermission is AuthHelper {
         }
 
         DSGuard guard = DSGuard(currAuthority);
-        guard.forbid(_contractAddr, address(this), bytes4(keccak256("execute(address,bytes)")));
-    }
-
-    function proxyOwner() internal view returns (address) {
-        return DSAuth(address(this)).owner();
+        guard.forbid(_contractAddr, address(this), EXECUTE_SELECTOR);
     }
 }

@@ -58,7 +58,7 @@ function sleep(ms) {
 
 async function deployContract(contractName, args) {
     const gasPriceSelected = args.gas;
-    const network = (await hre.ethers.provider.getNetwork()).name;
+    const network = hre.network.config.name;
     const prompt = await getInput(`You're deploying ${contractName} on ${network} at gas price of ${gasPriceSelected} gwei${args.nonce ? ` with nonce : ${args.nonce}` : ''}. Are you 100% sure? (Y/n)!\n`);
     if (prompt.toLowerCase() === 'n') {
         rl.close();
@@ -75,11 +75,20 @@ async function deployContract(contractName, args) {
     }
     console.log('Starting deployment process');
     await execShellCommand('npx hardhat compile');
-    const overrides = {
-        // The price (in wei) per unit of gas
-        maxFeePerGas: hre.ethers.utils.parseUnits(gasPriceSelected, 'gwei'),
-        maxPriorityFeePerGas: hre.ethers.utils.parseUnits('1.1', 'gwei'),
-    };
+    const txType = hre.network.config.txType;
+    let overrides;
+    if (txType === 0) {
+        overrides = {
+            // The price (in wei) per unit of gas
+            gasPrice: hre.ethers.utils.parseUnits(gasPriceSelected, 'gwei'),
+        };
+    } else if (txType === 2) {
+        overrides = {
+            // The price (in wei) per unit of gas
+            maxFeePerGas: hre.ethers.utils.parseUnits(gasPriceSelected, 'gwei'),
+            maxPriorityFeePerGas: hre.ethers.utils.parseUnits('1.1', 'gwei'),
+        };
+    }
     if (args.nonce) {
         overrides.nonce = parseInt(args.nonce, 10);
     }
@@ -106,16 +115,24 @@ async function deployContract(contractName, args) {
     );
     Contract = Contract.connect(deployer);
     const contract = await Contract.deploy(overrides);
-    console.log(`Transaction : https://${network === 'homestead' ? '' : `${network}.`}etherscan.io/tx/${contract.deployTransaction.hash}`);
+    const blockExplorer = hre.network.config.blockExplorer;
+
+    const networkPrefix = (network === 'mainnet' || network === 'arbitrum') ? '' : `${network}.`;
+
+    console.log(`Transaction : https://${networkPrefix}${blockExplorer}.io/tx/${contract.deployTransaction.hash}`);
 
     await contract.deployed();
-    console.log(`Contract deployed to: https://${network === 'homestead' ? '' : `${network}.`}etherscan.io/address/${contract.address}`);
+    console.log(`Contract deployed to: https://${networkPrefix}${blockExplorer}.io/address/${contract.address}`);
 
     return contract.address;
 }
 
 async function verifyContract(contractAddress, contractName) {
-    const network = (await hre.ethers.provider.getNetwork()).name;
+    const network = hre.network.config.name;
+    const networkSupportsVerification = hre.network.config.contractVerification;
+    if (!networkSupportsVerification) {
+        return;
+    }
     const flattenedFile = (
         await fs.readFileSync(`contracts/flattened/${contractName}.sol`)
     ).toString();
@@ -126,7 +143,10 @@ async function verifyContract(contractAddress, contractName) {
         },
     };
     const params = new URLSearchParams();
-    params.append('apikey', process.env.ETHERSCAN_API_KEY);
+
+    const apiKey = process.env.ETHERSCAN_API_KEY;
+
+    params.append('apikey', apiKey);
     params.append('module', 'contract');
     params.append('action', 'verifysourcecode');
     params.append('contractaddress', contractAddress);
@@ -134,30 +154,30 @@ async function verifyContract(contractAddress, contractName) {
     params.append('contractname', contractName);
     params.append('codeformat', 'solidity-single-file"');
     let solVersion;
+    // https://etherscan.io/solcversions see supported sol versions
     switch (hardhatSettings.solidity.version) {
-    case ('0.7.6'):
-        solVersion = 'v0.7.6+commit.7338295f';
-        break;
-    case ('0.8.4'):
-        solVersion = 'v0.8.4+commit.c7e474f2';
+    case ('=0.8.10'):
+        solVersion = 'v0.8.10+commit.fc410830';
         break;
     default:
-        solVersion = 'v0.7.6+commit.7338295f';
+        solVersion = 'v0.8.10+commit.fc410830';
     }
     params.append('compilerversion', solVersion);
     params.append('optimizationUsed', hardhatSettings.solidity.settings.optimizer.enabled ? 1 : 0);
     params.append('runs', hardhatSettings.solidity.settings.optimizer.runs);
+    params.append('EVMVersion', 'default (compiler defaults)');
     /// @notice : MIT license
     params.append('licenseType', 3);
 
-    let url = 'https://api.etherscan.io/api';
-    let demo = 'https://etherscan.io/sourcecode-demo.html';
-    if (network !== 'homestead') {
-        url = `https://api-${network}.etherscan.io/api`;
-        demo = `https://${network}.etherscan.io/sourcecode-demo.html`;
+    const blockExplorer = hre.network.config.blockExplorer;
+    let url = `https://api.${blockExplorer}.io/api`;
+    let demo = `https://${blockExplorer}.io/sourcecode-demo.html`;
+    if (!(network === 'mainnet' || network === 'arbitrum')) {
+        url = `https://api-${network}.${blockExplorer}.io/api`;
+        demo = `https://${network}.${blockExplorer}.io/sourcecode-demo.html`;
     }
     const tx = await axios.post(url, params, config);
-    console.log(`Check how verification is going at ${demo} with API key ${process.env.ETHERSCAN_API_KEY} and receipt GUID ${tx.data.result}`);
+    console.log(`Check how verification is going at ${demo} with API key ${apiKey} and receipt GUID ${tx.data.result}`);
 }
 
 async function flatten(filePath) {
@@ -243,14 +263,25 @@ async function changeNetworkNameForAddresses(oldNetworkName, newNetworkName) {
     files = getAllFiles('./contracts');
     files.map(async (file) => {
         if (file.toString().includes('Helper.sol')) {
-            const contractContent = (
-                await fs.readFileSync(file.toString())
-            ).toString();
-            fs.writeFileSync(file, contractContent.replaceAll(oldNetworkName, newNetworkName));
+            const fileDir = path.dirname(file);
+            const filesInSameDir = getAllFiles(fileDir);
+            let rewrite = false;
+            filesInSameDir.forEach((fileInSameDir) => {
+                if (fileInSameDir.toString().includes(newNetworkName)) {
+                    rewrite = true;
+                }
+            });
+            if (rewrite) {
+                console.log(file);
+                const contractContent = (
+                    await fs.readFileSync(file.toString())
+                ).toString();
+                fs.writeFileSync(file, contractContent.replaceAll(oldNetworkName, newNetworkName));
+            }
         }
     });
     changeWethAddress(oldNetworkName, newNetworkName);
-
+    console.log('Wait for the compilation to end');
     await execShellCommand('npx hardhat compile');
 }
 

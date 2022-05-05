@@ -1,0 +1,438 @@
+{
+	"contractName": "ParaswapWrapper",
+	"abi": [
+		{
+			"inputs": [],
+			"name": "InvalidOffchainData",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "NonContractCall",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "OutOfRangeSlicingError",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotAdmin",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "SenderNotOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_PROTOCOL_FEE",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_SRC_AMOUNT",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "ERR_TOKENS_SWAPPED_ZERO",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "adminVault",
+			"outputs": [
+				{
+					"internalType": "contract AdminVault",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "kill",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "srcAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "destAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "srcAmount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "destAmount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "minPrice",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "dfsFeeDivider",
+							"type": "uint256"
+						},
+						{
+							"internalType": "address",
+							"name": "user",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "wrapper",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes",
+							"name": "wrapperData",
+							"type": "bytes"
+						},
+						{
+							"components": [
+								{
+									"internalType": "address",
+									"name": "wrapper",
+									"type": "address"
+								},
+								{
+									"internalType": "address",
+									"name": "exchangeAddr",
+									"type": "address"
+								},
+								{
+									"internalType": "address",
+									"name": "allowanceTarget",
+									"type": "address"
+								},
+								{
+									"internalType": "uint256",
+									"name": "price",
+									"type": "uint256"
+								},
+								{
+									"internalType": "uint256",
+									"name": "protocolFee",
+									"type": "uint256"
+								},
+								{
+									"internalType": "bytes",
+									"name": "callData",
+									"type": "bytes"
+								}
+							],
+							"internalType": "struct DFSExchangeData.OffchainData",
+							"name": "offchainData",
+							"type": "tuple"
+						}
+					],
+					"internalType": "struct DFSExchangeData.ExchangeData",
+					"name": "_exData",
+					"type": "tuple"
+				}
+			],
+			"name": "packExchangeData",
+			"outputs": [
+				{
+					"internalType": "bytes",
+					"name": "",
+					"type": "bytes"
+				}
+			],
+			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "srcAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "destAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "srcAmount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "destAmount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "minPrice",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "dfsFeeDivider",
+							"type": "uint256"
+						},
+						{
+							"internalType": "address",
+							"name": "user",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "wrapper",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes",
+							"name": "wrapperData",
+							"type": "bytes"
+						},
+						{
+							"components": [
+								{
+									"internalType": "address",
+									"name": "wrapper",
+									"type": "address"
+								},
+								{
+									"internalType": "address",
+									"name": "exchangeAddr",
+									"type": "address"
+								},
+								{
+									"internalType": "address",
+									"name": "allowanceTarget",
+									"type": "address"
+								},
+								{
+									"internalType": "uint256",
+									"name": "price",
+									"type": "uint256"
+								},
+								{
+									"internalType": "uint256",
+									"name": "protocolFee",
+									"type": "uint256"
+								},
+								{
+									"internalType": "bytes",
+									"name": "callData",
+									"type": "bytes"
+								}
+							],
+							"internalType": "struct DFSExchangeData.OffchainData",
+							"name": "offchainData",
+							"type": "tuple"
+						}
+					],
+					"internalType": "struct DFSExchangeData.ExchangeData",
+					"name": "_exData",
+					"type": "tuple"
+				},
+				{
+					"internalType": "enum DFSExchangeData.ExchangeActionType",
+					"name": "_type",
+					"type": "uint8"
+				}
+			],
+			"name": "takeOrder",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "success",
+					"type": "bool"
+				},
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "payable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes",
+					"name": "_data",
+					"type": "bytes"
+				}
+			],
+			"name": "unpackExchangeData",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "srcAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "destAddr",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "srcAmount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "destAmount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "minPrice",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "dfsFeeDivider",
+							"type": "uint256"
+						},
+						{
+							"internalType": "address",
+							"name": "user",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "wrapper",
+							"type": "address"
+						},
+						{
+							"internalType": "bytes",
+							"name": "wrapperData",
+							"type": "bytes"
+						},
+						{
+							"components": [
+								{
+									"internalType": "address",
+									"name": "wrapper",
+									"type": "address"
+								},
+								{
+									"internalType": "address",
+									"name": "exchangeAddr",
+									"type": "address"
+								},
+								{
+									"internalType": "address",
+									"name": "allowanceTarget",
+									"type": "address"
+								},
+								{
+									"internalType": "uint256",
+									"name": "price",
+									"type": "uint256"
+								},
+								{
+									"internalType": "uint256",
+									"name": "protocolFee",
+									"type": "uint256"
+								},
+								{
+									"internalType": "bytes",
+									"name": "callData",
+									"type": "bytes"
+								}
+							],
+							"internalType": "struct DFSExchangeData.OffchainData",
+							"name": "offchainData",
+							"type": "tuple"
+						}
+					],
+					"internalType": "struct DFSExchangeData.ExchangeData",
+					"name": "_exData",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_token",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_receiver",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_amount",
+					"type": "uint256"
+				}
+			],
+			"name": "withdrawStuckFunds",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"stateMutability": "payable",
+			"type": "receive"
+		}
+	],
+	"networks": {
+		"local": {}
+	}
+}

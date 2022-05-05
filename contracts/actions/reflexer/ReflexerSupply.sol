@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
@@ -10,33 +9,37 @@ import "./helpers/ReflexerHelper.sol";
 /// @title Supply collateral to a Reflexer safe
 contract ReflexerSupply is ActionBase, ReflexerHelper {
     using TokenUtils for address;
+    struct Params {
+        uint256 safeId;
+        uint256 amount;
+        address adapterAddr;
+        address from;
+    }
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable override returns (bytes32) {
-        (uint256 safeId, uint256 amount, address adapterAddr, address from) =
-            parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        safeId = _parseParamUint(safeId, _paramMapping[0], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
-        adapterAddr = _parseParamAddr(adapterAddr, _paramMapping[2], _subData, _returnValues);
-        from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
+        inputData.safeId = _parseParamUint(inputData.safeId, _paramMapping[0], _subData, _returnValues);
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.adapterAddr = _parseParamAddr(inputData.adapterAddr, _paramMapping[2], _subData, _returnValues);
+        inputData.from = _parseParamAddr(inputData.from, _paramMapping[3], _subData, _returnValues);
 
-        uint256 returnAmount = _reflexerSupply(safeId, amount, adapterAddr, from);
-
+        (uint256 returnAmount, bytes memory logData) = _reflexerSupply(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.from);
+        emit ActionEvent("ReflexerSupply", logData);
         return bytes32(returnAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
-        (uint256 safeId, uint256 amount, address adapterAddr, address from) =
-            parseInputs(_callData);
-
-        _reflexerSupply(safeId, amount, adapterAddr, from);
+    function executeActionDirect(bytes memory _callData) public payable override {
+        Params memory inputData = parseInputs(_callData);
+        (, bytes memory logData) = _reflexerSupply(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.from);
+        logger.logActionDirectEvent("ReflexerSupply", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -56,7 +59,7 @@ contract ReflexerSupply is ActionBase, ReflexerHelper {
         uint256 _amount,
         address _adapterAddr,
         address _from
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         address tokenAddr = getTokenFromAdapter(_adapterAddr);
 
         // if amount type(uint).max, pull current _from  balance
@@ -81,29 +84,11 @@ contract ReflexerSupply is ActionBase, ReflexerHelper {
             0
         );
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "ReflexerSupply",
-            abi.encode(_safeId, _amount, _adapterAddr, _from)
-        );
-
-        return _amount;
+        bytes memory logData = abi.encode(_safeId, _amount, _adapterAddr, _from);
+        return (_amount, logData);
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
-        pure
-        returns (
-            uint256 safeId,
-            uint256 amount,
-            address adapterAddr,
-            address from
-        )
-    {
-        safeId = abi.decode(_callData[0], (uint256));
-        amount = abi.decode(_callData[1], (uint256));
-        adapterAddr = abi.decode(_callData[2], (address));
-        from = abi.decode(_callData[3], (address));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

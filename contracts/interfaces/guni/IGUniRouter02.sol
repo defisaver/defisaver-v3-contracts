@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.7.6;
+pragma solidity =0.8.10;
 pragma abicoder v2;
 
 interface IGUniRouter02 {

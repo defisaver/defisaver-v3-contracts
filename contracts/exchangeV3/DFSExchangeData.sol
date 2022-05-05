@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 contract DFSExchangeData {
 
     // first is empty to keep the legacy order in place
-    enum ExchangeType { _, OASIS, KYBER, UNISWAP, ZEROX }
+    // EMPTY was _, but in >0.8.x using underscore as name is forbidden
+    enum ExchangeType { EMPTY, OASIS, KYBER, UNISWAP, ZEROX }
 
     enum ExchangeActionType { SELL, BUY }
 

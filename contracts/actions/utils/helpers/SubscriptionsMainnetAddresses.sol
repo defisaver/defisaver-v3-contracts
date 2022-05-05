@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 
 contract SubscriptionsMainnetAddresses {
     address public constant MCD_SUB_ADDRESS = 0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a;

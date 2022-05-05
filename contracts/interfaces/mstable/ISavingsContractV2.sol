@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 
 interface ISavingsContractV2 {
     // DEPRECATED but still backwards compatible

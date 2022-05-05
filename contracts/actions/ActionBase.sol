@@ -1,22 +1,29 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../auth/AdminAuth.sol";
 import "../core/DFSRegistry.sol";
+import "../DS/DSProxy.sol";
+import "../utils/DefisaverLogger.sol";
 import "./utils/helpers/ActionsUtilHelper.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
 abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
+    event ActionEvent(
+        string indexed logName,
+        bytes data
+    );
+
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     DefisaverLogger public constant logger = DefisaverLogger(
         DFS_LOGGER_ADDR
     );
 
-    string public constant ERR_SUB_INDEX_VALUE = "Wrong sub index value";
-    string public constant ERR_RETURN_INDEX_VALUE = "Wrong return index value";
+    //Wrong sub index value
+    error SubIndexValueError();
+    //Wrong return index value
+    error ReturnIndexValueError();
 
     /// @dev Subscription params index range [128, 255]
     uint8 public constant SUB_MIN_INDEX_VALUE = 128;
@@ -30,25 +37,25 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
     uint8 public constant NO_PARAM_MAPPING = 0;
 
     /// @dev We need to parse Flash loan actions in a different way
-    enum ActionType { FL_ACTION, STANDARD_ACTION, CUSTOM_ACTION }
+    enum ActionType { FL_ACTION, STANDARD_ACTION, FEE_ACTION, CHECK_ACTION, CUSTOM_ACTION }
 
     /// @notice Parses inputs and runs the implemented action through a proxy
-    /// @dev Is called by the TaskExecutor chaining actions together
+    /// @dev Is called by the RecipeExecutor chaining actions together
     /// @param _callData Array of input values each value encoded as bytes
     /// @param _subData Array of subscribed vales, replaces input values if specified
     /// @param _paramMapping Array that specifies how return and subscribed values are mapped in input
     /// @param _returnValues Returns values from actions before, which can be injected in inputs
     /// @return Returns a bytes32 value through DSProxy, each actions implements what that value is
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual returns (bytes32);
 
     /// @notice Parses inputs and runs the single implemented action through a proxy
     /// @dev Used to save gas when executing a single action directly
-    function executeActionDirect(bytes[] memory _callData) public virtual payable;
+    function executeActionDirect(bytes memory _callData) public virtual payable;
 
     /// @notice Returns the type of action we are implementing
     function actionType() public pure virtual returns (uint8);
@@ -64,14 +71,14 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
     function _parseParamUint(
         uint _param,
         uint8 _mapType,
-        bytes[] memory _subData,
+        bytes32[] memory _subData,
         bytes32[] memory _returnValues
     ) internal pure returns (uint) {
         if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
                 _param = uint(_returnValues[getReturnIndex(_mapType)]);
             } else {
-                _param = abi.decode(_subData[getSubIndex(_mapType)], (uint));
+                _param = uint256(_subData[getSubIndex(_mapType)]);
             }
         }
 
@@ -87,14 +94,18 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
     function _parseParamAddr(
         address _param,
         uint8 _mapType,
-        bytes[] memory _subData,
+        bytes32[] memory _subData,
         bytes32[] memory _returnValues
-    ) internal pure returns (address) {
+    ) internal view returns (address) {
         if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
                 _param = address(bytes20((_returnValues[getReturnIndex(_mapType)])));
             } else {
-                _param = abi.decode(_subData[getSubIndex(_mapType)], (address));
+                /// @dev The last two values are specially reserved for proxy addr and owner addr
+                if (_mapType == 254) return address(this); //DSProxy address
+                if (_mapType == 255) return DSProxy(payable(address(this))).owner(); // owner of DSProxy
+
+                _param = address(uint160(uint256(_subData[getSubIndex(_mapType)])));
             }
         }
 
@@ -109,14 +120,14 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
     function _parseParamABytes32(
         bytes32 _param,
         uint8 _mapType,
-        bytes[] memory _subData,
+        bytes32[] memory _subData,
         bytes32[] memory _returnValues
     ) internal pure returns (bytes32) {
         if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
                 _param = (_returnValues[getReturnIndex(_mapType)]);
             } else {
-                _param = abi.decode(_subData[getSubIndex(_mapType)], (bytes32));
+                _param = _subData[getSubIndex(_mapType)];
             }
         }
 
@@ -138,7 +149,9 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
     /// @notice Transforms the paramMapping value to the index in return array value
     /// @param _type Indicated the type of the input
     function getReturnIndex(uint8 _type) internal pure returns (uint8) {
-        require(isReturnInjection(_type), ERR_SUB_INDEX_VALUE);
+        if (!(isReturnInjection(_type))){
+            revert SubIndexValueError();
+        }
 
         return (_type - RETURN_MIN_INDEX_VALUE);
     }
@@ -146,8 +159,9 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
     /// @notice Transforms the paramMapping value to the index in sub array value
     /// @param _type Indicated the type of the input
     function getSubIndex(uint8 _type) internal pure returns (uint8) {
-        require(_type >= SUB_MIN_INDEX_VALUE, ERR_RETURN_INDEX_VALUE);
-
+        if (_type < SUB_MIN_INDEX_VALUE){
+            revert ReturnIndexValueError();
+        }
         return (_type - SUB_MIN_INDEX_VALUE);
     }
 }

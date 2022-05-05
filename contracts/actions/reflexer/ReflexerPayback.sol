@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../../interfaces/reflexer/ICoinJoin.sol";
 import "../../utils/TokenUtils.sol";
@@ -12,29 +11,36 @@ import "./helpers/ReflexerHelper.sol";
 contract ReflexerPayback is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 
+    struct Params {
+        uint256 safeId;
+        uint256 amount;
+        address from;
+    }
+    error InvalidCollateralType();
+
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable override returns (bytes32) {
-        (uint256 safeId, uint256 amount, address from) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        safeId = _parseParamUint(safeId, _paramMapping[0], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
-        from = _parseParamAddr(from, _paramMapping[2], _subData, _returnValues);
+        inputData.safeId = _parseParamUint(inputData.safeId, _paramMapping[0], _subData, _returnValues);
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.from = _parseParamAddr(inputData.from, _paramMapping[2], _subData, _returnValues);
 
-        amount = _reflexerPayback(safeId, amount, from);
-
-        return bytes32(amount);
+        (uint256 repayAmount, bytes memory logData) = _reflexerPayback(inputData.safeId, inputData.amount, inputData.from);
+        emit ActionEvent("ReflexerPayback", logData);
+        return bytes32(repayAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
-        (uint256 safeId, uint256 amount, address from) = parseInputs(_callData);
-
-        _reflexerPayback(safeId, amount, from);
+    function executeActionDirect(bytes memory _callData) public payable override {
+        Params memory inputData = parseInputs(_callData);
+        (, bytes memory logData) = _reflexerPayback(inputData.safeId, inputData.amount, inputData.from);
+        logger.logActionDirectEvent("ReflexerPayback", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -52,7 +58,7 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
         uint256 _safeId,
         uint256 _amount,
         address _from
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         address safe = safeManager.safes(_safeId);
         bytes32 collType = safeManager.collateralTypes(_safeId);
 
@@ -72,28 +78,8 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
         // decrease the safe debt
         safeManager.modifySAFECollateralization(_safeId, 0, paybackAmount);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "ReflexerPayback",
-            abi.encode(_safeId, _amount, _from)
-        );
-
-        return _amount;
-    }
-
-    function parseInputs(bytes[] memory _callData)
-        internal
-        pure
-        returns (
-            uint256 safeId,
-            uint256 amount,
-            address from
-        )
-    {
-        safeId = abi.decode(_callData[0], (uint256));
-        amount = abi.decode(_callData[1], (uint256));
-        from = abi.decode(_callData[2], (address));
+        bytes memory logData = abi.encode(_safeId, _amount, _from);
+        return (_amount, logData);
     }
 
     /// @notice Gets repaid delta debt generated (rate adjusted debt)
@@ -108,7 +94,9 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
     ) internal view returns (int256 deltaDebt) {
         // Gets actual rate from the safeEngine
         (, uint256 rate, , , , ) = safeEngine.collateralTypes(collateralType);
-        require(rate > 0, "invalid-collateral-type");
+        if (rate <= 0){
+            revert InvalidCollateralType();
+        }
 
         // Gets actual generatedDebt value of the safe
         (, uint256 generatedDebt) = safeEngine.safes(collateralType, safe);
@@ -138,5 +126,9 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
         raiAmount = rad / RAY;
 
         raiAmount = mul(raiAmount, RAY) < rad ? raiAmount + 1 : raiAmount;
+    }
+
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

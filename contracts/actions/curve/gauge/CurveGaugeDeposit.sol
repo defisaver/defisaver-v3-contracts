@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../../ActionBase.sol";
@@ -20,8 +20,8 @@ contract CurveGaugeDeposit is ActionBase, CurveHelper {
     }
 
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -30,14 +30,16 @@ contract CurveGaugeDeposit is ActionBase, CurveHelper {
         params.onBehalfOf = _parseParamAddr(params.onBehalfOf, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
 
-        uint256 deposited = _curveGaugeDeposit(params);
+        (uint256 deposited, bytes memory logData) = _curveGaugeDeposit(params);
+        emit ActionEvent("CurveGaugeDeposit", logData);
         return bytes32(deposited);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-        _curveGaugeDeposit(params);
+        (, bytes memory logData) = _curveGaugeDeposit(params);
+        logger.logActionDirectEvent("CurveGaugeDeposit", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -47,7 +49,7 @@ contract CurveGaugeDeposit is ActionBase, CurveHelper {
 
     /// @notice Deposits LP tokens into pool Liquidity Gauge
     /// @dev if _params.receiver != address(this) the receiver must call set_approve_deposit on gauge
-    function _curveGaugeDeposit(Params memory _params) internal returns (uint256) {
+    function _curveGaugeDeposit(Params memory _params) internal returns (uint256, bytes memory) {
         require(_params.onBehalfOf != address(0), "cant deposit on behalf of 0x0");
         
         if (_params.amount == type(uint256).max) {
@@ -56,20 +58,12 @@ contract CurveGaugeDeposit is ActionBase, CurveHelper {
         _params.lpToken.pullTokensIfNeeded(_params.sender, _params.amount);
         _params.lpToken.approveToken(_params.gaugeAddr, _params.amount);
         ILiquidityGauge(_params.gaugeAddr).deposit(_params.amount, _params.onBehalfOf);
-        
-        logger.Log(
-            address(this),
-            msg.sender,
-            "CurveGaugeDeposit",
-            abi.encode(
-                _params
-            )
-        );
 
-        return _params.amount;
+        bytes memory logData = abi.encode(_params);
+        return (_params.amount, logData);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

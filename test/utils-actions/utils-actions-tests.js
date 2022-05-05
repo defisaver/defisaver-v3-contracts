@@ -10,23 +10,34 @@ const {
     redeploy,
     balanceOf,
     formatExchangeObj,
-    WETH_ADDRESS,
     setNewExchangeWrapper,
     sendEther,
-    ETH_ADDR,
     depositToWeth,
     send,
     approve,
     stopImpersonatingAccount,
-    DFS_REG_CONTROLLER,
-    ADMIN_ACC,
     impersonateAccount,
     setBalance,
     resetForkToBlock,
+    WETH_ADDRESS,
+    ETH_ADDR,
+    DFS_REG_CONTROLLER,
+    ADMIN_ACC,
+    DAI_ADDR,
+    redeployCore,
+    fetchAmountinUSDPrice,
+    openStrategyAndBundleStorage,
+    getChainLinkPrice,
 } = require('../utils');
 
 const { fetchMakerAddresses } = require('../utils-mcd');
-const { changeProxyOwner, automationV2Unsub, executeAction } = require('../actions');
+const {
+    changeProxyOwner, automationV2Unsub, executeAction, openVault, updateSubData,
+} = require('../actions');
+const { addBotCaller, createStrategy, subToStrategy } = require('../utils-strategies');
+const { createMcdCloseStrategy } = require('../strategies');
+const { subMcdCloseStrategy } = require('../strategy-subs');
+const { RATIO_STATE_OVER, createChainLinkPriceTrigger } = require('../triggers');
 
 const wrapEthTest = async () => {
     describe('Wrap-Eth', function () {
@@ -34,13 +45,13 @@ const wrapEthTest = async () => {
 
         let makerAddresses; let senderAcc; let proxy; let
             uniWrapperAddr;
-        let taskExecutorAddr;
+        let recipeExecutorAddr;
 
         before(async () => {
             uniWrapperAddr = await getAddrFromRegistry('UniswapWrapperV3');
 
             makerAddresses = await fetchMakerAddresses();
-            taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+            recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
 
             // eslint-disable-next-line prefer-destructuring
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -86,7 +97,7 @@ const wrapEthTest = async () => {
 
             const daiBalanceBefore = await balanceOf(makerAddresses.MCD_DAI, senderAcc.address);
             console.log(`Dai acc before: ${daiBalanceBefore / 1e18}`);
-            await proxy['execute(address,bytes)'](taskExecutorAddr, functionData[1], {
+            await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], {
                 gasLimit: 3000000,
                 value: amount,
             });
@@ -102,16 +113,11 @@ const unwrapEthTest = async () => {
     describe('Unwrap-Eth', function () {
         this.timeout(80000);
 
-        let senderAcc; let proxy; let
-            uniWrapperAddr;
+        let senderAcc; let proxy;
 
         before(async () => {
-            uniWrapperAddr = await getAddrFromRegistry('UniswapWrapperV3');
-
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-
-            await setNewExchangeWrapper(senderAcc, uniWrapperAddr);
         });
         it('... should unwrap native WEth to Eth direct action', async () => {
             const amount = hre.ethers.utils.parseUnits('2', 18);
@@ -150,7 +156,7 @@ const unwrapEthTest = async () => {
             const ethBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
             console.log(`Eth proxy before: ${ethBalanceBefore / 1e18}`);
 
-            await executeAction('TaskExecutor', functionData[1], proxy);
+            await executeAction('RecipeExecutor', functionData[1], proxy);
 
             const ethBalanceAfter = await balanceOf(ETH_ADDR, senderAcc.address);
             console.log(`Eth proxy after: ${ethBalanceAfter / 1e18}`);
@@ -163,10 +169,10 @@ const sumInputsTest = async () => {
     describe('Sum-Inputs', function () {
         this.timeout(80000);
 
-        let taskExecutorAddr; let senderAcc; let proxy;
+        let recipeExecutorAddr; let senderAcc; let proxy;
 
         before(async () => {
-            taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+            recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
@@ -184,7 +190,7 @@ const sumInputsTest = async () => {
             ]);
             const functionData = testSumInputs.encodeForDsProxyCall()[1];
 
-            await executeAction('TaskExecutor', functionData, proxy);
+            await executeAction('RecipeExecutor', functionData, proxy);
 
             expect(await balanceOf(WETH_ADDRESS, proxy.address)).to.be.eq(hre.ethers.utils.parseUnits('9', 18));
         });
@@ -201,7 +207,7 @@ const sumInputsTest = async () => {
             ]);
             const functionData = testSumInputs.encodeForDsProxyCall()[1];
 
-            await expect(proxy['execute(address,bytes)'](taskExecutorAddr, functionData)).to.be.reverted;
+            await expect(proxy['execute(address,bytes)'](recipeExecutorAddr, functionData)).to.be.reverted;
         });
     });
 };
@@ -209,10 +215,10 @@ const subInputsTest = async () => {
     describe('Sub-Inputs', function () {
         this.timeout(80000);
 
-        let taskExecutorAddr; let senderAcc; let proxy;
+        let recipeExecutorAddr; let senderAcc; let proxy;
 
         before(async () => {
-            taskExecutorAddr = await getAddrFromRegistry('TaskExecutor');
+            recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
@@ -230,7 +236,7 @@ const subInputsTest = async () => {
             ]);
             const functionData = testSubInputs.encodeForDsProxyCall()[1];
 
-            await executeAction('TaskExecutor', functionData, proxy);
+            await executeAction('RecipeExecutor', functionData, proxy);
 
             expect(await balanceOf(WETH_ADDRESS, proxy.address)).to.be.eq(hre.ethers.utils.parseUnits('7', 18));
         });
@@ -247,7 +253,7 @@ const subInputsTest = async () => {
             ]);
             const functionData = testSubInputs.encodeForDsProxyCall()[1];
 
-            await expect(proxy['execute(address,bytes)'](taskExecutorAddr, functionData)).to.be.reverted;
+            await expect(proxy['execute(address,bytes)'](recipeExecutorAddr, functionData)).to.be.reverted;
         });
     });
 };
@@ -295,6 +301,96 @@ const sendTokenTest = async () => {
         });
     });
 };
+
+const sendTokenAndUnwrapTest = async () => {
+    describe('Send-Token-And-Unwrap', function () {
+        this.timeout(80000);
+
+        let senderAcc; let proxy;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+        it('... should send tokens direct action', async () => {
+            // clean any WETH balance from earlier tests
+            await setBalance(WETH_ADDRESS, proxy.address, hre.ethers.utils.parseUnits('0', 18));
+
+            await depositToWeth(hre.ethers.utils.parseUnits('4', 18));
+            await send(WETH_ADDRESS, proxy.address, hre.ethers.utils.parseUnits('4', 18));
+
+            const sendTokenAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+                WETH_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('3', 18),
+            );
+            const sendTokenData = sendTokenAction.encodeForDsProxyCall()[1];
+
+            const ethBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
+            console.log(`Eth before closing : ${ethBalanceBefore.toString() / 1e18}`);
+
+            await executeAction('SendTokenAndUnwrap', sendTokenData, proxy);
+
+            const ethBalanceAfter = await balanceOf(ETH_ADDR, senderAcc.address);
+            console.log(`Eth after closing : ${ethBalanceAfter.toString() / 1e18}`);
+
+            expect(ethBalanceAfter / 1e18).to.be.closeTo((ethBalanceBefore / 1e18) + 3, 0.1);
+        });
+
+        it('... should send tokens direct action uint256.max', async () => {
+            const sendTokenAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+                WETH_ADDRESS, senderAcc.address, hre.ethers.constants.MaxUint256,
+            );
+            const sendTokenData = sendTokenAction.encodeForDsProxyCall()[1];
+
+            const ethBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
+            console.log(`Eth before closing : ${ethBalanceBefore.toString() / 1e18}`);
+
+            await executeAction('SendTokenAndUnwrap', sendTokenData, proxy);
+
+            const ethBalanceAfter = await balanceOf(ETH_ADDR, senderAcc.address);
+            console.log(`Eth after closing : ${ethBalanceAfter.toString() / 1e18}`);
+
+            expect(ethBalanceAfter / 1e18).to.be.gt(ethBalanceBefore / 1e18);
+        });
+
+        it('... should send DAI direct action', async () => {
+            await setBalance(DAI_ADDR, proxy.address, hre.ethers.utils.parseUnits('0', 18));
+            await setBalance(DAI_ADDR, proxy.address, hre.ethers.utils.parseUnits('1000', 18));
+
+            const sendTokenAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+                DAI_ADDR, senderAcc.address, hre.ethers.utils.parseUnits('300', 18),
+            );
+            const sendTokenData = sendTokenAction.encodeForDsProxyCall()[1];
+
+            const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
+            console.log(`Dai before closing : ${daiBalanceBefore.toString() / 1e18}`);
+
+            await executeAction('SendTokenAndUnwrap', sendTokenData, proxy);
+
+            const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
+            console.log(`Dai after closing : ${daiBalanceAfter.toString() / 1e18}`);
+
+            expect(daiBalanceAfter / 1e18).to.be.closeTo((daiBalanceBefore / 1e18) + 300, 0.00001);
+        });
+
+        it('... should send DAI direct action uint256.max', async () => {
+            const sendTokenAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+                DAI_ADDR, senderAcc.address, hre.ethers.constants.MaxUint256,
+            );
+            const sendTokenData = sendTokenAction.encodeForDsProxyCall()[1];
+
+            const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
+            console.log(`Dai before closing : ${daiBalanceBefore.toString() / 1e18}`);
+
+            await executeAction('SendTokenAndUnwrap', sendTokenData, proxy);
+
+            const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
+            console.log(`Dai after closing : ${daiBalanceAfter.toString() / 1e18}`);
+
+            expect(daiBalanceAfter / 1e18).to.be.closeTo((daiBalanceBefore / 1e18) + 700, 0.00001);
+        });
+    });
+};
+
 const pullTokenTest = async () => {
     describe('Pull-Token', function () {
         this.timeout(80000);
@@ -395,8 +491,9 @@ const automationV2UnsubTest = async () => {
         this.timeout(1000000);
 
         before(async () => {
-            await resetForkToBlock(13530577);
-            const blockNum = 13530577;
+            const blockNum = 14368070;
+
+            await resetForkToBlock(blockNum);
             expect(
                 await hre.ethers.provider.getBlockNumber(),
                 `This test should be ran at block number ${blockNum}`,
@@ -406,13 +503,13 @@ const automationV2UnsubTest = async () => {
 
         it('... should unsubscribe Mcd subscription', async () => {
             const mcdSubscriptionsAddr = '0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a';
-            const OWNER_ACC = '0xC48d4d15c2aE6037E9E9E4E79fC989feFAF4d6Fc';
-            const cdpId = 12190;
+            const CDP_OWNER_ACC = '0x8eceBBF3fA6d894476Cd9DD34D6A53DdD185233e';
+            const cdpId = 20648;
 
-            await impersonateAccount(OWNER_ACC);
+            await impersonateAccount(CDP_OWNER_ACC);
 
-            const ownerAcc = hre.ethers.provider.getSigner(OWNER_ACC);
-            const ownerProxy = await getProxy(OWNER_ACC);
+            const ownerAcc = hre.ethers.provider.getSigner(CDP_OWNER_ACC);
+            const ownerProxy = await getProxy(CDP_OWNER_ACC);
             const impersonatedProxy = ownerProxy.connect(ownerAcc);
 
             const mcdSubscriptions = new hre.ethers.Contract(
@@ -435,17 +532,17 @@ const automationV2UnsubTest = async () => {
                 'Couldn\'t unsubscribe the proxy.',
             ).to.be.false;
 
-            await stopImpersonatingAccount(OWNER_ACC);
+            await stopImpersonatingAccount(CDP_OWNER_ACC);
         });
 
         it('... should unsubscribe Compound subscription', async () => {
             const compoundSubscriptionsAddr = '0x52015EFFD577E08f498a0CCc11905925D58D6207';
-            const OWNER_ACC = '0x18625142e5E576C524329B2568884099E4D9caC1';
+            const COMPOUND_OWNER_ACC = '0xe10eB997d51C2AFCd3e0F80e0a984949b2ed3349';
 
-            await impersonateAccount(OWNER_ACC);
+            await impersonateAccount(COMPOUND_OWNER_ACC);
 
-            const ownerAcc = hre.ethers.provider.getSigner(OWNER_ACC);
-            const ownerProxy = await getProxy(OWNER_ACC);
+            const ownerAcc = hre.ethers.provider.getSigner(COMPOUND_OWNER_ACC);
+            const ownerProxy = await getProxy(COMPOUND_OWNER_ACC);
             const impersonatedProxy = ownerProxy.connect(ownerAcc);
 
             const compoundSubscriptions = new hre.ethers.Contract(
@@ -468,17 +565,17 @@ const automationV2UnsubTest = async () => {
                 'Couldn\'t unsubscribe the proxy.',
             ).to.be.false;
 
-            await stopImpersonatingAccount(OWNER_ACC);
+            await stopImpersonatingAccount(COMPOUND_OWNER_ACC);
         });
 
         it('... should unsubscribe Aave subscription', async () => {
             const aaveSubscriptionsAddr = '0x6B25043BF08182d8e86056C6548847aF607cd7CD';
-            const OWNER_ACC = '0x01d31Ad58827df47Fae2642AFFB5dE41b0891d93';
+            const AAVE_OWNER_ACC = '0x160FF555a7836d8bC027eDA92Fb524BecE5C9B88';
 
-            await impersonateAccount(OWNER_ACC);
+            await impersonateAccount(AAVE_OWNER_ACC);
 
-            const ownerAcc = hre.ethers.provider.getSigner(OWNER_ACC);
-            const ownerProxy = await getProxy(OWNER_ACC);
+            const ownerAcc = hre.ethers.provider.getSigner(AAVE_OWNER_ACC);
+            const ownerProxy = await getProxy(AAVE_OWNER_ACC);
             const impersonatedProxy = ownerProxy.connect(ownerAcc);
 
             const aaveSubscriptions = new hre.ethers.Contract(
@@ -501,33 +598,201 @@ const automationV2UnsubTest = async () => {
                 'Couldn\'t unsubscribe the proxy.',
             ).to.be.false;
 
-            await stopImpersonatingAccount(OWNER_ACC);
+            await stopImpersonatingAccount(AAVE_OWNER_ACC);
         });
     });
 };
+
+const updateSubDataTest = async () => {
+    describe('Update Sub Data', function () {
+        this.timeout(1000000);
+
+        let senderAcc;
+        let proxy;
+        let botAcc;
+        let vaultId;
+        let subStorage;
+        let subId;
+        let flAmount;
+        let subStorageAddr;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            botAcc = (await hre.ethers.getSigners())[1];
+
+            await redeployCore();
+
+            await redeploy('SendToken');
+            await redeploy('McdRatioTrigger');
+            await redeploy('DFSSell');
+            await redeploy('McdView');
+            await redeploy('GasFeeTaker');
+            await redeploy('McdRatioCheck');
+
+            subStorageAddr = await getAddrFromRegistry('SubStorage');
+            subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+
+            await redeploy('McdSupply');
+            await redeploy('McdWithdraw');
+            await redeploy('McdGenerate');
+            await redeploy('McdPayback');
+            await redeploy('McdOpen');
+            await redeploy('ChainLinkPriceTrigger');
+            await addBotCaller(botAcc.address);
+            await getAddrFromRegistry('FLMaker');
+            proxy = await getProxy(senderAcc.address);
+        });
+
+        it('... should update sub data', async () => {
+            const vaultColl = fetchAmountinUSDPrice('WETH', '40000');
+            const amountDai = fetchAmountinUSDPrice('DAI', '18000');
+            vaultId = await openVault(
+                proxy,
+                'ETH-A',
+                vaultColl,
+                amountDai,
+            );
+            console.log(`VaultId: ${vaultId}`);
+            console.log(`Vault collateral${vaultColl}`);
+            console.log(`Vault debt${amountDai}`);
+            flAmount = (parseFloat(amountDai) + 1).toString();
+            flAmount = hre.ethers.utils.parseUnits(flAmount, 18);
+
+            await openStrategyAndBundleStorage();
+
+            const strategyData = createMcdCloseStrategy();
+            const strategyId = await createStrategy(proxy, ...strategyData, false);
+
+            const currPrice = await getChainLinkPrice(ETH_ADDR);
+            let strategySub;
+            const targetPrice = currPrice - 100; // Target is smaller so we can execute it
+            ({ subId, strategySub } = await subMcdCloseStrategy(
+                vaultId,
+                proxy,
+                targetPrice,
+                WETH_ADDRESS,
+                RATIO_STATE_OVER,
+                strategyId,
+            ));
+            console.log(subId);
+            const subHashBefore = await subStorage.getSub(subId);
+
+            const triggerData = await createChainLinkPriceTrigger(
+                WETH_ADDRESS, currPrice + 100, RATIO_STATE_OVER,
+            );
+            strategySub[2] = [triggerData];
+
+            await updateSubData(proxy, subId, strategySub);
+            const subHashAfter = await subStorage.getSub(subId);
+
+            expect(subHashAfter.strategySubHash).to.not.have.string(subHashBefore.strategySubHash);
+        });
+    });
+};
+
+const toggleSubDataTest = async () => {
+    describe('Toggle Sub', function () {
+        this.timeout(1000000);
+
+        let senderAcc;
+        let proxy;
+        let subId;
+        let subStorageAddr;
+        let subStorage;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+
+            await redeployCore();
+
+            subStorageAddr = await getAddrFromRegistry('SubStorage');
+            subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+
+            proxy = await getProxy(senderAcc.address);
+        });
+
+        it('... should create a dummy strategy', async () => {
+            const abiCoder = new hre.ethers.utils.AbiCoder();
+
+            const dummyStrategy = new dfs.Strategy('DummyStrategy');
+
+            dummyStrategy.addSubSlot('&amount', 'uint256');
+
+            const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+                WETH_ADDRESS, '&eoa', '&amount',
+            );
+
+            dummyStrategy.addTrigger((new dfs.triggers.GasPriceTrigger(0)));
+            dummyStrategy.addAction(pullTokenAction);
+
+            const callData = dummyStrategy.encodeForDsProxyCall();
+
+            const strategyId = await createStrategy(proxy, ...callData, false);
+
+            const amountEncoded = abiCoder.encode(['uint256'], [0]);
+
+            const triggerData = abiCoder.encode(['uint256'], [0]);
+            const strategySub = [strategyId, false, [triggerData], [amountEncoded]];
+
+            subId = await subToStrategy(proxy, strategySub);
+
+            const storedSub = await subStorage.getSub(subId);
+            expect(storedSub.isEnabled).to.be.eq(true);
+        });
+
+        it('... should deactivate the strategy', async () => {
+            const disableSub = new dfs.actions.basic.ToggleSubAction(subId, false);
+
+            const functionData = disableSub.encodeForDsProxyCall()[1];
+
+            await executeAction('ToggleSub', functionData, proxy);
+
+            const storedSub = await subStorage.getSub(subId);
+            expect(storedSub.isEnabled).to.be.eq(false);
+        });
+
+        it('... should activate the strategy again', async () => {
+            const disableSub = new dfs.actions.basic.ToggleSubAction(subId, true);
+
+            const functionData = disableSub.encodeForDsProxyCall()[1];
+
+            await executeAction('ToggleSub', functionData, proxy);
+
+            const storedSub = await subStorage.getSub(subId);
+            expect(storedSub.isEnabled).to.be.eq(true);
+        });
+    });
+};
+
 const deployUtilsActionsContracts = async () => {
+    await redeploy('SendTokenAndUnwrap');
     await redeploy('WrapEth');
-    await redeploy('DFSSell');
-    await redeploy('TaskExecutor');
     await redeploy('UnwrapEth');
+    await redeploy('DFSSell');
+    await redeploy('RecipeExecutor');
     await redeploy('PullToken');
     await redeploy('SumInputs');
     await redeploy('SubInputs');
     await redeploy('SendToken');
     await redeploy('UniswapWrapperV3');
     await redeploy('ChangeProxyOwner');
+    await redeploy('UpdateSub');
+    await redeploy('ToggleSub');
 };
 
 const utilsActionsFullTest = async () => {
     await deployUtilsActionsContracts();
+    await toggleSubDataTest();
+    await sendTokenAndUnwrapTest();
     await wrapEthTest();
     await unwrapEthTest();
     await sumInputsTest();
     await subInputsTest();
     await sendTokenTest();
     await pullTokenTest();
-    await changeOwnerTest();
+    await updateSubDataTest();
     await automationV2UnsubTest();
+    await changeOwnerTest();
 };
 
 module.exports = {
@@ -540,4 +805,7 @@ module.exports = {
     pullTokenTest,
     automationV2UnsubTest,
     utilsActionsFullTest,
+    sendTokenAndUnwrapTest,
+    updateSubDataTest,
+    toggleSubDataTest,
 };

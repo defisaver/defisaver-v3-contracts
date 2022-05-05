@@ -27,13 +27,13 @@ const {
     DAI_ADDR,
     UNISWAP_WRAPPER,
     MAX_UINT,
+    REGISTRY_ADDR,
 } = require('../utils');
 const {
     getVaultsForUser,
     fetchMakerAddresses,
     getVaultInfo,
     canGenerateDebt,
-    castSpell,
     cropJoinIlks,
     MCD_MANAGER_ADDR,
     CROPPER_ADDR,
@@ -70,7 +70,7 @@ const mcdOpenTest = async (mcdTestLength) => {
                 const vaultsBefore = await getVaultsForUser(proxy.address, makerAddresses);
                 const numVaultsForUser = vaultsBefore[0].length;
 
-                await openMcd(proxy, makerAddresses, joinAddr);
+                await openMcd(proxy, joinAddr);
 
                 const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
                 const numVaultsForUserAfter = vaultsAfter[0].length;
@@ -82,9 +82,9 @@ const mcdOpenTest = async (mcdTestLength) => {
         }
 
         it('... should open an empty CropJoin Maker vault', async () => {
-            await castSpell('0xEEC1e1aef39309998d14615a177d989F37342cf1');
+            // await castSpell('0xEEC1e1aef39309998d14615a177d989F37342cf1');
 
-            const vaultId = await openMcd(proxy, makerAddresses, cropData.joinAddr, CROPPER_ADDR);
+            const vaultId = await openMcd(proxy, cropData.joinAddr, CROPPER_ADDR);
 
             const vaultInfo = await mcdView.getCropJoinCdps([cropData.ilk], proxy.address);
 
@@ -99,15 +99,12 @@ const mcdSupplyTest = async (mcdTestLength) => {
     describe('Mcd-Supply', function () {
         this.timeout(80000);
 
-        let makerAddresses;
         let senderAcc;
         let proxy;
         let mcdView;
         let mcdViewAddr;
 
         before(async () => {
-            makerAddresses = await fetchMakerAddresses();
-
             mcdViewAddr = await getAddrFromRegistry('McdView');
             mcdView = await hre.ethers.getContractAt('McdView', mcdViewAddr);
 
@@ -137,16 +134,18 @@ const mcdSupplyTest = async (mcdTestLength) => {
                     expect(true).to.be.true;
                     return;
                 }
-                // can't fetch price for these
                 if (ilkData.ilkLabel === 'GUNIV3DAIUSDC1-A'
                 || ilkData.ilkLabel === 'GUNIV3DAIUSDC2-A'
-                || ilkData.ilkLabel === 'WSTETH-A') {
+                || ilkData.ilkLabel === 'WSTETH-A'
+                || ilkData.ilkLabel === 'CRVV1ETHSTETH-A'
+                || ilkData.ilkLabel === 'TUSD-A'
+                ) {
                     // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
 
-                const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
+                const vaultId = await openMcd(proxy, joinAddr);
                 const amount = BigNumber.from(
                     hre.ethers.utils.parseUnits(amountFetchedFromUSD, tokenData.decimals),
                 );
@@ -166,9 +165,7 @@ const mcdSupplyTest = async (mcdTestLength) => {
         }
 
         it('... should supply to CropJoin vault', async () => {
-            await castSpell('0xEEC1e1aef39309998d14615a177d989F37342cf1');
-
-            const vaultId = await openMcd(proxy, makerAddresses, cropData.joinAddr, CROPPER_ADDR);
+            const vaultId = await openMcd(proxy, cropData.joinAddr, CROPPER_ADDR);
 
             const amount = '40';
             const amountWei = hre.ethers.utils.parseUnits(amount, 18);
@@ -184,6 +181,7 @@ const mcdSupplyTest = async (mcdTestLength) => {
                 cropData.tokenAddr,
                 cropData.joinAddr,
                 from,
+                REGISTRY_ADDR,
                 CROPPER_ADDR,
             );
 
@@ -234,7 +232,9 @@ const mcdGenerateTest = async (mcdTestLength) => {
                 // can't fetch price for these
                 if (ilkData.ilkLabel === 'GUNIV3DAIUSDC1-A'
                 || ilkData.ilkLabel === 'GUNIV3DAIUSDC2-A'
-                || ilkData.ilkLabel === 'WSTETH-A') {
+                || ilkData.ilkLabel === 'WSTETH-A'
+                || ilkData.ilkLabel === 'CRVV1ETHSTETH-A'
+                || ilkData.ilkLabel === 'TUSD-A') {
                     // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
@@ -251,7 +251,7 @@ const mcdGenerateTest = async (mcdTestLength) => {
                     tokenData.address = WETH_ADDRESS;
                 }
 
-                const vaultId = await openMcd(proxy, makerAddresses, joinAddr);
+                const vaultId = await openMcd(proxy, joinAddr);
                 const collAmount = hre.ethers.utils.parseUnits(
                     fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
                     tokenData.decimals,
@@ -273,9 +273,7 @@ const mcdGenerateTest = async (mcdTestLength) => {
         }
 
         it('... should generate from CropJoin vault', async () => {
-            await castSpell('0xEEC1e1aef39309998d14615a177d989F37342cf1');
-
-            const vaultId = await openMcd(proxy, makerAddresses, cropData.joinAddr, CROPPER_ADDR);
+            const vaultId = await openMcd(proxy, cropData.joinAddr, CROPPER_ADDR);
 
             const amount = '40';
             const amountWei = hre.ethers.utils.parseUnits(amount, 18);
@@ -292,6 +290,7 @@ const mcdGenerateTest = async (mcdTestLength) => {
                 cropData.tokenAddr,
                 cropData.joinAddr,
                 from,
+                REGISTRY_ADDR,
                 CROPPER_ADDR,
             );
             const infoBefore = await getVaultInfo(mcdView, vaultId, cropJoinIlks[0], CROPPER_ADDR);
@@ -307,7 +306,6 @@ const mcdGenerateTest = async (mcdTestLength) => {
 
 const mcdGiveTest = async () => {
     describe('Mcd-Give', () => {
-        let makerAddresses;
         let senderAcc;
         let secondAcc;
         let thirdAcc;
@@ -316,8 +314,6 @@ const mcdGiveTest = async () => {
         let mcdManager;
 
         before(async () => {
-            makerAddresses = await fetchMakerAddresses();
-
             senderAcc = (await hre.ethers.getSigners())[0];
             secondAcc = (await hre.ethers.getSigners())[1];
             thirdAcc = (await hre.ethers.getSigners())[2];
@@ -331,7 +327,7 @@ const mcdGiveTest = async () => {
         it('... should give a cdp to another proxy', async () => {
             const { join } = ilks[0];
 
-            const vaultId = await openMcd(proxy, makerAddresses, join);
+            const vaultId = await openMcd(proxy, join);
 
             const secondProxy = await getProxy(secondAcc.address);
             const createProxy = false;
@@ -346,7 +342,7 @@ const mcdGiveTest = async () => {
         it('... should give a cdp to an address and proxy should be created for it', async () => {
             const { join } = ilks[0];
 
-            const vaultId = await openMcd(proxy, makerAddresses, join);
+            const vaultId = await openMcd(proxy, join);
 
             const createProxy = true;
 
@@ -362,13 +358,11 @@ const mcdGiveTest = async () => {
 };
 const mcdMergeTest = async (mcdTestLength) => {
     describe('Mcd-Merge', () => {
-        let makerAddresses;
         let senderAcc;
         let proxy;
         let mcdView;
         let mcdViewAddr;
         before(async () => {
-            makerAddresses = await fetchMakerAddresses();
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
 
@@ -378,7 +372,6 @@ const mcdMergeTest = async (mcdTestLength) => {
 
         for (let i = 0; i < mcdTestLength; ++i) {
             const ilkData = ilks[i];
-            const joinAddr = ilkData.join;
             const tokenData = getAssetInfo(ilkData.asset);
 
             it(`... should merge two ${ilkData.ilkLabel} Maker vaults`, async () => {
@@ -407,24 +400,22 @@ const mcdMergeTest = async (mcdTestLength) => {
                 // can't fetch price for these
                 if (ilkData.ilkLabel === 'GUNIV3DAIUSDC1-A'
                 || ilkData.ilkLabel === 'GUNIV3DAIUSDC2-A'
-                || ilkData.ilkLabel === 'WSTETH-A') {
+                || ilkData.ilkLabel === 'WSTETH-A'
+                || ilkData.ilkLabel === 'CRVV1ETHSTETH-A'
+                || ilkData.ilkLabel === 'TUSD-A') {
                     // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
                 const vaultId1 = await openVault(
-                    makerAddresses,
                     proxy,
-                    joinAddr,
-                    tokenData,
+                    ilkData.ilkLabel,
                     fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
                     GENERATE_AMOUNT_IN_USD,
                 );
                 const vaultId2 = await openVault(
-                    makerAddresses,
                     proxy,
-                    joinAddr,
-                    tokenData,
+                    ilkData.ilkLabel,
                     fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
                     GENERATE_AMOUNT_IN_USD,
                 );
@@ -471,7 +462,6 @@ const mcdPaybackTest = async (mcdTestLength) => {
 
         for (let i = 0; i < mcdTestLength; ++i) {
             const ilkData = ilks[i];
-            const joinAddr = ilkData.join;
             const tokenData = getAssetInfo(ilkData.asset);
             let vaultId;
             it(`... should payback ${PARTIAL_DAI_AMOUNT} DAI for ${ilkData.ilkLabel} vault`, async () => {
@@ -490,7 +480,9 @@ const mcdPaybackTest = async (mcdTestLength) => {
                 // can't fetch price for these
                 if (ilkData.ilkLabel === 'GUNIV3DAIUSDC1-A'
                 || ilkData.ilkLabel === 'GUNIV3DAIUSDC2-A'
-                || ilkData.ilkLabel === 'WSTETH-A') {
+                || ilkData.ilkLabel === 'WSTETH-A'
+                || ilkData.ilkLabel === 'CRVV1ETHSTETH-A'
+                || ilkData.ilkLabel === 'TUSD-A') {
                     // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
@@ -508,10 +500,8 @@ const mcdPaybackTest = async (mcdTestLength) => {
                 }
 
                 vaultId = await openVault(
-                    makerAddresses,
                     proxy,
-                    joinAddr,
-                    tokenData,
+                    ilkData.ilkLabel,
                     fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
                     fetchAmountinUSDPrice('DAI', GENERATE_AMOUNT_IN_USD),
                 );
@@ -547,7 +537,9 @@ const mcdPaybackTest = async (mcdTestLength) => {
                 // can't fetch price for these
                 if (ilkData.ilkLabel === 'GUNIV3DAIUSDC1-A'
                 || ilkData.ilkLabel === 'GUNIV3DAIUSDC2-A'
-                || ilkData.ilkLabel === 'WSTETH-A') {
+                || ilkData.ilkLabel === 'WSTETH-A'
+                || ilkData.ilkLabel === 'CRVV1ETHSTETH-A'
+                || ilkData.ilkLabel === 'TUSD-A') {
                     // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
@@ -564,19 +556,15 @@ const mcdPaybackTest = async (mcdTestLength) => {
                     tokenData.address = WETH_ADDRESS;
                 }
                 await openVault(
-                    makerAddresses,
                     proxy,
-                    joinAddr,
-                    tokenData,
+                    ilkData.ilkLabel,
                     fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
                     GENERATE_AMOUNT_IN_USD,
                 );
 
                 vaultId = await openVault(
-                    makerAddresses,
                     proxy,
-                    joinAddr,
-                    tokenData,
+                    ilkData.ilkLabel,
                     fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
                     GENERATE_AMOUNT_IN_USD,
                 );
@@ -614,7 +602,9 @@ const mcdPaybackTest = async (mcdTestLength) => {
                 // can't fetch price for these
                 if (ilkData.ilkLabel === 'GUNIV3DAIUSDC1-A'
                 || ilkData.ilkLabel === 'GUNIV3DAIUSDC2-A'
-                || ilkData.ilkLabel === 'WSTETH-A') {
+                || ilkData.ilkLabel === 'WSTETH-A'
+                || ilkData.ilkLabel === 'CRVV1ETHSTETH-A'
+                || ilkData.ilkLabel === 'TUSD-A') {
                     // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
@@ -632,19 +622,15 @@ const mcdPaybackTest = async (mcdTestLength) => {
                 }
                 const amountDebt = GENERATE_AMOUNT_IN_USD;
                 await openVault(
-                    makerAddresses,
                     proxy,
-                    joinAddr,
-                    tokenData,
+                    ilkData.ilkLabel,
                     fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
                     amountDebt,
                 );
 
                 vaultId = await openVault(
-                    makerAddresses,
                     proxy,
-                    joinAddr,
-                    tokenData,
+                    ilkData.ilkLabel,
                     fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
                     amountDebt,
                 );
@@ -670,9 +656,7 @@ const mcdPaybackTest = async (mcdTestLength) => {
         }
 
         it('... should payback Dai in CropJoin vault', async () => {
-            await castSpell('0xEEC1e1aef39309998d14615a177d989F37342cf1');
-
-            const vaultId = await openMcd(proxy, makerAddresses, cropData.joinAddr, CROPPER_ADDR);
+            const vaultId = await openMcd(proxy, cropData.joinAddr, CROPPER_ADDR);
 
             const amount = '40';
             const amountWei = hre.ethers.utils.parseUnits(amount, 18);
@@ -692,6 +676,7 @@ const mcdPaybackTest = async (mcdTestLength) => {
                 cropData.tokenAddr,
                 cropData.joinAddr,
                 from,
+                REGISTRY_ADDR,
                 CROPPER_ADDR,
             );
 
@@ -706,7 +691,7 @@ const mcdPaybackTest = async (mcdTestLength) => {
         });
 
         it('... should payback uint.max Dai in CropJoin vault', async () => {
-            const vaultId = await openMcd(proxy, makerAddresses, cropData.joinAddr, CROPPER_ADDR);
+            const vaultId = await openMcd(proxy, cropData.joinAddr, CROPPER_ADDR);
             const from = senderAcc.address;
 
             await paybackMcd(proxy, vaultId, MAX_UINT, from, DAI_ADDR, CROPPER_ADDR);
@@ -721,15 +706,12 @@ const mcdWithdrawTest = async (mcdTestLength) => {
     describe('Mcd-Withdraw', function () {
         this.timeout(40000);
 
-        let makerAddresses;
         let senderAcc;
         let proxy;
         let mcdView;
         let mcdViewAddr;
 
         before(async () => {
-            makerAddresses = await fetchMakerAddresses();
-
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             mcdViewAddr = await getAddrFromRegistry('McdView');
@@ -766,7 +748,9 @@ const mcdWithdrawTest = async (mcdTestLength) => {
                 // can't fetch price for these
                 if (ilkData.ilkLabel === 'GUNIV3DAIUSDC1-A'
                 || ilkData.ilkLabel === 'GUNIV3DAIUSDC2-A'
-                || ilkData.ilkLabel === 'WSTETH-A') {
+                || ilkData.ilkLabel === 'WSTETH-A'
+                || ilkData.ilkLabel === 'CRVV1ETHSTETH-A'
+                || ilkData.ilkLabel === 'TUSD-A') {
                     // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
@@ -784,10 +768,8 @@ const mcdWithdrawTest = async (mcdTestLength) => {
                     tokenData.address = WETH_ADDRESS;
                 }
                 vaultId = await openVault(
-                    makerAddresses,
                     proxy,
-                    joinAddr,
-                    tokenData,
+                    ilkData.ilkLabel,
                     supplyAmount,
                     MIN_VAULT_DAI_AMOUNT,
                 );
@@ -820,7 +802,9 @@ const mcdWithdrawTest = async (mcdTestLength) => {
                 // can't fetch price for these
                 if (ilkData.ilkLabel === 'GUNIV3DAIUSDC1-A'
                 || ilkData.ilkLabel === 'GUNIV3DAIUSDC2-A'
-                || ilkData.ilkLabel === 'WSTETH-A') {
+                || ilkData.ilkLabel === 'WSTETH-A'
+                || ilkData.ilkLabel === 'CRVV1ETHSTETH-A'
+                || ilkData.ilkLabel === 'TUSD-A') {
                     // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
@@ -843,7 +827,7 @@ const mcdWithdrawTest = async (mcdTestLength) => {
                 const to = senderAcc.address;
                 const from = senderAcc.address;
 
-                vaultId = await openMcd(proxy, makerAddresses, joinAddr);
+                vaultId = await openMcd(proxy, joinAddr);
                 await supplyMcd(proxy, vaultId, amount, tokenData.address, joinAddr, from);
                 const collBalanceBefore = await balanceOf(tokenData.address, to);
                 await withdrawMcd(proxy, vaultId, hre.ethers.constants.MaxUint256, joinAddr, to);
@@ -854,9 +838,7 @@ const mcdWithdrawTest = async (mcdTestLength) => {
         }
 
         it('... should withdraw from CropJoin vault', async () => {
-            await castSpell('0xEEC1e1aef39309998d14615a177d989F37342cf1');
-
-            const vaultId = await openMcd(proxy, makerAddresses, cropData.joinAddr, CROPPER_ADDR);
+            const vaultId = await openMcd(proxy, cropData.joinAddr, CROPPER_ADDR);
 
             const amount = '40';
             const amountWei = hre.ethers.utils.parseUnits(amount, 18);
@@ -874,12 +856,13 @@ const mcdWithdrawTest = async (mcdTestLength) => {
                 cropData.tokenAddr,
                 cropData.joinAddr,
                 from,
+                REGISTRY_ADDR,
                 CROPPER_ADDR,
             );
 
             const infoBefore = await getVaultInfo(mcdView, vaultId, cropJoinIlks[0], CROPPER_ADDR);
 
-            await withdrawMcd(proxy, vaultId, withdrawAmountWei, cropData.joinAddr, to, CROPPER_ADDR);
+            await withdrawMcd(proxy, vaultId, withdrawAmountWei, cropData.joinAddr, to, REGISTRY_ADDR, CROPPER_ADDR);
 
             const infoAfter = await getVaultInfo(mcdView, vaultId, cropJoinIlks[0], CROPPER_ADDR);
 
@@ -892,21 +875,16 @@ const mcdClaimTest = async () => {
     describe('Mcd-Claim', function () {
         this.timeout(40000);
 
-        let makerAddresses;
         let senderAcc;
         let proxy;
 
         before(async () => {
-            makerAddresses = await fetchMakerAddresses();
-
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
 
         it('... should claim from CropJoin vault', async () => {
-            await castSpell('0xEEC1e1aef39309998d14615a177d989F37342cf1');
-
-            const vaultId = await openMcd(proxy, makerAddresses, cropData.joinAddr, CROPPER_ADDR);
+            const vaultId = await openMcd(proxy, cropData.joinAddr, CROPPER_ADDR);
 
             const amount = '40';
             const amountWei = hre.ethers.utils.parseUnits(amount, 18);
@@ -921,6 +899,7 @@ const mcdClaimTest = async () => {
                 cropData.tokenAddr,
                 cropData.joinAddr,
                 from,
+                REGISTRY_ADDR,
                 CROPPER_ADDR,
             );
 
@@ -945,9 +924,7 @@ const mcdClaimTest = async () => {
             await claimMcd(proxy, vaultId, cropData.joinAddr, senderAcc2.address);
 
             const bonusBalanceAfter = await balanceOf(LDO_ADDR, senderAcc2.address);
-            const bonusBalanceProxy = await balanceOf(LDO_ADDR, proxy.address);
 
-            expect(bonusBalanceProxy).to.be.eq(0);
             expect(bonusBalanceAfter).to.be.gt(bonusBalanceBefore);
         });
     });

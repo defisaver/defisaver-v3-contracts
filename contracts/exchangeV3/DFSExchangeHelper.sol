@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 
 import "../utils/TokenUtils.sol";
 import "../utils/SafeERC20.sol";
@@ -10,7 +10,8 @@ contract DFSExchangeHelper {
     
     using TokenUtils for address;
     
-    string public constant ERR_OFFCHAIN_DATA_INVALID = "Offchain data invalid";
+    error InvalidOffchainData();
+    error OutOfRangeSlicingError();
 
     using SafeERC20 for IERC20;
 
@@ -27,7 +28,10 @@ contract DFSExchangeHelper {
     }
 
     function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {
-        require(bs.length >= start + 32, "slicing out of range");
+        if (bs.length < start + 32){
+            revert OutOfRangeSlicingError();
+        }
+
 
         uint256 x;
         assembly {
@@ -43,7 +47,7 @@ contract DFSExchangeHelper {
         uint256 _input
     ) internal pure {
         if (_b.length < _index + 32) {
-            revert(ERR_OFFCHAIN_DATA_INVALID);
+            revert InvalidOffchainData();
         }
 
         bytes32 input = bytes32(_input);

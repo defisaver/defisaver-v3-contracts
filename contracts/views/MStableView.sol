@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 
 import "contracts/interfaces/mstable/IBoostedVaultWithLockup.sol";
 import "contracts/interfaces/mstable/ImAsset.sol";

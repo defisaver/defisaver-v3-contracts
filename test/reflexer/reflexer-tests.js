@@ -71,7 +71,7 @@ const reflexerOpenTest = async () => {
         it('... should log every event', async () => {
             const snapshot = await takeSnapshot();
             await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
             revertToSnapshot(snapshot);
         }).timeout(10000);
     });
@@ -150,7 +150,7 @@ const reflexerSupplyTest = async () => {
         it('... should log every event', async () => {
             const snapshot = await takeSnapshot();
             await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
 
             const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
             await depositToWeth(amountWETH.toString());
@@ -158,7 +158,7 @@ const reflexerSupplyTest = async () => {
             const safeID = await lastSafeID(proxy.address);
             const from = senderAcc.address;
             await expect(reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
             revertToSnapshot(snapshot);
         }).timeout(40000);
     });
@@ -198,7 +198,7 @@ const reflexerGenerateTest = async () => {
         it('... should log every event', async () => {
             const snapshot = await takeSnapshot();
             await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
 
             const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
             const amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
@@ -207,11 +207,11 @@ const reflexerGenerateTest = async () => {
             const safeID = await lastSafeID(proxy.address);
             const from = senderAcc.address;
             await expect(reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
 
             const to = senderAcc.address;
             await expect(reflexerGenerate(proxy, safeID, amountRai, to))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
             revertToSnapshot(snapshot);
         }).timeout(40000);
     });
@@ -287,7 +287,7 @@ const reflexerPaybackTest = async () => {
         it('... should log every event', async () => {
             const snapshot = await takeSnapshot();
             await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
 
             const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
             const amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
@@ -296,15 +296,15 @@ const reflexerPaybackTest = async () => {
             const safeID = await lastSafeID(proxy.address);
             const from = senderAcc.address;
             await expect(reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
 
             const to = senderAcc.address;
             await expect(reflexerGenerate(proxy, safeID, amountRai, to))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
 
             await expect(reflexerPayback(proxy, safeID,
                 hre.ethers.constants.MaxUint256, from, RAI_ADDR))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
             revertToSnapshot(snapshot);
         }).timeout(40000);
     });
@@ -374,7 +374,7 @@ const reflexerWithdrawTest = async () => {
         it('... should log every event', async () => {
             const snapshot = await takeSnapshot();
             await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
 
             const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
             await depositToWeth(amountWETH.toString());
@@ -382,11 +382,11 @@ const reflexerWithdrawTest = async () => {
             const safeID = await lastSafeID(proxy.address);
             const from = senderAcc.address;
             await expect(reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
             const to = senderAcc.address;
             await expect(reflexerWithdraw(proxy, safeID,
                 hre.ethers.constants.MaxUint256, ADAPTER_ADDRESS, to))
-                .to.emit(logger, 'LogEvent');
+                .to.emit(logger, 'ActionDirectEvent');
             revertToSnapshot(snapshot);
         }).timeout(40000);
     });

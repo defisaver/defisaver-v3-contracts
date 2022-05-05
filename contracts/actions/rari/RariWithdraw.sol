@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
@@ -25,8 +25,8 @@ contract RariWithdraw is ActionBase, DSMath {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -48,15 +48,16 @@ contract RariWithdraw is ActionBase, DSMath {
         );
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[3], _subData, _returnValues);
 
-        uint256 tokensWithdrawn = _rariWithdraw(inputData);
+        (uint256 tokensWithdrawn, bytes memory logData) = _rariWithdraw(inputData);
+        emit ActionEvent("RariWithdraw", logData);
         return bytes32(tokensWithdrawn);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _rariWithdraw(inputData);
+        (, bytes memory logData) = _rariWithdraw(inputData);
+        logger.logActionDirectEvent("RariWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -65,7 +66,7 @@ contract RariWithdraw is ActionBase, DSMath {
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
-    function _rariWithdraw(Params memory _inputData) internal returns (uint256 tokensWithdrawn) {
+    function _rariWithdraw(Params memory _inputData) internal returns (uint256 tokensWithdrawn, bytes memory logData) {
         require(_inputData.to != address(0), "Can't send to burn address");
 
         IFundManager fundManager = IFundManager(_inputData.fundManager);
@@ -91,15 +92,10 @@ contract RariWithdraw is ActionBase, DSMath {
 
         _inputData.stablecoinAddress.withdrawTokens(_inputData.to, tokensWithdrawn);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "RariWithdraw",
-            abi.encode(_inputData, tokensWithdrawn)
-        );
+        logData = abi.encode(_inputData, tokensWithdrawn);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
-        inputData = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
+        inputData = abi.decode(_callData, (Params));
     }
 }

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../DS/DSMath.sol";
 import "../actions/aave/helpers/AaveHelper.sol";
@@ -10,7 +9,7 @@ import "../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
 import "../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../utils/TokenUtils.sol";
 
-contract AaveView is DSMath, AaveHelper {
+contract AaveView is AaveHelper, DSMath{
 
     using TokenUtils for address;
 
@@ -72,7 +71,7 @@ contract AaveView is DSMath, AaveHelper {
 
         if (totalDebtETH == 0) return uint256(0);
 
-        return wdiv(add(totalDebtETH, availableBorrowsETH), totalDebtETH);
+        return wdiv(totalDebtETH + availableBorrowsETH, totalDebtETH);
     }
 
     /// @notice Calculated the ratio of coll/debt for a compound user

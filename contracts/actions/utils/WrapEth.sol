@@ -1,30 +1,33 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
 /// @title Helper action to wrap Ether to WETH9
 contract WrapEth is ActionBase {
+    struct Params {
+        uint256 amount;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        uint256 amount = abi.decode(_callData[0], (uint256));
+        Params memory inputData = parseInputs(_callData);
 
-        amount = _parseParamUint(amount, _paramMapping[0], _subData, _returnValues);
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
 
-        return bytes32(_wrapEth(amount));
+        return bytes32(_wrapEth(inputData.amount));
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes[] memory _callData) public payable override {
-        uint256 amount = abi.decode(_callData[0], (uint256));
+    function executeActionDirect(bytes memory _callData) public payable override {
+        uint256 amount = abi.decode(_callData, (uint256));
 
         _wrapEth(amount);
     }
@@ -45,5 +48,9 @@ contract WrapEth is ActionBase {
 
         TokenUtils.depositWeth(_amount);
         return _amount;
+    }
+
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

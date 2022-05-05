@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 
 import "./DSAuth.sol";
 import "./DSNote.sol";
@@ -9,7 +9,9 @@ abstract contract DSProxy is DSAuth, DSNote {
     DSProxyCache public cache; // global cache for contracts
 
     constructor(address _cacheAddr) {
-        require(setCache(_cacheAddr), "Cache not set");
+        if (!(setCache(_cacheAddr))){
+            require(isAuthorized(msg.sender, msg.sig), "Not authorized");
+        }
     }
 
     // solhint-disable-next-line no-empty-blocks

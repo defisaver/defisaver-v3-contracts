@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../../interfaces/IProxyRegistry.sol";
 import "../../interfaces/mcd/IJoin.sol";
@@ -13,28 +12,35 @@ import "./helpers/McdHelper.sol";
 /// @title Merge two vaults that are of the same type
 contract McdMerge is ActionBase, McdHelper {
 
-    /// @inheritdoc ActionBase
-    function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
-        uint8[] memory _paramMapping,
-        bytes32[] memory _returnValues
-    ) public payable virtual override returns (bytes32) {
-        (uint256 srcVaultId, uint256 destVaultId, address mcdManager) = parseInputs(_callData);
-
-        srcVaultId = _parseParamUint(srcVaultId, _paramMapping[0], _subData, _returnValues);
-        destVaultId = _parseParamUint(destVaultId, _paramMapping[1], _subData, _returnValues);
-
-        _mcdMerge(srcVaultId, destVaultId, mcdManager);
-
-        return bytes32(destVaultId);
+    struct Params {
+        uint256 srcVaultId;
+        uint256 destVaultId;
+        address mcdManager;
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
-        (uint256 srcVaultId, uint256 destVaultId, address mcdManager) = parseInputs(_callData);
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory _subData,
+        uint8[] memory _paramMapping,
+        bytes32[] memory _returnValues
+    ) public payable virtual override returns (bytes32) {
+        Params memory inputData = parseInputs(_callData);
 
-        _mcdMerge(srcVaultId, destVaultId, mcdManager);
+        inputData.srcVaultId = _parseParamUint(inputData.srcVaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.destVaultId = _parseParamUint(inputData.destVaultId, _paramMapping[1], _subData, _returnValues);
+        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[2], _subData, _returnValues);
+
+        bytes memory logData = _mcdMerge(inputData.srcVaultId, inputData.destVaultId, inputData.mcdManager);
+        emit ActionEvent("McdMerge", logData);
+        return bytes32(inputData.destVaultId);
+    }
+
+    /// @inheritdoc ActionBase
+    function executeActionDirect(bytes memory _callData) public payable override {
+        Params memory inputData = parseInputs(_callData);
+        bytes memory logData = _mcdMerge(inputData.srcVaultId, inputData.destVaultId, inputData.mcdManager);
+        logger.logActionDirectEvent("McdMerge", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -53,28 +59,12 @@ contract McdMerge is ActionBase, McdHelper {
         uint256 _srcVaultId,
         uint256 _destVaultId,
         address _mcdManager
-    ) internal {
+    ) internal returns (bytes memory logData) {
         IManager(_mcdManager).shift(_srcVaultId, _destVaultId);
-
-        logger.Log(
-            address(this),
-            msg.sender,
-            "McdMerge",
-            abi.encode(_srcVaultId, _destVaultId, _mcdManager)
-        );
+        logData = abi.encode(_srcVaultId, _destVaultId, _mcdManager);
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
-        pure
-        returns (
-            uint256 srcVaultId,
-            uint256 destVaultId,
-            address mcdManager
-        )
-    {
-        srcVaultId = abi.decode(_callData[0], (uint256));
-        destVaultId = abi.decode(_callData[1], (uint256));
-        mcdManager = abi.decode(_callData[2], (address));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

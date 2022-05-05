@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
-import "../../../DS/DSMath.sol";
 import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
 import "./helpers/UniV3Helper.sol";
 
 /// @title Action for creating Uniswap V3 Pool and minting a position in it after that
 /// @notice If pool already exists, it will only mint a position in pool
-contract UniCreatePoolV3 is ActionBase, DSMath, UniV3Helper {
+contract UniCreatePoolV3 is ActionBase, UniV3Helper {
     using TokenUtils for address;
 
     /// @param token0 The contract address of token0 of the pool
@@ -44,8 +43,8 @@ contract UniCreatePoolV3 is ActionBase, DSMath, UniV3Helper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -66,17 +65,18 @@ contract UniCreatePoolV3 is ActionBase, DSMath, UniV3Helper {
 
         _createPool(inputData);
 
-        uint256 tokenId = _uniCreatePosition(inputData);
-
+        (uint256 tokenId, bytes memory logData) = _uniCreatePosition(inputData);
+        emit ActionEvent("UniCreatePoolV3", logData);
         return bytes32(tokenId);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
         _createPool(inputData);
-        _uniCreatePosition(inputData);
+        (, bytes memory logData) = _uniCreatePosition(inputData);
+        logger.logActionDirectEvent("UniCreatePoolV3", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -95,7 +95,7 @@ contract UniCreatePoolV3 is ActionBase, DSMath, UniV3Helper {
         );
     }
 
-    function _uniCreatePosition(Params memory _inputData) internal returns (uint256 tokenId) {
+    function _uniCreatePosition(Params memory _inputData) internal returns (uint256 tokenId, bytes memory logData) {
         // fetch tokens from address;
         uint256 amount0Pulled = _inputData.token0.pullTokensIfNeeded(
             _inputData.from,
@@ -119,19 +119,14 @@ contract UniCreatePoolV3 is ActionBase, DSMath, UniV3Helper {
         (tokenId, liquidity, amount0, amount1) = _uniMint(_inputData);
 
         //send leftovers
-        _inputData.token0.withdrawTokens(_inputData.from, sub(_inputData.amount0Desired, amount0));
-        _inputData.token1.withdrawTokens(_inputData.from, sub(_inputData.amount1Desired, amount1));
+        _inputData.token0.withdrawTokens(_inputData.from, _inputData.amount0Desired - amount0);
+        _inputData.token1.withdrawTokens(_inputData.from, _inputData.amount1Desired - amount1);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "UniCreatePoolV3",
-            abi.encode(_inputData, tokenId, liquidity, amount0, amount1)
-        );
+        logData = abi.encode(_inputData, tokenId, liquidity, amount0, amount1);
     }
 
     /// @dev mints new NFT that represents a position with selected parameters
-    /// @return tokenId of new NFT, how much liquidity it now has and amount of tokens that were transfered to uniswap pool
+    /// @return tokenId of new NFT, how much liquidity it now has and amount of tokens that were transferred to uniswap pool
     function _uniMint(Params memory _inputData)
         internal
         returns (
@@ -158,7 +153,7 @@ contract UniCreatePoolV3 is ActionBase, DSMath, UniV3Helper {
         (tokenId, liquidity, amount0, amount1) = positionManager.mint(mintParams);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
-        inputData = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
+        inputData = abi.decode(_callData, (Params));
     }
 }

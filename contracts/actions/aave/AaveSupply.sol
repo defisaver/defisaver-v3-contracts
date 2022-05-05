@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
@@ -11,45 +10,40 @@ import "./helpers/AaveHelper.sol";
 contract AaveSupply is ActionBase, AaveHelper {
     using TokenUtils for address;
 
+    struct Params {
+        address market;
+        address tokenAddr;
+        uint256 amount;
+        address from;
+        address onBehalf;
+        bool enableAsColl;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (
-            address market,
-            address tokenAddr,
-            uint256 amount,
-            address from,
-            address onBehalf,
-            bool enableAsColl
-        ) = parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        market = _parseParamAddr(market, _paramMapping[0], _subData, _returnValues);
-        tokenAddr = _parseParamAddr(tokenAddr, _paramMapping[1], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[2], _subData, _returnValues);
-        from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
-        onBehalf = _parseParamAddr(onBehalf, _paramMapping[4], _subData, _returnValues);
+        params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
+        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
+        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
 
-        uint256 supplyAmount = _supply(market, tokenAddr, amount, from, onBehalf, enableAsColl);
-
+        (uint256 supplyAmount, bytes memory logData) = _supply(params.market, params.tokenAddr, params.amount, params.from, params.onBehalf, params.enableAsColl);
+        emit ActionEvent("AaveSupply", logData);
         return bytes32(supplyAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
-        (
-            address market,
-            address tokenAddr,
-            uint256 amount,
-            address from,
-            address onBehalf,
-            bool enableAsColl
-        ) = parseInputs(_callData);
-
-        _supply(market, tokenAddr, amount, from, onBehalf, enableAsColl);
+    function executeActionDirect(bytes memory _callData) public payable override {
+        Params memory params = parseInputs(_callData);
+        (, bytes memory logData) = _supply(params.market, params.tokenAddr, params.amount, params.from, params.onBehalf, params.enableAsColl);
+        logger.logActionDirectEvent("AaveSupply", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -74,7 +68,7 @@ contract AaveSupply is ActionBase, AaveHelper {
         address _from,
         address _onBehalf,
         bool _enableAsColl
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         ILendingPoolV2 lendingPool = getLendingPool(_market);
 
         // if amount is set to max, take the whole _from balance
@@ -100,33 +94,18 @@ contract AaveSupply is ActionBase, AaveHelper {
             enableAsCollateral(_market, _tokenAddr, true);
         }
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "AaveSupply",
-            abi.encode(_market, _tokenAddr, _amount, _from, _onBehalf, _enableAsColl)
+        bytes memory logData = abi.encode(
+            _market,
+            _tokenAddr,
+            _amount,
+            _from,
+            _onBehalf,
+            _enableAsColl
         );
-
-        return _amount;
+        return (_amount, logData);
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
-        pure
-        returns (
-            address market,
-            address tokenAddr,
-            uint256 amount,
-            address from,
-            address onBehalf,
-            bool enableAsColl
-        )
-    {
-        market = abi.decode(_callData[0], (address));
-        tokenAddr = abi.decode(_callData[1], (address));
-        amount = abi.decode(_callData[2], (uint256));
-        from = abi.decode(_callData[3], (address));
-        onBehalf = abi.decode(_callData[4], (address));
-        enableAsColl = abi.decode(_callData[5], (bool));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

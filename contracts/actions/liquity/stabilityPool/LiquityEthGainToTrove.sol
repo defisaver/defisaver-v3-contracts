@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
@@ -20,23 +19,24 @@ contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
         params.lqtyTo = _parseParamAddr(params.lqtyTo, _paramMapping[0], _subData, _returnValues);
 
-        uint256 ethGain = _liquityEthGainToTrove(params);
+        (uint256 ethGain, bytes memory logData) = _liquityEthGainToTrove(params);
+        emit ActionEvent("LiquityEthGainToTrove", logData);
         return bytes32(ethGain);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-
-        _liquityEthGainToTrove(params);
+        (, bytes memory logData) = _liquityEthGainToTrove(params);
+        logger.logActionDirectEvent("LiquityEthGainToTrove", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -47,31 +47,19 @@ contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Withdraws ETH gains to the users Trove
-    function _liquityEthGainToTrove(Params memory _params) internal returns (uint256) {
-        uint256 ethGain = StabilityPool.getDepositorETHGain(address(this));
-        uint256 lqtyBefore = LQTYTokenAddr.getBalance(address(this));
+    function _liquityEthGainToTrove(Params memory _params) internal returns (uint256 ethGain, bytes memory logData) {
+        ethGain = StabilityPool.getDepositorETHGain(address(this));
+        uint256 lqtyBefore = LQTY_TOKEN_ADDRESS.getBalance(address(this));
         
         StabilityPool.withdrawETHGainToTrove(_params.upperHint, _params.lowerHint);
 
-        uint256 lqtyGain = LQTYTokenAddr.getBalance(address(this)).sub(lqtyBefore);
+        uint256 lqtyGain = LQTY_TOKEN_ADDRESS.getBalance(address(this)).sub(lqtyBefore);
 
         withdrawStabilityGains(0, lqtyGain, address(0), _params.lqtyTo);
-
-        logger.Log(
-            address(this),
-            msg.sender,
-            "LiquityEthGainToTrove",
-            abi.encode(
-                _params.lqtyTo,
-                ethGain,
-                lqtyGain
-            )
-        );
-
-        return ethGain;
+        logData = abi.encode(_params.lqtyTo, ethGain, lqtyGain);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

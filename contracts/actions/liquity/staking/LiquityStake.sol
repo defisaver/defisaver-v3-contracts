@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
@@ -19,8 +18,8 @@ contract LiquityStake is ActionBase, LiquityHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -30,15 +29,16 @@ contract LiquityStake is ActionBase, LiquityHelper {
         params.wethTo = _parseParamAddr(params.wethTo, _paramMapping[2], _subData, _returnValues);
         params.lusdTo = _parseParamAddr(params.lusdTo, _paramMapping[3], _subData, _returnValues);
 
-        params.lqtyAmount = _liquityStake(params);
-        return bytes32(params.lqtyAmount);
+        (uint256 stakedAmount, bytes memory logData) = _liquityStake(params);
+        emit ActionEvent("LiquityStake", logData);
+        return bytes32(stakedAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-
-        _liquityStake(params);
+        (, bytes memory logData) = _liquityStake(params);
+        logger.logActionDirectEvent("LiquityStake", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -49,34 +49,24 @@ contract LiquityStake is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Stakes LQTY tokens
-    function _liquityStake(Params memory _params) internal returns (uint256) {
+    function _liquityStake(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.lqtyAmount == type(uint256).max) {
-            _params.lqtyAmount = LQTYTokenAddr.getBalance(_params.from);
+            _params.lqtyAmount = LQTY_TOKEN_ADDRESS.getBalance(_params.from);
         }
 
         uint256 ethGain = LQTYStaking.getPendingETHGain(address(this));
         uint256 lusdGain = LQTYStaking.getPendingLUSDGain(address(this));
 
-        LQTYTokenAddr.pullTokensIfNeeded(_params.from, _params.lqtyAmount);
+        LQTY_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lqtyAmount);
         LQTYStaking.stake(_params.lqtyAmount);
 
         withdrawStaking(ethGain, lusdGain, _params.wethTo, _params.lusdTo);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "LiquityStake",
-            abi.encode(
-                _params,
-                ethGain,
-                lusdGain
-            )
-        );
-
-        return _params.lqtyAmount;
+        bytes memory logData = abi.encode(_params, ethGain, lusdGain);
+        return (_params.lqtyAmount, logData);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

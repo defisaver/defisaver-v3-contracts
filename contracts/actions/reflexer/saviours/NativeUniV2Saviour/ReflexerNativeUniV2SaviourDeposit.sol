@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../../../ActionBase.sol";
@@ -22,8 +22,8 @@ contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -37,15 +37,16 @@ contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
             _returnValues
         );
 
-        uint256 amountDeposited = _reflexerSaviourDeposit(inputData);
+        (uint256 amountDeposited, bytes memory logData) = _reflexerSaviourDeposit(inputData);
+        emit ActionEvent("ReflexerNativeUniV2SaviourDeposit", logData);
         return bytes32(amountDeposited);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _reflexerSaviourDeposit(inputData);
+        (, bytes memory logData) = _reflexerSaviourDeposit(inputData);
+        logger.logActionDirectEvent("ReflexerNativeUniV2SaviourDeposit", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -57,7 +58,7 @@ contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
 
     function _reflexerSaviourDeposit(Params memory _inputData)
         internal
-        returns (uint256 amountPulled)
+        returns (uint256 amountPulled, bytes memory logData)
     {   
         safeManager.protectSAFE(
             _inputData.safeId,
@@ -78,15 +79,10 @@ contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
             amountPulled
         );
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "ReflexerNativeUniV2SaviourDeposit",
-            abi.encode(_inputData, amountPulled)
-        );
+        logData = abi.encode(_inputData, amountPulled);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
-        inputData = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
+        inputData = abi.decode(_callData, (Params));
     }
 }

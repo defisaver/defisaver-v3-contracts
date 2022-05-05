@@ -58,7 +58,7 @@ const mcdBoostTest = async () => {
         before(async () => {
             await redeploy('McdOpen');
             await redeploy('McdSupply');
-            await redeploy('TaskExecutor');
+            await redeploy('RecipeExecutor');
             await redeploy('McdGenerate');
             await redeploy('FLDyDx');
             await redeploy('FLAaveV2');
@@ -93,10 +93,8 @@ const mcdBoostTest = async () => {
             it(`... should call a boost ${boostAmount} on a ${ilkData.ilkLabel} vault`, async () => {
                 // create a vault
                 vaultId = await openVault(
-                    makerAddresses,
                     proxy,
-                    joinAddr,
-                    tokenData,
+                    ilkData.ilkLabel,
                     fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
                     fetchAmountinUSDPrice('DAI', GENERATE_AMOUNT_IN_USD),
                 );
@@ -145,7 +143,7 @@ const mcdBoostTest = async () => {
 
                 const functionData = boostRecipe.encodeForDsProxyCall();
 
-                await executeAction('TaskExecutor', functionData[1], proxy);
+                await executeAction('RecipeExecutor', functionData[1], proxy);
                 const ratioAfter = await getRatio(mcdView, vaultId);
                 const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
                 console.log(
@@ -233,7 +231,7 @@ const mcdBoostTest = async () => {
 
                 const functionData = boostRecipe.encodeForDsProxyCall();
 
-                await executeAction('TaskExecutor', functionData[1], proxy);
+                await executeAction('RecipeExecutor', functionData[1], proxy);
 
                 const ratioAfter = await getRatio(mcdView, vaultId);
                 const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
@@ -340,7 +338,7 @@ const mcdBoostTest = async () => {
 
             const functionData = boostRecipe.encodeForDsProxyCall();
 
-            await executeAction('TaskExecutor', functionData[1], proxy);
+            await executeAction('RecipeExecutor', functionData[1], proxy);
 
             const ratioAfter = await getRatio(mcdView, vaultId);
             const info2 = await getVaultInfo(
@@ -371,9 +369,8 @@ const mcdCloseTest = async () => {
         // let mcdView;
 
         before(async () => {
-            await redeploy('TaskExecutor');
+            await redeploy('RecipeExecutor');
             await redeploy('FLDyDx');
-            await redeploy('DFSBuy');
             await redeploy('DFSSell');
             await redeploy('SendToken');
 
@@ -413,10 +410,8 @@ const mcdCloseTest = async () => {
 
                 const amountDai = (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 200).toString();
                 const vaultId = await openVault(
-                    makerAddresses,
                     proxy,
-                    joinAddr,
-                    tokenData,
+                    ilkData.ilkLabel,
                     vaultColl,
                     amountDai,
                 );
@@ -470,7 +465,7 @@ const mcdCloseTest = async () => {
                 const daiBalanceBefore = await balanceOf(daiAddr, senderAcc.address);
                 console.log(`Dai balance before: ${daiBalanceBefore / 1e18}`);
 
-                await executeAction('TaskExecutor', functionData[1], proxy);
+                await executeAction('RecipeExecutor', functionData[1], proxy);
 
                 const daiBalanceAfter = await balanceOf(daiAddr, senderAcc.address);
                 console.log(`Dai balance before: ${daiBalanceAfter / 1e18}`);
@@ -491,10 +486,8 @@ const mcdCloseTest = async () => {
                 const amountColl = fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD);
 
                 const vaultId = await openVault(
-                    makerAddresses,
                     proxy,
-                    joinAddr,
-                    tokenData,
+                    ilkData.ilkLabel,
                     amountColl,
                     amountDai,
                 );
@@ -546,7 +539,7 @@ const mcdCloseTest = async () => {
                 const collBalanceBefore = await balanceOf(tokenAddr, senderAcc.address);
                 console.log(`Coll balance before: ${collBalanceBefore / 10 ** tokenData.decimals}`);
 
-                await executeAction('TaskExecutor', functionData[1], proxy);
+                await executeAction('RecipeExecutor', functionData[1], proxy);
 
                 const collBalanceAfter = await balanceOf(tokenAddr, senderAcc.address);
                 console.log(`Coll balance after: ${collBalanceAfter / 10 ** tokenData.decimals}`);
@@ -571,7 +564,7 @@ const mcdCreateTest = async () => {
         before(async () => {
             await redeploy('McdOpen');
             await redeploy('McdSupply');
-            await redeploy('TaskExecutor');
+            await redeploy('RecipeExecutor');
             await redeploy('SumInputs');
             await redeploy('McdGenerate');
             await redeploy('FLDyDx');
@@ -644,7 +637,7 @@ const mcdCreateTest = async () => {
 
                 const functionData = createVaultRecipe.encodeForDsProxyCall();
 
-                await executeAction('TaskExecutor', functionData[1], proxy);
+                await executeAction('RecipeExecutor', functionData[1], proxy);
 
                 const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
                 const vaultId = vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
@@ -721,7 +714,7 @@ const mcdCreateTest = async () => {
 
                 const functionData = createVaultRecipe.encodeForDsProxyCall();
 
-                await executeAction('TaskExecutor', functionData[1], proxy);
+                await executeAction('RecipeExecutor', functionData[1], proxy);
 
                 const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
                 const vaultId = vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
@@ -792,10 +785,8 @@ const mcdRepayTest = async () => {
             it(`... should call a repay ${repayAmount} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
                 // create a vault
                 vaultId = await openVault(
-                    makerAddresses,
                     proxy,
-                    joinAddr,
-                    tokenData,
+                    ilkData.ilkLabel,
                     fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
                     (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 400).toString(),
                 );
@@ -844,7 +835,7 @@ const mcdRepayTest = async () => {
 
                 const functionData = repayRecipe.encodeForDsProxyCall();
 
-                await executeAction('TaskExecutor', functionData[1], proxy);
+                await executeAction('RecipeExecutor', functionData[1], proxy);
 
                 const ratioAfter = await getRatio(mcdView, vaultId);
                 const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
@@ -862,10 +853,8 @@ const mcdRepayTest = async () => {
             it(`... should call a FL repay ${repayAmount} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
                 // create a vault
                 vaultId = await openVault(
-                    makerAddresses,
                     proxy,
-                    joinAddr,
-                    tokenData,
+                    ilkData.ilkLabel,
                     fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
                     (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 500).toString(),
                 );
@@ -908,7 +897,7 @@ const mcdRepayTest = async () => {
 
                 const functionData = repayRecipe.encodeForDsProxyCall();
 
-                await executeAction('TaskExecutor', functionData[1], proxy);
+                await executeAction('RecipeExecutor', functionData[1], proxy);
 
                 const ratioAfter = await getRatio(mcdView, vaultId);
                 const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
@@ -955,7 +944,7 @@ const mcdRepayTest = async () => {
                 proxy,
                 joinAddr,
                 { address: GUNIV3DAIUSDC, decimals: 18 },
-                poolTokensBalanceAfter.toString(),
+                poolTokensBalanceAfter,
                 (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 200).toString(),
             );
 
@@ -1022,7 +1011,7 @@ const mcdRepayTest = async () => {
             ]);
             const functionData = repayRecipe.encodeForDsProxyCall();
 
-            await executeAction('TaskExecutor', functionData[1], proxy);
+            await executeAction('RecipeExecutor', functionData[1], proxy);
 
             const ratioAfter = await getRatio(mcdView, vaultId);
             const info2 = await getVaultInfo(

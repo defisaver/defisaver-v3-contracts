@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../helpers/CurveHelper.sol";
@@ -32,8 +32,8 @@ contract CurveWithdraw is ActionBase, CurveHelper {
     }
 
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -47,14 +47,16 @@ contract CurveWithdraw is ActionBase, CurveHelper {
             params.withdrawAmounts[i] = _parseParamUint(params.withdrawAmounts[i], _paramMapping[3 + i], _subData, _returnValues);
         }
 
-        _curveWithdraw(params);
+        bytes memory logData = _curveWithdraw(params);
+        emit ActionEvent("CurveWithdraw", logData);
+        return bytes32(0);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-
-        _curveWithdraw(params);
+        bytes memory logData = _curveWithdraw(params);
+        logger.logActionDirectEvent("CurveWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -65,7 +67,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Withdraws user deposited tokens from depositTarget
-    function _curveWithdraw(Params memory _params) internal {
+    function _curveWithdraw(Params memory _params) internal returns (bytes memory logData) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
         
         _params.lpToken.pullTokensIfNeeded(_params.sender, _params.burnAmount);
@@ -91,14 +93,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
             tokenAddr.withdrawTokens(_params.receiver, balanceDelta);
         }
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "CurveWithdraw",
-            abi.encode(
-                _params
-            )
-        );
+        logData = abi.encode(_params);
     }
 
     /// @notice Constructs payload for external contract call
@@ -131,7 +126,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
             }
         }
     }
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

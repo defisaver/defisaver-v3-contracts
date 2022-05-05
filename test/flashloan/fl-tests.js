@@ -99,7 +99,7 @@ const aaveFlTest = async () => {
                 }
                 await setBalance(assetInfo.address, proxy.address, hre.ethers.utils.parseUnits('0', 18));
                 await send(assetInfo.address, proxy.address, feeAmount);
-                await executeAction('TaskExecutor', functionData[1], proxy);
+                await executeAction('RecipeExecutor', functionData[1], proxy);
             });
         }
     });
@@ -151,7 +151,7 @@ const balancerFLTest = async () => {
 
             const functionData = basicFLRecipe.encodeForDsProxyCall();
 
-            await executeAction('TaskExecutor', functionData[1], proxy);
+            await executeAction('RecipeExecutor', functionData[1], proxy);
         });
     });
 };
@@ -203,7 +203,7 @@ const dydxFLTest = async () => {
 
                 const functionData = basicFLRecipe.encodeForDsProxyCall();
 
-                await executeAction('TaskExecutor', functionData[1], proxy);
+                await executeAction('RecipeExecutor', functionData[1], proxy);
             });
         }
     });
@@ -267,14 +267,14 @@ const makerFLTest = async () => {
 
             await send(assetInfo.address, proxy.address, feeAmount);
 
-            await executeAction('TaskExecutor', functionData[1], proxy);
+            await executeAction('RecipeExecutor', functionData[1], proxy);
         });
     });
 };
 const deployFLContracts = async () => {
     await redeploy('FLMaker');
     await redeploy('SendToken');
-    await redeploy('TaskExecutor');
+    await redeploy('RecipeExecutor');
     await redeploy('FLDyDx');
     await redeploy('FLBalancer');
     await redeploy('FLAaveV2');

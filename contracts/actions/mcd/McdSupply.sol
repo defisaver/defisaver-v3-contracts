@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../../interfaces/mcd/IManager.sol";
 import "../../interfaces/mcd/IVat.sol";
@@ -17,42 +16,39 @@ import "./helpers/McdHelper.sol";
 contract McdSupply is ActionBase, McdHelper {
     using TokenUtils for address;
 
+    struct Params {
+        uint256 vaultId;
+        uint256 amount;
+        address joinAddr;
+        address from;
+        address mcdManager;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable override returns (bytes32) {
-        (
-            uint256 vaultId,
-            uint256 amount,
-            address joinAddr,
-            address from,
-            address mcdManager
-        ) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        vaultId = _parseParamUint(vaultId, _paramMapping[0], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
-        joinAddr = _parseParamAddr(joinAddr, _paramMapping[2], _subData, _returnValues);
-        from = _parseParamAddr(from, _paramMapping[3], _subData, _returnValues);
+        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.joinAddr = _parseParamAddr(inputData.joinAddr, _paramMapping[2], _subData, _returnValues);
+        inputData.from = _parseParamAddr(inputData.from, _paramMapping[3], _subData, _returnValues);
+        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[4], _subData, _returnValues);
 
-        uint256 returnAmount = _mcdSupply(vaultId, amount, joinAddr, from, mcdManager);
-
+        (uint256 returnAmount, bytes memory logData) = _mcdSupply(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.from, inputData.mcdManager);
+        emit ActionEvent("McdSupply", logData);
         return bytes32(returnAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
-        (
-            uint256 vaultId,
-            uint256 amount,
-            address joinAddr,
-            address from,
-            address mcdManager
-        ) = parseInputs(_callData);
-
-        _mcdSupply(vaultId, amount, joinAddr, from, mcdManager);
+    function executeActionDirect(bytes memory _callData) public payable override {
+        Params memory inputData = parseInputs(_callData);
+        (, bytes memory logData) = _mcdSupply(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.from, inputData.mcdManager);
+        logger.logActionDirectEvent("McdSupply", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -74,7 +70,7 @@ contract McdSupply is ActionBase, McdHelper {
         address _joinAddr,
         address _from,
         address _mcdManager
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         address tokenAddr = getTokenFromJoin(_joinAddr);
 
         // if amount type(uint).max, pull current _from balance
@@ -94,14 +90,8 @@ contract McdSupply is ActionBase, McdHelper {
             _mcdManagerSupply(_mcdManager, _vaultId, tokenAddr, _joinAddr, _amount, vatAmount);
         }
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "McdSupply",
-            abi.encode(_vaultId, _amount, _joinAddr, _from, _mcdManager)
-        );
-
-        return _amount;
+        bytes memory logData = abi.encode(_vaultId, _amount, _joinAddr, _from, _mcdManager);
+        return (_amount, logData);
     }
 
     function _cropperSupply(
@@ -144,21 +134,7 @@ contract McdSupply is ActionBase, McdHelper {
         );
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
-        pure
-        returns (
-            uint256 vaultId,
-            uint256 amount,
-            address joinAddr,
-            address from,
-            address mcdManager
-        )
-    {
-        vaultId = abi.decode(_callData[0], (uint256));
-        amount = abi.decode(_callData[1], (uint256));
-        joinAddr = abi.decode(_callData[2], (address));
-        from = abi.decode(_callData[3], (address));
-        mcdManager = abi.decode(_callData[4], (address));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

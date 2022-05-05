@@ -1,6 +1,7 @@
 const { expect } = require('chai');
 const hre = require('hardhat');
 
+const { getAssetInfo } = require('@defisaver/tokens');
 const {
     balanceOf,
     getProxy,
@@ -28,6 +29,8 @@ const {
 
 const poolData = require('./poolData');
 
+const forkNum = 14340400;
+
 const curveDepositTest = async (testLength) => {
     describe('Curve-Deposit', function () {
         this.timeout(1000000);
@@ -37,7 +40,7 @@ const curveDepositTest = async (testLength) => {
         let proxy; let proxyAddr;
 
         before(async () => {
-            await resetForkToBlock(13000000);
+            await resetForkToBlock(forkNum);
 
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAddr = senderAcc.address;
@@ -117,7 +120,7 @@ const curveWithdrawTest = async (testLength) => {
         let proxy; let proxyAddr;
 
         before(async () => {
-            await resetForkToBlock(13000000);
+            await resetForkToBlock(forkNum);
 
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAddr = senderAcc.address;
@@ -280,7 +283,7 @@ const curveWithdrawExactTest = async (testLength) => {
         let proxy; let proxyAddr;
 
         before(async () => {
-            await resetForkToBlock(13000000);
+            await resetForkToBlock(forkNum);
 
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAddr = senderAcc.address;
@@ -443,7 +446,7 @@ const curveGaugeDepositTest = async (testLength) => {
         let curveView;
 
         before(async () => {
-            await resetForkToBlock(13000000);
+            await resetForkToBlock(forkNum);
 
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAddr = senderAcc.address;
@@ -541,7 +544,7 @@ const curveGaugeWithdrawTest = async (testLength) => {
         let curveView;
 
         before(async () => {
-            await resetForkToBlock(13000000);
+            await resetForkToBlock(forkNum);
 
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAddr = senderAcc.address;
@@ -646,21 +649,19 @@ const curveClaimFeesTest = async () => {
 
         const claimFor = '0x7563839e02004d3f419ff78df4256e9c5dd713ed';
         const WEEK = 3600 * 24 * 7;
+        const crv3crvToken = getAssetInfo('3Crv').address;
 
         let senderAcc;
         let proxy;
-        let curveView; let crv3crvToken;
         let feesRewarded;
 
         before(async () => {
-            await resetForkToBlock(13000000);
+            await resetForkToBlock(forkNum);
 
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
 
             await redeploy('CurveClaimFees');
-            curveView = await redeploy('CurveView');
-            crv3crvToken = await curveView['CRV_3CRV_TOKEN_ADDR()']();
         });
 
         after(async () => {

@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
-import "../../../DS/DSMath.sol";
 import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
 import "./helpers/UniV3Helper.sol";
 
 /// @title Supplies liquidity to a UniswapV3 position represented by TokenId
-contract UniSupplyV3 is ActionBase, DSMath, UniV3Helper{
+contract UniSupplyV3 is ActionBase, UniV3Helper{
     using TokenUtils for address;
     
     /// @param tokenId - The ID of the token for which liquidity is being increased
@@ -36,8 +34,8 @@ contract UniSupplyV3 is ActionBase, DSMath, UniV3Helper{
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -47,15 +45,16 @@ contract UniSupplyV3 is ActionBase, DSMath, UniV3Helper{
         uniData.amount0Desired = _parseParamUint(uniData.amount0Desired, _paramMapping[1], _subData, _returnValues);
         uniData.amount1Desired = _parseParamUint(uniData.amount1Desired, _paramMapping[2], _subData, _returnValues);
 
-        uint128 liquidity = _uniSupplyPosition(uniData);
+        (uint128 liquidity, bytes memory logData) = _uniSupplyPosition(uniData);
+        emit ActionEvent("UniSupplyV3", logData);
         return bytes32(uint256(liquidity));
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory uniData = parseInputs(_callData);
-        _uniSupplyPosition(uniData);
-        
+        (, bytes memory logData) = _uniSupplyPosition(uniData);
+        logger.logActionDirectEvent("UniSupplyV3", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -67,7 +66,7 @@ contract UniSupplyV3 is ActionBase, DSMath, UniV3Helper{
 
     function _uniSupplyPosition(Params memory _uniData)
         internal
-        returns(uint128 liquidity)
+        returns(uint128 liquidity, bytes memory logData)
     {  
         // fetch tokens from address
         uint amount0Pulled = _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);
@@ -85,16 +84,10 @@ contract UniSupplyV3 is ActionBase, DSMath, UniV3Helper{
         (liquidity, amount0, amount1) = _uniSupply(_uniData);
 
         //send leftovers
-        _uniData.token0.withdrawTokens(_uniData.from, sub(_uniData.amount0Desired, amount0));
-        _uniData.token1.withdrawTokens(_uniData.from, sub(_uniData.amount1Desired, amount1));
+        _uniData.token0.withdrawTokens(_uniData.from, _uniData.amount0Desired - amount0);
+        _uniData.token1.withdrawTokens(_uniData.from, _uniData.amount1Desired - amount1);
 
-        logger.Log(
-                address(this),
-                msg.sender,
-                "UniSupplyV3",
-                abi.encode(_uniData, liquidity, amount0, amount1)
-            );
-
+        logData = abi.encode(_uniData, liquidity, amount0, amount1);
     }    
     /// @dev increases liquidity by token amounts desired
     /// @return liquidity new liquidity amount
@@ -118,13 +111,13 @@ contract UniSupplyV3 is ActionBase, DSMath, UniV3Helper{
         (liquidity, amount0, amount1) = positionManager.increaseLiquidity(increaseLiquidityParams);
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
+    function parseInputs(bytes memory _callData)
+       public
         pure
         returns (
             Params memory uniData
         )
     {
-        uniData = abi.decode(_callData[0], (Params));
+        uniData = abi.decode(_callData, (Params));
     }
 }

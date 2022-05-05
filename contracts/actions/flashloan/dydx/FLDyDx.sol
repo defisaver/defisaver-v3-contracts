@@ -1,26 +1,30 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
-import "../../../core/Subscriptions.sol";
+import "../../../interfaces/IDSProxy.sol";
 import "../../../interfaces/ILendingPool.sol";
 import "../../../interfaces/IWETH.sol";
 import "../../../interfaces/IFLParamGetter.sol";
 import "../../../interfaces/aave/ILendingPoolAddressesProvider.sol";
-import "../../../core/StrategyData.sol";
+import "../../../core/strategy/StrategyModel.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../../utils/FLFeeFaucet.sol";
 import "../../../utils/ReentrancyGuard.sol";
 import "../../ActionBase.sol";
 import "./DydxFlashLoanBase.sol";
+import "../../../interfaces/flashloan/IFlashLoanBase.sol";
 import "../helpers/FLHelper.sol";
 
 /// @title Action that gets and receives a FL from DyDx protocol
-contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard {
+contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard, IFlashLoanBase {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
+    //Caller not dydx
+    error OnlyDyDxCallerError();
+    //FL taker must be this contract
+    error SameCallerError();
     string constant ERR_ONLY_DYDX_CALLER = "Caller not dydx";
     string constant ERR_SAME_CALLER = "FL taker must be this contract";
     string constant ERR_WRONG_PAYBACK_AMOUNT = "Wrong FL payback amount sent";
@@ -29,38 +33,33 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
 
     FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
 
-    /// @dev Function sig of TaskExecutor._executeActionsFromFL()
-    bytes4 public constant CALLBACK_SELECTOR = 0xd6741b9e;
-
-    bytes32 constant TASK_EXECUTOR_ID = keccak256("TaskExecutor");
+    bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory,
+        bytes memory _callData,
+        bytes32[] memory,
         uint8[] memory,
         bytes32[] memory
     ) public payable override returns (bytes32) {
-        (uint256 amount, address token, address flParamGetterAddr, bytes memory flParamGetterData) =
-            parseInputs(_callData);
 
+        FlashLoanParams memory inputData = parseInputs(_callData);
          // if we want to get on chain info about FL params
-        if (flParamGetterAddr != address(0)) {
+        if (inputData.flParamGetterAddr != address(0)) {
             (address[] memory tokens, uint256[] memory amounts, ) =
-                IFLParamGetter(flParamGetterAddr).getFlashLoanParams(flParamGetterData);
+                IFLParamGetter(inputData.flParamGetterAddr).getFlashLoanParams(inputData.flParamGetterData);
 
-            amount = amounts[0];
-            token = tokens[0];
+            inputData.amounts[0] = amounts[0];
+            inputData.tokens[0] = tokens[0];
         }
 
-        bytes memory taskData = _callData[_callData.length - 1];
-        uint256 flAmount = _flDyDx(amount, token, abi.encode(taskData, amount, token));
-
+        bytes memory recipeData = inputData.recipeData;
+        uint256 flAmount = _flDyDx(inputData.amounts[0], inputData.tokens[0], abi.encode(recipeData, inputData.amounts[0], inputData.tokens[0]));
         return bytes32(flAmount);
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes[] memory _callData) public payable override {}
+    function executeActionDirect(bytes memory _callData) public payable override {}
 
     /// @inheritdoc ActionBase
     function actionType() public pure override returns (uint8) {
@@ -72,14 +71,14 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
     /// @notice Gets a Fl from Dydx and returns back the execution to the action address
     /// @param _amount Amount of tokens to FL
     /// @param _token Token address we want to FL
-    /// @param _data Rest of the data we have in the task
+    /// @param _data Rest of the data we have in the recipe
     function _flDyDx(
         uint256 _amount,
         address _token,
         bytes memory _data
     ) internal returns (uint256) {
 
-        address payable receiver = address(this);
+        address payable receiver = payable(address(this));
 
         ISoloMargin solo = ISoloMargin(SOLO_MARGIN_ADDRESS);
 
@@ -101,56 +100,43 @@ contract FLDyDx is ActionBase, StrategyData, DydxFlashLoanBase, ReentrancyGuard 
 
         solo.operate(accountInfos, operations);
 
-        logger.Log(address(this), msg.sender, "FLDyDx", abi.encode(_amount, _token));
+        emit ActionEvent("FLDyDx", abi.encode(_amount, _token));
 
         return _amount;
     }
 
-    /// @notice Dydx callback function that formats and calls back TaskExecutor
+    /// @notice Dydx callback function that formats and calls back RecipeExecutor
     function callFunction(
         address _initiator,
         Account.Info memory,
         bytes memory _data
     ) public nonReentrant {
-        require(msg.sender == SOLO_MARGIN_ADDRESS, ERR_ONLY_DYDX_CALLER);
-        require(_initiator == address(this), ERR_SAME_CALLER);
-
+        if (msg.sender != SOLO_MARGIN_ADDRESS){
+            revert OnlyDyDxCallerError();
+        }
+        if (_initiator != address(this)){
+            revert SameCallerError();
+        }
         (bytes memory callData, uint256 amount, address tokenAddr) =
             abi.decode(_data, (bytes, uint256, address));
 
-        (Task memory currTask, address proxy) = abi.decode(callData, (Task, address));
-
+        (Recipe memory currRecipe, address proxy) = abi.decode(callData, (Recipe, address));
         tokenAddr.withdrawTokens(proxy, amount);
 
-        address payable taskExecutor = payable(registry.getAddr(TASK_EXECUTOR_ID));
-
+        address payable RecipeExecutor = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
-            taskExecutor,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currTask, amount)
+            RecipeExecutor,
+            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, amount)
         );
-
         // return FL (just send funds to this addr)
         require(tokenAddr.getBalance(address(this)) == amount, ERR_WRONG_PAYBACK_AMOUNT);
         
         flFeeFaucet.my2Wei(tokenAddr); // get extra 2 wei for DyDx fee
     }
 
-
-    function parseInputs(bytes[] memory _callData)
-        public
-        pure
-        returns (
-            uint256 amount,
-            address token,
-            address flParamGetterAddr,
-            bytes memory flParamGetterData
-        )
-    {
-        amount = abi.decode(_callData[0], (uint256));
-        token = abi.decode(_callData[1], (address));
-        flParamGetterAddr = abi.decode(_callData[2], (address));
-        flParamGetterData = abi.decode(_callData[3], (bytes));
+    function parseInputs(bytes memory _callData) public pure returns (FlashLoanParams memory inputData) {
+        inputData = abi.decode(_callData, (FlashLoanParams));
     }
 
     // solhint-disable-next-line no-empty-blocks

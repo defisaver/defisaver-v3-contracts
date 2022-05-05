@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 
 import "../../../DS/DSMath.sol";
 import "../../../interfaces/reflexer/ISAFEEngine.sol";
@@ -15,6 +15,8 @@ contract ReflexerHelper is DSMath, MainnetReflexerAddresses {
     ISAFEEngine public constant safeEngine = ISAFEEngine(SAFE_ENGINE_ADDRESS);
     ISAFEManager public constant safeManager = ISAFEManager(SAFE_MANAGER_ADDRESS);
 
+    error IntOverflow();
+    
     /// @notice Returns the underlying token address from the adapterAddr
     /// @param _adapterAddr  address to check
     function getTokenFromAdapter(address _adapterAddr) internal view returns (address) {
@@ -26,19 +28,21 @@ contract ReflexerHelper is DSMath, MainnetReflexerAddresses {
     /// @param _adapterAddr Adapter address of the collateral
     /// @param _amount Number to be converted
     function convertTo18(address _adapterAddr, uint256 _amount) internal view returns (uint256) {
-        return mul(_amount, 10**sub(18, IBasicTokenAdapters(_adapterAddr).decimals()));
+        return _amount * (10 ** (18 - IBasicTokenAdapters(_adapterAddr).decimals()));
     }
 
     /// @notice Converts a uint to int and checks if positive
     /// @param _x Number to be converted
     function toPositiveInt(uint256 _x) internal pure returns (int256 y) {
         y = int256(_x);
-        require(y >= 0, "int-overflow");
+        if (y < 0){
+            revert IntOverflow();
+        }
     }
 
     /// @notice Converts a number to Rad precision
     /// @param _wad The input number in wad precision
     function toRad(uint256 _wad) internal pure returns (uint256) {
-        return mul(_wad, RAY);
+        return _wad * RAY;
     }
 }

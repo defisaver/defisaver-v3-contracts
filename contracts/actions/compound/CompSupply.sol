@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../../interfaces/IWETH.sol";
 import "../../utils/TokenUtils.sol";
@@ -11,34 +10,38 @@ import "./helpers/CompHelper.sol";
 /// @title Supply a token to Compound
 contract CompSupply is ActionBase, CompHelper {
     using TokenUtils for address;
+    struct Params {
+        address cTokenAddr;
+        uint256 amount;
+        address from;
+        bool enableAsColl;
+    }
 
-    string public constant ERR_COMP_SUPPLY_FAILED = "Compound supply failed";
+    error CompSupplyError();
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (address cTokenAddr, uint256 amount, address from, bool enableAsColl) =
-            parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        cTokenAddr = _parseParamAddr(cTokenAddr, _paramMapping[0], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
-        from = _parseParamAddr(from, _paramMapping[2], _subData, _returnValues);
+        params.cTokenAddr = _parseParamAddr(params.cTokenAddr, _paramMapping[0], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
 
-        uint256 withdrawAmount = _supply(cTokenAddr, amount, from, enableAsColl);
-
+        (uint256 withdrawAmount, bytes memory logData) = _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
+        emit ActionEvent("CompSupply", logData);
         return bytes32(withdrawAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
-        (address cTokenAddr, uint256 amount, address from, bool enableAsColl) =
-            parseInputs(_callData);
-
-        _supply(cTokenAddr, amount, from, enableAsColl);
+    function executeActionDirect(bytes memory _callData) public payable override {
+        Params memory params = parseInputs(_callData);
+        (, bytes memory logData) = _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
+        logger.logActionDirectEvent("CompSupply", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -59,7 +62,7 @@ contract CompSupply is ActionBase, CompHelper {
         uint256 _amount,
         address _from,
         bool _enableAsColl
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
         // if amount type(uint256).max, pull current _from balance
@@ -78,34 +81,19 @@ contract CompSupply is ActionBase, CompHelper {
         if (tokenAddr != TokenUtils.WETH_ADDR) {
             tokenAddr.approveToken(_cTokenAddr, _amount);
 
-            require(ICToken(_cTokenAddr).mint(_amount) == NO_ERROR, ERR_COMP_SUPPLY_FAILED);
+            if (ICToken(_cTokenAddr).mint(_amount) != NO_ERROR){
+                revert CompSupplyError();
+            }
         } else {
             TokenUtils.withdrawWeth(_amount);
             ICToken(_cTokenAddr).mint{value: _amount}(); // reverts on fail
         }
-        logger.Log(
-            address(this),
-            msg.sender,
-            "CompSupply",
-            abi.encode(tokenAddr, _amount, _from, _enableAsColl)
-        );
 
-        return _amount;
+        bytes memory logData = abi.encode(tokenAddr, _amount, _from, _enableAsColl);
+        return (_amount, logData);
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
-        pure
-        returns (
-            address cTokenAddr,
-            uint256 amount,
-            address from,
-            bool enableAsColl
-        )
-    {
-        cTokenAddr = abi.decode(_callData[0], (address));
-        amount = abi.decode(_callData[1], (uint256));
-        from = abi.decode(_callData[2], (address));
-        enableAsColl = abi.decode(_callData[3], (bool));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

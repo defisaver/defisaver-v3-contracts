@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
@@ -21,8 +20,8 @@ contract LiquitySPWithdraw is ActionBase, LiquityHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -32,15 +31,16 @@ contract LiquitySPWithdraw is ActionBase, LiquityHelper {
         params.wethTo = _parseParamAddr(params.wethTo, _paramMapping[2], _subData, _returnValues);
         params.lqtyTo = _parseParamAddr(params.lqtyTo, _paramMapping[3], _subData, _returnValues);
 
-        params.lusdAmount = _liquitySPWithdraw(params);
-        return bytes32(params.lusdAmount);
+        (uint256 withdrawnAmount, bytes memory logData) = _liquitySPWithdraw(params);
+        emit ActionEvent("LiquitySPWithdraw", logData);
+        return bytes32(withdrawnAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-
-        _liquitySPWithdraw(params);
+        (, bytes memory logData) = _liquitySPWithdraw(params);
+        logger.logActionDirectEvent("LiquitySPWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -51,36 +51,26 @@ contract LiquitySPWithdraw is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Withdraws LUSD from the user's stability pool deposit
-    function _liquitySPWithdraw(Params memory _params) internal returns (uint256) {
+    function _liquitySPWithdraw(Params memory _params) internal returns (uint256, bytes memory) {
         uint256 ethGain = StabilityPool.getDepositorETHGain(address(this));
-        uint256 lqtyBefore = LQTYTokenAddr.getBalance(address(this));
+        uint256 lqtyBefore = LQTY_TOKEN_ADDRESS.getBalance(address(this));
 
         uint256 deposit = StabilityPool.getCompoundedLUSDDeposit(address(this));
         _params.lusdAmount = deposit > _params.lusdAmount ? _params.lusdAmount : deposit;
 
         StabilityPool.withdrawFromSP(_params.lusdAmount);
         // Amount goes through min(amount, depositedAmount)
-        LUSDTokenAddr.withdrawTokens(_params.to, _params.lusdAmount);
+        LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, _params.lusdAmount);
 
-        uint256 lqtyGain = LQTYTokenAddr.getBalance(address(this)).sub(lqtyBefore);
+        uint256 lqtyGain = LQTY_TOKEN_ADDRESS.getBalance(address(this)).sub(lqtyBefore);
 
         withdrawStabilityGains(ethGain, lqtyGain, _params.wethTo, _params.lqtyTo);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "LiquitySPWithdraw",
-            abi.encode(
-                _params,
-                ethGain,
-                lqtyGain
-            )
-        );
-
-        return _params.lusdAmount;
+        bytes memory logData = abi.encode(_params, ethGain, lqtyGain);
+        return (_params.lusdAmount, logData);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

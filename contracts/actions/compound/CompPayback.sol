@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../../interfaces/compound/IComptroller.sol";
 import "../../interfaces/compound/ICToken.sol";
@@ -9,45 +7,42 @@ import "../../interfaces/IWETH.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
-
 /// @title Payback a token a user borrowed from Compound
 contract CompPayback is ActionBase, CompHelper {
     using TokenUtils for address;
 
-    string public constant ERR_COMP_PAYBACK_FAILED = "Compound payback failed";
+    struct Params {
+        address cTokenAddr;
+        uint256 amount;
+        address from;
+        address onBehalf;
+    }
+    error CompPaybackError();
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (
-            address cTokenAddr,
-            uint256 amount,
-            address from,
-            address onBehalf
-        ) = parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        cTokenAddr = _parseParamAddr(cTokenAddr, _paramMapping[0], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
-        from = _parseParamAddr(from, _paramMapping[2], _subData, _returnValues);
-        uint256 withdrawAmount = _payback(cTokenAddr, amount, from, onBehalf);
+        params.cTokenAddr = _parseParamAddr(params.cTokenAddr, _paramMapping[0], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
+        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
 
+        (uint256 withdrawAmount, bytes memory logData) = _payback(params.cTokenAddr, params.amount, params.from, params.onBehalf);
+        emit ActionEvent("CompPayback", logData);
         return bytes32(withdrawAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
-        (
-            address cTokenAddr,
-            uint256 amount, 
-            address from,
-            address onBehalf
-        ) = parseInputs(_callData);
-
-        _payback(cTokenAddr, amount, from, onBehalf);
+    function executeActionDirect(bytes memory _callData) public payable override {
+        Params memory params = parseInputs(_callData);
+        (, bytes memory logData) = _payback(params.cTokenAddr, params.amount, params.from, params.onBehalf);
+        logger.logActionDirectEvent("CompPayback", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -68,14 +63,14 @@ contract CompPayback is ActionBase, CompHelper {
         uint256 _amount,
         address _from,
         address _onBehalf
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
         // default to onBehalf of proxy
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }
-
+        
         uint256 maxDebt = ICToken(_cTokenAddr).borrowBalanceCurrent(_onBehalf);
         _amount = _amount > maxDebt ? maxDebt : _amount;
 
@@ -84,30 +79,19 @@ contract CompPayback is ActionBase, CompHelper {
         // we always expect actions to deal with WETH never Eth
         if (tokenAddr != TokenUtils.WETH_ADDR) {
             tokenAddr.approveToken(_cTokenAddr, _amount);
-            require(ICToken(_cTokenAddr).repayBorrowBehalf(_onBehalf ,_amount) == NO_ERROR, ERR_COMP_PAYBACK_FAILED);
+            if (ICToken(_cTokenAddr).repayBorrow(_amount) != NO_ERROR){
+                revert CompPaybackError();
+            }
         } else {
             TokenUtils.withdrawWeth(_amount);
             ICToken(_cTokenAddr).repayBorrowBehalf{value: _amount}(_onBehalf); // reverts on fail
         }
 
-        logger.Log(address(this), msg.sender, "CompPayback", abi.encode(tokenAddr, _amount, _from, _onBehalf));
-
-        return _amount;
+        bytes memory logData = abi.encode(tokenAddr, _amount, _from, _onBehalf);
+        return (_amount, logData);
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
-        pure
-        returns (
-            address cTokenAddr,
-            uint256 amount,
-            address from,
-            address onBehalf
-        )
-    {
-        cTokenAddr = abi.decode(_callData[0], (address));
-        amount = abi.decode(_callData[1], (uint256));
-        from = abi.decode(_callData[2], (address));
-        onBehalf = abi.decode(_callData[3], (address));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

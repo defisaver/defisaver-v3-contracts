@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
-import "../../../DS/DSMath.sol";
 import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
 import "./helpers/UniV3Helper.sol";
 
 /// @title Mints NFT that represents a position in uni v3
-contract UniMintV3 is ActionBase, DSMath, UniV3Helper{
+contract UniMintV3 is ActionBase, UniV3Helper{
     using TokenUtils for address;
     
     struct Params {
@@ -29,8 +27,8 @@ contract UniMintV3 is ActionBase, DSMath, UniV3Helper{
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -38,16 +36,17 @@ contract UniMintV3 is ActionBase, DSMath, UniV3Helper{
 
         uniData.amount0Desired = _parseParamUint(uniData.amount0Desired, _paramMapping[0], _subData, _returnValues);
         uniData.amount1Desired = _parseParamUint(uniData.amount1Desired, _paramMapping[1], _subData, _returnValues);
-        uint256 tokenId = _uniCreatePosition(uniData);
 
+        (uint256 tokenId, bytes memory logData) = _uniCreatePosition(uniData);
+        emit ActionEvent("UniMintV3", logData);
         return bytes32(tokenId);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory uniData = parseInputs(_callData);
-        _uniCreatePosition(uniData);
-        
+        (, bytes memory logData) = _uniCreatePosition(uniData);
+        logger.logActionDirectEvent("UniMintV3", logData);
     }
     
     /// @inheritdoc ActionBase
@@ -57,7 +56,7 @@ contract UniMintV3 is ActionBase, DSMath, UniV3Helper{
     
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _uniCreatePosition(Params memory _uniData) internal returns (uint256 tokenId){
+    function _uniCreatePosition(Params memory _uniData) internal returns (uint256 tokenId, bytes memory logData){
             // fetch tokens from address;
             uint amount0Pulled = _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);        
             uint amount1Pulled = _uniData.token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
@@ -75,15 +74,10 @@ contract UniMintV3 is ActionBase, DSMath, UniV3Helper{
             (tokenId, liquidity, amount0, amount1) = _uniMint(_uniData);
 
             //send leftovers
-            _uniData.token0.withdrawTokens(_uniData.from, sub(_uniData.amount0Desired, amount0));
-            _uniData.token1.withdrawTokens(_uniData.from, sub(_uniData.amount1Desired, amount1));
+            _uniData.token0.withdrawTokens(_uniData.from, _uniData.amount0Desired - amount0);
+            _uniData.token1.withdrawTokens(_uniData.from, _uniData.amount1Desired - amount1);
             
-            logger.Log(
-                address(this),
-                msg.sender,
-                "UniMintV3",
-                abi.encode(_uniData, tokenId, liquidity, amount0, amount1)
-            );
+            logData = abi.encode(_uniData, tokenId, liquidity, amount0, amount1);
     }
 
     /// @dev mints new NFT that represents a position with selected parameters
@@ -114,13 +108,13 @@ contract UniMintV3 is ActionBase, DSMath, UniV3Helper{
         (tokenId, liquidity, amount0, amount1) = positionManager.mint(mintParams);
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
+    function parseInputs(bytes memory _callData)
+       public
         pure
         returns (
             Params memory uniData
         )
     {   
-        uniData = abi.decode(_callData[0], (Params));
+        uniData = abi.decode(_callData, (Params));
     }
 }

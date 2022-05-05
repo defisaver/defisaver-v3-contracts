@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../../../interfaces/uniswap/IUniswapV2Factory.sol";
 import "../../../interfaces/exchange/IUniswapRouter.sol";
@@ -26,8 +25,8 @@ contract UniWithdraw is ActionBase, UniV2Helper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -44,16 +43,16 @@ contract UniWithdraw is ActionBase, UniV2Helper {
         uniData.to = _parseParamAddr(uniData.to, _paramMapping[3], _subData, _returnValues);
         uniData.from = _parseParamAddr(uniData.from, _paramMapping[4], _subData, _returnValues);
 
-        uint256 liqAmount = _uniWithdraw(uniData);
-
+        (uint256 liqAmount, bytes memory logData) = _uniWithdraw(uniData);
+        emit ActionEvent("UniWithdraw", logData);
         return bytes32(liqAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         UniWithdrawData memory uniData = parseInputs(_callData);
-
-        _uniWithdraw(uniData);
+        (, bytes memory logData) = _uniWithdraw(uniData);
+        logger.logActionDirectEvent("UniWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -65,7 +64,7 @@ contract UniWithdraw is ActionBase, UniV2Helper {
 
     /// @notice Removes liquidity from uniswap
     /// @param _uniData All the required data to withdraw from uni
-    function _uniWithdraw(UniWithdrawData memory _uniData) internal returns (uint256) {
+    function _uniWithdraw(UniWithdrawData memory _uniData) internal returns (uint256, bytes memory) {
         address lpTokenAddr = factory.getPair(_uniData.tokenA, _uniData.tokenB);
 
         uint pulledTokens = lpTokenAddr.pullTokensIfNeeded(_uniData.from, _uniData.liquidity);
@@ -76,14 +75,8 @@ contract UniWithdraw is ActionBase, UniV2Helper {
         // withdraw liq. and get info how much we got out
         (uint256 amountA, uint256 amountB) = _withdrawLiquidity(_uniData);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "UniWithdraw",
-            abi.encode(_uniData, amountA, amountB)
-        );
-
-        return _uniData.liquidity;
+        bytes memory logData = abi.encode(_uniData, amountA, amountB);
+        return (_uniData.liquidity, logData);
     }
 
     function _withdrawLiquidity(UniWithdrawData memory _uniData)
@@ -101,11 +94,11 @@ contract UniWithdraw is ActionBase, UniV2Helper {
         );
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
+    function parseInputs(bytes memory _callData)
+       public
         pure
         returns (UniWithdrawData memory uniData)
     {
-        uniData = abi.decode(_callData[0], (UniWithdrawData));
+        uniData = abi.decode(_callData, (UniWithdrawData));
     }
 }

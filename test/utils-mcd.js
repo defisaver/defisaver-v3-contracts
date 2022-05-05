@@ -4,6 +4,7 @@ const hre = require('hardhat');
 const makerVersion = '1.9.9';
 
 const MCD_MANAGER_ADDR = '0x5ef30b9986345249bc32d8928B7ee64DE9435E39';
+const GET_CDPS_ADDR = '0x36a724Bd100c39f0Ea4D3A20F7097eE01A8Ff573';
 const CDP_REGISTRY = '0xBe0274664Ca7A68d6b5dF826FB3CcB7c620bADF3';
 const CROPPER_ADDR = '0x8377CD01a5834a6EaD3b7efb482f678f2092b77e';
 const LDO_ADDR = '0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32';
@@ -27,7 +28,7 @@ const canGenerateDebt = async (ilkInfo) => {
     const debtCeiling = Math.round(ilkData.line / 1e45);
     const debt = (ilkData.Art / 1e18) * (ilkData.rate / 1e27);
 
-    return debtCeiling > (debt + 50000);
+    return debtCeiling > (debt + 40_0000);
 };
 
 const fetchMakerAddresses = async (version = makerVersion, params = {}) => {
@@ -38,11 +39,11 @@ const fetchMakerAddresses = async (version = makerVersion, params = {}) => {
     return res.data;
 };
 
-const getVaultsForUser = async (user, makerAddresses) => {
+const getVaultsForUser = async (user) => {
     const GetCdps = await
-    hre.ethers.getContractAt('IGetCdps', makerAddresses.GET_CDPS);
+    hre.ethers.getContractAt('IGetCdps', GET_CDPS_ADDR);
 
-    const vaults = await GetCdps.getCdpsAsc(makerAddresses.CDP_MANAGER, user);
+    const vaults = await GetCdps.getCdpsAsc(MCD_MANAGER_ADDR, user);
 
     return vaults;
 };
@@ -86,6 +87,20 @@ const getVaultInfo = async (mcdView, vaultId, ilk, mcdManager = MCD_MANAGER_ADDR
     };
 };
 
+const getNextEthPrice = async () => {
+    try {
+        const pipAddr = '0x81FE72B5A8d1A857d176C3E7d5Bd2679A9B85763';
+        const priceStorage = await hre.ethers.provider.getStorageAt(pipAddr, 4);
+
+        const priceInBigNum = hre.ethers.BigNumber.from(`0x${priceStorage.slice(-32)}`);
+
+        return priceInBigNum.toString();
+    } catch (err) {
+        console.log(err);
+        return 0;
+    }
+};
+
 const castSpell = async (spellAddr) => {
     const dssSpell = await hre.ethers.getContractAt('IDssSpell', spellAddr);
 
@@ -121,6 +136,7 @@ module.exports = {
     getVaultInfoRaw,
     getVaultInfo,
     canGenerateDebt,
+    getNextEthPrice,
     getCropJoinVaultIds,
     getCropJoinVaultId,
     castSpell,

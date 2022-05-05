@@ -1,16 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "./helpers/LiquityHelper.sol";
 import "../../utils/TokenUtils.sol";
-import "../../utils/SafeMath.sol";
 import "../ActionBase.sol";
 
 contract LiquityRedeem is ActionBase, LiquityHelper {
     using TokenUtils for address;
-    using SafeMath for uint256;
 
     struct Params {
         uint256 lusdAmount;
@@ -26,8 +23,8 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -48,15 +45,17 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
             _returnValues
         );
 
-        uint256 ethRedeemed = _liquityRedeem(params);
+        (uint256 ethRedeemed, bytes memory logData) = _liquityRedeem(params);
+        emit ActionEvent("LiquityRedeem", logData);
         return bytes32(ethRedeemed);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
-        _liquityRedeem(params);
+        (, bytes memory logData) = _liquityRedeem(params);
+        logger.logActionDirectEvent("LiquityRedeem", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -67,13 +66,13 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Redeems ETH(wrapped) using LUSD with the target price of LUSD = 1$
-    function _liquityRedeem(Params memory _params) internal returns (uint256) {
+    function _liquityRedeem(Params memory _params) internal returns (uint256 ethRedeemed, bytes memory logData) {
         if (_params.lusdAmount == type(uint256).max) {
-            _params.lusdAmount = LUSDTokenAddr.getBalance(_params.from);
+            _params.lusdAmount = LUSD_TOKEN_ADDRESS.getBalance(_params.from);
         }
-        LUSDTokenAddr.pullTokensIfNeeded(_params.from, _params.lusdAmount);
+        LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
 
-        uint256 lusdBefore = LUSDTokenAddr.getBalance(address(this));
+        uint256 lusdBefore = LUSD_TOKEN_ADDRESS.getBalance(address(this));
         uint256 ethBefore = address(this).balance;
 
         TroveManager.redeemCollateral(
@@ -86,29 +85,22 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
             _params.maxFeePercentage
         );
 
-        uint256 lusdAmountUsed = lusdBefore.sub(LUSDTokenAddr.getBalance(address(this)));   // It isn't guaranteed that the whole requested LUSD amount will be used
-        uint256 lusdToReturn = _params.lusdAmount.sub(lusdAmountUsed);
-        uint256 ethRedeemed = address(this).balance.sub(ethBefore);
+        uint256 lusdAmountUsed = lusdBefore - (LUSD_TOKEN_ADDRESS.getBalance(address(this)));   // It isn't guaranteed that the whole requested LUSD amount will be used
+        uint256 lusdToReturn = _params.lusdAmount - lusdAmountUsed;
+        ethRedeemed = address(this).balance -ethBefore;
 
         withdrawStaking(ethRedeemed, lusdToReturn, _params.to, _params.from);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "LiquityRedeem",
-            abi.encode(
-                lusdAmountUsed,
-                ethRedeemed,
-                _params.maxFeePercentage,
-                _params.from,
-                _params.to
-            )
+        logData = abi.encode(
+            lusdAmountUsed,
+            ethRedeemed,
+            _params.maxFeePercentage,
+            _params.from,
+            _params.to
         );
-
-        return ethRedeemed;
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

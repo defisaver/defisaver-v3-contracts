@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
@@ -11,29 +9,35 @@ contract SendToken is ActionBase {
 
     using TokenUtils for address;
 
-    /// @inheritdoc ActionBase
-    function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
-        uint8[] memory _paramMapping,
-        bytes32[] memory _returnValues
-    ) public virtual payable override returns (bytes32) {
-        (address tokenAddr, address to, uint amount) = parseInputs(_callData);
-
-        tokenAddr = _parseParamAddr(tokenAddr, _paramMapping[0], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[1], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[2], _subData, _returnValues);
-
-        amount = _sendToken(tokenAddr, to, amount);
-
-        return bytes32(amount);
+    struct Params {
+        address tokenAddr;
+        address to;
+        uint256 amount;
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
-        (address tokenAddr, address to, uint amount) = parseInputs(_callData);
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory _subData,
+        uint8[] memory _paramMapping,
+        bytes32[] memory _returnValues
+    ) public virtual payable override returns (bytes32) {
+        Params memory inputData = parseInputs(_callData);
 
-        _sendToken(tokenAddr, to, amount);
+        inputData.tokenAddr = _parseParamAddr(inputData.tokenAddr, _paramMapping[0], _subData, _returnValues);
+        inputData.to = _parseParamAddr(inputData.to, _paramMapping[1], _subData, _returnValues);
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[2], _subData, _returnValues);
+
+        inputData.amount = _sendToken(inputData.tokenAddr, inputData.to, inputData.amount);
+
+        return bytes32(inputData.amount);
+    }
+
+    /// @inheritdoc ActionBase
+    function executeActionDirect(bytes memory _callData) public payable override {
+        Params memory inputData = parseInputs(_callData);
+
+        _sendToken(inputData.tokenAddr, inputData.to, inputData.amount);
     }
 
     /// @inheritdoc ActionBase
@@ -56,17 +60,7 @@ contract SendToken is ActionBase {
         return _amount;
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
-        pure
-        returns (
-            address tokenAddr,
-            address to,
-            uint amount
-        )
-    {
-        tokenAddr = abi.decode(_callData[0], (address));
-        to = abi.decode(_callData[1], (address));
-        amount = abi.decode(_callData[2], (uint256));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

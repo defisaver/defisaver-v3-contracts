@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 
 abstract contract IPipInterface {
     function read() public virtual returns (bytes32);

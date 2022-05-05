@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../../interfaces/IWETH.sol";
 import "../../utils/TokenUtils.sol";
@@ -12,29 +11,35 @@ import "./helpers/DyDxHelper.sol";
 contract DyDxWithdraw is ActionBase, DyDxHelper {
     using TokenUtils for address;
 
-    /// @inheritdoc ActionBase
-    function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
-        uint8[] memory _paramMapping,
-        bytes32[] memory _returnValues
-    ) public payable virtual override returns (bytes32) {
-        (address tokenAddr, uint256 amount, address to) = parseInputs(_callData);
-
-        tokenAddr = _parseParamAddr(tokenAddr, _paramMapping[0], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[2], _subData, _returnValues);
-
-        uint256 withdrawAmount = _withdraw(tokenAddr, amount, to);
-
-        return bytes32(withdrawAmount);
+    struct Params {
+        address tokenAddr;
+        uint256 amount;
+        address to;
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
-        (address tokenAddr, uint256 amount, address from) = parseInputs(_callData);
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory _subData,
+        uint8[] memory _paramMapping,
+        bytes32[] memory _returnValues
+    ) public payable virtual override returns (bytes32) {
+        Params memory params = parseInputs(_callData);
 
-        _withdraw(tokenAddr, amount, from);
+        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[0], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
+
+        (uint256 withdrawnAmount, bytes memory logData) = _withdraw(params.tokenAddr, params.amount, params.to);
+        emit ActionEvent("DyDxWithdraw", logData);
+        return bytes32(withdrawnAmount);
+    }
+
+    /// @inheritdoc ActionBase
+    function executeActionDirect(bytes memory _callData) public payable override {
+        Params memory params = parseInputs(_callData);
+        (, bytes memory logData) = _withdraw(params.tokenAddr, params.amount, params.to);
+        logger.logActionDirectEvent("DyDxWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -52,7 +57,7 @@ contract DyDxWithdraw is ActionBase, DyDxHelper {
         address _tokenAddr,
         uint256 _amount,
         address _to
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         uint256 marketId = getMarketIdFromTokenAddress(_tokenAddr);
 
         // take max balance of the user
@@ -87,22 +92,11 @@ contract DyDxWithdraw is ActionBase, DyDxHelper {
 
         _tokenAddr.withdrawTokens(_to, _amount);
 
-        logger.Log(address(this), msg.sender, "DyDxWithdraw", abi.encode(_tokenAddr, _amount, _to));
-
-        return _amount;
+        bytes memory logData = abi.encode(_tokenAddr, _amount, _to);
+        return (_amount, logData);
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
-        pure
-        returns (
-            address tokenAddr,
-            uint256 amount,
-            address to
-        )
-    {
-        tokenAddr = abi.decode(_callData[0], (address));
-        amount = abi.decode(_callData[1], (uint256));
-        to = abi.decode(_callData[2], (address));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

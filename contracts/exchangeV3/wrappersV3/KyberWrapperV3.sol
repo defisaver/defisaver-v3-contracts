@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 
 import "../../utils/SafeERC20.sol";
 import "../../interfaces//exchange/IKyberNetworkProxy.sol";
@@ -12,6 +12,7 @@ import "./helpers/WrapperHelper.sol";
 
 contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
 
+    error WrongDestAmountError(uint256, uint256);
     using SafeERC20 for IERC20;
 
     /// @notice Sells a _srcAmount of tokens at Kyber
@@ -65,7 +66,9 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
             WALLET_ID
         );
 
-        require(destAmount == _destAmount, "Wrong dest amount");
+        if (destAmount != _destAmount){
+            revert WrongDestAmountError(destAmount, _destAmount);
+        }
 
         uint256 srcAmountAfter = srcToken.balanceOf(address(this));
 
@@ -86,9 +89,9 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
             .getExpectedRate(IERC20(_srcAddr), IERC20(_destAddr), _srcAmount);
 
         // multiply with decimal difference in src token
-        rate = rate * (10**sub(18, getDecimals(_srcAddr)));
+        rate = rate * (10 ** (18 - getDecimals(_srcAddr)));
         // divide with decimal difference in dest token
-        rate = rate / (10**sub(18, getDecimals(_destAddr)));
+        rate = rate / (10 ** (18 - getDecimals(_srcAddr)));
     }
 
     /// @notice Return a rate for which we can buy an amount of tokens
@@ -109,7 +112,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     /// @notice Send any leftover tokens, we use to clear out srcTokens after buy
     /// @param _srcAddr Source token address
     function sendLeftOver(address _srcAddr) internal {
-        msg.sender.transfer(address(this).balance);
+        payable(msg.sender).transfer(address(this).balance);
 
         if (_srcAddr != ETH_ADDRESS) {
             IERC20(_srcAddr).safeTransfer(msg.sender, IERC20(_srcAddr).balanceOf(address(this)));

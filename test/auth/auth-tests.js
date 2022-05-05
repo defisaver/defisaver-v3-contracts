@@ -1,6 +1,7 @@
 const { expect } = require('chai');
 const hre = require('hardhat');
-const { executeAction } = require('../actions.js');
+
+const { deployContract } = require('../../scripts/utils/deployer');
 
 const {
     impersonateAccount,
@@ -8,13 +9,14 @@ const {
     redeploy,
     balanceOf,
     send,
-    OWNER_ACC,
-    ADMIN_ACC,
-    DAI_ADDR,
+    getProxyAuth,
     getAddrFromRegistry,
-    setBalance,
+    depositToWeth,
     sendEther,
     getProxy,
+    OWNER_ACC,
+    ADMIN_ACC,
+    WETH_ADDRESS,
 } = require('../utils.js');
 
 const adminAuthTest = async () => {
@@ -30,45 +32,44 @@ const adminAuthTest = async () => {
             sender = (await hre.ethers.getSigners())[0];
         });
 
-        it('... owner should withdraw 10 Dai from contract', async () => {
+        it('... owner should withdraw 1 WETH from contract', async () => {
             // 10 Dai
-            const amount = hre.ethers.utils.parseUnits('10', 18);
+            const amount = hre.ethers.utils.parseUnits('11', 18);
+            await depositToWeth(amount);
 
-            await setBalance(DAI_ADDR, sender.address, amount);
+            const tokenBalanceBefore = await balanceOf(WETH_ADDRESS, sender.address);
 
-            const tokenBalanceBefore = await balanceOf(DAI_ADDR, sender.address);
-
-            await send(DAI_ADDR, adminAuth.address, amount);
+            await send(WETH_ADDRESS, adminAuth.address, amount);
 
             await impersonateAccount(OWNER_ACC);
 
             const adminAuthByOwner = adminAuth.connect(ownerAcc);
-            await adminAuthByOwner.withdrawStuckFunds(DAI_ADDR, sender.address, amount);
+            await adminAuthByOwner.withdrawStuckFunds(WETH_ADDRESS, sender.address, amount);
 
             await stopImpersonatingAccount(OWNER_ACC);
 
-            const tokenBalanceAfter = await balanceOf(DAI_ADDR, sender.address);
+            const tokenBalanceAfter = await balanceOf(WETH_ADDRESS, sender.address);
 
             expect(tokenBalanceBefore).to.be.eq(tokenBalanceAfter);
         });
 
-        it('... non owner should fail to withdraw Dai from contract', async () => {
+        it('... non owner should fail to withdraw WETH from contract', async () => {
             try {
-                await adminAuth.withdrawStuckFunds(DAI_ADDR, sender.address, 0);
-                // eslint-disable-next-line no-unused-expressions
-                expect(true).to.be.false;
+                await adminAuth.withdrawStuckFunds(WETH_ADDRESS, sender.address, 0);
+
+                expect(true).to.be(false);
             } catch (err) {
-                expect(err.toString()).to.have.string('msg.sender not owner');
+                expect(err.toString()).to.have.string('SenderNotOwner');
             }
         });
 
         it('... non admin should not be able to kill the contract', async () => {
             try {
                 await adminAuth.kill();
-                // eslint-disable-next-line no-unused-expressions
-                expect(true).to.be.false;
+
+                expect(true).to.be(false);
             } catch (err) {
-                expect(err.toString()).to.have.string('msg.sender not admin');
+                expect(err.toString()).to.have.string('SenderNotAdmin');
             }
         });
 
@@ -82,23 +83,22 @@ const adminAuthTest = async () => {
 
             try {
                 await adminAuth.adminVault();
-                // eslint-disable-next-line no-unused-expressions
-                expect(true).to.be.false;
+
+                expect(true).to.be(false);
             } catch (err) {
-                // eslint-disable-next-line no-unused-expressions
-                expect(true).to.be.true;
+                expect(err.toString()).to.have.string('Error: call revert exception');
             }
         });
     });
 };
+
 const adminVaultTest = async () => {
     describe('Admin-Vault', () => {
         let notOwner; let adminAcc; let adminVault; let
             newOwner; let newAdminAcc;
 
         before(async () => {
-            const adminVaultAddr = await getAddrFromRegistry('AdminVault');
-            adminVault = await hre.ethers.getContractAt('AdminVault', adminVaultAddr);
+            adminVault = await redeploy('AdminVault');
 
             adminAcc = await hre.ethers.provider.getSigner(ADMIN_ACC);
 
@@ -122,7 +122,12 @@ const adminVaultTest = async () => {
         });
 
         it('... should fail to change the owner address if not called by admin', async () => {
-            await expect(adminVault.changeAdmin(newOwner.address)).to.be.revertedWith('msg.sender not admin');
+            try {
+                await adminVault.changeAdmin(newOwner.address);
+                expect(true).to.be(false);
+            } catch (err) {
+                expect(err.toString()).to.have.string('SenderNotAdmin');
+            }
         });
 
         it('... should change the admin address', async () => {
@@ -140,10 +145,10 @@ const adminVaultTest = async () => {
         it('... should fail to change the admin address if not called by admin', async () => {
             try {
                 await adminVault.changeAdmin(notOwner.address);
-                // eslint-disable-next-line no-unused-expressions
-                expect(true).to.be.false;
+
+                expect(true).to.be(false);
             } catch (err) {
-                expect(err.toString()).to.have.string('msg.sender not admin');
+                expect(err.toString()).to.have.string('SenderNotAdmin');
             }
         });
     });
@@ -151,9 +156,11 @@ const adminVaultTest = async () => {
 const proxyPermissionTest = async () => {
     describe('Proxy-Permission', () => {
         let ownerAcc1; let ownerAcc2; let
-            proxy;
+            proxy; let proxyPermission;
 
         before(async () => {
+            proxyPermission = await deployContract('ProxyPermission');
+
             ownerAcc1 = (await hre.ethers.getSigners())[0];
             ownerAcc2 = (await hre.ethers.getSigners())[1];
 
@@ -166,8 +173,11 @@ const proxyPermissionTest = async () => {
                 'givePermission',
                 [ownerAcc2.address],
             );
-            await executeAction('ProxyPermission', functionData, proxy);
-            // TODO: check permission
+
+            await proxy['execute(address,bytes)'](proxyPermission.address, functionData, { gasLimit: 1500000 });
+
+            const hasPermission = await getProxyAuth(proxy.address, ownerAcc2.address);
+            expect(hasPermission).to.be.equal(true);
         });
 
         it('... should through DSProxy remove contract permission', async () => {
@@ -177,9 +187,10 @@ const proxyPermissionTest = async () => {
                 [ownerAcc2.address],
             );
 
-            await executeAction('ProxyPermission', functionData, proxy);
+            await proxy['execute(address,bytes)'](proxyPermission.address, functionData, { gasLimit: 1500000 });
 
-            // TODO: check permission
+            const hasPermission = await getProxyAuth(proxy.address, ownerAcc2.address);
+            expect(hasPermission).to.be.equal(false);
         });
     });
 };

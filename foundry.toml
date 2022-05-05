@@ -1,0 +1,16 @@
+[default]
+src = 'contracts'
+out = 'artifacts'
+test = 'test-sol'
+libs = ['node_modules']
+solc="0.8.10"
+optimizer = true
+optimizer_runs = 10000
+gas_reports = ['*']
+remappings = [
+    '@ensdomains/=node_modules/@ensdomains/',
+    'eth-gas-reporter/=node_modules/eth-gas-reporter/',
+    'hardhat/=node_modules/hardhat/',
+]
+
+# See more config options https://github.com/gakonst/foundry/tree/master/config

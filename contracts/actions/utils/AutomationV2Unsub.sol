@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
@@ -22,8 +22,8 @@ contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -42,14 +42,16 @@ contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
             _returnValues
         ));
 
-        _automationV2Unsub(params);
+        bytes memory logData = _automationV2Unsub(params);
+        emit ActionEvent("Unsubscribe", logData);
     }
 
-    /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
-        Params memory params = parseInputs(_callData);
 
-        _automationV2Unsub(params);
+    /// @inheritdoc ActionBase
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
+        Params memory params = parseInputs(_callData);
+        bytes memory logData = _automationV2Unsub(params);
+        logger.logActionDirectEvent("Unsubscribe", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -60,7 +62,7 @@ contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Unsubscribes proxy from automation
-    function _automationV2Unsub(Params memory _params) internal {
+    function _automationV2Unsub(Params memory _params) internal returns (bytes memory logData) {
         ( uint256 cdpId, Protocols protocol ) = ( _params.cdpId, _params.protocol );
 
         if (protocol == Protocols.MCD) {
@@ -71,17 +73,10 @@ contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
             ISubscriptions(AAVE_SUB_ADDRESS).unsubscribe();
         } else revert("Invalid protocol argument");
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "Unsubscribe",
-            abi.encode(
-                _params
-            )
-        );
+        logData = abi.encode(_params);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

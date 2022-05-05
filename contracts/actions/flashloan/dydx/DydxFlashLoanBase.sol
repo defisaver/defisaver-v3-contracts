@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
-
+pragma solidity =0.8.10;
 import "../../../utils/SafeMath.sol";
 import "../../../interfaces/dydx/ISoloMargin.sol";
 import "../helpers/FLHelper.sol";
 
 contract DydxFlashLoanBase is FLHelper {
     using SafeMath for uint256;
+
+    error MarketIdNotFound();
 
     function _getMarketIdFromTokenAddress(address _solo, address _token)
         internal
@@ -26,7 +26,7 @@ contract DydxFlashLoanBase is FLHelper {
         }
 
         // if we get this far no id has been found
-        revert("No DyDx market id found for token");
+        revert MarketIdNotFound();
     }
 
     function _getRepaymentAmountInternal(uint256 amount) internal pure returns (uint256) {

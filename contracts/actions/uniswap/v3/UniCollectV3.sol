@@ -1,20 +1,18 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
-import "../../../DS/DSMath.sol";
 import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
 import "./helpers/UniV3Helper.sol";
 
 /// @title Collects tokensOwed from a position represented by tokenId
-contract UniCollectV3 is ActionBase, DSMath, UniV3Helper {
+contract UniCollectV3 is ActionBase, UniV3Helper {
     using TokenUtils for address;
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -22,15 +20,16 @@ contract UniCollectV3 is ActionBase, DSMath, UniV3Helper {
         
         uniData.tokenId = _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
         
-        (uint256 amount0, ) = _uniCollect(uniData);
+        (uint256 amount0, , bytes memory logData) = _uniCollect(uniData);
+        emit ActionEvent("UniCollectV3", logData);
         return bytes32(amount0);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         IUniswapV3NonfungiblePositionManager.CollectParams memory uniData = parseInputs(_callData);
-        
-        _uniCollect(uniData);
+        (, , bytes memory logData) = _uniCollect(uniData);
+        logger.logActionDirectEvent("UniCollectV3", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -46,26 +45,21 @@ contract UniCollectV3 is ActionBase, DSMath, UniV3Helper {
         internal
         returns (
             uint256 amount0,
-            uint256 amount1
+            uint256 amount1,
+            bytes memory logData
         )
     {
         (amount0, amount1) = positionManager.collect(_uniData);
-
-        logger.Log(
-                address(this),
-                msg.sender,
-                "UniCollectV3",
-                abi.encode(_uniData, amount0, amount1)
-            );
+        logData = abi.encode(_uniData, amount0, amount1);
     }
         
-    function parseInputs(bytes[] memory _callData)
-        internal
+    function parseInputs(bytes memory _callData)
+       public
         pure
         returns (
             IUniswapV3NonfungiblePositionManager.CollectParams memory uniData
         )
     {
-        uniData = abi.decode(_callData[0], (IUniswapV3NonfungiblePositionManager.CollectParams));
+        uniData = abi.decode(_callData, (IUniswapV3NonfungiblePositionManager.CollectParams));
     }
 }

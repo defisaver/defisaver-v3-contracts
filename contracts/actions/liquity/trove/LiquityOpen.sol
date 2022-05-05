@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
@@ -22,8 +21,8 @@ contract LiquityOpen is ActionBase, LiquityHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -50,15 +49,17 @@ contract LiquityOpen is ActionBase, LiquityHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        uint256 troveOwner = _liquityOpen(params);
-        return bytes32(troveOwner);
+        (uint256 collSupplied, bytes memory logData) = _liquityOpen(params);
+        emit ActionEvent("LiquityOpen", logData);
+        return bytes32(collSupplied);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
-        _liquityOpen(params);
+        (, bytes memory logData) = _liquityOpen(params);
+        logger.logActionDirectEvent("LiquityOpen", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -69,7 +70,7 @@ contract LiquityOpen is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Opens up a trove
-    function _liquityOpen(Params memory _params) internal returns (uint256) {
+    function _liquityOpen(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.collAmount == type(uint256).max) {
             _params.collAmount = TokenUtils.WETH_ADDR.getBalance(_params.from);
         }
@@ -83,25 +84,19 @@ contract LiquityOpen is ActionBase, LiquityHelper {
             _params.lowerHint
         );
 
-        LUSDTokenAddr.withdrawTokens(_params.to, _params.lusdAmount);
+        LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, _params.lusdAmount);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "LiquityOpen",
-            abi.encode(
-                _params.maxFeePercentage,
-                _params.collAmount,
-                _params.lusdAmount,
-                _params.from,
-                _params.to
-            )
+        bytes memory logData = abi.encode(
+            _params.maxFeePercentage,
+            _params.collAmount,
+            _params.lusdAmount,
+            _params.from,
+            _params.to
         );
-
-        return _params.collAmount;
+        return (_params.collAmount, logData);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

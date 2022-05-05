@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
@@ -20,8 +19,8 @@ contract LiquityBorrow is ActionBase, LiquityHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -41,15 +40,16 @@ contract LiquityBorrow is ActionBase, LiquityHelper {
         );
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
-        params.lusdAmount = _liquityBorrow(params);
-        return bytes32(params.lusdAmount);
+        (uint256 borrowedAmount, bytes memory logData) = _liquityBorrow(params);
+        emit ActionEvent("LiquityBorrow", logData);
+        return bytes32(borrowedAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-
-        _liquityBorrow(params);
+        (, bytes memory logData) = _liquityBorrow(params);
+        logger.logActionDirectEvent("LiquityBorrow", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -60,7 +60,7 @@ contract LiquityBorrow is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Increases the trove"s debt and withdraws minted LUSD tokens from the trove
-    function _liquityBorrow(Params memory params) internal returns (uint256) {
+    function _liquityBorrow(Params memory params) internal returns (uint256, bytes memory) {
         BorrowerOperations.withdrawLUSD(
             params.maxFeePercentage,
             params.lusdAmount,
@@ -68,19 +68,14 @@ contract LiquityBorrow is ActionBase, LiquityHelper {
             params.lowerHint
         );
 
-        LUSDTokenAddr.withdrawTokens(params.to, params.lusdAmount);
+        LUSD_TOKEN_ADDRESS.withdrawTokens(params.to, params.lusdAmount);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "LiquityBorrow",
-            abi.encode(params.maxFeePercentage, params.lusdAmount, params.to)
-        );
 
-        return params.lusdAmount;
+        bytes memory logData = abi.encode(params.maxFeePercentage, params.lusdAmount, params.to);
+        return (params.lusdAmount, logData);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

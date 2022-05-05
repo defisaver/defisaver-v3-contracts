@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../helpers/CurveHelper.sol";
@@ -25,8 +25,8 @@ contract CurveDeposit is ActionBase, CurveHelper {
     }
 
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -40,15 +40,16 @@ contract CurveDeposit is ActionBase, CurveHelper {
             params.amounts[i] = _parseParamUint(params.amounts[i], _paramMapping[3 + i], _subData, _returnValues);
         }
 
-        uint256 received = _curveDeposit(params);
+        (uint256 received, bytes memory logData) = _curveDeposit(params);
+        emit ActionEvent("CurveDeposit", logData);
         return bytes32(received);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-
-        _curveDeposit(params);
+        (, bytes memory logData) = _curveDeposit(params);
+        logger.logActionDirectEvent("CurveDeposit", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -59,7 +60,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Deposits tokens into liquidity pool
-    function _curveDeposit(Params memory _params) internal returns (uint256) {
+    function _curveDeposit(Params memory _params) internal returns (uint256 received, bytes memory logData) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
 
         uint256 tokensBefore = _params.lpToken.getBalance(address(this));
@@ -80,20 +81,10 @@ contract CurveDeposit is ActionBase, CurveHelper {
         (bool success, ) = _params.depositTarget.call{ value: msgValue }(payload);
         require(success, "Bad payload or revert in pool contract");
 
-        uint256 received = _params.lpToken.getBalance(address(this)).sub(tokensBefore);
+        received = _params.lpToken.getBalance(address(this)).sub(tokensBefore);
         _params.lpToken.withdrawTokens(_params.receiver, received);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "CurveDeposit",
-            abi.encode(
-                _params,
-                received
-            )
-        );
-
-        return received;
+        logData = abi.encode(_params, received);
     }
 
     /// @notice Constructs payload for external contract call
@@ -119,7 +110,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
         }
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

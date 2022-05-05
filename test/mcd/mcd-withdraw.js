@@ -9,6 +9,7 @@ describe('Mcd-Withdraw', function () {
     this.timeout(40000);
 
     before(async () => {
+        await redeploy('McdSupply');
         await redeploy('McdWithdraw');
         await redeploy('McdOpen');
         await redeploy('McdGenerate');

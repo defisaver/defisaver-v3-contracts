@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 
 contract MainnetMcdAddresses {
     address internal constant VAT_ADDR = 0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B;

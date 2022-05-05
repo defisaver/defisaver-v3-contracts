@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 
 import "../../../interfaces/compound/IComptroller.sol";
 import "../../../interfaces/compound/ICToken.sol";
@@ -11,9 +11,8 @@ import "./MainnetCompAddresses.sol";
 contract CompHelper is MainnetCompAddresses{
 
     uint256 constant NO_ERROR = 0;
-
-    string public constant ERR_COMP_ENTER_MARKET = "Comp failed to enter market";
-    string public constant ERR_COMP_EXIT_MARKET = "Comp failed to exit market";
+    error CompEnterMarketError();
+    error CompExitMarketError();
 
     // @notice Returns the underlying token address of the given cToken
     function getUnderlyingAddr(address _cTokenAddr) internal returns (address tokenAddr) {
@@ -31,12 +30,17 @@ contract CompHelper is MainnetCompAddresses{
         markets[0] = _cTokenAddr;
 
         uint256[] memory errCodes = IComptroller(COMPTROLLER_ADDR).enterMarkets(markets);
-        require(errCodes[0] == NO_ERROR, ERR_COMP_ENTER_MARKET);
+
+        if (errCodes[0] != NO_ERROR){
+            revert CompEnterMarketError();
+        }
     }
 
     /// @notice Exits the Compound market
     /// @param _cTokenAddr CToken address of the token
     function exitMarket(address _cTokenAddr) public {
-        require(IComptroller(COMPTROLLER_ADDR).exitMarket(_cTokenAddr) == NO_ERROR, ERR_COMP_EXIT_MARKET);
+        if (IComptroller(COMPTROLLER_ADDR).exitMarket(_cTokenAddr) != NO_ERROR){
+            revert CompExitMarketError();
+        }
     }
 }

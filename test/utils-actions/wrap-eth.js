@@ -11,7 +11,7 @@ describe('Wrap-Eth', function () {
         await redeploy('WrapEth');
         await redeploy('DFSSell');
         await redeploy('UniswapWrapperV3');
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
     });
     it('... should wrap native Eth to Weth direct action', async () => {
         await wrapEthTest();

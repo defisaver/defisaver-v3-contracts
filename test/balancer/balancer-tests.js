@@ -271,9 +271,10 @@ const balancerClaimTest = async () => {
 
         let senderAcc; let
             proxy;
-        /// @dev this is tested on block number 12984088
+        // TODO: UPDATE merkle proofs and other data
+        /// @dev this is tested on block number 14340400
         before(async () => {
-            await resetForkToBlock(12984088);
+            await resetForkToBlock(14340400);
             await redeploy('BalancerV2Claim');
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);

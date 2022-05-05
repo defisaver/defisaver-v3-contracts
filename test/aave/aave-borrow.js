@@ -12,6 +12,7 @@ describe('Aave-Borrow', function () {
     this.timeout(80000);
 
     before(async () => {
+        await redeploy('AaveSupply');
         await redeploy('AaveBorrow');
         await redeploy('AaveSupply');
     });

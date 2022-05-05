@@ -7,6 +7,7 @@ describe('Balancer-Withdraw', function () {
     this.timeout(80000);
 
     before(async () => {
+        await redeploy('DFSSell');
         await redeploy('BalancerV2Supply');
         await redeploy('BalancerV2Withdraw');
     });

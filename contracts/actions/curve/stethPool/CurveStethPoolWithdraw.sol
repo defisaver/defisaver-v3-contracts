@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../../../interfaces/curve/stethPool/ICurveStethPool.sol";
@@ -32,8 +32,8 @@ contract CurveStethPoolWithdraw is ActionBase {
     }
 
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -44,14 +44,18 @@ contract CurveStethPoolWithdraw is ActionBase {
         params.amounts[1] = _parseParamUint(params.amounts[1], _paramMapping[3], _subData, _returnValues);
         params.maxBurnAmount = _parseParamUint(params.maxBurnAmount, _paramMapping[4], _subData, _returnValues);
 
-        uint256 returnValue = _curveWithdraw(params);
-        return bytes32(returnValue);
+        (uint256 burnedLp, bytes memory logData) = _curveWithdraw(params);
+
+        emit ActionEvent("CurveStethPoolWithdraw", logData);
+
+        return bytes32(burnedLp);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-        _curveWithdraw(params);
+        (, bytes memory logData) = _curveWithdraw(params);
+        logger.logActionDirectEvent("CurveStethPoolWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -62,13 +66,13 @@ contract CurveStethPoolWithdraw is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Withdraws tokens from curve steth pool
-    function _curveWithdraw(Params memory _params) internal returns (uint256) {
+    function _curveWithdraw(Params memory _params) internal returns (uint256 burnedLp, bytes memory logData) {
         require(_params.to != address(0), "to cant be 0x0");
 
         STE_CRV_ADDR.pullTokensIfNeeded(_params.from, _params.maxBurnAmount);
         STE_CRV_ADDR.approveToken(CURVE_STETH_POOL_ADDR, _params.maxBurnAmount);
 
-        uint256 burnedLp = ICurveStethPool(CURVE_STETH_POOL_ADDR).remove_liquidity_imbalance(
+        burnedLp = ICurveStethPool(CURVE_STETH_POOL_ADDR).remove_liquidity_imbalance(
             _params.amounts,
             _params.maxBurnAmount
         );
@@ -82,19 +86,15 @@ contract CurveStethPoolWithdraw is ActionBase {
         // return unburned lp tokens to from
         STE_CRV_ADDR.withdrawTokens(_params.from, _params.maxBurnAmount.sub(burnedLp));
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "CurveStethPoolWithdraw",
-            abi.encode(_params.amounts[0], _params.amounts[1], burnedLp)
-        );
+        logData = abi.encode(_params.amounts[0], _params.amounts[1], burnedLp);
 
-        if (_params.returnValue == ReturnValue.WETH) return _params.amounts[0];
-        if (_params.returnValue == ReturnValue.STETH) return _params.amounts[1];
-        return burnedLp;
+        if (_params.returnValue == ReturnValue.WETH) return (_params.amounts[0], logData);
+        if (_params.returnValue == ReturnValue.STETH) return (_params.amounts[1], logData);
+
+        return (burnedLp, logData);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

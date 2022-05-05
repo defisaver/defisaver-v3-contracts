@@ -9,7 +9,7 @@ describe('FL-Maker', function () {
     before(async () => {
         await redeploy('FLMaker');
         await redeploy('SendToken');
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
     });
 
     const tokenSymbol = 'DAI';

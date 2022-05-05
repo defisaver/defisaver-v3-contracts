@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
-import "../../DS/DSMath.sol";
-import "../../interfaces/balancer/IMerkleReedem.sol";
+import "../../interfaces/balancer/IMerkleRedeem.sol";
 import "./helpers/BalancerV2Helper.sol";
 
 /// @title Claim BAL tokens
-contract BalancerV2Claim is ActionBase, DSMath, BalancerV2Helper {
+contract BalancerV2Claim is ActionBase, BalancerV2Helper {
     using TokenUtils for address;
-    IMerkleReedem public constant merkleReedemer = IMerkleReedem(MERKLE_REEDEM_ADDR);
+
+    IMerkleRedeem public constant merkleRedeemer = IMerkleRedeem(MERKLE_REDEEM_ADDR);
 
     /// @param liquidityProvider - The address of the liquidity provider that the tokens are claimed for
     /// @param to - The address to which to send Balancer tokens to
@@ -30,8 +30,8 @@ contract BalancerV2Claim is ActionBase, DSMath, BalancerV2Helper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -40,15 +40,16 @@ contract BalancerV2Claim is ActionBase, DSMath, BalancerV2Helper {
         inputData.liquidityProvider = _parseParamAddr(inputData.liquidityProvider, _paramMapping[0], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[1], _subData, _returnValues);
         
-        uint256 balClaimedAmount = claim(inputData);
+        (uint256 balClaimedAmount, bytes memory logData) = claim(inputData);
+        emit ActionEvent("BalancerV2Claim", logData);
         return bytes32(balClaimedAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
-        Params memory inputData = parseInputs(_callData);
-        
-        claim(inputData);
+    function executeActionDirect(bytes memory _callData) public payable override {
+        Params memory inputData = parseInputs(_callData);        
+        (, bytes memory logData) = claim(inputData);
+        logger.logActionDirectEvent("BalancerV2Claim", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -57,13 +58,13 @@ contract BalancerV2Claim is ActionBase, DSMath, BalancerV2Helper {
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
-    function claim(Params memory _inputData) internal returns (uint256 balClaimedAmount) {
+    function claim(Params memory _inputData) internal returns (uint256 balClaimedAmount, bytes memory logData) {
         require(_inputData.to != address(0), ADDR_MUST_NOT_BE_ZERO);
-        IMerkleReedem.Claim[] memory claims = packClaims(_inputData.week, _inputData.balances, _inputData.merkleProofs);
+        IMerkleRedeem.Claim[] memory claims = packClaims(_inputData.week, _inputData.balances, _inputData.merkleProofs);
         
         balClaimedAmount = balToken.getBalance(_inputData.liquidityProvider);
-        merkleReedemer.claimWeeks(_inputData.liquidityProvider, claims);
-        balClaimedAmount = sub(balToken.getBalance(_inputData.liquidityProvider), balClaimedAmount);
+        merkleRedeemer.claimWeeks(_inputData.liquidityProvider, claims);
+        balClaimedAmount = balToken.getBalance(_inputData.liquidityProvider) - balClaimedAmount;
         
         /// @dev if _to isn't the same as _lp, liquidityProvider needs to approve DSProxy to pull BAL tokens
         if (_inputData.to != _inputData.liquidityProvider) {
@@ -71,25 +72,23 @@ contract BalancerV2Claim is ActionBase, DSMath, BalancerV2Helper {
             balToken.withdrawTokens(_inputData.to, balClaimedAmount);
         }
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "BalancerV2Claim",
-            abi.encode(_inputData, balClaimedAmount)
-        );
+        logData = abi.encode(_inputData, balClaimedAmount);
     }
 
     /// @dev Decoding Claims[] from _callData returns stack too deep error, so packing must be done onchain
-    function packClaims(uint256[] memory _weeks, uint256[] memory _balances, bytes32[][] memory _merkleProofs) internal pure returns (IMerkleReedem.Claim[] memory){
-        require (_weeks.length == _balances.length && _weeks.length == _merkleProofs.length);
-        IMerkleReedem.Claim[] memory claims = new IMerkleReedem.Claim[](_weeks.length);
+    function packClaims(uint256[] memory _weeks, uint256[] memory _balances, bytes32[][] memory _merkleProofs) internal pure returns (IMerkleRedeem.Claim[] memory){
+        require(_weeks.length == _balances.length && _weeks.length == _merkleProofs.length);
+
+        IMerkleRedeem.Claim[] memory claims = new IMerkleRedeem.Claim[](_weeks.length);
+
         for (uint256 i = 0; i < _weeks.length; i++){
-            claims[i] = IMerkleReedem.Claim(_weeks[i], _balances[i], _merkleProofs[i]);
+            claims[i] = IMerkleRedeem.Claim(_weeks[i], _balances[i], _merkleProofs[i]);
         }
+
         return claims;
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
-        inputData = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

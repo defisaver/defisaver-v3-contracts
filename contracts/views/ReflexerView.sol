@@ -1,6 +1,5 @@
-pragma solidity 0.7.6;
 // SPDX-License-Identifier: MIT
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../DS/DSMath.sol";
 import "../interfaces/reflexer/IGetSafes.sol";

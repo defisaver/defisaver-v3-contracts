@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../../interfaces/mcd/ICropJoin.sol";
@@ -25,8 +25,8 @@ contract McdClaim is ActionBase, McdHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable override returns (bytes32) {
@@ -36,16 +36,19 @@ contract McdClaim is ActionBase, McdHelper {
         inputData.joinAddr = _parseParamAddr(inputData.joinAddr, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        uint256 returnAmount = _mcdClaim(inputData.vaultId, inputData.joinAddr, inputData.to);
+        (uint256 returnAmount, bytes memory logData) = _mcdClaim(inputData.vaultId, inputData.joinAddr, inputData.to);
+
+        emit ActionEvent("McdClaim", logData);
 
         return bytes32(returnAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
-        _mcdClaim(inputData.vaultId, inputData.joinAddr, inputData.to);
+        (, bytes memory logData) = _mcdClaim(inputData.vaultId, inputData.joinAddr, inputData.to);
+        logger.logActionDirectEvent("McdClaim", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -64,7 +67,7 @@ contract McdClaim is ActionBase, McdHelper {
         uint256 _vaultId,
         address _joinAddr,
         address _to
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
         address bonusTokenAddr = address(ICropJoin(_joinAddr).bonus());
 
@@ -77,22 +80,17 @@ contract McdClaim is ActionBase, McdHelper {
 
         uint256 amount = bonusAfterBalance - bonusBeforeBalance;
         bonusTokenAddr.withdrawTokens(_to, amount);
-        
-        logger.Log(
-            address(this),
-            msg.sender,
-            "McdClaim",
-            abi.encode(_vaultId, _joinAddr, _to, amount)
-        );
 
-        return amount;
+        bytes memory logData = abi.encode(_vaultId, _joinAddr, _to, amount);
+
+        return (amount, logData);
     }
 
-    function parseInputs(bytes[] memory _callData)
+    function parseInputs(bytes memory _callData)
         internal
         pure
         returns (Params memory inputData)
     {
-        inputData = abi.decode(_callData[0], (Params));
+        inputData = abi.decode(_callData, (Params));
     }
 }

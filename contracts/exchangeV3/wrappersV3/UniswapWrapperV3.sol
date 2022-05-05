@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity =0.7.6;
-
+pragma solidity =0.8.10;
 
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/exchange/IExchangeV3.sol";
@@ -82,7 +80,7 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     /// @notice Send any leftover tokens, we use to clear out srcTokens after buy
     /// @param _srcAddr Source token address
     function sendLeftOver(address _srcAddr) internal {
-        msg.sender.transfer(address(this).balance);
+        payable(msg.sender).transfer(address(this).balance);
 
         if (_srcAddr != ETH_ADDRESS) {
             IERC20(_srcAddr).safeTransfer(msg.sender, IERC20(_srcAddr).balanceOf(address(this)));

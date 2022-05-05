@@ -1,95 +1,123 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 
 import "../auth/AdminAuth.sol";
-import "../DS/DSMath.sol";
-import "../interfaces/mcd/IManager.sol";
-import "../interfaces/mcd/IVat.sol";
-import "../interfaces/mcd/ISpotter.sol";
-import "../core/Subscriptions.sol";
-
+import "../actions/mcd/helpers/McdRatioHelper.sol";
 import "../interfaces/ITrigger.sol";
+import "../interfaces/IMCDPriceVerifier.sol";
+import "../core/helpers/CoreHelper.sol";
+import "../core/DFSRegistry.sol";
+import "./helpers/TriggerHelper.sol";
 
-contract McdRatioTrigger is ITrigger, AdminAuth, DSMath {
-    IManager public constant manager = IManager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
-    IVat public constant vat = IVat(0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B);
-    ISpotter public constant spotter = ISpotter(0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3);
 
-    enum RatioState {OVER, UNDER}
+/// @title Trigger contract that verifies if current MCD vault ratio is higher or lower than wanted
+contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, TriggerHelper {
+    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+
+    error WrongNextPrice(uint256);
+
+    enum RatioState {
+        OVER,
+        UNDER
+    }
+
+    enum RatioCheck {
+        CURR_RATIO,
+        NEXT_RATIO,
+        BOTH_RATIOS
+    }
+    
+    /// @param nextPrice price that OSM returns as next price value
+    /// @param ratioCheck returns if we want the trigger to look at the current asset price, nextPrice param or both
+    struct CallParams {
+        uint256 nextPrice;
+        uint8 ratioCheck;
+    }
+
+    /// @param vaultId id of the vault whose ratio we check
+    /// @param ratio ratio that represents the triggerable point
+    /// @param state represents if we want current ratio to be higher or lower than ratio param
+    struct SubParams {
+        uint256 vaultId;
+        uint256 ratio;
+        uint8 state;
+    }
 
     function isTriggered(bytes memory _callData, bytes memory _subData)
         public
-        view
         override
         returns (bool)
     {
-        uint256 nextPrice = parseParamData(_callData);
-        (uint256 cdpId, uint256 ratio, RatioState state) = parseSubData(_subData);
+        CallParams memory triggerCallData = parseCallInputs(_callData);
+        SubParams memory triggerSubData = parseSubInputs(_subData);
 
-        uint256 currRatio = getRatio(cdpId, nextPrice);
+        uint256 checkedRatio;
+        bool shouldTriggerCurr;
+        bool shouldTriggerNext;
+    
+        if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.CURR_RATIO || RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS){
+            checkedRatio = getRatio(triggerSubData.vaultId, 0);
 
-        if (state == RatioState.OVER) {
-            if (currRatio > ratio) return true;
+            // if cdp has 0 ratio don't trigger it
+            if (checkedRatio == 0) return false;
+
+            shouldTriggerCurr = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
         }
 
-        if (state == RatioState.UNDER) {
-            if (currRatio < ratio) return true;
+        if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.NEXT_RATIO || RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS){
+            checkedRatio = getRatio(triggerSubData.vaultId, triggerCallData.nextPrice);
+            
+            // if cdp has 0 ratio don't trigger it
+            if (checkedRatio == 0) return false;
+
+            shouldTriggerNext = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
+
+            // must convert back to wad
+            if (triggerCallData.nextPrice != 0) {
+                triggerCallData.nextPrice = triggerCallData.nextPrice / 1e9;
+            }
+
+            /// @dev if we don't have access to the next price on-chain this returns true, if we do this compares the nextPrice param we sent
+            if (
+                !IMCDPriceVerifier(MCD_PRICE_VERIFIER).verifyVaultNextPrice(
+                    triggerCallData.nextPrice,
+                    triggerSubData.vaultId
+                )
+            ) {
+                revert WrongNextPrice(triggerCallData.nextPrice);
+            }
+        }
+
+        return shouldTriggerCurr || shouldTriggerNext;
+    }
+    
+    function shouldTrigger(uint8 state, uint256 checkedRatio, uint256 subbedToRatio) internal pure returns (bool){
+        if (RatioState(state) == RatioState.OVER) {
+            if (checkedRatio > subbedToRatio) return true;
+        }
+        if (RatioState(state) == RatioState.UNDER) {
+            if (checkedRatio < subbedToRatio) return true;
         }
 
         return false;
     }
 
-    function parseSubData(bytes memory _data)
-        public
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {}
+
+    function isChangeable() public pure override returns (bool) {
+        return false;
+    }
+
+    function parseCallInputs(bytes memory _callData)
+        internal
         pure
-        returns (
-            uint256,
-            uint256,
-            RatioState
-        )
+        returns (CallParams memory params)
     {
-        (uint256 cdpId, uint256 ratio, uint8 state) = abi.decode(_data, (uint256, uint256, uint8));
-
-        return (cdpId, ratio, RatioState(state));
+        params = abi.decode(_callData, (CallParams));
     }
 
-    function parseParamData(bytes memory _data) public pure returns (uint256 nextPrice) {
-        (nextPrice) = abi.decode(_data, (uint256));
-    }
-
-    /// @notice Gets CDP ratio
-    /// @param _cdpId Id of the CDP
-    /// @param _nextPrice Next price for user
-    function getRatio(uint256 _cdpId, uint256 _nextPrice) public view returns (uint256) {
-        bytes32 ilk = manager.ilks(_cdpId);
-        uint256 price = (_nextPrice == 0) ? getPrice(ilk) : _nextPrice;
-
-        (uint256 collateral, uint256 debt) = getCdpInfo(_cdpId, ilk);
-
-        if (debt == 0) return 0;
-
-        return rdiv(wmul(collateral, price), debt) / (10**18);
-    }
-
-    /// @notice Gets CDP info (collateral, debt)
-    /// @param _cdpId Id of the CDP
-    /// @param _ilk Ilk of the CDP
-    function getCdpInfo(uint256 _cdpId, bytes32 _ilk) public view returns (uint256, uint256) {
-        address urn = manager.urns(_cdpId);
-
-        (uint256 collateral, uint256 debt) = vat.urns(_ilk, urn);
-        (, uint256 rate, , , ) = vat.ilks(_ilk);
-
-        return (collateral, rmul(debt, rate));
-    }
-
-    /// @notice Gets a price of the asset
-    /// @param _ilk Ilk of the CDP
-    function getPrice(bytes32 _ilk) public view returns (uint256) {
-        (, uint256 mat) = spotter.ilks(_ilk);
-        (, , uint256 spot, , ) = vat.ilks(_ilk);
-
-        return rmul(rmul(spot, spotter.par()), mat);
+    function parseSubInputs(bytes memory _subData) internal pure returns (SubParams memory params) {
+        params = abi.decode(_subData, (SubParams));
     }
 }

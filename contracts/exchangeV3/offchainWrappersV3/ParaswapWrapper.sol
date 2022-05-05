@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../../utils/SafeERC20.sol";
@@ -57,7 +57,7 @@ contract ParaswapWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMa
             require(tokensSwapped > 0, ERR_TOKENS_SWAPPED_ZERO);
         }
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
-        sendLeftover(_exData.srcAddr, _exData.destAddr, msg.sender);
+        sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
 
         return (success, tokensSwapped);
     }

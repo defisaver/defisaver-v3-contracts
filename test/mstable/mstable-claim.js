@@ -17,7 +17,7 @@ const {
 
 const {
     mStableClaim, mStableDeposit,
-} = require('../actions.js');
+} = require('../actions');
 
 const {
     imUSDVault,

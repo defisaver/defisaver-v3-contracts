@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../../interfaces/mcd/IManager.sol";
 import "../../interfaces/mcd/IVat.sol";
@@ -29,13 +28,12 @@ contract McdPayback is ActionBase, McdHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
-
         inputData.vaultId = _parseParamUint(
             inputData.vaultId,
             _paramMapping[0],
@@ -48,18 +46,29 @@ contract McdPayback is ActionBase, McdHelper {
             _subData,
             _returnValues
         );
-        inputData.from = _parseParamAddr(inputData.from, _paramMapping[2], _subData, _returnValues);
+        inputData.from = _parseParamAddr(
+            inputData.from,
+            _paramMapping[2],
+            _subData,
+            _returnValues
+        );
+        inputData.mcdManager = _parseParamAddr(
+            inputData.mcdManager,
+            _paramMapping[3],
+            _subData,
+            _returnValues
+        );
 
-        _mcdPayback(inputData);
-
+        bytes memory logData = _mcdPayback(inputData);
+        emit ActionEvent("McdPayback", logData);
         return bytes32(inputData.amount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _mcdPayback(inputData);
+        bytes memory logData = _mcdPayback(inputData);
+        logger.logActionDirectEvent("McdPayback", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -70,7 +79,7 @@ contract McdPayback is ActionBase, McdHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Paybacks the debt for a specified vault
-    function _mcdPayback(Params memory _inputData) internal {
+    function _mcdPayback(Params memory _inputData) internal returns (bytes memory logData) {
         IManager mcdManager = IManager(_inputData.mcdManager);
 
         (address urn, bytes32 ilk) = getUrnAndIlk(_inputData.mcdManager, _inputData.vaultId);
@@ -88,7 +97,7 @@ contract McdPayback is ActionBase, McdHelper {
             _mcdManagerPayback(mcdManager, _inputData.vaultId, urn, ilk, _inputData.amount);
         }
 
-        logger.Log(address(this), msg.sender, "McdPayback", abi.encode(_inputData, debt));
+        logData = abi.encode(_inputData, debt);
     }
 
     function _mcdManagerPayback(
@@ -135,7 +144,8 @@ contract McdPayback is ActionBase, McdHelper {
         vat.nope(CROPPER);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
-        inputData = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
+
 }

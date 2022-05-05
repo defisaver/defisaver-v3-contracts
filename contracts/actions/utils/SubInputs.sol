@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
-import "../../DS/DSMath.sol";
 import "../ActionBase.sol";
 
 /// @title Helper action to subtract 2 inputs/return values
-contract SubInputs is ActionBase, DSMath {
+contract SubInputs is ActionBase {
     struct Params {
         uint256 a;
         uint256 b;
@@ -14,8 +13,8 @@ contract SubInputs is ActionBase, DSMath {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public virtual override payable returns (bytes32) {
@@ -28,7 +27,7 @@ contract SubInputs is ActionBase, DSMath {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes[] memory _callData) public override payable {}
+    function executeActionDirect(bytes memory _callData) public override payable {}
 
     /// @inheritdoc ActionBase
     function actionType() public virtual override pure returns (uint8) {
@@ -38,10 +37,10 @@ contract SubInputs is ActionBase, DSMath {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _subInputs(uint _a, uint _b) internal pure returns (uint) {
-        return sub(_a, _b);
+        return (_a - _b);
     }
 
-    function parseInputs(bytes[] memory _callData) public pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

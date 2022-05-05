@@ -10,7 +10,7 @@ describe('FL-AaveV2', function () {
     before(async () => {
         await redeploy('FLAaveV2');
         await redeploy('SendToken');
-        await redeploy('TaskExecutor');
+        await redeploy('RecipeExecutor');
     });
 
     it('... should get an  AaveV2 flash loan', async () => {

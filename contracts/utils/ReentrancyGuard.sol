@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 
 abstract contract ReentrancyGuard {
     // Booleans are more expensive than uint256 or any type that takes up a full
@@ -18,6 +18,8 @@ abstract contract ReentrancyGuard {
     uint256 private constant _ENTERED = 2;
 
     uint256 private _status;
+    
+    error ReentrantCall();
 
     constructor () {
         _status = _NOT_ENTERED;
@@ -32,7 +34,9 @@ abstract contract ReentrancyGuard {
      */
     modifier nonReentrant() {
         // On the first call to nonReentrant, _notEntered will be true
-        require(_status != _ENTERED, "ReentrancyGuard: reentrant call");
+        if (_status == _ENTERED){
+            revert ReentrantCall();
+        }
 
         // Any calls to nonReentrant after this point will fail
         _status = _ENTERED;

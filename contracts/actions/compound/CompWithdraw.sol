@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
-import "../../DS/DSMath.sol";
+pragma solidity =0.8.10;
+
 import "../../interfaces/IWETH.sol";
 import "../../interfaces/compound/ICToken.sol";
 import "../../utils/TokenUtils.sol";
@@ -10,34 +9,40 @@ import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
 
 /// @title Withdraw a token from Compound
-contract CompWithdraw is ActionBase, CompHelper, DSMath {
+contract CompWithdraw is ActionBase, CompHelper {
     using TokenUtils for address;
+    struct Params {
+        address cTokenAddr;
+        uint256 amount;
+        address to;
+    }
 
-    string public constant ERR_COMP_REDEEM = "Comp redeem failed";
-    string public constant ERR_COMP_REDEEM_UNDERLYING = "Underlying comp redeem failed";
+    error CompRedeemError();
+    error CompUnderlyingRedeemError();
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (address tokenAddr, uint256 amount, address to) = parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        tokenAddr = _parseParamAddr(tokenAddr, _paramMapping[0], _subData, _returnValues);
-        amount = _parseParamUint(amount, _paramMapping[1], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[2], _subData, _returnValues);
-        uint256 withdrawAmount = _withdraw(tokenAddr, amount, to);
+        params.cTokenAddr = _parseParamAddr(params.cTokenAddr, _paramMapping[0], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
+        (uint256 withdrawAmount, bytes memory logData) = _withdraw(params.cTokenAddr, params.amount, params.to);
+        emit ActionEvent("CompWithdraw", logData);
         return bytes32(withdrawAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
-        (address cTokenAddr, uint256 amount, address to) = parseInputs(_callData);
-
-        _withdraw(cTokenAddr, amount, to);
+    function executeActionDirect(bytes memory _callData) public payable override {
+        Params memory params = parseInputs(_callData);
+        (, bytes memory logData) = _withdraw(params.cTokenAddr, params.amount, params.to);
+        logger.logActionDirectEvent("CompWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -56,7 +61,7 @@ contract CompWithdraw is ActionBase, CompHelper, DSMath {
         address _cTokenAddr,
         uint256 _amount,
         address _to
-    ) internal returns (uint256) {
+    ) internal returns (uint256, bytes memory) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
         // because comp returns native eth we need to check the balance of that
@@ -69,18 +74,19 @@ contract CompWithdraw is ActionBase, CompHelper, DSMath {
         // if _amount type(uint).max that means take out proxy whole balance
         if (_amount == type(uint256).max) {
             _amount = _cTokenAddr.getBalance(address(this));
-            require(ICToken(_cTokenAddr).redeem(_amount) == NO_ERROR, ERR_COMP_REDEEM);
+            if (ICToken(_cTokenAddr).redeem(_amount) != NO_ERROR){
+                revert CompRedeemError();
+            }
         } else {
-            require(
-                ICToken(_cTokenAddr).redeemUnderlying(_amount) == NO_ERROR,
-                ERR_COMP_REDEEM_UNDERLYING
-            );
+            if (ICToken(_cTokenAddr).redeemUnderlying(_amount) != NO_ERROR){
+                revert CompUnderlyingRedeemError();
+            }
         }
 
         uint256 tokenBalanceAfter = tokenAddr.getBalance(address(this));
 
         // used to return the precise amount of tokens returned
-        _amount = sub(tokenBalanceAfter, tokenBalanceBefore);
+        _amount = tokenBalanceAfter - tokenBalanceBefore;
 
         // always return WETH, never native Eth
         if (tokenAddr == TokenUtils.ETH_ADDR) {
@@ -91,22 +97,11 @@ contract CompWithdraw is ActionBase, CompHelper, DSMath {
         // If tokens needs to be send to the _to address
         tokenAddr.withdrawTokens(_to, _amount);
 
-        logger.Log(address(this), msg.sender, "CompWithdraw", abi.encode(tokenAddr, _amount, _to));
-
-        return _amount;
+        bytes memory logData = abi.encode(tokenAddr, _amount, _to);
+        return (_amount, logData);
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
-        pure
-        returns (
-            address tokenAddr,
-            uint256 amount,
-            address to
-        )
-    {
-        tokenAddr = abi.decode(_callData[0], (address));
-        amount = abi.decode(_callData[1], (uint256));
-        to = abi.decode(_callData[2], (address));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

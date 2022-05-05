@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../../interfaces/mcd/IJoin.sol";
 import "../../interfaces/mcd/IManager.sol";
@@ -11,27 +10,34 @@ import "../ActionBase.sol";
 
 /// @title Open a new Maker vault
 contract McdOpen is ActionBase, McdHelper {
+
+    struct Params {
+        address joinAddr;
+        address mcdManager;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (address joinAddr, address mcdManager) = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        joinAddr = _parseParamAddr(joinAddr, _paramMapping[0], _subData, _returnValues);
+        inputData.joinAddr = _parseParamAddr(inputData.joinAddr, _paramMapping[0], _subData, _returnValues);
+        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[1], _subData, _returnValues);
 
-        uint256 newVaultId = _mcdOpen(joinAddr, mcdManager);
-
+        (uint256 newVaultId, bytes memory logData) = _mcdOpen(inputData.joinAddr, inputData.mcdManager);
+        emit ActionEvent("McdOpen", logData);
         return bytes32(newVaultId);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
-        (address joinAddr, address mcdManager) = parseInputs(_callData);
-
-        _mcdOpen(joinAddr, mcdManager);
+    function executeActionDirect(bytes memory _callData) public payable override {
+        Params memory inputData = parseInputs(_callData);
+        (, bytes memory logData) = _mcdOpen(inputData.joinAddr, inputData.mcdManager);
+        logger.logActionDirectEvent("McdOpen", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -44,7 +50,7 @@ contract McdOpen is ActionBase, McdHelper {
     /// @notice Opens up an empty vault
     /// @param _joinAddr Join address of the maker collateral
     /// @param _mcdManager The manager address we are using
-    function _mcdOpen(address _joinAddr, address _mcdManager) internal returns (uint256 vaultId) {
+    function _mcdOpen(address _joinAddr, address _mcdManager) internal returns (uint256 vaultId, bytes memory logData) {
         bytes32 ilk = IJoin(_joinAddr).ilk();
 
         if (_mcdManager == CROPPER) {
@@ -52,21 +58,12 @@ contract McdOpen is ActionBase, McdHelper {
         } else {
             vaultId = IManager(_mcdManager).open(ilk, address(this));
         }
+                
+        logData = abi.encode(vaultId, _joinAddr, _mcdManager);
 
-        logger.Log(
-            address(this),
-            msg.sender,
-            "McdOpen",
-            abi.encode(vaultId, _joinAddr, _mcdManager)
-        );
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
-        pure
-        returns (address joinAddr, address mcdManager)
-    {
-        joinAddr = abi.decode(_callData[0], (address));
-        mcdManager = abi.decode(_callData[1], (address));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../../ActionBase.sol";
@@ -17,22 +17,24 @@ contract CurveMintCrv is ActionBase, CurveHelper {
     }
 
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
         params.receiver = _parseParamAddr(params.receiver, _paramMapping[0], _subData, _returnValues);
         
-        uint256 minted = _curveMintCrv(params);
+        (uint256 minted, bytes memory logData) = _curveMintCrv(params);
+        emit ActionEvent("CurveMintCrv", logData);
         return bytes32(minted);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable virtual override {
+    function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-        _curveMintCrv(params);
+        (, bytes memory logData) = _curveMintCrv(params);
+        logger.logActionDirectEvent("CurveMintCrv", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -41,29 +43,18 @@ contract CurveMintCrv is ActionBase, CurveHelper {
     }
 
     /// @notice Mints Crv tokens based on up to 8 gauges
-    function _curveMintCrv(Params memory _params) internal returns (uint256) {
+    function _curveMintCrv(Params memory _params) internal returns (uint256 minted, bytes memory logData) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
 
         uint256 balanceBefore = CRV_TOKEN_ADDR.getBalance(address(this));
         Minter.mint_many(_params.gaugeAddrs);
-        uint256 minted = CRV_TOKEN_ADDR.getBalance(address(this)).sub(balanceBefore);
+        minted = CRV_TOKEN_ADDR.getBalance(address(this)).sub(balanceBefore);
 
         CRV_TOKEN_ADDR.withdrawTokens(_params.receiver, minted);
-
-        logger.Log(
-            address(this),
-            msg.sender,
-            "CurveMintCrv",
-            abi.encode(
-                _params,
-                minted
-                )
-        );
-
-        return minted;
+        logData = abi.encode(_params, minted);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory params) {
-        params = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

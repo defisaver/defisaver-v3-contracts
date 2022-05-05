@@ -1,17 +1,14 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/yearn/IYVault.sol";
-import "../../DS/DSMath.sol";
 import "./helpers/YearnHelper.sol";
 
 /// @title Supplies tokens to Yearn vault
 /// @dev tokens need to be approved for DSProxy to pull them (token address)
-contract YearnSupply is ActionBase, DSMath, YearnHelper {
+contract YearnSupply is ActionBase, YearnHelper {
     using TokenUtils for address;
 
     /// @param token - address of token to supply
@@ -27,8 +24,8 @@ contract YearnSupply is ActionBase, DSMath, YearnHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
@@ -43,15 +40,16 @@ contract YearnSupply is ActionBase, DSMath, YearnHelper {
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        uint256 yAmountReceived = _yearnSupply(inputData);
+        (uint256 yAmountReceived, bytes memory logData) = _yearnSupply(inputData);
+        emit ActionEvent("YearnSupply", logData);
         return bytes32(yAmountReceived);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-
-        _yearnSupply(inputData);
+        (, bytes memory logData) = _yearnSupply(inputData);
+        logger.logActionDirectEvent("YearnSupply", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -61,7 +59,7 @@ contract YearnSupply is ActionBase, DSMath, YearnHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _yearnSupply(Params memory _inputData) internal returns (uint256 yTokenAmount) {
+    function _yearnSupply(Params memory _inputData) internal returns (uint256 yTokenAmount, bytes memory logData) {
         IYVault vault = IYVault(yearnRegistry.latestVault(_inputData.token));
 
         uint256 amountPulled =
@@ -72,14 +70,14 @@ contract YearnSupply is ActionBase, DSMath, YearnHelper {
         uint256 yBalanceBefore = address(vault).getBalance(address(this));
         vault.deposit(_inputData.amount);
         uint256 yBalanceAfter = address(vault).getBalance(address(this));
-        yTokenAmount = sub(yBalanceAfter, yBalanceBefore);
+        yTokenAmount = yBalanceAfter - yBalanceBefore;
 
         address(vault).withdrawTokens(_inputData.to, yTokenAmount);
 
-        logger.Log(address(this), msg.sender, "YearnSupply", abi.encode(_inputData, yTokenAmount));
+        logData = abi.encode(_inputData, yTokenAmount);
     }
 
-    function parseInputs(bytes[] memory _callData) internal pure returns (Params memory inputData) {
-        inputData = abi.decode(_callData[0], (Params));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
+        inputData = abi.decode(_callData, (Params));
     }
 }

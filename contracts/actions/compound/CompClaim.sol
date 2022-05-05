@@ -1,43 +1,46 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
-import "../../DS/DSMath.sol";
 import "../../interfaces/IWETH.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
 
 /// @title Claims Comp reward for the specified user
-contract CompClaim is ActionBase, CompHelper, DSMath {
+contract CompClaim is ActionBase, CompHelper {
     using TokenUtils for address;
+
+    struct Params {
+        address[] cTokensSupply;
+        address[] cTokensBorrow;
+        address from;
+        address to;
+    }
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes[] memory _callData,
-        bytes[] memory _subData,
+        bytes memory _callData,
+        bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        (address[] memory cTokensSupply, address[] memory cTokensBorrow, address from, address to) =
-            parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
         // the first 2 inputs are not mappable, just the last two
-        from = _parseParamAddr(from, _paramMapping[0], _subData, _returnValues);
-        to = _parseParamAddr(to, _paramMapping[1], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[0], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
 
-        uint256 compClaimed = _claim(cTokensSupply, cTokensBorrow, from, to);
-
+        (uint256 compClaimed, bytes memory logData) = _claim(params.cTokensSupply, params.cTokensBorrow, params.from, params.to);
+        emit ActionEvent("CompClaim", logData);
         return bytes32(compClaimed);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes[] memory _callData) public payable override {
-        (address[] memory cTokensSupply, address[] memory cTokensBorrow, address from, address to) =
-            parseInputs(_callData);
-
-        _claim(cTokensSupply, cTokensBorrow, from, to);
+    function executeActionDirect(bytes memory _callData) public payable override {
+        Params memory params = parseInputs(_callData);
+        (, bytes memory logData) = _claim(params.cTokensSupply, params.cTokensBorrow, params.from, params.to);
+        logger.logActionDirectEvent("CompClaim", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -58,7 +61,7 @@ contract CompClaim is ActionBase, CompHelper, DSMath {
         address[] memory _cTokensBorrow,
         address _from,
         address _to
-    ) internal returns (uint256) {
+    ) internal returns (uint256 compClaimed, bytes memory logData) {
         address[] memory users = new address[](1);
         users[0] = _from;
 
@@ -69,30 +72,16 @@ contract CompClaim is ActionBase, CompHelper, DSMath {
 
         uint256 compBalanceAfter = COMP_ADDR.getBalance(_from);
 
-        uint256 compClaimed = sub(compBalanceAfter, compBalanceBefore);
+        compClaimed = compBalanceAfter - compBalanceBefore;
 
         if (_from == address(this)) {
             COMP_ADDR.withdrawTokens(_to, compClaimed);
         }
 
-        logger.Log(address(this), msg.sender, "CompClaim", abi.encode(_from, _to, compClaimed));
-
-        return compClaimed;
+        logData = abi.encode(_from, _to, compClaimed);
     }
 
-    function parseInputs(bytes[] memory _callData)
-        internal
-        pure
-        returns (
-            address[] memory cTokensSupply,
-            address[] memory cTokensBorrow,
-            address from,
-            address to
-        )
-    {
-        cTokensSupply = abi.decode(_callData[0], (address[]));
-        cTokensBorrow = abi.decode(_callData[1], (address[]));
-        from = abi.decode(_callData[2], (address));
-        to = abi.decode(_callData[3], (address));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

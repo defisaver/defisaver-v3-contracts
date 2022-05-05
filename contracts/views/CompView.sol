@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.10;
 
 import "../DS/DSMath.sol";
 import "../utils/Exponential.sol";
@@ -87,7 +86,7 @@ contract CompView is Exponential, DSMath {
             }
         }
 
-        if (sumBorrow == 0) return uint(-1);
+        if (sumBorrow == 0) return type(uint256).max;
 
         uint borrowPowerUsed = (sumBorrow * 10**18) / sumCollateral;
         return wdiv(1e18, borrowPowerUsed);

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.7.6;
+pragma solidity =0.8.10;
 
 import "./DFSProxyRegistry.sol";
 import "../interfaces/IDSProxy.sol";
@@ -11,13 +11,13 @@ import "./helpers/UtilHelper.sol";
 /// @title User facing contract to manage new proxies (is owner of DFSProxyRegistry)
 contract DFSProxyRegistryController is AdminAuth, UtilHelper {
 
-    /// @dev List of prebuild proxies the users can claim to save gas
+    /// @dev List of prebuilt proxies the users can claim to save gas
     address[] public proxyPool;
 
     event NewProxy(address, address);
     event ChangedOwner(address, address);
 
-    /// @notice User calls from EOA to build a new DFS registred proxy
+    /// @notice User calls from EOA to build a new DFS registered proxy
     function addNewProxy() public returns (address) {
         address newProxy = getFromPoolOrBuild(msg.sender);
         DFSProxyRegistry(DFS_PROXY_REGISTRY_ADDR).addAdditionalProxy(msg.sender, newProxy);
