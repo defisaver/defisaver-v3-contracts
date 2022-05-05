@@ -1544,6 +1544,83 @@ const rariWithdraw = async (
     return tx;
 };
 
+const convexDeposit = async (
+    proxy,
+    from,
+    to,
+    curveLp,
+    amount,
+    option,
+) => {
+    const action = new dfs.actions.convex.ConvexDepositAction(
+        from,
+        to,
+        curveLp,
+        amount,
+        option,
+    );
+
+    const assets = await action.getAssetsToApprove();
+    await Promise.all(
+        assets.map(
+            (e) => approve(e.asset, proxy.address),
+        ),
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    return executeAction('ConvexDeposit', functionData, proxy);
+};
+
+const convexWithdraw = async (
+    proxy,
+    from,
+    to,
+    curveLp,
+    amount,
+    option,
+) => {
+    const action = new dfs.actions.convex.ConvexWithdrawAction(
+        from,
+        to,
+        curveLp,
+        amount,
+        option,
+    );
+
+    const assets = await action.getAssetsToApprove();
+    await Promise.all(
+        assets.map(
+            (e) => approve(e.asset, proxy.address),
+        ),
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    return executeAction('ConvexWithdraw', functionData, proxy);
+};
+
+const convexClaim = async (
+    proxy,
+    from,
+    to,
+    curveLp,
+) => {
+    const action = new dfs.actions.convex.ConvexClaimAction(
+        from,
+        to,
+        curveLp,
+    );
+
+    const assets = await action.getAssetsToApprove();
+    await Promise.all(
+        assets.map(
+            (e) => approve(e.asset, proxy.address),
+        ),
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    return executeAction('ConvexClaim', functionData, proxy);
+};
+
 const aaveV3Supply = async (
     proxy, market, amount, tokenAddr, assetId, from,
 ) => {
@@ -1868,7 +1945,6 @@ const aaveV3SwitchCollateralCallDataOptimised = async (
 module.exports = {
     executeAction,
     sell,
-    buy,
 
     openMcd,
     supplyMcd,
@@ -1982,4 +2058,8 @@ module.exports = {
     aaveV3SwapBorrowRateCalldataOptimised,
 
     updateSubData,
+
+    convexDeposit,
+    convexWithdraw,
+    convexClaim,
 };
