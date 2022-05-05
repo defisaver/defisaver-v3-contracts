@@ -11,16 +11,19 @@ contract QiDaoRegistry is AdminAuth {
     mapping(uint16 => address) public vaultAddressById;
 
     uint16 public latestVaultId = 0;
-    // TODO: add only owner
-    function addVault(address _vaultAddr) public returns (uint16 vaultId) {
-        if (vaultIdByVaultAddress[_vaultAddr] != 0) revert VaultAlreadyRegistered(vaultIdByVaultAddress[_vaultAddr]);
 
+    function addVault(address _vaultAddr) public onlyOwner returns (uint16 vaultId) {
+        if (vaultIdByVaultAddress[_vaultAddr] != 0) revert VaultAlreadyRegistered(vaultIdByVaultAddress[_vaultAddr]);
+        vaultId = registerVault(_vaultAddr);
+    }
+
+    function registerVault(address _vaultAddr) internal returns (uint16 vaultId){
         vaultId = ++latestVaultId;
         vaultIdByVaultAddress[_vaultAddr] = vaultId;
         vaultAddressById[vaultId] = _vaultAddr;
     }
 
-    function removeVault(uint16 _vaultId) public {
+    function removeVault(uint16 _vaultId) public onlyOwner {
         vaultIdByVaultAddress[vaultAddressById[_vaultId]] = 0;
         vaultAddressById[_vaultId] = address(0);
     }

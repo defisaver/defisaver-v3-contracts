@@ -21,7 +21,7 @@ const {
 const WETH_VAULT_ID = '1';
 const WBTC_VAULT_ID = '2';
 
-const vaultRegistyAddress = '0xF03F92e206706b407A17Fc9009CC35285d8bbe76';
+const vaultRegistyAddress = '0xAa41ffE5712cfA0ab5930db4cb438B00166cf630';
 const MAI_STABLECOIN_ADDRESS = '0xdFA46478F9e5EA86d57387849598dbFB2e964b02';
 const WBTC_OPTI_ADDRESS = '0x68f180fcCe6836688e9084f035309E29Bf0A2095';
 
@@ -405,7 +405,6 @@ const qiDaoPaybackTest = async () => {
             expect(coll).to.be.eq(supplyAmount);
 
             const generateAmount = hre.ethers.utils.parseUnits('10000', 18);
-            const amountNeededToRepay = hre.ethers.utils.parseUnits('10050', 18);
             const balanceBefore = await balanceOf(MAI_STABLECOIN_ADDRESS, senderAcc.address);
 
             await qiDaoGenerate(
@@ -421,7 +420,7 @@ const qiDaoPaybackTest = async () => {
             const debtAmount = await findVaultDebt(WETH_VAULT_ID, userVaultId);
             console.log(`Debt after generate : ${(debtAmount / 1e18).toString()} MAI`);
             expect(debtAmount).to.be.eq(generateAmount);
-            await setBalance(MAI_STABLECOIN_ADDRESS, senderAcc.address, amountNeededToRepay);
+            await setBalance(MAI_STABLECOIN_ADDRESS, senderAcc.address, generateAmount);
             await approve(MAI_STABLECOIN_ADDRESS, proxy.address, senderAcc);
             await qiDaoPayback(
                 proxy,
@@ -467,7 +466,6 @@ const qiDaoPaybackTest = async () => {
             expect(coll).to.be.eq(supplyAmount);
 
             const generateAmount = hre.ethers.utils.parseUnits('10000', 18);
-            const amountNeededToRepay = hre.ethers.utils.parseUnits('10050', 18);
 
             const balanceBefore = await balanceOf(MAI_STABLECOIN_ADDRESS, senderAcc.address);
 
@@ -484,7 +482,7 @@ const qiDaoPaybackTest = async () => {
             const debtAmount = await findVaultDebt(WBTC_VAULT_ID, userVaultId);
             console.log(`Debt after generate : ${(debtAmount / 1e18).toString()} MAI`);
             expect(debtAmount).to.be.eq(generateAmount);
-            await setBalance(MAI_STABLECOIN_ADDRESS, senderAcc.address, amountNeededToRepay);
+            await setBalance(MAI_STABLECOIN_ADDRESS, senderAcc.address, generateAmount);
             await approve(MAI_STABLECOIN_ADDRESS, proxy.address, senderAcc);
             await qiDaoPayback(
                 proxy,
