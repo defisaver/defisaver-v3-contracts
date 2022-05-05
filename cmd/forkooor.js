@@ -32,6 +32,7 @@ const {
     rariDaiFundManager,
     rdptAddress,
     WBTC_ADDR,
+    redeploy,
 } = require('../test/utils');
 
 const {
@@ -48,6 +49,8 @@ const {
     mStableDeposit,
     supplyMcd,
     withdrawMcd,
+    liquityOpen,
+    liquityWithdraw,
 } = require('../test/actions');
 
 const { deployContract } = require('../scripts/utils/deployer');
@@ -63,9 +66,20 @@ const {
     getSubHash,
     addBotCaller,
     getLatestStrategyId,
+    createStrategy,
 } = require('../test/utils-strategies');
 
-const { subRepayFromSavingsStrategy, subMcdCloseStrategy, subMcdCloseToCollStrategy } = require('../test/strategy-subs');
+const { createLiquityCloseToCollStrategy } = require('../test/strategies');
+
+const {
+    subRepayFromSavingsStrategy,
+    subMcdCloseStrategy,
+    subMcdCloseToCollStrategy,
+    subLiquityCloseToCollStrategy,
+} = require('../test/strategy-subs');
+
+const { getTroveInfo } = require('../test/utils-liquity');
+
 const { createMcdTrigger, createChainLinkPriceTrigger, RATIO_STATE_UNDER } = require('../test/triggers');
 
 program.version('0.0.1');
@@ -436,6 +450,47 @@ const mcdCloseToCollStrategySub = async (vaultId, type, price, priceState, sende
     console.log(`Subscribed to mcd close strategy with sub id #${subId}`);
 };
 
+const liquityCloseToCollStrategySub = async (price, priceState, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await openStrategyAndBundleStorage(true);
+
+    // create
+    const liquityCloseToCollStrategy = createLiquityCloseToCollStrategy();
+
+    const strategyId = await createStrategy(proxy, ...liquityCloseToCollStrategy, false);
+
+    const formattedPrice = (price * 1e8).toString();
+
+    console.log('strategyId: ', strategyId);
+
+    let formattedPriceState;
+    if (priceState.toLowerCase() === 'over') {
+        formattedPriceState = 0;
+    } else if (priceState.toLowerCase() === 'under') {
+        formattedPriceState = 1;
+    }
+
+    const { subId } = await subLiquityCloseToCollStrategy(
+        proxy,
+        formattedPrice,
+        formattedPriceState,
+        10,
+        REGISTRY_ADDR,
+    );
+
+    console.log(`Subscribed to liquity close strategy with sub id #${subId}`);
+};
+
 // eslint-disable-next-line max-len
 const updateSmartSavingsStrategySub = async (protocol, subId, vaultId, minRatio, targetRatio, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
@@ -579,6 +634,53 @@ const deactivateSub = async (subId, sender) => {
     }
 };
 
+const createLiquityTrove = async (coll, debt, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const amountColl = hre.ethers.utils.parseUnits(coll, 18);
+    const amountLusd = hre.ethers.utils.parseUnits(debt, 18);
+
+    await depositToWeth(amountColl, senderAcc);
+    await approve(WETH_ADDRESS, proxy.address, senderAcc);
+    await redeploy('LiquityView');
+
+    const maxFeePercentage = hre.ethers.utils.parseUnits('5', 16);
+
+    try {
+        const tx = await liquityOpen(
+            proxy,
+            maxFeePercentage,
+            amountColl,
+            amountLusd,
+            senderAcc.address,
+            proxy.address,
+        );
+
+        await tx.wait();
+
+        console.log(`Trove created at proxy address: ${proxy.address}`);
+    } catch (err) {
+        console.log(`Error opening trove at proxy address: ${proxy.address}`);
+
+        const troveInfo = await getTroveInfo(proxy.address);
+
+        if (troveInfo.troveStatus.eq('1')) {
+            console.log('Trove already open');
+        }
+    }
+};
+
 // eslint-disable-next-line consistent-return
 const createMcdVault = async (type, coll, debt, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
@@ -678,6 +780,24 @@ const getCdp = async (cdpId, type) => {
     }
 };
 
+const getTrove = async (acc) => {
+    if (!acc) {
+        const senderAcc = (await hre.ethers.getSigners())[0];
+
+        const proxy = await getProxy(senderAcc.address);
+        // eslint-disable-next-line no-param-reassign
+        acc = proxy.address;
+    }
+
+    await redeploy('LiquityView');
+    const proxy = await getProxy(acc);
+
+    const troveInfo = await getTroveInfo(proxy.address);
+
+    console.log(`Coll amount ${troveInfo.collAmount / 1e18}`);
+    console.log(`Debt amount ${troveInfo.debtAmount / 1e18}`);
+};
+
 const callSell = async (srcTokenLabel, destTokenLabel, srcAmount, sender) => {
     const srcToken = getAssetInfo(srcTokenLabel);
     const destToken = getAssetInfo(destTokenLabel);
@@ -761,6 +881,44 @@ const supplyCdp = async (type, cdpId, amount, sender) => {
     } catch (err) {
         console.log(err);
         console.log('Failed to supply to cdp');
+    }
+};
+
+const withdrawLiquity = async (collAmount, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+    await redeploy('LiquityView');
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const collAmountWei = hre.ethers.utils.parseUnits(collAmount, 18);
+
+    try {
+        const tx = await liquityWithdraw(
+            proxy,
+            collAmountWei,
+            senderAcc.address,
+        );
+
+        await tx.wait();
+
+        console.log(`Withdraw ${collAmount} eth from trove ${proxy.address}`);
+
+        const troveInfo = await getTroveInfo(proxy.address);
+
+        console.log(`Coll amount ${troveInfo.collAmount / 1e18}`);
+        console.log(`Debt amount ${troveInfo.debtAmount / 1e18}`);
+    } catch (err) {
+        console.log(err);
+        console.log('Failed to withdraw from trove');
     }
 };
 
@@ -858,6 +1016,14 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
         });
 
     program
+        .command('create-trove <coll> <debt> [senderAddr]')
+        .description('Creates a Liquity trove')
+        .action(async (coll, debt, senderAddr) => {
+            await createLiquityTrove(coll, debt, senderAddr);
+            process.exit(0);
+        });
+
+    program
         .command('deposit-in-ss <protocol> <amount> [senderAddr]')
         .description('Deposits dai in smart savings')
         .action(async (protocol, amount, senderAddr) => {
@@ -889,6 +1055,15 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
         .action(async (vaultId, type, price, priceState, senderAddr) => {
             // eslint-disable-next-line max-len
             await mcdCloseToCollStrategySub(vaultId, type, price, priceState, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('sub-liquity-close-to-coll <price> <priceState> [senderAddr]')
+        .description('Subscribes to a Liquity to coll strategy')
+        .action(async (price, priceState, senderAddr) => {
+            // eslint-disable-next-line max-len
+            await liquityCloseToCollStrategySub(price, priceState, senderAddr);
             process.exit(0);
         });
 
@@ -959,6 +1134,14 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
         });
 
     program
+        .command('liquity-withdraw <collAmount> [senderAddr]')
+        .description('Withdraw coll from liquity trove')
+        .action(async (collAmount, senderAddr) => {
+            await withdrawLiquity(collAmount, senderAddr);
+            process.exit(0);
+        });
+
+    program
         .command('gib-money <account>')
         .description('Gives 100000 Eth to the specified account')
         .action(async (account) => {
@@ -988,6 +1171,14 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
         .description('Returns data about a cdp')
         .action(async (cdpId, type) => {
             await getCdp(cdpId, type);
+            process.exit(0);
+        });
+
+    program
+        .command('get-trove [acc]')
+        .description('Returns data about trove defaults to senders proxy')
+        .action(async (acc) => {
+            await getTrove(acc);
             process.exit(0);
         });
 

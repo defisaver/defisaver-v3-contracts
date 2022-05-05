@@ -21,7 +21,7 @@ function getTestFiles(dir, files_) {
     return files_;
 }
 
-const DEFAULT_NODE_COUNT = 11;
+const DEFAULT_NODE_COUNT = 1;
 const MAX_NODE_COUNT = 22;
 const NODE_GRACE_TIME = 15000;
 const MAX_RETRIES = 3;
@@ -158,8 +158,8 @@ class TestRunner extends events.EventEmitter {
     }
 
     finish() {
-        // const comp = (a, b) => (a.fileName > b.fileName ? 1 : -1);
-        // this.passedTests.sort(comp).forEach((e) => console.log(e.output));
+        const comp = (a, b) => (a.fileName > b.fileName ? 1 : -1);
+        this.passedTests.sort(comp).forEach((e) => console.log(e.output));
         this.passedTests.sort((a, b) => b.time - a.time).forEach((e) => console.log(`${e.fileName.padEnd(32)}\tretries: ${MAX_RETRIES - e.retries}\ttime: ${e.time}`));
         console.log(`${this.passed}/${this.total} tests passed`);
         if (this.total !== this.passed) exit(1);

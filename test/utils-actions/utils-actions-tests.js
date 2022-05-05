@@ -24,10 +24,20 @@ const {
     DFS_REG_CONTROLLER,
     ADMIN_ACC,
     DAI_ADDR,
+    redeployCore,
+    fetchAmountinUSDPrice,
+    openStrategyAndBundleStorage,
+    getChainLinkPrice,
 } = require('../utils');
 
 const { fetchMakerAddresses } = require('../utils-mcd');
-const { changeProxyOwner, automationV2Unsub, executeAction } = require('../actions');
+const {
+    changeProxyOwner, automationV2Unsub, executeAction, openVault, updateSubData,
+} = require('../actions');
+const { addBotCaller, createStrategy, subToStrategy } = require('../utils-strategies');
+const { createMcdCloseStrategy } = require('../strategies');
+const { subMcdCloseStrategy } = require('../strategy-subs');
+const { RATIO_STATE_OVER, createChainLinkPriceTrigger } = require('../triggers');
 
 const wrapEthTest = async () => {
     describe('Wrap-Eth', function () {
@@ -592,6 +602,168 @@ const automationV2UnsubTest = async () => {
         });
     });
 };
+
+const updateSubDataTest = async () => {
+    describe('Update Sub Data', function () {
+        this.timeout(1000000);
+
+        let senderAcc;
+        let proxy;
+        let botAcc;
+        let vaultId;
+        let subStorage;
+        let subId;
+        let flAmount;
+        let subStorageAddr;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            botAcc = (await hre.ethers.getSigners())[1];
+
+            await redeployCore();
+
+            await redeploy('SendToken');
+            await redeploy('McdRatioTrigger');
+            await redeploy('DFSSell');
+            await redeploy('McdView');
+            await redeploy('GasFeeTaker');
+            await redeploy('McdRatioCheck');
+
+            subStorageAddr = await getAddrFromRegistry('SubStorage');
+            subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+
+            await redeploy('McdSupply');
+            await redeploy('McdWithdraw');
+            await redeploy('McdGenerate');
+            await redeploy('McdPayback');
+            await redeploy('McdOpen');
+            await redeploy('ChainLinkPriceTrigger');
+            await addBotCaller(botAcc.address);
+            await getAddrFromRegistry('FLMaker');
+            proxy = await getProxy(senderAcc.address);
+        });
+
+        it('... should update sub data', async () => {
+            const vaultColl = fetchAmountinUSDPrice('WETH', '40000');
+            const amountDai = fetchAmountinUSDPrice('DAI', '18000');
+            vaultId = await openVault(
+                proxy,
+                'ETH-A',
+                vaultColl,
+                amountDai,
+            );
+            console.log(`VaultId: ${vaultId}`);
+            console.log(`Vault collateral${vaultColl}`);
+            console.log(`Vault debt${amountDai}`);
+            flAmount = (parseFloat(amountDai) + 1).toString();
+            flAmount = hre.ethers.utils.parseUnits(flAmount, 18);
+
+            await openStrategyAndBundleStorage();
+
+            const strategyData = createMcdCloseStrategy();
+            const strategyId = await createStrategy(proxy, ...strategyData, false);
+
+            const currPrice = await getChainLinkPrice(ETH_ADDR);
+            let strategySub;
+            const targetPrice = currPrice - 100; // Target is smaller so we can execute it
+            ({ subId, strategySub } = await subMcdCloseStrategy(
+                vaultId,
+                proxy,
+                targetPrice,
+                WETH_ADDRESS,
+                RATIO_STATE_OVER,
+                strategyId,
+            ));
+            console.log(subId);
+            const subHashBefore = await subStorage.getSub(subId);
+
+            const triggerData = await createChainLinkPriceTrigger(
+                WETH_ADDRESS, currPrice + 100, RATIO_STATE_OVER,
+            );
+            strategySub[2] = [triggerData];
+
+            await updateSubData(proxy, subId, strategySub);
+            const subHashAfter = await subStorage.getSub(subId);
+
+            expect(subHashAfter.strategySubHash).to.not.have.string(subHashBefore.strategySubHash);
+        });
+    });
+};
+
+const toggleSubDataTest = async () => {
+    describe('Toggle Sub', function () {
+        this.timeout(1000000);
+
+        let senderAcc;
+        let proxy;
+        let subId;
+        let subStorageAddr;
+        let subStorage;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+
+            await redeployCore();
+
+            subStorageAddr = await getAddrFromRegistry('SubStorage');
+            subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+
+            proxy = await getProxy(senderAcc.address);
+        });
+
+        it('... should create a dummy strategy', async () => {
+            const abiCoder = new hre.ethers.utils.AbiCoder();
+
+            const dummyStrategy = new dfs.Strategy('DummyStrategy');
+
+            dummyStrategy.addSubSlot('&amount', 'uint256');
+
+            const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+                WETH_ADDRESS, '&eoa', '&amount',
+            );
+
+            dummyStrategy.addTrigger((new dfs.triggers.GasPriceTrigger(0)));
+            dummyStrategy.addAction(pullTokenAction);
+
+            const callData = dummyStrategy.encodeForDsProxyCall();
+
+            const strategyId = await createStrategy(proxy, ...callData, false);
+
+            const amountEncoded = abiCoder.encode(['uint256'], [0]);
+
+            const triggerData = abiCoder.encode(['uint256'], [0]);
+            const strategySub = [strategyId, false, [triggerData], [amountEncoded]];
+
+            subId = await subToStrategy(proxy, strategySub);
+
+            const storedSub = await subStorage.getSub(subId);
+            expect(storedSub.isEnabled).to.be.eq(true);
+        });
+
+        it('... should deactivate the strategy', async () => {
+            const disableSub = new dfs.actions.basic.ToggleSubAction(subId, false);
+
+            const functionData = disableSub.encodeForDsProxyCall()[1];
+
+            await executeAction('ToggleSub', functionData, proxy);
+
+            const storedSub = await subStorage.getSub(subId);
+            expect(storedSub.isEnabled).to.be.eq(false);
+        });
+
+        it('... should activate the strategy again', async () => {
+            const disableSub = new dfs.actions.basic.ToggleSubAction(subId, true);
+
+            const functionData = disableSub.encodeForDsProxyCall()[1];
+
+            await executeAction('ToggleSub', functionData, proxy);
+
+            const storedSub = await subStorage.getSub(subId);
+            expect(storedSub.isEnabled).to.be.eq(true);
+        });
+    });
+};
+
 const deployUtilsActionsContracts = async () => {
     await redeploy('SendTokenAndUnwrap');
     await redeploy('WrapEth');
@@ -604,10 +776,13 @@ const deployUtilsActionsContracts = async () => {
     await redeploy('SendToken');
     await redeploy('UniswapWrapperV3');
     await redeploy('ChangeProxyOwner');
+    await redeploy('UpdateSub');
+    await redeploy('ToggleSub');
 };
 
 const utilsActionsFullTest = async () => {
     await deployUtilsActionsContracts();
+    await toggleSubDataTest();
     await sendTokenAndUnwrapTest();
     await wrapEthTest();
     await unwrapEthTest();
@@ -615,8 +790,9 @@ const utilsActionsFullTest = async () => {
     await subInputsTest();
     await sendTokenTest();
     await pullTokenTest();
-    await changeOwnerTest();
+    await updateSubDataTest();
     await automationV2UnsubTest();
+    await changeOwnerTest();
 };
 
 module.exports = {
@@ -630,4 +806,6 @@ module.exports = {
     automationV2UnsubTest,
     utilsActionsFullTest,
     sendTokenAndUnwrapTest,
+    updateSubDataTest,
+    toggleSubDataTest,
 };

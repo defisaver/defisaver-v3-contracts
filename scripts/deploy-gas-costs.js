@@ -75,7 +75,6 @@ async function main() {
     totalGasUsed += await deployContractAndReturnGasUsed('McdRatioCheck');
 
     // sell actions
-    totalGasUsed += await deployContractAndReturnGasUsed('DFSBuy');
     totalGasUsed += await deployContractAndReturnGasUsed('DFSSell');
 
     console.log(`Sell and checker gas cost: ${(totalGasUsed - lastSnapShot).toString()}`);

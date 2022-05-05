@@ -54,7 +54,6 @@ async function main() {
 
     // // exchange actions
     // await redeploy('DFSSell');
-    // await redeploy('DFSBuy');
 
     // // flashloan actions
     // await redeploy('FLDyDx');
