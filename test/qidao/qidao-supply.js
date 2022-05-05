@@ -3,7 +3,7 @@ const {
 } = require('../utils');
 const { qiDaoSupplyTest } = require('./qidao-tests');
 
-describe('QiDao-Open', () => {
+describe('QiDao-Supply', () => {
     before(async () => {
         await redeploy('QiDaoOpen');
         await redeploy('QiDaoSupply');

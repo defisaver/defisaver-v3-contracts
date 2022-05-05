@@ -40,5 +40,4 @@ interface IStablecoin {
     function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256 tokenId);
 
     function vaultCollateral(uint256 vaultId) external view returns (uint256 collAmount);
-
 }
