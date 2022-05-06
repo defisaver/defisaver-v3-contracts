@@ -27,19 +27,21 @@ contract QiDaoPayback is ActionBase, QiDaoHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
+        inputData.vaultId = uint16(_parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues));
+
         inputData.userVaultId = _parseParamUint(
             inputData.userVaultId,
-            _paramMapping[0],
+            _paramMapping[1],
             _subData,
             _returnValues
         );
         inputData.amount = _parseParamUint(
             inputData.amount,
-            _paramMapping[1],
+            _paramMapping[2],
             _subData,
             _returnValues
         );
-        inputData.from = _parseParamAddr(inputData.from, _paramMapping[2], _subData, _returnValues);
+        inputData.from = _parseParamAddr(inputData.from, _paramMapping[3], _subData, _returnValues);
 
         (uint256 amount, bytes memory logData) = _qiDaoPayback(inputData);
         emit ActionEvent("QiDaoPayback", logData);

@@ -27,19 +27,22 @@ contract QiDaoSupply is ActionBase, QiDaoHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
+        inputData.vaultId = uint16(_parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues));
+
+
         inputData.userVaultId = _parseParamUint(
             inputData.userVaultId,
-            _paramMapping[0],
+            _paramMapping[1],
             _subData,
             _returnValues
         );
         inputData.amount = _parseParamUint(
             inputData.amount,
-            _paramMapping[1],
+            _paramMapping[2],
             _subData,
             _returnValues
         );
-        inputData.from = _parseParamAddr(inputData.from, _paramMapping[2], _subData, _returnValues);
+        inputData.from = _parseParamAddr(inputData.from, _paramMapping[3], _subData, _returnValues);
 
         (uint256 amount, bytes memory logData) = _qiDaoSupply(inputData);
         emit ActionEvent("QiDaoSupply", logData);
@@ -75,7 +78,7 @@ contract QiDaoSupply is ActionBase, QiDaoHelper {
         address vaultAddress = vaultRegistry.vaultAddressById(_inputParams.vaultId);
         address collateralAsset = IStablecoin(vaultAddress).collateral();
 
-        collateralAsset.pullTokensIfNeeded(_inputParams.from, _inputParams.amount);
+        _inputParams.amount = collateralAsset.pullTokensIfNeeded(_inputParams.from, _inputParams.amount);
         collateralAsset.approveToken(vaultAddress, _inputParams.amount);
 
         IStablecoin(vaultAddress).depositCollateral(_inputParams.userVaultId, _inputParams.amount);
