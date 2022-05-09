@@ -79,7 +79,7 @@ contract CompPayback is ActionBase, CompHelper {
         // we always expect actions to deal with WETH never Eth
         if (tokenAddr != TokenUtils.WETH_ADDR) {
             tokenAddr.approveToken(_cTokenAddr, _amount);
-            if (ICToken(_cTokenAddr).repayBorrow(_amount) != NO_ERROR){
+            if (ICToken(_cTokenAddr).repayBorrowBehalf(_onBehalf, _amount) != NO_ERROR){
                 revert CompPaybackError();
             }
         } else {
