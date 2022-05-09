@@ -3,7 +3,7 @@ pragma solidity 0.8.10;
 
 interface IStablecoin {
 	
-	function getDebtCeiling() external view returns (uint256);
+    function getDebtCeiling() external view returns (uint256);
 
     function balanceOf(address account) external view returns (uint256);
 
