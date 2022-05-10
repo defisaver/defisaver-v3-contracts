@@ -32,6 +32,7 @@ jobs:
         RINKEBY_ARBITRUM_NODE: ${{ secrets.RINKEBY_ARBITRUM_NODE }}
         KOVAN_OPTIMISM_NODE: ${{ secrets.KOVAN_OPTIMISM_NODE }}
         OPTIMISM_NODE: ${{ secrets.OPTIMISM_NODE }}
+        TENDERLY_ACCESS_KEY: ${{ secrets.TENDERLY_ACCESS_KEY }}
 
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -44,6 +45,9 @@ jobs:
           node-version: '16'
       
       - run: npm ci
+      
+      - name: Tenderly-setup
+        run: echo 'access_key:' $TENDERLY_ACCESS_KEY > $HOME/.tenderly/config.yaml
       
       - name: Lint
         run: npm run lint
