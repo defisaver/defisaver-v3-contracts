@@ -47,7 +47,7 @@ jobs:
       - run: npm ci
       
       - name: Tenderly-setup
-        run: echo 'access_key:' $TENDERLY_ACCESS_KEY > $HOME/.tenderly/config.yaml
+        run: mkdir $HOME/.tenderly && echo 'access_key:' $TENDERLY_ACCESS_KEY > $HOME/.tenderly/config.yaml
       
       - name: Lint
         run: npm run lint
