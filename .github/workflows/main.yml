@@ -28,6 +28,11 @@ jobs:
         TENDERLY_PROJECT: ${{ secrets.TENDERLY_PROJECT }}
         KOVAN_ETHEREUM_NODE: ${{ secrets.KOVAN_ETHEREUM_NODE }}
         PRIV_KEY_KOVAN: ${{ secrets.PRIV_KEY_KOVAN }}
+        ARBITRUM_NODE: ${{ secrets.ARBITRUM_NODE }}
+        RINKEBY_ARBITRUM_NODE: ${{ secrets.RINKEBY_ARBITRUM_NODE }}
+        KOVAN_OPTIMISM_NODE: ${{ secrets.KOVAN_OPTIMISM_NODE }}
+        OPTIMISM_NODE: ${{ secrets.OPTIMISM_NODE }}
+
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
