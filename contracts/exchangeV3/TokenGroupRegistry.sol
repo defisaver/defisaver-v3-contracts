@@ -7,7 +7,7 @@ import "../auth/AdminAuth.sol";
 contract TokenGroupRegistry is AdminAuth {
     /// @dev 0.25% fee as we divide the amount with this number
     uint256 public constant STANDARD_FEE_DIVIDER = 400;
-    
+
     uint256 public constant STABLE_FEE_DIVIDER = 1000;
     uint256 public constant MAX_FEE_DIVIDER = 50;
 
@@ -53,14 +53,14 @@ contract TokenGroupRegistry is AdminAuth {
     /// @dev This will overwrite if token is part of a different group
     /// @dev Groups needs to exist to add to it
     function addTokenInGroup(address _tokenAddr, uint256 _groupId) public onlyOwner {
-        if (_groupId >= feesPerGroup.length) revert GroupNonExistent(_groupId);
+        if (_groupId > feesPerGroup.length) revert GroupNonExistent(_groupId);
 
         groupIds[_tokenAddr] = _groupId;
     }
 
     /// @notice Add multiple tokens to a group
     function addTokensInGroup(address[] memory _tokensAddr, uint256 _groupId) public onlyOwner {
-        if (_groupId >= feesPerGroup.length) revert GroupNonExistent(_groupId);
+        if (_groupId > feesPerGroup.length) revert GroupNonExistent(_groupId);
 
         for (uint256 i; i < _tokensAddr.length; ++i) {
             groupIds[_tokensAddr[i]] = _groupId;
