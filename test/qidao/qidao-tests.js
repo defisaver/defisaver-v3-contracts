@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-expressions */
 const hre = require('hardhat');
 const { expect } = require('chai');
+const { BigNumber } = require('ethers');
 const {
     getProxy,
     redeploy,
@@ -9,6 +11,7 @@ const {
     approve,
     setBalance,
     balanceOf,
+    MAX_UINT128,
 } = require('../utils');
 const {
     qiDaoOpen,
@@ -21,7 +24,7 @@ const {
 const WETH_VAULT_ID = '1';
 const WBTC_VAULT_ID = '2';
 
-const vaultRegistyAddress = '0xAa41ffE5712cfA0ab5930db4cb438B00166cf630';
+const vaultRegistyAddress = '0x8B3750F1991CA39Fa21f38B6C3130B8Eda983B77';
 const MAI_STABLECOIN_ADDRESS = '0xdFA46478F9e5EA86d57387849598dbFB2e964b02';
 const WBTC_OPTI_ADDRESS = '0x68f180fcCe6836688e9084f035309E29Bf0A2095';
 
@@ -48,6 +51,13 @@ const findVaultDebt = async (vaultId, userVaultId) => {
     const vaultContract = await hre.ethers.getContractAt('IStablecoin', vaultAddress);
     const debtAmount = await vaultContract.vaultDebt(userVaultId);
     return debtAmount;
+};
+
+const maiAmountAvailable = async (vaultId) => {
+    const registryContract = await hre.ethers.getContractAt('QiDaoRegistry', vaultRegistyAddress);
+    const vaultAddress = await registryContract.vaultAddressById(vaultId);
+    const maiBalance = await balanceOf(MAI_STABLECOIN_ADDRESS, vaultAddress);
+    return maiBalance;
 };
 
 const qiDaoOpenTest = async () => {
@@ -113,7 +123,6 @@ const qiDaoSupplyTest = async () => {
             await setBalance(WETH_ADDRESS, senderAcc.address, supplyAmount);
             await approve(WETH_ADDRESS, proxy.address, senderAcc);
             const userVaultId = await findLatestQiDaoVault(proxy.address, WETH_VAULT_ID);
-
             await qiDaoSupply(
                 proxy,
                 WETH_VAULT_ID,
@@ -126,6 +135,20 @@ const qiDaoSupplyTest = async () => {
             const coll = await findVaultCollateral(WETH_VAULT_ID, userVaultId.toString());
             console.log(`Collateral after supply : ${(coll / 1e18).toString()} WETH`);
             expect(coll).to.be.eq(supplyAmount);
+
+            await setBalance(WETH_ADDRESS, senderAcc.address, supplyAmount);
+            await qiDaoSupply(
+                proxy,
+                WETH_VAULT_ID,
+                userVaultId.toString(),
+                WETH_ADDRESS,
+                MAX_UINT128,
+                senderAcc.address,
+            );
+
+            const collAfter = await findVaultCollateral(WETH_VAULT_ID, userVaultId.toString());
+            console.log(`Collateral after max supply : ${(collAfter / 1e18).toString()} WETH`);
+            expect(collAfter).to.be.eq(supplyAmount.mul(2));
         });
         it('... should suply WBTC to QiDao vault', async () => {
             await qiDaoOpen(proxy, WBTC_VAULT_ID);
@@ -134,7 +157,6 @@ const qiDaoSupplyTest = async () => {
             await setBalance(WBTC_OPTI_ADDRESS, senderAcc.address, supplyAmount);
             await approve(WBTC_OPTI_ADDRESS, proxy.address, senderAcc);
             const userVaultId = await findLatestQiDaoVault(proxy.address, WBTC_VAULT_ID);
-
             await qiDaoSupply(
                 proxy,
                 WBTC_VAULT_ID,
@@ -146,6 +168,20 @@ const qiDaoSupplyTest = async () => {
             const coll = await findVaultCollateral('2', userVaultId.toString());
             console.log(`Collateral after supply : ${(coll / 1e8).toString()} WBTC`);
             expect(coll).to.be.eq(supplyAmount);
+
+            await setBalance(WBTC_OPTI_ADDRESS, senderAcc.address, supplyAmount);
+            await qiDaoSupply(
+                proxy,
+                WBTC_VAULT_ID,
+                userVaultId.toString(),
+                WBTC_OPTI_ADDRESS,
+                MAX_UINT128,
+                senderAcc.address,
+            );
+
+            const collAfter = await findVaultCollateral(WBTC_VAULT_ID, userVaultId.toString());
+            console.log(`Collateral after max supply : ${(collAfter / 1e8).toString()} WBTC`);
+            expect(collAfter).to.be.eq(supplyAmount.mul(2));
         });
     });
 };
@@ -195,6 +231,14 @@ const qiDaoGenerateTest = async () => {
             const generateAmount = hre.ethers.utils.parseUnits('10000', 18);
             const balanceBefore = await balanceOf(MAI_STABLECOIN_ADDRESS, senderAcc.address);
 
+            const availableAmount = await maiAmountAvailable(WETH_VAULT_ID);
+            const availableAmountBigNumber = BigNumber.from(availableAmount);
+            const generateAmountBigNumber = BigNumber.from(generateAmount);
+
+            if (availableAmountBigNumber.lt(generateAmountBigNumber)) {
+                expect(true).to.be.true;
+                return;
+            }
             await qiDaoGenerate(
                 proxy,
                 WETH_VAULT_ID,
@@ -232,7 +276,14 @@ const qiDaoGenerateTest = async () => {
 
             const generateAmount = hre.ethers.utils.parseUnits('10000', 18);
             const balanceBefore = await balanceOf(MAI_STABLECOIN_ADDRESS, senderAcc.address);
+            const availableAmount = await maiAmountAvailable(WBTC_VAULT_ID);
+            const availableAmountBigNumber = BigNumber.from(availableAmount);
+            const generateAmountBigNumber = BigNumber.from(generateAmount);
 
+            if (availableAmountBigNumber.lt(generateAmountBigNumber)) {
+                expect(true).to.be.true;
+                return;
+            }
             await qiDaoGenerate(
                 proxy,
                 WBTC_VAULT_ID,
@@ -307,7 +358,7 @@ const qiDaoWithdrawTest = async () => {
                 proxy,
                 WETH_VAULT_ID,
                 userVaultId.toString(),
-                (hre.ethers.constants.MaxUint256).toString(),
+                MAX_UINT128,
                 senderAcc.address,
             );
             const collAfterSnd = await findVaultCollateral(WETH_VAULT_ID, userVaultId.toString());
@@ -316,7 +367,7 @@ const qiDaoWithdrawTest = async () => {
             const wethBalanceAfterWithdraw = await balanceOf(WETH_ADDRESS, senderAcc.address);
             expect(wethBalanceAfterWithdraw).to.be.eq(supplyAmount);
         });
-        it('... should suply WBTC to QiDao vault', async () => {
+        it('... should suply WBTC to QiDao vault and then withdraw it', async () => {
             await qiDaoOpen(proxy, WBTC_VAULT_ID);
             const supplyAmount = hre.ethers.utils.parseUnits('5', 8);
 
@@ -350,7 +401,7 @@ const qiDaoWithdrawTest = async () => {
                 proxy,
                 WBTC_VAULT_ID,
                 userVaultId.toString(),
-                (hre.ethers.constants.MaxUint256).toString(),
+                MAX_UINT128,
                 senderAcc.address,
             );
             const collAfterSnd = await findVaultCollateral(WBTC_VAULT_ID, userVaultId.toString());
@@ -406,7 +457,14 @@ const qiDaoPaybackTest = async () => {
 
             const generateAmount = hre.ethers.utils.parseUnits('10000', 18);
             const balanceBefore = await balanceOf(MAI_STABLECOIN_ADDRESS, senderAcc.address);
+            const availableAmount = await maiAmountAvailable(WETH_VAULT_ID);
+            const availableAmountBigNumber = BigNumber.from(availableAmount);
+            const generateAmountBigNumber = BigNumber.from(generateAmount);
 
+            if (availableAmountBigNumber.lt(generateAmountBigNumber)) {
+                expect(true).to.be.true;
+                return;
+            }
             await qiDaoGenerate(
                 proxy,
                 WETH_VAULT_ID,
@@ -436,7 +494,7 @@ const qiDaoPaybackTest = async () => {
                 proxy,
                 WETH_VAULT_ID,
                 userVaultId.toString(),
-                (hre.ethers.constants.MaxUint256).toString(),
+                MAX_UINT128,
                 senderAcc.address,
             );
 
@@ -468,7 +526,14 @@ const qiDaoPaybackTest = async () => {
             const generateAmount = hre.ethers.utils.parseUnits('10000', 18);
 
             const balanceBefore = await balanceOf(MAI_STABLECOIN_ADDRESS, senderAcc.address);
+            const availableAmount = await maiAmountAvailable(WBTC_VAULT_ID);
+            const availableAmountBigNumber = BigNumber.from(availableAmount);
+            const generateAmountBigNumber = BigNumber.from(generateAmount);
 
+            if (availableAmountBigNumber.lt(generateAmountBigNumber)) {
+                expect(true).to.be.true;
+                return;
+            }
             await qiDaoGenerate(
                 proxy,
                 WBTC_VAULT_ID,
@@ -498,7 +563,7 @@ const qiDaoPaybackTest = async () => {
                 proxy,
                 WBTC_VAULT_ID,
                 userVaultId.toString(),
-                (hre.ethers.constants.MaxUint256).toString(),
+                MAX_UINT128,
                 senderAcc.address,
             );
 

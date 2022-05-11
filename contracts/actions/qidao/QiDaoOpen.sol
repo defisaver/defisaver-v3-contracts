@@ -20,23 +20,23 @@ contract QiDaoOpen is ActionBase, QiDaoHelper {
         uint8[] memory,
         bytes32[] memory
     ) public payable virtual override returns (bytes32) {
-        Params memory params = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        (uint256 vaultId, bytes memory logData) = _qiDaoOpen(params);
+        (uint256 vaultId, bytes memory logData) = _qiDaoOpen(inputData);
         emit ActionEvent("QiDaoOpen", logData);
         return bytes32(vaultId);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
-        Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _qiDaoOpen(params);
+        Params memory inputData = parseInputs(_callData);
+        (, bytes memory logData) = _qiDaoOpen(inputData);
         logger.logActionDirectEvent("QiDaoOpen", logData);
     }
 
     function executeActionDirectL2() public payable {
-        Params memory params = decodeInputs(msg.data[4:]);
-        (, bytes memory logData) = _qiDaoOpen(params);
+        Params memory inputData = decodeInputs(msg.data[4:]);
+        (, bytes memory logData) = _qiDaoOpen(inputData);
         logger.logActionDirectEvent("QiDaoOpen", logData);
     }
 
@@ -52,7 +52,7 @@ contract QiDaoOpen is ActionBase, QiDaoHelper {
         internal
         returns (uint256 userVaultId, bytes memory logData)
     {
-        address vaultAddress = vaultRegistry.vaultAddressById(_inputParams.vaultId);
+        address vaultAddress = vaultRegistry.getVaultAddressById(_inputParams.vaultId);
         userVaultId = IStablecoin(vaultAddress).createVault();
 
         logData = abi.encode(_inputParams, vaultAddress, userVaultId);
