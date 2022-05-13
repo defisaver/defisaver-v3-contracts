@@ -1,4 +1,5 @@
 /* eslint-disable no-await-in-loop */
+const { default: curve } = require('@curvefi/api');
 const hre = require('hardhat');
 const fs = require('fs');
 const storageSlots = require('./storageSlots.json');
@@ -558,7 +559,7 @@ const balanceOfOnTokenInBlock = async (tokenAddr, addr, block) => {
     return balance;
 };
 
-const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee) => {
+const formatExchangeObjUni = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
     let firstPath = srcAddr;
@@ -598,6 +599,72 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, u
         path,
         [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
     ];
+};
+
+const formatExchangeObjCurve = async (
+    srcAddr,
+    destAddr,
+    amount,
+    wrapper,
+) => {
+    const { route: sdkRoute } = await curve.getBestRouteAndOutput(
+        srcAddr,
+        destAddr,
+        '1000', // this is fine
+    );
+    const swapParams = sdkRoute.map((e) => [e.i, e.j, e.swapType]).concat(
+        [...Array(4 - sdkRoute.length).keys()].map(
+            () => [0, 0, 0],
+        ),
+    );
+    const route = [srcAddr].concat(
+        ...sdkRoute.map((e) => [e.poolAddress, e.outputCoinAddress]),
+        ...[...Array(8 - (sdkRoute.length) * 2).keys()].map(
+            () => [nullAddress],
+        ),
+    );
+
+    const exchangeData = hre.ethers.utils.defaultAbiCoder.encode(
+        ['address[9]', 'uint256[3][4]'],
+        [route, swapParams],
+    );
+
+    return [
+        srcAddr,
+        destAddr,
+        amount,
+        0,
+        0,
+        0,
+        nullAddress,
+        wrapper,
+        exchangeData,
+        [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
+    ];
+};
+
+const formatExchangeObj = async (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee) => {
+    const isCurve = (
+        await getAddrFromRegistry('CurveWrapperV3')
+    ).toLowerCase() === wrapper.toLowerCase();
+
+    if (!isCurve) {
+        return formatExchangeObjUni(
+            srcAddr,
+            destAddr,
+            amount,
+            wrapper,
+            destAmount,
+            uniV3fee,
+        );
+    }
+
+    return formatExchangeObjCurve(
+        srcAddr,
+        destAddr,
+        amount,
+        wrapper,
+    );
 };
 
 const isEth = (tokenAddr) => {
@@ -888,4 +955,7 @@ module.exports = {
     setForkForTesting,
     resetForkToBlock,
     balanceOfOnTokenInBlock,
+    curveApiInit: async () => curve.init('Alchemy', {
+        url: hre.network.url,
+    }),
 };

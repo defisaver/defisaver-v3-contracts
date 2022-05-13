@@ -61,7 +61,7 @@ const executeAction = async (actionName, functionData, proxy, regAddr = REGISTRY
 
 // eslint-disable-next-line max-len
 const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0, signer, regAddr = REGISTRY_ADDR) => {
-    const exchangeObject = formatExchangeObj(
+    const exchangeObject = await formatExchangeObj(
         sellAddr,
         buyAddr,
         sellAmount.toString(),
