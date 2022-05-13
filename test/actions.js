@@ -20,6 +20,7 @@ const {
     // getGasUsed,
     mineBlock,
     getGasUsed,
+    formatExchangeObjCurve,
     addrs,
 } = require('./utils');
 
@@ -63,15 +64,25 @@ const executeAction = async (actionName, functionData, proxy, regAddr = addrs[ne
 };
 
 // eslint-disable-next-line max-len
-const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0, signer, regAddr = REGISTRY_ADDR) => {
-    const exchangeObject = formatExchangeObj(
-        sellAddr,
-        buyAddr,
-        sellAmount.toString(),
-        wrapper,
-        0,
-        fee,
-    );
+const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0, signer, regAddr = REGISTRY_ADDR, isCurve = false) => {
+    let exchangeObject;
+    if (!isCurve) {
+        exchangeObject = formatExchangeObj(
+            sellAddr,
+            buyAddr,
+            sellAmount.toString(),
+            wrapper,
+            0,
+            fee,
+        );
+    } else {
+        exchangeObject = await formatExchangeObjCurve(
+            sellAddr,
+            buyAddr,
+            sellAmount.toString(),
+            wrapper,
+        );
+    }
 
     const sellAction = new dfs.actions.basic.SellAction(exchangeObject, from, to);
 
