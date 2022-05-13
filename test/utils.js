@@ -559,7 +559,7 @@ const balanceOfOnTokenInBlock = async (tokenAddr, addr, block) => {
     return balance;
 };
 
-const formatExchangeObjUni = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee) => {
+const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
     let firstPath = srcAddr;
@@ -641,30 +641,6 @@ const formatExchangeObjCurve = async (
         exchangeData,
         [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
     ];
-};
-
-const formatExchangeObj = async (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee) => {
-    const isCurve = (
-        await getAddrFromRegistry('CurveWrapperV3')
-    ).toLowerCase() === wrapper.toLowerCase();
-
-    if (!isCurve) {
-        return formatExchangeObjUni(
-            srcAddr,
-            destAddr,
-            amount,
-            wrapper,
-            destAmount,
-            uniV3fee,
-        );
-    }
-
-    return formatExchangeObjCurve(
-        srcAddr,
-        destAddr,
-        amount,
-        wrapper,
-    );
 };
 
 const isEth = (tokenAddr) => {
@@ -955,6 +931,7 @@ module.exports = {
     setForkForTesting,
     resetForkToBlock,
     balanceOfOnTokenInBlock,
+    formatExchangeObjCurve,
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),
