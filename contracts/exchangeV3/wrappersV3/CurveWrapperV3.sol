@@ -3,6 +3,7 @@ pragma solidity =0.8.10;
 
 import "../../interfaces/exchange/IExchangeV3.sol";
 import "../../interfaces/curve/ISwaps.sol";
+import "../../interfaces/curve/IAddressProvider.sol";
 import "../../interfaces/IERC20.sol";
 import "../../auth/AdminAuth.sol";
 import "../../utils/SafeERC20.sol";
@@ -12,14 +13,17 @@ import "./helpers/WrapperHelper.sol";
 contract CurveWrapperV3 is IExchangeV3, AdminAuth, WrapperHelper {
     using SafeERC20 for IERC20;
 
-    ISwaps public constant exchangeContract = ISwaps(CURVE_EXCHANGE_CONTRACT);
+    IAddressProvider addressProvider = IAddressProvider(CURVE_ADDRESS_PROVIDER);
 
     /// @notice Sells _srcAmount of tokens on Curve
     /// @param _srcAddr From token
     /// @param _srcAmount From amount
     /// @param _additionalData Route and swap params
     /// @return uint256 amount of tokens received from selling
-    function sell(address _srcAddr, address, uint256 _srcAmount, bytes calldata _additionalData) external override returns (uint) {
+    function sell(address _srcAddr, address, uint256 _srcAmount, bytes calldata _additionalData) external override returns (uint) {    
+        ISwaps exchangeContract = ISwaps(
+                addressProvider.get_address(2)
+        );
         IERC20(_srcAddr).safeApprove(address(exchangeContract), _srcAmount);
 
         (
@@ -49,6 +53,9 @@ contract CurveWrapperV3 is IExchangeV3, AdminAuth, WrapperHelper {
     /// @param _additionalData Route and swap params
     /// @return uint256 Rate (price)
     function getSellRate(address, address, uint256 _srcAmount, bytes memory _additionalData) public override returns (uint) {
+        ISwaps exchangeContract = ISwaps(
+                addressProvider.get_address(2)
+        );
         (
             address[9] memory _route, uint256[3][4] memory _swap_params
         ) = abi.decode(_additionalData, (address[9], uint256[3][4]));
