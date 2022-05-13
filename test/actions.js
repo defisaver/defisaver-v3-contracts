@@ -20,6 +20,7 @@ const {
     // getGasUsed,
     mineBlock,
     getGasUsed,
+    addrs,
 } = require('./utils');
 
 const {
@@ -32,7 +33,9 @@ const { getSecondTokenAmount } = require('./utils-uni');
 const { LiquityActionIds, getHints, getRedemptionHints } = require('./utils-liquity');
 const { execShellCommand } = require('../scripts/hardhat-tasks-functions');
 
-const executeAction = async (actionName, functionData, proxy, regAddr = REGISTRY_ADDR) => {
+const network = hre.network.config.name;
+
+const executeAction = async (actionName, functionData, proxy, regAddr = addrs[network].REGISTRY_ADDR) => {
     if (hre.network.config.type !== 'tenderly') {
         await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
             '0x1', // 1 wei
@@ -1543,6 +1546,103 @@ const rariWithdraw = async (
     const tx = await executeAction('RariWithdraw', functionData, proxy);
     return tx;
 };
+const qiDaoOpen = async (
+    proxy,
+    vaultId,
+) => {
+    dfs.configure({
+        chainId: 10,
+    });
+    const qidaoOpenAction = new dfs.actions.qidao.QiDaoOpenVaultAction(
+        vaultId,
+    );
+    const functionData = qidaoOpenAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('QiDaoOpen', functionData, proxy);
+    return tx;
+};
+const qiDaoSupply = async (
+    proxy,
+    vaultId,
+    userVaultId,
+    tokenAddress,
+    amount,
+    from,
+) => {
+    dfs.configure({
+        chainId: 10,
+    });
+    const qiDaoSupplyAction = new dfs.actions.qidao.QiDaoSupplyAction(
+        vaultId,
+        userVaultId,
+        amount,
+        from,
+        tokenAddress,
+    );
+    const functionData = qiDaoSupplyAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('QiDaoSupply', functionData, proxy);
+    return tx;
+};
+const qiDaoWithdraw = async (
+    proxy,
+    vaultId,
+    userVaultid,
+    amount,
+    to,
+) => {
+    dfs.configure({
+        chainId: 10,
+    });
+    const qiDaoWithdrawAction = new dfs.actions.qidao.QiDaoWithdrawAction(
+        vaultId,
+        userVaultid,
+        amount,
+        to,
+    );
+    const functionData = qiDaoWithdrawAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('QiDaoWithdraw', functionData, proxy);
+    return tx;
+};
+
+const qiDaoGenerate = async (
+    proxy,
+    vaultId,
+    userVaultId,
+    amount,
+    to,
+) => {
+    dfs.configure({
+        chainId: 10,
+    });
+    const qiDaoGenerateAction = new dfs.actions.qidao.QiDaoGenerateAction(
+        vaultId,
+        userVaultId,
+        amount,
+        to,
+    );
+    const functionData = qiDaoGenerateAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('QiDaoGenerate', functionData, proxy);
+    return tx;
+};
+const qiDaoPayback = async (
+    proxy,
+    vaultId,
+    userVaultId,
+    amount,
+    from,
+) => {
+    dfs.configure({
+        chainId: 10,
+    });
+    const qiDaoGenerateAction = new dfs.actions.qidao.QiDaoPaybackAction(
+        vaultId,
+        userVaultId,
+        amount,
+        from,
+    );
+    const functionData = qiDaoGenerateAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('QiDaoPayback', functionData, proxy);
+    return tx;
+};
 
 const convexDeposit = async (
     proxy,
@@ -2039,6 +2139,12 @@ module.exports = {
 
     rariDeposit,
     rariWithdraw,
+
+    qiDaoOpen,
+    qiDaoSupply,
+    qiDaoGenerate,
+    qiDaoPayback,
+    qiDaoWithdraw,
 
     aaveV3Supply,
     aaveV3SupplyCalldataOptimised,

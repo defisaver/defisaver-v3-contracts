@@ -370,7 +370,6 @@ const getAddrFromRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR)
     } if (name === 'SubProxy') {
         return '0xd18d4756bbf848674cc35f1a0B86afEF20787382';
     }
-
     const addr = await registry.getAddr(
         getNameId(name),
     );
