@@ -43,7 +43,7 @@ contract CurveWrapperV3 is IExchangeV3, AdminAuth, WrapperHelper {
         return amountOut;
     }
 
-    /// @dev depricated function
+    /// @dev deprecated function
     function buy(address, address, uint, bytes calldata) external override returns(uint) {
         return 0;
     }
@@ -68,7 +68,7 @@ contract CurveWrapperV3 is IExchangeV3, AdminAuth, WrapperHelper {
         return amountOut;
     }
 
-    /// @dev depricated function
+    /// @dev deprecated function
     function getBuyRate(address, address, uint, bytes memory) public override returns (uint) {
         return 0;
     }
