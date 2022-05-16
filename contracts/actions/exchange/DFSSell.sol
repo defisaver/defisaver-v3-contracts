@@ -104,13 +104,11 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         _exchangeData.user = getUserAddress();
 
         /// @dev only check for custom fee if a non standard fee is sent
-        if (_exchangeData.dfsFeeDivider < RECIPE_FEE) {
+        if (_exchangeData.dfsFeeDivider != RECIPE_FEE) {
             _exchangeData.dfsFeeDivider = TokenGroupRegistry(GROUP_REGISTRY).getFeeForTokens(
                 _exchangeData.srcAddr,
                 _exchangeData.destAddr
             );
-        } else {
-            _exchangeData.dfsFeeDivider = RECIPE_FEE;
         }
 
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
