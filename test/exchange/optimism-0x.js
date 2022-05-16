@@ -17,9 +17,6 @@ const {
 describe('Dfs-Sell-Optimism 0x', function () {
     this.timeout(140000);
 
-    configure({
-        chainId: 1,
-    });
     let zxWrapper; let senderAcc; let
         proxy;
 
@@ -38,7 +35,7 @@ describe('Dfs-Sell-Optimism 0x', function () {
 
     it('... should try to sell WETH for USDC with offchain calldata (0x) on Optimism', async () => {
         const WETH_ADDRESS = addrs[network].WETH_ADDRESS;
-        const USDC_ADDRESS = '0x7F5c764cBc14f9669B88837ca1490cCa17c31607';
+        const USDC_ADDRESS = addrs[network].USDC_ADDR;
         const sellBalanceBefore = hre.ethers.utils.parseUnits('10', 18);
 
         await setBalance(WETH_ADDRESS, senderAcc.address, sellBalanceBefore);
@@ -48,7 +45,7 @@ describe('Dfs-Sell-Optimism 0x', function () {
         const options = {
             method: 'GET',
             baseURL: 'https://optimism.api.0x.org',
-            url: '/swap/v1/quote/?sellToken=0x4200000000000000000000000000000000000006&buyToken=0x7F5c764cBc14f9669B88837ca1490cCa17c31607&sellAmount=10000000000000000000&affiliateAddress=0x322d58b9E75a6918f7e7849AEe0fF09369977e08&takerAddress=0x0000000000000000000000000000000000000001&skipValidation=true',
+            url: `/swap/v1/quote/?sellToken=${WETH_ADDRESS}&buyToken=${USDC_ADDRESS}&sellAmount=${sellBalanceBefore.toString()}&affiliateAddress=0x322d58b9E75a6918f7e7849AEe0fF09369977e08&takerAddress=0x0000000000000000000000000000000000000001&skipValidation=true`,
         };
         console.log(options.baseURL + options.url);
         const priceObject = await axios(options).then((response) => response.data);
