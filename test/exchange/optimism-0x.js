@@ -14,7 +14,7 @@ const {
     executeAction,
 } = require('../actions');
 
-describe('Dfs-Sell', function () {
+describe('Dfs-Sell-Optimism 0x', function () {
     this.timeout(140000);
 
     configure({
@@ -36,7 +36,7 @@ describe('Dfs-Sell', function () {
         await setNewExhcangeWrapperOptimism(senderAcc, zxWrapper.address);
     });
 
-    it('... should try to sell WETH for USDC with offchain calldata (Paraswap)', async () => {
+    it('... should try to sell WETH for USDC with offchain calldata (0x) on Optimism', async () => {
         const WETH_ADDRESS = addrs[network].WETH_ADDRESS;
         const USDC_ADDRESS = '0x7F5c764cBc14f9669B88837ca1490cCa17c31607';
         const sellBalanceBefore = hre.ethers.utils.parseUnits('10', 18);
