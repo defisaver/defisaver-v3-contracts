@@ -1,13 +1,12 @@
 const { default: axios } = require('axios');
 const hre = require('hardhat');
-const { configure } = require('@defisaver/sdk');
 const dfs = require('@defisaver/sdk');
 const { expect } = require('chai');
 const {
     redeploy,
     getProxy,
     balanceOf, setBalance, approve, addrs,
-    formatExchangeObjForOffchain, setNewExhcangeWrapperOptimism,
+    formatExchangeObjForOffchain, setNewExchangeWrapper,
 } = require('../utils');
 
 const {
@@ -30,7 +29,7 @@ describe('Dfs-Sell-Optimism 0x', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
 
-        await setNewExhcangeWrapperOptimism(senderAcc, zxWrapper.address);
+        await setNewExchangeWrapper(senderAcc, zxWrapper.address);
     });
 
     it('... should try to sell WETH for USDC with offchain calldata (0x) on Optimism', async () => {

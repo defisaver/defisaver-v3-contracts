@@ -693,21 +693,6 @@ const setNewExchangeWrapper = async (acc, newAddr) => {
     await stopImpersonatingAccount(exchangeOwnerAddr);
 };
 
-const setNewExhcangeWrapperOptimism = async (acc, newAddr) => {
-    const exchangeOwnerAddr = addrs[network].EXCHANGE_OWNER_ADDR;
-    await sendEther(acc, exchangeOwnerAddr, '1');
-    await impersonateAccount(exchangeOwnerAddr);
-
-    const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
-
-    const registryInstance = await hre.ethers.getContractFactory('SaverExchangeRegistry');
-    const registry = await registryInstance.attach(addrs[network].SAVER_EXCHANGE_ADDR);
-    const registryByOwner = registry.connect(signer);
-
-    await registryByOwner.addWrapper(newAddr, { gasLimit: 300000 });
-    await stopImpersonatingAccount(exchangeOwnerAddr);
-};
-
 const depositToWeth = async (amount, signer) => {
     const weth = await hre.ethers.getContractAt('IWETH', addrs[network].WETH_ADDRESS);
 
@@ -953,7 +938,6 @@ module.exports = {
     resetForkToBlock,
     balanceOfOnTokenInBlock,
     formatExchangeObjCurve,
-    setNewExhcangeWrapperOptimism,
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),
