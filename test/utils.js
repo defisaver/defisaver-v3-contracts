@@ -22,6 +22,9 @@ const addrs = {
         DAI_ADDRESS: '0x6b175474e89094c44da98b954eedeac495271d0f',
         TOKEN_GROUP_REGISTRY: '0xcA49e64FE1FE8be40ED30F682edA1b27a6c8611c',
         FEE_RECEIVER: '0x6467e807dB1E71B9Ef04E0E3aFb962E4B0900B2B',
+        USDC_ADDR: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        EXCHANGE_OWNER_ADDR: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
+        SAVER_EXCHANGE_ADDR: '0x25dd3F51e0C3c3Ff164DDC02A8E4D65Bb9cBB12D',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -29,6 +32,9 @@ const addrs = {
         OWNER_ACC: '0x322d58b9E75a6918f7e7849AEe0fF09369977e08',
         WETH_ADDRESS: '0x4200000000000000000000000000000000000006',
         DAI_ADDRESS: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
+        USDC_ADDR: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+        EXCHANGE_OWNER_ADDR: '0x322d58b9E75a6918f7e7849AEe0fF09369977e08',
+        SAVER_EXCHANGE_ADDR: '0x36Bf2251E9797df071A9b8bc4dE58F7cAcc16F44',
     },
     kovan: {
         PROXY_REGISTRY: '0xF9722E05B68E5ad5D6E1674C4d6BfE11791a1E33',
@@ -311,6 +317,7 @@ const setBalance = async (tokenAddr, userAddr, value) => {
         );
     }
     while (index.startsWith('0x0')) { index = `0x${index.slice(3)}`; }
+
     await setStorageAt(
         tokenAddr,
         index.toString(),
@@ -674,14 +681,14 @@ const getProxyAuth = async (proxyAddr, addrWithAuth) => {
 };
 
 const setNewExchangeWrapper = async (acc, newAddr) => {
-    const exchangeOwnerAddr = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
+    const exchangeOwnerAddr = addrs[network].EXCHANGE_OWNER_ADDR;
     await sendEther(acc, exchangeOwnerAddr, '1');
     await impersonateAccount(exchangeOwnerAddr);
 
     const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
 
     const registryInstance = await hre.ethers.getContractFactory('SaverExchangeRegistry');
-    const registry = await registryInstance.attach('0x25dd3F51e0C3c3Ff164DDC02A8E4D65Bb9cBB12D');
+    const registry = await registryInstance.attach(addrs[network].SAVER_EXCHANGE_ADDR);
     const registryByOwner = registry.connect(signer);
 
     await registryByOwner.addWrapper(newAddr, { gasLimit: 300000 });
