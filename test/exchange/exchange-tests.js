@@ -1,18 +1,14 @@
+/* eslint-disable max-len */
 const { getAssetInfo } = require('@defisaver/tokens');
-const dfs = require('@defisaver/sdk');
 const { expect } = require('chai');
 const hre = require('hardhat');
-const axios = require('axios');
+// const axios = require('axios');
 
 const {
     getProxy,
     redeploy,
     balanceOf,
     setNewExchangeWrapper,
-    depositToWeth,
-    approve,
-    formatExchangeObjForOffchain,
-    addToZRXAllowlist,
     setBalance,
     resetForkToBlock,
     Float2BN,
@@ -21,10 +17,11 @@ const {
     BN2Float,
     formatExchangeObjCurve,
     REGISTRY_ADDR,
+    addrs,
 } = require('../utils');
 
 const {
-    sell, executeAction,
+    sell,
 } = require('../actions');
 
 const trades = [
@@ -63,7 +60,7 @@ const curveTrades = [
     },
 ];
 
-const test = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve = false) => {
+const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve = false) => {
     const sellAssetInfo = getAssetInfo(trade.sellToken);
     const buyAssetInfo = getAssetInfo(trade.buyToken);
 
@@ -92,6 +89,7 @@ const test = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve = false
     }
     const exchangeData = exchangeObject.at(-2);
 
+    // eslint-disable-next-line no-unused-vars
     const rate = await dfsPrices.callStatic.getExpectedRate(
         wrapper.address,
         sellAssetInfo.address,
@@ -100,6 +98,10 @@ const test = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve = false
         0, // exchangeType = SELL
         exchangeData,
     );
+
+    const feeReceiverAmountBefore = await balanceOf(sellAssetInfo.address,
+        addrs[hre.network.config.name].FEE_RECEIVER);
+
     await sell(
         proxy,
         sellAssetInfo.address,
@@ -113,7 +115,21 @@ const test = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve = false
         REGISTRY_ADDR,
         isCurve,
     );
+
+    const feeReceiverAmountAfter = await balanceOf(sellAssetInfo.address,
+        addrs[hre.network.config.name].FEE_RECEIVER);
     const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
+
+    // test fee amount
+    const tokenGroupRegistry = await hre.ethers.getContractAt('TokenGroupRegistry',
+        addrs[hre.network.config.name].TOKEN_GROUP_REGISTRY);
+
+    const fee = await tokenGroupRegistry.getFeeForTokens(sellAssetInfo.address, buyAssetInfo.address);
+
+    const feeAmount = amount.div(fee);
+
+    // must be closeTo because 1 wei steth bug
+    expect(feeReceiverAmountAfter).to.be.closeTo(feeReceiverAmountBefore.add(feeAmount), '1');
 
     expect(buyBalanceAfter).is.gt('0');
     // expect(buyBalanceAfter).to.be.closeTo(rate, rate.div('1000'));
@@ -155,103 +171,103 @@ const dfsSellTest = async () => {
 
             await setNewExchangeWrapper(senderAcc, paraswapWrapper.address);
         });
-        it('... should try to sell WETH for DAI with offchain calldata (Paraswap)', async () => {
-            const sellAssetInfo = getAssetInfo('WETH');
-            const buyAssetInfo = getAssetInfo('USDC');
+        // it('... should try to sell WETH for DAI with offchain calldata (Paraswap)', async () => {
+        //     const sellAssetInfo = getAssetInfo('WETH');
+        //     const buyAssetInfo = getAssetInfo('USDC');
 
-            const buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
+        //     const buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
 
-            await depositToWeth(hre.ethers.utils.parseUnits('10', 18));
-            await approve(sellAssetInfo.address, proxy.address);
+        //     await depositToWeth(hre.ethers.utils.parseUnits('10', 18));
+        //     await approve(sellAssetInfo.address, proxy.address);
 
-            const options = {
-                method: 'GET',
-                baseURL: 'https://apiv5.paraswap.io',
-                url: '/prices?srcToken=0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2&srcDecimals=18&destToken=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&destDecimals=6&amount=1000000000000000000&side=SELL&network=1'
-                + '&excludeDEXS=Balancer'
-                + '&excludeContractMethods=simpleSwap,swapOnZeroXv4'
-                + `&userAddress=${paraswapWrapper.address}`,
-            };
-            // console.log(options.baseURL + options.url);
-            const priceObject = await axios(options).then((response) => response.data.priceRoute);
-            // console.log(priceObject);
-            const secondOptions = {
-                method: 'POST',
-                baseURL: 'https://apiv5.paraswap.io/transactions/1?ignoreChecks=true',
-                data: {
-                    priceRoute: priceObject,
-                    srcToken: priceObject.srcToken,
-                    destToken: priceObject.destToken,
-                    srcAmount: priceObject.srcAmount,
-                    userAddress: paraswapWrapper.address,
-                    partner: 'paraswap.io',
-                    srcDecimals: priceObject.srcDecimals,
-                    destDecimals: priceObject.destDecimals,
-                    slippage: 1000,
-                    txOrigin: senderAcc.address,
-                },
-            };
-            // console.log(secondOptions.data);
-            const resultObject = await axios(secondOptions).then((response) => response.data);
-            // console.log(resultObject);
-            // THIS IS CHANGEABLE WITH API INFORMATION
-            const allowanceTarget = priceObject.tokenTransferProxy;
-            const price = 1; // just for testing, anything bigger than 0 triggers offchain if
-            const protocolFee = 0;
-            const callData = resultObject.data;
-            // console.log(callData);
-            let amountInHex = hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [priceObject.srcAmount]);
-            amountInHex = amountInHex.slice(2);
-            // console.log(amountInHex.toString());
-            let offset = callData.toString().indexOf(amountInHex);
-            // console.log(offset);
-            offset = offset / 2 - 1;
-            // console.log(offset);
-            const paraswapSpecialCalldata = hre.ethers.utils.defaultAbiCoder.encode(['(bytes,uint256)'], [[callData, offset]]);
+        //     const options = {
+        //         method: 'GET',
+        //         baseURL: 'https://apiv5.paraswap.io',
+        //         url: '/prices?srcToken=0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2&srcDecimals=18&destToken=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&destDecimals=6&amount=1000000000000000000&side=SELL&network=1'
+        //         + '&excludeDEXS=Balancer'
+        //         + '&excludeContractMethods=simpleSwap'
+        //         + `&userAddress=${paraswapWrapper.address}`,
+        //     };
+        //     // console.log(options.baseURL + options.url);
+        //     const priceObject = await axios(options).then((response) => response.data.priceRoute);
+        //     // console.log(priceObject);
+        //     const secondOptions = {
+        //         method: 'POST',
+        //         baseURL: 'https://apiv5.paraswap.io/transactions/1?ignoreChecks=true',
+        //         data: {
+        //             priceRoute: priceObject,
+        //             srcToken: priceObject.srcToken,
+        //             destToken: priceObject.destToken,
+        //             srcAmount: priceObject.srcAmount,
+        //             userAddress: paraswapWrapper.address,
+        //             partner: 'paraswap.io',
+        //             srcDecimals: priceObject.srcDecimals,
+        //             destDecimals: priceObject.destDecimals,
+        //             slippage: 1000,
+        //             txOrigin: senderAcc.address,
+        //         },
+        //     };
+        //     // console.log(secondOptions.data);
+        //     const resultObject = await axios(secondOptions).then((response) => response.data);
+        //     // console.log(resultObject);
+        //     // THIS IS CHANGEABLE WITH API INFORMATION
+        //     const allowanceTarget = priceObject.tokenTransferProxy;
+        //     const price = 1; // just for testing, anything bigger than 0 triggers offchain if
+        //     const protocolFee = 0;
+        //     const callData = resultObject.data;
+        //     // console.log(callData);
+        //     let amountInHex = hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [priceObject.srcAmount]);
+        //     amountInHex = amountInHex.slice(2);
+        //     // console.log(amountInHex.toString());
+        //     let offset = callData.toString().indexOf(amountInHex);
+        //     // console.log(offset);
+        //     offset = offset / 2 - 1;
+        //     // console.log(offset);
+        //     const paraswapSpecialCalldata = hre.ethers.utils.defaultAbiCoder.encode(['(bytes,uint256)'], [[callData, offset]]);
 
-            const exchangeObject = formatExchangeObjForOffchain(
-                sellAssetInfo.address,
-                buyAssetInfo.address,
-                hre.ethers.utils.parseUnits('1', 18),
-                paraswapWrapper.address,
-                priceObject.contractAddress,
-                allowanceTarget,
-                price,
-                protocolFee,
-                paraswapSpecialCalldata,
-            );
+        //     const exchangeObject = formatExchangeObjForOffchain(
+        //         sellAssetInfo.address,
+        //         buyAssetInfo.address,
+        //         hre.ethers.utils.parseUnits('1', 18),
+        //         paraswapWrapper.address,
+        //         priceObject.contractAddress,
+        //         allowanceTarget,
+        //         price,
+        //         protocolFee,
+        //         paraswapSpecialCalldata,
+        //     );
 
-            await addToZRXAllowlist(senderAcc, priceObject.contractAddress);
-            const sellAction = new dfs.actions.basic.SellAction(
-                exchangeObject, senderAcc.address, senderAcc.address,
-            );
+        //     await addToZRXAllowlist(senderAcc, priceObject.contractAddress);
+        //     const sellAction = new dfs.actions.basic.SellAction(
+        //         exchangeObject, senderAcc.address, senderAcc.address,
+        //     );
 
-            const functionData = sellAction.encodeForDsProxyCall()[1];
+        //     const functionData = sellAction.encodeForDsProxyCall()[1];
 
-            await executeAction('DFSSell', functionData, proxy);
+        //     await executeAction('DFSSell', functionData, proxy);
 
-            const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
+        //     const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
 
-            expect(buyBalanceBefore).is.lt(buyBalanceAfter);
-        });
+        //     expect(buyBalanceBefore).is.lt(buyBalanceAfter);
+        // });
         for (let i = 0; i < trades.length; ++i) {
             const trade = trades[i];
 
             it(`... should sell ${trade.sellToken} for ${trade.buyToken}`, async () => {
-                const kyberRate = await test(senderAcc, proxy, dfsPrices, trade, kyberWrapper);
+                const kyberRate = await executeSell(senderAcc, proxy, dfsPrices, trade, kyberWrapper);
                 console.log(`Kyber sell rate -> ${kyberRate}`);
 
-                const uniRate = await test(
+                const uniRate = await executeSell(
                     senderAcc, proxy, dfsPrices,
                     { ...trade, fee: 0 },
                     uniWrapper,
                 );
                 console.log(`Uniswap sell rate -> ${uniRate}`);
 
-                const uniV3Rate = await test(senderAcc, proxy, dfsPrices, trade, uniV3Wrapper);
+                const uniV3Rate = await executeSell(senderAcc, proxy, dfsPrices, trade, uniV3Wrapper);
                 console.log(`UniswapV3 sell rate -> ${uniV3Rate}`);
 
-                const curveRate = await test(
+                const curveRate = await executeSell(
                     senderAcc,
                     proxy,
                     dfsPrices,
@@ -267,7 +283,7 @@ const dfsSellTest = async () => {
             const trade = curveTrades[i];
 
             it(`... should sell ${trade.sellToken} for ${trade.buyToken} on Curve`, async () => {
-                const curveRate = await test(
+                const curveRate = await executeSell(
                     senderAcc,
                     proxy,
                     dfsPrices,

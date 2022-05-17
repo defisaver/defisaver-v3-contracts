@@ -4,6 +4,7 @@ pragma solidity =0.8.10;
 
 import "../../interfaces/IDSProxy.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
+import "../../exchangeV3/TokenGroupRegistry.sol";
 import "../ActionBase.sol";
 
 /// @title A exchange sell action through the dfs exchange
@@ -51,7 +52,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 exchangedAmount, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, RECIPE_FEE);
+        (uint256 exchangedAmount, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to);
         emit ActionEvent("DFSSell", logData);
         return bytes32(exchangedAmount);
     }
@@ -59,7 +60,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public override payable   {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, 0);
+        (, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to);
         logger.logActionDirectEvent("DFSSell", logData);
     }
 
@@ -75,12 +76,10 @@ contract DFSSell is ActionBase, DFSExchangeCore {
     /// @param _exchangeData DFS Exchange data struct
     /// @param _from Address from which we'll pull the srcTokens
     /// @param _to Address where we'll send the _to token
-    /// @param _fee Fee divider for the exchange action
     function _dfsSell(
         ExchangeData memory _exchangeData,
         address _from,
-        address _to,
-        uint _fee
+        address _to
     ) internal returns (uint256, bytes memory) {
          // if we set srcAmount to max, take the whole proxy balance
         if (_exchangeData.srcAmount == type(uint256).max) {
@@ -103,8 +102,14 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         } 
 
         _exchangeData.user = getUserAddress();
-        _exchangeData.dfsFeeDivider = _fee;
 
+        /// @dev only check for custom fee if a non standard fee is sent
+        if (_exchangeData.dfsFeeDivider != RECIPE_FEE) {
+            _exchangeData.dfsFeeDivider = TokenGroupRegistry(GROUP_REGISTRY).getFeeForTokens(
+                _exchangeData.srcAddr,
+                _exchangeData.destAddr
+            );
+        }
 
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
 
@@ -123,7 +128,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             _exchangeData.destAddr,
             _exchangeData.srcAmount,
             exchangedAmount,
-            _fee
+            _exchangeData.dfsFeeDivider
         );
         return (exchangedAmount, logData);
     }
