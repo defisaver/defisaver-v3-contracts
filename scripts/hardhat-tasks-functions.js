@@ -99,7 +99,14 @@ async function deployContract(contractName, args) {
             hideEchoBack: true, // The typed text on screen is hidden by `*` (default).
             mask: '',
         });
-        const decryptedKey = decrypt(process.env.ENCRYPTED_KEY, secretKey);
+
+        let encryptedKey = process.env.ENCRYPTED_KEY;
+
+        if (network !== 'mainnet') {
+            encryptedKey = process.env[`ENCRYPTED_KEY_${network.toUpperCase()}`];
+        }
+
+        const decryptedKey = decrypt(encryptedKey, secretKey);
         deployer = new hre.ethers.Wallet(
             decryptedKey,
             hre.ethers.provider,
@@ -144,7 +151,13 @@ async function verifyContract(contractAddress, contractName) {
     };
     const params = new URLSearchParams();
 
-    const apiKey = process.env.ETHERSCAN_API_KEY;
+    let apiKey = process.env.ETHERSCAN_API_KEY;
+
+    if (network === 'arbitrum') {
+        apiKey = process.env.ARBISCAN_API_KEY;
+    } else if (network === 'optimism') {
+        apiKey = process.env.OPTIMISTIC_ETHERSCAN_API_KEY;
+    }
 
     params.append('apikey', apiKey);
     params.append('module', 'contract');
