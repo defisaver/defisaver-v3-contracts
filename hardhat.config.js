@@ -143,7 +143,7 @@ module.exports = {
     },
     wethAddress: {
         Mainnet: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-        Arbitrum: '0x0',
+        Arbitrum: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
         Optimism: '0x4200000000000000000000000000000000000006',
     },
 };

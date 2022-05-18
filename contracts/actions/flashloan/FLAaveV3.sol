@@ -17,8 +17,8 @@ import "../../interfaces/flashloan/IFlashLoanBase.sol";
 import "../../core/strategy/StrategyModel.sol";
 
 
-/// @title Action that gets and receives a FL from Aave V2
-contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlashLoanBase, DSMath {
+/// @title Action that gets and receives a FL from Aave V3
+contract FLAaveV3 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlashLoanBase, DSMath {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
     //Caller not aave pool
@@ -57,7 +57,7 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlas
         }
 
         bytes memory recipeData = flData.recipeData;
-        uint flAmount = _flAaveV2(flData, recipeData);
+        uint flAmount = _flAaveV3(flData, recipeData);
 
         return bytes32(flAmount);
     }
@@ -72,10 +72,10 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlas
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Gets a Fl from AaveV2 and returns back the execution to the action address
+    /// @notice Gets a Fl from AaveV3 and returns back the execution to the action address
     /// @param _flData All the amounts/tokens and related aave fl data
     /// @param _params Rest of the data we have in the recipe
-    function _flAaveV2(FlashLoanParams memory _flData, bytes memory _params) internal returns (uint) {
+    function _flAaveV3(FlashLoanParams memory _flData, bytes memory _params) internal returns (uint) {
 
         ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
             address(this),
@@ -88,7 +88,7 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlas
         );
 
         emit ActionEvent(
-            "FLAaveV2",
+            "FLAaveV3",
             abi.encode(_flData.tokens, _flData.amounts, _flData.modes, _flData.onBehalfOf)
         );
 
