@@ -52,7 +52,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 exchangedAmount, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to);
+        (uint256 exchangedAmount, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, false);
         emit ActionEvent("DFSSell", logData);
         return bytes32(exchangedAmount);
     }
@@ -60,7 +60,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public override payable   {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to);
+        (, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, true);
         logger.logActionDirectEvent("DFSSell", logData);
     }
 
@@ -76,10 +76,12 @@ contract DFSSell is ActionBase, DFSExchangeCore {
     /// @param _exchangeData DFS Exchange data struct
     /// @param _from Address from which we'll pull the srcTokens
     /// @param _to Address where we'll send the _to token
+    /// @param _isDirect True if it's just one sell action, false if part of recipe
     function _dfsSell(
         ExchangeData memory _exchangeData,
         address _from,
-        address _to
+        address _to,
+        bool _isDirect
     ) internal returns (uint256, bytes memory) {
          // if we set srcAmount to max, take the whole proxy balance
         if (_exchangeData.srcAmount == type(uint256).max) {
@@ -104,12 +106,17 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         _exchangeData.user = getUserAddress();
 
         /// @dev only check for custom fee if a non standard fee is sent
-        if (_exchangeData.dfsFeeDivider != RECIPE_FEE) {
-            _exchangeData.dfsFeeDivider = TokenGroupRegistry(GROUP_REGISTRY).getFeeForTokens(
-                _exchangeData.srcAddr,
-                _exchangeData.destAddr
-            );
+        if (!_isDirect) {
+            if (_exchangeData.dfsFeeDivider != RECIPE_FEE) {
+                _exchangeData.dfsFeeDivider = TokenGroupRegistry(GROUP_REGISTRY).getFeeForTokens(
+                    _exchangeData.srcAddr,
+                    _exchangeData.destAddr
+                );
+            }
+        } else {
+            _exchangeData.dfsFeeDivider = 0;
         }
+        
 
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
 
