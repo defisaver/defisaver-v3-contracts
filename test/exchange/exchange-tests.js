@@ -133,16 +133,10 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
     expect(feeReceiverAmountAfter).to.be.closeTo(feeReceiverAmountBefore.add(feeAmount), '1');
 
     expect(buyBalanceAfter).is.gt('0');
-    if (Math.abs(
-        +BN2Float(buyBalanceAfter, buyAssetInfo.decimals) - expectedOutput,
-    ) > expectedOutput * 0.01) {
-        console.log(`
-        Bad liquidity or rate getter:
-        Expected: ${expectedOutput}
-        Output: ${+BN2Float(buyBalanceAfter, buyAssetInfo.decimals)}
-        `);
-    }
-    return rate;
+    expect(
+        +BN2Float(buyBalanceAfter, buyAssetInfo.decimals),
+    ).to.be.closeTo(expectedOutput, expectedOutput * 0.01);
+    return BN2Float(rate);
 };
 
 const dfsSellTest = async () => {

@@ -54,7 +54,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
 
         // fallback to desired wrapper if 0x failed
         if (!offChainSwapSuccess) {
-            onChainSwap(exData, ExchangeActionType.SELL);
+            onChainSwap(exData);
             wrapper = exData.wrapper;
         }
 
@@ -64,56 +64,6 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
         // check slippage
         if (amountBought < wmul(exData.minPrice, exData.srcAmount)){
             revert SlippageHitError(amountBought, wmul(exData.minPrice, exData.srcAmount));
-        }
-
-        // revert back exData changes to keep it consistent
-        exData.srcAmount = amountWithoutFee;
-
-        return (wrapper, amountBought);
-    }
-
-    /// @notice Internal method that preforms a buy on 0x/on-chain
-    /// @dev Useful for other DFS contract to integrate for exchanging
-    /// @param exData Exchange data struct
-    /// @return (address, uint) Address of the wrapper used and srcAmount
-    function _buy(ExchangeData memory exData) internal returns (address, uint256) {
-        if (exData.destAmount == 0){
-            revert DestAmountMissingError();
-        }
-
-        uint256 amountWithoutFee = exData.srcAmount;
-        address wrapper = exData.offchainData.wrapper;
-        bool offChainSwapSuccess;
-
-        uint256 destBalanceBefore = exData.destAddr.getBalance(address(this));
-
-        // Takes DFS exchange fee
-        if (exData.dfsFeeDivider != 0) {
-            exData.srcAmount = sub(exData.srcAmount, getFee(
-                exData.srcAmount,
-                exData.user,
-                exData.srcAddr,
-                exData.dfsFeeDivider
-            ));
-        }
-
-        // Try 0x first and then fallback on specific wrapper
-        if (exData.offchainData.price > 0) {
-            (offChainSwapSuccess, ) = offChainSwap(exData, ExchangeActionType.BUY);
-        }
-
-        // fallback to desired wrapper if 0x failed
-        if (!offChainSwapSuccess) {
-            onChainSwap(exData, ExchangeActionType.BUY);
-            wrapper = exData.wrapper;
-        }
-
-        uint256 destBalanceAfter = exData.destAddr.getBalance(address(this));
-        uint256 amountBought = destBalanceAfter - destBalanceBefore;
-
-        // check slippage
-        if (amountBought < exData.destAmount){
-            revert SlippageHitError(amountBought, exData.destAmount);
         }
 
         // revert back exData changes to keep it consistent
@@ -149,9 +99,8 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
 
     /// @notice Calls wrapper contract for exchange to preform an on-chain swap
     /// @param _exData Exchange data struct
-    /// @param _type Type of action SELL|BUY
-    /// @return swappedTokens For Sell that the destAmount, for Buy thats the srcAmount
-    function onChainSwap(ExchangeData memory _exData, ExchangeActionType _type)
+    /// @return swappedTokens output amount
+    function onChainSwap(ExchangeData memory _exData)
         internal
         returns (uint256 swappedTokens)
     {
@@ -161,21 +110,12 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
 
         IERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
 
-        if (_type == ExchangeActionType.SELL) {
-            swappedTokens = IExchangeV3(_exData.wrapper).sell(
-                _exData.srcAddr,
-                _exData.destAddr,
-                _exData.srcAmount,
-                _exData.wrapperData
-            );
-        } else {
-            swappedTokens = IExchangeV3(_exData.wrapper).buy(
-                _exData.srcAddr,
-                _exData.destAddr,
-                _exData.destAmount,
-                _exData.wrapperData
-            );
-        }
+        swappedTokens = IExchangeV3(_exData.wrapper).sell(
+            _exData.srcAddr,
+            _exData.destAddr,
+            _exData.srcAmount,
+            _exData.wrapperData
+        );
     }
 
     /// @notice Takes a feePercentage and sends it to wallet

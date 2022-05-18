@@ -7,11 +7,13 @@ import "../../interfaces/curve/IAddressProvider.sol";
 import "../../interfaces/IERC20.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
+import "../../utils/TokenUtils.sol";
 import "../../utils/SafeERC20.sol";
 import "./helpers/WrapperHelper.sol";
 
 /// @title DFS exchange wrapper for Curve
 contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
+    using TokenUtils for address;
     using SafeERC20 for IERC20;
 
     IAddressProvider addressProvider = IAddressProvider(CURVE_ADDRESS_PROVIDER);
@@ -44,16 +46,13 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         return amountOut;
     }
 
-    /// @dev deprecated function
-    function buy(address, address, uint, bytes calldata) external override returns(uint) {
-        return 0;
-    }
-
     /// @notice Return a rate for which we can sell an amount of tokens
+    /// @param _srcAddr From token
+    /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @param _additionalData Route and swap params
     /// @return uint256 Rate (price)
-    function getSellRate(address, address, uint256 _srcAmount, bytes memory _additionalData) public override returns (uint) {
+    function getSellRate(address _srcAddr, address _destAddr, uint256 _srcAmount, bytes memory _additionalData) public override returns (uint) {
         ISwaps exchangeContract = ISwaps(
                 addressProvider.get_address(2)
         );
@@ -66,12 +65,10 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
             _swap_params,
             _srcAmount
         );
-        return wdiv(amountOut, _srcAmount);
-    }
-
-    /// @dev deprecated function
-    function getBuyRate(address, address, uint, bytes memory) public override returns (uint) {
-        return 0;
+        uint256 amountOutNormalized = amountOut * (10 ** (18 - _destAddr.getTokenDecimals()));
+        uint256 srcAmountNormalized = _srcAmount * (10 ** (18 - _srcAddr.getTokenDecimals()));
+        uint256 rate = wdiv(amountOutNormalized, srcAmountNormalized);
+        return rate;
     }
 
     // solhint-disable-next-line no-empty-blocks
