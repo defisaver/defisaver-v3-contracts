@@ -5,12 +5,13 @@ import "../../interfaces/exchange/IExchangeV3.sol";
 import "../../interfaces/curve/ISwaps.sol";
 import "../../interfaces/curve/IAddressProvider.sol";
 import "../../interfaces/IERC20.sol";
+import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 import "../../utils/SafeERC20.sol";
 import "./helpers/WrapperHelper.sol";
 
 /// @title DFS exchange wrapper for Curve
-contract CurveWrapperV3 is IExchangeV3, AdminAuth, WrapperHelper {
+contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     using SafeERC20 for IERC20;
 
     IAddressProvider addressProvider = IAddressProvider(CURVE_ADDRESS_PROVIDER);
@@ -65,7 +66,7 @@ contract CurveWrapperV3 is IExchangeV3, AdminAuth, WrapperHelper {
             _swap_params,
             _srcAmount
         );
-        return amountOut;
+        return wdiv(amountOut, _srcAmount);
     }
 
     /// @dev deprecated function

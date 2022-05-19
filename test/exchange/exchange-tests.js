@@ -98,6 +98,7 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
         0, // exchangeType = SELL
         exchangeData,
     );
+    const expectedOutput = +BN2Float(rate) * trade.amount;
 
     const feeReceiverAmountBefore = await balanceOf(sellAssetInfo.address,
         addrs[hre.network.config.name].FEE_RECEIVER);
@@ -132,8 +133,16 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
     expect(feeReceiverAmountAfter).to.be.closeTo(feeReceiverAmountBefore.add(feeAmount), '1');
 
     expect(buyBalanceAfter).is.gt('0');
-    // expect(buyBalanceAfter).to.be.closeTo(rate, rate.div('1000'));
-    return BN2Float(buyBalanceAfter, buyAssetInfo.decimals);
+    if (Math.abs(
+        +BN2Float(buyBalanceAfter, buyAssetInfo.decimals) - expectedOutput,
+    ) > expectedOutput * 0.01) {
+        console.log(`
+        Bad liquidity or rate getter:
+        Expected: ${expectedOutput}
+        Output: ${+BN2Float(buyBalanceAfter, buyAssetInfo.decimals)}
+        `);
+    }
+    return rate;
 };
 
 const dfsSellTest = async () => {
