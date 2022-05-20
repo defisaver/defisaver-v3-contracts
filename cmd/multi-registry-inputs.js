@@ -168,6 +168,8 @@ for (const [key, value] of Object.entries(actionAddresses)) {
 // console.log(actions.map((d) => d.contractAddr));
 // console.log(actions.map((d) => d.time));
 
-console.log(deploymentData.map((d) => d.id));
-console.log(deploymentData.map((d) => d.contractAddr));
-console.log(deploymentData.map((d) => d.time));
+// console.log(deploymentData.map((d) => d.id));
+// console.log(deploymentData.map((d) => d.contractAddr));
+// console.log(deploymentData.map((d) => d.time));
+
+console.log(getNameId('FLAaveV3'));
