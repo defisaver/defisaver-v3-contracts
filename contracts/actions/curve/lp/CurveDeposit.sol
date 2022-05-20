@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
 
 import "../helpers/CurveHelper.sol";
 import "../../../utils/TokenUtils.sol";
@@ -10,18 +8,19 @@ import "../../ActionBase.sol";
 
 contract CurveDeposit is ActionBase, CurveHelper {
     using TokenUtils for address;
-    using SafeMath for uint256;
+
+    error CurveDepositZeroRecepient();
+    error CurveDepositWrongArraySize();
+    error CurveDepositPoolReverted();
+    error CurveDepositSlippageHit();
 
     struct Params {
         address sender;         // address where to pull tokens from
         address receiver;       // address that will receive the LP tokens
         address depositTarget;  // pool contract or zap deposit contract in which to deposit
-        address lpToken;        // LP token of the pool
-        bytes4 sig;             // target contract function signature
         uint256 minMintAmount;  // minimum amount of LP tokens to accept
+        uint8 flags;
         uint256[] amounts;      // amount of each token to deposit
-        address[] tokens;       // tokens to deposit, needed for token approval
-        bool useUnderlying;     // some contracts take this additional parameter
     }
 
     function executeAction(
@@ -31,13 +30,14 @@ contract CurveDeposit is ActionBase, CurveHelper {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
+
         params.sender = _parseParamAddr(params.sender, _paramMapping[0], _subData, _returnValues);
         params.receiver = _parseParamAddr(params.receiver, _paramMapping[1], _subData, _returnValues);
-        params.minMintAmount = _parseParamUint(params.minMintAmount, _paramMapping[2], _subData, _returnValues);
-        
-        require(params.amounts.length == params.tokens.length, "amounts and tokens array length mismatch");
+        params.depositTarget = _parseParamAddr(params.depositTarget, _paramMapping[2], _subData, _returnValues);
+        params.minMintAmount = _parseParamUint(params.minMintAmount, _paramMapping[3], _subData, _returnValues);
+        params.flags = uint8(_parseParamUint(params.flags, _paramMapping[4], _subData, _returnValues));
         for (uint256 i = 0; i < params.amounts.length; i++) {
-            params.amounts[i] = _parseParamUint(params.amounts[i], _paramMapping[3 + i], _subData, _returnValues);
+            params.amounts[i] = _parseParamUint(params.amounts[i], _paramMapping[5 + i], _subData, _returnValues);
         }
 
         (uint256 received, bytes memory logData) = _curveDeposit(params);
@@ -61,53 +61,59 @@ contract CurveDeposit is ActionBase, CurveHelper {
 
     /// @notice Deposits tokens into liquidity pool
     function _curveDeposit(Params memory _params) internal returns (uint256 received, bytes memory logData) {
-        require(_params.receiver != address(0), "receiver cant be 0x0");
+        if (_params.receiver == address(0)) revert CurveDepositZeroRecepient();
+        (
+            DepositTargetType depositTargetType,
+            bool explicitUnderlying,
+        ) = parseFlags(_params.flags);
+        (
+            address lpToken,
+            uint256 N_COINS,
+            address[8] memory tokens
+        ) = _getPoolParams(_params.depositTarget, depositTargetType, explicitUnderlying);
 
-        uint256 tokensBefore = _params.lpToken.getBalance(address(this));
+        if (_params.amounts.length != N_COINS) revert CurveDepositWrongArraySize();
+        uint256 tokensBefore = lpToken.getBalance(address(this));
         uint256 msgValue;
-
-        for (uint256 i = 0; i < _params.tokens.length; i++) {
-            if (_params.tokens[i] == TokenUtils.ETH_ADDR) {
+        for (uint256 i = 0; i < N_COINS; i++) {
+            if (tokens[i] == TokenUtils.ETH_ADDR) {
                 TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.sender, _params.amounts[i]);
                 TokenUtils.withdrawWeth(_params.amounts[i]);
                 msgValue = _params.amounts[i];
                 continue;
             }
-            _params.tokens[i].pullTokensIfNeeded(_params.sender, _params.amounts[i]);
-            _params.tokens[i].approveToken(_params.depositTarget, _params.amounts[i]);
+            tokens[i].pullTokensIfNeeded(_params.sender, _params.amounts[i]);
+            tokens[i].approveToken(_params.depositTarget, _params.amounts[i]);
         }
 
-        bytes memory payload = _constructPayload(_params.sig, _params.amounts, _params.minMintAmount, _params.useUnderlying);
+        bytes memory payload = _constructPayload(_params.amounts, _params.minMintAmount, explicitUnderlying);
         (bool success, ) = _params.depositTarget.call{ value: msgValue }(payload);
-        require(success, "Bad payload or revert in pool contract");
+        if (!success) revert CurveDepositPoolReverted();
 
-        received = _params.lpToken.getBalance(address(this)).sub(tokensBefore);
-        _params.lpToken.withdrawTokens(_params.receiver, received);
+        received = lpToken.getBalance(address(this)) - tokensBefore;
+        if (received < _params.minMintAmount) revert CurveDepositSlippageHit();
+        lpToken.withdrawTokens(_params.receiver, received);
 
         logData = abi.encode(_params, received);
     }
 
     /// @notice Constructs payload for external contract call
-    function _constructPayload(bytes4 _sig, uint256[] memory _amounts, uint256 _minMintAmount, bool _useUnderlying) internal pure returns (bytes memory payload) {
-        uint256 payloadSize = 4 + (_amounts.length + 1) * 32;
-        if (_useUnderlying) payloadSize = payloadSize.add(32);
-        payload = new bytes(payloadSize);
+    function _constructPayload(uint256[] memory _amounts, uint256 _minMintAmount, bool _explicitUnderlying) internal pure returns (bytes memory payload) {
+        bytes memory sig;
+        bytes4 selector;
+        bytes memory optional;
 
-        assembly {
-            mstore(add(payload, 0x20), _sig)    // store the signature after dynamic array length field (&callData + 0x20)
-
-            let offset := 0x20  // offset of the first element in '_amounts'
-            for { let i := 0 } lt(i, mload(_amounts)) { i := add(i, 1) } {
-                mstore(add(payload, add(0x4, offset)), mload(add(_amounts, offset)))    // payload offset needs to account for 0x4 bytes of selector
-                offset := add(offset, 0x20) // offset for next copy
-            }
-
-            mstore(add(payload, add(0x4, offset)), _minMintAmount)
-            if eq(_useUnderlying, true) {
-                offset := add(offset, 0x20) // offset for final conditional copy
-                mstore(add(payload, add(0x4, offset)), true)
-            }
+        if (_explicitUnderlying) {
+            sig = "add_liquidity(uint256[0],uint256,bool)";
+            //                index = 22 ^
+            optional = abi.encode(uint256(1));
+        } else {
+            sig = "add_liquidity(uint256[0],uint256)";
         }
+        sig[22] = bytes1(uint8(sig[22]) + uint8(_amounts.length));
+        selector = bytes4(keccak256(sig));
+
+        return payload = bytes.concat(abi.encodePacked(selector, _amounts, _minMintAmount), optional);
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
