@@ -7,7 +7,11 @@ import "../ActionBase.sol";
 import "../../utils/DFSProxyRegistryController.sol";
 
 /// @title Changes the owner of the DSProxy and updated the DFSRegistry
-contract ChangeProxyOwner is ActionBase{
+contract ChangeProxyOwner is ActionBase {
+
+    struct Params {
+        address newOwner;
+    }
 
     DFSProxyRegistryController constant dfsRegController =
         DFSProxyRegistryController(DFS_REG_CONTROLLER_ADDR);
@@ -19,19 +23,19 @@ contract ChangeProxyOwner is ActionBase{
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        address newOwner = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        newOwner = _parseParamAddr(newOwner, _paramMapping[0], _subData, _returnValues);
+        inputData.newOwner = _parseParamAddr(inputData.newOwner, _paramMapping[0], _subData, _returnValues);
 
-        _changeOwner(newOwner);
+        _changeOwner(inputData.newOwner);
 
-        return bytes32(bytes20(newOwner));
+        return bytes32(bytes20(inputData.newOwner));
     }
 
     function executeActionDirect(bytes memory _callData) public payable override {
-        address newOwner = parseInputs(_callData);
+        Params memory inputData = parseInputs(_callData);
 
-        _changeOwner(newOwner);
+        _changeOwner(inputData.newOwner);
     }
 
     /// @inheritdoc ActionBase
@@ -49,7 +53,7 @@ contract ChangeProxyOwner is ActionBase{
         dfsRegController.changeOwnerInDFSRegistry(_newOwner);
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (address newOwner) {
-        newOwner = abi.decode(_callData, (address));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }

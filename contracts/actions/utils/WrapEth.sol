@@ -27,9 +27,9 @@ contract WrapEth is ActionBase {
 
     // solhint-disable-next-line no-empty-blocks
     function executeActionDirect(bytes memory _callData) public payable override {
-        uint256 amount = abi.decode(_callData, (uint256));
+        Params memory inputData = parseInputs(_callData);
 
-        _wrapEth(amount);
+        _wrapEth(inputData.amount);
     }
 
     /// @inheritdoc ActionBase
