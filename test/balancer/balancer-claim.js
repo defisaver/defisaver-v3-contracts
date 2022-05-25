@@ -1,4 +1,4 @@
-const { balancerClaimTest } = require('./balancer-tests.js');
+const { balancerClaimTest } = require('./balancer-tests');
 
 describe('Balancer Claiming', function () {
     this.timeout(80000);

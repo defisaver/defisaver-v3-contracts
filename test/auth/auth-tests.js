@@ -17,7 +17,7 @@ const {
     OWNER_ACC,
     ADMIN_ACC,
     WETH_ADDRESS,
-} = require('../utils.js');
+} = require('../utils');
 
 const adminAuthTest = async () => {
     describe('Admin-Auth', () => {

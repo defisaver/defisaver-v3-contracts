@@ -1,7 +1,7 @@
 const {
     redeploy,
-} = require('../utils.js');
-const { adminVaultTest } = require('./auth-tests.js');
+} = require('../utils');
+const { adminVaultTest } = require('./auth-tests');
 
 describe('Admin-Vault', () => {
     before(async () => {

@@ -24,6 +24,7 @@ const {
     revertToSnapshot,
     takeSnapshot,
     redeploy,
+    resetForkToBlock,
 } = require('../utils');
 
 const {
@@ -39,6 +40,7 @@ const aaveSupplyTest = async (testLength) => {
         this.timeout(150000);
 
         let senderAcc; let proxy; let dataProvider;
+        let snapshotId;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -46,15 +48,30 @@ const aaveSupplyTest = async (testLength) => {
             dataProvider = await getAaveDataProvider();
         });
 
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
+        });
+
         for (let i = 0; i < testLength; i++) {
             const tokenSymbol = aaveV2assetsDefaultMarket[i];
             const fetchedAmountWithUSD = fetchAmountinUSDPrice(tokenSymbol, '10000');
 
             it(`... should supply ${fetchedAmountWithUSD} ${tokenSymbol} to Aave`, async () => {
-                const snapshot = await takeSnapshot();
                 const assetInfo = getAssetInfo(tokenSymbol);
                 if (assetInfo.symbol === 'ETH') {
                     assetInfo.address = WETH_ADDRESS;
+                }
+
+                const reserveInfo = await getAaveReserveInfo(dataProvider, assetInfo.address);
+
+                if (reserveInfo.isFrozen) {
+                    // eslint-disable-next-line no-unused-expressions
+                    expect(true).to.be.true;
+                    return;
                 }
 
                 const aaveTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
@@ -70,7 +87,6 @@ const aaveSupplyTest = async (testLength) => {
                 const balanceAfter = await balanceOf(aToken, proxy.address);
 
                 expect(balanceAfter).to.be.gt(balanceBefore);
-                await revertToSnapshot(snapshot);
             });
         }
     });
@@ -79,17 +95,24 @@ const aaveSupplyTest = async (testLength) => {
 const aaveBorrowTest = async (testLength) => {
     describe('Aave-Borrow', () => {
         let senderAcc; let proxy; let dataProvider;
+        let snapshotId;
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             dataProvider = await getAaveDataProvider();
+        });
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
         });
 
         for (let i = 0; i < testLength; ++i) {
             const tokenSymbol = aaveV2assetsDefaultMarket[i];
             const fetchedAmountWithUSD = fetchAmountinUSDPrice(tokenSymbol, '5000');
             it(`... should variable borrow ${fetchedAmountWithUSD} ${tokenSymbol} from Aave`, async () => {
-                const snapshot = await takeSnapshot();
                 const assetInfo = getAssetInfo(tokenSymbol);
 
                 if (assetInfo.symbol === 'ETH') {
@@ -100,7 +123,7 @@ const aaveBorrowTest = async (testLength) => {
                 const aTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
                 const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
-                if (!reserveInfo.borrowingEnabled) {
+                if (!reserveInfo.borrowingEnabled || reserveInfo.isFrozen) {
                 // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
@@ -143,12 +166,10 @@ const aaveBorrowTest = async (testLength) => {
 
                 expect(debtBalanceAfter).to.be.gt(debtBalanceBefore);
                 expect(balanceAfter).to.be.gt(balanceBefore);
-                await revertToSnapshot(snapshot);
             });
 
             const fetchedAmountDiv10 = fetchAmountinUSDPrice(tokenSymbol, '500');
             it(`... should stable borrow ${fetchedAmountDiv10} ${tokenSymbol} from Aave`, async () => {
-                const snapshot = await takeSnapshot();
                 const assetInfo = getAssetInfo(tokenSymbol);
 
                 if (assetInfo.symbol === 'ETH') {
@@ -163,7 +184,7 @@ const aaveBorrowTest = async (testLength) => {
                 const aTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
                 const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
-                if (!reserveInfo.stableBorrowRateEnabled) {
+                if (!reserveInfo.stableBorrowRateEnabled || reserveInfo.isFrozen) {
                 // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
@@ -205,7 +226,6 @@ const aaveBorrowTest = async (testLength) => {
 
                 expect(debtBalanceAfter).to.be.gt(debtBalanceBefore);
                 expect(balanceAfter).to.be.gt(balanceBefore);
-                await revertToSnapshot(snapshot);
             });
         }
     });
@@ -216,11 +236,19 @@ const aaveWithdrawTest = async (testLength) => {
         this.timeout(150000);
 
         let senderAcc; let proxy; let dataProvider;
+        let snapshotId;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             dataProvider = await getAaveDataProvider();
+        });
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
         });
 
         for (let i = 0; i < testLength; ++i) {
@@ -230,6 +258,14 @@ const aaveWithdrawTest = async (testLength) => {
             it(`... should withdraw ${fetchedAmountWithUSD} ${tokenSymbol} from Aave`, async () => {
                 const snapshot = await takeSnapshot();
                 const assetInfo = getAssetInfo(tokenSymbol);
+
+                const reserveInfo = await getAaveReserveInfo(dataProvider, assetInfo.address);
+
+                if (reserveInfo.isFrozen) {
+                    // eslint-disable-next-line no-unused-expressions
+                    expect(true).to.be.true;
+                    return;
+                }
 
                 if (assetInfo.symbol === 'ETH') {
                     assetInfo.address = WETH_ADDRESS;
@@ -269,11 +305,19 @@ const aavePaybackTest = async (testLength) => {
         this.timeout(80000);
 
         let senderAcc; let proxy; let dataProvider;
+        let snapshotId;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             dataProvider = await getAaveDataProvider();
+        });
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
         });
 
         for (let i = 0; i < testLength; ++i) {
@@ -291,7 +335,7 @@ const aavePaybackTest = async (testLength) => {
                 const aTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
                 const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
-                if (!reserveInfo.borrowingEnabled) {
+                if (!reserveInfo.borrowingEnabled || reserveInfo.isFrozen) {
                     // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
@@ -365,7 +409,7 @@ const aavePaybackTest = async (testLength) => {
                 const aTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
                 const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
-                if (!reserveInfo.stableBorrowRateEnabled) {
+                if (!reserveInfo.stableBorrowRateEnabled || reserveInfo.isFrozen) {
                     // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
@@ -441,6 +485,10 @@ const aaveClaimStkAaveTest = async () => {
         let snapshot;
 
         before(async () => {
+            await resetForkToBlock(14615070);
+            await redeploy('AaveSupply');
+            await redeploy('AaveClaimStkAave');
+            await redeploy('AaveView');
             const aaveViewAddr = await getAddrFromRegistry('AaveView');
             AaveView = await hre.ethers.getContractAt('AaveView', aaveViewAddr);
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -468,7 +516,6 @@ const aaveClaimStkAaveTest = async () => {
             // eslint-disable-next-line max-len
             await supplyAave(proxy, AAVE_MARKET, hre.ethers.constants.One, WETH_ADDRESS, senderAcc.address);
             // this is done so the getter function below returns accurate balance
-
             accruedRewards = await AaveView['getUserUnclaimedRewards(address)'](proxyAddr);
             expect(accruedRewards).to.be.gt(hre.ethers.constants.Zero);
         });

@@ -1,8 +1,8 @@
 const {
     redeploy,
-} = require('../utils.js');
+} = require('../utils');
 
-const { adminAuthTest } = require('./auth-tests.js');
+const { adminAuthTest } = require('./auth-tests');
 
 describe('Admin-Auth', () => {
     before(async () => {
