@@ -17,6 +17,8 @@ contract CurveHelper is MainnetCurveAddresses {
     IVotingEscrow public constant VotingEscrow = IVotingEscrow(VOTING_ESCROW_ADDR);
     IFeeDistributor public constant FeeDistributor = IFeeDistributor(FEE_DISTRIBUTOR_ADDR);
 
+    error CurveHelperInvalidPool();
+
     enum DepositTargetType {
         SWAP,
         ZAP_POOL,
@@ -58,7 +60,6 @@ contract CurveHelper is MainnetCurveAddresses {
         uint256 N_COINS,
         address[8] memory tokens
     ) {
-        IRegistry poolRegistry = getRegistry();
         address pool;
         bool underlying = false;
 
@@ -74,7 +75,10 @@ contract CurveHelper is MainnetCurveAddresses {
             }
         }
 
+        IRegistry poolRegistry = getRegistry();
         lpToken = poolRegistry.get_lp_token(pool);
+        if (lpToken == address(0)) revert CurveHelperInvalidPool();
+
         N_COINS = poolRegistry.get_n_coins(pool)[(_explicitUnderlying || underlying) ? 1 : 0];
 
         if (underlying || _explicitUnderlying) {

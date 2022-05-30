@@ -3,13 +3,12 @@ pragma solidity =0.8.10;
 
 import "../helpers/CurveHelper.sol";
 import "../../../utils/TokenUtils.sol";
-import "../../../utils/SafeMath.sol";
 import "../../ActionBase.sol";
 
 contract CurveWithdraw is ActionBase, CurveHelper {
     using TokenUtils for address;
 
-    error CurveWithdrawZeroRecepient();
+    error CurveWithdrawZeroRecipient();
     error CurveWithdrawWrongArraySize();
     error CurveWithdrawPoolReverted();
     error CurveWithdrawSlippageHit();
@@ -61,7 +60,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
 
     /// @notice Withdraws user deposited tokens from depositTarget
     function _curveWithdraw(Params memory _params) internal returns (uint256 burned, bytes memory logData) {
-        if (_params.receiver == address(0)) revert CurveWithdrawZeroRecepient();
+        if (_params.receiver == address(0)) revert CurveWithdrawZeroRecipient();
         (
             DepositTargetType depositTargetType,
             bool explicitUnderlying,
