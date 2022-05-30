@@ -329,7 +329,7 @@ const uniV3SupplyTest = async () => {
 };
 
 const uniV3WithdrawTest = async () => {
-    describe('Uni-Supply-V3', () => {
+    describe('Uni-Withdraw-V3', () => {
         let senderAcc; let proxy; let logger; let positionManager;
 
         const uniPairs = [

@@ -10,6 +10,7 @@ const {
     ADMIN_ACC,
     addrs,
     WETH_ADDRESS,
+    sendEther,
 } = require('../utils');
 
 const { deployAsOwner } = require('../../scripts/utils/deployer');
@@ -31,6 +32,9 @@ describe('Multi-DFSRegistry-Setter', function () {
     const exampleID2 = getNameId(exampleName2);
 
     before(async () => {
+        const senderAcc = (await hre.ethers.getSigners())[0];
+        await sendEther(senderAcc, callerAddr, '100');
+
         dfsRegistry = await hre.ethers.getContractAt('DFSRegistry', addrs[hre.network.config.name].REGISTRY_ADDR);
         multiDFSRegistrySetter = await deployAsOwner('MultiDFSRegistrySetter');
 

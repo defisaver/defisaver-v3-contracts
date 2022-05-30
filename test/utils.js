@@ -175,7 +175,7 @@ const coinGeckoHelper = {
     ZRX: '0x',
     KNCL: 'kyber-network',
     MANA: 'decentraland',
-    PAXUSD: 'paxos-standard',
+    USDP: 'paxos-standard',
     COMP: 'compound-governance-token',
     LRC: 'loopring',
     LINK: 'chainlink',

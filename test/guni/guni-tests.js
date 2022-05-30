@@ -12,7 +12,7 @@ const {
     ETH_ADDR,
 } = require('../utils');
 
-const { gUniDeposit, gUniWithdraw } = require('../actions.js');
+const { gUniDeposit, gUniWithdraw } = require('../actions');
 
 const guniDepositTest = async () => {
     describe('GUNI deposit', function () {

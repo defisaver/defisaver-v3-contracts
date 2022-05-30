@@ -10,9 +10,9 @@ const {
     fetchAmountinUSDPrice,
 } = require('../../utils');
 
-const { getPair } = require('../../utils-uni.js');
+const { getPair } = require('../../utils-uni');
 
-const { uniSupply, uniWithdraw } = require('../../actions.js');
+const { uniSupply, uniWithdraw } = require('../../actions');
 
 const uniSupplyTest = async () => {
     describe('Uni-Supply', function () {

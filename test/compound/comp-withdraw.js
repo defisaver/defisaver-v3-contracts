@@ -1,8 +1,7 @@
-const { compoundCollateralAssets } = require('@defisaver/tokens');
 const {
     redeploy,
 } = require('../utils');
-const { compWithdrawTest } = require('./comp-tests');
+const { compWithdrawTest, compoundCollateralAssets } = require('./comp-tests');
 
 describe('Comp-Withdraw', function () {
     this.timeout(80000);

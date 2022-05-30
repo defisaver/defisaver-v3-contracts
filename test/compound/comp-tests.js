@@ -315,4 +315,5 @@ module.exports = {
     compSupplyTest,
     compoundDeployContracts,
     compoundFullTest,
+    compoundCollateralAssets,
 };

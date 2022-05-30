@@ -1,7 +1,7 @@
 const {
     redeploy,
 } = require('../utils');
-const { lidoStakeTest } = require('./lido-tests.js');
+const { lidoStakeTest } = require('./lido-tests');
 
 describe('Lido WETH staking', function () {
     this.timeout(80000);

@@ -11,7 +11,7 @@ const {
     setBalance,
 } = require('../utils');
 
-const { rariDeposit, rariWithdraw } = require('../actions.js');
+const { rariDeposit, rariWithdraw } = require('../actions');
 
 const rariDepositTest = async () => {
     describe('Rari deposit', function () {

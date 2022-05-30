@@ -37,7 +37,7 @@ const SUPPLY_AMOUNT_IN_USD = '150000';
 const GENERATE_AMOUNT_IN_USD = '50000';
 const {
     openVaultForExactAmountInDecimals, gUniDeposit, openVault, executeAction,
-} = require('../../actions.js');
+} = require('../../actions');
 
 const McdPaybackAction = dfs.actions.maker.MakerPaybackAction;
 const McdWithdrawAction = dfs.actions.maker.MakerWithdrawAction;

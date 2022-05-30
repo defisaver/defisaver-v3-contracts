@@ -3,7 +3,7 @@
 require('dotenv-safe').config();
 
 const fs = require('fs');
-const { getFile, getCurrentDir } = require('./utils.js');
+const { getFile, getCurrentDir } = require('./utils');
 
 const fsPromises = fs.promises;
 

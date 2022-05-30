@@ -22,7 +22,7 @@ const {
 
 const {
     supplyComp, executeAction,
-} = require('../../actions.js');
+} = require('../../actions');
 
 const {
     getBorrowBalance,

@@ -25,7 +25,7 @@ const {
     curveClaimFees,
     curveStethPoolDeposit,
     curveStethPoolWithdraw,
-} = require('../actions.js');
+} = require('../actions');
 
 const poolData = require('./poolData');
 

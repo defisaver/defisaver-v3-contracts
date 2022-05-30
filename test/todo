@@ -1,0 +1,31 @@
+aave - pass
+aaveV3 - pass
+auth - pass
+balancer - pass
+compound - pass
+flashloan - pass
+guni - pass
+insta - pass
+lido - pass
+mcd - pass
+qidao - pass
+rari - pass
+reflexer - pass
+triggers - pass
+uniswap/v2 - pass
+uniswap/v3 - pass
+utils-test - pass
+views - pass
+yearn - pass
+mstable - pass
+liquity - pass
+exchange - pass (see with kjare bad liq or rate getter)
+
+curve - not live?
+convex - (update sdk)
+
+core
+
+strategies - many errors
+utils-actions - (toggleSub + sendTokenUnwrap sdk issues)
+recipes - 6 fail (old block before new registry and more)

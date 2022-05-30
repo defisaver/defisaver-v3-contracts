@@ -30,7 +30,7 @@ const {
     liquityUnstake,
 
     liquityRedeem,
-} = require('../actions.js');
+} = require('../actions');
 
 const lusdAddr = getAssetInfo('LUSD').address;
 const lqtyAddr = getAssetInfo('LQTY').address;

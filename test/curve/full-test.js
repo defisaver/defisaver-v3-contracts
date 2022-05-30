@@ -1,5 +1,5 @@
 const { curveFullTest } = require('./curve-tests');
-const config = require('../../hardhat.config.js');
+const config = require('../../hardhat.config');
 
 describe('Curve full test', () => {
     it('... should do full curve test', async () => {
