@@ -71,18 +71,18 @@ contract CurveDeposit is ActionBase, CurveHelper {
             uint256 N_COINS,
             address[8] memory tokens
         ) = _getPoolParams(_params.depositTarget, depositTargetType, explicitUnderlying);
-
         if (_params.amounts.length != N_COINS) revert CurveDepositWrongArraySize();
+
         uint256 tokensBefore = lpToken.getBalance(address(this));
         uint256 msgValue;
         for (uint256 i = 0; i < N_COINS; i++) {
             if (tokens[i] == TokenUtils.ETH_ADDR) {
-                TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.sender, _params.amounts[i]);
+                _params.amounts[i] = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.sender, _params.amounts[i]);
                 TokenUtils.withdrawWeth(_params.amounts[i]);
                 msgValue = _params.amounts[i];
                 continue;
             }
-            tokens[i].pullTokensIfNeeded(_params.sender, _params.amounts[i]);
+            _params.amounts[i] = tokens[i].pullTokensIfNeeded(_params.sender, _params.amounts[i]);
             tokens[i].approveToken(_params.depositTarget, _params.amounts[i]);
         }
 
