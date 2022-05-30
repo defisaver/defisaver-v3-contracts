@@ -10,6 +10,10 @@ import "../../ActionBase.sol";
 contract LiquityClaim is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    struct Params {
+        address to;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
@@ -17,19 +21,19 @@ contract LiquityClaim is ActionBase, LiquityHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        address to = parseInputs(_callData);
-        to = _parseParamAddr(to, _paramMapping[0], _subData, _returnValues);
+        Params memory params = parseInputs(_callData);
+        params.to = _parseParamAddr(params.to, _paramMapping[0], _subData, _returnValues);
 
-        (uint256 claimedColl, bytes memory logData) = _liquityClaim(to);
+        (uint256 claimedColl, bytes memory logData) = _liquityClaim(params.to);
         emit ActionEvent("LiquityClaim", logData);
         return bytes32(claimedColl);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
-        address to = parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        (, bytes memory logData) = _liquityClaim(to);
+        (, bytes memory logData) = _liquityClaim(params.to);
         logger.logActionDirectEvent("LiquityClaim", logData);
     }
 
@@ -52,7 +56,7 @@ contract LiquityClaim is ActionBase, LiquityHelper {
         logData = abi.encode(_to, claimableColl);
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (address to) {
-        to = abi.decode(_callData, (address));
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
     }
 }
