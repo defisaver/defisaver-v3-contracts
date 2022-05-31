@@ -1282,27 +1282,18 @@ const curveDeposit = async (
     proxy,
     sender,
     receiver,
-    depositTarget,
-    lpToken,
+    poolAddr,
     minMintAmount,
-    amounts,
-    tokens,
     useUnderlying,
+    amounts,
 ) => {
-    const curveViewAddr = await getAddrFromRegistry('CurveView');
-    const curveView = await hre.ethers.getContractAt('CurveView', curveViewAddr);
-    const sig = await curveView['curveDepositSig(uint256,bool)'](tokens.length, useUnderlying);
-
     const curveDepositAction = new dfs.actions.curve.CurveDepositAction(
         sender,
         receiver,
-        depositTarget,
-        lpToken,
-        sig,
+        poolAddr,
         minMintAmount,
-        amounts,
-        tokens,
         useUnderlying,
+        amounts,
     );
 
     const functionData = curveDepositAction.encodeForDsProxyCall()[1];
@@ -1315,34 +1306,20 @@ const curveWithdraw = async (
     proxy,
     sender,
     receiver,
-    pool,
-    lpToken,
-    burnAmount,
-    minAmounts,
-    tokens,
-    withdrawExact,
+    poolAddr,
+    minMintAmount,
     useUnderlying,
+    withdrawExact,
+    amounts,
 ) => {
-    const curveViewAddr = await getAddrFromRegistry('CurveView');
-    const curveView = await hre.ethers.getContractAt('CurveView', curveViewAddr);
-    let sig;
-    if (withdrawExact) {
-        sig = await curveView.curveWithdrawImbalanceSig(tokens.length, useUnderlying);
-    } else {
-        sig = await curveView.curveWithdrawSig(tokens.length, useUnderlying);
-    }
-
     const curveWithdrawAction = new dfs.actions.curve.CurveWithdrawAction(
         sender,
         receiver,
-        pool,
-        lpToken,
-        sig,
-        burnAmount,
-        minAmounts,
-        tokens,
-        withdrawExact,
+        poolAddr,
+        minMintAmount,
         useUnderlying,
+        withdrawExact,
+        amounts,
     );
 
     const functionData = curveWithdrawAction.encodeForDsProxyCall()[1];

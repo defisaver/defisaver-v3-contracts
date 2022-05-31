@@ -1,3 +1,5 @@
+const dfs = require('@defisaver/sdk');
+const { poolInfo } = require('@defisaver/sdk/src/utils/curve-utils');
 const { expect } = require('chai');
 const hre = require('hardhat');
 
@@ -7,7 +9,6 @@ const {
     getProxy,
     redeploy,
     approve,
-    ETH_ADDR,
     WETH_ADDRESS,
     setBalance,
     Float2BN,
@@ -15,6 +16,8 @@ const {
     timeTravel,
     BN2Float,
     STETH_ADDRESS,
+    revertToSnapshot,
+    takeSnapshot,
 } = require('../utils');
 
 const {
@@ -25,19 +28,94 @@ const {
     curveClaimFees,
     curveStethPoolDeposit,
     curveStethPoolWithdraw,
-} = require('../actions.js');
+} = require('../actions');
 
-const poolData = require('./poolData');
+const forkNum = 14700000;
 
-const forkNum = 14340400;
+const testDeposit = async (
+    proxy,
+    sender,
+    receiver,
+    pool,
+    minMintAmount,
+    useUnderlying,
+    amountEach,
+) => {
+    const amounts = (useUnderlying ? pool.underlyingDecimals : pool.decimals).map(
+        (e) => Float2BN(amountEach, e),
+    );
+
+    const assetsToApprove = await (new dfs.actions.curve.CurveDepositAction(
+        sender,
+        receiver,
+        pool.swapAddr,
+        minMintAmount,
+        useUnderlying,
+        amounts,
+    )).getAssetsToApprove();
+
+    await Promise.all(assetsToApprove.map(async (e, i) => {
+        await setBalance(e.asset, sender, amounts[i]);
+        await approve(e.asset, proxy.address);
+    }));
+
+    await setBalance(pool.lpToken, receiver, Float2BN('0'));
+    await curveDeposit(
+        proxy,
+        sender,
+        receiver,
+        pool.swapAddr,
+        minMintAmount,
+        useUnderlying,
+        amounts,
+    );
+    const tokensAfter = await balanceOf(pool.lpToken, receiver);
+    expect(tokensAfter).to.be.gt('0');
+    return tokensAfter;
+};
+
+const testWithdraw = async (
+    proxy,
+    sender,
+    receiver,
+    pool,
+    burnAmount,
+    useUnderlying,
+    withdrawExact,
+    amountEach,
+) => {
+    const amounts = (useUnderlying ? pool.underlyingDecimals : pool.decimals).map(
+        (e) => Float2BN(amountEach, e),
+    );
+
+    await approve(pool.lpToken, proxy.address);
+    await curveWithdraw(
+        proxy,
+        sender,
+        receiver,
+        pool.swapAddr,
+        burnAmount,
+        useUnderlying,
+        withdrawExact,
+        amounts,
+    );
+
+    await Promise.all(
+        (useUnderlying ? pool.underlyingCoins : pool.coins).map(async (c, i) => expect(
+            await balanceOf(c, receiver),
+        ).to.be.gte(amounts[i].sub(amounts[i].div(1000)))),
+    );
+};
 
 const curveDepositTest = async (testLength) => {
-    describe('Curve-Deposit', function () {
+    describe('Curve-Deposit', async function () {
         this.timeout(1000000);
-        const amount = '1000';
+        const amountEach = '1000';
 
-        let senderAcc; let senderAddr;
-        let proxy; let proxyAddr;
+        let senderAcc;
+        let senderAddr;
+        let proxy;
+        let snapshot;
 
         before(async () => {
             await resetForkToBlock(forkNum);
@@ -45,79 +123,57 @@ const curveDepositTest = async (testLength) => {
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAddr = senderAcc.address;
             proxy = await getProxy(senderAcc.address);
-            proxyAddr = proxy.address;
 
             await redeploy('CurveDeposit');
             await redeploy('CurveView');
         });
 
-        Object.keys(poolData).slice(0, testLength).map(async (poolName) => {
-            it(`... should deposit [coins] via [swapContract] ${poolName}`, async () => {
-                const coins = poolData[poolName].coins;
-                const decimals = poolData[poolName].decimals;
-                const amounts = decimals.map((e) => Float2BN(amount, e));
-
-                await Promise.all(coins.map(async (c, i) => {
-                    let coinToApprove = c;
-                    if (c === ETH_ADDR) coinToApprove = WETH_ADDRESS;
-                    await setBalance(coinToApprove, senderAddr, amounts[i]);
-                    await approve(coinToApprove, proxyAddr);
-                }));
-
-                const tokensBefore = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                await curveDeposit(proxy, senderAddr, senderAddr, poolData[poolName].swapAddr, poolData[poolName].lpTokenAddr, '0', amounts, coins, false);
-                const tokensAfter = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                expect(tokensAfter.sub(tokensBefore)).to.be.gt('0');
-            });
-            if (poolData[poolName].useUnderlying) {
-                it(`... should deposit [underlyingCoins] via [swapContract] ${poolName}`, async () => {
-                    const underlyingCoins = poolData[poolName].underlyingCoins;
-                    const decimals = poolData[poolName].underlyingDecimals;
-                    const amounts = decimals.map((e) => Float2BN(amount, e));
-
-                    await Promise.all(underlyingCoins.map(async (c, i) => {
-                        let coinToApprove = c;
-                        if (c === ETH_ADDR) coinToApprove = WETH_ADDRESS;
-                        await setBalance(coinToApprove, senderAddr, amounts[i]);
-                        await approve(coinToApprove, proxyAddr);
-                    }));
-
-                    // eslint-disable-next-line max-len
-                    const tokensBefore = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                    await curveDeposit(proxy, senderAddr, senderAddr, poolData[poolName].swapAddr, poolData[poolName].lpTokenAddr, '0', amounts, underlyingCoins, true);
-                    const tokensAfter = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                    expect(tokensAfter.sub(tokensBefore)).to.be.gt('0');
-                });
-            }
-            if (poolData[poolName].depositAddr == null) return;
-            it(`... should deposit [underlyingCoins] via [depositContract] ${poolName}`, async () => {
-                const underlyingCoins = poolData[poolName].underlyingCoins;
-                const decimals = poolData[poolName].underlyingDecimals;
-                const amounts = decimals.map((e) => Float2BN(amount, e));
-
-                await Promise.all(underlyingCoins.map(async (c, i) => {
-                    let coinToApprove = c;
-                    if (c === ETH_ADDR) coinToApprove = WETH_ADDRESS;
-                    await setBalance(coinToApprove, senderAddr, amounts[i]);
-                    await approve(coinToApprove, proxyAddr);
-                }));
-
-                const tokensBefore = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                await curveDeposit(proxy, senderAddr, senderAddr, poolData[poolName].depositAddr, poolData[poolName].lpTokenAddr, '0', amounts, underlyingCoins, false);
-                const tokensAfter = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                expect(tokensAfter.sub(tokensBefore)).to.be.gt('0');
-            });
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
         });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        await Promise.all(poolInfo.slice(0, testLength).map(async (pool) => {
+            const poolName = pool.name;
+            it(`... should deposit coins [${poolName}]`, async () => {
+                await testDeposit(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    '0', // minMintAmount
+                    false,
+                    amountEach,
+                );
+            });
+            if (!pool.depositContract && !pool.underlyingFlag) return;
+            it(`... should deposit underlyingCoins [${poolName}]`, async () => {
+                await testDeposit(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    '0', // minMintAmount
+                    true,
+                    amountEach,
+                );
+            });
+        }));
     });
 };
 
 const curveWithdrawTest = async (testLength) => {
-    describe('Curve-Withdraw', function () {
+    describe('Curve-Withdraw', async function () {
         this.timeout(1000000);
-        const amount = '1000';
+        const amountEach = '1000';
 
-        let senderAcc; let senderAddr;
-        let proxy; let proxyAddr;
+        let senderAcc;
+        let senderAddr;
+        let proxy;
+        let snapshot;
 
         before(async () => {
             await resetForkToBlock(forkNum);
@@ -125,162 +181,78 @@ const curveWithdrawTest = async (testLength) => {
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAddr = senderAcc.address;
             proxy = await getProxy(senderAcc.address);
-            proxyAddr = proxy.address;
 
             await redeploy('CurveDeposit');
             await redeploy('CurveWithdraw');
             await redeploy('CurveView');
         });
 
-        Object.keys(poolData).slice(0, testLength).forEach(async (poolName) => {
-            it(`... should deposit and then withdraw [coins] via [swapContract] ${poolName}`, async () => {
-                const coins = poolData[poolName].coins;
-                const decimals = poolData[poolName].decimals;
-                const amounts = decimals.map((e) => Float2BN(amount, e));
-
-                await Promise.all(coins.map(async (c, i) => {
-                    let coinToApprove = c;
-                    if (c === ETH_ADDR) coinToApprove = WETH_ADDRESS;
-                    await setBalance(coinToApprove, senderAddr, amounts[i]);
-                    await approve(coinToApprove, proxyAddr);
-                }));
-
-                const tokensBefore = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                await curveDeposit(proxy, senderAddr, senderAddr, poolData[poolName].swapAddr, poolData[poolName].lpTokenAddr, '0', amounts, coins, false);
-                const tokensAfter = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                const minted = tokensAfter.sub(tokensBefore);
-
-                expect(minted).to.be.gt('0');
-
-                // eslint-disable-next-line max-len
-                const balancesBefore = await Promise.all(coins.map(async (c) => balanceOf(c === ETH_ADDR ? WETH_ADDRESS : c, senderAddr)));
-
-                await approve(poolData[poolName].lpTokenAddr, proxyAddr);
-
-                await curveWithdraw(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    poolData[poolName].swapAddr,
-                    poolData[poolName].lpTokenAddr,
-                    minted, amounts.map(() => '0'),
-                    coins,
-                    false,
-                    false,
-                );
-                // eslint-disable-next-line max-len
-                const balancesAfter = await Promise.all(coins.map(async (c) => balanceOf(c === ETH_ADDR ? WETH_ADDRESS : c, senderAddr)));
-
-                const nominalBalanceDelta = balancesAfter.reduce((prev, e) => prev.add(e)).sub(
-                    balancesBefore.reduce((prev, e) => prev.add(e)),
-                );
-
-                expect(nominalBalanceDelta).to.be.gt('0');
-            });
-            if (poolData[poolName].useUnderlying) {
-                it(`... should deposit and then withdraw [underlyingCoins] via [swapContract] ${poolName}`, async () => {
-                    const underlyingCoins = poolData[poolName].underlyingCoins;
-                    const decimals = poolData[poolName].underlyingDecimals;
-                    const amounts = decimals.map((e) => Float2BN(amount, e));
-
-                    await Promise.all(underlyingCoins.map(async (c, i) => {
-                        let coinToApprove = c;
-                        if (c === ETH_ADDR) coinToApprove = WETH_ADDRESS;
-                        await setBalance(coinToApprove, senderAddr, amounts[i]);
-                        await approve(coinToApprove, proxyAddr);
-                    }));
-
-                    // eslint-disable-next-line max-len
-                    const tokensBefore = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                    await curveDeposit(proxy, senderAddr, senderAddr, poolData[poolName].swapAddr, poolData[poolName].lpTokenAddr, '0', amounts, underlyingCoins, true);
-                    const tokensAfter = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                    const minted = tokensAfter.sub(tokensBefore);
-                    expect(minted).to.be.gt('0');
-
-                    // eslint-disable-next-line max-len
-                    const balancesBefore = await Promise.all(underlyingCoins.map(async (c) => balanceOf(c, senderAddr)));
-
-                    await approve(poolData[poolName].lpTokenAddr, proxyAddr);
-                    await curveWithdraw(
-                        proxy,
-                        senderAddr,
-                        senderAddr,
-                        poolData[poolName].swapAddr,
-                        poolData[poolName].lpTokenAddr,
-                        minted,
-                        amounts.map(() => '0'),
-                        underlyingCoins,
-                        false,
-                        true,
-                    );
-
-                    // eslint-disable-next-line max-len
-                    const balancesAfter = await Promise.all(underlyingCoins.map(async (c) => balanceOf(c, senderAddr)));
-
-                    const nominalBalanceDelta = balancesAfter.reduce((prev, e) => prev.add(e)).sub(
-                        balancesBefore.reduce((prev, e) => prev.add(e)),
-                    );
-
-                    expect(nominalBalanceDelta).to.be.gt('0');
-                });
-            }
-            if (poolData[poolName].depositAddr == null) return;
-            it(`... should deposit and then withdraw [underlyingCoins] via [depositContract] ${poolName}`, async () => {
-                const underlyingCoins = poolData[poolName].underlyingCoins;
-                const decimals = poolData[poolName].underlyingDecimals;
-                const amounts = decimals.map((e) => Float2BN(amount, e));
-
-                await Promise.all(underlyingCoins.map(async (c, i) => {
-                    let coinToApprove = c;
-                    if (c === ETH_ADDR) coinToApprove = WETH_ADDRESS;
-                    await setBalance(coinToApprove, senderAddr, amounts[i]);
-                    await approve(coinToApprove, proxyAddr);
-                }));
-
-                const tokensBefore = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                await curveDeposit(proxy, senderAddr, senderAddr, poolData[poolName].depositAddr, poolData[poolName].lpTokenAddr, '0', amounts, underlyingCoins, false, false);
-                const tokensAfter = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                const minted = tokensAfter.sub(tokensBefore);
-                expect(minted).to.be.gt('0');
-
-                // eslint-disable-next-line max-len
-                const balancesBefore = await Promise.all(underlyingCoins.map(async (c) => balanceOf(c, senderAddr)));
-
-                await approve(poolData[poolName].lpTokenAddr, proxyAddr);
-                await curveWithdraw(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    poolData[poolName].depositAddr,
-                    poolData[poolName].lpTokenAddr,
-                    minted,
-                    amounts.map(() => '0'),
-                    underlyingCoins,
-                    false,
-                    false,
-                );
-
-                // eslint-disable-next-line max-len
-                const balancesAfter = await Promise.all(underlyingCoins.map(async (c) => balanceOf(c, senderAddr)));
-
-                const nominalBalanceDelta = balancesAfter.reduce((prev, e) => prev.add(e)).sub(
-                    balancesBefore.reduce((prev, e) => prev.add(e)),
-                );
-
-                expect(nominalBalanceDelta).to.be.gt('0');
-            });
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
         });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        await Promise.all(poolInfo.slice(0, testLength).map(async (pool) => {
+            const poolName = pool.name;
+            it(`... should deposit then withdraw coins [${poolName}]`, async () => {
+                const lpMinted = await testDeposit(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    '0', // minMintAmount
+                    false,
+                    amountEach,
+                );
+                await testWithdraw(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    lpMinted,
+                    false,
+                    false,
+                    `${+amountEach * 0.2}`,
+                );
+            });
+            if (!pool.depositContract && !pool.underlyingFlag) return;
+            it(`... should deposit then withdraw underlyingCoins [${poolName}]`, async () => {
+                const lpMinted = await testDeposit(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    '0', // minMintAmount
+                    true,
+                    amountEach,
+                );
+                await testWithdraw(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    lpMinted,
+                    true,
+                    false,
+                    `${+amountEach * 0.2}`,
+                );
+            });
+        }));
     });
 };
 
 const curveWithdrawExactTest = async (testLength) => {
-    describe('Curve-Withdraw-Exact', function () {
+    describe('Curve-Withdraw', async function () {
         this.timeout(1000000);
-        const amount = '1000';
-        const withdrawAmount = '900';
+        const amountEach = '1000';
 
-        let senderAcc; let senderAddr;
-        let proxy; let proxyAddr;
+        let senderAcc;
+        let senderAddr;
+        let proxy;
+        let snapshot;
 
         before(async () => {
             await resetForkToBlock(forkNum);
@@ -288,158 +260,73 @@ const curveWithdrawExactTest = async (testLength) => {
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAddr = senderAcc.address;
             proxy = await getProxy(senderAcc.address);
-            proxyAddr = proxy.address;
 
             await redeploy('CurveDeposit');
             await redeploy('CurveWithdraw');
             await redeploy('CurveView');
         });
 
-        Object.keys(poolData).slice(0, testLength).forEach(async (poolName) => {
-            it(`... should deposit and then withdraw [coins] via [swapContract] ${poolName}`, async () => {
-                const coins = poolData[poolName].coins;
-                const decimals = poolData[poolName].decimals;
-                const amounts = decimals.map((e) => Float2BN(amount, e));
-
-                await Promise.all(coins.map(async (c, i) => {
-                    let coinToApprove = c;
-                    if (c === ETH_ADDR) coinToApprove = WETH_ADDRESS;
-                    await setBalance(coinToApprove, senderAddr, amounts[i]);
-                    await approve(coinToApprove, proxyAddr);
-                }));
-
-                const tokensBefore = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                await curveDeposit(proxy, senderAddr, senderAddr, poolData[poolName].swapAddr, poolData[poolName].lpTokenAddr, '0', amounts, coins, false);
-                const tokensAfter = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                const minted = tokensAfter.sub(tokensBefore);
-                expect(minted).to.be.gt('0');
-
-                // eslint-disable-next-line max-len
-                const balancesBefore = await Promise.all(coins.map(async (c) => balanceOf(c === ETH_ADDR ? WETH_ADDRESS : c, senderAddr)));
-
-                await approve(poolData[poolName].lpTokenAddr, proxyAddr);
-                await curveWithdraw(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    poolData[poolName].swapAddr,
-                    poolData[poolName].lpTokenAddr,
-                    minted,
-                    amounts.map(() => withdrawAmount),
-                    coins,
-                    true,
-                    false,
-                );
-
-                // eslint-disable-next-line max-len
-                const balancesAfter = await Promise.all(coins.map(async (c) => balanceOf(c === ETH_ADDR ? WETH_ADDRESS : c, senderAddr)));
-
-                const nominalBalanceDelta = balancesAfter.reduce((prev, e) => prev.add(e)).sub(
-                    balancesBefore.reduce((prev, e) => prev.add(e)),
-                );
-
-                expect(nominalBalanceDelta).to.be.gt('0');
-            });
-            if (poolData[poolName].useUnderlying) {
-                it(`... should deposit and then withdraw [underlyingCoins] via [swapContract] ${poolName}`, async () => {
-                    const underlyingCoins = poolData[poolName].underlyingCoins;
-                    const decimals = poolData[poolName].underlyingDecimals;
-                    const amounts = decimals.map((e) => Float2BN(amount, e));
-
-                    await Promise.all(underlyingCoins.map(async (c, i) => {
-                        let coinToApprove = c;
-                        if (c === ETH_ADDR) coinToApprove = WETH_ADDRESS;
-                        await setBalance(coinToApprove, senderAddr, amounts[i]);
-                        await approve(coinToApprove, proxyAddr);
-                    }));
-
-                    // eslint-disable-next-line max-len
-                    const tokensBefore = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                    await curveDeposit(proxy, senderAddr, senderAddr, poolData[poolName].swapAddr, poolData[poolName].lpTokenAddr, '0', amounts, underlyingCoins, true);
-                    const tokensAfter = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                    const minted = tokensAfter.sub(tokensBefore);
-                    expect(minted).to.be.gt('0');
-
-                    // eslint-disable-next-line max-len
-                    const balancesBefore = await Promise.all(underlyingCoins.map(async (c) => balanceOf(c, senderAddr)));
-
-                    await approve(poolData[poolName].lpTokenAddr, proxyAddr);
-                    await curveWithdraw(
-                        proxy,
-                        senderAddr,
-                        senderAddr,
-                        poolData[poolName].swapAddr,
-                        poolData[poolName].lpTokenAddr,
-                        minted,
-                        amounts.map(() => withdrawAmount),
-                        underlyingCoins,
-                        true,
-                        true,
-                    );
-
-                    // eslint-disable-next-line max-len
-                    const balancesAfter = await Promise.all(underlyingCoins.map(async (c) => balanceOf(c, senderAddr)));
-
-                    const nominalBalanceDelta = balancesAfter.reduce((prev, e) => prev.add(e)).sub(
-                        balancesBefore.reduce((prev, e) => prev.add(e)),
-                    );
-
-                    expect(nominalBalanceDelta).to.be.gt('0');
-                });
-            }
-            if (poolData[poolName].depositAddr == null) return;
-            it(`... should deposit and then withdraw [underlyingCoins] via [depositContract] ${poolName}`, async () => {
-                const underlyingCoins = poolData[poolName].underlyingCoins;
-                const decimals = poolData[poolName].underlyingDecimals;
-                const amounts = decimals.map((e) => Float2BN(amount, e));
-
-                await Promise.all(underlyingCoins.map(async (c, i) => {
-                    let coinToApprove = c;
-                    if (c === ETH_ADDR) coinToApprove = WETH_ADDRESS;
-                    await setBalance(coinToApprove, senderAddr, amounts[i]);
-                    await approve(coinToApprove, proxyAddr);
-                }));
-
-                const tokensBefore = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                await curveDeposit(proxy, senderAddr, senderAddr, poolData[poolName].depositAddr, poolData[poolName].lpTokenAddr, '0', amounts, underlyingCoins, false);
-                const tokensAfter = await balanceOf(poolData[poolName].lpTokenAddr, senderAddr);
-                const minted = tokensAfter.sub(tokensBefore);
-                expect(minted).to.be.gt('0');
-
-                // eslint-disable-next-line max-len
-                const balancesBefore = await Promise.all(underlyingCoins.map(async (c) => balanceOf(c, senderAddr)));
-
-                await approve(poolData[poolName].lpTokenAddr, proxyAddr);
-                await curveWithdraw(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    poolData[poolName].depositAddr,
-                    poolData[poolName].lpTokenAddr,
-                    minted,
-                    amounts.map(() => withdrawAmount),
-                    underlyingCoins,
-                    true,
-                    false,
-                );
-
-                // eslint-disable-next-line max-len
-                const balancesAfter = await Promise.all(underlyingCoins.map(async (c) => balanceOf(c, senderAddr)));
-
-                const nominalBalanceDelta = balancesAfter.reduce((prev, e) => prev.add(e)).sub(
-                    balancesBefore.reduce((prev, e) => prev.add(e)),
-                );
-
-                expect(nominalBalanceDelta).to.be.gt('0');
-            });
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
         });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        await Promise.all(poolInfo.slice(0, testLength).map(async (pool) => {
+            const poolName = pool.name;
+            it(`... should deposit then withdraw exact coins [${poolName}]`, async () => {
+                const lpMinted = await testDeposit(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    '0', // minMintAmount
+                    false,
+                    amountEach,
+                );
+                await testWithdraw(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    lpMinted,
+                    false,
+                    true,
+                    `${+amountEach * 0.2}`,
+                );
+            });
+            if (!pool.depositContract && !pool.underlyingFlag) return;
+            it(`... should deposit then withdraw exact underlyingCoins [${poolName}]`, async () => {
+                const lpMinted = await testDeposit(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    '0', // minMintAmount
+                    true,
+                    amountEach,
+                );
+                await testWithdraw(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    lpMinted,
+                    true,
+                    true,
+                    `${+amountEach * 0.2}`,
+                );
+            });
+        }));
     });
 };
 
 const curveGaugeDepositTest = async (testLength) => {
-    describe('Curve-Gauge-Deposit', function () {
+    describe('Curve-Gauge-Deposit', async function () {
         this.timeout(1000000);
-        const amount = '1000';
+        const amountEach = '1000';
 
         let senderAcc; let senderAddr;
         let proxy; let proxyAddr;
@@ -458,86 +345,33 @@ const curveGaugeDepositTest = async (testLength) => {
             curveView = await redeploy('CurveView');
         });
 
-        Object.keys(poolData).slice(0, testLength).forEach(async (poolName) => {
-            const pool = poolData[poolName];
+        await Promise.all(poolInfo.slice(0, testLength).map(async (pool) => {
+            const poolName = pool.name;
 
-            it(`... should deposit LP tokens([coins, swapContract]) into gauge ${poolName}`, async () => {
-                const coins = pool.coins;
-                const amounts = pool.decimals.map((e) => Float2BN(amount, e));
+            it(`... should deposit LP tokens into gauge [${poolName}]`, async () => {
+                const lpMinted = await testDeposit(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    '0', // minMintAmount
+                    false,
+                    amountEach,
+                );
 
-                await Promise.all(coins.map(async (c, i) => {
-                    let coinToApprove = c;
-                    if (c === ETH_ADDR) coinToApprove = WETH_ADDRESS;
-                    await setBalance(coinToApprove, senderAddr, amounts[i]);
-                    await approve(coinToApprove, proxyAddr);
-                }));
-
-                const tokensBefore = await balanceOf(pool.lpTokenAddr, senderAddr);
-                await curveDeposit(proxy, senderAddr, senderAddr, pool.swapAddr, pool.lpTokenAddr, '0', amounts, coins, false);
-                const tokensAfter = await balanceOf(pool.lpTokenAddr, senderAddr);
-                const minted = tokensAfter.sub(tokensBefore);
-                expect(minted).to.be.gt('0');
-
-                await approve(pool.lpTokenAddr, proxyAddr);
+                await approve(pool.lpToken, proxyAddr);
                 // eslint-disable-next-line max-len
-                await curveGaugeDeposit(proxy, pool.gaugeAddr, pool.lpTokenAddr, senderAddr, proxyAddr, minted);
-                expect(await curveView.gaugeBalance(pool.gaugeAddr, proxyAddr)).to.be.gt('0');
+                await curveGaugeDeposit(proxy, pool.gauges[0], pool.lpToken, senderAddr, proxyAddr, lpMinted);
+                expect(await curveView.gaugeBalance(pool.gauges[0], proxyAddr)).to.be.gt('0');
             });
-            if (pool.useUnderlying) {
-                it(`... should deposit LP tokens([underlyingCoins, swapContract]) into gauge ${poolName}`, async () => {
-                    const underlyingCoins = pool.underlyingCoins;
-                    const amounts = pool.underlyingDecimals.map((e) => Float2BN(amount, e));
-
-                    await Promise.all(underlyingCoins.map(async (c, i) => {
-                        let coinToApprove = c;
-                        if (c === ETH_ADDR) coinToApprove = WETH_ADDRESS;
-                        await setBalance(coinToApprove, senderAddr, amounts[i]);
-                        await approve(coinToApprove, proxyAddr);
-                    }));
-
-                    const tokensBefore = await balanceOf(pool.lpTokenAddr, senderAddr);
-                    await curveDeposit(proxy, senderAddr, senderAddr, pool.swapAddr, pool.lpTokenAddr, '0', amounts, underlyingCoins, true);
-                    const tokensAfter = await balanceOf(pool.lpTokenAddr, senderAddr);
-                    const minted = tokensAfter.sub(tokensBefore);
-                    expect(minted).to.be.gt('0');
-
-                    await approve(pool.lpTokenAddr, proxyAddr);
-                    // eslint-disable-next-line max-len
-                    await curveGaugeDeposit(proxy, pool.gaugeAddr, pool.lpTokenAddr, senderAddr, proxyAddr, minted);
-                    expect(await curveView.gaugeBalance(pool.gaugeAddr, proxyAddr)).to.be.gt('0');
-                });
-            }
-            if (pool.depositAddr == null) return;
-            it(`... should deposit LP tokens([underlyingCoins, depositContract]) into gauge ${poolName}`, async () => {
-                const underlyingCoins = pool.underlyingCoins;
-                const amounts = pool.underlyingDecimals.map((e) => Float2BN(amount, e));
-
-                await Promise.all(underlyingCoins.map(async (c, i) => {
-                    let coinToApprove = c;
-                    if (c === ETH_ADDR) coinToApprove = WETH_ADDRESS;
-                    await setBalance(coinToApprove, senderAddr, amounts[i]);
-                    await approve(coinToApprove, proxyAddr);
-                }));
-
-                const tokensBefore = await balanceOf(pool.lpTokenAddr, senderAddr);
-                await curveDeposit(proxy, senderAddr, senderAddr, pool.depositAddr, pool.lpTokenAddr, '0', amounts, underlyingCoins, false);
-                const tokensAfter = await balanceOf(pool.lpTokenAddr, senderAddr);
-                const minted = tokensAfter.sub(tokensBefore);
-                expect(minted).to.be.gt('0');
-
-                await approve(pool.lpTokenAddr, proxyAddr);
-                // eslint-disable-next-line max-len
-                await curveGaugeDeposit(proxy, pool.gaugeAddr, pool.lpTokenAddr, senderAddr, proxyAddr, minted);
-                expect(await curveView.gaugeBalance(pool.gaugeAddr, proxyAddr)).to.be.gt('0');
-            });
-        });
+        }));
     });
 };
 
 const curveGaugeWithdrawTest = async (testLength) => {
     describe('Curve-Gauge-Withdraw', function () {
         this.timeout(1000000);
-        const amount = '1000';
+        const amountEach = '1000';
 
         let senderAcc; let senderAddr;
         let proxy; let proxyAddr;
@@ -557,87 +391,28 @@ const curveGaugeWithdrawTest = async (testLength) => {
             curveView = await redeploy('CurveView');
         });
 
-        Object.keys(poolData).slice(0, testLength).forEach(async (poolName) => {
-            const pool = poolData[poolName];
+        poolInfo.slice(0, testLength).map(async (pool) => {
+            const poolName = pool.name;
 
-            it(`... should deposit LP tokens([coins, swapContract]) into gauge, then withdraw ${poolName}`, async () => {
-                const coins = pool.coins;
-                const amounts = pool.decimals.map((e) => Float2BN(amount, e));
+            it(`... should deposit LP tokens into gauge then withdraw [${poolName}]`, async () => {
+                const lpMinted = await testDeposit(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    '0', // minMintAmount
+                    false,
+                    amountEach,
+                );
 
-                await Promise.all(coins.map(async (c, i) => {
-                    let coinToApprove = c;
-                    if (c === ETH_ADDR) coinToApprove = WETH_ADDRESS;
-                    await setBalance(coinToApprove, senderAddr, amounts[i]);
-                    await approve(coinToApprove, proxyAddr);
-                }));
-
-                const tokensBefore = await balanceOf(pool.lpTokenAddr, senderAddr);
-                await curveDeposit(proxy, senderAddr, senderAddr, pool.swapAddr, pool.lpTokenAddr, '0', amounts, coins, false);
-                const tokensAfter = await balanceOf(pool.lpTokenAddr, senderAddr);
-                const minted = tokensAfter.sub(tokensBefore);
-                expect(minted).to.be.gt('0');
-
-                await approve(pool.lpTokenAddr, proxyAddr);
+                await approve(pool.lpToken, proxyAddr);
                 // eslint-disable-next-line max-len
-                await curveGaugeDeposit(proxy, pool.gaugeAddr, pool.lpTokenAddr, senderAddr, proxyAddr, minted);
-                expect(await curveView.gaugeBalance(pool.gaugeAddr, proxyAddr)).to.be.eq(minted);
+                await curveGaugeDeposit(proxy, pool.gauges[0], pool.lpToken, senderAddr, proxyAddr, lpMinted);
+                expect(await curveView.gaugeBalance(pool.gauges[0], proxyAddr)).to.be.gt('0');
+
                 // eslint-disable-next-line max-len
-                await curveGaugeWithdraw(proxy, pool.gaugeAddr, pool.lpTokenAddr, senderAddr, hre.ethers.constants.MaxUint256);
-                expect(await balanceOf(pool.lpTokenAddr, senderAddr)).to.be.eq(tokensAfter);
-            });
-            if (pool.useUnderlying) {
-                it(`... should deposit LP tokens([underlyingCoins, swapContract]) into gauge, then withdraw ${poolName}`, async () => {
-                    const underlyingCoins = pool.underlyingCoins;
-                    const amounts = pool.underlyingDecimals.map((e) => Float2BN(amount, e));
-
-                    await Promise.all(underlyingCoins.map(async (c, i) => {
-                        let coinToApprove = c;
-                        if (c === ETH_ADDR) coinToApprove = WETH_ADDRESS;
-                        await setBalance(coinToApprove, senderAddr, amounts[i]);
-                        await approve(coinToApprove, proxyAddr);
-                    }));
-
-                    const tokensBefore = await balanceOf(pool.lpTokenAddr, senderAddr);
-                    await curveDeposit(proxy, senderAddr, senderAddr, pool.swapAddr, pool.lpTokenAddr, '0', amounts, underlyingCoins, true);
-                    const tokensAfter = await balanceOf(pool.lpTokenAddr, senderAddr);
-                    const minted = tokensAfter.sub(tokensBefore);
-                    expect(minted).to.be.gt('0');
-
-                    await approve(pool.lpTokenAddr, proxyAddr);
-                    // eslint-disable-next-line max-len
-                    await curveGaugeDeposit(proxy, pool.gaugeAddr, pool.lpTokenAddr, senderAddr, proxyAddr, minted);
-                    // eslint-disable-next-line max-len
-                    expect(await curveView.gaugeBalance(pool.gaugeAddr, proxyAddr)).to.be.eq(minted);
-                    // eslint-disable-next-line max-len
-                    await curveGaugeWithdraw(proxy, pool.gaugeAddr, pool.lpTokenAddr, senderAddr, hre.ethers.constants.MaxUint256);
-                    expect(await balanceOf(pool.lpTokenAddr, senderAddr)).to.be.eq(tokensAfter);
-                });
-            }
-            if (pool.depositAddr == null) return;
-            it(`... should deposit LP tokens([underlyingCoins, depositContract]) into gauge, then withdraw ${poolName}`, async () => {
-                const underlyingCoins = pool.underlyingCoins;
-                const amounts = pool.underlyingDecimals.map((e) => Float2BN(amount, e));
-
-                await Promise.all(underlyingCoins.map(async (c, i) => {
-                    let coinToApprove = c;
-                    if (c === ETH_ADDR) coinToApprove = WETH_ADDRESS;
-                    await setBalance(coinToApprove, senderAddr, amounts[i]);
-                    await approve(coinToApprove, proxyAddr);
-                }));
-
-                const tokensBefore = await balanceOf(pool.lpTokenAddr, senderAddr);
-                await curveDeposit(proxy, senderAddr, senderAddr, pool.depositAddr, pool.lpTokenAddr, '0', amounts, underlyingCoins, false);
-                const tokensAfter = await balanceOf(pool.lpTokenAddr, senderAddr);
-                const minted = tokensAfter.sub(tokensBefore);
-                expect(minted).to.be.gt('0');
-
-                await approve(pool.lpTokenAddr, proxyAddr);
-                // eslint-disable-next-line max-len
-                await curveGaugeDeposit(proxy, pool.gaugeAddr, pool.lpTokenAddr, senderAddr, proxyAddr, minted);
-                expect(await curveView.gaugeBalance(pool.gaugeAddr, proxyAddr)).to.be.eq(minted);
-                // eslint-disable-next-line max-len
-                await curveGaugeWithdraw(proxy, pool.gaugeAddr, pool.lpTokenAddr, senderAddr, hre.ethers.constants.MaxUint256);
-                expect(await balanceOf(pool.lpTokenAddr, senderAddr)).to.be.eq(tokensAfter);
+                await curveGaugeWithdraw(proxy, pool.gauges[0], pool.lpToken, senderAddr, hre.ethers.constants.MaxUint256);
+                expect(await balanceOf(pool.lpToken, senderAddr)).to.be.eq(lpMinted);
             });
         });
     });
