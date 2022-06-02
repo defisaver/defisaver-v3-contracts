@@ -11,11 +11,11 @@ contract CurveDeposit is ActionBase, CurveHelper {
     error CurveDepositZeroRecipient();
     error CurveDepositWrongArraySize();
     error CurveDepositPoolReverted();
-    error CurveDepositSlippageHit();
+    error CurveDepositSlippageHit(uint256 expected, uint256 received);
 
     struct Params {
-        address sender;         // address where to pull tokens from
-        address receiver;       // address that will receive the LP tokens
+        address from;         // address where to pull tokens from
+        address to;       // address that will receive the LP tokens
         address depositTarget;  // pool contract or zap deposit contract in which to deposit
         uint256 minMintAmount;  // minimum amount of LP tokens to accept
         uint8 flags;
@@ -30,8 +30,8 @@ contract CurveDeposit is ActionBase, CurveHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.sender = _parseParamAddr(params.sender, _paramMapping[0], _subData, _returnValues);
-        params.receiver = _parseParamAddr(params.receiver, _paramMapping[1], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[0], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.depositTarget = _parseParamAddr(params.depositTarget, _paramMapping[2], _subData, _returnValues);
         params.minMintAmount = _parseParamUint(params.minMintAmount, _paramMapping[3], _subData, _returnValues);
         params.flags = uint8(_parseParamUint(params.flags, _paramMapping[4], _subData, _returnValues));
@@ -60,7 +60,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
 
     /// @notice Deposits tokens into liquidity pool
     function _curveDeposit(Params memory _params) internal returns (uint256 received, bytes memory logData) {
-        if (_params.receiver == address(0)) revert CurveDepositZeroRecipient();
+        if (_params.to == address(0)) revert CurveDepositZeroRecipient();
         (
             DepositTargetType depositTargetType,
             bool explicitUnderlying,
@@ -76,12 +76,12 @@ contract CurveDeposit is ActionBase, CurveHelper {
         uint256 msgValue;
         for (uint256 i = 0; i < N_COINS; i++) {
             if (tokens[i] == TokenUtils.ETH_ADDR) {
-                _params.amounts[i] = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.sender, _params.amounts[i]);
+                _params.amounts[i] = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.amounts[i]);
                 TokenUtils.withdrawWeth(_params.amounts[i]);
                 msgValue = _params.amounts[i];
                 continue;
             }
-            _params.amounts[i] = tokens[i].pullTokensIfNeeded(_params.sender, _params.amounts[i]);
+            _params.amounts[i] = tokens[i].pullTokensIfNeeded(_params.from, _params.amounts[i]);
             tokens[i].approveToken(_params.depositTarget, _params.amounts[i]);
         }
 
@@ -90,8 +90,8 @@ contract CurveDeposit is ActionBase, CurveHelper {
         if (!success) revert CurveDepositPoolReverted();
 
         received = lpToken.getBalance(address(this)) - tokensBefore;
-        if (received < _params.minMintAmount) revert CurveDepositSlippageHit();
-        lpToken.withdrawTokens(_params.receiver, received);
+        if (received < _params.minMintAmount) revert CurveDepositSlippageHit(_params.minMintAmount, received);
+        lpToken.withdrawTokens(_params.to, received);
 
         logData = abi.encode(_params, received);
     }
@@ -101,7 +101,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
         bytes memory sig;
         bytes4 selector;
         bytes memory optional;
-
+        assert(_amounts.length < 9); // sanity check
         if (_explicitUnderlying) {
             sig = "add_liquidity(uint256[0],uint256,bool)";
             //                index = 22 ^

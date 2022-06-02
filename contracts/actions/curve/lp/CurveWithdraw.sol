@@ -11,11 +11,11 @@ contract CurveWithdraw is ActionBase, CurveHelper {
     error CurveWithdrawZeroRecipient();
     error CurveWithdrawWrongArraySize();
     error CurveWithdrawPoolReverted();
-    error CurveWithdrawSlippageHit();
+    error CurveWithdrawSlippageHit(uint256 coinIndex, uint256 expected, uint256 received);
 
     struct Params {
-        address sender;     // address where the LP tokens are pulled from
-        address receiver;   // address that will receive withdrawn tokens
+        address from;     // address where the LP tokens are pulled from
+        address to;   // address that will receive withdrawn tokens
         address depositTarget;       // pool contract or zap deposit contract from which to withdraw
         uint256 burnAmount; // amount of LP tokens to burn for withdrawal
         uint8 flags;
@@ -30,8 +30,8 @@ contract CurveWithdraw is ActionBase, CurveHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
     
-        params.sender = _parseParamAddr(params.sender, _paramMapping[0], _subData, _returnValues);
-        params.receiver = _parseParamAddr(params.receiver, _paramMapping[1], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[0], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.depositTarget = _parseParamAddr(params.depositTarget, _paramMapping[2], _subData, _returnValues);
         params.burnAmount = _parseParamUint(params.burnAmount, _paramMapping[3], _subData, _returnValues);
         params.flags = uint8(_parseParamUint(params.flags, _paramMapping[4], _subData, _returnValues));
@@ -60,7 +60,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
 
     /// @notice Withdraws user deposited tokens from depositTarget
     function _curveWithdraw(Params memory _params) internal returns (uint256 burned, bytes memory logData) {
-        if (_params.receiver == address(0)) revert CurveWithdrawZeroRecipient();
+        if (_params.to == address(0)) revert CurveWithdrawZeroRecipient();
         (
             DepositTargetType depositTargetType,
             bool explicitUnderlying,
@@ -73,7 +73,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
         ) = _getPoolParams(_params.depositTarget, depositTargetType, explicitUnderlying);
         if (_params.amounts.length != N_COINS) revert CurveWithdrawWrongArraySize();
 
-        _params.burnAmount = lpToken.pullTokensIfNeeded(_params.sender, _params.burnAmount);
+        _params.burnAmount = lpToken.pullTokensIfNeeded(_params.from, _params.burnAmount);
         burned = lpToken.getBalance(address(this));
         lpToken.approveToken(_params.depositTarget, _params.burnAmount);
 
@@ -89,12 +89,12 @@ contract CurveWithdraw is ActionBase, CurveHelper {
         for (uint256 i = 0; i < N_COINS; i++) {
             uint256 balanceDelta = tokens[i].getBalance(address(this)) - balances[i];
             address tokenAddr = tokens[i];
-            if (balanceDelta < (_params.amounts[i] - _params.amounts[i] / 1_00_00)) revert CurveWithdrawSlippageHit();
+            if (balanceDelta < (_params.amounts[i] - _params.amounts[i] / 1_00_00)) revert CurveWithdrawSlippageHit(i, _params.amounts[i], balanceDelta);
             if (tokenAddr == TokenUtils.ETH_ADDR) {
                 TokenUtils.depositWeth(balanceDelta);
                 tokenAddr = TokenUtils.WETH_ADDR;
             }
-            tokenAddr.withdrawTokens(_params.receiver, balanceDelta);
+            tokenAddr.withdrawTokens(_params.to, balanceDelta);
         }
 
         logData = abi.encode(_params);
@@ -106,7 +106,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
         bytes memory sig;
         bytes4 selector;
         bytes memory optional;
-
+        assert(_amounts.length < 9); // sanity check
         if (_withdrawExact) {
             if (_explicitUnderlying) {
                 sig = "remove_liquidity_imbalance(uint256[0],uint256,bool)";
