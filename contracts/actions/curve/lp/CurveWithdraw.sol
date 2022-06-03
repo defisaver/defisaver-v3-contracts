@@ -89,6 +89,10 @@ contract CurveWithdraw is ActionBase, CurveHelper {
         for (uint256 i = 0; i < N_COINS; i++) {
             uint256 balanceDelta = tokens[i].getBalance(address(this)) - balances[i];
             address tokenAddr = tokens[i];
+            // some curve pools will disrespect the minOutAmounts via rounding error and will not revert
+            // we tolerate this error up to 1bps (1 / 1_00_00)
+            // otherwise slippage shouldn't exist and the pool contract should revert if unable to withdraw the specified amounts
+            // however we do this check in case of an invalid deposit zap
             if (balanceDelta < (_params.amounts[i] - _params.amounts[i] / 1_00_00)) revert CurveWithdrawSlippageHit(i, _params.amounts[i], balanceDelta);
             if (tokenAddr == TokenUtils.ETH_ADDR) {
                 TokenUtils.depositWeth(balanceDelta);
