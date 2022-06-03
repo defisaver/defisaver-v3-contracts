@@ -6,6 +6,8 @@ import "../../interfaces/IDSProxy.sol";
 import "../../auth/AdminAuth.sol";
 import "./../helpers/CoreHelper.sol";
 
+import "hardhat/console.sol";
+
 /// @title ProxyAuth Gets DSProxy auth from users and is callable by the Executor
 contract ProxyAuth is AdminAuth, CoreHelper {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
@@ -17,6 +19,8 @@ contract ProxyAuth is AdminAuth, CoreHelper {
 
     modifier onlyExecutor {
         address executorAddr = registry.getAddr(STRATEGY_EXECUTOR_ID);
+
+        console.log("executorAddr: ", executorAddr);
 
         if (msg.sender != executorAddr){
             revert SenderNotExecutorError(msg.sender, executorAddr);
@@ -35,6 +39,8 @@ contract ProxyAuth is AdminAuth, CoreHelper {
         address _contractAddr,
         bytes memory _callData
     ) public payable onlyExecutor {
+        console.log(_proxyAddr, _contractAddr);
+        console.logBytes(_callData);
         IDSProxy(_proxyAddr).execute{value: msg.value}(_contractAddr, _callData);
     }
 }

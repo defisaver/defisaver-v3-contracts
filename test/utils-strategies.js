@@ -5,9 +5,9 @@ const {
     stopImpersonatingAccount,
     getGasUsed,
     calcGasToUSD,
-    OWNER_ACC,
     AVG_GAS_PRICE,
-    REGISTRY_ADDR,
+    addrs,
+    network,
 } = require('./utils');
 
 const getLatestBundleId = async () => {
@@ -34,7 +34,7 @@ const getLatestStrategyId = async () => {
     return latestStrategyId;
 };
 
-const getLatestSubId = async (regAddr = REGISTRY_ADDR) => {
+const getLatestSubId = async (regAddr = addrs[network].REGISTRY_ADDR) => {
     const subStorageAddr = await getAddrFromRegistry('SubStorage', regAddr);
 
     const subStorageInstance = await hre.ethers.getContractFactory('SubStorage');
@@ -99,7 +99,7 @@ const createBundle = async (proxy, strategyIds) => {
     return latestBundleId;
 };
 
-const subToStrategy = async (proxy, strategySub, regAddr = REGISTRY_ADDR) => {
+const subToStrategy = async (proxy, strategySub, regAddr = addrs[network].REGISTRY_ADDR) => {
     const SubProxyAddr = await getAddrFromRegistry('SubProxy', regAddr);
 
     const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
@@ -121,13 +121,15 @@ const subToStrategy = async (proxy, strategySub, regAddr = REGISTRY_ADDR) => {
     return latestSubId;
 };
 
-const addBotCaller = async (botAddr, regAddr = REGISTRY_ADDR, isFork = false) => {
-    if (regAddr === REGISTRY_ADDR && !isFork) {
-        await impersonateAccount(OWNER_ACC);
+const addBotCaller = async (botAddr, regAddr = addrs[network].REGISTRY_ADDR, isFork = false) => {
+    if (regAddr === addrs[network].REGISTRY_ADDR && !isFork) {
+        await impersonateAccount(addrs[network].OWNER_ACC);
     }
 
-    const signer = await hre.ethers.provider.getSigner(OWNER_ACC);
+    const signer = await hre.ethers.provider.getSigner(addrs[network].OWNER_ACC);
     const botAuthAddr = await getAddrFromRegistry('BotAuth', regAddr);
+
+    console.log('botAuthAddr', botAuthAddr);
 
     const botAuthInstance = await hre.ethers.getContractFactory('BotAuth', signer);
     let botAuth = await botAuthInstance.attach(botAuthAddr);
@@ -136,8 +138,8 @@ const addBotCaller = async (botAddr, regAddr = REGISTRY_ADDR, isFork = false) =>
 
     await botAuth.addCaller(botAddr);
 
-    if (regAddr === REGISTRY_ADDR && !isFork) {
-        await stopImpersonatingAccount(OWNER_ACC);
+    if (regAddr === addrs[network].REGISTRY_ADDR && !isFork) {
+        await stopImpersonatingAccount(addrs[network].OWNER_ACC);
     }
 };
 

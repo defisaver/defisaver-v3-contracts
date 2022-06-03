@@ -11,7 +11,7 @@ import "./helpers/GasFeeHelper.sol";
 import "hardhat/console.sol";
 
 /// @title Helper action to send a token to the specified address
-contract GasFeeTaker is ActionBase, GasFeeHelper {
+contract GasFeeTakerL2 is ActionBase, GasFeeHelper {
     using TokenUtils for address;
 
     struct Params {

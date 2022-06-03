@@ -4,10 +4,12 @@ pragma solidity =0.8.10;
 
 import "../DS/DSMath.sol";
 import "../actions/aaveV3/helpers/AaveV3Helper.sol";
+import "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+
 import "../utils/TokenUtils.sol";
 import "../interfaces/aaveV3/IAaveV3Oracle.sol";
 
-contract AaveV3View is AaveV3Helper, DSMath {
+contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant SUPPLY_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant EMODE_CATEGORY_MASK =            0xFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
@@ -76,25 +78,6 @@ contract AaveV3View is AaveV3Helper, DSMath {
         bool borrowingEnabled; //pool.config
         bool stableBorrowRateEnabled; //pool.config
         bool isolationModeBorrowingEnabled; //pool.config
-    }
-
-    function getSafetyRatio(address _market, address _user) public view returns (uint256) {
-        IPoolV3 lendingPool = getLendingPool(_market);
-
-        (, uint256 totalDebtETH, uint256 availableBorrowsETH, , , ) = lendingPool
-            .getUserAccountData(_user);
-
-        if (totalDebtETH == 0) return uint256(0);
-
-        return wdiv(totalDebtETH + availableBorrowsETH, totalDebtETH);
-    }
-
-    /// @notice Calculated the ratio of coll/debt for an aave user
-    /// @param _market Address of LendingPoolAddressesProvider for specific market
-    /// @param _user Address of the user
-    function getRatio(address _market, address _user) public view returns (uint256) {
-        // For each asset the account is in
-        return getSafetyRatio(_market, _user);
     }
 
     function getHealthFactor(address _market, address _user)
