@@ -90,6 +90,8 @@ contract CurveDeposit is ActionBase, CurveHelper {
         if (!success) revert CurveDepositPoolReverted();
 
         received = lpToken.getBalance(address(this)) - tokensBefore;
+        // pool contract should revert on its own, but we cant check if a deposit zap is legit on-chain
+        // so we need this check
         if (received < _params.minMintAmount) revert CurveDepositSlippageHit(_params.minMintAmount, received);
         lpToken.withdrawTokens(_params.to, received);
 
