@@ -9,6 +9,11 @@ require('@tenderly/hardhat-tenderly');
 require('hardhat-log-remover');
 
 const Dec = require('decimal.js');
+const dfs = require('@defisaver/sdk');
+
+dfs.configure({
+    testingMode: true,
+});
 
 Dec.set({
     precision: 50,

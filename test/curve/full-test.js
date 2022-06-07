@@ -3,9 +3,9 @@ const config = require('../../hardhat.config');
 
 describe('Curve full test', () => {
     it('... should do full curve test', async () => {
-        let testLength = -1;
+        let testLength;
         if (config.lightTesting) testLength = 2;
         // TODO: commented out for now
-        // await curveFullTest(testLength);
+        await curveFullTest(testLength);
     });
 });
