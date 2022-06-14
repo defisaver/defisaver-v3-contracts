@@ -60,8 +60,6 @@ const aaveV3RepayL2StrategyTest = async () => {
 
             strategyExecutorL2 = await redeployCore(true);
 
-            console.log("Hir");
-
             await redeploy('BotAuth');
             await redeploy('AaveV3RatioTrigger');
             await redeploy('GasFeeTaker');
@@ -122,6 +120,19 @@ const aaveV3RepayL2StrategyTest = async () => {
         });
 
         it('... should call AaveV3 L2 Repay strategy', async () => {
+            const ratioBefore = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
+            console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
+
+            const repayAmount = hre.ethers.utils.parseUnits('1', 18);
+            // eslint-disable-next-line max-len
+            await callAaveV3RepayL2Strategy(botAcc, strategyExecutorL2, subId, strategySub, ethAssetId, daiAssetId, repayAmount);
+
+            const ratioAfter = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
+            console.log(`Aave position ratio: ${ratioAfter / 1e16}%`);
+            expect(ratioAfter).to.be.gt(ratioBefore);
+        });
+
+        it('... should call AaveV3 L2 With FL Repay strategy', async () => {
             const ratioBefore = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
             console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
 
