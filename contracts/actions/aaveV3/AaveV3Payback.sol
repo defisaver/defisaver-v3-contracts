@@ -29,7 +29,7 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        Params memory params = decodeInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
