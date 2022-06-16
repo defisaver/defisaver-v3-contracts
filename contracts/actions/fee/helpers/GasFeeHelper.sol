@@ -11,8 +11,6 @@ import "../../../interfaces/aaveV2/IPriceOracleGetterAave.sol";
 
 import "../helpers/OptimismFeeAddresses.sol";
 
-import "hardhat/console.sol";
-
 contract GasFeeHelper is DSMath, OptimismFeeAddresses {
     using TokenUtils for address;
 
@@ -26,8 +24,6 @@ contract GasFeeHelper is DSMath, OptimismFeeAddresses {
     function calcGasCost(uint256 _gasUsed, address _feeToken) public view returns (uint256 txCost) {
         uint256 gasPrice = tx.gasprice;
 
-        console.log("Gas price: ", gasPrice);
-
         // gas price must be in a reasonable range
         if (tx.gasprice > SANITY_GAS_PRICE) {
             gasPrice = SANITY_GAS_PRICE;
@@ -37,9 +33,6 @@ contract GasFeeHelper is DSMath, OptimismFeeAddresses {
         if (_gasUsed > block.gaslimit) {
             _gasUsed = block.gaslimit;
         }
-
-        console.log("_gasUsed: ", _gasUsed);
-        console.logBytes(msg.data);
 
         // calc gas used
         txCost = _gasUsed * gasPrice;

@@ -24,12 +24,12 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes memory _callData,
+        bytes calldata _callData,
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        Params memory params = decodeInputs(msg.data[4:]);
+        Params memory params = decodeInputs(_callData);
 
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);

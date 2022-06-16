@@ -460,7 +460,7 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
 
     const c = await deployAsOwner(name);
 
-    if (name === 'StrategyExecutor' || name === 'StrategyExecutorL22') {
+    if (name === 'StrategyExecutor' || name === 'StrategyExecutorL2') {
         // eslint-disable-next-line no-param-reassign
         name = 'StrategyExecutorID';
     }
@@ -483,8 +483,6 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
         await registry.approveContractChange(id, { gasLimit: 2000000 });
     }
 
-    console.log("jis");
-
     // for strategy deployment set open to public for easier testing
     if (name === 'StrategyStorage' || name === 'BundleStorage') {
         const storageContract = c.connect(signer);
@@ -503,8 +501,6 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
             address: c.address,
         });
     }
-
-    console.log("wut");
 
     return c;
 };

@@ -6,8 +6,6 @@ import "../auth/AdminAuth.sol";
 import "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 import "../interfaces/ITrigger.sol";
 
-import "hardhat/console.sol";
-
 contract AaveV3RatioTrigger is ITrigger, AdminAuth, AaveV3RatioHelper {
 
     enum RatioState { OVER, UNDER }
@@ -28,10 +26,7 @@ contract AaveV3RatioTrigger is ITrigger, AdminAuth, AaveV3RatioHelper {
         override
         returns (bool)
     {   
-        console.logBytes(_subData);
         SubParams memory triggerSubData = parseInputs(_subData);
-
-        console.log(triggerSubData.market, triggerSubData.user);
 
         uint256 currRatio = getSafetyRatio(triggerSubData.market, triggerSubData.user);
 

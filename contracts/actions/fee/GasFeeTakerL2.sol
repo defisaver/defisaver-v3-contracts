@@ -8,8 +8,6 @@ import "../../utils/FeeRecipient.sol";
 import "../ActionBase.sol";
 import "./helpers/GasFeeHelper.sol";
 
-import "hardhat/console.sol";
-
 /// @title Helper action to send a token to the specified address
 contract GasFeeTakerL2 is ActionBase, GasFeeHelper {
     using TokenUtils for address;
@@ -41,8 +39,6 @@ contract GasFeeTakerL2 is ActionBase, GasFeeHelper {
         if (_paramMapping[1] == 0) {
             inputData.availableAmount = inputData.feeToken.getBalance(address(this));
         }
-
-        console.log("txCost: ", txCost);
 
         // cap at 20% of the max amount
         if (txCost >= (inputData.availableAmount / 5)) {

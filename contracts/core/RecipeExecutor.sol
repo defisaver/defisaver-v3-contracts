@@ -13,8 +13,6 @@ import "./strategy/SubStorage.sol";
 import "../interfaces/flashloan/IFlashLoanBase.sol";
 import "../interfaces/ITrigger.sol";
 
-import "hardhat/console.sol";
-
 /// @title Entry point into executing recipes/checking triggers directly and as part of a strategy
 contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
@@ -42,7 +40,6 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
         uint256 _strategyIndex,
         StrategySub memory _sub
     ) public payable {
-        console.log("executeRecipeFromStrategy");
         Strategy memory strategy;
 
         { // to handle stack too deep
@@ -95,22 +92,14 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
         address triggerAddr;
         uint256 i;
 
-                console.log("_checkTriggers");
-
-
         for (i = 0; i < triggerIds.length; i++) {
             triggerAddr = registry.getAddr(triggerIds[i]);
 
-            console.logBytes(_triggerCallData[i]);
-
-            console.log(triggerAddr);
             isTriggered = ITrigger(triggerAddr).isTriggered(
                 _triggerCallData[i],
                 _sub.triggerData[i]
             );
 
-
-            console.log(isTriggered);
 
             if (!isTriggered) return (false, i);
 
@@ -134,7 +123,6 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
 
         // skips the first actions as it was the fl action
         for (uint256 i = 1; i < _currRecipe.actionIds.length; ++i) {
-            console.log(i);
             returnValues[i] = _executeAction(_currRecipe, i, returnValues);
         }
     }
@@ -151,8 +139,6 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
             _parseFLAndExecute(_currRecipe, firstActionAddr, returnValues);
         } else {
             for (uint256 i = 0; i < _currRecipe.actionIds.length; ++i) {
-                            console.log(i);
-
                 returnValues[i] = _executeAction(_currRecipe, i, returnValues);
             }
         }

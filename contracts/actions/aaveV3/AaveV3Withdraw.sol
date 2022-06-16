@@ -21,12 +21,12 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes memory _callData,
+        bytes calldata callData,
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        Params memory params = decodeInputs(msg.data[4:]);
+        Params memory params = decodeInputs(callData);
 
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
@@ -92,6 +92,7 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
         if (_amount == type(uint256).max) {
             tokenBefore = tokenAddr.getBalance(_to);
         }
+
         // withdraw underlying tokens from aave and send _to address
         lendingPool.withdraw(tokenAddr, _amount, _to);
 
@@ -122,7 +123,7 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
         }
     }
 
-    function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
+    function decodeInputs(bytes calldata encodedInput) public view returns (Params memory params) {
         params.assetId = uint16(bytes2(encodedInput[0:2]));
         params.useDefaultMarket = bytesToBool(bytes1(encodedInput[2:3]));
         params.amount = uint256(bytes32(encodedInput[3:35]));
