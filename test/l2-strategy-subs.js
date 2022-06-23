@@ -16,6 +16,38 @@ const {
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
+const subAaveV3RepayBundle = async (
+    proxy,
+    bundleId,
+    market,
+    rationUnder,
+    targetRatio,
+    isBundle,
+    regAddr = addrs[network].REGISTRY_ADDR,
+) => {
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const useDefaultMarketEncoded = abiCoder.encode(['bool'], [true]);
+    const onBehalfOfEncoded = abiCoder.encode(['bool'], [false]);
+
+    const triggerData = await createAaveV3RatioTrigger(
+        proxy.address,
+        market,
+        rationUnder,
+        RATIO_STATE_UNDER,
+    );
+
+    const strategySub = [
+        bundleId,
+        isBundle,
+        [triggerData],
+        [targetRatioEncoded, useDefaultMarketEncoded, onBehalfOfEncoded],
+    ];
+
+    const subId = await subToStrategy(proxy, strategySub, regAddr);
+
+    return { subId, strategySub };
+};
+
 const subAaveV3RepayL2Strategy = async (
     proxy,
     strategyId,
@@ -49,5 +81,6 @@ const subAaveV3RepayL2Strategy = async (
 };
 
 module.exports = {
+    subAaveV3RepayBundle,
     subAaveV3RepayL2Strategy,
 };

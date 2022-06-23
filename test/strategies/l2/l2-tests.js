@@ -13,17 +13,15 @@ const {
     addrs,
 } = require('../../utils');
 
-const { addBotCaller, createStrategy } = require('../../utils-strategies');
+const { addBotCaller, createStrategy, createBundle } = require('../../utils-strategies');
 
-const { createAaveV3RepayL2Strategy } = require('../../l2-strategies');
+const { createAaveV3RepayL2Strategy, createAaveFLV3RepayL2Strategy } = require('../../l2-strategies');
 const { subAaveV3RepayL2Strategy } = require('../../l2-strategy-subs');
-const { callAaveV3RepayL2Strategy } = require('../../l2-strategy-calls');
+const { callAaveV3RepayL2Strategy, callAaveFLV3RepayL2Strategy } = require('../../l2-strategy-calls');
 
 const {
     aaveV3Supply, aaveV3Borrow,
 } = require('../../actions');
-const { dfsExchangeFullTest } = require('../../exchange/exchange-tests');
-
 
 const aaveV3RepayL2StrategyTest = async () => {
     describe('AaveV3-Repay-L2-Strategy-Test', function () {
@@ -36,11 +34,10 @@ const aaveV3RepayL2StrategyTest = async () => {
         let strategyExecutorL2;
         let pool;
         let aaveView;
-        let strategyId;
         let subId;
-        let strategySub;
         let ethAssetId;
         let daiAssetId;
+        let flAaveV3Addr;
 
         before(async () => {
             console.log(`Network: ${network}`);
@@ -69,6 +66,7 @@ const aaveV3RepayL2StrategyTest = async () => {
             await redeploy('DFSSell');
             await redeploy('AaveV3Payback');
             await redeploy('AaveV3Withdraw');
+            flAaveV3Addr = await redeploy('FLAaveV3');
 
             aaveView = await redeploy('AaveV3View');
 
@@ -80,8 +78,6 @@ const aaveV3RepayL2StrategyTest = async () => {
 
             const reserveData = await pool.getReserveData(addrs[network].WETH_ADDRESS);
             ethAssetId = reserveData.id;
-
-            console.log('Before supply');
 
             await aaveV3Supply(
                 proxy,
@@ -109,19 +105,27 @@ const aaveV3RepayL2StrategyTest = async () => {
 
         it('... should make a AaveV3 L2 Repay bundle and subscribe', async () => {
             await openStrategyAndBundleStorage();
-            const strategyData = createAaveV3RepayL2Strategy();
-            strategyId = await createStrategy(proxy, ...strategyData, true);
+            const aaveRepayStrategyEncoded = createAaveV3RepayL2Strategy();
+            const aaveRepayFLStrategyEncoded = createAaveFLV3RepayL2Strategy();
 
-            const targetRatio = hre.ethers.utils.parseUnits('2.2', '18');
-            const ratioUnder = hre.ethers.utils.parseUnits('1.9', '18');
+            const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
+            const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
 
+            const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+
+            const targetRatio = hre.ethers.utils.parseUnits('2.5', '18');
+            const ratioUnder = hre.ethers.utils.parseUnits('2.2', '18');
+
+            let strategySub;
+
+            // eslint-disable-next-line no-unused-vars
             ({ subId, strategySub } = await subAaveV3RepayL2Strategy(
                 proxy,
-                strategyId,
+                bundleId,
                 addrs[network].AAVE_MARKET,
                 ratioUnder,
                 targetRatio,
-                false,
+                true,
             ));
         });
 
@@ -131,25 +135,35 @@ const aaveV3RepayL2StrategyTest = async () => {
 
             const repayAmount = hre.ethers.utils.parseUnits('1', 18);
             // eslint-disable-next-line max-len
-            await callAaveV3RepayL2Strategy(botAcc, strategyExecutorL2, subId, strategySub, ethAssetId, daiAssetId, repayAmount);
+            await callAaveV3RepayL2Strategy(botAcc, strategyExecutorL2, subId, ethAssetId, daiAssetId, repayAmount, 0);
 
             const ratioAfter = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
             console.log(`Aave position ratio: ${ratioAfter / 1e16}%`);
             expect(ratioAfter).to.be.gt(ratioBefore);
         });
 
-        // it('... should call AaveV3 L2 With FL Repay strategy', async () => {
-        //     const ratioBefore = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
-        //     console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
+        it('... should call AaveV3 L2 With FL Repay strategy', async () => {
+            const ratioBefore = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
+            console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
 
-        //     const repayAmount = hre.ethers.utils.parseUnits('1', 18);
-        //     // eslint-disable-next-line max-len
-        //     await callAaveV3RepayL2Strategy(botAcc, strategyExecutorL2, subId, strategySub, ethAssetId, daiAssetId, repayAmount);
+            const repayAmount = hre.ethers.utils.parseUnits('1', 18);
+            // eslint-disable-next-line max-len
+            await callAaveFLV3RepayL2Strategy(
+                botAcc,
+                strategyExecutorL2,
+                subId,
+                ethAssetId,
+                addrs[network].WETH_ADDRESS,
+                daiAssetId,
+                repayAmount,
+                flAaveV3Addr.address,
+                1,
+            );
 
-        //     const ratioAfter = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
-        //     console.log(`Aave position ratio: ${ratioAfter / 1e16}%`);
-        //     expect(ratioAfter).to.be.gt(ratioBefore);
-        // });
+            const ratioAfter = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
+            console.log(`Aave position ratio: ${ratioAfter / 1e16}%`);
+            expect(ratioAfter).to.be.gt(ratioBefore);
+        });
     });
 };
 

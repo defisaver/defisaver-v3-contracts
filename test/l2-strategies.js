@@ -23,21 +23,21 @@ const createAaveV3RepayL2Strategy = () => {
         '%market', // hardcoded because default market is true
     );
 
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', // must stay variable backend sets gasCost
-        '%collAddr', // must stay variable as coll can differ
-        '$1', // hardcoded output from withdraw action
-    );
-
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%collAddr', // must stay variable
             '%debtAddr', // must stay variable
-            '$2', //  hardcoded piped from fee taking
+            '$1', //  hardcoded piped from fee taking
             '%exchangeWrapper', // can pick exchange wrapper
         ),
         '&proxy', // hardcoded
         '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%debtAddr', // must stay variable as debt can differ
+        '$2', // hardcoded output from withdraw action
     );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
@@ -53,8 +53,8 @@ const createAaveV3RepayL2Strategy = () => {
     );
 
     aaveV3RepayL2Strategy.addAction(withdrawAction);
-    aaveV3RepayL2Strategy.addAction(feeTakingAction);
     aaveV3RepayL2Strategy.addAction(sellAction);
+    aaveV3RepayL2Strategy.addAction(feeTakingAction);
     aaveV3RepayL2Strategy.addAction(paybackAction);
 
     return aaveV3RepayL2Strategy.encodeForDsProxyCall();
@@ -77,21 +77,21 @@ const createAaveFLV3RepayL2Strategy = () => {
         nullAddress,
     );
 
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', // must stay variable backend sets gasCost
-        '%collAddr', // must stay variable as coll can differ
-        '$1', // hardcoded output from withdraw action
-    );
-
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%collAddr', // must stay variable
             '%debtAddr', // must stay variable
-            '$2', //  hardcoded piped from fee taking
+            '0', //  can't hard code because of fee
             '%exchangeWrapper', // can pick exchange wrapper
         ),
         '&proxy', // hardcoded
         '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%debtAddr', // must stay variable as coll can differ
+        '$2', // hardcoded output from sell
     );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
@@ -109,16 +109,16 @@ const createAaveFLV3RepayL2Strategy = () => {
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         '%assetId', // must stay variable can choose diff. asset
         '&useDefaultMarket', // set to true hardcoded
-        '%amount', // must stay variable
+        '$1', // repay fl amount
         '%flAddr', // flAddr not hardcoded (tx will fail if not returned to correct addr)
         '%market', // hardcoded because default market is true
     );
 
     aaveV3RepayL2Strategy.addAction(flAction);
-    aaveV3RepayL2Strategy.addAction(withdrawAction);
-    aaveV3RepayL2Strategy.addAction(feeTakingAction);
     aaveV3RepayL2Strategy.addAction(sellAction);
+    aaveV3RepayL2Strategy.addAction(feeTakingAction);
     aaveV3RepayL2Strategy.addAction(paybackAction);
+    aaveV3RepayL2Strategy.addAction(withdrawAction);
 
     return aaveV3RepayL2Strategy.encodeForDsProxyCall();
 };

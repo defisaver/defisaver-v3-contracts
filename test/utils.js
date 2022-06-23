@@ -802,7 +802,7 @@ const calcGasToUSD = (gasUsed, gasPriceInGwei = 0, callData = 0) => {
 
         extraCost = ((l1GasCost) * addrs.mainnet.AVG_GAS_PRICE * 1000000000) / 1e18;
 
-        console.log('L1 gas cost":', extraCost);
+        console.log('L1 gas cost:', extraCost);
     }
 
     let ethSpent = ((gasUsed) * gasPriceInGwei * 1000000000) / 1e18;
