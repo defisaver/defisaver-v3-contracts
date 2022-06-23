@@ -123,7 +123,137 @@ const createAaveFLV3RepayL2Strategy = () => {
     return aaveV3RepayL2Strategy.encodeForDsProxyCall();
 };
 
+const createAaveV3BoostL2Strategy = () => {
+    const aaveV3BoostL2Strategy = new dfs.Strategy('AaveV3BoostL2');
+
+    aaveV3BoostL2Strategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3BoostL2Strategy.addSubSlot('&useDefaultMarket', 'bool');
+    aaveV3BoostL2Strategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3BoostL2Strategy.addSubSlot('&enableAsColl', 'bool');
+
+    const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger('0', '0', '0');
+    aaveV3BoostL2Strategy.addTrigger(aaveV3Trigger);
+
+    const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
+        '&useDefaultMarket', // default market
+        '%marketAddr', // hardcoded because default market is true
+        '%amount', // must stay variable
+        '&proxy', // hardcoded
+        '%rateMode', // depends on type of debt we want
+        '%assetId', // must stay variable can choose diff. asset
+        '&useOnBehalf', // set to false hardcoded
+        '%onBehalfAddr', // set to empty because flag is true
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%debtAddr', // must stay variable
+            '%collAddr', // must stay variable
+            '$1', //  hardcoded piped from borrow
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%collAddr', // must stay variable as coll can differ
+        '$2', // hardcoded output from withdraw action
+    );
+
+    const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        '$3', // amount hardcoded
+        '&proxy', // proxy hardcoded
+        '%collAddr', // is variable as it can change
+        '%assetId', // must be variable
+        '&enableAsColl', // hardcoded always enable as coll
+        '&useDefaultMarket', // hardcoded default market
+        '&useOnBehalf', // hardcoded false use on behalf
+        '%market', // hardcoded 0
+        '%onBehalf', // hardcoded 0 as its false
+
+    );
+
+    aaveV3BoostL2Strategy.addAction(borrowAction);
+    aaveV3BoostL2Strategy.addAction(sellAction);
+    aaveV3BoostL2Strategy.addAction(feeTakingAction);
+    aaveV3BoostL2Strategy.addAction(supplyAction);
+
+    return aaveV3BoostL2Strategy.encodeForDsProxyCall();
+};
+
+const createAaveFLV3BoostL2Strategy = () => {
+    const aaveV3BoostL2Strategy = new dfs.Strategy('AaveFLV3BoostL2');
+
+    aaveV3BoostL2Strategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3BoostL2Strategy.addSubSlot('&useDefaultMarket', 'bool');
+    aaveV3BoostL2Strategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3BoostL2Strategy.addSubSlot('&enableAsColl', 'bool');
+
+    const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger('0', '0', '0');
+    aaveV3BoostL2Strategy.addTrigger(aaveV3Trigger);
+
+    const flAction = new dfs.actions.flashloan.AaveV3FlashLoanAction(
+        ['%repayAmount'],
+        ['%collAsset'],
+        ['%AAVE_NO_DEBT_MODE'],
+        nullAddress,
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%debtAddr', // must stay variable
+            '%collAddr', // must stay variable
+            '%flAmount', // variable as flAmount returns with fee
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%collAddr', // must stay variable as coll can differ
+        '$2', // hardcoded output from sell action
+    );
+
+    const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        '$3', // amount hardcoded
+        '&proxy', // proxy hardcoded
+        '%collAddr', // is variable as it can change
+        '%assetId', // must be variable
+        '&enableAsColl', // hardcoded always enable as coll
+        '&useDefaultMarket', // hardcoded default market
+        '&useOnBehalf', // hardcoded false use on behalf
+        '%market', // hardcoded 0
+        '%onBehalf', // hardcoded 0 as its false
+
+    );
+
+    const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
+        '&useDefaultMarket', // default market
+        '%marketAddr', // hardcoded because default market is true
+        '$1', // from Fl amount
+        '%flAddr', // fl address that can change
+        '%rateMode', // depends on type of debt we want
+        '%assetId', // must stay variable can choose diff. asset
+        '&useOnBehalf', // set to true hardcoded
+        '%onBehalfAddr', // set to empty because flag is true
+    );
+
+    aaveV3BoostL2Strategy.addAction(flAction);
+    aaveV3BoostL2Strategy.addAction(sellAction);
+    aaveV3BoostL2Strategy.addAction(feeTakingAction);
+    aaveV3BoostL2Strategy.addAction(supplyAction);
+    aaveV3BoostL2Strategy.addAction(borrowAction);
+
+    return aaveV3BoostL2Strategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createAaveV3RepayL2Strategy,
     createAaveFLV3RepayL2Strategy,
+    createAaveV3BoostL2Strategy,
+    createAaveFLV3BoostL2Strategy,
 };
