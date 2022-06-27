@@ -101,8 +101,8 @@ contract CurveWithdraw is ActionBase, CurveHelper {
             tokenAddr.withdrawTokens(_params.to, balanceDelta);
         }
 
-        logData = abi.encode(_params);
         burned -= lpToken.getBalance(address(this));
+        logData = abi.encode(_params, burned);
         lpToken.withdrawTokens(_params.from, _params.burnAmount - burned);
     }
 
