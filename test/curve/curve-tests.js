@@ -100,6 +100,8 @@ const testWithdraw = async (
         amounts,
     );
 
+    console.log(`unburned lp: ${((+BN2Float(await balanceOf(pool.lpToken, sender)) / +BN2Float(burnAmount))) * 100}%`);
+    expect(await balanceOf(pool.lpToken, proxy.address)).to.be.eq(0);
     await Promise.all(
         (useUnderlying ? pool.underlyingCoins : pool.coins).map(async (c, i) => expect(
             await balanceOf(c, receiver),
@@ -215,7 +217,7 @@ const curveWithdrawTest = async (testLength) => {
                     lpMinted,
                     false,
                     false,
-                    `${+amountEach * 0.2}`,
+                    `${+amountEach * 0.5}`,
                 );
             });
             if (!pool.depositContract && !pool.underlyingFlag) return;
@@ -237,7 +239,7 @@ const curveWithdrawTest = async (testLength) => {
                     lpMinted,
                     true,
                     false,
-                    `${+amountEach * 0.2}`,
+                    `${+amountEach * 0.5}`,
                 );
             });
         }));
@@ -294,7 +296,7 @@ const curveWithdrawExactTest = async (testLength) => {
                     lpMinted,
                     false,
                     true,
-                    `${+amountEach * 0.2}`,
+                    `${+amountEach * 0.9}`,
                 );
             });
             if (!pool.depositContract && !pool.underlyingFlag) return;
@@ -316,7 +318,7 @@ const curveWithdrawExactTest = async (testLength) => {
                     lpMinted,
                     true,
                     true,
-                    `${+amountEach * 0.2}`,
+                    `${+amountEach * 0.9}`,
                 );
             });
         }));
