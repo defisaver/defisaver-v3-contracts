@@ -116,7 +116,7 @@ const DFS_REG_CONTROLLER = '0xF8f8B3C98Cf2E63Df3041b73f80F362a4cf3A576';
 
 const dydxTokens = ['WETH', 'USDC', 'DAI'];
 
-const network = hre.network.config.name;
+let network = hre.network.config.name;
 
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
 const MIN_VAULT_DAI_AMOUNT = '45010'; // TODO: can we fetch this dynamically
@@ -192,6 +192,10 @@ const coinGeckoHelper = {
     RAI: 'rai',
     MATIC: 'matic-network',
     SUSHI: 'sushi',
+};
+
+const setNetwork = (networkName) => {
+    network = networkName;
 };
 
 const getOwnerAddr = () => addrs[network].OWNER_ACC;
@@ -415,6 +419,7 @@ const getProxyWithSigner = async (signer, addr) => {
 };
 
 const getProxy = async (acc) => {
+    console.log(network);
     const proxyRegistry = await
     hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
     let proxyAddr = await proxyRegistry.proxies(acc);
@@ -997,6 +1002,7 @@ module.exports = {
     rsptAddress,
     AAVE_MARKET_OPTIMISM,
     network,
+    setNetwork,
     setBalance,
     takeSnapshot,
     revertToSnapshot,

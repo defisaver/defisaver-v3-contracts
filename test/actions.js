@@ -1744,6 +1744,8 @@ const aaveV3Supply = async (
     await approve(tokenAddr, proxy.address);
     const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
 
+    console.log('call supply');
+
     const receipt = await proxy['execute(address,bytes)'](aaveSupplyAddr, functionData, { gasLimit: 3000000 });
 
     const gasUsed = await getGasUsed(receipt);
