@@ -46,6 +46,7 @@ const addrs = {
         StrategyProxy: '0xEe0C404FD30E289c305E760b3AE1d1Ae6503350f',
         SubProxy: '0xfE87DE5e11F580fBD3637f34089BaeeA2C393826',
         UNISWAP_WRAPPER: '0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357',
+        AAVE_V3_VIEW: '0x5aD16e393615bfeF64e15210C370dd4b8f2753Cb',
         AVG_GAS_PRICE: 0.001,
     },
     kovan: {
@@ -443,16 +444,18 @@ const sendEther = async (signer, toAddress, amount) => {
 };
 
 // eslint-disable-next-line max-len
-const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTenderly = config.saveOnTenderly) => {
-    await hre.network.provider.send('hardhat_setBalance', [
-        getOwnerAddr(),
-        '0xC9F2C9CD04674EDEA40000000',
-    ]);
-    await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
-        '0x1', // 1 wei
-    ]);
-    if (regAddr === addrs[network].REGISTRY_ADDR) {
-        await impersonateAccount(getOwnerAddr());
+const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTenderly = config.saveOnTenderly, isFork = false) => {
+    if (!isFork) {
+        await hre.network.provider.send('hardhat_setBalance', [
+            getOwnerAddr(),
+            '0xC9F2C9CD04674EDEA40000000',
+        ]);
+        await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
+            '0x1', // 1 wei
+        ]);
+        if (regAddr === addrs[network].REGISTRY_ADDR) {
+            await impersonateAccount(getOwnerAddr());
+        }
     }
 
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());

@@ -2,6 +2,7 @@ const hre = require('hardhat');
 
 const {
     subToStrategy,
+    subToAaveProxy,
 } = require('./utils-strategies');
 
 const {
@@ -16,6 +17,30 @@ const {
 } = require('./l2-triggers');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
+
+const subAaveV3L2AutomationStrategy = async (
+    proxy,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    regAddr = addrs[network].REGISTRY_ADDR,
+) => {
+    let subInput = '0x';
+
+    subInput = subInput.concat(minRatio.padStart(32, '0'));
+    subInput = subInput.concat(maxRatio.padStart(32, '0'));
+    subInput = subInput.concat(optimalRatioBoost.padStart(32, '0'));
+    subInput = subInput.concat(optimalRatioRepay.padStart(32, '0'));
+    subInput = subInput.concat(boostEnabled ? '01' : '00');
+
+    console.log(subInput);
+
+    const subId = await subToAaveProxy(proxy, subInput, regAddr);
+
+    return subId;
+};
 
 const subAaveV3RepayL2Strategy = async (
     proxy,
@@ -85,4 +110,5 @@ const subAaveV3BoostL2Strategy = async (
 module.exports = {
     subAaveV3RepayL2Strategy,
     subAaveV3BoostL2Strategy,
+    subAaveV3L2AutomationStrategy,
 };

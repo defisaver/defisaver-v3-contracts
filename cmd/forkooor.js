@@ -38,6 +38,13 @@ const {
 } = require('../test/utils');
 
 const {
+    createAaveV3RepayL2Strategy,
+    createAaveFLV3RepayL2Strategy,
+    createAaveV3BoostL2Strategy,
+    createAaveFLV3BoostL2Strategy,
+} = require('../test/l2-strategies');
+
+const {
     getVaultsForUser,
     getRatio,
     getVaultInfo,
@@ -57,6 +64,8 @@ const {
     aaveV3Borrow,
 } = require('../test/actions');
 
+const { subAaveV3L2AutomationStrategy } = require('../test/l2-strategy-subs');
+
 const { deployContract } = require('../scripts/utils/deployer');
 
 const {
@@ -71,6 +80,7 @@ const {
     addBotCaller,
     getLatestStrategyId,
     createStrategy,
+    createBundle,
 } = require('../test/utils-strategies');
 
 const { createLiquityCloseToCollStrategy } = require('../test/strategies');
@@ -1002,8 +1012,10 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
 
     const pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
 
+    const amount = hre.ethers.utils.parseUnits(collAmount, collAssetInfo.decimals);
+
     if (collSymbol === 'WETH') {
-        await depositToWeth(collAmount, senderAcc);
+        await depositToWeth(amount, senderAcc);
     } else {
         try {
             await sell(
@@ -1026,7 +1038,7 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
     const reserveData = await pool.getReserveData(collAddr);
     const collAssetId = reserveData.id;
 
-    const amount = hre.ethers.utils.parseUnits(collAmount, collAssetInfo.decimals);
+    console.log('amount: ', amount);
 
     await aaveV3Supply(
         proxy,
@@ -1040,6 +1052,8 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
     const reserveDataDebt = await pool.getReserveData(debtAddr);
     const amountDebt = hre.ethers.utils.parseUnits(debtAmount, debtAssetInfo.decimals);
 
+    console.log('amountDebt: ', amountDebt);
+
     const debtAssetId = reserveDataDebt.id;
 
     await aaveV3Borrow(
@@ -1050,6 +1064,135 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
         2, // variable
         debtAssetId,
     );
+};
+
+const subAaveAutomation = async (
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    sender,
+) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    const network = 'optimism';
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await redeploy('AaveSubProxy', addrs[network].REGISTRY_ADDR, false, true);
+
+    await openStrategyAndBundleStorage(true);
+    const aaveRepayStrategyEncoded = createAaveV3RepayL2Strategy();
+    const aaveRepayFLStrategyEncoded = createAaveFLV3RepayL2Strategy();
+
+    const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
+    const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
+
+    await createBundle(proxy, [strategyId1, strategyId2]);
+
+    const aaveBoostStrategyEncoded = createAaveV3BoostL2Strategy();
+    const aaveBoostFLStrategyEncoded = createAaveFLV3BoostL2Strategy();
+
+    const strategyId11 = await createStrategy(proxy, ...aaveBoostStrategyEncoded, true);
+    const strategyId22 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
+
+    await createBundle(proxy, [strategyId11, strategyId22]);
+
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
+
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
+
+    await subAaveV3L2AutomationStrategy(
+        proxy,
+        minRatioFormatted.toHexString().slice(2),
+        maxRatioFormatted.toHexString().slice(2),
+        optimalRatioBoostFormatted.toHexString().slice(2),
+        optimalRatioRepayFormatted.toHexString().slice(2),
+        boostEnabled,
+        addrs[network].REGISTRY_ADDR,
+    );
+
+    console.log('Aave position subed');
+};
+
+const getAavePos = async (
+    sender,
+) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    const network = 'optimism';
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const aaveView = await hre.ethers.getContractAt('AaveV3View', addrs[network].AAVE_V3_VIEW);
+
+    const aaveInfo = await aaveView.getLoanData(addrs[network].AAVE_MARKET, proxy.address);
+
+    console.log(`User proxy: ${aaveInfo.user}`);
+    console.log(`Ratio: ${aaveInfo.ratio / 1e16}%`);
+
+    aaveInfo.collAmounts.forEach((amount, i) => {
+        if (!amount.eq(0)) {
+            const collAssetInfo = assets.find(
+                (a) => a.addresses[chainIds[network]] === aaveInfo.collAddr[i].toLowerCase(),
+            );
+
+            console.log(`Collateral ${collAssetInfo.symbol}, amount: $${amount / 1e8}`);
+        }
+    });
+
+    aaveInfo.borrowVariableAmounts.forEach((amount, i) => {
+        if (!amount.eq(0)) {
+            const borrowAssetInfo = assets.find(
+                (a) => a.addresses[chainIds[network]] === aaveInfo.borrowAddr[i].toLowerCase(),
+            );
+
+            console.log(`Borrow ${borrowAssetInfo.symbol}, amount: $${amount / 1e8}}`);
+        }
+    });
+
+    aaveInfo.borrowStableAmounts.forEach((amount, i) => {
+        if (!amount.eq(0)) {
+            const borrowAssetInfo = assets.find(
+                (a) => a.addresses[chainIds[network]] === aaveInfo.borrowAddr[i].toLowerCase(),
+            );
+
+            console.log(`Borrow stable ${borrowAssetInfo.symbol}, amount: $${amount / 1e8}}`);
+        }
+    });
 };
 
 (async () => {
@@ -1145,6 +1288,33 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
             await mcdCloseStrategySub(vaultId, type, price, priceState, senderAddr);
             process.exit(0);
         });
+
+    program
+        .command(
+            'sub-aave-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+        )
+        .description('Subscribes to aave automation can be both b/r')
+        .action(
+            async (
+                minRatio,
+                maxRatio,
+                optimalRatioBoost,
+                optimalRatioRepay,
+                boostEnabled,
+                senderAcc,
+            ) => {
+                // eslint-disable-next-line max-len
+                await subAaveAutomation(
+                    minRatio,
+                    maxRatio,
+                    optimalRatioBoost,
+                    optimalRatioRepay,
+                    boostEnabled,
+                    senderAcc,
+                );
+                process.exit(0);
+            },
+        );
 
     program
         .command('sub-mcd-close-to-coll <vaultId> <type> <price> <priceState> [senderAddr]')
@@ -1268,6 +1438,14 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
         .description('Returns data about a cdp')
         .action(async (cdpId, type) => {
             await getCdp(cdpId, type);
+            process.exit(0);
+        });
+
+    program
+        .command('get-aave-position [addr]')
+        .description('Aave position view, default to proxy')
+        .action(async (addr) => {
+            await getAavePos(addr);
             process.exit(0);
         });
 

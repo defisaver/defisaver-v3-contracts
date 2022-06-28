@@ -23,7 +23,7 @@ const {
     createAaveFLV3BoostL2Strategy,
 } = require('../../l2-strategies');
 
-const { subAaveV3RepayL2Strategy, subAaveV3BoostL2Strategy } = require('../../l2-strategy-subs');
+const { subAaveV3L2AutomationStrategy } = require('../../l2-strategy-subs');
 const {
     callAaveV3RepayL2Strategy,
     callAaveFLV3RepayL2Strategy,
@@ -78,6 +78,8 @@ const aaveV3RepayL2StrategyTest = async () => {
             await redeploy('DFSSell');
             await redeploy('AaveV3Payback');
             await redeploy('AaveV3Withdraw');
+            await redeploy('AaveSubProxy');
+
             flAaveV3Addr = await redeploy('FLAaveV3');
 
             aaveView = await redeploy('AaveV3View');
@@ -125,20 +127,19 @@ const aaveV3RepayL2StrategyTest = async () => {
 
             const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
 
+            console.log('bundleId: ', bundleId);
+
             const targetRatio = hre.ethers.utils.parseUnits('2.5', '18');
             const ratioUnder = hre.ethers.utils.parseUnits('2.2', '18');
 
-            let strategySub;
-
-            // eslint-disable-next-line no-unused-vars
-            ({ subId, strategySub } = await subAaveV3RepayL2Strategy(
+            subId = await subAaveV3L2AutomationStrategy(
                 proxy,
-                bundleId,
-                addrs[network].AAVE_MARKET,
-                ratioUnder,
-                targetRatio,
-                true,
-            ));
+                ratioUnder.toHexString().slice(2),
+                '0',
+                '0',
+                targetRatio.toHexString().slice(2),
+                false,
+            );
         });
 
         it('... should call AaveV3 L2 Repay strategy', async () => {
@@ -224,6 +225,8 @@ const aaveV3BoostL2StrategyTest = async () => {
             await redeploy('DFSSell');
             await redeploy('AaveV3Supply');
             await redeploy('AaveV3Borrow');
+            await redeploy('AaveSubProxy');
+
             flAaveV3Addr = await redeploy('FLAaveV3');
 
             aaveView = await redeploy('AaveV3View');
@@ -277,17 +280,17 @@ const aaveV3BoostL2StrategyTest = async () => {
             const targetRatio = hre.ethers.utils.parseUnits('1.5', '18');
             const ratioOver = hre.ethers.utils.parseUnits('1.7', '18');
 
-            let strategySub;
+            console.log(ratioOver.toHexString());
+            console.log(ratioOver.toString().toString(16));
 
-            // eslint-disable-next-line no-unused-vars
-            ({ subId, strategySub } = await subAaveV3BoostL2Strategy(
+            subId = await subAaveV3L2AutomationStrategy(
                 proxy,
-                bundleId,
-                addrs[network].AAVE_MARKET,
-                ratioOver,
-                targetRatio,
+                '0',
+                ratioOver.toHexString().slice(2),
+                targetRatio.toHexString().slice(2),
+                '0',
                 true,
-            ));
+            );
         });
 
         it('... should call AaveV3 L2 Boost strategy', async () => {

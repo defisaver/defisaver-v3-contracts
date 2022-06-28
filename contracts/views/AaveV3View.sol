@@ -290,11 +290,11 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
                 data.borrowVariableAmounts[borrowVariablePos] = userBorrowBalanceEth;
                 borrowVariablePos++;
             }
-
-            data.ratio = uint128(getSafetyRatio(_market, _user));
-
-            return data;
         }
+
+        data.ratio = uint128(getSafetyRatio(_market, _user));
+
+        return data;
     }
     /// @notice Fetches all the collateral/debt address and amounts, denominated in ether
     /// @param _market Address of LendingPoolAddressesProvider for specific market
