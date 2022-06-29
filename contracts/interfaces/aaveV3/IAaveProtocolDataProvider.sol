@@ -31,4 +31,5 @@ interface IAaveProtocolDataProvider {
             uint40 stableRateLastUpdated,
             bool usageAsCollateralEnabled
         );
+    function getSiloedBorrowing(address asset) external view returns (bool);	
 }
