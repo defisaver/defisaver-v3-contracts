@@ -1733,7 +1733,7 @@ const convexClaim = async (
 };
 
 const aaveV3Supply = async (
-    proxy, market, amount, tokenAddr, assetId, from,
+    proxy, market, amount, tokenAddr, assetId, from, signer
 ) => {
     const aaveSupplyAddr = await getAddrFromRegistry('AaveV3Supply');
 
@@ -1741,7 +1741,7 @@ const aaveV3Supply = async (
         amount.toString(), from, tokenAddr, assetId, true, true, false, nullAddress, nullAddress,
     );
 
-    await approve(tokenAddr, proxy.address);
+    await approve(tokenAddr, proxy.address, signer);
     const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
 
     console.log('call supply');
