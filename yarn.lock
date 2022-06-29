@@ -173,7 +173,7 @@
     "memoizee" "^0.4.15"
 
 "@defisaver/sdk@github:DecenterApps/defisaver-sdk#feature/l2-strategies":
-  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#56683b6e7a3e2f3fd8789d2154799c2069441a6e"
+  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#19659f8660e751c3b057efe12f1ce3352879db64"
   "version" "0.3.2"
   dependencies:
     "@defisaver/tokens" "^1.4.18"

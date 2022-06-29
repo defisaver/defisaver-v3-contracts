@@ -49,7 +49,13 @@ const callAaveV3RepayL2Strategy = async (
     );
 
     const repayGasCost = 1_000_000; // 1 mil gas
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(repayGasCost, addrs[network].DAI_ADDRESS, '0');
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        repayGasCost,
+        addrs[network].DAI_ADDRESS,
+        '0',
+        '0',
+        '10000000',
+    );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         true,
@@ -132,7 +138,13 @@ const callAaveFLV3RepayL2Strategy = async (
     );
 
     const repayGasCost = 1_330_000; // 1.33 mil gas
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(repayGasCost, addrs[network].DAI_ADDRESS, '0');
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        repayGasCost,
+        addrs[network].DAI_ADDRESS,
+        '0',
+        '0',
+        '10000000',
+    );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         true,
@@ -227,8 +239,14 @@ const callAaveV3BoostL2Strategy = async (
         placeHolderAddr,
     );
 
-    const repayGasCost = 1_000_000; // 1 mil gas
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(repayGasCost, collAddr, '0');
+    const boostGasCost = 1_000_000; // 1 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        boostGasCost,
+        collAddr,
+        '0',
+        '0',
+        '10000000',
+    );
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
         0, // amount hardcoded from fee taker
@@ -269,7 +287,7 @@ const callAaveV3BoostL2Strategy = async (
     );
 
     const gasUsed = await getGasUsed(receipt);
-    const dollarPrice = calcGasToUSD(repayGasCost, 0, callData);
+    const dollarPrice = calcGasToUSD(boostGasCost, 0, callData);
 
     console.log(
         `GasUsed callAaveV3BoostL2Strategy: ${gasUsed}, price at mainnet ${addrs.mainnet.AVG_GAS_PRICE} gwei $${dollarPrice} and ${addrs[network].AVG_GAS_PRICE} gwei on L2`,
@@ -311,8 +329,14 @@ const callAaveFLV3BoostL2Strategy = async (
         placeHolderAddr,
     );
 
-    const repayGasCost = 1_320_000; // 1.32 mil gas
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(repayGasCost, collAddr, '0');
+    const boostGasCost = 1_320_000; // 1.32 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        boostGasCost,
+        collAddr,
+        '0',
+        '0',
+        '10000000',
+    );
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
         0, // amount hardcoded from fee taker
@@ -365,7 +389,7 @@ const callAaveFLV3BoostL2Strategy = async (
     );
 
     const gasUsed = await getGasUsed(receipt);
-    const dollarPrice = calcGasToUSD(repayGasCost, 0, callData);
+    const dollarPrice = calcGasToUSD(boostGasCost, 0, callData);
 
     console.log(
         `GasUsed callAaveFLV3BoostL2Strategy: ${gasUsed}, price at mainnet ${addrs.mainnet.AVG_GAS_PRICE} gwei $${dollarPrice} and ${addrs[network].AVG_GAS_PRICE} gwei on L2`,

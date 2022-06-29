@@ -35,6 +35,25 @@ const {
     aaveV3Supply, aaveV3Borrow,
 } = require('../../actions');
 
+const deployBundles = async (proxy) => {
+    await openStrategyAndBundleStorage();
+    const aaveRepayStrategyEncoded = createAaveV3RepayL2Strategy();
+    const aaveRepayFLStrategyEncoded = createAaveFLV3RepayL2Strategy();
+
+    const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
+    const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
+
+    await createBundle(proxy, [strategyId1, strategyId2]);
+
+    const aaveBoostStrategyEncoded = createAaveV3BoostL2Strategy();
+    const aaveBoostFLStrategyEncoded = createAaveFLV3BoostL2Strategy();
+
+    const strategyId11 = await createStrategy(proxy, ...aaveBoostStrategyEncoded, true);
+    const strategyId22 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
+
+    await createBundle(proxy, [strategyId11, strategyId22]);
+};
+
 const aaveV3RepayL2StrategyTest = async () => {
     describe('AaveV3-Repay-L2-Strategy-Test', function () {
         this.timeout(1200000);
@@ -74,7 +93,7 @@ const aaveV3RepayL2StrategyTest = async () => {
 
             await redeploy('BotAuth');
             await redeploy('AaveV3RatioTrigger');
-            await redeploy('GasFeeTaker');
+            await redeploy('GasFeeTakerL2');
             await redeploy('DFSSell');
             await redeploy('AaveV3Payback');
             await redeploy('AaveV3Withdraw');
@@ -118,16 +137,7 @@ const aaveV3RepayL2StrategyTest = async () => {
         });
 
         it('... should make a AaveV3 L2 Repay bundle and subscribe', async () => {
-            await openStrategyAndBundleStorage();
-            const aaveRepayStrategyEncoded = createAaveV3RepayL2Strategy();
-            const aaveRepayFLStrategyEncoded = createAaveFLV3RepayL2Strategy();
-
-            const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
-            const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
-
-            const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
-
-            console.log('bundleId: ', bundleId);
+            await deployBundles(proxy);
 
             const targetRatio = hre.ethers.utils.parseUnits('2.5', '18');
             const ratioUnder = hre.ethers.utils.parseUnits('2.2', '18');
@@ -221,7 +231,7 @@ const aaveV3BoostL2StrategyTest = async () => {
 
             await redeploy('BotAuth');
             await redeploy('AaveV3RatioTrigger');
-            await redeploy('GasFeeTaker');
+            await redeploy('GasFeeTakerL2');
             await redeploy('DFSSell');
             await redeploy('AaveV3Supply');
             await redeploy('AaveV3Borrow');
@@ -268,14 +278,7 @@ const aaveV3BoostL2StrategyTest = async () => {
         });
 
         it('... should make a AaveV3 L2 Boost bundle and subscribe', async () => {
-            await openStrategyAndBundleStorage();
-            const aaveBoostStrategyEncoded = createAaveV3BoostL2Strategy();
-            const aaveBoostFLStrategyEncoded = createAaveFLV3BoostL2Strategy();
-
-            const strategyId1 = await createStrategy(proxy, ...aaveBoostStrategyEncoded, true);
-            const strategyId2 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
-
-            const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+            await deployBundles(proxy);
 
             const targetRatio = hre.ethers.utils.parseUnits('1.5', '18');
             const ratioOver = hre.ethers.utils.parseUnits('1.7', '18');

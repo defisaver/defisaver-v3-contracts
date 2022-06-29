@@ -34,10 +34,12 @@ const createAaveV3RepayL2Strategy = () => {
         '&proxy', // hardcoded
     );
 
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
         '0', // must stay variable backend sets gasCost
         '%debtAddr', // must stay variable as debt can differ
         '$2', // hardcoded output from withdraw action
+        '%dfsFeeDivider', // defaults at 0.05%
+        '%l1GasCostInEth', // send custom amount for Optimism
     );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
@@ -88,10 +90,12 @@ const createAaveFLV3RepayL2Strategy = () => {
         '&proxy', // hardcoded
     );
 
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
         '0', // must stay variable backend sets gasCost
         '%debtAddr', // must stay variable as coll can differ
         '$2', // hardcoded output from sell
+        '%dfsFeeDivider', // defaults at 0.05%
+        '%l1GasCostInEth', // send custom amount for Optimism
     );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
@@ -156,10 +160,12 @@ const createAaveV3BoostL2Strategy = () => {
         '&proxy', // hardcoded
     );
 
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
         '0', // must stay variable backend sets gasCost
         '%collAddr', // must stay variable as coll can differ
         '$2', // hardcoded output from withdraw action
+        '%dfsFeeDivider', // defaults at 0.05%
+        '%l1GasCostInEth', // send custom amount for Optimism
     );
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
@@ -212,10 +218,12 @@ const createAaveFLV3BoostL2Strategy = () => {
         '&proxy', // hardcoded
     );
 
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
         '0', // must stay variable backend sets gasCost
         '%collAddr', // must stay variable as coll can differ
         '$2', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+        '%l1GasCostInEth', // send custom amount for Optimism
     );
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(

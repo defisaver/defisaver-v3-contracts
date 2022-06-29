@@ -21,7 +21,7 @@ contract GasFeeHelper is DSMath, OptimismFeeAddresses {
     /// @dev Divider for input amount, 5 bps
     uint256 public constant MAX_DFS_FEE = 2000;
 
-    function calcGasCost(uint256 _gasUsed, address _feeToken) public view returns (uint256 txCost) {
+    function calcGasCost(uint256 _gasUsed, address _feeToken, uint256 _l1GasCostInEth) public view returns (uint256 txCost) {
         uint256 gasPrice = tx.gasprice;
 
         // gas price must be in a reasonable range
@@ -35,7 +35,7 @@ contract GasFeeHelper is DSMath, OptimismFeeAddresses {
         }
 
         // calc gas used
-        txCost = _gasUsed * gasPrice;
+        txCost = (_gasUsed * gasPrice) + _l1GasCostInEth;
 
         // convert to token amount
         if (_feeToken != TokenUtils.WETH_ADDR) {
