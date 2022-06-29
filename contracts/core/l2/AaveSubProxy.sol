@@ -4,7 +4,7 @@ pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
 import "../../auth/ProxyPermission.sol";
-import "./SubStorage.sol";
+import "./SubStorageL2.sol";
 
 /// @title Called through DSProxy, handles auth and calls subscription contract
 contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
@@ -33,7 +33,7 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         SubData memory subData = parseSubData(encodedInput);
 
         StrategySub memory repaySub = formatRepaySub(subData);
-        SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
+        SubStorageL2(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
 
         if (subData.boostEnabled) {
             if (subData.minRatio > subData.maxRatio) {
@@ -41,13 +41,12 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
             }
 
             StrategySub memory boostSub = formatBoostSub(subData);
-            SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
+            SubStorageL2(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
         }
 
     }
 
-    /// @notice Calls SubStorage to update the users subscription data
-    // TODO: MAKE SURE 0 subId isn't a valid one
+    /// @notice Calls SubStorageL2 to update the users subscription data
     /// @dev Updating sub data will activate it as well
     function updateSubData(
         bytes calldata encodedInput
@@ -63,18 +62,18 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
 
         // update repay as we must have a subId, it's ok if it's the same data
         StrategySub memory repaySub = formatRepaySub(subData);
-        SubStorage(SUB_STORAGE_ADDR).updateSubData(subId1, repaySub);
-        SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);
+        SubStorageL2(SUB_STORAGE_ADDR).updateSubData(subId1, repaySub);
+        SubStorageL2(SUB_STORAGE_ADDR).activateSub(subId1);
 
         if (subData.boostEnabled) {
             StrategySub memory boostSub = formatBoostSub(subData);
-            SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
+            SubStorageL2(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
 
             if (subId2 == 0) {
-                SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
+                SubStorageL2(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
             } else {
-                SubStorage(SUB_STORAGE_ADDR).updateSubData(subId2, boostSub);
-                SubStorage(SUB_STORAGE_ADDR).activateSub(subId2);
+                SubStorageL2(SUB_STORAGE_ADDR).updateSubData(subId2, boostSub);
+                SubStorageL2(SUB_STORAGE_ADDR).activateSub(subId2);
 
             }
         }
@@ -85,10 +84,10 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     ) public {
         (uint32 subId1, uint32 subId2) = parseSubIds(encodedInput[0:8]);
 
-        SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);
+        SubStorageL2(SUB_STORAGE_ADDR).activateSub(subId1);
 
         if (subId2 != 0) {
-            SubStorage(SUB_STORAGE_ADDR).activateSub(subId2);
+            SubStorageL2(SUB_STORAGE_ADDR).activateSub(subId2);
         }
     }
 
@@ -98,10 +97,10 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     ) public {
         (uint32 subId1, uint32 subId2) = parseSubIds(encodedInput[0:8]);
 
-        SubStorage(SUB_STORAGE_ADDR).deactivateSub(subId1);
+        SubStorageL2(SUB_STORAGE_ADDR).deactivateSub(subId1);
 
         if (subId2 != 0) {
-            SubStorage(SUB_STORAGE_ADDR).deactivateSub(subId2);
+            SubStorageL2(SUB_STORAGE_ADDR).deactivateSub(subId2);
         }
     }
 

@@ -25,6 +25,22 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
 
     StrategySub[] public storedStrategies;
 
+    /// @dev push one empty sub for AaveSubProxy to function correctly
+    constructor() {
+        strategiesSubs.push(StoredSubData({
+            userProxy: bytes20(0),
+            isEnabled: false,
+            strategySubHash: bytes32(0)
+        }));
+
+        storedStrategies.push(StrategySub({
+            strategyOrBundleId: 0,
+            isBundle: false,
+            triggerData: new bytes[](0),
+            subData: new bytes32[](0)
+        }));
+    }
+
 
     /// @notice Checks if subId is init. and if the sender is the owner
     modifier onlySubOwner(uint256 _subId) {

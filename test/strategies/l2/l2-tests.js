@@ -294,6 +294,8 @@ const aaveV3BoostL2StrategyTest = async () => {
                 '0',
                 true,
             );
+
+            console.log('subId: ', subId);
         });
 
         it('... should call AaveV3 L2 Boost strategy', async () => {
