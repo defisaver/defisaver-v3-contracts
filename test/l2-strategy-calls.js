@@ -69,10 +69,16 @@ const callAaveV3RepayL2Strategy = async (
         placeHolderAddr, // onBehalf
     );
 
+    const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
+        0, // checkBoostState
+        0, // 0
+    );
+
     actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
@@ -166,11 +172,17 @@ const callAaveFLV3RepayL2Strategy = async (
         placeHolderAddr, // market
     );
 
+    const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
+        0, // checkBoostState
+        0, // 0
+    );
+
     actionsCallData.push(flAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(paybackAction.encodeForRecipe()[0]);
     actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
@@ -260,10 +272,16 @@ const callAaveV3BoostL2Strategy = async (
         placeHolderAddr, // hardcoded onBehalf
     );
 
+    const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
+        0, // checkBoostState
+        0, // 0
+    );
+
     actionsCallData.push(borrowAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(supplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
@@ -361,11 +379,17 @@ const callAaveFLV3BoostL2Strategy = async (
         placeHolderAddr, // set to empty because flag is false
     );
 
+    const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
+        0, // checkBoostState
+        0, // 0
+    );
+
     actionsCallData.push(flAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(supplyAction.encodeForRecipe()[0]);
     actionsCallData.push(borrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));

@@ -23,7 +23,7 @@ const {
     createAaveFLV3BoostL2Strategy,
 } = require('../../l2-strategies');
 
-const { subAaveV3L2AutomationStrategy } = require('../../l2-strategy-subs');
+const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy } = require('../../l2-strategy-subs');
 const {
     callAaveV3RepayL2Strategy,
     callAaveFLV3RepayL2Strategy,
@@ -65,7 +65,7 @@ const aaveV3RepayL2StrategyTest = async () => {
         let strategyExecutorL2;
         let pool;
         let aaveView;
-        let subId;
+        let subIds;
         let ethAssetId;
         let daiAssetId;
         let flAaveV3Addr;
@@ -98,6 +98,7 @@ const aaveV3RepayL2StrategyTest = async () => {
             await redeploy('AaveV3Payback');
             await redeploy('AaveV3Withdraw');
             await redeploy('AaveSubProxy');
+            await redeploy('AaveV3RatioCheck');
 
             flAaveV3Addr = await redeploy('FLAaveV3');
 
@@ -139,10 +140,10 @@ const aaveV3RepayL2StrategyTest = async () => {
         it('... should make a AaveV3 L2 Repay bundle and subscribe', async () => {
             await deployBundles(proxy);
 
-            const targetRatio = hre.ethers.utils.parseUnits('2.5', '18');
-            const ratioUnder = hre.ethers.utils.parseUnits('2.2', '18');
+            const targetRatio = hre.ethers.utils.parseUnits('1.8', '18');
+            const ratioUnder = hre.ethers.utils.parseUnits('1.7', '18');
 
-            subId = await subAaveV3L2AutomationStrategy(
+            subIds = await subAaveV3L2AutomationStrategy(
                 proxy,
                 ratioUnder.toHexString().slice(2),
                 '0',
@@ -156,9 +157,10 @@ const aaveV3RepayL2StrategyTest = async () => {
             const ratioBefore = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
             console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
 
-            const repayAmount = hre.ethers.utils.parseUnits('1', 18);
+            const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('ETH', '4000'), 18);
+
             // eslint-disable-next-line max-len
-            await callAaveV3RepayL2Strategy(botAcc, strategyExecutorL2, subId, ethAssetId, daiAssetId, repayAmount, 0);
+            await callAaveV3RepayL2Strategy(botAcc, strategyExecutorL2, subIds.firstSub, ethAssetId, daiAssetId, repayAmount, 0);
 
             const ratioAfter = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
             console.log(`Aave position ratio: ${ratioAfter / 1e16}%`);
@@ -169,12 +171,27 @@ const aaveV3RepayL2StrategyTest = async () => {
             const ratioBefore = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
             console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
 
-            const repayAmount = hre.ethers.utils.parseUnits('1', 18);
+            const targetRatio = hre.ethers.utils.parseUnits('2', '18');
+            const ratioUnder = hre.ethers.utils.parseUnits('1.85', '18');
+
+            await updateAaveV3L2AutomationStrategy(
+                proxy,
+                subIds.firstSub,
+                subIds.secondSub,
+                ratioUnder.toHexString().slice(2),
+                '0',
+                '0',
+                targetRatio.toHexString().slice(2),
+                false,
+            );
+
+            const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('ETH', '2000'), 18);
+
             // eslint-disable-next-line max-len
             await callAaveFLV3RepayL2Strategy(
                 botAcc,
                 strategyExecutorL2,
-                subId,
+                subIds.firstSub,
                 ethAssetId,
                 addrs[network].WETH_ADDRESS,
                 daiAssetId,
@@ -201,7 +218,7 @@ const aaveV3BoostL2StrategyTest = async () => {
         let strategyExecutorL2;
         let pool;
         let aaveView;
-        let subId;
+        let subIds;
         let ethAssetId;
         let daiAssetId;
         let flAaveV3Addr;
@@ -236,6 +253,7 @@ const aaveV3BoostL2StrategyTest = async () => {
             await redeploy('AaveV3Supply');
             await redeploy('AaveV3Borrow');
             await redeploy('AaveSubProxy');
+            await redeploy('AaveV3RatioCheck');
 
             flAaveV3Addr = await redeploy('FLAaveV3');
 
@@ -283,10 +301,7 @@ const aaveV3BoostL2StrategyTest = async () => {
             const targetRatio = hre.ethers.utils.parseUnits('1.5', '18');
             const ratioOver = hre.ethers.utils.parseUnits('1.7', '18');
 
-            console.log(ratioOver.toHexString());
-            console.log(ratioOver.toString().toString(16));
-
-            subId = await subAaveV3L2AutomationStrategy(
+            subIds = await subAaveV3L2AutomationStrategy(
                 proxy,
                 '0',
                 ratioOver.toHexString().slice(2),
@@ -294,8 +309,6 @@ const aaveV3BoostL2StrategyTest = async () => {
                 '0',
                 true,
             );
-
-            console.log('subId: ', subId);
         });
 
         it('... should call AaveV3 L2 Boost strategy', async () => {
@@ -307,7 +320,7 @@ const aaveV3BoostL2StrategyTest = async () => {
             await callAaveV3BoostL2Strategy(
                 botAcc,
                 strategyExecutorL2,
-                subId,
+                subIds.secondSub,
                 collAddr,
                 debtAddr,
                 ethAssetId,
@@ -325,11 +338,27 @@ const aaveV3BoostL2StrategyTest = async () => {
             const ratioBefore = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
             console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
 
+            const targetRatio = hre.ethers.utils.parseUnits('1.5', '18');
+            const ratioOver = hre.ethers.utils.parseUnits('1.7', '18');
+
+            // update
+            subIds = await updateAaveV3L2AutomationStrategy(
+                proxy,
+                subIds.firstSub,
+                subIds.secondSub,
+                '0',
+                ratioOver.toHexString().slice(2),
+                targetRatio.toHexString().slice(2),
+                '0',
+                true,
+            );
+
             const boostAmount = hre.ethers.utils.parseUnits('1000', 18);
+
             await callAaveFLV3BoostL2Strategy(
                 botAcc,
                 strategyExecutorL2,
-                subId,
+                subIds.secondSub,
                 collAddr,
                 debtAddr,
                 ethAssetId,

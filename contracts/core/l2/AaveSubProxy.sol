@@ -15,7 +15,11 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
 
     address public constant AAVE_MARKET = 0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb;
 
+    /// @dev 5% offset acceptable
+    uint256 internal constant RATIO_OFFSET = 50000000000000000;
+
     error WrongSubParams(uint128 minRatio, uint128 maxRatio);
+    error RangeTooClose(uint128 ratio, uint128 targetRatio);
 
     /// @dev Input data from the user, for both repay/boost bundles
     struct AaveSubData {
@@ -46,7 +50,6 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
             StrategySub memory boostSub = formatBoostSub(subData);
             SubStorageL2(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
         }
-
     }
 
     /// @notice Calls SubStorageL2 to update the users subscription data
@@ -112,8 +115,19 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
 
     function _validateSubData(AaveSubData memory _subData) internal pure {
         if (_subData.minRatio > _subData.maxRatio) {
-                revert WrongSubParams(_subData.minRatio, _subData.maxRatio);
+            revert WrongSubParams(_subData.minRatio, _subData.maxRatio);
+        }
+
+        // check when we have boost as well that ranges aren't too close
+        if (_subData.boostEnabled) {
+            if ((_subData.maxRatio - RATIO_OFFSET) < _subData.targetRatioRepay) {
+                revert RangeTooClose(_subData.maxRatio, _subData.targetRatioRepay);
             }
+
+            if ((_subData.minRatio + RATIO_OFFSET) > _subData.targetRatioBoost) {
+                revert RangeTooClose(_subData.maxRatio, _subData.targetRatioRepay);
+            }
+        }
     }
 
     /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized aave sub
@@ -126,10 +140,11 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         repaySub.triggerData =  new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
-        repaySub.subData =  new bytes32[](3);
+        repaySub.subData =  new bytes32[](4);
         repaySub.subData[0] = bytes32(uint256(_user.targetRatioRepay)); // targetRatio
-        repaySub.subData[1] = bytes32(bytes1(0x01)); // useDefaultMarket = true
-        repaySub.subData[2] = bytes32(0x00); // onBehalfOf = false
+        repaySub.subData[1] = bytes32(uint256(1)); // ratioState = repay
+        repaySub.subData[2] = bytes32(bytes1(0x01)); // useDefaultMarket = true
+        repaySub.subData[3] = bytes32(0x00); // onBehalfOf = false
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized aave sub
@@ -142,11 +157,12 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         repaySub.triggerData = new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
-        repaySub.subData =  new bytes32[](4);
+        repaySub.subData =  new bytes32[](5);
         repaySub.subData[0] = bytes32(uint256(_user.targetRatioBoost)); // targetRatio
-        repaySub.subData[1] = bytes32(bytes1(0x01)); // useDefaultMarket = true
-        repaySub.subData[2] = bytes32(bytes1(0x00)); // onBehalfOf = false
-        repaySub.subData[3] = bytes32(bytes1(0x01)); // enableAsColl = true
+        repaySub.subData[1] = bytes32(uint256(0)); // ratioState = boost
+        repaySub.subData[2] = bytes32(bytes1(0x01)); // useDefaultMarket = true
+        repaySub.subData[3] = bytes32(bytes1(0x00)); // onBehalfOf = false
+        repaySub.subData[4] = bytes32(bytes1(0x01)); // enableAsColl = true
     }
 
     function parseSubData(bytes calldata encodedInput) public pure returns (AaveSubData memory user) {

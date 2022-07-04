@@ -1,22 +1,14 @@
 const hre = require('hardhat');
 
 const {
-    subToStrategy,
     subToAaveProxy,
+    updateAaveProxy,
 } = require('./utils-strategies');
 
 const {
     addrs,
     network,
 } = require('./utils');
-
-const {
-    createAaveV3RatioTrigger,
-    RATIO_STATE_UNDER,
-    RATIO_STATE_OVER,
-} = require('./l2-triggers');
-
-const abiCoder = new hre.ethers.utils.AbiCoder();
 
 const subAaveV3L2AutomationStrategy = async (
     proxy,
@@ -35,80 +27,59 @@ const subAaveV3L2AutomationStrategy = async (
     subInput = subInput.concat(optimalRatioRepay.padStart(32, '0'));
     subInput = subInput.concat(boostEnabled ? '01' : '00');
 
-    console.log(subInput);
-
     const subId = await subToAaveProxy(proxy, subInput, regAddr);
 
-    return subId;
+    let subId1 = '0';
+    let subId2 = '0';
+
+    if (boostEnabled) {
+        subId1 = (parseInt(subId, 10) - 1).toString();
+        subId2 = subId;
+    } else {
+        subId1 = subId;
+        subId2 = '0';
+    }
+
+    console.log('Subs: ', subId, subId2);
+
+    return { firstSub: subId1, secondSub: subId2 };
 };
 
-const subAaveV3RepayL2Strategy = async (
+const updateAaveV3L2AutomationStrategy = async (
     proxy,
-    strategyId,
-    market,
-    rationUnder,
-    targetRatio,
-    isBundle,
+    subId1,
+    subId2,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
     regAddr = addrs[network].REGISTRY_ADDR,
 ) => {
-    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
-    const useDefaultMarketEncoded = abiCoder.encode(['bool'], [true]);
-    const onBehalfOfEncoded = abiCoder.encode(['bool'], [false]);
+    let subInput = '0x';
 
-    const triggerData = await createAaveV3RatioTrigger(
-        proxy.address,
-        market,
-        rationUnder,
-        RATIO_STATE_UNDER,
-    );
+    subInput = subInput.concat(subId1.toString().padStart(8, '0'));
+    subInput = subInput.concat(subId2.toString().padStart(8, '0'));
 
-    const strategySub = [
-        strategyId,
-        isBundle,
-        [triggerData],
-        [targetRatioEncoded, useDefaultMarketEncoded, onBehalfOfEncoded],
-    ];
+    subInput = subInput.concat(minRatio.padStart(32, '0'));
+    subInput = subInput.concat(maxRatio.padStart(32, '0'));
+    subInput = subInput.concat(optimalRatioBoost.padStart(32, '0'));
+    subInput = subInput.concat(optimalRatioRepay.padStart(32, '0'));
+    subInput = subInput.concat(boostEnabled ? '01' : '00');
 
-    const subId = await subToStrategy(proxy, strategySub, regAddr);
+    console.log(subInput);
 
-    return { subId, strategySub };
-};
+    const subId = await updateAaveProxy(proxy, subInput, regAddr);
 
-const subAaveV3BoostL2Strategy = async (
-    proxy,
-    strategyId,
-    market,
-    rationOver,
-    targetRatio,
-    isBundle,
-    regAddr = addrs[network].REGISTRY_ADDR,
-) => {
-    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
-    const useDefaultMarketEncoded = abiCoder.encode(['bool'], [true]);
-    const onBehalfOfEncoded = abiCoder.encode(['bool'], [false]);
-    const enableAsCollEncoded = abiCoder.encode(['bool'], [true]);
+    if (subId2 === '0' && boostEnabled === true) {
+        // eslint-disable-next-line no-param-reassign
+        subId2 = subId;
+    }
 
-    const triggerData = await createAaveV3RatioTrigger(
-        proxy.address,
-        market,
-        rationOver,
-        RATIO_STATE_OVER,
-    );
-
-    const strategySub = [
-        strategyId,
-        isBundle,
-        [triggerData],
-        [targetRatioEncoded, useDefaultMarketEncoded, onBehalfOfEncoded, enableAsCollEncoded],
-    ];
-
-    const subId = await subToStrategy(proxy, strategySub, regAddr);
-
-    return { subId, strategySub };
+    return { firstSub: subId1, secondSub: subId2 };
 };
 
 module.exports = {
-    subAaveV3RepayL2Strategy,
-    subAaveV3BoostL2Strategy,
     subAaveV3L2AutomationStrategy,
+    updateAaveV3L2AutomationStrategy,
 };
