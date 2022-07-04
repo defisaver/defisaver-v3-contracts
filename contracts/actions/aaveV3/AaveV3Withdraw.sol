@@ -28,9 +28,15 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(callData);
 
-        params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
-        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
-        params.market = _parseParamAddr(params.market, _paramMapping[2], _subData, _returnValues);
+        params.assetId = uint16(_parseParamUint(uint16(params.assetId), _paramMapping[0], _subData, _returnValues));
+        params.useDefaultMarket = _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[1], _subData, _returnValues) == 1;
+        params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
+        params.market = _parseParamAddr(params.market, _paramMapping[4], _subData, _returnValues);
+
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
 
         (uint256 withdrawnAmount, bytes memory logData) = _withdraw(
             params.market,
@@ -107,9 +113,6 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
-        if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
-        }
     }
 
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {

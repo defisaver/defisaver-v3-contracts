@@ -1,5 +1,3 @@
-const hre = require('hardhat');
-
 const {
     subToAaveProxy,
     updateAaveProxy,

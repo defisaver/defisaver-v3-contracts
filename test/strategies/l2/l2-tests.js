@@ -157,7 +157,7 @@ const aaveV3RepayL2StrategyTest = async () => {
             const ratioBefore = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
             console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
 
-            const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('ETH', '4000'), 18);
+            const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('ETH', '3000'), 18);
 
             // eslint-disable-next-line max-len
             await callAaveV3RepayL2Strategy(botAcc, strategyExecutorL2, subIds.firstSub, ethAssetId, daiAssetId, repayAmount, 0);

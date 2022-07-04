@@ -143,8 +143,8 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         repaySub.subData =  new bytes32[](4);
         repaySub.subData[0] = bytes32(uint256(_user.targetRatioRepay)); // targetRatio
         repaySub.subData[1] = bytes32(uint256(1)); // ratioState = repay
-        repaySub.subData[2] = bytes32(bytes1(0x01)); // useDefaultMarket = true
-        repaySub.subData[3] = bytes32(0x00); // onBehalfOf = false
+        repaySub.subData[2] = bytes32(uint256(1)); // useDefaultMarket = true
+        repaySub.subData[3] = bytes32(uint256(0)); // onBehalfOf = false
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized aave sub
@@ -160,9 +160,9 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         repaySub.subData =  new bytes32[](5);
         repaySub.subData[0] = bytes32(uint256(_user.targetRatioBoost)); // targetRatio
         repaySub.subData[1] = bytes32(uint256(0)); // ratioState = boost
-        repaySub.subData[2] = bytes32(bytes1(0x01)); // useDefaultMarket = true
-        repaySub.subData[3] = bytes32(bytes1(0x00)); // onBehalfOf = false
-        repaySub.subData[4] = bytes32(bytes1(0x01)); // enableAsColl = true
+        repaySub.subData[2] = bytes32(uint256(1)); // useDefaultMarket = true
+        repaySub.subData[3] = bytes32(uint256(0)); // onBehalfOf = false
+        repaySub.subData[4] = bytes32(uint256(1)); // enableAsColl = true
     }
 
     function parseSubData(bytes calldata encodedInput) public pure returns (AaveSubData memory user) {
