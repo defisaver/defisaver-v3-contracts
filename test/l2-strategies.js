@@ -9,6 +9,7 @@ const createAaveV3RepayL2Strategy = () => {
     const aaveV3RepayL2Strategy = new dfs.Strategy('AaveV3RepayL2');
 
     aaveV3RepayL2Strategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3RepayL2Strategy.addSubSlot('&checkRepayState', 'uint256');
     aaveV3RepayL2Strategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3RepayL2Strategy.addSubSlot('&useOnBehalf', 'bool');
 
@@ -54,10 +55,16 @@ const createAaveV3RepayL2Strategy = () => {
         '%onBehalf', // hardcoded 0 as its false
     );
 
+    const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
+        '&checkRepayState',
+        '&targetRatio',
+    );
+
     aaveV3RepayL2Strategy.addAction(withdrawAction);
     aaveV3RepayL2Strategy.addAction(sellAction);
     aaveV3RepayL2Strategy.addAction(feeTakingAction);
     aaveV3RepayL2Strategy.addAction(paybackAction);
+    aaveV3RepayL2Strategy.addAction(checkerAction);
 
     return aaveV3RepayL2Strategy.encodeForDsProxyCall();
 };
@@ -66,6 +73,7 @@ const createAaveFLV3RepayL2Strategy = () => {
     const aaveV3RepayL2Strategy = new dfs.Strategy('AaveFLV3RepayL2');
 
     aaveV3RepayL2Strategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3RepayL2Strategy.addSubSlot('&checkRepayState', 'uint256');
     aaveV3RepayL2Strategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3RepayL2Strategy.addSubSlot('&useOnBehalf', 'bool');
 
@@ -118,11 +126,17 @@ const createAaveFLV3RepayL2Strategy = () => {
         '%market', // hardcoded because default market is true
     );
 
+    const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
+        '&checkRepayState',
+        '&targetRatio',
+    );
+
     aaveV3RepayL2Strategy.addAction(flAction);
     aaveV3RepayL2Strategy.addAction(sellAction);
     aaveV3RepayL2Strategy.addAction(feeTakingAction);
     aaveV3RepayL2Strategy.addAction(paybackAction);
     aaveV3RepayL2Strategy.addAction(withdrawAction);
+    aaveV3RepayL2Strategy.addAction(checkerAction);
 
     return aaveV3RepayL2Strategy.encodeForDsProxyCall();
 };
@@ -131,6 +145,7 @@ const createAaveV3BoostL2Strategy = () => {
     const aaveV3BoostL2Strategy = new dfs.Strategy('AaveV3BoostL2');
 
     aaveV3BoostL2Strategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3BoostL2Strategy.addSubSlot('&checkBoostState', 'uint256');
     aaveV3BoostL2Strategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3BoostL2Strategy.addSubSlot('&useOnBehalf', 'bool');
     aaveV3BoostL2Strategy.addSubSlot('&enableAsColl', 'bool');
@@ -178,13 +193,18 @@ const createAaveV3BoostL2Strategy = () => {
         '&useOnBehalf', // hardcoded false use on behalf
         '%market', // hardcoded 0
         '%onBehalf', // hardcoded 0 as its false
+    );
 
+    const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
+        '&checkBoostState',
+        '&targetRatio',
     );
 
     aaveV3BoostL2Strategy.addAction(borrowAction);
     aaveV3BoostL2Strategy.addAction(sellAction);
     aaveV3BoostL2Strategy.addAction(feeTakingAction);
     aaveV3BoostL2Strategy.addAction(supplyAction);
+    aaveV3BoostL2Strategy.addAction(checkerAction);
 
     return aaveV3BoostL2Strategy.encodeForDsProxyCall();
 };
@@ -193,6 +213,7 @@ const createAaveFLV3BoostL2Strategy = () => {
     const aaveV3BoostL2Strategy = new dfs.Strategy('AaveFLV3BoostL2');
 
     aaveV3BoostL2Strategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3BoostL2Strategy.addSubSlot('&checkBoostState', 'uint256');
     aaveV3BoostL2Strategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3BoostL2Strategy.addSubSlot('&useOnBehalf', 'bool');
     aaveV3BoostL2Strategy.addSubSlot('&enableAsColl', 'bool');
@@ -250,11 +271,17 @@ const createAaveFLV3BoostL2Strategy = () => {
         '%onBehalfAddr', // set to empty because flag is true
     );
 
+    const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
+        '&checkBoostState',
+        '&targetRatio',
+    );
+
     aaveV3BoostL2Strategy.addAction(flAction);
     aaveV3BoostL2Strategy.addAction(sellAction);
     aaveV3BoostL2Strategy.addAction(feeTakingAction);
     aaveV3BoostL2Strategy.addAction(supplyAction);
     aaveV3BoostL2Strategy.addAction(borrowAction);
+    aaveV3BoostL2Strategy.addAction(checkerAction);
 
     return aaveV3BoostL2Strategy.encodeForDsProxyCall();
 };
