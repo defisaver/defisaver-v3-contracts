@@ -2,10 +2,8 @@
 
 pragma solidity =0.8.10;
 
-import "../DS/DSMath.sol";
 import "../actions/aaveV3/helpers/AaveV3Helper.sol";
 import "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
-
 import "../utils/TokenUtils.sol";
 import "../interfaces/aaveV3/IAaveV3Oracle.sol";
 
@@ -19,6 +17,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant LTV_MASK =                       0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000; // prettier-ignore
     uint256 internal constant RESERVE_FACTOR_MASK =            0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant LIQUIDATION_THRESHOLD_MASK =     0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFF; // prettier-ignore
+    uint256 internal constant DEBT_CEILING_MASK =              0xF0000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
+
     
     uint256 internal constant LIQUIDATION_THRESHOLD_START_BIT_POSITION = 16;
     uint256 internal constant RESERVE_FACTOR_START_BIT_POSITION = 64;
@@ -27,6 +27,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant BORROW_CAP_START_BIT_POSITION = 80;
     uint256 internal constant SUPPLY_CAP_START_BIT_POSITION = 116;
     uint256 internal constant EMODE_CATEGORY_START_BIT_POSITION = 168;
+    uint256 internal constant DEBT_CEILING_START_BIT_POSITION = 212;
 
     using TokenUtils for address;
 
@@ -74,10 +75,13 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint256 supplyCap; //pool.config
         uint256 borrowCap; //pool.config
         uint256 emodeCategory; //pool.config
+        uint256 debtCeilingForIsolationMode; //pool.config 212-251
+        uint256 isolationModeTotalDebt; //pool.isolationModeTotalDebt
         bool usageAsCollateralEnabled; //usageAsCollateralEnabled = liquidationThreshold > 0;
         bool borrowingEnabled; //pool.config
         bool stableBorrowRateEnabled; //pool.config
         bool isolationModeBorrowingEnabled; //pool.config
+        bool isSiloedForBorrowing; //AaveProtocolDataProvider.getSiloedBorrowing
     }
 
     function getHealthFactor(address _market, address _user)
@@ -224,7 +228,10 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             usageAsCollateralEnabled: getLiquidationThreshold(config) > 0,
             borrowingEnabled: getBorrowingEnabled(config),
             stableBorrowRateEnabled: getStableRateBorrowingEnabled(config),
-            isolationModeBorrowingEnabled: getBorrowableInIsolation(config)
+            isolationModeBorrowingEnabled: getBorrowableInIsolation(config),
+            debtCeilingForIsolationMode: getDebtCeiling(config),
+            isolationModeTotalDebt: reserveData.isolationModeTotalDebt,
+            isSiloedForBorrowing: isSiloedForBorrowing(_market, _tokenAddr)
         });
     }
 
@@ -395,5 +402,24 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     {
         return (self.data & ~BORROWABLE_IN_ISOLATION_MASK) != 0;
     }
+
+    /**
+    * @notice Gets the debt ceiling for the asset if the asset is in isolation mode
+    * @param self The reserve configuration
+    * @return The debt ceiling (0 = isolation mode disabled)
+    **/
+    function getDebtCeiling(DataTypes.ReserveConfigurationMap memory self)
+        internal
+        pure
+        returns (uint256)
+    {
+        return (self.data & ~DEBT_CEILING_MASK) >> DEBT_CEILING_START_BIT_POSITION;
+    }
+
+    function isSiloedForBorrowing(address _market, address _tokenAddr) internal view returns (bool){
+        IAaveProtocolDataProvider dataProvider = getDataProvider(_market);
+        return dataProvider.getSiloedBorrowing(_tokenAddr);
+    }
+
 
 }
