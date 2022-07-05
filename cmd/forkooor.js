@@ -64,7 +64,7 @@ const {
     aaveV3Borrow,
 } = require('../test/actions');
 
-const { subAaveV3L2AutomationStrategy } = require('../test/l2-strategy-subs');
+const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy } = require('../test/l2-strategy-subs');
 
 const { deployContract } = require('../scripts/utils/deployer');
 
@@ -989,7 +989,11 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
 
     await topUp(senderAcc.address);
 
-    const network = 'optimism';
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
 
     configure({
         chainId: chainIds[network],
@@ -1047,6 +1051,7 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
         collAddr,
         collAssetId,
         senderAcc.address,
+        senderAcc,
     );
 
     const reserveDataDebt = await pool.getReserveData(debtAddr);
@@ -1076,6 +1081,8 @@ const subAaveAutomation = async (
 ) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
+    await topUp(senderAcc.address);
+
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
         // eslint-disable-next-line no-underscore-dangle
@@ -1084,7 +1091,11 @@ const subAaveAutomation = async (
 
     await topUp(senderAcc.address);
 
-    const network = 'optimism';
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
 
     configure({
         chainId: chainIds[network],
@@ -1121,7 +1132,7 @@ const subAaveAutomation = async (
     const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
     const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
 
-    await subAaveV3L2AutomationStrategy(
+    const subIds = await subAaveV3L2AutomationStrategy(
         proxy,
         minRatioFormatted.toHexString().slice(2),
         maxRatioFormatted.toHexString().slice(2),
@@ -1131,7 +1142,7 @@ const subAaveAutomation = async (
         addrs[network].REGISTRY_ADDR,
     );
 
-    console.log('Aave position subed');
+    console.log(`Aave position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
 };
 
 const getAavePos = async (
@@ -1139,13 +1150,19 @@ const getAavePos = async (
 ) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
+    await topUp(senderAcc.address);
+
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
         // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
-    const network = 'optimism';
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
 
     configure({
         chainId: chainIds[network],
@@ -1193,6 +1210,97 @@ const getAavePos = async (
             console.log(`Borrow stable ${borrowAssetInfo.symbol}, amount: $${amount / 1e8}}`);
         }
     });
+};
+
+const updateAaveV3AutomationSub = async (
+    subIdRepay,
+    subIdBoost,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    sender,
+) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await redeploy('AaveSubProxy', addrs[network].REGISTRY_ADDR, false, true);
+
+    await openStrategyAndBundleStorage(true);
+    const aaveRepayStrategyEncoded = createAaveV3RepayL2Strategy();
+    const aaveRepayFLStrategyEncoded = createAaveFLV3RepayL2Strategy();
+
+    const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
+    const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
+
+    await createBundle(proxy, [strategyId1, strategyId2]);
+
+    const aaveBoostStrategyEncoded = createAaveV3BoostL2Strategy();
+    const aaveBoostFLStrategyEncoded = createAaveFLV3BoostL2Strategy();
+
+    const strategyId11 = await createStrategy(proxy, ...aaveBoostStrategyEncoded, true);
+    const strategyId22 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
+
+    await createBundle(proxy, [strategyId11, strategyId22]);
+
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
+
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
+
+    await updateAaveV3L2AutomationStrategy(
+        proxy,
+        subIdRepay,
+        subIdBoost,
+        minRatioFormatted.toHexString().slice(2),
+        maxRatioFormatted.toHexString().slice(2),
+        optimalRatioBoostFormatted.toHexString().slice(2),
+        optimalRatioRepayFormatted.toHexString().slice(2),
+        boostEnabled,
+        addrs[network].REGISTRY_ADDR,
+    );
+
+    console.log('Aave position updated');
+};
+
+const setBotAuth = async (addr) => {
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    await addBotCaller(addr, addrs[network].REGISTRY_ADDR, true, network);
 };
 
 (async () => {
@@ -1352,6 +1460,37 @@ const getAavePos = async (
         });
 
     program
+        .command(
+            'update-aave-automation <subIdRepay> <subIdBoost> <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+        )
+        .description('Updates aaveV3 automation bundles')
+        .action(
+            async (
+                subIdRepay,
+                subIdBoost,
+                minRatio,
+                maxRatio,
+                optimalRatioBoost,
+                optimalRatioRepay,
+                boostEnabled,
+                senderAcc,
+            ) => {
+                // eslint-disable-next-line max-len
+                await updateAaveV3AutomationSub(
+                    subIdRepay,
+                    subIdBoost,
+                    minRatio,
+                    maxRatio,
+                    optimalRatioBoost,
+                    optimalRatioRepay,
+                    boostEnabled,
+                    senderAcc,
+                );
+                process.exit(0);
+            },
+        );
+
+    program
         .command('update-ss <protocol> <subId> <vaultId> <minRatio> <targetRatio> [senderAddr]')
         .description('Updates to a Smart Savings strategy')
         .action(async (protocol, subId, vaultId, minRatio, targetRatio, senderAddr) => {
@@ -1461,7 +1600,7 @@ const getAavePos = async (
         .command('set-bot-auth <botAddr>')
         .description('Gives an address the authority to call a contract')
         .action(async (botAddr) => {
-            await addBotCaller(botAddr, REGISTRY_ADDR, true);
+            await setBotAuth(botAddr);
 
             console.log(`Bot auth given to ${botAddr}`);
             process.exit(0);

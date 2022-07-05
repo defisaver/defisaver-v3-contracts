@@ -1710,7 +1710,7 @@ const convexClaim = async (
 };
 
 const aaveV3Supply = async (
-    proxy, market, amount, tokenAddr, assetId, from, signer
+    proxy, market, amount, tokenAddr, assetId, from, signer,
 ) => {
     const aaveSupplyAddr = await getAddrFromRegistry('AaveV3Supply');
 

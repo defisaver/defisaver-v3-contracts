@@ -165,22 +165,25 @@ const updateAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGIST
     return latestSubId;
 };
 
-const addBotCaller = async (botAddr, regAddr = addrs[network].REGISTRY_ADDR, isFork = false) => {
+const addBotCaller = async (
+    botAddr,
+    regAddr = addrs[network].REGISTRY_ADDR,
+    isFork = false,
+    networkInjected = network,
+) => {
     if (regAddr === addrs[network].REGISTRY_ADDR && !isFork) {
         await impersonateAccount(addrs[network].OWNER_ACC);
     }
 
-    const signer = await hre.ethers.provider.getSigner(addrs[network].OWNER_ACC);
+    const signer = await hre.ethers.provider.getSigner(addrs[networkInjected].OWNER_ACC);
     const botAuthAddr = await getAddrFromRegistry('BotAuth', regAddr);
-
-    console.log('botAuthAddr', botAuthAddr);
 
     const botAuthInstance = await hre.ethers.getContractFactory('BotAuth', signer);
     let botAuth = await botAuthInstance.attach(botAuthAddr);
 
     botAuth = botAuth.connect(signer);
 
-    await botAuth.addCaller(botAddr);
+    await botAuth.addCaller(botAddr, { gasLimit: 400000 });
 
     if (regAddr === addrs[network].REGISTRY_ADDR && !isFork) {
         await stopImpersonatingAccount(addrs[network].OWNER_ACC);
