@@ -65,8 +65,6 @@ const updateAaveV3L2AutomationStrategy = async (
     subInput = subInput.concat(optimalRatioRepay.padStart(32, '0'));
     subInput = subInput.concat(boostEnabled ? '01' : '00');
 
-    console.log(subInput);
-
     const subId = await updateAaveProxy(proxy, subInput, regAddr);
 
     if (subId2 === '0' && boostEnabled === true) {

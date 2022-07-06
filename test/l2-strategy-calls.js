@@ -21,6 +21,8 @@ const callAaveV3RepayL2Strategy = async (
     subId,
     ethAssetId,
     daiAssetId,
+    collAssetAddr,
+    debtAssetAddr,
     repayAmount,
     strategyIndex,
 ) => {
@@ -37,8 +39,8 @@ const callAaveV3RepayL2Strategy = async (
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            addrs[network].WETH_ADDRESS,
-            addrs[network].DAI_ADDRESS,
+            collAssetAddr,
+            debtAssetAddr,
             '0',
             addrs[network].UNISWAP_WRAPPER,
             0,
@@ -51,7 +53,7 @@ const callAaveV3RepayL2Strategy = async (
     const repayGasCost = 1_000_000; // 1 mil gas
     const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
         repayGasCost,
-        addrs[network].DAI_ADDRESS,
+        debtAssetAddr,
         '0',
         '0',
         '10000000',
@@ -63,7 +65,7 @@ const callAaveV3RepayL2Strategy = async (
         0, // amount
         placeHolderAddr, // proxy
         2, // rateMode
-        addrs[network].DAI_ADDR, // debtAddr
+        debtAssetAddr, // debtAddr
         daiAssetId,
         false, // useOnBehalf
         placeHolderAddr, // onBehalf
@@ -115,6 +117,7 @@ const callAaveFLV3RepayL2Strategy = async (
     subId,
     collAssetId,
     collAssetAddr,
+    debtAssetAddr,
     daiAssetId,
     repayAmount,
     flAddr,
@@ -132,8 +135,8 @@ const callAaveFLV3RepayL2Strategy = async (
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            addrs[network].WETH_ADDRESS,
-            addrs[network].DAI_ADDRESS,
+            collAssetAddr,
+            debtAssetAddr,
             repayAmount,
             addrs[network].UNISWAP_WRAPPER,
             0,
@@ -146,7 +149,7 @@ const callAaveFLV3RepayL2Strategy = async (
     const repayGasCost = 1_330_000; // 1.33 mil gas
     const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
         repayGasCost,
-        addrs[network].DAI_ADDRESS,
+        debtAssetAddr,
         '0',
         '0',
         '10000000',
@@ -158,7 +161,7 @@ const callAaveFLV3RepayL2Strategy = async (
         0, // amount
         placeHolderAddr, // proxy
         2, // rateMode
-        addrs[network].DAI_ADDR, // debtAddr
+        debtAssetAddr, // debtAddr
         daiAssetId,
         false, // useOnBehalf
         placeHolderAddr, // onBehalf

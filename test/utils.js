@@ -119,6 +119,12 @@ const dydxTokens = ['WETH', 'USDC', 'DAI'];
 
 let network = hre.network.config.name;
 
+const chainIds = {
+    mainnet: 1,
+    optimism: 10,
+    arbitrum: 42161,
+};
+
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
 const MIN_VAULT_DAI_AMOUNT = '45010'; // TODO: can we fetch this dynamically
 const MIN_VAULT_RAI_AMOUNT = '3000'; // TODO: can we fetch this dynamically
@@ -1005,6 +1011,7 @@ module.exports = {
     rsptAddress,
     AAVE_MARKET_OPTIMISM,
     network,
+    chainIds,
     setNetwork,
     setBalance,
     takeSnapshot,
