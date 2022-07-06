@@ -1183,8 +1183,10 @@ const getAavePos = async (
 
     aaveInfo.collAmounts.forEach((amount, i) => {
         if (!amount.eq(0)) {
+            console.log(aaveInfo.collAddr[i]);
             const collAssetInfo = assets.find(
-                (a) => a.addresses[chainIds[network]] === aaveInfo.collAddr[i].toLowerCase(),
+                // eslint-disable-next-line max-len
+                (a) => a.addresses[chainIds[network]].toLocaleLowerCase() === aaveInfo.collAddr[i].toLowerCase(),
             );
 
             console.log(`Collateral ${collAssetInfo.symbol}, amount: $${amount / 1e8}`);
