@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+const dfs = require('@defisaver/sdk');
 const { ilks, getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { BigNumber } = require('ethers');
@@ -14,6 +15,7 @@ const {
     withdrawMcd,
     claimMcd,
     sell,
+    executeAction,
 } = require('../actions');
 const {
     getProxy,
@@ -28,6 +30,11 @@ const {
     UNISWAP_WRAPPER,
     MAX_UINT,
     REGISTRY_ADDR,
+    formatExchangeObj,
+    setNewExchangeWrapper,
+    Float2BN,
+    takeSnapshot,
+    revertToSnapshot,
 } = require('../utils');
 const {
     getVaultsForUser,
@@ -39,6 +46,7 @@ const {
     CROPPER_ADDR,
     LDO_ADDR,
     cropData,
+    getRatio,
 } = require('../utils-mcd');
 
 const SUPPLY_AMOUNT_IN_USD = '150000';
@@ -930,6 +938,115 @@ const mcdClaimTest = async () => {
     });
 };
 
+const mcdRepayCompositeTest = async () => {
+    describe('Mcd-Composite-Repay', async function () {
+        this.timeout(80000);
+
+        let makerAddresses;
+        let uniWrapper;
+        let senderAcc;
+        let proxy;
+        let mcdView;
+
+        let snapshot;
+
+        before(async () => {
+            uniWrapper = await redeploy('UniswapWrapperV3');
+            mcdView = await redeploy('McdView');
+
+            makerAddresses = await fetchMakerAddresses();
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+            console.log(`eoa: ${senderAcc.address}`);
+            console.log(`proxy: ${proxy.address}`);
+
+            await setNewExchangeWrapper(senderAcc, uniWrapper.address);
+        });
+
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        for (let i = 0; i < ilks.length; i++) {
+            const ilkData = ilks[i];
+            const joinAddr = ilkData.join;
+            const tokenData = getAssetInfo(ilkData.asset);
+
+            if (tokenData.symbol === 'ETH') {
+                tokenData.address = WETH_ADDRESS;
+            }
+
+            if (![
+                'ETH',
+                'WBTC',
+            // eslint-disable-next-line no-continue
+            ].includes(tokenData.symbol)) continue;
+
+            const repayAmount = fetchAmountinUSDPrice(tokenData.symbol, '10000');
+
+            it(`... should call a FL repay ${repayAmount} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
+                expect(repayAmount).to.not.be.eq(0, `cant fetch price for ${tokenData.symbol}`);
+
+                // create a vault
+                // eslint-disable-next-line no-await-in-loop
+                const vaultId = await openVault(
+                    proxy,
+                    ilkData.ilkLabel,
+                    fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
+                    (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 500).toString(),
+                );
+                expect(vaultId).to.not.be.eq(-1, 'cant open vault');
+
+                const ratioBefore = await getRatio(mcdView, vaultId);
+                const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
+                console.log(
+                    `Ratio before: ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} ${
+                        tokenData.symbol
+                    }, debt: ${info.debt.toFixed(2)} Dai)`,
+                );
+
+                const collToken = tokenData.address;
+                const daiToken = makerAddresses.MCD_DAI;
+
+                const exchangeOrder = formatExchangeObj(
+                    collToken,
+                    daiToken,
+                    Float2BN(repayAmount, tokenData.decimals),
+                    UNISWAP_WRAPPER,
+                );
+
+                const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
+                    vaultId,
+                    Float2BN(repayAmount, tokenData.decimals),
+                    ilkData.isCrop ? CROPPER_ADDR : MCD_MANAGER_ADDR,
+                    joinAddr,
+                    exchangeOrder,
+                );
+
+                const functionData = repayCompositeAction.encodeForDsProxyCall();
+
+                await executeAction('McdRepayComposite', functionData[1], proxy);
+
+                const ratioAfter = await getRatio(mcdView, vaultId);
+                const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
+                console.log(
+                    `Ratio after: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${
+                        tokenData.symbol
+                    }, debt: ${info2.debt.toFixed(2)} Dai)`,
+                );
+
+                expect(ratioAfter).to.be.gt(ratioBefore);
+                expect(info2.coll).to.be.lt(info.coll);
+                expect(info2.debt).to.be.lt(info.debt);
+            });
+        }
+    });
+};
+
 const mcdDeployContracts = async () => {
     await redeploy('McdOpen');
     await redeploy('McdSupply');
@@ -965,5 +1082,6 @@ module.exports = {
     mcdPaybackTest,
     mcdWithdrawTest,
     mcdClaimTest,
+    mcdRepayCompositeTest,
     GENERATE_AMOUNT_IN_USD,
 };
