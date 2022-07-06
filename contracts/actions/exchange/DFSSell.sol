@@ -27,7 +27,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public override payable returns (bytes32) {
+    ) public virtual override payable returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
         params.exchangeData.srcAddr = _parseParamAddr(
@@ -58,14 +58,14 @@ contract DFSSell is ActionBase, DFSExchangeCore {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes memory _callData) public override payable   {
+    function executeActionDirect(bytes memory _callData) public virtual override payable   {
         Params memory params = parseInputs(_callData);
         (, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, true);
         logger.logActionDirectEvent("DFSSell", logData);
     }
 
     /// @inheritdoc ActionBase
-    function actionType() public override pure returns (uint8) {
+    function actionType() public virtual override pure returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
