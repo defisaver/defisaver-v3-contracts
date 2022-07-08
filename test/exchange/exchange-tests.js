@@ -16,8 +16,9 @@ const {
     formatExchangeObj,
     BN2Float,
     formatExchangeObjCurve,
-    REGISTRY_ADDR,
     addrs,
+    takeSnapshot,
+    revertToSnapshot,
 } = require('../utils');
 
 const {
@@ -60,12 +61,19 @@ const curveTrades = [
     },
 ];
 
-const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve = false) => {
-    const sellAssetInfo = getAssetInfo(trade.sellToken);
-    const buyAssetInfo = getAssetInfo(trade.buyToken);
+const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve = false, predefinedRoute) => {
+    let sellAssetInfo;
+    let buyAssetInfo;
+    if (trade.specialCurveCase) {
+        sellAssetInfo = { address: trade.sellAddress, decimals: 18 };
+        buyAssetInfo = { address: trade.buyAddress, decimals: 6 };
+    } else {
+        sellAssetInfo = getAssetInfo(trade.sellToken);
+        buyAssetInfo = getAssetInfo(trade.buyToken);
+    }
 
-    const amount = Float2BN(trade.amount, getAssetInfo(trade.sellToken).decimals);
-
+    const amount = Float2BN(trade.amount, sellAssetInfo.decimals);
+    console.log(amount);
     await setBalance(buyAssetInfo.address, senderAcc.address, Float2BN('0'));
     await setBalance(sellAssetInfo.address, senderAcc.address, amount);
 
@@ -78,6 +86,15 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
             wrapper.address,
             0,
             trade.fee,
+        );
+    } else if (predefinedRoute) {
+        console.log(wrapper.address);
+        exchangeObject = await formatExchangeObjCurve(
+            sellAssetInfo.address,
+            buyAssetInfo.address,
+            amount,
+            wrapper.address,
+            predefinedRoute,
         );
     } else {
         exchangeObject = await formatExchangeObjCurve(
@@ -99,10 +116,7 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
         exchangeData,
     );
     const expectedOutput = +BN2Float(rate) * trade.amount;
-
-    const feeReceiverAmountBefore = await balanceOf(sellAssetInfo.address,
-        addrs[hre.network.config.name].FEE_RECEIVER);
-
+    console.log(wrapper.address);
     await sell(
         proxy,
         sellAssetInfo.address,
@@ -113,14 +127,12 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
         senderAcc.address,
         trade.fee,
         senderAcc,
-        REGISTRY_ADDR,
+        addrs[hre.network.config.name].REGISTRY_ADDR,
         isCurve,
+        predefinedRoute,
     );
-
-    const feeReceiverAmountAfter = await balanceOf(sellAssetInfo.address,
-        addrs[hre.network.config.name].FEE_RECEIVER);
     const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
-
+/*
     // test fee amount
     const tokenGroupRegistry = await hre.ethers.getContractAt('TokenGroupRegistry',
         addrs[hre.network.config.name].TOKEN_GROUP_REGISTRY);
@@ -140,6 +152,7 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
         `);
     }
     return rate;
+    */
 };
 
 const dfsSellTest = async () => {
@@ -256,10 +269,12 @@ const dfsSellTest = async () => {
 
         //     expect(buyBalanceBefore).is.lt(buyBalanceAfter);
         // });
+        let snapshot;
         for (let i = 0; i < trades.length; ++i) {
             const trade = trades[i];
-
             it(`... should sell ${trade.sellToken} for ${trade.buyToken}`, async () => {
+                snapshot = await takeSnapshot();
+                /*
                 const kyberRate = await executeSell(senderAcc, proxy, dfsPrices, trade, kyberWrapper);
                 console.log(`Kyber sell rate -> ${kyberRate}`);
 
@@ -272,7 +287,7 @@ const dfsSellTest = async () => {
 
                 const uniV3Rate = await executeSell(senderAcc, proxy, dfsPrices, trade, uniV3Wrapper);
                 console.log(`UniswapV3 sell rate -> ${uniV3Rate}`);
-
+*/
                 const curveRate = await executeSell(
                     senderAcc,
                     proxy,
@@ -282,6 +297,7 @@ const dfsSellTest = async () => {
                     true,
                 );
                 console.log(`Curve sell rate -> ${curveRate}`);
+                await revertToSnapshot(snapshot);
             });
         }
 
@@ -289,6 +305,8 @@ const dfsSellTest = async () => {
             const trade = curveTrades[i];
 
             it(`... should sell ${trade.sellToken} for ${trade.buyToken} on Curve`, async () => {
+                snapshot = await takeSnapshot();
+
                 const curveRate = await executeSell(
                     senderAcc,
                     proxy,
@@ -298,6 +316,7 @@ const dfsSellTest = async () => {
                     true,
                 );
                 console.log(`Curve sell rate -> ${curveRate}`);
+                await revertToSnapshot(snapshot);
             });
         }
     });
@@ -310,4 +329,5 @@ const dfsExchangeFullTest = async () => {
 module.exports = {
     dfsExchangeFullTest,
     dfsSellTest,
+    executeSell,
 };

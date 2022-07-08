@@ -626,12 +626,20 @@ const formatExchangeObjCurve = async (
     destAddr,
     amount,
     wrapper,
+    predefinedRoute,
 ) => {
-    const { route: sdkRoute } = await curve.getBestRouteAndOutput(
-        srcAddr,
-        destAddr,
-        '1000', // this is fine
-    );
+    console.log(wrapper);
+    let sdkRoute;
+    if (!predefinedRoute) {
+        sdkRoute = await curve.getBestRouteAndOutput(
+            srcAddr,
+            destAddr,
+            '1000', // this is fine
+        );
+        sdkRoute = sdkRoute.route;
+    } else {
+        sdkRoute = predefinedRoute;
+    }
     const swapParams = sdkRoute.map((e) => [e.i, e.j, e.swapType]).concat(
         [...Array(4 - sdkRoute.length).keys()].map(
             () => [0, 0, 0],
@@ -955,4 +963,5 @@ module.exports = {
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),
+    setCode,
 };

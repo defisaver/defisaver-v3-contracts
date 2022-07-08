@@ -2,6 +2,7 @@ const { expect } = require('chai');
 const hre = require('hardhat');
 
 const dfs = require('@defisaver/sdk');
+const dfsRegistryBytecode = require('../../../artifacts/contracts/core/DFSRegistry.sol/DFSRegistry.json').deployedBytecode;
 
 const {
     getAddrFromRegistry,
@@ -25,6 +26,8 @@ const {
     AUNI_ADDR,
     ADAI_ADDR,
     UNI_ADDR,
+    setCode,
+    REGISTRY_ADDR,
 } = require('../../utils');
 const { executeAction } = require('../../actions');
 
@@ -40,6 +43,7 @@ const instAaveDebtShiftTest = async () => {
         /// @notice run on block number 14368070
         before(async () => {
             await resetForkToBlock(14368070);
+            await setCode(REGISTRY_ADDR, dfsRegistryBytecode);
             await redeploy('InstPullTokens');
             await redeploy('AaveCollateralSwitch');
             await redeploy('TokenBalance');
@@ -57,7 +61,7 @@ const instAaveDebtShiftTest = async () => {
             const OWNER_ACC = '0x2Ee8670d2b936985D5fb1EE968810c155D3bB9cA';
             const dsaAddress = '0x63bf1D484d7D799722b1BA9c91f5ffa6d416D60A';
             const dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress);
-            sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '10');
+            await sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '10');
             proxy = await getProxy(OWNER_ACC);
             // Approve dsproxy to have authoritiy over DSA account!
             await impersonateAccount(OWNER_ACC);
@@ -168,7 +172,7 @@ const instAaveDebtShiftTest = async () => {
             const dsaAddress = '0x2E15905711635118da35D5aB9a0f994f2cfb304C';
             const dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress);
 
-            sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '10');
+            await sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '10');
             proxy = await getProxy(OWNER_ACC);
             // Approve dsproxy to have authoritiy over DSA account!
             await impersonateAccount(OWNER_ACC);
@@ -310,7 +314,7 @@ const instAaveNoDebtShiftTest = async () => {
         const OWNER_ACC = '0x6F6c0194A67c2727c61370e76042B3D92F3AC35E';
         before(async () => {
             await resetForkToBlock(12805354);
-
+            await setCode(REGISTRY_ADDR, dfsRegistryBytecode);
             await redeploy('InstPullTokens');
             await redeploy('AaveCollateralSwitch');
 
@@ -381,6 +385,7 @@ const instCompDebtShiftTest = async () => {
 
         before(async () => {
             await resetForkToBlock(13229894);
+            await setCode(REGISTRY_ADDR, dfsRegistryBytecode);
             await redeploy('InstPullTokens');
             await redeploy('CompCollateralSwitch');
             await redeploy('TokenBalance');
@@ -396,7 +401,7 @@ const instCompDebtShiftTest = async () => {
             const OWNER_ACC = '0x9488B8F6BcB897314bcB4Fd986C7C39dc26Dc51f';
             const dsaAddress = '0x2BC853B03481F0EA9e7a02D8E92fDC446f1966C6';
             const dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress);
-            sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '10');
+            await sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '10');
             proxy = await getProxy(OWNER_ACC);
             // Approve dsproxy to have authoritiy over DSA account!
             await impersonateAccount(OWNER_ACC);

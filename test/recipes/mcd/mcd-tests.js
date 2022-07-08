@@ -1,7 +1,8 @@
 const { expect } = require('chai');
 const hre = require('hardhat');
 
-const { getAssetInfo, ilks } = require('@defisaver/tokens');
+const { getAssetInfo } = require('@defisaver/tokens');
+let ilks = require('@defisaver/tokens');
 const dfs = require('@defisaver/sdk');
 
 const {
@@ -20,6 +21,8 @@ const {
     approve,
     setBalance,
     UNISWAP_WRAPPER,
+    takeSnapshot,
+    revertToSnapshot,
 } = require('../../utils');
 
 const {
@@ -38,6 +41,9 @@ const GENERATE_AMOUNT_IN_USD = '50000';
 const {
     openVaultForExactAmountInDecimals, gUniDeposit, openVault, executeAction,
 } = require('../../actions');
+
+const usableAssets = ['ETH', 'WBTC'];
+ilks = ilks.ilks.filter((ilk) => usableAssets.includes(ilk.asset));
 
 const McdPaybackAction = dfs.actions.maker.MakerPaybackAction;
 const McdWithdrawAction = dfs.actions.maker.MakerWithdrawAction;
@@ -167,7 +173,6 @@ const mcdBoostTest = async () => {
                 //     (standardAmounts[tokenData.symbol] * 2).toString(),
                 //     (parseInt(MIN_VAULT_DAI_AMOUNT) + 200).toString()
                 // );
-
                 boostAmount = '200';
 
                 boostAmount = hre.ethers.utils.parseUnits(boostAmount, 18);
@@ -276,7 +281,7 @@ const mcdBoostTest = async () => {
                 proxy,
                 joinAddr,
                 { address: GUNIV3DAIUSDC, decimals: 18 },
-                poolTokensBalanceAfter.toString(),
+                poolTokensBalanceAfter,
                 (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString(),
             );
             const ratioBefore = await getRatio(mcdView, vaultId);
@@ -364,22 +369,21 @@ const mcdCloseTest = async () => {
         let makerAddresses;
         let senderAcc;
         let proxy;
-        let dydxFlAddr;
+        let flBalancerAddr;
         let uniWrapper;
         // let mcdView;
+        let snapshot;
 
         before(async () => {
             await redeploy('RecipeExecutor');
-            await redeploy('FLDyDx');
+            await redeploy('FLBalancer');
             await redeploy('DFSSell');
             await redeploy('SendToken');
-
-            // mcdView = await redeploy('McdView');
 
             makerAddresses = await fetchMakerAddresses();
             uniWrapper = await redeploy('UniswapWrapperV3');
 
-            dydxFlAddr = await getAddrFromRegistry('FLDyDx');
+            flBalancerAddr = await getAddrFromRegistry('FLBalancer');
 
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
@@ -387,7 +391,14 @@ const mcdCloseTest = async () => {
             await setNewExchangeWrapper(senderAcc, uniWrapper.address);
         });
 
-        for (let i = 0; i < 1; ++i) {
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+        afterEach(async () => {
+            revertToSnapshot(snapshot);
+        });
+
+        for (let i = 0; i < ilks.length; ++i) {
             const ilkData = ilks[i];
             const tokenData = getAssetInfo(ilkData.asset);
 
@@ -397,7 +408,6 @@ const mcdCloseTest = async () => {
 
             const joinAddr = ilkData.join;
             const tokenAddr = tokenData.address;
-
             it(`... should close a ${ilkData.ilkLabel} Vault and return Dai`, async () => {
                 const canGenerate = await canGenerateDebt(ilkData);
                 if (!canGenerate) {
@@ -422,8 +432,6 @@ const mcdCloseTest = async () => {
                 let flAmount = (parseFloat(amountDai) + 1).toString();
                 flAmount = hre.ethers.utils.parseUnits(flAmount, 18);
 
-                console.log(hre.ethers.utils.parseUnits(vaultColl, tokenData.decimals).toString());
-
                 const exchangeOrder = formatExchangeObj(
                     tokenAddr,
                     daiAddr,
@@ -432,11 +440,9 @@ const mcdCloseTest = async () => {
                 );
 
                 const closeToDaiVaultRecipe = new dfs.Recipe('CloseToDaiVaultRecipe', [
-                    new dfs.actions.flashloan.DyDxFlashLoanAction(
-                        flAmount,
-                        daiAddr,
-                        nullAddress,
-                        [],
+                    new dfs.actions.flashloan.BalancerFlashLoanAction(
+                        [daiAddr],
+                        [flAmount],
                     ),
                     new dfs.actions.maker.MakerPaybackAction(
                         vaultId,
@@ -452,7 +458,7 @@ const mcdCloseTest = async () => {
                         MCD_MANAGER_ADDR,
                     ),
                     new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
-                    new dfs.actions.basic.SendTokenAction(daiAddr, dydxFlAddr, flAmount),
+                    new dfs.actions.basic.SendTokenAction(daiAddr, flBalancerAddr, flAmount),
                     new dfs.actions.basic.SendTokenAction(
                         daiAddr,
                         senderAcc.address,
@@ -491,9 +497,26 @@ const mcdCloseTest = async () => {
                     amountColl,
                     amountDai,
                 );
+                const mcdView = await redeploy('McdView');
+                const ratio = await getRatio(mcdView, vaultId);
+                console.log(`Vault id: #${vaultId} has ratio ${ratio}%`);
+
+                const cdpState = await getVaultInfo(
+                    mcdView, vaultId, ilkData.ilkBytes, MCD_MANAGER_ADDR,
+                );
+
+                console.log(`Coll: ${cdpState.coll}`);
+                console.log(`Debt: ${cdpState.debt}`);
 
                 // Vault debt + 1 dai to handle stability fee
                 let flAmount = (parseFloat(amountDai) + 1).toString();
+
+                let flAmountInCollAsset = fetchAmountinUSDPrice(tokenData.symbol, flAmount);
+
+                flAmountInCollAsset *= 1.1;
+                flAmountInCollAsset = (parseFloat(flAmountInCollAsset).toFixed(2));
+                console.log(flAmountInCollAsset);
+
                 flAmount = hre.ethers.utils.parseUnits(flAmount, 18);
 
                 const daiAddr = makerAddresses.MCD_DAI;
@@ -501,17 +524,14 @@ const mcdCloseTest = async () => {
                 const exchangeOrder = formatExchangeObj(
                     tokenAddr,
                     daiAddr,
-                    hre.ethers.utils.parseUnits(amountColl, tokenData.decimals),
+                    hre.ethers.utils.parseUnits(flAmountInCollAsset.toString(), tokenData.decimals),
                     uniWrapper.address,
-                    flAmount,
                 );
 
                 const closeToCollVaultRecipe = new dfs.Recipe('CloseToCollVaultRecipe', [
-                    new dfs.actions.flashloan.DyDxFlashLoanAction(
-                        flAmount,
-                        daiAddr,
-                        nullAddress,
-                        [],
+                    new dfs.actions.flashloan.BalancerFlashLoanAction(
+                        [daiAddr],
+                        [flAmount],
                     ),
                     new dfs.actions.maker.MakerPaybackAction(
                         vaultId,
@@ -526,7 +546,13 @@ const mcdCloseTest = async () => {
                         proxy.address,
                         MCD_MANAGER_ADDR,
                     ),
-                    new dfs.actions.basic.BuyAction(exchangeOrder, proxy.address, dydxFlAddr),
+                    new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
+                    new dfs.actions.basic.SendTokenAction(daiAddr, flBalancerAddr, flAmount),
+                    new dfs.actions.basic.SendTokenAction(
+                        daiAddr,
+                        senderAcc.address,
+                        hre.ethers.constants.MaxUint256,
+                    ),
                     new dfs.actions.basic.SendTokenAction(
                         tokenAddr,
                         senderAcc.address,
@@ -556,10 +582,10 @@ const mcdCreateTest = async () => {
         let makerAddresses;
         let senderAcc;
         let proxy;
-        let dydxFlAddr;
-        // let aaveV2FlAddr;
         let mcdView;
         let uniWrapper;
+        let snapshot;
+        let flBalancerAddr;
 
         before(async () => {
             await redeploy('McdOpen');
@@ -567,16 +593,14 @@ const mcdCreateTest = async () => {
             await redeploy('RecipeExecutor');
             await redeploy('SumInputs');
             await redeploy('McdGenerate');
-            await redeploy('FLDyDx');
-            await redeploy('FLAaveV2');
+            await redeploy('FLBalancer');
 
             mcdView = await redeploy('McdView');
             uniWrapper = await redeploy('UniswapWrapperV3');
 
             makerAddresses = await fetchMakerAddresses();
 
-            dydxFlAddr = await getAddrFromRegistry('FLDyDx');
-            // aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
+            flBalancerAddr = await getAddrFromRegistry('FLBalancer');
 
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
@@ -584,7 +608,14 @@ const mcdCreateTest = async () => {
             await setNewExchangeWrapper(senderAcc, uniWrapper.address);
         });
 
-        for (let i = 0; i < 1; ++i) {
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+        afterEach(async () => {
+            revertToSnapshot(snapshot);
+        });
+
+        for (let i = 0; i < ilks.length; ++i) {
             const ilkData = ilks[i];
             const tokenData = getAssetInfo(ilkData.asset);
 
@@ -608,7 +639,7 @@ const mcdCreateTest = async () => {
                 const daiAmount = hre.ethers.utils.parseUnits(amount, 18);
                 const collAmount = BigNumber.from(
                     hre.ethers.utils.parseUnits(
-                        fetchAmountinUSDPrice('WETH', SUPPLY_AMOUNT_IN_USD),
+                        fetchAmountinUSDPrice(ilkData.asset, SUPPLY_AMOUNT_IN_USD),
                         tokenData.decimals,
                     ),
                 );
@@ -668,7 +699,7 @@ const mcdCreateTest = async () => {
 
                 const collAmount = BigNumber.from(
                     hre.ethers.utils.parseUnits(
-                        fetchAmountinUSDPrice('WETH', SUPPLY_AMOUNT_IN_USD),
+                        fetchAmountinUSDPrice(ilkData.asset, SUPPLY_AMOUNT_IN_USD),
                         tokenData.decimals,
                     ),
                 );
@@ -686,13 +717,9 @@ const mcdCreateTest = async () => {
                 );
 
                 const createVaultRecipe = new dfs.Recipe('CreateVaultRecipe', [
-                    // eslint-disable-next-line max-len
-                    // new dfs.actions.flashloan.AaveV2FlashLoanAction([daiAmount], [daiAddr], [0], nullAddress, nullAddress, []),
-                    new dfs.actions.flashloan.DyDxFlashLoanAction(
-                        daiAmount,
-                        daiAddr,
-                        nullAddress,
-                        [],
+                    new dfs.actions.flashloan.BalancerFlashLoanAction(
+                        [daiAddr],
+                        [daiAmount],
                     ),
                     new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
                     new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR),
@@ -707,7 +734,7 @@ const mcdCreateTest = async () => {
                     new dfs.actions.maker.MakerGenerateAction(
                         '$3',
                         '$1',
-                        dydxFlAddr,
+                        flBalancerAddr,
                         MCD_MANAGER_ADDR,
                     ),
                 ]);
@@ -730,15 +757,6 @@ const mcdCreateTest = async () => {
                 expect(info2.debt).to.be.gte(parseInt(amount, 10));
             });
         }
-
-        // it(`... should create a leveraged UNIV2ETHDAI vault`, async () => {
-        //     const uniJoinAddr = '';
-
-        //     const uniVaultRecipe = new dfs.Recipe("CreateVaultRecipe", [
-        //         new dfs.actions.maker.MakerOpenVaultAction(uniJoinAddr, MCD_MANAGER_ADDR),
-
-        //     ]);
-        // });
     });
 };
 
@@ -770,7 +788,7 @@ const mcdRepayTest = async () => {
             await setNewExchangeWrapper(senderAcc, uniWrapper.address);
         });
 
-        for (let i = 0; i < 1; ++i) {
+        for (let i = 0; i < ilks.length; ++i) {
             const ilkData = ilks[i];
             const joinAddr = ilkData.join;
             const tokenData = getAssetInfo(ilkData.asset);
@@ -784,6 +802,12 @@ const mcdRepayTest = async () => {
 
             it(`... should call a repay ${repayAmount} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
                 // create a vault
+                const canGenerate = await canGenerateDebt(ilkData);
+                if (!canGenerate) {
+                    // eslint-disable-next-line no-unused-expressions
+                    expect(true).to.be.true;
+                    return;
+                }
                 vaultId = await openVault(
                     proxy,
                     ilkData.ilkLabel,
@@ -851,6 +875,12 @@ const mcdRepayTest = async () => {
             });
 
             it(`... should call a FL repay ${repayAmount} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
+                const canGenerate = await canGenerateDebt(ilkData);
+                if (!canGenerate) {
+                    // eslint-disable-next-line no-unused-expressions
+                    expect(true).to.be.true;
+                    return;
+                }
                 // create a vault
                 vaultId = await openVault(
                     proxy,

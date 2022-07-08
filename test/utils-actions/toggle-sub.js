@@ -8,6 +8,8 @@ describe('Toggle-sub', function () {
 
     before(async () => {
         await redeploy('ToggleSub');
+        await redeploy('PullToken');
+        await redeploy('GasPriceTrigger');
     });
     it('... should activate/deactivate sub in an action', async () => {
         await toggleSubDataTest();

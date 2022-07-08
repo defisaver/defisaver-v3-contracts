@@ -644,8 +644,8 @@ const updateSubDataTest = async () => {
         });
 
         it('... should update sub data', async () => {
-            const vaultColl = fetchAmountinUSDPrice('WETH', '40000');
-            const amountDai = fetchAmountinUSDPrice('DAI', '18000');
+            const vaultColl = fetchAmountinUSDPrice('WETH', '100000');
+            const amountDai = fetchAmountinUSDPrice('DAI', '20000');
             vaultId = await openVault(
                 proxy,
                 'ETH-A',
@@ -721,11 +721,11 @@ const toggleSubDataTest = async () => {
             const pullTokenAction = new dfs.actions.basic.PullTokenAction(
                 WETH_ADDRESS, '&eoa', '&amount',
             );
-
             dummyStrategy.addTrigger((new dfs.triggers.GasPriceTrigger(0)));
             dummyStrategy.addAction(pullTokenAction);
 
             const callData = dummyStrategy.encodeForDsProxyCall();
+            await openStrategyAndBundleStorage();
 
             const strategyId = await createStrategy(proxy, ...callData, false);
 

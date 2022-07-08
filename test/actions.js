@@ -58,13 +58,13 @@ const executeAction = async (actionName, functionData, proxy, regAddr = addrs[ne
         const blockNum = await hre.ethers.provider.getBlockNumber();
         const block = await hre.ethers.provider.getBlockWithTransactions(blockNum);
         const txHash = block.transactions[0].hash;
-        await execShellCommand(`tenderly export ${txHash}`);
+        //await execShellCommand(`tenderly export ${txHash}`);
         throw error;
     }
 };
 
 // eslint-disable-next-line max-len
-const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0, signer, regAddr = REGISTRY_ADDR, isCurve = false) => {
+const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0, signer, regAddr = REGISTRY_ADDR, isCurve = false, predefinedRoute) => {
     let exchangeObject;
     if (!isCurve) {
         exchangeObject = formatExchangeObj(
@@ -75,6 +75,14 @@ const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee
             0,
             fee,
         );
+    } else if (predefinedRoute) {
+        exchangeObject = await formatExchangeObjCurve(
+            sellAddr,
+            buyAddr,
+            sellAmount.toString(),
+            wrapper,
+            predefinedRoute,
+        );
     } else {
         exchangeObject = await formatExchangeObjCurve(
             sellAddr,
@@ -83,18 +91,28 @@ const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee
             wrapper,
         );
     }
+    console.log("HERE");
+    console.log(exchangeObject);
+    console.log("HERE");
 
+    console.log(from);
+    console.log("HERE");
+
+    console.log(to);
     const sellAction = new dfs.actions.basic.SellAction(exchangeObject, from, to);
 
     const functionData = sellAction.encodeForDsProxyCall()[1];
-
+    console.log("TEST");
     if (isEth(sellAddr)) {
         await depositToWeth(sellAmount.toString(), signer);
     }
+    console.log("TEST");
 
     await approve(sellAddr, proxy.address, signer);
+    console.log("TEST");
 
     const tx = await executeAction('DFSSell', functionData, proxy, regAddr);
+    console.log(tx);
     return tx;
 };
 

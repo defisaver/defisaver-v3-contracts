@@ -1,5 +1,5 @@
+MAINNET
 aave - pass
-aaveV3 - pass
 auth - pass
 balancer - pass
 compound - pass
@@ -8,7 +8,6 @@ guni - pass
 insta - pass
 lido - pass
 mcd - pass
-qidao - pass
 rari - pass
 reflexer - pass
 triggers - pass
@@ -19,13 +18,20 @@ views - pass
 yearn - pass
 mstable - pass
 liquity - pass
-exchange - pass (see with kjare bad liq or rate getter)
+convex - pass
+core - pass
+curve - pass
+utils-actions - pass
+exchange - pass (exchange wrapper fixes branch)
 
-curve - not live?
-convex - (update sdk)
+Optimism
+aaveV3 - pass
 
-core
+Arbitrum
+qidao - pass
 
 strategies - many errors
-utils-actions - (toggleSub + sendTokenUnwrap sdk issues)
-recipes - 6 fail (old block before new registry and more)
+recipes:
+recipesCompound - pass
+recipesMcd - close (Buy action), repay GUNI
+recipesInst - nothing works
