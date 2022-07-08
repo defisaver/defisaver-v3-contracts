@@ -43,6 +43,54 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
     ) public payable virtual override (ActionBase, DFSSell) returns (bytes32) {
         RepayParams memory repayParams = _parseCompositParams(_callData);
 
+        repayParams.vaultId = _parseParamUint(
+            repayParams.vaultId,
+            _paramMapping[0],
+            _subData,
+            _returnValues
+        );
+
+        repayParams.repayAmount = _parseParamUint(
+            repayParams.repayAmount,
+            _paramMapping[1],
+            _subData,
+            _returnValues
+        );
+
+        repayParams.mcdManager = _parseParamAddr(
+            repayParams.mcdManager,
+            _paramMapping[2],
+            _subData,
+            _returnValues
+        );
+
+        repayParams.joinAddr = _parseParamAddr(
+            repayParams.joinAddr,
+            _paramMapping[3],
+            _subData,
+            _returnValues
+        );
+
+        repayParams.exchangeData.srcAddr = _parseParamAddr(
+            repayParams.exchangeData.srcAddr,
+            _paramMapping[4],
+            _subData,
+            _returnValues
+        );
+        repayParams.exchangeData.destAddr = _parseParamAddr(
+            repayParams.exchangeData.destAddr,
+            _paramMapping[5],
+            _subData,
+            _returnValues
+        );
+
+        repayParams.exchangeData.srcAmount = _parseParamUint(
+            repayParams.exchangeData.srcAmount,
+            _paramMapping[6],
+            _subData,
+            _returnValues
+        );
+
         _flBalancer(repayParams);
     }
 
@@ -102,8 +150,6 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         _repayParams.exchangeData.srcAmount = _repayParams.repayAmount; // CONSIDER
         _repayParams.exchangeData.destAddr = DAI_ADDR; // CONSIDER
         (uint256 exchangedAmount, ) = _dfsSell(_repayParams.exchangeData, address(this), address(this), false);
-
-        // PAYBACK c+p
 
         (address urn, bytes32 ilk) = getUrnAndIlk(address(mcdManager), _repayParams.vaultId);
 
@@ -172,7 +218,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
 
         // Allows cropper to access to proxy's DAI balance in the vat
         vat.hope(CROPPER);
-        // Paybacks debt to the CDP
+        // Payback debt and withdraw collateral
         {
             int256 paybackAmountNormalized = normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk);
             ICropper(CROPPER).frob(
@@ -184,7 +230,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
                 paybackAmountNormalized
             );
         }
-        // Denies cropper to access to proxy"s DAI balance in the vat after execution
+        // Denies cropper to access to proxy's DAI balance in the vat after execution
         vat.nope(CROPPER);
 
 
