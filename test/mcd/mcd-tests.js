@@ -1,5 +1,4 @@
 /* eslint-disable max-len */
-const dfs = require('@defisaver/sdk');
 const { ilks, getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { BigNumber } = require('ethers');
@@ -15,7 +14,7 @@ const {
     withdrawMcd,
     claimMcd,
     sell,
-    executeAction,
+    mcdRepayComposite,
 } = require('../actions');
 const {
     getProxy,
@@ -943,16 +942,20 @@ const mcdRepayCompositeTest = async () => {
         this.timeout(80000);
 
         let makerAddresses;
-        let uniWrapper;
+        let sellWrapper;
+        let backupWrapper;
         let senderAcc;
         let proxy;
         let mcdView;
+        let repayComposite;
 
         let snapshot;
 
         before(async () => {
-            uniWrapper = await redeploy('UniswapWrapperV3');
+            sellWrapper = await redeploy('UniswapWrapperV3');
+            backupWrapper = await redeploy('UniV3WrapperV3');
             mcdView = await redeploy('McdView');
+            repayComposite = await redeploy('McdRepayComposite');
 
             makerAddresses = await fetchMakerAddresses();
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -960,7 +963,8 @@ const mcdRepayCompositeTest = async () => {
             console.log(`eoa: ${senderAcc.address}`);
             console.log(`proxy: ${proxy.address}`);
 
-            await setNewExchangeWrapper(senderAcc, uniWrapper.address);
+            await setNewExchangeWrapper(senderAcc, sellWrapper.address);
+            await setNewExchangeWrapper(senderAcc, backupWrapper.address);
         });
 
         beforeEach(async () => {
@@ -983,6 +987,7 @@ const mcdRepayCompositeTest = async () => {
             if (![
                 'ETH',
                 'WBTC',
+                'wstETH',
             // eslint-disable-next-line no-continue
             ].includes(tokenData.symbol)) continue;
 
@@ -1016,20 +1021,22 @@ const mcdRepayCompositeTest = async () => {
                     collToken,
                     daiToken,
                     Float2BN(repayAmount, tokenData.decimals),
-                    UNISWAP_WRAPPER,
+                    sellWrapper.address,
                 );
 
-                const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
+                if (tokenData.symbol === 'wstETH') {
+                    exchangeOrder[7] = backupWrapper.address;
+                    exchangeOrder[8] = '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca00001f4c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20001f46b175474e89094c44da98b954eedeac495271d0f';
+                }
+
+                await mcdRepayComposite(
+                    proxy,
                     vaultId,
                     Float2BN(repayAmount, tokenData.decimals),
                     ilkData.isCrop ? CROPPER_ADDR : MCD_MANAGER_ADDR,
                     joinAddr,
                     exchangeOrder,
                 );
-
-                const functionData = repayCompositeAction.encodeForDsProxyCall();
-
-                await executeAction('McdRepayComposite', functionData[1], proxy);
 
                 const ratioAfter = await getRatio(mcdView, vaultId);
                 const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
@@ -1042,6 +1049,8 @@ const mcdRepayCompositeTest = async () => {
                 expect(ratioAfter).to.be.gt(ratioBefore);
                 expect(info2.coll).to.be.lt(info.coll);
                 expect(info2.debt).to.be.lt(info.debt);
+                expect(await balanceOf(tokenData.address, repayComposite.address)).to.be.eq(0);
+                expect(await balanceOf(DAI_ADDR, repayComposite.address)).to.be.eq(0);
             });
         }
     });

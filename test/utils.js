@@ -164,6 +164,7 @@ const coinGeckoHelper = {
     KNCL: 'kyber-network',
     MANA: 'decentraland',
     PAXUSD: 'paxos-standard',
+    USDP: 'paxos-standard',
     COMP: 'compound-governance-token',
     LRC: 'loopring',
     LINK: 'chainlink',
@@ -180,6 +181,7 @@ const coinGeckoHelper = {
     RAI: 'rai',
     MATIC: 'matic-network',
     SUSHI: 'sushi',
+    wstETH: 'wrapped-steth',
 };
 
 const getOwnerAddr = () => addrs[network].OWNER_ACC;

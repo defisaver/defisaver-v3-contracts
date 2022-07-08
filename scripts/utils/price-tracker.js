@@ -11,7 +11,7 @@ const req = CoinGeckoClient.simple.price({
         + 'renbtc,0x,kyber-network,decentraland,paxos-standard,compound-governance-token,'
         + 'gemini-dollar,yearn-finance,liquity-usd,liquity,tornado-cash,musd,imusd,rai,'
         + 'loopring,chainlink,tether,true-usd,balancer,musd,imusd,pax-dollar,'
-        + 'gemini-dollar,yearn-finance,liquity-usd,liquity,tornado-cash,sushi,matic-network,',
+        + 'gemini-dollar,yearn-finance,liquity-usd,liquity,tornado-cash,sushi,matic-network,wrapped-steth',
     vs_currencies: 'usd',
 });
 

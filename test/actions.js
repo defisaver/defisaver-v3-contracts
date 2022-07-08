@@ -574,6 +574,28 @@ const mcdMerge = async (proxy, srcVaultId, destVaultId) => {
     return tx;
 };
 
+const mcdRepayComposite = async (
+    proxy,
+    vaultId,
+    repayAmount,
+    mcdManager,
+    joinAddr,
+    exchangeParams,
+) => {
+    const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
+        vaultId,
+        repayAmount,
+        mcdManager,
+        joinAddr,
+        exchangeParams,
+    );
+
+    const functionData = repayCompositeAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('McdRepayComposite', functionData, proxy);
+    return tx;
+};
+
 /*
   _______  __    __  .__   __.  __
  /  _____||  |  |  | |  \ |  | |  |
@@ -2156,4 +2178,6 @@ module.exports = {
     convexDeposit,
     convexWithdraw,
     convexClaim,
+
+    mcdRepayComposite,
 };
