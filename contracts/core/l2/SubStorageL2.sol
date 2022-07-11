@@ -11,7 +11,6 @@ import "../strategy/StrategyModel.sol";
 /// @title Storage of users subscriptions to strategies/bundles
 contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
     error SenderNotSubOwnerError(address, uint256);
-    error UserPositionsEmpty();
     error SubIdOutOfRange(uint256, bool);
 
     event Subscribe(uint256 indexed subId, address indexed proxy, bytes32 indexed subHash, StrategySub subStruct);
