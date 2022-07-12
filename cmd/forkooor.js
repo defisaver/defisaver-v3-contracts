@@ -1002,6 +1002,11 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
 
     setNetwork(network);
 
+    await redeploy('AaveV3Payback', addrs[network].REGISTRY_ADDR, false, true);
+    await redeploy('AaveV3Withdraw', addrs[network].REGISTRY_ADDR, false, true);
+    await redeploy('AaveV3Supply', addrs[network].REGISTRY_ADDR, false, true);
+    await redeploy('AaveV3Borrow', addrs[network].REGISTRY_ADDR, false, true);
+
     const collAssetInfo = assets.find((i) => i.symbol === collSymbol);
     const debtAssetInfo = assets.find((i) => i.symbol === debtSymbol);
 
