@@ -9,9 +9,9 @@ import "../../../utils/FeeRecipient.sol";
 import "../../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../../../interfaces/aaveV2/IPriceOracleGetterAave.sol";
 
-import "../helpers/MainnetFeeAddresses.sol";
+import "../helpers/OptimismFeeAddresses.sol";
 
-contract GasFeeHelper is DSMath, MainnetFeeAddresses {
+contract GasFeeHelper is DSMath, OptimismFeeAddresses {
     using TokenUtils for address;
 
     FeeRecipient public constant feeRecipient = FeeRecipient(FEE_RECIPIENT);
