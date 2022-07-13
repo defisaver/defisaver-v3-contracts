@@ -49,16 +49,8 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes memory _callData) public payable override {
-        Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _withdraw(
-            params.market,
-            params.assetId,
-            params.amount,
-            params.to
-        );
-        logger.logActionDirectEvent("AaveV3Withdraw", logData);
-    }
+    /// @dev Only used on L2 currently, must parse inputs here if implemented later on
+    function executeActionDirect(bytes memory _callData) public payable override {}
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
