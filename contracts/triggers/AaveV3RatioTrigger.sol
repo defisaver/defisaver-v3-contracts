@@ -32,6 +32,8 @@ contract AaveV3RatioTrigger is ITrigger, AdminAuth, AaveV3RatioHelper {
 
         uint256 currRatio = getSafetyRatio(triggerSubData.market, triggerSubData.user);
 
+        if (currRatio == 0) return false;
+
         tempStorage.setBytes32("AAVE_RATIO", bytes32(currRatio));
 
         if (RatioState(triggerSubData.state) == RatioState.OVER) {
