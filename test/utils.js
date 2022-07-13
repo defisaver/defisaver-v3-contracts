@@ -482,11 +482,12 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
         if (regAddr === addrs[network].REGISTRY_ADDR) {
             await impersonateAccount(getOwnerAddr());
         }
+
+        const ethSender = (await hre.ethers.getSigners())[0];
+        await sendEther(ethSender, getOwnerAddr(), '100');
     }
 
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
-    const ethSender = (await hre.ethers.getSigners())[0];
-    await sendEther(ethSender, getOwnerAddr(), '100');
     const registryInstance = await hre.ethers.getContractFactory('DFSRegistry', signer);
     let registry = await registryInstance.attach(regAddr);
 
