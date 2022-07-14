@@ -191,7 +191,7 @@ const aaveV3RepayL2StrategyTest = async (numTestPairs) => {
                 console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
 
                 const repayAmount = hre.ethers.utils.parseUnits(
-                    fetchAmountinUSDPrice(testPairs[i].collAsset, '3000'),
+                    fetchAmountinUSDPrice(testPairs[i].collAsset, '2000'),
                     collAssetInfo.decimals,
                 );
 
@@ -216,12 +216,8 @@ const aaveV3RepayL2StrategyTest = async (numTestPairs) => {
                 const ratioBefore = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
                 console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
 
-                let targetRatio = hre.ethers.utils.parseUnits('2', '18');
-                const ratioUnder = hre.ethers.utils.parseUnits('1.85', '18');
-
-                if (i === 2) {
-                    targetRatio = hre.ethers.utils.parseUnits('2.2', '18');
-                }
+                const targetRatio = hre.ethers.utils.parseUnits('2.2', '18');
+                const ratioUnder = hre.ethers.utils.parseUnits('2', '18');
 
                 await updateAaveV3L2AutomationStrategy(
                     proxy,
@@ -235,7 +231,7 @@ const aaveV3RepayL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const repayAmount = hre.ethers.utils.parseUnits(
-                    fetchAmountinUSDPrice(testPairs[i].collAsset, '2000'),
+                    fetchAmountinUSDPrice(testPairs[i].collAsset, '2300'),
                     collAssetInfo.decimals,
                 );
 

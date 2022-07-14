@@ -500,6 +500,11 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
         name = 'StrategyExecutorID';
     }
 
+    if (name === 'FLAaveV3') {
+        // eslint-disable-next-line no-param-reassign
+        name = 'FLActionL2';
+    }
+
     const id = getNameId(name);
 
     console.log(name, id);

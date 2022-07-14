@@ -6,10 +6,10 @@ pragma experimental ABIEncoderV2;
 
 import "../../utils/FeeRecipient.sol";
 import "../ActionBase.sol";
-import "./helpers/GasFeeHelper.sol";
+import "./helpers/GasFeeHelperL2.sol";
 
 /// @title Helper action to send a token to the specified address
-contract GasFeeTakerL2 is ActionBase, GasFeeHelper {
+contract GasFeeTakerL2 is ActionBase, GasFeeHelperL2 {
     using TokenUtils for address;
 
     struct Params {
