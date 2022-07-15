@@ -81,6 +81,10 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
                 SubStorageL2(SUB_STORAGE_ADDR).activateSub(subId2);
 
             }
+        } else {
+            if (subId2 != 0) {
+                SubStorageL2(SUB_STORAGE_ADDR).deactivateSub(subId2);
+            }
         }
     }
 
