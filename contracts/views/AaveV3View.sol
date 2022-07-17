@@ -265,8 +265,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         });
 
         uint64 collPos = 0;
-        uint64 borrowStablePos = 0;
-        uint64 borrowVariablePos = 0;
+        uint64 borrowPos = 0;
+
         for (uint256 i = 0; i < reserveList.length; i++) {
             address reserve = reserveList[i];
             uint256 price = getAssetPrice(_market, reserve);
@@ -285,17 +285,19 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             // Sum up debt in Usd
             if (borrowsStable > 0) {
                 uint256 userBorrowBalanceEth = (borrowsStable * price) / (10 ** (reserve.getTokenDecimals()));
-                data.borrowAddr[borrowStablePos] = reserve;
-                data.borrowStableAmounts[borrowStablePos] = userBorrowBalanceEth;
-                borrowStablePos++;
+                data.borrowAddr[borrowPos] = reserve;
+                data.borrowStableAmounts[borrowPos] = userBorrowBalanceEth;
             }
 
             // Sum up debt in Usd
             if (borrowsVariable > 0) {
                 uint256 userBorrowBalanceEth = (borrowsVariable * price) / (10 ** (reserve.getTokenDecimals()));
-                data.borrowAddr[borrowVariablePos] = reserve;
-                data.borrowVariableAmounts[borrowVariablePos] = userBorrowBalanceEth;
-                borrowVariablePos++;
+                data.borrowAddr[borrowPos] = reserve;
+                data.borrowVariableAmounts[borrowPos] = userBorrowBalanceEth;
+            }
+
+            if (borrowsStable > 0 || borrowsVariable > 0) {
+                borrowPos++;
             }
         }
 
