@@ -276,23 +276,23 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             uint256 borrowsVariable = reserveData.variableDebtTokenAddress.getBalance(_user);
         
             if (aTokenBalance > 0) {
-                uint256 userTokenBalanceEth = wmul(aTokenBalance, price) * (10 ** (18 - reserve.getTokenDecimals()));
+                uint256 userTokenBalanceEth = (aTokenBalance * price) / (10 ** (reserve.getTokenDecimals()));
                 data.collAddr[collPos] = reserve;
                 data.collAmounts[collPos] = userTokenBalanceEth;
                 collPos++;
             }
 
-            // Sum up debt in Eth
+            // Sum up debt in Usd
             if (borrowsStable > 0) {
-                uint256 userBorrowBalanceEth = wmul(borrowsStable, price) * (10 ** (18 - reserve.getTokenDecimals()));
+                uint256 userBorrowBalanceEth = (borrowsStable * price) / (10 ** (reserve.getTokenDecimals()));
                 data.borrowAddr[borrowStablePos] = reserve;
                 data.borrowStableAmounts[borrowStablePos] = userBorrowBalanceEth;
                 borrowStablePos++;
             }
 
-            // Sum up debt in Eth
+            // Sum up debt in Usd
             if (borrowsVariable > 0) {
-                uint256 userBorrowBalanceEth = wmul(borrowsVariable, price) * (10 ** (18 - reserve.getTokenDecimals()));
+                uint256 userBorrowBalanceEth = (borrowsVariable * price) / (10 ** (reserve.getTokenDecimals()));
                 data.borrowAddr[borrowVariablePos] = reserve;
                 data.borrowVariableAmounts[borrowVariablePos] = userBorrowBalanceEth;
                 borrowVariablePos++;
