@@ -71,7 +71,6 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
             _validateSubData(subData);
 
             StrategySub memory boostSub = formatBoostSub(subData);
-            SubStorageL2(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
 
             // if we don't have a boost bundleId, create one
             if (subId2 == 0) {
@@ -79,7 +78,6 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
             } else {
                 SubStorageL2(SUB_STORAGE_ADDR).updateSubData(subId2, boostSub);
                 SubStorageL2(SUB_STORAGE_ADDR).activateSub(subId2);
-
             }
         } else {
             if (subId2 != 0) {
