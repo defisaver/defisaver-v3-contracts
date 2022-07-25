@@ -1331,7 +1331,7 @@ const setBotAuth = async (addr) => {
                     // eslint-disable-next-line no-await-in-loop
                     await topUp(botAddr);
                     // eslint-disable-next-line no-await-in-loop
-                    await addBotCaller(botAddr, REGISTRY_ADDR, true);
+                    await addBotCaller(botAddr, addrs[network].REGISTRY_ADDR, true);
                 }
             }
 
