@@ -102,10 +102,10 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
     }
 
     /// @notice Gets a FL from Balancer and returns back the execution to the action address
-    function _flBalancer(RepayParams memory _repayParams) internal returns (uint256) {
+    function _flBalancer(RepayParams memory _repayParams) internal {
         address[] memory tokens = new address[](1);
-        tokens[0] = _repayParams.exchangeData.srcAddr;
         uint256[] memory amounts = new uint256[](1);
+        tokens[0] = _repayParams.exchangeData.srcAddr;
         amounts[0] = _repayParams.repayAmount;
 
         IManager(_repayParams.mcdManager).cdpAllow(_repayParams.vaultId, ACTION_ADDR, 1);
@@ -118,12 +118,9 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         );
 
         IManager(_repayParams.mcdManager).cdpAllow(_repayParams.vaultId, ACTION_ADDR, 0);
-
-        // emit ActionEvent("FLBalancer", abi.encode(_params));
-        // return _params.amounts[0];
     }
 
-    /// @notice Balancer FL callback function that formats and calls back RecipeExecutor
+    /// @notice Balancer FL callback function that formats and calls back this Action contract
     function receiveFlashLoan(
         address[] memory _tokens,
         uint256[] memory _amounts,
@@ -140,25 +137,21 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
     }
 
     function _repay(address _proxy, RepayParams memory _repayParams) internal {
-        IManager mcdManager = IManager(_repayParams.mcdManager);
-        // WITHDRAW Params
-        // if amount type(uint).max _amount is whole collateral amount
-        uint256 collateral = getAllColl(mcdManager, _repayParams.joinAddr, _repayParams.vaultId);
+        uint256 collateral = getAllColl(IManager(_repayParams.mcdManager), _repayParams.joinAddr, _repayParams.vaultId);
         _repayParams.repayAmount = _repayParams.repayAmount > collateral ? collateral : _repayParams.repayAmount;
 
         // Sell flashloaned collateral asset for debt asset
-        _repayParams.exchangeData.srcAmount = _repayParams.repayAmount; // CONSIDER
-        _repayParams.exchangeData.destAddr = DAI_ADDR; // CONSIDER
+        assert(_repayParams.exchangeData.srcAmount == _repayParams.repayAmount); // CONSIDER
+        assert(_repayParams.exchangeData.destAddr == DAI_ADDR); // CONSIDER
         (uint256 exchangedAmount, ) = _dfsSell(_repayParams.exchangeData, address(this), address(this), false);
 
-        (address urn, bytes32 ilk) = getUrnAndIlk(address(mcdManager), _repayParams.vaultId);
-
+        (address urn, bytes32 ilk) = getUrnAndIlk(_repayParams.mcdManager, _repayParams.vaultId);
         uint256 paybackAmount = exchangedAmount;
         // if paybackAmount is higher than current debt, repay all debt and send remaining dai to proxy
         {
             uint256 debt = getAllDebt(address(vat), urn, urn, ilk);
             if (exchangedAmount > debt) {
-                DAI_ADDR.withdrawTokens(_proxy, exchangedAmount - debt);
+                DAI_ADDR.withdrawTokens(IDSProxy(_proxy).owner(), exchangedAmount - debt);
                 paybackAmount = debt;
             }
         }
@@ -167,18 +160,42 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         {
             address joinToken = _repayParams.exchangeData.srcAddr;
             uint256 collateralAssetBalanceDelta = joinToken.getBalance(address(this));
-            if (address(mcdManager) == CROPPER) {
-                _cropperRepay(_repayParams.vaultId, urn, ilk, _repayParams.joinAddr, paybackAmount, _repayParams.repayAmount);
+
+            if (_repayParams.mcdManager == CROPPER) {
+                _cropperRepay(
+                    _repayParams.vaultId,
+                    urn,
+                    ilk,
+                    _repayParams.joinAddr,
+                    paybackAmount,
+                    _repayParams.repayAmount
+                );
             } else {
-                _mcdManagerRepay(mcdManager, _repayParams.vaultId, urn, ilk, _repayParams.joinAddr, paybackAmount, _repayParams.repayAmount);
+                _mcdManagerRepay(
+                    _repayParams.mcdManager,
+                    _repayParams.vaultId,
+                    urn,
+                    ilk,
+                    _repayParams.joinAddr,
+                    paybackAmount,
+                    _repayParams.repayAmount
+                );
             }
             collateralAssetBalanceDelta = joinToken.getBalance(address(this)) - collateralAssetBalanceDelta;
             require(collateralAssetBalanceDelta == _repayParams.repayAmount);
         }
+
+        logger.logRecipeEvent("McdRepayCompositeAction");
+        emit ActionEvent("", abi.encode(
+            _proxy,
+            _repayParams.repayAmount,
+            exchangedAmount,
+            paybackAmount
+        ));
     }
 
     function _mcdManagerRepay(
-        IManager _mcdManager,
+        address _mcdManager,
         uint256 _vaultId,
         address _urn,
         bytes32 _ilk,
@@ -186,18 +203,17 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         uint256 _paybackAmount,
         uint256 _withdrawAmount
     ) internal {
-        uint256 frobAmount = convertTo18(_joinAddr, _withdrawAmount);
         IDaiJoin(DAI_JOIN_ADDR).join(_urn, _paybackAmount);
-
         uint256 daiVatBalance = vat.dai(_urn);
+        int256 paybackAmountNormalized = normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk);
+        uint256 frobAmount = convertTo18(_joinAddr, _withdrawAmount);
 
-        _mcdManager.frob(
+        IManager(_mcdManager).frob(
             _vaultId,
             -toPositiveInt(frobAmount),
-            normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk)
+            paybackAmountNormalized
         );
-        _mcdManager.flux(_vaultId, address(this), frobAmount);
-
+        IManager(_mcdManager).flux(_vaultId, address(this), frobAmount);
         // withdraw the tokens from Join
         IJoin(_joinAddr).exit(address(this), _withdrawAmount);
     }
@@ -210,31 +226,25 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         uint256 _paybackAmount,
         uint256 _withdrawAmount
     ) internal {
+        address cdpOwner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
+        IDaiJoin(DAI_JOIN_ADDR).join(cdpOwner, _paybackAmount);
+        uint256 daiVatBalance = vat.dai(_urn);
+        int256 paybackAmountNormalized = normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk);
         uint256 frobAmount = convertTo18(_joinAddr, _withdrawAmount);
-        address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
-        IDaiJoin(DAI_JOIN_ADDR).join(owner, _paybackAmount);
 
-        uint256 daiVatBalance = vat.dai(owner);
-
-        // Allows cropper to access to proxy's DAI balance in the vat
         vat.hope(CROPPER);
-        // Payback debt and withdraw collateral
         {
-            int256 paybackAmountNormalized = normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk);
             ICropper(CROPPER).frob(
                 _ilk,
-                owner,
-                owner,
-                owner,
+                cdpOwner,
+                cdpOwner,
+                cdpOwner,
                 -toPositiveInt(frobAmount),
                 paybackAmountNormalized
             );
         }
-        // Denies cropper to access to proxy's DAI balance in the vat after execution
         vat.nope(CROPPER);
-
-
-        // Exits token amount to proxy address as a token
+        // withdraw the tokens from Cropper
         ICropper(CROPPER).exit(_joinAddr, address(this), _withdrawAmount);
     }
 
