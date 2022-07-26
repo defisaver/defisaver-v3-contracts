@@ -596,6 +596,28 @@ const mcdRepayComposite = async (
     return tx;
 };
 
+const mcdBoostComposite = async (
+    proxy,
+    vaultId,
+    boostAmount,
+    mcdManager,
+    joinAddr,
+    exchangeParams,
+) => {
+    const boostCompositeAction = new dfs.actions.maker.MakerBoostCompositeAction(
+        vaultId,
+        boostAmount,
+        mcdManager,
+        joinAddr,
+        exchangeParams,
+    );
+
+    const functionData = boostCompositeAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('McdBoostComposite', functionData, proxy);
+    return tx;
+};
+
 /*
   _______  __    __  .__   __.  __
  /  _____||  |  |  | |  \ |  | |  |
@@ -2180,4 +2202,5 @@ module.exports = {
     convexClaim,
 
     mcdRepayComposite,
+    mcdBoostComposite,
 };
