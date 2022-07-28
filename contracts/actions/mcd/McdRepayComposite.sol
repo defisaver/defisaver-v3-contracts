@@ -185,7 +185,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
             require(collateralAssetBalanceDelta == _repayParams.repayAmount);
         }
 
-        logger.logRecipeEvent("McdRepayCompositeAction");
+        logger.logRecipeEvent("McdRepayComposite");
         emit ActionEvent("", abi.encode(
             _proxy,
             _repayParams.repayAmount,

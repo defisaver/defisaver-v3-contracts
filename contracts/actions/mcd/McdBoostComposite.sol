@@ -176,7 +176,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         IDaiJoin(DAI_JOIN_ADDR).exit(address(this), _boostParams.boostAmount);
         vat.nope(DAI_JOIN_ADDR);
 
-        logger.logRecipeEvent("McdBoostCompositeAction");
+        logger.logRecipeEvent("McdBoostComposite");
         emit ActionEvent("", abi.encode(
             _proxy,
             _boostParams.boostAmount,
