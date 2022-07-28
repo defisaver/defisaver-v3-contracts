@@ -1053,7 +1053,7 @@ const mcdRepayCompositeTest = async () => {
 
                 const recipeEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('RecipeEvent(address,string)')
                     && e.topics[1] === hre.ethers.utils.defaultAbiCoder.encode(['address'], [repayComposite.address])
-                    && e.topics[2] === hre.ethers.utils.id('McdRepayCompositeAction'));
+                    && e.topics[2] === hre.ethers.utils.id('McdRepayComposite'));
                 expect(recipeEvent).to.not.be.eq(undefined);
 
                 const actionEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('ActionEvent(string,bytes)')
@@ -1216,7 +1216,7 @@ const mcdBoostCompositeTest = async () => {
 
                 const recipeEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('RecipeEvent(address,string)')
                     && e.topics[1] === hre.ethers.utils.defaultAbiCoder.encode(['address'], [boostComposite.address])
-                    && e.topics[2] === hre.ethers.utils.id('McdBoostCompositeAction'));
+                    && e.topics[2] === hre.ethers.utils.id('McdBoostComposite'));
                 expect(recipeEvent).to.not.be.eq(undefined);
 
                 const actionEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('ActionEvent(string,bytes)')
