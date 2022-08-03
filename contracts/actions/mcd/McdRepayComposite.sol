@@ -34,6 +34,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         ExchangeData exchangeData;
     }
 
+    /// @inheritdoc ActionBase
     function executeAction(
         bytes calldata _callData,
         bytes32[] memory _subData,
@@ -86,35 +87,33 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         _flBalancer(repayParams);
     }
 
-    /// @notice Parses inputs and runs the single implemented action through a proxy
-    /// @dev Used to save gas when executing a single action directly
+    /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override (ActionBase, DFSSell) {
         RepayParams memory repayParams = _parseCompositeParams(_callData);
         _flBalancer(repayParams);
     }
 
-    /// @notice Gets a FL from Balancer and returns back the execution to the action address
+    /// @notice Gets a FL from Balancer
     function _flBalancer(RepayParams memory _repayParams) internal {
+        assert(_repayParams.exchangeData.destAddr == DAI_ADDR);
+
         address[] memory tokens = new address[](1);
         uint256[] memory amounts = new uint256[](1);
 
-        assert(_repayParams.exchangeData.destAddr == DAI_ADDR);
         tokens[0] = _repayParams.exchangeData.srcAddr;
         amounts[0] = _repayParams.exchangeData.srcAmount;
 
         IManager(_repayParams.mcdManager).cdpAllow(_repayParams.vaultId, ACTION_ADDR, 1);
-
         IFlashLoans(VAULT_ADDR).flashLoan(
             ACTION_ADDR,
             tokens,
             amounts,
             abi.encode(_repayParams, address(this))
         );
-
         IManager(_repayParams.mcdManager).cdpAllow(_repayParams.vaultId, ACTION_ADDR, 0);
     }
 
-    /// @notice Balancer FL callback function that formats and calls back this Action contract
+    /// @notice Balancer FL callback function that formats and calls back this action contract
     function receiveFlashLoan(
         address[] memory _tokens,
         uint256[] memory _amounts,
@@ -130,6 +129,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         _tokens[0].withdrawTokens(address(VAULT_ADDR), flPaybackAmount);
     }
 
+    /// @notice Executes repay logic
     function _repay(address _proxy, RepayParams memory _repayParams) internal {
         uint256 collateral = getAllColl(IManager(_repayParams.mcdManager), _repayParams.joinAddr, _repayParams.vaultId);
         uint256 repayAmount = _repayParams.exchangeData.srcAmount > collateral ? collateral : _repayParams.exchangeData.srcAmount;
@@ -240,7 +240,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         ICropper(CROPPER).exit(_joinAddr, address(this), _withdrawAmount);
     }
 
-    /// @notice Returns the type of action we are implementing
+    /// @inheritdoc ActionBase
     function actionType()
     public
     pure

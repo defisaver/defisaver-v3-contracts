@@ -35,6 +35,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         ExchangeData exchangeData;
     }
 
+    /// @inheritdoc ActionBase
     function executeAction(
         bytes calldata _callData,
         bytes32[] memory _subData,
@@ -87,19 +88,19 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         _flBalancer(boostParams);
     }
 
-    /// @notice Parses inputs and runs the single implemented action through a proxy
-    /// @dev Used to save gas when executing a single action directly
+    /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override (ActionBase, DFSSell) {
         BoostParams memory boostParams = _parseCompositeParams(_callData);
         _flBalancer(boostParams);
     }
 
-    /// @notice Gets a FL from Balancer and returns back the execution to the action address
+    /// @notice Gets a FL from Balancer
     function _flBalancer(BoostParams memory _boostParams) internal {
+        assert(_boostParams.exchangeData.srcAddr == DAI_ADDR);
+
         address[] memory tokens = new address[](1);
         uint256[] memory amounts = new uint256[](1);
 
-        assert(_boostParams.exchangeData.srcAddr == DAI_ADDR);
         tokens[0] = _boostParams.exchangeData.srcAddr;
         amounts[0] = _boostParams.exchangeData.srcAmount;
 
@@ -113,7 +114,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         IManager(_boostParams.mcdManager).cdpAllow(_boostParams.vaultId, ACTION_ADDR, 0);
     }
 
-    /// @notice Balancer FL callback function that formats and calls back RecipeExecutor
+    /// @notice Balancer FL callback function that formats and calls back this action contract
     function receiveFlashLoan(
         address[] memory _tokens,
         uint256[] memory _amounts,
@@ -128,6 +129,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         _tokens[0].withdrawTokens(address(VAULT_ADDR), flPaybackAmount);
     }
 
+    /// @notice Executes boost logic
     function _boost(address _proxy, BoostParams memory _boostParams) internal {
         address collateralAsset = _boostParams.exchangeData.destAddr;
         uint256 boostAmount = _boostParams.exchangeData.srcAmount;
@@ -221,7 +223,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         );
     }
 
-    /// @notice Returns the type of action we are implementing
+    /// @inheritdoc ActionBase
     function actionType()
     public
     pure
