@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: SEE LICENSE IN LICENSE
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
 import "../ActionBase.sol";
@@ -24,13 +24,12 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
 
     address internal immutable ACTION_ADDR = address(this);
 
-    /// @param _vaultId Id of the vault
-    /// @param _amount Amount of dai to be payed back
-    /// @param _from Where the Dai is pulled from
-    /// @param _mcdManager The manager address we are using
+    /// @param vaultId Id of the vault
+    /// @param mcdManager The manager address we are using
+    /// @param joinAddr Collateral join address
+    /// @param exchangeData Data needed for swap
     struct BoostParams {
         uint256 vaultId;
-        uint256 boostAmount;
         address mcdManager;
         address joinAddr;
         ExchangeData exchangeData;
@@ -42,7 +41,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override (ActionBase, DFSSell) returns (bytes32) {
-        BoostParams memory boostParams = _parseCompositParams(_callData);
+        BoostParams memory boostParams = _parseCompositeParams(_callData);
 
         boostParams.vaultId = _parseParamUint(
             boostParams.vaultId,
@@ -51,43 +50,36 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
             _returnValues
         );
 
-        boostParams.boostAmount = _parseParamUint(
-            boostParams.boostAmount,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
-
         boostParams.mcdManager = _parseParamAddr(
             boostParams.mcdManager,
-            _paramMapping[2],
+            _paramMapping[1],
             _subData,
             _returnValues
         );
 
         boostParams.joinAddr = _parseParamAddr(
             boostParams.joinAddr,
-            _paramMapping[3],
+            _paramMapping[2],
             _subData,
             _returnValues
         );
 
         boostParams.exchangeData.srcAddr = _parseParamAddr(
             boostParams.exchangeData.srcAddr,
-            _paramMapping[4],
+            _paramMapping[3],
             _subData,
             _returnValues
         );
         boostParams.exchangeData.destAddr = _parseParamAddr(
             boostParams.exchangeData.destAddr,
-            _paramMapping[5],
+            _paramMapping[4],
             _subData,
             _returnValues
         );
 
         boostParams.exchangeData.srcAmount = _parseParamUint(
             boostParams.exchangeData.srcAmount,
-            _paramMapping[6],
+            _paramMapping[5],
             _subData,
             _returnValues
         );
@@ -98,7 +90,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
     /// @notice Parses inputs and runs the single implemented action through a proxy
     /// @dev Used to save gas when executing a single action directly
     function executeActionDirect(bytes memory _callData) public payable virtual override (ActionBase, DFSSell) {
-        BoostParams memory boostParams = _parseCompositParams(_callData);
+        BoostParams memory boostParams = _parseCompositeParams(_callData);
         _flBalancer(boostParams);
     }
 
@@ -106,8 +98,10 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
     function _flBalancer(BoostParams memory _boostParams) internal {
         address[] memory tokens = new address[](1);
         uint256[] memory amounts = new uint256[](1);
+
+        assert(_boostParams.exchangeData.srcAddr == DAI_ADDR);
         tokens[0] = _boostParams.exchangeData.srcAddr;
-        amounts[0] = _boostParams.boostAmount;
+        amounts[0] = _boostParams.exchangeData.srcAmount;
 
         IManager(_boostParams.mcdManager).cdpAllow(_boostParams.vaultId, ACTION_ADDR, 1);
         IFlashLoans(VAULT_ADDR).flashLoan(
@@ -136,17 +130,16 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
 
     function _boost(address _proxy, BoostParams memory _boostParams) internal {
         address collateralAsset = _boostParams.exchangeData.destAddr;
+        uint256 boostAmount = _boostParams.exchangeData.srcAmount;
 
         // Sell flashloaned debt asset for collateral asset
-        assert(_boostParams.exchangeData.srcAmount == _boostParams.boostAmount); // CONSIDER
-        assert(_boostParams.exchangeData.srcAddr == DAI_ADDR); // CONSIDER
         (uint256 supplyAmount, ) = _dfsSell(_boostParams.exchangeData, address(this), address(this), false);
 
         (address urn, bytes32 ilk) = getUrnAndIlk(_boostParams.mcdManager, _boostParams.vaultId);
         uint256 rate = IJug(JUG_ADDRESS).drip(ilk);
         uint256 daiVatBalance = vat.dai(urn);
         int256 vatSupplyAmount = toPositiveInt(convertTo18(_boostParams.joinAddr, supplyAmount));
-        int256 drawAmountNormalized = normalizeDrawAmount(_boostParams.boostAmount, rate, daiVatBalance);
+        int256 drawAmountNormalized = normalizeDrawAmount(boostAmount, rate, daiVatBalance);
 
         if (_boostParams.mcdManager == CROPPER) {
             _cropperBoost(
@@ -166,20 +159,20 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
                 _boostParams.vaultId,
                 supplyAmount,
                 vatSupplyAmount,
-                _boostParams.boostAmount,
+                boostAmount,
                 drawAmountNormalized,
                 urn
             );
         }
 
         vat.hope(DAI_JOIN_ADDR);
-        IDaiJoin(DAI_JOIN_ADDR).exit(address(this), _boostParams.boostAmount);
+        IDaiJoin(DAI_JOIN_ADDR).exit(address(this), boostAmount);
         vat.nope(DAI_JOIN_ADDR);
 
         logger.logRecipeEvent("McdBoostComposite");
-        emit ActionEvent("", abi.encode(
+        emit ActionEvent("McdBoostComposite", abi.encode(
             _proxy,
-            _boostParams.boostAmount,
+            boostAmount,
             supplyAmount
         ));
     }
@@ -237,7 +230,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         return uint8(ActionType.CUSTOM_ACTION);
     }
 
-    function _parseCompositParams(bytes memory _calldata) internal pure returns (BoostParams memory params) {
+    function _parseCompositeParams(bytes memory _calldata) internal pure returns (BoostParams memory params) {
         params = abi.decode(_calldata, (BoostParams));
     }
 

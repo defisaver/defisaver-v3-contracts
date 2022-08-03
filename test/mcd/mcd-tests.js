@@ -1044,7 +1044,6 @@ const mcdRepayCompositeTest = async () => {
                 const receipt = await (await mcdRepayComposite(
                     proxy,
                     vaultId,
-                    Float2BN(repayAmount, tokenData.decimals),
                     ilkData.isCrop ? CROPPER_ADDR : MCD_MANAGER_ADDR,
                     joinAddr,
                     exchangeOrder,
@@ -1207,7 +1206,6 @@ const mcdBoostCompositeTest = async () => {
                 const receipt = await (await mcdBoostComposite(
                     proxy,
                     vaultId,
-                    Float2BN(boostAmount),
                     ilkData.isCrop ? CROPPER_ADDR : MCD_MANAGER_ADDR,
                     joinAddr,
                     exchangeOrder,

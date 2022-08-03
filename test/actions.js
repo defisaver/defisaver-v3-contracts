@@ -577,14 +577,12 @@ const mcdMerge = async (proxy, srcVaultId, destVaultId) => {
 const mcdRepayComposite = async (
     proxy,
     vaultId,
-    repayAmount,
     mcdManager,
     joinAddr,
     exchangeParams,
 ) => {
     const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
         vaultId,
-        repayAmount,
         mcdManager,
         joinAddr,
         exchangeParams,
@@ -599,14 +597,12 @@ const mcdRepayComposite = async (
 const mcdBoostComposite = async (
     proxy,
     vaultId,
-    boostAmount,
     mcdManager,
     joinAddr,
     exchangeParams,
 ) => {
     const boostCompositeAction = new dfs.actions.maker.MakerBoostCompositeAction(
         vaultId,
-        boostAmount,
         mcdManager,
         joinAddr,
         exchangeParams,

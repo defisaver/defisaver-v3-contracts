@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: SEE LICENSE IN LICENSE
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
 import "../ActionBase.sol";
@@ -23,13 +23,12 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
 
     address internal immutable ACTION_ADDR = address(this);
 
-    /// @param _vaultId Id of the vault
-    /// @param _amount Amount of dai to be payed back
-    /// @param _from Where the Dai is pulled from
-    /// @param _mcdManager The manager address we are using
+    /// @param vaultId Id of the vault
+    /// @param mcdManager The manager address we are using
+    /// @param joinAddr Collateral join address
+    /// @param exchangeData Data needed for swap
     struct RepayParams {
         uint256 vaultId;
-        uint256 repayAmount;
         address mcdManager;
         address joinAddr;
         ExchangeData exchangeData;
@@ -41,7 +40,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override (ActionBase, DFSSell) returns (bytes32) {
-        RepayParams memory repayParams = _parseCompositParams(_callData);
+        RepayParams memory repayParams = _parseCompositeParams(_callData);
 
         repayParams.vaultId = _parseParamUint(
             repayParams.vaultId,
@@ -50,43 +49,36 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
             _returnValues
         );
 
-        repayParams.repayAmount = _parseParamUint(
-            repayParams.repayAmount,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
-
         repayParams.mcdManager = _parseParamAddr(
             repayParams.mcdManager,
-            _paramMapping[2],
+            _paramMapping[1],
             _subData,
             _returnValues
         );
 
         repayParams.joinAddr = _parseParamAddr(
             repayParams.joinAddr,
-            _paramMapping[3],
+            _paramMapping[2],
             _subData,
             _returnValues
         );
 
         repayParams.exchangeData.srcAddr = _parseParamAddr(
             repayParams.exchangeData.srcAddr,
-            _paramMapping[4],
+            _paramMapping[3],
             _subData,
             _returnValues
         );
         repayParams.exchangeData.destAddr = _parseParamAddr(
             repayParams.exchangeData.destAddr,
-            _paramMapping[5],
+            _paramMapping[4],
             _subData,
             _returnValues
         );
 
         repayParams.exchangeData.srcAmount = _parseParamUint(
             repayParams.exchangeData.srcAmount,
-            _paramMapping[6],
+            _paramMapping[5],
             _subData,
             _returnValues
         );
@@ -97,7 +89,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
     /// @notice Parses inputs and runs the single implemented action through a proxy
     /// @dev Used to save gas when executing a single action directly
     function executeActionDirect(bytes memory _callData) public payable virtual override (ActionBase, DFSSell) {
-        RepayParams memory repayParams = _parseCompositParams(_callData);
+        RepayParams memory repayParams = _parseCompositeParams(_callData);
         _flBalancer(repayParams);
     }
 
@@ -105,8 +97,10 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
     function _flBalancer(RepayParams memory _repayParams) internal {
         address[] memory tokens = new address[](1);
         uint256[] memory amounts = new uint256[](1);
+
+        assert(_repayParams.exchangeData.destAddr == DAI_ADDR);
         tokens[0] = _repayParams.exchangeData.srcAddr;
-        amounts[0] = _repayParams.repayAmount;
+        amounts[0] = _repayParams.exchangeData.srcAmount;
 
         IManager(_repayParams.mcdManager).cdpAllow(_repayParams.vaultId, ACTION_ADDR, 1);
 
@@ -138,11 +132,9 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
 
     function _repay(address _proxy, RepayParams memory _repayParams) internal {
         uint256 collateral = getAllColl(IManager(_repayParams.mcdManager), _repayParams.joinAddr, _repayParams.vaultId);
-        _repayParams.repayAmount = _repayParams.repayAmount > collateral ? collateral : _repayParams.repayAmount;
+        uint256 repayAmount = _repayParams.exchangeData.srcAmount > collateral ? collateral : _repayParams.exchangeData.srcAmount;
 
         // Sell flashloaned collateral asset for debt asset
-        assert(_repayParams.exchangeData.srcAmount == _repayParams.repayAmount); // CONSIDER
-        assert(_repayParams.exchangeData.destAddr == DAI_ADDR); // CONSIDER
         (uint256 exchangedAmount, ) = _dfsSell(_repayParams.exchangeData, address(this), address(this), false);
 
         (address urn, bytes32 ilk) = getUrnAndIlk(_repayParams.mcdManager, _repayParams.vaultId);
@@ -168,7 +160,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
                     ilk,
                     _repayParams.joinAddr,
                     paybackAmount,
-                    _repayParams.repayAmount
+                    repayAmount
                 );
             } else {
                 _mcdManagerRepay(
@@ -178,17 +170,17 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
                     ilk,
                     _repayParams.joinAddr,
                     paybackAmount,
-                    _repayParams.repayAmount
+                    repayAmount
                 );
             }
             collateralAssetBalanceDelta = joinToken.getBalance(address(this)) - collateralAssetBalanceDelta;
-            require(collateralAssetBalanceDelta == _repayParams.repayAmount);
+            require(collateralAssetBalanceDelta == repayAmount);
         }
 
         logger.logRecipeEvent("McdRepayComposite");
         emit ActionEvent("", abi.encode(
             _proxy,
-            _repayParams.repayAmount,
+            repayAmount,
             exchangedAmount,
             paybackAmount
         ));
@@ -257,7 +249,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         return uint8(ActionType.CUSTOM_ACTION);
     }
 
-    function _parseCompositParams(bytes memory _calldata) internal pure returns (RepayParams memory params) {
+    function _parseCompositeParams(bytes memory _calldata) internal pure returns (RepayParams memory params) {
         params = abi.decode(_calldata, (RepayParams));
     }
 
