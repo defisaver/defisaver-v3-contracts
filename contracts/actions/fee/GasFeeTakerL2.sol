@@ -6,10 +6,10 @@ pragma experimental ABIEncoderV2;
 
 import "../../utils/FeeRecipient.sol";
 import "../ActionBase.sol";
-import "./helpers/GasFeeHelper.sol";
+import "./helpers/GasFeeHelperL2.sol";
 
 /// @title Helper action to send a token to the specified address
-contract GasFeeTaker is ActionBase, GasFeeHelper {
+contract GasFeeTakerL2 is ActionBase, GasFeeHelperL2 {
     using TokenUtils for address;
 
     struct Params {
@@ -17,6 +17,7 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
         address feeToken;
         uint256 availableAmount;
         uint256 dfsFeeDivider;
+        uint256 l1GasCostInEth;
     }
 
     /// @inheritdoc ActionBase
@@ -32,7 +33,7 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
         inputData.availableAmount = _parseParamUint(inputData.availableAmount, _paramMapping[1], _subData, _returnValues);
         inputData.dfsFeeDivider = _parseParamUint(inputData.dfsFeeDivider, _paramMapping[2], _subData, _returnValues);
 
-        uint256 txCost = calcGasCost(inputData.gasUsed, inputData.feeToken, 0);
+        uint256 txCost = calcGasCost(inputData.gasUsed, inputData.feeToken, inputData.l1GasCostInEth);
 
         /// @dev This means inputData.availableAmount is not being piped into
         /// @dev To stop sender from sending any value here, if not piped take proxy balance
@@ -53,7 +54,7 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
         // add amount we take for dfs fee as well
         txCost += inputData.availableAmount / inputData.dfsFeeDivider;
 
-        uint256 amountLeft = sub(inputData.availableAmount, txCost);
+        uint256 amountLeft = inputData.availableAmount - txCost;
 
         inputData.feeToken.withdrawTokens(feeRecipient.getFeeAddr(), txCost);
 

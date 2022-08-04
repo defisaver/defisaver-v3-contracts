@@ -5,9 +5,9 @@ const {
     stopImpersonatingAccount,
     getGasUsed,
     calcGasToUSD,
-    OWNER_ACC,
     AVG_GAS_PRICE,
-    REGISTRY_ADDR,
+    addrs,
+    network,
 } = require('./utils');
 
 const getLatestBundleId = async () => {
@@ -34,7 +34,7 @@ const getLatestStrategyId = async () => {
     return latestStrategyId;
 };
 
-const getLatestSubId = async (regAddr = REGISTRY_ADDR) => {
+const getLatestSubId = async (regAddr = addrs[network].REGISTRY_ADDR) => {
     const subStorageAddr = await getAddrFromRegistry('SubStorage', regAddr);
 
     const subStorageInstance = await hre.ethers.getContractFactory('SubStorage');
@@ -99,7 +99,7 @@ const createBundle = async (proxy, strategyIds) => {
     return latestBundleId;
 };
 
-const subToStrategy = async (proxy, strategySub, regAddr = REGISTRY_ADDR) => {
+const subToStrategy = async (proxy, strategySub, regAddr = addrs[network].REGISTRY_ADDR) => {
     const SubProxyAddr = await getAddrFromRegistry('SubProxy', regAddr);
 
     const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
@@ -121,12 +121,61 @@ const subToStrategy = async (proxy, strategySub, regAddr = REGISTRY_ADDR) => {
     return latestSubId;
 };
 
-const addBotCaller = async (botAddr, regAddr = REGISTRY_ADDR, isFork = false) => {
-    if (regAddr === REGISTRY_ADDR && !isFork) {
-        await impersonateAccount(OWNER_ACC);
+const subToAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const aaveSubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
+
+    const AaveSubProxy = await hre.ethers.getContractFactory('AaveSubProxy');
+    const functionData = AaveSubProxy.interface.encodeFunctionData(
+        'subToAaveAutomation',
+        [inputData],
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](aaveSubProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToAaveProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+
+    return latestSubId;
+};
+
+const updateAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const aaveSubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
+
+    const AaveSubProxy = await hre.ethers.getContractFactory('AaveSubProxy');
+    const functionData = AaveSubProxy.interface.encodeFunctionData(
+        'updateSubData',
+        [inputData],
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](aaveSubProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToAaveProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+
+    return latestSubId;
+};
+
+const addBotCaller = async (
+    botAddr,
+    regAddr = addrs[network].REGISTRY_ADDR,
+    isFork = false,
+    networkInjected = network,
+) => {
+    if (regAddr === addrs[network].REGISTRY_ADDR && !isFork) {
+        await impersonateAccount(addrs[network].OWNER_ACC);
     }
 
-    const signer = await hre.ethers.provider.getSigner(OWNER_ACC);
+    const signer = await hre.ethers.provider.getSigner(addrs[networkInjected].OWNER_ACC);
     const botAuthAddr = await getAddrFromRegistry('BotAuth', regAddr);
 
     const botAuthInstance = await hre.ethers.getContractFactory('BotAuth', signer);
@@ -134,10 +183,10 @@ const addBotCaller = async (botAddr, regAddr = REGISTRY_ADDR, isFork = false) =>
 
     botAuth = botAuth.connect(signer);
 
-    await botAuth.addCaller(botAddr);
+    await botAuth.addCaller(botAddr, { gasLimit: 400000 });
 
-    if (regAddr === REGISTRY_ADDR && !isFork) {
-        await stopImpersonatingAccount(OWNER_ACC);
+    if (regAddr === addrs[network].REGISTRY_ADDR && !isFork) {
+        await stopImpersonatingAccount(addrs[network].OWNER_ACC);
     }
 };
 
@@ -167,6 +216,8 @@ const getSubHash = (subData) => {
 
 module.exports = {
     subToStrategy,
+    subToAaveProxy,
+    updateAaveProxy,
     createStrategy,
     createBundle,
     getLatestStrategyId,

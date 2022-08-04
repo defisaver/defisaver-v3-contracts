@@ -269,8 +269,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         });
 
         uint64 collPos = 0;
-        uint64 borrowStablePos = 0;
-        uint64 borrowVariablePos = 0;
+        uint64 borrowPos = 0;
+
         for (uint256 i = 0; i < reserveList.length; i++) {
             address reserve = reserveList[i];
             uint256 price = getAssetPrice(_market, reserve);
@@ -280,26 +280,28 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             uint256 borrowsVariable = reserveData.variableDebtTokenAddress.getBalance(_user);
         
             if (aTokenBalance > 0) {
-                uint256 userTokenBalanceEth = wmul(aTokenBalance, price) * (10 ** (18 - reserve.getTokenDecimals()));
+                uint256 userTokenBalanceEth = (aTokenBalance * price) / (10 ** (reserve.getTokenDecimals()));
                 data.collAddr[collPos] = reserve;
                 data.collAmounts[collPos] = userTokenBalanceEth;
                 collPos++;
             }
 
-            // Sum up debt in Eth
+            // Sum up debt in Usd
             if (borrowsStable > 0) {
-                uint256 userBorrowBalanceEth = wmul(borrowsStable, price) * (10 ** (18 - reserve.getTokenDecimals()));
-                data.borrowAddr[borrowStablePos] = reserve;
-                data.borrowStableAmounts[borrowStablePos] = userBorrowBalanceEth;
-                borrowStablePos++;
+                uint256 userBorrowBalanceEth = (borrowsStable * price) / (10 ** (reserve.getTokenDecimals()));
+                data.borrowAddr[borrowPos] = reserve;
+                data.borrowStableAmounts[borrowPos] = userBorrowBalanceEth;
             }
 
-            // Sum up debt in Eth
+            // Sum up debt in Usd
             if (borrowsVariable > 0) {
-                uint256 userBorrowBalanceEth = wmul(borrowsVariable, price) * (10 ** (18 - reserve.getTokenDecimals()));
-                data.borrowAddr[borrowVariablePos] = reserve;
-                data.borrowVariableAmounts[borrowVariablePos] = userBorrowBalanceEth;
-                borrowVariablePos++;
+                uint256 userBorrowBalanceEth = (borrowsVariable * price) / (10 ** (reserve.getTokenDecimals()));
+                data.borrowAddr[borrowPos] = reserve;
+                data.borrowVariableAmounts[borrowPos] = userBorrowBalanceEth;
+            }
+
+            if (borrowsStable > 0 || borrowsVariable > 0) {
+                borrowPos++;
             }
         }
 

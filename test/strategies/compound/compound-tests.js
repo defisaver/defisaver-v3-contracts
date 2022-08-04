@@ -179,7 +179,7 @@ const compRepayStrategyTest = async () => {
             ));
         });
 
-        it('... should trigger a Comp boost strategy', async () => {
+        it('... should trigger a Comp repay strategy', async () => {
             const ratioBefore = await getCompRatio(compView, proxy.address);
             console.log(ratioBefore.toString());
             // expect(ratioBefore).to.be.lt(ratioUnder);

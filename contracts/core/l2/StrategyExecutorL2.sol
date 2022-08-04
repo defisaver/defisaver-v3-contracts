@@ -3,14 +3,14 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "./StrategyModel.sol";
-import "./BotAuth.sol";
+import "../strategy/StrategyModel.sol";
+import "../strategy/BotAuth.sol";
 import "../DFSRegistry.sol";
-import "./ProxyAuth.sol";
-import "../strategy/SubStorage.sol";
+import "../strategy/ProxyAuth.sol";
+import "./SubStorageL2.sol";
 
 /// @title Main entry point for executing automated strategies
-contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
+contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper {
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
@@ -18,7 +18,6 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
 
     error BotNotApproved(address, uint256);
     error SubNotEnabled(uint256);
-    error SubDatHashMismatch(uint256, bytes32, bytes32);
 
     /// @notice Checks all the triggers and executes actions
     /// @dev Only authorized callers can execute it
@@ -26,27 +25,19 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
     /// @param _strategyIndex Which strategy in a bundle, need to specify because when sub is part of a bundle
     /// @param _triggerCallData All input data needed to execute triggers
     /// @param _actionsCallData All input data needed to execute actions
-    /// @param _sub StrategySub struct needed because on-chain we store only the hash
     function executeStrategy(
         uint256 _subId,
         uint256 _strategyIndex,
         bytes[] calldata _triggerCallData,
-        bytes[] calldata _actionsCallData,
-        StrategySub memory _sub
+        bytes[] calldata _actionsCallData
     ) public {
         // check bot auth
         if (!checkCallerAuth(_subId)) {
             revert BotNotApproved(msg.sender, _subId);
         }
 
-        StoredSubData memory storedSubData = SubStorage(SUB_STORAGE_ADDR).getSub(_subId);
-
-        bytes32 subDataHash = keccak256(abi.encode(_sub));
-
-        // data sent from the caller must match the stored hash of the data
-        if (subDataHash != storedSubData.strategySubHash) {
-            revert SubDatHashMismatch(_subId, subDataHash, storedSubData.strategySubHash);
-        }
+        StoredSubData memory storedSubData = SubStorageL2(SUB_STORAGE_ADDR).getSub(_subId);
+        StrategySub memory _sub = SubStorageL2(SUB_STORAGE_ADDR).getStrategySub(_subId);
 
         // subscription must be enabled
         if (!storedSubData.isEnabled) {
