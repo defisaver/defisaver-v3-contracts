@@ -34,6 +34,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     struct LoanData {
         address user;
         uint128 ratio;
+        bool usesEMode;
         address[] collAddr;
         address[] borrowAddr;
         uint256[] collAmounts;
@@ -82,6 +83,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         bool stableBorrowRateEnabled; //pool.config
         bool isolationModeBorrowingEnabled; //pool.config
         bool isSiloedForBorrowing; //AaveProtocolDataProvider.getSiloedBorrowing
+        uint256 eModeCollateralFactor; //pool.getEModeCategoryData.ltv
     }
 
     function getHealthFactor(address _market, address _user)
@@ -231,7 +233,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             isolationModeBorrowingEnabled: getBorrowableInIsolation(config),
             debtCeilingForIsolationMode: getDebtCeiling(config),
             isolationModeTotalDebt: reserveData.isolationModeTotalDebt,
-            isSiloedForBorrowing: isSiloedForBorrowing(_market, _tokenAddr)
+            isSiloedForBorrowing: isSiloedForBorrowing(_market, _tokenAddr),
+            eModeCollateralFactor: getEModeCollateralFactor(uint8(getEModeCategory(config)), lendingPool)
         });
     }
 
@@ -255,6 +258,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         IPoolV3 lendingPool = getLendingPool(_market);
         address[] memory reserveList = lendingPool.getReservesList();
         data = LoanData({
+            usesEMode: lendingPool.getUserEMode(_user) != 0,
             user: _user,
             ratio: 0,
             collAddr: new address[](reserveList.length),
@@ -419,6 +423,11 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     function isSiloedForBorrowing(address _market, address _tokenAddr) internal view returns (bool){
         IAaveProtocolDataProvider dataProvider = getDataProvider(_market);
         return dataProvider.getSiloedBorrowing(_tokenAddr);
+    }
+
+    function getEModeCollateralFactor(uint256 emodeCategory, IPoolV3 lendingPool) public view returns (uint16){
+        DataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(emodeCategory));
+        return categoryData.ltv;
     }
 
 
