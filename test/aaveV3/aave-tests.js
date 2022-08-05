@@ -1032,6 +1032,8 @@ const aaveV3ClaimRewardsTest = async () => {
 
             const balanceAfter = await balanceOf(opToken, ownerAcc);
             console.log(balanceAfter.toString());
+
+            expect(balanceAfter.sub(balanceBefore)).to.be.eq(opAmount);
         });
     });
 };
