@@ -1,11 +1,6 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
-/**
- * @title IRewardsDistributor
- * @author Aave
- * @notice Defines the basic interface for a Rewards Distributor.
- */
 interface IRewardsDistributor {
   /**
    * @dev Emitted when the configuration of the rewards of an asset is updated.

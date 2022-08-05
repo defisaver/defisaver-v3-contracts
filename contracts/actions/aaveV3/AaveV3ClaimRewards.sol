@@ -67,11 +67,7 @@ contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {
 
         IRewardsController rewardsController = IRewardsController(REWARDS_CONTROLLER_ADDRESS);
 
-        uint256 balanceBefore = params.reward.getBalance(params.to);
-
-        rewardsController.claimRewards(params.assets, params.amount, params.to, params.reward);
-
-        amountReceived = params.reward.getBalance(params.to) - balanceBefore;
+        amountReceived = rewardsController.claimRewards(params.assets, params.amount, params.to, params.reward);
 
         bytes memory logData = abi.encode(params, amountReceived);
         return (amountReceived, logData);
