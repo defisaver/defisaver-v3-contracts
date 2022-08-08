@@ -34,7 +34,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     struct LoanData {
         address user;
         uint128 ratio;
-        bool usesEMode;
+        uint256 eMode;
         address[] collAddr;
         address[] borrowAddr;
         uint256[] collAmounts;
@@ -258,7 +258,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         IPoolV3 lendingPool = getLendingPool(_market);
         address[] memory reserveList = lendingPool.getReservesList();
         data = LoanData({
-            usesEMode: lendingPool.getUserEMode(_user) != 0,
+            eMode: lendingPool.getUserEMode(_user),
             user: _user,
             ratio: 0,
             collAddr: new address[](reserveList.length),
