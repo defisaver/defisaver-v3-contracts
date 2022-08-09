@@ -6,14 +6,14 @@ const { configure } = require('@defisaver/sdk');
 const {
     getProxy,
     balanceOf, setBalance, redeploy,
-    takeSnapshot, revertToSnapshot, AAVE_MARKET_OPTIMISM, addrs, approve,
+    takeSnapshot, revertToSnapshot, AAVE_MARKET_OPTIMISM, addrs, approve, impersonateAccount, resetForkToBlock,
 } = require('../utils');
 const {
     aaveV3Supply, aaveV3SupplyCalldataOptimised, aaveV3Borrow, aaveV3Withdraw,
     aaveV3WithdrawCalldataOptimised, aaveV3Payback, aaveV3PaybackCalldataOptimised,
     aaveV3SwapBorrowRateCalldataOptimised, aaveV3SwapBorrowRate, aaveV3SetEModeCalldataOptimised,
     aaveV3SetEMode, aaveV3SwitchCollateral, aaveV3SwitchCollateralCallDataOptimised,
-    aaveV3ATokenPaybackCalldataOptimised, aaveV3ATokenPayback, aaveV3BorrowCalldataOptimised,
+    aaveV3ATokenPaybackCalldataOptimised, aaveV3ATokenPayback, aaveV3BorrowCalldataOptimised, aaveV3ClaimRewards,
 } = require('../actions');
 
 const aaveV3SupplyTest = async () => {
@@ -994,6 +994,49 @@ const aaveV3ATokenPaybackTest = async () => {
         });
     });
 };
+const aaveV3ClaimRewardsTest = async () => {
+    describe('AaveV3-ClaimRewards-L2', function () {
+        this.timeout(150000);
+
+        configure({
+            chainId: 10,
+        });
+        let snapshotId;
+
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
+        });
+        // TODO : hardcode block number on L2 chains? tested on 15281577
+        it('... should claim OP rewards on Optimism DSProxy position', async () => {
+            const ownerAcc = '0xEA57Dc30959eb17c506E4dA095fa9181f3E0Ac6D';
+            let proxy = await getProxy(ownerAcc);
+            await impersonateAccount(ownerAcc);
+            proxy = proxy.connect(await hre.ethers.provider.getSigner(ownerAcc));
+            const aWBTC = '0x078f358208685046a11C85e8ad32895DED33A249';
+            const aWETH = '0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8';
+            const aVariableUSDC = '0xFCCf3cAbbe80101232d343252614b6A3eE81C989';
+
+            const opAmount = '2168856438217507949';
+            const opToken = '0x4200000000000000000000000000000000000042';
+
+            const balanceBefore = await balanceOf(opToken, ownerAcc);
+            console.log(balanceBefore.toString());
+
+            await aaveV3ClaimRewards(
+                proxy, [aWBTC, aWETH, aVariableUSDC], opAmount, ownerAcc, opToken,
+            );
+
+            const balanceAfter = await balanceOf(opToken, ownerAcc);
+            console.log(balanceAfter.toString());
+
+            expect(balanceAfter.sub(balanceBefore)).to.be.eq(opAmount);
+        });
+    });
+};
 
 const aaveV3DeployContracts = async () => {
     await redeploy('AaveV3Supply');
@@ -1028,4 +1071,5 @@ module.exports = {
     aaveV3PaybackTest,
     aaveV3CollSwitchTest,
     aaveV3ATokenPaybackTest,
+    aaveV3ClaimRewardsTest,
 };
