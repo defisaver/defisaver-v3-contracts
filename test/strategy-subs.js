@@ -14,6 +14,7 @@ const {
     createCompTrigger,
     createReflexerTrigger,
     createLiquityTrigger,
+    createTrailingStopTrigger,
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
 } = require('./triggers');
@@ -201,6 +202,29 @@ const subMcdCloseToCollStrategy = async (vaultId, proxy, targetPrice, tokenAddre
     return { subId, strategySub };
 };
 
+const subMcdTrailingCloseToCollStrategy = async (vaultId, proxy, tokenAddress, percentage, strategyId, regAddr = REGISTRY_ADDR) => {
+    const isBundle = false;
+
+    const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
+    const collEncoded = abiCoder.encode(['address'], [tokenAddress]);
+    const daiEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const mcdManagerEncoded = abiCoder.encode(['address'], [MCD_MANAGER_ADDR]);
+
+    let chainlinkTokenAddr = tokenAddress;
+    if (tokenAddress.toLowerCase() === WBTC_ADDR.toLowerCase()) {
+        chainlinkTokenAddr = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
+    }
+
+    // TODO: should it be block.timestamp of time of mining???
+    const triggerData = await createTrailingStopTrigger(
+        chainlinkTokenAddr, percentage, Math.floor(Date.now() / 1000),
+    );
+    const strategySub = [strategyId, isBundle, [triggerData], [vaultIdEncoded, collEncoded, daiEncoded, mcdManagerEncoded]];
+    const subId = await subToStrategy(proxy, strategySub, regAddr);
+
+    return { subId, strategySub };
+};
+
 const subLiquityCloseToCollStrategy = async (proxy, targetPrice, tokenState, strategyId, regAddr = REGISTRY_ADDR) => {
     const isBundle = false;
 
@@ -300,4 +324,5 @@ module.exports = {
     subLiquityBoostStrategy,
     subLiquityRepayStrategy,
     subLiquityCloseToCollStrategy,
+    subMcdTrailingCloseToCollStrategy,
 };

@@ -15,6 +15,9 @@ const {
     approve,
     depositToWeth,
     getChainLinkPrice,
+    setMockPrice,
+    mockChainlinkPriceFeed,
+    timeTravel,
     DAI_ADDR,
     WETH_ADDRESS,
     USDC_ADDR,
@@ -71,6 +74,7 @@ const {
     subRepayFromSavingsStrategy,
     subMcdCloseStrategy,
     subMcdCloseToCollStrategy,
+    subMcdTrailingCloseToCollStrategy,
 } = require('../../strategy-subs');
 
 const {
@@ -927,6 +931,7 @@ const mcdCloseToCollStrategyTest = async () => {
         let subId;
         let strategySub;
         let flAmount;
+        let mockedPriceFeed;
 
         const daiDebt = '18000';
         const ethCollInDollars = '40000';
@@ -936,6 +941,8 @@ const mcdCloseToCollStrategyTest = async () => {
             botAcc = (await hre.ethers.getSigners())[1];
 
             strategyExecutor = await redeployCore();
+
+            mockedPriceFeed = mockChainlinkPriceFeed();
 
             await redeploy('SendToken');
             await redeploy('SendTokenAndUnwrap');
@@ -952,9 +959,99 @@ const mcdCloseToCollStrategyTest = async () => {
             await redeploy('McdPayback');
             await redeploy('McdOpen');
             await redeploy('ChainLinkPriceTrigger');
+            await redeploy('TrailingStopTrigger');
+
             await addBotCaller(botAcc.address);
             makerFlAddr = await getAddrFromRegistry('FLMaker');
             proxy = await getProxy(senderAcc.address);
+        });
+
+        it('... should make a new strategy for trailing cdp close to coll', async () => {
+            const vaultColl = fetchAmountinUSDPrice('WETH', ethCollInDollars);
+            const amountDai = fetchAmountinUSDPrice('DAI', daiDebt);
+            vaultId = await openVault(
+                proxy,
+                'ETH-A',
+                vaultColl,
+                amountDai,
+            );
+            console.log(`VaultId: ${vaultId}`);
+            console.log(`Vault collateral${vaultColl}`);
+            console.log(`Vault debt${amountDai}`);
+            flAmount = (parseFloat(amountDai) + 1).toString();
+            flAmount = hre.ethers.utils.parseUnits(flAmount, 18);
+
+            await openStrategyAndBundleStorage();
+
+            const strategyData = createMcdCloseToCollStrategy(true);
+            console.log(strategyData);
+            const strategyId = await createStrategy(proxy, ...strategyData, false);
+
+            const percentage = 10 * 1e8;
+
+            console.log(percentage);
+
+            // mock chainlink price before sub
+            const roundId = 1;
+            const ethPrice = 1500;
+            await setMockPrice(mockedPriceFeed, roundId, ETH_ADDR, ethPrice);
+
+            ({ subId, strategySub } = await subMcdTrailingCloseToCollStrategy(
+                vaultId,
+                proxy,
+                WETH_ADDRESS,
+                percentage,
+                strategyId,
+            ));
+            console.log(subId);
+            console.log(await subStorage.getSub(subId));
+        });
+
+        it('... should trigger a trialing mcd close strategy', async () => {
+            const ethBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
+            console.log(`Eth before closing : ${ethBalanceBefore.toString() / 1e18}`);
+
+            const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
+            console.log(`Dai before closing : ${daiBalanceBefore.toString() / 1e18}`);
+
+            // enough eth to payback whole dai debt + 5% because of slippage
+            const debtEstimate = (parseInt(daiDebt, 10) * 1.05).toString();
+            const sellAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', debtEstimate), '18');
+
+            console.log(sellAmount);
+
+            // mock chainlink price after sub
+            let roundId = 2;
+            let ethPrice = 1900;
+            await setMockPrice(mockedPriceFeed, roundId, ETH_ADDR, ethPrice);
+
+            await timeTravel(60 * 60 * 1);
+            roundId = 3;
+            ethPrice = 1700;
+            await setMockPrice(mockedPriceFeed, roundId, ETH_ADDR, ethPrice);
+
+            await callMcdCloseToCollStrategy(
+                proxy,
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                flAmount,
+                sellAmount,
+                ethJoin,
+                makerFlAddr,
+                true,
+                roundId - 1,
+            );
+
+            const ethBalanceAfter = await balanceOf(ETH_ADDR, senderAcc.address);
+            console.log(`Eth after closing : ${ethBalanceAfter.toString() / 1e18}`);
+
+            const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
+            console.log(`Dai after closing : ${daiBalanceAfter.toString() / 1e18}`);
+
+            expect(ethBalanceAfter).to.be.gt(ethBalanceBefore);
+            expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
         });
 
         it('... should make a new strategy for cdp close to coll', async () => {

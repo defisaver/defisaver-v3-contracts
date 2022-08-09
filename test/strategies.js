@@ -669,15 +669,23 @@ const createMcdCloseStrategy = () => {
     return mcdCloseStrategy.encodeForDsProxyCall();
 };
 
-const createMcdCloseToCollStrategy = () => {
-    const mcdCloseStrategy = new dfs.Strategy('McdCloseToCollStrategy');
+const createMcdCloseToCollStrategy = (isTrailing = false) => {
+    const strategyName = isTrailing ? 'McdTrailingCloseToCollStrategy' : 'McdCloseToCollStrategy';
+
+    const mcdCloseStrategy = new dfs.Strategy(strategyName);
     mcdCloseStrategy.addSubSlot('&vaultId', 'uint256');
     mcdCloseStrategy.addSubSlot('&collAddr', 'address');
     mcdCloseStrategy.addSubSlot('&daiAddr', 'address');
     mcdCloseStrategy.addSubSlot('&mcdManager', 'address');
 
-    const chainLinkPriceTrigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
-    mcdCloseStrategy.addTrigger(chainLinkPriceTrigger);
+    let trigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
+
+    if (isTrailing) {
+        // tokenAddr, percentage, startTimeStamp
+        trigger = new dfs.triggers.TrailingStopTrigger(nullAddress, '0', '0');
+    }
+
+    mcdCloseStrategy.addTrigger(trigger);
     mcdCloseStrategy.addAction(
         new dfs.actions.flashloan.MakerFlashLoanAction(
             '%loanAmount', // cdp.debt + a bit extra to handle debt increasing

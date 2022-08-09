@@ -11,8 +11,6 @@ import "../utils/Denominations.sol";
 import "../utils/TokenUtils.sol";
 import "./helpers/TriggerHelper.sol";
 
-import "hardhat/console.sol";
-
 contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
     using TokenUtils for address;
 
@@ -58,8 +56,6 @@ contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
     ) public view returns (bool) {
         uint256 amountDiff = (_maxPrice * _percentage) / 10**10;
 
-        console.log(_currPrice, _maxPrice - amountDiff);
-
         return _currPrice < (_maxPrice - amountDiff);
     }
 
@@ -77,19 +73,19 @@ contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
             tokenAddr = STETH_ADDR;
         }
 
-        int256 price;
+        int256 chainlinkPrice;
 
         if (_roundId == 0) {
-            (, price, , updateTimestamp, ) = feedRegistry.latestRoundData(tokenAddr, Denominations.USD);
+            (, chainlinkPrice, , updateTimestamp, ) = feedRegistry.latestRoundData(tokenAddr, Denominations.USD);
         } else {
-            (, price, , updateTimestamp, ) = feedRegistry.getRoundData(tokenAddr, Denominations.USD, _roundId);
+            (, chainlinkPrice, , updateTimestamp, ) = feedRegistry.getRoundData(tokenAddr, Denominations.USD, _roundId);
         }
 
         if (_inputTokenAddr == WSTETH_ADDR) {
             return (wmul(uint256(price), IWStEth(WSTETH_ADDR).stEthPerToken()), updateTimestamp);
         }
 
-        return (uint256(price), updateTimestamp);
+        return (uint256(chainlinkPrice), updateTimestamp);
     }
 
     function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {}

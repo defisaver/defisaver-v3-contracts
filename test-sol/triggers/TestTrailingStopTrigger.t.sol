@@ -11,6 +11,8 @@ contract TestTrailingStopTrigger is DSTest, MainnetTriggerAddresses {
 
     function setUp() public {
         trigger = new TrailingStopTrigger();
+
+        console.log(Denominations.USD);
     }
 
     function testPercentageDiffWithFixedEthPrices() public {
