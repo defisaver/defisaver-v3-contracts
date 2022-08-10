@@ -50,10 +50,10 @@ contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
         uint256 _currPrice,
         uint256 _maxPrice,
         uint256 _percentage
-    ) public view returns (bool) {
+    ) public pure returns (bool) {
         uint256 amountDiff = (_maxPrice * _percentage) / 10**10;
 
-        return _currPrice < (_maxPrice - amountDiff);
+        return _currPrice <= (_maxPrice - amountDiff);
     }
 
     /// @dev helper function that returns latest token price in USD
