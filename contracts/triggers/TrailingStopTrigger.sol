@@ -14,8 +14,6 @@ import "./helpers/TriggerHelper.sol";
 contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
     using TokenUtils for address;
 
-    error WrongRoundIdTimeStamp(uint256 roundId, uint256 maxPriceTimeStamp, uint256 startTimeStamp);
-
     struct SubParams {
         address tokenAddr;
         uint256 percentage;
@@ -42,8 +40,7 @@ contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
 
         // we can't send a roundId that happened before the users sub
         if (maxPriceTimeStamp < triggerSubData.startTimeStamp) {
-            // TODO: should we revert or returns false?
-            revert WrongRoundIdTimeStamp(triggerCallData.maxRoundId, maxPriceTimeStamp, triggerSubData.startTimeStamp);
+            return false;
         }
 
         return checkPercentageDiff(currPrice, maxPrice, triggerSubData.percentage);

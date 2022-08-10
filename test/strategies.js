@@ -603,14 +603,22 @@ const createReflexerFLBoostStrategy = () => {
     return reflexerFLBoostStrategy.encodeForDsProxyCall();
 };
 
-const createMcdCloseStrategy = () => {
-    const mcdCloseStrategy = new dfs.Strategy('McdCloseToDaiStrategy');
+const createMcdCloseToDaiStrategy = (isTrailing = false) => {
+    const strategyName = isTrailing ? 'McdTrailingCloseToCollStrategy' : 'McdCloseToCollStrategy';
+
+    const mcdCloseStrategy = new dfs.Strategy(strategyName);
     mcdCloseStrategy.addSubSlot('&vaultId', 'uint256');
     mcdCloseStrategy.addSubSlot('&daiAddr', 'address');
     mcdCloseStrategy.addSubSlot('&mcdManager', 'address');
 
-    const chainLinkPriceTrigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
-    mcdCloseStrategy.addTrigger(chainLinkPriceTrigger);
+    let trigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
+
+    if (isTrailing) {
+        // tokenAddr, percentage, startTimeStamp
+        trigger = new dfs.triggers.TrailingStopTrigger(nullAddress, '0', '0');
+    }
+
+    mcdCloseStrategy.addTrigger(trigger);
     mcdCloseStrategy.addAction(
         new dfs.actions.flashloan.MakerFlashLoanAction(
             '%loanAmount', // cdp.debt + a bit extra to handle debt increasing
@@ -959,13 +967,21 @@ const createLiquityFLBoostStrategy = () => {
     return liquityFLBoostStrategy.encodeForDsProxyCall();
 };
 
-const createLiquityCloseToCollStrategy = () => {
-    const liquityCloseToCollStrategy = new dfs.Strategy('LiquityCloseToCollStrategy');
+const createLiquityCloseToCollStrategy = (isTrailing = false) => {
+    const strategyName = isTrailing ? 'LiquityTrailingCloseToCollStrategy' : 'LiquityCloseToCollStrategy';
+
+    const liquityCloseToCollStrategy = new dfs.Strategy(strategyName);
     liquityCloseToCollStrategy.addSubSlot('&weth', 'address');
     liquityCloseToCollStrategy.addSubSlot('&lusd', 'address');
 
-    const chainLinkPriceTrigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
-    liquityCloseToCollStrategy.addTrigger(chainLinkPriceTrigger);
+    let trigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
+
+    if (isTrailing) {
+        // tokenAddr, percentage, startTimeStamp
+        trigger = new dfs.triggers.TrailingStopTrigger(nullAddress, '0', '0');
+    }
+
+    liquityCloseToCollStrategy.addTrigger(trigger);
     const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
         '%loanAmount', // (trove.debt - 200 LUSD) in weth + a bit over to handle slippage
         '&weth', // hardcoded only weth is used (currently must be set by backend)
@@ -1334,7 +1350,7 @@ module.exports = {
     createReflexerFLRepayStrategy,
     createReflexerFLBoostStrategy,
     createReflexerBoostStrategy,
-    createMcdCloseStrategy,
+    createMcdCloseToDaiStrategy,
     createLiquityRepayStrategy,
     createLiquityFLRepayStrategy,
     createLiquityFLBoostStrategy,

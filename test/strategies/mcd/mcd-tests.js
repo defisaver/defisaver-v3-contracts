@@ -49,7 +49,7 @@ const {
     createYearnRepayStrategyWithExchange,
     createMstableRepayStrategy,
     createMstableRepayStrategyWithExchange,
-    createMcdCloseStrategy,
+    createMcdCloseToDaiStrategy,
     createMcdCloseToCollStrategy,
 } = require('../../strategies');
 
@@ -64,17 +64,18 @@ const {
     callMcdRepayFromYearnWithExchangeStrategy,
     callMcdRepayFromMstableStrategy,
     callMcdRepayFromMstableWithExchangeStrategy,
-    callMcdCloseStrategy,
     callMcdCloseToCollStrategy,
+    callMcdCloseToDaiStrategy,
 } = require('../../strategy-calls');
 
 const {
     subMcdBoostStrategy,
     subMcdRepayStrategy,
     subRepayFromSavingsStrategy,
-    subMcdCloseStrategy,
+    subMcdCloseToDaiStrategy,
     subMcdCloseToCollStrategy,
     subMcdTrailingCloseToCollStrategy,
+    subMcdTrailingCloseToDaiStrategy,
 } = require('../../strategy-subs');
 
 const {
@@ -812,7 +813,7 @@ const mcdRepayFromMStableStrategyTest = async () => {
 };
 
 const mcdCloseToDaiStrategyTest = async () => {
-    describe('Mcd-Close Strategy (convert coll to DAI, payback debt, send DAI to recipient)', function () {
+    describe('Mcd-Close-to-dai Strategy', function () {
         this.timeout(120000);
         const ethJoin = ilks[0].join;
         let senderAcc;
@@ -825,6 +826,7 @@ const mcdCloseToDaiStrategyTest = async () => {
         let subId;
         let strategySub;
         let flAmount;
+        let mockedPriceFeed;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -832,12 +834,15 @@ const mcdCloseToDaiStrategyTest = async () => {
 
             strategyExecutor = await redeployCore();
 
+            mockedPriceFeed = mockChainlinkPriceFeed();
+
             await redeploy('SendToken');
             await redeploy('McdRatioTrigger');
             await redeploy('DFSSell');
             await redeploy('McdView');
             await redeploy('GasFeeTaker');
             await redeploy('McdRatioCheck');
+            await redeploy('TrailingStopTrigger');
 
             const subStorageAddr = getAddrFromRegistry('SubStorage');
             subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
@@ -851,6 +856,76 @@ const mcdCloseToDaiStrategyTest = async () => {
             await addBotCaller(botAcc.address);
             makerFlAddr = await getAddrFromRegistry('FLMaker');
             proxy = await getProxy(senderAcc.address);
+        });
+
+        it('... should make a new trailing stop that closes CDP to Dai', async () => {
+            const vaultColl = fetchAmountinUSDPrice('WETH', '40000');
+            const amountDai = fetchAmountinUSDPrice('DAI', '18000');
+            vaultId = await openVault(
+                proxy,
+                'ETH-A',
+                vaultColl,
+                amountDai,
+            );
+            console.log(`VaultId: ${vaultId}`);
+            console.log(`Vault collateral${vaultColl}`);
+            console.log(`Vault debt${amountDai}`);
+            flAmount = (parseFloat(amountDai) + 1).toString();
+            flAmount = hre.ethers.utils.parseUnits(flAmount, 18);
+
+            await openStrategyAndBundleStorage();
+
+            const strategyData = createMcdCloseToDaiStrategy(true);
+            const strategyId = await createStrategy(proxy, ...strategyData, false);
+
+            const percentage = 10 * 1e8;
+
+            // mock chainlink price before sub
+            const roundId = 1;
+            const ethPrice = 1500;
+            await setMockPrice(mockedPriceFeed, roundId, ETH_ADDR, ethPrice);
+
+            ({ subId, strategySub } = await subMcdTrailingCloseToDaiStrategy(
+                vaultId,
+                proxy,
+                WETH_ADDRESS,
+                percentage,
+                strategyId,
+            ));
+            console.log(subId);
+            console.log(await subStorage.getSub(subId));
+        });
+
+        it('... should trigger a trailing mcd close strategy', async () => {
+            const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
+            console.log(`Dai before closing : ${daiBalanceBefore.toString()}`);
+
+            // mock chainlink price after sub
+            let roundId = 2;
+            let ethPrice = 1900;
+            await setMockPrice(mockedPriceFeed, roundId, ETH_ADDR, ethPrice);
+
+            await timeTravel(60 * 60 * 1);
+            roundId = 3;
+            ethPrice = 1700;
+            await setMockPrice(mockedPriceFeed, roundId, ETH_ADDR, ethPrice);
+
+            await callMcdCloseToDaiStrategy(
+                proxy,
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                flAmount,
+                ethJoin,
+                makerFlAddr,
+                true,
+                roundId - 1,
+            );
+
+            const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
+            console.log(`Dai after closing : ${daiBalanceAfter.toString()}`);
+            expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
         });
 
         it('... should make a new strategy that closes CDP when price hits a point, transfers ETH to DAI, repays debt, transfers all remaining DAI to user', async () => {
@@ -870,13 +945,13 @@ const mcdCloseToDaiStrategyTest = async () => {
 
             await openStrategyAndBundleStorage();
 
-            const strategyData = createMcdCloseStrategy();
+            const strategyData = createMcdCloseToDaiStrategy();
             const strategyId = await createStrategy(proxy, ...strategyData, false);
 
             const currPrice = await getChainLinkPrice(ETH_ADDR);
 
             const targetPrice = currPrice - 100; // Target is smaller so we can execute it
-            ({ subId, strategySub } = await subMcdCloseStrategy(
+            ({ subId, strategySub } = await subMcdCloseToDaiStrategy(
                 vaultId,
                 proxy,
                 targetPrice,
@@ -891,7 +966,7 @@ const mcdCloseToDaiStrategyTest = async () => {
         it('... should trigger a mcd close strategy', async () => {
             const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
             console.log(`Dai before closing : ${daiBalanceBefore.toString()}`);
-            await callMcdCloseStrategy(
+            await callMcdCloseToDaiStrategy(
                 proxy, botAcc, strategyExecutor, subId, strategySub, flAmount, ethJoin, makerFlAddr,
             );
             const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
@@ -900,7 +975,7 @@ const mcdCloseToDaiStrategyTest = async () => {
         });
         it('... should fail to trigger the same strategy again as its one time', async () => {
             try {
-                await callMcdCloseStrategy(
+                await callMcdCloseToDaiStrategy(
                     proxy,
                     botAcc,
                     strategyExecutor,
