@@ -34,8 +34,8 @@ const createChainLinkPriceTrigger = async (tokenAddr, price, state) => {
     return param;
 };
 
-const createTrailingStopTrigger = async (chainlinkTokenAddr, percentage, startTimestamp) => {
-    const param = abiCoder.encode(['address', 'uint256', 'uint256'], [chainlinkTokenAddr, percentage, startTimestamp]);
+const createTrailingStopTrigger = async (chainlinkTokenAddr, percentage, roundId) => {
+    const param = abiCoder.encode(['address', 'uint256', 'uint80'], [chainlinkTokenAddr, percentage, roundId]);
     return param;
 };
 

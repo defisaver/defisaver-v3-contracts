@@ -78,7 +78,7 @@ contract TestTrailingStopTrigger is DSTest, DSMath, MainnetTriggerAddresses {
    // Test with fetching roundId
    function testGetRoundInfoForEth() public {
        uint256 chainLinkPrice = 10_000; // ide gas
-       uint80 roundId = 0;
+       uint80 roundId = 1;
        setPrice(roundId, chainLinkPrice, ETH_ADDR);
 
        (uint256 price, uint256 timestamp) = trigger.getRoundInfo(ETH_ADDR, roundId);
@@ -89,7 +89,7 @@ contract TestTrailingStopTrigger is DSTest, DSMath, MainnetTriggerAddresses {
 
     function testGetRoundInfoForWStEth() public {
        uint256 chainLinkPrice = 10_000; // ide gas
-       uint80 roundId = 0;
+       uint80 roundId = 1;
        setPrice(roundId, chainLinkPrice, STETH_ADDR);
 
        (uint256 price, uint256 timestamp) = trigger.getRoundInfo(WSTETH_ADDR, roundId);
@@ -99,12 +99,13 @@ contract TestTrailingStopTrigger is DSTest, DSMath, MainnetTriggerAddresses {
     }
 
     function testIsTriggeredToPass() public {
-        uint80 maxRoundId = 1;
+        uint80 startRoundId = 1;
+        uint80 maxRoundId = 2;
         uint256 percentage = 10 * 10**8;
         bytes memory callData = abi.encode(maxRoundId);
-        bytes memory subData = abi.encode(ETH_ADDR, percentage, block.timestamp);
+        bytes memory subData = abi.encode(ETH_ADDR, percentage, startRoundId);
 
-        setPrice(0, 10_000, ETH_ADDR);
+        setPrice(startRoundId, 10_000, ETH_ADDR);
 
         vm.warp(block.timestamp + 60*60);
 
@@ -120,11 +121,12 @@ contract TestTrailingStopTrigger is DSTest, DSMath, MainnetTriggerAddresses {
     }
 
     function testIsTriggeredTimestampInPast() public {
-        uint80 maxRoundId = 1;
+        uint80 startRoundId = 1;
+        uint80 maxRoundId = 2;
         uint256 percentage = 10 * 10**8;
         bytes memory callData = abi.encode(maxRoundId);
 
-        setPrice(0, 10_000, ETH_ADDR);
+        setPrice(startRoundId, 10_000, ETH_ADDR);
 
         vm.warp(block.timestamp + 60*60);
 
@@ -134,7 +136,7 @@ contract TestTrailingStopTrigger is DSTest, DSMath, MainnetTriggerAddresses {
 
         setPrice(maxRoundId + 1, 12_000, ETH_ADDR);
 
-        bytes memory subData = abi.encode(ETH_ADDR, percentage, block.timestamp);
+        bytes memory subData = abi.encode(ETH_ADDR, percentage, maxRoundId + 1);
 
         bool isTriggered = trigger.isTriggered(callData, subData);
 

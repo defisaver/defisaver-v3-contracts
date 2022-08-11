@@ -890,6 +890,7 @@ const mcdCloseToDaiStrategyTest = async () => {
                 proxy,
                 WETH_ADDRESS,
                 percentage,
+                roundId,
                 strategyId,
             ));
             console.log(subId);
@@ -1076,6 +1077,7 @@ const mcdCloseToCollStrategyTest = async () => {
                 proxy,
                 WETH_ADDRESS,
                 percentage,
+                roundId,
                 strategyId,
             ));
             console.log(subId);

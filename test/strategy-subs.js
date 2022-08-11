@@ -180,7 +180,7 @@ const subMcdCloseToDaiStrategy = async (vaultId, proxy, targetPrice, tokenAddres
     return { subId, strategySub };
 };
 
-const subMcdTrailingCloseToDaiStrategy = async (vaultId, proxy, tokenAddress, percentage, strategyId, regAddr = REGISTRY_ADDR) => {
+const subMcdTrailingCloseToDaiStrategy = async (vaultId, proxy, tokenAddress, percentage, roundId, strategyId, regAddr = REGISTRY_ADDR) => {
     const isBundle = false;
 
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
@@ -192,9 +192,8 @@ const subMcdTrailingCloseToDaiStrategy = async (vaultId, proxy, tokenAddress, pe
         chainlinkTokenAddr = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
     }
 
-    // TODO: should it be block.timestamp of time of mining???
     const triggerData = await createTrailingStopTrigger(
-        chainlinkTokenAddr, percentage, Math.floor(Date.now() / 1000),
+        chainlinkTokenAddr, percentage, roundId,
     );
 
     const strategySub = [strategyId, isBundle, [triggerData], [vaultIdEncoded, daiEncoded, mcdManagerEncoded]];
@@ -225,7 +224,7 @@ const subMcdCloseToCollStrategy = async (vaultId, proxy, targetPrice, tokenAddre
     return { subId, strategySub };
 };
 
-const subMcdTrailingCloseToCollStrategy = async (vaultId, proxy, tokenAddress, percentage, strategyId, regAddr = REGISTRY_ADDR) => {
+const subMcdTrailingCloseToCollStrategy = async (vaultId, proxy, tokenAddress, percentage, roundId, strategyId, regAddr = REGISTRY_ADDR) => {
     const isBundle = false;
 
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
@@ -238,9 +237,8 @@ const subMcdTrailingCloseToCollStrategy = async (vaultId, proxy, tokenAddress, p
         chainlinkTokenAddr = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
     }
 
-    // TODO: should it be block.timestamp of time of mining???
     const triggerData = await createTrailingStopTrigger(
-        chainlinkTokenAddr, percentage, Math.floor(Date.now() / 1000),
+        chainlinkTokenAddr, percentage, roundId,
     );
     const strategySub = [strategyId, isBundle, [triggerData], [vaultIdEncoded, collEncoded, daiEncoded, mcdManagerEncoded]];
     const subId = await subToStrategy(proxy, strategySub, regAddr);
@@ -263,14 +261,14 @@ const subLiquityCloseToCollStrategy = async (proxy, targetPrice, tokenState, str
     return { subId, strategySub };
 };
 
-const subLiquityTrailingCloseToCollStrategy = async (proxy, percentage, strategyId, regAddr = REGISTRY_ADDR) => {
+const subLiquityTrailingCloseToCollStrategy = async (proxy, percentage, roundId, strategyId, regAddr = REGISTRY_ADDR) => {
     const isBundle = false;
 
     const wethEncoded = abiCoder.encode(['address'], [WETH_ADDRESS]);
     const lusdEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
 
     const triggerData = await createTrailingStopTrigger(
-        WETH_ADDRESS, percentage, Math.floor(Date.now() / 1000),
+        WETH_ADDRESS, percentage, roundId,
     );
 
     const strategySub = [strategyId, isBundle, [triggerData], [wethEncoded, lusdEncoded]];

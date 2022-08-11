@@ -351,6 +351,7 @@ const liquityCloseToCollStrategyTest = async () => {
             ({ subId, strategySub } = await subLiquityTrailingCloseToCollStrategy(
                 proxy,
                 percentage,
+                roundId,
                 strategyId,
             ));
         });

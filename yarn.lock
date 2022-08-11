@@ -173,7 +173,7 @@
     "memoizee" "^0.4.15"
 
 "@defisaver/sdk@github:DecenterApps/defisaver-sdk#feature/trailing-stop":
-  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#427177805661d9739979263d9f3ab6451a4d17ce"
+  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#e408b917d3b7e06cc2986383f6e4b85ca80625e5"
   "version" "0.3.10"
   dependencies:
     "@defisaver/tokens" "^1.4.18"
