@@ -8,11 +8,10 @@ import "../../../utils/TokenUtils.sol";
 import "../../../utils/FeeRecipient.sol";
 import "../../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../../../interfaces/aaveV2/IPriceOracleGetterAave.sol";
-import "../../../interfaces/lido/IWStEth.sol";
 
 import "../helpers/OptimismFeeAddresses.sol";
 
-contract GasFeeHelper is DSMath, OptimismFeeAddresses {
+contract GasFeeHelperL2 is DSMath, OptimismFeeAddresses {
     using TokenUtils for address;
 
     FeeRecipient public constant feeRecipient = FeeRecipient(FEE_RECIPIENT);
@@ -40,12 +39,16 @@ contract GasFeeHelper is DSMath, OptimismFeeAddresses {
 
         // convert to token amount
         if (_feeToken != TokenUtils.WETH_ADDR) {
-            uint256 price = getTokenPrice(_feeToken);
+            uint256 tokenPriceInUSD = getTokenPrice(_feeToken);
+            uint256 wethPriceInUSD = getTokenPrice(WETH_ADDR);
             uint256 tokenDecimals = _feeToken.getTokenDecimals();
 
             require(tokenDecimals <= 18, "Token decimal too big");
 
-            txCost = wdiv(txCost, uint256(price)) / (10**(18 - tokenDecimals));
+            uint256 tokenPriceInEth = wdiv(tokenPriceInUSD, wethPriceInUSD);
+
+            txCost = wdiv(txCost, uint256(tokenPriceInEth)) / (10**(18 - tokenDecimals));
+
         }
     }
 
@@ -53,11 +56,6 @@ contract GasFeeHelper is DSMath, OptimismFeeAddresses {
         address priceOracleAddress =
             ILendingPoolAddressesProviderV2(AAVE_MARKET).getPriceOracle();
 
-        address tokenAddr = _tokenAddr == TokenUtils.WSTETH_ADDR ? TokenUtils.STETH_ADDR : _tokenAddr;
-        price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(tokenAddr);
-
-        if (_tokenAddr == TokenUtils.WSTETH_ADDR) {
-            price = wmul(price, IWStEth(_tokenAddr).stEthPerToken());
-        }
+        price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr);
     }
 }

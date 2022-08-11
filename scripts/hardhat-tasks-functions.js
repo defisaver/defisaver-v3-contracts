@@ -275,7 +275,8 @@ async function encryptPrivateKey() {
 async function changeNetworkNameForAddresses(oldNetworkName, newNetworkName) {
     files = getAllFiles('./contracts');
     files.map(async (file) => {
-        if (file.toString().includes('Helper.sol')) {
+        const helperRegex = 'Helper(.*)sol';
+        if (file.toString().match(helperRegex)) {
             const fileDir = path.dirname(file);
             const filesInSameDir = getAllFiles(fileDir);
             let rewrite = false;

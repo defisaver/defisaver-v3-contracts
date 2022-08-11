@@ -34,6 +34,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     struct LoanData {
         address user;
         uint128 ratio;
+        uint256 eMode;
         address[] collAddr;
         address[] borrowAddr;
         uint256[] collAmounts;
@@ -82,6 +83,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         bool stableBorrowRateEnabled; //pool.config
         bool isolationModeBorrowingEnabled; //pool.config
         bool isSiloedForBorrowing; //AaveProtocolDataProvider.getSiloedBorrowing
+        uint256 eModeCollateralFactor; //pool.getEModeCategoryData.ltv
     }
 
     function getHealthFactor(address _market, address _user)
@@ -215,7 +217,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             borrowRateVariable: reserveData.currentVariableBorrowRate,
             borrowRateStable: reserveData.currentStableBorrowRate,
             totalSupply: IERC20(reserveData.aTokenAddress).totalSupply(),
-            availableLiquidity: reserveData.currentLiquidityRate,
+            availableLiquidity: IERC20(reserveData.aTokenAddress).totalSupply() - totalVariableBorrow - totalStableBorrow,
             totalBorrow: totalVariableBorrow + totalStableBorrow,
             totalBorrowVar: totalVariableBorrow,
             totalBorrowStab: totalStableBorrow,
@@ -231,7 +233,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             isolationModeBorrowingEnabled: getBorrowableInIsolation(config),
             debtCeilingForIsolationMode: getDebtCeiling(config),
             isolationModeTotalDebt: reserveData.isolationModeTotalDebt,
-            isSiloedForBorrowing: isSiloedForBorrowing(_market, _tokenAddr)
+            isSiloedForBorrowing: isSiloedForBorrowing(_market, _tokenAddr),
+            eModeCollateralFactor: getEModeCollateralFactor(uint8(getEModeCategory(config)), lendingPool)
         });
     }
 
@@ -255,6 +258,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         IPoolV3 lendingPool = getLendingPool(_market);
         address[] memory reserveList = lendingPool.getReservesList();
         data = LoanData({
+            eMode: lendingPool.getUserEMode(_user),
             user: _user,
             ratio: 0,
             collAddr: new address[](reserveList.length),
@@ -265,8 +269,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         });
 
         uint64 collPos = 0;
-        uint64 borrowStablePos = 0;
-        uint64 borrowVariablePos = 0;
+        uint64 borrowPos = 0;
+
         for (uint256 i = 0; i < reserveList.length; i++) {
             address reserve = reserveList[i];
             uint256 price = getAssetPrice(_market, reserve);
@@ -276,26 +280,28 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             uint256 borrowsVariable = reserveData.variableDebtTokenAddress.getBalance(_user);
         
             if (aTokenBalance > 0) {
-                uint256 userTokenBalanceEth = wmul(aTokenBalance, price) * (10 ** (18 - reserve.getTokenDecimals()));
+                uint256 userTokenBalanceEth = (aTokenBalance * price) / (10 ** (reserve.getTokenDecimals()));
                 data.collAddr[collPos] = reserve;
                 data.collAmounts[collPos] = userTokenBalanceEth;
                 collPos++;
             }
 
-            // Sum up debt in Eth
+            // Sum up debt in Usd
             if (borrowsStable > 0) {
-                uint256 userBorrowBalanceEth = wmul(borrowsStable, price) * (10 ** (18 - reserve.getTokenDecimals()));
-                data.borrowAddr[borrowStablePos] = reserve;
-                data.borrowStableAmounts[borrowStablePos] = userBorrowBalanceEth;
-                borrowStablePos++;
+                uint256 userBorrowBalanceEth = (borrowsStable * price) / (10 ** (reserve.getTokenDecimals()));
+                data.borrowAddr[borrowPos] = reserve;
+                data.borrowStableAmounts[borrowPos] = userBorrowBalanceEth;
             }
 
-            // Sum up debt in Eth
+            // Sum up debt in Usd
             if (borrowsVariable > 0) {
-                uint256 userBorrowBalanceEth = wmul(borrowsVariable, price) * (10 ** (18 - reserve.getTokenDecimals()));
-                data.borrowAddr[borrowVariablePos] = reserve;
-                data.borrowVariableAmounts[borrowVariablePos] = userBorrowBalanceEth;
-                borrowVariablePos++;
+                uint256 userBorrowBalanceEth = (borrowsVariable * price) / (10 ** (reserve.getTokenDecimals()));
+                data.borrowAddr[borrowPos] = reserve;
+                data.borrowVariableAmounts[borrowPos] = userBorrowBalanceEth;
+            }
+
+            if (borrowsStable > 0 || borrowsVariable > 0) {
+                borrowPos++;
             }
         }
 
@@ -419,6 +425,11 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     function isSiloedForBorrowing(address _market, address _tokenAddr) internal view returns (bool){
         IAaveProtocolDataProvider dataProvider = getDataProvider(_market);
         return dataProvider.getSiloedBorrowing(_tokenAddr);
+    }
+
+    function getEModeCollateralFactor(uint256 emodeCategory, IPoolV3 lendingPool) public view returns (uint16){
+        DataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(emodeCategory));
+        return categoryData.ltv;
     }
 
 

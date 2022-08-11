@@ -4,12 +4,12 @@ pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
 import "../DFSRegistry.sol";
-import "./BundleStorage.sol";
-import "./StrategyStorage.sol";
-import "./StrategyModel.sol";
+import "../strategy/BundleStorage.sol";
+import "../strategy/StrategyStorage.sol";
+import "../strategy/StrategyModel.sol";
 
 /// @title Storage of users subscriptions to strategies/bundles
-contract SubStorage is StrategyModel, AdminAuth, CoreHelper {
+contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
     error SenderNotSubOwnerError(address, uint256);
     error SubIdOutOfRange(uint256, bool);
 
@@ -21,6 +21,25 @@ contract SubStorage is StrategyModel, AdminAuth, CoreHelper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     StoredSubData[] public strategiesSubs;
+
+    StrategySub[] public storedStrategies;
+
+    /// @dev push one empty sub for AaveSubProxy to function correctly
+    constructor() {
+        strategiesSubs.push(StoredSubData({
+            userProxy: bytes20(0),
+            isEnabled: false,
+            strategySubHash: bytes32(0)
+        }));
+
+        storedStrategies.push(StrategySub({
+            strategyOrBundleId: 0,
+            isBundle: false,
+            triggerData: new bytes[](0),
+            subData: new bytes32[](0)
+        }));
+    }
+
 
     /// @notice Checks if subId is init. and if the sender is the owner
     modifier onlySubOwner(uint256 _subId) {
@@ -60,6 +79,8 @@ contract SubStorage is StrategyModel, AdminAuth, CoreHelper {
             subStorageHash
         ));
 
+        storedStrategies.push(_sub);
+
         uint256 currentId = strategiesSubs.length - 1;
 
         emit Subscribe(currentId, msg.sender, subStorageHash, _sub);
@@ -80,6 +101,8 @@ contract SubStorage is StrategyModel, AdminAuth, CoreHelper {
         bytes32 subStorageHash = keccak256(abi.encode(_sub));
 
         storedSubData.strategySubHash = subStorageHash;
+
+        storedStrategies[_subId] = _sub;
 
         emit UpdateData(_subId, subStorageHash, _sub);
     }
@@ -114,6 +137,10 @@ contract SubStorage is StrategyModel, AdminAuth, CoreHelper {
 
     function getSub(uint _subId) public view returns (StoredSubData memory) {
         return strategiesSubs[_subId];
+    }
+
+    function getStrategySub(uint _subId) public view returns (StrategySub memory) {
+        return storedStrategies[_subId];
     }
 
     function getSubsCount() public view returns (uint256) {

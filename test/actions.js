@@ -1754,7 +1754,7 @@ const convexClaim = async (
 };
 
 const aaveV3Supply = async (
-    proxy, market, amount, tokenAddr, assetId, from,
+    proxy, market, amount, tokenAddr, assetId, from, signer,
 ) => {
     const aaveSupplyAddr = await getAddrFromRegistry('AaveV3Supply');
 
@@ -1762,8 +1762,10 @@ const aaveV3Supply = async (
         amount.toString(), from, tokenAddr, assetId, true, true, false, nullAddress, nullAddress,
     );
 
-    await approve(tokenAddr, proxy.address);
+    await approve(tokenAddr, proxy.address, signer);
     const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
+
+    console.log('call supply');
 
     const receipt = await proxy['execute(address,bytes)'](aaveSupplyAddr, functionData, { gasLimit: 3000000 });
 
@@ -2032,6 +2034,22 @@ const aaveV3SetEModeCalldataOptimised = async (
     console.log(`GasUsed aaveV3SetEModeCalldataOptimised: ${gasUsed}`);
     return receipt;
 };
+const aaveV3ClaimRewards = async (
+    proxy, assets, amount, to, rewardsAsset,
+) => {
+    const aaveClaimRewardsAction = new dfs.actions.aaveV3.AaveV3ClaimRewardsAction(
+        assets.length,
+        amount,
+        to,
+        rewardsAsset,
+        assets,
+    );
+
+    const functionData = aaveClaimRewardsAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('AaveV3ClaimRewards', functionData, proxy);
+    return tx;
+};
+
 const aaveV3SwitchCollateral = async (
     proxy, market, arrayLength, tokens, useAsCollateral,
 ) => {
@@ -2194,6 +2212,7 @@ module.exports = {
     aaveV3SwitchCollateralCallDataOptimised,
     aaveV3SwapBorrowRate,
     aaveV3SwapBorrowRateCalldataOptimised,
+    aaveV3ClaimRewards,
 
     updateSubData,
 
