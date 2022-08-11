@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.10;
 
-import "./OptimismExchangeAddresses.sol";
+import "./MainnetExchangeAddresses.sol";
 
-contract ExchangeHelper is OptimismExchangeAddresses {
+contract ExchangeHelper is MainnetExchangeAddresses {
 }

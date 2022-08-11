@@ -10,9 +10,9 @@ import "../../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../../../interfaces/aaveV2/IPriceOracleGetterAave.sol";
 import "../../../interfaces/lido/IWStEth.sol";
 
-import "../helpers/OptimismFeeAddresses.sol";
+import "../helpers/MainnetFeeAddresses.sol";
 
-contract GasFeeHelper is DSMath, OptimismFeeAddresses {
+contract GasFeeHelper is DSMath, MainnetFeeAddresses {
     using TokenUtils for address;
 
     FeeRecipient public constant feeRecipient = FeeRecipient(FEE_RECIPIENT);

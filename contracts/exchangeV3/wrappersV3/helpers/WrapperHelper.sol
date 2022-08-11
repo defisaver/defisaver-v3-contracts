@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.10;
 
-import "./OptimismWrapperAddresses.sol";
+import "./MainnetWrapperAddresses.sol";
 
-contract WrapperHelper is OptimismWrapperAddresses {
+contract WrapperHelper is MainnetWrapperAddresses {
 }
