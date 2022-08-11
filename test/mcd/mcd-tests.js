@@ -943,6 +943,8 @@ const mcdRepayCompositeTest = async () => {
     describe('Mcd-Repay-Composite', async function () {
         this.timeout(80000);
 
+        const repayGasUsed = 2_000_000;
+
         let makerAddresses;
         let feeReciever;
         let sellWrapper;
@@ -1040,15 +1042,18 @@ const mcdRepayCompositeTest = async () => {
                     exchangeOrder[8] = '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca00001f4c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20001f46b175474e89094c44da98b954eedeac495271d0f';
                 }
 
-                const feesBefore = await balanceOf(tokenData.address, feeReciever);
+                const feesBeforeCollateralAsset = await balanceOf(tokenData.address, feeReciever);
+                const feesBeforeDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
                 const receipt = await (await mcdRepayComposite(
                     proxy,
                     vaultId,
                     ilkData.isCrop ? CROPPER_ADDR : MCD_MANAGER_ADDR,
                     joinAddr,
+                    repayGasUsed,
                     exchangeOrder,
                 )).wait();
-                const feesAfter = await balanceOf(tokenData.address, feeReciever);
+                const feesAfterCollateralAsset = await balanceOf(tokenData.address, feeReciever);
+                const feesAfterDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
 
                 const recipeEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('RecipeEvent(address,string)')
                     && e.topics[1] === hre.ethers.utils.defaultAbiCoder.encode(['address'], [repayComposite.address])
@@ -1093,10 +1098,12 @@ const mcdRepayCompositeTest = async () => {
                 expect(await balanceOf(DAI_ADDR, repayComposite.address)).to.be.eq(0);
                 expect(await balanceOf(tokenData.address, proxy.address)).to.be.eq(0);
                 expect(await balanceOf(DAI_ADDR, proxy.address)).to.be.eq(0);
-                expect(await balanceOf(DAI_ADDR, senderAcc.address)).to.be.eq(
+                expect(feesAfterCollateralAsset.sub(feesBeforeCollateralAsset)).to.be.eq(feeAmount);
+                expect(feesAfterDebtAsset.sub(
+                    feesBeforeDebtAsset,
+                ).add(await balanceOf(DAI_ADDR, senderAcc.address))).to.be.eq(
                     eventParams.exchangedAmount.sub(eventParams.paybackAmount),
                 );
-                expect(feesAfter.sub(feesBefore)).to.be.eq(feeAmount);
             });
         }
     });
@@ -1105,6 +1112,8 @@ const mcdRepayCompositeTest = async () => {
 const mcdBoostCompositeTest = async () => {
     describe('Mcd-Boost-Composite', async function () {
         this.timeout(80000);
+
+        const boostGasUsed = 2_000_000;
 
         let makerAddresses;
         let sellWrapper;
@@ -1202,15 +1211,18 @@ const mcdBoostCompositeTest = async () => {
                     exchangeOrder[8] = '0x6b175474e89094c44da98b954eedeac495271d0f0001f4c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20001f47f39c581f595b53c5cb19bd0b3f8da6c935e2ca0';
                 }
 
-                const feesBefore = await balanceOf(DAI_ADDR, feeReciever);
+                const feesBeforeCollateralAsset = await balanceOf(tokenData.address, feeReciever);
+                const feesBeforeDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
                 const receipt = await (await mcdBoostComposite(
                     proxy,
                     vaultId,
                     ilkData.isCrop ? CROPPER_ADDR : MCD_MANAGER_ADDR,
                     joinAddr,
+                    boostGasUsed,
                     exchangeOrder,
                 )).wait();
-                const feesAfter = await balanceOf(DAI_ADDR, feeReciever);
+                const feesAfterCollateralAsset = await balanceOf(tokenData.address, feeReciever);
+                const feesAfterDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
 
                 const recipeEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('RecipeEvent(address,string)')
                     && e.topics[1] === hre.ethers.utils.defaultAbiCoder.encode(['address'], [boostComposite.address])
@@ -1221,7 +1233,7 @@ const mcdBoostCompositeTest = async () => {
                     && e.address === boostComposite.address);
                 expect(actionEvent).to.not.be.eq(undefined);
                 const eventParams = hre.ethers.utils.defaultAbiCoder.decode(
-                    ['(address proxy, uint256 boostAmount, uint256 supplyAmount)'],
+                    ['(address proxy, uint256 boostAmount, uint256 exchangedAmount, uint256 supplyAmount)'],
                     hre.ethers.utils.defaultAbiCoder.decode(
                         ['bytes'],
                         actionEvent.data,
@@ -1255,7 +1267,10 @@ const mcdBoostCompositeTest = async () => {
                 expect(await balanceOf(DAI_ADDR, boostComposite.address)).to.be.eq(0);
                 expect(await balanceOf(tokenData.address, proxy.address)).to.be.eq(0);
                 expect(await balanceOf(DAI_ADDR, proxy.address)).to.be.eq(0);
-                expect(feesAfter.sub(feesBefore)).to.be.eq(feeAmount);
+                expect(feesAfterDebtAsset.sub(feesBeforeDebtAsset)).to.be.eq(feeAmount);
+                expect(feesAfterCollateralAsset.sub(feesBeforeCollateralAsset)).to.be.eq(
+                    eventParams.exchangedAmount.sub(eventParams.supplyAmount),
+                );
             });
         }
     });

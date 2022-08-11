@@ -579,12 +579,14 @@ const mcdRepayComposite = async (
     vaultId,
     mcdManager,
     joinAddr,
+    gasUsed,
     exchangeParams,
 ) => {
     const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
         vaultId,
         mcdManager,
         joinAddr,
+        gasUsed,
         exchangeParams,
     );
 
@@ -599,12 +601,14 @@ const mcdBoostComposite = async (
     vaultId,
     mcdManager,
     joinAddr,
+    gasUsed,
     exchangeParams,
 ) => {
     const boostCompositeAction = new dfs.actions.maker.MakerBoostCompositeAction(
         vaultId,
         mcdManager,
         joinAddr,
+        gasUsed,
         exchangeParams,
     );
 

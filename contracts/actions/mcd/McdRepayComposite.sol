@@ -3,6 +3,7 @@ pragma solidity 0.8.10;
 
 import "../ActionBase.sol";
 import "../exchange/DFSSell.sol";
+import "../fee/GasFeeTaker.sol";
 
 import "../../interfaces/balancer/IFlashLoanRecipient.sol";
 import "../../interfaces/balancer/IFlashLoans.sol";
@@ -17,7 +18,7 @@ import "./helpers/McdHelper.sol";
 import "../balancer/helpers/MainnetBalancerV2Addresses.sol";
 
 contract McdRepayComposite is
-ActionBase, DFSSell, McdHelper, IFlashLoanRecipient,
+ActionBase, DFSSell, GasFeeTaker, McdHelper, IFlashLoanRecipient,
 ReentrancyGuard, MainnetBalancerV2Addresses {
     using TokenUtils for address;
 
@@ -31,6 +32,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         uint256 vaultId;
         address mcdManager;
         address joinAddr;
+        uint256 gasUsed;
         ExchangeData exchangeData;
     }
 
@@ -40,7 +42,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public payable virtual override (ActionBase, DFSSell) returns (bytes32) {
+    ) public payable virtual override (ActionBase, DFSSell, GasFeeTaker) returns (bytes32) {
         RepayParams memory repayParams = _parseCompositeParams(_callData);
 
         repayParams.vaultId = _parseParamUint(
@@ -88,7 +90,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes memory _callData) public payable virtual override (ActionBase, DFSSell) {
+    function executeActionDirect(bytes memory _callData) public payable virtual override (ActionBase, DFSSell, GasFeeTaker) {
         RepayParams memory repayParams = _parseCompositeParams(_callData);
         _flBalancer(repayParams);
     }
@@ -138,12 +140,19 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         (uint256 exchangedAmount, ) = _dfsSell(_repayParams.exchangeData, address(this), address(this), false);
 
         (address urn, bytes32 ilk) = getUrnAndIlk(_repayParams.mcdManager, _repayParams.vaultId);
-        uint256 paybackAmount = exchangedAmount;
+
+        uint256 paybackAmount = _takeFee(GasFeeTakerParams(
+            _repayParams.gasUsed,
+            DAI_ADDR,
+            exchangedAmount,
+            0
+        ));
+
         // if paybackAmount is higher than current debt, repay all debt and send remaining dai to proxy
         {
             uint256 debt = getAllDebt(address(vat), urn, urn, ilk);
-            if (exchangedAmount > debt) {
-                DAI_ADDR.withdrawTokens(IDSProxy(_proxy).owner(), exchangedAmount - debt);
+            if (paybackAmount > debt) {
+                DAI_ADDR.withdrawTokens(IDSProxy(_proxy).owner(), paybackAmount - debt);
                 paybackAmount = debt;
             }
         }
@@ -244,7 +253,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
     function actionType()
     public
     pure
-    virtual override (ActionBase, DFSSell)
+    virtual override (ActionBase, DFSSell, GasFeeTaker)
     returns (uint8) {
         return uint8(ActionType.CUSTOM_ACTION);
     }

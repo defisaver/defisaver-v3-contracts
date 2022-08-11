@@ -3,6 +3,7 @@ pragma solidity 0.8.10;
 
 import "../ActionBase.sol";
 import "../exchange/DFSSell.sol";
+import "../fee/GasFeeTaker.sol";
 
 import "../../interfaces/balancer/IFlashLoanRecipient.sol";
 import "../../interfaces/balancer/IFlashLoans.sol";
@@ -18,7 +19,7 @@ import "./helpers/McdHelper.sol";
 import "../balancer/helpers/MainnetBalancerV2Addresses.sol";
 
 contract McdBoostComposite is
-ActionBase, DFSSell, McdHelper, IFlashLoanRecipient,
+ActionBase, DFSSell, GasFeeTaker, McdHelper, IFlashLoanRecipient,
 ReentrancyGuard, MainnetBalancerV2Addresses {
     using TokenUtils for address;
 
@@ -32,6 +33,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         uint256 vaultId;
         address mcdManager;
         address joinAddr;
+        uint256 gasUsed;
         ExchangeData exchangeData;
     }
 
@@ -41,7 +43,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public payable virtual override (ActionBase, DFSSell) returns (bytes32) {
+    ) public payable virtual override (ActionBase, DFSSell, GasFeeTaker) returns (bytes32) {
         BoostParams memory boostParams = _parseCompositeParams(_callData);
 
         boostParams.vaultId = _parseParamUint(
@@ -89,7 +91,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes memory _callData) public payable virtual override (ActionBase, DFSSell) {
+    function executeActionDirect(bytes memory _callData) public payable virtual override (ActionBase, DFSSell, GasFeeTaker) {
         BoostParams memory boostParams = _parseCompositeParams(_callData);
         _flBalancer(boostParams);
     }
@@ -135,7 +137,14 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         uint256 boostAmount = _boostParams.exchangeData.srcAmount;
 
         // Sell flashloaned debt asset for collateral asset
-        (uint256 supplyAmount, ) = _dfsSell(_boostParams.exchangeData, address(this), address(this), false);
+        (uint256 exchangedAmount, ) = _dfsSell(_boostParams.exchangeData, address(this), address(this), false);
+
+        uint256 supplyAmount = _takeFee(GasFeeTakerParams(
+            _boostParams.gasUsed,
+            collateralAsset,
+            exchangedAmount,
+            0
+        ));
 
         (address urn, bytes32 ilk) = getUrnAndIlk(_boostParams.mcdManager, _boostParams.vaultId);
         uint256 rate = IJug(JUG_ADDRESS).drip(ilk);
@@ -175,6 +184,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         emit ActionEvent("McdBoostComposite", abi.encode(
             _proxy,
             boostAmount,
+            exchangedAmount,
             supplyAmount
         ));
     }
@@ -227,7 +237,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
     function actionType()
     public
     pure
-    virtual override (ActionBase, DFSSell)
+    virtual override (ActionBase, DFSSell, GasFeeTaker)
     returns (uint8) {
         return uint8(ActionType.CUSTOM_ACTION);
     }

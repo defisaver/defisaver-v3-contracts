@@ -8,6 +8,7 @@ import "../../../utils/TokenUtils.sol";
 import "../../../utils/FeeRecipient.sol";
 import "../../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../../../interfaces/aaveV2/IPriceOracleGetterAave.sol";
+import "../../../interfaces/lido/IWStEth.sol";
 
 contract GasFeeHelper is DSMath {
     using TokenUtils for address;
@@ -53,6 +54,11 @@ contract GasFeeHelper is DSMath {
         address priceOracleAddress =
             ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
 
-        price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr);
+        address tokenAddr = _tokenAddr == TokenUtils.WSTETH_ADDR ? TokenUtils.STETH_ADDR : _tokenAddr;
+        price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(tokenAddr);
+
+        if (_tokenAddr == TokenUtils.WSTETH_ADDR) {
+            price = wmul(price, IWStEth(_tokenAddr).stEthPerToken());
+        }
     }
 }
