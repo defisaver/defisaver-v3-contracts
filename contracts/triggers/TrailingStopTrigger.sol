@@ -11,8 +11,11 @@ import "../utils/Denominations.sol";
 import "../utils/TokenUtils.sol";
 import "./helpers/TriggerHelper.sol";
 
+/// @title Validates trailing stop, caller injects a chainlink roundId where conditions are met
 contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
     using TokenUtils for address;
+
+    IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
     struct SubParams {
         address tokenAddr;
@@ -24,8 +27,6 @@ contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
         uint80 maxRoundId;
     }
 
-    IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
-
     function isTriggered(bytes memory _callData, bytes memory _subData)
         public
         view
@@ -36,7 +37,10 @@ contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
         CallParams memory triggerCallData = parseCallInputs(_callData);
 
         (uint256 currPrice, ) = getRoundInfo(triggerSubData.tokenAddr, 0);
-        (uint256 maxPrice, uint256 maxPriceTimeStamp) = getRoundInfo(triggerSubData.tokenAddr, triggerCallData.maxRoundId);
+        (uint256 maxPrice, uint256 maxPriceTimeStamp) = getRoundInfo(
+            triggerSubData.tokenAddr,
+            triggerCallData.maxRoundId
+        );
 
         // we can't send a roundId that happened before the users sub
         if (maxPriceTimeStamp < triggerSubData.startTimeStamp) {
@@ -46,6 +50,7 @@ contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
         return checkPercentageDiff(currPrice, maxPrice, triggerSubData.percentage);
     }
 
+    /// @notice Given the currentPrice and the maxPrice see if there diff. > than percentage
     function checkPercentageDiff(
         uint256 _currPrice,
         uint256 _maxPrice,
@@ -56,10 +61,14 @@ contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
         return _currPrice <= (_maxPrice - amountDiff);
     }
 
-    /// @dev helper function that returns latest token price in USD
-    function getRoundInfo(address _inputTokenAddr, uint80 _roundId) public view returns (
-        uint256 price, uint256 updateTimestamp
-        ) {
+    /// @dev Helper function that returns chainlink price data
+    /// @param _inputTokenAddr Token address we are looking the usd price for
+    /// @param _roundId Chainlink roundId, if 0 uses the latest
+    function getRoundInfo(address _inputTokenAddr, uint80 _roundId)
+        public
+        view
+        returns (uint256, uint256 updateTimestamp)
+    {
         address tokenAddr = _inputTokenAddr;
 
         if (_inputTokenAddr == TokenUtils.WETH_ADDR) {
@@ -73,13 +82,24 @@ contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
         int256 chainlinkPrice;
 
         if (_roundId == 0) {
-            (, chainlinkPrice, , updateTimestamp, ) = feedRegistry.latestRoundData(tokenAddr, Denominations.USD);
+            (, chainlinkPrice, , updateTimestamp, ) = feedRegistry.latestRoundData(
+                tokenAddr,
+                Denominations.USD
+            );
         } else {
-            (, chainlinkPrice, , updateTimestamp, ) = feedRegistry.getRoundData(tokenAddr, Denominations.USD, _roundId);
+            (, chainlinkPrice, , updateTimestamp, ) = feedRegistry.getRoundData(
+                tokenAddr,
+                Denominations.USD,
+                _roundId
+            );
         }
 
+        // no price for wsteth, can calculate from steth
         if (_inputTokenAddr == WSTETH_ADDR) {
-            return (wmul(uint256(price), IWStEth(WSTETH_ADDR).stEthPerToken()), updateTimestamp);
+            return (
+                wmul(uint256(chainlinkPrice), IWStEth(WSTETH_ADDR).stEthPerToken()),
+                updateTimestamp
+            );
         }
 
         return (uint256(chainlinkPrice), updateTimestamp);

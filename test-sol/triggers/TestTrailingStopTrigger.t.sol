@@ -8,7 +8,7 @@ import "../CheatCodes.sol";
 import "../../contracts/mocks/MockChainlinkFeedRegistry.sol";
 import "../../contracts/triggers/TrailingStopTrigger.sol";
 
-contract TestTrailingStopTrigger is DSTest, MainnetTriggerAddresses {
+contract TestTrailingStopTrigger is DSTest, DSMath, MainnetTriggerAddresses {
     CheatCodes vm = CheatCodes(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
     address internal constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -77,15 +77,74 @@ contract TestTrailingStopTrigger is DSTest, MainnetTriggerAddresses {
 
    // Test with fetching roundId
    function testGetRoundInfoForEth() public {
-       int256 chainLinkPrice = 10_000; // ide gas
+       uint256 chainLinkPrice = 10_000; // ide gas
        uint80 roundId = 0;
-
-       mockPriceFeed.setRoundData(ETH_ADDR, Denominations.USD, roundId, chainLinkPrice);
+       setPrice(roundId, chainLinkPrice, ETH_ADDR);
 
        (uint256 price, uint256 timestamp) = trigger.getRoundInfo(ETH_ADDR, roundId);
-       
+
        assert(price == uint256(chainLinkPrice));
        assert(timestamp == block.timestamp);
+    }
+
+    function testGetRoundInfoForWStEth() public {
+       uint256 chainLinkPrice = 10_000; // ide gas
+       uint80 roundId = 0;
+       setPrice(roundId, chainLinkPrice, STETH_ADDR);
+
+       (uint256 price, uint256 timestamp) = trigger.getRoundInfo(WSTETH_ADDR, roundId);
+
+       assert(price == wmul(uint256(chainLinkPrice), IWStEth(WSTETH_ADDR).stEthPerToken()));
+       assert(timestamp == block.timestamp);
+    }
+
+    function testIsTriggeredToPass() public {
+        uint80 maxRoundId = 1;
+        uint256 percentage = 10 * 10**8;
+        bytes memory callData = abi.encode(maxRoundId);
+        bytes memory subData = abi.encode(ETH_ADDR, percentage, block.timestamp);
+
+        setPrice(0, 10_000, ETH_ADDR);
+
+        vm.warp(block.timestamp + 60*60);
+
+        setPrice(maxRoundId, 15_000, ETH_ADDR);
+
+        vm.warp(block.timestamp + 60*60);
+
+        setPrice(maxRoundId + 1, 12_000, ETH_ADDR);
+
+        bool isTriggered = trigger.isTriggered(callData, subData);
+
+        assert(isTriggered);
+    }
+
+    function testIsTriggeredTimestampInPast() public {
+        uint80 maxRoundId = 1;
+        uint256 percentage = 10 * 10**8;
+        bytes memory callData = abi.encode(maxRoundId);
+
+        setPrice(0, 10_000, ETH_ADDR);
+
+        vm.warp(block.timestamp + 60*60);
+
+        setPrice(maxRoundId, 15_000, ETH_ADDR);
+
+        vm.warp(block.timestamp + 60*60);
+
+        setPrice(maxRoundId + 1, 12_000, ETH_ADDR);
+
+        bytes memory subData = abi.encode(ETH_ADDR, percentage, block.timestamp);
+
+        bool isTriggered = trigger.isTriggered(callData, subData);
+
+        assert(!isTriggered);
+    }
+
+
+    // Helper function
+    function setPrice(uint80 _roundId, uint256 _price, address _tokenAddr) public {
+        mockPriceFeed.setRoundData(_tokenAddr, Denominations.USD, _roundId, int256(_price));
     }
 
 }
