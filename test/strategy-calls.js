@@ -17,7 +17,7 @@ const {
     calcGasToUSD,
     AVG_GAS_PRICE,
     placeHolderAddr,
-    MCD_MANAGER_ADDR,
+    // MCD_MANAGER_ADDR,
     WETH_ADDRESS,
     DAI_ADDR,
     UNISWAP_WRAPPER,
@@ -34,6 +34,10 @@ const {
     USDC_ADDR,
     LUSD_ADDR,
 } = require('./utils');
+
+const {
+    MCD_MANAGER_ADDR,
+} = require('./utils-mcd');
 
 const { ADAPTER_ADDRESS } = require('./utils-reflexer');
 
@@ -602,6 +606,80 @@ const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, s
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
     console.log(`GasUsed callFLMcdRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
+const callCompositeMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, ethJoin, repayAmount) => {
+    // console.log(botAcc, strategyExecutor, strategyIndex, subId, strategySub, ethJoin, repayAmount);
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const repayGasCost = 800000; // .8 mil gas
+
+    const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
+        '0', // '&vaultId'
+        MCD_MANAGER_ADDR,
+        ethJoin,
+        repayGasCost,
+        formatExchangeObj(
+            WETH_ADDRESS,
+            DAI_ADDR,
+            repayAmount,
+            UNISWAP_WRAPPER,
+        ),
+    );
+
+    actionsCallData.push(repayCompositeAction.encodeForRecipe()[0]);
+
+    // const nextPrice = await getNextEthPrice();
+    const nextPrice = 0;
+
+    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callCompositeMcdRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
+const callCompositeMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, ethJoin, boostAmount) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const boostGasCost = 800000; // .8 mil gas
+
+    const boostCompositeAction = new dfs.actions.maker.MakerBoostCompositeAction(
+        '0', // &vaultId
+        MCD_MANAGER_ADDR,
+        ethJoin,
+        boostGasCost,
+        formatExchangeObj(
+            DAI_ADDR,
+            WETH_ADDRESS,
+            boostAmount,
+            UNISWAP_WRAPPER,
+        ),
+    );
+
+    actionsCallData.push(boostCompositeAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callFLMcdBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 const callCompRepayStrategy = async (botAcc, strategyExecutor, subId, strategySub, repayAmount) => {
@@ -1660,4 +1738,6 @@ module.exports = {
     callMcdRepayFromMstableWithExchangeStrategy,
     callMcdRepayFromRariStrategy,
     callMcdRepayFromRariStrategyWithExchange,
+    callCompositeMcdRepayStrategy,
+    callCompositeMcdBoostStrategy,
 };

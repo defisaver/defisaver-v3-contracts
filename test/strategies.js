@@ -153,6 +153,33 @@ const createFLRepayStrategy = () => {
     return repayStrategy.encodeForDsProxyCall();
 };
 
+const createCompositeRepayStrategy = () => {
+    const repayStrategy = new dfs.Strategy('MakerCompositeRepayStrategy');
+
+    repayStrategy.addSubSlot('&vaultId', 'uint256');
+    repayStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
+    repayStrategy.addTrigger(mcdRatioTrigger);
+
+    const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
+        '&vaultId',
+        '%mcdManager',
+        '%joinAddr',
+        '%gasUsed',
+        formatExchangeObj(
+            '%wethAddr',
+            '%daiAddr',
+            '%repayAmount',
+            '%exchangeWrapper',
+        ),
+    );
+
+    repayStrategy.addAction(repayCompositeAction);
+
+    return repayStrategy.encodeForDsProxyCall();
+};
+
 const createRariRepayStrategy = () => {
     const repayStrategy = new dfs.Strategy('McdRariRepayStrategy');
 
@@ -1312,6 +1339,32 @@ const createFlMcdBoostStrategy = () => {
     return mcdBoostStrategy.encodeForDsProxyCall();
 };
 
+const createCompositeMcdBoostStrategy = () => {
+    const mcdBoostStrategy = new dfs.Strategy('MakerCompositeBoostStrategy');
+    mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
+    mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
+    mcdBoostStrategy.addTrigger(mcdRatioTrigger);
+
+    const boostCompositeAction = new dfs.actions.maker.MakerBoostCompositeAction(
+        '&vaultId',
+        '%mcdManager',
+        '%joinAddr',
+        '%gasUsed',
+        formatExchangeObj(
+            '%daiAddr',
+            '%wethAddr',
+            '%boostAmount',
+            '%wrapper',
+        ),
+    );
+
+    mcdBoostStrategy.addAction(boostCompositeAction);
+
+    return mcdBoostStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
@@ -1340,4 +1393,6 @@ module.exports = {
     createMcdBoostStrategy,
     createFlMcdBoostStrategy,
     createMcdCloseToCollStrategy,
+    createCompositeRepayStrategy,
+    createCompositeMcdBoostStrategy,
 };
