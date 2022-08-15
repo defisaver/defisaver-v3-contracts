@@ -30,7 +30,7 @@ const {
     curveStethPoolWithdraw,
 } = require('../actions');
 
-const forkNum = 14700000;
+const forkNum = 15300000;
 
 const testDeposit = async (
     proxy,
@@ -217,7 +217,7 @@ const curveWithdrawTest = async (testLength) => {
                     lpMinted,
                     false,
                     false,
-                    `${+amountEach * 0.5}`,
+                    `${+amountEach * 0.2}`,
                 );
             });
             if (!pool.depositContract && !pool.underlyingFlag) return;
@@ -239,7 +239,7 @@ const curveWithdrawTest = async (testLength) => {
                     lpMinted,
                     true,
                     false,
-                    `${+amountEach * 0.5}`,
+                    `${+amountEach * 0.2}`,
                 );
             });
         }));
