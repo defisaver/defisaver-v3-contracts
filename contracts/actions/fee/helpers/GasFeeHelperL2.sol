@@ -9,9 +9,9 @@ import "../../../utils/FeeRecipient.sol";
 import "../../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../../../interfaces/aaveV2/IPriceOracleGetterAave.sol";
 
-import "../helpers/OptimismFeeAddresses.sol";
+import "../helpers/MainnetFeeAddresses.sol";
 
-contract GasFeeHelperL2 is DSMath, OptimismFeeAddresses {
+contract GasFeeHelperL2 is DSMath, MainnetFeeAddresses {
     using TokenUtils for address;
 
     FeeRecipient public constant feeRecipient = FeeRecipient(FEE_RECIPIENT);
@@ -40,7 +40,7 @@ contract GasFeeHelperL2 is DSMath, OptimismFeeAddresses {
         // convert to token amount
         if (_feeToken != TokenUtils.WETH_ADDR) {
             uint256 tokenPriceInUSD = getTokenPrice(_feeToken);
-            uint256 wethPriceInUSD = getTokenPrice(WETH_ADDR);
+            uint256 wethPriceInUSD = getTokenPrice(TokenUtils.WETH_ADDR);
             uint256 tokenDecimals = _feeToken.getTokenDecimals();
 
             require(tokenDecimals <= 18, "Token decimal too big");
