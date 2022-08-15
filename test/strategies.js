@@ -614,7 +614,7 @@ const createMcdCloseToDaiStrategy = (isTrailing = false) => {
     let trigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
 
     if (isTrailing) {
-        // tokenAddr, percentage, startTimeStamp
+        // tokenAddr, percentage, startRoundId
         trigger = new dfs.triggers.TrailingStopTrigger(nullAddress, '0', '0');
     }
 
@@ -689,7 +689,7 @@ const createMcdCloseToCollStrategy = (isTrailing = false) => {
     let trigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
 
     if (isTrailing) {
-        // tokenAddr, percentage, startTimeStamp
+        // tokenAddr, percentage, startRoundId
         trigger = new dfs.triggers.TrailingStopTrigger(nullAddress, '0', '0');
     }
 
@@ -977,7 +977,7 @@ const createLiquityCloseToCollStrategy = (isTrailing = false) => {
     let trigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
 
     if (isTrailing) {
-        // tokenAddr, percentage, startTimeStamp
+        // tokenAddr, percentage, startRoundId
         trigger = new dfs.triggers.TrailingStopTrigger(nullAddress, '0', '0');
     }
 

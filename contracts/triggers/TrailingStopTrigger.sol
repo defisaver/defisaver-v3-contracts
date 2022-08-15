@@ -11,8 +11,6 @@ import "../utils/Denominations.sol";
 import "../utils/TokenUtils.sol";
 import "./helpers/TriggerHelper.sol";
 
-import "hardhat/console.sol";
-
 /// @title Validates trailing stop, caller injects a chainlink roundId where conditions are met
 contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
     using TokenUtils for address;
@@ -35,12 +33,8 @@ contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
         override
         returns (bool)
     {
-
-        console.log("sdfds");
         SubParams memory triggerSubData = parseSubInputs(_subData);
         CallParams memory triggerCallData = parseCallInputs(_callData);
-
-        console.log(triggerCallData.maxRoundId, triggerSubData.startRoundId);
 
         // valid chainlink id should never be 0
         if (triggerCallData.maxRoundId == 0 || triggerSubData.startRoundId == 0) return false;
@@ -52,8 +46,6 @@ contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
         );
 
         (, uint256 startTimeStamp) = getRoundInfo(triggerSubData.tokenAddr, triggerSubData.startRoundId);
-
-         console.log(maxPriceTimeStamp, startTimeStamp);
 
         // we can't send a roundId that happened before the users sub
         if (maxPriceTimeStamp < startTimeStamp) {
