@@ -604,7 +604,7 @@ const createReflexerFLBoostStrategy = () => {
 };
 
 const createMcdCloseToDaiStrategy = (isTrailing = false) => {
-    const strategyName = isTrailing ? 'McdTrailingCloseToCollStrategy' : 'McdCloseToCollStrategy';
+    const strategyName = isTrailing ? 'McdTrailingCloseToDaiStrategy' : 'McdCloseToDaiStrategy';
 
     const mcdCloseStrategy = new dfs.Strategy(strategyName);
     mcdCloseStrategy.addSubSlot('&vaultId', 'uint256');
@@ -759,8 +759,6 @@ const createMcdCloseToCollStrategy = (isTrailing = false) => {
             '%amountToRecipient(maxUint)', // kept variable (can support partial close later)
         ),
     );
-
-    console.log(mcdCloseStrategy.encodeForDsProxyCall());
 
     return mcdCloseStrategy.encodeForDsProxyCall();
 };
