@@ -21,16 +21,22 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes memory _callData,
+        bytes calldata callData,
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        Params memory params = parseInputs(_callData);
+        Params memory params = parseInputs(callData);
 
-        params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
-        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
-        params.market = _parseParamAddr(params.market, _paramMapping[2], _subData, _returnValues);
+        params.assetId = uint16(_parseParamUint(uint16(params.assetId), _paramMapping[0], _subData, _returnValues));
+        params.useDefaultMarket = _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[1], _subData, _returnValues) == 1;
+        params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
+        params.market = _parseParamAddr(params.market, _paramMapping[4], _subData, _returnValues);
+
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
 
         (uint256 withdrawnAmount, bytes memory logData) = _withdraw(
             params.market,
@@ -43,16 +49,8 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes memory _callData) public payable override {
-        Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _withdraw(
-            params.market,
-            params.assetId,
-            params.amount,
-            params.to
-        );
-        logger.logActionDirectEvent("AaveV3Withdraw", logData);
-    }
+    /// @dev Only used on L2 currently, must parse inputs here if implemented later on
+    function executeActionDirect(bytes memory _callData) public payable override {}
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
@@ -92,6 +90,7 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
         if (_amount == type(uint256).max) {
             tokenBefore = tokenAddr.getBalance(_to);
         }
+
         // withdraw underlying tokens from aave and send _to address
         lendingPool.withdraw(tokenAddr, _amount, _to);
 
@@ -106,9 +105,6 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
-        if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
-        }
     }
 
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
@@ -122,7 +118,7 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
         }
     }
 
-    function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
+    function decodeInputs(bytes calldata encodedInput) public view returns (Params memory params) {
         params.assetId = uint16(bytes2(encodedInput[0:2]));
         params.useDefaultMarket = bytesToBool(bytes1(encodedInput[2:3]));
         params.amount = uint256(bytes32(encodedInput[3:35]));

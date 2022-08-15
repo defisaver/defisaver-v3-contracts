@@ -32,7 +32,7 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
         inputData.availableAmount = _parseParamUint(inputData.availableAmount, _paramMapping[1], _subData, _returnValues);
         inputData.dfsFeeDivider = _parseParamUint(inputData.dfsFeeDivider, _paramMapping[2], _subData, _returnValues);
 
-        uint256 txCost = calcGasCost(inputData.gasUsed, inputData.feeToken);
+        uint256 txCost = calcGasCost(inputData.gasUsed, inputData.feeToken, 0);
 
         /// @dev This means inputData.availableAmount is not being piped into
         /// @dev To stop sender from sending any value here, if not piped take proxy balance

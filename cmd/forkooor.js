@@ -4,8 +4,8 @@ const hre = require('hardhat');
 require('dotenv-safe').config();
 const fs = require('fs');
 const { spawnSync } = require('child_process');
-const dfs = require('@defisaver/sdk');
-const { getAssetInfo, ilks } = require('@defisaver/tokens');
+const { getAssetInfo, ilks, assets } = require('@defisaver/tokens');
+const { dfs, configure } = require('@defisaver/sdk');
 
 const { program } = require('commander');
 
@@ -16,7 +16,7 @@ const {
 
 const path = require('path');
 const {
-    createFork, topUp,
+    createFork, topUp, chainIds,
 } = require('../scripts/utils/fork');
 
 const {
@@ -33,7 +33,16 @@ const {
     rdptAddress,
     WBTC_ADDR,
     redeploy,
+    setNetwork,
+    addrs,
 } = require('../test/utils');
+
+const {
+    createAaveV3RepayL2Strategy,
+    createAaveFLV3RepayL2Strategy,
+    createAaveV3BoostL2Strategy,
+    createAaveFLV3BoostL2Strategy,
+} = require('../test/l2-strategies');
 
 const {
     getVaultsForUser,
@@ -51,7 +60,11 @@ const {
     withdrawMcd,
     liquityOpen,
     liquityWithdraw,
+    aaveV3Supply,
+    aaveV3Borrow,
 } = require('../test/actions');
+
+const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy } = require('../test/l2-strategy-subs');
 
 const { deployContract } = require('../scripts/utils/deployer');
 
@@ -67,6 +80,7 @@ const {
     addBotCaller,
     getLatestStrategyId,
     createStrategy,
+    createBundle,
 } = require('../test/utils-strategies');
 
 const { createLiquityCloseToCollStrategy } = require('../test/strategies');
@@ -964,17 +978,350 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
     }
 };
 
+const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    await redeploy('AaveV3Payback', addrs[network].REGISTRY_ADDR, false, true);
+    await redeploy('AaveV3Withdraw', addrs[network].REGISTRY_ADDR, false, true);
+    await redeploy('AaveV3Supply', addrs[network].REGISTRY_ADDR, false, true);
+    await redeploy('AaveV3Borrow', addrs[network].REGISTRY_ADDR, false, true);
+
+    const collAssetInfo = assets.find((i) => i.symbol === collSymbol);
+    const debtAssetInfo = assets.find((i) => i.symbol === debtSymbol);
+
+    const collAddr = collAssetInfo.addresses[chainIds[network]];
+    const debtAddr = debtAssetInfo.addresses[chainIds[network]];
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
+    const poolAddress = await aaveMarketContract.getPool();
+
+    const pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
+
+    const amount = hre.ethers.utils.parseUnits(collAmount, collAssetInfo.decimals);
+
+    if (collSymbol === 'WETH') {
+        await depositToWeth(amount, senderAcc);
+    } else {
+        try {
+            await sell(
+                proxy,
+                addrs[network].WETH_ADDRESS,
+                collAddr,
+                hre.ethers.utils.parseUnits('50', 18),
+                addrs[network].UNISWAP_WRAPPER,
+                senderAcc.address,
+                senderAcc.address,
+                0,
+                senderAcc,
+                addrs[network].REGISTRY_ADDR,
+            );
+        } catch (err) {
+            console.log(`Buying ${debtSymbol} failed`);
+        }
+    }
+
+    const reserveData = await pool.getReserveData(collAddr);
+    const collAssetId = reserveData.id;
+
+    console.log('amount: ', amount);
+
+    await aaveV3Supply(
+        proxy,
+        addrs[network].AAVE_MARKET,
+        amount,
+        collAddr,
+        collAssetId,
+        senderAcc.address,
+        senderAcc,
+    );
+
+    const reserveDataDebt = await pool.getReserveData(debtAddr);
+    const amountDebt = hre.ethers.utils.parseUnits(debtAmount, debtAssetInfo.decimals);
+
+    console.log('amountDebt: ', amountDebt);
+
+    const debtAssetId = reserveDataDebt.id;
+
+    await aaveV3Borrow(
+        proxy,
+        addrs[network].AAVE_MARKET,
+        amountDebt,
+        senderAcc.address,
+        2, // variable
+        debtAssetId,
+    );
+};
+
+const subAaveAutomation = async (
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    sender,
+) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    await topUp(senderAcc.address);
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await redeploy('AaveSubProxy', addrs[network].REGISTRY_ADDR, false, true);
+
+    await openStrategyAndBundleStorage(true);
+    const aaveRepayStrategyEncoded = createAaveV3RepayL2Strategy();
+    const aaveRepayFLStrategyEncoded = createAaveFLV3RepayL2Strategy();
+
+    const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
+    const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
+
+    await createBundle(proxy, [strategyId1, strategyId2]);
+
+    const aaveBoostStrategyEncoded = createAaveV3BoostL2Strategy();
+    const aaveBoostFLStrategyEncoded = createAaveFLV3BoostL2Strategy();
+
+    const strategyId11 = await createStrategy(proxy, ...aaveBoostStrategyEncoded, true);
+    const strategyId22 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
+
+    await createBundle(proxy, [strategyId11, strategyId22]);
+
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
+
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
+
+    const subIds = await subAaveV3L2AutomationStrategy(
+        proxy,
+        minRatioFormatted.toHexString().slice(2),
+        maxRatioFormatted.toHexString().slice(2),
+        optimalRatioBoostFormatted.toHexString().slice(2),
+        optimalRatioRepayFormatted.toHexString().slice(2),
+        boostEnabled,
+        addrs[network].REGISTRY_ADDR,
+    );
+
+    console.log(`Aave position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
+};
+
+const getAavePos = async (
+    sender,
+) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    await topUp(senderAcc.address);
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const aaveView = await hre.ethers.getContractAt('AaveV3View', addrs[network].AAVE_V3_VIEW);
+
+    const aaveInfo = await aaveView.getLoanData(addrs[network].AAVE_MARKET, proxy.address);
+
+    console.log(`User proxy: ${aaveInfo.user}`);
+    console.log(`Ratio: ${aaveInfo.ratio / 1e16}%`);
+
+    aaveInfo.collAmounts.forEach((amount, i) => {
+        if (!amount.eq(0)) {
+            console.log(aaveInfo.collAddr[i]);
+            const collAssetInfo = assets.find(
+                // eslint-disable-next-line max-len
+                (a) => a.addresses[chainIds[network]].toLocaleLowerCase() === aaveInfo.collAddr[i].toLowerCase(),
+            );
+
+            console.log(`Collateral ${collAssetInfo.symbol}, amount: $${amount / 1e8}`);
+        }
+    });
+
+    aaveInfo.borrowVariableAmounts.forEach((amount, i) => {
+        if (!amount.eq(0)) {
+            const borrowAssetInfo = assets.find(
+                (a) => a.addresses[chainIds[network]] === aaveInfo.borrowAddr[i].toLowerCase(),
+            );
+
+            console.log(`Borrow ${borrowAssetInfo.symbol}, amount: $${amount / 1e8}}`);
+        }
+    });
+
+    aaveInfo.borrowStableAmounts.forEach((amount, i) => {
+        if (!amount.eq(0)) {
+            const borrowAssetInfo = assets.find(
+                (a) => a.addresses[chainIds[network]] === aaveInfo.borrowAddr[i].toLowerCase(),
+            );
+
+            console.log(`Borrow stable ${borrowAssetInfo.symbol}, amount: $${amount / 1e8}}`);
+        }
+    });
+};
+
+const updateAaveV3AutomationSub = async (
+    subIdRepay,
+    subIdBoost,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    sender,
+) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await redeploy('AaveSubProxy', addrs[network].REGISTRY_ADDR, false, true);
+
+    await openStrategyAndBundleStorage(true);
+    const aaveRepayStrategyEncoded = createAaveV3RepayL2Strategy();
+    const aaveRepayFLStrategyEncoded = createAaveFLV3RepayL2Strategy();
+
+    const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
+    const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
+
+    await createBundle(proxy, [strategyId1, strategyId2]);
+
+    const aaveBoostStrategyEncoded = createAaveV3BoostL2Strategy();
+    const aaveBoostFLStrategyEncoded = createAaveFLV3BoostL2Strategy();
+
+    const strategyId11 = await createStrategy(proxy, ...aaveBoostStrategyEncoded, true);
+    const strategyId22 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
+
+    await createBundle(proxy, [strategyId11, strategyId22]);
+
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
+
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
+
+    await updateAaveV3L2AutomationStrategy(
+        proxy,
+        subIdRepay,
+        subIdBoost,
+        minRatioFormatted.toHexString().slice(2),
+        maxRatioFormatted.toHexString().slice(2),
+        optimalRatioBoostFormatted.toHexString().slice(2),
+        optimalRatioRepayFormatted.toHexString().slice(2),
+        boostEnabled,
+        addrs[network].REGISTRY_ADDR,
+    );
+
+    console.log('Aave position updated');
+};
+
+const setBotAuth = async (addr) => {
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    await addBotCaller(addr, addrs[network].REGISTRY_ADDR, true, network);
+};
+
 (async () => {
     program
-        .command('new-fork')
+        .command('new-fork <network>')
         .description('Creates a new tenderly fork')
         .option('-b, --bots <botAddr...>', 'bot addresses', [])
-        .action(async (options) => {
-            const forkId = await createFork();
+        .action(async (network, options) => {
+            const forkId = await createFork(network);
 
             console.log(`Fork id: ${forkId}   |   Rpc url https://rpc.tenderly.co/fork/${forkId}`);
 
             setEnv('FORK_ID', forkId);
+            setEnv('TEST_CHAIN_ID', network);
 
             if (options.bots.length > 0) {
                 // setting this so we can do topUp and addBotCaller from this script
@@ -984,7 +1331,7 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
                     // eslint-disable-next-line no-await-in-loop
                     await topUp(botAddr);
                     // eslint-disable-next-line no-await-in-loop
-                    await addBotCaller(botAddr, REGISTRY_ADDR, true);
+                    await addBotCaller(botAddr, addrs[network].REGISTRY_ADDR, true);
                 }
             }
 
@@ -1012,6 +1359,14 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
         .description('Creates a Mcd Vault')
         .action(async (type, coll, debt, senderAddr) => {
             await createMcdVault(type, coll, debt, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('create-aave-position <collType> <debtType> <collAmount> <debtAmount> [senderAddr]')
+        .description('Creates Aave position ')
+        .action(async (collSymbol, debtSymbol, collAmount, debtAmount, senderAddr) => {
+            await createAavePosition(collSymbol, debtSymbol, collAmount, debtAmount, senderAddr);
             process.exit(0);
         });
 
@@ -1050,6 +1405,33 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
         });
 
     program
+        .command(
+            'sub-aave-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+        )
+        .description('Subscribes to aave automation can be both b/r')
+        .action(
+            async (
+                minRatio,
+                maxRatio,
+                optimalRatioBoost,
+                optimalRatioRepay,
+                boostEnabled,
+                senderAcc,
+            ) => {
+                // eslint-disable-next-line max-len
+                await subAaveAutomation(
+                    minRatio,
+                    maxRatio,
+                    optimalRatioBoost,
+                    optimalRatioRepay,
+                    boostEnabled,
+                    senderAcc,
+                );
+                process.exit(0);
+            },
+        );
+
+    program
         .command('sub-mcd-close-to-coll <vaultId> <type> <price> <priceState> [senderAddr]')
         .description('Subscribes to a Mcd close to coll strategy')
         .action(async (vaultId, type, price, priceState, senderAddr) => {
@@ -1083,6 +1465,37 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
             await updateMcdCloseToCollStrategySub(subId, vaultId, type, price, priceState, senderAddr);
             process.exit(0);
         });
+
+    program
+        .command(
+            'update-aave-automation <subIdRepay> <subIdBoost> <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+        )
+        .description('Updates aaveV3 automation bundles')
+        .action(
+            async (
+                subIdRepay,
+                subIdBoost,
+                minRatio,
+                maxRatio,
+                optimalRatioBoost,
+                optimalRatioRepay,
+                boostEnabled,
+                senderAcc,
+            ) => {
+                // eslint-disable-next-line max-len
+                await updateAaveV3AutomationSub(
+                    subIdRepay,
+                    subIdBoost,
+                    minRatio,
+                    maxRatio,
+                    optimalRatioBoost,
+                    optimalRatioRepay,
+                    boostEnabled,
+                    senderAcc,
+                );
+                process.exit(0);
+            },
+        );
 
     program
         .command('update-ss <protocol> <subId> <vaultId> <minRatio> <targetRatio> [senderAddr]')
@@ -1175,6 +1588,14 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
         });
 
     program
+        .command('get-aave-position [addr]')
+        .description('Aave position view, default to proxy')
+        .action(async (addr) => {
+            await getAavePos(addr);
+            process.exit(0);
+        });
+
+    program
         .command('get-trove [acc]')
         .description('Returns data about trove defaults to senders proxy')
         .action(async (acc) => {
@@ -1186,7 +1607,7 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
         .command('set-bot-auth <botAddr>')
         .description('Gives an address the authority to call a contract')
         .action(async (botAddr) => {
-            await addBotCaller(botAddr, REGISTRY_ADDR, true);
+            await setBotAuth(botAddr);
 
             console.log(`Bot auth given to ${botAddr}`);
             process.exit(0);

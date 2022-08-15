@@ -51,6 +51,12 @@ module.exports = {
             gasPrice: 1883022292,
             name: 'optimism',
         },
+        localArbitrum: {
+            url: 'http://127.0.0.1:8545',
+            timeout: 1000000,
+            gasPrice: 1700000000,
+            name: 'arbitrum',
+        },
         fork: {
             url: `https://rpc.tenderly.co/fork/${process.env.FORK_ID}`,
             timeout: 1000000,

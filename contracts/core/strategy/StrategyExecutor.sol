@@ -15,7 +15,6 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));
-    address constant internal RECIPE_EXECUTOR_ADDR = 0x1D6DEdb49AF91A11B5C5F34954FD3E8cC4f03A86;
 
     error BotNotApproved(address, uint256);
     error SubNotEnabled(uint256);

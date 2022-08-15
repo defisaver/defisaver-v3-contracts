@@ -94,10 +94,12 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
 
         for (i = 0; i < triggerIds.length; i++) {
             triggerAddr = registry.getAddr(triggerIds[i]);
+
             isTriggered = ITrigger(triggerAddr).isTriggered(
                 _triggerCallData[i],
                 _sub.triggerData[i]
             );
+
 
             if (!isTriggered) return (false, i);
 
