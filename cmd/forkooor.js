@@ -433,6 +433,8 @@ const mcdCloseStrategySub = async (vaultId, type, price, priceState, sender) => 
 const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
+    await redeploy('TrailingStopTrigger', REGISTRY_ADDR, false, true);
+
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
         // eslint-disable-next-line no-underscore-dangle
@@ -1415,6 +1417,11 @@ const setMockChainlinkPrice = async (tokenLabel, roundId, price) => {
     const c = await hre.ethers.getContractAt('MockChainlinkFeedRegistry', MOCK_CHAINLINK_ORACLE);
 
     const srcToken = getAssetInfo(tokenLabel);
+
+    if (roundId === 0) {
+        console.log('RoundId cant be 0');
+        return;
+    }
 
     await c.setRoundData(srcToken.address, USD_QUOTE, roundId, formattedPrice);
 
