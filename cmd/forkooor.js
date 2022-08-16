@@ -455,7 +455,7 @@ const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, s
 
     const priceOracle = await hre.ethers.getContractAt('MockChainlinkFeedRegistry', MOCK_CHAINLINK_ORACLE);
     const USD_QUOTE = '0x0000000000000000000000000000000000000348';
-    const oracleData = await priceOracle.latestRoundData(ETH_ADDR, USD_QUOTE);
+    const oracleData = await priceOracle.latestRoundData(ilkObj.assetAddress, USD_QUOTE);
 
     console.log(`Current roundId: ${oracleData.roundId}`);
 
