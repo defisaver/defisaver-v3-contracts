@@ -35,6 +35,7 @@ const {
     redeploy,
     setNetwork,
     addrs,
+    ETH_ADDR,
 } = require('../test/utils');
 
 const {
@@ -87,9 +88,12 @@ const { createLiquityCloseToCollStrategy } = require('../test/strategies');
 
 const {
     subRepayFromSavingsStrategy,
-    subMcdCloseStrategy,
+    subMcdCloseToDaiStrategy,
     subMcdCloseToCollStrategy,
     subLiquityCloseToCollStrategy,
+    subMcdTrailingCloseToCollStrategy,
+    subMcdTrailingCloseToDaiStrategy,
+    subLiquityTrailingCloseToCollStrategy,
 } = require('../test/strategy-subs');
 
 const { getTroveInfo } = require('../test/utils-liquity');
@@ -105,6 +109,7 @@ try {
     console.log('No forked registry set yet, please run deploy');
 }
 
+const MOCK_CHAINLINK_ORACLE = '0x9C3744c5F72Bb18a9a8a5Cfd1336121EB0d3AdCa';
 const REGISTRY_ADDR = '0x287778F121F134C66212FB16c9b53eC991D32f5b'; // forkedAddresses.DFSRegistry;
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -412,7 +417,7 @@ const mcdCloseStrategySub = async (vaultId, type, price, priceState, sender) => 
 
     const strategyId = 7;
 
-    const { subId } = await subMcdCloseStrategy(
+    const { subId } = await subMcdCloseToDaiStrategy(
         vaultId,
         proxy,
         formattedPrice,
@@ -423,6 +428,64 @@ const mcdCloseStrategySub = async (vaultId, type, price, priceState, sender) => 
     );
 
     console.log(`Subscribed to mcd close strategy with sub id #${subId}`);
+};
+
+const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const strategyId = 11;
+
+    const ilkObj = ilks.find((i) => i.ilkLabel === type);
+
+    // diff. chainlink price address for bitcoin
+    if (ilkObj.assetAddress.toLocaleLowerCase() === WBTC_ADDR.toLocaleLowerCase()) {
+        ilkObj.assetAddress = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
+    }
+
+    const priceOracle = await hre.ethers.getContractAt('MockChainlinkFeedRegistry', MOCK_CHAINLINK_ORACLE);
+    const USD_QUOTE = '0x0000000000000000000000000000000000000348';
+    const oracleData = await priceOracle.latestRoundData(ETH_ADDR, USD_QUOTE);
+
+    console.log(`Current roundId: ${oracleData.roundId}`);
+
+    const formatPercentage = percentage * 1e8;
+
+    let subInfo;
+
+    if (isToDai) {
+        subInfo = await subMcdTrailingCloseToDaiStrategy(
+            vaultId,
+            proxy,
+            ilkObj.assetAddress,
+            formatPercentage,
+            oracleData.roundId,
+            strategyId,
+            REGISTRY_ADDR,
+        );
+
+        console.log(`Subscribed to trailing mcd close to dai strategy with sub id #${subInfo.subId}`);
+    } else {
+        subInfo = await subMcdTrailingCloseToCollStrategy(
+            vaultId,
+            proxy,
+            ilkObj.assetAddress,
+            formatPercentage,
+            oracleData.roundId,
+            strategyId,
+            REGISTRY_ADDR,
+        );
+
+        console.log(`Subscribed to trailing mcd close to coll strategy with sub id #${subInfo.subId}`);
+    }
 };
 
 const mcdCloseToCollStrategySub = async (vaultId, type, price, priceState, sender) => {
@@ -462,6 +525,42 @@ const mcdCloseToCollStrategySub = async (vaultId, type, price, priceState, sende
     );
 
     console.log(`Subscribed to mcd close strategy with sub id #${subId}`);
+};
+
+const liquityTrailingCloseToCollStrategySub = async (percentage, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    await redeploy('TrailingStopTrigger', REGISTRY_ADDR, false, true);
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const formatPercentage = percentage * 1e8;
+    const strategyId = 13;
+
+    // grab latest roundId from chainlink
+    const priceOracle = await hre.ethers.getContractAt('MockChainlinkFeedRegistry', MOCK_CHAINLINK_ORACLE);
+
+    const USD_QUOTE = '0x0000000000000000000000000000000000000348';
+    const oracleData = await priceOracle.latestRoundData(ETH_ADDR, USD_QUOTE);
+
+    console.log(`Current price of time of sub $${oracleData.answer / 1e8} at roundId ${oracleData.roundId}`);
+
+    const subInfo = await subLiquityTrailingCloseToCollStrategy(
+        proxy,
+        formatPercentage,
+        oracleData.roundId,
+        strategyId,
+        REGISTRY_ADDR,
+    );
+
+    console.log(`Subscribed to trailing liquity close strategy with sub id #${subInfo.subId}`);
 };
 
 const liquityCloseToCollStrategySub = async (price, priceState, sender) => {
@@ -1310,6 +1409,20 @@ const setBotAuth = async (addr) => {
     await addBotCaller(addr, addrs[network].REGISTRY_ADDR, true, network);
 };
 
+const setMockChainlinkPrice = async (tokenLabel, roundId, price) => {
+    const USD_QUOTE = '0x0000000000000000000000000000000000000348';
+    const formattedPrice = price * 1e8;
+    const c = await hre.ethers.getContractAt('MockChainlinkFeedRegistry', MOCK_CHAINLINK_ORACLE);
+
+    const srcToken = getAssetInfo(tokenLabel);
+
+    await c.setRoundData(srcToken.address, USD_QUOTE, roundId, formattedPrice);
+
+    const oracleData = await c.latestRoundData(srcToken.address, USD_QUOTE);
+
+    console.log(`Current price for token ${tokenLabel} at ${new Date(oracleData.updatedAt * 1000).toLocaleTimeString('en-US')} is $${oracleData.answer / 1e8}`);
+};
+
 (async () => {
     program
         .command('new-fork <network>')
@@ -1405,6 +1518,24 @@ const setBotAuth = async (addr) => {
         });
 
     program
+        .command('sub-mcd-trailing-close-to-coll <vaultId> <type> <percentage> [senderAddr]')
+        .description('Subscribes to a Trailing Mcd close to coll strategy')
+        .action(async (vaultId, type, percentage, senderAddr) => {
+            // eslint-disable-next-line max-len
+            await mcdTrailingCloseStrategySub(vaultId, type, percentage, false, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('sub-mcd-trailing-close-to-dai <vaultId> <type> <percentage> [senderAddr]')
+        .description('Subscribes to a Trailing Mcd close to dai strategy')
+        .action(async (vaultId, percentage, senderAddr) => {
+            // eslint-disable-next-line max-len
+            await mcdTrailingCloseStrategySub(vaultId, percentage, true, senderAddr);
+            process.exit(0);
+        });
+
+    program
         .command(
             'sub-aave-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
         )
@@ -1437,6 +1568,15 @@ const setBotAuth = async (addr) => {
         .action(async (vaultId, type, price, priceState, senderAddr) => {
             // eslint-disable-next-line max-len
             await mcdCloseToCollStrategySub(vaultId, type, price, priceState, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('sub-trailing-liquity-close <percentage> [senderAddr]')
+        .description('Subscribes to a trailing liquity to coll strategy')
+        .action(async (percentage, senderAddr) => {
+            // eslint-disable-next-line max-len
+            await liquityTrailingCloseToCollStrategySub(percentage, senderAddr);
             process.exit(0);
         });
 
@@ -1610,6 +1750,15 @@ const setBotAuth = async (addr) => {
             await setBotAuth(botAddr);
 
             console.log(`Bot auth given to ${botAddr}`);
+            process.exit(0);
+        });
+
+    program
+        .command('set-chainlink-price <tokenLabel> <roundId> <priceId>')
+        .description('Sets price in a mock chainlink oracle used on fork')
+        .action(async (tokenLabel, roundId, priceId) => {
+            await setMockChainlinkPrice(tokenLabel, roundId, priceId);
+
             process.exit(0);
         });
 
