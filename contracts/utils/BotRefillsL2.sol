@@ -8,12 +8,14 @@ import "../interfaces/uniswap/v3/IQuoter.sol";
 import "../interfaces/IBotRegistry.sol";
 import "./TokenUtils.sol";
 import "./helpers/UtilHelper.sol";
-import "../actions/fee/helpers/GasFeeHelperL2.sol";
+import "./FeeRecipient.sol";
 
-contract BotRefillsL2 is AdminAuth, UtilHelper, GasFeeHelperL2{
+contract BotRefillsL2 is AdminAuth, UtilHelper{
     using TokenUtils for address;
     error WrongRefillCallerError();
     error NotAuthBotError();
+
+    FeeRecipient public constant feeRecipient = FeeRecipient(FEE_RECIPIENT);
 
     ISwapRouter internal router = ISwapRouter(UNI_V3_ROUTER);
     IQuoter internal quoter = IQuoter(UNI_V3_QUOTER);
