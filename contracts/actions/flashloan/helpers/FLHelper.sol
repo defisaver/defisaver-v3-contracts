@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.10;
 
-import "./OptimismFLAddresses.sol";
+import "./MainnetFLAddresses.sol";
 
-contract FLHelper is OptimismFLAddresses {
+contract FLHelper is MainnetFLAddresses {
 }
