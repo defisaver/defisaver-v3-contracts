@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.10;
 
-contract OptimismUtilAdresses {
+contract OptimismUtilAddresses {
     address internal refillCaller = 0xaFdFC3814921d49AA412d6a22e3F44Cc555dDcC8;
     address internal feeAddr = 0x76720aC2574631530eC8163e4085d6F98513fb27;
     address internal DEFAULT_BOT = 0x16dd89D6e2f81d0528120fb31f6cFE8528E2738e;
