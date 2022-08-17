@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.10;
 
-import "./OptimismUtilAdresses.sol";
+import "./OptimismUtilAddresses.sol";
 
-contract UtilHelper is OptimismUtilAdresses{
+contract UtilHelper is OptimismUtilAddresses{
 }

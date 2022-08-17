@@ -8,8 +8,9 @@ import "../interfaces/uniswap/v3/IQuoter.sol";
 import "../interfaces/IBotRegistry.sol";
 import "./TokenUtils.sol";
 import "./helpers/UtilHelper.sol";
+import "../actions/fee/helpers/GasFeeHelperL2.sol";
 
-contract BotRefillsL2 is AdminAuth, UtilHelper {
+contract BotRefillsL2 is AdminAuth, UtilHelper, GasFeeHelperL2{
     using TokenUtils for address;
     error WrongRefillCallerError();
     error NotAuthBotError();
@@ -43,11 +44,12 @@ contract BotRefillsL2 is AdminAuth, UtilHelper {
         isRefillCaller
         isApprovedBot(_botAddress)
     {
+        address feeReceiverAddr = feeRecipient.getFeeAddr();
         // check if we have enough weth to send
-        uint256 wethBalance = IERC20(TokenUtils.WETH_ADDR).balanceOf(feeAddr);
+        uint256 wethBalance = IERC20(TokenUtils.WETH_ADDR).balanceOf(feeReceiverAddr);
 
         if (wethBalance >= _ethAmount) {
-            IERC20(TokenUtils.WETH_ADDR).transferFrom(feeAddr, address(this), _ethAmount);
+            IERC20(TokenUtils.WETH_ADDR).transferFrom(feeReceiverAddr, address(this), _ethAmount);
 
             TokenUtils.withdrawWeth(_ethAmount);
             payable(_botAddress).transfer(_ethAmount);
@@ -55,7 +57,7 @@ contract BotRefillsL2 is AdminAuth, UtilHelper {
             // get how much dai we need to convert
             uint256 daiAmount = getEth2Dai(_ethAmount);
 
-            IERC20(DAI_ADDR).transferFrom(feeAddr, address(this), daiAmount);
+            IERC20(DAI_ADDR).transferFrom(feeReceiverAddr, address(this), daiAmount);
             DAI_ADDR.approveToken(address(router), daiAmount);
 
             ISwapRouter.ExactInputSingleParams memory params =
@@ -90,10 +92,6 @@ contract BotRefillsL2 is AdminAuth, UtilHelper {
 
     function setRefillCaller(address _newBot) public onlyOwner {
         refillCaller = _newBot;
-    }
-
-    function setFeeAddr(address _newFeeAddr) public onlyOwner {
-        feeAddr = _newFeeAddr;
     }
 
     function setAdditionalBot(address _botAddr, bool _approved) public onlyOwner {
