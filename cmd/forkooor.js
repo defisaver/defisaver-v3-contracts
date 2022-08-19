@@ -5,7 +5,8 @@ require('dotenv-safe').config();
 const fs = require('fs');
 const { spawnSync } = require('child_process');
 const { getAssetInfo, ilks, assets } = require('@defisaver/tokens');
-const { dfs, configure } = require('@defisaver/sdk');
+const { configure } = require('@defisaver/sdk');
+const dfs = require('@defisaver/sdk');
 
 const { program } = require('commander');
 
