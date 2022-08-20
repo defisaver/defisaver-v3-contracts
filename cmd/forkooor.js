@@ -110,7 +110,7 @@ try {
     console.log('No forked registry set yet, please run deploy');
 }
 
-const MOCK_CHAINLINK_ORACLE = '0x0CA7cE9EeD38c82BE579fc21494a93cadAF87B01';
+const MOCK_CHAINLINK_ORACLE = '0x5303617C5334c0F92413352c4cccEEe01a55328A';
 const REGISTRY_ADDR = '0x287778F121F134C66212FB16c9b53eC991D32f5b'; // forkedAddresses.DFSRegistry;
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -449,17 +449,10 @@ const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, s
 
     const ilkObj = ilks.find((i) => i.ilkLabel === type);
 
-    // diff. chainlink price address for bitcoin
-    if (ilkObj.assetAddress.toLocaleLowerCase() === WBTC_ADDR.toLocaleLowerCase()) {
-        ilkObj.assetAddress = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
-    }
-
     const priceOracle = await hre.ethers.getContractAt('MockChainlinkFeedRegistry', MOCK_CHAINLINK_ORACLE);
     const USD_QUOTE = '0x0000000000000000000000000000000000000348';
     const oracleData = await priceOracle.latestRoundData(ilkObj.assetAddress, USD_QUOTE);
-
     console.log(`Current roundId: ${oracleData.roundId}`);
-
     const formatPercentage = percentage * 1e8;
 
     let subInfo;
@@ -515,7 +508,7 @@ const mcdCloseToCollStrategySub = async (vaultId, type, price, priceState, sende
     }
 
     const ilkObj = ilks.find((i) => i.ilkLabel === type);
-    const strategyId = 8;
+    const strategyId = 9;
 
     const { subId } = await subMcdCloseToCollStrategy(
         vaultId,
@@ -1412,19 +1405,15 @@ const setBotAuth = async (addr) => {
     await addBotCaller(addr, addrs[network].REGISTRY_ADDR, true, network);
 };
 
-const setMockChainlinkPrice = async (tokenLabel, roundId, price) => {
+const setMockChainlinkPrice = async (tokenLabel, price) => {
     const USD_QUOTE = '0x0000000000000000000000000000000000000348';
     const formattedPrice = price * 1e8;
     const c = await hre.ethers.getContractAt('MockChainlinkFeedRegistry', MOCK_CHAINLINK_ORACLE);
 
     const srcToken = getAssetInfo(tokenLabel);
 
-    if (roundId === 0) {
-        console.log('RoundId cant be 0');
-        return;
-    }
-
-    await c.setRoundData(srcToken.address, USD_QUOTE, roundId, formattedPrice);
+    console.log(srcToken.address);
+    await c.setRoundData(srcToken.address, USD_QUOTE, formattedPrice);
 
     const oracleData = await c.latestRoundData(srcToken.address, USD_QUOTE);
 
@@ -1762,10 +1751,10 @@ const setMockChainlinkPrice = async (tokenLabel, roundId, price) => {
         });
 
     program
-        .command('set-chainlink-price <tokenLabel> <roundId> <priceId>')
+        .command('set-chainlink-price <tokenLabel> <priceId>')
         .description('Sets price in a mock chainlink oracle used on fork')
-        .action(async (tokenLabel, roundId, priceId) => {
-            await setMockChainlinkPrice(tokenLabel, roundId, priceId);
+        .action(async (tokenLabel, priceId) => {
+            await setMockChainlinkPrice(tokenLabel, priceId);
 
             process.exit(0);
         });

@@ -2,6 +2,8 @@
 
 pragma solidity =0.8.10;
 
+import "../interfaces/chainlink/IFeedRegistry.sol";
+
 contract MockChainlinkFeedRegistry {
 
     IFeedRegistry public constant feedRegistry = IFeedRegistry(0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf);
