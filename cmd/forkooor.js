@@ -110,7 +110,7 @@ try {
     console.log('No forked registry set yet, please run deploy');
 }
 
-var MOCK_CHAINLINK_ORACLE = '0x5303617C5334c0F92413352c4cccEEe01a55328A';
+const MOCK_CHAINLINK_ORACLE = '0x5d0e4672C77A2743F8b583D152A8935121D8F879';
 const REGISTRY_ADDR = '0x287778F121F134C66212FB16c9b53eC991D32f5b'; // forkedAddresses.DFSRegistry;
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -460,10 +460,6 @@ const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, s
         break;
     }
 
-    // await redeploy('MockChainlinkFeedRegistry', REGISTRY_ADDR, false, true);
-    console.log('registry', REGISTRY_ADDR);
-    MOCK_CHAINLINK_ORACLE = await getAddrFromRegistry('MockChainlinkFeedRegistry', REGISTRY_ADDR);
-    console.log('chainlink', MOCK_CHAINLINK_ORACLE);
     const priceOracle = await hre.ethers.getContractAt('MockChainlinkFeedRegistry', MOCK_CHAINLINK_ORACLE);
 
     const USD_QUOTE = '0x0000000000000000000000000000000000000348';
@@ -559,7 +555,6 @@ const liquityTrailingCloseToCollStrategySub = async (percentage, sender) => {
     const strategyId = 13;
 
     // grab latest roundId from chainlink
-    MOCK_CHAINLINK_ORACLE = await getAddrFromRegistry('MockChainlinkFeedRegistry', REGISTRY_ADDR);
     const priceOracle = await hre.ethers.getContractAt('MockChainlinkFeedRegistry', MOCK_CHAINLINK_ORACLE);
 
     const USD_QUOTE = '0x0000000000000000000000000000000000000348';
@@ -1440,7 +1435,6 @@ const setBotAuth = async (addr) => {
 const setMockChainlinkPrice = async (tokenLabel, price) => {
     const USD_QUOTE = '0x0000000000000000000000000000000000000348';
     const formattedPrice = price * 1e8;
-    MOCK_CHAINLINK_ORACLE = await getAddrFromRegistry('MockChainlinkFeedRegistry', REGISTRY_ADDR);
     const c = await hre.ethers.getContractAt('MockChainlinkFeedRegistry', MOCK_CHAINLINK_ORACLE);
 
     const srcToken = getAssetInfo(tokenLabel);
@@ -1466,9 +1460,6 @@ const setMockChainlinkPrice = async (tokenLabel, price) => {
 
             setEnv('FORK_ID', forkId);
             setEnv('TEST_CHAIN_ID', network);
-
-            await redeploy('MockChainlinkFeedRegistry', REGISTRY_ADDR, false, true);
-            MOCK_CHAINLINK_ORACLE = await getAddrFromRegistry('MockChainlinkFeedRegistry', REGISTRY_ADDR);
 
             const currentBlockNum = await hre.ethers.provider.getBlockNumber();
 
