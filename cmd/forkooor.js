@@ -110,7 +110,7 @@ try {
     console.log('No forked registry set yet, please run deploy');
 }
 
-const MOCK_CHAINLINK_ORACLE = '0x5303617C5334c0F92413352c4cccEEe01a55328A';
+var MOCK_CHAINLINK_ORACLE = '0x5303617C5334c0F92413352c4cccEEe01a55328A';
 const REGISTRY_ADDR = '0x287778F121F134C66212FB16c9b53eC991D32f5b'; // forkedAddresses.DFSRegistry;
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -445,19 +445,36 @@ const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, s
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    const strategyId = 11;
-
     const ilkObj = ilks.find((i) => i.ilkLabel === type);
 
+    var oracleDataAddress = ilkObj.assetAddress;
+
+    switch(oracleDataAddress.toLowerCase()) {
+      case '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'.toLowerCase():
+        oracleDataAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+        break;
+      case '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'.toLowerCase():
+        oracleDataAddress = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
+        break;
+      default:
+        break;
+    }
+
+    // await redeploy('MockChainlinkFeedRegistry', REGISTRY_ADDR, false, true);
+    console.log('registry', REGISTRY_ADDR);
+    MOCK_CHAINLINK_ORACLE = await getAddrFromRegistry('MockChainlinkFeedRegistry', REGISTRY_ADDR);
+    console.log('chainlink', MOCK_CHAINLINK_ORACLE);
     const priceOracle = await hre.ethers.getContractAt('MockChainlinkFeedRegistry', MOCK_CHAINLINK_ORACLE);
+
     const USD_QUOTE = '0x0000000000000000000000000000000000000348';
-    const oracleData = await priceOracle.latestRoundData(ilkObj.assetAddress, USD_QUOTE);
+    const oracleData = await priceOracle.latestRoundData(oracleDataAddress, USD_QUOTE);
     console.log(`Current roundId: ${oracleData.roundId}`);
     const formatPercentage = percentage * 1e8;
 
     let subInfo;
 
     if (isToDai) {
+        const strategyId = 12;
         subInfo = await subMcdTrailingCloseToDaiStrategy(
             vaultId,
             proxy,
@@ -470,6 +487,7 @@ const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, s
 
         console.log(`Subscribed to trailing mcd close to dai strategy with sub id #${subInfo.subId}`);
     } else {
+        const strategyId = 11;
         subInfo = await subMcdTrailingCloseToCollStrategy(
             vaultId,
             proxy,
@@ -541,6 +559,7 @@ const liquityTrailingCloseToCollStrategySub = async (percentage, sender) => {
     const strategyId = 13;
 
     // grab latest roundId from chainlink
+    MOCK_CHAINLINK_ORACLE = await getAddrFromRegistry('MockChainlinkFeedRegistry', REGISTRY_ADDR);
     const priceOracle = await hre.ethers.getContractAt('MockChainlinkFeedRegistry', MOCK_CHAINLINK_ORACLE);
 
     const USD_QUOTE = '0x0000000000000000000000000000000000000348';
@@ -754,6 +773,19 @@ const createLiquityTrove = async (coll, debt, sender) => {
 
     await topUp(senderAcc.address);
 
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
@@ -762,8 +794,8 @@ const createLiquityTrove = async (coll, debt, sender) => {
 
     await depositToWeth(amountColl, senderAcc);
     await approve(WETH_ADDRESS, proxy.address, senderAcc);
-    await redeploy('LiquityView');
-
+    await redeploy('LiquityView', addrs[network].REGISTRY_ADDR, false, true);
+    
     const maxFeePercentage = hre.ethers.utils.parseUnits('5', 16);
 
     try {
@@ -1408,6 +1440,7 @@ const setBotAuth = async (addr) => {
 const setMockChainlinkPrice = async (tokenLabel, price) => {
     const USD_QUOTE = '0x0000000000000000000000000000000000000348';
     const formattedPrice = price * 1e8;
+    MOCK_CHAINLINK_ORACLE = await getAddrFromRegistry('MockChainlinkFeedRegistry', REGISTRY_ADDR);
     const c = await hre.ethers.getContractAt('MockChainlinkFeedRegistry', MOCK_CHAINLINK_ORACLE);
 
     const srcToken = getAssetInfo(tokenLabel);
@@ -1428,14 +1461,22 @@ const setMockChainlinkPrice = async (tokenLabel, price) => {
         .action(async (network, options) => {
             const forkId = await createFork(network);
 
-            console.log(`Fork id: ${forkId}   |   Rpc url https://rpc.tenderly.co/fork/${forkId}`);
+            hre.ethers.provider = hre.ethers.getDefaultProvider(`https://rpc.tenderly.co/fork/${forkId}`);
+            process.env.FORK_ID = forkId;
 
             setEnv('FORK_ID', forkId);
             setEnv('TEST_CHAIN_ID', network);
 
+            await redeploy('MockChainlinkFeedRegistry', REGISTRY_ADDR, false, true);
+            MOCK_CHAINLINK_ORACLE = await getAddrFromRegistry('MockChainlinkFeedRegistry', REGISTRY_ADDR);
+
+            const currentBlockNum = await hre.ethers.provider.getBlockNumber();
+
+            console.log(`Fork id: ${forkId}   |   Rpc url https://rpc.tenderly.co/fork/${forkId}`);
+            console.log('chainlink oracle', MOCK_CHAINLINK_ORACLE);
+            console.log('blockNumber', currentBlockNum.toString());
             if (options.bots.length > 0) {
                 // setting this so we can do topUp and addBotCaller from this script
-                process.env.FORK_ID = forkId;
                 for (let i = 0; i < options.bots.length; i++) {
                     const botAddr = options.bots[i];
                     // eslint-disable-next-line no-await-in-loop
