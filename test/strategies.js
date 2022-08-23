@@ -153,8 +153,8 @@ const createFLRepayStrategy = () => {
     return repayStrategy.encodeForDsProxyCall();
 };
 
-const createCompositeRepayStrategy = () => {
-    const repayStrategy = new dfs.Strategy('MakerCompositeRepayStrategy');
+const createMcdRepayCompositeStrategy = () => {
+    const repayStrategy = new dfs.Strategy('MakerRepayCompositeStrategy');
 
     repayStrategy.addSubSlot('&vaultId', 'uint256');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
@@ -164,7 +164,32 @@ const createCompositeRepayStrategy = () => {
 
     const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
         '&vaultId',
-        '%mcdManager',
+        '%joinAddr',
+        '%gasUsed',
+        formatExchangeObj(
+            '%wethAddr',
+            '%daiAddr',
+            '%repayAmount',
+            '%exchangeWrapper',
+        ),
+    );
+
+    repayStrategy.addAction(repayCompositeAction);
+
+    return repayStrategy.encodeForDsProxyCall();
+};
+
+const createMcdFLRepayCompositeStrategy = () => {
+    const repayStrategy = new dfs.Strategy('MakerFLRepayCompositeStrategy');
+
+    repayStrategy.addSubSlot('&vaultId', 'uint256');
+    repayStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
+    repayStrategy.addTrigger(mcdRatioTrigger);
+
+    const repayCompositeAction = new dfs.actions.maker.MakerFLRepayCompositeAction(
+        '&vaultId',
         '%joinAddr',
         '%gasUsed',
         formatExchangeObj(
@@ -1339,8 +1364,8 @@ const createFlMcdBoostStrategy = () => {
     return mcdBoostStrategy.encodeForDsProxyCall();
 };
 
-const createCompositeMcdBoostStrategy = () => {
-    const mcdBoostStrategy = new dfs.Strategy('MakerCompositeBoostStrategy');
+const createMcdBoostCompositeStrategy = () => {
+    const mcdBoostStrategy = new dfs.Strategy('MakerBoostCompositeStrategy');
     mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
     mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
 
@@ -1349,7 +1374,31 @@ const createCompositeMcdBoostStrategy = () => {
 
     const boostCompositeAction = new dfs.actions.maker.MakerBoostCompositeAction(
         '&vaultId',
-        '%mcdManager',
+        '%joinAddr',
+        '%gasUsed',
+        formatExchangeObj(
+            '%daiAddr',
+            '%wethAddr',
+            '%boostAmount',
+            '%wrapper',
+        ),
+    );
+
+    mcdBoostStrategy.addAction(boostCompositeAction);
+
+    return mcdBoostStrategy.encodeForDsProxyCall();
+};
+
+const createMcdFLBoostCompositeStrategy = () => {
+    const mcdBoostStrategy = new dfs.Strategy('MakerFLBoostCompositeStrategy');
+    mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
+    mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
+    mcdBoostStrategy.addTrigger(mcdRatioTrigger);
+
+    const boostCompositeAction = new dfs.actions.maker.MakerFLBoostCompositeAction(
+        '&vaultId',
         '%joinAddr',
         '%gasUsed',
         formatExchangeObj(
@@ -1393,6 +1442,8 @@ module.exports = {
     createMcdBoostStrategy,
     createFlMcdBoostStrategy,
     createMcdCloseToCollStrategy,
-    createCompositeRepayStrategy,
-    createCompositeMcdBoostStrategy,
+    createMcdRepayCompositeStrategy,
+    createMcdFLRepayCompositeStrategy,
+    createMcdBoostCompositeStrategy,
+    createMcdFLBoostCompositeStrategy,
 };
