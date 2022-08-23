@@ -12,5 +12,6 @@ contract MainnetMcdAddresses {
 
     address internal constant CDP_REGISTRY = 0xBe0274664Ca7A68d6b5dF826FB3CcB7c620bADF3;
     address internal constant CROPPER = 0x8377CD01a5834a6EaD3b7efb482f678f2092b77e;
+    address internal constant MCD_MANAGER_ADDR = 0x5ef30b9986345249bc32d8928B7ee64DE9435E39;
 
 }

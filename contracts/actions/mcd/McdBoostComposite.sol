@@ -5,33 +5,25 @@ import "../ActionBase.sol";
 import "../exchange/DFSSell.sol";
 import "../fee/GasFeeTaker.sol";
 
-import "../../interfaces/balancer/IFlashLoanRecipient.sol";
-import "../../interfaces/balancer/IFlashLoans.sol";
 import "../../interfaces/mcd/IManager.sol";
 import "../../interfaces/mcd/IDaiJoin.sol";
 import "../../interfaces/mcd/IJug.sol";
 
-import "../../utils/ReentrancyGuard.sol";
 import "../../utils/TokenUtils.sol";
 import "../../core/strategy/StrategyModel.sol";
 
 import "./helpers/McdHelper.sol";
-import "../balancer/helpers/MainnetBalancerV2Addresses.sol";
 
 contract McdBoostComposite is
-ActionBase, DFSSell, GasFeeTaker, McdHelper, IFlashLoanRecipient,
-ReentrancyGuard, MainnetBalancerV2Addresses {
+ActionBase, DFSSell, GasFeeTaker, McdHelper {
     using TokenUtils for address;
 
-    address internal immutable ACTION_ADDR = address(this);
-
     /// @param vaultId Id of the vault
-    /// @param mcdManager The manager address we are using
     /// @param joinAddr Collateral join address
+    /// @param gasUsed Gas amount to charge in strategies
     /// @param exchangeData Data needed for swap
     struct BoostParams {
         uint256 vaultId;
-        address mcdManager;
         address joinAddr;
         uint256 gasUsed;
         ExchangeData exchangeData;
@@ -53,92 +45,79 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
             _returnValues
         );
 
-        boostParams.mcdManager = _parseParamAddr(
-            boostParams.mcdManager,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
-
         boostParams.joinAddr = _parseParamAddr(
             boostParams.joinAddr,
-            _paramMapping[2],
+            _paramMapping[1],
             _subData,
             _returnValues
         );
 
         boostParams.exchangeData.srcAddr = _parseParamAddr(
             boostParams.exchangeData.srcAddr,
-            _paramMapping[3],
+            _paramMapping[2],
             _subData,
             _returnValues
         );
         boostParams.exchangeData.destAddr = _parseParamAddr(
             boostParams.exchangeData.destAddr,
-            _paramMapping[4],
+            _paramMapping[3],
             _subData,
             _returnValues
         );
 
         boostParams.exchangeData.srcAmount = _parseParamUint(
             boostParams.exchangeData.srcAmount,
-            _paramMapping[5],
+            _paramMapping[4],
             _subData,
             _returnValues
         );
 
-        _flBalancer(boostParams);
+        bytes memory logData = _boost(boostParams);
+        emit ActionEvent(
+            "McdBoostComposite",
+            logData
+        );
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override (ActionBase, DFSSell, GasFeeTaker) {
         BoostParams memory boostParams = _parseCompositeParams(_callData);
-        _flBalancer(boostParams);
-    }
-
-    /// @notice Gets a FL from Balancer
-    function _flBalancer(BoostParams memory _boostParams) internal {
-        assert(_boostParams.exchangeData.srcAddr == DAI_ADDR);
-
-        address[] memory tokens = new address[](1);
-        uint256[] memory amounts = new uint256[](1);
-
-        tokens[0] = _boostParams.exchangeData.srcAddr;
-        amounts[0] = _boostParams.exchangeData.srcAmount;
-
-        IManager(_boostParams.mcdManager).cdpAllow(_boostParams.vaultId, ACTION_ADDR, 1);
-        IFlashLoans(VAULT_ADDR).flashLoan(
-            ACTION_ADDR,
-            tokens,
-            amounts,
-            abi.encode(_boostParams, address(this))
+        bytes memory logData = _boost(boostParams);
+        logger.logActionDirectEvent(
+            "McdBoostComposite",
+            logData
         );
-        IManager(_boostParams.mcdManager).cdpAllow(_boostParams.vaultId, ACTION_ADDR, 0);
-    }
-
-    /// @notice Balancer FL callback function that formats and calls back this action contract
-    function receiveFlashLoan(
-        address[] memory _tokens,
-        uint256[] memory _amounts,
-        uint256[] memory _feeAmounts,
-        bytes memory _userData
-    ) external override nonReentrant {
-        require(msg.sender == VAULT_ADDR, "Untrusted lender");
-        (BoostParams memory boostParams, address proxy) = abi.decode(_userData, (BoostParams, address));
-
-        _boost(proxy, boostParams);
-        uint256 flPaybackAmount = _amounts[0] + _feeAmounts[0];
-        _tokens[0].withdrawTokens(address(VAULT_ADDR), flPaybackAmount);
     }
 
     /// @notice Executes boost logic
-    function _boost(address _proxy, BoostParams memory _boostParams) internal {
+    function _boost(BoostParams memory _boostParams) internal returns (bytes memory logData) {
+        assert(_boostParams.exchangeData.srcAddr == DAI_ADDR);
+        (address urn, bytes32 ilk) = getUrnAndIlk(MCD_MANAGER_ADDR, _boostParams.vaultId);
+    
         address collateralAsset = _boostParams.exchangeData.destAddr;
         uint256 boostAmount = _boostParams.exchangeData.srcAmount;
 
-        // Sell flashloaned debt asset for collateral asset
+        // Draw debt
+        {
+            uint256 daiVatBalance = vat.dai(urn);
+            uint256 rate = IJug(JUG_ADDRESS).drip(ilk);
+            int256 drawAmountNormalized = normalizeDrawAmount(boostAmount, rate, daiVatBalance);
+
+            IManager(MCD_MANAGER_ADDR).frob(
+                _boostParams.vaultId,
+                0,
+                drawAmountNormalized
+            );
+            IManager(MCD_MANAGER_ADDR).move(_boostParams.vaultId, address(this), toRad(boostAmount));
+            vat.hope(DAI_JOIN_ADDR);
+            IDaiJoin(DAI_JOIN_ADDR).exit(address(this), boostAmount);
+            vat.nope(DAI_JOIN_ADDR);
+        }
+
+        // Sell debt asset for collateral asset
         (uint256 exchangedAmount, ) = _dfsSell(_boostParams.exchangeData, address(this), address(this), false);
 
+        // Take gas fee
         uint256 supplyAmount = _takeFee(GasFeeTakerParams(
             _boostParams.gasUsed,
             collateralAsset,
@@ -146,90 +125,23 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
             0
         ));
 
-        (address urn, bytes32 ilk) = getUrnAndIlk(_boostParams.mcdManager, _boostParams.vaultId);
-        uint256 rate = IJug(JUG_ADDRESS).drip(ilk);
-        uint256 daiVatBalance = vat.dai(urn);
-        int256 vatSupplyAmount = toPositiveInt(convertTo18(_boostParams.joinAddr, supplyAmount));
-        int256 drawAmountNormalized = normalizeDrawAmount(boostAmount, rate, daiVatBalance);
+        // Supply collateral
+        {
+            int256 vatSupplyAmount = toPositiveInt(convertTo18(_boostParams.joinAddr, supplyAmount));
+            collateralAsset.approveToken(_boostParams.joinAddr, supplyAmount);
+            IJoin(_boostParams.joinAddr).join(urn, supplyAmount);
 
-        if (_boostParams.mcdManager == CROPPER) {
-            _cropperBoost(
-                collateralAsset,
-                _boostParams.joinAddr,
+            IManager(MCD_MANAGER_ADDR).frob(
                 _boostParams.vaultId,
-                supplyAmount,
                 vatSupplyAmount,
-                drawAmountNormalized,
-                ilk
-            );
-        } else {
-            _mcdManagerBoost(
-                _boostParams.mcdManager,
-                collateralAsset,
-                _boostParams.joinAddr,
-                _boostParams.vaultId,
-                supplyAmount,
-                vatSupplyAmount,
-                boostAmount,
-                drawAmountNormalized,
-                urn
+                0
             );
         }
 
-        vat.hope(DAI_JOIN_ADDR);
-        IDaiJoin(DAI_JOIN_ADDR).exit(address(this), boostAmount);
-        vat.nope(DAI_JOIN_ADDR);
-
-        logger.logRecipeEvent("McdBoostComposite");
-        emit ActionEvent("McdBoostComposite", abi.encode(
-            _proxy,
+        logData = abi.encode(
             boostAmount,
             exchangedAmount,
             supplyAmount
-        ));
-    }
-
-    function _mcdManagerBoost(
-       address _mcdManager,
-       address _collateralAsset,
-       address _joinAddr,
-       uint256 _vaultId,
-       uint256 _supplyAmount,
-       int256 _vatSupplyAmount,
-       uint256 _drawAmount,
-       int256 _drawAmountNormalized,
-       address _urn
-    ) internal {
-        _collateralAsset.approveToken(_joinAddr, _supplyAmount);
-        IJoin(_joinAddr).join(_urn, _supplyAmount);
-        IManager(_mcdManager).frob(
-            _vaultId,
-            _vatSupplyAmount,
-            _drawAmountNormalized
-        );
-        IManager(_mcdManager).move(_vaultId, address(this), toRad(_drawAmount));
-    }
-
-    function _cropperBoost(
-        address _joinAddr,
-        address _collateralAsset,
-        uint256 _vaultId,
-        uint256 _supplyAmount,
-        int256 _vatSupplyAmount,
-        int256 _drawAmountNormalized,
-        bytes32 _ilk
-    ) internal {
-        address cdpOwner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
-
-        _collateralAsset.approveToken(CROPPER, _supplyAmount);
-        ICropper(CROPPER).join(_joinAddr, cdpOwner, _supplyAmount);
-        ICropper(CROPPER).frob(
-            _ilk,
-            cdpOwner,
-            cdpOwner,
-            cdpOwner,
-            _vatSupplyAmount,
-            _drawAmountNormalized
         );
     }
 
