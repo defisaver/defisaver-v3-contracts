@@ -50,8 +50,8 @@ const executeAction = async (actionName, functionData, proxy, regAddr = addrs[ne
         receipt = await proxy['execute(address,bytes)'](actionAddr, functionData, {
             gasLimit: 10000000,
         });
-        // const gasUsed = await getGasUsed(receipt);
-        // console.log(`Gas used by ${actionName} action; ${gasUsed}`);
+        const gasUsed = await getGasUsed(receipt);
+        console.log(`Gas used by ${actionName} action; ${gasUsed}`);
         return receipt;
     } catch (error) {
         console.log(error);
@@ -574,17 +574,35 @@ const mcdMerge = async (proxy, srcVaultId, destVaultId) => {
     return tx;
 };
 
+const mcdFLRepayComposite = async (
+    proxy,
+    vaultId,
+    joinAddr,
+    gasUsed,
+    exchangeParams,
+) => {
+    const repayCompositeAction = new dfs.actions.maker.MakerFLRepayCompositeAction(
+        vaultId,
+        joinAddr,
+        gasUsed,
+        exchangeParams,
+    );
+
+    const functionData = repayCompositeAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('McdFLRepayComposite', functionData, proxy);
+    return tx;
+};
+
 const mcdRepayComposite = async (
     proxy,
     vaultId,
-    mcdManager,
     joinAddr,
     gasUsed,
     exchangeParams,
 ) => {
     const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
         vaultId,
-        mcdManager,
         joinAddr,
         gasUsed,
         exchangeParams,
@@ -596,17 +614,35 @@ const mcdRepayComposite = async (
     return tx;
 };
 
+const mcdFLBoostComposite = async (
+    proxy,
+    vaultId,
+    joinAddr,
+    gasUsed,
+    exchangeParams,
+) => {
+    const boostCompositeAction = new dfs.actions.maker.MakerFLBoostCompositeAction(
+        vaultId,
+        joinAddr,
+        gasUsed,
+        exchangeParams,
+    );
+
+    const functionData = boostCompositeAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('McdFLBoostComposite', functionData, proxy);
+    return tx;
+};
+
 const mcdBoostComposite = async (
     proxy,
     vaultId,
-    mcdManager,
     joinAddr,
     gasUsed,
     exchangeParams,
 ) => {
     const boostCompositeAction = new dfs.actions.maker.MakerBoostCompositeAction(
         vaultId,
-        mcdManager,
         joinAddr,
         gasUsed,
         exchangeParams,
@@ -2220,6 +2256,8 @@ module.exports = {
     convexWithdraw,
     convexClaim,
 
+    mcdFLRepayComposite,
     mcdRepayComposite,
+    mcdFLBoostComposite,
     mcdBoostComposite,
 };

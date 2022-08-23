@@ -9,7 +9,7 @@ describe('Mcd-Repay-Composite', function () {
     this.timeout(4000000);
 
     before(async () => {
-        await resetForkToBlock(15102400);
+        await resetForkToBlock(15000000);
 
         await redeploy('McdSupply');
         await redeploy('McdWithdraw');

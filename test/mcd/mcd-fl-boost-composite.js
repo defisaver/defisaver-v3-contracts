@@ -3,9 +3,9 @@ const { ilks } = require('@defisaver/tokens');
 const {
     redeploy, resetForkToBlock,
 } = require('../utils');
-const { mcdBoostCompositeTest } = require('./mcd-tests');
+const { mcdFLBoostCompositeTest } = require('./mcd-tests');
 
-describe('Mcd-Boost-Composite', function () {
+describe('Mcd-Fl-Boost-Composite', function () {
     this.timeout(4000000);
 
     before(async () => {
@@ -18,7 +18,7 @@ describe('Mcd-Boost-Composite', function () {
         await redeploy('McdSupply');
     });
 
-    it('... should test mcd boost composite action', async () => {
-        await mcdBoostCompositeTest(ilks.length);
+    it('... should test mcd fl boost composite action', async () => {
+        await mcdFLBoostCompositeTest(ilks.length);
     });
 });

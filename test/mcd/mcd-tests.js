@@ -16,6 +16,8 @@ const {
     sell,
     mcdRepayComposite,
     mcdBoostComposite,
+    mcdFLBoostComposite,
+    mcdFLRepayComposite,
 } = require('../actions');
 const {
     getProxy,
@@ -30,12 +32,14 @@ const {
     UNISWAP_WRAPPER,
     MAX_UINT,
     REGISTRY_ADDR,
-    formatExchangeObj,
     setNewExchangeWrapper,
     Float2BN,
     takeSnapshot,
     revertToSnapshot,
     setBalance,
+    formatMockExchangeObj,
+    cacheChainlinkPrice,
+    LOGGER_ADDR,
 } = require('../utils');
 const {
     getVaultsForUser,
@@ -939,16 +943,15 @@ const mcdClaimTest = async () => {
     });
 };
 
-const mcdRepayCompositeTest = async () => {
-    describe('Mcd-Repay-Composite', async function () {
+const mcdFLRepayCompositeTest = async () => {
+    describe('Mcd-FL-Repay-Composite', async function () {
         this.timeout(80000);
 
         const repayGasUsed = 2_000_000;
+        const USD_REPAY_AMOUNT = '10000';
 
-        let makerAddresses;
         let feeReciever;
-        let sellWrapper;
-        let backupWrapper;
+        let mockWrapper;
         let senderAcc;
         let proxy;
         let mcdView;
@@ -956,13 +959,20 @@ const mcdRepayCompositeTest = async () => {
 
         let snapshot;
 
-        before(async () => {
-            sellWrapper = await redeploy('UniswapWrapperV3');
-            backupWrapper = await redeploy('UniV3WrapperV3');
-            mcdView = await redeploy('McdView');
-            repayComposite = await redeploy('McdRepayComposite');
+        const ilkSubset = ilks.reduce((acc, curr) => {
+            if ([
+                'ETH',
+                'WBTC',
+                'wstETH',
+            ].includes(curr.asset)) acc.push(curr);
+            return acc;
+        }, []).sort((a, b) => (a.ilkLabel < b.ilkLabel ? (-1) : 1));
 
-            makerAddresses = await fetchMakerAddresses();
+        before(async () => {
+            mockWrapper = await redeploy('MockWrapper');
+            mcdView = await redeploy('McdView');
+            repayComposite = await redeploy('McdFLRepayComposite');
+
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
 
@@ -975,8 +985,14 @@ const mcdRepayCompositeTest = async () => {
                 }),
             )[0];
 
-            await setNewExchangeWrapper(senderAcc, sellWrapper.address);
-            await setNewExchangeWrapper(senderAcc, backupWrapper.address);
+            await setNewExchangeWrapper(senderAcc, mockWrapper.address);
+
+            await Promise.all(
+                ilkSubset.map(async (ilk) => {
+                    const tokenInfo = getAssetInfo(ilk.asset);
+                    return cacheChainlinkPrice(tokenInfo.symbol, tokenInfo.address);
+                }),
+            );
         });
 
         beforeEach(async () => {
@@ -987,8 +1003,7 @@ const mcdRepayCompositeTest = async () => {
             await revertToSnapshot(snapshot);
         });
 
-        for (let i = 0; i < ilks.length; i++) {
-            const ilkData = ilks[i];
+        ilkSubset.forEach((ilkData) => {
             const joinAddr = ilkData.join;
             const tokenData = getAssetInfo(ilkData.asset);
 
@@ -996,16 +1011,8 @@ const mcdRepayCompositeTest = async () => {
                 tokenData.address = WETH_ADDRESS;
             }
 
-            if (![
-                'ETH',
-                'WBTC',
-                'wstETH',
-            // eslint-disable-next-line no-continue
-            ].includes(tokenData.symbol)) continue;
-
-            const repayAmount = fetchAmountinUSDPrice(tokenData.symbol, '10000');
-
-            it(`... should call a FL repay ${repayAmount} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
+            it(`... should call a FL repay $${USD_REPAY_AMOUNT} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
+                const repayAmount = fetchAmountinUSDPrice(tokenData.symbol, USD_REPAY_AMOUNT);
                 expect(repayAmount).to.not.be.eq(0, `cant fetch price for ${tokenData.symbol}`);
 
                 // create a vault
@@ -1014,7 +1021,7 @@ const mcdRepayCompositeTest = async () => {
                     proxy,
                     ilkData.ilkLabel,
                     fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
-                    (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 500).toString(),
+                    GENERATE_AMOUNT_IN_USD,
                 );
                 expect(vaultId).to.not.be.eq(-1, 'cant open vault');
 
@@ -1025,29 +1032,20 @@ const mcdRepayCompositeTest = async () => {
                         tokenData.symbol
                     }, debt: ${info.debt.toFixed(2)} Dai)`,
                 );
-
                 await setBalance(DAI_ADDR, senderAcc.address, Float2BN('0'));
-                const collToken = tokenData.address;
-                const daiToken = makerAddresses.MCD_DAI;
 
-                const exchangeOrder = formatExchangeObj(
-                    collToken,
-                    daiToken,
+                const exchangeOrder = await formatMockExchangeObj(
+                    tokenData,
+                    getAssetInfo('DAI'),
                     Float2BN(repayAmount, tokenData.decimals),
-                    sellWrapper.address,
+                    mockWrapper.address,
                 );
-
-                if (tokenData.symbol === 'wstETH') {
-                    exchangeOrder[7] = backupWrapper.address;
-                    exchangeOrder[8] = '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca00001f4c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20001f46b175474e89094c44da98b954eedeac495271d0f';
-                }
 
                 const feesBeforeCollateralAsset = await balanceOf(tokenData.address, feeReciever);
                 const feesBeforeDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
-                const receipt = await (await mcdRepayComposite(
+                const receipt = await (await mcdFLRepayComposite(
                     proxy,
                     vaultId,
-                    ilkData.isCrop ? CROPPER_ADDR : MCD_MANAGER_ADDR,
                     joinAddr,
                     repayGasUsed,
                     exchangeOrder,
@@ -1057,7 +1055,7 @@ const mcdRepayCompositeTest = async () => {
 
                 const recipeEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('RecipeEvent(address,string)')
                     && e.topics[1] === hre.ethers.utils.defaultAbiCoder.encode(['address'], [repayComposite.address])
-                    && e.topics[2] === hre.ethers.utils.id('McdRepayComposite'));
+                    && e.topics[2] === hre.ethers.utils.id('McdFLRepayComposite'));
                 expect(recipeEvent).to.not.be.eq(undefined);
 
                 const actionEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('ActionEvent(string,bytes)')
@@ -1105,19 +1103,176 @@ const mcdRepayCompositeTest = async () => {
                     eventParams.exchangedAmount.sub(eventParams.paybackAmount),
                 );
             });
-        }
+        });
     });
 };
 
-const mcdBoostCompositeTest = async () => {
-    describe('Mcd-Boost-Composite', async function () {
+const mcdRepayCompositeTest = async () => {
+    describe('Mcd-Repay-Composite', async function () {
+        this.timeout(80000);
+
+        const repayGasUsed = 2_000_000;
+        const USD_REPAY_AMOUNT = '10000';
+
+        let feeReciever;
+        let mockWrapper;
+        let senderAcc;
+        let proxy;
+        let mcdView;
+        let repayComposite;
+        let snapshot;
+
+        const ilkSubset = ilks.reduce((acc, curr) => {
+            if ([
+                'ETH',
+                'WBTC',
+                'wstETH',
+            ].includes(curr.asset)) acc.push(curr);
+            return acc;
+        }, []).sort((a, b) => (a.ilkLabel < b.ilkLabel ? (-1) : 1));
+
+        before(async () => {
+            mockWrapper = await redeploy('MockWrapper');
+            mcdView = await redeploy('McdView');
+            repayComposite = await redeploy('McdRepayComposite');
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+
+            const feeRecipient = await repayComposite.feeRecipient();
+            feeReciever = hre.ethers.utils.defaultAbiCoder.decode(
+                ['address'],
+                await senderAcc.call({
+                    to: feeRecipient,
+                    data: hre.ethers.utils.id('wallet()'),
+                }),
+            )[0];
+
+            await setNewExchangeWrapper(senderAcc, mockWrapper.address);
+
+            await Promise.all(
+                ilkSubset.map(async (ilk) => {
+                    const tokenInfo = getAssetInfo(ilk.asset);
+                    return cacheChainlinkPrice(tokenInfo.symbol, tokenInfo.address);
+                }),
+            );
+        });
+
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        ilkSubset.forEach((ilkData) => {
+            const joinAddr = ilkData.join;
+            const tokenData = getAssetInfo(ilkData.asset);
+
+            if (tokenData.symbol === 'ETH') {
+                tokenData.address = WETH_ADDRESS;
+            }
+
+            it(`... should call a repay $${USD_REPAY_AMOUNT} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
+                const repayAmount = fetchAmountinUSDPrice(tokenData.symbol, USD_REPAY_AMOUNT);
+                expect(repayAmount).to.not.be.eq(0, `cant fetch price for ${tokenData.symbol}`);
+                // create a vault
+                // eslint-disable-next-line no-await-in-loop
+                const vaultId = await openVault(
+                    proxy,
+                    ilkData.ilkLabel,
+                    fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
+                    GENERATE_AMOUNT_IN_USD,
+                );
+                expect(vaultId).to.not.be.eq(-1, 'cant open vault');
+
+                const ratioBefore = await getRatio(mcdView, vaultId);
+                const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
+                console.log(
+                    `Ratio before: ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} ${
+                        tokenData.symbol
+                    }, debt: ${info.debt.toFixed(2)} Dai)`,
+                );
+
+                await setBalance(DAI_ADDR, senderAcc.address, Float2BN('0'));
+
+                const exchangeOrder = await formatMockExchangeObj(
+                    tokenData,
+                    getAssetInfo('DAI'),
+                    Float2BN(repayAmount, tokenData.decimals),
+                    mockWrapper.address,
+                );
+
+                const feesBeforeCollateralAsset = await balanceOf(tokenData.address, feeReciever);
+                const feesBeforeDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
+                const receipt = await (await mcdRepayComposite(
+                    proxy,
+                    vaultId,
+                    joinAddr,
+                    repayGasUsed,
+                    exchangeOrder,
+                )).wait();
+                const feesAfterCollateralAsset = await balanceOf(tokenData.address, feeReciever);
+                const feesAfterDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
+
+                const actionEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('ActionDirectEvent(address,string,bytes)')
+                    && e.address === LOGGER_ADDR);
+                expect(actionEvent).to.not.be.eq(undefined);
+
+                const eventParams = hre.ethers.utils.defaultAbiCoder.decode(
+                    ['(address proxy, uint256 repayAmount, uint256 exchangedAmount, uint256 paybackAmount)'],
+                    hre.ethers.utils.defaultAbiCoder.decode(
+                        ['bytes'],
+                        actionEvent.data,
+                    )[0],
+                )[0];
+
+                const ratioAfter = await getRatio(mcdView, vaultId);
+                const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
+                console.log(
+                    `Ratio after: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${
+                        tokenData.symbol
+                    }, debt: ${info2.debt.toFixed(2)} Dai)`,
+                );
+                const feeAmount = Float2BN(repayAmount, tokenData.decimals).div(400);
+
+                info.coll = Float2BN(`${info.coll}`, tokenData.decimals);
+                info.debt = Float2BN(`${info.debt}`);
+                info2.coll = Float2BN(`${info2.coll}`, tokenData.decimals);
+                info2.debt = Float2BN(`${info2.debt}`);
+
+                if (ratioAfter !== 0) {
+                    expect(ratioAfter).to.be.gt(ratioBefore);
+                }
+                expect(info.coll.sub(info2.coll)).to.be.eq(Float2BN(repayAmount, tokenData.decimals));
+                expect(info.debt.sub(info2.debt)).to.be.closeTo(
+                    eventParams.paybackAmount,
+                    eventParams.paybackAmount.div(Float2BN('1', 6)),
+                );
+                expect(await balanceOf(tokenData.address, repayComposite.address)).to.be.eq(0);
+                expect(await balanceOf(DAI_ADDR, repayComposite.address)).to.be.eq(0);
+                expect(await balanceOf(tokenData.address, proxy.address)).to.be.eq(0);
+                expect(await balanceOf(DAI_ADDR, proxy.address)).to.be.eq(0);
+                expect(feesAfterCollateralAsset.sub(feesBeforeCollateralAsset)).to.be.eq(feeAmount);
+                expect(feesAfterDebtAsset.sub(
+                    feesBeforeDebtAsset,
+                ).add(await balanceOf(DAI_ADDR, senderAcc.address))).to.be.eq(
+                    eventParams.exchangedAmount.sub(eventParams.paybackAmount),
+                );
+            });
+        });
+    });
+};
+
+const mcdFLBoostCompositeTest = async () => {
+    describe('Mcd-FL-Boost-Composite', async function () {
         this.timeout(80000);
 
         const boostGasUsed = 2_000_000;
+        const USD_BOOST_AMOUNT = '10000';
 
-        let makerAddresses;
-        let sellWrapper;
-        let backupWrapper;
+        let mockWrapper;
         let senderAcc;
         let proxy;
         let mcdView;
@@ -1126,13 +1281,20 @@ const mcdBoostCompositeTest = async () => {
 
         let snapshot;
 
-        before(async () => {
-            sellWrapper = await redeploy('UniswapWrapperV3');
-            backupWrapper = await redeploy('UniV3WrapperV3');
-            mcdView = await redeploy('McdView');
-            boostComposite = await redeploy('McdBoostComposite');
+        const ilkSubset = ilks.reduce((acc, curr) => {
+            if ([
+                'ETH',
+                'WBTC',
+                'wstETH',
+            ].includes(curr.asset)) acc.push(curr);
+            return acc;
+        }, []).sort((a, b) => (a.ilkLabel < b.ilkLabel ? (-1) : 1));
 
-            makerAddresses = await fetchMakerAddresses();
+        before(async () => {
+            mockWrapper = await redeploy('MockWrapper');
+            mcdView = await redeploy('McdView');
+            boostComposite = await redeploy('McdFLBoostComposite');
+
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
 
@@ -1145,8 +1307,176 @@ const mcdBoostCompositeTest = async () => {
                 }),
             )[0];
 
-            await setNewExchangeWrapper(senderAcc, sellWrapper.address);
-            await setNewExchangeWrapper(senderAcc, backupWrapper.address);
+            await setNewExchangeWrapper(senderAcc, mockWrapper.address);
+
+            await Promise.all(
+                ilkSubset.map(async (ilk) => {
+                    const tokenInfo = getAssetInfo(ilk.asset);
+                    return cacheChainlinkPrice(tokenInfo.symbol, tokenInfo.address);
+                }),
+            );
+        });
+
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        ilkSubset.forEach((ilkData) => {
+            const joinAddr = ilkData.join;
+            const tokenData = getAssetInfo(ilkData.asset);
+
+            if (tokenData.symbol === 'ETH') {
+                tokenData.address = WETH_ADDRESS;
+            }
+
+            it(`... should call a FL boost $${USD_BOOST_AMOUNT} DAI on a ${ilkData.ilkLabel} vault`, async () => {
+                const boostAmount = Float2BN(USD_BOOST_AMOUNT);
+                const openSupplyAmount = fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD);
+                expect(openSupplyAmount).to.not.be.eq(0, `cant fetch price for ${tokenData.symbol}`);
+
+                // create a vault
+                // eslint-disable-next-line no-await-in-loop
+                const vaultId = await openVault(
+                    proxy,
+                    ilkData.ilkLabel,
+                    openSupplyAmount,
+                    GENERATE_AMOUNT_IN_USD,
+                );
+                expect(vaultId).to.not.be.eq(-1, 'cant open vault');
+
+                const ratioBefore = await getRatio(mcdView, vaultId);
+                const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
+                console.log(
+                    `Ratio before: ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} ${
+                        tokenData.symbol
+                    }, debt: ${info.debt.toFixed(2)} Dai)`,
+                );
+
+                const exchangeOrder = await formatMockExchangeObj(
+                    getAssetInfo('DAI'),
+                    tokenData,
+                    boostAmount,
+                    mockWrapper.address,
+                );
+
+                const feesBeforeCollateralAsset = await balanceOf(tokenData.address, feeReciever);
+                const feesBeforeDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
+                const receipt = await (await mcdFLBoostComposite(
+                    proxy,
+                    vaultId,
+                    joinAddr,
+                    boostGasUsed,
+                    exchangeOrder,
+                )).wait();
+                const feesAfterCollateralAsset = await balanceOf(tokenData.address, feeReciever);
+                const feesAfterDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
+
+                const recipeEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('RecipeEvent(address,string)')
+                    && e.topics[1] === hre.ethers.utils.defaultAbiCoder.encode(['address'], [boostComposite.address])
+                    && e.topics[2] === hre.ethers.utils.id('McdFLBoostComposite'));
+                expect(recipeEvent).to.not.be.eq(undefined);
+
+                const actionEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('ActionEvent(string,bytes)')
+                    && e.address === boostComposite.address);
+                expect(actionEvent).to.not.be.eq(undefined);
+                const eventParams = hre.ethers.utils.defaultAbiCoder.decode(
+                    ['(address proxy, uint256 boostAmount, uint256 exchangedAmount, uint256 supplyAmount)'],
+                    hre.ethers.utils.defaultAbiCoder.decode(
+                        ['bytes'],
+                        actionEvent.data,
+                    )[0],
+                )[0];
+
+                const ratioAfter = await getRatio(mcdView, vaultId);
+                const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
+                console.log(
+                    `Ratio after: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${
+                        tokenData.symbol
+                    }, debt: ${info2.debt.toFixed(2)} Dai)`,
+                );
+                const feeAmount = boostAmount.div(400);
+
+                info.coll = Float2BN(`${info.coll}`, tokenData.decimals);
+                info.debt = Float2BN(`${info.debt}`);
+                info2.coll = Float2BN(`${info2.coll}`, tokenData.decimals);
+                info2.debt = Float2BN(`${info2.debt}`);
+
+                expect(ratioAfter).to.be.lt(ratioBefore);
+                expect(info2.coll.sub(info.coll)).to.be.closeTo(
+                    eventParams.supplyAmount,
+                    eventParams.supplyAmount.div(Float2BN('1', 6)),
+                );
+                expect(info2.debt.sub(info.debt)).to.be.closeTo(
+                    boostAmount,
+                    boostAmount.div(Float2BN('1', 6)),
+                );
+                expect(await balanceOf(tokenData.address, boostComposite.address)).to.be.eq(0);
+                expect(await balanceOf(DAI_ADDR, boostComposite.address)).to.be.eq(0);
+                expect(await balanceOf(tokenData.address, proxy.address)).to.be.eq(0);
+                expect(await balanceOf(DAI_ADDR, proxy.address)).to.be.eq(0);
+                expect(feesAfterDebtAsset.sub(feesBeforeDebtAsset)).to.be.eq(feeAmount);
+                expect(feesAfterCollateralAsset.sub(feesBeforeCollateralAsset)).to.be.eq(
+                    eventParams.exchangedAmount.sub(eventParams.supplyAmount),
+                );
+            });
+        });
+    });
+};
+
+const mcdBoostCompositeTest = async () => {
+    describe('Mcd-Boost-Composite', async function () {
+        this.timeout(80000);
+
+        const boostGasUsed = 2_000_000;
+        const USD_BOOST_AMOUNT = '10000';
+
+        let mockWrapper;
+        let senderAcc;
+        let proxy;
+        let mcdView;
+        let boostComposite;
+        let feeReciever;
+
+        let snapshot;
+
+        const ilkSubset = ilks.reduce((acc, curr) => {
+            if ([
+                'ETH',
+                'WBTC',
+                'wstETH',
+            ].includes(curr.asset)) acc.push(curr);
+            return acc;
+        }, []).sort((a, b) => (a.ilkLabel < b.ilkLabel ? (-1) : 1));
+
+        before(async () => {
+            mockWrapper = await redeploy('MockWrapper');
+            mcdView = await redeploy('McdView');
+            boostComposite = await redeploy('McdBoostComposite');
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+
+            const feeRecipient = await boostComposite.feeRecipient();
+            feeReciever = hre.ethers.utils.defaultAbiCoder.decode(
+                ['address'],
+                await senderAcc.call({
+                    to: feeRecipient,
+                    data: hre.ethers.utils.id('wallet()'),
+                }),
+            )[0];
+
+            await setNewExchangeWrapper(senderAcc, mockWrapper.address);
+
+            await Promise.all(
+                ilkSubset.map(async (ilk) => {
+                    const tokenInfo = getAssetInfo(ilk.asset);
+                    return cacheChainlinkPrice(tokenInfo.symbol, tokenInfo.address);
+                }),
+            );
         });
 
         beforeEach(async () => {
@@ -1173,18 +1503,18 @@ const mcdBoostCompositeTest = async () => {
             // eslint-disable-next-line no-continue
             ].includes(tokenData.symbol)) continue;
 
-            const boostAmount = fetchAmountinUSDPrice(getAssetInfo('DAI').symbol, '10000');
-
-            it(`... should call a FL boost ${boostAmount} DAI on a ${ilkData.ilkLabel} vault`, async () => {
-                expect(boostAmount).to.not.be.eq(0, `cant fetch price for ${tokenData.symbol}`);
+            it(`... should call a boost ${USD_BOOST_AMOUNT} DAI on a ${ilkData.ilkLabel} vault`, async () => {
+                const boostAmount = Float2BN(USD_BOOST_AMOUNT);
+                const openSupplyAmount = fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD);
+                expect(openSupplyAmount).to.not.be.eq(0, `cant fetch price for ${tokenData.symbol}`);
 
                 // create a vault
                 // eslint-disable-next-line no-await-in-loop
                 const vaultId = await openVault(
                     proxy,
                     ilkData.ilkLabel,
-                    fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
-                    (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 500).toString(),
+                    openSupplyAmount,
+                    GENERATE_AMOUNT_IN_USD,
                 );
                 expect(vaultId).to.not.be.eq(-1, 'cant open vault');
 
@@ -1196,27 +1526,18 @@ const mcdBoostCompositeTest = async () => {
                     }, debt: ${info.debt.toFixed(2)} Dai)`,
                 );
 
-                const collToken = tokenData.address;
-                const daiToken = makerAddresses.MCD_DAI;
-
-                const exchangeOrder = formatExchangeObj(
-                    daiToken,
-                    collToken,
-                    Float2BN(boostAmount),
-                    sellWrapper.address,
+                const exchangeOrder = await formatMockExchangeObj(
+                    getAssetInfo('DAI'),
+                    tokenData,
+                    boostAmount,
+                    mockWrapper.address,
                 );
-
-                if (tokenData.symbol === 'wstETH') {
-                    exchangeOrder[7] = backupWrapper.address;
-                    exchangeOrder[8] = '0x6b175474e89094c44da98b954eedeac495271d0f0001f4c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20001f47f39c581f595b53c5cb19bd0b3f8da6c935e2ca0';
-                }
 
                 const feesBeforeCollateralAsset = await balanceOf(tokenData.address, feeReciever);
                 const feesBeforeDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
                 const receipt = await (await mcdBoostComposite(
                     proxy,
                     vaultId,
-                    ilkData.isCrop ? CROPPER_ADDR : MCD_MANAGER_ADDR,
                     joinAddr,
                     boostGasUsed,
                     exchangeOrder,
@@ -1224,16 +1545,12 @@ const mcdBoostCompositeTest = async () => {
                 const feesAfterCollateralAsset = await balanceOf(tokenData.address, feeReciever);
                 const feesAfterDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
 
-                const recipeEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('RecipeEvent(address,string)')
-                    && e.topics[1] === hre.ethers.utils.defaultAbiCoder.encode(['address'], [boostComposite.address])
-                    && e.topics[2] === hre.ethers.utils.id('McdBoostComposite'));
-                expect(recipeEvent).to.not.be.eq(undefined);
-
-                const actionEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('ActionEvent(string,bytes)')
-                    && e.address === boostComposite.address);
+                const actionEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('ActionDirectEvent(address,string,bytes)')
+                    && e.address === LOGGER_ADDR);
                 expect(actionEvent).to.not.be.eq(undefined);
+
                 const eventParams = hre.ethers.utils.defaultAbiCoder.decode(
-                    ['(address proxy, uint256 boostAmount, uint256 exchangedAmount, uint256 supplyAmount)'],
+                    ['(uint256 boostAmount, uint256 exchangedAmount, uint256 supplyAmount)'],
                     hre.ethers.utils.defaultAbiCoder.decode(
                         ['bytes'],
                         actionEvent.data,
@@ -1247,7 +1564,7 @@ const mcdBoostCompositeTest = async () => {
                         tokenData.symbol
                     }, debt: ${info2.debt.toFixed(2)} Dai)`,
                 );
-                const feeAmount = Float2BN(boostAmount).div(400);
+                const feeAmount = boostAmount.div(400);
 
                 info.coll = Float2BN(`${info.coll}`, tokenData.decimals);
                 info.debt = Float2BN(`${info.debt}`);
@@ -1260,8 +1577,8 @@ const mcdBoostCompositeTest = async () => {
                     eventParams.supplyAmount.div(Float2BN('1', 6)),
                 );
                 expect(info2.debt.sub(info.debt)).to.be.closeTo(
-                    Float2BN(boostAmount),
-                    Float2BN(boostAmount).div(Float2BN('1', 6)),
+                    boostAmount,
+                    boostAmount.div(Float2BN('1', 6)),
                 );
                 expect(await balanceOf(tokenData.address, boostComposite.address)).to.be.eq(0);
                 expect(await balanceOf(DAI_ADDR, boostComposite.address)).to.be.eq(0);
@@ -1311,7 +1628,9 @@ module.exports = {
     mcdPaybackTest,
     mcdWithdrawTest,
     mcdClaimTest,
+    mcdFLRepayCompositeTest,
     mcdRepayCompositeTest,
+    mcdFLBoostCompositeTest,
     mcdBoostCompositeTest,
     GENERATE_AMOUNT_IN_USD,
 };
