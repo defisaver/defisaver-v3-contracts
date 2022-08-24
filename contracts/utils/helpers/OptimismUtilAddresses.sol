@@ -15,7 +15,6 @@ contract OptimismUtilAddresses {
     address internal constant DAI_ADDR = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;
     address internal constant WETH_ADDR = 0x4200000000000000000000000000000000000006;
     address internal constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address internal constant USDC_ADDR = 0x7F5c764cBc14f9669B88837ca1490cCa17c31607;
     
     // TODO: not needed now
     address internal constant FEE_RECEIVER_ADMIN_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
