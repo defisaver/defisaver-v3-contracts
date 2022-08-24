@@ -12,6 +12,7 @@ const subStorageBytecodeL2 = require('../artifacts/contracts/core/l2/SubStorageL
 const bundleStorageBytecode = require('../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
 const recipeExecutorBytecode = require('../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
 const proxyAuthBytecode = require('../artifacts/contracts/core/strategy/ProxyAuth.sol/ProxyAuth.json').deployedBytecode;
+const mockChainlinkFeedRegistryBytecode = require('../artifacts/contracts/mocks/MockChainlinkFeedRegistry.sol/MockChainlinkFeedRegistry.json').deployedBytecode;
 
 const addrs = {
     mainnet: {
@@ -29,6 +30,7 @@ const addrs = {
         StrategyProxy: '0x0822902D30CC9c77404e6eB140dC1E98aF5b559A',
         SubProxy: '0xd18d4756bbf848674cc35f1a0B86afEF20787382',
         UNISWAP_WRAPPER: '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54',
+        FEED_REGISTRY: '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf',
         AVG_GAS_PRICE: 100,
 
     },
@@ -953,6 +955,25 @@ const resetForkToBlock = async (block) => {
     await setForkForTesting();
 };
 
+const mockChainlinkPriceFeed = async () => {
+    await setCode(addrs[network].FEED_REGISTRY, mockChainlinkFeedRegistryBytecode);
+
+    const registryInstance = await hre.ethers.getContractFactory('MockChainlinkFeedRegistry');
+    const registry = await registryInstance.attach(addrs[network].FEED_REGISTRY);
+
+    return registry;
+};
+
+const setMockPrice = async (mockContract, roundId, token, price) => {
+    const USD_QUOTE = '0x0000000000000000000000000000000000000348';
+    const formattedPrice = price * 1e8;
+    const c = await hre.ethers.getContractAt(
+        'MockChainlinkFeedRegistry',
+        addrs[network].FEED_REGISTRY,
+    );
+    await c.setRoundData(token, USD_QUOTE, roundId, formattedPrice);
+};
+
 module.exports = {
     addToZRXAllowlist,
     getAddrFromRegistry,
@@ -988,6 +1009,8 @@ module.exports = {
     BN2Float,
     Float2BN,
     callDataCost,
+    mockChainlinkPriceFeed,
+    setMockPrice,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,
