@@ -1022,7 +1022,19 @@ const callLimitOrderStrategy = async (botAcc, senderAcc, strategyExecutor, subId
 };
 
 // eslint-disable-next-line max-len
-const callMcdCloseToCollStrategy = async (proxy, botAcc, strategyExecutor, subId, strategySub, flAmount, sellAmount, ethJoin, makerFlAddr) => {
+const callMcdCloseToCollStrategy = async (
+    proxy,
+    botAcc,
+    strategyExecutor,
+    subId,
+    strategySub,
+    flAmount,
+    sellAmount,
+    ethJoin,
+    makerFlAddr,
+    isTrailing = false,
+    roundId = 0,
+) => {
     const actionsCallData = [];
     const flashLoanAction = new dfs.actions.flashloan.MakerFlashLoanAction(
         flAmount,
@@ -1055,14 +1067,8 @@ const callMcdCloseToCollStrategy = async (proxy, botAcc, strategyExecutor, subId
     );
 
     const closeGasCost = 1_200_000;
-    const gasFee = new dfs.actions.basic.GasFeeAction(
-        closeGasCost, placeHolderAddr, 0,
-    );
-    const sendFirst = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr,
-        makerFlAddr,
-        0,
-    );
+    const gasFee = new dfs.actions.basic.GasFeeAction(closeGasCost, placeHolderAddr, 0);
+    const sendFirst = new dfs.actions.basic.SendTokenAction(placeHolderAddr, makerFlAddr, 0);
     const sendSecond = new dfs.actions.basic.SendTokenAction(
         placeHolderAddr,
         placeHolderAddr,
@@ -1085,20 +1091,45 @@ const callMcdCloseToCollStrategy = async (proxy, botAcc, strategyExecutor, subId
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     const strategyIndex = 0;
     const triggerCallData = [];
-    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
+
+    if (isTrailing) {
+        triggerCallData.push(abiCoder.encode(['uint256'], [roundId]));
+    } else {
+        triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
+    }
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
-        gasLimit: 8000000,
-    });
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
-    console.log(`GasUsed callMcdCloseToCollStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+    console.log(
+        `GasUsed callMcdCloseToCollStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
 };
 
 // eslint-disable-next-line max-len
-const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, strategySub, flAmount, ethJoin, makerFlAddr) => {
+const callMcdCloseToDaiStrategy = async (
+    proxy,
+    botAcc,
+    strategyExecutor,
+    subId,
+    strategySub,
+    flAmount,
+    ethJoin,
+    makerFlAddr,
+    isTrailing = false,
+    roundId = 0,
+) => {
     const actionsCallData = [];
     const flashLoanAction = new dfs.actions.flashloan.MakerFlashLoanAction(
         flAmount,
@@ -1131,14 +1162,8 @@ const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, stra
     );
 
     const closeGasCost = 1_200_000;
-    const gasFee = new dfs.actions.basic.GasFeeAction(
-        closeGasCost, placeHolderAddr, 0,
-    );
-    const sendFirst = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr,
-        makerFlAddr,
-        0,
-    );
+    const gasFee = new dfs.actions.basic.GasFeeAction(closeGasCost, placeHolderAddr, 0);
+    const sendFirst = new dfs.actions.basic.SendTokenAction(placeHolderAddr, makerFlAddr, 0);
     const sendSecond = new dfs.actions.basic.SendTokenAction(
         placeHolderAddr,
         placeHolderAddr,
@@ -1155,16 +1180,30 @@ const callMcdCloseStrategy = async (proxy, botAcc, strategyExecutor, subId, stra
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     const strategyIndex = 0;
     const triggerCallData = [];
-    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
+
+    if (isTrailing) {
+        triggerCallData.push(abiCoder.encode(['uint256'], [roundId]));
+    } else {
+        triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
+    }
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
-        gasLimit: 8000000,
-    });
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
-    console.log(`GasUsed callMcdCloseStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+    console.log(
+        `GasUsed callMcdCloseStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
 };
 
 const callReflexerBoostStrategy = async (botAcc, strategyExecutor, subId, strategySub, boostAmount) => {
@@ -1705,7 +1744,16 @@ const callLiquityFLRepayStrategy = async (
 };
 
 // eslint-disable-next-line max-len
-const callLiquityCloseToCollStrategy = async (botAcc, strategyExecutor, subId, strategySub, flAmount, balancerFlAddr) => {
+const callLiquityCloseToCollStrategy = async (
+    botAcc,
+    strategyExecutor,
+    subId,
+    strategySub,
+    flAmount,
+    balancerFlAddr,
+    isTrailing = false,
+    roundId = 0,
+) => {
     const actionsCallData = [];
     const flashLoanAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
         [WETH_ADDRESS], // weth
@@ -1729,14 +1777,8 @@ const callLiquityCloseToCollStrategy = async (botAcc, strategyExecutor, subId, s
     );
 
     const closeGasCost = 1_500_000;
-    const gasFee = new dfs.actions.basic.GasFeeAction(
-        closeGasCost, placeHolderAddr, 0,
-    );
-    const sendFL = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr,
-        balancerFlAddr,
-        0,
-    );
+    const gasFee = new dfs.actions.basic.GasFeeAction(closeGasCost, placeHolderAddr, 0);
+    const sendFL = new dfs.actions.basic.SendTokenAction(placeHolderAddr, balancerFlAddr, 0);
     const sendWethToEOA = new dfs.actions.basic.SendTokenAction(
         placeHolderAddr,
         placeHolderAddr,
@@ -1758,16 +1800,31 @@ const callLiquityCloseToCollStrategy = async (botAcc, strategyExecutor, subId, s
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     const strategyIndex = 0;
     const triggerCallData = [];
-    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
+
+    if (isTrailing) {
+        triggerCallData.push(abiCoder.encode(['uint256'], [roundId]));
+    } else {
+        triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
+    }
+
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
-        gasLimit: 8000000,
-    });
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
-    console.log(`GasUsed callMcdCloseToCollStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+    console.log(
+        `GasUsed callMcdCloseToCollStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
 };
 
 module.exports = {
@@ -1778,7 +1835,7 @@ module.exports = {
     callFLMcdBoostStrategy,
     callLimitOrderStrategy,
     callUniV3RangeOrderStrategy,
-    callMcdCloseStrategy,
+    callMcdCloseToDaiStrategy,
     callMcdCloseToCollStrategy,
     callUniV3CollectStrategy,
     callCompBoostStrategy,

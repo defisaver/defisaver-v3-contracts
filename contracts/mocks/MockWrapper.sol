@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import "../../interfaces/exchange/IExchangeV3.sol";
-import "../../interfaces/curve/ISwaps.sol";
-import "../../interfaces/IERC20.sol";
-import "../../DS/DSMath.sol";
-import "../../auth/AdminAuth.sol";
-import "../../utils/SafeERC20.sol";
-import "../../utils/TokenUtils.sol";
-import "./helpers/WrapperHelper.sol";
+import "../interfaces/exchange/IExchangeV3.sol";
+import "../interfaces/curve/ISwaps.sol";
+import "../interfaces/IERC20.sol";
+import "../DS/DSMath.sol";
+import "../auth/AdminAuth.sol";
+import "../utils/SafeERC20.sol";
+import "../utils/TokenUtils.sol";
+import "../exchangeV3/wrappersV3/helpers/WrapperHelper.sol";
 
 /// @title DFS exchange wrapper used for mocking in tests
 contract MockWrapper is DSMath, IExchangeV3, AdminAuth, WrapperHelper {

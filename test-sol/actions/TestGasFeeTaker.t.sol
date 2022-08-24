@@ -42,13 +42,13 @@ contract TestGasFeeTaker is DSTest, GasFeeTaker {
         console.log(price);
    }
 
-    function testGasCost() public {
-        cheats.fee(100000000000);
-        console.log(tx.gasprice);
-        uint gasCost = feeTaker.calcGasCost(1_000_000, matic);
+    // function testGasCost() public {
+    //     cheats.fee(100000000000);
+    //     console.log(tx.gasprice);
+    //     uint gasCost = feeTaker.calcGasCost(1_000_000, matic);
 
-        console.log("Gas cost:", gasCost);
-    }
+    //     console.log("Gas cost:", gasCost);
+    // }
   
 
 }
