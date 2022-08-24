@@ -52,13 +52,16 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
             txCost = _inputData.availableAmount / 5;
         }
 
-        /// @dev If divider is lower the fee is greater, should be max 5 bps
-        if (_inputData.dfsFeeDivider < MAX_DFS_FEE) {
-            _inputData.dfsFeeDivider = MAX_DFS_FEE;
+        if (_inputData.dfsFeeDivider != 0) {
+            /// @dev If divider is lower the fee is greater, should be max 5 bps
+            if (_inputData.dfsFeeDivider < MAX_DFS_FEE) {
+                _inputData.dfsFeeDivider = MAX_DFS_FEE;
+            }
+
+            // add amount we take for dfs fee as well
+            txCost += _inputData.availableAmount / _inputData.dfsFeeDivider;
         }
 
-        // add amount we take for dfs fee as well
-        txCost += _inputData.availableAmount / _inputData.dfsFeeDivider;
         amountLeft = sub(_inputData.availableAmount, txCost);
         _inputData.feeToken.withdrawTokens(feeRecipient.getFeeAddr(), txCost);
     }
