@@ -11,7 +11,7 @@ import "../utils/TokenUtils.sol";
 import "../exchangeV3/wrappersV3/helpers/WrapperHelper.sol";
 
 /// @title DFS exchange wrapper used for mocking in tests
-contract MockWrapper is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
+contract MockExchangeWrapper is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 

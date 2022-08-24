@@ -969,7 +969,7 @@ const mcdFLRepayCompositeTest = async () => {
         }, []).sort((a, b) => (a.ilkLabel < b.ilkLabel ? (-1) : 1));
 
         before(async () => {
-            mockWrapper = await redeploy('MockWrapper');
+            mockWrapper = await redeploy('MockExchangeWrapper');
             mcdView = await redeploy('McdView');
             repayComposite = await redeploy('McdFLRepayComposite');
 
@@ -1132,7 +1132,7 @@ const mcdRepayCompositeTest = async () => {
         }, []).sort((a, b) => (a.ilkLabel < b.ilkLabel ? (-1) : 1));
 
         before(async () => {
-            mockWrapper = await redeploy('MockWrapper');
+            mockWrapper = await redeploy('MockExchangeWrapper');
             mcdView = await redeploy('McdView');
             repayComposite = await redeploy('McdRepayComposite');
 
@@ -1291,7 +1291,7 @@ const mcdFLBoostCompositeTest = async () => {
         }, []).sort((a, b) => (a.ilkLabel < b.ilkLabel ? (-1) : 1));
 
         before(async () => {
-            mockWrapper = await redeploy('MockWrapper');
+            mockWrapper = await redeploy('MockExchangeWrapper');
             mcdView = await redeploy('McdView');
             boostComposite = await redeploy('McdFLBoostComposite');
 
@@ -1453,7 +1453,7 @@ const mcdBoostCompositeTest = async () => {
         }, []).sort((a, b) => (a.ilkLabel < b.ilkLabel ? (-1) : 1));
 
         before(async () => {
-            mockWrapper = await redeploy('MockWrapper');
+            mockWrapper = await redeploy('MockExchangeWrapper');
             mcdView = await redeploy('McdView');
             boostComposite = await redeploy('McdBoostComposite');
 
