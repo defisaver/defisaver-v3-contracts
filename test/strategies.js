@@ -803,7 +803,7 @@ const createLiquityFLRepayStrategy = () => {
     const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%wethAddr'], ['%repayAmount']);
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '%repayGasCost', '%wethAddr', '$1',
+        '%repayGasCost', '%wethAddr', '%flAmountWeGotBack',
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -860,7 +860,7 @@ const createLiquityBoostStrategy = () => {
         formatExchangeObj(
             '%lusdAddr',
             '%wethAddr',
-            '$1',
+            '%flAmountWeGotBack',
             '%wrapper',
         ),
         '&proxy',
@@ -897,7 +897,7 @@ const createLiquityFLBoostStrategy = () => {
     const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%wethAddr'], ['%flAmount']);
 
     const liquitySupplyFLAction = new dfs.actions.liquity.LiquitySupplyAction(
-        '$1',
+        '%flAmountWeGotBack',
         '&proxy',
         '%upperHint',
         '%lowerHint',
@@ -967,7 +967,7 @@ const createLiquityCloseToCollStrategy = () => {
         formatExchangeObj(
             '&weth',
             '&lusd',
-            '$1',
+            '%amount', // kept variable as flAction might be amount + fee
             '%wrapper',
         ),
         '&proxy',
@@ -1009,8 +1009,12 @@ const createLiquityCloseToCollStrategy = () => {
     liquityCloseToCollStrategy.addAction(sendWethToEoa);
     liquityCloseToCollStrategy.addAction(sendLUSDToEoa);
 
+    console.log(liquityCloseToCollStrategy.encodeForDsProxyCall());
+
     return liquityCloseToCollStrategy.encodeForDsProxyCall();
 };
+
+createLiquityCloseToCollStrategy();
 
 const createLimitOrderStrategy = () => {
     const limitOrderStrategy = new dfs.Strategy('LimitOrderStrategy');
@@ -1267,7 +1271,7 @@ const createFlMcdBoostStrategy = () => {
         formatExchangeObj(
             '%daiAddr',
             '%wethAddr',
-            '$1',
+            '%flAmountWeGotBack',
             '%wrapper',
         ),
         '&proxy',
