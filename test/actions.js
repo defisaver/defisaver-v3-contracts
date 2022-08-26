@@ -405,6 +405,28 @@ const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) =>
     return tx;
 };
 /*
+  ______   ______   .___  ___. .______     ______    __    __  .__   __.  _______   ___       ___  ____
+ /      | /  __  \  |   \/   | |   _  \   /  __  \  |  |  |  | |  \ |  | |       \  \  \     /  / |___ \
+|  ,----'|  |  |  | |  \  /  | |  |_)  | |  |  |  | |  |  |  | |   \|  | |  .--.  |  \  \   /  /    __) |
+|  |     |  |  |  | |  |\/|  | |   ___/  |  |  |  | |  |  |  | |  . `  | |  |  |  |   \  \ /  /    |__ <
+|  `----.|  `--'  | |  |  |  | |  |      |  `--'  | |  `--'  | |  |\   | |  '--'  |    \  V  /     ___) |
+ \______| \______/  |__|  |__| | _|       \______/   \______/  |__| \__| |_______/      \___/     |____/
+*/
+const borrowCompV3 = async (proxy, amount, to) => {
+    const compBorrowAction = new dfs.actions.compoundV3.CompoundV3BorrowAction(amount, to);
+    const functionData = compBorrowAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('CompV3Borrow', functionData, proxy);
+    return tx;
+};
+const allowCompV3 = async (proxy, manager, isAllowed) => {
+    const compAllowAction = new dfs.actions.compoundV3.CompoundV3AllowAction(manager, isAllowed);
+    const functionData = compAllowAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('CompV3Allow', functionData, proxy);
+    return tx;
+};
+/*
 .___  ___.      ___       __  ___  _______ .______
 |   \/   |     /   \     |  |/  / |   ____||   _  \
 |  \  /  |    /  ^  \    |  '  /  |  |__   |  |_)  |
@@ -2074,6 +2096,9 @@ module.exports = {
     borrowComp,
     paybackComp,
     claimComp,
+
+    borrowCompV3,
+    allowCompV3,
 
     uniSupply,
     uniWithdraw,
