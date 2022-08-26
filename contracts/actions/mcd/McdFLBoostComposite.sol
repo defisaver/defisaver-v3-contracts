@@ -118,15 +118,16 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         require(msg.sender == VAULT_ADDR, "Untrusted lender");
         (BoostParams memory boostParams, address proxy) = abi.decode(_userData, (BoostParams, address));
 
-        _boost(proxy, boostParams);
+        _boost(proxy, _feeAmounts[0], boostParams);
+
         uint256 flPaybackAmount = _amounts[0] + _feeAmounts[0];
         _tokens[0].withdrawTokens(address(VAULT_ADDR), flPaybackAmount);
     }
 
     /// @notice Executes boost logic
-    function _boost(address _proxy, BoostParams memory _boostParams) internal {
+    function _boost(address _proxy, uint256 _flFeeAmount, BoostParams memory _boostParams) internal {
         address collateralAsset = _boostParams.exchangeData.destAddr;
-        uint256 boostAmount = _boostParams.exchangeData.srcAmount;
+        uint256 boostAmount = _boostParams.exchangeData.srcAmount + _flFeeAmount;
 
         // Sell flashloaned debt asset for collateral asset
         (uint256 exchangedAmount, ) = _dfsSell(_boostParams.exchangeData, address(this), address(this), false);

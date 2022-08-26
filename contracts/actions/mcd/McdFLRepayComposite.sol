@@ -117,17 +117,17 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         require(msg.sender == VAULT_ADDR, "Untrusted lender");
         (RepayParams memory repayParams, address proxy) = abi.decode(_userData, (RepayParams, address));
 
-        _repay(proxy, repayParams);
+        _repay(proxy, _feeAmounts[0], repayParams);
 
         uint256 flPaybackAmount = _amounts[0] + _feeAmounts[0];
         _tokens[0].withdrawTokens(address(VAULT_ADDR), flPaybackAmount);
     }
 
     /// @notice Executes flashloan repay logic
-    function _repay(address _proxy, RepayParams memory _repayParams) internal {
+    function _repay(address _proxy, uint256 _flFeeAmount, RepayParams memory _repayParams) internal {
         uint256 collateral = getAllColl(IManager(MCD_MANAGER_ADDR), _repayParams.joinAddr, _repayParams.vaultId);
-        uint256 repayAmount = _repayParams.exchangeData.srcAmount > collateral ? collateral : _repayParams.exchangeData.srcAmount;
-        _repayParams.exchangeData.srcAmount = repayAmount;
+        uint256 repayAmount = _repayParams.exchangeData.srcAmount + _flFeeAmount > collateral ? collateral : _repayParams.exchangeData.srcAmount + _flFeeAmount;
+        _repayParams.exchangeData.srcAmount = repayAmount - _flFeeAmount;
 
         // Sell flashloaned collateral asset for debt asset
         (uint256 exchangedAmount, ) = _dfsSell(_repayParams.exchangeData, address(this), address(this), false);
