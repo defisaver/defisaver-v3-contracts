@@ -157,9 +157,4 @@ ActionBase, DFSSell, GasFeeTaker, McdHelper {
     function _parseCompositeParams(bytes memory _calldata) internal pure returns (BoostParams memory params) {
         params = abi.decode(_calldata, (BoostParams));
     }
-
-    /// @dev workaround for dfsSell expecting context to be proxy
-    function owner() external pure returns (address) {
-        return address(0);
-    }
 }

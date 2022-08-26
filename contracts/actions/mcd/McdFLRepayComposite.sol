@@ -189,7 +189,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
     }
 
     /// @dev workaround for dfsSell expecting context to be proxy
-    function owner() external pure returns (address) {
-        return address(0);
+    function owner() external view returns (address) {
+        return ACTION_ADDR;
     }
 }
