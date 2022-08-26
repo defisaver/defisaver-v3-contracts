@@ -98,7 +98,7 @@ const createFLRepayStrategy = () => {
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     repayStrategy.addTrigger(mcdRatioTrigger);
 
-    const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction('%amount', '%wethAddr');
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%wethAddr'], ['%amount']);
 
     const ratioAction = new dfs.actions.maker.MakerRatioAction(
         '&vaultId',
@@ -1335,7 +1335,7 @@ const createFlMcdBoostStrategy = () => {
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     mcdBoostStrategy.addTrigger(mcdRatioTrigger);
 
-    const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction('%amount', '%daiAddr');
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%daiAddr'], ['%amount']);
 
     const ratioAction = new dfs.actions.maker.MakerRatioAction(
         '&vaultId',
@@ -1345,7 +1345,7 @@ const createFlMcdBoostStrategy = () => {
         formatExchangeObj(
             '%daiAddr',
             '%wethAddr',
-            '%flAmountWeGotBack',
+            '$1',
             '%wrapper',
         ),
         '&proxy',

@@ -538,7 +538,7 @@ const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, s
     const triggerCallData = [];
     const actionsCallData = [];
 
-    const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction(repayAmount, WETH_ADDRESS);
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction([WETH_ADDRESS], [repayAmount]);
 
     const ratioAction = new dfs.actions.maker.MakerRatioAction(
         '0',
@@ -920,6 +920,7 @@ const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, s
     );
 
     const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction(boostAmount, DAI_ADDR);
+    // const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction([DAI_ADDR], [boostAmount]);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(

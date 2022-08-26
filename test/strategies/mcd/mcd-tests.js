@@ -119,7 +119,7 @@ const mcdBoostStrategyTest = async () => {
         let strategySub;
         let vaultId;
         let mcdView;
-        let flDyDx;
+        let flBalancer;
         let strategyTriggerView;
         let bundleId;
         const ethJoin = ilks[0].join;
@@ -141,7 +141,7 @@ const mcdBoostStrategyTest = async () => {
             await redeploy('GasFeeTaker');
             await redeploy('McdRatioCheck');
 
-            flDyDx = await redeploy('FLDyDx');
+            flBalancer = await redeploy('FLBalancer');
             await redeploy('McdSupply');
             await redeploy('McdWithdraw');
             await redeploy('McdGenerate');
@@ -258,7 +258,7 @@ const mcdBoostStrategyTest = async () => {
             const ratioBefore = await getRatio(mcdView, vaultId);
 
             // eslint-disable-next-line max-len
-            await callFLMcdBoostStrategy(botAcc, strategyExecutor, 1, subId, strategySub, flDyDx.address, ethJoin, boostAmount);
+            await callFLMcdBoostStrategy(botAcc, strategyExecutor, 1, subId, strategySub, flBalancer.address, ethJoin, boostAmount);
 
             const ratioAfter = await getRatio(mcdView, vaultId);
 
@@ -316,7 +316,7 @@ const mcdRepayStrategyTest = async () => {
         let senderAcc;
         let proxy;
         let botAcc;
-        let flDyDx;
+        let flBalancer;
         let strategyExecutor;
         let subId;
         let vaultId;
@@ -349,7 +349,7 @@ const mcdRepayStrategyTest = async () => {
             await redeploy('McdPayback');
             await redeploy('McdOpen');
             await redeploy('McdRatio');
-            flDyDx = await redeploy('FLDyDx');
+            flBalancer = await redeploy('FLBalancer');
             await redeploy('McdRepayComposite');
             await redeploy('McdFLRepayComposite');
 
@@ -429,7 +429,7 @@ const mcdRepayStrategyTest = async () => {
                 1,
                 subId,
                 strategySub,
-                flDyDx.address,
+                flBalancer.address,
                 ethJoin,
                 repayAmount,
             );
