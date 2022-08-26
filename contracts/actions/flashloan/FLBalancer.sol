@@ -75,8 +75,10 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, Balance
         require(msg.sender == VAULT_ADDR, "Untrusted lender");
         (Recipe memory currRecipe, address proxy) = abi.decode(_userData, (Recipe, address));
 
+        uint256[] memory balancesBefore = new uint256[](_tokens.length);
         for (uint256 i = 0; i < _tokens.length; i++) {
             _tokens[i].withdrawTokens(proxy, _amounts[i]);
+            balancesBefore[i] = _tokens[i].getBalance(address(this));
         }
         address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
 
@@ -89,7 +91,7 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, Balance
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 paybackAmount = _amounts[i].add(_feeAmounts[i]);
             
-            require(_tokens[i].getBalance(address(this)) == paybackAmount, "Wrong payback amount");
+            require(_tokens[i].getBalance(address(this)) == paybackAmount + balancesBefore[i], "Wrong payback amount");
 
             _tokens[i].withdrawTokens(address(VAULT_ADDR), paybackAmount);
         }

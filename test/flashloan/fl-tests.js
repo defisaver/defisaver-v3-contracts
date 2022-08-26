@@ -19,6 +19,7 @@ const {
     WETH_ADDRESS,
     fetchAmountinUSDPrice,
     setBalance,
+    Float2BN,
 } = require('../utils');
 
 const { sell, executeAction } = require('../actions');
@@ -50,6 +51,10 @@ const aaveFlTest = async () => {
                 if (assetInfo.symbol === 'ETH') {
                     assetInfo.address = WETH_ADDRESS;
                 }
+
+                // test if balance will brick fl action
+                await setBalance(assetInfo.address, aaveFl.address, Float2BN('1', 0));
+
                 const amount = fetchAmountinUSDPrice(tokenSymbol, '5000');
                 const loanAmount = hre.ethers.utils.parseUnits(
                     amount,
@@ -130,6 +135,13 @@ const balancerFLTest = async () => {
                 assetInfo[i].decimals,
             ));
 
+            // test if balance will brick fl action
+            await Promise.all(
+                assetInfo.map(
+                    (asset) => setBalance(asset.address, flBalancer.address, Float2BN('1', 0)),
+                ),
+            );
+
             const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
                 new dfs.actions.flashloan.BalancerFlashLoanAction(
                     tokenAddrs,
@@ -181,6 +193,9 @@ const dydxFLTest = async () => {
                     assetInfo.address = WETH_ADDRESS;
                 }
 
+                // test if balance will brick fl action
+                await setBalance(assetInfo.address, dydxFl.address, Float2BN('1', 0));
+
                 const amount = fetchAmountinUSDPrice(tokenSymbol, '1000');
                 const loanAmount = hre.ethers.utils.parseUnits(
                     amount,
@@ -227,6 +242,9 @@ const makerFLTest = async () => {
 
         it(`... should get a ${tokenSymbol} Maker flash loan`, async () => {
             const assetInfo = getAssetInfo(tokenSymbol);
+
+            // test if balance will brick fl action
+            await setBalance(assetInfo.address, flMaker.address, Float2BN('1', 0));
 
             const amount = fetchAmountinUSDPrice(tokenSymbol, '1000');
             const loanAmount = hre.ethers.utils.parseUnits(
