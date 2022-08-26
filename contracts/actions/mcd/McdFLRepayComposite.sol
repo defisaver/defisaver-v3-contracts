@@ -126,8 +126,14 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
     /// @notice Executes flashloan repay logic
     function _repay(address _proxy, uint256 _flFeeAmount, RepayParams memory _repayParams) internal {
         uint256 collateral = getAllColl(IManager(MCD_MANAGER_ADDR), _repayParams.joinAddr, _repayParams.vaultId);
-        uint256 repayAmount = _repayParams.exchangeData.srcAmount + _flFeeAmount > collateral ? collateral : _repayParams.exchangeData.srcAmount + _flFeeAmount;
-        _repayParams.exchangeData.srcAmount = repayAmount - _flFeeAmount;
+        uint256 swapAmountWithFLFee = _repayParams.exchangeData.srcAmount + _flFeeAmount;
+        uint256 repayAmount;
+        if (swapAmountWithFLFee > collateral) {
+            repayAmount = collateral;
+            _repayParams.exchangeData.srcAmount = collateral - _flFeeAmount;
+        } else {
+            repayAmount = swapAmountWithFLFee;
+        }
 
         // Sell flashloaned collateral asset for debt asset
         (uint256 exchangedAmount, ) = _dfsSell(_repayParams.exchangeData, address(this), address(this), false);
