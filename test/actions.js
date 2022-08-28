@@ -426,6 +426,24 @@ const allowCompV3 = async (proxy, manager, isAllowed) => {
     const tx = await executeAction('CompV3Allow', functionData, proxy);
     return tx;
 };
+const withdrawCompV3 = async (proxy, to, asset, amount) => {
+    const compV3WithdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        to,
+        asset,
+        amount,
+    );
+    const functionData = compV3WithdrawAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('CompV3Withdraw', functionData, proxy);
+    return tx;
+};
+const claimCompV3 = async (proxy, src, to, shouldAccrue) => {
+    const claimCompV3Action = new dfs.actions.compound.CompoundV3ClaimAction(src, to, shouldAccrue);
+
+    const functionData = claimCompV3Action.encodeForDsProxyCall()[1];
+    const tx = await executeAction('CompV3Claim', functionData, proxy);
+    return tx;
+};
 /*
 .___  ___.      ___       __  ___  _______ .______
 |   \/   |     /   \     |  |/  / |   ____||   _  \
@@ -2099,6 +2117,8 @@ module.exports = {
 
     borrowCompV3,
     allowCompV3,
+    withdrawCompV3,
+    claimCompV3,
 
     uniSupply,
     uniWithdraw,
