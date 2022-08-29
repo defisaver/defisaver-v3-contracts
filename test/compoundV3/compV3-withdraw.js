@@ -1,4 +1,3 @@
-const { compoundCollateralAssets } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { withdrawCompV3, supplyCompV3 } = require('../actions');
 const {
