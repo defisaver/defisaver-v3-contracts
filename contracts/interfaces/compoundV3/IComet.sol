@@ -26,4 +26,6 @@ abstract contract IComet {
     function governor() virtual external view returns (address);
     function baseToken() virtual external view returns (address);
     function baseTokenPriceFeed() virtual external view returns (address);
+
+    function borrowBalanceOf(address account) virtual public view returns (uint256);
 }
