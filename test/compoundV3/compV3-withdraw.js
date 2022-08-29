@@ -1,5 +1,6 @@
 const { compoundCollateralAssets } = require('@defisaver/tokens');
-const { withdrawCompV3 } = require('../actions');
+const { expect } = require('chai');
+const { withdrawCompV3, supplyCompV3 } = require('../actions');
 const {
     redeploy,
     WETH_ADDRESS,
@@ -28,7 +29,7 @@ describe('CompV3-Withdraw', function () {
     it(`... should withdraw ${USDCAmountWithUSD} USDC from CompoundV3`, async () => {
         const amount = hre.ethers.utils.parseUnits(USDCAmountWithUSD, 18);
 
-        // await supplyComp(proxy, cToken, assetInfo.address, amount, senderAcc.address);
+        await supplyCompV3(proxy, USDC_ADDR, amount, senderAcc.address);
 
         const balanceBefore = await balanceOf(USDC_ADDR, senderAcc.address);
 
@@ -44,7 +45,7 @@ describe('CompV3-Withdraw', function () {
     it(`... should withdraw ${WETHAmountWithUSD} WETH from CompoundV3`, async () => {
         const amount = hre.ethers.utils.parseUnits(WETHAmountWithUSD, 18);
 
-        // await supplyComp(proxy, cToken, assetInfo.address, amount, senderAcc.address);
+        await supplyCompV3(proxy, WETH_ADDRESS, amount, senderAcc.address);
 
         const balanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
 
