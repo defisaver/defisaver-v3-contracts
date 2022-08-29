@@ -17,7 +17,7 @@ describe('CompV3-Withdraw', function () {
     let proxy;
 
     before(async () => {
-        // await redeploy('CompV3Supply');
+        await redeploy('CompV3Supply');
         await redeploy('CompV3Withdraw');
 
         senderAcc = (await hre.ethers.getSigners())[0];
