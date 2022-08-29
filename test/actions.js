@@ -415,7 +415,7 @@ const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) =>
 const supplyCompV3 = async (proxy, tokenAddr, amount, from) => {
     await setBalance(tokenAddr, from, amount);
     await approve(tokenAddr, proxy.address);
- 
+
     const compSupplyAction = new dfs.actions.compoundV3.CompoundV3SupplyAction(
         tokenAddr,
         amount,
@@ -454,21 +454,21 @@ const withdrawCompV3 = async (proxy, to, asset, amount) => {
     return tx;
 };
 const claimCompV3 = async (proxy, src, to, shouldAccrue) => {
-    const claimCompV3Action = new dfs.actions.compound.CompoundV3ClaimAction(src, to, shouldAccrue);
+    const claimCompV3Action = new dfs.actions.compoundV3.CompoundV3ClaimAction(src, to, shouldAccrue);
 
     const functionData = claimCompV3Action.encodeForDsProxyCall()[1];
     const tx = await executeAction('CompV3Claim', functionData, proxy);
     return tx;
 };
 const paybackCompV3 = async (proxy, amount, from, onBehalf) => {
-    const paybackCompV3Action = new dfs.actions.compound.CompoundV3PaybackAction(amount, from, onBehalf);
+    const paybackCompV3Action = new dfs.actions.compoundV3.CompoundV3PaybackAction(amount, from, onBehalf);
 
     const functionData = paybackCompV3Action.encodeForDsProxyCall()[1];
     const tx = await executeAction('CompV3Payback', functionData, proxy);
     return tx;
 };
 const transferCompV3 = async (proxy, from, to, asset, amount) => {
-    const paybackCompV3Action = new dfs.actions.compound.CompoundV3PaybackAction(from, to, asset, amount);
+    const paybackCompV3Action = new dfs.actions.compoundV3.CompoundV3PaybackAction(from, to, asset, amount);
 
     const functionData = paybackCompV3Action.encodeForDsProxyCall()[1];
     const tx = await executeAction('CompV3Transfer', functionData, proxy);
