@@ -48,7 +48,7 @@ const executeAction = async (actionName, functionData, proxy, regAddr = addrs[ne
     try {
         mineBlock();
         receipt = await proxy['execute(address,bytes)'](actionAddr, functionData, {
-            gasLimit: 10000000,
+            gasLimit: 25000000,
         });
         // const gasUsed = await getGasUsed(receipt);
         // console.log(`Gas used by ${actionName} action; ${gasUsed}`);

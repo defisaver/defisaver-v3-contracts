@@ -32,7 +32,7 @@ const addrs = {
         UNISWAP_WRAPPER: '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54',
         FEED_REGISTRY: '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf',
         AVG_GAS_PRICE: 100,
-
+        ZRX_ALLOWLIST_ADDR: '0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -51,6 +51,8 @@ const addrs = {
         AAVE_V3_VIEW: '0x5aD16e393615bfeF64e15210C370dd4b8f2753Cb',
         AVG_GAS_PRICE: 0.001,
         TOKEN_GROUP_REGISTRY: '0x566b2a957D8FCE39D2744059d558F27aF52a70c0',
+        ZRX_ALLOWLIST_ADDR: '0x52F6ae5aE5a8a6316c970d3a02C50b74c1a50bB8',
+
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -70,6 +72,8 @@ const addrs = {
         AAVE_V3_VIEW: '0x710f01037018Daad969B8FeFe69b4823Ef788bc6',
         UNISWAP_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
         AVG_GAS_PRICE: 0.5,
+        ZRX_ALLOWLIST_ADDR: '0x5eD8e74b1caE57B0c68B3278B88589991FBa0750',
+
     },
     kovan: {
         PROXY_REGISTRY: '0xF9722E05B68E5ad5D6E1674C4d6BfE11791a1E33',
@@ -793,14 +797,14 @@ const formatExchangeObjForOffchain = (
 ];
 
 const addToZRXAllowlist = async (acc, newAddr) => {
-    const exchangeOwnerAddr = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
+    const exchangeOwnerAddr = addrs[network].EXCHANGE_OWNER_ADDR;
     await sendEther(acc, exchangeOwnerAddr, '1');
     await impersonateAccount(exchangeOwnerAddr);
 
     const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
 
     const registryInstance = await hre.ethers.getContractFactory('ZrxAllowlist');
-    const registry = await registryInstance.attach('0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F');
+    const registry = await registryInstance.attach(addrs[network].ZRX_ALLOWLIST_ADDR);
     const registryByOwner = await registry.connect(signer);
 
     await registryByOwner.setAllowlistAddr(newAddr, true);
@@ -1073,4 +1077,5 @@ module.exports = {
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),
+    setCode,
 };
