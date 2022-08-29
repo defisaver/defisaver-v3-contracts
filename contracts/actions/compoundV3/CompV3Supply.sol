@@ -78,8 +78,7 @@ contract CompV3Supply is ActionBase, CompV3Helper {
 
             IComet(COMET_ADDR).supply(_tokenAddr,_amount);
         }
-        // we always expect actions to deal with WETH never Eth
-        else if (_tokenAddr != TokenUtils.WETH_ADDR) {
+        else{
             IComet(COMET_ADDR).supply(_tokenAddr,_amount);
         }
 
