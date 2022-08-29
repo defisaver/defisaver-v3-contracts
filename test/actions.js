@@ -412,6 +412,22 @@ const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) =>
 |  `----.|  `--'  | |  |  |  | |  |      |  `--'  | |  `--'  | |  |\   | |  '--'  |    \  V  /     ___) |
  \______| \______/  |__|  |__| | _|       \______/   \______/  |__| \__| |_______/      \___/     |____/
 */
+const supplyCompV3 = async (proxy, tokenAddr, amount, from) => {
+    await setBalance(tokenAddr, from, amount);
+    await approve(tokenAddr, proxy.address);
+ 
+    const compSupplyAction = new dfs.actions.compoundV3.CompoundV3SupplyAction(
+        tokenAddr,
+        amount,
+        from
+    );
+
+    const functionData = compSupplyAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('CompV3Supply', functionData, proxy);
+    return tx;
+};
+
 const borrowCompV3 = async (proxy, amount, to) => {
     const compBorrowAction = new dfs.actions.compoundV3.CompoundV3BorrowAction(amount, to);
     const functionData = compBorrowAction.encodeForDsProxyCall()[1];
@@ -2129,6 +2145,7 @@ module.exports = {
     paybackComp,
     claimComp,
 
+    supplyCompV3,
     borrowCompV3,
     allowCompV3,
     withdrawCompV3,
