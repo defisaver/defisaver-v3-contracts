@@ -82,7 +82,7 @@ contract CompV3Payback is ActionBase, CompV3Helper {
         //deauthorization
         ICometExt(COMET_EXT_ADDR).allow(COMET_ADDR, false); 
         
-        bytes memory logData = abi.encode(tokenAddr, _amount, _from, _onBehalf);
+        bytes memory logData = abi.encode(_amount, _from, _onBehalf);
         return (_amount, logData);
     }
 
