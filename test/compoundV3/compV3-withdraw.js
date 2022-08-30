@@ -1,5 +1,6 @@
-const { compoundCollateralAssets } = require('@defisaver/tokens');
-const { withdrawCompV3 } = require('../actions');
+const { hre } = require('hardhat');
+const { expect } = require('chai');
+const { withdrawCompV3, supplyCompV3 } = require('../actions');
 const {
     redeploy,
     WETH_ADDRESS,
@@ -16,7 +17,7 @@ describe('CompV3-Withdraw', function () {
     let proxy;
 
     before(async () => {
-        // await redeploy('CompV3Supply');
+        await redeploy('CompV3Supply');
         await redeploy('CompV3Withdraw');
 
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -24,14 +25,16 @@ describe('CompV3-Withdraw', function () {
     });
 
     const USDCAmountWithUSD = fetchAmountinUSDPrice('USDC', '1000');
+    const WETHAmountWithUSD = fetchAmountinUSDPrice('WETH', '2000');
 
     it(`... should withdraw ${USDCAmountWithUSD} USDC from CompoundV3`, async () => {
-        const amount = hre.ethers.utils.parseUnits(USDCAmountWithUSD, 18);
+        const amount = hre.ethers.utils.parseUnits(USDCAmountWithUSD, 6);
 
-        // await supplyComp(proxy, cToken, assetInfo.address, amount, senderAcc.address);
+        await supplyCompV3(proxy, USDC_ADDR, amount, senderAcc.address);
 
         const balanceBefore = await balanceOf(USDC_ADDR, senderAcc.address);
 
+        // cant withdraw full amount?
         await withdrawCompV3(proxy, senderAcc.address, USDC_ADDR, amount);
 
         const balanceAfter = await balanceOf(USDC_ADDR, senderAcc.address);
@@ -39,12 +42,10 @@ describe('CompV3-Withdraw', function () {
         expect(balanceAfter).to.be.gt(balanceBefore);
     });
 
-    const WETHAmountWithUSD = fetchAmountinUSDPrice('WETH', '1000');
-
     it(`... should withdraw ${WETHAmountWithUSD} WETH from CompoundV3`, async () => {
         const amount = hre.ethers.utils.parseUnits(WETHAmountWithUSD, 18);
 
-        // await supplyComp(proxy, cToken, assetInfo.address, amount, senderAcc.address);
+        await supplyCompV3(proxy, WETH_ADDRESS, amount, senderAcc.address);
 
         const balanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
 

@@ -44,4 +44,6 @@ abstract contract IComet {
 
     function numAssets() virtual public view returns (uint8);
     function getAssetInfo(uint8 i) virtual public view returns (AssetInfo memory);
+
+    function allow(address manager, bool isAllowed) virtual external;
 }
