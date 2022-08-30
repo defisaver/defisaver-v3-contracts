@@ -39,11 +39,13 @@ abstract contract IComet {
     function baseTokenPriceFeed() virtual external view returns (address);
 
     function balanceOf(address account) virtual public view returns (uint256);
+    function collateralBalanceOf(address account, address asset) virtual external view returns (uint128);
     function borrowBalanceOf(address account) virtual public view returns (uint256);
     function totalSupply() virtual external view returns (uint256);
 
     function numAssets() virtual public view returns (uint8);
     function getAssetInfo(uint8 i) virtual public view returns (AssetInfo memory);
+    function getPrice(address priceFeed) virtual public view returns (uint256);
 
     function allow(address manager, bool isAllowed) virtual external;
 }

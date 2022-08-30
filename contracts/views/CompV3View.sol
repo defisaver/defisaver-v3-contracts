@@ -12,12 +12,15 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
 
     struct LoanData {
         address user;
-        uint128 ratio;
         address[] collAddr;
         uint[] collAmounts;
         uint depositAmount;
         uint borrowAmount;
+        uint collValue;
+        uint maxDebt;
     }
+    
+    uint64 public constant FACTOR_SCALE = 1e18;
 
     IComet public constant comet = IComet(COMET_ADDR);
     ICometExt public constant cometExt = ICometExt(COMET_EXT_ADDR);
@@ -32,7 +35,7 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
         return assets;
     }
 
-/*
+
     /// @notice Fetches all the collateral/debt address and amounts, denominated in usd
     /// @param _users Addresses of the user
     /// @return loans Array of LoanData information
@@ -48,53 +51,40 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
     /// @param _user Address of the user
     /// @return data LoanData information
     function getLoanData(address _user) public view returns (LoanData memory data) {
-        AssetInfo[] memory assets = getAssets;
+        IComet.AssetInfo[] memory assets = getAssets();
 
         data = LoanData({
             user: _user,
-            ratio: 0,
             collAddr: new address[](assets.length),
-            borrowAddr: new address[](assets.length),
             collAmounts: new uint[](assets.length),
-            borrowAmounts: new uint[](assets.length)
+            depositAmount: 0,
+            borrowAmount: 0,
+            collValue: 0,
+            maxDebt: 0
         });
 
         uint collPos = 0;
-        uint borrowPos = 0;
 
         for (uint i = 0; i < assets.length; i++) {
-            address asset = assets[i];
+            address asset = assets[i].asset;
+            address priceFeed = assets[i].priceFeed; 
 
-            (, uint cTokenBalance, uint borrowBalance, uint exchangeRateMantissa)
-                                        = ICToken(asset).getAccountSnapshot(_user);
-
-            Exp memory oraclePrice;
-
-            if (cTokenBalance != 0 || borrowBalance != 0) {
-                oraclePrice = Exp({mantissa: ICompoundOracle(oracleAddr).getUnderlyingPrice(asset)});
-            }
-
-            // Sum up collateral in Usd
-            if (cTokenBalance != 0) {
-                Exp memory exchangeRate = Exp({mantissa: exchangeRateMantissa});
-                (, Exp memory tokensToUsd) = mulExp(exchangeRate, oraclePrice);
+            uint tokenBalance = comet.collateralBalanceOf(_user,asset);
+            data.collAddr[i] = asset;
+            data.collAmounts[i] = tokenBalance;
+            if (tokenBalance != 0) {
 
                 data.collAddr[collPos] = asset;
-                (, data.collAmounts[collPos]) = mulScalarTruncate(tokensToUsd, cTokenBalance);
+                uint value = tokenBalance * comet.getPrice(priceFeed) / assets[i].scale;
+                data.collAmounts[collPos] = value;
+                data.collValue += value;
+                data.maxDebt += value* assets[i].liquidationFactor/ FACTOR_SCALE;
                 collPos++;
             }
-
-            // Sum up debt in Usd
-            if (borrowBalance != 0) {
-                data.borrowAddr[borrowPos] = asset;
-                (, data.borrowAmounts[borrowPos]) = mulScalarTruncate(oraclePrice, borrowBalance);
-                borrowPos++;
-            }
         }
-
-        data.ratio = uint128(getSafetyRatio(_user));
+        data.borrowAmount = comet.borrowBalanceOf(_user);
+        data.depositAmount = comet.balanceOf(_user);
 
         return data;
     }
-*/
 }
