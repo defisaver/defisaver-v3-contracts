@@ -22,6 +22,7 @@ const {
     getGasUsed,
     formatExchangeObjCurve,
     addrs,
+    USDC_ADDR,
 } = require('./utils');
 
 const {
@@ -461,6 +462,7 @@ const claimCompV3 = async (proxy, src, to, shouldAccrue) => {
     return tx;
 };
 const paybackCompV3 = async (proxy, amount, from, onBehalf) => {
+    await approve(USDC_ADDR, proxy.address);
     const paybackCompV3Action = new dfs.actions.compoundV3.CompoundV3PaybackAction(amount, from, onBehalf);
 
     const functionData = paybackCompV3Action.encodeForDsProxyCall()[1];
@@ -468,9 +470,9 @@ const paybackCompV3 = async (proxy, amount, from, onBehalf) => {
     return tx;
 };
 const transferCompV3 = async (proxy, from, to, asset, amount) => {
-    const paybackCompV3Action = new dfs.actions.compoundV3.CompoundV3PaybackAction(from, to, asset, amount);
+    const transferCompV3Action = new dfs.actions.compoundV3.CompoundV3TransferAction(from, to, asset, amount);
 
-    const functionData = paybackCompV3Action.encodeForDsProxyCall()[1];
+    const functionData = transferCompV3Action.encodeForDsProxyCall()[1];
     const tx = await executeAction('CompV3Transfer', functionData, proxy);
     return tx;
 };
