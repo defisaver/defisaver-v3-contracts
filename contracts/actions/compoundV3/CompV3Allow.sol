@@ -3,7 +3,6 @@
 pragma solidity =0.8.10;
 
 import "../../interfaces/compoundV3/IComet.sol";
-import "../../interfaces/compoundV3/ICometExt.sol";
 import "../../interfaces/IWETH.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
@@ -58,7 +57,7 @@ contract CompV3Allow is ActionBase, CompV3Helper {
         address _manager,
         bool _isAllowed
     ) internal returns (bool, bytes memory) {
-        ICometExt(COMET_EXT_ADDR).allow(_manager,_isAllowed);
+        IComet(COMET_ADDR).allow(_manager,_isAllowed);
 
         bytes memory logData = abi.encode(_manager, _isAllowed);
         return (_isAllowed, logData);
