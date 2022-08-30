@@ -8,12 +8,12 @@ import "../../auth/AdminAuth.sol";
 import "../DFSExchangeHelper.sol";
 import "../../interfaces/exchange/IOffchainWrapper.sol";
 
-contract KyberSwapWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath{
+contract EditableExchangeWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath{
 
     using TokenUtils for address;
 
     /// @notice offchainData.callData should be this struct encoded
-    struct KyberSwapData{
+    struct EditableCallData{
         bytes realCalldata;
         uint256[] indexes;
     }
@@ -47,7 +47,10 @@ contract KyberSwapWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSM
 
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
-        (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(rewriteCalldata(abi.decode(_exData.offchainData.callData, (KyberSwapData)), _exData.srcAmount));
+
+        bytes memory callDataForUse = rewriteCalldata(abi.decode(_exData.offchainData.callData, (EditableCallData)), _exData.srcAmount);
+        (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(callDataForUse);
+
         uint256 tokensSwapped = 0;
         if (success) {
             // get the current balance of the swapped tokens
@@ -62,11 +65,11 @@ contract KyberSwapWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSM
         return (success, tokensSwapped);
     }
 
-    function rewriteCalldata(KyberSwapData memory _kyberSwapData, uint256 _srcAmount) internal pure returns (bytes memory callDataForUse) {
-        for (uint i = 0; i < _kyberSwapData.indexes.length; i++){
-            writeUint256(_kyberSwapData.realCalldata, _kyberSwapData.indexes[i], _srcAmount);
+    function rewriteCalldata(EditableCallData memory _editableSwapCallData, uint256 _srcAmount) internal pure returns (bytes memory callDataForUse) {
+        for (uint i = 0; i < _editableSwapCallData.indexes.length; i++){
+            writeUint256(_editableSwapCallData.realCalldata, _editableSwapCallData.indexes[i], _srcAmount);
         }
-        callDataForUse = _kyberSwapData.realCalldata;
+        callDataForUse = _editableSwapCallData.realCalldata;
     }
     
 

@@ -26,7 +26,7 @@ describe('Dfs-Sell-Arbitrum KyberSwap', function () {
     before(async () => {
         await redeploy('DFSSell');
 
-        ooWrapper = await redeploy('KyberSwapWrapper');
+        ooWrapper = await redeploy('EditableExchangeWrapper');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -61,7 +61,7 @@ describe('Dfs-Sell-Arbitrum KyberSwap', function () {
         };
         console.log(options.baseURL + options.url);
         const priceObject = await axios(options).then((response) => response.data);
-        //priceObject.routerAddress = '0x617Dee16B86534a5d792A4d7A62FB491B544111E';
+        priceObject.routerAddress = '0x617Dee16B86534a5d792A4d7A62FB491B544111E';
         console.log(priceObject);
         if (priceObject.code === 500) {
             console.log('DEAD');
@@ -121,7 +121,7 @@ describe('Dfs-Sell-Arbitrum KyberSwap', function () {
         // balancer,curve,dodo,swapr,sushiswap
         console.log(options.baseURL + options.url);
         const priceObject = await axios(options).then((response) => response.data);
-        //priceObject.routerAddress = '0x617Dee16B86534a5d792A4d7A62FB491B544111E';
+        priceObject.routerAddress = '0x617Dee16B86534a5d792A4d7A62FB491B544111E';
         console.log(priceObject);
         if (priceObject.code === 500) {
             console.log('DEAD');
