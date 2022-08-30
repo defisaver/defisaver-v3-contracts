@@ -1,14 +1,8 @@
-const { getAssetInfo } = require('@defisaver/tokens');
+const { hre, ethers, network } = require('hardhat');
 const { expect } = require('chai');
 const { supplyCompV3, claimCompV3, borrowCompV3 } = require('../actions');
 const {
-    redeploy,
-    USDC_ADDR,
-    balanceOf,
-    getProxy,
-    WETH_ADDRESS,
-    send,
-    setBalance,
+    redeploy, USDC_ADDR, balanceOf, getProxy, WETH_ADDRESS, setBalance,
 } = require('../utils');
 const { COMP_ADDR } = require('../utils-comp');
 
@@ -37,17 +31,24 @@ describe('CompV3-Claim', function () {
             'function getRewardOwed(address, address) public view returns(address, uint256)',
         ];
 
-        const CometRewardsContract = new ethers.Contract(COMET_REWARDS_ADDR, abi, senderAcc)
+        const CometRewardsContract = new ethers.Contract(COMET_REWARDS_ADDR, abi, senderAcc);
 
-        await setBalance(COMP_ADDR, COMET_REWARDS_ADDR, hre.ethers.utils.parseUnits('1000000000', 18));
+        await setBalance(
+            COMP_ADDR,
+            COMET_REWARDS_ADDR,
+            hre.ethers.utils.parseUnits('1000000000', 18),
+        );
 
         await supplyCompV3(proxy, USDC_ADDR, amount, senderAcc.address);
 
-        await network.provider.send("evm_increaseTime", [36000]);
-        await network.provider.send("evm_mine");
+        await network.provider.send('evm_increaseTime', [36000]);
+        await network.provider.send('evm_mine');
 
-        const tx = await CometRewardsContract.callStatic.getRewardOwed(COMET_ADDR, proxy.address)
-        console.log(tx.toString())
+        await supplyCompV3(proxy, WETH_ADDRESS, amount, senderAcc.address);
+        await borrowCompV3(proxy, amount, senderAcc.address);
+
+        const tx = await CometRewardsContract.callStatic.getRewardOwed(COMET_ADDR, proxy.address);
+        console.log(tx.toString());
 
         const BalanceBefore = await balanceOf(COMP_ADDR, senderAcc.address);
         const BalanceProxyBefore = await balanceOf(COMP_ADDR, proxy.address);

@@ -1,5 +1,6 @@
+const { hre } = require('hardhat');
 const { expect } = require('chai');
-const { withdrawCompV3, supplyCompV3, borrowCompV3 } = require('../actions');
+const { withdrawCompV3, supplyCompV3 } = require('../actions');
 const {
     redeploy,
     WETH_ADDRESS,
@@ -7,7 +8,6 @@ const {
     balanceOf,
     fetchAmountinUSDPrice,
     getProxy,
-    setBalance,
 } = require('../utils');
 
 describe('CompV3-Withdraw', function () {
@@ -19,7 +19,6 @@ describe('CompV3-Withdraw', function () {
     before(async () => {
         await redeploy('CompV3Supply');
         await redeploy('CompV3Withdraw');
-        await redeploy('CompV3Borrow');
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
