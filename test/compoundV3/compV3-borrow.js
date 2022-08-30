@@ -7,9 +7,9 @@ const { borrowCompV3, supplyCompV3 } = require('../actions');
 const {
     fetchAmountinUSDPrice,
     balanceOf,
+    setBalance,
     redeploy,
     getProxy,
-    WETH_ADDRESS,
 } = require('../utils');
 
 describe('CompV3-Borrow', function () {
@@ -27,13 +27,15 @@ describe('CompV3-Borrow', function () {
 
     it('... should test CompoundV3 borrow', async () => {
         const assetInfo = getAssetInfo('USDC');
+        const colInfo = getAssetInfo('WETH');
+        await setBalance(colInfo.address, senderAcc.address, ethers.utils.parseEther('100'));
 
         const borrowingAmount = hre.ethers.utils.parseUnits(
             fetchAmountinUSDPrice('USDC', '2000'),
             assetInfo.decimals,
         );
 
-        await supplyCompV3(proxy, WETH_ADDRESS, ethers.utils.parseEther('10'), senderAcc.address);
+        await supplyCompV3(proxy, colInfo.address, ethers.utils.parseEther('10'), senderAcc.address);
 
         const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
 

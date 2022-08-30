@@ -8,12 +8,11 @@ const {
     getProxy,
 } = require('../utils');
 
-const cometExtAbi = [
+const cometAbi = [
     'function allowance(address owner, address spender) external view returns (uint256)',
-    'function allow(address manager, bool isAllowed_) external',
 ];
 
-const cometExtAddress = '0x285617313887d43256F852cAE0Ee4de4b68D45B0';
+const cometAddress = '0xc3d688B66703497DAA19211EEdff47f25384cdc3';
 
 describe('CompV3-Allow', function () {
     this.timeout(80000);
@@ -30,7 +29,7 @@ describe('CompV3-Allow', function () {
     });
 
     it('... should test CompoundV3 allow', async () => {
-        const cometExt = new ethers.Contract(cometExtAddress, cometExtAbi, ownerAcc);
+        const cometExt = new ethers.Contract(cometAddress, cometAbi, ownerAcc);
 
         await allowCompV3(proxy, ownerAcc.address, true);
 
