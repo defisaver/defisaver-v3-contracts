@@ -6,6 +6,7 @@ import "../../interfaces/compoundV3/ICometExt.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompV3Helper.sol";
+import "../../interfaces/IERC20.sol";
 
 /// @title Payback a token a user borrowed from Compound
 contract CompV3Payback is ActionBase, CompV3Helper {
@@ -16,7 +17,6 @@ contract CompV3Payback is ActionBase, CompV3Helper {
         address from;
         address onBehalf;
     }
-    error CompV3PaybackError();
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -69,18 +69,14 @@ contract CompV3Payback is ActionBase, CompV3Helper {
 
         uint256 maxDebt = IComet(COMET_ADDR).borrowBalanceOf(_onBehalf);
         _amount = _amount > maxDebt ? maxDebt : _amount;
-        
+
         tokenAddr.pullTokensIfNeeded(_from, _amount);
 
         //authorization
         tokenAddr.approveToken(COMET_ADDR, _amount);
-        ICometExt(COMET_EXT_ADDR).allow(COMET_ADDR, true); 
-        
+
         //function
-        IComet(COMET_ADDR).supplyTo(_onBehalf, tokenAddr, _amount);
-        
-        //deauthorization
-        ICometExt(COMET_EXT_ADDR).allow(COMET_ADDR, false); 
+        IComet(COMET_ADDR).supply(tokenAddr, _amount);
         
         bytes memory logData = abi.encode(_amount, _from, _onBehalf);
         return (_amount, logData);
