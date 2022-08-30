@@ -75,13 +75,10 @@ contract CompV3Supply is ActionBase, CompV3Helper {
             uint256 debt = IComet(COMET_ADDR).borrowBalanceOf(address(this));
             if(debt > 0)
                 revert CompV3SupplyWithDebtError();
-
-            IComet(COMET_ADDR).supply(_tokenAddr,_amount);
         }
-        else{
-            IComet(COMET_ADDR).supply(_tokenAddr,_amount);
-        }
-
+        
+        IComet(COMET_ADDR).supply(_tokenAddr,_amount);
+        
         bytes memory logData = abi.encode(_tokenAddr, _amount, _from);
         return (_amount, logData);
     }
