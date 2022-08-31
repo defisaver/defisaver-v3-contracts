@@ -2,24 +2,17 @@
 
 pragma solidity =0.8.10;
 
-import "../../interfaces/compoundV3/IComet.sol";
-import "../../interfaces/compoundV3/ICometExt.sol";
-import "../../interfaces/IWETH.sol";
-import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompV3Helper.sol";
 
 /// @title Borrow base token from CompoundV3
 contract CompV3Borrow is ActionBase, CompV3Helper {
 
-     using TokenUtils for address;
-
     struct Params {
         uint256 amount;
         address to;
     }
-    error CompV3BorrowError();
-
+    
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
@@ -58,7 +51,7 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
         uint256 _amount,
         address _to
     ) internal returns (uint256, bytes memory) {
-        address baseTokenAddress=IComet(COMET_ADDR).baseToken();
+        address baseTokenAddress = IComet(COMET_ADDR).baseToken();
         IComet(COMET_ADDR).withdrawTo(_to,baseTokenAddress,_amount);
         bytes memory logData = abi.encode(baseTokenAddress, _amount, _to);
         return (_amount, logData);
