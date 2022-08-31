@@ -51,11 +51,11 @@ contract CompV3Supply is ActionBase, CompV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Supplies a token to the Compound protocol
+    /// @notice Supplies a token to the CompoundV3 protocol
     /// @dev If amount == type(uint256).max we are getting the whole balance of the proxy
-    /// @param _tokenAddr Address of the token we'll get when supplying
-    /// @param _amount Amount of the underlying token we are supplying
-    /// @param _from Address where we are pulling the underlying tokens from
+    /// @param _tokenAddr Address of the token we are supplying
+    /// @param _amount Amount of the token we are supplying
+    /// @param _from Address where we are pulling the tokens from
     function _supply(
         address _tokenAddr,
         uint256 _amount,
@@ -75,13 +75,10 @@ contract CompV3Supply is ActionBase, CompV3Helper {
             uint256 debt = IComet(COMET_ADDR).borrowBalanceOf(address(this));
             if(debt > 0)
                 revert CompV3SupplyWithDebtError();
-
-            IComet(COMET_ADDR).supply(_tokenAddr,_amount);
         }
-        else{
-            IComet(COMET_ADDR).supply(_tokenAddr,_amount);
-        }
-
+        
+        IComet(COMET_ADDR).supply(_tokenAddr,_amount);
+        
         bytes memory logData = abi.encode(_tokenAddr, _amount, _from);
         return (_amount, logData);
     }

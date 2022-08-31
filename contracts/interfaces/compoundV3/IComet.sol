@@ -3,6 +3,17 @@
 pragma solidity =0.8.10;
 
 abstract contract IComet {
+
+    struct AssetInfo {
+        uint8 offset;
+        address asset;
+        address priceFeed;
+        uint64 scale;
+        uint64 borrowCollateralFactor;
+        uint64 liquidateCollateralFactor;
+        uint64 liquidationFactor;
+        uint128 supplyCap;
+    }
     
     function supply(address asset, uint amount) virtual external;
     function supplyTo(address dst, address asset, uint amount) virtual external;
@@ -27,7 +38,14 @@ abstract contract IComet {
     function baseToken() virtual external view returns (address);
     function baseTokenPriceFeed() virtual external view returns (address);
 
+    function balanceOf(address account) virtual public view returns (uint256);
+    function collateralBalanceOf(address account, address asset) virtual external view returns (uint128);
     function borrowBalanceOf(address account) virtual public view returns (uint256);
+    function totalSupply() virtual external view returns (uint256);
+
+    function numAssets() virtual public view returns (uint8);
+    function getAssetInfo(uint8 i) virtual public view returns (AssetInfo memory);
+    function getPrice(address priceFeed) virtual public view returns (uint256);
 
     function allow(address manager, bool isAllowed) virtual external;
 }
