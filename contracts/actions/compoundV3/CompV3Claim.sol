@@ -12,7 +12,7 @@ import '../../interfaces/IERC20.sol';
 /// @title Claims Comp reward for the specified user
 contract CompV3Claim is ActionBase, CompV3Helper {
     struct Params {
-        address src;
+        address onBehalf;
         address to;
         bool shouldAccrue;
     }
@@ -26,7 +26,7 @@ contract CompV3Claim is ActionBase, CompV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.src = _parseParamAddr(params.src, _paramMapping[0], _subData, _returnValues);
+        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.shouldAccrue =
             _parseParamUint(
@@ -37,7 +37,7 @@ contract CompV3Claim is ActionBase, CompV3Helper {
             ) == 1;
             
         (uint256 compClaimed, bytes memory logData) = _claim(
-            params.src,
+            params.onBehalf,
             params.to,
             params.shouldAccrue
         );
@@ -48,7 +48,7 @@ contract CompV3Claim is ActionBase, CompV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _claim(params.src, params.to, params.shouldAccrue);
+        (, bytes memory logData) = _claim(params.onBehalf, params.to, params.shouldAccrue);
         logger.logActionDirectEvent('CompV3Claim', logData);
     }
 

@@ -1,4 +1,4 @@
-const { hre } = require('hardhat');
+const hre = require('hardhat');
 const { expect } = require('chai');
 const { withdrawCompV3, supplyCompV3 } = require('../actions');
 const {
@@ -34,8 +34,8 @@ describe('CompV3-Withdraw', function () {
 
         const balanceBefore = await balanceOf(USDC_ADDR, senderAcc.address);
 
-        // cant withdraw full amount?
-        await withdrawCompV3(proxy, senderAcc.address, USDC_ADDR, amount);
+        // withdraw all balance from address with max uint256 as amount
+        await withdrawCompV3(proxy, senderAcc.address, USDC_ADDR, hre.ethers.constants.MaxUint256);
 
         const balanceAfter = await balanceOf(USDC_ADDR, senderAcc.address);
 
