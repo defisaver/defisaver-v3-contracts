@@ -76,6 +76,7 @@ describe('CompV3-Supply', async function () {
 
         expect(balanceAfter).to.be.gt(balanceBefore);
 
+        // console.log(await getSupportedAssets(compV3View));
         // console.log(await compV3View.getLoanData(proxy.address));
     });
 });

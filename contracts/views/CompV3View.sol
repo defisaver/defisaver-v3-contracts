@@ -21,6 +21,9 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
     }
     
     uint64 public constant FACTOR_SCALE = 1e18;
+    uint64 public constant BASE_SCALE = 1e6;
+    address public constant USDC_PRICE_FEED = 0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6;
+    uint public constant PRICE_FEED_SCALE = 1e8;
 
     IComet public constant comet = IComet(COMET_ADDR);
     ICometExt public constant cometExt = ICometExt(COMET_EXT_ADDR);
@@ -75,15 +78,15 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
             if (tokenBalance != 0) {
 
                 data.collAddr[collPos] = asset;
-                uint value = tokenBalance * comet.getPrice(priceFeed) / assets[i].scale;
-                data.collAmounts[collPos] = value;
+                uint value = tokenBalance * comet.getPrice(priceFeed) / PRICE_FEED_SCALE / assets[i].scale;
+                data.collAmounts[collPos] = tokenBalance;
                 data.collValue += value;
                 data.maxDebt += value* assets[i].liquidationFactor/ FACTOR_SCALE;
                 collPos++;
             }
         }
-        data.borrowAmount = comet.borrowBalanceOf(_user);
-        data.depositAmount = comet.balanceOf(_user);
+        data.borrowAmount = comet.borrowBalanceOf(_user) * comet.getPrice(USDC_PRICE_FEED) / PRICE_FEED_SCALE / BASE_SCALE;
+        data.depositAmount = comet.balanceOf(_user) * comet.getPrice(USDC_PRICE_FEED) / PRICE_FEED_SCALE / BASE_SCALE;
 
         return data;
     }
