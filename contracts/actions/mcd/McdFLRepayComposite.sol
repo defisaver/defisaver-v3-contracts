@@ -22,6 +22,7 @@ ActionBase, DFSSell, GasFeeTaker, McdHelper, IFlashLoanRecipient,
 ReentrancyGuard, MainnetBalancerV2Addresses {
     using TokenUtils for address;
 
+    error RatioNotLowerThanBefore(uint256, uint256);
     address internal immutable ACTION_ADDR = address(this);
 
     /// @param vaultId Id of the vault
@@ -128,6 +129,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         uint256 collateral = getAllColl(IManager(MCD_MANAGER_ADDR), _repayParams.joinAddr, _repayParams.vaultId);
         uint256 swapAmountWithFLFee = _repayParams.exchangeData.srcAmount + _flFeeAmount;
         uint256 repayAmount;
+        // cap swap amount
         if (swapAmountWithFLFee > collateral) {
             repayAmount = collateral;
             _repayParams.exchangeData.srcAmount = collateral - _flFeeAmount;
@@ -154,6 +156,11 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
             if (paybackAmount > debt) {
                 DAI_ADDR.withdrawTokens(IDSProxy(_proxy).owner(), paybackAmount - debt);
                 paybackAmount = debt;
+            } else {
+                // check if repay raises CR
+                uint256 rawRatioBefore = rdiv(collateral, debt);
+                uint256 rawRatioAfter = rdiv(collateral - repayAmount, debt - paybackAmount);
+                if (rawRatioAfter < rawRatioBefore) revert RatioNotLowerThanBefore(rawRatioBefore, rawRatioAfter);
             }
 
             DAI_ADDR.approveToken(DAI_JOIN_ADDR, paybackAmount);

@@ -21,6 +21,8 @@ contract McdRepayComposite is
 ActionBase, DFSSell, GasFeeTaker, McdHelper {
     using TokenUtils for address;
 
+    error RatioNotLowerThanBefore(uint256, uint256);
+
     /// @param vaultId Id of the vault
     /// @param joinAddr Collateral join address
     /// @param gasUsed Gas amount to charge in strategies
@@ -130,6 +132,11 @@ ActionBase, DFSSell, GasFeeTaker, McdHelper {
             if (paybackAmount > debt) {
                 DAI_ADDR.withdrawTokens(IDSProxy(address(this)).owner(), paybackAmount - debt);
                 paybackAmount = debt;
+            } else {
+                // check if repay raises CR
+                uint256 rawRatioBefore = rdiv(collateral, debt);
+                uint256 rawRatioAfter = rdiv(collateral - repayAmount, debt - paybackAmount);
+                if (rawRatioAfter < rawRatioBefore) revert RatioNotLowerThanBefore(rawRatioBefore, rawRatioAfter);
             }
 
             DAI_ADDR.approveToken(DAI_JOIN_ADDR, paybackAmount);

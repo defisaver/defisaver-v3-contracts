@@ -18,6 +18,8 @@ contract McdBoostComposite is
 ActionBase, DFSSell, GasFeeTaker, McdHelper {
     using TokenUtils for address;
 
+    error RatioNotHigherThanBefore(uint256, uint256);
+
     /// @param vaultId Id of the vault
     /// @param joinAddr Collateral join address
     /// @param gasUsed Gas amount to charge in strategies
@@ -124,6 +126,19 @@ ActionBase, DFSSell, GasFeeTaker, McdHelper {
             exchangedAmount,
             0
         ));
+
+        // check if boost lowers CR
+        {
+            (uint256 collateral, uint256 debt) = getCdpInfo(
+                IManager(MCD_MANAGER_ADDR),
+                _boostParams.vaultId,
+                ilk
+            );
+
+            uint256 rawRatioBefore = rdiv(collateral, debt);
+            uint256 rawRatioAfter = rdiv(collateral + supplyAmount, debt + boostAmount);
+            if (rawRatioAfter > rawRatioBefore) revert RatioNotHigherThanBefore(rawRatioBefore, rawRatioAfter);
+        }
 
         // Supply collateral
         {

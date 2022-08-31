@@ -23,6 +23,7 @@ ActionBase, DFSSell, GasFeeTaker, McdHelper, IFlashLoanRecipient,
 ReentrancyGuard, MainnetBalancerV2Addresses {
     using TokenUtils for address;
 
+    error RatioNotHigherThanBefore(uint256, uint256);
     address internal immutable ACTION_ADDR = address(this);
 
     /// @param vaultId Id of the vault
@@ -126,6 +127,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
 
     /// @notice Executes boost logic
     function _boost(address _proxy, uint256 _flFeeAmount, BoostParams memory _boostParams) internal {
+        (address urn, bytes32 ilk) = getUrnAndIlk(MCD_MANAGER_ADDR, _boostParams.vaultId);
         address collateralAsset = _boostParams.exchangeData.destAddr;
         uint256 boostAmount = _boostParams.exchangeData.srcAmount + _flFeeAmount;
 
@@ -140,9 +142,21 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
             0
         ));
 
+        // check if boost lowers CR
+        {
+            (uint256 collateral, uint256 debt) = getCdpInfo(
+                IManager(MCD_MANAGER_ADDR),
+                _boostParams.vaultId,
+                ilk
+            );
+
+            uint256 rawRatioBefore = rdiv(collateral, debt);
+            uint256 rawRatioAfter = rdiv(collateral + supplyAmount, debt + boostAmount);
+            if (rawRatioAfter > rawRatioBefore) revert RatioNotHigherThanBefore(rawRatioBefore, rawRatioAfter);
+        }
+
         // Draw debt and supply collateral
         {
-            (address urn, bytes32 ilk) = getUrnAndIlk(MCD_MANAGER_ADDR, _boostParams.vaultId);
             uint256 rate = IJug(JUG_ADDRESS).drip(ilk);
             uint256 daiVatBalance = vat.dai(urn);
             int256 vatSupplyAmount = toPositiveInt(convertTo18(_boostParams.joinAddr, supplyAmount));
