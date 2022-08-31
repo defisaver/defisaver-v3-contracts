@@ -23,7 +23,7 @@ const cometAbi = [
 ];
 const cometAddress = '0xc3d688B66703497DAA19211EEdff47f25384cdc3';
 
-describe('CompV3-Payback', function () {
+describe('CompV3-Transfer', function () {
     this.timeout(80000);
 
     let senderAcc;
@@ -50,7 +50,7 @@ describe('CompV3-Payback', function () {
         proxy2 = await getProxy(receiverAcc.address);
     });
 
-    /*it('... Transfer WETH', async () => {
+    it('... Transfer WETH', async () => {
         const cometExt = new ethers.Contract(cometAddress, cometAbi, senderAcc);
         const assetInfo = getAssetInfo('WETH');
 
@@ -71,7 +71,7 @@ describe('CompV3-Payback', function () {
 
         expect(receiverBalanceAfter).to.be.gt(receiverBalanceBefore);
         expect(senderBalanceAfter).to.be.lt(senderBalanceBefore);
-    });*/
+    });
 
     it('... Transfer WBTC', async () => {
         const cometExt = new ethers.Contract(cometAddress, cometAbi, senderAcc);
