@@ -1,6 +1,5 @@
 const { expect } = require('chai');
 const hre = require('hardhat');
-const ethers = require('ethers');
 const { getAssetInfo } = require('@defisaver/tokens');
 const dfs = require('@defisaver/sdk');
 const { supplyCompV3, borrowCompV3, executeAction } = require('../../actions');
@@ -17,12 +16,6 @@ const {
     getAddrFromRegistry,
 } = require('../../utils');
 
-const cometABI = [
-    'function collateralBalanceOf(address account, address asset) external view returns (uint128)',
-    'function borrowBalanceOf(address account) public view returns (uint256)',
-];
-const cometAddress = '0xc3d688B66703497DAA19211EEdff47f25384cdc3';
-
 describe('CompoundV3 Repay recipe test', function () {
     this.timeout(80000);
 
@@ -38,6 +31,7 @@ describe('CompoundV3 Repay recipe test', function () {
         await redeploy('DFSSell');
         await redeploy('CompV3Payback');
         await redeploy('CompV3Borrow');
+        await redeploy('CompV3View');
 
         aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
 
@@ -52,7 +46,8 @@ describe('CompoundV3 Repay recipe test', function () {
         let repayAmount = fetchAmountinUSDPrice(tokenData.symbol, '100');
 
         it(`... should call a repay ${repayAmount} ${ilk}`, async () => {
-            const comet = new ethers.Contract(cometAddress, cometABI, senderAcc);
+            const compV3ViewAddr = await getAddrFromRegistry('CompV3View');
+            const compV3View = await hre.ethers.getContractAt('CompV3View', compV3ViewAddr);
             const assetInfo = getAssetInfo('USDC');
 
             const colAmount = hre.ethers.utils.parseUnits(
@@ -77,9 +72,8 @@ describe('CompoundV3 Repay recipe test', function () {
             repayAmount = hre.ethers.utils.parseUnits(repayAmount, tokenData.decimals);
 
             // Get ratio before
-            const colBefore = await comet.collateralBalanceOf(proxy.address, tokenData.address);
-            const debtBefore = await comet.borrowBalanceOf(proxy.address);
-            const ratioBefore = colBefore / debtBefore;
+            const infoBefore = await compV3View.getLoanData(proxy.address);
+            const ratioBefore = infoBefore.collValue / infoBefore.borrowAmount;
 
             const from = proxy.address;
             const to = proxy.address;
@@ -123,17 +117,18 @@ describe('CompoundV3 Repay recipe test', function () {
             await executeAction('RecipeExecutor', functionData[1], proxy);
 
             // Get ratio after
-            const colAfter = await comet.collateralBalanceOf(proxy.address, tokenData.address);
-            const debtAfter = await comet.borrowBalanceOf(proxy.address);
-            const ratioAfter = colAfter / debtAfter;
+            const infoAfter = await compV3View.getLoanData(proxy.address);
+            const ratioAfter = infoAfter.collValue / infoAfter.borrowAmount;
 
-            expect(colBefore).to.be.gt(colAfter);
-            expect(debtBefore).to.be.gt(debtAfter);
+            expect(infoBefore.collValue).to.be.gt(infoAfter.collValue);
+            expect(infoBefore.borrowAmount).to.be.gt(infoAfter.borrowAmount);
             expect(ratioAfter).to.be.gt(ratioBefore);
         });
 
         it(`... should call a FL repay ${repayAmount} ${tokenData.symbol}`, async () => {
-            const comet = new ethers.Contract(cometAddress, cometABI, senderAcc);
+            const compV3ViewAddr = await getAddrFromRegistry('CompV3View');
+            const compV3View = await hre.ethers.getContractAt('CompV3View', compV3ViewAddr);
+
             const assetInfo = getAssetInfo('USDC');
             const colAmount = hre.ethers.utils.parseUnits(
                 fetchAmountinUSDPrice(tokenData.symbol, '5000'),
@@ -157,9 +152,8 @@ describe('CompoundV3 Repay recipe test', function () {
             const flAmount = hre.ethers.utils.parseUnits('0.2', tokenData.decimals);
 
             // Get ratio before
-            const colBefore = await comet.collateralBalanceOf(proxy.address, tokenData.address);
-            const debtBefore = await comet.borrowBalanceOf(proxy.address);
-            const ratioBefore = colBefore / debtBefore;
+            const infoBefore = await compV3View.getLoanData(proxy.address);
+            const ratioBefore = infoBefore.collValue / infoBefore.borrowAmount;
 
             const collToken = tokenData.address;
             const fromToken = getAssetInfo('USDC').address;
@@ -200,12 +194,11 @@ describe('CompoundV3 Repay recipe test', function () {
             await executeAction('RecipeExecutor', functionData[1], proxy);
 
             // Get ratio after
-            const colAfter = await comet.collateralBalanceOf(proxy.address, tokenData.address);
-            const debtAfter = await comet.borrowBalanceOf(proxy.address);
-            const ratioAfter = colAfter / debtAfter;
+            const infoAfter = await compV3View.getLoanData(proxy.address);
+            const ratioAfter = infoAfter.collValue / infoAfter.borrowAmount;
 
-            expect(colBefore).to.be.gt(colAfter);
-            expect(debtBefore).to.be.gt(debtAfter);
+            expect(infoBefore.collValue).to.be.gt(infoAfter.collValue);
+            expect(infoBefore.borrowAmount).to.be.gt(infoAfter.borrowAmount);
             expect(ratioAfter).to.be.gt(ratioBefore);
         });
     });
