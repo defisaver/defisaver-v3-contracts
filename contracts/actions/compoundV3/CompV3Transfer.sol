@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import "../../interfaces/compoundV3/IComet.sol";
-import "../../interfaces/compoundV3/ICometExt.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompV3Helper.sol";
 
-/// @title Payback a token a user borrowed from Compound
+/// @title Transfer amount of specified colateral to another wallet
 contract CompV3Transfer is ActionBase, CompV3Helper {
     using TokenUtils for address;
 
@@ -64,15 +62,18 @@ contract CompV3Transfer is ActionBase, CompV3Helper {
         address _asset,
         uint256 _amount
     ) internal returns (uint256, bytes memory) {
+        if( _to == address(0)) { 
+            revert CompV3TransferError();
+        }
+
         address tokenAddr = _asset;
 
-        if (_from != address(0)) {  //sends assets from one EOA to another
-            IComet(COMET_ADDR).transferAssetFrom(_from, _to, tokenAddr, _amount);
+        if (_from == address(0)) {
+            _from = address(this);
         }
-        else {                      //sends assets from this address to dst
-            IComet(COMET_ADDR).transferAsset(_to, tokenAddr, _amount);
-        }
-        
+
+        IComet(COMET_ADDR).transferAssetFrom(_from, _to, tokenAddr, _amount);
+
         bytes memory logData = abi.encode(_from, _to, _asset, _amount);
         return (_amount, logData);
     }

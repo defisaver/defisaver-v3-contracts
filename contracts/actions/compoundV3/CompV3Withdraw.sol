@@ -4,7 +4,6 @@ pragma solidity =0.8.10;
 
 import "../ActionBase.sol";
 import "./helpers/CompV3Helper.sol";
-import "../../interfaces/compoundV3/IComet.sol";
 import "../../interfaces/IERC20.sol";
 import "./helpers/MainnetCompV3Addresses.sol";
 
@@ -53,7 +52,7 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Withdraws a token amount from compound
-    /// @dev Send type(uint).max to withdraw whole balance
+    /// @dev Send type(uint).max withdraws the whole balance from Comet
     /// @param _to The recipient address
     /// @param _asset The asset to withdraw
     /// @param _amount The quantity to withdraw
@@ -62,11 +61,6 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
         address _asset,
         uint256 _amount
     ) internal returns (uint256, bytes memory) {
-
-        // if _amount type(uint).max that means take out proxy whole balance
-        if (_amount == type(uint256).max) {
-            _amount = IERC20(_asset).balanceOf(address(this));
-        }
 
         IComet(COMET_ADDR).withdrawTo(_to, _asset, _amount);
 
