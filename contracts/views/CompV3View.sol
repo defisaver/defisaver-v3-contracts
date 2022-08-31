@@ -15,14 +15,15 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
         address[] collAddr;
         uint[] collAmounts;
         uint depositAmount;
+        uint depositValue;
         uint borrowAmount;
+        uint borrowValue;
         uint collValue;
         uint maxDebt;
     }
     
     uint64 public constant FACTOR_SCALE = 1e18;
     uint64 public constant BASE_SCALE = 1e6;
-    address public constant USDC_PRICE_FEED = 0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6;
     uint public constant PRICE_FEED_SCALE = 1e8;
 
     IComet public constant comet = IComet(COMET_ADDR);
@@ -61,12 +62,12 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
             collAddr: new address[](assets.length),
             collAmounts: new uint[](assets.length),
             depositAmount: 0,
+            depositValue: 0,
             borrowAmount: 0,
+            borrowValue: 0,
             collValue: 0,
             maxDebt: 0
         });
-
-        uint collPos = 0;
 
         for (uint i = 0; i < assets.length; i++) {
             address asset = assets[i].asset;
@@ -76,17 +77,18 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
             data.collAddr[i] = asset;
             data.collAmounts[i] = tokenBalance;
             if (tokenBalance != 0) {
-
-                data.collAddr[collPos] = asset;
+                data.collAddr[i] = asset;
                 uint value = tokenBalance * comet.getPrice(priceFeed) / PRICE_FEED_SCALE / assets[i].scale;
-                data.collAmounts[collPos] = tokenBalance;
+                data.collAmounts[i] = tokenBalance;
                 data.collValue += value;
                 data.maxDebt += value* assets[i].liquidationFactor/ FACTOR_SCALE;
-                collPos++;
             }
         }
-        data.borrowAmount = comet.borrowBalanceOf(_user) * comet.getPrice(USDC_PRICE_FEED) / PRICE_FEED_SCALE / BASE_SCALE;
-        data.depositAmount = comet.balanceOf(_user) * comet.getPrice(USDC_PRICE_FEED) / PRICE_FEED_SCALE / BASE_SCALE;
+        address usdcPriceFeed = comet.baseTokenPriceFeed();
+        data.borrowAmount = comet.borrowBalanceOf(_user);
+        data.borrowValue = comet.borrowBalanceOf(_user) * comet.getPrice(usdcPriceFeed) / PRICE_FEED_SCALE / BASE_SCALE;
+        data.depositAmount = comet.balanceOf(_user);
+        data.depositValue = comet.balanceOf(_user) * comet.getPrice(usdcPriceFeed) / PRICE_FEED_SCALE / BASE_SCALE;
 
         return data;
     }
