@@ -3,21 +3,16 @@
 pragma solidity =0.8.10;
 
 import "../../interfaces/compoundV3/IComet.sol";
-import "../../interfaces/IWETH.sol";
-import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompV3Helper.sol";
 
 /// @title Allow or disallow manager
 contract CompV3Allow is ActionBase, CompV3Helper {
 
-     using TokenUtils for address;
-
     struct Params {
         address manager;
         bool isAllowed;
     }
-    error CompV3AllowError();
 
     /// @inheritdoc ActionBase
     function executeAction(
