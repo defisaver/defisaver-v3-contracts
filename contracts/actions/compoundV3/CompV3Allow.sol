@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../../interfaces/compoundV3/IComet.sol";
 import "../ActionBase.sol";
 import "./helpers/CompV3Helper.sol";
 

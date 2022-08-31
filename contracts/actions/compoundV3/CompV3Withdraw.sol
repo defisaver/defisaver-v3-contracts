@@ -4,7 +4,6 @@ pragma solidity =0.8.10;
 
 import "../ActionBase.sol";
 import "./helpers/CompV3Helper.sol";
-import "../../interfaces/compoundV3/IComet.sol";
 import "../../interfaces/IERC20.sol";
 import "./helpers/MainnetCompV3Addresses.sol";
 
