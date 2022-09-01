@@ -242,6 +242,17 @@
         "history": []
     },
     {
+        "name": "MultiDFSRegistrySetter",
+        "address": "0x683a0fd868857cc9F0f1dc9c7fDbE1be04506583",
+        "id": "0x137fe529",
+        "path": "contracts/utils/MultiDFSRegistrySetter.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "StrategyTriggerView",
         "address": "0x7e048c89D7e6adA900AE53daBA742e6CCCFC54f6",
         "id": "0x5e0ef18c",
@@ -1508,5 +1519,65 @@
         "changeTime": "0",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "CompoundMonitorProxy",
+        "address": "0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a",
+        "path": "old_contracts"
+    },
+    {
+        "name": "CompoundMonitor",
+        "address": "0xA7f469590eefa4d30b4cC71F9016BeE84f86057f",
+        "path": "old_contracts"
+    },
+    {
+        "name": "CompoundSubscriptions",
+        "address": "0x52015EFFD577E08f498a0CCc11905925D58D6207",
+        "path": "old_contracts"
+    },
+    {
+        "name": "CompoundFlashLoanTaker",
+        "address": "0x6E1ab1353257360A755d972ef9683a9B33a58626",
+        "path": "old_contracts"
+    },
+    {
+        "name": "AaveMonitorProxyV2",
+        "address": "0x380982902872836ceC629171DaeAF42EcC02226e",
+        "path": "old_contracts"
+    },
+    {
+        "name": "AaveMonitorV2",
+        "address": "0xBaC78d552A79aa10863c4ec1b0FF9efFA41f6Fac",
+        "path": "old_contracts"
+    },
+    {
+        "name": "AaveSubscriptionsV2",
+        "address": "0x6B25043BF08182d8e86056C6548847aF607cd7CD",
+        "path": "old_contracts"
+    },
+    {
+        "name": "AaveSaverTakerOV2",
+        "address": "0x8172D625737BF1B13004420d520b627E738ccA0C",
+        "path": "old_contracts"
+    },
+    {
+        "name": "MCDMonitorProxyV2",
+        "address": "0x1816A86C4DA59395522a42b871bf11A4E96A1C7a",
+        "path": "old_contracts"
+    },
+    {
+        "name": "MCDMonitorV2",
+        "address": "0x5d5d63822647b9068Ff95fd263ff9a00b6cDd7C0",
+        "path": "old_contracts"
+    },
+    {
+        "name": "SubscriptionsV2",
+        "address": "0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a",
+        "path": "old_contracts"
+    },
+    {
+        "name": "MCDSaverTaker",
+        "address": "0x99DDE0B130833Ce0a6D9EFcFE330327aCf38006E",
+        "path": "old_contracts"
     }
 ]
