@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-param-reassign */
 /* eslint-disable import/no-extraneous-dependencies */
@@ -32,7 +33,7 @@ const generateIds = () => {
         const fileName = filePath.split('/').pop().split('.')[0];
         const id = getNameId(fileName);
 
-        idsMap[id] = fileName;
+        idsMap[id] = { fileName, filePath };
     });
 
     return idsMap;
@@ -70,7 +71,9 @@ const getEntryHistory = async (idOrName, options) => {
 
     const addNewContractEvent = events.find((e) => parseAddNewContractEvent(e).id === id);
 
-    console.log(parseAddNewContractEvent(addNewContractEvent));
+    const historyArr = [];
+
+    historyArr.push(parseAddNewContractEvent(addNewContractEvent));
 
     filter = registry.filters.ApproveContractChange();
     events = await registry.queryFilter(filter);
@@ -78,8 +81,10 @@ const getEntryHistory = async (idOrName, options) => {
     const updateEvents = events.filter((e) => e.args[1] === id);
 
     updateEvents.forEach((e) => {
-        console.log(parseApproveContractChangeEvent(e));
+        historyArr.push(parseApproveContractChangeEvent(e));
     });
+
+    return historyArr;
 };
 
 const getFullEntryData = async (idOrName, options) => {
@@ -103,10 +108,11 @@ const fetchAllContractsInRegistry = async (options) => {
     const { provider, registry } = await setProviderAndRegistry(options);
 
     // fetch newContract events
-    const filter = registry.filters.AddNewContract();
-    const events = await registry.queryFilter(filter);
+    let filter = registry.filters.AddNewContract();
+    let events = await registry.queryFilter(filter);
 
     const idsMap = generateIds();
+
     let registeredIds = [];
 
     events.forEach(async (e) => {
@@ -121,11 +127,34 @@ const fetchAllContractsInRegistry = async (options) => {
 
     const entries = await Promise.all(entryPromises);
 
-    entries.forEach((entry) => {
-        entry.name = idsMap[entry.id];
+    const formattedArr = [];
 
-        console.log(entry);
-    });
+    filter = registry.filters.ApproveContractChange();
+    events = await registry.queryFilter(filter);
+
+    for (let i = 0; i < entries.length; ++i) {
+        const entry = entries[i];
+        entry.name = idsMap[entry.id]?.fileName;
+
+        let updateEvents = events.filter((e) => e.args[1] === entry.id);
+        updateEvents = updateEvents.map((e) => e.args[2]);
+
+        const formattedEntry = {
+            name: idsMap[entry.id]?.fileName,
+            address: entry.addr,
+            id: entry.id,
+            path: idsMap[entry.id]?.filePath,
+            version: `1.0.${updateEvents.length}`,
+            inRegistry: true,
+            changeTime: entry.changeTime,
+            registryIds: [],
+            history: updateEvents,
+        };
+
+        formattedArr.push(formattedEntry);
+    }
+
+    console.log(JSON.stringify(formattedArr));
 };
 
 (async () => {
@@ -152,7 +181,9 @@ const fetchAllContractsInRegistry = async (options) => {
         .option('-n, --network <network>', 'Specify network we are calling (defaults to L1)', [])
         .description('Returns history of changes for the entry')
         .action(async (nameOrId, options) => {
-            await getEntryHistory(nameOrId, options);
+            const historyArr = await getEntryHistory(nameOrId, options);
+
+            console.log(historyArr);
             process.exit(0);
         });
 
@@ -162,7 +193,7 @@ const fetchAllContractsInRegistry = async (options) => {
         .action(async (id) => {
             const idsMap = generateIds();
 
-            console.log(idsMap[id]);
+            console.log(idsMap[id].fileName);
             process.exit(0);
         });
 
