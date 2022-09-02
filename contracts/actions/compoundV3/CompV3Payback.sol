@@ -68,13 +68,14 @@ contract CompV3Payback is ActionBase, CompV3Helper {
         uint256 maxDebt = IComet(COMET_ADDR).borrowBalanceOf(_onBehalf);
         _amount = _amount > maxDebt ? maxDebt : _amount;
 
+        //get tokens from owner address if neccessary
         tokenAddr.pullTokensIfNeeded(_from, _amount);
 
-        //authorization
+        //authorize COMET to pull tokens
         tokenAddr.approveToken(COMET_ADDR, _amount);
 
-        //function
-        IComet(COMET_ADDR).supply(tokenAddr, _amount);
+        //repay debt
+        IComet(COMET_ADDR).supplyTo(_onBehalf, tokenAddr, _amount);
         
         bytes memory logData = abi.encode(_amount, _from, _onBehalf);
         return (_amount, logData);
