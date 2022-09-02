@@ -13,7 +13,7 @@ const { getNameId } = require('../test/utils');
 
 const registryAbi = require('../artifacts/contracts/core/DFSRegistry.sol/DFSRegistry.json').abi;
 
-const setProviderAndRegistry = async (options) => {
+const setRegistry = async (options) => {
     const network = options.network.length === 0 ? 'mainnet' : options.network;
 
     const nodeName = network !== 'mainnet' ? `${network.toUpperCase()}_NODE` : 'ETHEREUM_NODE';
@@ -22,18 +22,24 @@ const setProviderAndRegistry = async (options) => {
 
     const registry = new ethers.Contract(addrs[network].REGISTRY_ADDR, registryAbi, provider);
 
-    return { provider, registry };
+    return registry;
 };
 
 const generateIds = () => {
     const idsMap = {};
     const files = getAllFiles('./contracts');
 
+    // add extra non-contract name ids
+    files.push('/StrategyExecutorID.sol');
+    files.push('/FLActionL2.sol');
+
     files.forEach((filePath) => {
         const fileName = filePath.split('/').pop().split('.')[0];
         const id = getNameId(fileName);
 
         idsMap[id] = { fileName, filePath };
+        // add id if it's contract name + New at the end
+        idsMap[`${getNameId(fileName)}New`] = { fileName: `${fileName}New`, filePath };
     });
 
     return idsMap;
@@ -62,7 +68,7 @@ const getEntry = async (registry, id) => {
 };
 
 const getEntryHistory = async (idOrName, options) => {
-    const { provider, registry } = await setProviderAndRegistry(options);
+    const registry = await setRegistry(options);
 
     const id = idOrName.startsWith('0x') ? idOrName : getNameId(idOrName);
 
@@ -88,7 +94,7 @@ const getEntryHistory = async (idOrName, options) => {
 };
 
 const getFullEntryData = async (idOrName, options) => {
-    const { provider, registry } = await setProviderAndRegistry(options);
+    const registry = await setRegistry(options);
 
     const id = idOrName.startsWith('0x') ? idOrName : getNameId(idOrName);
 
@@ -105,7 +111,7 @@ const getFullEntryData = async (idOrName, options) => {
 };
 
 const fetchAllContractsInRegistry = async (options) => {
-    const { provider, registry } = await setProviderAndRegistry(options);
+    const registry = await setRegistry(options);
 
     // fetch newContract events
     let filter = registry.filters.AddNewContract();
@@ -157,6 +163,64 @@ const fetchAllContractsInRegistry = async (options) => {
     console.log(JSON.stringify(formattedArr));
 };
 
+const addEntryCall = async (idOrName, contractAddr, waitTime, options) => {
+    const registry = await setRegistry(options);
+    const network = options.network.length === 0 ? 'mainnet' : options.network;
+
+    // validate inputs
+    const id = idOrName.startsWith('0x') ? idOrName : getNameId(idOrName);
+
+    console.log('\nId is: ', id);
+    console.log('Contract addr: ', contractAddr);
+    if (waitTime > 0) {
+        console.log('Wait time is: ', waitTime / 8600, 'Days');
+    }
+    console.log('\n');
+
+    const txData = registry.interface.encodeFunctionData('addNewContract', [id, contractAddr, waitTime]);
+
+    return {
+        addr: addrs[network].REGISTRY_ADDR,
+        data: txData,
+    };
+};
+
+const startContractChangeCall = async (idOrName, contractAddr, options) => {
+    const registry = await setRegistry(options);
+    const network = options.network.length === 0 ? 'mainnet' : options.network;
+
+    // validate inputs
+    const id = idOrName.startsWith('0x') ? idOrName : getNameId(idOrName);
+
+    console.log('\nId is: ', id);
+    console.log('New contract addr: ', contractAddr);
+    console.log('\n');
+
+    const txData = registry.interface.encodeFunctionData('startContractChange', [id, contractAddr]);
+
+    return {
+        addr: addrs[network].REGISTRY_ADDR,
+        data: txData,
+    };
+};
+
+const approveContractChangeCall = async (idOrName, options) => {
+    const registry = await setRegistry(options);
+    const network = options.network.length === 0 ? 'mainnet' : options.network;
+
+    // validate inputs
+    const id = idOrName.startsWith('0x') ? idOrName : getNameId(idOrName);
+
+    console.log('\nId is: ', id);
+
+    const txData = registry.interface.encodeFunctionData('approveContractChange', [id]);
+
+    return {
+        addr: addrs[network].REGISTRY_ADDR,
+        data: txData,
+    };
+};
+
 (async () => {
     program
         .command('dump')
@@ -168,20 +232,20 @@ const fetchAllContractsInRegistry = async (options) => {
         });
 
     program
-        .command('get-entry <nameOrId>')
+        .command('get-entry <idOrName>')
         .option('-n, --network <network>', 'Specify network we are calling (defaults to L1)', [])
         .description('Return current state for the entry')
-        .action(async (nameOrId, options) => {
-            console.log((await getFullEntryData(nameOrId, options)));
+        .action(async (idOrName, options) => {
+            console.log((await getFullEntryData(idOrName, options)));
             process.exit(0);
         });
 
     program
-        .command('get-entry-history <nameOrId>')
+        .command('get-entry-history <idOrName>')
         .option('-n, --network <network>', 'Specify network we are calling (defaults to L1)', [])
         .description('Returns history of changes for the entry')
-        .action(async (nameOrId, options) => {
-            const historyArr = await getEntryHistory(nameOrId, options);
+        .action(async (idOrName, options) => {
+            const historyArr = await getEntryHistory(idOrName, options);
 
             console.log(historyArr);
             process.exit(0);
@@ -193,7 +257,7 @@ const fetchAllContractsInRegistry = async (options) => {
         .action(async (id) => {
             const idsMap = generateIds();
 
-            console.log(idsMap[id].fileName);
+            console.log(idsMap[id]?.fileName);
             process.exit(0);
         });
 
@@ -202,6 +266,39 @@ const fetchAllContractsInRegistry = async (options) => {
         .description('Returns a contract id based on name')
         .action(async (name) => {
             console.log(getNameId(name));
+            process.exit(0);
+        });
+
+    program
+        .command('add-entry <idOrName> <contractAddr> <waitTime>')
+        .option('-n, --network <network>', 'Specify network we are calling (defaults to L1)', [])
+        .description('Formats a call to add a new entry to registry')
+        .action(async (idOrName, contractAddr, waitTime, options) => {
+            const txData = await addEntryCall(idOrName, contractAddr, waitTime, options);
+
+            console.log(txData);
+            process.exit(0);
+        });
+
+    program
+        .command('start-contract-change <idOrName> <contractAddr>')
+        .option('-n, --network <network>', 'Specify network we are calling (defaults to L1)', [])
+        .description('Formats a call to start contract change to registry')
+        .action(async (idOrName, contractAddr, options) => {
+            const txData = await startContractChangeCall(idOrName, contractAddr, options);
+
+            console.log(txData);
+            process.exit(0);
+        });
+
+    program
+        .command('approve-contract-change <idOrName>')
+        .option('-n, --network <network>', 'Specify network we are calling (defaults to L1)', [])
+        .description('Formats a call to approve contract change to registry')
+        .action(async (idOrName, options) => {
+            const txData = await approveContractChangeCall(idOrName, options);
+
+            console.log(txData);
             process.exit(0);
         });
 
