@@ -420,7 +420,7 @@ const supplyCompV3 = async (proxy, tokenAddr, amount, from) => {
     const compSupplyAction = new dfs.actions.compoundV3.CompoundV3SupplyAction(
         tokenAddr,
         amount,
-        from
+        from,
     );
 
     const functionData = compSupplyAction.encodeForDsProxyCall()[1];

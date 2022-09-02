@@ -61,13 +61,10 @@ contract CompV3Supply is ActionBase, CompV3Helper {
         uint256 _amount,
         address _from
     ) internal returns (uint256, bytes memory) {
-        // if amount type(uint256).max, pull current _from balance
-        if (_amount == type(uint256).max) {
-            _amount = _tokenAddr.getBalance(_from);
-        }
+        
         // pull the tokens _from to the proxy
-        _tokenAddr.pullTokensIfNeeded(_from, _amount);
-            
+        _amount = _tokenAddr.pullTokensIfNeeded(_from, _amount);
+
         _tokenAddr.approveToken(COMET_ADDR, _amount);
 
         if(_tokenAddr == IComet(COMET_ADDR).baseToken())
