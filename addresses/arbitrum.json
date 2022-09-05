@@ -1,0 +1,575 @@
+[
+    {
+        "name": "DFSRegistry",
+        "address": "0xBF1CaC12DB60819Bfa71A328282ecbc1D40443aA",
+        "id": "0x34486add",
+        "path": "contracts/core/DFSRegistry.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SubProxy",
+        "address": "0x275A8f98dBA07Ad6380D3ea3F36B665DD6E02F25",
+        "id": "0x15c87229",
+        "path": "contracts/core/strategy/SubProxy.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveSubProxy",
+        "address": "0x7524C98ECF884e4EC62347c34f5BaefD7D067C84",
+        "id": "0xd11b2581",
+        "path": "contracts/core/l2/AaveSubProxy.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "ZrxAllowlist",
+        "address": "0x5eD8e74b1caE57B0c68B3278B88589991FBa0750",
+        "id": "0x0c33e794",
+        "path": "contracts/utils/ZrxAllowlist.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "Discount",
+        "address": "0x9b8F21A50511B6Ffb304190072908A3756A9dc87",
+        "id": "0x88f9bc1a",
+        "path": "contracts/utils/Discount.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FeeRecipient",
+        "address": "0xe000e3c9428D539566259cCd89ed5fb85e655A01",
+        "id": "0x8743f91c",
+        "path": "contracts/utils/FeeRecipient.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "DefisaverLogger",
+        "address": "0xE6f9A5C850dbcD12bc64f40d692F537250aDEC38",
+        "id": "0x35934e1a",
+        "path": "contracts/utils/DefisaverLogger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "UniV3WrapperV3",
+        "address": "0x48eF488054b5c570cF3A2AC0A0697B0b0D34c431",
+        "id": "0x7c1f8079",
+        "path": "contracts/exchangeV3/wrappersV3/UniV3WrapperV3.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveWrapperV3",
+        "address": "0xB82b43c4c0ABF41Dfc342571C330964fF576a9b3",
+        "id": "0xb856c9af",
+        "path": "contracts/exchangeV3/wrappersV3/CurveWrapperV3.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "DFSPrices",
+        "address": "0x8f9ee420D3fA095E8Ed3f227053164dAC41e790a",
+        "id": "0x066e594a",
+        "path": "contracts/exchangeV3/DFSPrices.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SaverExchangeRegistry",
+        "address": "0xaB1E4b72BC2f3890F052df111EE626c1c7229F26",
+        "id": "0x848bdf22",
+        "path": "contracts/exchangeV3/SaverExchangeRegistry.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TokenGroupRegistry",
+        "address": "0xb03fe103f54841821C080C124312059c9A3a7B5c",
+        "id": "0x4f594ea4",
+        "path": "contracts/exchangeV3/TokenGroupRegistry.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "StrategyTriggerView",
+        "address": "0xae3F50BA1804301b1aA39e75CD94142eF77d8fF8",
+        "id": "0x5e0ef18c",
+        "path": "contracts/views/StrategyTriggerView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3View",
+        "address": "0x48d32ee631ebce01f2cd8f99b94911d5a059e9da",
+        "id": "0x026c569e",
+        "path": "contracts/views/AaveV3View.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "ERC20View",
+        "address": "0xd2CFBb9846dc053e45e597f1F1F18F2f08781253",
+        "id": "0xde8e6da5",
+        "path": "contracts/views/ERC20View.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TransientStorage",
+        "address": "0x48cdE7c1f67fF11A62F6b4272166AB60EFB48C1F",
+        "id": "0x69885459",
+        "path": "contracts/utils/TransientStorage.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AdminVault",
+        "address": "0xd47D8D97cAd12A866900eEc6Cde1962529F25351",
+        "id": "0xeb51cb26",
+        "path": "contracts/auth/AdminVault.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+      },
+    {
+      "name": "DFSSell",
+      "address": "0x49E1574Ba6b8134c29B1EbC010784A01D91b794F",
+      "id": "0x7f2a0f35",
+      "path": "contracts/actions/exchange/DFSSell.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "WrapEth",
+      "address": "0x35136b25bFA7CCC8f5b94E3181a16B61c06980F0",
+      "id": "0x11135183",
+      "path": "contracts/actions/utils/WrapEth.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "UnwrapEth",
+      "address": "0x2B69d494536098700910D167902D1d397dcA2B61",
+      "id": "0x929145d0",
+      "path": "contracts/actions/utils/UnwrapEth.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "SendToken",
+      "address": "0xb022BaFfcEdc0ceA15aF6B2B744795A12D21F2a9",
+      "id": "0x02abc227",
+      "path": "contracts/actions/utils/SendToken.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "AaveV3Supply",
+      "address": "0x1fFd0E73EB34013951a3da99e10ba5BC4e786Dd3",
+      "id": "0xfc33bf00",
+      "path": "contracts/actions/aaveV3/AaveV3Supply.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": [
+        "0xd4AE9d95faca89B235B8A71F410501104fF16E56"
+      ]
+    },
+    {
+      "name": "AaveV3ATokenPayback",
+      "address": "0x261906e5E0D0D38D9cBb5c10dB9c4031aabdf8C1",
+      "id": "0x62c722e3",
+      "path": "contracts/actions/aaveV3/AaveV3ATokenPayback.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "AaveV3Borrow",
+      "address": "0x5786809DA660dB613994460F096F19fcd19eD4c9",
+      "id": "0x9e9290b1",
+      "path": "contracts/actions/aaveV3/AaveV3Borrow.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": [
+        "0xe729954e40546557Fa547ecd163644457Da28A04"
+      ]
+    },
+    {
+      "name": "AaveV3CollateralSwitch",
+      "address": "0x7AcdD66C13f87b1cBcE7B106a8C34E426475BADd",
+      "id": "0xbffa4e35",
+      "path": "contracts/actions/aaveV3/AaveV3CollateralSwitch.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "AaveV3Payback",
+      "address": "0xd88D5356e08dAd84E1576F89f4BF43C79a8BF0b2",
+      "id": "0x17683e81",
+      "path": "contracts/actions/aaveV3/AaveV3Payback.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": [
+        "0x05dD6025d4075bBCA3260C5eDBeFcF7574d4AF70"
+      ]
+    },
+    {
+      "name": "AaveV3SetEMode",
+      "address": "0x99D5068d9520316e8D3B5136c0B6EA33C5E0c27e",
+      "id": "0x3d35d254",
+      "path": "contracts/actions/aaveV3/AaveV3SetEMode.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "AaveV3SwapBorrowRateMode",
+      "address": "0x738042389A8d6B0F6D6ab009c42dfF84ebB737C0",
+      "id": "0xd5baf3f8",
+      "path": "contracts/actions/aaveV3/AaveV3SwapBorrowRateMode.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "AaveV3Withdraw",
+      "address": "0xbf492F869DdB1A18BB4F41b6c3059D9f882Fe7ff",
+      "id": "0x72a6498a",
+      "path": "contracts/actions/aaveV3/AaveV3Withdraw.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": [
+        "0x204ae0d3f7cB0db44A297DC4aD433298ed2042F3"
+      ]
+    },
+    {
+      "name": "FLAaveV3",
+      "address": "0x3Cc0d5DAE1B94e294152C3150aA732b97af603E1",
+      "id": "0x8d7fb192",
+      "path": "contracts/actions/flashloan/FLAaveV3.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "RecipeExecutor",
+      "address": "0xe775c59e5662597bcE8aB4432C06380709554883",
+      "id": "0x4c69ee1e",
+      "path": "contracts/core/RecipeExecutor.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": [
+        "0xc1cB462033D8319016dF4e8A1810f1afB06b50bB"
+      ]
+    },
+    {
+      "name": "SendTokenAndUnwrap",
+      "address": "0x0fb867A5Ee1CA9426D3dAb95e613Be166218b977",
+      "id": "0x17782156",
+      "path": "contracts/actions/utils/SendTokenAndUnwrap.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "PullToken",
+      "address": "0xD8B3769f74bd9F196C3416a42a91E786948898e6",
+      "id": "0xcc063de4",
+      "path": "contracts/actions/utils/PullToken.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "FLBalancer",
+      "address": "0x88bF227d844262539b96fc7187914D74F45cFcf5",
+      "id": "0xf97d044f",
+      "path": "contracts/actions/flashloan/FLBalancer.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "TokenBalance",
+      "address": "0x483B903E702F60698Dd8124558C6199922737f1F",
+      "id": "0x019d9978",
+      "path": "contracts/actions/utils/TokenBalance.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "StrategyStorage",
+      "address": "0x6aeA695fcd0655650323e9dc5f80Ac0b15A91Da2",
+      "id": "0x43ebc538",
+      "path": "contracts/core/strategy/StrategyStorage.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "BotAuth",
+      "address": "0x17Fd145332C488F2dEcCa9Fe262B09A23585fdC1",
+      "id": "0xa267eb4d",
+      "path": "contracts/core/strategy/BotAuth.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "BundleStorage",
+      "address": "0x8332F2a50A9a6C85a476e1ea33031681291cB694",
+      "id": "0x471b2a04",
+      "path": "contracts/core/strategy/BundleStorage.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "SubStorageL2",
+      "address": "0x24ab68395660b910BfBF1cc88BaA316BA06354eE",
+      "id": "0x9d6d05f4",
+      "path": "contracts/core/l2/SubStorageL2.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "ProxyAuth",
+      "address": "0xF3A8479538319756e100C386b3E60BF783680d8f",
+      "id": "0x5079c3ea",
+      "path": "contracts/core/strategy/ProxyAuth.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "StrategyExecutor",
+      "address": "0x9652f91B10045Cd2a36ca8D87df4A800eD2AF05D",
+      "id": "0x0c1dc439",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "AaveV3RatioTrigger",
+      "address": "0x07b5E4382b2a8fBC4bF31b09fdee89A918E33856",
+      "id": "0x21a42a26",
+      "path": "contracts/triggers/AaveV3RatioTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "GasFeeTakerL2",
+      "address": "0x2F64f73B222B4978CAfd0295c0fa106cE5f34996",
+      "id": "0x7ec82077",
+      "path": "contracts/actions/fee/GasFeeTakerL2.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": [
+        "0x5AF1f885064CFeC4EdfF2cbb23Dbe4DeC1ad7E50"
+      ]
+    },
+    {
+      "name": "AaveV3RatioCheck",
+      "address": "0x0Cf69Cc3A9f9d1848C78e745c504d5AA320a8153",
+      "id": "0x71ef3d4e",
+      "path": "contracts/actions/checkers/AaveV3RatioCheck.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "FLActionL2",
+      "address": "0x3Cc0d5DAE1B94e294152C3150aA732b97af603E1",
+      "id": "0x9f01e6ae",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": [
+        "0xBF1CaC12DB60819Bfa71A328282ecbc1D40443aA"
+      ]
+    },
+    {
+      "name": "ToggleSub",
+      "address": "0x71015226EADFd4aC887fB56556F64338e352439b",
+      "id": "0xd6499530",
+      "path": "contracts/actions/utils/ToggleSub.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "UniCollectV3",
+      "address": "0xd521cbEfE58440d1C31FD0baF41fdfE18D028704",
+      "id": "0x56a75b05",
+      "path": "contracts/actions/uniswap/v3/UniCollectV3.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "UniCreatePoolV3",
+      "address": "0x334Ab3C12a4c0315566fd9308880Dad71F838Dc5",
+      "id": "0xba6f48af",
+      "path": "contracts/actions/uniswap/v3/UniCreatePoolV3.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "UniMintV3",
+      "address": "0x7AC778fB7CaB7D368f37d6E7CE3c293077969331",
+      "id": "0xe5eb7e36",
+      "path": "contracts/actions/uniswap/v3/UniMintV3.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "UniSupplyV3",
+      "address": "0x55675C6041A33EE9BDd796Edaa0f098AC7F3534f",
+      "id": "0xe8ce1e88",
+      "path": "contracts/actions/uniswap/v3/UniSupplyV3.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "UniWithdrawV3",
+      "address": "0xa004c22eFd0CD87847DE83Ce9ab92af5382c2efe",
+      "id": "0x5fc98a7b",
+      "path": "contracts/actions/uniswap/v3/UniWithdrawV3.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    }
+  ]
