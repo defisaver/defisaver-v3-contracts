@@ -577,5 +577,16 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": []
-    }
+    },
+    {
+        "name": "TokenBalance",
+        "address": "0xC6FF5b01f7c7b35b6e093fF70D2332B361C5Be5A",
+        "id": "0x019d9978",
+        "path": "contracts/actions/utils/TokenBalance.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+      }
   ]
