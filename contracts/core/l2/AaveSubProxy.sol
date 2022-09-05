@@ -120,15 +120,12 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
             revert WrongSubParams(_subData.minRatio, _subData.maxRatio);
         }
 
-        // check when we have boost as well that ranges aren't too close
-        if (_subData.boostEnabled) {
-            if ((_subData.maxRatio - RATIO_OFFSET) < _subData.targetRatioRepay) {
-                revert RangeTooClose(_subData.maxRatio, _subData.targetRatioRepay);
-            }
+        if ((_subData.maxRatio - RATIO_OFFSET) < _subData.targetRatioRepay) {
+            revert RangeTooClose(_subData.maxRatio, _subData.targetRatioRepay);
+        }
 
-            if ((_subData.minRatio + RATIO_OFFSET) > _subData.targetRatioBoost) {
-                revert RangeTooClose(_subData.maxRatio, _subData.targetRatioRepay);
-            }
+        if ((_subData.minRatio + RATIO_OFFSET) > _subData.targetRatioBoost) {
+            revert RangeTooClose(_subData.minRatio, _subData.targetRatioBoost);
         }
     }
 
@@ -178,9 +175,5 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     function parseSubIds(bytes calldata encodedInput) public pure returns (uint32 subId1, uint32 subId2) {
         subId1 = uint32(bytes4(encodedInput[0:4]));
         subId2 = uint32(bytes4(encodedInput[4:8]));
-    }
-
-    function bytesToBool(bytes1 x) internal pure returns (bool r) {
-        return x != bytes1(0x00);
     }
 }
