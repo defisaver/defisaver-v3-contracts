@@ -13,6 +13,9 @@ const {
     resetForkToBlock,
     getChainLinkPrice,
     balanceOf,
+    mockChainlinkPriceFeed,
+    setMockPrice,
+    timeTravel,
     WETH_ADDRESS,
     ETH_ADDR,
     LUSD_ADDR,
@@ -30,7 +33,12 @@ const {
     callLiquityCloseToCollStrategy,
 } = require('../../strategy-calls');
 
-const { subLiquityBoostStrategy, subLiquityRepayStrategy, subLiquityCloseToCollStrategy } = require('../../strategy-subs');
+const {
+    subLiquityBoostStrategy,
+    subLiquityRepayStrategy,
+    subLiquityCloseToCollStrategy,
+    subLiquityTrailingCloseToCollStrategy,
+} = require('../../strategy-subs');
 
 const {
     createLiquityBoostStrategy,
@@ -274,13 +282,15 @@ const liquityCloseToCollStrategyTest = async () => {
         let strategyExecutor;
         let subId;
         let strategySub;
+        let mockedPriceFeed;
 
         const maxFeePercentage = Float2BN('5', 16);
         const lusdDebt = '12000';
         const troveAmount = Float2BN(fetchAmountinUSDPrice('WETH', '30000'));
+        const forkedBlock = 15313530; // doing this to optimize hints fetching
 
         before(async () => {
-            await resetForkToBlock(14430140);
+            await resetForkToBlock(forkedBlock);
 
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
@@ -290,6 +300,8 @@ const liquityCloseToCollStrategyTest = async () => {
             console.log(proxyAddr);
 
             strategyExecutor = await redeployCore();
+
+            mockedPriceFeed = mockChainlinkPriceFeed();
 
             balancerFL = await redeploy('FLBalancer');
 
@@ -304,6 +316,7 @@ const liquityCloseToCollStrategyTest = async () => {
             await redeploy('ChainLinkPriceTrigger');
             await redeploy('SendToken');
             await redeploy('SendTokenAndUnwrap');
+            await redeploy('TrailingStopTrigger');
 
             await addBotCaller(botAcc.address);
 
@@ -320,7 +333,86 @@ const liquityCloseToCollStrategyTest = async () => {
             );
         });
 
+        it('... should make a new trailing Liquity close to coll strategy', async () => {
+            const liquityCloseToCollStrategy = createLiquityCloseToCollStrategy(true);
+
+            await openStrategyAndBundleStorage();
+
+            const strategyId = await createStrategy(proxy, ...liquityCloseToCollStrategy, false);
+
+            const percentage = 10 * 1e8;
+
+            // mock chainlink price before sub
+            const roundId = 1;
+            const ethPrice = 1500;
+            await setMockPrice(mockedPriceFeed, roundId, ETH_ADDR, ethPrice);
+
+            // eslint-disable-next-line max-len
+            ({ subId, strategySub } = await subLiquityTrailingCloseToCollStrategy(
+                proxy,
+                percentage,
+                roundId,
+                strategyId,
+            ));
+        });
+
+        it('... should trigger a trailing Liquity close to coll strategy', async () => {
+            // weth amount of trove debt + 1% extra for slippage and fee-s
+            const debtEstimate = (parseInt(lusdDebt, 10) * 1.01).toString();
+            const flAmount = Float2BN(fetchAmountinUSDPrice('WETH', debtEstimate));
+
+            const ethBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
+            console.log(`Eth before closing : ${ethBalanceBefore.toString() / 1e18}`);
+
+            const lusdBalanceBefore = await balanceOf(LUSD_ADDR, senderAcc.address);
+            console.log(`Lusd before closing : ${lusdBalanceBefore.toString() / 1e18}`);
+
+            // mock chainlink price after sub
+            let roundId = 2;
+            let ethPrice = 1900;
+            await setMockPrice(mockedPriceFeed, roundId, ETH_ADDR, ethPrice);
+
+            await timeTravel(60 * 60 * 1);
+            roundId = 3;
+            ethPrice = 1700;
+            await setMockPrice(mockedPriceFeed, roundId, ETH_ADDR, ethPrice);
+
+            await callLiquityCloseToCollStrategy(
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                flAmount,
+                balancerFL.address,
+                true,
+                roundId - 1,
+            );
+
+            // balance of eth and lusd should increase
+            const ethBalanceAfter = await balanceOf(ETH_ADDR, senderAcc.address);
+            console.log(`Eth after closing : ${ethBalanceAfter.toString() / 1e18}`);
+
+            const lusdBalanceAfter = await balanceOf(LUSD_ADDR, senderAcc.address);
+            console.log(`Lusd after closing : ${lusdBalanceAfter.toString() / 1e18}`);
+
+            expect(ethBalanceAfter).to.be.gt(ethBalanceBefore);
+            expect(lusdBalanceAfter).to.be.gt(lusdBalanceBefore);
+        });
+
         it('... should make a new Liquity close to coll strategy', async () => {
+            // create new liq. position
+            await depositToWeth(troveAmount);
+            await send(WETH_ADDRESS, proxyAddr, troveAmount);
+
+            await liquityOpen(
+                proxy,
+                maxFeePercentage,
+                troveAmount,
+                Float2BN(lusdDebt),
+                proxyAddr,
+                proxyAddr,
+            );
+
             const liquityCloseToCollStrategy = createLiquityCloseToCollStrategy();
 
             await openStrategyAndBundleStorage();

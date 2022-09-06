@@ -14,6 +14,7 @@ const {
     createCompTrigger,
     createReflexerTrigger,
     createLiquityTrigger,
+    createTrailingStopTrigger,
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
 } = require('./triggers');
@@ -163,7 +164,7 @@ const subMcdBoostStrategy = async (proxy, bundleId, vaultId, rationUnder, target
     return { subId, strategySub };
 };
 
-const subMcdCloseStrategy = async (vaultId, proxy, targetPrice, tokenAddress, tokenState, strategyId, regAddr = REGISTRY_ADDR) => {
+const subMcdCloseToDaiStrategy = async (vaultId, proxy, targetPrice, tokenAddress, tokenState, strategyId, regAddr = REGISTRY_ADDR) => {
     const isBundle = false;
 
     const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
@@ -173,6 +174,28 @@ const subMcdCloseStrategy = async (vaultId, proxy, targetPrice, tokenAddress, to
     const triggerData = await createChainLinkPriceTrigger(
         tokenAddress, targetPrice, tokenState,
     );
+    const strategySub = [strategyId, isBundle, [triggerData], [vaultIdEncoded, daiEncoded, mcdManagerEncoded]];
+    const subId = await subToStrategy(proxy, strategySub, regAddr);
+
+    return { subId, strategySub };
+};
+
+const subMcdTrailingCloseToDaiStrategy = async (vaultId, proxy, tokenAddress, percentage, roundId, strategyId, regAddr = REGISTRY_ADDR) => {
+    const isBundle = false;
+
+    const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
+    const daiEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const mcdManagerEncoded = abiCoder.encode(['address'], [MCD_MANAGER_ADDR]);
+
+    let chainlinkTokenAddr = tokenAddress;
+    if (tokenAddress.toLowerCase() === WBTC_ADDR.toLowerCase()) {
+        chainlinkTokenAddr = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
+    }
+
+    const triggerData = await createTrailingStopTrigger(
+        chainlinkTokenAddr, percentage, roundId,
+    );
+
     const strategySub = [strategyId, isBundle, [triggerData], [vaultIdEncoded, daiEncoded, mcdManagerEncoded]];
     const subId = await subToStrategy(proxy, strategySub, regAddr);
 
@@ -201,6 +224,28 @@ const subMcdCloseToCollStrategy = async (vaultId, proxy, targetPrice, tokenAddre
     return { subId, strategySub };
 };
 
+const subMcdTrailingCloseToCollStrategy = async (vaultId, proxy, tokenAddress, percentage, roundId, strategyId, regAddr = REGISTRY_ADDR) => {
+    const isBundle = false;
+
+    const vaultIdEncoded = abiCoder.encode(['uint256'], [vaultId.toString()]);
+    const collEncoded = abiCoder.encode(['address'], [tokenAddress]);
+    const daiEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const mcdManagerEncoded = abiCoder.encode(['address'], [MCD_MANAGER_ADDR]);
+
+    let chainlinkTokenAddr = tokenAddress;
+    if (tokenAddress.toLowerCase() === WBTC_ADDR.toLowerCase()) {
+        chainlinkTokenAddr = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
+    }
+
+    const triggerData = await createTrailingStopTrigger(
+        chainlinkTokenAddr, percentage, roundId,
+    );
+    const strategySub = [strategyId, isBundle, [triggerData], [vaultIdEncoded, collEncoded, daiEncoded, mcdManagerEncoded]];
+    const subId = await subToStrategy(proxy, strategySub, regAddr);
+
+    return { subId, strategySub };
+};
+
 const subLiquityCloseToCollStrategy = async (proxy, targetPrice, tokenState, strategyId, regAddr = REGISTRY_ADDR) => {
     const isBundle = false;
 
@@ -210,6 +255,22 @@ const subLiquityCloseToCollStrategy = async (proxy, targetPrice, tokenState, str
     const triggerData = await createChainLinkPriceTrigger(
         WETH_ADDRESS, targetPrice, tokenState,
     );
+    const strategySub = [strategyId, isBundle, [triggerData], [wethEncoded, lusdEncoded]];
+    const subId = await subToStrategy(proxy, strategySub, regAddr);
+
+    return { subId, strategySub };
+};
+
+const subLiquityTrailingCloseToCollStrategy = async (proxy, percentage, roundId, strategyId, regAddr = REGISTRY_ADDR) => {
+    const isBundle = false;
+
+    const wethEncoded = abiCoder.encode(['address'], [WETH_ADDRESS]);
+    const lusdEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
+
+    const triggerData = await createTrailingStopTrigger(
+        WETH_ADDRESS, percentage, roundId,
+    );
+
     const strategySub = [strategyId, isBundle, [triggerData], [wethEncoded, lusdEncoded]];
     const subId = await subToStrategy(proxy, strategySub, regAddr);
 
@@ -291,7 +352,8 @@ module.exports = {
     subRepayFromSavingsStrategy,
     subLimitOrderStrategy,
     subUniV3RangeOrderStrategy,
-    subMcdCloseStrategy,
+    subMcdCloseToDaiStrategy,
+    subMcdTrailingCloseToDaiStrategy,
     subUniContinuousCollectStrategy,
     subCompBoostStrategy,
     subCompRepayStrategy,
@@ -300,4 +362,6 @@ module.exports = {
     subLiquityBoostStrategy,
     subLiquityRepayStrategy,
     subLiquityCloseToCollStrategy,
+    subLiquityTrailingCloseToCollStrategy,
+    subMcdTrailingCloseToCollStrategy,
 };
