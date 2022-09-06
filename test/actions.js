@@ -413,11 +413,12 @@ const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) =>
 |  `----.|  `--'  | |  |  |  | |  |      |  `--'  | |  `--'  | |  |\   | |  '--'  |    \  V  /     ___) |
  \______| \______/  |__|  |__| | _|       \______/   \______/  |__| \__| |_______/      \___/     |____/
 */
-const supplyCompV3 = async (proxy, tokenAddr, amount, from) => {
+const supplyCompV3 = async (market, proxy, tokenAddr, amount, from) => {
     await setBalance(tokenAddr, from, amount);
     await approve(tokenAddr, proxy.address);
 
     const compSupplyAction = new dfs.actions.compoundV3.CompoundV3SupplyAction(
+        market,
         tokenAddr,
         amount,
         from,
@@ -429,22 +430,25 @@ const supplyCompV3 = async (proxy, tokenAddr, amount, from) => {
     return tx;
 };
 
-const borrowCompV3 = async (proxy, amount, to) => {
-    const compBorrowAction = new dfs.actions.compoundV3.CompoundV3BorrowAction(amount, to);
+const borrowCompV3 = async (market, proxy, amount, to) => {
+    const compBorrowAction = new dfs.actions.compoundV3.CompoundV3BorrowAction(market, amount, to);
     const functionData = compBorrowAction.encodeForDsProxyCall()[1];
 
     const tx = await executeAction('CompV3Borrow', functionData, proxy);
     return tx;
 };
-const allowCompV3 = async (proxy, manager, isAllowed) => {
-    const compAllowAction = new dfs.actions.compoundV3.CompoundV3AllowAction(manager, isAllowed);
+
+const allowCompV3 = async (market, proxy, manager, isAllowed) => {
+    const compAllowAction = new dfs.actions.compoundV3.CompoundV3AllowAction(market, manager, isAllowed);
     const functionData = compAllowAction.encodeForDsProxyCall()[1];
 
     const tx = await executeAction('CompV3Allow', functionData, proxy);
     return tx;
 };
-const withdrawCompV3 = async (proxy, to, asset, amount) => {
+
+const withdrawCompV3 = async (market, proxy, to, asset, amount) => {
     const compV3WithdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        market,
         to,
         asset,
         amount,
@@ -454,28 +458,32 @@ const withdrawCompV3 = async (proxy, to, asset, amount) => {
     const tx = await executeAction('CompV3Withdraw', functionData, proxy);
     return tx;
 };
-const claimCompV3 = async (proxy, src, to, shouldAccrue) => {
-    const claimCompV3Action = new dfs.actions.compoundV3.CompoundV3ClaimAction(src, to, shouldAccrue);
+
+const claimCompV3 = async (market, proxy, src, to, shouldAccrue) => {
+    const claimCompV3Action = new dfs.actions.compoundV3.CompoundV3ClaimAction(market, src, to, shouldAccrue);
 
     const functionData = claimCompV3Action.encodeForDsProxyCall()[1];
     const tx = await executeAction('CompV3Claim', functionData, proxy);
     return tx;
 };
-const paybackCompV3 = async (proxy, amount, from, onBehalf) => {
+
+const paybackCompV3 = async (market, proxy, amount, from, onBehalf) => {
     await approve(USDC_ADDR, proxy.address);
-    const paybackCompV3Action = new dfs.actions.compoundV3.CompoundV3PaybackAction(amount, from, onBehalf);
+    const paybackCompV3Action = new dfs.actions.compoundV3.CompoundV3PaybackAction(market, amount, from, onBehalf);
 
     const functionData = paybackCompV3Action.encodeForDsProxyCall()[1];
     const tx = await executeAction('CompV3Payback', functionData, proxy);
     return tx;
 };
-const transferCompV3 = async (proxy, from, to, asset, amount) => {
-    const transferCompV3Action = new dfs.actions.compoundV3.CompoundV3TransferAction(from, to, asset, amount);
+
+const transferCompV3 = async (market, proxy, from, to, asset, amount) => {
+    const transferCompV3Action = new dfs.actions.compoundV3.CompoundV3TransferAction(market, from, to, asset, amount);
 
     const functionData = transferCompV3Action.encodeForDsProxyCall()[1];
     const tx = await executeAction('CompV3Transfer', functionData, proxy);
     return tx;
 };
+
 /*
 .___  ___.      ___       __  ___  _______ .______
 |   \/   |     /   \     |  |/  / |   ____||   _  \

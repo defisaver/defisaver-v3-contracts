@@ -10,7 +10,9 @@ import "./helpers/CompV3Helper.sol";
 /// @title Supply a token to CompoundV3
 contract CompV3Supply is ActionBase, CompV3Helper {
     using TokenUtils for address;
+
     struct Params {
+        address market;
         address tokenAddr;
         uint256 amount;
         address from;
@@ -27,11 +29,12 @@ contract CompV3Supply is ActionBase, CompV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[0], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
-        params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
+        params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
+        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
 
-        (uint256 withdrawAmount, bytes memory logData) = _supply(params.tokenAddr, params.amount, params.from);
+        (uint256 withdrawAmount, bytes memory logData) = _supply(params.market, params.tokenAddr, params.amount, params.from);
         emit ActionEvent("CompV3Supply", logData);
         return bytes32(withdrawAmount);
     }
@@ -39,7 +42,7 @@ contract CompV3Supply is ActionBase, CompV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _supply(params.tokenAddr, params.amount, params.from);
+        (, bytes memory logData) = _supply(params.market, params.tokenAddr, params.amount, params.from);
         logger.logActionDirectEvent("CompV3Supply", logData);
     }
 
@@ -52,10 +55,12 @@ contract CompV3Supply is ActionBase, CompV3Helper {
 
     /// @notice Supplies a token to the CompoundV3 protocol
     /// @dev If amount == type(uint256).max we are getting the whole balance of the proxy
+    /// @param _market Main Comet proxy contract that is different for each compound market
     /// @param _tokenAddr Address of the token we are supplying
     /// @param _amount Amount of the token we are supplying
     /// @param _from Address where we are pulling the tokens from
     function _supply(
+        address _market,
         address _tokenAddr,
         uint256 _amount,
         address _from
@@ -64,19 +69,19 @@ contract CompV3Supply is ActionBase, CompV3Helper {
         // pull the tokens _from to the proxy
         _amount = _tokenAddr.pullTokensIfNeeded(_from, _amount);
 
-        _tokenAddr.approveToken(COMET_ADDR, _amount);
+        _tokenAddr.approveToken(_market, _amount);
 
         // if the user has baseToken debt, use payback
-        if(_tokenAddr == IComet(COMET_ADDR).baseToken()) {
-            uint256 debt = IComet(COMET_ADDR).borrowBalanceOf(address(this));
+        if(_tokenAddr == IComet(_market).baseToken()) {
+            uint256 debt = IComet(_market).borrowBalanceOf(address(this));
             if(debt > 0) {
                 revert CompV3SupplyWithDebtError();
             }
         }
         
-        IComet(COMET_ADDR).supply(_tokenAddr,_amount);
+        IComet(_market).supply(_tokenAddr,_amount);
         
-        bytes memory logData = abi.encode(_tokenAddr, _amount, _from);
+        bytes memory logData = abi.encode(_market, _tokenAddr, _amount, _from);
         return (_amount, logData);
     }
 

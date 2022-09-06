@@ -173,7 +173,7 @@
     "memoizee" "^0.4.15"
 
 "@defisaver/sdk@github:DecenterApps/defisaver-sdk#feature/comp-v3":
-  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#b7df5bf47b1e4f63206ff6bd391455022a7c32f5"
+  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#4f5c7de4bbdb296f008d4760f2a7fc3af7cbc960"
   "version" "0.3.12"
   dependencies:
     "@defisaver/tokens" "^1.4.18"

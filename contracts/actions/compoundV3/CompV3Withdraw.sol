@@ -11,6 +11,7 @@ import "./helpers/MainnetCompV3Addresses.sol";
 contract CompV3Withdraw is ActionBase, CompV3Helper {
 
     struct Params {
+        address market;
         address to;
         address asset;
         uint256 amount;
@@ -25,11 +26,12 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.to = _parseParamAddr(params.to, _paramMapping[0], _subData, _returnValues);
-        params.asset = _parseParamAddr(params.asset, _paramMapping[1], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
+        params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
+        params.asset = _parseParamAddr(params.asset, _paramMapping[2], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
 
-        (uint256 withdrawAmount, bytes memory logData) = _withdraw(params.to, params.asset, params.amount);
+        (uint256 withdrawAmount, bytes memory logData) = _withdraw(params.market, params.to, params.asset, params.amount);
         emit ActionEvent("CompV3Withdraw", logData);
         return bytes32(withdrawAmount);
     }
@@ -37,7 +39,7 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _withdraw(params.to, params.asset, params.amount);
+        (, bytes memory logData) = _withdraw(params.market, params.to, params.asset, params.amount);
         logger.logActionDirectEvent("CompV3Withdraw", logData);
     }
 
@@ -50,18 +52,20 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
 
     /// @notice Withdraws a token amount from compound
     /// @dev Send type(uint).max withdraws the whole balance from Comet
+    /// @param _market Main Comet proxy contract that is different for each compound market
     /// @param _to The recipient address
     /// @param _asset The asset to withdraw
     /// @param _amount The quantity to withdraw
     function _withdraw(
+        address _market,
         address _to,
         address _asset,
         uint256 _amount
     ) internal returns (uint256, bytes memory) {
 
-        IComet(COMET_ADDR).withdrawTo(_to, _asset, _amount);
+        IComet(_market).withdrawTo(_to, _asset, _amount);
 
-        bytes memory logData = abi.encode(_to, _asset, _amount);
+        bytes memory logData = abi.encode(_market, _to, _asset, _amount);
         return (_amount, logData);
     }
 

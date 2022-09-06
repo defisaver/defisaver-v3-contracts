@@ -72,7 +72,7 @@ const compV3SupplyTest = async () => {
 
                     const balanceBefore = await comet.collateralBalanceOf(proxy.address, token.address);
 
-                    await supplyCompV3(proxy, token.address, amount, senderAcc.address);
+                    await supplyCompV3(addrs[network].COMET_USDC_ADDR, proxy, token.address, amount, senderAcc.address);
 
                     const balanceAfter = await comet.collateralBalanceOf(proxy.address, token.address);
 
@@ -89,7 +89,7 @@ const compV3SupplyTest = async () => {
 
                 const balanceBefore = await comet.balanceOf(proxy.address);
 
-                await supplyCompV3(proxy, token.address, amount, senderAcc.address);
+                await supplyCompV3(addrs[network].COMET_USDC_ADDR, proxy, token.address, amount, senderAcc.address);
 
                 const balanceAfter = await comet.balanceOf(proxy.address);
 
@@ -146,6 +146,7 @@ const compV3TransferTest = async () => {
                     );
 
                     await supplyCompV3(
+                        addrs[network].COMET_USDC_ADDR,
                         proxy,
                         assetInfo.address,
                         transferringAmount,
@@ -162,6 +163,7 @@ const compV3TransferTest = async () => {
                     );
 
                     await transferCompV3(
+                        addrs[network].COMET_USDC_ADDR,
                         proxy,
                         proxy.address,
                         proxy2.address,
@@ -200,12 +202,13 @@ const compV3TransferTest = async () => {
 
                 await setBalance(assetInfo.address, senderAcc.address, supplyAmount);
 
-                await supplyCompV3(proxy, assetInfo.address, supplyAmount, senderAcc.address);
+                await supplyCompV3(addrs[network].COMET_USDC_ADDR, proxy, assetInfo.address, supplyAmount, senderAcc.address);
 
                 const senderBalanceBefore = await cometContract.balanceOf(proxy.address);
                 const receiverBalanceBefore = await cometContract.balanceOf(proxy2.address);
 
                 await transferCompV3(
+                    addrs[network].COMET_USDC_ADDR,
                     proxy,
                     proxy.address,
                     proxy2.address,
@@ -244,12 +247,12 @@ const compV3AllowTest = async () => {
             const cometContract = await hre.ethers.getContractAt('IComet', addrs[network].COMET_USDC_ADDR);
 
             // gib allowance
-            await allowCompV3(proxy, ownerAcc.address, true);
+            await allowCompV3(addrs[network].COMET_USDC_ADDR, proxy, ownerAcc.address, true);
             const allowance = await cometContract.allowance(proxy.address, ownerAcc.address);
             expect(allowance.toString()).to.be.equal(hre.ethers.constants.MaxUint256);
 
             // remove allowance
-            await allowCompV3(proxy, ownerAcc.address, false);
+            await allowCompV3(addrs[network].COMET_USDC_ADDR, proxy, ownerAcc.address, false);
             const allowanceAfter = await cometContract.allowance(proxy.address, ownerAcc.address);
             expect(allowanceAfter.toString()).to.equal('0');
         });
@@ -283,11 +286,11 @@ const compV3WithdrawTest = async () => {
                     const assetInfo = getAssetInfo(collName);
                     const amount = hre.ethers.utils.parseUnits('1000', assetInfo.decimals);
 
-                    await supplyCompV3(proxy, assetInfo.address, amount, senderAcc.address);
+                    await supplyCompV3(addrs[network].COMET_USDC_ADDR, proxy, assetInfo.address, amount, senderAcc.address);
 
                     const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
 
-                    await withdrawCompV3(proxy, senderAcc.address, assetInfo.address, amount);
+                    await withdrawCompV3(addrs[network].COMET_USDC_ADDR, proxy, senderAcc.address, assetInfo.address, amount);
 
                     const balanceAfter = await balanceOf(assetInfo.address, senderAcc.address);
 
@@ -300,12 +303,13 @@ const compV3WithdrawTest = async () => {
                 const assetInfo = getAssetInfo(bAsset);
                 const amount = hre.ethers.utils.parseUnits('1000', assetInfo.decimals);
 
-                await supplyCompV3(proxy, assetInfo.address, amount, senderAcc.address);
+                await supplyCompV3(addrs[network].COMET_USDC_ADDR, proxy, assetInfo.address, amount, senderAcc.address);
 
                 const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
 
                 // withdraw all balance from address with max uint256 as amount
                 await withdrawCompV3(
+                    addrs[network].COMET_USDC_ADDR,
                     proxy,
                     senderAcc.address,
                     assetInfo.address,
@@ -322,12 +326,13 @@ const compV3WithdrawTest = async () => {
                 const assetInfo = getAssetInfo(bAsset);
                 const amount = hre.ethers.utils.parseUnits('1000', assetInfo.decimals);
 
-                await supplyCompV3(proxy, assetInfo.address, amount, senderAcc.address);
+                await supplyCompV3(addrs[network].COMET_USDC_ADDR, proxy, assetInfo.address, amount, senderAcc.address);
 
                 const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
 
                 // withdraw all balance from address with max uint256 as amount
                 await withdrawCompV3(
+                    addrs[network].COMET_USDC_ADDR,
                     proxy,
                     senderAcc.address,
                     assetInfo.address,
@@ -373,6 +378,7 @@ const compV3BorrowTest = async () => {
                 );
 
                 await supplyCompV3(
+                    addrs[network].COMET_USDC_ADDR,
                     proxy,
                     colInfo.address,
                     hre.ethers.utils.parseEther('10'),
@@ -381,7 +387,7 @@ const compV3BorrowTest = async () => {
 
                 const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
 
-                await borrowCompV3(proxy, borrowingAmount, senderAcc.address);
+                await borrowCompV3(addrs[network].COMET_USDC_ADDR, proxy, borrowingAmount, senderAcc.address);
 
                 const balanceAfter = await balanceOf(assetInfo.address, senderAcc.address);
 
@@ -439,18 +445,19 @@ const compV3PaybackTest = async () => {
                 );
 
                 await supplyCompV3(
+                    addrs[network].COMET_USDC_ADDR,
                     proxy,
                     collAssetInfo.address,
                     hre.ethers.utils.parseEther('25'),
                     senderAcc.address,
                 );
 
-                await borrowCompV3(proxy, borrowingAmount, senderAcc.address);
+                await borrowCompV3(addrs[network].COMET_USDC_ADDR, proxy, borrowingAmount, senderAcc.address);
 
                 const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
                 const borrowBalanceBefore = await cometContract.borrowBalanceOf(proxy.address);
 
-                await paybackCompV3(proxy, paybackAmount, senderAcc.address, proxy.address);
+                await paybackCompV3(addrs[network].COMET_USDC_ADDR, proxy, paybackAmount, senderAcc.address, proxy.address);
 
                 const balanceAfter = await balanceOf(assetInfo.address, senderAcc.address);
                 const borrowBalanceAfter = await cometContract.borrowBalanceOf(proxy.address);
@@ -480,17 +487,18 @@ const compV3PaybackTest = async () => {
                 );
 
                 await supplyCompV3(
+                    addrs[network].COMET_USDC_ADDR,
                     proxy,
                     collAssetInfo.address,
                     hre.ethers.utils.parseEther('25'),
                     senderAcc.address,
                 );
 
-                await borrowCompV3(proxy, borrowingAmount, senderAcc.address);
+                await borrowCompV3(addrs[network].COMET_USDC_ADDR, proxy, borrowingAmount, senderAcc.address);
 
                 const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
 
-                await paybackCompV3(proxy, paybackAmount, senderAcc.address, proxy.address);
+                await paybackCompV3(addrs[network].COMET_USDC_ADDR, proxy, paybackAmount, senderAcc.address, proxy.address);
 
                 const balanceAfter = await balanceOf(assetInfo.address, senderAcc.address);
                 const borrowBalanceAfter = await cometContract.borrowBalanceOf(proxy.address);
@@ -570,7 +578,7 @@ const compV3ClaimTest = async () => {
                 hre.ethers.utils.parseUnits('100000', 18),
             );
 
-            await supplyCompV3(proxy, USDC_ADDR, amount, senderAcc.address);
+            await supplyCompV3(addrs[network].COMET_USDC_ADDR, proxy, USDC_ADDR, amount, senderAcc.address);
 
             await hre.network.provider.send('evm_increaseTime', [36000]);
             await hre.network.provider.send('evm_mine');
@@ -584,7 +592,7 @@ const compV3ClaimTest = async () => {
             const BalanceBefore = await balanceOf(addrs[network].COMP_ADDR, senderAcc.address);
             const BalanceProxyBefore = await balanceOf(addrs[network].COMP_ADDR, proxy.address);
 
-            await claimCompV3(proxy, proxy.address, senderAcc.address, true);
+            await claimCompV3(addrs[network].COMET_USDC_ADDR, proxy, proxy.address, senderAcc.address, true);
 
             const BalanceAfter = await balanceOf(addrs[network].COMP_ADDR, senderAcc.address);
             const BalanceProxyAfter = await balanceOf(addrs[network].COMP_ADDR, proxy.address);

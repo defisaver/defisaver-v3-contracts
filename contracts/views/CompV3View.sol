@@ -25,14 +25,13 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
     uint64 public constant BASE_SCALE = 1e6;
     uint public constant PRICE_FEED_SCALE = 1e8;
 
-    IComet public constant comet = IComet(COMET_ADDR);
-
     /// @notice Returns all supported collateral assets 
-    function getAssets() public view returns(IComet.AssetInfo[] memory assets){
-        uint8 numAssets = comet.numAssets();
+    function getAssets(address _market) public view returns(IComet.AssetInfo[] memory assets){
+        uint8 numAssets = IComet(_market).numAssets();
         assets = new IComet.AssetInfo[](numAssets);
-        for(uint8 i=0;i<numAssets;i++){
-            assets[i]=comet.getAssetInfo(i);
+
+        for(uint8 i = 0; i < numAssets; i++){
+            assets[i] = IComet(_market).getAssetInfo(i);
         }
         return assets;
     }
@@ -41,19 +40,21 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
     /// @notice Fetches all the collateral/debt address and amounts, denominated in usd
     /// @param _users Addresses of the user
     /// @return loans Array of LoanData information
-    function getLoanDataArr(address[] memory _users) public view returns (LoanData[] memory loans) {
+    function getLoanDataArr(address _market, address[] memory _users) public view returns (LoanData[] memory loans) {
         loans = new LoanData[](_users.length);
 
         for (uint i = 0; i < _users.length; ++i) {
-            loans[i] = getLoanData(_users[i]);
+            loans[i] = getLoanData(_market, _users[i]);
         }
     }
 
     /// @notice Fetches all the collateral/debt address and amounts, denominated in usd
     /// @param _user Address of the user
     /// @return data LoanData information
-    function getLoanData(address _user) public view returns (LoanData memory data) {
-        IComet.AssetInfo[] memory assets = getAssets();
+    function getLoanData(address _market, address _user) public view returns (LoanData memory data) {
+        IComet.AssetInfo[] memory assets = getAssets(_market);
+
+        IComet comet = IComet(_market);
 
         data = LoanData({
             user: _user,

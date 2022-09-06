@@ -9,6 +9,7 @@ import "./helpers/CompV3Helper.sol";
 contract CompV3Allow is ActionBase, CompV3Helper {
 
     struct Params {
+        address market;
         address manager;
         bool isAllowed;
     }
@@ -22,10 +23,11 @@ contract CompV3Allow is ActionBase, CompV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.manager = _parseParamAddr(params.manager, _paramMapping[0], _subData, _returnValues);
-        params.isAllowed = _parseParamUint(params.isAllowed ? 1 : 0, _paramMapping[1], _subData, _returnValues) == 1;
+        params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
+        params.manager = _parseParamAddr(params.manager, _paramMapping[1], _subData, _returnValues);
+        params.isAllowed = _parseParamUint(params.isAllowed ? 1 : 0, _paramMapping[2], _subData, _returnValues) == 1;
 
-        (bool isAllowed, bytes memory logData) = _allow(params.manager, params.isAllowed);
+        (bool isAllowed, bytes memory logData) = _allow(params.market, params.manager, params.isAllowed);
         emit ActionEvent("CompV3Allow", logData);
         return bytes32(uint256(isAllowed ? 1 : 0));
     }
@@ -33,7 +35,7 @@ contract CompV3Allow is ActionBase, CompV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _allow(params.manager, params.isAllowed);
+        (, bytes memory logData) = _allow(params.market, params.manager, params.isAllowed);
         logger.logActionDirectEvent("CompV3Allow", logData);
     }
 
@@ -45,15 +47,17 @@ contract CompV3Allow is ActionBase, CompV3Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice User allows or disallows manager
+    /// @param _market Main Comet proxy contract that is different for each compound market
     /// @param _manager Address of manager
     /// @param _isAllowed True for allow, false for disallow
     function _allow(
+        address _market,
         address _manager,
         bool _isAllowed
     ) internal returns (bool, bytes memory) {
-        IComet(COMET_ADDR).allow(_manager,_isAllowed);
+        IComet(_market).allow(_manager,_isAllowed);
 
-        bytes memory logData = abi.encode(_manager, _isAllowed);
+        bytes memory logData = abi.encode(_market, _manager, _isAllowed);
         return (_isAllowed, logData);
     }
 

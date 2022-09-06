@@ -9,6 +9,7 @@ import "./helpers/CompV3Helper.sol";
 contract CompV3Borrow is ActionBase, CompV3Helper {
 
     struct Params {
+        address market;
         uint256 amount;
         address to;
     }
@@ -22,10 +23,11 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
-        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
+        params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 withdrawAmount, bytes memory logData) = _borrow(params.amount, params.to);
+        (uint256 withdrawAmount, bytes memory logData) = _borrow(params.market, params.amount, params.to);
         emit ActionEvent("CompV3Borrow", logData);
         return bytes32(withdrawAmount);
     }
@@ -33,7 +35,7 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _borrow(params.amount, params.to);
+        (, bytes memory logData) = _borrow(params.market, params.amount, params.to);
         logger.logActionDirectEvent("CompV3Borrow", logData);
     }
 
@@ -45,15 +47,19 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice User borrows tokens from the Compound protocol
+    /// @param _market Main Comet proxy contract that is different for each compound market
     /// @param _amount Amount of tokens to be borrowed
     /// @param _to The address we are sending the borrowed tokens to
     function _borrow(
+        address _market,
         uint256 _amount,
         address _to
     ) internal returns (uint256, bytes memory) {
-        address baseTokenAddress = IComet(COMET_ADDR).baseToken();
-        IComet(COMET_ADDR).withdrawTo(_to,baseTokenAddress,_amount);
-        bytes memory logData = abi.encode(baseTokenAddress, _amount, _to);
+        address baseTokenAddress = IComet(_market).baseToken();
+
+        IComet(_market).withdrawTo(_to,baseTokenAddress,_amount);
+
+        bytes memory logData = abi.encode(_market, baseTokenAddress, _amount, _to);
         return (_amount, logData);
     }
 
