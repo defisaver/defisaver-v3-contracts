@@ -44,7 +44,7 @@ contract CompV3Allow is ActionBase, CompV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User allowes or disallowes manager
+    /// @notice User allows or disallows manager
     /// @param _manager Address of manager
     /// @param _isAllowed True for allow, false for disallow
     function _allow(

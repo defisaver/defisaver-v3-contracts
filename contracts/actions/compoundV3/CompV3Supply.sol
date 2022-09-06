@@ -7,7 +7,7 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompV3Helper.sol";
 
-/// @title Supply a token to Compound
+/// @title Supply a token to CompoundV3
 contract CompV3Supply is ActionBase, CompV3Helper {
     using TokenUtils for address;
     struct Params {
@@ -16,7 +16,6 @@ contract CompV3Supply is ActionBase, CompV3Helper {
         address from;
     }
 
-    error CompV3SupplyError();
     error CompV3SupplyWithDebtError();
 
     /// @inheritdoc ActionBase
@@ -67,11 +66,12 @@ contract CompV3Supply is ActionBase, CompV3Helper {
 
         _tokenAddr.approveToken(COMET_ADDR, _amount);
 
-        if(_tokenAddr == IComet(COMET_ADDR).baseToken())
-        {
+        // if the user has baseToken debt, use payback
+        if(_tokenAddr == IComet(COMET_ADDR).baseToken()) {
             uint256 debt = IComet(COMET_ADDR).borrowBalanceOf(address(this));
-            if(debt > 0)
+            if(debt > 0) {
                 revert CompV3SupplyWithDebtError();
+            }
         }
         
         IComet(COMET_ADDR).supply(_tokenAddr,_amount);

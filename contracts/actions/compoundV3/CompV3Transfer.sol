@@ -5,7 +5,7 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompV3Helper.sol";
 
-/// @title Transfer amount of specified colateral to another wallet
+/// @title Transfer amount of specified collateral to another wallet
 contract CompV3Transfer is ActionBase, CompV3Helper {
     using TokenUtils for address;
 
@@ -55,7 +55,7 @@ contract CompV3Transfer is ActionBase, CompV3Helper {
     /// @param _from The address of an account that is the sender of the asset in the transaction
     /// @param _to The address of an account that is the receiver in the transaction
     /// @param _asset The ERC-20 address of the asset that is being sent in the transaction
-    /// @param _amount Amount of the specified asset to be transfered
+    /// @param _amount Amount of the specified asset to be transferred
     function _transfer(
         address _from,
         address _to,

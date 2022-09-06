@@ -5,7 +5,6 @@ pragma solidity =0.8.10;
 import "../DS/DSMath.sol";
 import "../utils/Exponential.sol";
 import "../interfaces/compoundV3/IComet.sol";
-import "../interfaces/compoundV3/ICometExt.sol";
 import "../actions/compoundV3/helpers/CompV3Helper.sol";
 
 contract CompV3View is Exponential, DSMath, CompV3Helper {
@@ -27,7 +26,6 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
     uint public constant PRICE_FEED_SCALE = 1e8;
 
     IComet public constant comet = IComet(COMET_ADDR);
-    ICometExt public constant cometExt = ICometExt(COMET_EXT_ADDR);
 
     /// @notice Returns all supported collateral assets 
     function getAssets() public view returns(IComet.AssetInfo[] memory assets){

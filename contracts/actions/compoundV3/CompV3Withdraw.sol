@@ -7,7 +7,7 @@ import "./helpers/CompV3Helper.sol";
 import "../../interfaces/IERC20.sol";
 import "./helpers/MainnetCompV3Addresses.sol";
 
-/// @title Withdraw a token from Compound
+/// @title Withdraw a token from CompoundV3
 contract CompV3Withdraw is ActionBase, CompV3Helper {
 
     struct Params {
@@ -15,9 +15,6 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
         address asset;
         uint256 amount;
     }
-
-    error CompRedeemError();
-    error CompUnderlyingRedeemError();
 
     /// @inheritdoc ActionBase
     function executeAction(
