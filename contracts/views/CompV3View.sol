@@ -20,6 +20,35 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
         uint collValue;
         uint maxDebt;
     }
+
+    struct CollateralInfoFull {
+        address tokenAddr;
+        uint totalSupply;
+        uint supplyReserved;
+        uint borrowCollateralFactor;
+        uint liquidateCollateralFactor;
+        uint liquidationFactor;
+        uint price;
+        uint supplyCap;
+    }
+
+    struct BaseTokenInfoFull {
+        address tokenAddr;
+        uint supplyIndex;
+        uint borrowIndex;
+        uint trackingSupplyIndex;
+        uint trackingBorrowIndex;
+        uint totalSupply;
+        uint totalBorrow;
+        uint utilization;
+    }
+
+    struct GovernanceInfoFull {
+        bool isSupplyPaused;
+        bool isTransferPaused;
+        bool isWithdrawPaused;
+        bool isAbsorbPaused;
+    }
     
     uint64 public constant FACTOR_SCALE = 1e18;
     uint64 public constant BASE_SCALE = 1e6;
@@ -53,7 +82,6 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
     /// @return data LoanData information
     function getLoanData(address _market, address _user) public view returns (LoanData memory data) {
         IComet.AssetInfo[] memory assets = getAssets(_market);
-
         IComet comet = IComet(_market);
 
         data = LoanData({
@@ -83,6 +111,7 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
                 data.maxDebt += value* assets[i].liquidationFactor/ FACTOR_SCALE;
             }
         }
+
         address usdcPriceFeed = comet.baseTokenPriceFeed();
         data.borrowAmount = comet.borrowBalanceOf(_user);
         data.borrowValue = comet.borrowBalanceOf(_user) * comet.getPrice(usdcPriceFeed) / PRICE_FEED_SCALE / BASE_SCALE;
@@ -90,5 +119,66 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
         data.depositValue = comet.balanceOf(_user) * comet.getPrice(usdcPriceFeed) / PRICE_FEED_SCALE / BASE_SCALE;
 
         return data;
+    }
+
+    function getFullCollInfo(address _market, address _tokenAddr) public returns(CollateralInfoFull memory coll) {
+        IComet comet = IComet(_market);
+
+        IComet.AssetInfo memory assetInfo = comet.getAssetInfoByAddress(_tokenAddr);
+        IComet.TotalsCollateral memory totalColl = comet.totalsCollateral(_tokenAddr);
+
+        coll = CollateralInfoFull({
+            tokenAddr: _tokenAddr,
+            totalSupply: totalColl.totalSupplyAsset,
+            supplyReserved: totalColl._reserved,
+            borrowCollateralFactor: assetInfo.borrowCollateralFactor,
+            liquidateCollateralFactor: assetInfo.liquidateCollateralFactor,
+            liquidationFactor: assetInfo.liquidationFactor,
+            price: comet.getPrice(assetInfo.priceFeed),
+            supplyCap: assetInfo.supplyCap
+        });
+    }
+
+    function getFullBaseTokenInfo(address _market) public view returns (BaseTokenInfoFull memory baseToken) {
+        IComet comet = IComet(_market);
+
+        IComet.TotalsBasic memory basics = comet.totalsBasic();
+
+        baseToken = BaseTokenInfoFull({
+            tokenAddr: comet.baseToken(),
+            supplyIndex: basics.baseSupplyIndex,
+            borrowIndex: basics.baseBorrowIndex,
+            trackingSupplyIndex: basics.trackingSupplyIndex,
+            trackingBorrowIndex: basics.trackingBorrowIndex,
+            totalSupply: basics.totalSupplyBase,
+            totalBorrow: basics.totalBorrowBase,
+            utilization: comet.getUtilization()
+        });
+    }
+
+    function getFullCollInfos(address _market, address[] memory _tokensAddr) public returns(CollateralInfoFull[] memory colls) {
+        colls = new CollateralInfoFull[](_tokensAddr.length);
+
+        for (uint i; i < _tokensAddr.length; ++i) {
+            colls[i] = getFullCollInfo(_market, _tokensAddr[i]);
+        }
+    }
+
+    function getAssetPrice(address _market, address _tokenAddr) public view returns (uint256) {
+        IComet comet = IComet(_market);
+        IComet.AssetInfo memory assetInfo = comet.getAssetInfoByAddress(_tokenAddr);
+
+        return comet.getPrice(assetInfo.priceFeed);
+    }
+
+    function getGovernanceInfoFull(address _market) public view returns (GovernanceInfoFull memory govInfo) {
+        IComet comet = IComet(_market);
+
+        govInfo = GovernanceInfoFull({
+            isSupplyPaused: comet.isSupplyPaused(),
+            isTransferPaused: comet.isTransferPaused(),
+            isWithdrawPaused: comet.isWithdrawPaused(),
+            isAbsorbPaused: comet.isAbsorbPaused()
+        });
     }
 }

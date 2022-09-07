@@ -14,6 +14,26 @@ abstract contract IComet {
         uint64 liquidationFactor;
         uint128 supplyCap;
     }
+
+    struct TotalsCollateral {
+        uint128 totalSupplyAsset;
+        uint128 _reserved;
+    }
+
+    struct TotalsBasic {
+        uint64 baseSupplyIndex;
+        uint64 baseBorrowIndex;
+        uint64 trackingSupplyIndex;
+        uint64 trackingBorrowIndex;
+        uint104 totalSupplyBase;
+        uint104 totalBorrowBase;
+        uint40 lastAccrualTime;
+        uint8 pauseFlags;
+    }
+
+    function totalsBasic() public virtual view returns (TotalsBasic memory);
+
+    function totalsCollateral(address) public virtual returns (TotalsCollateral memory);
     
     function supply(address asset, uint amount) virtual external;
     function supplyTo(address dst, address asset, uint amount) virtual external;
@@ -45,8 +65,15 @@ abstract contract IComet {
 
     function numAssets() virtual public view returns (uint8);
     function getAssetInfo(uint8 i) virtual public view returns (AssetInfo memory);
+    function getAssetInfoByAddress(address asset) virtual public view returns (AssetInfo memory);
     function getPrice(address priceFeed) virtual public view returns (uint256);
 
     function allow(address manager, bool isAllowed) virtual external;
     function allowance(address owner, address spender) virtual external view returns (uint256);
+
+    function isSupplyPaused() virtual external view returns (bool);
+    function isTransferPaused() virtual external view returns (bool);
+    function isWithdrawPaused() virtual external view returns (bool);
+    function isAbsorbPaused() virtual external view returns (bool);
+
 }
