@@ -4,7 +4,6 @@ pragma solidity =0.8.10;
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompV3Helper.sol";
-import "../../interfaces/IERC20.sol";
 
 /// @title Payback a token a user borrowed from Compound
 contract CompV3Payback is ActionBase, CompV3Helper {
