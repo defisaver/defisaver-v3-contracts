@@ -38,6 +38,8 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
         uint borrowIndex;
         uint trackingSupplyIndex;
         uint trackingBorrowIndex;
+        uint supplyRate;
+        uint borrowRate;
         uint totalSupply;
         uint totalBorrow;
         uint utilization;
@@ -144,15 +146,19 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
 
         IComet.TotalsBasic memory basics = comet.totalsBasic();
 
+        uint utilization = comet.getUtilization();
+
         baseToken = BaseTokenInfoFull({
             tokenAddr: comet.baseToken(),
             supplyIndex: basics.baseSupplyIndex,
             borrowIndex: basics.baseBorrowIndex,
             trackingSupplyIndex: basics.trackingSupplyIndex,
             trackingBorrowIndex: basics.trackingBorrowIndex,
+            supplyRate: comet.getSupplyRate(utilization),
+            borrowRate: comet.getBorrowRate(utilization),
             totalSupply: basics.totalSupplyBase,
             totalBorrow: basics.totalBorrowBase,
-            utilization: comet.getUtilization()
+            utilization: utilization
         });
     }
 
