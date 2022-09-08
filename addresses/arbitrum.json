@@ -99,6 +99,17 @@
         "history": []
     },
     {
+      "name": "ZeroxWrapper",
+      "address": "0x04a518629EBa20C949F94636F75291607c9B9Ca8",
+      "id": "0x6eddecea",
+      "path": "contracts/exchangeV3/offchainWrappersV3/ZeroxWrapper.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
         "name": "DFSPrices",
         "address": "0x8f9ee420D3fA095E8Ed3f227053164dAC41e790a",
         "id": "0x066e594a",

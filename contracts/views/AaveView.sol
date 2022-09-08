@@ -42,6 +42,10 @@ contract AaveView is AaveHelper, DSMath{
         uint256 collateralFactor;
         uint256 liquidationRatio;
         uint256 price;
+        uint256 totalBorrowVar;	
+        uint256 totalBorrowStab;
+        bool isActive;
+        bool isFrozen;
         bool usageAsCollateralEnabled;
         bool borrowingEnabled;
         bool stableBorrowRateEnabled;
@@ -61,6 +65,7 @@ contract AaveView is AaveHelper, DSMath{
         uint256 balance;
         uint256 borrowsStable;
         uint256 borrowsVariable;
+        uint256 stableBorrowRate;
         bool enabledAsCollateral;
     }
 
@@ -113,7 +118,7 @@ contract AaveView is AaveHelper, DSMath{
             address asset = _tokens[i];
             userTokens[i].token = asset;
 
-            (userTokens[i].balance, userTokens[i].borrowsStable, userTokens[i].borrowsVariable,,,,,,userTokens[i].enabledAsCollateral) = dataProvider.getUserReserveData(asset, _user);
+            (userTokens[i].balance, userTokens[i].borrowsStable, userTokens[i].borrowsVariable,,,userTokens[i].stableBorrowRate,,,userTokens[i].enabledAsCollateral) = dataProvider.getUserReserveData(asset, _user);
         }
     }
 
@@ -152,7 +157,7 @@ contract AaveView is AaveHelper, DSMath{
         }
     }
 
-    function getTokenInfoFull(IAaveProtocolDataProviderV2 _dataProvider, address _priceOracleAddress, address _token) private view returns(TokenInfoFull memory _tokenInfo) {
+    function getTokenInfoFull(IAaveProtocolDataProviderV2 _dataProvider, address _priceOracleAddress, address _token) public view returns(TokenInfoFull memory _tokenInfo) {
         (
             , // uint256 decimals
             uint256 ltv,
@@ -162,8 +167,8 @@ contract AaveView is AaveHelper, DSMath{
             bool usageAsCollateralEnabled,
             bool borrowingEnabled,
             bool stableBorrowRateEnabled,
-            , //   bool isActive
-            //   bool isFrozen
+            bool isActive,
+            bool isFrozen
         ) = _dataProvider.getReserveConfigurationData(_token);
 
         ReserveData memory t;
@@ -197,6 +202,10 @@ contract AaveView is AaveHelper, DSMath{
             collateralFactor: ltv,
             liquidationRatio: liquidationThreshold,
             price: price,
+            totalBorrowVar: t.totalVariableDebt,	
+            totalBorrowStab: t.totalStableDebt,
+            isActive: isActive,
+            isFrozen: isFrozen,
             usageAsCollateralEnabled: usageAsCollateralEnabled,
             borrowingEnabled: borrowingEnabled,
             stableBorrowRateEnabled: stableBorrowRateEnabled
