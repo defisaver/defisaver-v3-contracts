@@ -172,8 +172,8 @@
     "ethers" "^5.4.6"
     "memoizee" "^0.4.15"
 
-"@defisaver/sdk@github:DecenterApps/defisaver-sdk#feature/comp-v3":
-  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#4f5c7de4bbdb296f008d4760f2a7fc3af7cbc960"
+"@defisaver/sdk@github:DecenterApps/defisaver-sdk#feature/comp-v3-automation":
+  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#3ea04728afa779f5699751f70e2ce8c373379f79"
   "version" "0.3.12"
   dependencies:
     "@defisaver/tokens" "^1.4.18"
