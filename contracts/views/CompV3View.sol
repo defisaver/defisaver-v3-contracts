@@ -34,6 +34,7 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
 
     struct BaseTokenInfoFull {
         address tokenAddr;
+        uint price;
         uint supplyIndex;
         uint borrowIndex;
         uint trackingSupplyIndex;
@@ -52,10 +53,6 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
         bool isAbsorbPaused;
     }
     
-    uint64 public constant FACTOR_SCALE = 1e18;
-    uint64 public constant BASE_SCALE = 1e6;
-    uint public constant PRICE_FEED_SCALE = 1e8;
-
     /// @notice Returns all supported collateral assets 
     function getAssets(address _market) public view returns(IComet.AssetInfo[] memory assets){
         uint8 numAssets = IComet(_market).numAssets();
@@ -107,18 +104,18 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
             data.collAmounts[i] = tokenBalance;
             if (tokenBalance != 0) {
                 data.collAddr[i] = asset;
-                uint value = tokenBalance * comet.getPrice(priceFeed) / PRICE_FEED_SCALE / assets[i].scale;
+                uint value = tokenBalance * comet.getPrice(priceFeed) / assets[i].scale;
                 data.collAmounts[i] = tokenBalance;
                 data.collValue += value;
-                data.maxDebt += value* assets[i].liquidationFactor/ FACTOR_SCALE;
+                data.maxDebt += value * assets[i].liquidationFactor / comet.factorScale();
             }
         }
 
         address usdcPriceFeed = comet.baseTokenPriceFeed();
         data.borrowAmount = comet.borrowBalanceOf(_user);
-        data.borrowValue = comet.borrowBalanceOf(_user) * comet.getPrice(usdcPriceFeed) / PRICE_FEED_SCALE / BASE_SCALE;
+        data.borrowValue = comet.borrowBalanceOf(_user) * comet.getPrice(usdcPriceFeed) / comet.priceScale();
         data.depositAmount = comet.balanceOf(_user);
-        data.depositValue = comet.balanceOf(_user) * comet.getPrice(usdcPriceFeed) / PRICE_FEED_SCALE / BASE_SCALE;
+        data.depositValue = comet.balanceOf(_user) * comet.getPrice(usdcPriceFeed) / comet.priceScale();
 
         return data;
     }
@@ -150,6 +147,7 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
 
         baseToken = BaseTokenInfoFull({
             tokenAddr: comet.baseToken(),
+            price: comet.getPrice(comet.baseTokenPriceFeed()),
             supplyIndex: basics.baseSupplyIndex,
             borrowIndex: basics.baseBorrowIndex,
             trackingSupplyIndex: basics.trackingSupplyIndex,
