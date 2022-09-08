@@ -20,6 +20,20 @@ abstract contract IComet {
         uint128 _reserved;
     }
 
+      struct UserCollateral {
+        uint128 balance;
+        uint128 _reserved;
+    }
+
+
+    struct UserBasic {
+        int104 principal;
+        uint64 baseTrackingIndex;
+        uint64 baseTrackingAccrued;
+        uint16 assetsIn;
+        uint8 _reserved;
+    }
+
     struct TotalsBasic {
         uint64 baseSupplyIndex;
         uint64 baseBorrowIndex;
@@ -75,5 +89,10 @@ abstract contract IComet {
     function isTransferPaused() virtual external view returns (bool);
     function isWithdrawPaused() virtual external view returns (bool);
     function isAbsorbPaused() virtual external view returns (bool);
+    function baseIndexScale() virtual external pure returns (uint64);
 
+    function userBasic(address) virtual external view returns (UserBasic memory);
+    function userCollateral(address, address) virtual external view returns (UserCollateral memory);
+    function priceScale() virtual external pure returns (uint64);
+    function factorScale() virtual external pure returns (uint64);
 }
