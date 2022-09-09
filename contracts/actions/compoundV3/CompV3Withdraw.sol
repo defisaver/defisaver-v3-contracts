@@ -60,6 +60,7 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
         address _asset,
         uint256 _amount
     ) internal returns (uint256, bytes memory) {
+        require(_to != address(0), "Tokens sent to 0x0");
 
         IComet(_market).withdrawTo(_to, _asset, _amount);
 

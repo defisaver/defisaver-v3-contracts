@@ -70,13 +70,13 @@ contract CompV3Claim is ActionBase, CompV3Helper {
         address _to,
         bool _shouldAccrue
     ) internal returns (uint256 compClaimed, bytes memory logData) {
-        address baseToken = IComet(_market).baseToken();
+        ICometRewards.RewardConfig memory rewards = ICometRewards(COMET_REWARDS_ADDR).rewardConfig(_market);
 
-        uint256 balanceBefore = IERC20(baseToken).balanceOf(address(this));
+        uint256 balanceBefore = IERC20(rewards.token).balanceOf(address(this));
 
         ICometRewards(COMET_REWARDS_ADDR).claimTo(_market, _onBehalf, _to, _shouldAccrue);
 
-        uint256 balanceAfter = IERC20(baseToken).balanceOf(address(this));
+        uint256 balanceAfter = IERC20(rewards.token).balanceOf(address(this));
 
         compClaimed = balanceBefore - balanceAfter;
 
