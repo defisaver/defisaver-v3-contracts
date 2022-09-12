@@ -1351,7 +1351,7 @@ const createCompV3RepayStrategy = () => {
         '&market', // comet proxy addr of used market
         '&proxy', // hardcoded
         '%assetAddr', // variable token to withdraw
-        '&amount', // variable amount to withdraw
+        '%amount', // variable amount to withdraw
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -1407,12 +1407,12 @@ const createFlCompV3RepayStrategy = () => {
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '&baseToken', '$3',
+        '0', '&baseToken', '$2',
     );
 
     const paybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
         '&market', // hardcoded
-        '$4', // amount hardcoded
+        '$3', // amount hardcoded
         '&proxy', // proxy hardcoded (from)
         '&proxy', // proxy hardcoded (onBehalf)
     );
