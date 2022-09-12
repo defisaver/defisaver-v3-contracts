@@ -57,7 +57,7 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
     ) internal returns (uint256, bytes memory) {
         address baseTokenAddress = IComet(_market).baseToken();
 
-        IComet(_market).withdrawTo(_to,baseTokenAddress,_amount);
+        IComet(_market).withdrawTo(_to, baseTokenAddress, _amount);
 
         bytes memory logData = abi.encode(_market, baseTokenAddress, _amount, _to);
         return (_amount, logData);
