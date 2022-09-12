@@ -18,7 +18,6 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
         uint borrowAmount;
         uint borrowValue;
         uint collValue;
-        uint maxDebt;
     }
 
     struct CollateralInfoFull {
@@ -91,8 +90,7 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
             depositValue: 0,
             borrowAmount: 0,
             borrowValue: 0,
-            collValue: 0,
-            maxDebt: 0
+            collValue: 0
         });
 
         for (uint i = 0; i < assets.length; i++) {
@@ -107,7 +105,6 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
                 uint value = tokenBalance * comet.getPrice(priceFeed) / assets[i].scale;
                 data.collAmounts[i] = tokenBalance;
                 data.collValue += value;
-                data.maxDebt += value * assets[i].liquidationFactor / comet.factorScale();
             }
         }
 
