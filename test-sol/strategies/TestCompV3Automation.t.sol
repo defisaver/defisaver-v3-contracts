@@ -4,7 +4,6 @@ pragma solidity =0.8.10;
 import "ds-test/test.sol";
 import "../CheatCodes.sol";
 
-import "../../contracts/triggers/CompV3RatioTrigger.sol";
 import "../utils/Tokens.sol";
 import "../utils/CompUser.sol";
 import "../TokenAddresses.sol";
@@ -12,11 +11,30 @@ import "../TokenAddresses.sol";
 import "../utils/StrategyBuilder.sol";
 import "../utils/BundleBuilder.sol";
 import "../utils/RegistryUtils.sol";
+import "../utils/ActionsUtils.sol";
+import "../utils/Strategies.sol";
 
+import "../../contracts/core/strategy/StrategyModel.sol";
+import "../../contracts/core/strategy/StrategyExecutor.sol";
+import "../../contracts/triggers/CompV3RatioTrigger.sol";
 import "../../contracts/actions/fee/GasFeeTaker.sol";
 import "../../contracts/actions/exchange/DFSSell.sol";
+import "../../contracts/actions/compoundV3/CompV3SubProxy.sol";
 
-contract TestCompV3Automation is DSTest, DSMath, Tokens, TokenAddresses, RegistryUtils {
+contract TestCompV3Automation is
+    DSTest,
+    DSMath,
+    Tokens,
+    TokenAddresses,
+    RegistryUtils,
+    ActionsUtils,
+    Strategies
+{
+    address internal constant COMET_USDC = 0xc3d688B66703497DAA19211EEdff47f25384cdc3;
+
+    CompUser user1;
+    CompV3SubProxy subProxy;
+
     constructor() {
         redeploy("CompV3Supply", address(new CompV3Supply()));
         redeploy("CompV3Withdraw", address(new CompV3Withdraw()));
@@ -26,162 +44,85 @@ contract TestCompV3Automation is DSTest, DSMath, Tokens, TokenAddresses, Registr
         redeploy("DFSSell", address(new DFSSell()));
         redeploy("GasFeeTaker", address(new GasFeeTaker()));
 
-        uint repayId = createCompV3Repay();
-        uint repayFLId = createCompV3FLRepay();
+        addBotCaller(address(this));
 
-        uint boostId = createCompV3Boost();
-        uint boostFLId = createCompV3FLBoost();
+        vm.etch(SUB_STORAGE_ADDR, address(new SubStorage()).code);
+
+        uint256 repayId = createCompV3Repay();
+        uint256 repayFLId = createCompV3FLRepay();
+
+        uint256 boostId = createCompV3Boost();
+        uint256 boostFLId = createCompV3FLBoost();
 
         uint64[] memory repayIds = new uint64[](2);
         repayIds[0] = uint64(repayId);
         repayIds[1] = uint64(repayFLId);
-        uint repayBundleId = new BundleBuilder().init(repayIds);
+        new BundleBuilder().init(repayIds);
 
         uint64[] memory boostIds = new uint64[](2);
         boostIds[0] = uint64(boostId);
         boostIds[1] = uint64(boostFLId);
-        uint boostBundleId = new BundleBuilder().init(boostIds);
+        new BundleBuilder().init(boostIds);
 
-        console.log(repayBundleId, boostBundleId);
+        // create compV3 position
+        user1 = new CompUser();
+        gibTokens(user1.proxyAddr(), WETH_ADDR, 10 ether);
+
+        user1.supply(COMET_USDC, WETH_ADDR, 10 ether);
+        user1.borrow(COMET_USDC, 10_000e6);
+
+        subProxy = new CompV3SubProxy();
     }
 
-    function createCompV3Repay() internal returns (uint) {
-        StrategyBuilder repayStrategy = new StrategyBuilder("CompV3Repay", true);
-        repayStrategy.addSubMapping("&market");
-        repayStrategy.addSubMapping("&baseToken");
+    function testCompV3RepayStrategy() public {
+        uint128 minRatio = 180e16;
+        uint128 maxRatio = 220e16;
+        uint128 targetRatioBoost = 200e16;
+        uint128 targetRatioRepay = 200e16;
 
-        repayStrategy.addTrigger("CompV3RatioTrigger");
+        uint256 wethAmount = 0.5 ether;
 
-        string[] memory withdrawParams = new string[](4);
-        withdrawParams[0] = "&market";
-        withdrawParams[1] = "&proxy";
-        repayStrategy.addAction("CompV3Withdraw", withdrawParams);
+        CompV3SubProxy.CompV3SubData memory params = CompV3SubProxy.CompV3SubData({
+            market: COMET_USDC,
+            baseToken: USDC_ADDR,
+            minRatio: minRatio,
+            maxRatio: maxRatio,
+            targetRatioBoost: targetRatioBoost,
+            targetRatioRepay: targetRatioRepay,
+            boostEnabled: true
+        });
 
-        string[] memory sellParams = new string[](5);
-        sellParams[1] = "&baseToken";
-        sellParams[2] = "$1";
-        sellParams[3] = "&proxy";
-        sellParams[4] = "&proxy";
-        repayStrategy.addAction("DFSSell", sellParams);
+        user1.executeWithProxy(
+            address(subProxy),
+            abi.encodeWithSignature(
+                "subToCompV3Automation((address,address,uint128,uint128,uint128,uint128,bool))",
+                params
+            )
+        );
 
-        string[] memory gasFeeParams = new string[](3);
-        gasFeeParams[1] = "&baseToken";
-        gasFeeParams[2] = "$2";
-        repayStrategy.addAction("GasFeeTaker", gasFeeParams);
+        StrategyExecutor executor = StrategyExecutor(getAddr("StrategyExecutorID"));
+        uint256 repayIndex = 0;
 
-        string[] memory paybackParams = new string[](4);
-        paybackParams[0] = "&market";
-        paybackParams[1] = "$3";
-        paybackParams[2] = "&proxy";
-        paybackParams[3] = "&proxy";
-        repayStrategy.addAction("CompV3Payback", paybackParams);
+        bytes[] memory _triggerCallData = new bytes[](1);
+        _triggerCallData[0] = "";
+        bytes[] memory _actionsCallData = new bytes[](4);
 
-        return repayStrategy.createStrategy();
+        address proxy = user1.proxyAddr();
+
+        address[] memory path = new address[](2);
+        path[0] = WETH_ADDR;
+        path[1] = USDC_ADDR;
+        bytes memory wrapperData = abi.encode(path);
+
+        _actionsCallData[0] = compV3WithdrawEncode(COMET_USDC, proxy, WETH_ADDR, wethAmount);
+        _actionsCallData[1] = sellEncode(WETH_ADDR, USDC_ADDR, 0, proxy, proxy, UNI_V2_WRAPPER, wrapperData);
+        _actionsCallData[2] = gasFeeEncode(1_200_000, USDC_ADDR);
+        _actionsCallData[3] = compV3PaybackEncode(COMET_USDC, proxy, 0);
+
+        StrategyModel.StrategySub memory sub = subProxy.formatRepaySub(params, proxy);
+
+        uint256 subId = SubStorage(SUB_STORAGE_ADDR).getSubsCount() - 2;
+
+        executor.executeStrategy(subId, repayIndex, _triggerCallData, _actionsCallData, sub);
     }
-
-    function createCompV3FLRepay() internal returns (uint) {
-        StrategyBuilder repayStrategy = new StrategyBuilder("CompV3FLRepay", true);
-        repayStrategy.addSubMapping("&market");
-        repayStrategy.addSubMapping("&baseToken");
-
-        repayStrategy.addTrigger("CompV3RatioTrigger");
-
-        string[] memory flParams = new string[](1);
-        repayStrategy.addAction("FLBalancer", flParams);
-
-        string[] memory sellParams = new string[](5);
-        sellParams[1] = "&baseToken";
-        sellParams[3] = "&proxy";
-        sellParams[4] = "&proxy";
-        repayStrategy.addAction("DFSSell", sellParams);
-
-        string[] memory gasFeeParams = new string[](3);
-        gasFeeParams[1] = "&baseToken";
-        gasFeeParams[2] = "$2";
-        repayStrategy.addAction("GasFeeTaker", gasFeeParams);
-
-        string[] memory paybackParams = new string[](4);
-        paybackParams[0] = "&market";
-        paybackParams[1] = "$3";
-        paybackParams[2] = "&proxy";
-        paybackParams[3] = "&proxy";
-        repayStrategy.addAction("CompV3Payback", paybackParams);
-
-        string[] memory withdrawParams = new string[](4);
-        withdrawParams[0] = "&market";
-        withdrawParams[3] = "$1";
-        repayStrategy.addAction("CompV3Withdraw", withdrawParams);
-
-        return repayStrategy.createStrategy();
-    }
-
-    function createCompV3Boost() internal returns (uint) {
-        StrategyBuilder boostStrategy = new StrategyBuilder("CompV3Boost", true);
-        boostStrategy.addSubMapping("&market");
-        boostStrategy.addSubMapping("&baseToken");
-
-        boostStrategy.addTrigger("CompV3RatioTrigger");
-
-        string[] memory borrowParams = new string[](3);
-        borrowParams[0] = "&market";
-        borrowParams[2] = "&proxy";
-        boostStrategy.addAction("CompV3Borrow", borrowParams);
-
-        string[] memory sellParams = new string[](5);
-        sellParams[0] = "&baseToken";
-        sellParams[2] = "$1";
-        sellParams[3] = "&proxy";
-        sellParams[4] = "&proxy";
-        boostStrategy.addAction("DFSSell", sellParams);
-
-        string[] memory gasFeeParams = new string[](3);
-        gasFeeParams[2] = "$2";
-        boostStrategy.addAction("GasFeeTaker", gasFeeParams);
-
-        string[] memory supplyParams = new string[](4);
-        supplyParams[0] = "&market";
-        supplyParams[2] = "$3";
-        supplyParams[3] = "&proxy";
-        boostStrategy.addAction("CompV3Supply", supplyParams);
-
-        return boostStrategy.createStrategy();
-    }
-
-    function createCompV3FLBoost() internal returns (uint) {
-        StrategyBuilder boostStrategy = new StrategyBuilder("CompV3FLBoost", true);
-        boostStrategy.addSubMapping("&market");
-        boostStrategy.addSubMapping("&baseToken");
-
-        boostStrategy.addTrigger("CompV3RatioTrigger");
-
-        string[] memory flParams = new string[](1);
-        boostStrategy.addAction("FLBalancer", flParams);
-
-        string[] memory sellParams = new string[](5);
-        sellParams[0] = "&baseToken";
-        sellParams[3] = "&proxy";
-        sellParams[4] = "&proxy";
-        boostStrategy.addAction("DFSSell", sellParams);
-
-        string[] memory gasFeeParams = new string[](3);
-        gasFeeParams[2] = "$2";
-        boostStrategy.addAction("GasFeeTaker", gasFeeParams);
-
-        string[] memory supplyParams = new string[](4);
-        supplyParams[0] = "&market";
-        supplyParams[2] = "$3";
-        supplyParams[3] = "&proxy";
-        boostStrategy.addAction("CompV3Supply", supplyParams);
-
-        string[] memory borrowParams = new string[](4);
-        borrowParams[0] = "&market";
-        borrowParams[2] = "$1";
-        boostStrategy.addAction("CompV3Borrow", borrowParams);
-
-        return boostStrategy.createStrategy();
-    }
-
-    function testEmpty() public {
-
-    }
-} 
+}

@@ -19,6 +19,8 @@ contract CompV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
 
     struct CompV3SubData {
+        address market;
+        address baseToken;
         uint128 minRatio;
         uint128 maxRatio;
         uint128 targetRatioBoost;
@@ -34,13 +36,13 @@ contract CompV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
         CompV3SubData calldata _subData
     ) public {
         givePermission(PROXY_AUTH_ADDR);
-        StrategySub memory repaySub = formatRepaySub(_subData);
+        StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
         if (_subData.boostEnabled) {
             _validateSubData(_subData);
 
-            StrategySub memory boostSub = formatBoostSub(_subData);
+            StrategySub memory boostSub = formatBoostSub(_subData, address(this));
             SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
         }
     }
@@ -55,14 +57,14 @@ contract CompV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
     ) public {
 
         // update repay as we must have a subId, it's ok if it's the same data
-        StrategySub memory repaySub = formatRepaySub(_subData);
+        StrategySub memory repaySub = formatRepaySub(_subData, address(this));
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_subId1, repaySub);
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId1);
 
         if (_subData.boostEnabled) {
             _validateSubData(_subData);
 
-            StrategySub memory boostSub = formatBoostSub(_subData);
+            StrategySub memory boostSub = formatBoostSub(_subData, address(this));
 
             // if we don't have a boost bundleId, create one
             if (_subId2 == 0) {
@@ -120,31 +122,32 @@ contract CompV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
     }
 
     /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized aave sub
-    function formatRepaySub(CompV3SubData memory _user) public pure returns (StrategySub memory repaySub) {
+    function formatRepaySub(CompV3SubData memory _subData, address _proxy) public pure returns (StrategySub memory repaySub) {
         repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData = abi.encode(uint256(_user.minRatio), uint8(RatioState.UNDER));
+        bytes memory triggerData = abi.encode(_proxy, _subData.market, uint256(_subData.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData =  new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
         repaySub.subData =  new bytes32[](2);
-        repaySub.subData[0] = bytes32(uint256(_user.targetRatioRepay));
-
+        repaySub.subData[0] = bytes32(uint256(uint160(_subData.market)));
+        repaySub.subData[1] = bytes32(uint256(uint160(_subData.baseToken)));
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized aave sub
-    function formatBoostSub(CompV3SubData memory _user) public pure returns (StrategySub memory repaySub) {
-        repaySub.strategyOrBundleId = BOOST_BUNDLE_ID;
-        repaySub.isBundle = true;
+    function formatBoostSub(CompV3SubData memory _subData, address _proxy) public pure returns (StrategySub memory boostSub) {
+        boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
+        boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(uint256(_user.maxRatio), uint8(RatioState.OVER));
-        repaySub.triggerData =  new bytes[](1);
-        repaySub.triggerData[0] = triggerData;
+        bytes memory triggerData = abi.encode(_proxy, _subData.market, uint256(_subData.maxRatio), uint8(RatioState.OVER));
+        boostSub.triggerData =  new bytes[](1);
+        boostSub.triggerData[0] = triggerData;
 
-        repaySub.subData =  new bytes32[](2);
-        repaySub.subData[0] = bytes32(uint256(_user.targetRatioBoost));
+        boostSub.subData =  new bytes32[](2);
+        boostSub.subData[0] = bytes32(uint256(uint160(_subData.market)));
+        boostSub.subData[1] = bytes32(uint256(uint160(_subData.baseToken)));
     }
 }

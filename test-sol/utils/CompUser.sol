@@ -10,7 +10,7 @@ import "../../contracts/actions/compoundV3/CompV3Payback.sol";
 
 contract CompUser {
 
-    DSProxy proxy;
+    DSProxy public proxy;
     address public proxyAddr;
 
     address constant FACTORY_ADDR = 0xA26e15C895EFc0616177B7c1e7270A4C7D51C997;
@@ -49,5 +49,9 @@ contract CompUser {
                 "executeActionDirect(bytes)",
                 abi.encode(params)
             ));
+    }
+
+    function executeWithProxy(address _target, bytes memory _funcCalldata) public {
+        proxy.execute(_target, _funcCalldata);
     }
 }

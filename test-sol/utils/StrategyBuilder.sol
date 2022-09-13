@@ -32,14 +32,14 @@ contract StrategyBuilder {
     }
 
     function addAction(string memory _actionName, string[] memory _paramMaps) public {
-        bytes4 actionId = bytes4(keccak256(abi.encode(_actionName)));
+        bytes4 actionId = bytes4(keccak256(abi.encodePacked(_actionName)));
         actions.push(actionId);
 
         params[actionId] = _paramMaps;
     }
 
     function addTrigger(string memory _triggerName) public {
-        bytes4 triggerId = bytes4(keccak256(abi.encode(_triggerName)));
+        bytes4 triggerId = bytes4(keccak256(abi.encodePacked(_triggerName)));
         triggers.push(triggerId);
     }
 
@@ -80,6 +80,27 @@ contract StrategyBuilder {
         if (keccak256(abi.encode(_strParam)) == keccak256(abi.encode("&eoa"))) {
             return 255;
         }
+
+        if (keccak256(abi.encode(_strParam)) == keccak256(abi.encode("$1"))) {
+            return 1;
+        }
+
+        if (keccak256(abi.encode(_strParam)) == keccak256(abi.encode("$2"))) {
+            return 2;
+        }
+
+        if (keccak256(abi.encode(_strParam)) == keccak256(abi.encode("$3"))) {
+            return 3;
+        }
+
+        if (keccak256(abi.encode(_strParam)) == keccak256(abi.encode("$4"))) {
+            return 4;
+        }
+
+        if (keccak256(abi.encode(_strParam)) == keccak256(abi.encode("$5"))) {
+            return 5;
+        }
+
 
         return subValues[_strParam];
     }
