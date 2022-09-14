@@ -3,6 +3,7 @@
 pragma solidity =0.8.10;
 
 import "../auth/AdminAuth.sol";
+import "../utils/TransientStorage.sol";
 import "../actions/compoundV3/helpers/CompV3RatioHelper.sol";
 import "../interfaces/ITrigger.sol";
 
@@ -10,6 +11,8 @@ import "../interfaces/ITrigger.sol";
 contract CompV3RatioTrigger is ITrigger, AdminAuth, CompV3RatioHelper {
 
     enum RatioState { OVER, UNDER }
+
+    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
     
     /// @param user address of the user whose position we check
     /// @param _market Main Comet proxy contract that is different for each compound market
@@ -25,13 +28,16 @@ contract CompV3RatioTrigger is ITrigger, AdminAuth, CompV3RatioHelper {
     /// @dev checks current safety ratio of a CompoundV3 position and triggers if it's in a correct state
     function isTriggered(bytes memory, bytes memory _subData)
         public
-        view
         override
         returns (bool)
     {   
         SubParams memory triggerSubData = parseInputs(_subData);
 
         uint256 currRatio = getSafetyRatio(triggerSubData.market, triggerSubData.user);
+
+        if (currRatio == 0) return false;
+
+        tempStorage.setBytes32("COMP_RATIO", bytes32(currRatio));
 
         if (RatioState(triggerSubData.state) == RatioState.OVER) {
             if (currRatio > triggerSubData.ratio) return true;

@@ -3,11 +3,10 @@
 pragma solidity =0.8.10;
 
 import "../../../DS/DSMath.sol";
-import "../../../utils/Exponential.sol";
 import "../../../interfaces/compoundV3/IComet.sol";
+import "./MainnetCompV3Addresses.sol";
 
-
-contract CompV3RatioHelper is Exponential, DSMath {
+contract CompV3RatioHelper is DSMath, MainnetCompV3Addresses {
 
     function getAssets(address _market) public view returns(IComet.AssetInfo[] memory assets){
         uint8 numAssets = IComet(_market).numAssets();

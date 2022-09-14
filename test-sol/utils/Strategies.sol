@@ -9,6 +9,8 @@ contract Strategies {
         StrategyBuilder repayStrategy = new StrategyBuilder("CompV3Repay", true);
         repayStrategy.addSubMapping("&market");
         repayStrategy.addSubMapping("&baseToken");
+        repayStrategy.addSubMapping("&ratioState");
+        repayStrategy.addSubMapping("&targetRatio");
 
         repayStrategy.addTrigger("CompV3RatioTrigger");
 
@@ -36,6 +38,12 @@ contract Strategies {
         paybackParams[3] = "&proxy";
         repayStrategy.addAction("CompV3Payback", paybackParams);
 
+        string[] memory checkerParams = new string[](3);
+        checkerParams[0] = "&ratioState";
+        checkerParams[1] = "&targetRatio";
+        checkerParams[2] = "&market";
+        repayStrategy.addAction("CompV3RatioCheck", checkerParams);
+
         return repayStrategy.createStrategy();
     }
 
@@ -43,6 +51,8 @@ contract Strategies {
         StrategyBuilder repayStrategy = new StrategyBuilder("CompV3FLRepay", true);
         repayStrategy.addSubMapping("&market");
         repayStrategy.addSubMapping("&baseToken");
+        repayStrategy.addSubMapping("&ratioState");
+        repayStrategy.addSubMapping("&targetRatio");
 
         repayStrategy.addTrigger("CompV3RatioTrigger");
 
@@ -72,6 +82,12 @@ contract Strategies {
         withdrawParams[3] = "$1";
         repayStrategy.addAction("CompV3Withdraw", withdrawParams);
 
+        string[] memory checkerParams = new string[](3);
+        checkerParams[0] = "&ratioState";
+        checkerParams[1] = "&targetRatio";
+        checkerParams[2] = "&market";
+        repayStrategy.addAction("CompV3RatioCheck", checkerParams);
+
         return repayStrategy.createStrategy();
     }
 
@@ -79,6 +95,8 @@ contract Strategies {
         StrategyBuilder boostStrategy = new StrategyBuilder("CompV3Boost", true);
         boostStrategy.addSubMapping("&market");
         boostStrategy.addSubMapping("&baseToken");
+        boostStrategy.addSubMapping("&ratioState");
+        boostStrategy.addSubMapping("&targetRatio");
 
         boostStrategy.addTrigger("CompV3RatioTrigger");
 
@@ -104,6 +122,12 @@ contract Strategies {
         supplyParams[3] = "&proxy";
         boostStrategy.addAction("CompV3Supply", supplyParams);
 
+        string[] memory checkerParams = new string[](3);
+        checkerParams[0] = "&ratioState";
+        checkerParams[1] = "&targetRatio";
+        checkerParams[2] = "&market";
+        boostStrategy.addAction("CompV3RatioCheck", checkerParams);
+
         return boostStrategy.createStrategy();
     }
 
@@ -111,6 +135,8 @@ contract Strategies {
         StrategyBuilder boostStrategy = new StrategyBuilder("CompV3FLBoost", true);
         boostStrategy.addSubMapping("&market");
         boostStrategy.addSubMapping("&baseToken");
+        boostStrategy.addSubMapping("&ratioState");
+        boostStrategy.addSubMapping("&targetRatio");
 
         boostStrategy.addTrigger("CompV3RatioTrigger");
 
@@ -137,6 +163,12 @@ contract Strategies {
         borrowParams[0] = "&market";
         borrowParams[1] = "$1";
         boostStrategy.addAction("CompV3Borrow", borrowParams);
+
+        string[] memory checkerParams = new string[](3);
+        checkerParams[0] = "&ratioState";
+        checkerParams[1] = "&targetRatio";
+        checkerParams[2] = "&market";
+        boostStrategy.addAction("CompV3RatioCheck", checkerParams);
 
         return boostStrategy.createStrategy();
     }

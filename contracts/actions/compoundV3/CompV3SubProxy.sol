@@ -131,9 +131,11 @@ contract CompV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
         repaySub.triggerData =  new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
-        repaySub.subData =  new bytes32[](2);
+        repaySub.subData =  new bytes32[](4);
         repaySub.subData[0] = bytes32(uint256(uint160(_subData.market)));
         repaySub.subData[1] = bytes32(uint256(uint160(_subData.baseToken)));
+        repaySub.subData[2] = bytes32(uint256(1)); // ratioState = repay
+        repaySub.subData[3] = bytes32(uint256(_subData.targetRatioRepay)); // targetRatio
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized aave sub
@@ -146,8 +148,10 @@ contract CompV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
         boostSub.triggerData =  new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
-        boostSub.subData =  new bytes32[](2);
+        boostSub.subData =  new bytes32[](4);
         boostSub.subData[0] = bytes32(uint256(uint160(_subData.market)));
         boostSub.subData[1] = bytes32(uint256(uint160(_subData.baseToken)));
+        boostSub.subData[2] = bytes32(uint256(0)); // ratioState = boost
+        boostSub.subData[3] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
     }
 }

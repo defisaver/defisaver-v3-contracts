@@ -8,6 +8,8 @@ import "../../contracts/actions/compoundV3/CompV3Borrow.sol";
 import "../../contracts/actions/exchange/DFSSell.sol";
 import "../../contracts/actions/fee/GasFeeTaker.sol";
 import "../../contracts/actions/flashloan/FLBalancer.sol";
+import "../../contracts/actions/checkers/CompV3RatioCheck.sol";
+
 
 contract ActionsUtils {
 
@@ -141,6 +143,16 @@ contract ActionsUtils {
             flParamGetterAddr: address(0),
             flParamGetterData: "",
             recipeData: ""
+        });
+
+        return abi.encode(params);
+    }
+
+    function compV3RatioCheckEncode(uint8 _state, uint _targetRatio, address _market) public pure returns (bytes memory) {
+        CompV3RatioCheck.Params memory params = CompV3RatioCheck.Params({
+            ratioState: CompV3RatioCheck.RatioState(_state),
+            targetRatio: _targetRatio,
+            market: _market
         });
 
         return abi.encode(params);
