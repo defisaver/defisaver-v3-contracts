@@ -135,7 +135,7 @@ contract Strategies {
 
         string[] memory borrowParams = new string[](4);
         borrowParams[0] = "&market";
-        borrowParams[2] = "$1";
+        borrowParams[1] = "$1";
         boostStrategy.addAction("CompV3Borrow", borrowParams);
 
         return boostStrategy.createStrategy();

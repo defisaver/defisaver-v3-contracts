@@ -19,6 +19,7 @@ abstract contract TokenAddresses {
     address internal constant MKR_ADDR = 0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2;
 
     address internal constant OWNER_ADDR = 0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00;
+    address internal constant COMET_USDC = 0xc3d688B66703497DAA19211EEdff47f25384cdc3;
 
     address internal constant UNI_V2_WRAPPER = 0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54;
 

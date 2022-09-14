@@ -11,8 +11,6 @@ import "../TokenAddresses.sol";
 
 
 contract TestCompV3RatioTrigger is DSTest, DSMath, Tokens, TokenAddresses {
-    address internal constant COMET_USDC = 0xc3d688B66703497DAA19211EEdff47f25384cdc3;
-
     CompV3RatioTrigger trigger;
 
     function setUp() public {
