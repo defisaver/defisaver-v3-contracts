@@ -421,13 +421,14 @@
     },
     {
       "name": "StrategyExecutor",
-      "address": "0xF087652A441858c1FB5F47aFA5bb4AB45C05B273",
+      "address": "0xf9c0A56c4c2D40C13d9D377b5E1Cdfe3Cb0C9FF7",
       "id": "0x0c1dc439",
       "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "0",
       "registryIds": [],
       "history": [
+        "0xF087652A441858c1FB5F47aFA5bb4AB45C05B273",
         "0xfeCB0c92c2233570332B3D7690141ffF4093c11E"
       ]
     },
