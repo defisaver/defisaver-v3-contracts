@@ -363,6 +363,17 @@
         "history": []
     },
     {
+        "name": "TransientStorage",
+        "address": "0x2F7Ef2ea5E8c97B8687CA703A0e50Aa5a49B7eb2",
+        "id": "0x69885459",
+        "path": "contracts/utils/TransientStorage.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveView",
         "address": "0xe088a5005Bb995A9554bD3FE7F47e80f8F182389",
         "id": "0x7da42156",

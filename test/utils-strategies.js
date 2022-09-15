@@ -143,6 +143,28 @@ const subToAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGISTR
     return latestSubId;
 };
 
+const subToCompV3Proxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const compV3SubProxyAddr = await getAddrFromRegistry('CompV3SubProxy', regAddr);
+
+    const CompV3SubProxy = await hre.ethers.getContractFactory('CompV3SubProxy');
+    const functionData = CompV3SubProxy.interface.encodeFunctionData(
+        'subToCompV3Automation',
+        inputData,
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](compV3SubProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToCompV3Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+
+    return latestSubId;
+};
+
 const updateAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
     const aaveSubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
 
@@ -217,6 +239,7 @@ const getSubHash = (subData) => {
 module.exports = {
     subToStrategy,
     subToAaveProxy,
+    subToCompV3Proxy,
     updateAaveProxy,
     createStrategy,
     createBundle,

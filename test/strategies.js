@@ -1036,8 +1036,6 @@ const createLiquityCloseToCollStrategy = (isTrailing = false) => {
     return liquityCloseToCollStrategy.encodeForDsProxyCall();
 };
 
-createLiquityCloseToCollStrategy();
-
 const createLimitOrderStrategy = () => {
     const limitOrderStrategy = new dfs.Strategy('LimitOrderStrategy');
 
@@ -1343,11 +1341,13 @@ const createCompV3RepayStrategy = () => {
 
     compV3RepayStrategy.addSubSlot('&market', 'address');
     compV3RepayStrategy.addSubSlot('&baseToken', 'address');
+    compV3RepayStrategy.addSubSlot('&ratioState', 'uint256');
+    compV3RepayStrategy.addSubSlot('&targetRatio', 'uint256');
 
     const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
     compV3RepayStrategy.addTrigger(compV3Trigger);
 
-    const withdrawAction = new dfs.actions.compoundV3.CompoundV3Withdraw(
+    const withdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
         '&market', // comet proxy addr of used market
         '&proxy', // hardcoded
         '%assetAddr', // variable token to withdraw
@@ -1376,10 +1376,15 @@ const createCompV3RepayStrategy = () => {
         '&proxy', // proxy hardcoded (onBehalf)
     );
 
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState', '&targetRatio', '&market',
+    );
+
     compV3RepayStrategy.addAction(withdrawAction);
     compV3RepayStrategy.addAction(sellAction);
     compV3RepayStrategy.addAction(feeTakingAction);
     compV3RepayStrategy.addAction(paybackAction);
+    compV3RepayStrategy.addAction(checkerAction);
 
     return compV3RepayStrategy.encodeForDsProxyCall();
 };
@@ -1389,6 +1394,8 @@ const createFlCompV3RepayStrategy = () => {
 
     compV3RepayStrategy.addSubSlot('&market', 'address');
     compV3RepayStrategy.addSubSlot('&baseToken', 'address');
+    compV3RepayStrategy.addSubSlot('&ratioState', 'uint256');
+    compV3RepayStrategy.addSubSlot('&targetRatio', 'uint256');
 
     const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
     compV3RepayStrategy.addTrigger(compV3Trigger);
@@ -1417,11 +1424,15 @@ const createFlCompV3RepayStrategy = () => {
         '&proxy', // proxy hardcoded (onBehalf)
     );
 
-    const withdrawAction = new dfs.actions.compoundV3.CompoundV3Withdraw(
+    const withdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
         '&market', // comet proxy addr of used market
         '%flAddr', // hardcoded
         '%assetAddr', // variable token to withdraw
         '$1', // Fl amount
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState', '&targetRatio', '&market',
     );
 
     compV3RepayStrategy.addAction(flAction);
@@ -1429,6 +1440,7 @@ const createFlCompV3RepayStrategy = () => {
     compV3RepayStrategy.addAction(feeTakingAction);
     compV3RepayStrategy.addAction(paybackAction);
     compV3RepayStrategy.addAction(withdrawAction);
+    compV3RepayStrategy.addAction(checkerAction);
 
     return compV3RepayStrategy.encodeForDsProxyCall();
 };
@@ -1438,11 +1450,13 @@ const createCompV3BoostStrategy = () => {
 
     compV3BoostStrategy.addSubSlot('&market', 'address');
     compV3BoostStrategy.addSubSlot('&baseToken', 'address');
+    compV3BoostStrategy.addSubSlot('&ratioState', 'uint256');
+    compV3BoostStrategy.addSubSlot('&targetRatio', 'uint256');
 
     const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
     compV3BoostStrategy.addTrigger(compV3Trigger);
 
-    const borrowAction = new dfs.actions.compoundV3.CompoundV3Borrow(
+    const borrowAction = new dfs.actions.compoundV3.CompoundV3BorrowAction(
         '&market', // comet proxy addr of used market
         '%amount', // variable amount to borrow
         '&proxy', // hardcoded
@@ -1470,10 +1484,15 @@ const createCompV3BoostStrategy = () => {
         '&proxy', // proxy hardcoded (from)
     );
 
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState', '&targetRatio', '&market',
+    );
+
     compV3BoostStrategy.addAction(borrowAction);
     compV3BoostStrategy.addAction(sellAction);
     compV3BoostStrategy.addAction(feeTakingAction);
     compV3BoostStrategy.addAction(supplyAction);
+    compV3BoostStrategy.addAction(checkerAction);
 
     return compV3BoostStrategy.encodeForDsProxyCall();
 };
@@ -1483,6 +1502,8 @@ const createCompV3FlBoostStrategy = () => {
 
     compV3BoostStrategy.addSubSlot('&market', 'address');
     compV3BoostStrategy.addSubSlot('&baseToken', 'address');
+    compV3BoostStrategy.addSubSlot('&ratioState', 'uint256');
+    compV3BoostStrategy.addSubSlot('&targetRatio', 'uint256');
 
     const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
     compV3BoostStrategy.addTrigger(compV3Trigger);
@@ -1511,10 +1532,14 @@ const createCompV3FlBoostStrategy = () => {
         '&proxy', // proxy hardcoded (from)
     );
 
-    const borrowAction = new dfs.actions.compoundV3.CompoundV3Borrow(
+    const borrowAction = new dfs.actions.compoundV3.CompoundV3BorrowAction(
         '&market', // comet proxy addr of used market
         '$1', //  FL output
         '%flAddr', // variable flAddr
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState', '&targetRatio', '&market',
     );
 
     compV3BoostStrategy.addAction(flAction);
@@ -1522,6 +1547,7 @@ const createCompV3FlBoostStrategy = () => {
     compV3BoostStrategy.addAction(sellAction);
     compV3BoostStrategy.addAction(feeTakingAction);
     compV3BoostStrategy.addAction(supplyAction);
+    compV3BoostStrategy.addAction(checkerAction);
 
     return compV3BoostStrategy.encodeForDsProxyCall();
 };

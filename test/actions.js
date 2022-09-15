@@ -413,9 +413,11 @@ const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) =>
 |  `----.|  `--'  | |  |  |  | |  |      |  `--'  | |  `--'  | |  |\   | |  '--'  |    \  V  /     ___) |
  \______| \______/  |__|  |__| | _|       \______/   \______/  |__| \__| |_______/      \___/     |____/
 */
-const supplyCompV3 = async (market, proxy, tokenAddr, amount, from) => {
-    await setBalance(tokenAddr, from, amount);
-    await approve(tokenAddr, proxy.address);
+const supplyCompV3 = async (market, proxy, tokenAddr, amount, from, isFork = false, signer) => {
+    if (!isFork) {
+        await setBalance(tokenAddr, from, amount);
+    }
+    await approve(tokenAddr, proxy.address, signer);
 
     const compSupplyAction = new dfs.actions.compoundV3.CompoundV3SupplyAction(
         market,

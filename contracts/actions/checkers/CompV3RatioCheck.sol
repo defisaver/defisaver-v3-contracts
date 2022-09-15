@@ -8,8 +8,6 @@ import "../compoundV3/helpers/CompV3RatioHelper.sol";
 import "../../core/helpers/CoreHelper.sol";
 import "../../utils/TransientStorage.sol";
 
-import "forge-std/console.sol";
-
 contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {
 
     /// @dev 5% offset acceptable
