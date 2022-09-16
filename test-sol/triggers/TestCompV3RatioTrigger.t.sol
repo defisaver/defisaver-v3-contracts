@@ -10,7 +10,7 @@ import "../utils/CompUser.sol";
 import "../TokenAddresses.sol";
 
 
-contract TestCompV3RatioTrigger is DSTest, DSMath, Tokens, TokenAddresses {
+contract TestCompV3RatioTrigger is DSTest, DSMath, Tokens {
     CompV3RatioTrigger trigger;
 
     function setUp() public {
@@ -20,12 +20,12 @@ contract TestCompV3RatioTrigger is DSTest, DSMath, Tokens, TokenAddresses {
     function testGetSafetyRatio() public {
         CompUser robert = new CompUser();
 
-        gibTokens(robert.proxyAddr(), WETH_ADDR, 1 ether);
+        gibTokens(robert.proxyAddr(), TokenAddresses.WETH_ADDR, 1 ether);
 
-        robert.supply(COMET_USDC, WETH_ADDR, 1 ether);
-        robert.borrow(COMET_USDC, 1000e6);
+        robert.supply(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, 1 ether);
+        robert.borrow(TokenAddresses.COMET_USDC, 1000e6);
 
-        uint ratio = trigger.getSafetyRatio(COMET_USDC, address(robert.proxyAddr()));
+        uint ratio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, address(robert.proxyAddr()));
 
         console.log(ratio);
     }

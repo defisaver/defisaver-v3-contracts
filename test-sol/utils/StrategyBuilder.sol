@@ -79,26 +79,15 @@ contract StrategyBuilder {
 
         if (keccak256(abi.encode(_strParam)) == keccak256(abi.encode("&eoa"))) {
             return 255;
-        }
+        }  
 
-        if (keccak256(abi.encode(_strParam)) == keccak256(abi.encode("$1"))) {
-            return 1;
-        }
-
-        if (keccak256(abi.encode(_strParam)) == keccak256(abi.encode("$2"))) {
-            return 2;
-        }
-
-        if (keccak256(abi.encode(_strParam)) == keccak256(abi.encode("$3"))) {
-            return 3;
-        }
-
-        if (keccak256(abi.encode(_strParam)) == keccak256(abi.encode("$4"))) {
-            return 4;
-        }
-
-        if (keccak256(abi.encode(_strParam)) == keccak256(abi.encode("$5"))) {
-            return 5;
+        bytes memory b = bytes(_strParam);
+        if (b.length == 2) {
+            // 36 ascii == $
+            // 38 ascii == 0
+            if (uint8(b[0]) == 36) {
+                return uint8(b[1]) - 48;
+            }
         }
 
 

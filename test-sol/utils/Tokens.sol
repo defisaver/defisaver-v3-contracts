@@ -7,6 +7,7 @@ import "forge-std/Vm.sol";
 import "forge-std/Test.sol";
 
 import "../../contracts/interfaces/IERC20.sol";
+import "../../contracts/triggers/ChainLinkPriceTrigger.sol";
 
 contract Tokens is Test {
     using stdStorage for StdStorage;
@@ -17,5 +18,13 @@ contract Tokens is Test {
             .sig(IERC20(token).balanceOf.selector)
             .with_key(who)
             .checked_write(amt);
+    }
+
+    function amountInUSDPrice(address _tokenAddr, uint _amountUSD) internal returns (uint) {
+        ChainLinkPriceTrigger t = new ChainLinkPriceTrigger();
+        uint USD_DECIMALS = 8;
+
+        uint decimals = IERC20(_tokenAddr).decimals();
+        return (_amountUSD * 10**(decimals + USD_DECIMALS) / t.getPrice(_tokenAddr));
     }
 }
