@@ -75,18 +75,26 @@ contract TestCompV3Automation is
 
         uint256 repayId = createCompV3Repay();
         uint256 repayFLId = createCompV3FLRepay();
+        uint256 repayCompositeId = createCompV3CompositeRepay();
+        uint256 repayFLCompositeId = createCompV3FLCompositeRepay();
 
         uint256 boostId = createCompV3Boost();
         uint256 boostFLId = createCompV3FLBoost();
+        uint256 boostCompositeId = createCompV3CompositeBoost();
+        uint256 boostFLCompositeId = createCompV3FLCompositeBoost();
 
-        uint64[] memory repayIds = new uint64[](2);
+        uint64[] memory repayIds = new uint64[](4);
         repayIds[0] = uint64(repayId);
         repayIds[1] = uint64(repayFLId);
+        repayIds[2] = uint64(repayCompositeId);
+        repayIds[3] = uint64(repayFLCompositeId);
         new BundleBuilder().init(repayIds);
 
-        uint64[] memory boostIds = new uint64[](2);
+        uint64[] memory boostIds = new uint64[](4);
         boostIds[0] = uint64(boostId);
         boostIds[1] = uint64(boostFLId);
+        boostIds[2] = uint64(boostCompositeId);
+        boostIds[3] = uint64(boostFLCompositeId);
         new BundleBuilder().init(boostIds);
 
         // create compV3 position
@@ -129,9 +137,7 @@ contract TestCompV3Automation is
 
         uint beforeRatio = trigger.getSafetyRatio(COMET_USDC, proxy);
 
-        uint startGas = gasleft();
         executor.executeStrategy(repaySubId, repayIndex, _triggerCallData, _actionsCallData, repaySub);
-        console.log(startGas - gasleft());
 
         uint afterRatio = trigger.getSafetyRatio(COMET_USDC, proxy);
 

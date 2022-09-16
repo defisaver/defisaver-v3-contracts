@@ -1631,6 +1631,28 @@
         "history": []
     },
     {
+        "name": "CompV3RatioCheck",
+        "address": "0xDDE818191FDc8FeE53Af082643dE6103e354585c",
+        "id": "0x2ce67bb9",
+        "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompV3RatioTrigger",
+        "address": "0x8ACCaf4e0054AD73789A3ebF344c3061804c29D8",
+        "id": "0x506812d0",
+        "path": "contracts/triggers/CompV3RatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompoundMonitorProxy",
         "address": "0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a",
         "path": "old_contracts"
