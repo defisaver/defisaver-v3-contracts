@@ -23,5 +23,6 @@ library TokenAddresses {
     address public constant COMET_USDC = 0xc3d688B66703497DAA19211EEdff47f25384cdc3;
 
     address public constant UNI_V2_WRAPPER = 0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54;
+    address public constant FEE_RECEIVER = 0x6467e807dB1E71B9Ef04E0E3aFb962E4B0900B2B;
 
 }
