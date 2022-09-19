@@ -32,9 +32,8 @@ contract FLEuler is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel, 
 
     /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR = bytes4(keccak256("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"));
-    bytes32 constant RECIPE_EXECUTOR_ID = keccak256("RecipeExecutor");
+    bytes4 public constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
-    bytes32 public constant CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
     function executeAction(
         bytes memory _callData,
@@ -56,7 +55,6 @@ contract FLEuler is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel, 
         return uint8(ActionType.FL_ACTION);
     }
 
-    /// @notice 
     function _flEuler(FlashLoanParams memory _params) internal returns (uint256) {
         IDToken dToken = IDToken(IEulerMarkets(EULER_MARKET_ADDR).underlyingToDToken(_params.tokens[0]));
         EulerPassingData memory passingData = EulerPassingData(
@@ -77,12 +75,13 @@ contract FLEuler is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel, 
     /// @notice Euler callback function that formats and calls back RecipeExecutor
     function onFlashLoan(
         bytes calldata _data
-    ) external nonReentrant returns (bytes32) {
+    ) external nonReentrant{
         EulerPassingData memory passingData = abi.decode(_data, (EulerPassingData));
         require(msg.sender == address(EULER_ADDR), "Untrusted lender");
         
         (Recipe memory currRecipe, address proxy) = abi.decode(passingData.recipeData, (Recipe, address));
-        address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
+        address payable recipeExecutorAddr = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
+        passingData.token.withdrawTokens(proxy, passingData.amount);
 
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
@@ -94,7 +93,6 @@ contract FLEuler is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel, 
 
         passingData.token.withdrawTokens(msg.sender, passingData.amount);
 
-        return CALLBACK_SUCCESS;
     }
 
     function parseInputs(bytes memory _callData)
