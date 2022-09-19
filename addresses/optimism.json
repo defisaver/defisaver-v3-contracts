@@ -155,7 +155,7 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xf924f1E8cdB6AFC02d115fb9C6f80275B2E63cc9",
+        "address": "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
         "version": "1.0.0",
