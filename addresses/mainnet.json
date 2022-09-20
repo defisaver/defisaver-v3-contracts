@@ -951,6 +951,17 @@
         "history": []
     },
     {
+        "name": "FLEuler",
+        "address": "0xaf591afeCbAa4026Be377AA3cF02dA366f18DE07",
+        "id": "0x23179eb0",
+        "path": "contracts/actions/flashloan/FLEuler.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "UniSupply",
         "address": "0x9935e12F0218E61c27D7f23eAC9A9D6881a078eC",
         "id": "0x834ebcf7",
