@@ -1543,10 +1543,10 @@ const createCompV3FlBoostStrategy = () => {
     );
 
     compV3BoostStrategy.addAction(flAction);
-    compV3BoostStrategy.addAction(borrowAction);
     compV3BoostStrategy.addAction(sellAction);
     compV3BoostStrategy.addAction(feeTakingAction);
     compV3BoostStrategy.addAction(supplyAction);
+    compV3BoostStrategy.addAction(borrowAction);
     compV3BoostStrategy.addAction(checkerAction);
 
     return compV3BoostStrategy.encodeForDsProxyCall();
