@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "../../utils/ReentrancyGuard.sol";
-import "../../interfaces/flashloan/IERC3156FlashLender.sol";
 
 import "../../interfaces/flashloan/IFlashLoanBase.sol";
 import "../../core/strategy/StrategyModel.sol";
@@ -42,6 +40,13 @@ contract FLEuler is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel, 
         bytes32[] memory
     ) public override payable returns (bytes32) {
         FlashLoanParams memory params = parseInputs(_callData);
+
+        if (params.flParamGetterAddr != address(0)) {
+            (, uint256[] memory amounts,) =
+                IFLParamGetter(params.flParamGetterAddr).getFlashLoanParams(params.flParamGetterData);
+
+            params.amounts[0] = amounts[0];
+        }
 
         uint256 amount = _flEuler(params);
         return bytes32(amount);
