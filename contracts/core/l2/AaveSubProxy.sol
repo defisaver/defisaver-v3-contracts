@@ -147,21 +147,21 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized aave sub
-    function formatBoostSub(AaveSubData memory _user) public view returns (StrategySub memory repaySub) {
-        repaySub.strategyOrBundleId = BOOST_BUNDLE_ID;
-        repaySub.isBundle = true;
+    function formatBoostSub(AaveSubData memory _user) public view returns (StrategySub memory boostSub) {
+        boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
+        boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
         bytes memory triggerData = abi.encode(address(this), AAVE_MARKET, uint256(_user.maxRatio), uint8(RatioState.OVER));
-        repaySub.triggerData = new bytes[](1);
-        repaySub.triggerData[0] = triggerData;
+        boostSub.triggerData = new bytes[](1);
+        boostSub.triggerData[0] = triggerData;
 
-        repaySub.subData =  new bytes32[](5);
-        repaySub.subData[0] = bytes32(uint256(_user.targetRatioBoost)); // targetRatio
-        repaySub.subData[1] = bytes32(uint256(0)); // ratioState = boost
-        repaySub.subData[2] = bytes32(uint256(1)); // useDefaultMarket = true
-        repaySub.subData[3] = bytes32(uint256(0)); // onBehalfOf = false
-        repaySub.subData[4] = bytes32(uint256(1)); // enableAsColl = true
+        boostSub.subData =  new bytes32[](5);
+        boostSub.subData[0] = bytes32(uint256(_user.targetRatioBoost)); // targetRatio
+        boostSub.subData[1] = bytes32(uint256(0)); // ratioState = boost
+        boostSub.subData[2] = bytes32(uint256(1)); // useDefaultMarket = true
+        boostSub.subData[3] = bytes32(uint256(0)); // onBehalfOf = false
+        boostSub.subData[4] = bytes32(uint256(1)); // enableAsColl = true
     }
 
     function parseSubData(bytes calldata encodedInput) public pure returns (AaveSubData memory user) {
