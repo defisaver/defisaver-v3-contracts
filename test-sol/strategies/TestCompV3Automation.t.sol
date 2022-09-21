@@ -128,22 +128,8 @@ contract TestCompV3Automation is
         uint wethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 1_000);
         uint256 repayIndex = 0;
 
-        address[] memory path = new address[](2);
-        path[0] = TokenAddresses.WETH_ADDR;
-        path[1] = TokenAddresses.USDC_ADDR;
-        bytes memory wrapperData = abi.encode(path);
-
-        uint sellAmount = wethAmount - (wethAmount / 400);
-        uint amnt = UniswapWrapperV3(payable(TokenAddresses.UNI_V2_WRAPPER)).getSellRate(TokenAddresses.WETH_ADDR, TokenAddresses.USDC_ADDR, sellAmount, wrapperData);
-
-        console.log(sellAmount);
-        console.log(wmul(amnt, sellAmount));
-
         uint256 borrowAmountBefore = IComet(TokenAddresses.COMET_USDC).borrowBalanceOf(proxy);
-        console.log("borrowAmountBefore: ", borrowAmountBefore);
-
-        uint256 feeBalanceBefore = IERC20(TokenAddresses.WETH_ADDR).balanceOf(TokenAddresses.FEE_RECEIVER);
-        console.log("feeBalanceBefore: ", feeBalanceBefore);
+        uint256 txFeeBalanceBefore = IERC20(TokenAddresses.WETH_ADDR).balanceOf(TokenAddresses.FEE_RECEIVER);
 
         bytes[] memory _triggerCallData = new bytes[](1);
 
@@ -159,86 +145,88 @@ contract TestCompV3Automation is
         executor.executeStrategy(repaySubId, repayIndex, _triggerCallData, _actionsCallData, repaySub);
 
         uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
-        uint256 feeBalanceAfter = IERC20(TokenAddresses.WETH_ADDR).balanceOf(TokenAddresses.FEE_RECEIVER);
-        console.log("feeBalanceAfter: ", feeBalanceAfter);
+        uint256 txFeeBalanceAfter = IERC20(TokenAddresses.WETH_ADDR).balanceOf(TokenAddresses.FEE_RECEIVER);
+        uint256 borrowAmountAfter = IComet(TokenAddresses.COMET_USDC).borrowBalanceOf(proxy);
 
-        uint256 afterAmountBefore = IComet(TokenAddresses.COMET_USDC).borrowBalanceOf(proxy);
-        console.log("fee: ", afterAmountBefore - feeBalanceBefore);
+        uint amountAfterFee = wethAmount - (wethAmount / 400);
+
+        // assert exchange fee
+        assertEq(wethAmount - amountAfterFee, txFeeBalanceAfter - txFeeBalanceBefore);
+        assertGt(borrowAmountBefore, borrowAmountAfter);
+        assertGt(afterRatio, beforeRatio);
+    }
+
+    function testCompV3FLRepayStrategy() public {
+        uint wethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 1_000);
+
+        uint256 repayIndex = 1;
+
+        bytes[] memory _triggerCallData = new bytes[](1);
+
+        bytes[] memory _actionsCallData = new bytes[](6);
+        _actionsCallData[0] = flBalancerEncode(TokenAddresses.WETH_ADDR, wethAmount);
+        _actionsCallData[1] = sellEncode(TokenAddresses.WETH_ADDR, TokenAddresses.USDC_ADDR, wethAmount, proxy, proxy, TokenAddresses.UNI_V2_WRAPPER);
+        _actionsCallData[2] = gasFeeEncode(repayFLGasCost, TokenAddresses.USDC_ADDR);
+        _actionsCallData[3] = compV3PaybackEncode(TokenAddresses.COMET_USDC, proxy, 0);
+        _actionsCallData[4] = compV3WithdrawEncode(TokenAddresses.COMET_USDC, address(flBalancer), TokenAddresses.WETH_ADDR, wethAmount);
+        _actionsCallData[5] = compV3RatioCheckEncode(0, 0, address(0));
+
+        uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
+
+        executor.executeStrategy(repaySubId, repayIndex, _triggerCallData, _actionsCallData, repaySub);
+
+        uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
 
         assertGt(afterRatio, beforeRatio);
     }
 
-    // function testCompV3FLRepayStrategy() public {
-    //     uint wethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 1_000);
+    function testCompV3BoostStrategy() public {
+        uint256 usdcAmount = 500e6;
+        uint256 boostIndex = 0;
 
-    //     uint256 repayIndex = 1;
+        uint ethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 15_000);
+        user1.supply(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, ethAmount);
 
-    //     bytes[] memory _triggerCallData = new bytes[](1);
+        bytes[] memory _triggerCallData = new bytes[](1);
 
-    //     bytes[] memory _actionsCallData = new bytes[](6);
-    //     _actionsCallData[0] = flBalancerEncode(TokenAddresses.WETH_ADDR, wethAmount);
-    //     _actionsCallData[1] = sellEncode(TokenAddresses.WETH_ADDR, TokenAddresses.USDC_ADDR, wethAmount, proxy, proxy, TokenAddresses.UNI_V2_WRAPPER);
-    //     _actionsCallData[2] = gasFeeEncode(repayFLGasCost, TokenAddresses.USDC_ADDR);
-    //     _actionsCallData[3] = compV3PaybackEncode(TokenAddresses.COMET_USDC, proxy, 0);
-    //     _actionsCallData[4] = compV3WithdrawEncode(TokenAddresses.COMET_USDC, address(flBalancer), TokenAddresses.WETH_ADDR, wethAmount);
-    //     _actionsCallData[5] = compV3RatioCheckEncode(0, 0, address(0));
+        bytes[] memory _actionsCallData = new bytes[](5);
+        _actionsCallData[0] = compV3BorrowEncode(TokenAddresses.COMET_USDC, usdcAmount, proxy);
+        _actionsCallData[1] = sellEncode(TokenAddresses.USDC_ADDR, TokenAddresses.WETH_ADDR, 0, proxy, proxy, TokenAddresses.UNI_V2_WRAPPER);
+        _actionsCallData[2] = gasFeeEncode(boostGasCost, TokenAddresses.WETH_ADDR);
+        _actionsCallData[3] = compV3SupplyEncode(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, 0, proxy);
+        _actionsCallData[4] = compV3RatioCheckEncode(0, 0, address(0));
 
-    //     uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
+        uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
 
-    //     executor.executeStrategy(repaySubId, repayIndex, _triggerCallData, _actionsCallData, repaySub);
+        executor.executeStrategy(boostSubId, boostIndex, _triggerCallData, _actionsCallData, boostSub);
+        uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
 
-    //     uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
+        assertGt(beforeRatio, afterRatio);
+    }
 
-    //     assertGt(afterRatio, beforeRatio);
-    // }
+    function testCompV3BoostFLStrategy() public {
+        uint256 usdcAmount = 500e6;
+        uint256 boostIndex = 1;
 
-    // function testCompV3BoostStrategy() public {
-    //     uint256 usdcAmount = 500e6;
-    //     uint256 boostIndex = 0;
+        uint ethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 15_000);
+        user1.supply(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, ethAmount);
 
-    //     uint ethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 15_000);
-    //     user1.supply(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, ethAmount);
+        bytes[] memory _triggerCallData = new bytes[](1);
 
-    //     bytes[] memory _triggerCallData = new bytes[](1);
+        bytes[] memory _actionsCallData = new bytes[](6);
+        _actionsCallData[0] = flBalancerEncode(TokenAddresses.USDC_ADDR, usdcAmount);
+        _actionsCallData[1] = sellEncode(TokenAddresses.USDC_ADDR, TokenAddresses.WETH_ADDR, usdcAmount, proxy, proxy, TokenAddresses.UNI_V2_WRAPPER);
+        _actionsCallData[2] = gasFeeEncode(boostFLGasCost, TokenAddresses.WETH_ADDR);
+        _actionsCallData[3] = compV3SupplyEncode(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, 0, proxy);
+        _actionsCallData[4] = compV3BorrowEncode(TokenAddresses.COMET_USDC, usdcAmount, address(flBalancer));
+        _actionsCallData[5] = compV3RatioCheckEncode(0, 0, address(0));
 
-    //     bytes[] memory _actionsCallData = new bytes[](5);
-    //     _actionsCallData[0] = compV3BorrowEncode(TokenAddresses.COMET_USDC, usdcAmount, proxy);
-    //     _actionsCallData[1] = sellEncode(TokenAddresses.USDC_ADDR, TokenAddresses.WETH_ADDR, 0, proxy, proxy, TokenAddresses.UNI_V2_WRAPPER);
-    //     _actionsCallData[2] = gasFeeEncode(boostGasCost, TokenAddresses.WETH_ADDR);
-    //     _actionsCallData[3] = compV3SupplyEncode(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, 0, proxy);
-    //     _actionsCallData[4] = compV3RatioCheckEncode(0, 0, address(0));
+        uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
 
-    //     uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
+        executor.executeStrategy(boostSubId, boostIndex, _triggerCallData, _actionsCallData, boostSub);
 
-    //     executor.executeStrategy(boostSubId, boostIndex, _triggerCallData, _actionsCallData, boostSub);
-    //     uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
+        uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
 
-    //     assertGt(beforeRatio, afterRatio);
-    // }
-
-    // function testCompV3BoostFLStrategy() public {
-    //     uint256 usdcAmount = 500e6;
-    //     uint256 boostIndex = 1;
-
-    //     uint ethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 15_000);
-    //     user1.supply(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, ethAmount);
-
-    //     bytes[] memory _triggerCallData = new bytes[](1);
-
-    //     bytes[] memory _actionsCallData = new bytes[](6);
-    //     _actionsCallData[0] = flBalancerEncode(TokenAddresses.USDC_ADDR, usdcAmount);
-    //     _actionsCallData[1] = sellEncode(TokenAddresses.USDC_ADDR, TokenAddresses.WETH_ADDR, usdcAmount, proxy, proxy, TokenAddresses.UNI_V2_WRAPPER);
-    //     _actionsCallData[2] = gasFeeEncode(boostFLGasCost, TokenAddresses.WETH_ADDR);
-    //     _actionsCallData[3] = compV3SupplyEncode(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, 0, proxy);
-    //     _actionsCallData[4] = compV3BorrowEncode(TokenAddresses.COMET_USDC, usdcAmount, address(flBalancer));
-    //     _actionsCallData[5] = compV3RatioCheckEncode(0, 0, address(0));
-
-    //     uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
-
-    //     executor.executeStrategy(boostSubId, boostIndex, _triggerCallData, _actionsCallData, boostSub);
-
-    //     uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
-
-    //     assertGt(beforeRatio, afterRatio);
-    // }
+        assertGt(beforeRatio, afterRatio);
+    }
 }

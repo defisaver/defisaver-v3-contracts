@@ -11,9 +11,9 @@ contract StrategyBuilder {
     bool isContinuos;
     bytes4[] actions;
     bytes4[] triggers;
-    mapping (bytes4 => string[]) public params;
+    mapping(bytes4 => string[]) public params;
 
-    mapping (string => uint8) public subValues;
+    mapping(string => uint8) public subValues;
     address internal OWNER_ADDR = 0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00;
     address internal STORAGE_ADDR = 0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933;
 
@@ -43,23 +43,24 @@ contract StrategyBuilder {
         triggers.push(triggerId);
     }
 
-    function createStrategy() public returns (uint) {
+    function createStrategy() public returns (uint256) {
         StrategyStorage strategyStorage = StrategyStorage(STORAGE_ADDR);
 
         uint8[][] memory paramMappings = new uint8[][](actions.length);
 
-        for(uint i = 0; i < actions.length; ++i) {
+        for (uint256 i = 0; i < actions.length; ++i) {
             string[] memory strParams = params[actions[i]];
             paramMappings[i] = new uint8[](strParams.length);
 
-            for (uint j = 0; j < strParams.length; ++j) {
+            for (uint256 j = 0; j < strParams.length; ++j) {
                 paramMappings[i][j] = getParamNum(strParams[j]);
             }
         }
 
         vm.startPrank(OWNER_ADDR);
 
-        uint strategyId = strategyStorage.createStrategy(
+        bytes memory subCallData = abi.encodeWithSignature(
+            "createStrategy(string,bytes4[],bytes4[],uint8[][],bool)",
             name,
             triggers,
             actions,
@@ -67,9 +68,12 @@ contract StrategyBuilder {
             isContinuos
         );
 
+        (bool success, ) = address(strategyStorage).call(subCallData);
+        require(success);
+
         vm.stopPrank();
 
-        return strategyId;
+        return strategyStorage.getStrategyCount() - 1;
     }
 
     function getParamNum(string memory _strParam) public view returns (uint8) {
@@ -79,7 +83,7 @@ contract StrategyBuilder {
 
         if (keccak256(abi.encode(_strParam)) == keccak256(abi.encode("&eoa"))) {
             return 255;
-        }  
+        }
 
         bytes memory b = bytes(_strParam);
         if (b.length == 2) {
@@ -90,8 +94,6 @@ contract StrategyBuilder {
             }
         }
 
-
         return subValues[_strParam];
     }
-
 }

@@ -1621,7 +1621,7 @@
     },
     {
         "name": "CompV3Withdraw",
-        "address": "0xa803783B5270230dF64df16a1c5aEe73e27b3078",
+        "address": "0x59fED9975cd3bb07bB75490e86751D6025ce0bC2",
         "id": "0xc0072381",
         "path": "contracts/actions/compoundV3/CompV3Withdraw.sol",
         "version": "1.0.0",
@@ -1649,6 +1649,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompV3SubProxy",
+        "address": "0xb460c044Cb2ECA74c713b8504Fe5aF360764b38d",
+        "id": "0x8c896d4c",
+        "path": "contracts/triggers/CompV3RatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
