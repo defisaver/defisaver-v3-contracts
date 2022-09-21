@@ -6,6 +6,8 @@ import "../DS/DSMath.sol";
 import "../utils/Exponential.sol";
 import "../interfaces/compoundV3/IComet.sol";
 import "../interfaces/compoundV3/ICometExt.sol";
+import "../interfaces/compoundV3/ICometRewards.sol";
+
 import "../actions/compoundV3/helpers/CompV3Helper.sol";
 
 contract CompV3View is Exponential, DSMath, CompV3Helper {
@@ -45,6 +47,8 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
         uint totalBorrow;
         uint utilization;
         uint baseBorrowMin;
+        uint baseTrackingBorrowRewardsSpeed;
+        uint baseTrackingSupplyRewardsSpeed;
     }
 
     struct GovernanceInfoFull {
@@ -160,7 +164,9 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
             totalSupply: basics.totalSupplyBase,
             totalBorrow: basics.totalBorrowBase,
             utilization: utilization,
-            baseBorrowMin: comet.baseBorrowMin()
+            baseBorrowMin: comet.baseBorrowMin(),
+            baseTrackingBorrowRewardsSpeed: comet.baseTrackingBorrowSpeed(),
+            baseTrackingSupplyRewardsSpeed: comet.baseTrackingSupplySpeed()
         });
     }
 
@@ -189,5 +195,9 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
             isWithdrawPaused: comet.isWithdrawPaused(),
             isAbsorbPaused: comet.isAbsorbPaused()
         });
+    }
+
+    function getRewardsOwed(address _market, address _user) public returns (ICometRewards.RewardOwed memory rewardsOwed){
+        return ICometRewards(COMET_REWARDS_ADDR).getRewardOwed(_market, _user);
     }
 }
