@@ -388,7 +388,7 @@
     },
     {
         "name": "CompV3View",
-        "address": "0x4A8192aa4749904F9eED51424C897294EC9403A0",
+        "address": "0xf522b1588688b9887623b9C666175684d284D363",
         "id": "0x16be4292",
         "path": "contracts/views/CompV3View.sol",
         "version": "1.0.0",
