@@ -65,7 +65,7 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
         // if _amount type(uint).max that means take out proxy whole balance
         if (_amount == type(uint256).max) {
             if(_asset == IComet(_market).baseToken()) {
-                _amount = IComet(_market).borrowBalanceOf(address(this));
+                _amount = IComet(_market).balanceOf(address(this));
             } else {
                 _amount = IComet(_market).collateralBalanceOf(address(this), _asset);
             }
