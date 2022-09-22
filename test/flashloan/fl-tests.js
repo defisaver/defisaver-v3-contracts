@@ -289,6 +289,56 @@ const makerFLTest = async () => {
         });
     });
 };
+
+const eulerFLTest = async () => {
+    describe('FL-Euler', function () {
+        this.timeout(60000);
+
+        let senderAcc; let proxy;
+        let flEuler;
+
+        before(async () => {
+            const flEulerAddr = await getAddrFromRegistry('FLEuler');
+            console.log(flEulerAddr);
+            flEuler = await hre.ethers.getContractAt('FLEuler', flEulerAddr);
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+
+        const tokenSymbols = ['DAI', 'USDC', 'WETH', 'WBTC', 'USDT', 'UNI', 'LINK'];
+
+        for (let i = 0; i < tokenSymbols.length; i++) {
+            it(`... should get a ${tokenSymbols[i]} Euler flash loan`, async () => {
+                const assetInfo = getAssetInfo(tokenSymbols[i]);
+
+                const amount = fetchAmountinUSDPrice(tokenSymbols[i], '1000');
+                const loanAmount = hre.ethers.utils.parseUnits(
+                    amount,
+                    assetInfo.decimals,
+                );
+
+                const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
+                    new dfs.actions.flashloan.EulerFlashLoanAction(
+                        assetInfo.address,
+                        loanAmount,
+                        nullAddress,
+                        [],
+                    ),
+                    new dfs.actions.basic.SendTokenAction(
+                        assetInfo.address,
+                        flEuler.address,
+                        hre.ethers.constants.MaxUint256,
+                    ),
+                ]);
+
+                const functionData = basicFLRecipe.encodeForDsProxyCall();
+                await executeAction('RecipeExecutor', functionData[1], proxy);
+            });
+        }
+    });
+};
+
 const deployFLContracts = async () => {
     await redeploy('FLMaker');
     await redeploy('SendToken');
@@ -296,6 +346,7 @@ const deployFLContracts = async () => {
     await redeploy('FLDyDx');
     await redeploy('FLBalancer');
     await redeploy('FLAaveV2');
+    await redeploy('FLEuler');
 };
 
 const fullFLTest = async () => {
@@ -304,6 +355,7 @@ const fullFLTest = async () => {
     await balancerFLTest();
     await dydxFLTest();
     await makerFLTest();
+    await eulerFLTest();
 };
 module.exports = {
     fullFLTest,
@@ -311,4 +363,5 @@ module.exports = {
     balancerFLTest,
     dydxFLTest,
     makerFLTest,
+    eulerFLTest,
 };

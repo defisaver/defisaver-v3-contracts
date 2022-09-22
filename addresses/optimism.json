@@ -155,7 +155,7 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xf924f1E8cdB6AFC02d115fb9C6f80275B2E63cc9",
+        "address": "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
         "version": "1.0.0",
@@ -587,6 +587,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "BotRefillsL2",
+        "address": "0x38255CD752c56b5dF093Bc56f4411eeb5831d334",
+        "id": "0x96f884f7",
+        "path": "contracts/utils/BotRefillsL2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
       }

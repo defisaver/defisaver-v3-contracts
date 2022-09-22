@@ -399,7 +399,7 @@
     },
     {
         "name": "CompV3View",
-        "address": "0x5e07E953dac1d7c19091c3b493579ba7283572a4",
+        "address": "0x4A8192aa4749904F9eED51424C897294EC9403A0",
         "id": "0x16be4292",
         "path": "contracts/views/CompV3View.sol",
         "version": "1.0.0",
@@ -955,6 +955,17 @@
         "address": "0x5C7a9f4635AE4F95da2e45317311AAe255FB71B3",
         "id": "0xf97d044f",
         "path": "contracts/actions/flashloan/FLBalancer.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FLEuler",
+        "address": "0xaf591afeCbAa4026Be377AA3cF02dA366f18DE07",
+        "id": "0x23179eb0",
+        "path": "contracts/actions/flashloan/FLEuler.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",

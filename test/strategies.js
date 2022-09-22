@@ -1357,7 +1357,7 @@ const createCompV3RepayStrategy = () => {
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%collAddr', // must stay variable
-            '&baseToken', // must stay variable
+            '&baseToken', // baseToken hardcoded
             '$1', //  hardcoded piped from fee taking
             '%exchangeWrapper', // can pick exchange wrapper
         ),

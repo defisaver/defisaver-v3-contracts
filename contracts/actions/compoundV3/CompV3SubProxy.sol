@@ -121,7 +121,7 @@ contract CompV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
         }
     }
 
-    /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized aave sub
+    /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized compV3 sub
     function formatRepaySub(CompV3SubData memory _subData, address _proxy) public pure returns (StrategySub memory repaySub) {
         repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
@@ -138,7 +138,7 @@ contract CompV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
         repaySub.subData[3] = bytes32(uint256(_subData.targetRatioRepay)); // targetRatio
     }
 
-    /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized aave sub
+    /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized compV3 sub
     function formatBoostSub(CompV3SubData memory _subData, address _proxy) public pure returns (StrategySub memory boostSub) {
         boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
