@@ -23,14 +23,14 @@
     },
     {
         "name": "AaveSubProxy",
-        "address": "0x7524C98ECF884e4EC62347c34f5BaefD7D067C84",
+        "address": "0x29a172f04CF9C6a79EdF4dD2744F2d260b8b8FE4",
         "id": "0xd11b2581",
         "path": "contracts/core/l2/AaveSubProxy.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x7524C98ECF884e4EC62347c34f5BaefD7D067C84"]
     },
     {
         "name": "ZrxAllowlist",
@@ -339,14 +339,14 @@
     },
     {
       "name": "FLAaveV3",
-      "address": "0x3Cc0d5DAE1B94e294152C3150aA732b97af603E1",
+      "address": "0x219ac6dA971dE6d943cffD1BD62abde71525d382",
       "id": "0x8d7fb192",
       "path": "contracts/actions/flashloan/FLAaveV3.sol",
       "version": "1.0.0",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0x3Cc0d5DAE1B94e294152C3150aA732b97af603E1"]
     },
     {
       "name": "RecipeExecutor",

@@ -23,14 +23,14 @@
     },
     {
         "name": "AaveSubProxy",
-        "address": "0x4D93E49B8989222571c2D171B988c5A3C04C6621",
+        "address": "0x9E8aE909Af8A391b58f45819f0d36e4256991D19",
         "id": "0xd11b2581",
         "path": "contracts/core/l2/AaveSubProxy.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x4D93E49B8989222571c2D171B988c5A3C04C6621"]
     },
     {
         "name": "ZrxAllowlist",
@@ -331,14 +331,14 @@
     },
     {
       "name": "FLAaveV3",
-      "address": "0x352D4a1622f2DC34c738F542934372855f219F05",
+      "address": "0xfbcF23D2BeF8A2C491cfa4dD409D8dF12d431c85",
       "id": "0x8d7fb192",
       "path": "contracts/actions/flashloan/FLAaveV3.sol",
       "version": "1.0.0",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0x352D4a1622f2DC34c738F542934372855f219F05"]
     },
     {
       "name": "BotAuth",
