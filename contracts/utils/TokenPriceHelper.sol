@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.10;
 
-import '../DS/DSMath.sol';
-import '../utils/TokenUtils.sol';
-import '../interfaces/lido/IWStEth.sol';
-import './helpers/UtilHelper.sol';
-import '../interfaces/chainlink/IFeedRegistry.sol';
-import './Denominations.sol';
+import "../DS/DSMath.sol";
+import "../utils/TokenUtils.sol";
+import "../interfaces/lido/IWStEth.sol";
+import "./helpers/UtilHelper.sol";
+import "../interfaces/chainlink/IFeedRegistry.sol";
+import "./Denominations.sol";
 
 contract TokenPriceHelper is DSMath, UtilHelper {
 
