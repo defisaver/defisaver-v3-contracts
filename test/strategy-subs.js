@@ -3,6 +3,7 @@ const hre = require('hardhat');
 
 const {
     subToStrategy,
+    subToCompV3Proxy,
 } = require('./utils-strategies');
 
 const {
@@ -25,6 +26,7 @@ const {
     WBTC_ADDR,
     WETH_ADDRESS,
     LUSD_ADDR,
+    USDC_ADDR,
 } = require('./utils');
 
 const { MCD_MANAGER_ADDR } = require('./utils-mcd');
@@ -344,6 +346,36 @@ const subLiquityRepayStrategy = async (proxy, ratioUnder, targetRatio, bundleId)
     return { subId, strategySub };
 };
 
+const subCompV3AutomationStrategy = async (
+    proxy,
+    market,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    regAddr = REGISTRY_ADDR,
+) => {
+    const subInput = [[market, USDC_ADDR, minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled]];
+
+    const subId = await subToCompV3Proxy(proxy, subInput, regAddr);
+
+    let subId1 = '0';
+    let subId2 = '0';
+
+    if (boostEnabled) {
+        subId1 = (parseInt(subId, 10) - 1).toString();
+        subId2 = subId;
+    } else {
+        subId1 = subId;
+        subId2 = '0';
+    }
+
+    console.log('Subs: ', subId, subId2);
+
+    return { firstSub: subId1, secondSub: subId2 };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdRepayStrategy,
@@ -364,4 +396,5 @@ module.exports = {
     subLiquityCloseToCollStrategy,
     subLiquityTrailingCloseToCollStrategy,
     subMcdTrailingCloseToCollStrategy,
+    subCompV3AutomationStrategy,
 };

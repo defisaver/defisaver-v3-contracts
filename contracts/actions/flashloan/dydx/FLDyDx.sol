@@ -120,8 +120,10 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
         (bytes memory callData, uint256 amount, address tokenAddr) =
             abi.decode(_data, (bytes, uint256, address));
 
+
         (Recipe memory currRecipe, address proxy) = abi.decode(callData, (Recipe, address));
         tokenAddr.withdrawTokens(proxy, amount);
+        uint256 balanceBefore = tokenAddr.getBalance(address(this));
 
         address payable RecipeExecutor = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
         // call Action execution
@@ -130,7 +132,7 @@ contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard
             abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, amount)
         );
         // return FL (just send funds to this addr)
-        require(tokenAddr.getBalance(address(this)) == amount, ERR_WRONG_PAYBACK_AMOUNT);
+        require(tokenAddr.getBalance(address(this)) == amount + balanceBefore, ERR_WRONG_PAYBACK_AMOUNT);
         
         flFeeFaucet.my2Wei(tokenAddr); // get extra 2 wei for DyDx fee
     }

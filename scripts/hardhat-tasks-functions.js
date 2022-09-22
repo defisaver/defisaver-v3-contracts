@@ -303,6 +303,7 @@ module.exports = {
     flatten,
     verifyContract,
     deployContract,
+    getAllFiles,
     sleep,
     findPathByContractName,
     encryptPrivateKey,
