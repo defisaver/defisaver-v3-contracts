@@ -1,5 +1,6 @@
 const { expect } = require('chai');
 const hre = require('hardhat');
+const { getAssetInfo, assets } = require('@defisaver/tokens');
 
 const {
     redeploy,
@@ -428,6 +429,32 @@ const dfsRegistryControllerTest = async () => {
         });
     });
 };
+
+const tokenPriceHelperTest = async () => {
+    describe('Wrap-Eth', function () {
+        this.timeout(80000);
+
+        let tokenPriceHelper; let tokenPriceHelperAddr;
+
+        before(async () => {
+            tokenPriceHelperAddr = await getAddrFromRegistry('TokenPriceHelper');
+            tokenPriceHelper = await hre.ethers.getContractAt('TokenPriceHelper', tokenPriceHelperAddr);
+        });
+
+        for (let i = 0; i < assets.length; i++) {
+            it(`... should get USD and ETH price for ${assets[i].symbol} `, async () => {
+                if (assets[i].symbol === 'OP') return;
+                const assetInfo = getAssetInfo(assets[i].symbol);
+                const priceInUSD = await tokenPriceHelper.getPriceInUSD(assetInfo.address);
+                const priceInETH = await tokenPriceHelper.getPriceInETH(assetInfo.address);
+
+                console.log(priceInUSD);
+                console.log(priceInETH);
+            });
+        }
+    });
+};
+
 const deployUtilsTestsContracts = async () => {
     await redeploy('BotRefills');
     await redeploy('FeeReceiver');
@@ -443,4 +470,5 @@ module.exports = {
     botRefillL2Test,
     feeReceiverTest,
     dfsRegistryControllerTest,
+    tokenPriceHelperTest,
 };

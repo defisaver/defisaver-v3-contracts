@@ -10,9 +10,10 @@ import "../interfaces/lido/IWStEth.sol";
 import "../utils/Denominations.sol";
 import "../utils/TokenUtils.sol";
 import "./helpers/TriggerHelper.sol";
+import "../utils/TokenPriceHelper.sol";
 
 /// @title Trigger contract that verifies if current token price is over/under the price specified during subscription
-contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
+contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath, TokenPriceHelper {
     using TokenUtils for address;
 
     enum PriceState {
@@ -29,14 +30,11 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
         uint8 state;
     }
 
-    IFeedRegistry public constant feedRegistry =
-        IFeedRegistry(CHAINLINK_FEED_REGISTRY);
-
     /// @dev checks chainlink oracle for current price and triggers if it's in a correct state
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
-        uint256 currPrice = getPrice(triggerSubData.tokenAddr);
+        uint256 currPrice = getPriceInUSD(triggerSubData.tokenAddr);
 
         if (PriceState(triggerSubData.state) == PriceState.OVER) {
             if (currPrice > triggerSubData.price) return true;
@@ -49,26 +47,7 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
         return false;
     }
 
-    /// @dev helper function that returns latest token price in USD
-    function getPrice(address _inputTokenAddr) public view returns (uint256) {
-        address tokenAddr = _inputTokenAddr;
     
-        if (_inputTokenAddr == TokenUtils.WETH_ADDR) {
-            tokenAddr = TokenUtils.ETH_ADDR;
-        }
-
-        if (_inputTokenAddr == WSTETH_ADDR) {
-            tokenAddr = STETH_ADDR;
-        }
-
-        (, int256 price, , , ) = feedRegistry.latestRoundData(tokenAddr, Denominations.USD);
-
-        if (_inputTokenAddr == WSTETH_ADDR) {
-            return wmul(uint256(price), IWStEth(WSTETH_ADDR).stEthPerToken());
-        }
-
-        return uint256(price);
-    }
     
     function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {
     }

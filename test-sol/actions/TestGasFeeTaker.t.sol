@@ -20,19 +20,19 @@ contract TestGasFeeTaker is DSTest, GasFeeTaker {
     }
 
     function testGetWbtcPrice() public view {
-        uint256 price = feeTaker.getTokenPrice(wbtc);
+        uint256 price = feeTaker.getPriceInUSD(wbtc);
 
         console.log(price);
     }
 
    function testGetMaticPrice() public view {
-       uint256 price = feeTaker.getTokenPrice(matic);
+       uint256 price = feeTaker.getPriceInUSD(matic);
 
        console.log(price);
    }
 
     function testPriceForNonTokenAddr() public view {
-        uint256 price = feeTaker.getTokenPrice(nonTokenAddr);
+        uint256 price = feeTaker.getPriceInUSD(nonTokenAddr);
 
         //  address priceOracleAddress =
         //         ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
