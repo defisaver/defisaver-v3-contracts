@@ -593,5 +593,16 @@
       "changeTime": 0,
       "registryIds": [],
       "history": []
-    }
+    },
+    {
+      "name": "FLBalancer",
+      "address": "0xdb28fE77709D88badC86868B27937428C3F48E73",
+      "id": "0xf97d044f",
+      "path": "contracts/actions/flashloan/FLBalancer.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    } 
   ]
