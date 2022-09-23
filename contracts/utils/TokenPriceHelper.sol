@@ -83,7 +83,7 @@ contract TokenPriceHelper is DSMath, UtilHelper {
 
     function getPriceInETH(address _inputTokenAddr) public view returns (uint256) {
         uint256 tokenUSDPrice = getPriceInUSD(_inputTokenAddr);
-        uint256 ethUSDPrice = getPriceInUSD(WETH_ADDR);
+        uint256 ethUSDPrice = getPriceInUSD(ETH_ADDR);
 
         return wdiv(tokenUSDPrice, ethUSDPrice);
     }
