@@ -121,6 +121,26 @@ const subToStrategy = async (proxy, strategySub, regAddr = addrs[network].REGIST
     return latestSubId;
 };
 
+const activateSub = async (proxy, subId, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const SubProxyAddr = await getAddrFromRegistry('SubProxy', regAddr);
+
+    const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
+    const functionData = SubProxyProxy.interface.encodeFunctionData(
+        'activateSub',
+        [subId.toString()],
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](SubProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed activateSub; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    return subId;
+};
+
 const subToAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
     const aaveSubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
 
@@ -216,6 +236,7 @@ const getSubHash = (subData) => {
 
 module.exports = {
     subToStrategy,
+    activateSub,
     subToAaveProxy,
     updateAaveProxy,
     createStrategy,

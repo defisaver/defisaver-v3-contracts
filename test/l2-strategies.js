@@ -286,9 +286,184 @@ const createAaveFLV3BoostL2Strategy = () => {
     return aaveV3BoostL2Strategy.encodeForDsProxyCall();
 };
 
+const createAaveV3FLCloseToDebtL2Strategy = () => {
+    const strategyName = 'AaveCloseToDebtL2';
+
+    const aaveCloseStrategy = new dfs.Strategy(strategyName);
+    aaveCloseStrategy.addSubSlot('&collAsset', 'address');
+    aaveCloseStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveCloseStrategy.addSubSlot('&debtAsset', 'address');
+    aaveCloseStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveCloseStrategy.addSubSlot('&rateMode', 'uint8');
+
+    const trigger = new dfs.triggers.AaveQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+
+    aaveCloseStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.AaveV3FlashLoanAction(
+        ['%repayAmount'],
+        ['%debtAsset'],
+        ['%AAVE_NO_DEBT_MODE'],
+        nullAddress,
+    );
+
+    const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        '%true',
+        '%nullAddress',
+        '%daiAmountToPayback(maxUint)', // kept variable (can support partial close later)
+        '&proxy',
+        '&rateMode',
+        '&debtAsset',
+        '&debtAssetId',
+        '%false',
+        '%nullAddress',
+    );
+
+    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '&collAssetId',
+        '%true',
+        '%daiAmountToWithdraw(maxUint)',
+        '&proxy',
+        '%nullAddress',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collAsset', // must be left variable diff. coll from cdps
+            '&debtAsset', // hardcoded always will be buying dai
+            '%amountToSell(maxUint)', // amount to sell is variable
+            '%exchangeWrapper', // exchange wrapper can change
+        ),
+        '&proxy', // hardcoded take from user proxy
+        '&proxy', // hardcoded send to user proxy
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '0', // must stay variable backend sets gasCost
+        '&debtAsset', // must stay variable as coll can differ
+        '$4', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+
+    const sendAction = new dfs.actions.basic.SendTokenAction(
+        '&debtAsset', // hardcoded only can borrow Dai
+        '%makerFlAddr', // kept variable this can change (FL must be payed back to work)
+        '$1', // hardcoded output from FL action
+    );
+
+    const sendAction1 = new dfs.actions.basic.SendTokenAction(
+        '&debtAsset', // hardcoded Dai is left in proxy
+        '&eoa', // hardcoded so only proxy owner receives amount
+        '%amountToRecipient(maxUint)', // kept variable (can support partial close later)
+    );
+
+    aaveCloseStrategy.addAction(flAction);
+    aaveCloseStrategy.addAction(paybackAction);
+    aaveCloseStrategy.addAction(withdrawAction);
+    aaveCloseStrategy.addAction(sellAction);
+    aaveCloseStrategy.addAction(feeTakingAction);
+    aaveCloseStrategy.addAction(sendAction);
+    aaveCloseStrategy.addAction(sendAction1);
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV3FLCloseToCollL2Strategy = () => {
+    const strategyName = 'AaveCloseToCollL2';
+
+    const aaveCloseStrategy = new dfs.Strategy(strategyName);
+    aaveCloseStrategy.addSubSlot('&collAsset', 'address');
+    aaveCloseStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveCloseStrategy.addSubSlot('&debtAsset', 'address');
+    aaveCloseStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveCloseStrategy.addSubSlot('&rateMode', 'uint8');
+
+    const trigger = new dfs.triggers.AaveQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+
+    aaveCloseStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.AaveV3FlashLoanAction(
+        ['%repayAmount'],
+        ['%debtAsset'],
+        ['%AAVE_NO_DEBT_MODE'],
+        nullAddress,
+    );
+
+    const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        '%true',
+        '%nullAddress',
+        '%daiAmountToPayback(maxUint)', // kept variable (can support partial close later)
+        '&proxy',
+        '&rateMode',
+        '&debtAsset',
+        '&debtAssetId',
+        '%false',
+        '%nullAddress',
+    );
+
+    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '&collAssetId',
+        '%true',
+        '%daiAmountToWithdraw(maxUint)',
+        '&proxy',
+        '%nullAddress',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collAsset', // must be left variable diff. coll from cdps
+            '&debtAsset', // hardcoded always will be buying dai
+            '%amountToSell', // amount to sell is variable
+            '%exchangeWrapper', // exchange wrapper can change
+        ),
+        '&proxy', // hardcoded take from user proxy
+        '&proxy', // hardcoded send to user proxy
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '0', // must stay variable backend sets gasCost
+        '&debtAsset', // must stay variable as coll can differ
+        '$4', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+
+    const sendAction0 = new dfs.actions.basic.SendTokenAction(
+        '&debtAsset', // hardcoded only can borrow Dai
+        '%makerFlAddr', // kept variable this can change (FL must be payed back to work)
+        '$1', // hardcoded output from FL action
+    );
+
+    const sendAction1 = new dfs.actions.basic.SendTokenAction(
+        '&debtAsset', // hardcoded Dai is left in proxy
+        '&eoa', // hardcoded so only proxy owner receives amount
+        '%amountToRecipient(maxUint)', // kept variable (can support partial close later)
+    );
+
+    const sendAction2 = new dfs.actions.basic.SendTokenAction(
+        '&collAsset', // hardcoded Dai is left in proxy
+        '&eoa', // hardcoded so only proxy owner receives amount
+        '%amountToRecipient(maxUint)', // kept variable (can support partial close later)
+    );
+
+    aaveCloseStrategy.addAction(flAction);
+    aaveCloseStrategy.addAction(paybackAction);
+    aaveCloseStrategy.addAction(withdrawAction);
+    aaveCloseStrategy.addAction(sellAction);
+    aaveCloseStrategy.addAction(feeTakingAction);
+    aaveCloseStrategy.addAction(sendAction0);
+    aaveCloseStrategy.addAction(sendAction1);
+    aaveCloseStrategy.addAction(sendAction2);
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createAaveV3RepayL2Strategy,
     createAaveFLV3RepayL2Strategy,
     createAaveV3BoostL2Strategy,
     createAaveFLV3BoostL2Strategy,
+    createAaveV3FLCloseToDebtL2Strategy,
+    createAaveV3FLCloseToCollL2Strategy,
 };

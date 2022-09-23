@@ -7,7 +7,7 @@ const storageSlots = require('./storageSlots.json');
 const { deployAsOwner } = require('../scripts/utils/deployer');
 
 const strategyStorageBytecode = require('../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
-let subStorageBytecode = require('../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
+const subStorageBytecode = require('../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
 const subStorageBytecodeL2 = require('../artifacts/contracts/core/l2/SubStorageL2.sol/SubStorageL2.json').deployedBytecode;
 const bundleStorageBytecode = require('../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
 const recipeExecutorBytecode = require('../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
@@ -37,12 +37,12 @@ const addrs = {
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
         REGISTRY_ADDR: '0xAf707Ee480204Ed6e2640B53cE86F680D28Afcbd',
-        OWNER_ACC: '0x322d58b9E75a6918f7e7849AEe0fF09369977e08',
+        OWNER_ACC: '0xc9a956923bfb5f141f1cd4467126b3ae91e5cc33',
         WETH_ADDRESS: '0x4200000000000000000000000000000000000006',
         DAI_ADDRESS: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
         USDC_ADDR: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
-        EXCHANGE_OWNER_ADDR: '0x322d58b9E75a6918f7e7849AEe0fF09369977e08',
-        SAVER_EXCHANGE_ADDR: '0x36Bf2251E9797df071A9b8bc4dE58F7cAcc16F44',
+        EXCHANGE_OWNER_ADDR: '0xc9a956923bfb5f141f1cd4467126b3ae91e5cc33',
+        SAVER_EXCHANGE_ADDR: '0xFfE2F824f0a1Ca917885CB4f848f3aEf4a32AaB9',
         PROXY_AUTH_ADDR: '0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043',
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
         StrategyProxy: '0xEe0C404FD30E289c305E760b3AE1d1Ae6503350f',
@@ -222,6 +222,10 @@ const coinGeckoHelper = {
     MATIC: 'matic-network',
     SUSHI: 'sushi',
 };
+
+const BN2Float = hre.ethers.utils.formatUnits;
+
+const Float2BN = hre.ethers.utils.parseUnits;
 
 const setNetwork = (networkName) => {
     network = networkName;
@@ -420,11 +424,11 @@ const getAddrFromRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR)
     const registry = await registryInstance.attach(regAddr);
 
     // TODO: Write in registry later
-    if (name === 'StrategyProxy') {
-        return addrs[network].StrategyProxy;
-    } if (name === 'SubProxy') {
-        return addrs[network].SubProxy;
-    }
+    // if (name === 'StrategyProxy') {
+    //     return addrs[network].StrategyProxy;
+    // } if (name === 'SubProxy') {
+    //     return addrs[network].SubProxy;
+    // }
     const addr = await registry.getAddr(
         getNameId(name),
     );
@@ -502,10 +506,10 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
         name = 'StrategyExecutorID';
     }
 
-    if (name === 'FLAaveV3') {
-        // eslint-disable-next-line no-param-reassign
-        name = 'FLActionL2';
-    }
+    // if (name === 'FLAaveV3') {
+    //     // eslint-disable-next-line no-param-reassign
+    //     name = 'FLActionL2';
+    // }
 
     const id = getNameId(name);
 
@@ -557,9 +561,8 @@ const redeployCore = async (isL2 = false) => {
 
     const subStorageAddr = await getAddrFromRegistry('SubStorage', addrs[network].REGISTRY_ADDR);
 
-    if (isL2) subStorageBytecode = subStorageBytecodeL2;
-
-    await setCode(subStorageAddr, subStorageBytecode);
+    if (isL2) await setCode(subStorageAddr, subStorageBytecodeL2);
+    else await setCode(subStorageAddr, subStorageBytecode);
 
     const bundleStorageAddr = await getAddrFromRegistry('BundleStorage', addrs[network].REGISTRY_ADDR);
     await setCode(bundleStorageAddr, bundleStorageBytecode);
@@ -628,6 +631,47 @@ const balanceOfOnTokenInBlock = async (tokenAddr, addr, block) => {
     let balance = '';
     balance = await tokenContract.balanceOf(addr, { blockTag: block });
     return balance;
+};
+
+/// @notice formats exchange object and sets mock wrapper balance
+const formatMockExchangeObj = async (
+    srcTokenInfo,
+    destTokenInfo,
+    srcAmount,
+    wrapper = undefined,
+) => {
+    if (!wrapper) {
+        // eslint-disable-next-line no-param-reassign
+        wrapper = await getAddrFromRegistry('MockExchangeWrapper');
+    }
+
+    const rateDecimals = 18 + destTokenInfo.decimals - srcTokenInfo.decimals;
+    const rate = Float2BN(
+        (getLocalTokenPrice(srcTokenInfo.symbol)
+        / getLocalTokenPrice(destTokenInfo.symbol)).toFixed(rateDecimals),
+        rateDecimals,
+    );
+
+    const expectedOutput = hre.ethers.constants.MaxInt256;
+
+    await setBalance(
+        destTokenInfo.addresses[chainIds[network]],
+        wrapper,
+        expectedOutput,
+    );
+
+    return [
+        srcTokenInfo.addresses[chainIds[network]],
+        destTokenInfo.addresses[chainIds[network]],
+        srcAmount,
+        0,
+        0,
+        0,
+        nullAddress,
+        wrapper,
+        hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [rate]),
+        [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
+    ];
 };
 
 const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee) => {
@@ -865,10 +909,6 @@ const getChainLinkPrice = async (tokenAddr) => {
     return data.answer.toString();
 };
 
-const BN2Float = hre.ethers.utils.formatUnits;
-
-const Float2BN = hre.ethers.utils.parseUnits;
-
 const takeSnapshot = async () => hre.network.provider.request({
     method: 'evm_snapshot',
 });
@@ -1070,6 +1110,7 @@ module.exports = {
     resetForkToBlock,
     balanceOfOnTokenInBlock,
     formatExchangeObjCurve,
+    formatMockExchangeObj,
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),

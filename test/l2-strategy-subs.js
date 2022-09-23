@@ -1,6 +1,8 @@
+const { defaultAbiCoder } = require('ethers/lib/utils');
 const {
     subToAaveProxy,
     updateAaveProxy,
+    subToStrategy,
 } = require('./utils-strategies');
 
 const {
@@ -75,7 +77,34 @@ const updateAaveV3L2AutomationStrategy = async (
     return { firstSub: subId1, secondSub: subId2 };
 };
 
+const subAaveCloseToDebt = async (
+    proxy,
+    strategyId,
+    triggerQuoteAsset,
+    triggerBaseAsset,
+    targetPrice,
+    priceState,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    rateMode,
+) => {
+    const triggerData = defaultAbiCoder.encode(['address', 'address', 'uint256', 'uint8'], [triggerQuoteAsset, triggerBaseAsset, targetPrice, priceState]);
+
+    const strategySub = [strategyId, false, [triggerData], [
+        defaultAbiCoder.encode(['address'], [collAsset]),
+        defaultAbiCoder.encode(['uint16'], [collAssetId.toString()]),
+        defaultAbiCoder.encode(['address'], [debtAsset]),
+        defaultAbiCoder.encode(['uint16'], [debtAssetId.toString()]),
+        defaultAbiCoder.encode(['uint8'], [rateMode.toString()]),
+    ]];
+
+    return subToStrategy(proxy, strategySub);
+};
+
 module.exports = {
     subAaveV3L2AutomationStrategy,
     updateAaveV3L2AutomationStrategy,
+    subAaveCloseToDebt,
 };
