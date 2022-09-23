@@ -51,8 +51,9 @@ const executeAction = async (actionName, functionData, proxy, regAddr = addrs[ne
         receipt = await proxy['execute(address,bytes)'](actionAddr, functionData, {
             gasLimit: 10000000,
         });
-        // const gasUsed = await getGasUsed(receipt);
-        // console.log(`Gas used by ${actionName} action; ${gasUsed}`);
+
+        const gasUsed = await getGasUsed(receipt);
+        console.log(`Gas used by ${actionName} action: ${gasUsed}`);
         return receipt;
     } catch (error) {
         console.log(error);
@@ -413,9 +414,11 @@ const claimComp = async (proxy, cSupplyAddresses, cBorrowAddresses, from, to) =>
 |  `----.|  `--'  | |  |  |  | |  |      |  `--'  | |  `--'  | |  |\   | |  '--'  |    \  V  /     ___) |
  \______| \______/  |__|  |__| | _|       \______/   \______/  |__| \__| |_______/      \___/     |____/
 */
-const supplyCompV3 = async (market, proxy, tokenAddr, amount, from) => {
-    await setBalance(tokenAddr, from, amount);
-    await approve(tokenAddr, proxy.address);
+const supplyCompV3 = async (market, proxy, tokenAddr, amount, from, isFork = false, signer) => {
+    if (!isFork) {
+        await setBalance(tokenAddr, from, amount);
+    }
+    await approve(tokenAddr, proxy.address, signer);
 
     const compSupplyAction = new dfs.actions.compoundV3.CompoundV3SupplyAction(
         market,

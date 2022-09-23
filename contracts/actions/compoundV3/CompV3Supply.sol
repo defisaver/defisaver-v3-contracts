@@ -64,7 +64,6 @@ contract CompV3Supply is ActionBase, CompV3Helper {
         uint256 _amount,
         address _from
     ) internal returns (uint256, bytes memory) {
-        
         // pull the tokens _from to the proxy
         _amount = _tokenAddr.pullTokensIfNeeded(_from, _amount);
 

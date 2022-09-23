@@ -363,6 +363,17 @@
         "history": []
     },
     {
+        "name": "TransientStorage",
+        "address": "0x2F7Ef2ea5E8c97B8687CA703A0e50Aa5a49B7eb2",
+        "id": "0x69885459",
+        "path": "contracts/utils/TransientStorage.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveView",
         "address": "0xe088a5005Bb995A9554bD3FE7F47e80f8F182389",
         "id": "0x7da42156",
@@ -388,7 +399,7 @@
     },
     {
         "name": "CompV3View",
-        "address": "0x5e07E953dac1d7c19091c3b493579ba7283572a4",
+        "address": "0xf522b1588688b9887623b9C666175684d284D363",
         "id": "0x16be4292",
         "path": "contracts/views/CompV3View.sol",
         "version": "1.0.0",
@@ -944,6 +955,17 @@
         "address": "0x5C7a9f4635AE4F95da2e45317311AAe255FB71B3",
         "id": "0xf97d044f",
         "path": "contracts/actions/flashloan/FLBalancer.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FLEuler",
+        "address": "0xaf591afeCbAa4026Be377AA3cF02dA366f18DE07",
+        "id": "0x23179eb0",
+        "path": "contracts/actions/flashloan/FLEuler.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
@@ -1610,12 +1632,45 @@
     },
     {
         "name": "CompV3Withdraw",
-        "address": "0xa803783B5270230dF64df16a1c5aEe73e27b3078",
+        "address": "0x59fED9975cd3bb07bB75490e86751D6025ce0bC2",
         "id": "0xc0072381",
         "path": "contracts/actions/compoundV3/CompV3Withdraw.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompV3RatioCheck",
+        "address": "0xDDE818191FDc8FeE53Af082643dE6103e354585c",
+        "id": "0x2ce67bb9",
+        "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompV3RatioTrigger",
+        "address": "0x8ACCaf4e0054AD73789A3ebF344c3061804c29D8",
+        "id": "0x506812d0",
+        "path": "contracts/triggers/CompV3RatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompV3SubProxy",
+        "address": "0xb460c044Cb2ECA74c713b8504Fe5aF360764b38d",
+        "id": "0x8c896d4c",
+        "path": "contracts/triggers/CompV3RatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },

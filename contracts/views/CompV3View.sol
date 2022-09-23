@@ -5,6 +5,9 @@ pragma solidity =0.8.10;
 import "../DS/DSMath.sol";
 import "../utils/Exponential.sol";
 import "../interfaces/compoundV3/IComet.sol";
+import "../interfaces/compoundV3/ICometExt.sol";
+import "../interfaces/compoundV3/ICometRewards.sol";
+
 import "../actions/compoundV3/helpers/CompV3Helper.sol";
 
 contract CompV3View is Exponential, DSMath, CompV3Helper {
@@ -43,6 +46,9 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
         uint totalSupply;
         uint totalBorrow;
         uint utilization;
+        uint baseBorrowMin;
+        uint baseTrackingBorrowRewardsSpeed;
+        uint baseTrackingSupplyRewardsSpeed;
     }
 
     struct GovernanceInfoFull {
@@ -52,6 +58,10 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
         bool isAbsorbPaused;
     }
     
+    function isAllowed(address _market, address _owner, address _manager) public view returns(bool isAllowed) {
+        return ICometExt(_market).allowance(_owner, _manager) == 0 ? false : true;
+    }
+
     /// @notice Returns all supported collateral assets 
     function getAssets(address _market) public view returns(IComet.AssetInfo[] memory assets){
         uint8 numAssets = IComet(_market).numAssets();
@@ -153,15 +163,19 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
             borrowRate: comet.getBorrowRate(utilization),
             totalSupply: basics.totalSupplyBase,
             totalBorrow: basics.totalBorrowBase,
-            utilization: utilization
+            utilization: utilization,
+            baseBorrowMin: comet.baseBorrowMin(),
+            baseTrackingBorrowRewardsSpeed: comet.baseTrackingBorrowSpeed(),
+            baseTrackingSupplyRewardsSpeed: comet.baseTrackingSupplySpeed()
         });
     }
 
-    function getFullCollInfos(address _market, address[] memory _tokensAddr) public returns(CollateralInfoFull[] memory colls) {
-        colls = new CollateralInfoFull[](_tokensAddr.length);
+    function getFullCollInfos(address _market) public returns(CollateralInfoFull[] memory colls) {
+        IComet.AssetInfo[] memory assets = getAssets(_market);
+        colls = new CollateralInfoFull[](assets.length);
 
-        for (uint i; i < _tokensAddr.length; ++i) {
-            colls[i] = getFullCollInfo(_market, _tokensAddr[i]);
+        for (uint i; i < assets.length; ++i) {
+            colls[i] = getFullCollInfo(_market, assets[i].asset);
         }
     }
 
@@ -181,5 +195,9 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
             isWithdrawPaused: comet.isWithdrawPaused(),
             isAbsorbPaused: comet.isAbsorbPaused()
         });
+    }
+
+    function getRewardsOwed(address _market, address _user) public returns (ICometRewards.RewardOwed memory rewardsOwed){
+        return ICometRewards(COMET_REWARDS_ADDR).getRewardOwed(_market, _user);
     }
 }

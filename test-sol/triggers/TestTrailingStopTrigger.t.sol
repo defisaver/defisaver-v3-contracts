@@ -145,7 +145,7 @@ contract TestTrailingStopTrigger is DSTest, DSMath, MainnetTriggerAddresses, Mai
 
     // Helper function
     function setPrice(uint80 _roundId, uint256 _price, address _tokenAddr) public {
-        mockPriceFeed.setRoundData(_tokenAddr, Denominations.USD, _roundId, int256(_price));
+        // mockPriceFeed.setRoundData(_tokenAddr, Denominations.USD, _roundId, int256(_price));
     }
 */
 }

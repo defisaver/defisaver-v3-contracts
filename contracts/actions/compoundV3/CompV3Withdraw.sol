@@ -62,6 +62,15 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
     ) internal returns (uint256, bytes memory) {
         require(_to != address(0), "Tokens sent to 0x0");
 
+        // if _amount type(uint).max that means take out proxy whole balance
+        if (_amount == type(uint256).max) {
+            if(_asset == IComet(_market).baseToken()) {
+                _amount = IComet(_market).balanceOf(address(this));
+            } else {
+                _amount = IComet(_market).collateralBalanceOf(address(this), _asset);
+            }
+        }
+
         IComet(_market).withdrawTo(_to, _asset, _amount);
 
         bytes memory logData = abi.encode(_market, _to, _asset, _amount);
