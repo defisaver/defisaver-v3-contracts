@@ -84,6 +84,7 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
 
         (Recipe memory currRecipe, address proxy) = abi.decode(_data, (Recipe, address));
         _token.withdrawTokens(proxy, _amount);
+        uint256 balanceBefore = _token.getBalance(address(this));
 
         address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
 
@@ -94,7 +95,7 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
             abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, paybackAmount)
         );
 
-        require(_token.getBalance(address(this)) == paybackAmount, "Wrong payback amount");
+        require(_token.getBalance(address(this)) == paybackAmount + balanceBefore, "Wrong payback amount");
 
         _token.approveToken(DSS_FLASH_ADDR, paybackAmount);
         return CALLBACK_SUCCESS;

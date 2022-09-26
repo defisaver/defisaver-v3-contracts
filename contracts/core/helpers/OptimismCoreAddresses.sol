@@ -12,6 +12,6 @@ contract OptimismCoreAddresses {
 
     address internal constant PROXY_AUTH_ADDR = 0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043;
 
-    address constant internal RECIPE_EXECUTOR_ADDR = 0x93B018328aB415cDc1b001B3a9fdFA9BEaB971A2;
+    address constant internal RECIPE_EXECUTOR_ADDR = 0x44FDe16DDCd7c02bE28de52CEc08997336051735;
 
 }

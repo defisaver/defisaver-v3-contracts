@@ -34,7 +34,7 @@ const testNetworks = Object.fromEntries([...Array(MAX_NODE_COUNT).keys()].map((c
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-    saveOnTenderly: true,
+    saveOnTenderly: false,
     defaultNetwork: 'fork',
     lightTesting: true,
     networks: {

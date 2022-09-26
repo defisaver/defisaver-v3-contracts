@@ -111,10 +111,11 @@ contract FLAaveV3 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlas
         }
 
         (Recipe memory currRecipe, address proxy) = abi.decode(_params, (Recipe, address));
-
+        uint256[] memory balancesBefore = new uint256[](_assets.length);
         // Send FL amounts to user proxy
         for (uint256 i = 0; i < _assets.length; ++i) {
             _assets[i].withdrawTokens(proxy, _amounts[i]);
+            balancesBefore[i] = _assets[i].getBalance(address(this));
         }
 
         address payable recipeExecutor = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
@@ -129,7 +130,7 @@ contract FLAaveV3 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlas
         for (uint256 i = 0; i < _assets.length; i++) {
             uint256 paybackAmount = add(_amounts[i],_fees[i]);
 
-            bool correctAmount = _assets[i].getBalance(address(this)) == paybackAmount;
+            bool correctAmount = _assets[i].getBalance(address(this)) == paybackAmount + balancesBefore[i];
 
             if (_assets[i] == ST_ETH_ADDR && !correctAmount) {
                 flFeeFaucet.my2Wei(ST_ETH_ADDR);
