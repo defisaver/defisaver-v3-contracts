@@ -37,6 +37,7 @@ const {
     setNetwork,
     addrs,
     ETH_ADDR,
+    getOwnerAddr,
 } = require('../test/utils');
 
 const {
@@ -1240,28 +1241,12 @@ const subAaveAutomation = async (
     });
 
     setNetwork(network);
+    await topUp(getOwnerAddr());
 
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await redeploy('AaveSubProxy', addrs[network].REGISTRY_ADDR, false, true);
-
-    await openStrategyAndBundleStorage(true);
-    const aaveRepayStrategyEncoded = createAaveV3RepayL2Strategy();
-    const aaveRepayFLStrategyEncoded = createAaveFLV3RepayL2Strategy();
-
-    const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
-    const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
-
-    await createBundle(proxy, [strategyId1, strategyId2]);
-
-    const aaveBoostStrategyEncoded = createAaveV3BoostL2Strategy();
-    const aaveBoostFLStrategyEncoded = createAaveFLV3BoostL2Strategy();
-
-    const strategyId11 = await createStrategy(proxy, ...aaveBoostStrategyEncoded, true);
-    const strategyId22 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
-
-    await createBundle(proxy, [strategyId11, strategyId22]);
 
     const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
     const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
