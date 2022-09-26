@@ -16,15 +16,15 @@ contract TokenPriceHelper is DSMath, UtilHelper {
     function getRoundInfo(address _inputTokenAddr, uint80 _roundId) public view returns (uint256, uint256 updateTimestamp) {
         address tokenAddr = getAddrForChainlinkOracle(_inputTokenAddr);
 
-        int256 chainlinkPrice;
+        int256 price;
 
         if (_roundId == 0) {
-            (, chainlinkPrice, , updateTimestamp, ) = feedRegistry.latestRoundData(
+            (, price, , updateTimestamp, ) = feedRegistry.latestRoundData(
                 tokenAddr,
                 Denominations.USD
             );
         } else {
-            (, chainlinkPrice, , updateTimestamp, ) = feedRegistry.getRoundData(
+            (, price, , updateTimestamp, ) = feedRegistry.getRoundData(
                 tokenAddr,
                 Denominations.USD,
                 _roundId
@@ -32,14 +32,9 @@ contract TokenPriceHelper is DSMath, UtilHelper {
         }
 
         // no price for wsteth, can calculate from steth
-        if (_inputTokenAddr == WSTETH_ADDR) {
-            return (
-                wmul(uint256(chainlinkPrice), IWStEth(WSTETH_ADDR).stEthPerToken()),
-                updateTimestamp
-            );
-        }
+        if (_inputTokenAddr == WSTETH_ADDR) price = getWStEthPrice(price);
 
-        return (uint256(chainlinkPrice), updateTimestamp);
+        return (uint256(price), updateTimestamp);
         
     }
 
@@ -55,9 +50,7 @@ contract TokenPriceHelper is DSMath, UtilHelper {
             price = 0;
         }
 
-        if (_inputTokenAddr == WSTETH_ADDR) {
-            return wmul(uint256(price), IWStEth(WSTETH_ADDR).stEthPerToken());
-        }
+        if (_inputTokenAddr == WSTETH_ADDR) price = getWStEthPrice(price);
 
         return uint256(price);
     }
@@ -84,5 +77,9 @@ contract TokenPriceHelper is DSMath, UtilHelper {
         }else {
             tokenAddrForChainlinkUsage = _inputTokenAddr;
         }
+    }
+    
+    function getWStEthPrice(int256 _stEthPrice) public view returns (int256 wStEthPrice){
+        wStEthPrice = int256(wmul(uint256(_stEthPrice), IWStEth(WSTETH_ADDR).stEthPerToken()));
     }
 }
