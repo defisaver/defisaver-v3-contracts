@@ -14,15 +14,7 @@ contract TokenPriceHelper is DSMath, UtilHelper {
     IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
     function getRoundInfo(address _inputTokenAddr, uint80 _roundId) public view returns (uint256, uint256 updateTimestamp) {
-        address tokenAddr = _inputTokenAddr;
-
-        if (_inputTokenAddr == TokenUtils.WETH_ADDR) {
-            tokenAddr = TokenUtils.ETH_ADDR;
-        }
-
-        if (_inputTokenAddr == WSTETH_ADDR) {
-            tokenAddr = STETH_ADDR;
-        }
+        address tokenAddr = getAddrForChainlinkOracle(_inputTokenAddr);
 
         int256 chainlinkPrice;
 
@@ -53,19 +45,8 @@ contract TokenPriceHelper is DSMath, UtilHelper {
 
     /// @dev helper function that returns latest token price in USD
     function getPriceInUSD(address _inputTokenAddr) public view returns (uint256) {
-        address tokenAddr = _inputTokenAddr;
-
-        if (_inputTokenAddr == WETH_ADDR) {
-            tokenAddr = ETH_ADDR;
-        }
-
-        if (_inputTokenAddr == WSTETH_ADDR) {
-            tokenAddr = STETH_ADDR;
-        }
-
-        if (_inputTokenAddr == WBTC_ADDR) {
-            tokenAddr = CHAINLINK_WBTC_ADDR;
-        }
+        
+        address tokenAddr = getAddrForChainlinkOracle(_inputTokenAddr);
 
         int256 price;
         try this.getChainlinkPriceInUSD(tokenAddr) returns (int256 result) {
@@ -91,5 +72,17 @@ contract TokenPriceHelper is DSMath, UtilHelper {
 
     function getChainlinkPriceInUSD(address _inputTokenAddr) public view returns (int256 price) {
         (, price, , , ) = feedRegistry.latestRoundData(_inputTokenAddr, Denominations.USD);
+    }
+
+    function getAddrForChainlinkOracle(address _inputTokenAddr) public pure returns (address tokenAddrForChainlinkUsage) {
+        if (_inputTokenAddr == WETH_ADDR) {
+            tokenAddrForChainlinkUsage = ETH_ADDR;
+        }else if (_inputTokenAddr == WSTETH_ADDR) {
+            tokenAddrForChainlinkUsage = STETH_ADDR;
+        }else if (_inputTokenAddr == WBTC_ADDR) {
+            tokenAddrForChainlinkUsage = CHAINLINK_WBTC_ADDR;
+        }else {
+            tokenAddrForChainlinkUsage = _inputTokenAddr;
+        }
     }
 }
