@@ -23,6 +23,7 @@ const {
     getAddrFromRegistry,
     setBalance,
     addrs,
+    AAVE_MARKET,
 } = require('../utils');
 
 const botRefillL2Test = async () => {
@@ -435,10 +436,11 @@ const tokenPriceHelperTest = async () => {
         this.timeout(80000);
 
         let tokenPriceHelper; let tokenPriceHelperAddr;
-
+        let aaveView;
         before(async () => {
             tokenPriceHelperAddr = await getAddrFromRegistry('TokenPriceHelper');
             tokenPriceHelper = await hre.ethers.getContractAt('TokenPriceHelper', tokenPriceHelperAddr);
+            aaveView = await redeploy('AaveView');
         });
 
         for (let i = 0; i < assets.length; i++) {
@@ -446,10 +448,15 @@ const tokenPriceHelperTest = async () => {
                 if (assets[i].symbol === 'OP') return;
                 const assetInfo = getAssetInfo(assets[i].symbol);
                 const priceInUSD = await tokenPriceHelper.getPriceInUSD(assetInfo.address);
-                const priceInETH = await tokenPriceHelper.getPriceInETH(assetInfo.address);
+                const aaveInUSD = await tokenPriceHelper.getAaveTokenPriceInUSD(assetInfo.address);
 
+                const priceInETH = await tokenPriceHelper.getPriceInETH(assetInfo.address);
+                const aaveInETH = await tokenPriceHelper.getAaveTokenPriceInETH(assetInfo.address);
+                if (priceInUSD.toString() === '0' && aaveInUSD.toString() === '0') return;
                 console.log(priceInUSD);
+                console.log(aaveInUSD);
                 console.log(priceInETH);
+                console.log(aaveInETH);
             });
         }
     });

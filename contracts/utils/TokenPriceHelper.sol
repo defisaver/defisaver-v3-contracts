@@ -8,6 +8,9 @@ import "../interfaces/lido/IWStEth.sol";
 import "./helpers/UtilHelper.sol";
 import "../interfaces/chainlink/IFeedRegistry.sol";
 import "./Denominations.sol";
+import "../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
+import "../interfaces/aaveV2/IPriceOracleGetterAave.sol";
+
 
 contract TokenPriceHelper is DSMath, UtilHelper {
 
@@ -47,7 +50,7 @@ contract TokenPriceHelper is DSMath, UtilHelper {
         try this.getChainlinkPriceInUSD(tokenAddr) returns (int256 result) {
             price = result;
         } catch {
-            price = 0;
+            price = int256(getAaveTokenPriceInUSD(tokenAddr));
         }
 
         if (_inputTokenAddr == WSTETH_ADDR) price = getWStEthPrice(price);
@@ -57,6 +60,11 @@ contract TokenPriceHelper is DSMath, UtilHelper {
 
     function getPriceInETH(address _inputTokenAddr) public view returns (uint256) {
         uint256 tokenUSDPrice = getPriceInUSD(_inputTokenAddr);
+
+        if (tokenUSDPrice == 0) {
+            tokenUSDPrice = getAaveTokenPriceInUSD(_inputTokenAddr);
+        }
+        
         uint256 ethUSDPrice = getPriceInUSD(ETH_ADDR);
 
         return wdiv(tokenUSDPrice, ethUSDPrice);
@@ -81,5 +89,19 @@ contract TokenPriceHelper is DSMath, UtilHelper {
     
     function getWStEthPrice(int256 _stEthPrice) public view returns (int256 wStEthPrice){
         wStEthPrice = int256(wmul(uint256(_stEthPrice), IWStEth(WSTETH_ADDR).stEthPerToken()));
+    }
+
+    function getAaveTokenPriceInETH(address _tokenAddr) public view returns (uint256 price) {
+        address priceOracleAddress =
+            ILendingPoolAddressesProviderV2(AAVE_MARKET).getPriceOracle();
+
+        price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr);
+    }
+
+    function getAaveTokenPriceInUSD(address _tokenAddr) public view returns (uint256) {
+        uint256 tokenAavePriceInETH = getAaveTokenPriceInETH(_tokenAddr);
+        uint256 ethPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR));
+        
+        return wmul(tokenAavePriceInETH, ethPriceInUSD);
     }
 }
