@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import "./OptimismAaveV3Addresses.sol";
+import "./ArbitrumAaveV3Addresses.sol";
 
 import "../../../interfaces/aaveV3/IL2PoolV3.sol";
 import "../../../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
 import "../../../interfaces/aaveV3/IPoolAddressesProvider.sol";
 
 /// @title Utility functions and data used in AaveV3 actions
-contract AaveV3Helper is OptimismAaveV3Addresses {
+contract AaveV3Helper is ArbitrumAaveV3Addresses {
     
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
