@@ -1423,6 +1423,39 @@
         "history": ["0xb14226c3FD41e9B1FF85b4f7144CB4096a5D1Ec9"]
     },
     {
+        "name": "CompoundRatioTrigger",
+        "address": "0x8EfbD976709c2bD46bdaf0c3Db83E875F1451BAE",
+        "id": "0xfd030057",
+        "path": "contracts/triggers/CompoundRatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityRatioTrigger",
+        "address": "0x7dDA9F944c3Daf27fbe3B8f27EC5f14FE3fa94BF",
+        "id": "0x26ef9c60",
+        "path": "contracts/triggers/LiquityRatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3RatioTrigger",
+        "address": "0xEf78B55bD7bC090F809535f3B32Bcf1E050815df",
+        "id": "0x21a42a26",
+        "path": "contracts/triggers/AaveV3RatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "SendTokenAndUnwrap",
         "address": "0xeecd376026335261c89faD40D89625391b1eFF6a",
         "id": "0x17782156",
