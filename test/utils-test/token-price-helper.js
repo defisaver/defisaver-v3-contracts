@@ -3,7 +3,7 @@ const {
 } = require('../utils');
 const { tokenPriceHelperTest } = require('./utils-tests');
 
-describe('Fee-Receiver', function () {
+describe('Token-Price-Helper', function () {
     this.timeout(80000);
 
     before(async () => {

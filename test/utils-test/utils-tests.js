@@ -432,7 +432,7 @@ const dfsRegistryControllerTest = async () => {
 };
 
 const tokenPriceHelperTest = async () => {
-    describe('Wrap-Eth', function () {
+    describe('Token-Price-Helper', function () {
         this.timeout(80000);
 
         let tokenPriceHelper; let tokenPriceHelperAddr;
