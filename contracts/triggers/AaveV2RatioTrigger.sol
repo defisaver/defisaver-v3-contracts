@@ -12,6 +12,7 @@ contract AaveV2RatioTrigger is ITrigger, AdminAuth, AaveRatioHelper {
     enum RatioState { OVER, UNDER }
     
     /// @param user address of the user whose position we check
+    /// @param market aaveV2 market address
     /// @param ratio ratio that represents the triggerable point
     /// @param state represents if we want the current state to be higher or lower than ratio param
     struct SubParams {
