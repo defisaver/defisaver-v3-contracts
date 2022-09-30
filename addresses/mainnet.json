@@ -1450,8 +1450,8 @@
         "id": "0x7e8b6344",
         "path": "contracts/triggers/AaveV2RatioTrigger.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": "",
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
