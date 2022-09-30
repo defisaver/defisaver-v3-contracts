@@ -19,13 +19,13 @@ contract AaveQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper
         UNDER
     }
 
-    /// @param tokenAddr address of the token which is quoted
-    /// @param tokenAddr address of the base token
-    /// @param price price in base token of the quote token that represents the triggerable point
+    /// @param baseTokenAddr address of the base token which is quoted
+    /// @param quoteTokenAddr address of the quote token
+    /// @param price price in quote token of the base token that represents the triggerable point
     /// @param state represents if we want the current price to be higher or lower than price param
     struct SubParams {
-        address quoteTokenAddr;
         address baseTokenAddr;
+        address quoteTokenAddr;
         uint256 price;
         uint8 state;
     }
@@ -38,7 +38,7 @@ contract AaveQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
 
-        uint256 currPrice = getPrice(triggerSubData.quoteTokenAddr, triggerSubData.baseTokenAddr);
+        uint256 currPrice = getPrice(triggerSubData.baseTokenAddr, triggerSubData.quoteTokenAddr);
 
         if (PriceState(triggerSubData.state) == PriceState.OVER) {
             if (currPrice > triggerSubData.price) return true;
@@ -51,15 +51,8 @@ contract AaveQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper
         return false;
     }
 
-    /// @dev helper function that returns latest quote token price in base tokens
-    function getPrice(address _quoteTokenAddr, address _baseTokenAddr) public view returns (uint256 price) {
-        address quoteTokenAddr = _quoteTokenAddr;
-        if (quoteTokenAddr == TokenUtils.WETH_ADDR) {
-            quoteTokenAddr = TokenUtils.ETH_ADDR;
-        } else if (quoteTokenAddr == TokenUtils.WSTETH_ADDR) {
-            quoteTokenAddr = TokenUtils.STETH_ADDR;
-        }
-
+    /// @dev helper function that returns latest base token price in quote tokens
+    function getPrice(address _baseTokenAddr, address _quoteTokenAddr) public view returns (uint256 price) {
         address baseTokenAddr = _baseTokenAddr;
         if (baseTokenAddr == TokenUtils.WETH_ADDR) {
             baseTokenAddr = TokenUtils.ETH_ADDR;
@@ -67,20 +60,27 @@ contract AaveQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper
             baseTokenAddr = TokenUtils.STETH_ADDR;
         }
 
+        address quoteTokenAddr = _quoteTokenAddr;
+        if (quoteTokenAddr == TokenUtils.WETH_ADDR) {
+            quoteTokenAddr = TokenUtils.ETH_ADDR;
+        } else if (quoteTokenAddr == TokenUtils.WSTETH_ADDR) {
+            quoteTokenAddr = TokenUtils.STETH_ADDR;
+        }
+
         address[] memory assets = new address[](2);
-        assets[0] = _quoteTokenAddr;
-        assets[1] = _baseTokenAddr;
+        assets[0] = _baseTokenAddr;
+        assets[1] = _quoteTokenAddr;
         uint256[] memory assetPrices = aaveOracleV3.getAssetsPrices(
             assets
         );
 
         price = assetPrices[0] * 1e8 / assetPrices[1];
         
-        if (_quoteTokenAddr == TokenUtils.WSTETH_ADDR) {
+        if (_baseTokenAddr == TokenUtils.WSTETH_ADDR) {
             return wmul(uint256(price), IWStEth(TokenUtils.WSTETH_ADDR).stEthPerToken());
         }
 
-        if (_baseTokenAddr == TokenUtils.WSTETH_ADDR) {
+        if (_quoteTokenAddr == TokenUtils.WSTETH_ADDR) {
             return wdiv(uint256(price), IWStEth(TokenUtils.WSTETH_ADDR).stEthPerToken());
         }
 
