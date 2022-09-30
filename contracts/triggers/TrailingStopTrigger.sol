@@ -10,12 +10,11 @@ import "../interfaces/lido/IWStEth.sol";
 import "../utils/Denominations.sol";
 import "../utils/TokenUtils.sol";
 import "./helpers/TriggerHelper.sol";
+import "../utils/TokenPriceHelper.sol";
 
 /// @title Validates trailing stop, caller injects a chainlink roundId where conditions are met
-contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
+contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath, TokenPriceHelper {
     using TokenUtils for address;
-
-    IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
     struct SubParams {
         address tokenAddr;
@@ -64,50 +63,6 @@ contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath {
         uint256 amountDiff = (_maxPrice * _percentage) / 10**10;
 
         return _currPrice <= (_maxPrice - amountDiff);
-    }
-
-    /// @dev Helper function that returns chainlink price data
-    /// @param _inputTokenAddr Token address we are looking the usd price for
-    /// @param _roundId Chainlink roundId, if 0 uses the latest
-    function getRoundInfo(address _inputTokenAddr, uint80 _roundId)
-        public
-        view
-        returns (uint256, uint256 updateTimestamp)
-    {
-        address tokenAddr = _inputTokenAddr;
-
-        if (_inputTokenAddr == TokenUtils.WETH_ADDR) {
-            tokenAddr = TokenUtils.ETH_ADDR;
-        }
-
-        if (_inputTokenAddr == WSTETH_ADDR) {
-            tokenAddr = STETH_ADDR;
-        }
-
-        int256 chainlinkPrice;
-
-        if (_roundId == 0) {
-            (, chainlinkPrice, , updateTimestamp, ) = feedRegistry.latestRoundData(
-                tokenAddr,
-                Denominations.USD
-            );
-        } else {
-            (, chainlinkPrice, , updateTimestamp, ) = feedRegistry.getRoundData(
-                tokenAddr,
-                Denominations.USD,
-                _roundId
-            );
-        }
-
-        // no price for wsteth, can calculate from steth
-        if (_inputTokenAddr == WSTETH_ADDR) {
-            return (
-                wmul(uint256(chainlinkPrice), IWStEth(WSTETH_ADDR).stEthPerToken()),
-                updateTimestamp
-            );
-        }
-
-        return (uint256(chainlinkPrice), updateTimestamp);
     }
 
     function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {}

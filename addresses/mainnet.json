@@ -1392,14 +1392,14 @@
     },
     {
         "name": "GasFeeTaker",
-        "address": "0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d",
+        "address": "0xcCFFC73347B05cBDCCe7c3de2a0AdEcDAa8AEf51",
         "id": "0x4571b8b3",
         "path": "contracts/actions/fee/GasFeeTaker.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d"]
     },
     {
         "name": "StrategyExecutor",
@@ -1413,14 +1413,14 @@
     },
     {
         "name": "ChainLinkPriceTrigger",
-        "address": "0xe3457797c543AD91bd36023d2EE600305ee89195",
+        "address": "0xAbf52Fc6e5C0e6E44Daac7C6ca79498302D9B0CA",
         "id": "0xac6bb72a",
         "path": "contracts/triggers/ChainLinkPriceTrigger.sol",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0xb14226c3FD41e9B1FF85b4f7144CB4096a5D1Ec9"]
+        "history": ["0xb14226c3FD41e9B1FF85b4f7144CB4096a5D1Ec9", "0xe3457797c543AD91bd36023d2EE600305ee89195"]
     },
     {
         "name": "CompoundRatioTrigger",
@@ -1588,14 +1588,14 @@
     },
     {
         "name": "TrailingStopTrigger",
-        "address": "0x575C0Cfe52016B4CfeFb3134Bc6A3eEEf7718B07",
+        "address": "0x359651fb6636cb650Fa47F11C9D35533BbFF8158",
         "id": "0x818774c3",
         "path": "contracts/triggers/TrailingStopTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0x575C0Cfe52016B4CfeFb3134Bc6A3eEEf7718B07"]
     },
     {
         "name": "CompV3Allow",
