@@ -1621,14 +1621,14 @@
     },
     {
         "name": "CompV3Claim",
-        "address": "0x6a4A6d7f98c11fe9bB8636AB0059C18980548596",
+        "address": "0x4CEa369B63daAc0dA3423c5038a57483c5150986",
         "id": "0xf8470345",
         "path": "contracts/actions/compoundV3/CompV3Claim.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x6a4A6d7f98c11fe9bB8636AB0059C18980548596"]
     },
     {
         "name": "CompV3Payback",
