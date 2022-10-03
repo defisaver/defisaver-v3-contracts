@@ -13,4 +13,6 @@ contract MainnetLiquityAddresses {
     address internal constant STABILITY_POOL_ADDRESS = 0x66017D22b0f8556afDd19FC67041899Eb65a21bb;
     address internal constant LQTY_STAKING_ADDRESS = 0x4f9Fbb3f1E99B56e0Fe2892e623Ed36A76Fc605d;
     address internal constant LQTY_FRONT_END_ADDRESS = 0x76720aC2574631530eC8163e4085d6F98513fb27;
+    address internal constant CB_MANAGER_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant BLUSD_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 }

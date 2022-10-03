@@ -11,6 +11,7 @@ import "../../../interfaces/liquity/ISortedTroves.sol";
 import "../../../interfaces/liquity/ICollSurplusPool.sol";
 import "../../../interfaces/liquity/IStabilityPool.sol";
 import "../../../interfaces/liquity/ILQTYStaking.sol";
+import "../../../interfaces/liquity/IChickenBondManager.sol";
 import "./MainnetLiquityAddresses.sol";
 
 contract LiquityHelper is MainnetLiquityAddresses {
@@ -26,6 +27,7 @@ contract LiquityHelper is MainnetLiquityAddresses {
     ICollSurplusPool constant public CollSurplusPool = ICollSurplusPool(COLL_SURPLUS_POOL_ADDRESS);
     IStabilityPool constant public StabilityPool = IStabilityPool(STABILITY_POOL_ADDRESS);
     ILQTYStaking constant public LQTYStaking = ILQTYStaking(LQTY_STAKING_ADDRESS);
+    IChickenBondManager constant public CBManager = IChickenBondManager(CB_MANAGER_ADDRESS);
 
     function withdrawStaking(uint256 _ethGain, uint256 _lusdGain, address _wethTo, address _lusdTo) internal {
         if (_ethGain > 0) {
