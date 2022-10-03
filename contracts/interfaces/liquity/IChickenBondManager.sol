@@ -12,14 +12,26 @@ interface IChickenBondManager {
         chickenedIn
     }
 
+    struct BondData {
+        uint256 lusdAmount;
+        uint64 claimedBLUSD; // In BLUSD units without decimals
+        uint64 startTime;
+        uint64 endTime; // Timestamp of chicken in/out event
+        BondStatus status;
+    }
+
     function lusdToken() external view returns (address);
     function bLUSDToken() external view returns (address);
     function curvePool() external view returns (address);
     function bammSPVault() external view returns (address);
     function yearnCurveVault() external view returns (address);
 
+    function countChickenIn() external view returns (uint256);
+    function countChickenOut() external view returns (uint256);
+
     // constants
     function INDEX_OF_LUSD_TOKEN_IN_CURVE_POOL() external pure returns (int128);
+    function CHICKEN_IN_AMM_FEE() external view returns (uint256);
 
     function createBond(uint256 _lusdAmount) external returns (uint256);
     function createBondWithPermit(
@@ -36,7 +48,7 @@ interface IChickenBondManager {
 
     // getters
     function calcRedemptionFeePercentage(uint256 _fractionOfBLUSDToRedeem) external view returns (uint256);
-    function getBondData(uint256 _bondID) external view returns (uint256 lusdAmount, uint64 claimedBLUSD, uint64 startTime, uint64 endTime, uint8 status);
+    function getBondData(uint256 _bondID) external view returns (BondData memory);
     function getLUSDToAcquire(uint256 _bondID) external view returns (uint256);
     function calcAccruedBLUSD(uint256 _bondID) external view returns (uint256);
     function calcBondBLUSDCap(uint256 _bondID) external view returns (uint256);
@@ -53,4 +65,13 @@ interface IChickenBondManager {
     function calcSystemBackingRatio() external view returns (uint256);
     function calcUpdatedAccrualParameter() external view returns (uint256);
     function getBAMMLUSDDebt() external view returns (uint256);
+    function getOpenBondCount() external view returns (uint256);
+    function getTreasury()
+        external
+        view
+        returns (
+            uint256 _pendingLUSD,
+            uint256 _totalAcquiredLUSD,
+            uint256 _permanentLUSD
+        );
 }

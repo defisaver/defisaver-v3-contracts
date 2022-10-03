@@ -60,15 +60,15 @@ contract CBChickenOut is ActionBase, LiquityHelper {
     function _cbChickenOut(Params memory _params) internal returns (uint256, bytes memory) {
         require(_params.to != address(0), "Don't send to 0x0");
 
-        (uint256 lusdAmount,,,,) = CBManager.getBondData(_params.bondID);
-        require(lusdAmount > 0, "Must have non 0 amount of LUSD to chicken out");
+        IChickenBondManager.BondData memory bond = CBManager.getBondData(_params.bondID);
+        require(bond.lusdAmount > 0, "Must have non 0 amount of LUSD to chicken out");
 
         CBManager.chickenOut(_params.bondID, _params.minLUSD);
 
-        LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, lusdAmount);
+        LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, bond.lusdAmount);
 
-        bytes memory logData = abi.encode(lusdAmount, _params.bondID, _params.to);
-        return (lusdAmount, logData);
+        bytes memory logData = abi.encode(bond.lusdAmount, _params.bondID, _params.to);
+        return (bond.lusdAmount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
