@@ -12,6 +12,7 @@ contract CBRedeem is ActionBase, LiquityHelper {
     struct Params {
         uint256 bLUSDAmount;
         uint256 minLUSDFromSP;
+        address from;
         address to;
     }
 
@@ -59,6 +60,8 @@ contract CBRedeem is ActionBase, LiquityHelper {
 
     function _cbRedeem(Params memory _params) internal returns (uint256, bytes memory) {
         require(_params.to != address(0), "Don't send to 0x0");
+
+        _params.bLUSDAmount = BLUSD_ADDRESS.pullTokensIfNeeded(_params.from, _params.bLUSDAmount);
 
         (uint256 lusdFromBAMMSPVault, uint256 yTokensFromCurveVault) = CBManager.redeem(
             _params.bLUSDAmount,
