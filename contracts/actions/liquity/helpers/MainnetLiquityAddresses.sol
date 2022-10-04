@@ -14,7 +14,7 @@ contract MainnetLiquityAddresses {
     address internal constant LQTY_STAKING_ADDRESS = 0x4f9Fbb3f1E99B56e0Fe2892e623Ed36A76Fc605d;
     address internal constant LQTY_FRONT_END_ADDRESS = 0x76720aC2574631530eC8163e4085d6F98513fb27;
     
-    address internal constant CB_MANAGER_ADDRESS = 0x6EA66D267234dC5ABfcC9885765a1e2E50073A2A;
-    address internal constant BLUSD_ADDRESS = 0x1E2391a261217c93D09Ff3Ae9aB1903EA237BdA8;
-    address internal constant BOND_NFT_ADDRESS = 0x5d49599F6Ce3FE92C358055486Ab21FDCd8f52f3;
+    address internal constant CB_MANAGER_ADDRESS = 0x57619FE9C539f890b19c61812226F9703ce37137;
+    address internal constant BLUSD_ADDRESS = 0xB9D7DdDca9a4AC480991865EfEf82E01273F79C3;
+    address internal constant BOND_NFT_ADDRESS = 0xa8384862219188a8f03c144953Cf21fc124029Ee;
 }
