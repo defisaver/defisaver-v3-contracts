@@ -171,17 +171,38 @@ const compV3TransferTest = async () => {
                         transferringAmount,
                     );
 
-                    const senderBalanceAfter = await cometContract.collateralBalanceOf(
+                    let senderBalanceAfter = await cometContract.collateralBalanceOf(
                         proxy.address,
                         assetInfo.address,
                     );
-                    const receiverBalanceAfter = await cometContract.collateralBalanceOf(
+                    let receiverBalanceAfter = await cometContract.collateralBalanceOf(
                         proxy2.address,
                         assetInfo.address,
                     );
 
                     expect(receiverBalanceAfter).to.be.gt(receiverBalanceBefore);
                     expect(senderBalanceAfter).to.be.lt(senderBalanceBefore);
+                    await transferCompV3(
+                        addrs[network].COMET_USDC_ADDR,
+                        proxy,
+                        proxy.address,
+                        proxy2.address,
+                        assetInfo.address,
+                        hre.ethers.constants.MaxUint256,
+                    );
+
+                    senderBalanceAfter = await cometContract.collateralBalanceOf(
+                        proxy.address,
+                        assetInfo.address,
+                    );
+                    receiverBalanceAfter = await cometContract.collateralBalanceOf(
+                        proxy2.address,
+                        assetInfo.address,
+                    );
+
+                    expect(receiverBalanceAfter).to.be.gt(receiverBalanceBefore);
+                    expect(senderBalanceAfter).to.be.lt(senderBalanceBefore);
+                    expect(senderBalanceAfter).to.be.eq(0);
                 });
             }
 
@@ -216,11 +237,27 @@ const compV3TransferTest = async () => {
                     transferringAmount,
                 );
 
-                const senderBalanceAfter = await cometContract.balanceOf(proxy.address);
-                const receiverBalanceAfter = await cometContract.balanceOf(proxy2.address);
+                let senderBalanceAfter = await cometContract.balanceOf(proxy.address);
+                let receiverBalanceAfter = await cometContract.balanceOf(proxy2.address);
 
                 expect(receiverBalanceAfter).to.be.gt(receiverBalanceBefore);
                 expect(senderBalanceAfter).to.be.lt(senderBalanceBefore);
+
+                await transferCompV3(
+                    addrs[network].COMET_USDC_ADDR,
+                    proxy,
+                    proxy.address,
+                    proxy2.address,
+                    assetInfo.address,
+                    hre.ethers.constants.MaxUint256,
+                );
+
+                senderBalanceAfter = await cometContract.balanceOf(proxy.address);
+                receiverBalanceAfter = await cometContract.balanceOf(proxy2.address);
+
+                expect(receiverBalanceAfter).to.be.gt(receiverBalanceBefore);
+                expect(senderBalanceAfter).to.be.lt(senderBalanceBefore);
+                expect(senderBalanceAfter).to.be.eq(0);
             });
         }
     });
