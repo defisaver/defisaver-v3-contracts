@@ -52,7 +52,7 @@ contract SendNFT is ActionBase {
     function _sendNFT(address _nftAddr, address _to, uint _nftId) internal {
         require(_to != address(0), "Can't burn nft");
 
-        IERC721(_nftAddr).transferFrom(address(this), _to, _nftId);
+        IERC721(_nftAddr).safeTransferFrom(address(this), _to, _nftId);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

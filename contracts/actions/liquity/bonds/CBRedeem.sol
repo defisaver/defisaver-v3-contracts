@@ -6,9 +6,14 @@ import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
+/// @title CBRedeem Redeem LUSD for bLUSD
 contract CBRedeem is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param bLUSDAmount Amount of bLusd tokens to pull
+    /// @param minLUSDFromSP Min. amount of LUSD to receive
+    /// @param from Address from where to pull bLusd tokens
+    /// @param to Address where to send LUSD tokens (possibly yTokens as well)
     struct Params {
         uint256 bLUSDAmount;
         uint256 minLUSDFromSP;

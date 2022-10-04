@@ -6,9 +6,12 @@ import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
+/// @title CBChickenIn Chickens in a bond and gets back bLUSD
 contract CBChickenIn is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param bondID NFT token id of the bond
+    /// @param to Address where to send bLUSD returned
     struct Params {
         uint256 bondID;
         address to;

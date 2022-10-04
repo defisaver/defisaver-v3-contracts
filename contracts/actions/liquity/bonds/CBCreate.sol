@@ -6,9 +6,12 @@ import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
+/// @title CBCreate Creates a Chicken Bond from a proxy
 contract CBCreate is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param amount LUSD token amount to pull
+    /// @param from Account from where to pull LUSD amount
     struct Params {
         uint256 amount;
         address from;
@@ -31,9 +34,9 @@ contract CBCreate is ActionBase, LiquityHelper {
         );
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
 
-        (uint256 borrowedAmount, bytes memory logData) = _cbCreateBond(params);
+        (uint256 bondId, bytes memory logData) = _cbCreateBond(params);
         emit ActionEvent("CBCreate", logData);
-        return bytes32(borrowedAmount);
+        return bytes32(bondId);
     }
 
     /// @inheritdoc ActionBase
@@ -50,15 +53,16 @@ contract CBCreate is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @dev If amount == max.uint it will pull whole balance of .from
     function _cbCreateBond(Params memory _params) internal returns (uint256, bytes memory) {
         _params.amount = LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.amount);
 
         LUSD_TOKEN_ADDRESS.approveToken(address(CBManager), _params.amount);
 
-        CBManager.createBond(_params.amount);
+        uint256 bondId = CBManager.createBond(_params.amount);
 
-        bytes memory logData = abi.encode(_params.amount, _params.from);
-        return (_params.amount, logData);
+        bytes memory logData = abi.encode(bondId, _params.amount, _params.from);
+        return (bondId, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

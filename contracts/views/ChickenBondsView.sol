@@ -41,10 +41,8 @@ contract ChickenBondsView is LiquityHelper {
         IBondNFT bondNFT = IBondNFT(BOND_NFT_ADDRESS);
 
         IChickenBondManager.BondData memory bondData = CBManager.getBondData(_bondID);
-        IBondNFT.BondExtraData memory bondDataExtra = bondNFT.getBondExtraData(_bondID);
 
-        string memory tokenUri = IBondNFTArtwork(BOND_NFT_ARTWORK_ADDRESS).tokenURI(_bondID, bondDataExtra);
-
+        string memory tokenUri = bondNFT.tokenURI(_bondID);
 
         bond = BondDataFull({
             bondID: _bondID,

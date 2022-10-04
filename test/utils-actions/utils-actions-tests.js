@@ -764,6 +764,27 @@ const toggleSubDataTest = async () => {
     });
 };
 
+const sendNFTTest = async () => {
+    describe('Send NFT', function () {
+        this.timeout(1000000);
+
+        let senderAcc;
+        let proxy;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+
+            proxy = await getProxy(senderAcc.address);
+
+            // create nft and send to proxy
+        });
+
+        it('... should send a nft from proxy', async () => {
+            // send nft to different eoa
+        });
+    });
+};
+
 const deployUtilsActionsContracts = async () => {
     await redeploy('SendTokenAndUnwrap');
     await redeploy('WrapEth');
@@ -778,6 +799,7 @@ const deployUtilsActionsContracts = async () => {
     await redeploy('ChangeProxyOwner');
     await redeploy('UpdateSub');
     await redeploy('ToggleSub');
+    await redeploy('NFTSend');
 };
 
 const utilsActionsFullTest = async () => {
@@ -793,6 +815,7 @@ const utilsActionsFullTest = async () => {
     await updateSubDataTest();
     await automationV2UnsubTest();
     await changeOwnerTest();
+    await sendNFTTest();
 };
 
 module.exports = {
@@ -808,4 +831,5 @@ module.exports = {
     sendTokenAndUnwrapTest,
     updateSubDataTest,
     toggleSubDataTest,
+    sendNFTTest,
 };

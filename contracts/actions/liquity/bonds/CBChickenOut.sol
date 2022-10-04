@@ -6,9 +6,13 @@ import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
+/// @title CBChickenOut Withdraws backing lusd from a pending bond
 contract CBChickenOut is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param bondID NFT token id of the bond
+    /// @param minLUSD Minimum amount of LUSD to be returned if the full amount is not avail.
+    /// @param to Address where to send LUSD returned
     struct Params {
         uint256 bondID;
         uint256 minLUSD;
