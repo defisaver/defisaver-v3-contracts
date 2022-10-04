@@ -1445,10 +1445,10 @@
         "history": []
     },
     {
-        "name": "AaveV3RatioTrigger",
-        "address": "0xEf78B55bD7bC090F809535f3B32Bcf1E050815df",
-        "id": "0x21a42a26",
-        "path": "contracts/triggers/AaveV3RatioTrigger.sol",
+        "name": "AaveV2RatioTrigger",
+        "address": "0xd891f499260aF046B4d4324cBEB84d02a6D61195",
+        "id": "0x7e8b6344",
+        "path": "contracts/triggers/AaveV2RatioTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
