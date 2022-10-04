@@ -495,7 +495,7 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
     }
 
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
-    const registryInstance = await hre.ethers.getContractFactory('DFSRegistry', signer);
+    const registryInstance = await hre.ethers.getContractFactory('contracts/core/DFSRegistry.sol:DFSRegistry', signer);
     let registry = await registryInstance.attach(regAddr);
 
     registry = registry.connect(signer);

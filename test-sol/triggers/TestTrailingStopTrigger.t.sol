@@ -8,10 +8,9 @@ import "../CheatCodes.sol";
 import "../../contracts/mocks/MockChainlinkFeedRegistry.sol";
 import "../../contracts/triggers/TrailingStopTrigger.sol";
 
-contract TestTrailingStopTrigger is DSTest, DSMath, MainnetTriggerAddresses {
+contract TestTrailingStopTrigger is DSTest, DSMath, MainnetTriggerAddresses, MainnetUtilAddresses {
+    /*
     CheatCodes vm = CheatCodes(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
-
-    address internal constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     TrailingStopTrigger trigger;
     MockChainlinkFeedRegistry mockPriceFeed;
@@ -148,5 +147,5 @@ contract TestTrailingStopTrigger is DSTest, DSMath, MainnetTriggerAddresses {
     function setPrice(uint80 _roundId, uint256 _price, address _tokenAddr) public {
         // mockPriceFeed.setRoundData(_tokenAddr, Denominations.USD, _roundId, int256(_price));
     }
-
+*/
 }
