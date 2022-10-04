@@ -1321,6 +1321,19 @@ const chickenRedeem = async (proxy, bLUSDAmount, minLUSDFromSP, from, to) => {
     return tx;
 };
 
+const nftSend = async (proxy, nftAddr, tokenId, to) => {
+    const createCBAction = new dfs.actions.basic.SendNFTAction(
+        nftAddr,
+        to,
+        tokenId,
+    );
+
+    const functionData = createCBAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('SendNFT', functionData, proxy);
+    return tx;
+};
+
 const dydxSupply = async (proxy, tokenAddr, amount, from) => {
     await approve(tokenAddr, proxy.address);
 
@@ -2338,4 +2351,5 @@ module.exports = {
     chickenIn,
     chickenOut,
     chickenRedeem,
+    nftSend,
 };

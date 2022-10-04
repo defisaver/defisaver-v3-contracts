@@ -108,6 +108,7 @@ const UNIV2_ROUTER_ADDRESS = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
 const FEED_REGISTRY_ADDRESS = '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf';
 const USD_DENOMINATION = '0x0000000000000000000000000000000000000348';
 const BLUSD_ADDR = '0x1E2391a261217c93D09Ff3Ae9aB1903EA237BdA8';
+const BOND_NFT_ADDR = '0x5d49599F6Ce3FE92C358055486Ab21FDCd8f52f3';
 
 // optimism aave V3
 const AAVE_MARKET_OPTIMISM = '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb';
@@ -627,6 +628,14 @@ const balanceOf = async (tokenAddr, addr) => {
     }
     return balance;
 };
+
+const getNftOwner = async (nftAddr, tokenId) => {
+    const tokenContract = await hre.ethers.getContractAt('IERC721', nftAddr);
+    const owner = await tokenContract.ownerOf(tokenId);
+
+    return owner;
+};
+
 const balanceOfOnTokenInBlock = async (tokenAddr, addr, block) => {
     const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
     let balance = '';
@@ -1015,6 +1024,7 @@ module.exports = {
     callDataCost,
     mockChainlinkPriceFeed,
     setMockPrice,
+    getNftOwner,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,
@@ -1066,6 +1076,7 @@ module.exports = {
     network,
     chainIds,
     BLUSD_ADDR,
+    BOND_NFT_ADDR,
     setNetwork,
     setBalance,
     takeSnapshot,

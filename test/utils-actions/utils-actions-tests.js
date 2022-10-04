@@ -19,20 +19,29 @@ const {
     impersonateAccount,
     setBalance,
     resetForkToBlock,
+    redeployCore,
+    fetchAmountinUSDPrice,
+    openStrategyAndBundleStorage,
+    getChainLinkPrice,
+    getNftOwner,
     WETH_ADDRESS,
     ETH_ADDR,
     DFS_REG_CONTROLLER,
     ADMIN_ACC,
     DAI_ADDR,
-    redeployCore,
-    fetchAmountinUSDPrice,
-    openStrategyAndBundleStorage,
-    getChainLinkPrice,
+    LUSD_ADDR,
+    BOND_NFT_ADDR,
 } = require('../utils');
 
 const { fetchMakerAddresses } = require('../utils-mcd');
 const {
-    changeProxyOwner, automationV2Unsub, executeAction, openVault, updateSubData,
+    changeProxyOwner,
+    automationV2Unsub,
+    executeAction,
+    openVault,
+    updateSubData,
+    createChickenBond,
+    nftSend,
 } = require('../actions');
 const { addBotCaller, createStrategy, subToStrategy } = require('../utils-strategies');
 const { createMcdCloseStrategy } = require('../strategies');
@@ -770,17 +779,34 @@ const sendNFTTest = async () => {
 
         let senderAcc;
         let proxy;
+        let bondID;
+        let chickenBondsView;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
 
             proxy = await getProxy(senderAcc.address);
 
-            // create nft and send to proxy
+            chickenBondsView = await redeploy('ChickenBondsView');
+
+            const lusdAmount = hre.ethers.utils.parseUnits('1000', 18);
+            await setBalance(LUSD_ADDR, senderAcc.address, lusdAmount);
+
+            await createChickenBond(proxy, lusdAmount, senderAcc.address);
+
+            const bonds = await chickenBondsView.getUsersBonds(proxy.address);
+            bondID = bonds[bonds.length - 1].bondID.toString();
         });
 
         it('... should send a nft from proxy', async () => {
-            // send nft to different eoa
+            const ownerBefore = await getNftOwner(BOND_NFT_ADDR, bondID);
+
+            await nftSend(proxy, BOND_NFT_ADDR, bondID, senderAcc.address);
+
+            const ownerAfter = await getNftOwner(BOND_NFT_ADDR, bondID);
+
+            expect(ownerBefore).to.be.eq(proxy.address);
+            expect(ownerAfter).to.be.eq(senderAcc.address);
         });
     });
 };
