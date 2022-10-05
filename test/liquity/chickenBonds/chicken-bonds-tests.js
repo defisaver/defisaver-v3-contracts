@@ -10,7 +10,6 @@ const {
     MAX_UINT,
     BLUSD_ADDR,
     timeTravel,
-    mineBlock,
 } = require('../../utils');
 
 const {
@@ -214,8 +213,6 @@ const cbRedeemTest = async () => {
 
             const bonds2 = await chickenBondsView.getUsersBonds(proxy.address);
             bondID2 = bonds2[bonds2.length - 1].bondID.toString();
-
-            console.log(bondID, bondID2);
         });
 
         it('... should redeem LUSD for bLUSD', async () => {
@@ -231,14 +228,16 @@ const cbRedeemTest = async () => {
 
             await chickenRedeem(
                 proxy,
-                bLusdBalanceBefore,
+                bLusdBalanceBefore.div('2'),
                 0,
                 senderAcc.address,
                 senderAcc.address,
             );
 
             const lusdBalanceAfter = await balanceOf(LUSD_ADDR, senderAcc.address);
+            const lusdBalanceProxy = await balanceOf(LUSD_ADDR, proxy.address);
 
+            expect(lusdBalanceProxy).to.be.eq(0);
             expect(lusdBalanceAfter).to.be.gt(lusdBalanceBefore);
         });
     });

@@ -6,7 +6,7 @@ import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
-/// @title Redeem LUSD for bLUSD
+/// @title Redeem LUSD (sometimes yTokens) for bLUSD
 contract CBRedeem is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
