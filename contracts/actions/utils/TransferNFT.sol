@@ -4,8 +4,8 @@ pragma solidity =0.8.10;
 import "../../interfaces/IERC721.sol";
 import "../ActionBase.sol";
 
-/// @title Helper action to send a NFT token to the specified address
-contract SendNFT is ActionBase {
+/// @title Helper action to transfer a NFT token to the specified address
+contract TransferNFT is ActionBase {
 
     struct Params {
         address nftAddr;
@@ -28,7 +28,7 @@ contract SendNFT is ActionBase {
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
         inputData.nftId = _parseParamUint(inputData.nftId, _paramMapping[3], _subData, _returnValues);
 
-        _sendNFT(inputData.nftAddr, inputData.from, inputData.to, inputData.nftId);
+        _transferNFT(inputData.nftAddr, inputData.from, inputData.to, inputData.nftId);
 
         return bytes32(inputData.nftId);
     }
@@ -37,7 +37,7 @@ contract SendNFT is ActionBase {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
-        _sendNFT(inputData.nftAddr, inputData.from, inputData.to, inputData.nftId);
+        _transferNFT(inputData.nftAddr, inputData.from, inputData.to, inputData.nftId);
     }
 
     /// @inheritdoc ActionBase
@@ -51,9 +51,9 @@ contract SendNFT is ActionBase {
     /// @dev Proxy must have approve if _from != proxy
     /// @param _nftAddr Address of the ERC721 contract
     /// @param _from Where from we are pulling the nft (defaults to proxy)
-    /// @param _to Address where we are sending the nft
-    /// @param _nftId TokenId we are sending
-    function _sendNFT(address _nftAddr, address _from, address _to, uint _nftId) internal {
+    /// @param _to Address where we are transferring the nft
+    /// @param _nftId TokenId we are transferring
+    function _transferNFT(address _nftAddr, address _from, address _to, uint _nftId) internal {
         require(_to != address(0), "Can't burn nft");
 
         if (_from == address(0)) {

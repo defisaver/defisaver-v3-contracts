@@ -41,7 +41,7 @@ const {
     openVault,
     updateSubData,
     createChickenBond,
-    nftSend,
+    transferNFT,
 } = require('../actions');
 const { addBotCaller, createStrategy, subToStrategy } = require('../utils-strategies');
 const { createMcdCloseStrategy } = require('../strategies');
@@ -773,8 +773,8 @@ const toggleSubDataTest = async () => {
     });
 };
 
-const sendNFTTest = async () => {
-    describe('Send NFT', function () {
+const transferNFTTest = async () => {
+    describe('Transfer NFT', function () {
         this.timeout(1000000);
 
         let senderAcc;
@@ -801,10 +801,10 @@ const sendNFTTest = async () => {
             bondID = bonds[bonds.length - 1].bondID.toString();
         });
 
-        it('... should send a nft from proxy', async () => {
+        it('... should transfer a nft from proxy', async () => {
             const ownerBefore = await getNftOwner(BOND_NFT_ADDR, bondID);
 
-            await nftSend(proxy, BOND_NFT_ADDR, bondID, proxy.address, senderAcc.address);
+            await transferNFT(proxy, BOND_NFT_ADDR, bondID, proxy.address, senderAcc.address);
 
             const ownerAfter = await getNftOwner(BOND_NFT_ADDR, bondID);
 
@@ -817,7 +817,7 @@ const sendNFTTest = async () => {
 
             await bondNft.setApprovalForAll(proxy.address, true);
 
-            await nftSend(proxy, BOND_NFT_ADDR, bondID, senderAcc.address, proxy.address);
+            await transferNFT(proxy, BOND_NFT_ADDR, bondID, senderAcc.address, proxy.address);
 
             const ownerAfter = await getNftOwner(BOND_NFT_ADDR, bondID);
 
@@ -841,7 +841,7 @@ const deployUtilsActionsContracts = async () => {
     await redeploy('ChangeProxyOwner');
     await redeploy('UpdateSub');
     await redeploy('ToggleSub');
-    await redeploy('NFTSend');
+    await redeploy('TransferNFT');
 };
 
 const utilsActionsFullTest = async () => {
@@ -857,7 +857,7 @@ const utilsActionsFullTest = async () => {
     await updateSubDataTest();
     await automationV2UnsubTest();
     await changeOwnerTest();
-    await sendNFTTest();
+    await transferNFTTest();
 };
 
 module.exports = {
@@ -873,5 +873,5 @@ module.exports = {
     sendTokenAndUnwrapTest,
     updateSubDataTest,
     toggleSubDataTest,
-    sendNFTTest,
+    transferNFTTest,
 };

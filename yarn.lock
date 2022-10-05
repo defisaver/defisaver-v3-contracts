@@ -173,7 +173,7 @@
     "memoizee" "^0.4.15"
 
 "@defisaver/sdk@github:DecenterApps/defisaver-sdk#feature/chicken-bonds":
-  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#50ba555dee1db109b64460915af9deb20723c137"
+  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#825e62a1d934dc1e2253dd8e3f23d925d8ebc7fc"
   "version" "0.3.18"
   dependencies:
     "@defisaver/tokens" "^1.4.18"

@@ -17,7 +17,7 @@ async function main() {
     const cbChickenOut = await redeploy('CBChickenOut', addrs[network].REGISTRY_ADDR, true, true);
     const cbCreate = await redeploy('CBCreate', addrs[network].REGISTRY_ADDR, true, true);
     const cbRedeem = await redeploy('CBRedeem', addrs[network].REGISTRY_ADDR, true, true);
-    const sendNFT = await redeploy('SendNFT', addrs[network].REGISTRY_ADDR, true, true);
+    const transferNFT = await redeploy('TransferNFT', addrs[network].REGISTRY_ADDR, true, true);
 
     console.log(`ChickenBondsView: ${chickenBondsView.address}`);
 
@@ -25,7 +25,7 @@ async function main() {
     console.log(`CBChickenOut: ${cbChickenOut.address}`);
     console.log(`CBCreate: ${cbCreate.address}`);
     console.log(`CBRedeem: ${cbRedeem.address}`);
-    console.log(`SendNFT: ${sendNFT.address}`);
+    console.log(`TransferNFT: ${transferNFT.address}`);
 
     process.exit(0);
 }
