@@ -428,6 +428,87 @@ const callAaveFLV3BoostL2Strategy = async (
 const callAaveCloseToDebtL2Strategy = async (
     strategyExecutorByBot,
     subId,
+    srcTokenInfo,
+    destTokenInfo,
+) => {
+    const actionsCallData = [];
+    const triggerCallData = [];
+
+    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '0',
+        true,
+        MAXUINT,
+        placeHolderAddr,
+        nullAddress,
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        await formatMockExchangeObj(
+            srcTokenInfo,
+            destTokenInfo,
+            hre.ethers.constants.MaxUint256, // amount to sell is variable
+        ),
+        placeHolderAddr, // hardcoded take from user proxy
+        placeHolderAddr, // hardcoded send to user proxy
+    );
+
+    const closeGasCost = '1000000';
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        closeGasCost, // must stay variable backend sets gasCost
+        placeHolderAddr, // must stay variable as coll can differ
+        '0', // hardcoded output from sell action
+        '0', // defaults at 0.05%
+        closeGasCost, // send custom amount for Optimism
+    );
+
+    const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        true,
+        nullAddress,
+        MAXUINT, // kept variable (can support partial close later)
+        placeHolderAddr,
+        '0',
+        placeHolderAddr,
+        '0',
+        false,
+        nullAddress,
+    );
+
+    const sendAction = new dfs.actions.basic.SendTokenAction(
+        placeHolderAddr, // hardcoded Dai is left in proxy
+        placeHolderAddr, // hardcoded so only proxy owner receives amount
+        MAXUINT, // kept variable (can support partial close later)
+    );
+
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(sendAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        0,
+        triggerCallData,
+        actionsCallData,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callAaveCloseToDebtL2Strategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
+const callAaveFLCloseToDebtL2Strategy = async (
+    strategyExecutorByBot,
+    subId,
     repayAmount,
     flAsset,
     flAddr,
@@ -525,6 +606,95 @@ const callAaveCloseToDebtL2Strategy = async (
 };
 
 const callAaveCloseToCollL2Strategy = async (
+    strategyExecutorByBot,
+    subId,
+    swapAmount,
+    srcTokenInfo,
+    destTokenInfo,
+) => {
+    const actionsCallData = [];
+    const triggerCallData = [];
+
+    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '0',
+        true,
+        MAXUINT,
+        placeHolderAddr,
+        nullAddress,
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        await formatMockExchangeObj(
+            srcTokenInfo,
+            destTokenInfo,
+            swapAmount, // amount to sell is variable
+        ),
+        placeHolderAddr, // hardcoded take from user proxy
+        placeHolderAddr, // hardcoded send to user proxy
+    );
+
+    const closeGasCost = '1000000';
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        closeGasCost, // must stay variable backend sets gasCost
+        placeHolderAddr, // must stay variable as coll can differ
+        '0', // hardcoded output from sell action
+        '0', // defaults at 0.05%
+        closeGasCost, // send custom amount for Optimism
+    );
+
+    const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        true,
+        nullAddress,
+        MAXUINT, // kept variable (can support partial close later)
+        placeHolderAddr,
+        '0',
+        placeHolderAddr,
+        '0',
+        false,
+        nullAddress,
+    );
+
+    const sendAction1 = new dfs.actions.basic.SendTokenAction(
+        placeHolderAddr, // hardcoded Dai is left in proxy
+        placeHolderAddr, // hardcoded so only proxy owner receives amount
+        MAXUINT, // kept variable (can support partial close later)
+    );
+
+    const sendAction2 = new dfs.actions.basic.SendTokenAction(
+        placeHolderAddr, // hardcoded Dai is left in proxy
+        placeHolderAddr, // hardcoded so only proxy owner receives amount
+        MAXUINT, // kept variable (can support partial close later)
+    );
+
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(sendAction1.encodeForRecipe()[0]);
+    actionsCallData.push(sendAction2.encodeForRecipe()[0]);
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        0,
+        triggerCallData,
+        actionsCallData,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callAaveCloseToCollL2Strategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
+const callAaveFLCloseToCollL2Strategy = async (
     strategyExecutorByBot,
     subId,
     repayAmount,
@@ -637,5 +807,7 @@ module.exports = {
     callAaveV3BoostL2Strategy,
     callAaveFLV3BoostL2Strategy,
     callAaveCloseToDebtL2Strategy,
+    callAaveFLCloseToDebtL2Strategy,
     callAaveCloseToCollL2Strategy,
+    callAaveFLCloseToCollL2Strategy,
 };
