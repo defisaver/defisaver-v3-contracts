@@ -1321,9 +1321,10 @@ const chickenRedeem = async (proxy, bLUSDAmount, minLUSDFromSP, from, to) => {
     return tx;
 };
 
-const nftSend = async (proxy, nftAddr, tokenId, to) => {
+const nftSend = async (proxy, nftAddr, tokenId, from, to) => {
     const createCBAction = new dfs.actions.basic.SendNFTAction(
         nftAddr,
+        from,
         to,
         tokenId,
     );

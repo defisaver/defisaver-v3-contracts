@@ -781,11 +781,14 @@ const sendNFTTest = async () => {
         let proxy;
         let bondID;
         let chickenBondsView;
+        let bondNft;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
 
             proxy = await getProxy(senderAcc.address);
+
+            bondNft = await hre.ethers.getContractAt('IERC721', BOND_NFT_ADDR);
 
             chickenBondsView = await redeploy('ChickenBondsView');
 
@@ -801,12 +804,25 @@ const sendNFTTest = async () => {
         it('... should send a nft from proxy', async () => {
             const ownerBefore = await getNftOwner(BOND_NFT_ADDR, bondID);
 
-            await nftSend(proxy, BOND_NFT_ADDR, bondID, senderAcc.address);
+            await nftSend(proxy, BOND_NFT_ADDR, bondID, proxy.address, senderAcc.address);
 
             const ownerAfter = await getNftOwner(BOND_NFT_ADDR, bondID);
 
             expect(ownerBefore).to.be.eq(proxy.address);
             expect(ownerAfter).to.be.eq(senderAcc.address);
+        });
+
+        it('... should pull a nft from sender', async () => {
+            const ownerBefore = await getNftOwner(BOND_NFT_ADDR, bondID);
+
+            await bondNft.setApprovalForAll(proxy.address, true);
+
+            await nftSend(proxy, BOND_NFT_ADDR, bondID, senderAcc.address, proxy.address);
+
+            const ownerAfter = await getNftOwner(BOND_NFT_ADDR, bondID);
+
+            expect(ownerBefore).to.be.eq(senderAcc.address);
+            expect(ownerAfter).to.be.eq(proxy.address);
         });
     });
 };

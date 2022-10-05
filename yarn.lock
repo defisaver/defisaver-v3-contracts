@@ -173,8 +173,8 @@
     "memoizee" "^0.4.15"
 
 "@defisaver/sdk@github:DecenterApps/defisaver-sdk#feature/chicken-bonds":
-  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#58078624c42923ea0305db5547104962588c962d"
-  "version" "0.3.16"
+  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#50ba555dee1db109b64460915af9deb20723c137"
+  "version" "0.3.18"
   dependencies:
     "@defisaver/tokens" "^1.4.18"
     "@ethersproject/address" "^5.0.10"
@@ -185,9 +185,9 @@
     "web3-utils" "^1.3.0"
 
 "@defisaver/tokens@^1.3.30", "@defisaver/tokens@^1.4.18":
-  "integrity" "sha512-10NDcuCdnaN32yoaIz1zpi3piNo/mji2VNMjcmf7xT9DQdPv/kdOUEt6paGeNTjszwKDrTzTLt7g98mDCFUUMw=="
-  "resolved" "https://registry.npmjs.org/@defisaver/tokens/-/tokens-1.4.18.tgz"
-  "version" "1.4.18"
+  "integrity" "sha512-klj4RhxndoJeQojUC8JZ99ClGuUSOmJb95Xfso2h96UOwk5oJS4483OF2PtTHfbXXkXGa1fNY/rcgAYyiySOxQ=="
+  "resolved" "https://registry.npmjs.org/@defisaver/tokens/-/tokens-1.4.21.tgz"
+  "version" "1.4.21"
   dependencies:
     "decimal.js" "^10.2.1"
 

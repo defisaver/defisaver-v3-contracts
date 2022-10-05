@@ -61,22 +61,32 @@ contract CBChickenOut is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @dev If the user can withdraw full lusdAmount, set minLUSD == bond.lusdAmount to be gas optimal
     function _cbChickenOut(Params memory _params) internal returns (uint256, bytes memory) {
         require(_params.to != address(0), "Don't send to 0x0");
 
         IChickenBondManager.BondData memory bond = CBManager.getBondData(_params.bondID);
         require(bond.lusdAmount > 0, "Must have non 0 amount of LUSD to chicken out");
 
-        uint256 balanceBefore = LUSD_TOKEN_ADDRESS.getBalance(address(this));
+        bool canGetFullAmount = _params.minLUSD == bond.lusdAmount;
+        uint256 lusdAmountToSend = bond.lusdAmount;
+        uint256 balanceBefore;
+
+        if (!canGetFullAmount) {
+            balanceBefore = LUSD_TOKEN_ADDRESS.getBalance(address(this));
+        }
+
         CBManager.chickenOut(_params.bondID, _params.minLUSD);
-        uint256 balanceAfter = LUSD_TOKEN_ADDRESS.getBalance(address(this));
 
-        uint256 lusdAmount = balanceAfter - balanceBefore;
+        if (!canGetFullAmount) {
+            uint256 balanceAfter = LUSD_TOKEN_ADDRESS.getBalance(address(this));
+            lusdAmountToSend = balanceAfter - balanceBefore;
+        }
 
-        LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, lusdAmount);
+        LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, lusdAmountToSend);
 
-        bytes memory logData = abi.encode(lusdAmount, _params.bondID, _params.to);
-        return (lusdAmount, logData);
+        bytes memory logData = abi.encode(lusdAmountToSend, _params.bondID, _params.to);
+        return (lusdAmountToSend, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

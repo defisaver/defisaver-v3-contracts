@@ -99,7 +99,9 @@ const cbChickenOutTest = async () => {
         it('... should chicken out a bond', async () => {
             const lusdBalanceBefore = await balanceOf(LUSD_ADDR, senderAcc.address);
 
-            await chickenOut(proxy, bondID, 0, senderAcc.address);
+            const bondInfo = await chickenBondsView.getBondFullInfo(bondID);
+
+            await chickenOut(proxy, bondID, bondInfo.lusdAmount.toString(), senderAcc.address);
 
             const lusdBalanceAfter = await balanceOf(LUSD_ADDR, senderAcc.address);
 

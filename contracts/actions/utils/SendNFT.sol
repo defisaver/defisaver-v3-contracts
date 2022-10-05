@@ -9,6 +9,7 @@ contract SendNFT is ActionBase {
 
     struct Params {
         address nftAddr;
+        address from;
         address to;
         uint256 nftId;
     }
@@ -23,10 +24,11 @@ contract SendNFT is ActionBase {
         Params memory inputData = parseInputs(_callData);
 
         inputData.nftAddr = _parseParamAddr(inputData.nftAddr, _paramMapping[0], _subData, _returnValues);
-        inputData.to = _parseParamAddr(inputData.to, _paramMapping[1], _subData, _returnValues);
-        inputData.nftId = _parseParamUint(inputData.nftId, _paramMapping[2], _subData, _returnValues);
+        inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
+        inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
+        inputData.nftId = _parseParamUint(inputData.nftId, _paramMapping[3], _subData, _returnValues);
 
-        _sendNFT(inputData.nftAddr, inputData.to, inputData.nftId);
+        _sendNFT(inputData.nftAddr, inputData.from, inputData.to, inputData.nftId);
 
         return bytes32(inputData.nftId);
     }
@@ -35,7 +37,7 @@ contract SendNFT is ActionBase {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
-        _sendNFT(inputData.nftAddr, inputData.to, inputData.nftId);
+        _sendNFT(inputData.nftAddr, inputData.from, inputData.to, inputData.nftId);
     }
 
     /// @inheritdoc ActionBase
@@ -46,13 +48,19 @@ contract SendNFT is ActionBase {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
+    /// @dev Proxy must have approve if _from != proxy
     /// @param _nftAddr Address of the ERC721 contract
+    /// @param _from Where from we are pulling the nft (defaults to proxy)
     /// @param _to Address where we are sending the nft
     /// @param _nftId TokenId we are sending
-    function _sendNFT(address _nftAddr, address _to, uint _nftId) internal {
+    function _sendNFT(address _nftAddr, address _from, address _to, uint _nftId) internal {
         require(_to != address(0), "Can't burn nft");
 
-        IERC721(_nftAddr).safeTransferFrom(address(this), _to, _nftId);
+        if (_from == address(0)) {
+            _from = address(this);
+        }
+
+        IERC721(_nftAddr).transferFrom(_from, _to, _nftId);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
