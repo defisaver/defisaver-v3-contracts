@@ -48,7 +48,7 @@ contract AaveV3OracleView is AaveV3RatioHelper {
         return IAggregatorV3(aggregatorAddr).getTimestamp(_roundId);
     }
 
-    /// @dev will return 0 for invalid or latest roundId
+    /// @dev will return 0 for invalid input roundId and 1 if its the latest roundId
     function getNextRoundId(
         address _asset,
         uint80 _roundId
@@ -62,7 +62,7 @@ contract AaveV3OracleView is AaveV3RatioHelper {
         if (timestamp == 0) return 0;
 
         (uint80 latestRoundId, , , ,) = aggregatorProxy.latestRoundData();
-        if (_roundId == latestRoundId) return 0;
+        if (_roundId == latestRoundId) return 1;
 
         uint16 currentPhase = uint16(latestRoundId >> 64);
         if (currentPhase == phaseId) return _roundId + 1;
