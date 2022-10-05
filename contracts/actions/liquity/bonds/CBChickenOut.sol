@@ -6,7 +6,7 @@ import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
-/// @title CBChickenOut Withdraws backing lusd from a pending bond
+/// @title Withdraws backing lusd from a pending bond
 contract CBChickenOut is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
@@ -67,12 +67,16 @@ contract CBChickenOut is ActionBase, LiquityHelper {
         IChickenBondManager.BondData memory bond = CBManager.getBondData(_params.bondID);
         require(bond.lusdAmount > 0, "Must have non 0 amount of LUSD to chicken out");
 
+        uint256 balanceBefore = LUSD_TOKEN_ADDRESS.getBalance(address(this));
         CBManager.chickenOut(_params.bondID, _params.minLUSD);
+        uint256 balanceAfter = LUSD_TOKEN_ADDRESS.getBalance(address(this));
 
-        LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, bond.lusdAmount);
+        uint256 lusdAmount = balanceAfter - balanceBefore;
 
-        bytes memory logData = abi.encode(bond.lusdAmount, _params.bondID, _params.to);
-        return (bond.lusdAmount, logData);
+        LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, lusdAmount);
+
+        bytes memory logData = abi.encode(lusdAmount, _params.bondID, _params.to);
+        return (lusdAmount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

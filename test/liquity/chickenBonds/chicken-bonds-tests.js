@@ -2,12 +2,22 @@ const { expect } = require('chai');
 const hre = require('hardhat');
 
 const {
-    getProxy, setBalance, redeploy, balanceOf, LUSD_ADDR, MAX_UINT, BLUSD_ADDR, timeTravel,
+    getProxy,
+    setBalance,
+    redeploy,
+    balanceOf,
+    LUSD_ADDR,
+    MAX_UINT,
+    BLUSD_ADDR,
+    timeTravel,
+    mineBlock,
 } = require('../../utils');
 
 const {
     createChickenBond, chickenOut, chickenIn, chickenRedeem,
 } = require('../../actions');
+
+const FIFTEEN_DAYS = 1296000;
 
 const cbCreateTest = async () => {
     describe('Create Chicken Bond test', function () {
@@ -151,7 +161,11 @@ const cbChickenInTest = async () => {
         it('... should chicken in a bond', async () => {
             const bLusdBalanceBefore = await balanceOf(BLUSD_ADDR, senderAcc.address);
 
-            await timeTravel(60 * 60 * 24 * 7);
+            await timeTravel(FIFTEEN_DAYS);
+
+            const bondUpdated = await chickenBondsView.getBondFullInfo(bondID);
+
+            console.log(bondUpdated.accruedBLUSD.toString());
 
             await chickenIn(proxy, bondID, senderAcc.address);
 
@@ -159,7 +173,10 @@ const cbChickenInTest = async () => {
 
             const bond = await chickenBondsView.getBondFullInfo(bondID);
 
-            expect(bLusdBalanceBefore).to.be.lt(bLusdBalanceAfter);
+            expect(bLusdBalanceBefore.add(bondUpdated.accruedBLUSD) / 1e18).to.be.closeTo(
+                bLusdBalanceAfter / 1e18,
+                0.001,
+            );
             expect(bond.status).to.be.eq(3);
         });
     });
@@ -173,6 +190,7 @@ const cbRedeemTest = async () => {
         let proxy;
         let chickenBondsView;
         let bondID;
+        let bondID2;
         let lusdAmount;
 
         before(async () => {
@@ -188,12 +206,25 @@ const cbRedeemTest = async () => {
 
             const bonds = await chickenBondsView.getUsersBonds(proxy.address);
             bondID = bonds[bonds.length - 1].bondID.toString();
+
+            lusdAmount = hre.ethers.utils.parseUnits('1000000', 18);
+            await setBalance(LUSD_ADDR, senderAcc.address, lusdAmount);
+
+            await createChickenBond(proxy, lusdAmount, senderAcc.address);
+
+            const bonds2 = await chickenBondsView.getUsersBonds(proxy.address);
+            bondID2 = bonds2[bonds2.length - 1].bondID.toString();
+
+            console.log(bondID, bondID2);
         });
 
         it('... should redeem LUSD for bLUSD', async () => {
-            await timeTravel(60 * 60 * 24 * 7);
+            await timeTravel(FIFTEEN_DAYS);
 
             await chickenIn(proxy, bondID, senderAcc.address);
+            await chickenIn(proxy, bondID2, senderAcc.address);
+
+            await timeTravel(FIFTEEN_DAYS * 2);
 
             const bLusdBalanceBefore = await balanceOf(BLUSD_ADDR, senderAcc.address);
             const lusdBalanceBefore = await balanceOf(LUSD_ADDR, senderAcc.address);

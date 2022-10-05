@@ -6,7 +6,7 @@ import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
-/// @title CBCreate Creates a Chicken Bond from a proxy
+/// @title Creates a Chicken Bond from a proxy
 contract CBCreate is ActionBase, LiquityHelper {
     using TokenUtils for address;
 

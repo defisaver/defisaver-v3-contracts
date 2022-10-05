@@ -8,6 +8,8 @@ import "../interfaces/liquity/IChickenBondManager.sol";
 import "../interfaces/liquity/IBondNFT.sol";
 import "../interfaces/liquity/IBondNFTArtwork.sol";
 
+import "hardhat/console.sol";
+
 contract ChickenBondsView is LiquityHelper {
 
     struct BondDataFull {
@@ -39,6 +41,8 @@ contract ChickenBondsView is LiquityHelper {
 
     function getBondFullInfo(uint256 _bondID) public view returns (BondDataFull memory bond) {
         IBondNFT bondNFT = IBondNFT(BOND_NFT_ADDRESS);
+
+        console.log(CBManager.calcAccruedBLUSD(_bondID));
 
         IChickenBondManager.BondData memory bondData = CBManager.getBondData(_bondID);
 
