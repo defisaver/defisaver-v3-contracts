@@ -97,4 +97,7 @@ abstract contract IComet {
     function factorScale() virtual external pure returns (uint64);
 
     function baseBorrowMin() virtual external pure returns (uint256);
+    function baseTrackingBorrowSpeed() virtual external pure returns (uint256);
+    function baseTrackingSupplySpeed() virtual external pure returns (uint256);
+
 }

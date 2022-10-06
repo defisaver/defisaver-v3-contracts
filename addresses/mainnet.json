@@ -399,7 +399,7 @@
     },
     {
         "name": "CompV3View",
-        "address": "0x4A8192aa4749904F9eED51424C897294EC9403A0",
+        "address": "0xf522b1588688b9887623b9C666175684d284D363",
         "id": "0x16be4292",
         "path": "contracts/views/CompV3View.sol",
         "version": "1.0.0",
@@ -1392,14 +1392,14 @@
     },
     {
         "name": "GasFeeTaker",
-        "address": "0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d",
+        "address": "0xcCFFC73347B05cBDCCe7c3de2a0AdEcDAa8AEf51",
         "id": "0x4571b8b3",
         "path": "contracts/actions/fee/GasFeeTaker.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d"]
     },
     {
         "name": "StrategyExecutor",
@@ -1413,14 +1413,47 @@
     },
     {
         "name": "ChainLinkPriceTrigger",
-        "address": "0xe3457797c543AD91bd36023d2EE600305ee89195",
+        "address": "0xAbf52Fc6e5C0e6E44Daac7C6ca79498302D9B0CA",
         "id": "0xac6bb72a",
         "path": "contracts/triggers/ChainLinkPriceTrigger.sol",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0xb14226c3FD41e9B1FF85b4f7144CB4096a5D1Ec9"]
+        "history": ["0xb14226c3FD41e9B1FF85b4f7144CB4096a5D1Ec9", "0xe3457797c543AD91bd36023d2EE600305ee89195"]
+    },
+    {
+        "name": "CompoundRatioTrigger",
+        "address": "0x8EfbD976709c2bD46bdaf0c3Db83E875F1451BAE",
+        "id": "0xfd030057",
+        "path": "contracts/triggers/CompoundRatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityRatioTrigger",
+        "address": "0x7dDA9F944c3Daf27fbe3B8f27EC5f14FE3fa94BF",
+        "id": "0x26ef9c60",
+        "path": "contracts/triggers/LiquityRatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV2RatioTrigger",
+        "address": "0xd891f499260aF046B4d4324cBEB84d02a6D61195",
+        "id": "0x7e8b6344",
+        "path": "contracts/triggers/AaveV2RatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     },
     {
         "name": "SendTokenAndUnwrap",
@@ -1555,14 +1588,14 @@
     },
     {
         "name": "TrailingStopTrigger",
-        "address": "0x575C0Cfe52016B4CfeFb3134Bc6A3eEEf7718B07",
+        "address": "0x359651fb6636cb650Fa47F11C9D35533BbFF8158",
         "id": "0x818774c3",
         "path": "contracts/triggers/TrailingStopTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0x575C0Cfe52016B4CfeFb3134Bc6A3eEEf7718B07"]
     },
     {
         "name": "CompV3Allow",
@@ -1588,14 +1621,14 @@
     },
     {
         "name": "CompV3Claim",
-        "address": "0x6a4A6d7f98c11fe9bB8636AB0059C18980548596",
+        "address": "0x4CEa369B63daAc0dA3423c5038a57483c5150986",
         "id": "0xf8470345",
         "path": "contracts/actions/compoundV3/CompV3Claim.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x6a4A6d7f98c11fe9bB8636AB0059C18980548596"]
     },
     {
         "name": "CompV3Payback",
@@ -1621,14 +1654,14 @@
     },
     {
         "name": "CompV3Transfer",
-        "address": "0x0fB2390AEDB2dBeE08cec363c0eD72e9D8e64535",
+        "address": "0xeD7450e9C17146476137b77198DFfB17857906c4",
         "id": "0xc7443570",
         "path": "contracts/actions/compoundV3/CompV3Transfer.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x0fB2390AEDB2dBeE08cec363c0eD72e9D8e64535"]
     },
     {
         "name": "CompV3Withdraw",

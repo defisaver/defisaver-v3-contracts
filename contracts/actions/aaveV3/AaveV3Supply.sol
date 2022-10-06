@@ -126,6 +126,8 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
 
         if (_enableAsColl) {
             lendingPool.setUserUseReserveAsCollateral(tokenAddr, true);
+        } else {
+            lendingPool.setUserUseReserveAsCollateral(tokenAddr, false);
         }
 
         bytes memory logData = abi.encode(

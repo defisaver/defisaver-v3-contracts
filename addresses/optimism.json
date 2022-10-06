@@ -235,7 +235,7 @@
     },
     {
       "name": "AaveV3Supply",
-      "address": "0x4Ad0cf94e82b58C414266b84ACB061b41bf1bdF7",
+      "address": "0x85C20f47B8dF7eD41b85cA613d9c4208CE00326B",
       "id": "0xfc33bf00",
       "path": "contracts/actions/aaveV3/AaveV3Supply.sol",
       "version": "1.0.1",
@@ -243,6 +243,7 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0x4Ad0cf94e82b58C414266b84ACB061b41bf1bdF7",
         "0xe431c1C673Be123045c8635b0196d51a5bFE55c1"
       ]
     },
@@ -600,5 +601,16 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
-      }
+      },
+      {
+        "name": "FLBalancer",
+        "address": "0x79d6bf536b8DD65909a3174C87eA6395310d5c41",
+        "id": "0xf97d044f",
+        "path": "contracts/actions/flashloan/FLBalancer.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    }
   ]

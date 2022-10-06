@@ -40,7 +40,7 @@ const addrs = {
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
         REGISTRY_ADDR: '0xAf707Ee480204Ed6e2640B53cE86F680D28Afcbd',
-        OWNER_ACC: '0x322d58b9E75a6918f7e7849AEe0fF09369977e08',
+        OWNER_ACC: '0xC9a956923bfb5F141F1cd4467126b3ae91E5CC33',
         WETH_ADDRESS: '0x4200000000000000000000000000000000000006',
         DAI_ADDRESS: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
         USDC_ADDR: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
@@ -493,7 +493,7 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
     }
 
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
-    const registryInstance = await hre.ethers.getContractFactory('DFSRegistry', signer);
+    const registryInstance = await hre.ethers.getContractFactory('contracts/core/DFSRegistry.sol:DFSRegistry', signer);
     let registry = await registryInstance.attach(regAddr);
 
     registry = registry.connect(signer);
