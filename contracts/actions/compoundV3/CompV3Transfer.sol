@@ -70,13 +70,19 @@ contract CompV3Transfer is ActionBase, CompV3Helper {
             revert CompV3TransferError();
         }
 
-        address tokenAddr = _asset;
-
         if (_from == address(0)) {
             _from = address(this);
         }
+        // if _amount type(uint).max that means take out whole supplied balance
+        if (_amount == type(uint256).max) {
+            if(_asset == IComet(_market).baseToken()) {
+                _amount = IComet(_market).balanceOf(_from);
+            } else {
+                _amount = IComet(_market).collateralBalanceOf(_from, _asset);
+            }
+        }
 
-        IComet(_market).transferAssetFrom(_from, _to, tokenAddr, _amount);
+        IComet(_market).transferAssetFrom(_from, _to, _asset, _amount);
 
         bytes memory logData = abi.encode(_market, _from, _to, _asset, _amount);
         return (_amount, logData);
