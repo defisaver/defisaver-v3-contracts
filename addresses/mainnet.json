@@ -1654,14 +1654,14 @@
     },
     {
         "name": "CompV3Transfer",
-        "address": "0x0fB2390AEDB2dBeE08cec363c0eD72e9D8e64535",
+        "address": "0xeD7450e9C17146476137b77198DFfB17857906c4",
         "id": "0xc7443570",
         "path": "contracts/actions/compoundV3/CompV3Transfer.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x0fB2390AEDB2dBeE08cec363c0eD72e9D8e64535"]
     },
     {
         "name": "CompV3Withdraw",
