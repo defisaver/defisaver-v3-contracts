@@ -447,25 +447,25 @@ const callAaveCloseToDebtL2Strategy = async (
         await formatMockExchangeObj(
             srcTokenInfo,
             destTokenInfo,
-            hre.ethers.constants.MaxUint256, // amount to sell is variable
+            hre.ethers.constants.MaxUint256,
         ),
-        placeHolderAddr, // hardcoded take from user proxy
-        placeHolderAddr, // hardcoded send to user proxy
+        placeHolderAddr,
+        placeHolderAddr,
     );
 
     const closeGasCost = '1000000';
     const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
-        closeGasCost, // must stay variable backend sets gasCost
-        placeHolderAddr, // must stay variable as coll can differ
-        '0', // hardcoded output from sell action
-        '0', // defaults at 0.05%
-        closeGasCost, // send custom amount for Optimism
+        closeGasCost,
+        placeHolderAddr,
+        '0',
+        '0',
+        closeGasCost,
     );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         true,
         nullAddress,
-        partialAmounts?.repayAmount || MAXUINT, // kept variable (can support partial close later)
+        partialAmounts?.repayAmount || MAXUINT,
         placeHolderAddr,
         '0',
         placeHolderAddr,
@@ -475,9 +475,9 @@ const callAaveCloseToDebtL2Strategy = async (
     );
 
     const sendAction = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr, // hardcoded Dai is left in proxy
-        placeHolderAddr, // hardcoded so only proxy owner receives amount
-        MAXUINT, // kept variable (can support partial close later)
+        placeHolderAddr,
+        placeHolderAddr,
+        MAXUINT,
     );
 
     actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
@@ -551,31 +551,31 @@ const callAaveFLCloseToDebtL2Strategy = async (
         await formatMockExchangeObj(
             srcTokenInfo,
             destTokenInfo,
-            hre.ethers.constants.MaxUint256, // amount to sell is variable
+            hre.ethers.constants.MaxUint256,
         ),
-        placeHolderAddr, // hardcoded take from user proxy
-        placeHolderAddr, // hardcoded send to user proxy
+        placeHolderAddr,
+        placeHolderAddr,
     );
 
     const closeGasCost = '1000000';
     const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
-        closeGasCost, // must stay variable backend sets gasCost
-        placeHolderAddr, // must stay variable as coll can differ
-        '0', // hardcoded output from sell action
-        '0', // defaults at 0.05%
-        closeGasCost, // send custom amount for Optimism
+        closeGasCost,
+        placeHolderAddr,
+        '0',
+        '0',
+        closeGasCost,
     );
 
     const sendAction = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr, // hardcoded only can borrow Dai
-        flAddr, // kept variable this can change (FL must be payed back to work)
-        '0', // hardcoded output from FL action
+        placeHolderAddr,
+        flAddr,
+        '0',
     );
 
     const sendAction1 = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr, // hardcoded Dai is left in proxy
-        placeHolderAddr, // hardcoded so only proxy owner receives amount
-        MAXUINT, // kept variable (can support partial close later)
+        placeHolderAddr,
+        placeHolderAddr,
+        MAXUINT,
     );
 
     actionsCallData.push(flAction.encodeForRecipe()[0]);
@@ -630,25 +630,25 @@ const callAaveCloseToCollL2Strategy = async (
         await formatMockExchangeObj(
             srcTokenInfo,
             destTokenInfo,
-            swapAmount, // amount to sell is variable
+            swapAmount,
         ),
-        placeHolderAddr, // hardcoded take from user proxy
-        placeHolderAddr, // hardcoded send to user proxy
+        placeHolderAddr,
+        placeHolderAddr,
     );
 
     const closeGasCost = '1000000';
     const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
-        closeGasCost, // must stay variable backend sets gasCost
-        placeHolderAddr, // must stay variable as coll can differ
-        '0', // hardcoded output from sell action
-        '0', // defaults at 0.05%
-        closeGasCost, // send custom amount for Optimism
+        closeGasCost,
+        placeHolderAddr,
+        '0',
+        '0',
+        closeGasCost,
     );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         true,
         nullAddress,
-        partialAmounts?.repayAmount || MAXUINT, // kept variable (can support partial close later)
+        partialAmounts?.repayAmount || MAXUINT,
         placeHolderAddr,
         '0',
         placeHolderAddr,
@@ -658,15 +658,15 @@ const callAaveCloseToCollL2Strategy = async (
     );
 
     const sendAction1 = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr, // hardcoded Dai is left in proxy
-        placeHolderAddr, // hardcoded so only proxy owner receives amount
-        MAXUINT, // kept variable (can support partial close later)
+        placeHolderAddr,
+        placeHolderAddr,
+        MAXUINT,
     );
 
     const sendAction2 = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr, // hardcoded Dai is left in proxy
-        placeHolderAddr, // hardcoded so only proxy owner receives amount
-        MAXUINT, // kept variable (can support partial close later)
+        placeHolderAddr,
+        placeHolderAddr,
+        MAXUINT,
     );
 
     actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
@@ -721,7 +721,7 @@ const callAaveFLCloseToCollL2Strategy = async (
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         true,
         nullAddress,
-        withdrawAmount ? repayAmount : MAXUINT, // kept variable (can support partial close later)
+        withdrawAmount ? repayAmount : MAXUINT,
         placeHolderAddr,
         '0',
         placeHolderAddr,
@@ -742,37 +742,37 @@ const callAaveFLCloseToCollL2Strategy = async (
         await formatMockExchangeObj(
             srcTokenInfo,
             destTokenInfo,
-            withdrawAmount ? MAXUINT : swapAmount, // amount to sell is variable
+            withdrawAmount ? MAXUINT : swapAmount,
         ),
-        placeHolderAddr, // hardcoded take from user proxy
-        placeHolderAddr, // hardcoded send to user proxy
+        placeHolderAddr,
+        placeHolderAddr,
     );
 
     const closeGasCost = '1000000';
     const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
-        closeGasCost, // must stay variable backend sets gasCost
-        placeHolderAddr, // must stay variable as coll can differ
-        '0', // hardcoded output from sell action
-        '0', // defaults at 0.05%
-        closeGasCost, // send custom amount for Optimism
+        closeGasCost,
+        placeHolderAddr,
+        '0',
+        '0',
+        closeGasCost,
     );
 
     const sendAction0 = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr, // hardcoded only can borrow Dai
-        flAddr, // kept variable this can change (FL must be payed back to work)
-        '0', // hardcoded output from FL action
+        placeHolderAddr,
+        flAddr,
+        '0',
     );
 
     const sendAction1 = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr, // hardcoded Dai is left in proxy
-        placeHolderAddr, // hardcoded so only proxy owner receives amount
-        MAXUINT, // kept variable (can support partial close later)
+        placeHolderAddr,
+        placeHolderAddr,
+        MAXUINT,
     );
 
     const sendAction2 = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr, // hardcoded Dai is left in proxy
-        placeHolderAddr, // hardcoded so only proxy owner receives amount
-        MAXUINT, // kept variable (can support partial close later)
+        placeHolderAddr,
+        placeHolderAddr,
+        MAXUINT,
     );
 
     actionsCallData.push(flAction.encodeForRecipe()[0]);

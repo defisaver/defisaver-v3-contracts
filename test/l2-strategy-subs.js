@@ -8,6 +8,7 @@ const {
 const {
     addrs,
     network,
+    nullAddress,
 } = require('./utils');
 
 const subAaveV3L2AutomationStrategy = async (
@@ -98,6 +99,7 @@ const subAaveCloseToDebt = async (
         defaultAbiCoder.encode(['address'], [debtAsset]),
         defaultAbiCoder.encode(['uint16'], [debtAssetId.toString()]),
         defaultAbiCoder.encode(['uint8'], [rateMode.toString()]),
+        defaultAbiCoder.encode(['address'], [nullAddress]), // needed so we dont have to trust injection
     ]];
 
     return subToStrategy(proxy, strategySub);
