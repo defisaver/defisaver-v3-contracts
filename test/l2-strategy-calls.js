@@ -590,7 +590,7 @@ const callAaveFLCloseToDebtL2Strategy = async (
 
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
-        0,
+        1,
         triggerCallData,
         actionsCallData,
         {
@@ -788,7 +788,7 @@ const callAaveFLCloseToCollL2Strategy = async (
 
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
-        0,
+        1,
         triggerCallData,
         actionsCallData,
         {

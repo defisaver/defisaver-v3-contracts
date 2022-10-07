@@ -24,6 +24,7 @@ const {
     takeSnapshot,
     revertToSnapshot,
     expectCloseEq,
+    getAddrFromRegistry,
 } = require('../../utils');
 
 const {
@@ -47,7 +48,7 @@ const {
 const {
     subAaveV3L2AutomationStrategy,
     updateAaveV3L2AutomationStrategy,
-    subAaveCloseToDebt,
+    subAaveV3CloseBundle,
 } = require('../../l2-strategy-subs');
 
 const {
@@ -84,6 +85,46 @@ const deployBundles = async (proxy) => {
     const strategyId22 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
 
     await createBundle(proxy, [strategyId11, strategyId22]);
+};
+
+const deployCloseToDebtBundle = async (proxy) => {
+    await openStrategyAndBundleStorage();
+    const aaveV3CloseToDebtL2StrategyId = await createStrategy(
+        proxy,
+        ...createAaveV3CloseToDebtL2Strategy(),
+        false,
+    );
+    const aaveV3FLCloseToDebtL2StrategyId = await createStrategy(
+        proxy,
+        ...createAaveV3FLCloseToDebtL2Strategy(),
+        false,
+    );
+    const aaveV3CloseToDebtBundleId = await createBundle(
+        proxy,
+        [aaveV3CloseToDebtL2StrategyId, aaveV3FLCloseToDebtL2StrategyId],
+    );
+
+    return aaveV3CloseToDebtBundleId;
+};
+
+const deployCloseToCollBundle = async (proxy) => {
+    await openStrategyAndBundleStorage();
+    const aaveV3CloseToCollL2StrategyId = await createStrategy(
+        proxy,
+        ...createAaveV3CloseToCollL2Strategy(),
+        false,
+    );
+    const aaveV3FLCloseToCollL2StrategyId = await createStrategy(
+        proxy,
+        ...createAaveV3FLCloseToCollL2Strategy(),
+        false,
+    );
+    const aaveV3CloseToCollBundleId = await createBundle(
+        proxy,
+        [aaveV3CloseToCollL2StrategyId, aaveV3FLCloseToCollL2StrategyId],
+    );
+
+    return aaveV3CloseToCollBundleId;
 };
 
 const testPairs = [
@@ -491,7 +532,7 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
         let subId;
         let collAssetId;
         let debtAssetId;
-        let strategyId;
+        let bundleId;
         let snapshotId;
         let snapshotId4partial;
 
@@ -518,16 +559,8 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
 
             strategyExecutorL2 = await redeployCore(true);
 
-            await redeploy('BotAuth');
-            await redeploy('AaveV3RatioTrigger');
             await redeploy('AaveQuotePriceTrigger');
-            await redeploy('GasFeeTakerL2');
-            await redeploy('DFSSell');
-            await redeploy('AaveV3Withdraw');
-            await redeploy('AaveV3Payback');
-            await redeploy('AaveSubProxy');
 
-            await redeploy('AaveV3RatioCheck');
             const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
 
             await setNewExchangeWrapper(senderAcc, mockWrapperAddr);
@@ -537,9 +570,7 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
 
             strategyExecutorByBot = strategyExecutorL2.connect(botAcc);
 
-            const aaveCloseStrategyEncoded = createAaveV3CloseToDebtL2Strategy();
-            await openStrategyAndBundleStorage();
-            strategyId = await createStrategy(proxy, ...aaveCloseStrategyEncoded, false);
+            bundleId = await deployCloseToDebtBundle(proxy);
 
             const linkInfo = getAssetInfo('LINK');
             const amountLINK = Float2BN(
@@ -617,9 +648,9 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
                     8,
                 );
 
-                subId = await subAaveCloseToDebt(
+                subId = await subAaveV3CloseBundle(
                     proxy,
-                    strategyId,
+                    bundleId,
                     collAddr,
                     nullAddress,
                     triggerPrice,
@@ -767,7 +798,7 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
         let collAssetId;
         let debtAssetId;
         let flAaveV3;
-        let strategyId;
+        let bundleId;
         let snapshotId;
         let snapshotId4partial;
 
@@ -794,30 +825,20 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
 
             strategyExecutorL2 = await redeployCore(true);
 
-            await redeploy('BotAuth');
-            await redeploy('AaveV3RatioTrigger');
             await redeploy('AaveQuotePriceTrigger');
-            await redeploy('GasFeeTakerL2');
-            await redeploy('DFSSell');
-            await redeploy('AaveV3Withdraw');
-            await redeploy('AaveV3Payback');
-            await redeploy('AaveSubProxy');
 
-            await redeploy('AaveV3RatioCheck');
             const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
 
             await setNewExchangeWrapper(senderAcc, mockWrapperAddr);
 
-            flAaveV3 = await redeploy('FLAaveV3');
+            flAaveV3 = await getAddrFromRegistry('FLAaveV3');
 
             botAcc = (await hre.ethers.getSigners())[1];
             await addBotCaller(botAcc.address);
 
             strategyExecutorByBot = strategyExecutorL2.connect(botAcc);
 
-            const aaveCloseStrategyEncoded = createAaveV3FLCloseToDebtL2Strategy();
-            await openStrategyAndBundleStorage();
-            strategyId = await createStrategy(proxy, ...aaveCloseStrategyEncoded, false);
+            bundleId = await deployCloseToDebtBundle(proxy);
 
             snapshotId = await takeSnapshot();
         });
@@ -877,9 +898,9 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
                     8,
                 );
 
-                subId = await subAaveCloseToDebt(
+                subId = await subAaveV3CloseBundle(
                     proxy,
-                    strategyId,
+                    bundleId,
                     collAddr,
                     nullAddress,
                     triggerPrice,
@@ -910,7 +931,7 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
                     subId,
                     repayAmount,
                     debtAddr,
-                    flAaveV3.address,
+                    flAaveV3,
                     collAssetInfo,
                     debtAssetInfo,
                 );
@@ -975,7 +996,7 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
                     subId,
                     repayAmount,
                     debtAddr,
-                    flAaveV3.address,
+                    flAaveV3,
                     collAssetInfo,
                     debtAssetInfo,
                     withdrawAmount,
@@ -1040,7 +1061,7 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
         let subId;
         let collAssetId;
         let debtAssetId;
-        let strategyId;
+        let bundleId;
         let snapshotId;
         let snapshotId4partial;
 
@@ -1067,16 +1088,8 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
 
             strategyExecutorL2 = await redeployCore(true);
 
-            await redeploy('BotAuth');
-            await redeploy('AaveV3RatioTrigger');
             await redeploy('AaveQuotePriceTrigger');
-            await redeploy('GasFeeTakerL2');
-            await redeploy('DFSSell');
-            await redeploy('AaveV3Withdraw');
-            await redeploy('AaveV3Payback');
-            await redeploy('AaveSubProxy');
-            await redeploy('SubProxy');
-            await redeploy('AaveV3RatioCheck');
+
             const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
 
             await setNewExchangeWrapper(senderAcc, mockWrapperAddr);
@@ -1086,9 +1099,7 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
 
             strategyExecutorByBot = strategyExecutorL2.connect(botAcc);
 
-            const aaveCloseStrategyEncoded = createAaveV3CloseToCollL2Strategy();
-            await openStrategyAndBundleStorage();
-            strategyId = await createStrategy(proxy, ...aaveCloseStrategyEncoded, false);
+            bundleId = await deployCloseToCollBundle(proxy);
 
             const linkInfo = getAssetInfo('LINK');
             const amountLINK = Float2BN(
@@ -1167,9 +1178,9 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
                     8,
                 );
 
-                subId = await subAaveCloseToDebt(
+                subId = await subAaveV3CloseBundle(
                     proxy,
-                    strategyId,
+                    bundleId,
                     collAddr,
                     nullAddress,
                     triggerPrice,
@@ -1346,7 +1357,7 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
         let collAssetId;
         let debtAssetId;
         let flAaveV3;
-        let strategyId;
+        let bundleId;
         let snapshotId;
         let snapshotId4partial;
 
@@ -1373,30 +1384,20 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
 
             strategyExecutorL2 = await redeployCore(true);
 
-            await redeploy('BotAuth');
-            await redeploy('AaveV3RatioTrigger');
             await redeploy('AaveQuotePriceTrigger');
-            await redeploy('GasFeeTakerL2');
-            await redeploy('DFSSell');
-            await redeploy('AaveV3Withdraw');
-            await redeploy('AaveV3Payback');
-            await redeploy('AaveSubProxy');
-            await redeploy('SubProxy');
-            await redeploy('AaveV3RatioCheck');
+
             const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
 
             await setNewExchangeWrapper(senderAcc, mockWrapperAddr);
 
-            flAaveV3 = await redeploy('FLAaveV3');
+            flAaveV3 = await getAddrFromRegistry('FLAaveV3');
 
             botAcc = (await hre.ethers.getSigners())[1];
             await addBotCaller(botAcc.address);
 
             strategyExecutorByBot = strategyExecutorL2.connect(botAcc);
 
-            const aaveCloseStrategyEncoded = createAaveV3FLCloseToCollL2Strategy();
-            await openStrategyAndBundleStorage();
-            strategyId = await createStrategy(proxy, ...aaveCloseStrategyEncoded, false);
+            bundleId = await deployCloseToCollBundle(proxy);
 
             snapshotId = await takeSnapshot();
         });
@@ -1458,9 +1459,9 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                     8,
                 );
 
-                subId = await subAaveCloseToDebt(
+                subId = await subAaveV3CloseBundle(
                     proxy,
-                    strategyId,
+                    bundleId,
                     collAddr,
                     nullAddress,
                     triggerPrice,
@@ -1502,7 +1503,7 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                     subId,
                     repayAmount,
                     debtAddr,
-                    flAaveV3.address,
+                    flAaveV3,
                     swapAmount,
                     collAssetInfo,
                     debtAssetInfo,
@@ -1585,7 +1586,7 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                     subId,
                     repayAmount,
                     debtAddr,
-                    flAaveV3.address,
+                    flAaveV3,
                     swapAmount,
                     collAssetInfo,
                     debtAssetInfo,
