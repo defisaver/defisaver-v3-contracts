@@ -480,7 +480,7 @@ const sendEther = async (signer, toAddress, amount) => {
 };
 
 // eslint-disable-next-line max-len
-const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTenderly = config.saveOnTenderly, isFork = false) => {
+const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTenderly = config.saveOnTenderly, isFork = false, isL2 = false, ...args) => {
     if (!isFork) {
         await hre.network.provider.send('hardhat_setBalance', [
             getOwnerAddr(),
@@ -503,14 +503,14 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
 
     registry = registry.connect(signer);
 
-    const c = await deployAsOwner(name);
+    const c = await deployAsOwner(name, undefined, ...args);
 
     if (name === 'StrategyExecutor' || name === 'StrategyExecutorL2') {
         // eslint-disable-next-line no-param-reassign
         name = 'StrategyExecutorID';
     }
 
-    if (name === 'FLAaveV3') {
+    if (isL2 && name === 'FLAaveV3') {
         // eslint-disable-next-line no-param-reassign
         name = 'FLActionL2';
     }
