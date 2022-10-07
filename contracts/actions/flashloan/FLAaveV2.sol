@@ -39,8 +39,6 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlas
 
     bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
-    FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
-
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
