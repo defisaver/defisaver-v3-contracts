@@ -963,14 +963,14 @@
     },
     {
         "name": "FLAaveV2",
-        "address": "0xa4d52ED15018a5be4adE5796899e5d75cc8759C1",
+        "address": "0xEA55576383C96A69B3E8beD51Ce0d0294001bc5F",
         "id": "0xb73d5955",
         "path": "contracts/actions/flashloan/FLAaveV2.sol",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x6fE6B0eeeeC7B05d663A99C0805E1A18FbdC6E59"]
+        "history": ["0xa4d52ED15018a5be4adE5796899e5d75cc8759C1", "0x6fE6B0eeeeC7B05d663A99C0805E1A18FbdC6E59"]
     },
     {
         "name": "FLDyDx",
@@ -985,25 +985,25 @@
     },
     {
         "name": "FLMaker",
-        "address": "0x5DCf600C35ae2752A8a11eB7C489EF3D93126fB4",
+        "address": "0x672DE08e36A1698fD5e9E34045F81558dB4c1AFE",
         "id": "0x354c4555",
         "path": "contracts/actions/flashloan/FLMaker.sol",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0xd393582bE148A45585aB202Fa7Cc789Fa5127223"]
+        "history": ["0x5DCf600C35ae2752A8a11eB7C489EF3D93126fB4", "0xd393582bE148A45585aB202Fa7Cc789Fa5127223"]
     },
     {
         "name": "FLBalancer",
-        "address": "0x5C7a9f4635AE4F95da2e45317311AAe255FB71B3",
+        "address": "0x540a83E36E5E6Aa916A6c591934d800e17115048",
         "id": "0xf97d044f",
         "path": "contracts/actions/flashloan/FLBalancer.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x5C7a9f4635AE4F95da2e45317311AAe255FB71B3"]
     },
     {
         "name": "FLEuler",
@@ -1500,6 +1500,17 @@
         "history": []
     },
     {
+        "name": "LiquityDebtInFrontTrigger",
+        "address": "0xC4608Cb08ecBC109B9FaE4312274f60535a10820",
+        "id": "0xff4a5c51",
+        "path": "contracts/triggers/LiquityDebtInFrontTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "SendTokenAndUnwrap",
         "address": "0xeecd376026335261c89faD40D89625391b1eFF6a",
         "id": "0x17782156",
@@ -1698,14 +1709,14 @@
     },
     {
         "name": "CompV3Transfer",
-        "address": "0x0fB2390AEDB2dBeE08cec363c0eD72e9D8e64535",
+        "address": "0xeD7450e9C17146476137b77198DFfB17857906c4",
         "id": "0xc7443570",
         "path": "contracts/actions/compoundV3/CompV3Transfer.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x0fB2390AEDB2dBeE08cec363c0eD72e9D8e64535"]
     },
     {
         "name": "CompV3Withdraw",
