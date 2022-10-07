@@ -2,6 +2,8 @@
 const { default: curve } = require('@curvefi/api');
 const hre = require('hardhat');
 const fs = require('fs');
+const { getAssetInfo } = require('@defisaver/tokens');
+const { expect } = require('chai');
 const storageSlots = require('./storageSlots.json');
 
 const { deployAsOwner } = require('../scripts/utils/deployer');
@@ -375,12 +377,14 @@ const setBalance = async (tokenAddr, userAddr, value) => {
 };
 
 const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {
+    const { decimals } = getAssetInfo(tokenSign);
+
     const data = JSON.parse(fs.readFileSync('test/prices.json', 'utf8'));
     const tokenNames = Object.keys(data);
     for (let i = 0; i < tokenNames.length; i++) {
         if (tokenNames[i] === coinGeckoHelper[tokenSign]) {
             const amountNumber = (amountUSD / data[tokenNames[i]].usd);
-            return amountNumber.toFixed(2);
+            return amountNumber.toFixed(decimals);
         }
     }
     return 0;
@@ -813,6 +817,10 @@ const depositToWeth = async (amount, signer) => {
     }
 };
 
+const expectCloseEq = (expected, actual) => {
+    expect(expected).to.be.closeTo(actual, (expected * 1e-6).toFixed(0));
+};
+
 const formatExchangeObjForOffchain = (
     srcAddr,
     destAddr,
@@ -1111,6 +1119,7 @@ module.exports = {
     balanceOfOnTokenInBlock,
     formatExchangeObjCurve,
     formatMockExchangeObj,
+    expectCloseEq,
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),

@@ -430,6 +430,7 @@ const callAaveCloseToDebtL2Strategy = async (
     subId,
     srcTokenInfo,
     destTokenInfo,
+    partialAmounts = undefined,
 ) => {
     const actionsCallData = [];
     const triggerCallData = [];
@@ -437,7 +438,7 @@ const callAaveCloseToDebtL2Strategy = async (
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         '0',
         true,
-        MAXUINT,
+        partialAmounts?.withdrawAmount || MAXUINT,
         placeHolderAddr,
         nullAddress,
     );
@@ -464,7 +465,7 @@ const callAaveCloseToDebtL2Strategy = async (
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         true,
         nullAddress,
-        MAXUINT, // kept variable (can support partial close later)
+        partialAmounts?.repayAmount || MAXUINT, // kept variable (can support partial close later)
         placeHolderAddr,
         '0',
         placeHolderAddr,
@@ -514,6 +515,7 @@ const callAaveFLCloseToDebtL2Strategy = async (
     flAddr,
     srcTokenInfo,
     destTokenInfo,
+    withdrawAmount = undefined,
 ) => {
     const actionsCallData = [];
     const triggerCallData = [];
@@ -528,7 +530,7 @@ const callAaveFLCloseToDebtL2Strategy = async (
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         true,
         nullAddress,
-        MAXUINT, // kept variable (can support partial close later)
+        withdrawAmount ? repayAmount : MAXUINT,
         placeHolderAddr,
         '0',
         placeHolderAddr,
@@ -540,7 +542,7 @@ const callAaveFLCloseToDebtL2Strategy = async (
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         '0',
         true,
-        MAXUINT,
+        withdrawAmount || MAXUINT,
         placeHolderAddr,
         nullAddress,
     );
@@ -611,6 +613,7 @@ const callAaveCloseToCollL2Strategy = async (
     swapAmount,
     srcTokenInfo,
     destTokenInfo,
+    partialAmounts = undefined,
 ) => {
     const actionsCallData = [];
     const triggerCallData = [];
@@ -618,7 +621,7 @@ const callAaveCloseToCollL2Strategy = async (
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         '0',
         true,
-        MAXUINT,
+        partialAmounts?.withdrawAmount || MAXUINT,
         placeHolderAddr,
         nullAddress,
     );
@@ -645,7 +648,7 @@ const callAaveCloseToCollL2Strategy = async (
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         true,
         nullAddress,
-        MAXUINT, // kept variable (can support partial close later)
+        partialAmounts?.repayAmount || MAXUINT, // kept variable (can support partial close later)
         placeHolderAddr,
         '0',
         placeHolderAddr,
@@ -703,6 +706,7 @@ const callAaveFLCloseToCollL2Strategy = async (
     swapAmount,
     srcTokenInfo,
     destTokenInfo,
+    withdrawAmount = undefined,
 ) => {
     const actionsCallData = [];
     const triggerCallData = [];
@@ -717,7 +721,7 @@ const callAaveFLCloseToCollL2Strategy = async (
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         true,
         nullAddress,
-        MAXUINT, // kept variable (can support partial close later)
+        withdrawAmount ? repayAmount : MAXUINT, // kept variable (can support partial close later)
         placeHolderAddr,
         '0',
         placeHolderAddr,
@@ -729,7 +733,7 @@ const callAaveFLCloseToCollL2Strategy = async (
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         '0',
         true,
-        MAXUINT,
+        withdrawAmount || MAXUINT,
         placeHolderAddr,
         nullAddress,
     );
@@ -738,7 +742,7 @@ const callAaveFLCloseToCollL2Strategy = async (
         await formatMockExchangeObj(
             srcTokenInfo,
             destTokenInfo,
-            swapAmount, // amount to sell is variable
+            withdrawAmount ? MAXUINT : swapAmount, // amount to sell is variable
         ),
         placeHolderAddr, // hardcoded take from user proxy
         placeHolderAddr, // hardcoded send to user proxy

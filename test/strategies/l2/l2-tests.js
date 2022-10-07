@@ -23,6 +23,7 @@ const {
     BN2Float,
     takeSnapshot,
     revertToSnapshot,
+    expectCloseEq,
 } = require('../../utils');
 
 const {
@@ -475,6 +476,9 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
 
         const USD_COLL_OPEN = '25000';
         const USD_DEBT_OPEN = '10000';
+        const ALLOWED_SLIPPAGE = 0.05;
+        const EXPECTED_MAX_INTEREST = 1e-6;
+        const PARTIAL_CLOSE = 0.5;
         const RATE_MODE = 2;
 
         let strategyExecutorByBot;
@@ -489,6 +493,7 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
         let debtAssetId;
         let strategyId;
         let snapshotId;
+        let snapshotId4partial;
 
         before(async () => {
             console.log(`Network: ${network}`);
@@ -630,6 +635,8 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
             });
 
             it('... should call AaveV3 L2 Close strategy', async () => {
+                snapshotId4partial = await takeSnapshot();
+
                 await callAaveCloseToDebtL2Strategy(
                     strategyExecutorByBot,
                     subId,
@@ -665,7 +672,70 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
                     Float2BN(
                         fetchAmountinUSDPrice(
                             debtAssetInfo.symbol,
-                            `${(+USD_COLL_OPEN - USD_DEBT_OPEN) * 0.98}`,
+                            USD_COLL_OPEN * (1 - ALLOWED_SLIPPAGE)
+                            - USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST),
+                        ),
+                        debtAssetInfo.decimals,
+                    ),
+                );
+            });
+
+            it('... should call partial close', async () => {
+                await revertToSnapshot(snapshotId4partial);
+
+                const repayAmount = Float2BN(
+                    fetchAmountinUSDPrice(
+                        debtAssetInfo.symbol,
+                        USD_DEBT_OPEN * PARTIAL_CLOSE,
+                    ),
+                    debtAssetInfo.decimals,
+                );
+
+                const withdrawAmount = Float2BN(
+                    fetchAmountinUSDPrice(
+                        collAssetInfo.symbol,
+                        USD_DEBT_OPEN * PARTIAL_CLOSE * (1 + ALLOWED_SLIPPAGE),
+                    ),
+                    collAssetInfo.decimals,
+                );
+
+                await callAaveCloseToDebtL2Strategy(
+                    strategyExecutorByBot,
+                    subId,
+                    collAssetInfo,
+                    debtAssetInfo,
+                    { withdrawAmount, repayAmount },
+                );
+
+                const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
+                    collAddr,
+                    senderAcc.address,
+                ).then((e) => Object({
+                    collAssetBalance: e,
+                    collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
+                }));
+
+                const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
+                    debtAddr,
+                    senderAcc.address,
+                ).then((e) => Object({
+                    debtAssetBalance: e,
+                    debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
+                }));
+
+                console.log('-----sender coll/debt assets after close-----');
+                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
+                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
+                console.log('---------------------------------------------');
+
+                expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
+                expect(await balanceOf(debtAddr, proxyAddr)).to.be.eq(Float2BN('0'));
+                expect(collAssetBalance).to.be.eq(Float2BN('0'));
+                expect(debtAssetBalance).to.be.lt(
+                    Float2BN(
+                        fetchAmountinUSDPrice(
+                            debtAssetInfo.symbol,
+                            USD_DEBT_OPEN * PARTIAL_CLOSE * ALLOWED_SLIPPAGE,
                         ),
                         debtAssetInfo.decimals,
                     ),
@@ -682,6 +752,8 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
         const USD_COLL_OPEN = '25000';
         const USD_DEBT_OPEN = '10000';
         const ALLOWED_SLIPPAGE = 0.05;
+        const EXPECTED_MAX_INTEREST = 1e-6;
+        const PARTIAL_CLOSE = 0.5;
         const RATE_MODE = 2;
 
         let strategyExecutorByBot;
@@ -697,6 +769,7 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
         let flAaveV3;
         let strategyId;
         let snapshotId;
+        let snapshotId4partial;
 
         before(async () => {
             console.log(`Network: ${network}`);
@@ -780,7 +853,10 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
                 const reserveDataDebt = await pool.getReserveData(debtAddr);
 
                 const amountDebt = Float2BN(
-                    fetchAmountinUSDPrice(testPairs[i].debtAsset, USD_DEBT_OPEN),
+                    fetchAmountinUSDPrice(
+                        testPairs[i].debtAsset,
+                        USD_DEBT_OPEN,
+                    ),
                     debtAssetInfo.decimals,
                 );
                 debtAssetId = reserveDataDebt.id;
@@ -819,10 +895,12 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
             });
 
             it('... should call AaveV3 L2 FL Close strategy', async () => {
+                snapshotId4partial = await takeSnapshot();
+
                 const repayAmount = Float2BN(
                     fetchAmountinUSDPrice(
                         debtAssetInfo.symbol,
-                        USD_DEBT_OPEN * (1 + ALLOWED_SLIPPAGE / 2),
+                        USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST),
                     ),
                     debtAssetInfo.decimals,
                 );
@@ -861,11 +939,77 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
                 expect(await balanceOf(debtAddr, proxyAddr)).to.be.eq(Float2BN('0'));
                 expect(collAssetBalance).to.be.eq(Float2BN('0'));
-                expect(debtAssetBalance).to.be.gt(
+                expect(debtAssetBalance).to.be.gte(
                     Float2BN(
                         fetchAmountinUSDPrice(
                             debtAssetInfo.symbol,
-                            `${(+USD_COLL_OPEN - USD_DEBT_OPEN) * 0.98}`,
+                            USD_COLL_OPEN * (1 - ALLOWED_SLIPPAGE)
+                            - USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST),
+                        ),
+                        debtAssetInfo.decimals,
+                    ),
+                );
+            });
+
+            it('... should call partial close', async () => {
+                await revertToSnapshot(snapshotId4partial);
+
+                const repayAmount = Float2BN(
+                    fetchAmountinUSDPrice(
+                        debtAssetInfo.symbol,
+                        USD_DEBT_OPEN * PARTIAL_CLOSE,
+                    ),
+                    debtAssetInfo.decimals,
+                );
+
+                const withdrawAmount = Float2BN(
+                    fetchAmountinUSDPrice(
+                        collAssetInfo.symbol,
+                        USD_DEBT_OPEN * PARTIAL_CLOSE * (1 + ALLOWED_SLIPPAGE),
+                    ),
+                    collAssetInfo.decimals,
+                );
+
+                await callAaveFLCloseToDebtL2Strategy(
+                    strategyExecutorByBot,
+                    subId,
+                    repayAmount,
+                    debtAddr,
+                    flAaveV3.address,
+                    collAssetInfo,
+                    debtAssetInfo,
+                    withdrawAmount,
+                );
+
+                const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
+                    collAddr,
+                    senderAcc.address,
+                ).then((e) => Object({
+                    collAssetBalance: e,
+                    collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
+                }));
+
+                const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
+                    debtAddr,
+                    senderAcc.address,
+                ).then((e) => Object({
+                    debtAssetBalance: e,
+                    debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
+                }));
+
+                console.log('-----sender coll/debt assets after close-----');
+                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
+                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
+                console.log('---------------------------------------------');
+
+                expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
+                expect(await balanceOf(debtAddr, proxyAddr)).to.be.eq(Float2BN('0'));
+                expect(collAssetBalance).to.be.eq(Float2BN('0'));
+                expect(debtAssetBalance).to.be.lte(
+                    Float2BN(
+                        fetchAmountinUSDPrice(
+                            debtAssetInfo.symbol,
+                            USD_DEBT_OPEN * PARTIAL_CLOSE * ALLOWED_SLIPPAGE,
                         ),
                         debtAssetInfo.decimals,
                     ),
@@ -882,6 +1026,8 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
         const USD_COLL_OPEN = '25000';
         const USD_DEBT_OPEN = '10000';
         const ALLOWED_SLIPPAGE = 0.05;
+        const PARTIAL_CLOSE = 0.5;
+        const EXPECTED_MAX_INTEREST = 1e-6;
         const RATE_MODE = 2;
 
         let strategyExecutorByBot;
@@ -896,6 +1042,7 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
         let debtAssetId;
         let strategyId;
         let snapshotId;
+        let snapshotId4partial;
 
         before(async () => {
             console.log(`Network: ${network}`);
@@ -945,9 +1092,10 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
 
             const linkInfo = getAssetInfo('LINK');
             const amountLINK = Float2BN(
-                (+fetchAmountinUSDPrice(
-                    linkInfo.symbol, USD_COLL_OPEN,
-                )).toFixed(linkInfo.decimals),
+                fetchAmountinUSDPrice(
+                    linkInfo.symbol,
+                    USD_COLL_OPEN,
+                ),
                 linkInfo.decimals,
             );
             await setBalance(linkInfo.address, senderAcc.address, amountLINK);
@@ -1037,11 +1185,15 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
             });
 
             it('... should call AaveV3 L2 Close strategy', async () => {
+                snapshotId4partial = await takeSnapshot();
+                // eslint-disable-next-line max-len
+                const usdRepayAmount = USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST);
+                const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
-                    (+fetchAmountinUSDPrice(
+                    fetchAmountinUSDPrice(
                         collAssetInfo.symbol,
-                        USD_DEBT_OPEN * (1 + ALLOWED_SLIPPAGE / 2),
-                    )).toFixed(collAssetInfo.decimals),
+                        usdSwapAmount,
+                    ),
                     collAssetInfo.decimals,
                 );
 
@@ -1076,20 +1228,93 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
                 expect(await balanceOf(debtAddr, proxyAddr)).to.be.eq(Float2BN('0'));
-                expect(collAssetBalance).to.be.gt(
+                expectCloseEq(
+                    collAssetBalance,
                     Float2BN(
                         fetchAmountinUSDPrice(
                             collAssetInfo.symbol,
-                            `${+USD_COLL_OPEN - USD_DEBT_OPEN * (1 + ALLOWED_SLIPPAGE)}`,
+                            USD_COLL_OPEN - usdSwapAmount,
                         ),
                         collAssetInfo.decimals,
                     ),
                 );
+                expect(debtAssetBalance).to.be.lte(
+                    Float2BN(
+                        fetchAmountinUSDPrice(
+                            debtAssetInfo.symbol,
+                            usdRepayAmount * ALLOWED_SLIPPAGE,
+                        ),
+                        debtAssetInfo.decimals,
+                    ),
+                );
+            });
+
+            it('... should call partial close', async () => {
+                await revertToSnapshot(snapshotId4partial);
+
+                const usdRepayAmount = USD_DEBT_OPEN * PARTIAL_CLOSE;
+                const repayAmount = Float2BN(
+                    fetchAmountinUSDPrice(
+                        debtAssetInfo.symbol,
+                        usdRepayAmount,
+                    ),
+                    debtAssetInfo.decimals,
+                );
+
+                const withdrawAmount = Float2BN(
+                    fetchAmountinUSDPrice(
+                        collAssetInfo.symbol,
+                        USD_DEBT_OPEN * PARTIAL_CLOSE * (1 + ALLOWED_SLIPPAGE),
+                    ),
+                    collAssetInfo.decimals,
+                );
+
+                const swapAmount = Float2BN(
+                    fetchAmountinUSDPrice(
+                        collAssetInfo.symbol,
+                        usdRepayAmount * (1 + ALLOWED_SLIPPAGE),
+                    ),
+                    collAssetInfo.decimals,
+                );
+
+                await callAaveCloseToCollL2Strategy(
+                    strategyExecutorByBot,
+                    subId,
+                    swapAmount,
+                    collAssetInfo,
+                    debtAssetInfo,
+                    { withdrawAmount, repayAmount },
+                );
+
+                const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
+                    collAddr,
+                    senderAcc.address,
+                ).then((e) => Object({
+                    collAssetBalance: e,
+                    collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
+                }));
+
+                const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
+                    debtAddr,
+                    senderAcc.address,
+                ).then((e) => Object({
+                    debtAssetBalance: e,
+                    debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
+                }));
+
+                console.log('-----sender coll/debt assets after close-----');
+                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
+                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
+                console.log('---------------------------------------------');
+
+                expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
+                expect(await balanceOf(debtAddr, proxyAddr)).to.be.eq(Float2BN('0'));
+                expect(collAssetBalance).to.be.eq(Float2BN('0'));
                 expect(debtAssetBalance).to.be.lt(
                     Float2BN(
                         fetchAmountinUSDPrice(
                             debtAssetInfo.symbol,
-                            `${+USD_DEBT_OPEN * (1 - ALLOWED_SLIPPAGE)}`,
+                            usdRepayAmount * ALLOWED_SLIPPAGE,
                         ),
                         debtAssetInfo.decimals,
                     ),
@@ -1105,7 +1330,9 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
 
         const USD_COLL_OPEN = '25000';
         const USD_DEBT_OPEN = '10000';
-        const ALLOWED_SLIPPAGE = 0.05;
+        const ALLOWED_SLIPPAGE = 0.03;
+        const EXPECTED_MAX_INTEREST = 1e-6;
+        const PARTIAL_CLOSE = 0.5;
         const RATE_MODE = 2;
 
         let strategyExecutorByBot;
@@ -1121,6 +1348,7 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
         let flAaveV3;
         let strategyId;
         let snapshotId;
+        let snapshotId4partial;
 
         before(async () => {
             console.log(`Network: ${network}`);
@@ -1184,7 +1412,10 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                 snapshotId = await takeSnapshot();
 
                 const amount = Float2BN(
-                    fetchAmountinUSDPrice(testPairs[i].collAsset, USD_COLL_OPEN),
+                    fetchAmountinUSDPrice(
+                        testPairs[i].collAsset,
+                        USD_COLL_OPEN,
+                    ),
                     collAssetInfo.decimals,
                 );
                 await setBalance(collAddr, senderAcc.address, amount);
@@ -1202,9 +1433,11 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const reserveDataDebt = await pool.getReserveData(debtAddr);
-
                 const amountDebt = Float2BN(
-                    fetchAmountinUSDPrice(testPairs[i].debtAsset, USD_DEBT_OPEN),
+                    fetchAmountinUSDPrice(
+                        testPairs[i].debtAsset,
+                        USD_DEBT_OPEN,
+                    ),
                     debtAssetInfo.decimals,
                 );
                 debtAssetId = reserveDataDebt.id;
@@ -1243,19 +1476,24 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
             });
 
             it('... should call AaveV3 L2 FL Close strategy', async () => {
+                snapshotId4partial = await takeSnapshot();
+
+                const usdRepayAmount = USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST);
                 const repayAmount = Float2BN(
                     fetchAmountinUSDPrice(
                         debtAssetInfo.symbol,
-                        USD_DEBT_OPEN * (1 + ALLOWED_SLIPPAGE / 2),
+                        usdRepayAmount,
                     ),
                     debtAssetInfo.decimals,
                 );
 
+                // eslint-disable-next-line max-len
+                const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
-                    (+fetchAmountinUSDPrice(
+                    fetchAmountinUSDPrice(
                         collAssetInfo.symbol,
-                        USD_DEBT_OPEN * (1 + ALLOWED_SLIPPAGE / 2),
-                    )).toFixed(collAssetInfo.decimals),
+                        usdSwapAmount,
+                    ),
                     collAssetInfo.decimals,
                 );
 
@@ -1293,20 +1531,96 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
                 expect(await balanceOf(debtAddr, proxyAddr)).to.be.eq(Float2BN('0'));
-                expect(collAssetBalance).to.be.gt(
+                expectCloseEq(
+                    collAssetBalance,
                     Float2BN(
                         fetchAmountinUSDPrice(
                             collAssetInfo.symbol,
-                            `${+USD_COLL_OPEN - USD_DEBT_OPEN * (1 + ALLOWED_SLIPPAGE)}`,
+                            USD_COLL_OPEN - usdSwapAmount,
                         ),
                         collAssetInfo.decimals,
                     ),
                 );
+                expect(debtAssetBalance).to.be.lte(
+                    Float2BN(
+                        fetchAmountinUSDPrice(
+                            debtAssetInfo.symbol,
+                            usdRepayAmount * ALLOWED_SLIPPAGE,
+                        ),
+                        debtAssetInfo.decimals,
+                    ),
+                );
+            });
+
+            it('... should call partial close', async () => {
+                await revertToSnapshot(snapshotId4partial);
+
+                const usdRepayAmount = USD_DEBT_OPEN * PARTIAL_CLOSE;
+                const repayAmount = Float2BN(
+                    fetchAmountinUSDPrice(
+                        debtAssetInfo.symbol,
+                        usdRepayAmount,
+                    ),
+                    debtAssetInfo.decimals,
+                );
+
+                const withdrawAmount = Float2BN(
+                    fetchAmountinUSDPrice(
+                        collAssetInfo.symbol,
+                        USD_DEBT_OPEN * PARTIAL_CLOSE * (1 + ALLOWED_SLIPPAGE),
+                    ),
+                    collAssetInfo.decimals,
+                );
+
+                const swapAmount = Float2BN(
+                    fetchAmountinUSDPrice(
+                        collAssetInfo.symbol,
+                        usdRepayAmount * (1 + ALLOWED_SLIPPAGE),
+                    ),
+                    collAssetInfo.decimals,
+                );
+
+                await callAaveFLCloseToCollL2Strategy(
+                    strategyExecutorByBot,
+                    subId,
+                    repayAmount,
+                    debtAddr,
+                    flAaveV3.address,
+                    swapAmount,
+                    collAssetInfo,
+                    debtAssetInfo,
+                    withdrawAmount,
+                );
+
+                const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
+                    collAddr,
+                    senderAcc.address,
+                ).then((e) => Object({
+                    collAssetBalance: e,
+                    collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
+                }));
+
+                const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
+                    debtAddr,
+                    senderAcc.address,
+                ).then((e) => Object({
+                    debtAssetBalance: e,
+                    debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
+                }));
+
+                console.log('-----sender coll/debt assets after close-----');
+                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
+                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
+                console.log('---------------------------------------------');
+
+                expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
+                expect(await balanceOf(debtAddr, proxyAddr)).to.be.eq(Float2BN('0'));
+                expect(collAssetBalance).to.be.eq(Float2BN('0'));
                 expect(debtAssetBalance).to.be.lt(
                     Float2BN(
                         fetchAmountinUSDPrice(
                             debtAssetInfo.symbol,
-                            `${+USD_DEBT_OPEN * (1 - ALLOWED_SLIPPAGE)}`,
+                            usdRepayAmount * ALLOWED_SLIPPAGE,
                         ),
                         debtAssetInfo.decimals,
                     ),
@@ -1317,9 +1631,13 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
 };
 
 const l2StrategiesTest = async (numTestPairs) => {
-    await aaveV3BoostL2StrategyTest(numTestPairs);
+    // await aaveV3BoostL2StrategyTest(numTestPairs);
+    // await aaveV3RepayL2StrategyTest(numTestPairs);
 
-    await aaveV3RepayL2StrategyTest(numTestPairs);
+    await aaveV3CloseToDebtL2StrategyTest(numTestPairs);
+    await aaveV3FLCloseToDebtL2StrategyTest(numTestPairs);
+    await aaveV3CloseToCollL2StrategyTest(numTestPairs);
+    await aaveV3FLCloseToCollL2StrategyTest(numTestPairs);
 };
 
 module.exports = {
