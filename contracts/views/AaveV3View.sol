@@ -217,7 +217,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             borrowRateVariable: reserveData.currentVariableBorrowRate,
             borrowRateStable: reserveData.currentStableBorrowRate,
             totalSupply: IERC20(reserveData.aTokenAddress).totalSupply(),
-            availableLiquidity: IERC20(reserveData.aTokenAddress).totalSupply() - totalVariableBorrow - totalStableBorrow,
+            availableLiquidity: _tokenAddr.getBalance(reserveData.aTokenAddress),
             totalBorrow: totalVariableBorrow + totalStableBorrow,
             totalBorrowVar: totalVariableBorrow,
             totalBorrowStab: totalStableBorrow,

@@ -8,10 +8,11 @@ import "../../../utils/TokenUtils.sol";
 import "../../../utils/FeeRecipient.sol";
 import "../../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../../../interfaces/aaveV2/IPriceOracleGetterAave.sol";
+import "../../../utils/TokenPriceHelper.sol";
 
 import "../helpers/MainnetFeeAddresses.sol";
 
-contract GasFeeHelper is DSMath, MainnetFeeAddresses {
+contract GasFeeHelper is DSMath, TokenPriceHelper {
     using TokenUtils for address;
 
     FeeRecipient public constant feeRecipient = FeeRecipient(FEE_RECIPIENT);
@@ -39,19 +40,16 @@ contract GasFeeHelper is DSMath, MainnetFeeAddresses {
 
         // convert to token amount
         if (_feeToken != TokenUtils.WETH_ADDR) {
-            uint256 price = getTokenPrice(_feeToken);
+            uint256 price = getPriceInETH(_feeToken);
             uint256 tokenDecimals = _feeToken.getTokenDecimals();
 
             require(tokenDecimals <= 18, "Token decimal too big");
 
-            txCost = wdiv(txCost, uint256(price)) / (10**(18 - tokenDecimals));
+            if (price > 0) {
+                txCost = wdiv(txCost, uint256(price)) / (10**(18 - tokenDecimals));
+            } else {
+                txCost = 0;
+            }
         }
-    }
-
-    function getTokenPrice(address _tokenAddr) public view returns (uint256 price) {
-        address priceOracleAddress =
-            ILendingPoolAddressesProviderV2(AAVE_MARKET).getPriceOracle();
-
-        price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr);
     }
 }

@@ -37,6 +37,7 @@ const {
     setNetwork,
     addrs,
     ETH_ADDR,
+    getOwnerAddr,
 } = require('../test/utils');
 
 const {
@@ -64,6 +65,8 @@ const {
     liquityWithdraw,
     aaveV3Supply,
     aaveV3Borrow,
+    supplyCompV3,
+    borrowCompV3,
 } = require('../test/actions');
 
 const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy } = require('../test/l2-strategy-subs');
@@ -83,9 +86,16 @@ const {
     getLatestStrategyId,
     createStrategy,
     createBundle,
+    getLatestBundleId,
 } = require('../test/utils-strategies');
 
-const { createLiquityCloseToCollStrategy } = require('../test/strategies');
+const {
+    createLiquityCloseToCollStrategy,
+    createCompV3FlBoostStrategy,
+    createCompV3RepayStrategy,
+    createCompV3BoostStrategy,
+    createFlCompV3RepayStrategy,
+} = require('../test/strategies');
 
 const {
     subRepayFromSavingsStrategy,
@@ -95,6 +105,7 @@ const {
     subMcdTrailingCloseToCollStrategy,
     subMcdTrailingCloseToDaiStrategy,
     subLiquityTrailingCloseToCollStrategy,
+    subCompV3AutomationStrategy,
 } = require('../test/strategy-subs');
 
 const { getTroveInfo } = require('../test/utils-liquity');
@@ -447,16 +458,16 @@ const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, s
 
     const ilkObj = ilks.find((i) => i.ilkLabel === type);
 
-    var oracleDataAddress = ilkObj.assetAddress;
+    let oracleDataAddress = ilkObj.assetAddress;
 
-    switch(oracleDataAddress.toLowerCase()) {
-      case '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'.toLowerCase():
+    switch (oracleDataAddress.toLowerCase()) {
+    case '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'.toLowerCase():
         oracleDataAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
         break;
-      case '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'.toLowerCase():
+    case '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'.toLowerCase():
         oracleDataAddress = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
         break;
-      default:
+    default:
         break;
     }
 
@@ -790,7 +801,7 @@ const createLiquityTrove = async (coll, debt, sender) => {
     await depositToWeth(amountColl, senderAcc);
     await approve(WETH_ADDRESS, proxy.address, senderAcc);
     await redeploy('LiquityView', addrs[network].REGISTRY_ADDR, false, true);
-    
+
     const maxFeePercentage = hre.ethers.utils.parseUnits('5', 16);
 
     try {
@@ -1230,28 +1241,12 @@ const subAaveAutomation = async (
     });
 
     setNetwork(network);
+    await topUp(getOwnerAddr());
 
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await redeploy('AaveSubProxy', addrs[network].REGISTRY_ADDR, false, true);
-
-    await openStrategyAndBundleStorage(true);
-    const aaveRepayStrategyEncoded = createAaveV3RepayL2Strategy();
-    const aaveRepayFLStrategyEncoded = createAaveFLV3RepayL2Strategy();
-
-    const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
-    const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
-
-    await createBundle(proxy, [strategyId1, strategyId2]);
-
-    const aaveBoostStrategyEncoded = createAaveV3BoostL2Strategy();
-    const aaveBoostFLStrategyEncoded = createAaveFLV3BoostL2Strategy();
-
-    const strategyId11 = await createStrategy(proxy, ...aaveBoostStrategyEncoded, true);
-    const strategyId22 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
-
-    await createBundle(proxy, [strategyId11, strategyId22]);
 
     const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
     const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
@@ -1270,6 +1265,92 @@ const subAaveAutomation = async (
     );
 
     console.log(`Aave position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
+};
+
+const subCompV3Automation = async (
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    sender,
+) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    await topUp(senderAcc.address);
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await redeploy('CompV3SubProxy', addrs[network].REGISTRY_ADDR, false, true);
+
+    const bundleId = await getLatestBundleId();
+
+    console.log(parseInt(bundleId, 10));
+
+    let repayBundleId;
+    let boostBundleId;
+
+    if (parseInt(bundleId, 10) < 4) {
+        await openStrategyAndBundleStorage(true);
+        const compV3RepayStrategyEncoded = createCompV3RepayStrategy();
+        const compV3RepayFLStrategyEncoded = createFlCompV3RepayStrategy();
+
+        const strategyId1 = await createStrategy(proxy, ...compV3RepayStrategyEncoded, true);
+        const strategyId2 = await createStrategy(proxy, ...compV3RepayFLStrategyEncoded, true);
+
+        repayBundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+
+        const compV3BoostStrategyEncoded = createCompV3BoostStrategy();
+        const compV3BoostFLStrategyEncoded = createCompV3FlBoostStrategy();
+
+        const strategyId11 = await createStrategy(proxy, ...compV3BoostStrategyEncoded, true);
+        const strategyId22 = await createStrategy(proxy, ...compV3BoostFLStrategyEncoded, true);
+
+        boostBundleId = await createBundle(proxy, [strategyId11, strategyId22]);
+
+        console.log(repayBundleId, boostBundleId);
+    }
+
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
+
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
+
+    const subIds = await subCompV3AutomationStrategy(
+        proxy,
+        addrs[network].COMET_USDC_ADDR,
+        minRatioFormatted.toString(),
+        maxRatioFormatted.toString(),
+        optimalRatioBoostFormatted.toString(),
+        optimalRatioRepayFormatted.toString(),
+        boostEnabled,
+        addrs[network].REGISTRY_ADDR,
+    );
+
+    console.log(`CompV3 position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
 };
 
 const getAavePos = async (
@@ -1339,6 +1420,55 @@ const getAavePos = async (
             console.log(`Borrow stable ${borrowAssetInfo.symbol}, amount: $${amount / 1e8}}`);
         }
     });
+};
+
+const getCompV3Pos = async (
+    sender,
+) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    await topUp(senderAcc.address);
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const compV3View = await hre.ethers.getContractAt('CompV3View', '0x5e07E953dac1d7c19091c3b493579ba7283572a4');
+
+    const compInfo = await compV3View.getLoanData(addrs[network].COMET_USDC_ADDR, proxy.address);
+
+    compInfo.collAmounts.forEach((amount, i) => {
+        if (!amount.eq(0)) {
+            const collAssetInfo = assets.find(
+                // eslint-disable-next-line max-len
+                (a) => a.addresses[chainIds[network]].toLocaleLowerCase() === compInfo.collAddr[i].toLowerCase(),
+            );
+
+            console.log(`Collateral ${amount / 10 ** collAssetInfo.decimals} ${collAssetInfo.symbol}`);
+        }
+    });
+
+    console.log(`Coll $${compInfo.collValue / 1e8}`);
+    console.log(`Debt $${compInfo.borrowValue / 1e6}`);
+    console.log(`Ratio ${(compInfo.collValue / compInfo.borrowValue).toFixed(2)}%`);
 };
 
 const updateAaveV3AutomationSub = async (
@@ -1445,6 +1575,79 @@ const setMockChainlinkPrice = async (tokenLabel, price) => {
     const oracleData = await c.latestRoundData(srcToken.address, USD_QUOTE);
 
     console.log(`Current price for token ${tokenLabel} at ${new Date(oracleData.updatedAt * 1000).toLocaleTimeString('en-US')} is $${oracleData.answer / 1e8}`);
+};
+
+const createCompV3Position = async (
+    collType, collAmount, debtAmount, sender,
+) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    const collToken = getAssetInfo(collType);
+
+    const collAmountWei = hre.ethers.utils.parseUnits(collAmount, collToken.decimals);
+    const debtAmountWei = hre.ethers.utils.parseUnits(debtAmount, 6);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    console.log(proxy.address);
+
+    if (collType === 'WETH') {
+        await depositToWeth(collAmountWei, senderAcc);
+    } else {
+        try {
+            await sell(
+                proxy,
+                WETH_ADDRESS,
+                collToken.address,
+                hre.ethers.utils.parseUnits('100', 18),
+                UNISWAP_WRAPPER,
+                senderAcc.address,
+                senderAcc.address,
+                0,
+                senderAcc,
+                REGISTRY_ADDR,
+            );
+        } catch (err) {
+            console.log(`Buying ${collToken.name} failed`);
+        }
+    }
+
+    try {
+        await supplyCompV3(
+            addrs[network].COMET_USDC_ADDR,
+            proxy,
+            collToken.address,
+            collAmountWei,
+            senderAcc.address,
+            true,
+            senderAcc,
+        );
+        await borrowCompV3(addrs[network].COMET_USDC_ADDR, proxy, debtAmountWei, senderAcc.address);
+
+        console.log('Position created!');
+    } catch (err) {
+        console.log(err);
+    }
 };
 
 (async () => {
@@ -1592,6 +1795,33 @@ const setMockChainlinkPrice = async (tokenLabel, price) => {
         );
 
     program
+        .command(
+            'sub-compV3-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+        )
+        .description('Subscribes to compV3 automation can be both b/r')
+        .action(
+            async (
+                minRatio,
+                maxRatio,
+                optimalRatioBoost,
+                optimalRatioRepay,
+                boostEnabled,
+                senderAcc,
+            ) => {
+                // eslint-disable-next-line max-len
+                await subCompV3Automation(
+                    minRatio,
+                    maxRatio,
+                    optimalRatioBoost,
+                    optimalRatioRepay,
+                    boostEnabled,
+                    senderAcc,
+                );
+                process.exit(0);
+            },
+        );
+
+    program
         .command('sub-mcd-close-to-coll <vaultId> <type> <price> <priceState> [senderAddr]')
         .description('Subscribes to a Mcd close to coll strategy')
         .action(async (vaultId, type, price, priceState, senderAddr) => {
@@ -1724,6 +1954,14 @@ const setMockChainlinkPrice = async (tokenLabel, price) => {
         });
 
     program
+        .command('create-compV3-position <collType> <collAmount> <debtAmount> [senderAddr]')
+        .description('Creates a compV3 position')
+        .action(async (collType, collAmount, debtAmount, senderAddr) => {
+            await createCompV3Position(collType, collAmount, debtAmount, senderAddr);
+            process.exit(0);
+        });
+
+    program
         .command('gib-money <account>')
         .description('Gives 100000 Eth to the specified account')
         .action(async (account) => {
@@ -1761,6 +1999,14 @@ const setMockChainlinkPrice = async (tokenLabel, price) => {
         .description('Aave position view, default to proxy')
         .action(async (addr) => {
             await getAavePos(addr);
+            process.exit(0);
+        });
+
+    program
+        .command('get-compV3-position [addr]')
+        .description('CompV3 position view, default to proxy')
+        .action(async (addr) => {
+            await getCompV3Pos(addr);
             process.exit(0);
         });
 

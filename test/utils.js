@@ -33,13 +33,16 @@ const addrs = {
         SubProxy: '0xd18d4756bbf848674cc35f1a0B86afEF20787382',
         UNISWAP_WRAPPER: '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54',
         FEED_REGISTRY: '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf',
+        COMET_USDC_ADDR: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
+        COMET_USDC_REWARDS_ADDR: '0x1B0e765F6224C21223AeA2af16c1C46E38885a40',
+        COMP_ADDR: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
         AVG_GAS_PRICE: 100,
 
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
         REGISTRY_ADDR: '0xAf707Ee480204Ed6e2640B53cE86F680D28Afcbd',
-        OWNER_ACC: '0xc9a956923bfb5f141f1cd4467126b3ae91e5cc33',
+        OWNER_ACC: '0xC9a956923bfb5F141F1cd4467126b3ae91E5CC33',
         WETH_ADDRESS: '0x4200000000000000000000000000000000000006',
         DAI_ADDRESS: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
         USDC_ADDR: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
@@ -498,7 +501,7 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
     }
 
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
-    const registryInstance = await hre.ethers.getContractFactory('DFSRegistry', signer);
+    const registryInstance = await hre.ethers.getContractFactory('contracts/core/DFSRegistry.sol:DFSRegistry', signer);
     let registry = await registryInstance.attach(regAddr);
 
     registry = registry.connect(signer);

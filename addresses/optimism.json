@@ -23,14 +23,14 @@
     },
     {
         "name": "AaveSubProxy",
-        "address": "0x4D93E49B8989222571c2D171B988c5A3C04C6621",
+        "address": "0x9E8aE909Af8A391b58f45819f0d36e4256991D19",
         "id": "0xd11b2581",
         "path": "contracts/core/l2/AaveSubProxy.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x4D93E49B8989222571c2D171B988c5A3C04C6621"]
     },
     {
         "name": "ZrxAllowlist",
@@ -155,7 +155,7 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xf924f1E8cdB6AFC02d115fb9C6f80275B2E63cc9",
+        "address": "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
         "version": "1.0.0",
@@ -235,7 +235,7 @@
     },
     {
       "name": "AaveV3Supply",
-      "address": "0x4Ad0cf94e82b58C414266b84ACB061b41bf1bdF7",
+      "address": "0x85C20f47B8dF7eD41b85cA613d9c4208CE00326B",
       "id": "0xfc33bf00",
       "path": "contracts/actions/aaveV3/AaveV3Supply.sol",
       "version": "1.0.1",
@@ -243,6 +243,7 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0x4Ad0cf94e82b58C414266b84ACB061b41bf1bdF7",
         "0xe431c1C673Be123045c8635b0196d51a5bFE55c1"
       ]
     },
@@ -331,14 +332,14 @@
     },
     {
       "name": "FLAaveV3",
-      "address": "0x352D4a1622f2DC34c738F542934372855f219F05",
+      "address": "0xfbcF23D2BeF8A2C491cfa4dD409D8dF12d431c85",
       "id": "0x8d7fb192",
       "path": "contracts/actions/flashloan/FLAaveV3.sol",
       "version": "1.0.0",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0x352D4a1622f2DC34c738F542934372855f219F05"]
     },
     {
       "name": "BotAuth",
@@ -589,5 +590,27 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
-      }
+      },
+      {
+        "name": "BotRefillsL2",
+        "address": "0x38255CD752c56b5dF093Bc56f4411eeb5831d334",
+        "id": "0x96f884f7",
+        "path": "contracts/utils/BotRefillsL2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "FLBalancer",
+        "address": "0x79d6bf536b8DD65909a3174C87eA6395310d5c41",
+        "id": "0xf97d044f",
+        "path": "contracts/actions/flashloan/FLBalancer.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    }
   ]

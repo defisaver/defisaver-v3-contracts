@@ -20,6 +20,7 @@ const {
     fetchAmountinUSDPrice,
     setBalance,
     Float2BN,
+    addrs,
 } = require('../utils');
 
 const { sell, executeAction } = require('../actions');
@@ -123,41 +124,68 @@ const balancerFLTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
+        const network = hre.network.config.name;
+        const amountUSDC = hre.ethers.utils.parseUnits(
+            '100',
+            6,
+        );
+        const amountWeth = hre.ethers.utils.parseUnits(
+            '1',
+            18,
+        );
+        const amountDai = hre.ethers.utils.parseUnits(
+            '100',
+            18,
+        );
+        const wethAddr = addrs[network].WETH_ADDRESS;
+        const usdcAddr = addrs[network].USDC_ADDR;
+        const daiAddr = addrs[network].DAI_ADDRESS;
 
-        const tokenSymbols = ['WETH', 'WBTC'].sort();
+        // This must be sorted for FL to work
+        const tokenAddrs = [
+            wethAddr,
+            usdcAddr,
+            daiAddr,
+        ].sort();
 
-        it(`... should get a ${tokenSymbols} Balancer flash loan`, async () => {
-            const assetInfo = tokenSymbols.map((e) => getAssetInfo(e));
-            const tokenAddrs = assetInfo.map((e) => e.address);
-            const amounts = tokenSymbols.map((e) => fetchAmountinUSDPrice(e, '1000'));
-            const loanAmounts = tokenSymbols.map((e, i) => hre.ethers.utils.parseUnits(
-                amounts[i],
-                assetInfo[i].decimals,
-            ));
+        const map = new Map(
+            [
+                [wethAddr, amountWeth],
+                [usdcAddr, amountUSDC],
+                [daiAddr, amountDai],
+            ],
+        );
+        const amounts = [map.get(tokenAddrs[0]), map.get(tokenAddrs[1]), map.get(tokenAddrs[2])];
 
+        console.log(tokenAddrs);
+        console.log(amounts);
+        it('... should get a WETH and DAI Balancer flash loan', async () => {
             // test if balance will brick fl action
-            await Promise.all(
-                assetInfo.map(
-                    (asset) => setBalance(asset.address, flBalancer.address, Float2BN('1', 0)),
-                ),
-            );
+            await setBalance(tokenAddrs[0], flBalancer.address, Float2BN('1', 0));
+            await setBalance(tokenAddrs[1], flBalancer.address, Float2BN('1', 0));
+            await setBalance(tokenAddrs[2], flBalancer.address, Float2BN('1', 0));
 
             const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
                 new dfs.actions.flashloan.BalancerFlashLoanAction(
                     tokenAddrs,
-                    loanAmounts,
+                    amounts,
                     nullAddress,
                     [],
                 ),
                 new dfs.actions.basic.SendTokenAction(
                     tokenAddrs[0],
                     flBalancer.address,
-                    hre.ethers.constants.MaxUint256,
+                    amounts[0],
                 ),
                 new dfs.actions.basic.SendTokenAction(
                     tokenAddrs[1],
                     flBalancer.address,
-                    hre.ethers.constants.MaxUint256,
+                    amounts[1],
+                ),
+                new dfs.actions.basic.SendTokenAction(
+                    tokenAddrs[2],
+                    flBalancer.address,
+                    amounts[2],
                 ),
             ]);
 
@@ -289,6 +317,56 @@ const makerFLTest = async () => {
         });
     });
 };
+
+const eulerFLTest = async () => {
+    describe('FL-Euler', function () {
+        this.timeout(60000);
+
+        let senderAcc; let proxy;
+        let flEuler;
+
+        before(async () => {
+            const flEulerAddr = await getAddrFromRegistry('FLEuler');
+            console.log(flEulerAddr);
+            flEuler = await hre.ethers.getContractAt('FLEuler', flEulerAddr);
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+
+        const tokenSymbols = ['DAI', 'USDC', 'WETH', 'WBTC', 'USDT', 'UNI', 'LINK'];
+
+        for (let i = 0; i < tokenSymbols.length; i++) {
+            it(`... should get a ${tokenSymbols[i]} Euler flash loan`, async () => {
+                const assetInfo = getAssetInfo(tokenSymbols[i]);
+
+                const amount = fetchAmountinUSDPrice(tokenSymbols[i], '1000');
+                const loanAmount = hre.ethers.utils.parseUnits(
+                    amount,
+                    assetInfo.decimals,
+                );
+
+                const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
+                    new dfs.actions.flashloan.EulerFlashLoanAction(
+                        assetInfo.address,
+                        loanAmount,
+                        nullAddress,
+                        [],
+                    ),
+                    new dfs.actions.basic.SendTokenAction(
+                        assetInfo.address,
+                        flEuler.address,
+                        hre.ethers.constants.MaxUint256,
+                    ),
+                ]);
+
+                const functionData = basicFLRecipe.encodeForDsProxyCall();
+                await executeAction('RecipeExecutor', functionData[1], proxy);
+            });
+        }
+    });
+};
+
 const deployFLContracts = async () => {
     await redeploy('FLMaker');
     await redeploy('SendToken');
@@ -296,6 +374,7 @@ const deployFLContracts = async () => {
     await redeploy('FLDyDx');
     await redeploy('FLBalancer');
     await redeploy('FLAaveV2');
+    await redeploy('FLEuler');
 };
 
 const fullFLTest = async () => {
@@ -304,6 +383,7 @@ const fullFLTest = async () => {
     await balancerFLTest();
     await dydxFLTest();
     await makerFLTest();
+    await eulerFLTest();
 };
 module.exports = {
     fullFLTest,
@@ -311,4 +391,5 @@ module.exports = {
     balancerFLTest,
     dydxFLTest,
     makerFLTest,
+    eulerFLTest,
 };
