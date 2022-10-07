@@ -52,19 +52,4 @@ contract GasFeeHelper is DSMath, TokenPriceHelper {
             }
         }
     }
-<<<<<<< HEAD
-
-    function getTokenPrice(address _tokenAddr) public view returns (uint256 price) {
-        address priceOracleAddress =
-            ILendingPoolAddressesProviderV2(AAVE_MARKET).getPriceOracle();
-
-        address tokenAddr = _tokenAddr == TokenUtils.WSTETH_ADDR ? TokenUtils.STETH_ADDR : _tokenAddr;
-        price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(tokenAddr);
-
-        if (_tokenAddr == TokenUtils.WSTETH_ADDR) {
-            price = wmul(price, IWStEth(_tokenAddr).stEthPerToken());
-        }
-    }
-=======
->>>>>>> 6b7065e33e2a533a5ec6783d59dae8ba657dbdea
 }
