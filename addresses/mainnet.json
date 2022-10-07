@@ -1456,6 +1456,17 @@
         "history": []
     },
     {
+        "name": "LiquityDebtInFrontTrigger",
+        "address": "0xC4608Cb08ecBC109B9FaE4312274f60535a10820",
+        "id": "0xff4a5c51",
+        "path": "contracts/triggers/LiquityDebtInFrontTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "SendTokenAndUnwrap",
         "address": "0xeecd376026335261c89faD40D89625391b1eFF6a",
         "id": "0x17782156",
