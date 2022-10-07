@@ -425,6 +425,66 @@ const callAaveFLV3BoostL2Strategy = async (
     );
 };
 
+const aaveV3CloseActionsEncoded = {
+    flAction: ({ repayAmount, flAsset }) => (new dfs.actions.flashloan.AaveV3FlashLoanAction(
+        [repayAmount],
+        [flAsset],
+        [AAVE_NO_DEBT_MODE],
+        nullAddress,
+    )).encodeForRecipe()[0],
+
+    paybackAction: ({ repayAmount }) => (new dfs.actions.aaveV3.AaveV3PaybackAction(
+        true,
+        nullAddress,
+        repayAmount,
+        placeHolderAddr,
+        '0',
+        placeHolderAddr,
+        '0',
+        false,
+        nullAddress,
+    )).encodeForRecipe()[0],
+
+    withdrawAction: ({ withdrawAmount }) => (new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '0',
+        true,
+        withdrawAmount,
+        placeHolderAddr,
+        nullAddress,
+    )).encodeForRecipe()[0],
+
+    // eslint-disable-next-line max-len
+    sellAction: async ({ srcTokenInfo, destTokenInfo, swapAmount }) => (new dfs.actions.basic.SellAction(
+        await formatMockExchangeObj(
+            srcTokenInfo,
+            destTokenInfo,
+            swapAmount,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    )).encodeForRecipe()[0],
+
+    feeTakingAction: ({ closeGasCost }) => (new dfs.actions.basic.GasFeeActionL2(
+        closeGasCost,
+        placeHolderAddr,
+        '0',
+        '0',
+        closeGasCost,
+    )).encodeForRecipe()[0],
+
+    sendAction: () => (new dfs.actions.basic.SendTokenAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        MAXUINT,
+    )).encodeForRecipe()[0],
+
+    sendRepayFL: ({ flAddr }) => (new dfs.actions.basic.SendTokenAction(
+        placeHolderAddr,
+        flAddr,
+        0,
+    )).encodeForRecipe()[0],
+};
+
 const callAaveCloseToDebtL2Strategy = async (
     strategyExecutorByBot,
     subId,
@@ -435,56 +495,20 @@ const callAaveCloseToDebtL2Strategy = async (
     const actionsCallData = [];
     const triggerCallData = [];
 
-    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        '0',
-        true,
-        partialAmounts?.withdrawAmount || MAXUINT,
-        placeHolderAddr,
-        nullAddress,
-    );
-
-    const sellAction = new dfs.actions.basic.SellAction(
-        await formatMockExchangeObj(
-            srcTokenInfo,
-            destTokenInfo,
-            hre.ethers.constants.MaxUint256,
-        ),
-        placeHolderAddr,
-        placeHolderAddr,
-    );
-
     const closeGasCost = '1000000';
-    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
-        closeGasCost,
-        placeHolderAddr,
-        '0',
-        '0',
-        closeGasCost,
-    );
 
-    const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        true,
-        nullAddress,
-        partialAmounts?.repayAmount || MAXUINT,
-        placeHolderAddr,
-        '0',
-        placeHolderAddr,
-        '0',
-        false,
-        nullAddress,
-    );
-
-    const sendAction = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr,
-        placeHolderAddr,
-        MAXUINT,
-    );
-
-    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
-    actionsCallData.push(sellAction.encodeForRecipe()[0]);
-    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
-    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
-    actionsCallData.push(sendAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
+    }));
+    // eslint-disable-next-line max-len
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo, destTokenInfo, swapAmount: MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: partialAmounts?.repayAmount || MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
 
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
@@ -520,71 +544,22 @@ const callAaveFLCloseToDebtL2Strategy = async (
     const actionsCallData = [];
     const triggerCallData = [];
 
-    const flAction = new dfs.actions.flashloan.AaveV3FlashLoanAction(
-        [repayAmount],
-        [flAsset],
-        [AAVE_NO_DEBT_MODE],
-        nullAddress,
-    );
-
-    const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        true,
-        nullAddress,
-        withdrawAmount ? repayAmount : MAXUINT,
-        placeHolderAddr,
-        '0',
-        placeHolderAddr,
-        '0',
-        false,
-        nullAddress,
-    );
-
-    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        '0',
-        true,
-        withdrawAmount || MAXUINT,
-        placeHolderAddr,
-        nullAddress,
-    );
-
-    const sellAction = new dfs.actions.basic.SellAction(
-        await formatMockExchangeObj(
-            srcTokenInfo,
-            destTokenInfo,
-            hre.ethers.constants.MaxUint256,
-        ),
-        placeHolderAddr,
-        placeHolderAddr,
-    );
-
     const closeGasCost = '1000000';
-    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
-        closeGasCost,
-        placeHolderAddr,
-        '0',
-        '0',
-        closeGasCost,
-    );
 
-    const sendAction = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr,
-        flAddr,
-        '0',
-    );
-
-    const sendAction1 = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr,
-        placeHolderAddr,
-        MAXUINT,
-    );
-
-    actionsCallData.push(flAction.encodeForRecipe()[0]);
-    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
-    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
-    actionsCallData.push(sellAction.encodeForRecipe()[0]);
-    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
-    actionsCallData.push(sendAction.encodeForRecipe()[0]);
-    actionsCallData.push(sendAction1.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3CloseActionsEncoded.flAction({ flAsset, repayAmount }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: withdrawAmount ? repayAmount : MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: withdrawAmount || MAXUINT,
+    }));
+    // eslint-disable-next-line max-len
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo, destTokenInfo, swapAmount: MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendRepayFL({ flAddr }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
 
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
@@ -618,63 +593,20 @@ const callAaveCloseToCollL2Strategy = async (
     const actionsCallData = [];
     const triggerCallData = [];
 
-    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        '0',
-        true,
-        partialAmounts?.withdrawAmount || MAXUINT,
-        placeHolderAddr,
-        nullAddress,
-    );
-
-    const sellAction = new dfs.actions.basic.SellAction(
-        await formatMockExchangeObj(
-            srcTokenInfo,
-            destTokenInfo,
-            swapAmount,
-        ),
-        placeHolderAddr,
-        placeHolderAddr,
-    );
-
     const closeGasCost = '1000000';
-    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
-        closeGasCost,
-        placeHolderAddr,
-        '0',
-        '0',
-        closeGasCost,
-    );
 
-    const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        true,
-        nullAddress,
-        partialAmounts?.repayAmount || MAXUINT,
-        placeHolderAddr,
-        '0',
-        placeHolderAddr,
-        '0',
-        false,
-        nullAddress,
-    );
-
-    const sendAction1 = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr,
-        placeHolderAddr,
-        MAXUINT,
-    );
-
-    const sendAction2 = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr,
-        placeHolderAddr,
-        MAXUINT,
-    );
-
-    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
-    actionsCallData.push(sellAction.encodeForRecipe()[0]);
-    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
-    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
-    actionsCallData.push(sendAction1.encodeForRecipe()[0]);
-    actionsCallData.push(sendAction2.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
+    }));
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo, destTokenInfo, swapAmount,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: partialAmounts?.repayAmount || MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
 
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
@@ -711,78 +643,22 @@ const callAaveFLCloseToCollL2Strategy = async (
     const actionsCallData = [];
     const triggerCallData = [];
 
-    const flAction = new dfs.actions.flashloan.AaveV3FlashLoanAction(
-        [repayAmount],
-        [flAsset],
-        [AAVE_NO_DEBT_MODE],
-        nullAddress,
-    );
-
-    const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        true,
-        nullAddress,
-        withdrawAmount ? repayAmount : MAXUINT,
-        placeHolderAddr,
-        '0',
-        placeHolderAddr,
-        '0',
-        false,
-        nullAddress,
-    );
-
-    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        '0',
-        true,
-        withdrawAmount || MAXUINT,
-        placeHolderAddr,
-        nullAddress,
-    );
-
-    const sellAction = new dfs.actions.basic.SellAction(
-        await formatMockExchangeObj(
-            srcTokenInfo,
-            destTokenInfo,
-            withdrawAmount ? MAXUINT : swapAmount,
-        ),
-        placeHolderAddr,
-        placeHolderAddr,
-    );
-
     const closeGasCost = '1000000';
-    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
-        closeGasCost,
-        placeHolderAddr,
-        '0',
-        '0',
-        closeGasCost,
-    );
 
-    const sendAction0 = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr,
-        flAddr,
-        '0',
-    );
-
-    const sendAction1 = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr,
-        placeHolderAddr,
-        MAXUINT,
-    );
-
-    const sendAction2 = new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr,
-        placeHolderAddr,
-        MAXUINT,
-    );
-
-    actionsCallData.push(flAction.encodeForRecipe()[0]);
-    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
-    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
-    actionsCallData.push(sellAction.encodeForRecipe()[0]);
-    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
-    actionsCallData.push(sendAction0.encodeForRecipe()[0]);
-    actionsCallData.push(sendAction1.encodeForRecipe()[0]);
-    actionsCallData.push(sendAction2.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3CloseActionsEncoded.flAction({ repayAmount, flAsset }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: withdrawAmount ? repayAmount : MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: withdrawAmount || MAXUINT,
+    }));
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo, destTokenInfo, swapAmount,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendRepayFL({ flAddr }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
 
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
@@ -814,4 +690,5 @@ module.exports = {
     callAaveFLCloseToDebtL2Strategy,
     callAaveCloseToCollL2Strategy,
     callAaveFLCloseToCollL2Strategy,
+    aaveV3CloseActionsEncoded,
 };
