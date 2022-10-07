@@ -341,13 +341,57 @@
         "history": []
     },
     {
-        "name": "LiquityView",
-        "address": "0xd1913b977737c9505b8ecfedb8121546096d3393",
-        "id": "0xe23de5c6",
-        "path": "contracts/views/LiquityView.sol",
+        "name": "CBChickenIn",
+        "address": "0x1E990AF6dCf9E9f8a0b2fc76f3BC032A34fFfD14",
+        "id": "0x56185a2d",
+        "path": "contracts/actions/liquity/bonds/CBChickenIn.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CBChickenOut",
+        "address": "0x3d2f2d88749BB387abD07A2408b68D2Bf2D4be3f",
+        "id": "0x6b376b60",
+        "path": "contracts/actions/liquity/bonds/CBChickenOut.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CBCreate",
+        "address": "0xAB38eCb27aBc1d75cb83725a4c408C22F426A1c1",
+        "id": "0xb5b50f23",
+        "path": "contracts/actions/liquity/bonds/CBCreate.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CBRedeem",
+        "address": "0xdD06754cA5367B03af7014AB359332eD82D988d1",
+        "id": "0x0ec91495",
+        "path": "contracts/actions/liquity/bonds/CBRedeem.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TransferNFT",
+        "address": "0x861e893E1796F81248e75F06C0b09Abdc8fe2f6F",
+        "id": "0xa3443678",
+        "path": "contracts/actions/utils/TransferNFT.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },

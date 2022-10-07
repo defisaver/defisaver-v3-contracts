@@ -9,7 +9,7 @@ const { changeConstantInFiles } = require('./utils/utils');
 
 const { redeploy, OWNER_ACC } = require('../test/utils');
 
-const { topUp } = require('./utils/fork.js');
+const { topUp } = require('./utils/fork');
 
 const {
     createYearnRepayStrategy,
