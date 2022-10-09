@@ -96,9 +96,9 @@ contract FLEuler is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel, 
         bool isCorrectAmount = passingData.token.getBalance(address(this)) == passingData.amount + passingData.balanceBefore;
 
         if (passingData.token == ST_ETH_ADDR && !isCorrectAmount) {
-                flFeeFaucet.my2Wei(ST_ETH_ADDR);
-                isCorrectAmount = true;
-            }
+            flFeeFaucet.my2Wei(ST_ETH_ADDR);
+            isCorrectAmount = true;
+        }
 
         require(isCorrectAmount, "Wrong payback amount");
 
