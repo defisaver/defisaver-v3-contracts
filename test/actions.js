@@ -1281,25 +1281,25 @@ const createChickenBond = async (proxy, lusdAmount, from) => {
 };
 
 const chickenOut = async (proxy, bondID, minAmount, to) => {
-    const createCBAction = new dfs.actions.chickenBonds.CBChickenOutAction(
+    const chickenOutAction = new dfs.actions.chickenBonds.CBChickenOutAction(
         bondID,
         minAmount,
         to,
     );
 
-    const functionData = createCBAction.encodeForDsProxyCall()[1];
+    const functionData = chickenOutAction.encodeForDsProxyCall()[1];
 
     const tx = await executeAction('CBChickenOut', functionData, proxy);
     return tx;
 };
 
 const chickenIn = async (proxy, bondID, to) => {
-    const createCBAction = new dfs.actions.chickenBonds.CBChickenInAction(
+    const chickenInAction = new dfs.actions.chickenBonds.CBChickenInAction(
         bondID,
         to,
     );
 
-    const functionData = createCBAction.encodeForDsProxyCall()[1];
+    const functionData = chickenInAction.encodeForDsProxyCall()[1];
 
     const tx = await executeAction('CBChickenIn', functionData, proxy);
     return tx;
@@ -1308,14 +1308,14 @@ const chickenIn = async (proxy, bondID, to) => {
 const chickenRedeem = async (proxy, bLUSDAmount, minLUSDFromSP, from, to) => {
     await approve(BLUSD_ADDR, proxy.address);
 
-    const createCBAction = new dfs.actions.chickenBonds.CBRedeemAction(
+    const cbRedeemAction = new dfs.actions.chickenBonds.CBRedeemAction(
         bLUSDAmount,
         minLUSDFromSP,
         from,
         to,
     );
 
-    const functionData = createCBAction.encodeForDsProxyCall()[1];
+    const functionData = cbRedeemAction.encodeForDsProxyCall()[1];
 
     const tx = await executeAction('CBRedeem', functionData, proxy);
     return tx;
