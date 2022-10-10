@@ -87,8 +87,8 @@ const deployBundles = async (proxy) => {
     await createBundle(proxy, [strategyId11, strategyId22]);
 };
 
-const deployCloseToDebtBundle = async (proxy) => {
-    await openStrategyAndBundleStorage();
+const deployCloseToDebtBundle = async (proxy, isFork = undefined) => {
+    await openStrategyAndBundleStorage(isFork);
     const aaveV3CloseToDebtL2StrategyId = await createStrategy(
         proxy,
         ...createAaveV3CloseToDebtL2Strategy(),
@@ -107,8 +107,8 @@ const deployCloseToDebtBundle = async (proxy) => {
     return aaveV3CloseToDebtBundleId;
 };
 
-const deployCloseToCollBundle = async (proxy) => {
-    await openStrategyAndBundleStorage();
+const deployCloseToCollBundle = async (proxy, isFork = undefined) => {
+    await openStrategyAndBundleStorage(isFork);
     const aaveV3CloseToCollL2StrategyId = await createStrategy(
         proxy,
         ...createAaveV3CloseToCollL2Strategy(),
@@ -1649,4 +1649,7 @@ module.exports = {
     aaveV3FLCloseToDebtL2StrategyTest,
     aaveV3CloseToCollL2StrategyTest,
     aaveV3FLCloseToCollL2StrategyTest,
+
+    deployCloseToDebtBundle,
+    deployCloseToCollBundle,
 };

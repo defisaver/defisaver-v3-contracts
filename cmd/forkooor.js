@@ -69,7 +69,7 @@ const {
     borrowCompV3,
 } = require('../test/actions');
 
-const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy } = require('../test/l2-strategy-subs');
+const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy, subAaveV3CloseBundle } = require('../test/l2-strategy-subs');
 
 const { deployContract } = require('../scripts/utils/deployer');
 
@@ -110,7 +110,13 @@ const {
 
 const { getTroveInfo } = require('../test/utils-liquity');
 
-const { createMcdTrigger, createChainLinkPriceTrigger, RATIO_STATE_UNDER } = require('../test/triggers');
+const {
+    createMcdTrigger,
+    createChainLinkPriceTrigger,
+    RATIO_STATE_OVER,
+    RATIO_STATE_UNDER,
+} = require('../test/triggers');
+const { deployCloseToDebtBundle, deployCloseToCollBundle } = require('../test/strategies/l2/l2-tests');
 
 program.version('0.0.1');
 // let forkedAddresses = '';
@@ -1267,6 +1273,86 @@ const subAaveAutomation = async (
     console.log(`Aave position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
 };
 
+const subAaveClose = async (
+    triggerBaseSymbol,
+    triggerQuoteSymbol,
+    targetQuotePrice,
+    priceState,
+    collSymbol,
+    debtSymbol,
+    sender,
+    closeToColl = false,
+) => {
+    let network = 'mainnet';
+    // eslint-disable-next-line no-lone-blocks
+    {
+        if (process.env.TEST_CHAIN_ID) {
+            network = process.env.TEST_CHAIN_ID;
+        }
+
+        configure({
+            chainId: chainIds[network],
+            testMode: true,
+        });
+
+        setNetwork(network);
+    }
+
+    let proxy;
+    {
+        let senderAcc = (await hre.ethers.getSigners())[0];
+        if (sender) {
+            senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+            // eslint-disable-next-line no-underscore-dangle
+            senderAcc.address = senderAcc._address;
+        }
+        proxy = await getProxy(senderAcc.address);
+        proxy = sender ? proxy.connect(senderAcc) : proxy;
+    }
+    await topUp(getOwnerAddr());
+    await topUp(sender.address);
+
+    const rateMode = 2;
+
+    const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
+    const poolAddress = await aaveMarketContract.getPool();
+    const pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
+
+    const baseAssetInfo = getAssetInfo(triggerBaseSymbol);
+    const quoteAssetInfo = getAssetInfo(triggerQuoteSymbol);
+    const collAssetInfo = getAssetInfo(collSymbol);
+    const debtAssetInfo = getAssetInfo(debtSymbol);
+    const collReserveData = await pool.getReserveData(collAssetInfo.address);
+    const debtReserveData = await pool.getReserveData(debtAssetInfo.address);
+    const collAssetId = collReserveData.id;
+    const debtAssetId = debtReserveData.id;
+
+    let bundleId = await getLatestBundleId();
+    if (bundleId < 2) {
+        const closeToDebtId = await deployCloseToDebtBundle(proxy, true);
+        const closeToCollId = await deployCloseToCollBundle(proxy, true);
+        console.log(`close-to-debt-Id: ${closeToDebtId}, close-to-coll-Id: ${closeToCollId}`);
+
+        bundleId = closeToColl ? closeToCollId : closeToDebtId;
+    } else {
+        bundleId = closeToColl ? bundleId : bundleId - 1;
+    }
+
+    subAaveV3CloseBundle(
+        proxy,
+        bundleId,
+        baseAssetInfo.address,
+        quoteAssetInfo.address,
+        targetQuotePrice,
+        priceState,
+        collAssetInfo.address,
+        collAssetId,
+        debtReserveData.address,
+        debtAssetId,
+        rateMode,
+    );
+};
+
 const subCompV3Automation = async (
     minRatio,
     maxRatio,
@@ -1793,6 +1879,55 @@ const createCompV3Position = async (
                 process.exit(0);
             },
         );
+
+    program
+        .command('sub-aave-close-to-debt <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState>')
+        .description('Subscribes to AaveV3 close to debt bundle')
+        .action(async (
+            collSymbol,
+            debtSymbol,
+            triggerBaseSymbol,
+            triggerQuoteSymbol,
+            triggerTargetPrice,
+            triggerState,
+            senderAddr,
+        ) => {
+            await subAaveClose(
+                triggerBaseSymbol,
+                triggerQuoteSymbol,
+                triggerTargetPrice,
+                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                collSymbol,
+                debtSymbol,
+                senderAddr,
+            );
+            process.exit(0);
+        });
+
+    program
+        .command('sub-aave-close-to-coll <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState>')
+        .description('Subscribes to AaveV3 close to collateral bundle')
+        .action(async (
+            collSymbol,
+            debtSymbol,
+            triggerBaseSymbol,
+            triggerQuoteSymbol,
+            triggerTargetPrice,
+            triggerState,
+            senderAddr,
+        ) => {
+            await subAaveClose(
+                triggerBaseSymbol,
+                triggerQuoteSymbol,
+                triggerTargetPrice,
+                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                collSymbol,
+                debtSymbol,
+                senderAddr,
+                true,
+            );
+            process.exit(0);
+        });
 
     program
         .command(
