@@ -92,6 +92,23 @@ async function deployContract(contractName, args) {
     if (args.nonce) {
         overrides.nonce = parseInt(args.nonce, 10);
     }
+
+    const contractPath = `contracts/flattened/${contractName}.sol`;
+
+    const helperRegex = /contract (.*)Addresses/g;
+    const contractString = (await fs.readFileSync(`${__dirname}/../${contractPath}`).toString('utf-8'));
+
+    const addressesUsed = contractString.match(helperRegex);
+    console.log(addressesUsed);
+    for (let i = 0; i < addressesUsed.length; i++) {
+        if (!(addressesUsed[i].toLowerCase().includes(network.toLowerCase()))) {
+            console.log('ERROR! Check if addresses are matching!');
+            console.log(addressesUsed[i]);
+            console.log(network);
+            process.exit(1);
+        }
+    }
+
     const useEncrypted = await getInput('Do you wish to use encrypted key from .env? (Y/n)!\n');
     let deployer;
     if (useEncrypted.toLowerCase() !== 'n') {
@@ -118,21 +135,6 @@ async function deployContract(contractName, args) {
     console.log('Deploying from:', deployer.address);
     console.log('Account balance:', (await deployer.getBalance()).toString());
 
-    const contractPath = `contracts/flattened/${contractName}.sol`;
-
-    const helperRegex = /contract (.*)Addresses/g;
-    const contractString = (await fs.readFileSync(`${__dirname}/../${contractPath}`).toString('utf-8'));
-
-    const addressesUsed = contractString.match(helperRegex);
-    console.log(addressesUsed);
-    for (let i = 0; i < addressesUsed.length; i++) {
-        if (!(addressesUsed[i].toLowerCase().includes(network.toLowerCase()))) {
-            console.log('ERROR! Check if addresses are matching!');
-            console.log(addressesUsed[i]);
-            console.log(network);
-            process.exit(1);
-        }
-    }
     let Contract = await hre.ethers.getContractFactory(
         `${contractPath}:${contractName}`,
     );
