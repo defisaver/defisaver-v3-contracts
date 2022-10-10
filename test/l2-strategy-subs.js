@@ -81,8 +81,8 @@ const updateAaveV3L2AutomationStrategy = async (
 const subAaveV3CloseBundle = async (
     proxy,
     bundleId,
-    triggerQuoteAsset,
     triggerBaseAsset,
+    triggerQuoteAsset,
     targetPrice,
     priceState,
     collAsset,
@@ -91,7 +91,7 @@ const subAaveV3CloseBundle = async (
     debtAssetId,
     rateMode,
 ) => {
-    const triggerData = defaultAbiCoder.encode(['address', 'address', 'uint256', 'uint8'], [triggerQuoteAsset, triggerBaseAsset, targetPrice, priceState]);
+    const triggerData = defaultAbiCoder.encode(['address', 'address', 'uint256', 'uint8'], [triggerBaseAsset, triggerQuoteAsset, targetPrice, priceState]);
 
     const strategySub = [bundleId, true, [triggerData], [
         defaultAbiCoder.encode(['address'], [collAsset]),
