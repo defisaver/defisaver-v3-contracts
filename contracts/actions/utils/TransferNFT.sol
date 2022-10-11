@@ -7,6 +7,10 @@ import "../ActionBase.sol";
 /// @title Helper action to transfer a NFT token to the specified address
 contract TransferNFT is ActionBase {
 
+    /// @param nftAddr Address of the ERC721 contract
+    /// @param from Where from we are pulling the nft (defaults to proxy)
+    /// @param to Address where we are transferring the nft
+    /// @param nftId TokenId we are transferring
     struct Params {
         address nftAddr;
         address from;

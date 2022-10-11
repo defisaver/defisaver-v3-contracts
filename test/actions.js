@@ -1322,14 +1322,14 @@ const chickenRedeem = async (proxy, bLUSDAmount, minLUSDFromSP, from, to) => {
 };
 
 const transferNFT = async (proxy, nftAddr, tokenId, from, to) => {
-    const createCBAction = new dfs.actions.basic.TransferNFTAction(
+    const transferNFTAction = new dfs.actions.basic.TransferNFTAction(
         nftAddr,
         from,
         to,
         tokenId,
     );
 
-    const functionData = createCBAction.encodeForDsProxyCall()[1];
+    const functionData = transferNFTAction.encodeForDsProxyCall()[1];
 
     const tx = await executeAction('TransferNFT', functionData, proxy);
     return tx;

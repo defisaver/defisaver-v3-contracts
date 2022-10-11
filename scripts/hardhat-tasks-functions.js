@@ -265,7 +265,6 @@ const getAllFiles = function (dirPath, arrayOfFiles) {
 };
 
 async function findPathByContractName(contractName) {
-    console.log(contractName);
     files = getAllFiles('./contracts');
     let foundPath = '';
     files.forEach((file) => {
