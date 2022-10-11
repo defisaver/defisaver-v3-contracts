@@ -291,7 +291,7 @@ const aaveV3CloseActions = {
         ['%repayAmount'], // cant pipe in FL actions :(
         ['%debtAsset'],
         ['%AAVE_NO_DEBT_MODE'],
-        nullAddress,
+        '%nullAddress',
     ),
 
     paybackAction: () => new dfs.actions.aaveV3.AaveV3PaybackAction(
@@ -299,7 +299,7 @@ const aaveV3CloseActions = {
         '&nullAddress', // market
         '%repayAmount', // kept variable (can support partial close later)
         '&proxy',
-        '&rateMode',
+        '%rateMode',
         '&debtAsset', // one subscription - one token pair
         '&debtAssetId',
         '%false', // useOnBehalf - false or will revert
@@ -366,7 +366,6 @@ const createAaveCloseStrategyBase = (strategyName) => {
     aaveCloseStrategy.addSubSlot('&collAssetId', 'uint16');
     aaveCloseStrategy.addSubSlot('&debtAsset', 'address');
     aaveCloseStrategy.addSubSlot('&debtAssetId', 'uint16');
-    aaveCloseStrategy.addSubSlot('&rateMode', 'uint8');
     aaveCloseStrategy.addSubSlot('&nullAddress', 'address');
 
     const trigger = new dfs.triggers.AaveQuotePriceTrigger(nullAddress, nullAddress, '0', '0');

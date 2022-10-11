@@ -659,7 +659,6 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
                     collAssetId,
                     debtAddr,
                     debtAssetId,
-                    RATE_MODE,
                 );
 
                 await activateSub(proxy, subId);
@@ -909,7 +908,6 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
                     collAssetId,
                     debtAddr,
                     debtAssetId,
-                    RATE_MODE,
                 );
 
                 await activateSub(proxy, subId);
@@ -1189,7 +1187,6 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
                     collAssetId,
                     debtAddr,
                     debtAssetId,
-                    RATE_MODE,
                 );
 
                 await activateSub(proxy, subId);
@@ -1470,7 +1467,6 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                     collAssetId,
                     debtAddr,
                     debtAssetId,
-                    RATE_MODE,
                 );
 
                 await activateSub(proxy, subId);

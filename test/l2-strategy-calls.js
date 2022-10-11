@@ -426,6 +426,7 @@ const callAaveFLV3BoostL2Strategy = async (
 };
 
 const aaveV3CloseActionsEncoded = {
+    // eslint-disable-next-line max-len
     flAction: ({ repayAmount, flAsset }) => (new dfs.actions.flashloan.AaveV3FlashLoanAction(
         [repayAmount],
         [flAsset],
@@ -433,12 +434,12 @@ const aaveV3CloseActionsEncoded = {
         nullAddress,
     )).encodeForRecipe()[0],
 
-    paybackAction: ({ repayAmount }) => (new dfs.actions.aaveV3.AaveV3PaybackAction(
+    paybackAction: ({ repayAmount, rateMode = 2 }) => (new dfs.actions.aaveV3.AaveV3PaybackAction(
         true,
         nullAddress,
         repayAmount,
         placeHolderAddr,
-        '0',
+        rateMode,
         placeHolderAddr,
         '0',
         false,

@@ -89,7 +89,6 @@ const subAaveV3CloseBundle = async (
     collAssetId,
     debtAsset,
     debtAssetId,
-    rateMode,
 ) => {
     const triggerData = defaultAbiCoder.encode(['address', 'address', 'uint256', 'uint8'], [triggerBaseAsset, triggerQuoteAsset, targetPrice, priceState]);
 
@@ -98,7 +97,6 @@ const subAaveV3CloseBundle = async (
         defaultAbiCoder.encode(['uint16'], [collAssetId.toString()]),
         defaultAbiCoder.encode(['address'], [debtAsset]),
         defaultAbiCoder.encode(['uint16'], [debtAssetId.toString()]),
-        defaultAbiCoder.encode(['uint8'], [rateMode.toString()]),
         defaultAbiCoder.encode(['address'], [nullAddress]), // needed so we dont have to trust injection
     ]];
 
