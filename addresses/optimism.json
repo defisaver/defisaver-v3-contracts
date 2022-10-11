@@ -12,14 +12,14 @@
     },
     {
         "name": "SubProxy",
-        "address": "0xfE87DE5e11F580fBD3637f34089BaeeA2C393826",
+        "address": "0x163c08d3F6d916AD6Af55b37728D547e968103F8",
         "id": "0x15c87229",
         "path": "contracts/core/strategy/SubProxy.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xfE87DE5e11F580fBD3637f34089BaeeA2C393826"]
     },
     {
         "name": "AaveSubProxy",
