@@ -51,7 +51,7 @@ const addrs = {
         PROXY_AUTH_ADDR: '0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043',
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
         StrategyProxy: '0xEe0C404FD30E289c305E760b3AE1d1Ae6503350f',
-        SubProxy: '0xfE87DE5e11F580fBD3637f34089BaeeA2C393826',
+        SubProxy: '0x163c08d3F6d916AD6Af55b37728D547e968103F8',
         UNISWAP_WRAPPER: '0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357',
         AAVE_V3_VIEW: '0x5aD16e393615bfeF64e15210C370dd4b8f2753Cb',
         AVG_GAS_PRICE: 0.001,
@@ -235,6 +235,8 @@ const Float2BN = hre.ethers.utils.parseUnits;
 const setNetwork = (networkName) => {
     network = networkName;
 };
+
+const getNetwork = () => network;
 
 const getOwnerAddr = () => addrs[network].OWNER_ACC;
 
@@ -428,7 +430,7 @@ const getNameId = (name) => {
 
 const getAddrFromRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR) => {
     const registryInstance = await hre.ethers.getContractFactory('DFSRegistry');
-    const registry = await registryInstance.attach(regAddr);
+    const registry = registryInstance.attach(regAddr);
 
     // TODO: Write in registry later
     // if (name === 'StrategyProxy') {
@@ -459,7 +461,6 @@ const getProxyWithSigner = async (signer, addr) => {
 };
 
 const getProxy = async (acc) => {
-    console.log(network);
     const proxyRegistry = await
     hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
     let proxyAddr = await proxyRegistry.proxies(acc);
@@ -932,8 +933,8 @@ const revertToSnapshot = async (snapshotId) => hre.network.provider.request({
 const getWeth = () => addrs[network].WETH_ADDRESS;
 
 const openStrategyAndBundleStorage = async (isFork) => {
-    const strategySubAddr = getAddrFromRegistry('StrategyStorage');
-    const bundleSubAddr = getAddrFromRegistry('BundleStorage');
+    const strategySubAddr = await getAddrFromRegistry('StrategyStorage');
+    const bundleSubAddr = await getAddrFromRegistry('BundleStorage');
 
     const currOwnerAddr = getOwnerAddr();
 
@@ -1113,6 +1114,7 @@ module.exports = {
     network,
     chainIds,
     setNetwork,
+    getNetwork,
     setBalance,
     takeSnapshot,
     revertToSnapshot,

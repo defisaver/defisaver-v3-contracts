@@ -1274,43 +1274,39 @@ const subAaveAutomation = async (
 };
 
 const subAaveClose = async (
+    collSymbol,
+    debtSymbol,
     triggerBaseSymbol,
     triggerQuoteSymbol,
     targetQuotePrice,
     priceState,
-    collSymbol,
-    debtSymbol,
     sender,
     closeToColl = false,
 ) => {
     let network = 'mainnet';
-    // eslint-disable-next-line no-lone-blocks
-    {
-        if (process.env.TEST_CHAIN_ID) {
-            network = process.env.TEST_CHAIN_ID;
-        }
-
-        configure({
-            chainId: chainIds[network],
-            testMode: true,
-        });
-
-        setNetwork(network);
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
     }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
 
     let proxy;
-    {
-        let senderAcc = (await hre.ethers.getSigners())[0];
-        if (sender) {
-            senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-            // eslint-disable-next-line no-underscore-dangle
-            senderAcc.address = senderAcc._address;
-        }
-        proxy = await getProxy(senderAcc.address);
-        proxy = sender ? proxy.connect(senderAcc) : proxy;
+    let senderAcc = (await hre.ethers.getSigners())[0];
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
     }
+    proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
     await topUp(getOwnerAddr());
-    await topUp(sender.address);
+    await topUp(senderAcc.address);
 
     const rateMode = 2;
 
@@ -1329,8 +1325,19 @@ const subAaveClose = async (
 
     let bundleId = await getLatestBundleId();
     if (bundleId < 2) {
+        const triggerAddr = await redeploy(
+            'AaveQuotePriceTrigger', undefined, false, true,
+        ).then((c) => c.address);
+        const viewAddr = await redeploy(
+            'AaveV3OracleView', undefined, false, true,
+        ).then((c) => c.address);
+
+        console.log('AaveQuotePriceTrigger address:', triggerAddr);
+        console.log('AaveV3OracleView address:', viewAddr);
+
         const closeToDebtId = await deployCloseToDebtBundle(proxy, true);
         const closeToCollId = await deployCloseToCollBundle(proxy, true);
+
         console.log(`close-to-debt-Id: ${closeToDebtId}, close-to-coll-Id: ${closeToCollId}`);
 
         bundleId = closeToColl ? closeToCollId : closeToDebtId;
@@ -1338,19 +1345,21 @@ const subAaveClose = async (
         bundleId = closeToColl ? bundleId : bundleId - 1;
     }
 
-    subAaveV3CloseBundle(
+    const formattedPrice = (targetQuotePrice * 1e8).toString();
+
+    await subAaveV3CloseBundle(
         proxy,
         bundleId,
         baseAssetInfo.address,
         quoteAssetInfo.address,
-        targetQuotePrice,
+        formattedPrice,
         priceState,
         collAssetInfo.address,
         collAssetId,
-        debtReserveData.address,
+        debtAssetInfo.address,
         debtAssetId,
         rateMode,
-    );
+    ).then((subId) => console.log(`subId: ${subId}`));
 };
 
 const subCompV3Automation = async (
@@ -1881,7 +1890,7 @@ const createCompV3Position = async (
         );
 
     program
-        .command('sub-aave-close-to-debt <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState>')
+        .command('sub-aave-close-to-debt <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
         .description('Subscribes to AaveV3 close to debt bundle')
         .action(async (
             collSymbol,
@@ -1893,19 +1902,19 @@ const createCompV3Position = async (
             senderAddr,
         ) => {
             await subAaveClose(
+                collSymbol,
+                debtSymbol,
                 triggerBaseSymbol,
                 triggerQuoteSymbol,
                 triggerTargetPrice,
                 triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
-                collSymbol,
-                debtSymbol,
                 senderAddr,
             );
             process.exit(0);
         });
 
     program
-        .command('sub-aave-close-to-coll <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState>')
+        .command('sub-aave-close-to-coll <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
         .description('Subscribes to AaveV3 close to collateral bundle')
         .action(async (
             collSymbol,
@@ -1917,12 +1926,12 @@ const createCompV3Position = async (
             senderAddr,
         ) => {
             await subAaveClose(
+                collSymbol,
+                debtSymbol,
                 triggerBaseSymbol,
                 triggerQuoteSymbol,
                 triggerTargetPrice,
                 triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
-                collSymbol,
-                debtSymbol,
                 senderAddr,
                 true,
             );
