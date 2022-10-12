@@ -8,6 +8,7 @@ lerna-debug.log*
 
 .vscode
 bin/*
+docs/
 
 artifacts
 cache

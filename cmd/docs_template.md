@@ -1,8 +1,9 @@
 
 ## Description
 
-**Network ${network}**
-([Deployed address](${etherscan_link}) **|** [Code](${gh_link}))
+**Action ID:** ${action_id}
+
+${networks}
 
 ${description}
 
@@ -14,7 +15,7 @@ ${sdk_action}
 
 ## Contract
 
-This is a **${action_type}** dfs action.
+This is a DFS **${action_type}**.
 
 ${hints}
 
