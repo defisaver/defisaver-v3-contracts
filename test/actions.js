@@ -194,13 +194,7 @@ const paybackAave = async (proxy, market, tokenAddr, amount, rateMode, from) => 
     const tx = await executeAction('AavePayback', functionData, proxy);
     return tx;
 };
-const claimStkAave = async (proxy, assets, amount, to) => {
-    const aaveClaimStkAaveAction = new dfs.actions.aave.AaveClaimStkAaveAction(assets, amount, to);
-    const functionData = aaveClaimStkAaveAction.encodeForDsProxyCall()[1];
 
-    const tx = await executeAction('AaveClaimStkAave', functionData, proxy);
-    return tx;
-};
 /*
 .______       _______  _______  __       __________   ___  _______ .______
 |   _  \     |   ____||   ____||  |     |   ____\  \ /  / |   ____||   _  \
@@ -2231,7 +2225,6 @@ module.exports = {
     withdrawAave,
     borrowAave,
     paybackAave,
-    claimStkAave,
 
     supplyComp,
     withdrawComp,

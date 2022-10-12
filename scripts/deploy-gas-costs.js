@@ -52,7 +52,6 @@ async function main() {
     totalGasUsed += await deployContractAndReturnGasUsed('AaveBorrow');
     totalGasUsed += await deployContractAndReturnGasUsed('AavePayback');
     totalGasUsed += await deployContractAndReturnGasUsed('AaveCollateralSwitch');
-    totalGasUsed += await deployContractAndReturnGasUsed('AaveClaimStkAave');
 
     console.log(`Aave gas cost: ${(totalGasUsed - lastSnapShot).toString()}`);
     calcGasToUSD(totalGasUsed - lastSnapShot);
