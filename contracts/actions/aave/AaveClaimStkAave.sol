@@ -6,12 +6,16 @@ pragma experimental ABIEncoderV2;
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
+/// @title Claim stkAave tokens from DSProxy
 contract AaveClaimStkAave is ActionBase, AaveHelper {
 
+    /// @param assets Array of tokens addresses (assets) the proxy is using
+    /// @param amount Amount of stkAave tokens to claim
+    /// @param to Address that will be receiving the rewards
     struct Params {
         address[] assets;
-        uint256 amount;     // Amount of rewards to claim
-        address to;         // Address that will be receiving the rewards
+        uint256 amount;
+        address to;
     }
 
     /// @inheritdoc ActionBase
@@ -46,9 +50,8 @@ contract AaveClaimStkAave is ActionBase, AaveHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Claims stkAave rewards on the assets of the lending pool
+    /// @dev If amount > unclaimedRewards it will claim max. amount will not fail
     function _aaveClaimStkAave(Params memory _params) internal returns (uint256 claimedAmount, bytes memory logData) {
-        // amount 0 is safe
-        // amount > unclaimedRewards is safe
         claimedAmount = AaveIncentivesController.claimRewards(
             _params.assets,
             _params.amount,
@@ -58,8 +61,7 @@ contract AaveClaimStkAave is ActionBase, AaveHelper {
         logData = abi.encode(_params, claimedAmount);
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory params)
-    {
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
 }

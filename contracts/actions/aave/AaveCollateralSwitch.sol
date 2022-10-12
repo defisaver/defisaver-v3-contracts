@@ -7,9 +7,14 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
-/// @title Switch if you'll use tokens for collateral on aave for a market
+/// @title Switch to enable/disable tokens to be used as collateral in AaveV2
 contract AaveCollateralSwitch is ActionBase, AaveHelper {
+
     using TokenUtils for address;
+
+    /// @param market Address provider for specific market
+    /// @param tokens Array of tokens the user wants to set coll enable/disable
+    /// @param useAsCollateral Array of states for the tokens
     struct Params {
         address market;
         address[] tokens;
@@ -42,6 +47,7 @@ contract AaveCollateralSwitch is ActionBase, AaveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @dev For the action to work tokens.length == useAsCollateral.length, contract doesn't enforce this
     function _switchAsCollateral(Params memory _inputData) internal {
         for (uint256 i = 0; i < _inputData.tokens.length; i++){
             enableAsCollateral(_inputData.market, _inputData.tokens[i], _inputData.useAsCollateral[i]);

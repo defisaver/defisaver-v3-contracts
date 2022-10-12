@@ -49,19 +49,27 @@ const parseActionInfo = async (contractName, sdkName) => {
     let actionsString = fs.readFileSync(path.join(__dirname, '/../test/actions.js'), 'utf8');
 
     attributes.network = 'mainnet';
-    attributes.struct_params = contractString.match(/( \s*\/\/\/ @param[\w\s]+\s)*struct Params {\n[^}]*}/g);
+    attributes.struct_params = contractString.match(/( \s*\/\/\/ @param[\w\s_.,!"'-;/?$]+\s)*struct Params {\n[^}]*}/g);
     attributes.description = (contractString.match(/\/\/\/ @title .*/g))[0].slice(11);
     attributes.return_value = contractString.match(/return bytes32.*/g);
-    const hints = contractString.match(/\/\/\/ @dev.*/g);
-    attributes.events = (contractString.match(/(bytes memory logData [^;]*)|(logger.logActionDirectEvent.*)|(emit ActionEvent.*)/g)).join('\n\n');
+    let hints = contractString.match(/\/\/\/ @dev.*/g);
+    attributes.events = (contractString.match(/(bytes memory logData [^;]*)|(logger.logActionDirectEvent.*)|(emit ActionEvent.*)/g))?.join('\n\n');
     attributes.action_type = contractString.match(/ActionType[^)]*/g)[0].split('.')[1];
-    attributes.sdk_action = actionsString.match(new RegExp('.*' + sdkName + '[^;]*;', 'g'))[0];
+    attributes.sdk_action = actionsString.match(new RegExp('.*' + sdkName + '[^;]*;', 'g'));
+
+    if (attributes.sdk_action) {
+        attributes.sdk_action = attributes.sdk_action[0];
+    }
 
     let templateDoc = fs.readFileSync(path.join(__dirname, './docs_template.md'), 'utf8').toString();
 
     console.log(attributes.hints);
 
     attributes.hints = [];
+    if (!hints) {
+        hints = [];
+    }
+
     hints.forEach(hint => {
         attributes.hints.push(`{% hint style='info' %}\n${hint.slice(8)}\n{% endhint %}`);
     });

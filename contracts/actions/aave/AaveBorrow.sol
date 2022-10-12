@@ -4,10 +4,17 @@ pragma solidity =0.8.10;
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
-/// @title Borrow a token a from an Aave market
+
+/// @title Borrow a token a from an AaveV2 market
 contract AaveBorrow is ActionBase, AaveHelper {
     using TokenUtils for address;
 
+    /// @param market Address provider for specific market
+    /// @param tokenAddr The address of the token to be borrowed
+    /// @param amount Amount of tokens to be borrowed
+    /// @param rateMode Rate mode, 1 - stable, 2 - variable
+    /// @param to The address we are sending the borrowed tokens to
+    /// @param onBehalf On behalf of address we are borrowing, defaults to proxy
     struct Params {
         address market;
         address tokenAddr;
@@ -56,9 +63,9 @@ contract AaveBorrow is ActionBase, AaveHelper {
     /// @param _market Address provider for specific market
     /// @param _tokenAddr The address of the token to be borrowed
     /// @param _amount Amount of tokens to be borrowed
-    /// @param _rateMode Send 1 for stable rate and 2 for variable
+    /// @param _rateMode Rate mode, 1 - stable, 2 - variable
     /// @param _to The address we are sending the borrowed tokens to
-    /// @param _onBehalf From what user we are borrow the tokens, defaults to proxy
+    /// @param _onBehalf On behalf of address we are borrowing, defaults to proxy
     function _borrow(
         address _market,
         address _tokenAddr,

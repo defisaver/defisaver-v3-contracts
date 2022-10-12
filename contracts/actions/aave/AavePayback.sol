@@ -7,9 +7,17 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
 
-/// @title Payback a token a user borrowed from an Aave market
+/// @title Payback a token a user borrowed from an AaveV2 market
 contract AavePayback is ActionBase, AaveHelper {
+
     using TokenUtils for address;
+
+    /// @param market Address provider for specific market
+    /// @param tokenAddr The address of the token to be paid back
+    /// @param amount Amount of tokens to be paid back
+    /// @param rateMode Type of borrow debt Stable: 1, Variable: 2
+    /// @param from Where are we pulling the payback tokens amount from
+    /// @param onBehalf On behalf of the address we are borrowing, defaults to proxy
     struct Params {
         address market;
         address tokenAddr;
@@ -71,11 +79,11 @@ contract AavePayback is ActionBase, AaveHelper {
     /// @notice User paybacks tokens to the Aave protocol
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     /// @param _market Address provider for specific market
-    /// @param _tokenAddr The address of the token to be payed back
-    /// @param _amount Amount of tokens to be payed back
+    /// @param _tokenAddr The address of the token to be paid back
+    /// @param _amount Amount of tokens to be paid back
     /// @param _rateMode Type of borrow debt [Stable: 1, Variable: 2]
     /// @param _from Where are we pulling the payback tokens amount from
-    /// @param _onBehalf For what user we are paying back the debt, defaults to proxy
+    /// @param _onBehalf On behalf of the address we are borrowing, defaults to proxy
     function _payback(
         address _market,
         address _tokenAddr,
