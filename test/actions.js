@@ -23,6 +23,8 @@ const {
     formatExchangeObjCurve,
     addrs,
     USDC_ADDR,
+    LUSD_ADDR,
+    BLUSD_ADDR,
 } = require('./utils');
 
 const {
@@ -1333,6 +1335,85 @@ const liquityEthGainToTrove = async (proxy, lqtyTo) => {
     return tx;
 };
 
+/*
+ _____ _     _      _               ______                 _
+/  __ \ |   (_)    | |              | ___ \               | |
+| /  \/ |__  _  ___| | _____ _ __   | |_/ / ___  _ __   __| |___
+| |   | '_ \| |/ __| |/ / _ \ '_ \  | ___ \/ _ \| '_ \ / _` / __|
+| \__/\ | | | | (__|   <  __/ | | | | |_/ / (_) | | | | (_| \__ \
+ \____/_| |_|_|\___|_|\_\___|_| |_| \____/ \___/|_| |_|\__,_|___/
+
+ */
+
+const createChickenBond = async (proxy, lusdAmount, from) => {
+    await approve(LUSD_ADDR, proxy.address);
+
+    const createCBAction = new dfs.actions.chickenBonds.CBCreateAction(
+        lusdAmount,
+        from,
+    );
+
+    const functionData = createCBAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('CBCreate', functionData, proxy);
+    return tx;
+};
+
+const chickenOut = async (proxy, bondID, minAmount, to) => {
+    const chickenOutAction = new dfs.actions.chickenBonds.CBChickenOutAction(
+        bondID,
+        minAmount,
+        to,
+    );
+
+    const functionData = chickenOutAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('CBChickenOut', functionData, proxy);
+    return tx;
+};
+
+const chickenIn = async (proxy, bondID, to) => {
+    const chickenInAction = new dfs.actions.chickenBonds.CBChickenInAction(
+        bondID,
+        to,
+    );
+
+    const functionData = chickenInAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('CBChickenIn', functionData, proxy);
+    return tx;
+};
+
+const chickenRedeem = async (proxy, bLUSDAmount, minLUSDFromSP, from, to) => {
+    await approve(BLUSD_ADDR, proxy.address);
+
+    const cbRedeemAction = new dfs.actions.chickenBonds.CBRedeemAction(
+        bLUSDAmount,
+        minLUSDFromSP,
+        from,
+        to,
+    );
+
+    const functionData = cbRedeemAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('CBRedeem', functionData, proxy);
+    return tx;
+};
+
+const transferNFT = async (proxy, nftAddr, tokenId, from, to) => {
+    const createCBAction = new dfs.actions.basic.TransferNFTAction(
+        nftAddr,
+        from,
+        to,
+        tokenId,
+    );
+
+    const functionData = createCBAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('TransferNFT', functionData, proxy);
+    return tx;
+};
+
 const dydxSupply = async (proxy, tokenAddr, amount, from) => {
     await approve(tokenAddr, proxy.address);
 
@@ -2345,6 +2426,12 @@ module.exports = {
     convexDeposit,
     convexWithdraw,
     convexClaim,
+
+    createChickenBond,
+    chickenIn,
+    chickenOut,
+    chickenRedeem,
+    transferNFT,
 
     mcdFLRepayComposite,
     mcdRepayComposite,
