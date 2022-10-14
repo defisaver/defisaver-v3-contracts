@@ -92,40 +92,33 @@ contract AaveTrailingQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3Rat
             }
         }
 
-        // scope so we can have readable code and not run into stack too deep
-        {
-            uint80 encompassingFeedRoundId0;
-            uint80 encompassingFeedRoundId1;
-            uint256 encompassingFeedTimestamp0;
-            uint256 encompassingFeedTimestamp1;
-            uint256 encompassedFeedTimestamp;
-
-            if (triggerCallData.quoteMaxRoundIdNext != 0) {
-                encompassingFeedRoundId0 = triggerCallData.baseMaxRoundId;
-                encompassingFeedRoundId1 = triggerCallData.baseMaxRoundIdNext;
-                encompassingFeedTimestamp0 = baseMaxPriceTimeStamp;
-                (, encompassingFeedTimestamp1) = getRoundInfo(
-                    triggerSubData.baseTokenAddr,
-                    encompassingFeedRoundId1
-                );
-                encompassedFeedTimestamp = quoteMaxPriceTimeStamp;
-            } else {
-                encompassingFeedRoundId0 = triggerCallData.quoteMaxRoundId;
-                encompassingFeedRoundId1 = triggerCallData.quoteMaxRoundIdNext;
-                encompassingFeedTimestamp0 = quoteMaxPriceTimeStamp;
-                (, encompassingFeedTimestamp1) = getRoundInfo(
-                    triggerSubData.quoteTokenAddr,
-                    encompassingFeedRoundId1
-                );
-                encompassedFeedTimestamp = baseMaxPriceTimeStamp;
-            }
+        // compare if the max round ids of both assets are around the same time
+        /// @dev The caller chooses which asset (base or quote) is the anchor around we are comparing
+        if (triggerCallData.quoteMaxRoundIdNext != 0) {
+            (, uint256 baseMaxRoundIdNextTimestamp) = getRoundInfo(
+                triggerSubData.baseTokenAddr,
+                triggerCallData.baseMaxRoundIdNext
+            );
 
             if (!roundEncompassed(
-                encompassingFeedRoundId0,
-                encompassingFeedRoundId1,
-                encompassingFeedTimestamp0,
-                encompassingFeedTimestamp1,
-                encompassedFeedTimestamp
+                triggerCallData.baseMaxRoundId,
+                triggerCallData.baseMaxRoundIdNext,
+                baseMaxPriceTimeStamp,
+                baseMaxRoundIdNextTimestamp,
+                quoteMaxPriceTimeStamp
+            )) return false;
+        } else {
+            (, uint256 quoteMaxRoundIdNextTimestamp) = getRoundInfo(
+                triggerSubData.quoteTokenAddr,
+                triggerCallData.quoteMaxRoundIdNext
+            );
+
+            if (!roundEncompassed(
+                triggerCallData.quoteMaxRoundId,
+                triggerCallData.quoteMaxRoundIdNext,
+                quoteMaxPriceTimeStamp,
+                quoteMaxRoundIdNextTimestamp,
+                baseMaxPriceTimeStamp
             )) return false;
         }
 
@@ -147,25 +140,32 @@ contract AaveTrailingQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3Rat
 
     /// @dev checking if both maxRoundIds were 'latest' at the same time
     function roundEncompassed(
-        uint80 encompassingFeedRoundId0,
-        uint80 encompassingFeedRoundId1,
-        uint256 encompassingFeedTimestamp0,
-        uint256 encompassingFeedTimestamp1,
-        uint256 encompassedFeedTimestamp
+        uint80 _roundId,
+        uint80 _roundIdNext,
+        uint256 _roundIdTimestamp,
+        uint256 _roundIdNextTimestamp,
+        uint256 _timestampToCompare
     ) internal pure returns (bool) {
-        // encompassed feed round has to be in between the encompassing feed rounds
-        if (encompassingFeedTimestamp0 > encompassedFeedTimestamp) return false;
+        // check if the next roundId sent is actually the next roundId not something else
+        if (!checkIfNextRoundId(_roundId, _roundIdNext)) return false;
 
-        uint256 nextRoundId = encompassingFeedRoundId0 + 1;
-        uint16 phaseId = uint16(encompassingFeedRoundId0 >> 64);
+        // encompassed feed round has to be in between the encompassing feed rounds
+        if ((_roundIdTimestamp > _timestampToCompare) || 
+            (_roundIdNextTimestamp < _timestampToCompare)) {
+            return false;
+        } 
+
+        return true;
+    }
+
+    function checkIfNextRoundId(uint80 _roundId, uint80 _nextRoundId) internal pure returns (bool) {
+        uint256 nextRoundId = _roundId + 1;
+        uint16 phaseId = uint16(_roundId >> 64);
         uint256 nextPhaseRoundId = ((phaseId + 1) << 64) + 1;
 
         // encompassingFeedRoundId1 not valid next roundId
-        if (encompassingFeedRoundId1 != nextRoundId
-            && encompassingFeedRoundId1 != nextPhaseRoundId) return false;
-
-        // encompassed feed round has to be in between the encompassing feed rounds
-        if (encompassingFeedTimestamp1 < encompassedFeedTimestamp) return false;
+        if (_nextRoundId != nextRoundId
+            && _nextRoundId != nextPhaseRoundId) return false;
 
         return true;
     }
