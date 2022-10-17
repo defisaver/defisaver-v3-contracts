@@ -154,7 +154,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         }
         // Withdraw collateral and payback debt
         {
-            // if paybackAmount is higher than current debt, repay all debt and send remaining dai to proxy
+            // if paybackAmount is higher than current debt, repay all debt and send remaining dai to proxy owner
             (address urn, bytes32 ilk) = getUrnAndIlk(MCD_MANAGER_ADDR, _repayParams.vaultId);
             uint256 debt = getAllDebt(address(vat), urn, urn, ilk);
             if (paybackAmount > debt) {
