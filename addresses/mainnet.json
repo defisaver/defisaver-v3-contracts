@@ -1436,14 +1436,17 @@
     },
     {
         "name": "GasFeeTaker",
-        "address": "0xcCFFC73347B05cBDCCe7c3de2a0AdEcDAa8AEf51",
+        "address": "0x80536cb79341972a5Ef679dF5B70bB4A40a53d96",
         "id": "0x4571b8b3",
         "path": "contracts/actions/fee/GasFeeTaker.sol",
-        "version": "1.0.0",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d"]
+        "history": [
+            "0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d",
+            "0xcCFFC73347B05cBDCCe7c3de2a0AdEcDAa8AEf51"
+        ]
     },
     {
         "name": "StrategyExecutor",
