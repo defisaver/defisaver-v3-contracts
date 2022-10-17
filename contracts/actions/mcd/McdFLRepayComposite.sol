@@ -140,14 +140,18 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
         // Sell flashloaned collateral asset for debt asset
         (uint256 exchangedAmount, ) = _dfsSell(_repayParams.exchangeData, address(this), address(this), false);
 
-        // Take gas fee
-        uint256 paybackAmount = _takeFee(GasFeeTakerParams(
-            _repayParams.gasUsed,
-            DAI_ADDR,
-            exchangedAmount,
-            0
-        ));
-
+        // Take gas fee if part of strategy
+        uint256 paybackAmount;
+        if (_repayParams.gasUsed != 0) {
+            paybackAmount = _takeFee(GasFeeTakerParams(
+                _repayParams.gasUsed,
+                DAI_ADDR,
+                exchangedAmount,
+                MAX_DFS_FEE
+            ));
+        } else {
+            paybackAmount = exchangedAmount;
+        }
         // Withdraw collateral and payback debt
         {
             // if paybackAmount is higher than current debt, repay all debt and send remaining dai to proxy

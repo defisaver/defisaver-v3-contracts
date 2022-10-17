@@ -119,13 +119,18 @@ ActionBase, DFSSell, GasFeeTaker, McdHelper {
         // Sell debt asset for collateral asset
         (uint256 exchangedAmount, ) = _dfsSell(_boostParams.exchangeData, address(this), address(this), false);
 
-        // Take gas fee
-        uint256 supplyAmount = _takeFee(GasFeeTakerParams(
-            _boostParams.gasUsed,
-            collateralAsset,
-            exchangedAmount,
-            0
-        ));
+        // Take gas fee if part of strategy
+        uint256 supplyAmount;
+        if (_boostParams.gasUsed != 0) {
+            supplyAmount = _takeFee(GasFeeTakerParams(
+                _boostParams.gasUsed,
+                collateralAsset,
+                exchangedAmount,
+                MAX_DFS_FEE
+            ));
+        } else {
+            supplyAmount = exchangedAmount;
+        }
 
         // check if boost lowers CR
         {
