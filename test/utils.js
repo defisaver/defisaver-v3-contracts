@@ -86,6 +86,7 @@ const REGISTRY_ADDR = '0x287778F121F134C66212FB16c9b53eC991D32f5b';
 require('dotenv-safe').config();
 
 const config = require('../hardhat.config');
+const { getAssetInfo } = require('@defisaver/tokens');
 
 const nullAddress = '0x0000000000000000000000000000000000000000';
 const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
@@ -401,8 +402,9 @@ const getLocalTokenPrice = (tokenSymbol) => {
 };
 
 const fetchAmountinUSDPrice = (tokenSymbol, amountUSD) => {
+    const { decimals } = getAssetInfo(tokenSymbol);
     const tokenPrice = getLocalTokenPrice(tokenSymbol);
-    return (amountUSD / tokenPrice).toFixed(2);
+    return (amountUSD / tokenPrice).toFixed(decimals);
 };
 
 const fetchStandardAmounts = async () => standardAmounts;
@@ -701,7 +703,7 @@ const formatMockExchangeObj = async (
 ) => {
     if (!wrapper) {
         // eslint-disable-next-line no-param-reassign
-        wrapper = await getAddrFromRegistry('MockWrapper');
+        wrapper = await getAddrFromRegistry('MockExchangeWrapper');
     }
 
     const rateDecimals = 18 + destTokenInfo.decimals - srcTokenInfo.decimals;
@@ -711,7 +713,8 @@ const formatMockExchangeObj = async (
         rateDecimals,
     );
 
-    const expectedOutput = srcAmount.mul(rate).div(Float2BN('1'));
+    // const expectedOutput = srcAmount.mul(rate).div(Float2BN('1'));
+    const expectedOutput = hre.ethers.constants.MaxInt256;
 
     await setBalance(
         destTokenInfo.address,

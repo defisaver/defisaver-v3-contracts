@@ -1,7 +1,7 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const { ilks } = require('@defisaver/tokens');
+const { ilks, getAssetInfo } = require('@defisaver/tokens');
 
 const {
     getProxy,
@@ -30,6 +30,7 @@ const {
     takeSnapshot,
     revertToSnapshot,
     Float2BN,
+    setNewExchangeWrapper,
 } = require('../../utils');
 
 const {
@@ -81,8 +82,6 @@ const {
 } = require('../../strategy-calls');
 
 const {
-    subMcdBoostStrategy,
-    subMcdRepayStrategy,
     subRepayFromSavingsStrategy,
     subMcdCloseToDaiStrategy,
     subMcdCloseToCollStrategy,
@@ -145,11 +144,13 @@ const createBoostBundle = async (proxy) => {
     );
 };
 
-const mcdBoostStrategyTest = async () => {
+const mcdBoostStrategyTest = async (numTests) => {
     describe('Mcd-Boost-Strategy', function () {
         this.timeout(320000);
 
-        const boostAmount = Float2BN(fetchAmountinUSDPrice('DAI', '2000'), '18');
+        const SUPPLY_AMOUNT_IN_USD = '100000';
+        const GENERATE_AMOUNT = fetchAmountinUSDPrice('DAI', '41000');
+        const BOOST_AMOUNT = fetchAmountinUSDPrice('DAI', '10000');
 
         let senderAcc;
         let proxy;
@@ -160,164 +161,176 @@ const mcdBoostStrategyTest = async () => {
         let vaultId;
         let mcdView;
         let flBalancer;
-        let strategyTriggerView;
-        const ethJoin = ilks[0].join;
-
-        let snapshotId;
+        // let sellWrapper;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
 
+            flBalancer = await getAddrFromRegistry('FLBalancer').then((address) => ({ address }));
             strategyExecutor = await redeployCore();
-
-            await redeploy('McdRatioTrigger');
-            await redeploy('McdWithdraw');
-            await redeploy('DFSSell');
-            await redeploy('McdPayback');
             mcdView = await redeploy('McdView');
-
-            await redeploy('GasFeeTaker');
-            await redeploy('McdRatioCheck');
-
-            flBalancer = await redeploy('FLBalancer');
-            await redeploy('McdSupply');
-            await redeploy('McdWithdraw');
-            await redeploy('McdGenerate');
-            await redeploy('McdPayback');
-            await redeploy('McdOpen');
+            await redeploy('MockExchangeWrapper').then(({ address }) => setNewExchangeWrapper(senderAcc, address));
             await redeploy('McdRatio');
             await redeploy('McdBoostComposite');
             await redeploy('McdFLBoostComposite');
-            await redeploy('McdSubProxy');
-            strategyTriggerView = await redeploy('StrategyTriggerView');
+
             await addBotCaller(botAcc.address);
 
             proxy = await getProxy(senderAcc.address);
         });
 
         it('... should create boost and repay bundle', async () => {
-            await createRepayBundle(proxy);
-            await createBoostBundle(proxy);
+            const repayBundleId = await createRepayBundle(proxy);
+            const boostBundleId = await createBoostBundle(proxy);
+            await redeploy('McdSubProxy', undefined, undefined, undefined, undefined, repayBundleId, boostBundleId);
         });
 
-        it('... should sub via mcdSubProxy', async () => {
-            vaultId = await openVault(
-                proxy,
-                'ETH-A',
-                fetchAmountinUSDPrice('WETH', '40000'),
-                fetchAmountinUSDPrice('DAI', '18000'),
-            );
+        const ilkSubset = ilks.reduce((acc, curr) => {
+            if ([
+                'ETH',
+                'WBTC',
+                'wstETH',
+            ].includes(curr.asset)) acc.push(curr);
+            return acc;
+        }, []).sort((a, b) => (a.ilkLabel < b.ilkLabel ? (-1) : 1)).slice(0, numTests);
 
-            console.log('VaultId: ', vaultId);
+        ilkSubset.forEach((ilkData) => {
+            const joinAddr = ilkData.join;
+            const tokenData = getAssetInfo(ilkData.asset);
 
-            const ratioUnder = Float2BN('1.5');
-            const ratioOver = Float2BN('2');
-            const targetRatioRepay = Float2BN('1.7');
-            const targetRatioBoost = Float2BN('1.7');
+            if (tokenData.symbol === 'ETH') {
+                tokenData.address = WETH_ADDRESS;
+            }
 
-            ({ subId, boostSub: strategySub } = await subToMcdProxy(
-                proxy,
-                [
-                    vaultId,
-                    ratioUnder,
-                    ratioOver,
-                    targetRatioBoost,
-                    targetRatioRepay,
-                    true,
-                ],
-            ));
+            const boostAmount = Float2BN(BOOST_AMOUNT);
+            const openSupplyAmount = fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD);
+            expect(openSupplyAmount).to.not.be.eq(0, `cant fetch price for ${tokenData.symbol}`);
 
-            snapshotId = await takeSnapshot();
-        });
+            let snapshotId;
+            it('... should sub via mcdSubProxy', async () => {
+                vaultId = await openVault(
+                    proxy,
+                    ilkData.ilkLabel,
+                    openSupplyAmount,
+                    GENERATE_AMOUNT,
+                );
 
-        it('... should trigger a maker boost strategy', async () => {
-            const ratioBefore = await getRatio(mcdView, vaultId);
+                console.log('VaultId: ', vaultId);
 
-            const abiCoder = hre.ethers.utils.defaultAbiCoder;
-            const triggerCallData = [];
-            triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0'])); // check curr ratio
+                const ratioUnder = Float2BN('1.8');
+                const ratioOver = Float2BN('2.2');
+                const targetRatioRepay = Float2BN('2');
+                const targetRatioBoost = Float2BN('2');
 
-            await callMcdBoostStrategy(
-                botAcc,
-                strategyExecutor,
-                0,
-                subId,
-                strategySub,
-                ethJoin,
-                boostAmount,
-            );
+                ({ subId, boostSub: strategySub } = await subToMcdProxy(
+                    proxy,
+                    [
+                        vaultId,
+                        ratioUnder,
+                        ratioOver,
+                        targetRatioBoost,
+                        targetRatioRepay,
+                        true,
+                    ],
+                ));
 
-            const ratioAfter = await getRatio(mcdView, vaultId);
+                snapshotId = await takeSnapshot();
+            });
 
-            console.log(
-                `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
-            );
+            it(`... should trigger a maker boost strategy ${ilkData.ilkLabel}`, async () => {
+                const ratioBefore = await getRatio(mcdView, vaultId);
+                console.log(
+                    `Ratio before ${ratioBefore.toString()}`,
+                );
+                const abiCoder = hre.ethers.utils.defaultAbiCoder;
+                const triggerCallData = [];
+                triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0'])); // check curr ratio
 
-            expect(ratioBefore).to.be.gt(ratioAfter);
-        });
+                await callMcdBoostStrategy(
+                    botAcc,
+                    strategyExecutor,
+                    0,
+                    subId,
+                    strategySub,
+                    joinAddr,
+                    tokenData,
+                    boostAmount,
+                );
 
-        it('... should trigger a maker FL boost strategy', async () => {
-            await revertToSnapshot(snapshotId);
-            snapshotId = await takeSnapshot();
+                const ratioAfter = await getRatio(mcdView, vaultId);
 
-            const ratioBefore = await getRatio(mcdView, vaultId);
+                console.log(
+                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+                );
 
-            // eslint-disable-next-line max-len
-            await callFLMcdBoostStrategy(botAcc, strategyExecutor, 1, subId, strategySub, flBalancer.address, ethJoin, boostAmount);
+                expect(ratioBefore).to.be.gt(ratioAfter);
+            });
 
-            const ratioAfter = await getRatio(mcdView, vaultId);
+            it(`... should trigger a maker FL boost strategy ${ilkData.ilkLabel}`, async () => {
+                await revertToSnapshot(snapshotId);
+                snapshotId = await takeSnapshot();
 
-            console.log(
-                `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
-            );
+                const ratioBefore = await getRatio(mcdView, vaultId);
 
-            expect(ratioBefore).to.be.gt(ratioAfter);
-        });
+                // eslint-disable-next-line max-len
+                await callFLMcdBoostStrategy(botAcc, strategyExecutor, 1, subId, strategySub, flBalancer.address, joinAddr, tokenData, boostAmount);
 
-        it('... should trigger a maker boost composite strategy', async () => {
-            await revertToSnapshot(snapshotId);
-            snapshotId = await takeSnapshot();
+                const ratioAfter = await getRatio(mcdView, vaultId);
 
-            const ratioBefore = await getRatio(mcdView, vaultId);
+                console.log(
+                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+                );
 
-            // eslint-disable-next-line max-len
-            await callMcdBoostCompositeStrategy(botAcc, strategyExecutor, 2, subId, strategySub, ethJoin, boostAmount);
+                expect(ratioBefore).to.be.gt(ratioAfter);
+            });
 
-            const ratioAfter = await getRatio(mcdView, vaultId);
+            it(`... should trigger a maker boost composite strategy ${ilkData.ilkLabel}`, async () => {
+                await revertToSnapshot(snapshotId);
+                snapshotId = await takeSnapshot();
 
-            console.log(
-                `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
-            );
+                const ratioBefore = await getRatio(mcdView, vaultId);
 
-            expect(ratioBefore).to.be.gt(ratioAfter);
-        });
+                // eslint-disable-next-line max-len
+                await callMcdBoostCompositeStrategy(botAcc, strategyExecutor, 2, subId, strategySub, joinAddr, tokenData, boostAmount);
 
-        it('... should trigger a maker fl boost composite strategy', async () => {
-            await revertToSnapshot(snapshotId);
-            snapshotId = await takeSnapshot();
+                const ratioAfter = await getRatio(mcdView, vaultId);
 
-            const ratioBefore = await getRatio(mcdView, vaultId);
+                console.log(
+                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+                );
 
-            // eslint-disable-next-line max-len
-            await callMcdFLBoostCompositeStrategy(botAcc, strategyExecutor, 3, subId, strategySub, ethJoin, boostAmount);
+                expect(ratioBefore).to.be.gt(ratioAfter);
+            });
 
-            const ratioAfter = await getRatio(mcdView, vaultId);
+            it(`... should trigger a maker fl boost composite strategy ${ilkData.ilkLabel}`, async () => {
+                await revertToSnapshot(snapshotId);
+                snapshotId = await takeSnapshot();
 
-            console.log(
-                `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
-            );
+                const ratioBefore = await getRatio(mcdView, vaultId);
 
-            expect(ratioBefore).to.be.gt(ratioAfter);
+                // eslint-disable-next-line max-len
+                await callMcdFLBoostCompositeStrategy(botAcc, strategyExecutor, 3, subId, strategySub, joinAddr, tokenData, boostAmount);
+
+                const ratioAfter = await getRatio(mcdView, vaultId);
+
+                console.log(
+                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+                );
+
+                expect(ratioBefore).to.be.gt(ratioAfter);
+            });
         });
     });
 };
 
-const mcdRepayStrategyTest = async () => {
+const mcdRepayStrategyTest = async (numTests) => {
     describe('Mcd-Repay-Strategy', function () {
         this.timeout(1200000);
 
-        const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', '1000'), '18');
+        const SUPPLY_AMOUNT_USD = '100000';
+        const GENERATE_AMOUNT = fetchAmountinUSDPrice('DAI', '50000');
+        const REPAY_AMOUNT_USD = '5000';
 
         let senderAcc;
         let proxy;
@@ -329,166 +342,180 @@ const mcdRepayStrategyTest = async () => {
         let mcdView;
         let mcdRatioTriggerAddr;
         let strategySub;
-        let snapshotId;
-
-        const ethJoin = ilks[0].join;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
 
+            flBalancer = await getAddrFromRegistry('FLBalancer').then((address) => ({ address }));
             strategyExecutor = await redeployCore();
-
             mcdRatioTriggerAddr = (await redeploy('McdRatioTrigger')).address;
-            await redeploy('DFSSell');
-            await redeploy('McdPayback');
-
             mcdView = await redeploy('McdView');
-
-            await redeploy('GasFeeTaker');
-            await redeploy('McdRatioCheck');
-
-            await redeploy('McdSupply');
-            await redeploy('McdSubProxy');
-            await redeploy('McdWithdraw');
-            await redeploy('McdGenerate');
-            await redeploy('McdPayback');
-            await redeploy('McdOpen');
+            await redeploy('MockExchangeWrapper').then(({ address }) => setNewExchangeWrapper(senderAcc, address));
             await redeploy('McdRatio');
-            flBalancer = await redeploy('FLBalancer');
             await redeploy('McdRepayComposite');
             await redeploy('McdFLRepayComposite');
 
             await addBotCaller(botAcc.address);
-
             await setMCDPriceVerifier(mcdRatioTriggerAddr);
 
             proxy = await getProxy(senderAcc.address);
         });
 
         it('... should create a repay bundle', async () => {
-            await createRepayBundle(proxy);
+            const repayBundleId = await createRepayBundle(proxy);
+            await redeploy('McdSubProxy', undefined, undefined, undefined, undefined, repayBundleId, 0);
         });
 
-        it('... should sub via mcdSubProxy', async () => {
-            vaultId = await openVault(
-                proxy,
-                'ETH-A',
-                fetchAmountinUSDPrice('WETH', '40000'),
-                fetchAmountinUSDPrice('DAI', '18000'),
+        const ilkSubset = ilks.reduce((acc, curr) => {
+            if ([
+                'ETH',
+                'WBTC',
+                'wstETH',
+            ].includes(curr.asset)) acc.push(curr);
+            return acc;
+        }, []).sort((a, b) => (a.ilkLabel < b.ilkLabel ? (-1) : 1)).slice(0, numTests);
+
+        ilkSubset.forEach((ilkData) => {
+            const joinAddr = ilkData.join;
+            const tokenData = getAssetInfo(ilkData.asset);
+
+            if (tokenData.symbol === 'ETH') {
+                tokenData.address = WETH_ADDRESS;
+            }
+
+            const repayAmount = Float2BN(
+                fetchAmountinUSDPrice(tokenData.symbol, REPAY_AMOUNT_USD),
+                tokenData.decimals,
             );
+            const openSupplyAmount = fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_USD);
+            let snapshotId;
+            it('... should sub via mcdSubProxy', async () => {
+                vaultId = await openVault(
+                    proxy,
+                    ilkData.ilkLabel,
+                    openSupplyAmount,
+                    GENERATE_AMOUNT,
+                );
 
-            console.log('Vault id: ', vaultId);
+                console.log('Vault id: ', vaultId);
 
-            const ratioUnder = Float2BN('3');
-            const targetRatioRepay = Float2BN('3.2');
+                const ratioUnder = Float2BN('2.2');
+                const targetRatioRepay = Float2BN('2.5');
 
-            ({ subId, repaySub: strategySub } = await subToMcdProxy(
-                proxy,
-                [
-                    vaultId,
-                    ratioUnder,
-                    Float2BN('0'),
-                    Float2BN('0'),
-                    targetRatioRepay,
-                    false,
-                ],
-            ));
+                ({ subId, repaySub: strategySub } = await subToMcdProxy(
+                    proxy,
+                    [
+                        vaultId,
+                        ratioUnder,
+                        Float2BN('0'),
+                        Float2BN('0'),
+                        targetRatioRepay,
+                        false,
+                    ],
+                ));
 
-            snapshotId = await takeSnapshot();
-        });
+                snapshotId = await takeSnapshot();
+            });
 
-        it('... should trigger a maker repay strategy', async () => {
-            const ratioBefore = await getRatio(mcdView, vaultId);
+            it(`... should trigger a maker repay strategy ${ilkData.ilkLabel}`, async () => {
+                const ratioBefore = await getRatio(mcdView, vaultId);
+                console.log(
+                    `Ratio before ${ratioBefore.toString()}`,
+                );
+                await callMcdRepayStrategy(
+                    botAcc, strategyExecutor, 0, subId,
+                    strategySub, joinAddr, tokenData, repayAmount,
+                );
 
-            await callMcdRepayStrategy(
-                botAcc, strategyExecutor, 0, subId, strategySub, ethJoin, repayAmount,
-            );
+                const ratioAfter = await getRatio(mcdView, vaultId);
 
-            const ratioAfter = await getRatio(mcdView, vaultId);
+                console.log(
+                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+                );
 
-            console.log(
-                `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
-            );
+                expect(ratioAfter).to.be.gt(ratioBefore);
+            });
 
-            expect(ratioAfter).to.be.gt(ratioBefore);
-        });
+            it(`... should trigger a maker FL repay strategy ${ilkData.ilkLabel}`, async () => {
+                await revertToSnapshot(snapshotId);
+                snapshotId = await takeSnapshot();
 
-        it('... should trigger a maker FL repay strategy', async () => {
-            await revertToSnapshot(snapshotId);
-            snapshotId = await takeSnapshot();
+                const ratioBefore = await getRatio(mcdView, vaultId);
 
-            const ratioBefore = await getRatio(mcdView, vaultId);
+                // eslint-disable-next-line max-len
+                await callFLMcdRepayStrategy(
+                    botAcc,
+                    strategyExecutor,
+                    1,
+                    subId,
+                    strategySub,
+                    flBalancer.address,
+                    joinAddr,
+                    tokenData,
+                    repayAmount,
+                );
 
-            // eslint-disable-next-line max-len
-            await callFLMcdRepayStrategy(
-                botAcc,
-                strategyExecutor,
-                1,
-                subId,
-                strategySub,
-                flBalancer.address,
-                ethJoin,
-                repayAmount,
-            );
+                const ratioAfter = await getRatio(mcdView, vaultId);
 
-            const ratioAfter = await getRatio(mcdView, vaultId);
+                console.log(
+                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+                );
 
-            console.log(
-                `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
-            );
+                expect(ratioAfter).to.be.gt(ratioBefore);
+            });
 
-            expect(ratioAfter).to.be.gt(ratioBefore);
-        });
+            it(`... should trigger a maker composite repay strategy ${ilkData.ilkLabel}`, async () => {
+                await revertToSnapshot(snapshotId);
+                snapshotId = await takeSnapshot();
 
-        it('... should trigger a maker composite repay strategy', async () => {
-            await revertToSnapshot(snapshotId);
-            snapshotId = await takeSnapshot();
+                const ratioBefore = await getRatio(mcdView, vaultId);
 
-            const ratioBefore = await getRatio(mcdView, vaultId);
+                // eslint-disable-next-line max-len
+                await callMcdRepayCompositeStrategy(
+                    botAcc,
+                    strategyExecutor,
+                    2,
+                    subId,
+                    strategySub,
+                    joinAddr,
+                    tokenData,
+                    repayAmount,
+                );
 
-            // eslint-disable-next-line max-len
-            await callMcdRepayCompositeStrategy(
-                botAcc,
-                strategyExecutor,
-                2,
-                subId,
-                strategySub,
-                ethJoin,
-                repayAmount,
-            );
+                const ratioAfter = await getRatio(mcdView, vaultId);
 
-            const ratioAfter = await getRatio(mcdView, vaultId);
+                console.log(
+                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+                );
 
-            console.log(
-                `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
-            );
+                expect(ratioAfter).to.be.gt(ratioBefore);
+            });
 
-            expect(ratioAfter).to.be.gt(ratioBefore);
-        });
+            it(`... should trigger a maker fl composite repay strategy ${ilkData.ilkLabel}`, async () => {
+                await revertToSnapshot(snapshotId);
+                const ratioBefore = await getRatio(mcdView, vaultId);
 
-        it('... should trigger a maker fl composite repay strategy', async () => {
-            await revertToSnapshot(snapshotId);
-            const ratioBefore = await getRatio(mcdView, vaultId);
+                // eslint-disable-next-line max-len
+                await callMcdFLRepayCompositeStrategy(
+                    botAcc,
+                    strategyExecutor,
+                    3,
+                    subId,
+                    strategySub,
+                    joinAddr,
+                    tokenData,
+                    repayAmount,
+                );
 
-            // eslint-disable-next-line max-len
-            await callMcdFLRepayCompositeStrategy(
-                botAcc,
-                strategyExecutor,
-                3,
-                subId,
-                strategySub,
-                ethJoin,
-                repayAmount,
-            );
+                const ratioAfter = await getRatio(mcdView, vaultId);
 
-            const ratioAfter = await getRatio(mcdView, vaultId);
+                console.log(
+                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+                );
 
-            console.log(
-                `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
-            );
-
-            expect(ratioAfter).to.be.gt(ratioBefore);
+                expect(ratioAfter).to.be.gt(ratioBefore);
+            });
         });
     });
 };

@@ -33,6 +33,7 @@ const {
     BN2Float,
     USDC_ADDR,
     LUSD_ADDR,
+    formatMockExchangeObj,
 } = require('./utils');
 
 const {
@@ -154,76 +155,6 @@ const callUniV3CollectStrategy = async (botAcc, strategyExecutor, subId, strateg
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
     console.log(`GasUsed callUniV3CollectStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
-};
-
-// eslint-disable-next-line max-len
-const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, ethJoin, repayAmount) => {
-    const triggerCallData = [];
-    const actionsCallData = [];
-
-    const ratioAction = new dfs.actions.maker.MakerRatioAction(
-        '0',
-    );
-
-    const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
-        '0',
-        repayAmount,
-        ethJoin,
-        placeHolderAddr,
-        MCD_MANAGER_ADDR,
-    );
-
-    const repayGasCost = 1200000; // 1.2 mil gas
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        repayGasCost, WETH_ADDRESS, '0',
-    );
-
-    const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            WETH_ADDRESS,
-            DAI_ADDR,
-            '0',
-            UNISWAP_WRAPPER,
-        ),
-        placeHolderAddr,
-        placeHolderAddr,
-    );
-
-    const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
-        '0', // vaultId
-        '0', // amount
-        placeHolderAddr, // proxy
-        MCD_MANAGER_ADDR,
-    );
-
-    const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
-        '1', // ratioState - SHOULD_BE_HIGHER
-        false, // if exact triggerRatio should be checked
-        '0', // targetRatio
-        '0', // vaultId
-        '0', // returnValueIndex
-    );
-
-    actionsCallData.push(ratioAction.encodeForRecipe()[0]);
-    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
-    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
-    actionsCallData.push(sellAction.encodeForRecipe()[0]);
-    actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
-    actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
-
-    const nextPrice = 0;
-    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
-
-    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
-        gasLimit: 8000000,
-    });
-
-    const gasUsed = await getGasUsed(receipt);
-    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
-
-    console.log(`GasUsed callMcdRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 const callMcdRepayFromYearnWithExchangeStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, yWethAddr, repayAmount) => {
@@ -534,22 +465,90 @@ const callMcdRepayFromRariStrategy = async (botAcc, strategyExecutor, strategyIn
 };
 
 // eslint-disable-next-line max-len
-const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, flAddr, ethJoin, repayAmount) => {
+const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, joinAddr, collAsset, repayAmount) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction([WETH_ADDRESS], [repayAmount]);
+    const ratioAction = new dfs.actions.maker.MakerRatioAction(
+        '0',
+    );
+
+    const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
+        '0',
+        repayAmount,
+        joinAddr,
+        placeHolderAddr,
+        MCD_MANAGER_ADDR,
+    );
+
+    const repayGasCost = 1200000; // 1.2 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        repayGasCost, collAsset.address, '0',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        await formatMockExchangeObj(
+            collAsset,
+            getAssetInfo('DAI'),
+            '0',
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
+        '0', // vaultId
+        '0', // amount
+        placeHolderAddr, // proxy
+        MCD_MANAGER_ADDR,
+    );
+
+    const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+        '1', // ratioState - SHOULD_BE_HIGHER
+        false, // if exact triggerRatio should be checked
+        '0', // targetRatio
+        '0', // vaultId
+        '0', // returnValueIndex
+    );
+
+    actionsCallData.push(ratioAction.encodeForRecipe()[0]);
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
+
+    const nextPrice = 0;
+    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callMcdRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
+// eslint-disable-next-line max-len
+const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, flAddr, joinAddr, collAsset, repayAmount) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction([collAsset.address], [repayAmount]);
 
     const ratioAction = new dfs.actions.maker.MakerRatioAction(
         '0',
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            WETH_ADDRESS,
-            DAI_ADDR,
+        await formatMockExchangeObj(
+            collAsset,
+            getAssetInfo('DAI'),
             '0',
-            UNISWAP_WRAPPER,
         ),
         placeHolderAddr,
         placeHolderAddr,
@@ -570,7 +569,7 @@ const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, s
     const withdrawAction = new dfs.actions.maker.MakerWithdrawAction(
         '0',
         repayAmount,
-        ethJoin,
+        joinAddr,
         flAddr,
         MCD_MANAGER_ADDR,
     );
@@ -608,7 +607,7 @@ const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, s
     console.log(`GasUsed callFLMcdRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callMcdRepayCompositeStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, ethJoin, repayAmount) => {
+const callMcdRepayCompositeStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, joinAddr, collAsset, repayAmount) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -616,13 +615,12 @@ const callMcdRepayCompositeStrategy = async (botAcc, strategyExecutor, strategyI
 
     const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
         '0', // '&vaultId'
-        ethJoin,
+        joinAddr,
         repayGasCost,
-        formatExchangeObj(
-            WETH_ADDRESS,
-            DAI_ADDR,
+        await formatMockExchangeObj(
+            collAsset,
+            getAssetInfo('DAI'),
             repayAmount,
-            UNISWAP_WRAPPER,
         ),
     );
 
@@ -641,7 +639,7 @@ const callMcdRepayCompositeStrategy = async (botAcc, strategyExecutor, strategyI
     console.log(`GasUsed callMcdRepayCompositeStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callMcdFLRepayCompositeStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, ethJoin, repayAmount) => {
+const callMcdFLRepayCompositeStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, joinAddr, collAsset, repayAmount) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -649,13 +647,12 @@ const callMcdFLRepayCompositeStrategy = async (botAcc, strategyExecutor, strateg
 
     const repayCompositeAction = new dfs.actions.maker.MakerFLRepayCompositeAction(
         '0', // '&vaultId'
-        ethJoin,
+        joinAddr,
         repayGasCost,
-        formatExchangeObj(
-            WETH_ADDRESS,
-            DAI_ADDR,
+        await formatMockExchangeObj(
+            collAsset,
+            getAssetInfo('DAI'),
             repayAmount,
-            UNISWAP_WRAPPER,
         ),
     );
 
@@ -674,7 +671,7 @@ const callMcdFLRepayCompositeStrategy = async (botAcc, strategyExecutor, strateg
     console.log(`GasUsed callMcdFLRepayCompositeStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callMcdBoostCompositeStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, ethJoin, boostAmount) => {
+const callMcdBoostCompositeStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, joinAddr, collAsset, boostAmount) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -682,13 +679,12 @@ const callMcdBoostCompositeStrategy = async (botAcc, strategyExecutor, strategyI
 
     const boostCompositeAction = new dfs.actions.maker.MakerBoostCompositeAction(
         '0', // &vaultId
-        ethJoin,
+        joinAddr,
         boostGasCost,
-        formatExchangeObj(
-            DAI_ADDR,
-            WETH_ADDRESS,
+        await formatMockExchangeObj(
+            getAssetInfo('DAI'),
+            collAsset,
             boostAmount,
-            UNISWAP_WRAPPER,
         ),
     );
 
@@ -708,7 +704,7 @@ const callMcdBoostCompositeStrategy = async (botAcc, strategyExecutor, strategyI
     console.log(`GasUsed callMcdBoostCompositeStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callMcdFLBoostCompositeStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, ethJoin, boostAmount) => {
+const callMcdFLBoostCompositeStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, joinAddr, collAsset, boostAmount) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -716,13 +712,12 @@ const callMcdFLBoostCompositeStrategy = async (botAcc, strategyExecutor, strateg
 
     const boostCompositeAction = new dfs.actions.maker.MakerFLBoostCompositeAction(
         '0', // &vaultId
-        ethJoin,
+        joinAddr,
         boostGasCost,
-        formatExchangeObj(
-            DAI_ADDR,
-            WETH_ADDRESS,
+        await formatMockExchangeObj(
+            getAssetInfo('DAI'),
+            collAsset,
             boostAmount,
-            UNISWAP_WRAPPER,
         ),
     );
 
@@ -740,6 +735,146 @@ const callMcdFLBoostCompositeStrategy = async (botAcc, strategyExecutor, strateg
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
     console.log(`GasUsed callMcdFLBoostCompositeStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
+// eslint-disable-next-line max-len
+const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, joinAddr, collAsset, boostAmount) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    const ratioAction = new dfs.actions.maker.MakerRatioAction(
+        '0',
+    );
+
+    const generateAction = new dfs.actions.maker.MakerGenerateAction(
+        '0',
+        boostAmount,
+        placeHolderAddr,
+        MCD_MANAGER_ADDR,
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        await formatMockExchangeObj(
+            getAssetInfo('DAI'),
+            collAsset,
+            '0',
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const boostGasCost = 1200000; // 1.2 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        boostGasCost, collAsset.address, '0',
+    );
+
+    const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
+        '0', // vaultId
+        '0', // amount
+        joinAddr,
+        placeHolderAddr, // proxy
+        MCD_MANAGER_ADDR,
+    );
+
+    const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+        '0', // ratioState - SHOULD_BE_LOWER
+        false,
+        '0', // targetRatio
+        '0', // vaultId
+        '0', // returnValueIndex
+    );
+
+    actionsCallData.push(ratioAction.encodeForRecipe()[0]);
+    actionsCallData.push(generateAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(mcdSupplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callMcdBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
+// eslint-disable-next-line max-len
+const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, flLoanAddr, joinAddr, collAsset, boostAmount) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+
+    // const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction(boostAmount, DAI_ADDR);
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction([DAI_ADDR], [boostAmount]);
+
+    const ratioAction = new dfs.actions.maker.MakerRatioAction(
+        '0',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        await formatMockExchangeObj(
+            getAssetInfo('DAI'),
+            collAsset,
+            '0',
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const boostGasCost = 1200000; // 1.2 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        boostGasCost, collAsset.address, '0',
+    );
+
+    const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
+        '0', // vaultId
+        '0', // amount
+        joinAddr,
+        placeHolderAddr, // proxy
+        MCD_MANAGER_ADDR,
+    );
+
+    const generateAction = new dfs.actions.maker.MakerGenerateAction(
+        '0', // vaultId
+        '0', // amount
+        flLoanAddr,
+        MCD_MANAGER_ADDR,
+    );
+
+    const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
+        '0', // ratioState - SHOULD_BE_LOWER
+        false, // if exact triggerRatio should be checked
+        '0', // targetRatio
+        '0', // vaultId
+        '1', // returnValueIndex
+    );
+
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(ratioAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(mcdSupplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(generateAction.encodeForRecipe()[0]);
+    actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
+        gasLimit: 8000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callFLMcdBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 const callCompRepayStrategy = async (botAcc, strategyExecutor, subId, strategySub, repayAmount) => {
@@ -839,148 +974,6 @@ const callCompBoostStrategy = async (botAcc, strategyExecutor, subId, strategySu
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
     console.log(`GasUsed callCompBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
-};
-
-// eslint-disable-next-line max-len
-const callMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, ethJoin, boostAmount) => {
-    const triggerCallData = [];
-    const actionsCallData = [];
-
-    const ratioAction = new dfs.actions.maker.MakerRatioAction(
-        '0',
-    );
-
-    const generateAction = new dfs.actions.maker.MakerGenerateAction(
-        '0',
-        boostAmount,
-        placeHolderAddr,
-        MCD_MANAGER_ADDR,
-    );
-
-    const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            DAI_ADDR,
-            WETH_ADDRESS,
-            '0',
-            UNISWAP_WRAPPER,
-        ),
-        placeHolderAddr,
-        placeHolderAddr,
-    );
-
-    const boostGasCost = 1200000; // 1.2 mil gas
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        boostGasCost, WETH_ADDRESS, '0',
-    );
-
-    const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
-        '0', // vaultId
-        '0', // amount
-        ethJoin,
-        placeHolderAddr, // proxy
-        MCD_MANAGER_ADDR,
-    );
-
-    const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
-        '0', // ratioState - SHOULD_BE_LOWER
-        false,
-        '0', // targetRatio
-        '0', // vaultId
-        '0', // returnValueIndex
-    );
-
-    actionsCallData.push(ratioAction.encodeForRecipe()[0]);
-    actionsCallData.push(generateAction.encodeForRecipe()[0]);
-    actionsCallData.push(sellAction.encodeForRecipe()[0]);
-    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
-    actionsCallData.push(mcdSupplyAction.encodeForRecipe()[0]);
-    actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
-
-    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
-
-    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
-        gasLimit: 8000000,
-    });
-
-    const gasUsed = await getGasUsed(receipt);
-    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
-
-    console.log(`GasUsed callMcdBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
-};
-
-// eslint-disable-next-line max-len
-const callFLMcdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, flLoanAddr, ethJoin, boostAmount) => {
-    const triggerCallData = [];
-    const actionsCallData = [];
-
-    const ratioAction = new dfs.actions.maker.MakerRatioAction(
-        '0',
-    );
-
-    const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction(boostAmount, DAI_ADDR);
-    // const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction([DAI_ADDR], [boostAmount]);
-
-    const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            DAI_ADDR,
-            WETH_ADDRESS,
-            '0',
-            UNISWAP_WRAPPER,
-        ),
-        placeHolderAddr,
-        placeHolderAddr,
-    );
-
-    const boostGasCost = 1200000; // 1.2 mil gas
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        boostGasCost, WETH_ADDRESS, '0',
-    );
-
-    const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
-        '0', // vaultId
-        '0', // amount
-        ethJoin,
-        placeHolderAddr, // proxy
-        MCD_MANAGER_ADDR,
-    );
-
-    const generateAction = new dfs.actions.maker.MakerGenerateAction(
-        '0', // vaultId
-        '0', // amount
-        flLoanAddr,
-        MCD_MANAGER_ADDR,
-    );
-
-    const mcdRatioCheckAction = new dfs.actions.checkers.MakerRatioCheckAction(
-        '0', // ratioState - SHOULD_BE_LOWER
-        false, // if exact triggerRatio should be checked
-        '0', // targetRatio
-        '0', // vaultId
-        '1', // returnValueIndex
-    );
-
-    actionsCallData.push(flAction.encodeForRecipe()[0]);
-    actionsCallData.push(ratioAction.encodeForRecipe()[0]);
-    actionsCallData.push(sellAction.encodeForRecipe()[0]);
-    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
-    actionsCallData.push(mcdSupplyAction.encodeForRecipe()[0]);
-    actionsCallData.push(generateAction.encodeForRecipe()[0]);
-    actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
-
-    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
-
-    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
-        gasLimit: 8000000,
-    });
-
-    const gasUsed = await getGasUsed(receipt);
-    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
-
-    console.log(`GasUsed callFLMcdBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 const callLimitOrderStrategy = async (botAcc, senderAcc, strategyExecutor, subId, strategySub) => {
