@@ -143,12 +143,8 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
                 exchangedAmount,
                 MAX_DFS_FEE
             ));
-        } else {
-            supplyAmount = exchangedAmount;
-        }
 
-        // check if boost lowers CR
-        {
+            // check if boost lowers CR
             (uint256 collateral, uint256 debt) = getCdpInfo(
                 IManager(MCD_MANAGER_ADDR),
                 _boostParams.vaultId,
@@ -158,6 +154,8 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
             uint256 rawRatioBefore = rdiv(collateral, debt);
             uint256 rawRatioAfter = rdiv(collateral + supplyAmount, debt + boostAmount);
             if (rawRatioAfter > rawRatioBefore) revert RatioNotHigherThanBefore(rawRatioBefore, rawRatioAfter);
+        } else {
+            supplyAmount = exchangedAmount;
         }
 
         // Draw debt and supply collateral

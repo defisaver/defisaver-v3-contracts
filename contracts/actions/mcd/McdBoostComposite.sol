@@ -128,12 +128,8 @@ ActionBase, DFSSell, GasFeeTaker, McdHelper {
                 exchangedAmount,
                 MAX_DFS_FEE
             ));
-        } else {
-            supplyAmount = exchangedAmount;
-        }
 
-        // check if boost lowers CR
-        {
+            // check if boost lowers CR
             (uint256 collateral, uint256 debt) = getCdpInfo(
                 IManager(MCD_MANAGER_ADDR),
                 _boostParams.vaultId,
@@ -143,6 +139,8 @@ ActionBase, DFSSell, GasFeeTaker, McdHelper {
             uint256 rawRatioBefore = rdiv(collateral, debt);
             uint256 rawRatioAfter = rdiv(collateral + supplyAmount, debt + boostAmount);
             if (rawRatioAfter > rawRatioBefore) revert RatioNotHigherThanBefore(rawRatioBefore, rawRatioAfter);
+        } else {
+            supplyAmount = exchangedAmount;
         }
 
         // Supply collateral

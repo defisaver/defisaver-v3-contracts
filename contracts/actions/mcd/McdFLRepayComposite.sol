@@ -160,7 +160,7 @@ ReentrancyGuard, MainnetBalancerV2Addresses {
             if (paybackAmount > debt) {
                 DAI_ADDR.withdrawTokens(IDSProxy(_proxy).owner(), paybackAmount - debt);
                 paybackAmount = debt;
-            } else {
+            } else if (_repayParams.gasUsed != 0) {
                 // check if repay raises CR
                 uint256 rawRatioBefore = rdiv(collateral, debt);
                 uint256 rawRatioAfter = rdiv(collateral - repayAmount, debt - paybackAmount);
