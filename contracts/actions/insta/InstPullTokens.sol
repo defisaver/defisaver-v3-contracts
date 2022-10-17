@@ -7,10 +7,14 @@ import "./../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/mcd/IManager.sol";
 
-// @title Action for withdrawing tokens from DSA
+/// @title Withdraw tokens from Instadapp DSA
 contract InstPullTokens is ActionBase {
     using TokenUtils for address;
     
+    /// @param dsaAddress The address of the DSA account to withdraw tokens from
+    /// @param tokens List of token addresses we want to withdraw from DSA
+    /// @param amounts List of amounts that we want to withdraw correlating with tokens list
+    /// @param to The address we are withdrawing tokens to
     struct Params {
         address dsaAddress;
         address[] tokens;
@@ -46,6 +50,7 @@ contract InstPullTokens is ActionBase {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @dev Proxy must be authorized to interact with specific DSA
     function _pullTokens(Params memory _inputData) internal returns (bytes memory logData) {
         require (_inputData.to != address(0), "Receiver address can't be burn address");
         bytes memory spellData = _createSpell(_inputData);
@@ -56,6 +61,7 @@ contract InstPullTokens is ActionBase {
         logData = abi.encode(_inputData);
     }
 
+    /// @notice helper function for encoding specific Instadapp spell for withdrawing tokens
     function _createSpell(Params memory _inputData) internal view returns (bytes memory) {
         require(_inputData.amounts.length == _inputData.tokens.length, "Arrays must be of the same size");
 

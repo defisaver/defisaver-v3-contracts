@@ -15,9 +15,9 @@ const parseActionInfo = async (contractName, sdkName) => {
     const optimismAddrs = JSON.parse(fs.readFileSync(`${pathToAddrs}/optimism.json`, 'utf8'));
     const arbitrumAddrs = JSON.parse(fs.readFileSync(`${pathToAddrs}/arbitrum.json`, 'utf8'));
 
-    const addrInfoMainnet = mainnetAddrs.filter(n => n.name == contractName);
-    const addrInfoOptimism = optimismAddrs.filter(n => n.name == contractName);
-    const addrInfoArbitrum = arbitrumAddrs.filter(n => n.name == contractName);
+    const addrInfoMainnet = mainnetAddrs.filter((n) => n.name === contractName);
+    const addrInfoOptimism = optimismAddrs.filter((n) => n.name === contractName);
+    const addrInfoArbitrum = arbitrumAddrs.filter((n) => n.name === contractName);
 
     const networkInfos = [addrInfoMainnet[0], addrInfoOptimism[0], addrInfoArbitrum[0]];
 
@@ -45,8 +45,8 @@ const parseActionInfo = async (contractName, sdkName) => {
     });
     attributes.networks = attributes.networks.join('\n\n');
 
-    let contractString = fs.readFileSync(filePath, 'utf8').toString();
-    let actionsString = fs.readFileSync(path.join(__dirname, '/../test/actions.js'), 'utf8');
+    const contractString = fs.readFileSync(filePath, 'utf8').toString();
+    const actionsString = fs.readFileSync(path.join(__dirname, '/../test/actions.js'), 'utf8');
 
     attributes.network = 'mainnet';
     attributes.struct_params = contractString.match(/( \s*\/\/\/ @param[\w\s_.,!"'-;/?$]+\s)*struct Params {\n[^}]*}/g);
@@ -55,7 +55,7 @@ const parseActionInfo = async (contractName, sdkName) => {
     let hints = contractString.match(/\/\/\/ @dev.*/g);
     attributes.events = (contractString.match(/(bytes memory logData [^;]*)|(logger.logActionDirectEvent.*)|(emit ActionEvent.*)/g))?.join('\n\n');
     attributes.action_type = contractString.match(/ActionType[^)]*/g)[0].split('.')[1];
-    attributes.sdk_action = actionsString.match(new RegExp('.*' + sdkName + '[^;]*;', 'g'));
+    attributes.sdk_action = actionsString.match(new RegExp(`.*${sdkName}[^;]*;`, 'g'));
 
     if (attributes.sdk_action) {
         attributes.sdk_action = attributes.sdk_action[0];
@@ -70,18 +70,18 @@ const parseActionInfo = async (contractName, sdkName) => {
         hints = [];
     }
 
-    hints.forEach(hint => {
+    hints.forEach((hint) => {
         attributes.hints.push(`{% hint style='info' %}\n${hint.slice(8)}\n{% endhint %}`);
     });
 
     attributes.hints = attributes.hints.join('\n');
 
+    // eslint-disable-next-line guard-for-in, no-restricted-syntax
     for (const placeholder in attributes) {
-        templateDoc = templateDoc.replace('${' + placeholder + '}', attributes[placeholder]);
+        templateDoc = templateDoc.replace(`\${${placeholder}}`, attributes[placeholder]);
     }
 
     fs.writeFileSync(path.join(__dirname, `/../docs/${contractName}.md`), templateDoc);
-
 };
 
 (async () => {
