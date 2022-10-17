@@ -6,9 +6,16 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
 
-/// @title Switch if you'll use tokens for collateral on aave for a market
+/// @title Switch if you'll use tokens for collateral on AaveV3 for a market
 contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
+
     using TokenUtils for address;
+
+    /// @param arrayLength Number of assetIDs sent in the assetIds array (needed for encoding)
+    /// @param useDefaultMarket If true the action will inject aave default market
+    /// @param assetIds Array of assetIds (each asset in aave has an unique id)
+    /// @param useAsCollateral Array of booleans true - enable as collateral, false - disable
+    /// @param market Address provider for specific market
     struct Params {
         uint8 arrayLength;
         bool useDefaultMarket;
@@ -52,6 +59,8 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @dev arrayLength must be == assetIds.length or the tx reverts
+    /// @dev arrayLength must be == useAsCollateral.length or the tx reverts
     function _switchAsCollateral(Params memory _inputData)
         internal
         returns (uint256, bytes memory)

@@ -11,6 +11,13 @@ import "./helpers/BalancerV2Helper.sol";
 contract BalancerV2Withdraw is ActionBase, BalancerV2Helper{
     using TokenUtils for address;
 
+    /// @param poolId Masked address of the pool with additional info
+    /// @param from Where are we pulling the lp tokens amount from
+    /// @param to The address we are sending the underlying tokens to
+    /// @param lpTokenAmount Amount of lp tokens 
+    /// @param tokens Array of token addresses we are withdrawing
+    /// @param maxAmountsOut Array of max. amounts of tokens to pull out of the pool
+    /// @param userData Structured data of pool (array of amountsOut and other data depending on type of pool)
     struct Params {
         bytes32 poolId;
         address from;

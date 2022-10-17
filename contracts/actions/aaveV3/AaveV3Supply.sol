@@ -6,10 +6,18 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
 
-/// @title Supply a token to an Aave market
+/// @title Supply a token to an AaveV3 market
 contract AaveV3Supply is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
+    /// @param amount Amount of tokens to be deposited
+    /// @param from Where are we pulling the supply tokens amount from
+    /// @param assetId The id of the token to be deposited
+    /// @param useDefaultMarket If true the action will inject aave default market
+    /// @param useOnBehalf If true the action will inject _onBehalf addr
+    /// @param enableAsColl If the supply asset should be collateral
+    /// @param market Address provider for specific market
+    /// @param onBehalf On whose behalf we borrow the tokens, defaults to proxy
     struct Params {
         uint256 amount;
         address from;
@@ -89,12 +97,13 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
 
     /// @notice User deposits tokens to the Aave protocol
     /// @dev User needs to approve the DSProxy to pull the tokens being supplied
+    /// @dev If amount is set to uint.max, take the whole _from balance
     /// @param _market Address provider for specific market
     /// @param _amount Amount of tokens to be deposited
     /// @param _from Where are we pulling the supply tokens amount from
     /// @param _assetId The id of the token to be deposited
     /// @param _enableAsColl If the supply asset should be collateral
-    /// @param _onBehalf For what user we are supplying the tokens, defaults to proxy
+    /// @param _onBehalf On whose behalf we borrow the tokens, defaults to proxy
     function _supply(
         address _market,
         uint256 _amount,

@@ -6,9 +6,15 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
 
-/// @title Swaps proxy positions borrow rate mode between stable and variable.
+/// @title Changes borrow rate mode of an asset in AaveV3 between stable and variable
 contract AaveV3SwapBorrowRateMode is ActionBase, AaveV3Helper {
+
     using TokenUtils for address;
+
+    /// @param rateMode Type of borrow debt Stable: 1, Variable: 2
+    /// @param assetId The id of the asset in the aave protocol
+    /// @param useDefaultMarket If true the action will inject aave default market
+    /// @param market Address provider for specific market
     struct Params {
         uint256 rateMode;
         uint16 assetId;
@@ -58,10 +64,11 @@ contract AaveV3SwapBorrowRateMode is ActionBase, AaveV3Helper {
         internal
         returns (uint256, bytes memory)
     {
-
         IPoolV3 lendingPool = getLendingPool(_inputData.market);
+
         address tokenAddr = lendingPool.getReserveAddressById(_inputData.assetId);
         lendingPool.swapBorrowRateMode(tokenAddr, _inputData.rateMode);
+
         bytes memory logData = abi.encode(_inputData);
         return (0, logData);
     }

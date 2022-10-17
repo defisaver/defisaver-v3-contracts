@@ -6,10 +6,13 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
 
-/// @title Set positions eMode on Aave v3
+/// @title Set positions eMode on AaveV3
 contract AaveV3SetEMode is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
+    /// @param categoryId eMode category id (0 - 255)
+    /// @param useDefaultMarket If true the action will inject aave default market
+    /// @param market Address provider for specific market
     struct Params {
         uint8 categoryId;
         bool useDefaultMarket;

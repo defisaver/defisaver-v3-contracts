@@ -7,10 +7,18 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
 
-/// @title Payback a token a user borrowed from an Aave market
+/// @title Payback a token a user borrowed from an AaveV3 market
 contract AaveV3Payback is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
+    /// @param amount Amount of tokens to be paid back
+    /// @param from Where are we pulling the payback tokens amount from
+    /// @param rateMode Type of borrow debt Stable: 1, Variable: 2
+    /// @param assetId The id of the underlying asset to be repaid
+    /// @param useDefaultMarket If true the action will inject aave default market
+    /// @param useOnBehalf If true the action will inject _onBehalf addr
+    /// @param market Address provider for specific market
+    /// @param onBehalf For what user we are paying back the debt, defaults to proxy
     struct Params {
         uint256 amount;
         address from;
@@ -92,10 +100,10 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     /// @param _market Address provider for specific market
     /// @param _assetId The id of the underlying asset to be repaid
-    /// @param _amount Amount of tokens to be payed back
-    /// @param _rateMode Type of borrow debt [Stable: 1, Variable: 2]
+    /// @param _amount Amount of tokens to be paid back
+    /// @param _rateMode Type of borrow debt Stable: 1, Variable: 2
     /// @param _from Where are we pulling the payback tokens amount from
-    /// @param _onBehalf For what user we are paying back the debt, defaults to proxy
+    /// @param _onBehalf On whose behalf we borrow the tokens, defaults to proxy
     function _payback(
         address _market,
         uint16 _assetId,

@@ -9,6 +9,14 @@ import "./helpers/AaveV3Helper.sol";
 contract AaveV3Borrow is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
+    /// @param amount Amount of tokens to be borrowed
+    /// @param to The address we are sending the borrowed tokens to
+    /// @param rateMode Type of borrow debt Stable: 1, Variable: 2
+    /// @param assetId The id of the token to be borrowed
+    /// @param useDefaultMarket If true the action will inject aave default market
+    /// @param useOnBehalf If true the action will inject _onBehalf addr
+    /// @param market Address provider for specific market
+    /// @param onBehalf On whose behalf we borrow the tokens, defaults to proxy
     struct Params {
         uint256 amount;
         address to;
@@ -86,11 +94,11 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User borrows tokens from the Aave protocol
+    /// @notice User borrows tokens from the AaveV3 protocol
     /// @param _market Address provider for specific market
     /// @param _assetId The id of the token to be borrowed
     /// @param _amount Amount of tokens to be borrowed
-    /// @param _rateMode Type of borrow debt [Stable: 1, Variable: 2]
+    /// @param _rateMode Type of borrow debt Stable: 1, Variable: 2
     /// @param _to The address we are sending the borrowed tokens to
     /// @param _onBehalf On whose behalf we borrow the tokens, defaults to proxy
     function _borrow(

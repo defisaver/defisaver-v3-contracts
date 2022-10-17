@@ -11,6 +11,12 @@ import "./helpers/BalancerV2Helper.sol";
 contract BalancerV2Supply is ActionBase, BalancerV2Helper {
     using TokenUtils for address;
 
+    /// @param poolId Masked address of the pool with additional info
+    /// @param from Where are we pulling the supply tokens amount from
+    /// @param to The address we are sending the LP tokens to
+    /// @param tokens Array of token addresses we are depositing ()
+    /// @param maxAmountsIn Array of max. amounts of tokens to put into the pool
+    /// @param userData Structured data of pool (array of amountsIn and other data depending on type of pool)
     struct Params {
         bytes32 poolId;
         address from;

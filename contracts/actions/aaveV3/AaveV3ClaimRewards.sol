@@ -11,6 +11,11 @@ import "../../interfaces/aaveV3/IRewardsController.sol";
 contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
+    /// @param assetsLength Number of assets sent in the assets array (needed for encoding)
+    /// @param amount Amount of reward to claim
+    /// @param to The address we are sending the claimed tokens to
+    /// @param reward Token address of the reward token (stkAave)
+    /// @param assets Array of assets the user is into to
     struct Params {
         uint8 assetsLength;
         uint256 amount;
@@ -59,6 +64,7 @@ contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @dev assetsLength must be === assets.length or the action reverts
     function _claimRewards(Params memory params)
         internal
         returns (uint256 amountReceived, bytes memory)

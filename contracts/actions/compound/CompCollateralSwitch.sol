@@ -11,6 +11,8 @@ import "./helpers/CompHelper.sol";
 contract CompCollateralSwitch is ActionBase, CompHelper {
     using TokenUtils for address;
 
+    /// @param cTokens Array of tokens the user wants to set coll enable/disable
+    /// @param useAsCollateral Array of state of those tokens, true - enable, false - disable
     struct Params {
         address[] cTokens;
         bool[] useAsCollateral;

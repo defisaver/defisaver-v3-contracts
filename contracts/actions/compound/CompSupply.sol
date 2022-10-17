@@ -10,6 +10,11 @@ import "./helpers/CompHelper.sol";
 /// @title Supply a token to Compound
 contract CompSupply is ActionBase, CompHelper {
     using TokenUtils for address;
+
+    /// @param cTokenAddr Address of the cToken we'll get when supplying
+    /// @param amount Amount of the underlying token we are supplying
+    /// @param from Address where we are pulling the underlying tokens from
+    /// @param enableAsColl If the supply asset should be collateral
     struct Params {
         address cTokenAddr;
         uint256 amount;
@@ -32,9 +37,9 @@ contract CompSupply is ActionBase, CompHelper {
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 withdrawAmount, bytes memory logData) = _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
+        (uint256 supplyAmount, bytes memory logData) = _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
         emit ActionEvent("CompSupply", logData);
-        return bytes32(withdrawAmount);
+        return bytes32(supplyAmount);
     }
 
     /// @inheritdoc ActionBase

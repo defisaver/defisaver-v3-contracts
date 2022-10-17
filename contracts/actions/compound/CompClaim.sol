@@ -11,6 +11,10 @@ import "./helpers/CompHelper.sol";
 contract CompClaim is ActionBase, CompHelper {
     using TokenUtils for address;
 
+    /// @param cTokensSupply Array of cTokens which the user has supplied and has earned rewards
+    /// @param _cTokensBorrow Array of cTokens which the user has borrowed and has earned rewards
+    /// @param _from For which user we are claiming the tokens
+    /// @param _to Where we are sending the Comp to (if _from is proxy)
     struct Params {
         address[] cTokensSupply;
         address[] cTokensBorrow;
@@ -52,8 +56,8 @@ contract CompClaim is ActionBase, CompHelper {
 
     /// @notice Claims comp for _from address and for specified cTokens
     /// @dev if _from != proxy, the receiver will always be the _from and not the _to addr
-    /// @param _cTokensSupply Array of cTokens which _from supplied and has earned rewards
-    /// @param _cTokensBorrow Array of cTokens which _from supplied and has earned rewards
+    /// @param _cTokensSupply Array of cTokens which the user has supplied and has earned rewards
+    /// @param _cTokensBorrow Array of cTokens which the user has borrowed and has earned rewards
     /// @param _from For which user we are claiming the tokens
     /// @param _to Where we are sending the Comp to (if _from is proxy)
     function _claim(

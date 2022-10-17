@@ -8,7 +8,7 @@ import "../../utils/TokenUtils.sol";
 import "../../interfaces/balancer/IMerkleRedeem.sol";
 import "./helpers/BalancerV2Helper.sol";
 
-/// @title Claim BAL tokens
+/// @title Claim BAL tokens rewards
 contract BalancerV2Claim is ActionBase, BalancerV2Helper {
     using TokenUtils for address;
 
@@ -19,7 +19,6 @@ contract BalancerV2Claim is ActionBase, BalancerV2Helper {
     /// @param week - List of weeks for which to claim balancer tokens for
     /// @param balances - Amounts of balances to claim
     /// @param merkleProofs - Array of bytes32[] merkle proofs
-    /// @dev week - balances - merkleProofs arrays must be the same lengths
     struct Params {
         address liquidityProvider;
         address to;
@@ -75,7 +74,8 @@ contract BalancerV2Claim is ActionBase, BalancerV2Helper {
         logData = abi.encode(_inputData, balClaimedAmount);
     }
 
-    /// @dev Decoding Claims[] from _callData returns stack too deep error, so packing must be done onchain
+    /// @dev Decoding Claims from _callData returns stack too deep error, so packing must be done onchain
+    /// @dev Week - balances - merkleProofs arrays must be the same lengths
     function packClaims(uint256[] memory _weeks, uint256[] memory _balances, bytes32[][] memory _merkleProofs) internal pure returns (IMerkleRedeem.Claim[] memory){
         require(_weeks.length == _balances.length && _weeks.length == _merkleProofs.length);
 

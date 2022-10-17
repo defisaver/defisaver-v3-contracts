@@ -7,10 +7,15 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
 
-/// @title Withdraw a token from an Aave market
+/// @title Withdraw a token from an AaveV3 market
 contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
+    /// @param assetId The id of the token to be withdrawn
+    /// @param useDefaultMarket If true the action will inject aave default market
+    /// @param amount Amount of tokens to be withdrawn
+    /// @param to Where the withdrawn tokens will be sent
+    /// @param market Address provider for specific market
     struct Params {
         uint16 assetId;
         bool useDefaultMarket;
@@ -71,8 +76,9 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice User withdraws tokens from the Aave protocol
+    /// @dev If amount is uint.max withdraws whole amount
     /// @param _market Address provider for specific market
-    /// @param _assetId The id of the token to be deposited
+    /// @param _assetId The id of the token to be withdrawn
     /// @param _amount Amount of tokens to be withdrawn -> send type(uint).max for whole amount
     /// @param _to Where the withdrawn tokens will be sent
     function _withdraw(

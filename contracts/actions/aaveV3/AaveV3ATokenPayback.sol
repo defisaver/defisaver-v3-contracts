@@ -8,10 +8,16 @@ import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
 import "../../interfaces/aave/IAToken.sol";
 
-/// @title Allows user to repay with aTokens of the underlying debt asset eg. Pay DAI debt using aDAI tokens.
+/// @title Allows a user to repay with aTokens of the underlying debt asset eg. Pay DAI debt using aDAI tokens.
 contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
+    /// @param amount Amount of tokens to be paid back (uint.max for full debt)
+    /// @param from Where are we pulling the payback aTokens from
+    /// @param rateMode Type of borrow debt Stable: 1, Variable: 2
+    /// @param assetId The id of the underlying asset to be repaid
+    /// @param useDefaultMarket If true the action will inject aave default market
+    /// @param _market Address provider for specific market
     struct Params {
         uint256 amount;
         address from;
@@ -77,12 +83,12 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Allows user to repay with aTokens of the underlying debt asset eg. Pay DAI debt using aDAI tokens.
     /// @dev User needs to approve the DSProxy to pull aTokens
+    /// @dev If amount bigger than the current debt is sent just the max. debt amount will be pulled/paid
     /// @param _market Address provider for specific market
     /// @param _assetId The id of the underlying asset to be repaid
-    /// @param _amount Amount of tokens to be payed back (uint.max for full debt)
-    /// @param _rateMode Type of borrow debt [Stable: 1, Variable: 2]
+    /// @param _amount Amount of tokens to be paid back (uint.max for full debt)
+    /// @param _rateMode Type of borrow debt Stable: 1, Variable: 2
     /// @param _from Where are we pulling the payback aTokens from
     function _paybackWithATokens(
         address _market,
