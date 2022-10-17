@@ -127,7 +127,7 @@ contract McdSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         }
     }
 
-    /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized aave sub
+    /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the mcd sub
     function formatRepaySub(McdSubData memory _user) public view returns (StrategySub memory repaySub) {
         repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
@@ -143,18 +143,18 @@ contract McdSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         
     }
 
-    /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized aave sub
-    function formatBoostSub(McdSubData memory _user) public view returns (StrategySub memory repaySub) {
-        repaySub.strategyOrBundleId = BOOST_BUNDLE_ID;
-        repaySub.isBundle = true;
+    /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the mcd sub
+    function formatBoostSub(McdSubData memory _user) public view returns (StrategySub memory boostSub) {
+        boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
+        boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
         bytes memory triggerData = abi.encode(_user.vaultId, uint256(_user.maxRatio), uint8(RatioState.OVER));
-        repaySub.triggerData =  new bytes[](1);
-        repaySub.triggerData[0] = triggerData;
+        boostSub.triggerData =  new bytes[](1);
+        boostSub.triggerData[0] = triggerData;
 
-        repaySub.subData =  new bytes32[](2);
-        repaySub.subData[0] = bytes32(uint256(_user.vaultId));
-        repaySub.subData[1] = bytes32(uint256(_user.targetRatioBoost));
+        boostSub.subData =  new bytes32[](2);
+        boostSub.subData[0] = bytes32(uint256(_user.vaultId));
+        boostSub.subData[1] = bytes32(uint256(_user.targetRatioBoost));
     }
 }
