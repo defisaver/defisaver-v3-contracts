@@ -5,7 +5,7 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompV3Helper.sol";
 
-/// @title Transfer amount of specified collateral to another wallet
+/// @title Transfer amount of specified collateral to another wallet ()
 contract CompV3Transfer is ActionBase, CompV3Helper {
     using TokenUtils for address;
 

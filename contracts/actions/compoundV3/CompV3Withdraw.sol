@@ -8,6 +8,10 @@ import "./helpers/CompV3Helper.sol";
 /// @title Withdraw a token from CompoundV3
 contract CompV3Withdraw is ActionBase, CompV3Helper {
 
+    /// @param market Main Comet proxy contract that is different for each compound market
+    /// @param to The recipient address
+    /// @param asset Token address of the asset to withdraw
+    /// @param amount The quantity to withdraw
     struct Params {
         address market;
         address to;
@@ -52,7 +56,7 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
     /// @dev Send type(uint).max withdraws the whole balance from Comet
     /// @param _market Main Comet proxy contract that is different for each compound market
     /// @param _to The recipient address
-    /// @param _asset The asset to withdraw
+    /// @param _asset Token address of the asset to withdraw
     /// @param _amount The quantity to withdraw
     function _withdraw(
         address _market,

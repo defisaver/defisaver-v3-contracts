@@ -7,10 +7,16 @@ import "../../interfaces/IWETH.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
+
 /// @title Payback a token a user borrowed from Compound
 contract CompPayback is ActionBase, CompHelper {
+
     using TokenUtils for address;
 
+    /// @param cTokenAddr Address of the cToken we are paying back
+    /// @param amount Amount of the underlying token
+    /// @param from Address where we are pulling the underlying tokens from
+    /// @param onBehalf Repay on behalf of which address (if 0x0 defaults to proxy)
     struct Params {
         address cTokenAddr;
         uint256 amount;
@@ -33,9 +39,9 @@ contract CompPayback is ActionBase, CompHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
         params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
 
-        (uint256 withdrawAmount, bytes memory logData) = _payback(params.cTokenAddr, params.amount, params.from, params.onBehalf);
+        (uint256 paybackAmount, bytes memory logData) = _payback(params.cTokenAddr, params.amount, params.from, params.onBehalf);
         emit ActionEvent("CompPayback", logData);
-        return bytes32(withdrawAmount);
+        return bytes32(paybackAmount);
     }
 
     /// @inheritdoc ActionBase
@@ -54,6 +60,7 @@ contract CompPayback is ActionBase, CompHelper {
 
     /// @notice Payback a borrowed token from the Compound protocol
     /// @dev Amount type(uint).max will take the whole borrow amount
+    /// @dev If amount sent is over the whole debt amount, just the whole debt amount will be pulled
     /// @param _cTokenAddr Address of the cToken we are paying back
     /// @param _amount Amount of the underlying token
     /// @param _from Address where we are pulling the underlying tokens from

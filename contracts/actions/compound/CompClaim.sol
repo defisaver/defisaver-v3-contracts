@@ -12,9 +12,9 @@ contract CompClaim is ActionBase, CompHelper {
     using TokenUtils for address;
 
     /// @param cTokensSupply Array of cTokens which the user has supplied and has earned rewards
-    /// @param _cTokensBorrow Array of cTokens which the user has borrowed and has earned rewards
-    /// @param _from For which user we are claiming the tokens
-    /// @param _to Where we are sending the Comp to (if _from is proxy)
+    /// @param cTokensBorrow Array of cTokens which the user has borrowed and has earned rewards
+    /// @param from For which user we are claiming the tokens
+    /// @param to Where we are sending the Comp to (if _from is proxy)
     struct Params {
         address[] cTokensSupply;
         address[] cTokensBorrow;

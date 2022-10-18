@@ -8,9 +8,14 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CompHelper.sol";
 
-/// @title Withdraw a token from Compound
+/// @title Withdraw a token from Compound, burns cTokens and returns underlying tokens
 contract CompWithdraw is ActionBase, CompHelper {
+
     using TokenUtils for address;
+
+    /// @param cTokenAddr Address of the cToken we're burning for underlying
+    /// @param amount Amount of underlying tokens to withdraw
+    /// @param to Address where to send the tokens to (can be left on proxy)
     struct Params {
         address cTokenAddr;
         uint256 amount;

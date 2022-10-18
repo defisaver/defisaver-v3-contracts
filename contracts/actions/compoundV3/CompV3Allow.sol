@@ -8,6 +8,9 @@ import "./helpers/CompV3Helper.sol";
 /// @title Allow or disallow manager
 contract CompV3Allow is ActionBase, CompV3Helper {
 
+    /// @param market Main Comet proxy contract that is different for each compound market
+    /// @param manager Address of manager
+    /// @param isAllowed True for allow, false for disallow
     struct Params {
         address market;
         address manager;

@@ -13,6 +13,9 @@ import "./helpers/CompHelper.sol";
 contract CompBorrow is ActionBase, CompHelper {
     using TokenUtils for address;
 
+    /// @param cTokenAddr Address of the cToken we are borrowing
+    /// @param amount Amount of tokens to be borrowed
+    /// @param to The address we are sending the borrowed tokens to
     struct Params {
         address cTokenAddr;
         uint256 amount;
@@ -33,9 +36,9 @@ contract CompBorrow is ActionBase, CompHelper {
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 withdrawAmount, bytes memory logData) = _borrow(params.cTokenAddr, params.amount, params.to);
+        (uint256 borrowAmount, bytes memory logData) = _borrow(params.cTokenAddr, params.amount, params.to);
         emit ActionEvent("CompBorrow", logData);
-        return bytes32(withdrawAmount);
+        return bytes32(borrowAmount);
     }
 
     /// @inheritdoc ActionBase
