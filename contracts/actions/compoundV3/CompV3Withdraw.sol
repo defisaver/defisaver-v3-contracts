@@ -8,11 +8,17 @@ import "./helpers/CompV3Helper.sol";
 /// @title Withdraw a token from CompoundV3
 contract CompV3Withdraw is ActionBase, CompV3Helper {
 
+    /// @param market Main Comet proxy contract that is different for each compound market
+    /// @param tokenAddr Address of the token to withdraw
+    /// @param amount The quantity to withdraw
+    /// @param from Address from which we are withdrawing the tokens from
+    /// @param to Address where we are sending the withdrawn tokens
     struct Params {
         address market;
-        address to;
-        address asset;
+        address tokenAddr;
         uint256 amount;
+        address from;
+        address to;
     }
 
     /// @inheritdoc ActionBase
@@ -25,11 +31,12 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
         Params memory params = parseInputs(_callData);
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
-        params.asset = _parseParamAddr(params.asset, _paramMapping[2], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
+        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 withdrawAmount, bytes memory logData) = _withdraw(params.market, params.to, params.asset, params.amount);
+        (uint256 withdrawAmount, bytes memory logData) = _withdraw(params);
         emit ActionEvent("CompV3Withdraw", logData);
         return bytes32(withdrawAmount);
     }
@@ -37,7 +44,7 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _withdraw(params.market, params.to, params.asset, params.amount);
+        (, bytes memory logData) = _withdraw(params);
         logger.logActionDirectEvent("CompV3Withdraw", logData);
     }
 
@@ -49,32 +56,29 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Withdraws a token amount from compound
-    /// @dev Send type(uint).max withdraws the whole balance from Comet
-    /// @param _market Main Comet proxy contract that is different for each compound market
-    /// @param _to The recipient address
-    /// @param _asset The asset to withdraw
-    /// @param _amount The quantity to withdraw
+    /// @dev Send type(uint).max withdraws the whole balance of _from addr
+    /// @dev If _to == address(0) we default to proxy address
+    /// @param _params Withdraw input struct documented above
     function _withdraw(
-        address _market,
-        address _to,
-        address _asset,
-        uint256 _amount
+        Params memory _params
     ) internal returns (uint256, bytes memory) {
-        require(_to != address(0), "Tokens sent to 0x0");
+        if (_params.to == address(0)) {
+            _params.to = address(this);
+        }
 
-        // if _amount type(uint).max that means take out proxy whole balance
-        if (_amount == type(uint256).max) {
-            if(_asset == IComet(_market).baseToken()) {
-                _amount = IComet(_market).balanceOf(address(this));
+        // if _amount type(uint).max that means take out whole balance of _to address
+        if (_params.amount == type(uint256).max) {
+            if(_params.tokenAddr == IComet(_params.market).baseToken()) {
+                _params.amount = IComet(_params.market).balanceOf(_params.from);
             } else {
-                _amount = IComet(_market).collateralBalanceOf(address(this), _asset);
+                _params.amount = IComet(_params.market).collateralBalanceOf(_params.from, _params.tokenAddr);
             }
         }
 
-        IComet(_market).withdrawTo(_to, _asset, _amount);
+        IComet(_params.market).withdrawFrom(_params.from, _params.to, _params.tokenAddr, _params.amount);
 
-        bytes memory logData = abi.encode(_market, _to, _asset, _amount);
-        return (_amount, logData);
+        bytes memory logData = abi.encode(_params);
+        return (_params.amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

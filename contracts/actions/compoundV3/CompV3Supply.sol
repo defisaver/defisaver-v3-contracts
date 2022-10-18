@@ -10,11 +10,17 @@ import "./helpers/CompV3Helper.sol";
 contract CompV3Supply is ActionBase, CompV3Helper {
     using TokenUtils for address;
 
+    /// @param market Main Comet proxy contract that is different for each compound market
+    /// @param tokenAddr  Address of the token we are supplying
+    /// @param amount Amount in wei of tokens we are supplying
+    /// @param from Address from which we are pulling the tokens
+    /// @param to Address where we are supplying the tokens to
     struct Params {
         address market;
         address tokenAddr;
         uint256 amount;
         address from;
+        address to;
     }
 
     error CompV3SupplyWithDebtError();
@@ -32,8 +38,9 @@ contract CompV3Supply is ActionBase, CompV3Helper {
         params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 withdrawAmount, bytes memory logData) = _supply(params.market, params.tokenAddr, params.amount, params.from);
+        (uint256 withdrawAmount, bytes memory logData) = _supply(params);
         emit ActionEvent("CompV3Supply", logData);
         return bytes32(withdrawAmount);
     }
@@ -41,7 +48,7 @@ contract CompV3Supply is ActionBase, CompV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _supply(params.market, params.tokenAddr, params.amount, params.from);
+        (, bytes memory logData) = _supply(params);
         logger.logActionDirectEvent("CompV3Supply", logData);
     }
 
@@ -53,34 +60,31 @@ contract CompV3Supply is ActionBase, CompV3Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Supplies a token to the CompoundV3 protocol
-    /// @dev If amount == type(uint256).max we are getting the whole balance of the proxy
-    /// @param _market Main Comet proxy contract that is different for each compound market
-    /// @param _tokenAddr Address of the token we are supplying
-    /// @param _amount Amount of the token we are supplying
-    /// @param _from Address where we are pulling the tokens from
-    function _supply(
-        address _market,
-        address _tokenAddr,
-        uint256 _amount,
-        address _from
-    ) internal returns (uint256, bytes memory) {
-        // pull the tokens _from to the proxy
-        _amount = _tokenAddr.pullTokensIfNeeded(_from, _amount);
+    /// @dev If supply is baseToken it must not borrow balance or the action will revert
+    /// @dev If _to == address(0) we default to proxy address
+    /// @param _params Supply input struct documented above
+    function _supply(Params memory _params) internal returns (uint256, bytes memory) {
+        if (_params.to == address(0)) {
+            _params.to = address(this);
+        }
 
-        _tokenAddr.approveToken(_market, _amount);
+        // pull the tokens _from to the proxy
+        _params.amount = _params.tokenAddr.pullTokensIfNeeded(_params.from, _params.amount);
+
+        _params.tokenAddr.approveToken(_params.market, _params.amount);
 
         // if the user has baseToken debt, use payback
-        if(_tokenAddr == IComet(_market).baseToken()) {
-            uint256 debt = IComet(_market).borrowBalanceOf(address(this));
+        if(_params.tokenAddr == IComet(_params.market).baseToken()) {
+            uint256 debt = IComet(_params.market).borrowBalanceOf(_params.to);
             if(debt > 0) {
                 revert CompV3SupplyWithDebtError();
             }
         }
         
-        IComet(_market).supply(_tokenAddr,_amount);
+        IComet(_params.market).supplyTo(_params.to, _params.tokenAddr, _params.amount);
         
-        bytes memory logData = abi.encode(_market, _tokenAddr, _amount, _from);
-        return (_amount, logData);
+        bytes memory logData = abi.encode(_params);
+        return (_params.amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
