@@ -1679,14 +1679,14 @@
     },
     {
         "name": "CompV3Borrow",
-        "address": "0xAb01C815063178C3021a516ecaf56915fD0E6534",
+        "address": "0xAAD8CD95c75a5Ec3d9E3B9e2F4713A5E7aC5134f",
         "id": "0xbb9f4021",
         "path": "contracts/actions/compoundV3/CompV3Borrow.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xAb01C815063178C3021a516ecaf56915fD0E6534"]
     },
     {
         "name": "CompV3Claim",
@@ -1712,14 +1712,14 @@
     },
     {
         "name": "CompV3Supply",
-        "address": "0xAB53342d922Cc52b33486B92dC5dc361b7E4B436",
+        "address": "0xEd7002b7439A869d213C0a8a0D7B2850B71C66E7",
         "id": "0x71643f58",
         "path": "contracts/actions/compoundV3/CompV3Supply.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xAB53342d922Cc52b33486B92dC5dc361b7E4B436"]
     },
     {
         "name": "CompV3Transfer",
@@ -1734,14 +1734,14 @@
     },
     {
         "name": "CompV3Withdraw",
-        "address": "0x59fED9975cd3bb07bB75490e86751D6025ce0bC2",
+        "address": "0xf6DAB038bE797E138CCF541cb9C0467E3EF3EEA1",
         "id": "0xc0072381",
         "path": "contracts/actions/compoundV3/CompV3Withdraw.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x59fED9975cd3bb07bB75490e86751D6025ce0bC2"]
     },
     {
         "name": "CompV3RatioCheck",
