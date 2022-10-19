@@ -63,8 +63,10 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
     function _withdraw(
         Params memory _params
     ) internal returns (uint256, bytes memory) {
-        if (_params.to == address(0)) {
-            _params.to = address(this);
+        require(_params.to != address(0), "Can't send tokens to 0x0");
+
+        if (_params.onBehalf == address(0)) {
+            _params.onBehalf = address(this);
         }
 
         // if _amount type(uint).max that means take out whole balance of _to address
