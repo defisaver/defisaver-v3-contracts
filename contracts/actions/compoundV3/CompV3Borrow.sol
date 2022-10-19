@@ -10,13 +10,13 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
 
     /// @param market Main Comet proxy contract that is different for each compound market
     /// @param amount Amount of tokens to be borrowed
-    /// @param from The address from where we are borrowing the tokens from
     /// @param to The address we are sending the borrowed tokens to
+    /// @param onBehalf The address from where we are borrowing the tokens from
     struct Params {
         address market;
         uint256 amount;
-        address from;
         address to;
+        address onBehalf;
     }
     
     /// @inheritdoc ActionBase
@@ -30,8 +30,8 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
-        params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
-        params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
+        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
 
         (uint256 withdrawAmount, bytes memory logData) = _borrow(params);
         emit ActionEvent("CompV3Borrow", logData);
@@ -53,16 +53,19 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice User borrows tokens from the Compound protocol
-    /// @dev If _to == address(0) we default to proxy address
+    /// @dev If _to == address(0) the action will revert
+    /// @dev If onBehalf == address(0) it will default to proxy
     /// @param _params Borrow input struct documented above
     function _borrow(Params memory _params) internal returns (uint256, bytes memory) {
-        if (_params.to == address(0)) {
-            _params.to = address(this);
+        require(_params.to != address(0), "Can't send tokens to 0x0");
+
+        if (_params.onBehalf == address(0)) {
+            _params.onBehalf = address(this);
         }
 
         address baseTokenAddress = IComet(_params.market).baseToken();
 
-        IComet(_params.market).withdrawFrom(_params.from, _params.to, baseTokenAddress, _params.amount);
+        IComet(_params.market).withdrawFrom(_params.onBehalf, _params.to, baseTokenAddress, _params.amount);
 
         bytes memory logData = abi.encode(_params);
         return (_params.amount, logData);

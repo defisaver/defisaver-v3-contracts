@@ -173,7 +173,7 @@
     "memoizee" "^0.4.15"
 
 "@defisaver/sdk@github:DecenterApps/defisaver-sdk#improvement/compV3-eoa-manage":
-  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#3d109adfbf88ab43b320f96d0bb27ac9712403cd"
+  "resolved" "git+ssh://git@github.com/DecenterApps/defisaver-sdk.git#b22342b8463707575e71b522279da53d559952e2"
   "version" "0.3.26"
   dependencies:
     "@defisaver/tokens" "^1.4.18"

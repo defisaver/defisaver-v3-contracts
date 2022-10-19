@@ -14,13 +14,13 @@ contract CompV3Supply is ActionBase, CompV3Helper {
     /// @param tokenAddr  Address of the token we are supplying
     /// @param amount Amount in wei of tokens we are supplying
     /// @param from Address from which we are pulling the tokens
-    /// @param to Address where we are supplying the tokens to
+    /// @param onBehalf Address where we are supplying the tokens to
     struct Params {
         address market;
         address tokenAddr;
         uint256 amount;
         address from;
-        address to;
+        address onBehalf;
     }
 
     error CompV3SupplyWithDebtError();
@@ -38,7 +38,7 @@ contract CompV3Supply is ActionBase, CompV3Helper {
         params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
-        params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
+        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
 
         (uint256 withdrawAmount, bytes memory logData) = _supply(params);
         emit ActionEvent("CompV3Supply", logData);
@@ -61,11 +61,11 @@ contract CompV3Supply is ActionBase, CompV3Helper {
 
     /// @notice Supplies a token to the CompoundV3 protocol
     /// @dev If supply is baseToken it must not borrow balance or the action will revert
-    /// @dev If _to == address(0) we default to proxy address
+    /// @dev If onBehalf == address(0) we default to proxy address
     /// @param _params Supply input struct documented above
     function _supply(Params memory _params) internal returns (uint256, bytes memory) {
-        if (_params.to == address(0)) {
-            _params.to = address(this);
+        if (_params.onBehalf == address(0)) {
+            _params.onBehalf = address(this);
         }
 
         // pull the tokens _from to the proxy
@@ -75,13 +75,13 @@ contract CompV3Supply is ActionBase, CompV3Helper {
 
         // if the user has baseToken debt, use payback
         if(_params.tokenAddr == IComet(_params.market).baseToken()) {
-            uint256 debt = IComet(_params.market).borrowBalanceOf(_params.to);
+            uint256 debt = IComet(_params.market).borrowBalanceOf(_params.onBehalf);
             if(debt > 0) {
                 revert CompV3SupplyWithDebtError();
             }
         }
         
-        IComet(_params.market).supplyTo(_params.to, _params.tokenAddr, _params.amount);
+        IComet(_params.market).supplyTo(_params.onBehalf, _params.tokenAddr, _params.amount);
         
         bytes memory logData = abi.encode(_params);
         return (_params.amount, logData);
