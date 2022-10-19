@@ -341,6 +341,22 @@ const aaveV3CloseActions = {
         '%l1GasCostInEth', // send custom amount for Optimism
     ),
 
+    feeTakingActionFLColl: () => new dfs.actions.basic.GasFeeActionL2(
+        '%gasCost', // must stay variable backend sets gasCost
+        '&collAsset',
+        '$3', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+        '%l1GasCostInEth', // send custom amount for Optimism
+    ),
+
+    feeTakingActionColl: () => new dfs.actions.basic.GasFeeActionL2(
+        '%gasCost', // must stay variable backend sets gasCost
+        '&collAsset',
+        '$1', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+        '%l1GasCostInEth', // send custom amount for Optimism
+    ),
+
     sendRepayFL: () => new dfs.actions.basic.SendTokenAction(
         '&debtAsset',
         '%flAddr', // kept variable this can change (FL must be payed back to work)
@@ -411,8 +427,8 @@ const createAaveV3CloseToCollL2Strategy = () => {
     const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
 
     aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionColl());
     aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
-    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingAction());
     aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
     aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
     aaveCloseStrategy.addAction(aaveV3CloseActions.sendColl());
@@ -428,8 +444,8 @@ const createAaveV3FLCloseToCollL2Strategy = () => {
     aaveCloseStrategy.addAction(aaveV3CloseActions.flAction());
     aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
     aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionFLColl());
     aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
-    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionFL());
     aaveCloseStrategy.addAction(aaveV3CloseActions.sendRepayFL());
     aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
     aaveCloseStrategy.addAction(aaveV3CloseActions.sendColl());
