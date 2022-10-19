@@ -55,6 +55,7 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
     /// @notice User borrows tokens from the Compound protocol
     /// @dev If _to == address(0) the action will revert
     /// @dev If onBehalf == address(0) it will default to proxy
+    /// @dev If onBehalf is not the proxy, the onBehalf address needs to allow the proxy
     /// @param _params Borrow input struct documented above
     function _borrow(Params memory _params) internal returns (uint256, bytes memory) {
         require(_params.to != address(0), "Can't send tokens to 0x0");
