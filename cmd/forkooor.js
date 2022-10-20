@@ -38,6 +38,9 @@ const {
     addrs,
     ETH_ADDR,
     getOwnerAddr,
+    fetchAmountinUSDPrice,
+    getLocalTokenPrice,
+    Float2BN,
 } = require('../test/utils');
 
 const {
@@ -1152,38 +1155,43 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
 
     const pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
 
-    const amount = hre.ethers.utils.parseUnits(collAmount, collAssetInfo.decimals);
-
     if (collSymbol === 'WETH') {
-        await depositToWeth(amount, senderAcc);
+        await depositToWeth(Float2BN(collAmount), senderAcc);
     } else {
         try {
+            const sellAmount = (
+                (collAmount * 1.1 * getLocalTokenPrice(collSymbol)) / getLocalTokenPrice('WETH')
+            ).toFixed(18);
+            console.log(`selling ${sellAmount} WETH for ${collSymbol}`);
+
             await sell(
                 proxy,
                 addrs[network].WETH_ADDRESS,
                 collAddr,
-                hre.ethers.utils.parseUnits('50', 18),
+                Float2BN(sellAmount),
                 addrs[network].UNISWAP_WRAPPER,
                 senderAcc.address,
                 senderAcc.address,
                 0,
                 senderAcc,
-                addrs[network].REGISTRY_ADDR,
+                undefined,
+                undefined,
+                true,
             );
+            console.log(`Buying ${collSymbol} succeeded`);
         } catch (err) {
-            console.log(`Buying ${debtSymbol} failed`);
+            console.log(err);
+            console.log(`Buying ${collSymbol} failed`);
         }
     }
 
     const reserveData = await pool.getReserveData(collAddr);
     const collAssetId = reserveData.id;
 
-    console.log('amount: ', amount);
-
     await aaveV3Supply(
         proxy,
         addrs[network].AAVE_MARKET,
-        amount,
+        Float2BN(collAmount, collAssetInfo.decimals),
         collAddr,
         collAssetId,
         senderAcc.address,

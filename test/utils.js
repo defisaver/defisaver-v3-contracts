@@ -2,7 +2,7 @@
 const { default: curve } = require('@curvefi/api');
 const hre = require('hardhat');
 const fs = require('fs');
-const { getAssetInfo } = require('@defisaver/tokens');
+const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const storageSlots = require('./storageSlots.json');
 
@@ -766,6 +766,64 @@ const formatExchangeObjCurve = async (
     ];
 };
 
+const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
+    console.log({ srcAddr, destAddr });
+    const { AlphaRouter } = await import('@uniswap/smart-order-router');
+    const {
+        CurrencyAmount,
+        Token,
+        TradeType,
+        Percent,
+    } = await import('@uniswap/sdk-core');
+
+    const chainId = chainIds[network];
+    const srcTokenInfo = getAssetInfoByAddress(srcAddr, chainId);
+    const srcToken = new Token(
+        chainId,
+        srcAddr,
+        srcTokenInfo.decimals,
+        srcTokenInfo.symbol,
+        srcTokenInfo.name,
+    );
+    const destTokenInfo = getAssetInfoByAddress(destAddr, chainId);
+    const destToken = new Token(
+        chainId,
+        destAddr,
+        destTokenInfo.decimals,
+        destTokenInfo.symbol,
+        destTokenInfo.name,
+    );
+    const swapAmount = CurrencyAmount.fromRawAmount(srcToken, amount.toString());
+
+    const router = new AlphaRouter({ chainId, provider: hre.ethers.provider });
+    const route = await router.route(
+        swapAmount, destToken, TradeType.EXACT_INPUT,
+        {
+            slippageTolerance: new Percent(5, 100),
+        },
+    ).then((_route) => _route.trade.swaps[0].route);
+
+    const path = route.tokenPath.reduce((acc, curr, index) => {
+        const poolInput = curr.address;
+        const poolFee = poolInput.toLowerCase() === destAddr.toLowerCase() ? '' : (route.pools[index].fee).toString(16).padStart(6, 0);
+        return `${acc}${poolInput.slice(2)}${poolFee}`;
+    }, '0x');
+    console.log({ path });
+
+    return [
+        srcAddr,
+        destAddr,
+        amount,
+        0,
+        0,
+        0,
+        nullAddress,
+        wrapper,
+        path,
+        [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
+    ];
+};
+
 const isEth = (tokenAddr) => {
     if (tokenAddr.toLowerCase() === ETH_ADDR.toLowerCase()
     || tokenAddr.toLowerCase() === addrs[network].WETH_ADDRESS.toLowerCase()
@@ -1036,6 +1094,7 @@ module.exports = {
     approve,
     balanceOf,
     formatExchangeObj,
+    formatExchangeObjSdk,
     formatExchangeObjForOffchain,
     isEth,
     sendEther,

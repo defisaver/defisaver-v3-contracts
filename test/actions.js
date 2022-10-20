@@ -23,6 +23,8 @@ const {
     formatExchangeObjCurve,
     addrs,
     USDC_ADDR,
+    getNetwork,
+    formatExchangeObjSdk,
 } = require('./utils');
 
 const {
@@ -66,9 +68,23 @@ const executeAction = async (actionName, functionData, proxy, regAddr = addrs[ne
 };
 
 // eslint-disable-next-line max-len
-const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0, signer, regAddr = REGISTRY_ADDR, isCurve = false) => {
+const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0, signer, regAddr = addrs[getNetwork()].REGISTRY_ADDR, isCurve = false, uniSdk) => {
     let exchangeObject;
-    if (!isCurve) {
+    if (isCurve) {
+        exchangeObject = await formatExchangeObjCurve(
+            sellAddr,
+            buyAddr,
+            sellAmount.toString(),
+            wrapper,
+        );
+    } else if (uniSdk) {
+        exchangeObject = await formatExchangeObjSdk(
+            sellAddr,
+            buyAddr,
+            sellAmount.toString(),
+            wrapper,
+        );
+    } else {
         exchangeObject = formatExchangeObj(
             sellAddr,
             buyAddr,
@@ -76,13 +92,6 @@ const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee
             wrapper,
             0,
             fee,
-        );
-    } else {
-        exchangeObject = await formatExchangeObjCurve(
-            sellAddr,
-            buyAddr,
-            sellAmount.toString(),
-            wrapper,
         );
     }
 
