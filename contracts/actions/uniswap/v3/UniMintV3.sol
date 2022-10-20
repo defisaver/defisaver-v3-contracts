@@ -10,6 +10,18 @@ import "./helpers/UniV3Helper.sol";
 contract UniMintV3 is ActionBase, UniV3Helper{
     using TokenUtils for address;
     
+    /// @param token0 address of the first token
+    /// @param token1 address of the second token
+    /// @param fee The fee amount of the v3 pool for the specified token pair
+    /// @param tickLower The lower end of the tick range for the position
+    /// @param tickUpper The higher end of the tick range for the position
+    /// @param amount0Desired The desired amount of token0 that should be supplied
+    /// @param amount1Desired The desired amount of token1 that should be supplied
+    /// @param amount0Min The minimum amount of token0 that should be supplied
+    /// @param amount1Min The minimum amount of token1 that should be supplied
+    /// @param recipient address which will receive the NFT
+    /// @param deadline The time by which the transaction must be included to effect the change
+    /// @param from The address from which to pull token0 and token1
     struct Params {
         address token0;
         address token1;
@@ -56,6 +68,8 @@ contract UniMintV3 is ActionBase, UniV3Helper{
     
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @dev The address from which we're pulling token0 and token1 must approve proxy
+    /// @dev If amount0Desired or amount1Desired is uint.max this will pull whole balance of _from
     function _uniCreatePosition(Params memory _uniData) internal returns (uint256 tokenId, bytes memory logData){
             // fetch tokens from address;
             uint amount0Pulled = _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);        
@@ -79,8 +93,7 @@ contract UniMintV3 is ActionBase, UniV3Helper{
             
             logData = abi.encode(_uniData, tokenId, liquidity, amount0, amount1);
     }
-
-    /// @dev mints new NFT that represents a position with selected parameters
+    
     /// @return tokenId of new NFT, how much liquidity it now has and token amounts
     function _uniMint(Params memory _uniData)
         internal

@@ -6,10 +6,19 @@ import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 import "./helpers/UniV2Helper.sol";
 
-/// @title Supplies liquidity to uniswap
+/// @title Supplies liquidity to Uniswap V2
 contract UniSupply is ActionBase, UniV2Helper {
     using TokenUtils for address;
 
+    /// @param tokenA The address of the A token in pool
+    /// @param tokenB The address of the B token in pool
+    /// @param from The address from which we're pulling A and B tokens
+    /// @param to The address that will receive LP tokens
+    /// @param amountADesired The amount of tokenA to add as liquidity if the B/A price is <= amountBDesired/amountADesired (A depreciates).
+    /// @param amountBDesired The amount of tokenB to add as liquidity if the A/B price is <= amountADesired/amountBDesired (B depreciates).
+    /// @param amountAMin Bounds the extent to which the B/A price can go up before the transaction reverts. Must be <= amountADesired.
+    /// @param amountBMin Bounds the extent to which the A/B price can go up before the transaction reverts. Must be <= amountBDesired
+    /// @param deadline Unix timestamp after which the transaction will revert.
     struct UniSupplyData {
         address tokenA;
         address tokenB;
@@ -59,7 +68,8 @@ contract UniSupply is ActionBase, UniV2Helper {
 
     /// @notice Adds liquidity to uniswap and sends lp tokens and returns to _to
     /// @dev Uni markets can move, so extra tokens are expected to be left and are send to _to
-    /// @param _uniData All the required data to deposit to uni
+    /// @dev The address from which we're pulling tokens A and B must approve proxy
+    /// @dev if amountADeisred or AmountBDesired is uint.max whole _from token balance is pulled
     function _uniSupply(UniSupplyData memory _uniData) internal returns (uint256, bytes memory) {
         // fetch tokens from the address
         uint amountAPulled = _uniData.tokenA.pullTokensIfNeeded(_uniData.from, _uniData.amountADesired);

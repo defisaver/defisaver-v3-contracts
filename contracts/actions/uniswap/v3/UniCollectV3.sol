@@ -9,6 +9,18 @@ import "./helpers/UniV3Helper.sol";
 /// @title Collects tokensOwed from a position represented by tokenId
 contract UniCollectV3 is ActionBase, UniV3Helper {
     using TokenUtils for address;
+
+    /// @param tokenId The id of the erc721 token representing the position
+    /// @param recipient The address to which to send collected amount0 and amount1
+    /// @param amount0Max Maximum amount of token0 to collect from fees accrued
+    /// @param amount1Max Maximum amount of token1 to collect from fees accrued
+    struct Params {
+        uint256 tokenId;
+        address recipient;
+        uint128 amount0Max;
+        uint128 amount1Max;
+    }
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,

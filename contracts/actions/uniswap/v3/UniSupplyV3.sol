@@ -10,16 +10,16 @@ import "./helpers/UniV3Helper.sol";
 contract UniSupplyV3 is ActionBase, UniV3Helper{
     using TokenUtils for address;
     
-    /// @param tokenId - The ID of the token for which liquidity is being increased
-    /// @param liquidity -The amount by which liquidity will be increased,
-    /// @param amount0Desired - The desired amount of token0 that should be supplied,
-    /// @param amount1Desired - The desired amount of token1 that should be supplied,
-    /// @param amount0Min - The minimum amount of token0 that should be supplied,
-    /// @param amount1Min - The minimum amount of token1 that should be supplied,
-    /// @param deadline - The time by which the transaction must be included to effect the change
-    /// @param from - account to take amounts from
-    /// @param token0 - address of the first token
-    /// @param token1 - address of the second token
+    /// @param tokenId The ID of the token for which liquidity is being increased
+    /// @param liquidity The amount by which liquidity will be increased,
+    /// @param amount0Desired The desired amount of token0 that should be supplied,
+    /// @param amount1Desired The desired amount of token1 that should be supplied,
+    /// @param amount0Min The minimum amount of token0 that should be supplied,
+    /// @param amount1Min The minimum amount of token1 that should be supplied,
+    /// @param deadline The time by which the transaction must be included to effect the change
+    /// @param from account to take amounts from
+    /// @param token0 address of the first token
+    /// @param token1 address of the second token
     struct Params {
         uint256 tokenId;
         uint256 amount0Desired;
@@ -64,6 +64,8 @@ contract UniSupplyV3 is ActionBase, UniV3Helper{
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @dev The address from which we're pulling token0 and token1 must approve proxy
+    /// @dev If amount0Desired or amount1Desired is uint.max this will pull whole balance of _from
     function _uniSupplyPosition(Params memory _uniData)
         internal
         returns(uint128 liquidity, bytes memory logData)

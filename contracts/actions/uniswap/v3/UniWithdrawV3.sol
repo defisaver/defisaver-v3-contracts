@@ -9,14 +9,14 @@ import "./helpers/UniV3Helper.sol";
 contract UniWithdrawV3 is ActionBase, UniV3Helper{
     using TokenUtils for address;
 
-    /// @param tokenId - The ID of the token for which liquidity is being decreased
-    /// @param liquidity -The amount by which liquidity will be decreased,
-    /// @param amount0Min - The minimum amount of token0 that should be accounted for the burned liquidity,
-    /// @param amount1Min - The minimum amount of token1 that should be accounted for the burned liquidity,
-    /// @param deadline - The time by which the transaction must be included to effect the change
-    /// @param recipient - accounts to receive the tokens
-    /// @param amount0Max - The maximum amount of token0 to collect
-    /// @param amount1Max - The maximum amount of token1 to collect
+    /// @param tokenId The ID of the token for which liquidity is being decreased
+    /// @param liquidity The amount by which liquidity will be decreased,
+    /// @param amount0Min The minimum amount of token0 that should be accounted for the burned liquidity,
+    /// @param amount1Min The minimum amount of token1 that should be accounted for the burned liquidity,
+    /// @param deadline The time by which the transaction must be included to effect the change
+    /// @param recipient accounts to receive the tokens
+    /// @param amount0Max The maximum amount of token0 to collect
+    /// @param amount1Max The maximum amount of token1 to collect
     struct Params{
         uint256 tokenId;
         uint128 liquidity;

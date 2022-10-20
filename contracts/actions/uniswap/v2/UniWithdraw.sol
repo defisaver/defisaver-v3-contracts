@@ -8,10 +8,18 @@ import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 import "./helpers/UniV2Helper.sol";
 
-/// @title Supplies liquidity to uniswap
+/// @title Withdraws liquidity to uniswap
 contract UniWithdraw is ActionBase, UniV2Helper {
     using TokenUtils for address;
 
+    /// @param tokenA The address of the A token in pool
+    /// @param tokenB The address of the B token in pool
+    /// @param liquidity The amount of liquidity tokens to remove.
+    /// @param to The address that will receive LP tokens
+    /// @param from The address from which we're pulling A and B tokens
+    /// @param amountAMin The minimum amount of tokenA that must be received for the transaction not to revert.
+    /// @param amountBMin The minimum amount of tokenB that must be received for the transaction not to revert.
+    /// @param deadline Unix timestamp after which the transaction will revert.
     struct UniWithdrawData {
         address tokenA;
         address tokenB;
@@ -63,7 +71,8 @@ contract UniWithdraw is ActionBase, UniV2Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Removes liquidity from uniswap
-    /// @param _uniData All the required data to withdraw from uni
+    /// @dev The address from which we're pulling LP tokens must approve proxy
+    /// @dev If liquidity to be withdrawn amount is uint.max pull whole LP token balance from _from
     function _uniWithdraw(UniWithdrawData memory _uniData) internal returns (uint256, bytes memory) {
         address lpTokenAddr = factory.getPair(_uniData.tokenA, _uniData.tokenB);
 

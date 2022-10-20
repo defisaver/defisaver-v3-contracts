@@ -8,7 +8,6 @@ import "../../../utils/TokenUtils.sol";
 import "./helpers/UniV3Helper.sol";
 
 /// @title Action for creating Uniswap V3 Pool and minting a position in it after that
-/// @notice If pool already exists, it will only mint a position in pool
 contract UniCreatePoolV3 is ActionBase, UniV3Helper {
     using TokenUtils for address;
 
@@ -86,6 +85,7 @@ contract UniCreatePoolV3 is ActionBase, UniV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @dev If pool already exists, it will only mint a position in pool
     function _createPool(Params memory _inputData) internal {
         positionManager.createAndInitializePoolIfNecessary(
             _inputData.token0,
@@ -95,6 +95,8 @@ contract UniCreatePoolV3 is ActionBase, UniV3Helper {
         );
     }
 
+    /// @dev The address from which we're pulling token0 and token1 must approve proxy
+    /// @dev If amount0Desired or amount1Desired is uint.max this will pull whole balance of _from
     function _uniCreatePosition(Params memory _inputData) internal returns (uint256 tokenId, bytes memory logData) {
         // fetch tokens from address;
         uint256 amount0Pulled = _inputData.token0.pullTokensIfNeeded(
