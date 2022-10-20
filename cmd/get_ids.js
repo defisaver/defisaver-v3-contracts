@@ -12,6 +12,6 @@ const ethers = require('ethers');
 //     console.log(action, " : ", id, " : ", actionAddr[i]);
 // });
 
-const id = ethers.utils.keccak256(ethers.utils.toUtf8Bytes('BotRefillsL2'));
+const id = ethers.utils.keccak256(ethers.utils.toUtf8Bytes('McdRatio'));
 
 console.log(id.substr(0, 10));

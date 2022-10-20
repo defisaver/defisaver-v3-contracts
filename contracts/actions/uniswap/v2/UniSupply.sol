@@ -69,7 +69,7 @@ contract UniSupply is ActionBase, UniV2Helper {
     /// @notice Adds liquidity to uniswap and sends lp tokens and returns to _to
     /// @dev Uni markets can move, so extra tokens are expected to be left and are send to _to
     /// @dev The address from which we're pulling tokens A and B must approve proxy
-    /// @dev if amountADeisred or AmountBDesired is uint.max whole _from token balance is pulled
+    /// @dev if amountADesired or AmountBDesired is uint.max whole _from token balance is pulled
     function _uniSupply(UniSupplyData memory _uniData) internal returns (uint256, bytes memory) {
         // fetch tokens from the address
         uint amountAPulled = _uniData.tokenA.pullTokensIfNeeded(_uniData.from, _uniData.amountADesired);
