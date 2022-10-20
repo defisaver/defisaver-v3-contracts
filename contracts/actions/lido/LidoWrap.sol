@@ -13,10 +13,10 @@ import "./helpers/LidoHelper.sol";
 contract LidoWrap is ActionBase, DSMath, LidoHelper {
     using TokenUtils for address;
 
-    /// @param amount - amount to pull
-    /// @param from - address from which to pull token from
-    /// @param to - address where received WStEth will be sent to
-    /// @param useWeth - true for using WETH, false for using stEth
+    /// @param amount amount to pull
+    /// @param from address from which to pull token from
+    /// @param to address where received WStEth will be sent to
+    /// @param useWeth true for using WETH, false for using stEth
     struct Params {
         uint256 amount;
         address from;

@@ -13,9 +13,9 @@ import "./helpers/LidoHelper.sol";
 contract LidoUnwrap is ActionBase, DSMath, LidoHelper {
     using TokenUtils for address;
 
-    /// @param amount - amount of WStEth to pull
-    /// @param from - address from which to pull WStEth from
-    /// @param to - address where received stETH will be sent to
+    /// @param amount amount of WStEth to pull
+    /// @param from address from which to pull WStEth from
+    /// @param to address where received stETH will be sent to
     struct Params {
         uint256 amount;
         address from;

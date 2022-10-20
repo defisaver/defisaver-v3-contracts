@@ -10,9 +10,9 @@ import "./helpers/LidoHelper.sol";
 contract LidoStake is ActionBase, DSMath, LidoHelper {
     using TokenUtils for address;
 
-    /// @param amount - amount of WETH to pull
-    /// @param from - address from which to pull WETH from
-    /// @param to - address where received stETH will be sent to
+    /// @param amount amount of WETH to pull
+    /// @param from address from which to pull WETH from
+    /// @param to address where received stETH will be sent to
     struct Params {
         uint256 amount;
         address from;
