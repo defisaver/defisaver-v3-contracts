@@ -8,9 +8,12 @@ import "../../interfaces/mcd/ICdpRegistry.sol";
 import "./helpers/McdHelper.sol";
 import "../ActionBase.sol";
 
-/// @title Open a new Maker vault
+/// @title Open a new empty Maker vault
 contract McdOpen is ActionBase, McdHelper {
 
+
+    /// @param joinAddr Join address of the maker collateral
+    /// @param mcdManager The manager address we are using [mcd, b.protocol]
     struct Params {
         address joinAddr;
         address mcdManager;
@@ -48,8 +51,6 @@ contract McdOpen is ActionBase, McdHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Opens up an empty vault
-    /// @param _joinAddr Join address of the maker collateral
-    /// @param _mcdManager The manager address we are using
     function _mcdOpen(address _joinAddr, address _mcdManager) internal returns (uint256 vaultId, bytes memory logData) {
         bytes32 ilk = IJoin(_joinAddr).ilk();
 

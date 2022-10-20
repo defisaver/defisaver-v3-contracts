@@ -6,12 +6,17 @@ import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
+/// @title Supplies collateral to the DSProxy Liquity Trove
 contract LiquitySupply is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param collAmount Amount of WETH tokens to supply
+    /// @param from Address where to pull the tokens from
+    /// @param upperHint
+    /// @param lowerHint
     struct Params {
-        uint256 collAmount; // Amount of WETH tokens to supply
-        address from;       // Address where to pull the tokens from
+        uint256 collAmount; 
+        address from;        
         address upperHint;
         address lowerHint;
     }
@@ -54,6 +59,8 @@ contract LiquitySupply is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Supplies collateral to the users trove
+    /// @dev The address from which we are pulling WETH must approve proxy to pull tokens
+    /// @dev if collAmount is uint.max supply whole balance of WETH 
     function _liquitySupply(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.collAmount == type(uint256).max) {
             _params.collAmount = TokenUtils.WETH_ADDR.getBalance(_params.from);

@@ -15,10 +15,10 @@ import "../../interfaces/mcd/ICdpRegistry.sol";
 contract McdPayback is ActionBase, McdHelper {
     using TokenUtils for address;
 
-    /// @param _vaultId Id of the vault
-    /// @param _amount Amount of dai to be payed back
-    /// @param _from Where the Dai is pulled from
-    /// @param _mcdManager The manager address we are using
+    /// @param vaultId Id of the vault
+    /// @param amount Amount of dai to be paid back
+    /// @param from The address from which we are pulling DAI from
+    /// @param mcdManager The manager address we are using [mcd, b.protocol]
     struct Params {
         uint256 vaultId;
         uint256 amount;
@@ -79,6 +79,8 @@ contract McdPayback is ActionBase, McdHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Paybacks the debt for a specified vault
+    /// @dev The address from which we are pulling DAI must approve proxy to pull tokens
+    /// @dev If amount = uint.max this will repay all debt
     function _mcdPayback(Params memory _inputData) internal returns (bytes memory logData) {
         IManager mcdManager = IManager(_inputData.mcdManager);
 

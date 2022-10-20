@@ -7,15 +7,20 @@ import "../../../utils/TokenUtils.sol";
 import "../../../utils/SafeMath.sol";
 import "../../ActionBase.sol";
 
+/// @title Deposit LUSD into Stability Pool
 contract LiquitySPDeposit is ActionBase, LiquityHelper {
     using TokenUtils for address;
     using SafeMath for uint256;
 
+    /// @param lusdAmount Amount of LUSD tokens to deposit
+    /// @param from Address where to pull the tokens from
+    /// @param wethTo Address that will receive ETH(wrapped) gains
+    /// @param lqtyTo Address that will receive LQTY token gains
     struct Params {
-        uint256 lusdAmount; // Amount of LUSD tokens to deposit
-        address from;       // Address where to pull the tokens from
-        address wethTo;     // Address that will receive ETH(wrapped) gains
-        address lqtyTo;     // Address that will receive LQTY token gains
+        uint256 lusdAmount;
+        address from;       
+        address wethTo;     
+        address lqtyTo;     
     }
 
     /// @inheritdoc ActionBase
@@ -51,6 +56,8 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Deposits LUSD to the stability pool
+    /// @dev The address from which we are pulling LUSD must approve proxy to pull tokens
+    /// @dev If lusdAmount is max.uint deposit whole balance
     function _liquitySPDeposit(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.lusdAmount == type(uint256).max) {
             _params.lusdAmount = LUSD_TOKEN_ADDRESS.getBalance(_params.from);

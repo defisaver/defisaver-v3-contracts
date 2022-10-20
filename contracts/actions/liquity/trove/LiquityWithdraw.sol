@@ -6,12 +6,17 @@ import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
+/// @title Withdraws collateral from the DSProxy Liquity Trove
 contract LiquityWithdraw is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param collAmount Amount of WETH tokens to withdraw
+    /// @param to Address that will receive the tokens
+    /// @param upperHint
+    /// @param lowerHint
     struct Params {
-        uint256 collAmount; // Amount of WETH tokens to withdraw
-        address to;         // Address that will receive the tokens
+        uint256 collAmount; 
+        address to;         
         address upperHint;
         address lowerHint;
     }

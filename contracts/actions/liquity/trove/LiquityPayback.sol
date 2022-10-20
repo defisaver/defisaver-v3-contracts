@@ -6,12 +6,17 @@ import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
+/// @title Repays LUSD tokens to the DSProxy Liquity Trove
 contract LiquityPayback is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param lusdAmount Amount of LUSD tokens to repay
+    /// @param from Address where to pull the tokens from
+    /// @param upperHint
+    /// @param lowerHint
     struct Params {
-        uint256 lusdAmount; // Amount of LUSD tokens to repay
-        address from;       // Address where to pull the tokens from
+        uint256 lusdAmount; 
+        address from; 
         address upperHint;
         address lowerHint;
     }
@@ -54,6 +59,7 @@ contract LiquityPayback is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Repays LUSD tokens to the trove
+    /// @dev The address from which we are pulling LUSD must approve proxy to pull tokens
     function _liquityPayback(Params memory _params) internal returns (uint256, bytes memory) {
         LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
 

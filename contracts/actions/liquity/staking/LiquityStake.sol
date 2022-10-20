@@ -6,14 +6,19 @@ import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
+/// @title Stake LQTY tokens
 contract LiquityStake is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param lqtyAmount Amount of LQTY tokens to stake
+    /// @param from Address where to pull the tokens from
+    /// @param wethTo Address that will receive ETH(wrapped) gains
+    /// @param lusdTo Address that will receive LUSD token gains
     struct Params {
-        uint256 lqtyAmount; // Amount of LQTY tokens to stake
-        address from;       // Address where to pull the tokens from
-        address wethTo;     // Address that will receive ETH(wrapped) gains
-        address lusdTo;     // Address that will receive LUSD token gains
+        uint256 lqtyAmount;
+        address from; 
+        address wethTo;   
+        address lusdTo;     
     }
 
     /// @inheritdoc ActionBase
@@ -49,6 +54,8 @@ contract LiquityStake is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Stakes LQTY tokens
+    /// @dev The address from which we are pulling LQTY must approve proxy to pull tokens
+    /// @dev If lqtyAmount is max.uint pull whole balance
     function _liquityStake(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.lqtyAmount == type(uint256).max) {
             _params.lqtyAmount = LQTY_TOKEN_ADDRESS.getBalance(_params.from);

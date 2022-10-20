@@ -16,6 +16,10 @@ contract McdGive is ActionBase {
     //Can't send vault to 0x0
     error NoBurnVaultError();
 
+    /// @param vaultId The id of the vault
+    /// @param newOwner The address of the new owner
+    /// @param createProxy If true, it will create a proxy if the _newOwner does not have one
+    /// @param mcdManager The manager address we are using [mcd, b.protocol]
     struct Params {
         uint256 vaultId;
         address newOwner;
@@ -57,10 +61,6 @@ contract McdGive is ActionBase {
 
     /// @notice Gives the vault ownership to a different address
     /// @dev If _createProxy is true, vault is always sent to a proxy
-    /// @param _vaultId The id of the vault
-    /// @param _newOwner The address of the new owner
-    /// @param _createProxy If true, it will create a proxy if the _newOwner does not have one
-    /// @param _mcdManager Manager address
     function _mcdGive(
         uint256 _vaultId,
         address _newOwner,

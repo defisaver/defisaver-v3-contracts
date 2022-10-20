@@ -7,9 +7,11 @@ import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
+/// @title Claims remaining collateral from the user's closed DSProxy Liquity Trove
 contract LiquityClaim is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param to Address where claimed remaining collateral will be sent to
     struct Params {
         address to;
     }
@@ -45,6 +47,7 @@ contract LiquityClaim is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Claims remaining collateral from the user's closed Trove
+    /// @dev Reverts if claimableColl == 0
     function _liquityClaim(address _to) internal returns (uint256 claimableColl, bytes memory logData) {
         claimableColl = CollSurplusPool.getCollateral(address(this));
 

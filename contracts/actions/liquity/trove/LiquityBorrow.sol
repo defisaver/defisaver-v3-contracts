@@ -6,13 +6,19 @@ import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
+/// @title Borrow from DSProxy Liquity Trove
 contract LiquityBorrow is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param maxFeePercentage Highest borrowing fee to accept, ranges between 0.5 and 5%
+    /// @param lusdAmount Amount of LUSD tokens to borrow
+    /// @param to Address that will receive the tokens
+    /// @param upperHint
+    /// @param lowerHint
     struct Params {
-        uint256 maxFeePercentage;   // Highest borrowing fee to accept, ranges between 0.5 and 5%
-        uint256 lusdAmount;         // Amount of LUSD tokens to borrow
-        address to;                 // Address that will receive the tokens
+        uint256 maxFeePercentage;  
+        uint256 lusdAmount;         
+        address to;                
         address upperHint;
         address lowerHint;
     }

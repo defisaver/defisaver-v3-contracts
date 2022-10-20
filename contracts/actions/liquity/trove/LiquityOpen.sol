@@ -6,15 +6,23 @@ import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
+/// @title Open a DSProxy Liquity Trove
 contract LiquityOpen is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param maxFeePercentage Highest borrowing fee to accept, ranges between 0.5 and 5%
+    /// @param collAmount Amount of WETH tokens to supply as collateral
+    /// @param lusdAmount Amount of LUSD tokens to borrow from the trove, protocol minimum net debt is 1800
+    /// @param from Address where to pull the collateral from
+    /// @param to Address that will receive the borrowed tokens
+    /// @param upperHint
+    /// @param lowerHint
     struct Params {
-        uint256 maxFeePercentage;   // Highest borrowing fee to accept, ranges between 0.5 and 5%
-        uint256 collAmount;         // Amount of WETH tokens to supply as collateral
-        uint256 lusdAmount;         // Amount of LUSD tokens to borrow from the trove, protocol minimum net debt is 1800
-        address from;               // Address where to pull the collateral from
-        address to;                 // Address that will receive the borrowed tokens
+        uint256 maxFeePercentage;   
+        uint256 collAmount;         
+        uint256 lusdAmount;          
+        address from;                
+        address to;                 
         address upperHint;
         address lowerHint;
     }
@@ -70,6 +78,8 @@ contract LiquityOpen is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Opens up a trove
+    /// @dev The address from which we are pulling WETH must approve proxy to pull tokens
+    /// @dev if collAmount is uint.max supply whole balance of WETH 
     function _liquityOpen(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.collAmount == type(uint256).max) {
             _params.collAmount = TokenUtils.WETH_ADDR.getBalance(_params.from);

@@ -6,9 +6,12 @@ import "../../../utils/TokenUtils.sol";
 import "../../../utils/SafeMath.sol";
 import "../../ActionBase.sol";
 
+/// @title Closes DSProxy Liquity Trove
 contract LiquityClose is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param from Address where to pull the LUSD tokens from
+    /// @param to Address that will receive the collateral
     struct Params {
         address from;
         address to;
@@ -47,8 +50,8 @@ contract LiquityClose is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Closes the trove
-    /// @param _from Address where to pull the LUSD tokens from
-    /// @param _to Address that will receive the collateral
+    /// @dev The address from which we are pulling LUSD must approve proxy to pull tokens
+    /// @dev This will try to pull netDebt exact amount (TroveDebt - LUSD gas compensation)
     function _liquityClose(address _from, address _to) internal returns (uint256 coll, bytes memory logData) {
         uint256 netDebt = TroveManager.getTroveDebt(address(this)) - LUSD_GAS_COMPENSATION;
         coll = TroveManager.getTroveColl(address(this));

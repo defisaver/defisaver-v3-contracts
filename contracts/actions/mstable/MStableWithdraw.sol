@@ -6,19 +6,29 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/MStableHelper.sol";
 
+/// @title Action that withdraws the base asset from the Savings Contract, or if unstaking, from the Savings Vault
 contract MStableWithdraw is ActionBase, MStableHelper {
     using TokenUtils for address;
 
+    /// @param bAsset base asset address
+    /// @param mAsset the corresponding meta asset
+    /// @param saveAddress save contract address for the mAsset (imAsset address)
+    /// @param vaultAddress vault contract address for the imAsset (imAssetVault address)
+    /// @param from address from where to pull the entry asset
+    /// @param to address that will receive the exit asset
+    /// @param amount amount of entry asset to deposit
+    /// @param minOut minimum amount of mAsset to accept (if entry asset is base asset)
+    /// @param assetPair entry and exit asset pair enum
     struct Params {
-        address bAsset;         // base asset address
-        address mAsset;         // the corresponding meta asset
-        address saveAddress;    // save contract address for the mAsset (imAsset address)
-        address vaultAddress;   // vault contract address for the imAsset (imAssetVault address)
-        address from;           // address from where to pull the entry asset
-        address to;             // address that will receive the exit asset
-        uint256 amount;         // amount of entry asset to deposit
-        uint256 minOut;         // minimum amount of mAsset to accept (if entry asset is base asset)
-        AssetPair assetPair;    // exit and entry asset pair enum
+        address bAsset;       
+        address mAsset;      
+        address saveAddress;    
+        address vaultAddress;
+        address from;          
+        address to;             
+        uint256 amount;        
+        uint256 minOut;        
+        AssetPair assetPair;    
     }
 
     function executeAction(
@@ -52,6 +62,8 @@ contract MStableWithdraw is ActionBase, MStableHelper {
     }
 
     /// @notice Action that withdraws the base asset from the Savings Contract, or if unstaking, from the Savings Vault
+    /// @dev If AssetPair == BASSET_IMASSET || AssetPair == MASSET_IMASSET the address from where we're pulling imAsset must approve proxy
+    /// @dev If AssetPair == BASSET_MASSET the address from where we're pulling mAsset must approve proxy
     function _mStableWithdraw(Params memory _params) internal returns (uint256 amount, bytes memory logData) {
         require(_params.to != address(0), "Recipient can't be address(0)");
 

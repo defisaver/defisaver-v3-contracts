@@ -8,6 +8,7 @@ import "../ActionBase.sol";
 /// @title Returns a ratio for mcd vault
 contract McdRatio is ActionBase, McdRatioHelper {
 
+    /// @param vaultId Id of the vault
     struct Params {
         uint256 vaultId;
     }

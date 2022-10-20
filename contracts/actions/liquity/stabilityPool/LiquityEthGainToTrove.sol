@@ -7,12 +7,16 @@ import "../../../utils/TokenUtils.sol";
 import "../../../utils/SafeMath.sol";
 import "../../ActionBase.sol";
 
+/// @title withdraw ETH gains from stability pool to Trove
 contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
     using TokenUtils for address;
     using SafeMath for uint256;
     
+    /// @param lqtyTo Address that will receive LQTY token gains
+    /// @param upperHint
+    /// @param lowerHint
     struct Params {
-        address lqtyTo;     // Address that will receive LQTY token gains
+        address lqtyTo;     
         address upperHint;
         address lowerHint;
     }

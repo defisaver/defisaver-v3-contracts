@@ -6,19 +6,29 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/MStableHelper.sol";
 
+/// @title Deposit an entry asset and withdraws an exit asset from mStable
 contract MStableDeposit is ActionBase, MStableHelper {
     using TokenUtils for address;
 
+    /// @param bAsset base asset address
+    /// @param mAsset the corresponding meta asset
+    /// @param saveAddress save contract address for the mAsset (imAsset address)
+    /// @param vaultAddress vault contract address for the imAsset (imAssetVault address)
+    /// @param from address from where to pull the entry asset
+    /// @param to address that will receive the exit asset
+    /// @param amount amount of entry asset to deposit
+    /// @param minOut minimum amount of mAsset to accept (if entry asset is base asset)
+    /// @param assetPair entry and exit asset pair enum
     struct Params {
-        address bAsset;         // base asset address
-        address mAsset;         // the corresponding meta asset
-        address saveAddress;    // save contract address for the mAsset (imAsset address)
-        address vaultAddress;   // vault contract address for the imAsset (imAssetVault address)
-        address from;           // address from where to pull the entry asset
-        address to;             // address that will receive the exit asset
-        uint256 amount;         // amount of entry asset to deposit
-        uint256 minOut;         // minimum amount of mAsset to accept (if entry asset is base asset)
-        AssetPair assetPair;    // entry and exit asset pair enum
+        address bAsset;          
+        address mAsset;          
+        address saveAddress;     
+        address vaultAddress;   
+        address from;           
+        address to;              
+        uint256 amount;          
+        uint256 minOut;         
+        AssetPair assetPair;    
     }
 
     function executeAction(
@@ -51,7 +61,8 @@ contract MStableDeposit is ActionBase, MStableHelper {
         logger.logActionDirectEvent("MStableDeposit", logData);
     }
     
-    /// @notice Action that deposits an entry asset and withdraws an exit asset from mStable
+    /// @dev The address from which we are pulling entry token must approve proxy to pull tokens
+    /// @dev If amount = uint.max this will pull and supply whole balance
     function _mStableDeposit(Params memory _params) internal returns (uint256, bytes memory) {
         require(_params.to != address(0), "Recipient can't be address(0)");
         

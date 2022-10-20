@@ -12,6 +12,9 @@ import "./helpers/McdHelper.sol";
 /// @title Merge two vaults that are of the same type
 contract McdMerge is ActionBase, McdHelper {
 
+    /// @param srcVaultId Vault we are merging
+    /// @param destVaultId Destination vault
+    /// @param mcdManager The manager address we are using [mcd, b.protocol]
     struct Params {
         uint256 srcVaultId;
         uint256 destVaultId;
@@ -52,9 +55,6 @@ contract McdMerge is ActionBase, McdHelper {
 
     /// @notice Merges two vaults, first into second
     /// @dev Will not work if not the exact same ilk
-    /// @param _srcVaultId Vault we are merging
-    /// @param _destVaultId Destination vault
-    /// @param _mcdManager Mcd manager
     function _mcdMerge(
         uint256 _srcVaultId,
         uint256 _destVaultId,

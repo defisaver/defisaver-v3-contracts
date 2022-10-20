@@ -8,13 +8,18 @@ import "../../utils/TokenUtils.sol";
 import "../../utils/SafeMath.sol";
 import "../ActionBase.sol";
 
+/// @title Claim staking rewards from the Savings Vault
 contract MStableClaim is ActionBase, MStableHelper {
     using TokenUtils for address;
     using SafeMath for uint256;
 
+    /// @param vaultAddress Vault contract address for the imAsset (imAssetVault address)
+    /// @param to  The address that will receive the claimed MTA rewards
+    /// @param first Index of the first array element to claim
+    /// @param last Index of the last array element to claim
     struct Params {
-        address vaultAddress;   // vault contract address for the imAsset (imAssetVault address)
-        address to;             // address that will receive the claimed MTA rewards
+        address vaultAddress;   
+        address to;            
         uint256 first;
         uint256 last;
     }

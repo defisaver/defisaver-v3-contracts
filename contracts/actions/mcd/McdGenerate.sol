@@ -12,12 +12,16 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";
 
-/// @title Generate dai from a Maker Vault
+/// @title Generate Dai from a Maker Vault
 contract McdGenerate is ActionBase, McdHelper {
     using TokenUtils for address;
 
     ISpotter public constant spotter = ISpotter(SPOTTER_ADDRESS);
 
+    /// @param vaultId Id of the vault
+    /// @param amount Amount of DAI to generate as debt
+    /// @param to The address to receive generated DAI
+    /// @param mcdManager The manager address we are using [mcd, b.protocol]
     struct Params {
         uint256 vaultId;
         uint256 amount;
@@ -59,10 +63,6 @@ contract McdGenerate is ActionBase, McdHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Generates dai from a specified vault
-    /// @param _vaultId Id of the vault
-    /// @param _amount Amount of dai to be generated
-    /// @param _to Address which will receive the dai
-    /// @param _mcdManager The manager address we are using [mcd, b.protocol]
     function _mcdGenerate(
         uint256 _vaultId,
         uint256 _amount,

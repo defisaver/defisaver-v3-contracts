@@ -6,9 +6,19 @@ import "./helpers/LiquityHelper.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
+/// @title Redeems ETH(wrapped) using LUSD with the target price of LUSD = 1$
 contract LiquityRedeem is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param lusdAmount Amount of LUSD to redeem for
+    /// @param from Address from which to pull LUSD
+    /// @param to Address that will receive redeemed ETH
+    /// @param firstRedemptionHint hints at the position of the first Trove that will be redeemed from,
+    /// @param upperPartialRedemptionHint hints at the nextId neighbor of the last redeemed Trove upon reinsertion, if it's partially redeemed
+    /// @param lowerPartialRedemptionHint hints at the prevId neighbor of the last redeemed Trove upon reinsertion, if it's partially redeemed
+    /// @param partialRedemptionHintNICR  ensures that the transaction won't run out of gas if neither _lowerPartialRedemptionHint nor _upperPartialRedemptionHint are valid anymore
+    /// @param maxIterations The number of Troves to consider for redemption can be capped by passing a non-zero value as _maxIterations, while passing zero will leave it uncapped
+    /// @param maxFeePercentage The borrower has to provide a _maxFeePercentage that he/she is willing to accept in case of a fee slippage
     struct Params {
         uint256 lusdAmount;
         address from;
@@ -66,6 +76,8 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Redeems ETH(wrapped) using LUSD with the target price of LUSD = 1$
+    /// @dev The address from which we are pulling LUSD must approve proxy to pull tokens
+    /// @dev if lusdAmount is uint.max supply whole balance of LUSD
     function _liquityRedeem(Params memory _params) internal returns (uint256 ethRedeemed, bytes memory logData) {
         if (_params.lusdAmount == type(uint256).max) {
             _params.lusdAmount = LUSD_TOKEN_ADDRESS.getBalance(_params.from);
