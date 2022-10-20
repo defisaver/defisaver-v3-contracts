@@ -7,6 +7,10 @@ import "../ActionBase.sol";
 /// @title Helper action to pull a token from the specified address
 contract PullToken is ActionBase {
     
+
+    /// @param tokenAddr Address of token
+    /// @param from From where the tokens are pulled
+    /// @param amount Amount of tokens, can be type(uint).max
     using TokenUtils for address;
     struct Params {
         address tokenAddr;
@@ -50,9 +54,7 @@ contract PullToken is ActionBase {
 
     /// @notice Pulls a token from the specified addr, doesn't work with ETH
     /// @dev If amount is type(uint).max it will send proxy balance
-    /// @param _tokenAddr Address of token
-    /// @param _from From where the tokens are pulled
-    /// @param _amount Amount of tokens, can be type(uint).max
+    /// @dev The address from which we are pulling tokens must approve Proxy
     function _pullToken(address _tokenAddr, address _from, uint _amount) internal returns (uint amountPulled) {
         amountPulled = _tokenAddr.pullTokensIfNeeded(_from, _amount);
     }

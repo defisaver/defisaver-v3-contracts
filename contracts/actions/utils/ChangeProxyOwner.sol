@@ -9,6 +9,7 @@ import "../../utils/DFSProxyRegistryController.sol";
 /// @title Changes the owner of the DSProxy and updated the DFSRegistry
 contract ChangeProxyOwner is ActionBase {
 
+    /// @param newOwner The address of the new DSProxy owner
     struct Params {
         address newOwner;
     }

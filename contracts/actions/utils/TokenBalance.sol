@@ -5,9 +5,12 @@ pragma experimental ABIEncoderV2;
 import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 
+/// @title Action that returns balance of a token for a given address in current block
 contract TokenBalance is ActionBase {
     using TokenUtils for address;
 
+    /// @param tokenAddr Address of the token we're inquiring for
+    /// @param holderAddr Address of the token holder we're inquiring for
     struct Params {
         address tokenAddr;
         address holderAddr;

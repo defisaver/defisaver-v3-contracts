@@ -10,6 +10,9 @@ import "../../core/strategy/StrategyModel.sol";
 /// @title Updates users sub information on SubStorage contract
 /// @dev user can only change his own subscriptions
 contract UpdateSub is ActionBase {
+    
+    /// @param subId Id of the Subscription
+    /// @param sub Object that represents the updated sub
     struct Params {
         uint256 subId;
         StrategyModel.StrategySub sub;

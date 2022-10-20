@@ -6,6 +6,9 @@ import "../ActionBase.sol";
 
 /// @title Helper action to sum up 2 inputs/return values
 contract SumInputs is ActionBase {
+    
+    /// @param a First number to sum
+    /// @param b Second number to sum
     struct Params {
         uint256 a;
         uint256 b;

@@ -16,13 +16,17 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
         SHOULD_BE_LOWER,
         SHOULD_BE_HIGHER
     }
-
+    /// @param ratioState Enum if we're doing a Boost or Repay strategy
+    /// @param checkTarget True to check if we're in target range
+    /// @param targetRatio Ratio that the strategy is supposed to hit (within allowed offset)
+    /// @param vaultId Id of the MCD vault we're targeting
+    /// @param startRatioIndex index in returnValues where ratio before actions is stored
     struct Params {
         RatioState ratioState;
         bool checkTarget;
         uint256 ratioTarget;
         uint256 vaultId;
-        uint256 startRatioIndex; // index in returnValues where ratio before actions is stored
+        uint256 startRatioIndex;
     }
 
     error RatioOutsideTargetRange(uint256, uint256);

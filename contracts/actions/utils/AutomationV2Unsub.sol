@@ -7,6 +7,7 @@ import "../ActionBase.sol";
 import "./helpers/SubscriptionsMainnetAddresses.sol";
 import "../../interfaces/ISubscriptions.sol";
 
+/// @title Unsubscribes proxy from automation
 contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
 
     enum Protocols {
@@ -15,6 +16,8 @@ contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
         AAVE
     }
 
+    /// @param cdpId Id of the MCD vault (only needed if Protocol == MCD)
+    /// @param protocol Enum representing from which protocol to unsubscribe
     struct Params {
         uint256 cdpId;
         Protocols protocol;

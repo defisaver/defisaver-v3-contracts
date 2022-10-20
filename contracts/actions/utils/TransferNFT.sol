@@ -57,6 +57,7 @@ contract TransferNFT is ActionBase {
     /// @param _from Where from we are pulling the nft (defaults to proxy)
     /// @param _to Address where we are transferring the nft
     /// @param _nftId TokenId we are transferring
+    /// @dev The address from which we're pulling the ERC721 token must approve Proxy
     function _transferNFT(address _nftAddr, address _from, address _to, uint _nftId) internal {
         require(_to != address(0), "Can't burn nft");
 

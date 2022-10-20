@@ -5,9 +5,12 @@ pragma solidity =0.8.10;
 import "../ActionBase.sol";
 import "../../core/strategy/SubStorage.sol";
 
-/// @title ToggleSub - Sets the state of the sub to active or deactivated
+/// @title Sets the state of the sub to active or deactivated
 /// @dev User can only disable/enable his own subscriptions
 contract ToggleSub is ActionBase {
+    
+    /// @param subId Id of the subscription
+    /// @param active True to enable, False to disable
     struct Params {
         uint256 subId;
         bool active;

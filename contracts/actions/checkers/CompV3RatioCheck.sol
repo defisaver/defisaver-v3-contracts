@@ -8,6 +8,7 @@ import "../compoundV3/helpers/CompV3RatioHelper.sol";
 import "../../core/helpers/CoreHelper.sol";
 import "../../utils/TransientStorage.sol";
 
+/// @title Checks if CompV3 positions ratio is in target range
 contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {
 
     /// @dev 5% offset acceptable
@@ -22,6 +23,9 @@ contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {
         IN_REPAY
     }
 
+    /// @param ratioState Enum if we're doing a Boost or Repay strategy
+    /// @param targetRatio Ratio that the strategy is supposed to hit (within allowed offset)
+    /// @param market Address of the Comp V3 Market
     struct Params {
         RatioState ratioState;
         uint256 targetRatio;

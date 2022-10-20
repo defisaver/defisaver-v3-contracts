@@ -5,8 +5,10 @@ pragma solidity =0.8.10;
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
-/// @title Helper action to wrap Ether to WETH9
+/// @title Wraps native Eth to WETH9 token
 contract WrapEth is ActionBase {
+    
+    /// @param amount Amount of ETH to wrap
     struct Params {
         uint256 amount;
     }

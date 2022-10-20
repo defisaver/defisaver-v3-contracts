@@ -9,6 +9,9 @@ contract SendTokenAndUnwrap is ActionBase {
 
     using TokenUtils for address;
 
+    /// @param tokenAddr Address of token, use 0xEeee... for eth
+    /// @param to Where the tokens are sent
+    /// @param amount Amount of tokens, can be type(uint).max
     struct Params {
         address tokenAddr;
         address to;
@@ -52,9 +55,6 @@ contract SendTokenAndUnwrap is ActionBase {
     /// @notice Sends a token to the specified addr, works with Eth also
     /// @dev If amount is type(uint).max it will send proxy balance
     /// @dev If weth address is set it will unwrap by default
-    /// @param _tokenAddr Address of token, use 0xEeee... for eth
-    /// @param _to Where the tokens are sent
-    /// @param _amount Amount of tokens, can be type(uint).max
     function _sendToken(address _tokenAddr, address _to, uint _amount) internal returns (uint) {
         if (_amount == type(uint256).max) {
             _amount = _tokenAddr.getBalance(address(this));

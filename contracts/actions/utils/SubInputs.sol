@@ -6,6 +6,9 @@ import "../ActionBase.sol";
 
 /// @title Helper action to subtract 2 inputs/return values
 contract SubInputs is ActionBase {
+    
+    /// @param a The minuend
+    /// @param b The subtrahend
     struct Params {
         uint256 a;
         uint256 b;

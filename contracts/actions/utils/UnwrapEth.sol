@@ -5,10 +5,12 @@ pragma solidity =0.8.10;
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
-/// @title Helper action to un-wrap WETH9 to Eth
+/// @title Unwrap WETH9 token to native ETH
 contract UnwrapEth is ActionBase {
     using TokenUtils for address;
 
+    /// @param amount Amount of WETH to unwrap
+    /// @param to The address to which we're sending native ETH
     struct Params {
         uint256 amount;
         address to;
@@ -44,8 +46,7 @@ contract UnwrapEth is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Unwraps WETH9 -> Eth
-    /// @param _amount Amount of Weth to unwrap
-    /// @param _to Address where to send the unwrapped Eth
+    /// @dev If amount = max.uint unwrap whole Proxy WETH balance
     function _unwrapEth(uint256 _amount, address _to) internal returns (uint256) {
         if (_amount == type(uint256).max) {
             _amount = TokenUtils.WETH_ADDR.getBalance(address(this));
