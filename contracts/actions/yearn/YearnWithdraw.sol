@@ -6,14 +6,13 @@ import "../../utils/TokenUtils.sol";
 import "../../interfaces/yearn/IYVault.sol";
 
 /// @title Burns yTokens and receive underlying tokens in return
-/// @dev yTokens need to be approved for DSProxy to pull them (yToken address)
 contract YearnWithdraw is ActionBase {
     using TokenUtils for address;
 
-    /// @param yToken - address of yToken to withdraw (same as yVault address)
-    /// @param yAmount - amount of yToken to withdraw
-    /// @param from - address from which to pull yTokens from
-    /// @param to - address where received underlying tokens will be sent to
+    /// @param yToken The address of yToken to withdraw (same as yVault address)
+    /// @param yAmount Amount of yToken to withdraw
+    /// @param from The address from which to pull yTokens from
+    /// @param to The address where received underlying tokens will be sent to
     struct Params {
         address yToken;
         uint256 yAmount;
@@ -58,6 +57,8 @@ contract YearnWithdraw is ActionBase {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+    /// @dev yTokens need to be approved for DSProxy to pull them (yToken address)
+    /// @dev If amount is uint.max pull and withdraw whole balance of yTokens
     function _yearnWithdraw(Params memory _inputData)
         internal
         returns (uint256 tokenAmountReceived, bytes memory logData)

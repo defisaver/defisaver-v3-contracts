@@ -11,6 +11,10 @@ import "./helpers/ReflexerHelper.sol";
 contract ReflexerPayback is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 
+
+    /// @param safeId Id of the safe
+    /// @param amount Amount of rai to be payed back
+    /// @param from Where the rai is pulled from
     struct Params {
         uint256 safeId;
         uint256 amount;
@@ -51,9 +55,8 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Paybacks the debt for a specified safe
-    /// @param _safeId Id of the safe
-    /// @param _amount Amount of rai to be payed back
-    /// @param _from Where the rai is pulled from
+    /// @dev Address from which we're pulling RAI must approve proxy
+    /// @dev If amount is uint.max it will pull and payback whole RAI debt amount
     function _reflexerPayback(
         uint256 _safeId,
         uint256 _amount,

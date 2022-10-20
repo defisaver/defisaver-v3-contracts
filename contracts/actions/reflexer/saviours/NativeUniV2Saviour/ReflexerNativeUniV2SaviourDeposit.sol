@@ -11,9 +11,9 @@ import "../../../../utils/TokenUtils.sol";
 contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 
-    /// @param from - The address from which to pull LP tokens
-    /// @param safeId - The ID of the SAFE to protect. This ID should be registered inside GebSafeManager
-    /// @param lpTokenAmount - The amount of LP tokens to deposit
+    /// @param from The address from which to pull LP tokens
+    /// @param safeId The ID of the SAFE to protect. This ID should be registered inside GebSafeManager
+    /// @param lpTokenAmount The amount of LP tokens to deposit
     struct Params {
         address from;
         uint256 safeId;
@@ -55,7 +55,8 @@ contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
-
+    
+    /// @dev The address from which we're pulling UNIV2 LP tokens must approve proxy
     function _reflexerSaviourDeposit(Params memory _inputData)
         internal
         returns (uint256 amountPulled, bytes memory logData)

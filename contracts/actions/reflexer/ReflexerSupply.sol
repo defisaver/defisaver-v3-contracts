@@ -9,6 +9,11 @@ import "./helpers/ReflexerHelper.sol";
 /// @title Supply collateral to a Reflexer safe
 contract ReflexerSupply is ActionBase, ReflexerHelper {
     using TokenUtils for address;
+
+    /// @param safeId Id of the safe
+    /// @param amount Amount of tokens to supply
+    /// @param adapterAddr Adapter address of the reflexer collateral
+    /// @param from Address where to pull the collateral from
     struct Params {
         uint256 safeId;
         uint256 amount;
@@ -50,10 +55,8 @@ contract ReflexerSupply is ActionBase, ReflexerHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Supplies collateral to the safe
-    /// @param _safeId Id of the safe
-    /// @param _amount Amount of tokens to supply
-    /// @param _adapterAddr Adapter address of the reflexer collateral
-    /// @param _from Address where to pull the collateral from
+    /// @dev Address from which we're pulling collateral tokens must approve proxy
+    /// @dev If amount is uint.max then pull and supply whole token balance of _from address
     function _reflexerSupply(
         uint256 _safeId,
         uint256 _amount,

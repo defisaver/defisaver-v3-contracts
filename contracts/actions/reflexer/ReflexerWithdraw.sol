@@ -10,6 +10,10 @@ import "./helpers/ReflexerHelper.sol";
 contract ReflexerWithdraw is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 
+    /// @param safeId Id of the safe
+    /// @param amount Amount of collateral to withdraw
+    /// @param adapterAddr Adapter address of the reflexer collateral
+    /// @param to Address where to send the collateral we withdrew
     struct Params {
         uint256 safeId;
         uint256 amount;
@@ -51,10 +55,7 @@ contract ReflexerWithdraw is ActionBase, ReflexerHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Withdraws collateral from the safe
-    /// @param _safeId Id of the safe
-    /// @param _amount Amount of collateral to withdraw
-    /// @param _adapterAddr Adapter address of the reflexer collateral
-    /// @param _to Address where to send the collateral we withdrew
+    /// @notice if amount is uint.max withdraw whole collateral balance
     function _reflexerWithdraw(
         uint256 _safeId,
         uint256 _amount,

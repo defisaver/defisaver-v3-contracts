@@ -7,14 +7,13 @@ import "../../interfaces/yearn/IYVault.sol";
 import "./helpers/YearnHelper.sol";
 
 /// @title Supplies tokens to Yearn vault
-/// @dev tokens need to be approved for DSProxy to pull them (token address)
 contract YearnSupply is ActionBase, YearnHelper {
     using TokenUtils for address;
 
-    /// @param token - address of token to supply
-    /// @param amount - amount of token to supply
-    /// @param from - address from which to pull tokens from
-    /// @param to - address where received yTokens will be sent to
+    /// @param token The address of token to supply
+    /// @param amount Amount of token to supply
+    /// @param from The address from which to pull tokens from
+    /// @param to The address where received yTokens will be sent to
     struct Params {
         address token;
         uint256 amount;
@@ -59,6 +58,9 @@ contract YearnSupply is ActionBase, YearnHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
+
+    /// @dev The address from which we're pulling tokens must approve proxy
+    /// @dev If amount is uint.max the whole balance is pulled and supplied
     function _yearnSupply(Params memory _inputData) internal returns (uint256 yTokenAmount, bytes memory logData) {
         IYVault vault = IYVault(yearnRegistry.latestVault(_inputData.token));
 

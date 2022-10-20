@@ -8,9 +8,10 @@ import "./../../helpers/ReflexerHelper.sol";
 
 /// @title Withdraw lpToken from the contract and provide less cover for a SAFE
 contract ReflexerNativeUniV2SaviourWithdraw is ActionBase, ReflexerHelper {
-    /// @param to - The address that will receive the LP tokens
-    /// @param safeId - The ID of the SAFE that's protected. This ID should be registered inside GebSafeManager
-    /// @param lpTokenAmount - amount of LP tokens to withdraw
+    
+    /// @param to The address that will receive the LP tokens
+    /// @param safeId The ID of the SAFE that's protected. This ID should be registered inside GebSafeManager
+    /// @param lpTokenAmount amount of LP tokens to withdraw
     struct Params {
         address to;
         uint256 safeId;

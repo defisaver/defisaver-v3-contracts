@@ -8,8 +8,9 @@ import "./../../helpers/ReflexerHelper.sol";
 
 /// @title Get back system coins or collateral tokens that were withdrawn from Uniswap and not used to save a specific SAFE
 contract ReflexerNativeUniV2SaviourGetReserves is ActionBase, ReflexerHelper {
-    /// @param to - The address that will receive tokens
-    /// @param safeId - The ID of the SAFE. This ID should be registered inside GebSafeManager
+
+    /// @param to The address that will receive tokens
+    /// @param safeId The ID of the SAFE. This ID should be registered inside GebSafeManager
     struct Params {
         address to;
         uint256 safeId;

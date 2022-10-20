@@ -12,6 +12,10 @@ import "./helpers/ReflexerHelper.sol";
 contract ReflexerGenerate is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 
+
+    /// @param safeId Id of the safe
+    /// @param amount Amount of rai to be generated
+    /// @param to Address which will receive the rai
     struct Params {
         uint256 safeId;
         uint256 amount;
@@ -53,9 +57,6 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Generates rai from a specified safe
-    /// @param _safeId Id of the safe
-    /// @param _amount Amount of rai to be generated
-    /// @param _to Address which will receive the rai
     function _reflexerGenerate(
         uint256 _safeId,
         uint256 _amount,
