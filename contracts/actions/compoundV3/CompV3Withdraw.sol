@@ -35,7 +35,7 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
         params.asset = _parseParamAddr(params.asset, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
 
-        // param was added later on se we check if it's sent
+        // param was added later on, so we check if it's sent
         if (_paramMapping.length == 5) {
             params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
         }

@@ -32,7 +32,7 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
-        // param was added later on se we check if it's sent
+        // param was added later on so we check if it's sent
         if (_paramMapping.length == 4) {
             params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
         }
