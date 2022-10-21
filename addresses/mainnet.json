@@ -341,13 +341,68 @@
         "history": []
     },
     {
-        "name": "LiquityView",
-        "address": "0xd1913b977737c9505b8ecfedb8121546096d3393",
-        "id": "0xe23de5c6",
-        "path": "contracts/views/LiquityView.sol",
+        "name": "ChickenBondsView",
+        "address": "0x809a93fd4a0d7d7906Ef6176f0b5518b418Da08f",
+        "id": "0x542e7045",
+        "path": "contracts/views/ChickenBondsView.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CBChickenIn",
+        "address": "0x1E990AF6dCf9E9f8a0b2fc76f3BC032A34fFfD14",
+        "id": "0x56185a2d",
+        "path": "contracts/actions/liquity/bonds/CBChickenIn.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CBChickenOut",
+        "address": "0x3d2f2d88749BB387abD07A2408b68D2Bf2D4be3f",
+        "id": "0x6b376b60",
+        "path": "contracts/actions/liquity/bonds/CBChickenOut.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CBCreate",
+        "address": "0xAB38eCb27aBc1d75cb83725a4c408C22F426A1c1",
+        "id": "0xb5b50f23",
+        "path": "contracts/actions/liquity/bonds/CBCreate.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CBRedeem",
+        "address": "0xdD06754cA5367B03af7014AB359332eD82D988d1",
+        "id": "0x0ec91495",
+        "path": "contracts/actions/liquity/bonds/CBRedeem.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TransferNFT",
+        "address": "0x861e893E1796F81248e75F06C0b09Abdc8fe2f6F",
+        "id": "0xa3443678",
+        "path": "contracts/actions/utils/TransferNFT.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -963,14 +1018,14 @@
     },
     {
         "name": "FLEuler",
-        "address": "0xaf591afeCbAa4026Be377AA3cF02dA366f18DE07",
+        "address": "0x66DC6444CdC099153f89332e0d4C87af5C966A75",
         "id": "0x23179eb0",
         "path": "contracts/actions/flashloan/FLEuler.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xaf591afeCbAa4026Be377AA3cF02dA366f18DE07"]
     },
     {
         "name": "UniSupply",
@@ -1392,14 +1447,17 @@
     },
     {
         "name": "GasFeeTaker",
-        "address": "0xcCFFC73347B05cBDCCe7c3de2a0AdEcDAa8AEf51",
+        "address": "0x80536cb79341972a5Ef679dF5B70bB4A40a53d96",
         "id": "0x4571b8b3",
         "path": "contracts/actions/fee/GasFeeTaker.sol",
-        "version": "1.0.0",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d"]
+        "history": [
+            "0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d",
+            "0xcCFFC73347B05cBDCCe7c3de2a0AdEcDAa8AEf51"
+        ]
     },
     {
         "name": "StrategyExecutor",
@@ -1449,6 +1507,17 @@
         "address": "0xd891f499260aF046B4d4324cBEB84d02a6D61195",
         "id": "0x7e8b6344",
         "path": "contracts/triggers/AaveV2RatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityDebtInFrontTrigger",
+        "address": "0xC4608Cb08ecBC109B9FaE4312274f60535a10820",
+        "id": "0xff4a5c51",
+        "path": "contracts/triggers/LiquityDebtInFrontTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",

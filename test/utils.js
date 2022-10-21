@@ -109,6 +109,8 @@ const WSTETH_ADDRESS = '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0';
 const UNIV2_ROUTER_ADDRESS = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
 const FEED_REGISTRY_ADDRESS = '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf';
 const USD_DENOMINATION = '0x0000000000000000000000000000000000000348';
+const BLUSD_ADDR = '0xB9D7DdDca9a4AC480991865EfEf82E01273F79C3';
+const BOND_NFT_ADDR = '0xa8384862219188a8f03c144953Cf21fc124029Ee';
 
 // optimism aave V3
 const AAVE_MARKET_OPTIMISM = '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb';
@@ -330,20 +332,22 @@ async function findBalancesSlot(tokenAddress) {
 
 const toBytes32 = (bn) => hre.ethers.utils.hexlify(hre.ethers.utils.zeroPad(bn.toHexString(), 32));
 
+const mineBlock = async () => {
+    await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
+};
+
 const timeTravel = async (timeIncrease) => {
     await hre.network.provider.request({
         method: 'evm_increaseTime',
         params: [timeIncrease],
         id: (await hre.ethers.provider.getBlock('latest')).timestamp,
     });
+
+    await mineBlock();
 };
 
 const setStorageAt = async (address, index, value) => {
     await hre.ethers.provider.send('hardhat_setStorageAt', [address, index, value]);
-    await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
-};
-
-const mineBlock = async () => {
     await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
 };
 
@@ -634,6 +638,14 @@ const balanceOf = async (tokenAddr, addr) => {
     }
     return balance;
 };
+
+const getNftOwner = async (nftAddr, tokenId) => {
+    const tokenContract = await hre.ethers.getContractAt('IERC721', nftAddr);
+    const owner = await tokenContract.ownerOf(tokenId);
+
+    return owner;
+};
+
 const balanceOfOnTokenInBlock = async (tokenAddr, addr, block) => {
     const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
     let balance = '';
@@ -1122,6 +1134,7 @@ module.exports = {
     callDataCost,
     mockChainlinkPriceFeed,
     setMockPrice,
+    getNftOwner,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,
@@ -1172,6 +1185,8 @@ module.exports = {
     AAVE_MARKET_OPTIMISM,
     network,
     chainIds,
+    BLUSD_ADDR,
+    BOND_NFT_ADDR,
     setNetwork,
     getNetwork,
     setBalance,

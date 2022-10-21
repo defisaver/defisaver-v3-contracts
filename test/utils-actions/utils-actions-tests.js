@@ -19,20 +19,29 @@ const {
     impersonateAccount,
     setBalance,
     resetForkToBlock,
+    redeployCore,
+    fetchAmountinUSDPrice,
+    openStrategyAndBundleStorage,
+    getChainLinkPrice,
+    getNftOwner,
     WETH_ADDRESS,
     ETH_ADDR,
     DFS_REG_CONTROLLER,
     ADMIN_ACC,
     DAI_ADDR,
-    redeployCore,
-    fetchAmountinUSDPrice,
-    openStrategyAndBundleStorage,
-    getChainLinkPrice,
+    LUSD_ADDR,
+    BOND_NFT_ADDR,
 } = require('../utils');
 
 const { fetchMakerAddresses } = require('../utils-mcd');
 const {
-    changeProxyOwner, automationV2Unsub, executeAction, openVault, updateSubData,
+    changeProxyOwner,
+    automationV2Unsub,
+    executeAction,
+    openVault,
+    updateSubData,
+    createChickenBond,
+    transferNFT,
 } = require('../actions');
 const { addBotCaller, createStrategy, subToStrategy } = require('../utils-strategies');
 const { createMcdCloseStrategy } = require('../strategies');
@@ -764,6 +773,60 @@ const toggleSubDataTest = async () => {
     });
 };
 
+const transferNFTTest = async () => {
+    describe('Transfer NFT', function () {
+        this.timeout(1000000);
+
+        let senderAcc;
+        let proxy;
+        let bondID;
+        let chickenBondsView;
+        let bondNft;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+
+            proxy = await getProxy(senderAcc.address);
+
+            bondNft = await hre.ethers.getContractAt('IERC721', BOND_NFT_ADDR);
+
+            chickenBondsView = await redeploy('ChickenBondsView');
+
+            const lusdAmount = hre.ethers.utils.parseUnits('1000', 18);
+            await setBalance(LUSD_ADDR, senderAcc.address, lusdAmount);
+
+            await createChickenBond(proxy, lusdAmount, senderAcc.address);
+
+            const bonds = await chickenBondsView.getUsersBonds(proxy.address);
+            bondID = bonds[bonds.length - 1].bondID.toString();
+        });
+
+        it('... should transfer a nft from proxy', async () => {
+            const ownerBefore = await getNftOwner(BOND_NFT_ADDR, bondID);
+
+            await transferNFT(proxy, BOND_NFT_ADDR, bondID, proxy.address, senderAcc.address);
+
+            const ownerAfter = await getNftOwner(BOND_NFT_ADDR, bondID);
+
+            expect(ownerBefore).to.be.eq(proxy.address);
+            expect(ownerAfter).to.be.eq(senderAcc.address);
+        });
+
+        it('... should pull a nft from sender', async () => {
+            const ownerBefore = await getNftOwner(BOND_NFT_ADDR, bondID);
+
+            await bondNft.setApprovalForAll(proxy.address, true);
+
+            await transferNFT(proxy, BOND_NFT_ADDR, bondID, senderAcc.address, proxy.address);
+
+            const ownerAfter = await getNftOwner(BOND_NFT_ADDR, bondID);
+
+            expect(ownerBefore).to.be.eq(senderAcc.address);
+            expect(ownerAfter).to.be.eq(proxy.address);
+        });
+    });
+};
+
 const deployUtilsActionsContracts = async () => {
     await redeploy('SendTokenAndUnwrap');
     await redeploy('WrapEth');
@@ -778,6 +841,7 @@ const deployUtilsActionsContracts = async () => {
     await redeploy('ChangeProxyOwner');
     await redeploy('UpdateSub');
     await redeploy('ToggleSub');
+    await redeploy('TransferNFT');
 };
 
 const utilsActionsFullTest = async () => {
@@ -793,6 +857,7 @@ const utilsActionsFullTest = async () => {
     await updateSubDataTest();
     await automationV2UnsubTest();
     await changeOwnerTest();
+    await transferNFTTest();
 };
 
 module.exports = {
@@ -808,4 +873,5 @@ module.exports = {
     sendTokenAndUnwrapTest,
     updateSubDataTest,
     toggleSubDataTest,
+    transferNFTTest,
 };
