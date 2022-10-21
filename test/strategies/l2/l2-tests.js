@@ -1047,6 +1047,7 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
         const ALLOWED_SLIPPAGE = 0.05;
         const PARTIAL_CLOSE = 0.5;
         const EXPECTED_MAX_INTEREST = 1e-6;
+        const EXPECTED_MAX_FEE = 1e-2; // gas + dfs fee
         const RATE_MODE = 2;
 
         let strategyExecutorByBot;
@@ -1236,12 +1237,13 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
                 expect(await balanceOf(debtAddr, proxyAddr)).to.be.eq(Float2BN('0'));
-                expectCloseEq(
+                expect(
                     collAssetBalance,
+                ).to.be.gt(
                     Float2BN(
                         fetchAmountinUSDPrice(
                             collAssetInfo.symbol,
-                            USD_COLL_OPEN - usdSwapAmount,
+                            (USD_COLL_OPEN - usdSwapAmount) * (1 - EXPECTED_MAX_FEE),
                         ),
                         collAssetInfo.decimals,
                     ),
@@ -1269,18 +1271,12 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
                     debtAssetInfo.decimals,
                 );
 
+                const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
+                const usdWithdrawAmount = usdSwapAmount * (1 + EXPECTED_MAX_FEE);
                 const withdrawAmount = Float2BN(
                     fetchAmountinUSDPrice(
                         collAssetInfo.symbol,
-                        USD_DEBT_OPEN * PARTIAL_CLOSE * (1 + ALLOWED_SLIPPAGE),
-                    ),
-                    collAssetInfo.decimals,
-                );
-
-                const swapAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        collAssetInfo.symbol,
-                        usdRepayAmount * (1 + ALLOWED_SLIPPAGE),
+                        usdWithdrawAmount,
                     ),
                     collAssetInfo.decimals,
                 );
@@ -1288,7 +1284,7 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
                 await callAaveCloseToCollL2Strategy(
                     strategyExecutorByBot,
                     subId,
-                    swapAmount,
+                    0, // will be maxuint
                     collAssetInfo,
                     debtAssetInfo,
                     { withdrawAmount, repayAmount },
@@ -1317,12 +1313,12 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
                 expect(await balanceOf(debtAddr, proxyAddr)).to.be.eq(Float2BN('0'));
-                expect(collAssetBalance).to.be.eq(Float2BN('0'));
+                expect(collAssetBalance).to.be.eq(0);
                 expect(debtAssetBalance).to.be.lt(
                     Float2BN(
                         fetchAmountinUSDPrice(
                             debtAssetInfo.symbol,
-                            usdRepayAmount * ALLOWED_SLIPPAGE,
+                            usdWithdrawAmount - usdRepayAmount,
                         ),
                         debtAssetInfo.decimals,
                     ),
@@ -1340,6 +1336,7 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
         const USD_DEBT_OPEN = '10000';
         const ALLOWED_SLIPPAGE = 0.03;
         const EXPECTED_MAX_INTEREST = 1e-6;
+        const EXPECTED_MAX_FEE = 1e-2; // gas + dfsFee
         const PARTIAL_CLOSE = 0.5;
         const RATE_MODE = 2;
 
@@ -1528,12 +1525,13 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
                 expect(await balanceOf(debtAddr, proxyAddr)).to.be.eq(Float2BN('0'));
-                expectCloseEq(
+                expect(
                     collAssetBalance,
+                ).to.be.gt(
                     Float2BN(
                         fetchAmountinUSDPrice(
                             collAssetInfo.symbol,
-                            USD_COLL_OPEN - usdSwapAmount,
+                            (USD_COLL_OPEN - usdSwapAmount) * (1 - EXPECTED_MAX_FEE),
                         ),
                         collAssetInfo.decimals,
                     ),
@@ -1561,18 +1559,12 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                     debtAssetInfo.decimals,
                 );
 
+                const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
+                const usdWithdrawAmount = usdSwapAmount * (1 + EXPECTED_MAX_FEE);
                 const withdrawAmount = Float2BN(
                     fetchAmountinUSDPrice(
                         collAssetInfo.symbol,
-                        USD_DEBT_OPEN * PARTIAL_CLOSE * (1 + ALLOWED_SLIPPAGE),
-                    ),
-                    collAssetInfo.decimals,
-                );
-
-                const swapAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        collAssetInfo.symbol,
-                        usdRepayAmount * (1 + ALLOWED_SLIPPAGE),
+                        usdWithdrawAmount,
                     ),
                     collAssetInfo.decimals,
                 );
@@ -1583,7 +1575,7 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                     repayAmount,
                     debtAddr,
                     flAaveV3,
-                    swapAmount,
+                    0, // will be maxuint
                     collAssetInfo,
                     debtAssetInfo,
                     withdrawAmount,
@@ -1612,12 +1604,12 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
                 expect(await balanceOf(debtAddr, proxyAddr)).to.be.eq(Float2BN('0'));
-                expect(collAssetBalance).to.be.eq(Float2BN('0'));
+                expect(collAssetBalance).to.be.eq(0);
                 expect(debtAssetBalance).to.be.lt(
                     Float2BN(
                         fetchAmountinUSDPrice(
                             debtAssetInfo.symbol,
-                            usdRepayAmount * ALLOWED_SLIPPAGE,
+                            usdWithdrawAmount - usdRepayAmount,
                         ),
                         debtAssetInfo.decimals,
                     ),

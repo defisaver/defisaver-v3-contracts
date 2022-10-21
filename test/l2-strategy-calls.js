@@ -599,10 +599,10 @@ const callAaveCloseToCollL2Strategy = async (
     actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
         withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
     }));
-    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
-        srcTokenInfo, destTokenInfo, swapAmount,
-    }));
     actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo, destTokenInfo, swapAmount: partialAmounts ? MAXUINT : swapAmount,
+    }));
     actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
         repayAmount: partialAmounts?.repayAmount || MAXUINT,
     }));
@@ -653,10 +653,10 @@ const callAaveFLCloseToCollL2Strategy = async (
     actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
         withdrawAmount: withdrawAmount || MAXUINT,
     }));
-    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
-        srcTokenInfo, destTokenInfo, swapAmount,
-    }));
     actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo, destTokenInfo, swapAmount: withdrawAmount ? MAXUINT : swapAmount,
+    }));
     actionsCallData.push(aaveV3CloseActionsEncoded.sendRepayFL({ flAddr }));
     actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
     actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());

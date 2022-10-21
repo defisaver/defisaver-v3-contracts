@@ -38,7 +38,6 @@ const {
     addrs,
     ETH_ADDR,
     getOwnerAddr,
-    fetchAmountinUSDPrice,
     getLocalTokenPrice,
     Float2BN,
 } = require('../test/utils');
