@@ -1087,7 +1087,10 @@ const mcdFLRepayCompositeTest = async () => {
                 if (ratioAfter !== 0) {
                     expect(ratioAfter).to.be.gt(ratioBefore);
                 }
-                expect(info.coll.sub(info2.coll)).to.be.eq(Float2BN(repayAmount, tokenData.decimals));
+                expect(info.coll.sub(info2.coll)).to.be.closeTo(
+                    Float2BN(repayAmount, tokenData.decimals),
+                    Float2BN(repayAmount, tokenData.decimals).div(Float2BN('1', 6)),
+                );
                 expect(info.debt.sub(info2.debt)).to.be.closeTo(
                     eventParams.paybackAmount,
                     eventParams.paybackAmount.div(Float2BN('1', 6)),
@@ -1245,7 +1248,10 @@ const mcdRepayCompositeTest = async () => {
                 if (ratioAfter !== 0) {
                     expect(ratioAfter).to.be.gt(ratioBefore);
                 }
-                expect(info.coll.sub(info2.coll)).to.be.eq(Float2BN(repayAmount, tokenData.decimals));
+                expect(info.coll.sub(info2.coll)).to.be.closeTo(
+                    Float2BN(repayAmount, tokenData.decimals),
+                    Float2BN(repayAmount, tokenData.decimals).div(Float2BN('1', 6)),
+                );
                 expect(info.debt.sub(info2.debt)).to.be.closeTo(
                     eventParams.paybackAmount,
                     eventParams.paybackAmount.div(Float2BN('1', 6)),

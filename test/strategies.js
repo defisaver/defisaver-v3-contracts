@@ -33,6 +33,7 @@ const createRepayStrategy = () => {
 
     repayStrategy.addSubSlot('&vaultId', 'uint256');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&daiAddr', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     repayStrategy.addTrigger(mcdRatioTrigger);
@@ -56,7 +57,7 @@ const createRepayStrategy = () => {
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%wethAddr',
-            '%daiAddr',
+            '&daiAddr',
             '$3',
             '%exchangeWrapper',
         ),
@@ -94,6 +95,7 @@ const createFLRepayStrategy = () => {
 
     repayStrategy.addSubSlot('&vaultId', 'uint256');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&daiAddr', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     repayStrategy.addTrigger(mcdRatioTrigger);
@@ -107,7 +109,7 @@ const createFLRepayStrategy = () => {
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%wethAddr',
-            '%daiAddr',
+            '&daiAddr',
             '$1',
             '%exchangeWrapper',
         ),
@@ -116,7 +118,7 @@ const createFLRepayStrategy = () => {
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '%daiAddr', '$3',
+        '0', '&daiAddr', '$3',
     );
 
     const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
@@ -158,6 +160,7 @@ const createMcdRepayCompositeStrategy = () => {
 
     repayStrategy.addSubSlot('&vaultId', 'uint256');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&daiAddr', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     repayStrategy.addTrigger(mcdRatioTrigger);
@@ -168,7 +171,7 @@ const createMcdRepayCompositeStrategy = () => {
         '%gasUsed',
         formatExchangeObj(
             '%wethAddr',
-            '%daiAddr',
+            '&daiAddr',
             '%repayAmount',
             '%exchangeWrapper',
         ),
@@ -184,6 +187,7 @@ const createMcdFLRepayCompositeStrategy = () => {
 
     repayStrategy.addSubSlot('&vaultId', 'uint256');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&daiAddr', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     repayStrategy.addTrigger(mcdRatioTrigger);
@@ -194,7 +198,7 @@ const createMcdFLRepayCompositeStrategy = () => {
         '%gasUsed',
         formatExchangeObj(
             '%wethAddr',
-            '%daiAddr',
+            '&daiAddr',
             '%repayAmount',
             '%exchangeWrapper',
         ),
@@ -1269,6 +1273,7 @@ const createMcdBoostStrategy = () => {
     const mcdBoostStrategy = new dfs.Strategy('MakerBoostStrategy');
     mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
     mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    mcdBoostStrategy.addSubSlot('&daiAddr', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     mcdBoostStrategy.addTrigger(mcdRatioTrigger);
@@ -1286,7 +1291,7 @@ const createMcdBoostStrategy = () => {
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%daiAddr',
+            '&daiAddr',
             '%wethAddr',
             '$2',
             '%wrapper',
@@ -1329,6 +1334,7 @@ const createFlMcdBoostStrategy = () => {
     const mcdBoostStrategy = new dfs.Strategy('MakerFLBoostStrategy');
     mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
     mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    mcdBoostStrategy.addSubSlot('&daiAddr', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     mcdBoostStrategy.addTrigger(mcdRatioTrigger);
@@ -1341,7 +1347,7 @@ const createFlMcdBoostStrategy = () => {
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%daiAddr',
+            '&daiAddr',
             '%wethAddr',
             '$1',
             '%wrapper',
@@ -1392,6 +1398,7 @@ const createMcdBoostCompositeStrategy = () => {
     const mcdBoostStrategy = new dfs.Strategy('MakerBoostCompositeStrategy');
     mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
     mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    mcdBoostStrategy.addSubSlot('&daiAddr', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     mcdBoostStrategy.addTrigger(mcdRatioTrigger);
@@ -1401,7 +1408,7 @@ const createMcdBoostCompositeStrategy = () => {
         '%joinAddr',
         '%gasUsed',
         formatExchangeObj(
-            '%daiAddr',
+            '&daiAddr',
             '%wethAddr',
             '%boostAmount',
             '%wrapper',
@@ -1417,6 +1424,7 @@ const createMcdFLBoostCompositeStrategy = () => {
     const mcdBoostStrategy = new dfs.Strategy('MakerFLBoostCompositeStrategy');
     mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
     mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    mcdBoostStrategy.addSubSlot('&daiAddr', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     mcdBoostStrategy.addTrigger(mcdRatioTrigger);
@@ -1426,7 +1434,7 @@ const createMcdFLBoostCompositeStrategy = () => {
         '%joinAddr',
         '%gasUsed',
         formatExchangeObj(
-            '%daiAddr',
+            '&daiAddr',
             '%wethAddr',
             '%boostAmount',
             '%wrapper',

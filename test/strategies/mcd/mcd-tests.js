@@ -161,7 +161,6 @@ const mcdBoostStrategyTest = async (numTests) => {
         let vaultId;
         let mcdView;
         let flBalancer;
-        // let sellWrapper;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];

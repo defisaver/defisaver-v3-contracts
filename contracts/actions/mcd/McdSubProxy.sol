@@ -5,9 +5,10 @@ pragma solidity =0.8.10;
 import "../../auth/AdminAuth.sol";
 import "../../auth/ProxyPermission.sol";
 import "../../core/strategy/SubStorage.sol";
+import "../../utils/helpers/UtilHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
-contract McdSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+contract McdSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper, UtilHelper {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID; 
 
@@ -137,10 +138,10 @@ contract McdSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         repaySub.triggerData =  new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
-        repaySub.subData =  new bytes32[](2);
+        repaySub.subData =  new bytes32[](3);
         repaySub.subData[0] = bytes32(_user.vaultId);
         repaySub.subData[1] = bytes32(uint256(_user.targetRatioRepay));
-        
+        repaySub.subData[2] = bytes32(uint256(uint160(DAI_ADDR)));
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the mcd sub
@@ -153,8 +154,9 @@ contract McdSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         boostSub.triggerData =  new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
-        boostSub.subData =  new bytes32[](2);
+        boostSub.subData =  new bytes32[](3);
         boostSub.subData[0] = bytes32(uint256(_user.vaultId));
         boostSub.subData[1] = bytes32(uint256(_user.targetRatioBoost));
+        boostSub.subData[2] = bytes32(uint256(uint160(DAI_ADDR)));
     }
 }
