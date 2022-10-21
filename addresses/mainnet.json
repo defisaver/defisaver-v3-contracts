@@ -341,6 +341,17 @@
         "history": []
     },
     {
+        "name": "ChickenBondsView",
+        "address": "0x809a93fd4a0d7d7906Ef6176f0b5518b418Da08f",
+        "id": "0x542e7045",
+        "path": "contracts/views/ChickenBondsView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CBChickenIn",
         "address": "0x1E990AF6dCf9E9f8a0b2fc76f3BC032A34fFfD14",
         "id": "0x56185a2d",
@@ -1007,14 +1018,14 @@
     },
     {
         "name": "FLEuler",
-        "address": "0xaf591afeCbAa4026Be377AA3cF02dA366f18DE07",
+        "address": "0x66DC6444CdC099153f89332e0d4C87af5C966A75",
         "id": "0x23179eb0",
         "path": "contracts/actions/flashloan/FLEuler.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xaf591afeCbAa4026Be377AA3cF02dA366f18DE07"]
     },
     {
         "name": "UniSupply",
