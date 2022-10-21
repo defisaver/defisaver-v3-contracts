@@ -38,7 +38,11 @@ contract CompV3Supply is ActionBase, CompV3Helper {
         params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
+
+        // param was added later on se we check if it's sent
+        if (_paramMapping.length == 5) {
+            params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
+        }
 
         (uint256 withdrawAmount, bytes memory logData) = _supply(params);
         emit ActionEvent("CompV3Supply", logData);

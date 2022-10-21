@@ -26,6 +26,7 @@ contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {
         RatioState ratioState;
         uint256 targetRatio;
         address market;
+        address user;
     }
 
     /// @inheritdoc ActionBase
@@ -41,7 +42,13 @@ contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {
         uint256 targetRatio = _parseParamUint(uint256(inputData.targetRatio), _paramMapping[1], _subData, _returnValues);
         address market = _parseParamAddr(address(inputData.market), _paramMapping[2], _subData, _returnValues);
 
-        uint256 currRatio = getSafetyRatio(market, address(this));
+        address user = address(this);
+
+        if (_paramMapping.length == 4) {
+            user = _parseParamAddr(address(inputData.user), _paramMapping[3], _subData, _returnValues);
+        }
+
+        uint256 currRatio = getSafetyRatio(market, user);
 
         uint256 startRatio = uint256(tempStorage.getBytes32("COMP_RATIO"));
         

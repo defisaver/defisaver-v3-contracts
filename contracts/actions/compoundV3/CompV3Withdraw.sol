@@ -9,15 +9,15 @@ import "./helpers/CompV3Helper.sol";
 contract CompV3Withdraw is ActionBase, CompV3Helper {
 
     /// @param market Main Comet proxy contract that is different for each compound market
-    /// @param tokenAddr Address of the token to withdraw
-    /// @param amount The quantity to withdraw
     /// @param to Address where we are sending the withdrawn tokens
+    /// @param asset Address of the token to withdraw
+    /// @param amount The quantity to withdraw
     /// @param onBehalf Address from which we are withdrawing the tokens from
     struct Params {
         address market;
-        address tokenAddr;
-        uint256 amount;
         address to;
+        address asset;
+        uint256 amount;
         address onBehalf;
     }
 
@@ -31,10 +31,14 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
         Params memory params = parseInputs(_callData);
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
-        params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
+        params.asset = _parseParamAddr(params.asset, _paramMapping[2], _subData, _returnValues);
+        params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
+
+        // param was added later on se we check if it's sent
+        if (_paramMapping.length == 5) {
+            params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
+        }
 
         (uint256 withdrawAmount, bytes memory logData) = _withdraw(params);
         emit ActionEvent("CompV3Withdraw", logData);
@@ -72,14 +76,14 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
 
         // if _amount type(uint).max that means take out whole balance of _to address
         if (_params.amount == type(uint256).max) {
-            if(_params.tokenAddr == IComet(_params.market).baseToken()) {
+            if(_params.asset == IComet(_params.market).baseToken()) {
                 _params.amount = IComet(_params.market).balanceOf(_params.onBehalf);
             } else {
-                _params.amount = IComet(_params.market).collateralBalanceOf(_params.onBehalf, _params.tokenAddr);
+                _params.amount = IComet(_params.market).collateralBalanceOf(_params.onBehalf, _params.asset);
             }
         }
 
-        IComet(_params.market).withdrawFrom(_params.onBehalf, _params.to, _params.tokenAddr, _params.amount);
+        IComet(_params.market).withdrawFrom(_params.onBehalf, _params.to, _params.asset, _params.amount);
 
         bytes memory logData = abi.encode(_params);
         return (_params.amount, logData);

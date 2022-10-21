@@ -1,60 +1,41 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
+import "../../contracts/interfaces/compoundV3/IComet.sol";
 import "../../contracts/DS/DSProxyFactoryInterface.sol";
 import "../../contracts/actions/compoundV3/CompV3Supply.sol";
 import "../../contracts/actions/compoundV3/CompV3Borrow.sol";
 import "../../contracts/actions/compoundV3/CompV3Withdraw.sol";
 import "../../contracts/actions/compoundV3/CompV3Payback.sol";
-
 import "../../contracts/actions/compoundV3/CompV3SubProxy.sol";
 
-contract CompUser {
+contract CompUserEOA {
     DSProxy public proxy;
     address public proxyAddr;
+    IComet public comet;
 
     address constant FACTORY_ADDR = 0xA26e15C895EFc0616177B7c1e7270A4C7D51C997;
 
-    constructor() {
+    constructor(address _comet) {
         proxy = DSProxyFactoryInterface(FACTORY_ADDR).build();
         proxyAddr = address(proxy);
+        comet = IComet(_comet);
+
+        // gib allow to proxy
+        comet.allow(address(proxy), true);
     }
 
     function supply(
-        address _market,
         address _tokenAddr,
         uint256 _amount
     ) public {
-        CompV3Supply compV3Supply = new CompV3Supply();
+        IERC20(_tokenAddr).approve(address(comet), type(uint256).max);
 
-        CompV3Supply.Params memory params = CompV3Supply.Params({
-            market: _market,
-            tokenAddr: _tokenAddr,
-            amount: _amount,
-            from: proxyAddr,
-            onBehalf: address(0)
-        });
-
-        proxy.execute(
-            address(compV3Supply),
-            abi.encodeWithSignature("executeActionDirect(bytes)", abi.encode(params))
-        );
+        comet.supply(_tokenAddr, _amount);
     }
 
-    function borrow(address _market, uint256 _amount) public {
-        CompV3Borrow compV3Borrow = new CompV3Borrow();
-
-        CompV3Borrow.Params memory params = CompV3Borrow.Params({
-            market: _market,
-            amount: _amount,
-            to: msg.sender,
-            onBehalf: address(0)
-        });
-
-        proxy.execute(
-            address(compV3Borrow),
-            abi.encodeWithSignature("executeActionDirect(bytes)", abi.encode(params))
-        );
+    function borrow(uint256 _amount) public {
+        comet.withdraw(comet.baseToken(), _amount);
     }
 
     function subToAutomationBundles(
@@ -75,7 +56,7 @@ contract CompUser {
             targetRatioBoost: _targetRatioBoost,
             targetRatioRepay: _targetRatioRepay,
             boostEnabled: true,
-            isEOA: false
+            isEOA: true
         });
 
         proxy.execute(

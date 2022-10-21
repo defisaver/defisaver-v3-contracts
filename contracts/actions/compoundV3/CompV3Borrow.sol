@@ -31,7 +31,11 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
+
+        // param was added later on se we check if it's sent
+        if (_paramMapping.length == 4) {
+            params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
+        }
 
         (uint256 withdrawAmount, bytes memory logData) = _borrow(params);
         emit ActionEvent("CompV3Borrow", logData);
