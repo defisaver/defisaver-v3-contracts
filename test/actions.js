@@ -455,9 +455,9 @@ const allowCompV3 = async (market, proxy, manager, isAllowed) => {
 const withdrawCompV3 = async (market, proxy, tokenAddr, amount, onBehalf, to) => {
     const compV3WithdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
         market,
+        to,
         tokenAddr,
         amount,
-        to,
         onBehalf,
     );
     const functionData = compV3WithdrawAction.encodeForDsProxyCall()[1];
