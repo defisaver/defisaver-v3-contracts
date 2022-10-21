@@ -384,7 +384,7 @@ const createAaveCloseStrategyBase = (strategyName) => {
     aaveCloseStrategy.addSubSlot('&debtAssetId', 'uint16');
     aaveCloseStrategy.addSubSlot('&nullAddress', 'address');
 
-    const trigger = new dfs.triggers.AaveQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
 
     aaveCloseStrategy.addTrigger(trigger);
 

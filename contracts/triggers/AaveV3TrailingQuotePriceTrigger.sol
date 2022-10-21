@@ -9,10 +9,11 @@ import "../interfaces/lido/IWStEth.sol";
 import "../auth/AdminAuth.sol";
 import "../DS/DSMath.sol";
 import "../utils/TokenUtils.sol";
+import "../utils/TokenPriceHelper.sol";
 import "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 
 /// @title Validates trailing stop for quoted asset price
-contract AaveTrailingQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper {
+contract AaveV3TrailingQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper, TokenPriceHelper {
     using TokenUtils for address;
 
     IAaveV3Oracle public constant aaveOracleV3 =
@@ -21,7 +22,7 @@ contract AaveTrailingQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3Rat
     /// @param baseTokenAddr address of the token which is quoted
     /// @param baseStartRoundId roundId of the base token feed at time of subscription
     /// @param quoteTokenAddr address of the quote token
-    /// @param quoteTokenAddr roundId of the quote token feed at time of subscription
+    /// @param quoteStartRoundId roundId of the quote token feed at time of subscription
     /// @param percentage price percentage difference on which to trigger
     struct SubParams {
         address baseTokenAddr;
@@ -64,24 +65,42 @@ contract AaveTrailingQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3Rat
             return false;
         }
 
+        IAggregatorV3 baseAggregator;
+        IAggregatorV3 quoteAggregator;
+        {
+            /// @dev we need to handle steth but do nothing in the case of WETH and WBTC
+            /// because AaveV3Oracle doesnt use 0xeee... and 0xbbb...
+            address baseTokenAddr = triggerSubData.baseTokenAddr;
+            if (triggerSubData.baseTokenAddr == WSTETH_ADDR) baseTokenAddr = STETH_ADDR;
+            baseAggregator = IAggregatorV3(aaveOracleV3.getSourceOfAsset(baseTokenAddr));
+
+            address quoteTokenAddr = triggerSubData.quoteTokenAddr;
+            if (triggerSubData.quoteTokenAddr == WSTETH_ADDR) quoteTokenAddr = STETH_ADDR;
+            quoteAggregator = IAggregatorV3(aaveOracleV3.getSourceOfAsset(quoteTokenAddr));
+        }
+
         (uint256 baseMaxPrice, uint256 baseMaxPriceTimeStamp) = getRoundInfo(
             triggerSubData.baseTokenAddr,
-            triggerCallData.baseMaxRoundId
+            triggerCallData.baseMaxRoundId,
+            baseAggregator
         );
         (uint256 quoteMaxPrice, uint256 quoteMaxPriceTimeStamp) = getRoundInfo(
             triggerSubData.quoteTokenAddr,
-            triggerCallData.quoteMaxRoundId
+            triggerCallData.quoteMaxRoundId,
+            quoteAggregator
         );
 
         // we can't send a roundId that happened before the users sub
         {
             (, uint256 baseStartTimeStamp) = getRoundInfo(
                 triggerSubData.baseTokenAddr,
-                triggerSubData.baseStartRoundId
+                triggerSubData.baseStartRoundId,
+                baseAggregator
             );
             (, uint256 quoteStartTimeStamp) = getRoundInfo(
                 triggerSubData.quoteTokenAddr,
-                triggerSubData.quoteStartRoundId
+                triggerSubData.quoteStartRoundId,
+                quoteAggregator
             );
 
             if (
@@ -97,7 +116,8 @@ contract AaveTrailingQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3Rat
         if (triggerCallData.quoteMaxRoundIdNext != 0) {
             (, uint256 baseMaxRoundIdNextTimestamp) = getRoundInfo(
                 triggerSubData.baseTokenAddr,
-                triggerCallData.baseMaxRoundIdNext
+                triggerCallData.baseMaxRoundIdNext,
+                baseAggregator
             );
 
             if (!roundEncompassed(
@@ -110,7 +130,8 @@ contract AaveTrailingQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3Rat
         } else {
             (, uint256 quoteMaxRoundIdNextTimestamp) = getRoundInfo(
                 triggerSubData.quoteTokenAddr,
-                triggerCallData.quoteMaxRoundIdNext
+                triggerCallData.quoteMaxRoundIdNext,
+                quoteAggregator
             );
 
             if (!roundEncompassed(
@@ -179,45 +200,6 @@ contract AaveTrailingQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3Rat
         uint256 amountDiff = (_maxPrice * _percentage) / 10**10;
 
         return _currPrice <= (_maxPrice - amountDiff);
-    }
-
-    /// @dev Helper function that returns chainlink price data
-    /// @param _inputTokenAddr Token address we are looking the usd price for
-    /// @param _roundId Chainlink roundId, if 0 uses the latest
-    function getRoundInfo(address _inputTokenAddr, uint80 _roundId)
-        public
-        view
-        returns (uint256, uint256 updateTimestamp)
-    {
-        address tokenAddr = _inputTokenAddr;
-
-        if (_inputTokenAddr == TokenUtils.WETH_ADDR) {
-            tokenAddr = TokenUtils.ETH_ADDR;
-        }
-
-        if (_inputTokenAddr == TokenUtils.WSTETH_ADDR) {
-            tokenAddr = TokenUtils.STETH_ADDR;
-        }
-
-        address aggregatorAddr = aaveOracleV3.getSourceOfAsset(tokenAddr);
-        int256 chainlinkPrice;
-        
-        if (_roundId == 0) {
-            (, chainlinkPrice, , updateTimestamp, ) = IAggregatorV3(aggregatorAddr).latestRoundData();
-        } else {
-
-            (, chainlinkPrice, , updateTimestamp, ) = IAggregatorV3(aggregatorAddr).getRoundData(_roundId);
-        }
-
-        // no price for wsteth, can calculate from steth
-        if (_inputTokenAddr == TokenUtils.WSTETH_ADDR) {
-            return (
-                wmul(uint256(chainlinkPrice), IWStEth(TokenUtils.WSTETH_ADDR).stEthPerToken()),
-                updateTimestamp
-            );
-        }
-
-        return (uint256(chainlinkPrice), updateTimestamp);
     }
     
     function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {

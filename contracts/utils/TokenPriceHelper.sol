@@ -10,10 +10,33 @@ import "../interfaces/chainlink/IFeedRegistry.sol";
 import "./Denominations.sol";
 import "../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../interfaces/aaveV2/IPriceOracleGetterAave.sol";
+import "../interfaces/chainlink/IAggregatorV3.sol";
 
 /// @title TokenPriceHelper Fetches prices from chainlink/aave and formats tokens properly
 contract TokenPriceHelper is DSMath, UtilHelper {
     IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
+
+    /// @dev Helper function that returns chainlink price data
+    /// @param _inputTokenAddr Token address we are looking the usd price for
+    /// @param _roundId Chainlink roundId, if 0 uses the latest
+    function getRoundInfo(address _inputTokenAddr, uint80 _roundId, IAggregatorV3 aggregator)
+        public
+        view
+        returns (uint256, uint256 updateTimestamp)
+    {
+        int256 price;
+
+        if (_roundId == 0) {
+            (, price, , updateTimestamp, ) = aggregator.latestRoundData();
+        } else {
+            (, price, , updateTimestamp, ) = aggregator.getRoundData(_roundId);
+        }
+
+        // no price for wsteth, can calculate from steth
+        if (_inputTokenAddr == WSTETH_ADDR) price = getWStEthPrice(price);
+
+        return (uint256(price), updateTimestamp);
+    }
 
     /// @dev Helper function that returns chainlink price data
     /// @param _inputTokenAddr Token address we are looking the usd price for
@@ -24,26 +47,9 @@ contract TokenPriceHelper is DSMath, UtilHelper {
         returns (uint256, uint256 updateTimestamp)
     {
         address tokenAddr = getAddrForChainlinkOracle(_inputTokenAddr);
+        IAggregatorV3 aggregator = IAggregatorV3(feedRegistry.getFeed(tokenAddr, Denominations.USD));
 
-        int256 price;
-
-        if (_roundId == 0) {
-            (, price, , updateTimestamp, ) = feedRegistry.latestRoundData(
-                tokenAddr,
-                Denominations.USD
-            );
-        } else {
-            (, price, , updateTimestamp, ) = feedRegistry.getRoundData(
-                tokenAddr,
-                Denominations.USD,
-                _roundId
-            );
-        }
-
-        // no price for wsteth, can calculate from steth
-        if (_inputTokenAddr == WSTETH_ADDR) price = getWStEthPrice(price);
-
-        return (uint256(price), updateTimestamp);
+        return getRoundInfo(_inputTokenAddr, _roundId, aggregator);
     }
 
     /// @dev helper function that returns latest token price in USD

@@ -11,7 +11,7 @@ import "../utils/TokenUtils.sol";
 import "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription
-contract AaveQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper {
+contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper {
     using TokenUtils for address;
 
     enum PriceState {
@@ -53,20 +53,6 @@ contract AaveQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper
 
     /// @dev helper function that returns latest base token price in quote tokens
     function getPrice(address _baseTokenAddr, address _quoteTokenAddr) public view returns (uint256 price) {
-        address baseTokenAddr = _baseTokenAddr;
-        if (baseTokenAddr == TokenUtils.WETH_ADDR) {
-            baseTokenAddr = TokenUtils.ETH_ADDR;
-        } else if (baseTokenAddr == TokenUtils.WSTETH_ADDR) {
-            baseTokenAddr = TokenUtils.STETH_ADDR;
-        }
-
-        address quoteTokenAddr = _quoteTokenAddr;
-        if (quoteTokenAddr == TokenUtils.WETH_ADDR) {
-            quoteTokenAddr = TokenUtils.ETH_ADDR;
-        } else if (quoteTokenAddr == TokenUtils.WSTETH_ADDR) {
-            quoteTokenAddr = TokenUtils.STETH_ADDR;
-        }
-
         address[] memory assets = new address[](2);
         assets[0] = _baseTokenAddr;
         assets[1] = _quoteTokenAddr;

@@ -23,7 +23,6 @@ const {
     BN2Float,
     takeSnapshot,
     revertToSnapshot,
-    expectCloseEq,
     getAddrFromRegistry,
 } = require('../../utils');
 
@@ -559,7 +558,7 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
 
             strategyExecutorL2 = await redeployCore(true);
 
-            await redeploy('AaveQuotePriceTrigger');
+            await redeploy('AaveV3QuotePriceTrigger');
 
             const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
 
@@ -824,7 +823,7 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
 
             strategyExecutorL2 = await redeployCore(true);
 
-            await redeploy('AaveQuotePriceTrigger');
+            await redeploy('AaveV3QuotePriceTrigger');
 
             const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
 
@@ -1087,7 +1086,7 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
 
             strategyExecutorL2 = await redeployCore(true);
 
-            await redeploy('AaveQuotePriceTrigger');
+            await redeploy('AaveV3QuotePriceTrigger');
 
             const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
 
@@ -1378,7 +1377,7 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
 
             strategyExecutorL2 = await redeployCore(true);
 
-            await redeploy('AaveQuotePriceTrigger');
+            await redeploy('AaveV3QuotePriceTrigger');
 
             const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
 
