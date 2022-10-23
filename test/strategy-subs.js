@@ -16,6 +16,7 @@ const {
     createReflexerTrigger,
     createLiquityTrigger,
     createTrailingStopTrigger,
+    createCbRebondTrigger,
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
 } = require('./triggers');
@@ -27,6 +28,7 @@ const {
     WETH_ADDRESS,
     LUSD_ADDR,
     USDC_ADDR,
+    BLUSD_ADDR,
 } = require('./utils');
 
 const { MCD_MANAGER_ADDR } = require('./utils-mcd');
@@ -376,6 +378,21 @@ const subCompV3AutomationStrategy = async (
     return { firstSub: subId1, secondSub: subId2 };
 };
 
+const subCbRebondStrategy = async (proxy, bondID, strategyId) => {
+    const isBundle = false;
+
+    const bondIDEncoded = abiCoder.encode(['uint256'], [bondID.toString()]);
+    const bLusdTokenEncoded = abiCoder.encode(['address'], [BLUSD_ADDR]);
+    const lusdTokenEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
+
+    const triggerData = await createCbRebondTrigger(bondID);
+
+    const strategySub = [strategyId, isBundle, [triggerData], [bondIDEncoded, bLusdTokenEncoded, lusdTokenEncoded]];
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdRepayStrategy,
@@ -397,4 +414,5 @@ module.exports = {
     subLiquityTrailingCloseToCollStrategy,
     subMcdTrailingCloseToCollStrategy,
     subCompV3AutomationStrategy,
+    subCbRebondStrategy,
 };

@@ -1552,6 +1552,49 @@ const createCompV3FlBoostStrategy = () => {
     return compV3BoostStrategy.encodeForDsProxyCall();
 };
 
+const createCbRebondStrategy = () => {
+    const cbRebondStrategy = new dfs.Strategy('CBRebondStrategy');
+
+    cbRebondStrategy.addSubSlot('&bondID', 'uint256');
+    cbRebondStrategy.addSubSlot('&bLUSDToken', 'address');
+    cbRebondStrategy.addSubSlot('&lusdToken', 'address');
+
+    const cbRebondTrigger = new dfs.triggers.CBRebondTrigger('0');
+    cbRebondStrategy.addTrigger(cbRebondTrigger);
+
+    const cbChickenInAction = new dfs.actions.chickenBonds.CBChickenInAction(
+        '&bondID', // bondID hardcoded from sub slot
+        '&proxy', // _to hardcoded to proxy
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&bLUSDToken', // hardcoded as it's always bLUSD
+            '&lusdToken', // hardcoded as it's always LUSD
+            '$1', //  hardcoded from chickenIn Amount
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', '&lusdToken', '$2',
+    );
+
+    const cbCreateAction = new dfs.actions.chickenBonds.CBCreateAction(
+        '$3', // lusdAmount from the gas fee action
+        '&proxy', // from hardcoded proxy
+    );
+
+    cbRebondStrategy.addAction(cbChickenInAction);
+    cbRebondStrategy.addAction(sellAction);
+    cbRebondStrategy.addAction(feeTakingAction);
+    cbRebondStrategy.addAction(cbCreateAction);
+
+    return cbRebondStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
@@ -1584,4 +1627,5 @@ module.exports = {
     createFlCompV3RepayStrategy,
     createCompV3BoostStrategy,
     createCompV3FlBoostStrategy,
+    createCbRebondStrategy,
 };

@@ -10,6 +10,7 @@ import "../interfaces/curve/ISwaps.sol";
 import "../utils/Sqrt.sol";
 import "../DS/DSMath.sol";
 
+/// @title Chicken Bonds trigger for optimal rebond time of a bond
 contract CBRebondTrigger is ITrigger, AdminAuth, DSMath, ChickenBondsView {
 
     using Sqrt for uint256;
@@ -22,15 +23,19 @@ contract CBRebondTrigger is ITrigger, AdminAuth, DSMath, ChickenBondsView {
     
     function isTriggered(bytes memory, bytes memory _subData)
         public
+        view
         override
         returns (bool)
     {   
         SubParams memory triggerSubData = parseInputs(_subData);
+        IChickenBondManager.BondData memory bondData = CBManager.getBondData(triggerSubData.bondID);
 
-        // TODO: check state of the bond
+        // bond must be in active state
+        if (bondData.status != IChickenBondManager.BondStatus.active) {
+            return false;
+        }
 
         uint256 currentBLusdAmount = CBManager.calcAccruedBLUSD(triggerSubData.bondID);
-        IChickenBondManager.BondData memory bondData = CBManager.getBondData(triggerSubData.bondID);
 
         uint256 optimalRebondAmount = getOptimalBLusdAmount(bondData.lusdAmount, getOptimalRebondTime());
 

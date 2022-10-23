@@ -1689,6 +1689,69 @@ const callLiquityCloseToCollStrategy = async (
     );
 };
 
+// eslint-disable-next-line max-len
+const callCbRebondStrategy = async (
+    botAcc,
+    strategyExecutor,
+    subId,
+    strategySub,
+) => {
+    const actionsCallData = [];
+    const cbChickenInAction = new dfs.actions.chickenBonds.CBChickenInAction(
+        '0', // bondID hardcoded from sub slot
+        placeHolderAddr, // _to hardcoded to proxy
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            placeHolderAddr, // blusd
+            placeHolderAddr, // lusd
+            '0', // piped from chickenIn
+            UNISWAP_WRAPPER,
+        ),
+        placeHolderAddr, // proxy
+        placeHolderAddr, // proxy
+    );
+
+    const gasCost = 1_200_000;
+    const gasFee = new dfs.actions.basic.GasFeeAction(gasCost, placeHolderAddr, 0);
+
+    const cbCreateAction = new dfs.actions.chickenBonds.CBCreateAction(
+        '0', // lusdAmount from the gas fee action
+        placeHolderAddr, // from hardcoded proxy
+    );
+
+    actionsCallData.push(cbChickenInAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(gasFee.encodeForRecipe()[0]);
+    actionsCallData.push(cbCreateAction.encodeForRecipe()[0]);
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    const strategyIndex = 0;
+    const triggerCallData = [];
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(
+        `GasUsed callMcdCloseToCollStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
 module.exports = {
     callDcaStrategy,
     callMcdRepayStrategy,
@@ -1717,4 +1780,5 @@ module.exports = {
     callMcdRepayFromMstableWithExchangeStrategy,
     callMcdRepayFromRariStrategy,
     callMcdRepayFromRariStrategyWithExchange,
+    callCbRebondStrategy,
 };
