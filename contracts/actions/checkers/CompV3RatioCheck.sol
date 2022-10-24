@@ -42,10 +42,13 @@ contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {
         uint256 targetRatio = _parseParamUint(uint256(inputData.targetRatio), _paramMapping[1], _subData, _returnValues);
         address market = _parseParamAddr(address(inputData.market), _paramMapping[2], _subData, _returnValues);
 
-        address user = address(this);
-
+        address user;
         if (_paramMapping.length == 4) {
             user = _parseParamAddr(address(inputData.user), _paramMapping[3], _subData, _returnValues);
+        }
+
+        if (user == address(0)) {
+            user = address(this);
         }
 
         uint256 currRatio = getSafetyRatio(market, user);
