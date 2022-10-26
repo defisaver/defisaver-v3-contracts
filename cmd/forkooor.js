@@ -1325,7 +1325,7 @@ const subAaveClose = async (
     let bundleId = await getLatestBundleId();
     if (bundleId < 2) {
         const triggerAddr = await redeploy(
-            'AaveQuotePriceTrigger', undefined, false, true,
+            'AaveV3QuotePriceTrigger', undefined, false, true,
         ).then((c) => c.address);
         const viewAddr = await redeploy(
             'AaveV3OracleView', undefined, false, true,
