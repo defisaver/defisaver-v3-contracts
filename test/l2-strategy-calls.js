@@ -473,7 +473,7 @@ const aaveV3CloseActionsEncoded = {
         closeGasCost,
     )).encodeForRecipe()[0],
 
-    sendAction: () => (new dfs.actions.basic.SendTokenAction(
+    sendAction: () => (new dfs.actions.basic.SendTokenAndUnwrapAction(
         placeHolderAddr,
         placeHolderAddr,
         MAXUINT,
