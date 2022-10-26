@@ -363,13 +363,13 @@ const aaveV3CloseActions = {
         '$1', // hardcoded output from FL action
     ),
 
-    sendDebt: () => new dfs.actions.basic.SendTokenAction(
+    sendDebt: () => new dfs.actions.basic.SendTokenAndUnwrapAction(
         '&debtAsset',
         '&eoa', // hardcoded so only proxy owner receives amount
         '%amountToRecipient(maxUint)', // will always be maxUint
     ),
 
-    sendColl: () => new dfs.actions.basic.SendTokenAction(
+    sendColl: () => new dfs.actions.basic.SendTokenAndUnwrapAction(
         '&collAsset',
         '&eoa', // hardcoded so only proxy owner receives amount
         '%amountToRecipient(maxUint)', // will always be maxUint

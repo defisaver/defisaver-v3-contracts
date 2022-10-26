@@ -628,12 +628,12 @@ const getAllowance = async (tokenAddr, from, to) => {
 };
 
 const balanceOf = async (tokenAddr, addr) => {
-    const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
     let balance = '';
 
     if (tokenAddr.toLowerCase() === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
         balance = await hre.ethers.provider.getBalance(addr);
     } else {
+        const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
         balance = await tokenContract.balanceOf(addr);
     }
     return balance;

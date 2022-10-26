@@ -24,6 +24,7 @@ const {
     takeSnapshot,
     revertToSnapshot,
     getAddrFromRegistry,
+    ETH_ADDR,
 } = require('../../utils');
 
 const {
@@ -140,6 +141,8 @@ const testPairs = [
         debtAsset: 'WETH',
     },
 ];
+
+const compareAddr = (addrA, addrB) => addrA.toLowerCase() === addrB.toLowerCase();
 
 const aaveV3RepayL2StrategyTest = async (numTestPairs) => {
     describe('AaveV3-Repay-L2-Strategy-Test', function () {
@@ -549,7 +552,7 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
             proxy = await getProxy(senderAcc.address);
             proxyAddr = proxy.address;
 
-            console.log('proxyAddr: ', proxyAddr);
+            console.log({ eoa: senderAcc.address, proxy: proxyAddr });
 
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
             const poolAddress = await aaveMarketContract.getPool();
@@ -666,6 +669,16 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
             it('... should call AaveV3 L2 Close strategy', async () => {
                 snapshotId4partial = await takeSnapshot();
 
+                const collAssetBalanceBefore = await balanceOf(
+                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
+                    senderAcc.address,
+                );
+
+                const debtAssetBalanceBefore = await balanceOf(
+                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
+                    senderAcc.address,
+                );
+
                 await callAaveCloseToDebtL2Strategy(
                     strategyExecutorByBot,
                     subId,
@@ -674,19 +687,23 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    collAddr,
+                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 ).then((e) => Object({
-                    collAssetBalance: e,
-                    collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
+                    collAssetBalance: e.sub(collAssetBalanceBefore),
+                    collAssetBalanceFloat: BN2Float(
+                        e.sub(collAssetBalanceBefore), collAssetInfo.decimals,
+                    ),
                 }));
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    debtAddr,
+                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 ).then((e) => Object({
-                    debtAssetBalance: e,
-                    debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
+                    debtAssetBalance: e.sub(debtAssetBalanceBefore),
+                    debtAssetBalanceFloat: BN2Float(
+                        e.sub(debtAssetBalanceBefore), debtAssetInfo.decimals,
+                    ),
                 }));
 
                 console.log('-----sender coll/debt assets after close-----');
@@ -814,7 +831,7 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
             proxy = await getProxy(senderAcc.address);
             proxyAddr = proxy.address;
 
-            console.log('proxyAddr: ', proxyAddr);
+            console.log({ eoa: senderAcc.address, proxy: proxyAddr });
 
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
             const poolAddress = await aaveMarketContract.getPool();
@@ -923,6 +940,16 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
                     debtAssetInfo.decimals,
                 );
 
+                const collAssetBalanceBefore = await balanceOf(
+                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
+                    senderAcc.address,
+                );
+
+                const debtAssetBalanceBefore = await balanceOf(
+                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
+                    senderAcc.address,
+                );
+
                 await callAaveFLCloseToDebtL2Strategy(
                     strategyExecutorByBot,
                     subId,
@@ -934,19 +961,23 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    collAddr,
+                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 ).then((e) => Object({
-                    collAssetBalance: e,
-                    collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
+                    collAssetBalance: e.sub(collAssetBalanceBefore),
+                    collAssetBalanceFloat: BN2Float(
+                        e.sub(collAssetBalanceBefore), collAssetInfo.decimals,
+                    ),
                 }));
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    debtAddr,
+                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 ).then((e) => Object({
-                    debtAssetBalance: e,
-                    debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
+                    debtAssetBalance: e.sub(debtAssetBalanceBefore),
+                    debtAssetBalanceFloat: BN2Float(
+                        e.sub(debtAssetBalanceBefore), debtAssetInfo.decimals,
+                    ),
                 }));
 
                 console.log('-----sender coll/debt assets after close-----');
@@ -1077,7 +1108,7 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
             proxy = await getProxy(senderAcc.address);
             proxyAddr = proxy.address;
 
-            console.log('proxyAddr: ', proxyAddr);
+            console.log({ eoa: senderAcc.address, proxy: proxyAddr });
 
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
             const poolAddress = await aaveMarketContract.getPool();
@@ -1205,6 +1236,16 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
                     collAssetInfo.decimals,
                 );
 
+                const collAssetBalanceBefore = await balanceOf(
+                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
+                    senderAcc.address,
+                );
+
+                const debtAssetBalanceBefore = await balanceOf(
+                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
+                    senderAcc.address,
+                );
+
                 await callAaveCloseToCollL2Strategy(
                     strategyExecutorByBot,
                     subId,
@@ -1214,19 +1255,23 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    collAddr,
+                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 ).then((e) => Object({
-                    collAssetBalance: e,
-                    collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
+                    collAssetBalance: e.sub(collAssetBalanceBefore),
+                    collAssetBalanceFloat: BN2Float(
+                        e.sub(collAssetBalanceBefore), collAssetInfo.decimals,
+                    ),
                 }));
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    debtAddr,
+                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 ).then((e) => Object({
-                    debtAssetBalance: e,
-                    debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
+                    debtAssetBalance: e.sub(debtAssetBalanceBefore),
+                    debtAssetBalanceFloat: BN2Float(
+                        e.sub(debtAssetBalanceBefore), debtAssetInfo.decimals,
+                    ),
                 }));
 
                 console.log('-----sender coll/debt assets after close-----');
@@ -1368,7 +1413,7 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
             proxy = await getProxy(senderAcc.address);
             proxyAddr = proxy.address;
 
-            console.log('proxyAddr: ', proxyAddr);
+            console.log({ eoa: senderAcc.address, proxy: proxyAddr });
 
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
             const poolAddress = await aaveMarketContract.getPool();
@@ -1490,6 +1535,16 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                     collAssetInfo.decimals,
                 );
 
+                const collAssetBalanceBefore = await balanceOf(
+                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
+                    senderAcc.address,
+                );
+
+                const debtAssetBalanceBefore = await balanceOf(
+                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
+                    senderAcc.address,
+                );
+
                 await callAaveFLCloseToCollL2Strategy(
                     strategyExecutorByBot,
                     subId,
@@ -1502,19 +1557,23 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    collAddr,
+                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 ).then((e) => Object({
-                    collAssetBalance: e,
-                    collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
+                    collAssetBalance: e.sub(collAssetBalanceBefore),
+                    collAssetBalanceFloat: BN2Float(
+                        e.sub(collAssetBalanceBefore), collAssetInfo.decimals,
+                    ),
                 }));
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    debtAddr,
+                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 ).then((e) => Object({
-                    debtAssetBalance: e,
-                    debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
+                    debtAssetBalance: e.sub(debtAssetBalanceBefore),
+                    debtAssetBalanceFloat: BN2Float(
+                        e.sub(debtAssetBalanceBefore), debtAssetInfo.decimals,
+                    ),
                 }));
 
                 console.log('-----sender coll/debt assets after close-----');

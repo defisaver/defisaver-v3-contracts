@@ -7,12 +7,10 @@ import "../interfaces/aaveV3/IAaveV3Oracle.sol";
 import "../interfaces/lido/IWStEth.sol";
 import "../auth/AdminAuth.sol";
 import "../DS/DSMath.sol";
-import "../utils/TokenUtils.sol";
 import "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription
 contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper {
-    using TokenUtils for address;
 
     enum PriceState {
         OVER,
@@ -61,14 +59,6 @@ contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelp
         );
 
         price = assetPrices[0] * 1e8 / assetPrices[1];
-        
-        if (_baseTokenAddr == TokenUtils.WSTETH_ADDR) {
-            return wmul(uint256(price), IWStEth(TokenUtils.WSTETH_ADDR).stEthPerToken());
-        }
-
-        if (_quoteTokenAddr == TokenUtils.WSTETH_ADDR) {
-            return wdiv(uint256(price), IWStEth(TokenUtils.WSTETH_ADDR).stEthPerToken());
-        }
 
         return uint256(price);
     }
