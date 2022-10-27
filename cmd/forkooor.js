@@ -1339,7 +1339,7 @@ const subCompV3Automation = async (
         console.log(repayBundleId, boostBundleId);
     }
 
-    if (isEOA) {
+    if (isEOA === 'true') {
         if (parseInt(bundleId, 10) < 6) {
             await openStrategyAndBundleStorage(true);
             const compV3RepayStrategyEncoded = createCompV3EOARepayStrategy();
@@ -1377,7 +1377,7 @@ const subCompV3Automation = async (
         optimalRatioBoostFormatted.toString(),
         optimalRatioRepayFormatted.toString(),
         boostEnabled,
-        isEOA,
+        isEOA === 'true',
         addrs[network].REGISTRY_ADDR,
     );
 
@@ -1667,7 +1667,7 @@ const createCompV3Position = async (
     }
 
     try {
-        if (isEOA) {
+        if (isEOA === 'true') {
             let comet = await hre.ethers.getContractAt('IComet', addrs[network].COMET_USDC_ADDR);
             let erc20 = await hre.ethers.getContractAt('IERC20', collToken.address);
 
@@ -1683,7 +1683,7 @@ const createCompV3Position = async (
             // give proxy approval
             await comet.allow(proxy.address, true);
 
-            console.log(`Position created! for ${senderAcc.address}`);
+            console.log(`Position created for ${senderAcc.address}`);
         } else {
             await supplyCompV3(
                 addrs[network].COMET_USDC_ADDR,
