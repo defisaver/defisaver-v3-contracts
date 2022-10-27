@@ -1680,6 +1680,9 @@ const createCompV3Position = async (
             await comet.supply(collToken.address, collAmountWei);
             await comet.withdraw(addrs[network].USDC_ADDR, debtAmountWei);
 
+            // give proxy approval
+            await comet.allow(proxy.address, true);
+
             console.log(`Position created! for ${senderAcc.address}`);
         } else {
             await supplyCompV3(

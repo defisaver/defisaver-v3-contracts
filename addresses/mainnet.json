@@ -1679,7 +1679,7 @@
     },
     {
         "name": "CompV3Borrow",
-        "address": "0xAAD8CD95c75a5Ec3d9E3B9e2F4713A5E7aC5134f",
+        "address": "0x11e7b984299a771C92CD42A87358a32791A75CEA",
         "id": "0xbb9f4021",
         "path": "contracts/actions/compoundV3/CompV3Borrow.sol",
         "version": "1.0.1",
@@ -1712,7 +1712,7 @@
     },
     {
         "name": "CompV3Supply",
-        "address": "0xEd7002b7439A869d213C0a8a0D7B2850B71C66E7",
+        "address": "0xaF36Eca43bb26468078B8163fe5Bc1fCFc292095",
         "id": "0x71643f58",
         "path": "contracts/actions/compoundV3/CompV3Supply.sol",
         "version": "1.0.1",
@@ -1734,7 +1734,7 @@
     },
     {
         "name": "CompV3Withdraw",
-        "address": "0xf6DAB038bE797E138CCF541cb9C0467E3EF3EEA1",
+        "address": "0x0b0F21EDE32DE4243D9145a899E97FC2366Aec46",
         "id": "0xc0072381",
         "path": "contracts/actions/compoundV3/CompV3Withdraw.sol",
         "version": "1.0.1",
@@ -1745,7 +1745,7 @@
     },
     {
         "name": "CompV3RatioCheck",
-        "address": "0xDDE818191FDc8FeE53Af082643dE6103e354585c",
+        "address": "0xEeb7e195d69479910d071Ac1dBC923A17d042960",
         "id": "0x2ce67bb9",
         "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
         "version": "1.0.0",
