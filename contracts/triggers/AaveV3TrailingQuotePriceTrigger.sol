@@ -69,7 +69,7 @@ contract AaveV3TrailingQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3R
         IAggregatorV3 quoteAggregator;
         {
             /// @dev we need to handle steth but do nothing in the case of WETH and WBTC
-            /// because AaveV3Oracle doesnt use 0xeee... and 0xbbb...
+            /// because AaveV3Oracle doesn't use 0xeee... and 0xbbb...
             address baseTokenAddr = triggerSubData.baseTokenAddr;
             if (triggerSubData.baseTokenAddr == WSTETH_ADDR) baseTokenAddr = STETH_ADDR;
             baseAggregator = IAggregatorV3(aaveOracleV3.getSourceOfAsset(baseTokenAddr));

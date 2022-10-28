@@ -332,6 +332,28 @@
       ]
     },
     {
+      "name": "AaveV3QuotePriceTrigger",
+      "address": "0xf2488C41B37B3C990Ec09c0bc1f92460ad875309",
+      "id": "0xda3df4c8",
+      "path": "contracts/triggers/AaveV3QuotePriceTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "AaveV3TrailingQuotePriceTrigger",
+      "address": "0xE1d1c35f8c60001096964A0260b88F6B1c606b68",
+      "id": "0x0e31244d",
+      "path": "contracts/triggers/AaveV3TrailingQuotePriceTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "FLAaveV3",
       "address": "0xfbcF23D2BeF8A2C491cfa4dD409D8dF12d431c85",
       "id": "0x8d7fb192",
