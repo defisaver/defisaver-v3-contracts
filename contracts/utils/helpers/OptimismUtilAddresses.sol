@@ -8,6 +8,7 @@ contract OptimismUtilAddresses {
     address internal constant DEFAULT_BOT = 0x16dd89D6e2f81d0528120fb31f6cFE8528E2738e;
     address internal constant BOT_REGISTRY_ADDRESS = 0xfD2aAeBAe937dd69E13119250B065de4C21FcdBe;
     address internal constant FEE_RECIPIENT = 0x5b12C2B979CB3aB89DD4813837873bC4Dd1930D0;
+    address internal constant AAVE_MARKET = 0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb;
 
     address internal constant UNI_V3_ROUTER = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
     address internal constant UNI_V3_QUOTER = 0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6;
@@ -29,5 +30,4 @@ contract OptimismUtilAddresses {
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
 
     address internal constant CHAINLINK_FEED_REGISTRY = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    
 }
