@@ -19,4 +19,5 @@ contract MainnetLiquityAddresses {
     address internal constant BOND_NFT_ADDRESS = 0xa8384862219188a8f03c144953Cf21fc124029Ee;
     address internal constant BLUSD_AMM_ADDRESS = 0x74ED5d42203806c8CDCf2F04Ca5F60DC777b901c;
     address internal constant LUSD_3CRV_POOL_ADDRESS = 0xEd279fDD11cA84bEef15AF5D39BB4d4bEE23F0cA;
+    address internal constant CURVE_REGISTRY_SWAP_ADDRESS = 0x81C46fECa27B31F3ADC2b91eE4be9717d1cd3DD7;
 }
