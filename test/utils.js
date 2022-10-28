@@ -2,12 +2,14 @@
 const { default: curve } = require('@curvefi/api');
 const hre = require('hardhat');
 const fs = require('fs');
+const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
+const { expect } = require('chai');
 const storageSlots = require('./storageSlots.json');
 
 const { deployAsOwner } = require('../scripts/utils/deployer');
 
 const strategyStorageBytecode = require('../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
-let subStorageBytecode = require('../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
+const subStorageBytecode = require('../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
 const subStorageBytecodeL2 = require('../artifacts/contracts/core/l2/SubStorageL2.sol/SubStorageL2.json').deployedBytecode;
 const bundleStorageBytecode = require('../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
 const recipeExecutorBytecode = require('../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
@@ -44,12 +46,12 @@ const addrs = {
         WETH_ADDRESS: '0x4200000000000000000000000000000000000006',
         DAI_ADDRESS: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
         USDC_ADDR: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
-        EXCHANGE_OWNER_ADDR: '0x322d58b9E75a6918f7e7849AEe0fF09369977e08',
-        SAVER_EXCHANGE_ADDR: '0x36Bf2251E9797df071A9b8bc4dE58F7cAcc16F44',
+        EXCHANGE_OWNER_ADDR: '0xc9a956923bfb5f141f1cd4467126b3ae91e5cc33',
+        SAVER_EXCHANGE_ADDR: '0xFfE2F824f0a1Ca917885CB4f848f3aEf4a32AaB9',
         PROXY_AUTH_ADDR: '0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043',
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
         StrategyProxy: '0xEe0C404FD30E289c305E760b3AE1d1Ae6503350f',
-        SubProxy: '0xfE87DE5e11F580fBD3637f34089BaeeA2C393826',
+        SubProxy: '0x163c08d3F6d916AD6Af55b37728D547e968103F8',
         UNISWAP_WRAPPER: '0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357',
         AAVE_V3_VIEW: '0x5aD16e393615bfeF64e15210C370dd4b8f2753Cb',
         AVG_GAS_PRICE: 0.001,
@@ -228,9 +230,15 @@ const coinGeckoHelper = {
     SUSHI: 'sushi',
 };
 
+const BN2Float = hre.ethers.utils.formatUnits;
+
+const Float2BN = hre.ethers.utils.parseUnits;
+
 const setNetwork = (networkName) => {
     network = networkName;
 };
+
+const getNetwork = () => network;
 
 const getOwnerAddr = () => addrs[network].OWNER_ACC;
 
@@ -378,12 +386,14 @@ const setBalance = async (tokenAddr, userAddr, value) => {
 };
 
 const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {
+    const { decimals } = getAssetInfo(tokenSign);
+
     const data = JSON.parse(fs.readFileSync('test/prices.json', 'utf8'));
     const tokenNames = Object.keys(data);
     for (let i = 0; i < tokenNames.length; i++) {
         if (tokenNames[i] === coinGeckoHelper[tokenSign]) {
             const amountNumber = (amountUSD / data[tokenNames[i]].usd);
-            return amountNumber.toFixed(2);
+            return amountNumber.toFixed(decimals);
         }
     }
     return 0;
@@ -424,14 +434,14 @@ const getNameId = (name) => {
 
 const getAddrFromRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR) => {
     const registryInstance = await hre.ethers.getContractFactory('DFSRegistry');
-    const registry = await registryInstance.attach(regAddr);
+    const registry = registryInstance.attach(regAddr);
 
     // TODO: Write in registry later
-    if (name === 'StrategyProxy') {
-        return addrs[network].StrategyProxy;
-    } if (name === 'SubProxy') {
-        return addrs[network].SubProxy;
-    }
+    // if (name === 'StrategyProxy') {
+    //     return addrs[network].StrategyProxy;
+    // } if (name === 'SubProxy') {
+    //     return addrs[network].SubProxy;
+    // }
     const addr = await registry.getAddr(
         getNameId(name),
     );
@@ -455,7 +465,6 @@ const getProxyWithSigner = async (signer, addr) => {
 };
 
 const getProxy = async (acc) => {
-    console.log(network);
     const proxyRegistry = await
     hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
     let proxyAddr = await proxyRegistry.proxies(acc);
@@ -509,10 +518,10 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
         name = 'StrategyExecutorID';
     }
 
-    if (name === 'FLAaveV3') {
-        // eslint-disable-next-line no-param-reassign
-        name = 'FLActionL2';
-    }
+    // if (name === 'FLAaveV3') {
+    //     // eslint-disable-next-line no-param-reassign
+    //     name = 'FLActionL2';
+    // }
 
     const id = getNameId(name);
 
@@ -564,9 +573,8 @@ const redeployCore = async (isL2 = false) => {
 
     const subStorageAddr = await getAddrFromRegistry('SubStorage', addrs[network].REGISTRY_ADDR);
 
-    if (isL2) subStorageBytecode = subStorageBytecodeL2;
-
-    await setCode(subStorageAddr, subStorageBytecode);
+    if (isL2) await setCode(subStorageAddr, subStorageBytecodeL2);
+    else await setCode(subStorageAddr, subStorageBytecode);
 
     const bundleStorageAddr = await getAddrFromRegistry('BundleStorage', addrs[network].REGISTRY_ADDR);
     await setCode(bundleStorageAddr, bundleStorageBytecode);
@@ -620,12 +628,12 @@ const getAllowance = async (tokenAddr, from, to) => {
 };
 
 const balanceOf = async (tokenAddr, addr) => {
-    const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
     let balance = '';
 
     if (tokenAddr.toLowerCase() === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
         balance = await hre.ethers.provider.getBalance(addr);
     } else {
+        const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
         balance = await tokenContract.balanceOf(addr);
     }
     return balance;
@@ -643,6 +651,47 @@ const balanceOfOnTokenInBlock = async (tokenAddr, addr, block) => {
     let balance = '';
     balance = await tokenContract.balanceOf(addr, { blockTag: block });
     return balance;
+};
+
+/// @notice formats exchange object and sets mock wrapper balance
+const formatMockExchangeObj = async (
+    srcTokenInfo,
+    destTokenInfo,
+    srcAmount,
+    wrapper = undefined,
+) => {
+    if (!wrapper) {
+        // eslint-disable-next-line no-param-reassign
+        wrapper = await getAddrFromRegistry('MockExchangeWrapper');
+    }
+
+    const rateDecimals = 18 + destTokenInfo.decimals - srcTokenInfo.decimals;
+    const rate = Float2BN(
+        (getLocalTokenPrice(srcTokenInfo.symbol)
+        / getLocalTokenPrice(destTokenInfo.symbol)).toFixed(rateDecimals),
+        rateDecimals,
+    );
+
+    const expectedOutput = hre.ethers.constants.MaxInt256;
+
+    await setBalance(
+        destTokenInfo.addresses[chainIds[network]],
+        wrapper,
+        expectedOutput,
+    );
+
+    return [
+        srcTokenInfo.addresses[chainIds[network]],
+        destTokenInfo.addresses[chainIds[network]],
+        srcAmount,
+        0,
+        0,
+        0,
+        nullAddress,
+        wrapper,
+        hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [rate]),
+        [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
+    ];
 };
 
 const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee) => {
@@ -729,6 +778,64 @@ const formatExchangeObjCurve = async (
     ];
 };
 
+const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
+    console.log({ srcAddr, destAddr });
+    const { AlphaRouter } = await import('@uniswap/smart-order-router');
+    const {
+        CurrencyAmount,
+        Token,
+        TradeType,
+        Percent,
+    } = await import('@uniswap/sdk-core');
+
+    const chainId = chainIds[network];
+    const srcTokenInfo = getAssetInfoByAddress(srcAddr, chainId);
+    const srcToken = new Token(
+        chainId,
+        srcAddr,
+        srcTokenInfo.decimals,
+        srcTokenInfo.symbol,
+        srcTokenInfo.name,
+    );
+    const destTokenInfo = getAssetInfoByAddress(destAddr, chainId);
+    const destToken = new Token(
+        chainId,
+        destAddr,
+        destTokenInfo.decimals,
+        destTokenInfo.symbol,
+        destTokenInfo.name,
+    );
+    const swapAmount = CurrencyAmount.fromRawAmount(srcToken, amount.toString());
+
+    const router = new AlphaRouter({ chainId, provider: hre.ethers.provider });
+    const route = await router.route(
+        swapAmount, destToken, TradeType.EXACT_INPUT,
+        {
+            slippageTolerance: new Percent(5, 100),
+        },
+    ).then((_route) => _route.trade.swaps[0].route);
+
+    const path = route.tokenPath.reduce((acc, curr, index) => {
+        const poolInput = curr.address;
+        const poolFee = poolInput.toLowerCase() === destAddr.toLowerCase() ? '' : (route.pools[index].fee).toString(16).padStart(6, 0);
+        return `${acc}${poolInput.slice(2)}${poolFee}`;
+    }, '0x');
+    console.log({ path });
+
+    return [
+        srcAddr,
+        destAddr,
+        amount,
+        0,
+        0,
+        0,
+        nullAddress,
+        wrapper,
+        path,
+        [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
+    ];
+};
+
 const isEth = (tokenAddr) => {
     if (tokenAddr.toLowerCase() === ETH_ADDR.toLowerCase()
     || tokenAddr.toLowerCase() === addrs[network].WETH_ADDRESS.toLowerCase()
@@ -782,6 +889,10 @@ const depositToWeth = async (amount, signer) => {
     } else {
         await weth.deposit({ value: amount });
     }
+};
+
+const expectCloseEq = (expected, actual) => {
+    expect(expected).to.be.closeTo(actual, (expected * 1e-6).toFixed(0));
 };
 
 const formatExchangeObjForOffchain = (
@@ -880,10 +991,6 @@ const getChainLinkPrice = async (tokenAddr) => {
     return data.answer.toString();
 };
 
-const BN2Float = hre.ethers.utils.formatUnits;
-
-const Float2BN = hre.ethers.utils.parseUnits;
-
 const takeSnapshot = async () => hre.network.provider.request({
     method: 'evm_snapshot',
 });
@@ -896,8 +1003,8 @@ const revertToSnapshot = async (snapshotId) => hre.network.provider.request({
 const getWeth = () => addrs[network].WETH_ADDRESS;
 
 const openStrategyAndBundleStorage = async (isFork) => {
-    const strategySubAddr = getAddrFromRegistry('StrategyStorage');
-    const bundleSubAddr = getAddrFromRegistry('BundleStorage');
+    const strategySubAddr = await getAddrFromRegistry('StrategyStorage');
+    const bundleSubAddr = await getAddrFromRegistry('BundleStorage');
 
     const currOwnerAddr = getOwnerAddr();
 
@@ -999,6 +1106,7 @@ module.exports = {
     approve,
     balanceOf,
     formatExchangeObj,
+    formatExchangeObjSdk,
     formatExchangeObjForOffchain,
     isEth,
     sendEther,
@@ -1080,6 +1188,7 @@ module.exports = {
     BLUSD_ADDR,
     BOND_NFT_ADDR,
     setNetwork,
+    getNetwork,
     setBalance,
     takeSnapshot,
     revertToSnapshot,
@@ -1088,6 +1197,8 @@ module.exports = {
     resetForkToBlock,
     balanceOfOnTokenInBlock,
     formatExchangeObjCurve,
+    formatMockExchangeObj,
+    expectCloseEq,
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),
