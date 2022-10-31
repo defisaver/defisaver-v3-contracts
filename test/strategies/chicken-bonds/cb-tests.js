@@ -7,9 +7,15 @@ const {
     redeployCore,
     openStrategyAndBundleStorage,
     setBalance,
-    LUSD_ADDR,
     timeTravel,
+    setNewExchangeWrapper,
+    LUSD_ADDR,
+    BLUSD_ADDR,
 } = require('../../utils');
+
+const {
+    getRebondTime,
+} = require('../../utils-cb');
 
 const { createChickenBond } = require('../../actions');
 
@@ -22,41 +28,52 @@ const {
 const { callCbRebondStrategy } = require('../../strategy-calls');
 const { subCbRebondStrategy } = require('../../strategy-subs');
 
+const { createCbRebondTrigger } = require('../../triggers');
+
 const cbRebondStrategyTest = async () => {
     describe('Chicken-Bond-Rebond-Strategy', function () {
         this.timeout(1200000);
 
         let senderAcc;
         let proxy;
-        let proxyAddr;
         let botAcc;
         let strategyExecutor;
         let subId;
         let strategySub;
         let chickenBondsView;
         let bondID;
+        let bondIDNew;
+        let rebondTrigger;
+        let lusdAmountWei;
+        let newLusdAmount;
+        let strategyId;
+
+        const lusdAmount = '50000';
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-            proxyAddr = proxy.address;
             botAcc = (await hre.ethers.getSigners())[1];
 
             strategyExecutor = await redeployCore();
 
             chickenBondsView = await redeploy('ChickenBondsView');
-            await redeploy('CBRebondTrigger');
+            rebondTrigger = await redeploy('CBRebondTrigger');
             await redeploy('DFSSell');
             await redeploy('GasFeeTaker');
             await redeploy('CBCreate');
             await redeploy('CBChickenIn');
 
+            const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
+
+            await setNewExchangeWrapper(senderAcc, mockWrapperAddr);
+
             await addBotCaller(botAcc.address);
 
-            const lusdAmount = hre.ethers.utils.parseUnits('1000', 18);
-            await setBalance(LUSD_ADDR, senderAcc.address, lusdAmount);
+            lusdAmountWei = hre.ethers.utils.parseUnits(lusdAmount, 18);
+            await setBalance(LUSD_ADDR, senderAcc.address, lusdAmountWei);
 
-            await createChickenBond(proxy, lusdAmount, senderAcc.address);
+            await createChickenBond(proxy, lusdAmountWei, senderAcc.address);
 
             const bonds = await chickenBondsView.getUsersBonds(proxy.address);
             bondID = bonds[bonds.length - 1].bondID.toString();
@@ -67,17 +84,54 @@ const cbRebondStrategyTest = async () => {
 
             await openStrategyAndBundleStorage();
 
-            const strategyId = await createStrategy(proxy, ...cbRebondStrategy, true);
+            strategyId = await createStrategy(proxy, ...cbRebondStrategy, true);
 
             // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subCbRebondStrategy(proxy, bondID, strategyId));
         });
 
         it('... should trigger a Chicken Bond rebond strategy', async () => {
-            await timeTravel(10 * 24 * 60 * 60); // TODO: make it variable
+            const time = await getRebondTime(chickenBondsView, rebondTrigger, lusdAmount);
+
+            await timeTravel(time);
 
             await callCbRebondStrategy(botAcc, strategyExecutor, subId, strategySub);
+
+            const bonds = await chickenBondsView.getUsersBonds(proxy.address);
+            bondIDNew = bonds[bonds.length - 1].bondID.toString();
+
+            newLusdAmount = hre.ethers.utils.formatUnits(bonds[bonds.length - 1].lusdAmount, 18);
+
+            expect(bonds[bonds.length - 1].lusdAmount).to.be.gt(lusdAmountWei);
+            expect(+bondIDNew).to.be.eq(+bondID + 1);
+            console.log(bondIDNew, bondID);
         });
+
+        // it('... should rebond again for the new bondId', async () => {
+        //     const abiCoder = new hre.ethers.utils.AbiCoder();
+
+        //     const time = await getRebondTime(chickenBondsView, rebondTrigger, newLusdAmount);
+
+        //     const triggerData = await createCbRebondTrigger(bondIDNew);
+
+        //     const bondIDNewEncoded = abiCoder.encode(['uint256'], [bondID.toString()]);
+        //     const bLusdTokenEncoded = abiCoder.encode(['address'], [BLUSD_ADDR]);
+        //     const lusdTokenEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
+        //     strategySub = [strategyId, false,
+        //         [triggerData], [bondIDNewEncoded, bLusdTokenEncoded, lusdTokenEncoded]];
+
+        //     await timeTravel(time);
+
+        //     await callCbRebondStrategy(botAcc, strategyExecutor, subId, strategySub);
+
+        //     const newLusdAmountWei = hre.ethers.utils.parseUnits(newLusdAmount, 18);
+
+        //     const bonds = await chickenBondsView.getUsersBonds(proxy.address);
+        //     bondIDNew = bonds[bonds.length - 1].bondID.toString();
+
+        //     expect(bonds[bonds.length - 1].lusdAmount).to.be.gt(newLusdAmountWei);
+        //     expect(+bondIDNew).to.be.eq(+bondID + 1);
+        // });
     });
 };
 

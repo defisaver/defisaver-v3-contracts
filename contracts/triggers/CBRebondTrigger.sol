@@ -26,14 +26,16 @@ contract CBRebondTrigger is ITrigger, AdminAuth, CBHelper {
 
         uint256 currentBLusdAmount = CBManager.calcAccruedBLUSD(triggerSubData.bondID);
 
-        (uint256 optimalRebondAmount, uint256 marketPrice) = getOptimalBLusdAmount(bondData.lusdAmount);
+        (uint256 optimalLusdRebondAmount, uint256 marketPrice) = getOptimalLusdAmount(bondData.lusdAmount);
+
+        uint256 currentLusdAmount = wmul(currentBLusdAmount, marketPrice);
 
         // Sanity check if the calculation returns 0 or we get bLUSD amount less than initial LUSD deposited
-        if (optimalRebondAmount == 0 || wmul(optimalRebondAmount, marketPrice) < bondData.lusdAmount) {
+        if (optimalLusdRebondAmount == 0 || optimalLusdRebondAmount < bondData.lusdAmount) {
             return false;
         }
 
-        if (currentBLusdAmount >= optimalRebondAmount) {
+        if (currentLusdAmount >= optimalLusdRebondAmount) {
             return true;
         }
 
@@ -49,6 +51,7 @@ contract CBRebondTrigger is ITrigger, AdminAuth, CBHelper {
 
         // update bondId to the next one which will be created once the trigger is activated
         triggerSubData.bondID = IBondNFT(BOND_NFT_ADDRESS).totalSupply() + 1;
+
         return abi.encode(triggerSubData);
     }
 

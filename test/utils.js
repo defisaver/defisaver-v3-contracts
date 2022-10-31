@@ -228,6 +228,7 @@ const coinGeckoHelper = {
     RAI: 'rai',
     MATIC: 'matic-network',
     SUSHI: 'sushi',
+    bLUSD: 'bLUSD',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;

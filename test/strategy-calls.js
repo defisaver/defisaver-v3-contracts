@@ -33,6 +33,8 @@ const {
     BN2Float,
     USDC_ADDR,
     LUSD_ADDR,
+    formatMockExchangeObj,
+    MAX_UINT,
 } = require('./utils');
 
 const { ADAPTER_ADDRESS } = require('./utils-reflexer');
@@ -1702,18 +1704,20 @@ const callCbRebondStrategy = async (
         placeHolderAddr, // _to hardcoded to proxy
     );
 
+    const lusdInfo = getAssetInfo('LUSD');
+    const bLUSDInfo = getAssetInfo('bLUSD');
+
     const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            placeHolderAddr, // blusd
-            placeHolderAddr, // lusd
-            '0', // piped from chickenIn
-            UNISWAP_WRAPPER,
+        await formatMockExchangeObj(
+            bLUSDInfo,
+            lusdInfo,
+            MAX_UINT,
         ),
-        placeHolderAddr, // proxy
-        placeHolderAddr, // proxy
+        placeHolderAddr,
+        placeHolderAddr,
     );
 
-    const gasCost = 1_200_000;
+    const gasCost = 1_500_000;
     const gasFee = new dfs.actions.basic.GasFeeAction(gasCost, placeHolderAddr, 0);
 
     const cbCreateAction = new dfs.actions.chickenBonds.CBCreateAction(
@@ -1748,7 +1752,7 @@ const callCbRebondStrategy = async (
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
     console.log(
-        `GasUsed callMcdCloseToCollStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+        `GasUsed callCbRebondStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
     );
 };
 

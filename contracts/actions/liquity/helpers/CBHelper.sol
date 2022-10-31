@@ -48,8 +48,8 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
         return wdiv(outputAmount, _amount);
     }
 
-    /// @notice Calculates 'optimal' amount of bLUSD for an lusdAmount to accrue based on the market price
-    function getOptimalBLusdAmount(uint256 _lusdAmount) public view returns (uint256, uint256) {
+    /// @notice Calculates 'optimal' amount of LUSD for an lusdAmount to accrue based on the market price
+    function getOptimalLusdAmount(uint256 _lusdAmount) public view returns (uint256, uint256) {
         CBInfo memory systemInfo = getCbInfo();
         uint256 marketPrice = getBLusdPriceFromCurve(_lusdAmount);
         uint256 optimalRebondTime = _getOptimalRebondTime(systemInfo, marketPrice);

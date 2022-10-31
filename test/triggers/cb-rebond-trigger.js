@@ -1,41 +1,19 @@
 /* eslint-disable max-len */
 /* eslint-disable no-mixed-operators */
-const Dec = require('decimal.js');
 const hre = require('hardhat');
+const Dec = require('decimal.js');
 const { expect } = require('chai');
 
-const { assetAmountInEth } = require('@defisaver/tokens');
+const {
+    getSystemInfo,
+    calcCBondsBLUSDMarketPremium,
+    calcRebondMs,
+    calcAccruedAmountForMs,
+} = require('../utils-cb');
 
 const {
     redeploy,
 } = require('../utils');
-
-const calcRebondMs = (accrualParameter, marketPricePremium, chickenInAMMFee) => {
-    const effectivePremium = new Dec(1).sub(chickenInAMMFee).mul(marketPricePremium);
-    if (effectivePremium.lte(1)) return Infinity;
-    const sqrt = effectivePremium.sqrt();
-    const dividend = sqrt.add(1);
-    const divisor = effectivePremium.sub(1);
-
-    return new Dec(accrualParameter).mul(dividend.div(divisor)).round().toNumber();
-};
-
-const calcAccruedAmountForMs = (systemInfo, lusdAmount, ms) => (ms * +lusdAmount)
- / (ms + +systemInfo.accrualParameter)
- * (1 - +systemInfo.chickenInAMMFee) * +systemInfo.marketPrice;
-
-const getSystemInfo = async (chickenBondsView) => {
-    const systemInfo = await chickenBondsView.getSystemInfo();
-
-    return {
-        bLUSDSupply: assetAmountInEth(systemInfo.bLUSDSupply, 'bLUSD'),
-        accrualParameter: new Dec(assetAmountInEth(systemInfo.accrualParameter)).mul(1000).toString(),
-        chickenInAMMFee: assetAmountInEth(systemInfo.chickenInAMMFee),
-        totalReserveLUSD: assetAmountInEth(systemInfo.totalReserveLUSD, 'LUSD'),
-    };
-};
-
-const calcCBondsBLUSDMarketPremium = (floorPrice, marketPrice) => new Dec(marketPrice).div(floorPrice).toString();
 
 describe('CB-rebond-trigger', function () {
     this.timeout(80000);
@@ -43,7 +21,7 @@ describe('CB-rebond-trigger', function () {
     let cbRebondTrigger;
     let chickenBondsView;
 
-    const amounts = ['5000', '50000', '200000'];
+    const amounts = ['1000', '50000', '200000'];
 
     before(async () => {
         cbRebondTrigger = await redeploy('CBRebondTrigger');
@@ -59,7 +37,6 @@ describe('CB-rebond-trigger', function () {
 
             const floorPrice = new Dec(systemInfo.totalReserveLUSD).div(systemInfo.bLUSDSupply).toString();
             const marketPrice = (await cbRebondTrigger.getBLusdPriceFromCurve(lusdAmountWei)) / 1e18;
-
             systemInfo.marketPrice = marketPrice;
 
             const marketPricePremium = calcCBondsBLUSDMarketPremium(floorPrice, marketPrice);
@@ -76,7 +53,7 @@ describe('CB-rebond-trigger', function () {
             const optimalBLusdAmount = await cbRebondTrigger.getOptimalBLusdAmount(hre.ethers.utils.parseUnits(lusdAmount, 18));
             console.log('rebondAmount calc from sol: ', optimalBLusdAmount[0] / 1e18);
 
-            expect(rebondAmount).to.be.closeTo(optimalBLusdAmount[0] / 1e18, 0.0001);
+            expect(rebondAmount).to.be.closeTo(optimalBLusdAmount[0] / 1e18, 0.001);
         });
     }
 });
