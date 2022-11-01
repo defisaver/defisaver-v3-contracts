@@ -26,7 +26,7 @@ const {
 const { sell, executeAction } = require('../actions');
 
 const AAVE_NO_DEBT_MODE = 0;
-const aaveFlTest = async () => {
+const aaveFlTest = async (generalisedFLFlag) => {
     describe('FL-AaveV2', function () {
         this.timeout(60000);
 
@@ -47,6 +47,11 @@ const aaveFlTest = async () => {
             const tokenSymbol = FLASHLOAN_TOKENS[i];
 
             it(`... should get an ${tokenSymbol} AaveV2 flash loan`, async () => {
+                if (generalisedFLFlag) {
+                    const flActionAddr = await getAddrFromRegistry('FLAction');
+                    console.log(flActionAddr);
+                    aaveFl = await hre.ethers.getContractAt('FLAction', flActionAddr);
+                }
                 const assetInfo = getAssetInfo(tokenSymbol);
 
                 if (assetInfo.symbol === 'ETH') {
@@ -71,15 +76,21 @@ const aaveFlTest = async () => {
                 console.log(loanAmount.toString(), feeAmount.toString());
 
                 await approve(assetInfo.address, proxy.address);
+                let flAction = new dfs.actions.flashloan.AaveV2FlashLoanAction(
+                    [loanAmount],
+                    [assetInfo.address],
+                    [AAVE_NO_DEBT_MODE],
+                    nullAddress,
+                    nullAddress,
+                    [],
+                );
+                if (generalisedFLFlag) {
+                    flAction = new dfs.actions.flashloan.FLAction(
+                        flAction,
+                    );
+                }
                 const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
-                    new dfs.actions.flashloan.AaveV2FlashLoanAction(
-                        [loanAmount],
-                        [assetInfo.address],
-                        [AAVE_NO_DEBT_MODE],
-                        nullAddress,
-                        nullAddress,
-                        [],
-                    ),
+                    flAction,
                     new dfs.actions.basic.SendTokenAction(
                         assetInfo.address,
                         aaveFl.address,
@@ -110,7 +121,7 @@ const aaveFlTest = async () => {
         }
     });
 };
-const balancerFLTest = async () => {
+const balancerFLTest = async (generalisedFLFlag) => {
     describe('FL-Balancer', function () {
         this.timeout(60000);
 
@@ -160,18 +171,31 @@ const balancerFLTest = async () => {
         console.log(tokenAddrs);
         console.log(amounts);
         it('... should get a WETH and DAI Balancer flash loan', async () => {
+            if (generalisedFLFlag) {
+                const flActionAddr = await getAddrFromRegistry('FLAction');
+                console.log(flActionAddr);
+                flBalancer = await hre.ethers.getContractAt('FLAction', flActionAddr);
+            }
             // test if balance will brick fl action
             await setBalance(tokenAddrs[0], flBalancer.address, Float2BN('1', 0));
             await setBalance(tokenAddrs[1], flBalancer.address, Float2BN('1', 0));
             await setBalance(tokenAddrs[2], flBalancer.address, Float2BN('1', 0));
 
+            let flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+                tokenAddrs,
+                amounts,
+                nullAddress,
+                [],
+            );
+
+            if (generalisedFLFlag) {
+                flAction = new dfs.actions.flashloan.FLAction(
+                    flAction,
+                );
+            }
+
             const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
-                new dfs.actions.flashloan.BalancerFlashLoanAction(
-                    tokenAddrs,
-                    amounts,
-                    nullAddress,
-                    [],
-                ),
+                flAction,
                 new dfs.actions.basic.SendTokenAction(
                     tokenAddrs[0],
                     flBalancer.address,
@@ -251,7 +275,7 @@ const dydxFLTest = async () => {
         }
     });
 };
-const makerFLTest = async () => {
+const makerFLTest = async (generalisedFLFlag) => {
     describe('FL-Maker', function () {
         this.timeout(60000);
 
@@ -269,6 +293,11 @@ const makerFLTest = async () => {
         const tokenSymbol = 'DAI';
 
         it(`... should get a ${tokenSymbol} Maker flash loan`, async () => {
+            if (generalisedFLFlag) {
+                const flActionAddr = await getAddrFromRegistry('FLAction');
+                console.log(flActionAddr);
+                flMaker = await hre.ethers.getContractAt('FLAction', flActionAddr);
+            }
             const assetInfo = getAssetInfo(tokenSymbol);
 
             // test if balance will brick fl action
@@ -280,17 +309,24 @@ const makerFLTest = async () => {
                 assetInfo.decimals,
             );
             const feeAmount = '0';
+            let flAction = new dfs.actions.flashloan.MakerFlashLoanAction(
+                loanAmount,
+                nullAddress,
+                [],
+            );
+            console.log(flAction.args);
+            if (generalisedFLFlag) {
+                flAction = new dfs.actions.flashloan.FLAction(
+                    flAction,
+                );
+            }
 
             const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
-                new dfs.actions.flashloan.MakerFlashLoanAction(
-                    loanAmount,
-                    nullAddress,
-                    [],
-                ),
+                flAction,
                 new dfs.actions.basic.SendTokenAction(
                     assetInfo.address,
                     flMaker.address,
-                    hre.ethers.constants.MaxUint256,
+                    loanAmount,
                 ),
             ]);
 
@@ -318,7 +354,7 @@ const makerFLTest = async () => {
     });
 };
 
-const eulerFLTest = async () => {
+const eulerFLTest = async (generalisedFLFlag) => {
     describe('FL-Euler', function () {
         this.timeout(60000);
 
@@ -346,13 +382,23 @@ const eulerFLTest = async () => {
                     assetInfo.decimals,
                 );
 
+                let flAction = new dfs.actions.flashloan.EulerFlashLoanAction(
+                    assetInfo.address,
+                    loanAmount,
+                    nullAddress,
+                    [],
+                );
+                if (generalisedFLFlag) {
+                    flAction = new dfs.actions.flashloan.FLAction(
+                        flAction,
+                    );
+                    const flActionAddr = await getAddrFromRegistry('FLAction');
+                    console.log(flActionAddr);
+                    flEuler = await hre.ethers.getContractAt('FLAction', flActionAddr);
+                }
+
                 const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
-                    new dfs.actions.flashloan.EulerFlashLoanAction(
-                        assetInfo.address,
-                        loanAmount,
-                        nullAddress,
-                        [],
-                    ),
+                    flAction,
                     new dfs.actions.basic.SendTokenAction(
                         assetInfo.address,
                         flEuler.address,
