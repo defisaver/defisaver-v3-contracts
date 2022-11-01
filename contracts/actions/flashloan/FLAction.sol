@@ -21,6 +21,7 @@ import "../../core/strategy/StrategyModel.sol";
 
 import "./helpers/FLHelper.sol";
 
+/// @title Action that gets and receives FL from different variety of sources
 contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel, FLHelper, DSMath {
     using TokenUtils for address;
     using SafeMath for uint256;
@@ -41,23 +42,31 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     }
 
     /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
-    bytes4 public constant CALLBACK_SELECTOR = bytes4(keccak256("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"));
+    bytes4 public constant CALLBACK_SELECTOR =
+        bytes4(
+            keccak256(
+                "_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"
+            )
+        );
     bytes4 public constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     /// @inheritdoc ActionBase
-    function actionType() public override pure returns (uint8) {
+    function actionType() public pure override returns (uint8) {
         return uint8(ActionType.FL_ACTION);
     }
+
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public override payable {}
+    function executeActionDirect(bytes memory _callData) public payable override {}
 
     /// @inheritdoc ActionBase
+    /// @notice This action doesn't use flParamGetterAddr and flParamGetterData
+    /// @notice flParamGetterData is used to choose between FL providers
     function executeAction(
         bytes memory _callData,
         bytes32[] memory,
         uint8[] memory,
         bytes32[] memory
-    ) public override payable returns (bytes32) {
+    ) public payable override returns (bytes32) {
         FlashLoanParams memory params = abi.decode(_callData, (FlashLoanParams));
         FLSource flSource = FLSource(uint8(bytes1(params.flParamGetterData)));
         handleFlashloan(params, flSource);
@@ -65,25 +74,21 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         return bytes32(params.amounts[0]);
     }
 
-
-
-    function handleFlashloan(FlashLoanParams memory _flParams, FLSource _source) internal{
-        if (_source == FLSource.AAVE){
+    function handleFlashloan(FlashLoanParams memory _flParams, FLSource _source) internal {
+        if (_source == FLSource.AAVE) {
             _flAave(_flParams);
-        } else if (_source == FLSource.BALANCER){
+        } else if (_source == FLSource.BALANCER) {
             _flBalancer(_flParams);
-        } else if (_source == FLSource.EULER){
+        } else if (_source == FLSource.EULER) {
             _flEuler(_flParams);
-        } else if (_source == FLSource.MAKER){
+        } else if (_source == FLSource.MAKER) {
             _flMaker(_flParams);
         }
     }
 
-
     /// @notice Gets a Fl from AaveV2 and returns back the execution to the action address
     /// @param _flParams All the amounts/tokens and related aave fl data
     function _flAave(FlashLoanParams memory _flParams) internal {
-
         ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
             address(this),
             _flParams.tokens,
@@ -96,7 +101,13 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
 
         emit ActionEvent(
             "FLAction",
-            abi.encode("AAVE", _flParams.tokens, _flParams.amounts, _flParams.modes, _flParams.onBehalfOf)
+            abi.encode(
+                "AAVE",
+                _flParams.tokens,
+                _flParams.amounts,
+                _flParams.modes,
+                _flParams.onBehalfOf
+            )
         );
     }
 
@@ -113,7 +124,9 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     }
 
     function _flEuler(FlashLoanParams memory _flParams) internal {
-        IDToken dToken = IDToken(IEulerMarkets(EULER_MARKET_ADDR).underlyingToDToken(_flParams.tokens[0]));
+        IDToken dToken = IDToken(
+            IEulerMarkets(EULER_MARKET_ADDR).underlyingToDToken(_flParams.tokens[0])
+        );
         bytes memory passingData = abi.encode(
             _flParams.tokens[0].getBalance(address(this)),
             _flParams.amounts[0],
@@ -127,8 +140,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
 
     /// @notice Gets a DAI flash loan from Maker and returns back the execution to the action address
     /// @param _flParams All the amounts/tokens and related aave fl data
-    function _flMaker(FlashLoanParams memory _flParams) internal{
-
+    function _flMaker(FlashLoanParams memory _flParams) internal {
         IERC3156FlashLender(DSS_FLASH_ADDR).flashLoan(
             IERC3156FlashBorrower(address(this)),
             DAI_ADDR,
@@ -140,7 +152,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     }
 
     /// @notice Aave callback function that formats and calls back RecipeExecutor
-    /// @notice FLSource == AAVE
+    /// FLSource == AAVE
     function executeOperation(
         address[] memory _assets,
         uint256[] memory _amounts,
@@ -148,10 +160,10 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         address _initiator,
         bytes memory _params
     ) public nonReentrant returns (bool) {
-        if (msg.sender != AAVE_LENDING_POOL){
+        if (msg.sender != AAVE_LENDING_POOL) {
             revert UntrustedLender();
         }
-        if (_initiator != address(this)){
+        if (_initiator != address(this)) {
             revert UntrustedInitiator();
         }
 
@@ -173,27 +185,28 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
-            uint256 paybackAmount = add(_amounts[i],_fees[i]);
+            uint256 paybackAmount = add(_amounts[i], _fees[i]);
 
-            bool correctAmount = _assets[i].getBalance(address(this)) == paybackAmount + balancesBefore[i];
+            bool correctAmount = _assets[i].getBalance(address(this)) ==
+                paybackAmount + balancesBefore[i];
 
             if (_assets[i] == ST_ETH_ADDR && !correctAmount) {
                 flFeeFaucet.my2Wei(ST_ETH_ADDR);
                 correctAmount = true;
             }
 
-            if (!correctAmount){
+            if (!correctAmount) {
                 revert WrongPaybackAmountError();
             }
-            
-            _assets[i].approveToken(address(AAVE_LENDING_POOL), paybackAmount);
 
+            _assets[i].approveToken(address(AAVE_LENDING_POOL), paybackAmount);
         }
 
         return true;
     }
 
     /// @notice Balancer FL callback function that formats and calls back RecipeExecutor
+    /// FLSource == BALANCER
     function receiveFlashLoan(
         address[] memory _tokens,
         uint256[] memory _amounts,
@@ -220,8 +233,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
 
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 paybackAmount = _amounts[i].add(_feeAmounts[i]);
-            
-            if (_tokens[i].getBalance(address(this)) != paybackAmount + balancesBefore[i]){
+
+            if (_tokens[i].getBalance(address(this)) != paybackAmount + balancesBefore[i]) {
                 revert WrongPaybackAmountError();
             }
 
@@ -230,15 +243,15 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     }
 
     /// @notice Euler callback function that formats and calls back RecipeExecutor
-    function onFlashLoan(
-        bytes calldata _data
-    ) external nonReentrant{
-        (uint256 balanceBefore, uint256 amount, address token, bytes memory recipeData) = abi.decode(_data, (uint256, uint256, address, bytes));
+    /// FLSource = EULER
+    function onFlashLoan(bytes calldata _data) external nonReentrant {
+        (uint256 balanceBefore, uint256 amount, address token, bytes memory recipeData) = abi
+            .decode(_data, (uint256, uint256, address, bytes));
 
         if (msg.sender != EULER_ADDR) {
             revert UntrustedLender();
         }
-        
+
         (Recipe memory currRecipe, address proxy) = abi.decode(recipeData, (Recipe, address));
         address payable recipeExecutorAddr = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
         token.withdrawTokens(proxy, amount);
@@ -255,7 +268,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
             isCorrectAmount = true;
         }
 
-        if (!isCorrectAmount){
+        if (!isCorrectAmount) {
             revert WrongPaybackAmountError();
         }
 
@@ -263,7 +276,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     }
 
     /// @notice ERC3156 callback function that formats and calls back RecipeExecutor
-    /// @notice FLSource == MAKER
+    /// FLSource == MAKER
     function onFlashLoan(
         address _initiator,
         address _token,
@@ -271,12 +284,10 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         uint256 _fee,
         bytes calldata _data
     ) external nonReentrant returns (bytes32) {
-
-        if (msg.sender != DSS_FLASH_ADDR){
+        if (msg.sender != DSS_FLASH_ADDR) {
             revert UntrustedLender();
         }
-
-        if (_initiator != address(this)){
+        if (_initiator != address(this)) {
             revert UntrustedInitiator();
         }
 
@@ -292,7 +303,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
             recipeExecutorAddr,
             abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, paybackAmount)
         );
-        if (_token.getBalance(address(this)) != paybackAmount + balanceBefore){
+        if (_token.getBalance(address(this)) != paybackAmount + balanceBefore) {
             revert WrongPaybackAmountError();
         }
 
@@ -300,5 +311,4 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
 
         return keccak256("ERC3156FlashBorrower.onFlashLoan");
     }
-
 }
