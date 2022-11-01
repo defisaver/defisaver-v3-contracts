@@ -286,9 +286,181 @@ const createAaveFLV3BoostL2Strategy = () => {
     return aaveV3BoostL2Strategy.encodeForDsProxyCall();
 };
 
+const aaveV3CloseActions = {
+    flAction: () => new dfs.actions.flashloan.AaveV3FlashLoanAction(
+        ['%repayAmount'], // cant pipe in FL actions :(
+        ['%debtAsset'],
+        ['%AAVE_NO_DEBT_MODE'],
+        '%nullAddress',
+    ),
+
+    paybackAction: () => new dfs.actions.aaveV3.AaveV3PaybackAction(
+        '%true', // useDefaultMarket - true or will revert
+        '&nullAddress', // market
+        '%repayAmount', // kept variable (can support partial close later)
+        '&proxy',
+        '%rateMode',
+        '&debtAsset', // one subscription - one token pair
+        '&debtAssetId',
+        '%false', // useOnBehalf - false or will revert
+        '&nullAddress', // onBehalfOf
+    ),
+
+    withdrawAction: () => new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '&collAssetId', // one subscription - one token pair
+        '%true', // useDefaultMarket - true or will revert
+        '%withdrawAmount', // kept variable (can support partial close later)
+        '&proxy',
+        '&nullAddress', // market
+    ),
+
+    sellAction: () => new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collAsset',
+            '&debtAsset', // one subscription - one token pair
+            '%swapAmount', // amount to sell is variable
+            '%exchangeWrapper', // exchange wrapper can change
+        ),
+        '&proxy', // hardcoded take from user proxy
+        '&proxy', // hardcoded send to user proxy
+    ),
+
+    feeTakingActionFL: () => new dfs.actions.basic.GasFeeActionL2(
+        '%gasCost', // must stay variable backend sets gasCost
+        '&debtAsset',
+        '$4', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+        '%l1GasCostInEth', // send custom amount for Optimism
+    ),
+
+    feeTakingAction: () => new dfs.actions.basic.GasFeeActionL2(
+        '%gasCost', // must stay variable backend sets gasCost
+        '&debtAsset',
+        '$2', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+        '%l1GasCostInEth', // send custom amount for Optimism
+    ),
+
+    feeTakingActionFLColl: () => new dfs.actions.basic.GasFeeActionL2(
+        '%gasCost', // must stay variable backend sets gasCost
+        '&collAsset',
+        '$3', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+        '%l1GasCostInEth', // send custom amount for Optimism
+    ),
+
+    feeTakingActionColl: () => new dfs.actions.basic.GasFeeActionL2(
+        '%gasCost', // must stay variable backend sets gasCost
+        '&collAsset',
+        '$1', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+        '%l1GasCostInEth', // send custom amount for Optimism
+    ),
+
+    sendRepayFL: () => new dfs.actions.basic.SendTokenAction(
+        '&debtAsset',
+        '%flAddr', // kept variable this can change (FL must be payed back to work)
+        '$1', // hardcoded output from FL action
+    ),
+
+    sendDebt: () => new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&debtAsset',
+        '&eoa', // hardcoded so only proxy owner receives amount
+        '%amountToRecipient(maxUint)', // will always be maxUint
+    ),
+
+    sendColl: () => new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&collAsset',
+        '&eoa', // hardcoded so only proxy owner receives amount
+        '%amountToRecipient(maxUint)', // will always be maxUint
+    ),
+};
+
+const createAaveCloseStrategyBase = (strategyName) => {
+    const aaveCloseStrategy = new dfs.Strategy(strategyName);
+    aaveCloseStrategy.addSubSlot('&collAsset', 'address');
+    aaveCloseStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveCloseStrategy.addSubSlot('&debtAsset', 'address');
+    aaveCloseStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveCloseStrategy.addSubSlot('&nullAddress', 'address');
+
+    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+
+    aaveCloseStrategy.addTrigger(trigger);
+
+    return aaveCloseStrategy;
+};
+
+const createAaveV3CloseToDebtL2Strategy = () => {
+    const strategyName = 'AaveV3CloseToDebtL2';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV3FLCloseToDebtL2Strategy = () => {
+    const strategyName = 'AaveV3FLCloseToDebtL2';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.flAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionFL());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendRepayFL());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV3CloseToCollL2Strategy = () => {
+    const strategyName = 'AaveV3CloseToCollL2';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionColl());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendColl());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV3FLCloseToCollL2Strategy = () => {
+    const strategyName = 'AaveV3FLCloseToCollL2';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.flAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionFLColl());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendRepayFL());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendColl());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createAaveV3RepayL2Strategy,
     createAaveFLV3RepayL2Strategy,
     createAaveV3BoostL2Strategy,
     createAaveFLV3BoostL2Strategy,
+    createAaveV3CloseToDebtL2Strategy,
+    createAaveV3FLCloseToDebtL2Strategy,
+    createAaveV3CloseToCollL2Strategy,
+    createAaveV3FLCloseToCollL2Strategy,
+    aaveV3CloseActions,
 };
