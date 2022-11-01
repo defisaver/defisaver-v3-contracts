@@ -3,10 +3,10 @@ const {
 } = require('../utils');
 
 const {
-    aaveFlTest, balancerFLTest, eulerFLTest, makerFLTest,
+    aaveFlTest, balancerFLTest, eulerFLTest, makerFLTest, aaveV3FlTest,
 } = require('./fl-tests');
 
-describe('FL-AaveV2', function () {
+describe('Generalised flashloan test', function () {
     this.timeout(60000);
 
     before(async () => {
@@ -14,9 +14,14 @@ describe('FL-AaveV2', function () {
     });
 
     it('... should test generalised flash loan', async () => {
+        // Mainnet only
+
         await aaveFlTest(true);
-        await balancerFLTest(true);
         await eulerFLTest(true);
         await makerFLTest(true);
+
+        await balancerFLTest(true);
+        // L2 only
+        //await aaveV3FlTest(true);
     });
 });

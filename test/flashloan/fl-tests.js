@@ -21,6 +21,7 @@ const {
     setBalance,
     Float2BN,
     addrs,
+    AAVE_V3_FL_FEE,
 } = require('../utils');
 
 const { sell, executeAction } = require('../actions');
@@ -121,6 +122,100 @@ const aaveFlTest = async (generalisedFLFlag) => {
         }
     });
 };
+
+const aaveV3FlTest = async (generalisedFLFlag) => {
+    describe('FL-AaveV2', function () {
+        this.timeout(60000);
+
+        let senderAcc; let proxy; let
+            aaveFl;
+
+        const FLASHLOAN_TOKENS = ['WETH', 'DAI', 'USDC'];
+
+        before(async () => {
+            const flAaveAddr = await getAddrFromRegistry('FLAaveV3');
+            aaveFl = await hre.ethers.getContractAt('FLAaveV3', flAaveAddr);
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+
+        for (let i = 0; i < FLASHLOAN_TOKENS.length; ++i) {
+            const tokenSymbol = FLASHLOAN_TOKENS[i];
+
+            it(`... should get an ${tokenSymbol} AaveV3 flash loan`, async () => {
+                if (generalisedFLFlag) {
+                    const flActionAddr = await getAddrFromRegistry('FLAction');
+                    console.log(flActionAddr);
+                    aaveFl = await hre.ethers.getContractAt('FLAction', flActionAddr);
+                }
+                // hardcoded optimism chain ID
+                const assetInfo = getAssetInfo(tokenSymbol, 10);
+
+                // test if balance will brick fl action
+                await setBalance(assetInfo.address, aaveFl.address, Float2BN('1', 0));
+
+                const amount = fetchAmountinUSDPrice(tokenSymbol, '5000');
+                const loanAmount = hre.ethers.utils.parseUnits(
+                    amount,
+                    assetInfo.decimals,
+                );
+                const feeAmount = new Dec(amount)
+                    .mul(AAVE_V3_FL_FEE)
+                    .mul(10 ** assetInfo.decimals)
+                    .div(100)
+                    .toFixed(0)
+                    .toString();
+
+                console.log(loanAmount.toString(), feeAmount.toString());
+
+                await approve(assetInfo.address, proxy.address);
+                let flAction = new dfs.actions.flashloan.AaveV3FlashLoanAction(
+                    [loanAmount],
+                    [assetInfo.address],
+                    [AAVE_NO_DEBT_MODE],
+                    nullAddress,
+                    nullAddress,
+                    [],
+                );
+                if (generalisedFLFlag) {
+                    flAction = new dfs.actions.flashloan.FLAction(
+                        flAction,
+                    );
+                }
+                const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
+                    flAction,
+                    new dfs.actions.basic.SendTokenAction(
+                        assetInfo.address,
+                        aaveFl.address,
+                        hre.ethers.constants.MaxUint256,
+                    ),
+                ]);
+
+                const functionData = basicFLRecipe.encodeForDsProxyCall();
+
+                if (tokenSymbol === 'WETH') {
+                    await depositToWeth(feeAmount);
+                } else {
+                    // buy token so we have it for fee
+                    const tokenBalance = await balanceOf(assetInfo.address, senderAcc.address);
+
+                    if (tokenBalance.lt(feeAmount)) {
+                        await setBalance(
+                            assetInfo.address,
+                            senderAcc.address,
+                            hre.ethers.utils.parseUnits(feeAmount, 1),
+                        );
+                    }
+                }
+                await setBalance(assetInfo.address, proxy.address, hre.ethers.utils.parseUnits('0', 18));
+                await send(assetInfo.address, proxy.address, feeAmount);
+                await executeAction('RecipeExecutor', functionData[1], proxy);
+            });
+        }
+    });
+};
+
 const balancerFLTest = async (generalisedFLFlag) => {
     describe('FL-Balancer', function () {
         this.timeout(60000);
@@ -438,4 +533,5 @@ module.exports = {
     dydxFLTest,
     makerFLTest,
     eulerFLTest,
+    aaveV3FlTest,
 };
