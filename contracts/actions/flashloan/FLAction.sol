@@ -86,7 +86,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         }
     }
 
-    /// @notice Gets a Fl from AaveV2 and returns back the execution to the action address
+    /// @notice Gets a Fl from Aave and returns back the execution to the action address
     /// @param _flParams All the amounts/tokens and related aave fl data
     function _flAave(FlashLoanParams memory _flParams) internal {
         ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
