@@ -1704,8 +1704,8 @@ const callCbRebondStrategy = async (
         placeHolderAddr, // _to hardcoded to proxy
     );
 
-    const lusdInfo = getAssetInfo('LUSD');
     const bLUSDInfo = getAssetInfo('bLUSD');
+    const lusdInfo = getAssetInfo('LUSD');
 
     const sellAction = new dfs.actions.basic.SellAction(
         await formatMockExchangeObj(
@@ -1725,10 +1725,17 @@ const callCbRebondStrategy = async (
         placeHolderAddr, // from hardcoded proxy
     );
 
+    const cbUpdateRebondSubAction = new dfs.actions.chickenBonds.CBUpdateRebondSubAction(
+        '0', // hardcoded subId from subscription
+        '0', // hardcoded bondId from return value
+    );
+
+
     actionsCallData.push(cbChickenInAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(gasFee.encodeForRecipe()[0]);
     actionsCallData.push(cbCreateAction.encodeForRecipe()[0]);
+    actionsCallData.push(cbUpdateRebondSubAction.encodeForRecipe()[0]);
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     const strategyIndex = 0;

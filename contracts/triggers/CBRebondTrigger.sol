@@ -46,16 +46,9 @@ contract CBRebondTrigger is ITrigger, AdminAuth, CBHelper {
         params = abi.decode(_subData, (SubParams));
     }
 
-    function changedSubData(bytes memory _subData) public view override returns (bytes memory) {
-        SubParams memory triggerSubData = parseInputs(_subData);
-
-        // update bondId to the next one which will be created once the trigger is activated
-        triggerSubData.bondID = IBondNFT(BOND_NFT_ADDRESS).totalSupply() + 1;
-
-        return abi.encode(triggerSubData);
-    }
+    function changedSubData(bytes memory _subData) public view override returns (bytes memory) {}
 
     function isChangeable() public pure override returns (bool) {
-        return true;
+        return false;
     }
 }

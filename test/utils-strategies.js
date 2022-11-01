@@ -175,6 +175,28 @@ const subToCompV3Proxy = async (proxy, inputData, regAddr = addrs[network].REGIS
     return latestSubId;
 };
 
+const subToCBRebondProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const cbRebondSubProxyAddr = await getAddrFromRegistry('CBRebondSubProxy', regAddr);
+
+    const CBRebondSubProxy = await hre.ethers.getContractFactory('CBRebondSubProxy');
+    const functionData = CBRebondSubProxy.interface.encodeFunctionData(
+        'subToRebondStrategy',
+        inputData,
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](cbRebondSubProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToRebondStrategy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+
+    return latestSubId;
+};
+
 const updateAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
     const aaveSubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
 
@@ -260,4 +282,5 @@ module.exports = {
     addBotCaller,
     setMCDPriceVerifier,
     getSubHash,
+    subToCBRebondProxy,
 };

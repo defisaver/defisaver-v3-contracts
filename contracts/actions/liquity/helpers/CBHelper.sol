@@ -8,11 +8,14 @@ import "../../../interfaces/curve/ISwaps.sol";
 import "../../../views/ChickenBondsView.sol";
 import "../../../utils/Sqrt.sol";
 import "../../../DS/DSMath.sol";
+import "../../../core/strategy/StrategyModel.sol";
 
 /// @title Chicken Bonds helper contract that fetches market price and optimal rebonding calculations
 contract CBHelper is DSMath, MainnetLiquityAddresses {
 
     using Sqrt for uint256;
+
+    uint64 public constant REBOND_STRATEGY_ID = 23; 
 
     struct CBInfo {
         uint256 chickenInAMMFee;
@@ -118,5 +121,20 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
             chickenInAMMFee: CBManager.CHICKEN_IN_AMM_FEE(),
             bLUSDSupply: IERC20(BLUSD_ADDRESS).totalSupply()
         });
+    }
+
+    function formatRebondSub(uint64 _strategyId, uint256 _newSubId, uint256 _bondID) public pure returns (StrategyModel.StrategySub memory rebondSub) {
+        rebondSub.strategyOrBundleId = _strategyId;
+        rebondSub.isBundle = false;
+
+        bytes memory triggerData = abi.encode(_bondID);
+        rebondSub.triggerData =  new bytes[](1);
+        rebondSub.triggerData[0] = triggerData;
+
+        rebondSub.subData =  new bytes32[](4);
+        rebondSub.subData[0] = bytes32(_newSubId);
+        rebondSub.subData[1] = bytes32(_bondID);
+        rebondSub.subData[2] = bytes32(uint256(uint160(BLUSD_ADDRESS)));
+        rebondSub.subData[3] = bytes32(uint256(uint160(LUSD_TOKEN_ADDRESS)));
     }
 }

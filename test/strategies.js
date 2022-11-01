@@ -1555,6 +1555,7 @@ const createCompV3FlBoostStrategy = () => {
 const createCbRebondStrategy = () => {
     const cbRebondStrategy = new dfs.Strategy('CBRebondStrategy');
 
+    cbRebondStrategy.addSubSlot('&subID', 'uint256');
     cbRebondStrategy.addSubSlot('&bondID', 'uint256');
     cbRebondStrategy.addSubSlot('&bLUSDToken', 'address');
     cbRebondStrategy.addSubSlot('&lusdToken', 'address');
@@ -1587,10 +1588,16 @@ const createCbRebondStrategy = () => {
         '&proxy', // from hardcoded proxy
     );
 
+    const cbUpdateRebondSubAction = new dfs.actions.chickenBonds.CBUpdateRebondSubAction(
+        '&subID', // hardcoded subId from subscription
+        '$4', // hardcoded bondId from return value
+    );
+
     cbRebondStrategy.addAction(cbChickenInAction);
     cbRebondStrategy.addAction(sellAction);
     cbRebondStrategy.addAction(feeTakingAction);
     cbRebondStrategy.addAction(cbCreateAction);
+    cbRebondStrategy.addAction(cbUpdateRebondSubAction);
 
     return cbRebondStrategy.encodeForDsProxyCall();
 };

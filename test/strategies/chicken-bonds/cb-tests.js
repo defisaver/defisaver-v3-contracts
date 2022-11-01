@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const hre = require('hardhat');
 const { expect } = require('chai');
 
@@ -63,6 +64,8 @@ const cbRebondStrategyTest = async () => {
             await redeploy('GasFeeTaker');
             await redeploy('CBCreate');
             await redeploy('CBChickenIn');
+            await redeploy('CBRebondSubProxy');
+            await redeploy('CBUpdateRebondSub');
 
             const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
 
@@ -86,6 +89,8 @@ const cbRebondStrategyTest = async () => {
 
             strategyId = await createStrategy(proxy, ...cbRebondStrategy, true);
 
+            strategyId = '23';
+
             // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subCbRebondStrategy(proxy, bondID, strategyId));
         });
@@ -107,31 +112,32 @@ const cbRebondStrategyTest = async () => {
             console.log(bondIDNew, bondID);
         });
 
-        // it('... should rebond again for the new bondId', async () => {
-        //     const abiCoder = new hre.ethers.utils.AbiCoder();
+        it('... should rebond again for the new bondId', async () => {
+            const abiCoder = new hre.ethers.utils.AbiCoder();
 
-        //     const time = await getRebondTime(chickenBondsView, rebondTrigger, newLusdAmount);
+            const time = await getRebondTime(chickenBondsView, rebondTrigger, newLusdAmount);
 
-        //     const triggerData = await createCbRebondTrigger(bondIDNew);
+            const triggerData = await createCbRebondTrigger(bondIDNew);
 
-        //     const bondIDNewEncoded = abiCoder.encode(['uint256'], [bondID.toString()]);
-        //     const bLusdTokenEncoded = abiCoder.encode(['address'], [BLUSD_ADDR]);
-        //     const lusdTokenEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
-        //     strategySub = [strategyId, false,
-        //         [triggerData], [bondIDNewEncoded, bLusdTokenEncoded, lusdTokenEncoded]];
+            const subIdEncoded = abiCoder.encode(['uint256'], [subId.toString()]);
+            const bondIDNewEncoded = abiCoder.encode(['uint256'], [bondIDNew.toString()]);
+            const bLusdTokenEncoded = abiCoder.encode(['address'], [BLUSD_ADDR]);
+            const lusdTokenEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
+            strategySub = [strategyId, false,
+                [triggerData], [subIdEncoded, bondIDNewEncoded, bLusdTokenEncoded, lusdTokenEncoded]];
 
-        //     await timeTravel(time);
+            await timeTravel(time);
 
-        //     await callCbRebondStrategy(botAcc, strategyExecutor, subId, strategySub);
+            await callCbRebondStrategy(botAcc, strategyExecutor, subId, strategySub);
 
-        //     const newLusdAmountWei = hre.ethers.utils.parseUnits(newLusdAmount, 18);
+            const newLusdAmountWei = hre.ethers.utils.parseUnits(newLusdAmount, 18);
 
-        //     const bonds = await chickenBondsView.getUsersBonds(proxy.address);
-        //     bondIDNew = bonds[bonds.length - 1].bondID.toString();
+            const bonds = await chickenBondsView.getUsersBonds(proxy.address);
+            bondIDNew = bonds[bonds.length - 1].bondID.toString();
 
-        //     expect(bonds[bonds.length - 1].lusdAmount).to.be.gt(newLusdAmountWei);
-        //     expect(+bondIDNew).to.be.eq(+bondID + 1);
-        // });
+            expect(bonds[bonds.length - 1].lusdAmount).to.be.gt(newLusdAmountWei);
+            expect(+bondIDNew).to.be.eq(+bondID + 2);
+        });
     });
 };
 
