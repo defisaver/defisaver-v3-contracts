@@ -9,6 +9,7 @@ contract OptimismUtilAddresses {
     address internal constant BOT_REGISTRY_ADDRESS = 0xfD2aAeBAe937dd69E13119250B065de4C21FcdBe;
     address internal constant FEE_RECIPIENT = 0x5b12C2B979CB3aB89DD4813837873bC4Dd1930D0;
 
+
     address internal constant UNI_V3_ROUTER = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
     address internal constant UNI_V3_QUOTER = 0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6;
 
@@ -24,6 +25,7 @@ contract OptimismUtilAddresses {
     address internal constant DFS_PROXY_REGISTRY_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant UNI_V2_ROUTER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
+    address internal constant AAVE_MARKET = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant WSTETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant STETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
