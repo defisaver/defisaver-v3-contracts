@@ -1275,8 +1275,8 @@ const liquityEthGainToTrove = async (proxy, lqtyTo) => {
 
  */
 
-const createChickenBond = async (proxy, lusdAmount, from) => {
-    await approve(LUSD_ADDR, proxy.address);
+const createChickenBond = async (proxy, lusdAmount, from, signer) => {
+    await approve(LUSD_ADDR, proxy.address, signer);
 
     const createCBAction = new dfs.actions.chickenBonds.CBCreateAction(
         lusdAmount,
