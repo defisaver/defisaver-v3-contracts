@@ -1767,14 +1767,14 @@
     },
     {
         "name": "CompV3SubProxy",
-        "address": "0xb460c044Cb2ECA74c713b8504Fe5aF360764b38d",
+        "address": "0x5EE8853545CD8f96F1c3c30DDa8e1F6F5b7496cd",
         "id": "0x8c896d4c",
         "path": "contracts/triggers/CompV3RatioTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xb460c044Cb2ECA74c713b8504Fe5aF360764b38d"]
     },
     {
         "name": "CompoundMonitorProxy",
