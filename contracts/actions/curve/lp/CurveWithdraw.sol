@@ -136,8 +136,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
             selector = bytes4(keccak256(sig));
 
             payload = bytes.concat(abi.encodePacked(selector, _burnAmount, tokenIndex, _amounts[tokenIndex]), optional);
-        } else
-        if (!_withdrawExact) {
+        } else if (!_withdrawExact) {
             if (_explicitUnderlying) {
                 sig = "remove_liquidity(uint256,uint256[0],bool)";
                 //                           index = 33 ^
