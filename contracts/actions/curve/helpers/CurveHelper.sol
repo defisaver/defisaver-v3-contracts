@@ -28,11 +28,13 @@ contract CurveHelper is MainnetCurveAddresses {
     function makeFlags(
         DepositTargetType depositTargetType,
         bool explicitUnderlying,
+        bool removeOneCoin,
         bool withdrawExact
     ) public pure returns (uint8 flags) {
         flags = uint8(depositTargetType);
         flags |= (explicitUnderlying ? 1 : 0) << 2;
         flags |= (withdrawExact ? 1 : 0) << 3;
+        flags |= (removeOneCoin ? 1 : 0) << 4;
     }
 
     function parseFlags(
@@ -40,11 +42,13 @@ contract CurveHelper is MainnetCurveAddresses {
     ) public pure returns (
         DepositTargetType depositTargetType,
         bool explicitUnderlying,
+        bool removeOneCoin,
         bool withdrawExact
     ) {
         depositTargetType = DepositTargetType(flags & 3);
         explicitUnderlying = flags & (1 << 2) > 0;
         withdrawExact = flags & (1 << 3) > 0;
+        removeOneCoin = flags & (1 << 4) > 0;
     }
 
     function getSwaps() internal view returns (ISwaps) {
