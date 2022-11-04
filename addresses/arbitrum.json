@@ -165,6 +165,28 @@
         "history": []
     },
     {
+      "name": "AaveV3QuotePriceTrigger",
+      "address": "0xd85418d5896371069d831303b3004b7EFEE8E5bE",
+      "id": "0xda3df4c8",
+      "path": "contracts/triggers/AaveV3QuotePriceTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "AaveV3TrailingQuotePriceTrigger",
+      "address": "0x3471c7bAcB3470E7a2FAA1D4A64c6805c665d903",
+      "id": "0x0e31244d",
+      "path": "contracts/triggers/AaveV3TrailingQuotePriceTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
         "name": "ERC20View",
         "address": "0xd2CFBb9846dc053e45e597f1F1F18F2f08781253",
         "id": "0xde8e6da5",
