@@ -89,7 +89,7 @@ const cbRebondStrategyTest = async () => {
 
             strategyId = await createStrategy(proxy, ...cbRebondStrategy, true);
 
-            strategyId = '23';
+            strategyId = '31';
 
             // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subCbRebondStrategy(proxy, bondID, strategyId));

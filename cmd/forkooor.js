@@ -476,7 +476,7 @@ const cbRebondSub = async (bondId, sender) => {
     await openStrategyAndBundleStorage(true);
 
     let strategyId = await createStrategy(proxy, ...cbRebondStrategy, true);
-    strategyId = '23';
+    strategyId = '31';
 
     // eslint-disable-next-line no-unused-vars
     const { subId, strategySub } = await subCbRebondStrategy(proxy, bondId, strategyId);

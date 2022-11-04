@@ -15,7 +15,7 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
 
     using Sqrt for uint256;
 
-    uint64 public constant REBOND_STRATEGY_ID = 23; 
+    uint64 public constant REBOND_STRATEGY_ID = 31; 
 
     struct CBInfo {
         uint256 chickenInAMMFee;
