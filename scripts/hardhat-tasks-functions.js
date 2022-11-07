@@ -100,8 +100,9 @@ async function deployContract(contractName, args) {
 
     const addressesUsed = contractString.match(helperRegex);
     console.log(addressesUsed);
+    const networkFormatted = network === 'optimistic' ? 'optimism' : network;
     for (let i = 0; i < addressesUsed.length; i++) {
-        if (!(addressesUsed[i].toLowerCase().includes(network.toLowerCase()))) {
+        if (!(addressesUsed[i].toLowerCase().includes(networkFormatted.toLowerCase()))) {
             console.log('ERROR! Check if addresses are matching!');
             console.log(addressesUsed[i]);
             console.log(network);

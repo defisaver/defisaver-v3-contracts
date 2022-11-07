@@ -38,6 +38,8 @@ const {
     addrs,
     ETH_ADDR,
     getOwnerAddr,
+    getLocalTokenPrice,
+    Float2BN,
 } = require('../test/utils');
 
 const {
@@ -69,7 +71,7 @@ const {
     borrowCompV3,
 } = require('../test/actions');
 
-const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy } = require('../test/l2-strategy-subs');
+const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy, subAaveV3CloseBundle } = require('../test/l2-strategy-subs');
 
 const { deployContract } = require('../scripts/utils/deployer');
 
@@ -110,7 +112,13 @@ const {
 
 const { getTroveInfo } = require('../test/utils-liquity');
 
-const { createMcdTrigger, createChainLinkPriceTrigger, RATIO_STATE_UNDER } = require('../test/triggers');
+const {
+    createMcdTrigger,
+    createChainLinkPriceTrigger,
+    RATIO_STATE_OVER,
+    RATIO_STATE_UNDER,
+} = require('../test/triggers');
+const { deployCloseToDebtBundle, deployCloseToCollBundle } = require('../test/strategies/l2/l2-tests');
 
 program.version('0.0.1');
 // let forkedAddresses = '';
@@ -1135,16 +1143,8 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
 
     setNetwork(network);
 
-    await redeploy('AaveV3Payback', addrs[network].REGISTRY_ADDR, false, true);
-    await redeploy('AaveV3Withdraw', addrs[network].REGISTRY_ADDR, false, true);
-    await redeploy('AaveV3Supply', addrs[network].REGISTRY_ADDR, false, true);
-    await redeploy('AaveV3Borrow', addrs[network].REGISTRY_ADDR, false, true);
-
-    const collAssetInfo = assets.find((i) => i.symbol === collSymbol);
-    const debtAssetInfo = assets.find((i) => i.symbol === debtSymbol);
-
-    const collAddr = collAssetInfo.addresses[chainIds[network]];
-    const debtAddr = debtAssetInfo.addresses[chainIds[network]];
+    const { address: collAddr, ...collAssetInfo } = getAssetInfo(collSymbol);
+    const { address: debtAddr, ...debtAssetInfo } = getAssetInfo(debtSymbol);
 
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
@@ -1154,38 +1154,43 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
 
     const pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
 
-    const amount = hre.ethers.utils.parseUnits(collAmount, collAssetInfo.decimals);
-
     if (collSymbol === 'WETH') {
-        await depositToWeth(amount, senderAcc);
+        await depositToWeth(Float2BN(collAmount), senderAcc);
     } else {
         try {
+            const sellAmount = (
+                (collAmount * 1.1 * getLocalTokenPrice(collSymbol)) / getLocalTokenPrice('WETH')
+            ).toFixed(18);
+            console.log(`selling ${sellAmount} WETH for ${collSymbol}`);
+
             await sell(
                 proxy,
                 addrs[network].WETH_ADDRESS,
                 collAddr,
-                hre.ethers.utils.parseUnits('50', 18),
+                Float2BN(sellAmount),
                 addrs[network].UNISWAP_WRAPPER,
                 senderAcc.address,
                 senderAcc.address,
                 0,
                 senderAcc,
-                addrs[network].REGISTRY_ADDR,
+                undefined,
+                undefined,
+                true,
             );
+            console.log(`Buying ${collSymbol} succeeded`);
         } catch (err) {
-            console.log(`Buying ${debtSymbol} failed`);
+            console.log(err);
+            console.log(`Buying ${collSymbol} failed`);
         }
     }
 
     const reserveData = await pool.getReserveData(collAddr);
     const collAssetId = reserveData.id;
 
-    console.log('amount: ', amount);
-
     await aaveV3Supply(
         proxy,
         addrs[network].AAVE_MARKET,
-        amount,
+        Float2BN(collAmount, collAssetInfo.decimals),
         collAddr,
         collAssetId,
         senderAcc.address,
@@ -1265,6 +1270,95 @@ const subAaveAutomation = async (
     );
 
     console.log(`Aave position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
+};
+
+const subAaveClose = async (
+    collSymbol,
+    debtSymbol,
+    triggerBaseSymbol,
+    triggerQuoteSymbol,
+    targetQuotePrice,
+    priceState,
+    sender,
+    closeToColl = false,
+) => {
+    let network = 'mainnet';
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy;
+    let senderAcc = (await hre.ethers.getSigners())[0];
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+    proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await topUp(getOwnerAddr());
+    await topUp(senderAcc.address);
+
+    const rateMode = 2;
+
+    const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
+    const poolAddress = await aaveMarketContract.getPool();
+    const pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
+
+    const baseAssetInfo = getAssetInfo(triggerBaseSymbol);
+    const quoteAssetInfo = getAssetInfo(triggerQuoteSymbol);
+    const collAssetInfo = getAssetInfo(collSymbol);
+    const debtAssetInfo = getAssetInfo(debtSymbol);
+    const collReserveData = await pool.getReserveData(collAssetInfo.address);
+    const debtReserveData = await pool.getReserveData(debtAssetInfo.address);
+    const collAssetId = collReserveData.id;
+    const debtAssetId = debtReserveData.id;
+
+    let bundleId = await getLatestBundleId();
+    if (bundleId < 2) {
+        const triggerAddr = await redeploy(
+            'AaveV3QuotePriceTrigger', undefined, false, true,
+        ).then((c) => c.address);
+        const viewAddr = await redeploy(
+            'AaveV3OracleView', undefined, false, true,
+        ).then((c) => c.address);
+
+        console.log('AaveQuotePriceTrigger address:', triggerAddr);
+        console.log('AaveV3OracleView address:', viewAddr);
+
+        const closeToDebtId = await deployCloseToDebtBundle(proxy, true);
+        const closeToCollId = await deployCloseToCollBundle(proxy, true);
+
+        console.log(`close-to-debt-Id: ${closeToDebtId}, close-to-coll-Id: ${closeToCollId}`);
+
+        bundleId = closeToColl ? closeToCollId : closeToDebtId;
+    } else {
+        bundleId = closeToColl ? bundleId : bundleId - 1;
+    }
+
+    const formattedPrice = (targetQuotePrice * 1e8).toString();
+
+    await subAaveV3CloseBundle(
+        proxy,
+        bundleId,
+        baseAssetInfo.address,
+        quoteAssetInfo.address,
+        formattedPrice,
+        priceState,
+        collAssetInfo.address,
+        collAssetId,
+        debtAssetInfo.address,
+        debtAssetId,
+        rateMode,
+    ).then((subId) => console.log(`subId: ${subId}`));
 };
 
 const subCompV3Automation = async (
@@ -1679,7 +1773,7 @@ const createCompV3Position = async (
                     await addBotCaller(botAddr, addrs[network].REGISTRY_ADDR, true);
                 }
             }
-
+            topUp(addrs[network].OWNER_ACC);
             process.exit(0);
         });
 
@@ -1793,6 +1887,55 @@ const createCompV3Position = async (
                 process.exit(0);
             },
         );
+
+    program
+        .command('sub-aave-close-to-debt <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
+        .description('Subscribes to AaveV3 close to debt bundle')
+        .action(async (
+            collSymbol,
+            debtSymbol,
+            triggerBaseSymbol,
+            triggerQuoteSymbol,
+            triggerTargetPrice,
+            triggerState,
+            senderAddr,
+        ) => {
+            await subAaveClose(
+                collSymbol,
+                debtSymbol,
+                triggerBaseSymbol,
+                triggerQuoteSymbol,
+                triggerTargetPrice,
+                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                senderAddr,
+            );
+            process.exit(0);
+        });
+
+    program
+        .command('sub-aave-close-to-coll <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
+        .description('Subscribes to AaveV3 close to collateral bundle')
+        .action(async (
+            collSymbol,
+            debtSymbol,
+            triggerBaseSymbol,
+            triggerQuoteSymbol,
+            triggerTargetPrice,
+            triggerState,
+            senderAddr,
+        ) => {
+            await subAaveClose(
+                collSymbol,
+                debtSymbol,
+                triggerBaseSymbol,
+                triggerQuoteSymbol,
+                triggerTargetPrice,
+                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                senderAddr,
+                true,
+            );
+            process.exit(0);
+        });
 
     program
         .command(
