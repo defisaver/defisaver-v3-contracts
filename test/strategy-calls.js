@@ -1717,7 +1717,7 @@ const callCbRebondStrategy = async (
         placeHolderAddr,
     );
 
-    const gasCost = 1_500_000;
+    const gasCost = 1_600_000;
     const gasFee = new dfs.actions.basic.GasFeeAction(gasCost, placeHolderAddr, 0);
 
     const cbCreateAction = new dfs.actions.chickenBonds.CBCreateAction(
@@ -1729,7 +1729,6 @@ const callCbRebondStrategy = async (
         '0', // hardcoded subId from subscription
         '0', // hardcoded bondId from return value
     );
-
 
     actionsCallData.push(cbChickenInAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);

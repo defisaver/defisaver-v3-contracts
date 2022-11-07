@@ -9,6 +9,9 @@ import "../../../actions/liquity/helpers/CBHelper.sol";
 
 /// @title Special action to update rebond strategy data (Only use in that context)
 contract CBUpdateRebondSub is ActionBase, CBHelper {
+
+    /// @param subId Id of the sub we are changing (user must be owner)
+    /// @param bondId Id of the chicken bond NFT we just created
     struct Params {
         uint256 subId;
         uint256 bondId;
