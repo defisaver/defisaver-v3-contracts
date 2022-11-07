@@ -50,10 +50,10 @@ describe('CB-rebond-trigger', function () {
             const rebondAmount = calcAccruedAmountForMs(systemInfo, lusdAmount, rebondMs);
             console.log('rebondAmount calc from js: ', rebondAmount.toString());
 
-            const optimalBLusdAmount = await cbRebondTrigger.getOptimalBLusdAmount(hre.ethers.utils.parseUnits(lusdAmount, 18));
-            console.log('rebondAmount calc from sol: ', optimalBLusdAmount[0] / 1e18);
+            const optimalLusdAmount = await cbRebondTrigger.getOptimalLusdAmount(hre.ethers.utils.parseUnits(lusdAmount, 18));
+            console.log('rebondAmount calc from sol: ', optimalLusdAmount[0] / 1e18);
 
-            expect(rebondAmount).to.be.closeTo(optimalBLusdAmount[0] / 1e18, 0.001);
+            expect(rebondAmount).to.be.closeTo(optimalLusdAmount[0] / 1e18, 0.001);
         });
     }
 });
