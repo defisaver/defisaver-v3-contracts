@@ -1855,7 +1855,7 @@ const createCompV3Position = async (
                     await addBotCaller(botAddr, addrs[network].REGISTRY_ADDR, true);
                 }
             }
-
+            topUp(addrs[network].OWNER_ACC);
             process.exit(0);
         });
 
