@@ -1646,14 +1646,14 @@
     },
     {
         "name": "CurveWithdraw",
-        "address": "0xA2A6D75417807ebAf8364613018D697f88021771",
+        "address": "0xb6Be5c486dD65c2cb18A388671b348E62307F0B3",
         "id": "0x7633d6dc",
         "path": "contracts/actions/curve/lp/CurveWithdraw.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xA2A6D75417807ebAf8364613018D697f88021771"]
     },
     {
         "name": "TrailingStopTrigger",
