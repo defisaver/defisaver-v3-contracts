@@ -396,6 +396,39 @@
         "history": []
     },
     {
+        "name": "CBUpdateRebondSub",
+        "address": "0x2709Fd59a27F35997dFf618E3C68ABA1c9e91465",
+        "id": "0x291d78d0",
+        "path": "contracts/actions/liquity/bonds/CBUpdateRebondSub.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CBRebondTrigger",
+        "address": "0x74368A4a3892349837F198795CDaA12CB0B66763",
+        "id": "0xd39413dc",
+        "path": "contracts/triggers/CBRebondTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CBRebondSubProxy",
+        "address": "0x2b37E3A0ef2Bc449633F85b654a9C8D17A575F81",
+        "id": "0xa69c4bb7",
+        "path": "contracts/subProxies/CBRebondSubProxy.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "TransferNFT",
         "address": "0x861e893E1796F81248e75F06C0b09Abdc8fe2f6F",
         "id": "0xa3443678",

@@ -47,7 +47,7 @@ const cbRebondStrategyTest = async () => {
         let rebondTrigger;
         let lusdAmountWei;
         let newLusdAmount;
-        let strategyId;
+        const strategyId = '31';
 
         const lusdAmount = '50000';
 
@@ -83,14 +83,6 @@ const cbRebondStrategyTest = async () => {
         });
 
         it('... should make a Chicken Bond Rebond strategy and subscribe', async () => {
-            const cbRebondStrategy = createCbRebondStrategy();
-
-            await openStrategyAndBundleStorage();
-
-            strategyId = await createStrategy(proxy, ...cbRebondStrategy, true);
-
-            strategyId = '31';
-
             // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subCbRebondStrategy(proxy, bondID, strategyId));
         });

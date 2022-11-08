@@ -458,10 +458,6 @@ const mcdCloseStrategySub = async (vaultId, type, price, priceState, sender) => 
 const cbRebondSub = async (bondId, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
-    await redeploy('CBRebondTrigger', REGISTRY_ADDR, false, true);
-    await redeploy('CBRebondSubProxy', REGISTRY_ADDR, false, true);
-    await redeploy('CBUpdateRebondSub', REGISTRY_ADDR, false, true);
-
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
         // eslint-disable-next-line no-underscore-dangle
@@ -471,12 +467,7 @@ const cbRebondSub = async (bondId, sender) => {
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    const cbRebondStrategy = createCbRebondStrategy();
-
-    await openStrategyAndBundleStorage(true);
-
-    let strategyId = await createStrategy(proxy, ...cbRebondStrategy, true);
-    strategyId = '31';
+    const strategyId = '31';
 
     // eslint-disable-next-line no-unused-vars
     const { subId, strategySub } = await subCbRebondStrategy(proxy, bondId, strategyId);
