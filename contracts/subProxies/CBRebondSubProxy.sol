@@ -20,7 +20,7 @@ contract CBRebondSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelp
         // returns .length which is the next id we are subscribing
         uint256 newSubId = SubStorage(SUB_STORAGE_ADDR).getSubsCount();
 
-        StrategySub memory repaySub = formatRebondSub(REBOND_STRATEGY_ID, newSubId, _bondID);
+        StrategySub memory repaySub = formatRebondSub(newSubId, _bondID);
 
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
     }

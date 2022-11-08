@@ -8,8 +8,6 @@ import "../actions/liquity/helpers/CBHelper.sol";
 
 /// @title Chicken Bonds trigger when the optimal amount of bLUSD has accrued
 contract CBRebondTrigger is ITrigger, AdminAuth, CBHelper {
-    using Sqrt for uint256;
-
     /// @param bondID Nft id of the chicken bond
     struct SubParams {
         uint256 bondID;

@@ -46,9 +46,9 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
     }
 
     function executeActionDirect(bytes memory _callData) public override payable {
-        Params memory inputData = parseInputs(_callData);
+        Params memory params = parseInputs(_callData);
 
-        updateRebondSub(inputData);
+        updateRebondSub(params);
     }
 
     /// @inheritdoc ActionBase
@@ -59,7 +59,7 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function updateRebondSub(Params memory _params) internal {
-        StrategyModel.StrategySub memory rebondSub = formatRebondSub(REBOND_STRATEGY_ID, _params.subId, _params.bondId);
+        StrategyModel.StrategySub memory rebondSub = formatRebondSub(_params.subId, _params.bondId);
 
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_params.subId, rebondSub);
     }

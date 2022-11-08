@@ -123,8 +123,8 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
         });
     }
 
-    function formatRebondSub(uint64 _strategyId, uint256 _newSubId, uint256 _bondID) public pure returns (StrategyModel.StrategySub memory rebondSub) {
-        rebondSub.strategyOrBundleId = _strategyId;
+    function formatRebondSub(uint256 _newSubId, uint256 _bondID) public pure returns (StrategyModel.StrategySub memory rebondSub) {
+        rebondSub.strategyOrBundleId = REBOND_STRATEGY_ID;
         rebondSub.isBundle = false;
 
         bytes memory triggerData = abi.encode(_bondID);
