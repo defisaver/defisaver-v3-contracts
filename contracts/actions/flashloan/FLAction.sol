@@ -4,9 +4,7 @@ pragma solidity =0.8.10;
 import "../ActionBase.sol";
 
 import "../../utils/ReentrancyGuard.sol";
-import "../../DS/DSMath.sol";
 import "../../utils/TokenUtils.sol";
-import "../../utils/SafeMath.sol";
 
 import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/flashloan/IFlashLoanBase.sol";
@@ -22,9 +20,8 @@ import "../../core/strategy/StrategyModel.sol";
 import "./helpers/FLHelper.sol";
 
 /// @title Action that gets and receives FL from different variety of sources
-contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel, FLHelper, DSMath {
+contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel, FLHelper {
     using TokenUtils for address;
-    using SafeMath for uint256;
 
     /// @dev FL Initiator must be this contract
     error UntrustedInitiator();
@@ -32,6 +29,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     error UntrustedLender();
 
     error WrongPaybackAmountError(); // Wrong FL payback amount sent
+
+    error NonexistantFLSource();
 
     enum FLSource {
         EMPTY,
@@ -83,6 +82,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
             _flEuler(_flParams);
         } else if (_source == FLSource.MAKER) {
             _flMaker(_flParams);
+        } else {
+            revert NonexistantFLSource();
         }
     }
 
@@ -185,7 +186,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
-            uint256 paybackAmount = add(_amounts[i], _fees[i]);
+            uint256 paybackAmount = _amounts[i] + _fees[i];
 
             bool correctAmount = _assets[i].getBalance(address(this)) ==
                 paybackAmount + balancesBefore[i];
@@ -228,11 +229,11 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             recipeExecutorAddr,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, _amounts[0].add(_feeAmounts[0]))
+            abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, _amounts[0] +_feeAmounts[0])
         );
 
         for (uint256 i = 0; i < _tokens.length; i++) {
-            uint256 paybackAmount = _amounts[i].add(_feeAmounts[i]);
+            uint256 paybackAmount = _amounts[i] + (_feeAmounts[i]);
 
             if (_tokens[i].getBalance(address(this)) != paybackAmount + balancesBefore[i]) {
                 revert WrongPaybackAmountError();
@@ -297,7 +298,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
 
         address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
 
-        uint256 paybackAmount = _amount.add(_fee);
+        uint256 paybackAmount = _amount +_fee;
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             recipeExecutorAddr,
