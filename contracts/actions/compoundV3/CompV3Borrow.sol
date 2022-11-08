@@ -8,10 +8,15 @@ import "./helpers/CompV3Helper.sol";
 /// @title Borrow base token from CompoundV3
 contract CompV3Borrow is ActionBase, CompV3Helper {
 
+    /// @param market Main Comet proxy contract that is different for each compound market
+    /// @param amount Amount of tokens to be borrowed
+    /// @param to The address we are sending the borrowed tokens to
+    /// @param onBehalf The address from where we are borrowing the tokens from
     struct Params {
         address market;
         uint256 amount;
         address to;
+        address onBehalf;
     }
     
     /// @inheritdoc ActionBase
@@ -27,7 +32,12 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 withdrawAmount, bytes memory logData) = _borrow(params.market, params.amount, params.to);
+        // param was added later on so we check if it's sent
+        if (_paramMapping.length == 4) {
+            params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
+        }
+
+        (uint256 withdrawAmount, bytes memory logData) = _borrow(params);
         emit ActionEvent("CompV3Borrow", logData);
         return bytes32(withdrawAmount);
     }
@@ -35,7 +45,7 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _borrow(params.market, params.amount, params.to);
+        (, bytes memory logData) = _borrow(params);
         logger.logActionDirectEvent("CompV3Borrow", logData);
     }
 
@@ -47,20 +57,23 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice User borrows tokens from the Compound protocol
-    /// @param _market Main Comet proxy contract that is different for each compound market
-    /// @param _amount Amount of tokens to be borrowed
-    /// @param _to The address we are sending the borrowed tokens to
-    function _borrow(
-        address _market,
-        uint256 _amount,
-        address _to
-    ) internal returns (uint256, bytes memory) {
-        address baseTokenAddress = IComet(_market).baseToken();
+    /// @dev If _to == address(0) the action will revert
+    /// @dev If onBehalf == address(0) it will default to proxy
+    /// @dev If onBehalf is not the proxy, the onBehalf address needs to allow the proxy
+    /// @param _params Borrow input struct documented above
+    function _borrow(Params memory _params) internal returns (uint256, bytes memory) {
+        require(_params.to != address(0), "Can't send tokens to 0x0");
 
-        IComet(_market).withdrawTo(_to, baseTokenAddress, _amount);
+        if (_params.onBehalf == address(0)) {
+            _params.onBehalf = address(this);
+        }
 
-        bytes memory logData = abi.encode(_market, baseTokenAddress, _amount, _to);
-        return (_amount, logData);
+        address baseTokenAddress = IComet(_params.market).baseToken();
+
+        IComet(_params.market).withdrawFrom(_params.onBehalf, _params.to, baseTokenAddress, _params.amount);
+
+        bytes memory logData = abi.encode(_params);
+        return (_params.amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
