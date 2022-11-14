@@ -83,7 +83,12 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         address _to,
         bool _isDirect
     ) internal returns (uint256, bytes memory) {
-         // if we set srcAmount to max, take the whole proxy balance
+        // if source and destination address are same we want to skip exchanging and take no fees
+        if (_exchangeData.srcAddr == _exchangeData.destAddr){
+            return (_exchangeData.srcAmount, "");
+        }
+
+        // if we set srcAmount to max, take the whole proxy balance
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
