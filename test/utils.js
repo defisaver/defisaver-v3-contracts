@@ -1095,6 +1095,28 @@ const setMockPrice = async (mockContract, roundId, token, price) => {
     );
     await c.setRoundData(token, USD_QUOTE, roundId, formattedPrice);
 };
+const logUsersCompV3Position = async (market, user) => {
+    const cometContract = await hre.ethers.getContractAt('IComet', market);
+    const numAssets = await cometContract.numAssets();
+
+    const baseAsset = await cometContract.baseToken();
+    const baseAssetInfo = await getAssetInfoByAddress(baseAsset);
+
+    console.log('----------------------------');
+    console.log(`Supplied ${(await cometContract.balanceOf(user)).toString()} ${baseAssetInfo.symbol}`);
+
+    console.log(`Borrowed ${(await cometContract.borrowBalanceOf(user)).toString()} ${baseAssetInfo.symbol}`);
+
+    for (let i = 0; i < numAssets; i++) {
+        const asset = (await cometContract.getAssetInfo(i))[1];
+        const assetInfo = await getAssetInfoByAddress(asset);
+        const collBalance = await cometContract.collateralBalanceOf(user, assetInfo.address);
+        if (collBalance.toString() !== '0') {
+            console.log(`Supplied ${collBalance.toString()} ${assetInfo.symbol}`);
+        }
+    }
+    console.log('----------------------------');
+};
 
 module.exports = {
     addToZRXAllowlist,
@@ -1199,6 +1221,7 @@ module.exports = {
     formatExchangeObjCurve,
     formatMockExchangeObj,
     expectCloseEq,
+    logUsersCompV3Position,
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),

@@ -1779,6 +1779,110 @@ const createCompV3EOAFlBoostStrategy = () => {
     return compV3BoostStrategy.encodeForDsProxyCall();
 };
 
+const compV3CloseActions = {
+    flAction: () => new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['&baseAsset'], // hardcoded in backend as we can't pipe into FL
+        ['%paybackAmount'],
+    ),
+
+    withdrawAction: () => new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        '&market', // comp v3 market
+        '&proxy', // always send funds to proxy after withdraw for further use
+        '&collAsset', // depending on subscription which asset we're selling to close position
+        '%withdrawAmount', // kept variable (can support partial close later)
+        '&onBehalf', // eoa/proxy
+    ),
+
+    sellAction: () => new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collAsset',
+            '&baseAsset', // one subscription - one token pair
+            '%swapAmount', // amount to sell is variable
+            '%exchangeWrapper', // exchange wrapper can change
+        ),
+        '&proxy', // hardcoded take from user proxy
+        '&proxy', // hardcoded send to user proxy
+    ),
+    // eslint-disable-next-line max-len
+    paybackAction: () => new dfs.actions.compoundV3.CompoundV3PaybackAction(
+        '&market', // hardcoded
+        '%paybackAmount', // kept variable (can support partial close later
+        '&proxy', // proxy hardcoded (from)
+        '&onBehalf', // proxy hardcoded (onBehalf)
+        '&baseAsset', // additional only needed for sdk for front
+    ),
+
+    sendRepayFL: () => new dfs.actions.basic.SendTokenAction(
+        '&baseAsset',
+        '%flAddr', // kept variable this can change (FL must be payed back to work)
+        '$1', // hardcoded output from FL action
+    ),
+
+    sendDebt: () => new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&baseAsset',
+        '&eoa', // hardcoded so only proxy owner receives amount
+        '%amountToRecipient(maxUint)', // will always be maxUint
+    ),
+
+    sendColl: () => new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&collAsset',
+        '&eoa', // hardcoded so only proxy owner receives amount
+        '%amountToRecipient(maxUint)', // will always be maxUint
+    ),
+    feeTakingActionColl: (actionNumberWithFeeTakerAmount) => new dfs.actions.basic.GasFeeAction(
+        '%gasCost', // must stay variable backend sets gasCost
+        '&collAsset',
+        `$${actionNumberWithFeeTakerAmount}`, // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+    ),
+    feeTakingActionDebt: (actionNumberWithFeeTakerAmount) => new dfs.actions.basic.GasFeeAction(
+        '%gasCost', // must stay variable backend sets gasCost
+        '&baseAsset',
+        `$${actionNumberWithFeeTakerAmount}`, // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+    ),
+};
+
+const createCompV3CloseStrategyBase = (strategyName) => {
+    const compCloseStrategy = new dfs.Strategy(strategyName);
+
+    compCloseStrategy.addSubSlot('&market', 'address');
+    compCloseStrategy.addSubSlot('&collAsset', 'address');
+    compCloseStrategy.addSubSlot('&baseAsset', 'address');
+    compCloseStrategy.addSubSlot('&onBehalf', 'address');
+
+    const compV3Trigger = new dfs.triggers.CompV3RatioTrigger(nullAddress, nullAddress, '0', '0');
+    compCloseStrategy.addTrigger(compV3Trigger);
+
+    return compCloseStrategy;
+};
+
+const createCompV3CloseToDebtStrategy = () => {
+    const compCloseStrategy = createCompV3CloseStrategyBase('CompV3CloseToDebt');
+
+    compCloseStrategy.addAction(compV3CloseActions.withdrawAction());
+    compCloseStrategy.addAction(compV3CloseActions.sellAction());
+    compCloseStrategy.addAction(compV3CloseActions.feeTakingActionDebt('2'));
+    compCloseStrategy.addAction(compV3CloseActions.paybackAction());
+    compCloseStrategy.addAction(compV3CloseActions.sendDebt());
+
+    return compCloseStrategy.encodeForDsProxyCall();
+};
+
+const createCompV3FLCloseToDebtStrategy = () => {
+    const compCloseStrategy = createCompV3CloseStrategyBase('CompV3FLCloseToDebt');
+
+    compCloseStrategy.addAction(compV3CloseActions.flAction());
+    compCloseStrategy.addAction(compV3CloseActions.paybackAction());
+    compCloseStrategy.addAction(compV3CloseActions.withdrawAction());
+    compCloseStrategy.addAction(compV3CloseActions.sellAction());
+    compCloseStrategy.addAction(compV3CloseActions.feeTakingActionColl('4'));
+    compCloseStrategy.addAction(compV3CloseActions.sendRepayFL());
+    compCloseStrategy.addAction(compV3CloseActions.sendDebt());
+
+    return compCloseStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
@@ -1815,4 +1919,6 @@ module.exports = {
     createCompV3EOABoostStrategy,
     createCompV3FlBoostStrategy,
     createCompV3EOAFlBoostStrategy,
+    createCompV3CloseToDebtStrategy,
+    createCompV3FLCloseToDebtStrategy,
 };

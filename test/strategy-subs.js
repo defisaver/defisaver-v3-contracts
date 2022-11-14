@@ -375,6 +375,27 @@ const subCompV3AutomationStrategy = async (
     return { firstSub: subId1, secondSub: subId2 };
 };
 
+const subCompV3CloseBundle = async (
+    proxy,
+    bundleId,
+    market,
+    collAsset,
+    baseAsset,
+    targetRatio,
+    ratioState,
+    onBehalf,
+) => {
+    const triggerData = abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [onBehalf, market, targetRatio, ratioState]);
+    const strategySub = [bundleId, true, [triggerData], [
+        abiCoder.encode(['address'], [market]),
+        abiCoder.encode(['address'], [collAsset.toString()]),
+        abiCoder.encode(['address'], [baseAsset.toString()]),
+        abiCoder.encode(['address'], [onBehalf.toString()]),
+    ]];
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdRepayStrategy,
@@ -396,4 +417,5 @@ module.exports = {
     subLiquityTrailingCloseToCollStrategy,
     subMcdTrailingCloseToCollStrategy,
     subCompV3AutomationStrategy,
+    subCompV3CloseBundle,
 };

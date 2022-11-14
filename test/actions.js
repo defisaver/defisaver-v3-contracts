@@ -27,6 +27,7 @@ const {
     BLUSD_ADDR,
     getNetwork,
     formatExchangeObjSdk,
+    logUsersCompV3Position,
 } = require('./utils');
 
 const {
@@ -498,6 +499,43 @@ const transferCompV3 = async (market, proxy, from, to, asset, amount) => {
     const functionData = transferCompV3Action.encodeForDsProxyCall()[1];
     const tx = await executeAction('CompV3Transfer', functionData, proxy);
     return tx;
+};
+
+const openCompV3Position = async (
+    market, collAsset, debtAsset, supplyAmount, borrowAmount, onBehalf, senderAcc, proxy, isFork,
+) => {
+    // collAsset is 'WBTC' / 'ETH'...
+    const colInfo = getAssetInfo(collAsset);
+    const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, colInfo.decimals);
+
+    const assetInfo = getAssetInfo(debtAsset);
+    const borrowAmountInWei = hre.ethers.utils.parseUnits(
+        borrowAmount,
+        assetInfo.decimals,
+    );
+    await supplyCompV3(
+        market,
+        proxy,
+        colInfo.address,
+        supplyAmountInWei,
+        senderAcc.address,
+        onBehalf,
+        isFork,
+    );
+
+    if (onBehalf !== proxy.address) {
+        let cometContract = await hre.ethers.getContractAt('IComet', market);
+        const sender = await hre.ethers.provider.getSigner(onBehalf);
+        cometContract = cometContract.connect(sender);
+        await cometContract.allow(proxy.address, true);
+    }
+    await borrowCompV3(
+        market,
+        proxy,
+        borrowAmountInWei,
+        onBehalf,
+        senderAcc.address,
+    );
 };
 
 /*
@@ -2257,6 +2295,7 @@ module.exports = {
     claimCompV3,
     paybackCompV3,
     transferCompV3,
+    openCompV3Position,
 
     uniSupply,
     uniWithdraw,

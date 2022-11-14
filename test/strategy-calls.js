@@ -33,6 +33,8 @@ const {
     BN2Float,
     USDC_ADDR,
     LUSD_ADDR,
+    MAX_UINT,
+    formatMockExchangeObj,
 } = require('./utils');
 
 const { ADAPTER_ADDRESS } = require('./utils-reflexer');
@@ -1689,6 +1691,80 @@ const callLiquityCloseToCollStrategy = async (
     );
 };
 
+const callCompV3CloseToDebtStrategy = async (
+    strategyExecutorByBot,
+    subId,
+    withdrawAmount,
+    srcTokenInfo,
+    destTokenInfo,
+    strategySub,
+) => {
+    const closeGasCost = '1000000';
+
+    const actionsCallData = [];
+    // withdraw, sell, feeTaker, payback, send debt
+    const withdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        placeHolderAddr, // comp v3 market
+        placeHolderAddr, // always send funds to proxy after withdraw for further use
+        placeHolderAddr, // depending on subscription which asset we're selling to close position
+        withdrawAmount, // kept variable (can support partial close later)
+        placeHolderAddr, // eoa/proxy
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        await formatMockExchangeObj(
+            srcTokenInfo,
+            destTokenInfo,
+            MAX_UINT,
+        ),
+        '&proxy', // hardcoded take from user proxy
+        '&proxy', // hardcoded send to user proxy
+    );
+    const feeTakerAction = new dfs.actions.basic.GasFeeAction(
+        closeGasCost, placeHolderAddr, '0',
+    );
+    const paybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
+        placeHolderAddr, // hardcoded
+        MAX_UINT, // kept variable (can support partial close later
+        placeHolderAddr, // proxy hardcoded (from)
+        placeHolderAddr, // proxy hardcoded (onBehalf)
+        placeHolderAddr, // additional only needed for sdk for front
+    );
+    const sendDebtAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        placeHolderAddr,
+        placeHolderAddr, // hardcoded so only proxy owner receives amount
+        MAX_UINT, // will always be maxUint
+    );
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakerAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(sendDebtAction.encodeForRecipe()[0]);
+
+    const strategyIndex = 0;
+    const triggerCallData = [];
+
+    triggerCallData.push(abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [nullAddress, nullAddress, '0', '0']));
+
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(
+        `GasUsed callMcdCloseStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
 module.exports = {
     callDcaStrategy,
     callMcdRepayStrategy,
@@ -1717,4 +1793,5 @@ module.exports = {
     callMcdRepayFromMstableWithExchangeStrategy,
     callMcdRepayFromRariStrategy,
     callMcdRepayFromRariStrategyWithExchange,
+    callCompV3CloseToDebtStrategy,
 };
