@@ -88,6 +88,19 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
 
+        // if source and destination address are same we want to skip exchanging and take no fees
+        if (_exchangeData.srcAddr == _exchangeData.destAddr){
+            bytes memory sameAssetLogData = abi.encode(
+                address(0),
+                _exchangeData.srcAddr,
+                _exchangeData.destAddr,
+                _exchangeData.srcAmount,
+                _exchangeData.srcAmount,
+                0
+        );
+            return (_exchangeData.srcAmount, sameAssetLogData);
+        }
+
         // Wrap eth if sent directly
         if (_exchangeData.srcAddr == TokenUtils.ETH_ADDR) {
             TokenUtils.depositWeth(_exchangeData.srcAmount);
@@ -103,19 +116,6 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             isEthDest = true;
         } 
 
-        // if source and destination address are same we want to skip exchanging and take no fees
-        if (_exchangeData.srcAddr == _exchangeData.destAddr){
-            bytes memory sameAssetLogData = abi.encode(
-                address(0),
-                _exchangeData.srcAddr,
-                _exchangeData.destAddr,
-                _exchangeData.srcAmount,
-                _exchangeData.srcAmount,
-                0
-        );
-            return (_exchangeData.srcAmount, sameAssetLogData);
-        }
-
         _exchangeData.user = getUserAddress();
 
         /// @dev only check for custom fee if a non standard fee is sent
@@ -129,6 +129,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         } else {
             _exchangeData.dfsFeeDivider = 0;
         }
+        
 
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
 
