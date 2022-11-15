@@ -105,7 +105,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
 
         // if source and destination address are same we want to skip exchanging and take no fees
         if (_exchangeData.srcAddr == _exchangeData.destAddr){
-            bytes memory logData = abi.encode(
+            bytes memory sameAssetLogData = abi.encode(
                 address(0),
                 _exchangeData.srcAddr,
                 _exchangeData.destAddr,
@@ -113,9 +113,9 @@ contract DFSSell is ActionBase, DFSExchangeCore {
                 _exchangeData.srcAmount,
                 0
         );
-            return (_exchangeData.srcAmount, logData);
+            return (_exchangeData.srcAmount, sameAssetLogData);
         }
-        
+
         _exchangeData.user = getUserAddress();
 
         /// @dev only check for custom fee if a non standard fee is sent
