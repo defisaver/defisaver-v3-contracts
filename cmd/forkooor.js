@@ -38,6 +38,7 @@ const {
     addrs,
     ETH_ADDR,
     getOwnerAddr,
+    MAX_UINT,
     getLocalTokenPrice,
     Float2BN,
 } = require('../test/utils');
@@ -97,6 +98,10 @@ const {
     createCompV3RepayStrategy,
     createCompV3BoostStrategy,
     createFlCompV3RepayStrategy,
+    createCompV3EOABoostStrategy,
+    createCompV3EOAFlBoostStrategy,
+    createCompV3EOARepayStrategy,
+    createFlCompV3EOARepayStrategy,
 } = require('../test/strategies');
 
 const {
@@ -1367,6 +1372,7 @@ const subCompV3Automation = async (
     optimalRatioBoost,
     optimalRatioRepay,
     boostEnabled,
+    isEOA,
     sender,
 ) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
@@ -1427,6 +1433,30 @@ const subCompV3Automation = async (
         console.log(repayBundleId, boostBundleId);
     }
 
+    if (isEOA === 'true') {
+        if (parseInt(bundleId, 10) < 6) {
+            await openStrategyAndBundleStorage(true);
+            const compV3RepayStrategyEncoded = createCompV3EOARepayStrategy();
+            const compV3RepayFLStrategyEncoded = createFlCompV3EOARepayStrategy();
+
+            const strategyId1 = await createStrategy(proxy, ...compV3RepayStrategyEncoded, true);
+            const strategyId2 = await createStrategy(proxy, ...compV3RepayFLStrategyEncoded, true);
+
+            repayBundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+
+            const compV3BoostStrategyEncoded = createCompV3EOABoostStrategy();
+            const compV3BoostFLStrategyEncoded = createCompV3EOAFlBoostStrategy();
+
+            const strategyId11 = await createStrategy(proxy, ...compV3BoostStrategyEncoded, true);
+            const strategyId22 = await createStrategy(proxy, ...compV3BoostFLStrategyEncoded, true);
+
+            boostBundleId = await createBundle(proxy, [strategyId11, strategyId22]);
+
+            console.log(repayBundleId, boostBundleId);
+        }
+        // create strategies
+    }
+
     const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
     const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
 
@@ -1441,6 +1471,7 @@ const subCompV3Automation = async (
         optimalRatioBoostFormatted.toString(),
         optimalRatioRepayFormatted.toString(),
         boostEnabled,
+        isEOA === 'true',
         addrs[network].REGISTRY_ADDR,
     );
 
@@ -1517,7 +1548,7 @@ const getAavePos = async (
 };
 
 const getCompV3Pos = async (
-    sender,
+    isEOA, sender,
 ) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
@@ -1547,7 +1578,9 @@ const getCompV3Pos = async (
 
     const compV3View = await hre.ethers.getContractAt('CompV3View', '0x5e07E953dac1d7c19091c3b493579ba7283572a4');
 
-    const compInfo = await compV3View.getLoanData(addrs[network].COMET_USDC_ADDR, proxy.address);
+    const user = isEOA ? senderAcc.address : proxy.address;
+
+    const compInfo = await compV3View.getLoanData(addrs[network].COMET_USDC_ADDR, user);
 
     compInfo.collAmounts.forEach((amount, i) => {
         if (!amount.eq(0)) {
@@ -1562,7 +1595,6 @@ const getCompV3Pos = async (
 
     console.log(`Coll $${compInfo.collValue / 1e8}`);
     console.log(`Debt $${compInfo.borrowValue / 1e6}`);
-    console.log(`Ratio ${(compInfo.collValue / compInfo.borrowValue).toFixed(2)}%`);
 };
 
 const updateAaveV3AutomationSub = async (
@@ -1672,7 +1704,7 @@ const setMockChainlinkPrice = async (tokenLabel, price) => {
 };
 
 const createCompV3Position = async (
-    collType, collAmount, debtAmount, sender,
+    collType, collAmount, debtAmount, isEOA, sender,
 ) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
@@ -1681,6 +1713,8 @@ const createCompV3Position = async (
         // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
+
+    await topUp(senderAcc.address);
 
     let network = 'mainnet';
 
@@ -1727,18 +1761,43 @@ const createCompV3Position = async (
     }
 
     try {
-        await supplyCompV3(
-            addrs[network].COMET_USDC_ADDR,
-            proxy,
-            collToken.address,
-            collAmountWei,
-            senderAcc.address,
-            true,
-            senderAcc,
-        );
-        await borrowCompV3(addrs[network].COMET_USDC_ADDR, proxy, debtAmountWei, senderAcc.address);
+        if (isEOA === 'true') {
+            let comet = await hre.ethers.getContractAt('IComet', addrs[network].COMET_USDC_ADDR);
+            let erc20 = await hre.ethers.getContractAt('IERC20', collToken.address);
 
-        console.log('Position created!');
+            comet = comet.connect(senderAcc);
+            erc20 = erc20.connect(senderAcc);
+
+            // approve
+            await erc20.approve(addrs[network].COMET_USDC_ADDR, MAX_UINT);
+
+            await comet.supply(collToken.address, collAmountWei);
+            await comet.withdraw(addrs[network].USDC_ADDR, debtAmountWei);
+
+            // give proxy approval
+            await comet.allow(proxy.address, true);
+
+            console.log(`Position created for ${senderAcc.address}`);
+        } else {
+            await supplyCompV3(
+                addrs[network].COMET_USDC_ADDR,
+                proxy,
+                collToken.address,
+                collAmountWei,
+                senderAcc.address,
+                proxy.address,
+                true,
+                senderAcc,
+            );
+            await borrowCompV3(
+                addrs[network].COMET_USDC_ADDR,
+                proxy,
+                debtAmountWei,
+                proxy.address,
+                senderAcc.address,
+            );
+            console.log(`Position created! for ${proxy.address}`);
+        }
     } catch (err) {
         console.log(err);
     }
@@ -1939,7 +1998,7 @@ const createCompV3Position = async (
 
     program
         .command(
-            'sub-compV3-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+            'sub-compV3-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> <isEOA> [senderAddr]',
         )
         .description('Subscribes to compV3 automation can be both b/r')
         .action(
@@ -1949,6 +2008,7 @@ const createCompV3Position = async (
                 optimalRatioBoost,
                 optimalRatioRepay,
                 boostEnabled,
+                isEOA,
                 senderAcc,
             ) => {
                 // eslint-disable-next-line max-len
@@ -1958,6 +2018,7 @@ const createCompV3Position = async (
                     optimalRatioBoost,
                     optimalRatioRepay,
                     boostEnabled,
+                    isEOA,
                     senderAcc,
                 );
                 process.exit(0);
@@ -2097,10 +2158,10 @@ const createCompV3Position = async (
         });
 
     program
-        .command('create-compV3-position <collType> <collAmount> <debtAmount> [senderAddr]')
+        .command('create-compV3-position <collType> <collAmount> <debtAmount> <isEOA> [senderAddr]')
         .description('Creates a compV3 position')
-        .action(async (collType, collAmount, debtAmount, senderAddr) => {
-            await createCompV3Position(collType, collAmount, debtAmount, senderAddr);
+        .action(async (collType, collAmount, debtAmount, isEOA, senderAddr) => {
+            await createCompV3Position(collType, collAmount, debtAmount, isEOA, senderAddr);
             process.exit(0);
         });
 
@@ -2146,10 +2207,10 @@ const createCompV3Position = async (
         });
 
     program
-        .command('get-compV3-position [addr]')
+        .command('get-compV3-position <isEOA> [addr]')
         .description('CompV3 position view, default to proxy')
-        .action(async (addr) => {
-            await getCompV3Pos(addr);
+        .action(async (isEOA, addr) => {
+            await getCompV3Pos(isEOA, addr);
             process.exit(0);
         });
 

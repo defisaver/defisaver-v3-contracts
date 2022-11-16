@@ -10,7 +10,7 @@ describe('CompV3-Borrow', function () {
         await redeploy('CompV3Borrow');
     });
 
-    it('... should test CompoundV3 transfer', async () => {
+    it('... should test CompoundV3 borrow', async () => {
         await compV3BorrowTest();
     });
 });

@@ -354,9 +354,10 @@ const subCompV3AutomationStrategy = async (
     optimalRatioBoost,
     optimalRatioRepay,
     boostEnabled,
+    isEOA,
     regAddr = REGISTRY_ADDR,
 ) => {
-    const subInput = [[market, USDC_ADDR, minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled]];
+    const subInput = [[market, USDC_ADDR, minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled, isEOA]];
 
     const subId = await subToCompV3Proxy(proxy, subInput, regAddr);
 
@@ -370,8 +371,6 @@ const subCompV3AutomationStrategy = async (
         subId1 = subId;
         subId2 = '0';
     }
-
-    console.log('Subs: ', subId, subId2);
 
     return { firstSub: subId1, secondSub: subId2 };
 };

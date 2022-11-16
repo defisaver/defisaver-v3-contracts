@@ -10,7 +10,7 @@ describe('CompV3-Payback', function () {
         await redeploy('CompV3Payback');
     });
 
-    it('... should test CompoundV3 transfer', async () => {
+    it('... should test CompoundV3 payback', async () => {
         await compV3PaybackTest();
     });
 });
