@@ -6,7 +6,7 @@ const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const storageSlots = require('./storageSlots.json');
 
-const { deployAsOwner } = require('../scripts/utils/deployer');
+const { deployAsOwner, deployContract } = require('../scripts/utils/deployer');
 
 const strategyStorageBytecode = require('../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
 const subStorageBytecode = require('../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
@@ -488,7 +488,7 @@ const sendEther = async (signer, toAddress, amount) => {
 };
 
 // eslint-disable-next-line max-len
-const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTenderly = config.saveOnTenderly, isFork = false) => {
+const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveOnTenderly = config.saveOnTenderly, isFork = false, ...args) => {
     if (!isFork) {
         await hre.network.provider.send('hardhat_setBalance', [
             getOwnerAddr(),
@@ -497,7 +497,7 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
         await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
             '0x1', // 1 wei
         ]);
-        if (regAddr === addrs[network].REGISTRY_ADDR) {
+        if (regAddr === addrs[getNetwork()].REGISTRY_ADDR) {
             await impersonateAccount(getOwnerAddr());
         }
 
@@ -511,7 +511,7 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
 
     registry = registry.connect(signer);
 
-    const c = await deployAsOwner(name);
+    const c = await deployAsOwner(name, undefined, ...args);
 
     if (name === 'StrategyExecutor' || name === 'StrategyExecutorL2') {
         // eslint-disable-next-line no-param-reassign
@@ -565,6 +565,19 @@ const redeploy = async (name, regAddr = addrs[network].REGISTRY_ADDR, saveOnTend
 
 const setCode = async (addr, code) => {
     await hre.network.provider.send('hardhat_setCode', [addr, code]);
+};
+
+const setContractAt = async ({ name, address, args = [] }) => {
+    const contract = await deployContract(name, ...args);
+
+    const deployedBytecode = await hre.network.provider.request({
+        method: 'eth_getCode',
+        params: [contract.address],
+    });
+
+    await setCode(address, deployedBytecode);
+
+    return hre.ethers.getContractAt(name, address);
 };
 
 const redeployCore = async (isL2 = false) => {
@@ -1199,6 +1212,7 @@ module.exports = {
     formatExchangeObjCurve,
     formatMockExchangeObj,
     expectCloseEq,
+    setContractAt,
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),
