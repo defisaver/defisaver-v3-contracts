@@ -1061,6 +1061,17 @@
         "history": ["0xaf591afeCbAa4026Be377AA3cF02dA366f18DE07"]
     },
     {
+        "name": "FLAction",
+        "address": "0x9eC9E483Edb2dACA782222fF32b261AD56e43879",
+        "id": "0xbcab5e2a",
+        "path": "contracts/actions/flashloan/FLAction.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "UniSupply",
         "address": "0x9935e12F0218E61c27D7f23eAC9A9D6881a078eC",
         "id": "0x834ebcf7",

@@ -156,6 +156,7 @@ const chainIds = {
 };
 
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
+const AAVE_V3_FL_FEE = 0.05;
 const MIN_VAULT_DAI_AMOUNT = '45010'; // TODO: can we fetch this dynamically
 const MIN_VAULT_RAI_AMOUNT = '3000'; // TODO: can we fetch this dynamically
 
@@ -1154,6 +1155,7 @@ module.exports = {
     ADMIN_ACC,
     USDC_ADDR,
     AAVE_FL_FEE,
+    AAVE_V3_FL_FEE,
     MIN_VAULT_DAI_AMOUNT,
     MIN_VAULT_RAI_AMOUNT,
     RAI_ADDR,

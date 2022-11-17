@@ -35,8 +35,6 @@ contract FLAaveV2 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlas
             AAVE_LENDING_POOL_ADDRESS_PROVIDER
     );
 
-    uint16 public constant AAVE_REFERRAL_CODE = 64;
-
     bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     /// @inheritdoc ActionBase
