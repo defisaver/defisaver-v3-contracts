@@ -434,14 +434,14 @@
     },
     {
       "name": "DFSSell",
-      "address": "0xfA015aD97E25247c2144F1C89AeD449cc3Fd1FCB",
+      "address": "0xC6c601fcAa870efd26C624F8c65fbc54cBe533b1",
       "id": "0x7f2a0f35",
       "path": "contracts/actions/exchange/DFSSell.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0xfA015aD97E25247c2144F1C89AeD449cc3Fd1FCB"]
     },
     {
       "name": "StrategyExecutor",

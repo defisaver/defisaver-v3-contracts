@@ -221,14 +221,14 @@
       },
     {
       "name": "DFSSell",
-      "address": "0x49E1574Ba6b8134c29B1EbC010784A01D91b794F",
+      "address": "0x9109F34AB28D369cF894aF45C50E976B8E312a82",
       "id": "0x7f2a0f35",
       "path": "contracts/actions/exchange/DFSSell.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0x49E1574Ba6b8134c29B1EbC010784A01D91b794F"]
     },
     {
       "name": "WrapEth",
