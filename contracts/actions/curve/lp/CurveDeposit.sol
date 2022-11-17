@@ -63,7 +63,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
         if (_params.to == address(0)) revert CurveDepositZeroRecipient();
         (
             DepositTargetType depositTargetType,
-            bool explicitUnderlying,
+            bool explicitUnderlying,,
         ) = parseFlags(_params.flags);
         (
             address lpToken,

@@ -254,14 +254,14 @@
     },
     {
       "name": "SendToken",
-      "address": "0xb022BaFfcEdc0ceA15aF6B2B744795A12D21F2a9",
+      "address": "0x2Bbb31CCD39306365c27d03744fd1b72Af27bc12",
       "id": "0x02abc227",
       "path": "contracts/actions/utils/SendToken.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0xb022BaFfcEdc0ceA15aF6B2B744795A12D21F2a9"]
     },
     {
       "name": "AaveV3Supply",

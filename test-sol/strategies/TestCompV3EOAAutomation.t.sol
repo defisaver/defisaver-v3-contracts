@@ -7,7 +7,7 @@ import "../TokenAddresses.sol";
 import "../CheatCodes.sol";
 
 import "../utils/Tokens.sol";
-import "../utils/CompUser.sol";
+import "../utils/CompUserEOA.sol";
 import "../utils/StrategyBuilder.sol";
 import "../utils/BundleBuilder.sol";
 import "../utils/RegistryUtils.sol";
@@ -24,7 +24,7 @@ import "../../contracts/actions/compoundV3/CompV3SubProxy.sol";
 import "../../contracts/actions/checkers/CompV3RatioCheck.sol";
 import "../../contracts/exchangeV3/wrappersV3/UniswapWrapperV3.sol";
 
-contract TestCompV3Automation is
+contract TestCompV3EOAAutomation is
     DSTest,
     DSMath,
     Tokens,
@@ -32,7 +32,7 @@ contract TestCompV3Automation is
     ActionsUtils,
     Strategies
 {
-    CompUser user1;
+    CompUserEOA user1;
     CompV3SubProxy subProxy;
     StrategyExecutor executor;
     CompV3View compV3View;
@@ -74,13 +74,13 @@ contract TestCompV3Automation is
 
         addBotCaller(address(this));
 
-        uint256 repayId = createCompV3Repay();
-        uint256 repayFLId = createCompV3FLRepay();
+        uint256 repayId = createCompV3EOARepay();
+        uint256 repayFLId = createCompV3FLEOARepay();
         uint256 repayCompositeId = createCompV3CompositeRepay();
         uint256 repayFLCompositeId = createCompV3FLCompositeRepay();
 
-        uint256 boostId = createCompV3Boost();
-        uint256 boostFLId = createCompV3FLBoost();
+        uint256 boostId = createCompV3EOABoost();
+        uint256 boostFLId = createCompV3FLEOABoost();
         uint256 boostCompositeId = createCompV3CompositeBoost();
         uint256 boostFLCompositeId = createCompV3FLCompositeBoost();
 
@@ -99,14 +99,14 @@ contract TestCompV3Automation is
         new BundleBuilder().init(boostIds);
 
         // create compV3 position
-        user1 = new CompUser();
-        gibTokens(user1.proxyAddr(), TokenAddresses.WETH_ADDR, 1000 ether);
+        user1 = new CompUserEOA(TokenAddresses.COMET_USDC);
+        gibTokens(address(user1), TokenAddresses.WETH_ADDR, 1000 ether);
 
         uint ethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 15_000);
-        user1.supply(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, ethAmount);
-        user1.borrow(TokenAddresses.COMET_USDC, 10_000e6);
+        user1.supply(TokenAddresses.WETH_ADDR, ethAmount);
+        user1.borrow(10_000e6);
 
-        proxy = user1.proxyAddr();
+        proxy = user1.proxyAddr();        
 
         subProxy = new CompV3SubProxy();
 
@@ -120,15 +120,15 @@ contract TestCompV3Automation is
         repaySubId = SubStorage(SUB_STORAGE_ADDR).getSubsCount() - 2;
         boostSubId = SubStorage(SUB_STORAGE_ADDR).getSubsCount() - 1;
 
-        repaySub = subProxy.formatRepaySub(params, proxy, address(0));
-        boostSub = subProxy.formatBoostSub(params, proxy, address(0));
+        repaySub = subProxy.formatRepaySub(params, proxy, address(user1));
+        boostSub = subProxy.formatBoostSub(params, proxy, address(user1));
     }
 
-    function testCompV3RepayStrategy() public {
+    function testCompV3EOARepayStrategy() public {
         uint wethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 1_000);
         uint256 repayIndex = 0;
 
-        uint256 borrowAmountBefore = IComet(TokenAddresses.COMET_USDC).borrowBalanceOf(proxy);
+        uint256 borrowAmountBefore = IComet(TokenAddresses.COMET_USDC).borrowBalanceOf(address(user1));
         uint256 txFeeBalanceBefore = IERC20(TokenAddresses.WETH_ADDR).balanceOf(TokenAddresses.FEE_RECEIVER);
 
         bytes[] memory _triggerCallData = new bytes[](1);
@@ -140,13 +140,13 @@ contract TestCompV3Automation is
         _actionsCallData[3] = compV3PaybackEncode(TokenAddresses.COMET_USDC, proxy, 0);
         _actionsCallData[4] = compV3RatioCheckEncode(0, 0, address(0));
 
-        uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
+        uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, address(user1));
 
         executor.executeStrategy(repaySubId, repayIndex, _triggerCallData, _actionsCallData, repaySub);
 
-        uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
+        uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, address(user1));
         uint256 txFeeBalanceAfter = IERC20(TokenAddresses.WETH_ADDR).balanceOf(TokenAddresses.FEE_RECEIVER);
-        uint256 borrowAmountAfter = IComet(TokenAddresses.COMET_USDC).borrowBalanceOf(proxy);
+        uint256 borrowAmountAfter = IComet(TokenAddresses.COMET_USDC).borrowBalanceOf(address(user1));
 
         uint amountAfterFee = wethAmount - (wethAmount / 400);
 
@@ -156,7 +156,7 @@ contract TestCompV3Automation is
         assertGt(afterRatio, beforeRatio);
     }
 
-    function testCompV3FLRepayStrategy() public {
+    function testCompV3EOAFLRepayStrategy() public {
         uint wethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 1_000);
 
         uint256 repayIndex = 1;
@@ -171,21 +171,21 @@ contract TestCompV3Automation is
         _actionsCallData[4] = compV3WithdrawEncode(TokenAddresses.COMET_USDC, address(flBalancer), TokenAddresses.WETH_ADDR, wethAmount);
         _actionsCallData[5] = compV3RatioCheckEncode(0, 0, address(0));
 
-        uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
+        uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, address(user1));
 
         executor.executeStrategy(repaySubId, repayIndex, _triggerCallData, _actionsCallData, repaySub);
 
-        uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
+        uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, address(user1));
 
         assertGt(afterRatio, beforeRatio);
     }
 
-    function testCompV3BoostStrategy() public {
+    function testCompV3EOABoostStrategy() public {
         uint256 usdcAmount = 500e6;
         uint256 boostIndex = 0;
 
         uint ethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 15_000);
-        user1.supply(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, ethAmount);
+        user1.supply(TokenAddresses.WETH_ADDR, ethAmount);
 
         bytes[] memory _triggerCallData = new bytes[](1);
 
@@ -196,20 +196,20 @@ contract TestCompV3Automation is
         _actionsCallData[3] = compV3SupplyEncode(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, 0, proxy);
         _actionsCallData[4] = compV3RatioCheckEncode(0, 0, address(0));
 
-        uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
+        uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, address(user1));
 
         executor.executeStrategy(boostSubId, boostIndex, _triggerCallData, _actionsCallData, boostSub);
-        uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
+        uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, address(user1));
 
         assertGt(beforeRatio, afterRatio);
     }
 
-    function testCompV3BoostFLStrategy() public {
+    function testCompV3EOABoostFLStrategy() public {
         uint256 usdcAmount = 500e6;
         uint256 boostIndex = 1;
 
         uint ethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 15_000);
-        user1.supply(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, ethAmount);
+        user1.supply(TokenAddresses.WETH_ADDR, ethAmount);
 
         bytes[] memory _triggerCallData = new bytes[](1);
 
@@ -221,7 +221,7 @@ contract TestCompV3Automation is
         _actionsCallData[4] = compV3BorrowEncode(TokenAddresses.COMET_USDC, usdcAmount, address(flBalancer));
         _actionsCallData[5] = compV3RatioCheckEncode(0, 0, address(0));
 
-        uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, proxy);
+        uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, address(user1));
 
         executor.executeStrategy(boostSubId, boostIndex, _triggerCallData, _actionsCallData, boostSub);
 
