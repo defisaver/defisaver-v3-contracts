@@ -1722,6 +1722,55 @@ const createCompV3FlBoostStrategy = () => {
     return compV3BoostStrategy.encodeForDsProxyCall();
 };
 
+const createCbRebondStrategy = () => {
+    const cbRebondStrategy = new dfs.Strategy('CBRebondStrategy');
+
+    cbRebondStrategy.addSubSlot('&subID', 'uint256');
+    cbRebondStrategy.addSubSlot('&bondID', 'uint256');
+    cbRebondStrategy.addSubSlot('&bLUSDToken', 'address');
+    cbRebondStrategy.addSubSlot('&lusdToken', 'address');
+
+    const cbRebondTrigger = new dfs.triggers.CBRebondTrigger('0');
+    cbRebondStrategy.addTrigger(cbRebondTrigger);
+
+    const cbChickenInAction = new dfs.actions.chickenBonds.CBChickenInAction(
+        '&bondID', // bondID hardcoded from sub slot
+        '&proxy', // _to hardcoded to proxy
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&bLUSDToken', // hardcoded as it's always bLUSD
+            '&lusdToken', // hardcoded as it's always LUSD
+            '$1', //  hardcoded from chickenIn Amount
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', '&lusdToken', '$2',
+    );
+
+    const cbCreateAction = new dfs.actions.chickenBonds.CBCreateAction(
+        '$3', // lusdAmount from the gas fee action
+        '&proxy', // from hardcoded proxy
+    );
+
+    const cbUpdateRebondSubAction = new dfs.actions.chickenBonds.CBUpdateRebondSubAction(
+        '&subID', // hardcoded subId from subscription
+        '$4', // hardcoded bondId from return value
+    );
+
+    cbRebondStrategy.addAction(cbChickenInAction);
+    cbRebondStrategy.addAction(sellAction);
+    cbRebondStrategy.addAction(feeTakingAction);
+    cbRebondStrategy.addAction(cbCreateAction);
+    cbRebondStrategy.addAction(cbUpdateRebondSubAction);
+
+    return cbRebondStrategy.encodeForDsProxyCall();
+};
+
 const createCompV3EOAFlBoostStrategy = () => {
     const compV3BoostStrategy = new dfs.Strategy('CompV3EOAFlBoostStrategy');
 
@@ -1814,5 +1863,6 @@ module.exports = {
     createCompV3BoostStrategy,
     createCompV3EOABoostStrategy,
     createCompV3FlBoostStrategy,
+    createCbRebondStrategy,
     createCompV3EOAFlBoostStrategy,
 };
