@@ -386,10 +386,10 @@
       "history": []
     },
     {
-      "name": "FLBalancer",
-      "address": "0x88bF227d844262539b96fc7187914D74F45cFcf5",
-      "id": "0xf97d044f",
-      "path": "contracts/actions/flashloan/FLBalancer.sol",
+      "name": "FLAction",
+      "address": "0xFbd213073FC4f597C840B1ee202678d210d765fb",
+      "id": "0xbcab5e2a",
+      "path": "contracts/actions/flashloan/FLAction.sol",
       "version": "1.0.0",
       "inRegistry": true,
       "changeTime": "86400",
