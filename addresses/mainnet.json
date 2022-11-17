@@ -633,14 +633,14 @@
     },
     {
         "name": "SendToken",
-        "address": "0x5612e490c9549486dF16b34EBfD0E8b6cF6a1717",
+        "address": "0x36C26aA8bDc7CFE14e88721dc7fe53EdfED8C880",
         "id": "0x02abc227",
         "path": "contracts/actions/utils/SendToken.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x5612e490c9549486dF16b34EBfD0E8b6cF6a1717"]
     },
     {
         "name": "SumInputs",

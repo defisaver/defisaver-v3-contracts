@@ -55,7 +55,7 @@ contract SendToken is ActionBase {
     /// @param _to Where the tokens are sent
     /// @param _amount Amount of tokens, can be type(uint).max
     function _sendToken(address _tokenAddr, address _to, uint _amount) internal returns (uint) {
-        _tokenAddr.withdrawTokens(_to, _amount);
+        _amount = _tokenAddr.withdrawTokens(_to, _amount);
 
         return _amount;
     }
