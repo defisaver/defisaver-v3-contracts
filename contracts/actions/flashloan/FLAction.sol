@@ -30,7 +30,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
 
     error WrongPaybackAmountError(); // Wrong FL payback amount sent
 
-    error NonexistantFLSource();
+    error NonexistentFLSource();
 
     enum FLSource {
         EMPTY,
@@ -83,7 +83,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         } else if (_source == FLSource.MAKER) {
             _flMaker(_flParams);
         } else {
-            revert NonexistantFLSource();
+            revert NonexistentFLSource();
         }
     }
 
