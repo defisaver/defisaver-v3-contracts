@@ -23,8 +23,4 @@ contract MockAaveV3Oracle {
             prices[i] = uint256(price);
         }
     }
-
-    function vruh() public pure returns (bool) {
-        return true;
-    }
 }
