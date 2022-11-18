@@ -4,6 +4,7 @@ const hre = require('hardhat');
 const {
     subToStrategy,
     subToCompV3Proxy,
+    subToCBRebondProxy,
 } = require('./utils-strategies');
 
 const {
@@ -16,6 +17,7 @@ const {
     createReflexerTrigger,
     createLiquityTrigger,
     createTrailingStopTrigger,
+    createCbRebondTrigger,
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
 } = require('./triggers');
@@ -27,6 +29,7 @@ const {
     WETH_ADDRESS,
     LUSD_ADDR,
     USDC_ADDR,
+    BLUSD_ADDR,
 } = require('./utils');
 
 const { MCD_MANAGER_ADDR } = require('./utils-mcd');
@@ -393,6 +396,25 @@ const subCompV3CloseBundle = async (
         abiCoder.encode(['address'], [onBehalf.toString()]),
     ]];
     const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+
+const subCbRebondStrategy = async (proxy, bondID, strategyId, regAddr = REGISTRY_ADDR) => {
+    const inputData = [bondID.toString()];
+
+    const subId = await subToCBRebondProxy(proxy, inputData, regAddr);
+
+    const isBundle = false;
+    const subIDEncoded = abiCoder.encode(['uint256'], [subId.toString()]);
+    const bondIDEncoded = abiCoder.encode(['uint256'], [bondID.toString()]);
+    const bLusdTokenEncoded = abiCoder.encode(['address'], [BLUSD_ADDR]);
+    const lusdTokenEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
+
+    const triggerData = await createCbRebondTrigger(bondID);
+
+    const strategySub = [strategyId, isBundle, [triggerData], [subIDEncoded, bondIDEncoded, bLusdTokenEncoded, lusdTokenEncoded]];
+
     return { subId, strategySub };
 };
 
@@ -418,4 +440,5 @@ module.exports = {
     subMcdTrailingCloseToCollStrategy,
     subCompV3AutomationStrategy,
     subCompV3CloseBundle,
+    subCbRebondStrategy,
 };

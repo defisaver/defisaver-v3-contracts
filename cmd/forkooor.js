@@ -41,6 +41,8 @@ const {
     MAX_UINT,
     getLocalTokenPrice,
     Float2BN,
+    LUSD_ADDR,
+    timeTravel,
 } = require('../test/utils');
 
 const {
@@ -70,6 +72,7 @@ const {
     aaveV3Borrow,
     supplyCompV3,
     borrowCompV3,
+    createChickenBond,
 } = require('../test/actions');
 
 const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy, subAaveV3CloseBundle } = require('../test/l2-strategy-subs');
@@ -113,6 +116,7 @@ const {
     subMcdTrailingCloseToDaiStrategy,
     subLiquityTrailingCloseToCollStrategy,
     subCompV3AutomationStrategy,
+    subCbRebondStrategy,
 } = require('../test/strategy-subs');
 
 const { getTroveInfo } = require('../test/utils-liquity');
@@ -453,6 +457,26 @@ const mcdCloseStrategySub = async (vaultId, type, price, priceState, sender) => 
     );
 
     console.log(`Subscribed to mcd close strategy with sub id #${subId}`);
+};
+
+const cbRebondSub = async (bondId, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const strategyId = '31';
+
+    // eslint-disable-next-line no-unused-vars
+    const { subId, strategySub } = await subCbRebondStrategy(proxy, bondId, strategyId);
+
+    console.log(`Sub created #${subId}!`);
 };
 
 const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, sender) => {
@@ -824,7 +848,7 @@ const createLiquityTrove = async (coll, debt, sender) => {
             amountColl,
             amountLusd,
             senderAcc.address,
-            proxy.address,
+            senderAcc.address,
         );
 
         await tx.wait();
@@ -910,6 +934,54 @@ const createMcdVault = async (type, coll, debt, sender) => {
     }
 
     process.exit(0);
+};
+
+const createCB = async (lusdAmount, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    const lusdAmountWei = hre.ethers.utils.parseUnits(lusdAmount, 18);
+
+    const lusdBalance = await balanceOf(LUSD_ADDR, senderAcc.address);
+    if (lusdAmountWei.gt(lusdBalance)) {
+        console.log('Not enough Lusd to create chicken bond');
+        return;
+    }
+
+    const chickenBondsView = await hre.ethers.getContractAt(
+        'ChickenBondsView',
+        addrs[network].CHICKEN_BONDS_VIEW,
+    );
+
+    await createChickenBond(proxy, lusdAmountWei, senderAcc.address, senderAcc);
+
+    const bonds = await chickenBondsView.getUsersBonds(proxy.address);
+    const latestBond = bonds[bonds.length - 1].bondID;
+
+    console.log(`Bond ${latestBond} created!`);
 };
 
 const getDFSAddr = async (actionName) => {
@@ -1861,6 +1933,14 @@ const createCompV3Position = async (
         });
 
     program
+        .command('create-chicken-bond <lusdAmount> [senderAddr]')
+        .description('Creates a new chicken bond')
+        .action(async (lusdAmount, senderAddr) => {
+            await createCB(lusdAmount, senderAddr);
+            process.exit(0);
+        });
+
+    program
         .command('create-aave-position <collType> <debtType> <collAmount> <debtAmount> [senderAddr]')
         .description('Creates Aave position ')
         .action(async (collSymbol, debtSymbol, collAmount, debtAmount, senderAddr) => {
@@ -1899,6 +1979,15 @@ const createCompV3Position = async (
         .action(async (vaultId, type, price, priceState, senderAddr) => {
             // eslint-disable-next-line max-len
             await mcdCloseStrategySub(vaultId, type, price, priceState, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('sub-cb-rebond <bondId> [senderAddr]')
+        .description('Subscribes a bond to the rebonding strategy')
+        .action(async (bondId, senderAddr) => {
+            // eslint-disable-next-line max-len
+            await cbRebondSub(bondId, senderAddr);
             process.exit(0);
         });
 
@@ -2130,6 +2219,14 @@ const createCompV3Position = async (
         .description('Calls sell operation to get tokens other than eth')
         .action(async (srcTokenLabel, destTokenLabel, srcAmount, senderAddr) => {
             await callSell(srcTokenLabel, destTokenLabel, srcAmount, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('time-travel <seconds>')
+        .description('Moves the forked blockchain timestamp by <seconds>')
+        .action(async (seconds) => {
+            await timeTravel(+seconds);
             process.exit(0);
         });
 
