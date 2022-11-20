@@ -55,7 +55,12 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
     function getOptimalLusdAmount(uint256 _lusdAmount) public view returns (uint256, uint256) {
         CBInfo memory systemInfo = getCbInfo();
         uint256 marketPrice = getBLusdPriceFromCurve(_lusdAmount);
+
         uint256 optimalRebondTime = _getOptimalRebondTime(systemInfo, marketPrice);
+
+        if (optimalRebondTime == 0) {
+            return (0, 0);
+        }
 
         uint256 feeAmount = marketPrice * systemInfo.chickenInAMMFee;
         uint256 marketPriceMinusFee = (marketPrice * 10**18) - feeAmount;
@@ -84,6 +89,10 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
 
         uint256 premiumSqrt = premiumMinusFee.sqrt();
         uint256 premiumScaled = (premiumMinusFee / 1e18);
+
+        if (premiumScaled < 1e18) {
+            return 0;
+        }
 
         uint256 res = wmul(
             systemInfo.accrualParameter,
