@@ -52,9 +52,9 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
     }
 
     /// @notice Calculates 'optimal' amount of LUSD for an lusdAmount to accrue based on the market price
-    function getOptimalLusdAmount(uint256 _lusdAmount) public view returns (uint256, uint256) {
+    function getOptimalLusdAmount(uint256 _bLUSDCap, uint256 _accruedBLUSD) public view returns (uint256, uint256) {
         CBInfo memory systemInfo = getCbInfo();
-        uint256 marketPrice = getBLusdPriceFromCurve(_lusdAmount);
+        uint256 marketPrice = getBLusdPriceFromCurve(_accruedBLUSD);
 
         uint256 optimalRebondTime = _getOptimalRebondTime(systemInfo, marketPrice);
 
@@ -62,15 +62,12 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
             return (0, 0);
         }
 
-        uint256 feeAmount = marketPrice * systemInfo.chickenInAMMFee;
-        uint256 marketPriceMinusFee = (marketPrice * 10**18) - feeAmount;
-
         uint256 res = wmul(
             wdiv(
-                wmul(_lusdAmount, optimalRebondTime),
+                wmul(_bLUSDCap, optimalRebondTime),
                 (systemInfo.accrualParameter + optimalRebondTime)
             ),
-            marketPriceMinusFee
+            marketPrice * 10**18
         );
 
         return (res / 1e18, marketPrice);

@@ -24,7 +24,9 @@ contract CBRebondTrigger is ITrigger, AdminAuth, CBHelper {
 
         uint256 currentBLusdAmount = CBManager.calcAccruedBLUSD(triggerSubData.bondID);
 
-        (uint256 optimalLusdRebondAmount, uint256 marketPrice) = getOptimalLusdAmount(bondData.lusdAmount);
+        uint256 bondBLUSDCap = CBManager.calcBondBLUSDCap(triggerSubData.bondID);
+        
+        (uint256 optimalLusdRebondAmount, uint256 marketPrice) = getOptimalLusdAmount(bondBLUSDCap, currentBLusdAmount);
 
         uint256 currentLusdAmount = wmul(currentBLusdAmount, marketPrice);
 
