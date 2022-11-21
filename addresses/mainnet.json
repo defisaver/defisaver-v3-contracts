@@ -408,14 +408,14 @@
     },
     {
         "name": "CBRebondTrigger",
-        "address": "0x74368A4a3892349837F198795CDaA12CB0B66763",
+        "address": "0x6Bb48580977e2aBfD6c70B522204EFbe828a9428",
         "id": "0xd39413dc",
         "path": "contracts/triggers/CBRebondTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0x74368A4a3892349837F198795CDaA12CB0B66763", "0xC5379a785a7cE010f54c35484d83FA7f462f8a3B"]
     },
     {
         "name": "CBRebondSubProxy",
