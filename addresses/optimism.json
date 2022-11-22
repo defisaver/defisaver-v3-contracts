@@ -12,14 +12,14 @@
     },
     {
         "name": "SubProxy",
-        "address": "0xfE87DE5e11F580fBD3637f34089BaeeA2C393826",
+        "address": "0x163c08d3F6d916AD6Af55b37728D547e968103F8",
         "id": "0x15c87229",
         "path": "contracts/core/strategy/SubProxy.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xfE87DE5e11F580fBD3637f34089BaeeA2C393826"]
     },
     {
         "name": "AaveSubProxy",
@@ -224,14 +224,14 @@
     },
     {
       "name": "SendToken",
-      "address": "0xEbA499702856f1EFda2546e9fEFC1319A3b40538",
+      "address": "0x053D0dB021c5A912a854176B34D94521da9E6911",
       "id": "0x02abc227",
       "path": "contracts/actions/utils/SendToken.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0xEbA499702856f1EFda2546e9fEFC1319A3b40538"]
     },
     {
       "name": "AaveV3Supply",
@@ -332,6 +332,28 @@
       ]
     },
     {
+      "name": "AaveV3QuotePriceTrigger",
+      "address": "0xf2488C41B37B3C990Ec09c0bc1f92460ad875309",
+      "id": "0xda3df4c8",
+      "path": "contracts/triggers/AaveV3QuotePriceTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "AaveV3TrailingQuotePriceTrigger",
+      "address": "0xE1d1c35f8c60001096964A0260b88F6B1c606b68",
+      "id": "0x0e31244d",
+      "path": "contracts/triggers/AaveV3TrailingQuotePriceTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "FLAaveV3",
       "address": "0xfbcF23D2BeF8A2C491cfa4dD409D8dF12d431c85",
       "id": "0x8d7fb192",
@@ -341,6 +363,17 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": ["0x352D4a1622f2DC34c738F542934372855f219F05"]
+    },
+    {
+      "name": "FLAction",
+      "address": "0x5fA356C700F0C8A6f445B8a36Eb6e108590919D4",
+      "id": "0xbcab5e2a",
+      "path": "contracts/actions/flashloan/FLAction.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
     },
     {
       "name": "BotAuth",

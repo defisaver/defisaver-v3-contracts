@@ -1,4 +1,5 @@
 const dfs = require('@defisaver/sdk');
+const { MAXUINT } = require('@defisaver/tokens');
 const hre = require('hardhat');
 
 const {
@@ -9,6 +10,7 @@ const {
     nullAddress,
     addrs,
     network,
+    formatMockExchangeObj,
 } = require('./utils');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
@@ -423,9 +425,271 @@ const callAaveFLV3BoostL2Strategy = async (
     );
 };
 
+const aaveV3CloseActionsEncoded = {
+    // eslint-disable-next-line max-len
+    flAction: ({ repayAmount, flAsset }) => (new dfs.actions.flashloan.AaveV3FlashLoanAction(
+        [repayAmount],
+        [flAsset],
+        [AAVE_NO_DEBT_MODE],
+        nullAddress,
+    )).encodeForRecipe()[0],
+
+    paybackAction: ({ repayAmount, rateMode = 2 }) => (new dfs.actions.aaveV3.AaveV3PaybackAction(
+        true,
+        nullAddress,
+        repayAmount,
+        placeHolderAddr,
+        rateMode,
+        placeHolderAddr,
+        '0',
+        false,
+        nullAddress,
+    )).encodeForRecipe()[0],
+
+    withdrawAction: ({ withdrawAmount }) => (new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '0',
+        true,
+        withdrawAmount,
+        placeHolderAddr,
+        nullAddress,
+    )).encodeForRecipe()[0],
+
+    // eslint-disable-next-line max-len
+    sellAction: async ({ srcTokenInfo, destTokenInfo, swapAmount }) => (new dfs.actions.basic.SellAction(
+        await formatMockExchangeObj(
+            srcTokenInfo,
+            destTokenInfo,
+            swapAmount,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    )).encodeForRecipe()[0],
+
+    feeTakingAction: ({ closeGasCost }) => (new dfs.actions.basic.GasFeeActionL2(
+        closeGasCost,
+        placeHolderAddr,
+        '0',
+        '0',
+        closeGasCost,
+    )).encodeForRecipe()[0],
+
+    sendAction: () => (new dfs.actions.basic.SendTokenAndUnwrapAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        MAXUINT,
+    )).encodeForRecipe()[0],
+
+    sendRepayFL: ({ flAddr }) => (new dfs.actions.basic.SendTokenAction(
+        placeHolderAddr,
+        flAddr,
+        0,
+    )).encodeForRecipe()[0],
+};
+
+const callAaveCloseToDebtL2Strategy = async (
+    strategyExecutorByBot,
+    subId,
+    srcTokenInfo,
+    destTokenInfo,
+    partialAmounts = undefined,
+) => {
+    const actionsCallData = [];
+    const triggerCallData = [];
+
+    const closeGasCost = '1000000';
+
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
+    }));
+    // eslint-disable-next-line max-len
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo, destTokenInfo, swapAmount: MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: partialAmounts?.repayAmount || MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        0,
+        triggerCallData,
+        actionsCallData,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callAaveCloseToDebtL2Strategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
+const callAaveFLCloseToDebtL2Strategy = async (
+    strategyExecutorByBot,
+    subId,
+    repayAmount,
+    flAsset,
+    flAddr,
+    srcTokenInfo,
+    destTokenInfo,
+    withdrawAmount = undefined,
+) => {
+    const actionsCallData = [];
+    const triggerCallData = [];
+
+    const closeGasCost = '1000000';
+
+    actionsCallData.push(aaveV3CloseActionsEncoded.flAction({ flAsset, repayAmount }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: withdrawAmount ? repayAmount : MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: withdrawAmount || MAXUINT,
+    }));
+    // eslint-disable-next-line max-len
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo, destTokenInfo, swapAmount: MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendRepayFL({ flAddr }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        1,
+        triggerCallData,
+        actionsCallData,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callAaveCloseToDebtL2Strategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
+const callAaveCloseToCollL2Strategy = async (
+    strategyExecutorByBot,
+    subId,
+    swapAmount,
+    srcTokenInfo,
+    destTokenInfo,
+    partialAmounts = undefined,
+) => {
+    const actionsCallData = [];
+    const triggerCallData = [];
+
+    const closeGasCost = '1000000';
+
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo, destTokenInfo, swapAmount: partialAmounts ? MAXUINT : swapAmount,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: partialAmounts?.repayAmount || MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        0,
+        triggerCallData,
+        actionsCallData,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callAaveCloseToCollL2Strategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
+const callAaveFLCloseToCollL2Strategy = async (
+    strategyExecutorByBot,
+    subId,
+    repayAmount,
+    flAsset,
+    flAddr,
+    swapAmount,
+    srcTokenInfo,
+    destTokenInfo,
+    withdrawAmount = undefined,
+) => {
+    const actionsCallData = [];
+    const triggerCallData = [];
+
+    const closeGasCost = '1000000';
+
+    actionsCallData.push(aaveV3CloseActionsEncoded.flAction({ repayAmount, flAsset }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: withdrawAmount ? repayAmount : MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: withdrawAmount || MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo, destTokenInfo, swapAmount: withdrawAmount ? MAXUINT : swapAmount,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendRepayFL({ flAddr }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        1,
+        triggerCallData,
+        actionsCallData,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callAaveCloseToCollL2Strategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
 module.exports = {
     callAaveV3RepayL2Strategy,
     callAaveFLV3RepayL2Strategy,
     callAaveV3BoostL2Strategy,
     callAaveFLV3BoostL2Strategy,
+    callAaveCloseToDebtL2Strategy,
+    callAaveFLCloseToDebtL2Strategy,
+    callAaveCloseToCollL2Strategy,
+    callAaveFLCloseToCollL2Strategy,
+    aaveV3CloseActionsEncoded,
 };

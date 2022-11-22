@@ -39,7 +39,11 @@ const {
     addrs,
     ETH_ADDR,
     getOwnerAddr,
+    MAX_UINT,
+    getLocalTokenPrice,
     Float2BN,
+    LUSD_ADDR,
+    timeTravel,
 } = require('../test/utils');
 
 const {
@@ -69,9 +73,10 @@ const {
     aaveV3Borrow,
     supplyCompV3,
     borrowCompV3,
+    createChickenBond,
 } = require('../test/actions');
 
-const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy } = require('../test/l2-strategy-subs');
+const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy, subAaveV3CloseBundle } = require('../test/l2-strategy-subs');
 
 const { deployContract } = require('../scripts/utils/deployer');
 
@@ -98,6 +103,10 @@ const {
     createCompV3RepayStrategy,
     createCompV3BoostStrategy,
     createFlCompV3RepayStrategy,
+    createCompV3EOABoostStrategy,
+    createCompV3EOAFlBoostStrategy,
+    createCompV3EOARepayStrategy,
+    createFlCompV3EOARepayStrategy,
 } = require('../test/strategies');
 
 const {
@@ -109,11 +118,18 @@ const {
     subMcdTrailingCloseToDaiStrategy,
     subLiquityTrailingCloseToCollStrategy,
     subCompV3AutomationStrategy,
+    subCbRebondStrategy,
 } = require('../test/strategy-subs');
 
 const { getTroveInfo } = require('../test/utils-liquity');
 
-const { createMcdTrigger, createChainLinkPriceTrigger, RATIO_STATE_UNDER } = require('../test/triggers');
+const {
+    createMcdTrigger,
+    createChainLinkPriceTrigger,
+    RATIO_STATE_OVER,
+    RATIO_STATE_UNDER,
+} = require('../test/triggers');
+const { deployCloseToDebtBundle, deployCloseToCollBundle } = require('../test/strategies/l2/l2-tests');
 const { createRepayBundle, createBoostBundle } = require('../test/strategies/mcd/mcd-tests');
 
 program.version('0.0.1');
@@ -444,6 +460,26 @@ const mcdCloseStrategySub = async (vaultId, type, price, priceState, sender) => 
     );
 
     console.log(`Subscribed to mcd close strategy with sub id #${subId}`);
+};
+
+const cbRebondSub = async (bondId, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const strategyId = '31';
+
+    // eslint-disable-next-line no-unused-vars
+    const { subId, strategySub } = await subCbRebondStrategy(proxy, bondId, strategyId);
+
+    console.log(`Sub created #${subId}!`);
 };
 
 const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, sender) => {
@@ -878,7 +914,7 @@ const createLiquityTrove = async (coll, debt, sender) => {
             amountColl,
             amountLusd,
             senderAcc.address,
-            proxy.address,
+            senderAcc.address,
         );
 
         await tx.wait();
@@ -964,6 +1000,54 @@ const createMcdVault = async (type, coll, debt, sender) => {
     }
 
     process.exit(0);
+};
+
+const createCB = async (lusdAmount, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    const lusdAmountWei = hre.ethers.utils.parseUnits(lusdAmount, 18);
+
+    const lusdBalance = await balanceOf(LUSD_ADDR, senderAcc.address);
+    if (lusdAmountWei.gt(lusdBalance)) {
+        console.log('Not enough Lusd to create chicken bond');
+        return;
+    }
+
+    const chickenBondsView = await hre.ethers.getContractAt(
+        'ChickenBondsView',
+        addrs[network].CHICKEN_BONDS_VIEW,
+    );
+
+    await createChickenBond(proxy, lusdAmountWei, senderAcc.address, senderAcc);
+
+    const bonds = await chickenBondsView.getUsersBonds(proxy.address);
+    const latestBond = bonds[bonds.length - 1].bondID;
+
+    console.log(`Bond ${latestBond} created!`);
 };
 
 const getDFSAddr = async (actionName) => {
@@ -1202,16 +1286,8 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
 
     setNetwork(network);
 
-    await redeploy('AaveV3Payback', addrs[network].REGISTRY_ADDR, false, true);
-    await redeploy('AaveV3Withdraw', addrs[network].REGISTRY_ADDR, false, true);
-    await redeploy('AaveV3Supply', addrs[network].REGISTRY_ADDR, false, true);
-    await redeploy('AaveV3Borrow', addrs[network].REGISTRY_ADDR, false, true);
-
-    const collAssetInfo = assets.find((i) => i.symbol === collSymbol);
-    const debtAssetInfo = assets.find((i) => i.symbol === debtSymbol);
-
-    const collAddr = collAssetInfo.addresses[chainIds[network]];
-    const debtAddr = debtAssetInfo.addresses[chainIds[network]];
+    const { address: collAddr, ...collAssetInfo } = getAssetInfo(collSymbol);
+    const { address: debtAddr, ...debtAssetInfo } = getAssetInfo(debtSymbol);
 
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
@@ -1221,38 +1297,43 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
 
     const pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
 
-    const amount = hre.ethers.utils.parseUnits(collAmount, collAssetInfo.decimals);
-
     if (collSymbol === 'WETH') {
-        await depositToWeth(amount, senderAcc);
+        await depositToWeth(Float2BN(collAmount), senderAcc);
     } else {
         try {
+            const sellAmount = (
+                (collAmount * 1.1 * getLocalTokenPrice(collSymbol)) / getLocalTokenPrice('WETH')
+            ).toFixed(18);
+            console.log(`selling ${sellAmount} WETH for ${collSymbol}`);
+
             await sell(
                 proxy,
                 addrs[network].WETH_ADDRESS,
                 collAddr,
-                hre.ethers.utils.parseUnits('50', 18),
+                Float2BN(sellAmount),
                 addrs[network].UNISWAP_WRAPPER,
                 senderAcc.address,
                 senderAcc.address,
                 0,
                 senderAcc,
-                addrs[network].REGISTRY_ADDR,
+                undefined,
+                undefined,
+                true,
             );
+            console.log(`Buying ${collSymbol} succeeded`);
         } catch (err) {
-            console.log(`Buying ${debtSymbol} failed`);
+            console.log(err);
+            console.log(`Buying ${collSymbol} failed`);
         }
     }
 
     const reserveData = await pool.getReserveData(collAddr);
     const collAssetId = reserveData.id;
 
-    console.log('amount: ', amount);
-
     await aaveV3Supply(
         proxy,
         addrs[network].AAVE_MARKET,
-        amount,
+        Float2BN(collAmount, collAssetInfo.decimals),
         collAddr,
         collAssetId,
         senderAcc.address,
@@ -1334,12 +1415,102 @@ const subAaveAutomation = async (
     console.log(`Aave position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
 };
 
+const subAaveClose = async (
+    collSymbol,
+    debtSymbol,
+    triggerBaseSymbol,
+    triggerQuoteSymbol,
+    targetQuotePrice,
+    priceState,
+    sender,
+    closeToColl = false,
+) => {
+    let network = 'mainnet';
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy;
+    let senderAcc = (await hre.ethers.getSigners())[0];
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+    proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await topUp(getOwnerAddr());
+    await topUp(senderAcc.address);
+
+    const rateMode = 2;
+
+    const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
+    const poolAddress = await aaveMarketContract.getPool();
+    const pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
+
+    const baseAssetInfo = getAssetInfo(triggerBaseSymbol);
+    const quoteAssetInfo = getAssetInfo(triggerQuoteSymbol);
+    const collAssetInfo = getAssetInfo(collSymbol);
+    const debtAssetInfo = getAssetInfo(debtSymbol);
+    const collReserveData = await pool.getReserveData(collAssetInfo.address);
+    const debtReserveData = await pool.getReserveData(debtAssetInfo.address);
+    const collAssetId = collReserveData.id;
+    const debtAssetId = debtReserveData.id;
+
+    let bundleId = await getLatestBundleId();
+    if (bundleId < 2) {
+        const triggerAddr = await redeploy(
+            'AaveV3QuotePriceTrigger', undefined, false, true,
+        ).then((c) => c.address);
+        const viewAddr = await redeploy(
+            'AaveV3OracleView', undefined, false, true,
+        ).then((c) => c.address);
+
+        console.log('AaveQuotePriceTrigger address:', triggerAddr);
+        console.log('AaveV3OracleView address:', viewAddr);
+
+        const closeToDebtId = await deployCloseToDebtBundle(proxy, true);
+        const closeToCollId = await deployCloseToCollBundle(proxy, true);
+
+        console.log(`close-to-debt-Id: ${closeToDebtId}, close-to-coll-Id: ${closeToCollId}`);
+
+        bundleId = closeToColl ? closeToCollId : closeToDebtId;
+    } else {
+        bundleId = closeToColl ? bundleId : bundleId - 1;
+    }
+
+    const formattedPrice = (targetQuotePrice * 1e8).toString();
+
+    await subAaveV3CloseBundle(
+        proxy,
+        bundleId,
+        baseAssetInfo.address,
+        quoteAssetInfo.address,
+        formattedPrice,
+        priceState,
+        collAssetInfo.address,
+        collAssetId,
+        debtAssetInfo.address,
+        debtAssetId,
+        rateMode,
+    ).then((subId) => console.log(`subId: ${subId}`));
+};
+
 const subCompV3Automation = async (
     minRatio,
     maxRatio,
     optimalRatioBoost,
     optimalRatioRepay,
     boostEnabled,
+    isEOA,
     sender,
 ) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
@@ -1400,6 +1571,30 @@ const subCompV3Automation = async (
         console.log(repayBundleId, boostBundleId);
     }
 
+    if (isEOA === 'true') {
+        if (parseInt(bundleId, 10) < 6) {
+            await openStrategyAndBundleStorage(true);
+            const compV3RepayStrategyEncoded = createCompV3EOARepayStrategy();
+            const compV3RepayFLStrategyEncoded = createFlCompV3EOARepayStrategy();
+
+            const strategyId1 = await createStrategy(proxy, ...compV3RepayStrategyEncoded, true);
+            const strategyId2 = await createStrategy(proxy, ...compV3RepayFLStrategyEncoded, true);
+
+            repayBundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+
+            const compV3BoostStrategyEncoded = createCompV3EOABoostStrategy();
+            const compV3BoostFLStrategyEncoded = createCompV3EOAFlBoostStrategy();
+
+            const strategyId11 = await createStrategy(proxy, ...compV3BoostStrategyEncoded, true);
+            const strategyId22 = await createStrategy(proxy, ...compV3BoostFLStrategyEncoded, true);
+
+            boostBundleId = await createBundle(proxy, [strategyId11, strategyId22]);
+
+            console.log(repayBundleId, boostBundleId);
+        }
+        // create strategies
+    }
+
     const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
     const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
 
@@ -1414,6 +1609,7 @@ const subCompV3Automation = async (
         optimalRatioBoostFormatted.toString(),
         optimalRatioRepayFormatted.toString(),
         boostEnabled,
+        isEOA === 'true',
         addrs[network].REGISTRY_ADDR,
     );
 
@@ -1490,7 +1686,7 @@ const getAavePos = async (
 };
 
 const getCompV3Pos = async (
-    sender,
+    isEOA, sender,
 ) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
@@ -1520,7 +1716,9 @@ const getCompV3Pos = async (
 
     const compV3View = await hre.ethers.getContractAt('CompV3View', '0x5e07E953dac1d7c19091c3b493579ba7283572a4');
 
-    const compInfo = await compV3View.getLoanData(addrs[network].COMET_USDC_ADDR, proxy.address);
+    const user = isEOA ? senderAcc.address : proxy.address;
+
+    const compInfo = await compV3View.getLoanData(addrs[network].COMET_USDC_ADDR, user);
 
     compInfo.collAmounts.forEach((amount, i) => {
         if (!amount.eq(0)) {
@@ -1535,7 +1733,6 @@ const getCompV3Pos = async (
 
     console.log(`Coll $${compInfo.collValue / 1e8}`);
     console.log(`Debt $${compInfo.borrowValue / 1e6}`);
-    console.log(`Ratio ${(compInfo.collValue / compInfo.borrowValue).toFixed(2)}%`);
 };
 
 const updateAaveV3AutomationSub = async (
@@ -1645,7 +1842,7 @@ const setMockChainlinkPrice = async (tokenLabel, price) => {
 };
 
 const createCompV3Position = async (
-    collType, collAmount, debtAmount, sender,
+    collType, collAmount, debtAmount, isEOA, sender,
 ) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
@@ -1654,6 +1851,8 @@ const createCompV3Position = async (
         // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
+
+    await topUp(senderAcc.address);
 
     let network = 'mainnet';
 
@@ -1700,18 +1899,43 @@ const createCompV3Position = async (
     }
 
     try {
-        await supplyCompV3(
-            addrs[network].COMET_USDC_ADDR,
-            proxy,
-            collToken.address,
-            collAmountWei,
-            senderAcc.address,
-            true,
-            senderAcc,
-        );
-        await borrowCompV3(addrs[network].COMET_USDC_ADDR, proxy, debtAmountWei, senderAcc.address);
+        if (isEOA === 'true') {
+            let comet = await hre.ethers.getContractAt('IComet', addrs[network].COMET_USDC_ADDR);
+            let erc20 = await hre.ethers.getContractAt('IERC20', collToken.address);
 
-        console.log('Position created!');
+            comet = comet.connect(senderAcc);
+            erc20 = erc20.connect(senderAcc);
+
+            // approve
+            await erc20.approve(addrs[network].COMET_USDC_ADDR, MAX_UINT);
+
+            await comet.supply(collToken.address, collAmountWei);
+            await comet.withdraw(addrs[network].USDC_ADDR, debtAmountWei);
+
+            // give proxy approval
+            await comet.allow(proxy.address, true);
+
+            console.log(`Position created for ${senderAcc.address}`);
+        } else {
+            await supplyCompV3(
+                addrs[network].COMET_USDC_ADDR,
+                proxy,
+                collToken.address,
+                collAmountWei,
+                senderAcc.address,
+                proxy.address,
+                true,
+                senderAcc,
+            );
+            await borrowCompV3(
+                addrs[network].COMET_USDC_ADDR,
+                proxy,
+                debtAmountWei,
+                proxy.address,
+                senderAcc.address,
+            );
+            console.log(`Position created! for ${proxy.address}`);
+        }
     } catch (err) {
         console.log(err);
     }
@@ -1746,7 +1970,7 @@ const createCompV3Position = async (
                     await addBotCaller(botAddr, addrs[network].REGISTRY_ADDR, true);
                 }
             }
-
+            topUp(addrs[network].OWNER_ACC);
             process.exit(0);
         });
 
@@ -1771,6 +1995,14 @@ const createCompV3Position = async (
         .description('Creates a Mcd Vault')
         .action(async (type, coll, debt, senderAddr) => {
             await createMcdVault(type, coll, debt, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('create-chicken-bond <lusdAmount> [senderAddr]')
+        .description('Creates a new chicken bond')
+        .action(async (lusdAmount, senderAddr) => {
+            await createCB(lusdAmount, senderAddr);
             process.exit(0);
         });
 
@@ -1839,6 +2071,15 @@ const createCompV3Position = async (
         });
 
     program
+        .command('sub-cb-rebond <bondId> [senderAddr]')
+        .description('Subscribes a bond to the rebonding strategy')
+        .action(async (bondId, senderAddr) => {
+            // eslint-disable-next-line max-len
+            await cbRebondSub(bondId, senderAddr);
+            process.exit(0);
+        });
+
+    program
         .command('sub-mcd-trailing-close-to-coll <vaultId> <type> <percentage> [senderAddr]')
         .description('Subscribes to a Trailing Mcd close to coll strategy')
         .action(async (vaultId, type, percentage, senderAddr) => {
@@ -1884,8 +2125,57 @@ const createCompV3Position = async (
         );
 
     program
+        .command('sub-aave-close-to-debt <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
+        .description('Subscribes to AaveV3 close to debt bundle')
+        .action(async (
+            collSymbol,
+            debtSymbol,
+            triggerBaseSymbol,
+            triggerQuoteSymbol,
+            triggerTargetPrice,
+            triggerState,
+            senderAddr,
+        ) => {
+            await subAaveClose(
+                collSymbol,
+                debtSymbol,
+                triggerBaseSymbol,
+                triggerQuoteSymbol,
+                triggerTargetPrice,
+                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                senderAddr,
+            );
+            process.exit(0);
+        });
+
+    program
+        .command('sub-aave-close-to-coll <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
+        .description('Subscribes to AaveV3 close to collateral bundle')
+        .action(async (
+            collSymbol,
+            debtSymbol,
+            triggerBaseSymbol,
+            triggerQuoteSymbol,
+            triggerTargetPrice,
+            triggerState,
+            senderAddr,
+        ) => {
+            await subAaveClose(
+                collSymbol,
+                debtSymbol,
+                triggerBaseSymbol,
+                triggerQuoteSymbol,
+                triggerTargetPrice,
+                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                senderAddr,
+                true,
+            );
+            process.exit(0);
+        });
+
+    program
         .command(
-            'sub-compV3-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+            'sub-compV3-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> <isEOA> [senderAddr]',
         )
         .description('Subscribes to compV3 automation can be both b/r')
         .action(
@@ -1895,6 +2185,7 @@ const createCompV3Position = async (
                 optimalRatioBoost,
                 optimalRatioRepay,
                 boostEnabled,
+                isEOA,
                 senderAcc,
             ) => {
                 // eslint-disable-next-line max-len
@@ -1904,6 +2195,7 @@ const createCompV3Position = async (
                     optimalRatioBoost,
                     optimalRatioRepay,
                     boostEnabled,
+                    isEOA,
                     senderAcc,
                 );
                 process.exit(0);
@@ -2019,6 +2311,14 @@ const createCompV3Position = async (
         });
 
     program
+        .command('time-travel <seconds>')
+        .description('Moves the forked blockchain timestamp by <seconds>')
+        .action(async (seconds) => {
+            await timeTravel(+seconds);
+            process.exit(0);
+        });
+
+    program
         .command('mcd-supply <type> <cdpId> <amount> [senderAddr]')
         .description('Supplies coll to cdp')
         .action(async (type, cdpId, amount, senderAddr) => {
@@ -2043,10 +2343,10 @@ const createCompV3Position = async (
         });
 
     program
-        .command('create-compV3-position <collType> <collAmount> <debtAmount> [senderAddr]')
+        .command('create-compV3-position <collType> <collAmount> <debtAmount> <isEOA> [senderAddr]')
         .description('Creates a compV3 position')
-        .action(async (collType, collAmount, debtAmount, senderAddr) => {
-            await createCompV3Position(collType, collAmount, debtAmount, senderAddr);
+        .action(async (collType, collAmount, debtAmount, isEOA, senderAddr) => {
+            await createCompV3Position(collType, collAmount, debtAmount, isEOA, senderAddr);
             process.exit(0);
         });
 
@@ -2092,10 +2392,10 @@ const createCompV3Position = async (
         });
 
     program
-        .command('get-compV3-position [addr]')
+        .command('get-compV3-position <isEOA> [addr]')
         .description('CompV3 position view, default to proxy')
-        .action(async (addr) => {
-            await getCompV3Pos(addr);
+        .action(async (isEOA, addr) => {
+            await getCompV3Pos(isEOA, addr);
             process.exit(0);
         });
 

@@ -23,7 +23,8 @@ contract ActionsUtils {
             market: _market,
             tokenAddr: _tokenAddr,
             amount: _amount,
-            from: _from
+            from: _from,
+            onBehalf: address(0)
         });
 
         return abi.encode(params);
@@ -39,7 +40,8 @@ contract ActionsUtils {
             market: _market,
             to: _to,
             asset: _tokenAddr,
-            amount: _amount
+            amount: _amount,
+            onBehalf: address(0)
         });
 
         return abi.encode(params);
@@ -53,7 +55,8 @@ contract ActionsUtils {
         CompV3Borrow.Params memory params = CompV3Borrow.Params({
             market: _market,
             amount: _amount,
-            to: _to
+            to: _to,
+            onBehalf: address(0)
         });
 
         return abi.encode(params);
@@ -152,7 +155,8 @@ contract ActionsUtils {
         CompV3RatioCheck.Params memory params = CompV3RatioCheck.Params({
             ratioState: CompV3RatioCheck.RatioState(_state),
             targetRatio: _targetRatio,
-            market: _market
+            market: _market,
+            user: address(0)
         });
 
         return abi.encode(params);

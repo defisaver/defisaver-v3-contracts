@@ -18,6 +18,7 @@ const {
     STETH_ADDRESS,
     revertToSnapshot,
     takeSnapshot,
+    setNetwork,
 } = require('../utils');
 
 const {
@@ -83,12 +84,14 @@ const testWithdraw = async (
     useUnderlying,
     withdrawExact,
     amountEach,
+    { removeOneCoin } = { removeOneCoin: false },
 ) => {
     const amounts = (useUnderlying ? pool.underlyingDecimals : pool.decimals).map(
-        (e) => Float2BN(amountEach, e),
+        (e, i) => ((!removeOneCoin || i === 0) ? Float2BN(amountEach, e) : Float2BN('0')),
     );
 
     await approve(pool.lpToken, proxy.address);
+
     await curveWithdraw(
         proxy,
         sender,
@@ -98,6 +101,7 @@ const testWithdraw = async (
         useUnderlying,
         withdrawExact,
         amounts,
+        { removeOneCoin },
     );
 
     await Promise.all(
@@ -165,6 +169,92 @@ const curveDepositTest = async (testLength) => {
     });
 };
 
+const curveWithdrawOneCoinTest = async (testLength) => {
+    describe('Curve-Withdraw', async function () {
+        this.timeout(1000000);
+        const amountEach = '1000';
+
+        let senderAcc;
+        let senderAddr;
+        let proxy;
+        let snapshot;
+
+        setNetwork('mainnet');
+
+        before(async () => {
+            await resetForkToBlock(forkNum);
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            senderAddr = senderAcc.address;
+            proxy = await getProxy(senderAcc.address);
+
+            await redeploy('CurveDeposit');
+            await redeploy('CurveWithdraw');
+            await redeploy('CurveView');
+        });
+
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        await Promise.all(poolInfo.slice(0, testLength).map(async (pool) => {
+            const poolName = pool.name;
+
+            it(`... should deposit then withdraw one coin [${poolName}]`, async function () {
+                /// @dev these two pools dont implement remove_liquidity_one_coin
+                if (['susd', 'compound'].includes(poolName)) this.skip();
+                const lpMinted = await testDeposit(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    '0', // minMintAmount
+                    false,
+                    amountEach,
+                );
+                await testWithdraw(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    lpMinted,
+                    false,
+                    false,
+                    `${+amountEach * 0.2}`,
+                    { removeOneCoin: true },
+                );
+            });
+            if (!pool.depositContract && !pool.underlyingFlag) return;
+            it(`... should deposit then withdraw one underlying coin [${poolName}]`, async () => {
+                const lpMinted = await testDeposit(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    '0', // minMintAmount
+                    true,
+                    amountEach,
+                );
+                await testWithdraw(
+                    proxy,
+                    senderAddr,
+                    senderAddr,
+                    pool,
+                    lpMinted,
+                    true,
+                    false,
+                    `${+amountEach * 0.2}`,
+                    { removeOneCoin: true },
+                );
+            });
+        }));
+    });
+};
+
 const curveWithdrawTest = async (testLength) => {
     describe('Curve-Withdraw', async function () {
         this.timeout(1000000);
@@ -174,6 +264,8 @@ const curveWithdrawTest = async (testLength) => {
         let senderAddr;
         let proxy;
         let snapshot;
+
+        setNetwork('mainnet');
 
         before(async () => {
             await resetForkToBlock(forkNum);
@@ -253,6 +345,8 @@ const curveWithdrawExactTest = async (testLength) => {
         let senderAddr;
         let proxy;
         let snapshot;
+
+        setNetwork('mainnet');
 
         before(async () => {
             await resetForkToBlock(forkNum);
@@ -681,6 +775,7 @@ const curveStethPoolWithdrawTest = async () => {
 
 const curveFullTest = async (testLength) => {
     await curveDepositTest(testLength);
+    await curveWithdrawOneCoinTest(testLength);
     await curveWithdrawTest(testLength);
     await curveWithdrawExactTest(testLength);
     await curveGaugeDepositTest(testLength);
@@ -693,6 +788,7 @@ module.exports = {
 
     curveDepositTest,
     curveWithdrawTest,
+    curveWithdrawOneCoinTest,
     curveWithdrawExactTest,
 
     curveGaugeDepositTest,

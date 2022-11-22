@@ -31,7 +31,8 @@ contract CompUser {
             market: _market,
             tokenAddr: _tokenAddr,
             amount: _amount,
-            from: proxyAddr
+            from: proxyAddr,
+            onBehalf: address(0)
         });
 
         proxy.execute(
@@ -46,7 +47,8 @@ contract CompUser {
         CompV3Borrow.Params memory params = CompV3Borrow.Params({
             market: _market,
             amount: _amount,
-            to: msg.sender
+            to: msg.sender,
+            onBehalf: address(0)
         });
 
         proxy.execute(
@@ -72,13 +74,14 @@ contract CompUser {
             maxRatio: _maxRatio,
             targetRatioBoost: _targetRatioBoost,
             targetRatioRepay: _targetRatioRepay,
-            boostEnabled: true
+            boostEnabled: true,
+            isEOA: false
         });
 
         proxy.execute(
             address(_subProxy),
             abi.encodeWithSignature(
-                "subToCompV3Automation((address,address,uint128,uint128,uint128,uint128,bool))",
+                "subToCompV3Automation((address,address,uint128,uint128,uint128,uint128,bool,bool))",
                 params
             )
         );

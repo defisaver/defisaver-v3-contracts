@@ -8,6 +8,7 @@ const {
     AVG_GAS_PRICE,
     addrs,
     network,
+    getNetwork,
 } = require('./utils');
 
 const getLatestBundleId = async () => {
@@ -48,20 +49,15 @@ const getLatestSubId = async (regAddr = addrs[network].REGISTRY_ADDR) => {
 
 // eslint-disable-next-line max-len
 const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramMapping, continuous) => {
-    const strategyProxyAddr = await getAddrFromRegistry('StrategyProxy');
+    const storageAddr = await getAddrFromRegistry('StrategyStorage');
+    const storage = await hre.ethers.getContractAt('StrategyStorage', storageAddr);
 
-    const StrategyProxy = await hre.ethers.getContractFactory('StrategyProxy');
-
-    const functionData = StrategyProxy.interface.encodeFunctionData(
-        'createStrategy',
-        [strategyName, triggerIds, actionIds, paramMapping, continuous],
+    const receipt = await storage.createStrategy(
+        strategyName, triggerIds, actionIds, paramMapping, continuous,
+        {
+            gasLimit: 5000000,
+        },
     );
-
-    console.log('Create strategy: ', strategyProxyAddr);
-
-    const receipt = await proxy['execute(address,bytes)'](strategyProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -76,16 +72,10 @@ const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramM
 };
 
 const createBundle = async (proxy, strategyIds) => {
-    const strategyProxyAddr = await getAddrFromRegistry('StrategyProxy');
+    const storageAddr = await getAddrFromRegistry('BundleStorage');
+    const storage = await hre.ethers.getContractAt('BundleStorage', storageAddr);
 
-    const StrategyProxy = await hre.ethers.getContractFactory('StrategyProxy');
-
-    const functionData = StrategyProxy.interface.encodeFunctionData(
-        'createBundle',
-        [strategyIds],
-    );
-
-    const receipt = await proxy['execute(address,bytes)'](strategyProxyAddr, functionData, {
+    const receipt = await storage.createBundle(strategyIds, {
         gasLimit: 5000000,
     });
 
@@ -99,8 +89,8 @@ const createBundle = async (proxy, strategyIds) => {
     return latestBundleId;
 };
 
-const subToStrategy = async (proxy, strategySub, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const SubProxyAddr = await getAddrFromRegistry('SubProxy', regAddr);
+const subToStrategy = async (proxy, strategySub, regAddr = addrs[getNetwork()].REGISTRY_ADDR) => {
+    const SubProxyAddr = addrs[getNetwork()].SubProxy;
 
     const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
     const functionData = SubProxyProxy.interface.encodeFunctionData(
@@ -119,6 +109,26 @@ const subToStrategy = async (proxy, strategySub, regAddr = addrs[network].REGIST
     const latestSubId = await getLatestSubId(regAddr);
 
     return latestSubId;
+};
+
+const activateSub = async (proxy, subId, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const SubProxyAddr = await getAddrFromRegistry('SubProxy', regAddr);
+
+    const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
+    const functionData = SubProxyProxy.interface.encodeFunctionData(
+        'activateSub',
+        [subId.toString()],
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](SubProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed activateSub; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    return subId;
 };
 
 const subToAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
@@ -159,6 +169,28 @@ const subToCompV3Proxy = async (proxy, inputData, regAddr = addrs[network].REGIS
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
     console.log(`GasUsed subToCompV3Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+
+    return latestSubId;
+};
+
+const subToCBRebondProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const cbRebondSubProxyAddr = await getAddrFromRegistry('CBRebondSubProxy', regAddr);
+
+    const CBRebondSubProxy = await hre.ethers.getContractFactory('CBRebondSubProxy');
+    const functionData = CBRebondSubProxy.interface.encodeFunctionData(
+        'subToRebondStrategy',
+        inputData,
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](cbRebondSubProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToRebondStrategy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 
     const latestSubId = await getLatestSubId(regAddr);
 
@@ -271,6 +303,7 @@ const getSubHash = (subData) => {
 
 module.exports = {
     subToStrategy,
+    activateSub,
     subToAaveProxy,
     subToCompV3Proxy,
     updateAaveProxy,
@@ -282,5 +315,6 @@ module.exports = {
     addBotCaller,
     setMCDPriceVerifier,
     getSubHash,
+    subToCBRebondProxy,
     subToMcdProxy,
 };

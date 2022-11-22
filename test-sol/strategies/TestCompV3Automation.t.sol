@@ -120,8 +120,8 @@ contract TestCompV3Automation is
         repaySubId = SubStorage(SUB_STORAGE_ADDR).getSubsCount() - 2;
         boostSubId = SubStorage(SUB_STORAGE_ADDR).getSubsCount() - 1;
 
-        repaySub = subProxy.formatRepaySub(params, proxy);
-        boostSub = subProxy.formatBoostSub(params, proxy);
+        repaySub = subProxy.formatRepaySub(params, proxy, address(0));
+        boostSub = subProxy.formatBoostSub(params, proxy, address(0));
     }
 
     function testCompV3RepayStrategy() public {
