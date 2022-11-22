@@ -204,11 +204,20 @@ const subToMcdProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
     console.log(`GasUsed subToMcdProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 
-    const subId = await getLatestSubId(regAddr);
+    let repaySubId;
+    let boostSubId;
+    if (inputData.slice(-1)[0]) {
+        boostSubId = +await getLatestSubId(regAddr);
+        repaySubId = boostSubId - 1;
+    } else {
+        repaySubId = +await getLatestSubId(regAddr);
+    }
 
     const repaySub = await subProxy.formatRepaySub(inputData);
     const boostSub = await subProxy.formatBoostSub(inputData);
-    return { subId, repaySub, boostSub };
+    return {
+        repaySubId, boostSubId, repaySub, boostSub,
+    };
 };
 
 const addBotCaller = async (

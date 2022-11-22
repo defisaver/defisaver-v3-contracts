@@ -105,13 +105,13 @@ const {
 
 const { RATIO_STATE_OVER } = require('../../triggers');
 
-const createRepayBundle = async (proxy) => {
+const createRepayBundle = async (proxy, isFork) => {
     const repayStrategyEncoded = createRepayStrategy();
     const flRepayStrategyEncoded = createFLRepayStrategy();
     const repayCompositeStrategyEncoded = createMcdRepayCompositeStrategy();
     const flRepayCompositeStrategyEncoded = createMcdFLRepayCompositeStrategy();
 
-    await openStrategyAndBundleStorage();
+    await openStrategyAndBundleStorage(isFork);
 
     const strategyId1 = await createStrategy(proxy, ...repayStrategyEncoded, true);
     const strategyId2 = await createStrategy(proxy, ...flRepayStrategyEncoded, true);
@@ -125,13 +125,13 @@ const createRepayBundle = async (proxy) => {
     );
 };
 
-const createBoostBundle = async (proxy) => {
+const createBoostBundle = async (proxy, isFork) => {
     const boostStrategy = createMcdBoostStrategy();
     const flBoostStrategy = createFlMcdBoostStrategy();
     const boostCompositeStrategy = createMcdBoostCompositeStrategy();
     const flBoostCompositeStrategy = createMcdFLBoostCompositeStrategy();
 
-    await openStrategyAndBundleStorage();
+    await openStrategyAndBundleStorage(isFork);
 
     const strategyId1 = await createStrategy(proxy, ...boostStrategy, true);
     const strategyId2 = await createStrategy(proxy, ...flBoostStrategy, true);
@@ -222,7 +222,7 @@ const mcdBoostStrategyTest = async (numTests) => {
                 const targetRatioRepay = Float2BN('2');
                 const targetRatioBoost = Float2BN('2');
 
-                ({ subId, boostSub: strategySub } = await subToMcdProxy(
+                ({ boostSubId: subId, boostSub: strategySub } = await subToMcdProxy(
                     proxy,
                     [
                         vaultId,
@@ -402,7 +402,7 @@ const mcdRepayStrategyTest = async (numTests) => {
                 const ratioUnder = Float2BN('2.2');
                 const targetRatioRepay = Float2BN('2.5');
 
-                ({ subId, repaySub: strategySub } = await subToMcdProxy(
+                ({ repaySubId: subId, repaySub: strategySub } = await subToMcdProxy(
                     proxy,
                     [
                         vaultId,
@@ -1371,4 +1371,6 @@ module.exports = {
     mcdRepayFromMStableStrategyTest,
     mcdCloseToDaiStrategyTest,
     mcdCloseToCollStrategyTest,
+    createRepayBundle,
+    createBoostBundle,
 };
