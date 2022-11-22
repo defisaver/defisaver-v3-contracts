@@ -52,20 +52,26 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
     }
 
     /// @notice Calculates 'optimal' amount of LUSD for an lusdAmount to accrue based on the market price
-    function getOptimalLusdAmount(uint256 _lusdAmount) public view returns (uint256, uint256) {
+    function getOptimalLusdAmount(uint256 _bLUSDCap, uint256 _accruedBLUSD) public view returns (uint256, uint256) {
         CBInfo memory systemInfo = getCbInfo();
-        uint256 marketPrice = getBLusdPriceFromCurve(_lusdAmount);
+
+        uint256 minimalBLUSDForPriceFetching = 50 * 1e18;
+        _accruedBLUSD = _accruedBLUSD > minimalBLUSDForPriceFetching ? _accruedBLUSD : minimalBLUSDForPriceFetching;
+
+        uint256 marketPrice = getBLusdPriceFromCurve(_accruedBLUSD);
+
         uint256 optimalRebondTime = _getOptimalRebondTime(systemInfo, marketPrice);
 
-        uint256 feeAmount = marketPrice * systemInfo.chickenInAMMFee;
-        uint256 marketPriceMinusFee = (marketPrice * 10**18) - feeAmount;
+        if (optimalRebondTime == 0) {
+            return (0, 0);
+        }
 
         uint256 res = wmul(
             wdiv(
-                wmul(_lusdAmount, optimalRebondTime),
+                wmul(_bLUSDCap, optimalRebondTime),
                 (systemInfo.accrualParameter + optimalRebondTime)
             ),
-            marketPriceMinusFee
+            marketPrice * 10**18
         );
 
         return (res / 1e18, marketPrice);
@@ -84,6 +90,10 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
 
         uint256 premiumSqrt = premiumMinusFee.sqrt();
         uint256 premiumScaled = (premiumMinusFee / 1e18);
+
+        if (premiumScaled <= 1e18) {
+            return 0;
+        }
 
         uint256 res = wmul(
             systemInfo.accrualParameter,
