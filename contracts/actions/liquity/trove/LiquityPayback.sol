@@ -55,12 +55,18 @@ contract LiquityPayback is ActionBase, LiquityHelper {
 
     /// @notice Repays LUSD tokens to the trove
     function _liquityPayback(Params memory _params) internal returns (uint256, bytes memory) {
-        LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
+        uint256 lusdAmountToPayback = LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
 
-        BorrowerOperations.repayLUSD(_params.lusdAmount, _params.upperHint, _params.lowerHint);
+        uint256 debt = TroveManager.getTroveDebt(address(this));
+        
+        if (debt < lusdAmountToPayback + 2000e18 && _params.lusdAmount == type(uint256).max){
+            lusdAmountToPayback = debt - 2000e18;
+        }
 
-        bytes memory logData = abi.encode(_params.lusdAmount, _params.from);
-        return (_params.lusdAmount, logData);
+        BorrowerOperations.repayLUSD(lusdAmountToPayback, _params.upperHint, _params.lowerHint);
+
+        bytes memory logData = abi.encode(lusdAmountToPayback, _params.from);
+        return (lusdAmountToPayback, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
