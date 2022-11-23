@@ -18,6 +18,7 @@ contract LiquityHelper is MainnetLiquityAddresses {
     using TokenUtils for address;
 
     uint constant public LUSD_GAS_COMPENSATION = 200e18;
+    uint constant public MIN_DEBT = 2000e18; // MIN_NET_DEBT (1800e18) + LUSD_GAS_COMP (200e18)
 
     IPriceFeed constant public PriceFeed = IPriceFeed(PRICE_FEED_ADDRESS);
     IBorrowerOperations constant public BorrowerOperations = IBorrowerOperations(BORROWER_OPERATIONS_ADDRESS);

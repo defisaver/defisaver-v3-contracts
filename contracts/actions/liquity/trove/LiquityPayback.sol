@@ -59,8 +59,8 @@ contract LiquityPayback is ActionBase, LiquityHelper {
 
         uint256 debt = TroveManager.getTroveDebt(address(this));
         
-        if (debt < lusdAmountToPayback + 2000e18 && _params.lusdAmount == type(uint256).max){
-            lusdAmountToPayback = debt - 2000e18;
+        if (debt < lusdAmountToPayback + MIN_DEBT && _params.lusdAmount == type(uint256).max){
+            lusdAmountToPayback = debt - MIN_DEBT;
         }
 
         BorrowerOperations.repayLUSD(lusdAmountToPayback, _params.upperHint, _params.lowerHint);
