@@ -1827,6 +1827,147 @@ const createCompV3EOAFlBoostStrategy = () => {
 
     return compV3BoostStrategy.encodeForDsProxyCall();
 };
+const handleSources = (strategy, isMultiSource) => {
+    if (isMultiSource) {
+        strategy.addSubSlot('&currSubId', 'uint256');
+        strategy.addSubSlot('&numberOfSources', 'uint256');
+        /*
+        for (let i = 0; i < numberOfSources; i++) {
+            strategy.addSubSlot(`&paybackSourceId${i}`, 'uint256');
+            strategy.addSubSlot(`&paybackSourceType${i}`, 'uint256');
+        }
+        this isn't needed as we don't pipe those sources anywhere later on
+        */
+    } else {
+        strategy.addSubSlot('&paybackSourceId', 'uint256');
+        strategy.addSubSlot('&paybackSourceType', 'uint256');
+    }
+};
+
+const createLiquityCloseChickenInStrategy = (isMultiSource = false) => {
+    const strategy = new dfs.Strategy('LiquityCloseChickenInStrategy');
+    handleSources(strategy, isMultiSource);
+    const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
+    strategy.addTrigger(liquityRatioTrigger);
+    // const specialAction = new dfs.actions
+    const cbChickenInAction = new dfs.actions.chickenBonds.CBChickenInAction(
+
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+
+    );
+    const feeAction = new dfs.actions.basic.GasFeeAction(
+
+    );
+    const paybackAction = new dfs.actions.liquity.LiquityCloseAction(
+
+    );
+    const sendTokenAction = new dfs.actions.basic.SendTokenAction(
+
+    );
+    const sendETHAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+
+    );
+    // strategy.addAction(specialAction);
+    strategy.addAction(cbChickenInAction);
+    strategy.addAction(sellAction);
+    strategy.addAction(feeAction);
+    strategy.addAction(paybackAction);
+    strategy.addAction(sendTokenAction);
+    strategy.addAction(sendETHAction);
+
+    return strategy.encodeForDsProxyCall();
+};
+
+const createLiquityCloseChickenOutStrategy = (isMultiSource = false) => {
+    const strategy = new dfs.Strategy('LiquityCloseChickenOutStrategy');
+    handleSources(strategy, isMultiSource);
+    const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
+    strategy.addTrigger(liquityRatioTrigger);
+    // const specialAction = new dfs.actions
+    const cbChickenOutAction = new dfs.actions.chickenBonds.CBChickenOutAction(
+
+    );
+    const feeAction = new dfs.actions.basic.GasFeeAction(
+
+    );
+    const paybackAction = new dfs.actions.liquity.LiquityCloseAction(
+
+    );
+    const sendTokenAction = new dfs.actions.basic.SendTokenAction(
+
+    );
+    const sendETHAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+
+    );
+    // strategy.addAction(specialAction);
+    strategy.addAction(cbChickenOutAction);
+    strategy.addAction(feeAction);
+    strategy.addAction(paybackAction);
+    strategy.addAction(sendTokenAction);
+    strategy.addAction(sendETHAction);
+
+    return strategy.encodeForDsProxyCall();
+};
+
+const createLiquityPaybackChickenInStrategy = (isMultiSource = false) => {
+    const strategy = new dfs.Strategy('LiquityPaybackChickenInStrategy');
+    handleSources(strategy, isMultiSource);
+    const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
+    strategy.addTrigger(liquityRatioTrigger);
+
+    // const specialAction = new dfs.actions
+    const cbChickenInAction = new dfs.actions.chickenBonds.CBChickenInAction(
+
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+
+    );
+    const feeAction = new dfs.actions.basic.GasFeeAction(
+
+    );
+    const paybackAction = new dfs.actions.liquity.LiquityPaybackAction(
+
+    );
+    const sendTokenAction = new dfs.actions.basic.SendTokenAction(
+
+    );
+    // strategy.addAction(specialAction);
+    strategy.addAction(cbChickenInAction);
+    strategy.addAction(sellAction);
+    strategy.addAction(feeAction);
+    strategy.addAction(paybackAction);
+    strategy.addAction(sendTokenAction);
+
+    return strategy.encodeForDsProxyCall();
+};
+
+const createLiquityPaybackChickenOutStrategy = (isMultiSource = false) => {
+    const strategy = new dfs.Strategy('LiquityPaybackChickenInStrategy');
+    handleSources(strategy, isMultiSource);
+    const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
+    strategy.addTrigger(liquityRatioTrigger);
+    // const specialAction = new dfs.actions
+    const cbChickenOutAction = new dfs.actions.chickenBonds.CBChickenOutAction(
+
+    );
+    const feeAction = new dfs.actions.basic.GasFeeAction(
+
+    );
+    const paybackAction = new dfs.actions.liquity.LiquityPaybackAction(
+
+    );
+    const sendTokenAction = new dfs.actions.basic.SendTokenAction(
+
+    );
+        // strategy.addAction(specialAction);
+    strategy.addAction(cbChickenOutAction);
+    strategy.addAction(feeAction);
+    strategy.addAction(paybackAction);
+    strategy.addAction(sendTokenAction);
+
+    return strategy.encodeForDsProxyCall();
+};
 
 module.exports = {
     createUniV3RangeOrderStrategy,
@@ -1865,4 +2006,8 @@ module.exports = {
     createCompV3FlBoostStrategy,
     createCbRebondStrategy,
     createCompV3EOAFlBoostStrategy,
+    createLiquityCloseChickenInStrategy,
+    createLiquityCloseChickenOutStrategy,
+    createLiquityPaybackChickenInStrategy,
+    createLiquityPaybackChickenOutStrategy,
 };

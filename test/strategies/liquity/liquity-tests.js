@@ -269,6 +269,10 @@ const liquityRepayStrategyTest = async () => {
     });
 };
 
+const liquityPartialPaybackTest = async () => {
+
+};
+
 const liquityCloseToCollStrategyTest = async () => {
     describe('Liquity-Close-To-Coll', function () {
         this.timeout(1200000);
