@@ -22,12 +22,12 @@ contract Unnamed is ActionBase, CBHelper {
     /// @param currentSubId Id of the current strategy sub being executed
     /// @param ordinalNumberOfSourceId Ordinal number of the paybackSource being used starting from 0
     /// @param paybackSub StrategySub object of this subscription
-    /// @param rebondSub StrategySub object of a rebond sub (only used if paybackSource will be cb from rebond sub)
+    /// @param cbRebondBondId Id of the current bond in the Rebond sub (only used if paybackSourceId is of a sub, otherwise 0)
     struct Params {
         uint256 currentSubId;
         uint256 ordinalNumberOfSourceId;
         StrategyModel.StrategySub paybackSub;
-        StrategyModel.StrategySub rebondSub;
+        uint256 cbRebondBondId;
     }
 
     /// @inheritdoc ActionBase
@@ -61,7 +61,7 @@ contract Unnamed is ActionBase, CBHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function getBondId(Params memory _params) internal returns (uint256) {
+    function getBondId(Params memory _params) internal view returns (uint256) {
 
         StrategyModel.StoredSubData memory storedPaybackSubData = SubStorage(SUB_STORAGE_ADDR).getSub(_params.currentSubId);
         bytes32 paybackSubDataHash = keccak256(abi.encode(_params.paybackSub));
@@ -69,7 +69,7 @@ contract Unnamed is ActionBase, CBHelper {
         if (paybackSubDataHash != storedPaybackSubData.strategySubHash) {
             revert SubDatHashMismatch(_params.currentSubId, paybackSubDataHash, storedPaybackSubData.strategySubHash);
         }
-
+        
         uint256 paybackSourceId = uint256(_params.paybackSub.subData[2 + _params.ordinalNumberOfSourceId]);
         uint256 sourceType = uint256(_params.paybackSub.subData[2 + uint256(_params.paybackSub.subData[1]) + _params.ordinalNumberOfSourceId]);
 
@@ -79,7 +79,8 @@ contract Unnamed is ActionBase, CBHelper {
 
         if (SourceType(sourceType) == SourceType.SUB) {
             StrategyModel.StoredSubData memory storedCBSubData = SubStorage(SUB_STORAGE_ADDR).getSub(paybackSourceId);
-            bytes32 cbSubDataHash = keccak256(abi.encode(_params.rebondSub));
+            StrategyModel.StrategySub memory rebondSub = formatRebondSub(paybackSourceId, _params.cbRebondBondId);
+            bytes32 cbSubDataHash = keccak256(abi.encode(rebondSub));
             // data sent from the caller must match the stored hash of the data
             if (cbSubDataHash != storedCBSubData.strategySubHash) {
                 revert SubDatHashMismatch(paybackSourceId, cbSubDataHash, storedCBSubData.strategySubHash);
@@ -87,7 +88,7 @@ contract Unnamed is ActionBase, CBHelper {
             // TODO: maybe this isn't needed because bond will be used and CB Rebond strat won't be executable (will revert)
             //SubStorage(SUB_STORAGE_ADDR).deactivateSub(paybackSourceId);
 
-            return uint256(_params.rebondSub.subData[1]);
+            return _params.cbRebondBondId;
         }
 
         revert WrongSourceType(SourceType(sourceType));
