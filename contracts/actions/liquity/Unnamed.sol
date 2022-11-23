@@ -14,7 +14,6 @@ contract Unnamed is ActionBase, CBHelper {
     error SubDatHashMismatch(uint256, bytes32, bytes32);
 
     enum SourceType{
-        EMPTY,
         BOND,
         SUB
     }
