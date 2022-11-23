@@ -14,10 +14,9 @@ const calcRebondMs = (accrualParameter, marketPricePremium, chickenInAMMFee) => 
 
     return new Dec(accrualParameter).mul(dividend.div(divisor)).round().toNumber();
 };
-
-const calcAccruedAmountForMs = (systemInfo, lusdAmount, ms) => (ms * +lusdAmount)
+const calcAccruedAmountForMs = (systemInfo, blusdcap, ms) => (ms * +blusdcap)
  / (ms + +systemInfo.accrualParameter)
- * (1 - +systemInfo.chickenInAMMFee) * +systemInfo.marketPrice;
+ * +systemInfo.marketPrice;
 
 const getSystemInfo = async (chickenBondsView) => {
     const systemInfo = await chickenBondsView.getSystemInfo();
