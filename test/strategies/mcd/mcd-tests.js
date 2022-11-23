@@ -196,10 +196,10 @@ const mcdBoostStrategyTest = async (numTests) => {
 
         ilkSubset.forEach((ilkData) => {
             const joinAddr = ilkData.join;
-            const tokenData = getAssetInfo(ilkData.asset);
+            let tokenData = getAssetInfo(ilkData.asset);
 
             if (tokenData.symbol === 'ETH') {
-                tokenData.address = WETH_ADDRESS;
+                tokenData = getAssetInfo('WETH');
             }
 
             const boostAmount = Float2BN(BOOST_AMOUNT);
@@ -377,10 +377,10 @@ const mcdRepayStrategyTest = async (numTests) => {
 
         ilkSubset.forEach((ilkData) => {
             const joinAddr = ilkData.join;
-            const tokenData = getAssetInfo(ilkData.asset);
+            let tokenData = getAssetInfo(ilkData.asset);
 
             if (tokenData.symbol === 'ETH') {
-                tokenData.address = WETH_ADDRESS;
+                tokenData = getAssetInfo('WETH');
             }
 
             const repayAmount = Float2BN(
