@@ -19,12 +19,15 @@ contract Unnamed is ActionBase, CBHelper {
         SUB
     }
 
-    /// @param subId Id of the sub we are changing (user must be owner)
-    /// @param bondId Id of the chicken bond NFT we just created
+    /// @param currentSubId Id of the current strategy sub being executed
+    /// @param ordinalNumberOfSourceId Ordinal number of the paybackSource being used starting from 0
+    /// @param paybackSub StrategySub object of this subscription
+    /// @param rebondSub StrategySub object of a rebond sub (only used if paybackSource will be cb from rebond sub)
     struct Params {
-        uint256 paybackSourceID;
-        SourceType sourceType;
-        StrategyModel.StrategySub sub;
+        uint256 currentSubId;
+        uint256 ordinalNumberOfSourceId;
+        StrategyModel.StrategySub paybackSub;
+        StrategyModel.StrategySub rebondSub;
     }
 
     /// @inheritdoc ActionBase
@@ -36,19 +39,12 @@ contract Unnamed is ActionBase, CBHelper {
     ) public virtual override payable returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.paybackSourceID = _parseParamUint(
-            params.paybackSourceID,
+        params.currentSubId = _parseParamUint(
+            params.currentSubId,
             _paramMapping[0],
             _subData,
             _returnValues
         );
-
-        params.sourceType = SourceType(_parseParamUint(
-            params.paybackSourceID,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        ));
 
         uint256 bondId = getBondId(params);
 
@@ -66,24 +62,35 @@ contract Unnamed is ActionBase, CBHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function getBondId(Params memory _params) internal returns (uint256) {
-        if (_params.sourceType == SourceType.BOND){
-            return _params.paybackSourceID;
+
+        StrategyModel.StoredSubData memory storedPaybackSubData = SubStorage(SUB_STORAGE_ADDR).getSub(_params.currentSubId);
+        bytes32 paybackSubDataHash = keccak256(abi.encode(_params.paybackSub));
+        // data sent from the caller must match the stored hash of the data
+        if (paybackSubDataHash != storedPaybackSubData.strategySubHash) {
+            revert SubDatHashMismatch(_params.currentSubId, paybackSubDataHash, storedPaybackSubData.strategySubHash);
         }
 
-        if (_params.sourceType == SourceType.SUB) {
-            StrategyModel.StoredSubData memory storedSubData = SubStorage(SUB_STORAGE_ADDR).getSub(_params.paybackSourceID);
-            bytes32 subDataHash = keccak256(abi.encode(_params.sub));
+        uint256 paybackSourceId = uint256(_params.paybackSub.subData[2 + _params.ordinalNumberOfSourceId]);
+        uint256 sourceType = uint256(_params.paybackSub.subData[2 + uint256(_params.paybackSub.subData[1]) + _params.ordinalNumberOfSourceId]);
+
+        if (SourceType(sourceType) == SourceType.BOND){
+            return paybackSourceId;
+        }
+
+        if (SourceType(sourceType) == SourceType.SUB) {
+            StrategyModel.StoredSubData memory storedCBSubData = SubStorage(SUB_STORAGE_ADDR).getSub(paybackSourceId);
+            bytes32 cbSubDataHash = keccak256(abi.encode(_params.rebondSub));
             // data sent from the caller must match the stored hash of the data
-            if (subDataHash != storedSubData.strategySubHash) {
-                revert SubDatHashMismatch(_params.paybackSourceID, subDataHash, storedSubData.strategySubHash);
+            if (cbSubDataHash != storedCBSubData.strategySubHash) {
+                revert SubDatHashMismatch(paybackSourceId, cbSubDataHash, storedCBSubData.strategySubHash);
             }
             // TODO: maybe this isn't needed because bond will be used and CB Rebond strat won't be executable (will revert)
-            SubStorage(SUB_STORAGE_ADDR).deactivateSub(_params.paybackSourceID);
+            //SubStorage(SUB_STORAGE_ADDR).deactivateSub(paybackSourceId);
 
-            return uint256(_params.sub.subData[1]);
+            return uint256(_params.rebondSub.subData[1]);
         }
 
-        revert WrongSourceType(_params.sourceType);
+        revert WrongSourceType(SourceType(sourceType));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
