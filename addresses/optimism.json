@@ -344,14 +344,14 @@
     },
     {
       "name": "AaveV3TrailingQuotePriceTrigger",
-      "address": "0xE1d1c35f8c60001096964A0260b88F6B1c606b68",
+      "address": "0xB1550a97D3B5B5b5b5F685c06FcB24aCd125cED7",
       "id": "0x0e31244d",
       "path": "contracts/triggers/AaveV3TrailingQuotePriceTrigger.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0xE1d1c35f8c60001096964A0260b88F6B1c606b68"]
     },
     {
       "name": "FLAaveV3",
