@@ -732,14 +732,14 @@
     },
     {
         "name": "DFSSell",
-        "address": "0xB744474Bdd7226736ACa4Ba87593e32d8315e5c9",
+        "address": "0x951D7B421f45FF0e4A8ddE0288aE3f9C2C69b784",
         "id": "0x7f2a0f35",
         "path": "contracts/actions/exchange/DFSSell.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x1abDDCae131ce200e66140d9fBd0C37F7a40e642"]
+        "history": ["0x1abDDCae131ce200e66140d9fBd0C37F7a40e642", "0xB744474Bdd7226736ACa4Ba87593e32d8315e5c9"]
     },
     {
         "name": "McdGenerate",
