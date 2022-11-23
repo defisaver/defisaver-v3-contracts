@@ -8,7 +8,7 @@ import "../../core/strategy/StrategyModel.sol";
 import "../../actions/liquity/helpers/CBHelper.sol";
 
 /// @title Special action to fetch Bond Id for the Liquity payback from CB strategy and to deactivate strategy
-contract UnnamedSingle is ActionBase, CBHelper {
+contract FetchBondIdSingle is ActionBase, CBHelper {
 
     error WrongSourceType(SourceType);
     error SubDatHashMismatch(uint256, bytes32, bytes32);

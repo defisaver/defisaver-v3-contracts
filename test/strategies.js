@@ -1849,7 +1849,7 @@ const createLiquityCloseChickenInStrategy = (isMultiSource = false) => {
     handleSources(strategy, isMultiSource);
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     strategy.addTrigger(liquityRatioTrigger);
-    // const specialAction = new dfs.actions
+    // const fetcBondIdAction = new dfs.actions
     const cbChickenInAction = new dfs.actions.chickenBonds.CBChickenInAction(
 
     );
@@ -1868,7 +1868,7 @@ const createLiquityCloseChickenInStrategy = (isMultiSource = false) => {
     const sendETHAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
 
     );
-    // strategy.addAction(specialAction);
+    // strategy.addAction(fetcBondIdAction);
     strategy.addAction(cbChickenInAction);
     strategy.addAction(sellAction);
     strategy.addAction(feeAction);
@@ -1884,7 +1884,7 @@ const createLiquityCloseChickenOutStrategy = (isMultiSource = false) => {
     handleSources(strategy, isMultiSource);
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     strategy.addTrigger(liquityRatioTrigger);
-    // const specialAction = new dfs.actions
+    // const fetcBondIdAction = new dfs.actions
     const cbChickenOutAction = new dfs.actions.chickenBonds.CBChickenOutAction(
 
     );
@@ -1900,7 +1900,7 @@ const createLiquityCloseChickenOutStrategy = (isMultiSource = false) => {
     const sendETHAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
 
     );
-    // strategy.addAction(specialAction);
+    // strategy.addAction(fetcBondIdAction);
     strategy.addAction(cbChickenOutAction);
     strategy.addAction(feeAction);
     strategy.addAction(paybackAction);
@@ -1916,7 +1916,7 @@ const createLiquityPaybackChickenInStrategy = (isMultiSource = false) => {
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     strategy.addTrigger(liquityRatioTrigger);
 
-    // const specialAction = new dfs.actions
+    // const fetcBondIdAction = new dfs.actions
     const cbChickenInAction = new dfs.actions.chickenBonds.CBChickenInAction(
 
     );
@@ -1932,7 +1932,7 @@ const createLiquityPaybackChickenInStrategy = (isMultiSource = false) => {
     const sendTokenAction = new dfs.actions.basic.SendTokenAction(
 
     );
-    // strategy.addAction(specialAction);
+    // strategy.addAction(fetcBondIdAction);
     strategy.addAction(cbChickenInAction);
     strategy.addAction(sellAction);
     strategy.addAction(feeAction);
@@ -1947,7 +1947,7 @@ const createLiquityPaybackChickenOutStrategy = (isMultiSource = false) => {
     handleSources(strategy, isMultiSource);
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     strategy.addTrigger(liquityRatioTrigger);
-    // const specialAction = new dfs.actions
+    // const fetcBondIdAction = new dfs.actions
     const cbChickenOutAction = new dfs.actions.chickenBonds.CBChickenOutAction(
 
     );
@@ -1960,7 +1960,7 @@ const createLiquityPaybackChickenOutStrategy = (isMultiSource = false) => {
     const sendTokenAction = new dfs.actions.basic.SendTokenAction(
 
     );
-        // strategy.addAction(specialAction);
+        // strategy.addAction(fetcBondIdAction);
     strategy.addAction(cbChickenOutAction);
     strategy.addAction(feeAction);
     strategy.addAction(paybackAction);
