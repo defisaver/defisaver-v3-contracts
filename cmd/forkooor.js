@@ -2042,7 +2042,7 @@ const createCompV3Position = async (
             // triggerRatio should be [110 - 1000] (in that format)
             // triggerState, 0 for OVER, 1 for UNDER
             // if sourceId is BondID - sourceType is 0
-            // if sourceId is subId - sourceType is 0
+            // if sourceId is subId - sourceType is 1
             // When executing strategy from bundle, ChickenIn strategy index is 0, ChickenOut is 1
             // eslint-disable-next-line max-len
             await liqCBPaybackSub(sourceId, sourceType, triggerRatio, triggerState, senderAddr);
