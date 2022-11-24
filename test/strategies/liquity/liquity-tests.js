@@ -35,6 +35,7 @@ const {
     callLiquityRepayStrategy,
     callLiquityCloseToCollStrategy,
     callLiquityPaybackChickenOutStrategy,
+    callLiquityPaybackChickenInStrategy,
 } = require('../../strategy-calls');
 
 const {
@@ -393,26 +394,28 @@ const liquityCBPaybackTest = async () => {
 
             const bonds = await chickenBondsView.getUsersBonds(proxy.address);
             bondId = bonds[bonds.length - 1].bondID.toString();
-            console.log(bonds[bonds.length - 1].lusdAmount);
+            const bondAmount = bonds[bonds.length - 1].lusdAmount;
 
             // eslint-disable-next-line max-len
-            {
-                const { collAmount, debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
-                console.log(`Coll : ${collAmount} Debt : ${debtAmount}`);
-                console.log((await (await balanceOf(LUSD_ADDR, senderAcc.address)).toString()));
-            }
-            console.log(bundleId);
-            console.log(bondId);
             ({ subId, strategySub } = await subLiquityCBPaybackStrategy(proxy, bundleId, bondId, '0', ratioUnder, '1'));
-
+            let debtBefore; let debtAfter;
+            let lusdEOABefore; let lusdEOAAfter;
+            {
+                const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
+                debtBefore = debtAmount;
+                lusdEOABefore = await balanceOf(LUSD_ADDR, senderAcc.address);
+            }
             await callLiquityPaybackChickenOutStrategy(botAcc, strategyExecutor, subId, strategySub, '0', '0', upperHintFull, lowerHintFull);
 
             {
-                const { collAmount, debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
-                console.log(`Coll : ${collAmount} Debt : ${debtAmount}`);
-                console.log((await (await balanceOf(LUSD_ADDR, senderAcc.address)).toString()));
+                const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
+                debtAfter = debtAmount;
+                lusdEOAAfter = await balanceOf(LUSD_ADDR, senderAcc.address);
             }
 
+            console.log(`Bond size was ${bondAmount / 1e18}`);
+            console.log(`Debt was ${debtBefore / 1e18}`);
+            console.log(`Paid back ${(debtBefore.sub(debtAfter)) / 1e18} and user received ${(lusdEOAAfter.sub(lusdEOABefore) / 1e18)} LUSD to his eoa`);
             await revertToSnapshot(snapshot);
         });
         it('... should subscribe to LiquityCBPaybackStrategy and trigger ChickenOut from bond and payback half (bond is smaller)', async () => {
@@ -422,26 +425,28 @@ const liquityCBPaybackTest = async () => {
 
             const bonds = await chickenBondsView.getUsersBonds(proxy.address);
             bondId = bonds[bonds.length - 1].bondID.toString();
-            console.log(bonds[bonds.length - 1].lusdAmount);
+            const bondAmount = bonds[bonds.length - 1].lusdAmount;
 
+            let debtBefore; let debtAfter;
+            let lusdEOABefore; let lusdEOAAfter;
             // eslint-disable-next-line max-len
-            {
-                const { collAmount, debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
-                console.log(`Coll : ${collAmount} Debt : ${debtAmount}`);
-                console.log((await (await balanceOf(LUSD_ADDR, senderAcc.address)).toString()));
-            }
-            console.log(bundleId);
-            console.log(bondId);
-            ({ subId, strategySub } = await subLiquityCBPaybackStrategy(proxy, bundleId, bondId, '0', ratioUnder, '1'));
 
+            ({ subId, strategySub } = await subLiquityCBPaybackStrategy(proxy, bundleId, bondId, '0', ratioUnder, '1'));
+            {
+                const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
+                debtBefore = debtAmount;
+                lusdEOABefore = await balanceOf(LUSD_ADDR, senderAcc.address);
+            }
             await callLiquityPaybackChickenOutStrategy(botAcc, strategyExecutor, subId, strategySub, '0', '0', upperHintHalf, lowerHintHalf);
 
             {
-                const { collAmount, debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
-                console.log(`Coll : ${collAmount} Debt : ${debtAmount}`);
-                console.log((await (await balanceOf(LUSD_ADDR, senderAcc.address)).toString()));
+                const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
+                debtAfter = debtAmount;
+                lusdEOAAfter = await balanceOf(LUSD_ADDR, senderAcc.address);
             }
-
+            console.log(`Bond size was ${bondAmount / 1e18}`);
+            console.log(`Debt was ${debtBefore / 1e18}`);
+            console.log(`Paid back ${(debtBefore.sub(debtAfter)) / 1e18} and user received ${(lusdEOAAfter.sub(lusdEOABefore) / 1e18)} LUSD to his eoa`);
             await revertToSnapshot(snapshot);
         });
 
@@ -452,25 +457,29 @@ const liquityCBPaybackTest = async () => {
 
             const bonds = await chickenBondsView.getUsersBonds(proxy.address);
             bondId = bonds[bonds.length - 1].bondID.toString();
-            console.log(bonds[bonds.length - 1].lusdAmount);
-            let strategySubRebond;
-            ({ subId, strategySubRebond } = await subCbRebondStrategy(proxy, bondId, '31'));
+            const bondAmount = bonds[bonds.length - 1].lusdAmount;
+            ({ subId } = await subCbRebondStrategy(proxy, bondId, '31'));
             cbRebondSubId = subId;
 
             // eslint-disable-next-line max-len
-            console.log(cbRebondSubId);
             ({ subId, strategySub } = await subLiquityCBPaybackStrategy(proxy, bundleId, cbRebondSubId, '1', ratioUnder, '1'));
+            let debtBefore; let debtAfter;
+            let lusdEOABefore; let lusdEOAAfter;
             {
-                const { collAmount, debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
-                console.log(`Coll : ${collAmount} Debt : ${debtAmount}`);
-                console.log((await (await balanceOf(LUSD_ADDR, senderAcc.address)).toString()));
+                const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
+                debtBefore = debtAmount;
+                lusdEOABefore = await balanceOf(LUSD_ADDR, senderAcc.address);
             }
             await callLiquityPaybackChickenOutStrategy(botAcc, strategyExecutor, subId, strategySub, bondId, '0', upperHintFull, lowerHintFull);
             {
-                const { collAmount, debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
-                console.log(`Coll : ${collAmount} Debt : ${debtAmount}`);
-                console.log((await (await balanceOf(LUSD_ADDR, senderAcc.address)).toString()));
+                const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
+                debtAfter = debtAmount;
+                lusdEOAAfter = await balanceOf(LUSD_ADDR, senderAcc.address);
             }
+
+            console.log(`Bond size was ${bondAmount / 1e18}`);
+            console.log(`Debt was ${debtBefore / 1e18}`);
+            console.log(`Paid back ${(debtBefore.sub(debtAfter)) / 1e18} and user received ${(lusdEOAAfter.sub(lusdEOABefore) / 1e18)} LUSD to his eoa`);
             await revertToSnapshot(snapshot);
         });
         it('... should subscribe to LiquityCBPaybackStrategy and trigger ChickenOut from rebond Sub (smaller bond size)', async () => {
@@ -480,44 +489,96 @@ const liquityCBPaybackTest = async () => {
 
             const bonds = await chickenBondsView.getUsersBonds(proxy.address);
             bondId = bonds[bonds.length - 1].bondID.toString();
-            console.log(bonds[bonds.length - 1].lusdAmount);
-            let strategySubRebond;
-            ({ subId, strategySubRebond } = await subCbRebondStrategy(proxy, bondId, '31'));
+            const bondAmount = bonds[bonds.length - 1].lusdAmount;
+            ({ subId } = await subCbRebondStrategy(proxy, bondId, '31'));
             cbRebondSubId = subId;
 
             // eslint-disable-next-line max-len
-            console.log(cbRebondSubId);
             ({ subId, strategySub } = await subLiquityCBPaybackStrategy(proxy, bundleId, cbRebondSubId, '1', ratioUnder, '1'));
+            let debtBefore; let debtAfter;
+            let lusdEOABefore; let lusdEOAAfter;
             {
-                const { collAmount, debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
-                console.log(`Coll : ${collAmount} Debt : ${debtAmount}`);
-                console.log((await (await balanceOf(LUSD_ADDR, senderAcc.address)).toString()));
+                const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
+                debtBefore = debtAmount;
+                lusdEOABefore = await balanceOf(LUSD_ADDR, senderAcc.address);
             }
             await callLiquityPaybackChickenOutStrategy(botAcc, strategyExecutor, subId, strategySub, bondId, '0', upperHintHalf, lowerHintHalf);
             {
-                const { collAmount, debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
-                console.log(`Coll : ${collAmount} Debt : ${debtAmount}`);
-                console.log((await (await balanceOf(LUSD_ADDR, senderAcc.address)).toString()));
+                const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
+                debtAfter = debtAmount;
+                lusdEOAAfter = await balanceOf(LUSD_ADDR, senderAcc.address);
             }
+            console.log(`Bond size was ${bondAmount / 1e18}`);
+            console.log(`Debt was ${debtBefore / 1e18}`);
+            console.log(`Paid back ${(debtBefore.sub(debtAfter)) / 1e18} and user received ${(lusdEOAAfter.sub(lusdEOABefore) / 1e18)} LUSD to his eoa`);
             await revertToSnapshot(snapshot);
         });
-        /*
+
         it('... should subscribe to LiquityCBPaybackStrategy and trigger ChickenIn from bond', async () => {
             snapshot = await takeSnapshot();
+
+            await createChickenBond(proxy, Float2BN(lusdDebt), senderAcc.address, senderAcc);
+
+            const bonds = await chickenBondsView.getUsersBonds(proxy.address);
+            bondId = bonds[bonds.length - 1].bondID.toString();
+            const bondAmount = bonds[bonds.length - 1].lusdAmount;
+
             // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subLiquityCBPaybackStrategy(proxy, bundleId, bondId, '0', ratioUnder, '1'));
-            // timeskip so bond is > breakeven
+            let debtBefore; let debtAfter;
+            let lusdEOABefore; let lusdEOAAfter;
+            await timeTravel(5_260_000);// travel two months
+            {
+                const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
+                debtBefore = debtAmount;
+                lusdEOABefore = await balanceOf(LUSD_ADDR, senderAcc.address);
+            }
+            await callLiquityPaybackChickenInStrategy(botAcc, strategyExecutor, subId, strategySub, '0', '0', upperHintFull, lowerHintFull);
+            {
+                const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
+                debtAfter = debtAmount;
+                lusdEOAAfter = await balanceOf(LUSD_ADDR, senderAcc.address);
+            }
+
+            console.log(`Bond size was ${bondAmount / 1e18}`);
+            console.log(`Debt was ${debtBefore / 1e18}`);
+            console.log(`Paid back ${(debtBefore.sub(debtAfter)) / 1e18} and user received ${(lusdEOAAfter.sub(lusdEOABefore) / 1e18)} LUSD to his eoa`);
             await revertToSnapshot(snapshot);
         });
+
         it('... should subscribe to LiquityCBPaybackStrategy and trigger ChickenIn from rebond Sub', async () => {
             snapshot = await takeSnapshot();
 
+            await createChickenBond(proxy, Float2BN(lusdDebt), senderAcc.address, senderAcc);
+
+            const bonds = await chickenBondsView.getUsersBonds(proxy.address);
+            bondId = bonds[bonds.length - 1].bondID.toString();
+            const bondAmount = bonds[bonds.length - 1].lusdAmount;
+            ({ subId } = await subCbRebondStrategy(proxy, bondId, '31'));
+            cbRebondSubId = subId;
+
             // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subLiquityCBPaybackStrategy(proxy, bundleId, cbRebondSubId, '1', ratioUnder, '1'));
-            // timeskip so bond is > breakeven
+            let debtBefore; let debtAfter;
+            let lusdEOABefore; let lusdEOAAfter;
+            await timeTravel(5_260_000);// travel two months
+            {
+                const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
+                debtBefore = debtAmount;
+                lusdEOABefore = await balanceOf(LUSD_ADDR, senderAcc.address);
+            }
+            await callLiquityPaybackChickenInStrategy(botAcc, strategyExecutor, subId, strategySub, bondId, '0', upperHintFull, lowerHintFull);
+            {
+                const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
+                debtAfter = debtAmount;
+                lusdEOAAfter = await balanceOf(LUSD_ADDR, senderAcc.address);
+            }
+
+            console.log(`Bond size was ${bondAmount / 1e18}`);
+            console.log(`Debt was ${debtBefore / 1e18}`);
+            console.log(`Paid back ${(debtBefore.sub(debtAfter)) / 1e18} and user received ${(lusdEOAAfter.sub(lusdEOABefore) / 1e18)} LUSD to his eoa`);
             await revertToSnapshot(snapshot);
         });
-        */
     });
 };
 
