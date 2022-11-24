@@ -54,16 +54,22 @@ contract LiquityPayback is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Repays LUSD tokens to the trove
+    /// @notice Trove after payback can't have debt less than MIN_DEBT (2000e18)
     function _liquityPayback(Params memory _params) internal returns (uint256, bytes memory) {
         uint256 lusdAmountToPayback = LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
 
         uint256 debt = TroveManager.getTroveDebt(address(this));
-        
+
+        uint256 amountToReturn;
+
         if (debt < lusdAmountToPayback + MIN_DEBT && _params.lusdAmount == type(uint256).max){
+            amountToReturn = lusdAmountToPayback - (debt - MIN_DEBT);
             lusdAmountToPayback = debt - MIN_DEBT;
         }
 
         BorrowerOperations.repayLUSD(lusdAmountToPayback, _params.upperHint, _params.lowerHint);
+    
+        LUSD_TOKEN_ADDRESS.withdrawTokens(_params.from, amountToReturn);
 
         bytes memory logData = abi.encode(lusdAmountToPayback, _params.from);
         return (lusdAmountToPayback, logData);

@@ -22,9 +22,9 @@ contract FetchBondId is ActionBase, CBHelper {
     /// @param sourceType number indicating if sourceId refers to a bondId or subId
     /// @param cbRebondBondId Id of the current bond in the Rebond sub (only used if paybackSourceId is of a sub, otherwise 0)
     struct Params {
-        uint256 paybackSourceId; // this would be piped from sub data
-        uint256 sourceType; // this would be piped from sub data
-        uint256 cbRebondBondId; // backend would enter this
+        uint256 paybackSourceId;
+        uint256 sourceType;
+        uint256 cbRebondBondId;
     }
 
     /// @inheritdoc ActionBase
@@ -79,7 +79,7 @@ contract FetchBondId is ActionBase, CBHelper {
             if (cbSubDataHash != storedCBSubData.strategySubHash) {
                 revert SubDatHashMismatch(_params.paybackSourceId, cbSubDataHash, storedCBSubData.strategySubHash);
             }
-            // TODO: maybe this isn't needed because bond will be used and CB Rebond strat won't be executable (will revert)
+
             SubStorage(SUB_STORAGE_ADDR).deactivateSub(_params.paybackSourceId);
 
             return _params.cbRebondBondId;
