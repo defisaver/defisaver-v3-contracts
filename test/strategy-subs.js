@@ -5,7 +5,6 @@ const {
     subToStrategy,
     subToCompV3Proxy,
     subToCBRebondProxy,
-    subToLiquityCBPaybackProxy,
 } = require('./utils-strategies');
 
 const {
