@@ -1801,7 +1801,7 @@ const callLiquityPaybackChickenOutStrategy = async (
     actionsCallData.push(sendTokenAction.encodeForRecipe()[0]);
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    const strategyIndex = 0;
+    const strategyIndex = 1;
     const triggerCallData = [];
 
     triggerCallData.push(abiCoder.encode(['address', 'uint256', 'uint8'], [nullAddress, '0', '0']));

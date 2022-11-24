@@ -18,7 +18,7 @@ import "../../../core/strategy/StrategyModel.sol";
 contract LiquityHelper is MainnetLiquityAddresses {
     using TokenUtils for address;
 
-    uint64 constant LIQUITY_PAYBACK_BUNDLE_ID = 0;
+    uint64 constant LIQUITY_PAYBACK_BUNDLE_ID = 7;
 
     uint constant public LUSD_GAS_COMPENSATION = 200e18;
     uint constant public MIN_DEBT = 2000e18; // MIN_NET_DEBT (1800e18) + LUSD_GAS_COMP (200e18)
@@ -61,7 +61,7 @@ contract LiquityHelper is MainnetLiquityAddresses {
         paybackSub.triggerData =  new bytes[](1);
         paybackSub.triggerData[0] = triggerData;
 
-        paybackSub.subData =  new bytes32[](2);
+        paybackSub.subData =  new bytes32[](4);
         paybackSub.subData[0] = bytes32(_sourceId);
         paybackSub.subData[1] = bytes32(_sourceType);
         paybackSub.subData[2] = bytes32(uint256(uint160(LUSD_TOKEN_ADDRESS)));

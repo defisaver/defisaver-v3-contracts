@@ -1880,6 +1880,8 @@ const createLiquityPaybackChickenOutStrategy = () => {
     const strategy = new dfs.Strategy('LiquityPaybackChickenInStrategy');
     strategy.addSubSlot('&paybackSourceId', 'uint256');
     strategy.addSubSlot('&paybackSourceType', 'uint256');
+    strategy.addSubSlot('&LUSD', 'address');
+    strategy.addSubSlot('&BLUSD', 'address');
 
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     strategy.addTrigger(liquityRatioTrigger);
