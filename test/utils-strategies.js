@@ -197,29 +197,6 @@ const subToCBRebondProxy = async (proxy, inputData, regAddr = addrs[network].REG
     return latestSubId;
 };
 
-const subToLiquityCBPaybackProxy = async (
-    proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR,
-) => {
-    const liquityCBPaybackSubProxyAddr = await getAddrFromRegistry('LiquityCBPaybackSubProxy', regAddr);
-
-    const liquityCBPaybackSubProxy = await hre.ethers.getContractFactory('LiquityCBPaybackSubProxy');
-    const functionData = liquityCBPaybackSubProxy.interface.encodeFunctionData(
-        'subToStrategy',
-        inputData,
-    );
-    const receipt = await proxy['execute(address,bytes)'](liquityCBPaybackSubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
-
-    const gasUsed = await getGasUsed(receipt);
-    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
-    console.log(`GasUsed subToLiquityCBPaybackStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
-
-    const latestSubId = await getLatestSubId(regAddr);
-
-    return latestSubId;
-};
-
 const updateAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
     const aaveSubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
 
@@ -306,5 +283,4 @@ module.exports = {
     setMCDPriceVerifier,
     getSubHash,
     subToCBRebondProxy,
-    subToLiquityCBPaybackProxy,
 };

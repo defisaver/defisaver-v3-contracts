@@ -319,7 +319,6 @@ const liquityCBPaybackTest = async () => {
 
             strategyExecutor = await redeployCore();
 
-            await redeploy('LiquityCBPaybackSubProxy');
             await redeploy('CBRebondSubProxy');
             // await redeploy('LiquityRatioTrigger');
             // await redeploy('CBCreate');

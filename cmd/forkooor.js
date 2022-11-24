@@ -486,8 +486,6 @@ const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState,
     let senderAcc = (await hre.ethers.getSigners())[0];
     await redeploy('FetchBondId', REGISTRY_ADDR, false, true);
     await redeploy('LiquityPayback', REGISTRY_ADDR, false, true);
-    await redeploy('LiquityCBPaybackSubProxy', REGISTRY_ADDR, false, true);
-
     let bundleId = await getLatestBundleId();
 
     console.log(parseInt(bundleId, 10));

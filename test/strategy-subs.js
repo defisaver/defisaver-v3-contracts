@@ -397,11 +397,7 @@ const subCbRebondStrategy = async (proxy, bondID, strategyId, regAddr = REGISTRY
     return { subId, strategySub };
 };
 
-const subLiquityCBPaybackStrategy = async (proxy, bundleId, sourceId, sourceType, triggerRatio, triggerState, regAddr = REGISTRY_ADDR) => {
-    const inputData = [sourceId.toString(), sourceType.toString(), triggerRatio.toString(), triggerState.toString()];
-
-    const subId = await subToLiquityCBPaybackProxy(proxy, inputData, regAddr);
-
+const subLiquityCBPaybackStrategy = async (proxy, bundleId, sourceId, sourceType, triggerRatio, triggerState) => {
     const isBundle = true;
     const sourceIdEncoded = abiCoder.encode(['uint256'], [sourceId.toString()]);
     const sourceTypeEncoded = abiCoder.encode(['uint256'], [sourceType.toString()]);
@@ -411,6 +407,7 @@ const subLiquityCBPaybackStrategy = async (proxy, bundleId, sourceId, sourceType
     const triggerData = await createLiquityTrigger(proxy.address, triggerRatio.toString(), triggerState.toString());
 
     const strategySub = [bundleId, isBundle, [triggerData], [sourceIdEncoded, sourceTypeEncoded, lusdTokenEncoded, bLusdTokenEncoded]];
+    const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };
 };

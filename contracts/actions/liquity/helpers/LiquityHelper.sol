@@ -52,19 +52,4 @@ contract LiquityHelper is MainnetLiquityAddresses {
             LQTY_TOKEN_ADDRESS.withdrawTokens(_lqtyTo, _lqtyGain);
         }
     }
-
-    function formatLiquityCBPaybackSub(uint256 _sourceId, uint256 _sourceType, uint256 _ratio, uint256 _state) public view returns (StrategyModel.StrategySub memory paybackSub) {
-        paybackSub.strategyOrBundleId = LIQUITY_PAYBACK_BUNDLE_ID;
-        paybackSub.isBundle = true;
-
-        bytes memory triggerData = abi.encode(address(this), _ratio, _state);
-        paybackSub.triggerData =  new bytes[](1);
-        paybackSub.triggerData[0] = triggerData;
-
-        paybackSub.subData =  new bytes32[](4);
-        paybackSub.subData[0] = bytes32(_sourceId);
-        paybackSub.subData[1] = bytes32(_sourceType);
-        paybackSub.subData[2] = bytes32(uint256(uint160(LUSD_TOKEN_ADDRESS)));
-        paybackSub.subData[3] = bytes32(uint256(uint160(BLUSD_ADDRESS)));
-    }
 }
