@@ -105,6 +105,8 @@ const {
     createCompV3EOAFlBoostStrategy,
     createCompV3EOARepayStrategy,
     createFlCompV3EOARepayStrategy,
+    createLiquityPaybackChickenInStrategy,
+    createLiquityPaybackChickenOutStrategy,
 } = require('../test/strategies');
 
 const {
@@ -117,6 +119,7 @@ const {
     subLiquityTrailingCloseToCollStrategy,
     subCompV3AutomationStrategy,
     subCbRebondStrategy,
+    subLiquityCBPaybackStrategy,
 } = require('../test/strategy-subs');
 
 const { getTroveInfo } = require('../test/utils-liquity');
@@ -475,6 +478,47 @@ const cbRebondSub = async (bondId, sender) => {
 
     // eslint-disable-next-line no-unused-vars
     const { subId, strategySub } = await subCbRebondStrategy(proxy, bondId, strategyId);
+
+    console.log(`Sub created #${subId}!`);
+};
+
+const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+    await redeploy('FetchBondId', REGISTRY_ADDR, false, true);
+    await redeploy('LiquityPayback', REGISTRY_ADDR, false, true);
+    await redeploy('LiquityCBPaybackSubProxy', REGISTRY_ADDR, false, true);
+
+    let bundleId = await getLatestBundleId();
+
+    console.log(parseInt(bundleId, 10));
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    if (parseInt(bundleId, 10) < 7) {
+        await openStrategyAndBundleStorage(true);
+        const liqInStrategyEncoded = createLiquityPaybackChickenInStrategy();
+        const liqOutFLStrategyEncoded = createLiquityPaybackChickenOutStrategy();
+
+        const strategyId1 = await createStrategy(proxy, ...liqInStrategyEncoded, false);
+        const strategyId2 = await createStrategy(proxy, ...liqOutFLStrategyEncoded, false);
+
+        bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+        console.log(`Bundle Id is ${bundleId} and should be 7`);
+        console.log('Chicken in strat - 0, Chicken out strat - 1');
+    }
+
+    bundleId = '7';
+    const targetRatioWei = hre.ethers.utils.parseUnits(triggerRatio, '16');
+
+    const { subId } = await subLiquityCBPaybackStrategy(
+        proxy, bundleId, sourceId, sourceType, targetRatioWei, triggerState,
+    );
 
     console.log(`Sub created #${subId}!`);
 };
@@ -1988,6 +2032,20 @@ const createCompV3Position = async (
         .action(async (bondId, senderAddr) => {
             // eslint-disable-next-line max-len
             await cbRebondSub(bondId, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('sub-liquity-cb-payback <sourceId> <sourceType> <triggerRatio> <triggerState> [senderAddr]')
+        .description('Subscribes a bond to the rebonding strategy')
+        .action(async (sourceId, sourceType, triggerRatio, triggerState, senderAddr) => {
+            // triggerRatio should be [110 - 1000] (in that format)
+            // triggerState, 0 for OVER, 1 for UNDER
+            // if sourceId is BondID - sourceType is 0
+            // if sourceId is subId - sourceType is 0
+            // When executing strategy from bundle, ChickenIn strategy index is 0, ChickenOut is 1
+            // eslint-disable-next-line max-len
+            await liqCBPaybackSub(sourceId, sourceType, triggerRatio, triggerState, senderAddr);
             process.exit(0);
         });
 
