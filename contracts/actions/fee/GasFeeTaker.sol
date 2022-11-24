@@ -7,7 +7,6 @@ pragma experimental ABIEncoderV2;
 import "../../utils/FeeRecipient.sol";
 import "../ActionBase.sol";
 import "./helpers/GasFeeHelper.sol";
-import "hardhat/console.sol";
 
 /// @title Helper action to send a token to the specified address
 contract GasFeeTaker is ActionBase, GasFeeHelper {
@@ -32,21 +31,17 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
         inputData.feeToken = _parseParamAddr(inputData.feeToken, _paramMapping[0], _subData, _returnValues);
         inputData.availableAmount = _parseParamUint(inputData.availableAmount, _paramMapping[1], _subData, _returnValues);
         inputData.dfsFeeDivider = _parseParamUint(inputData.dfsFeeDivider, _paramMapping[2], _subData, _returnValues);
-        console.log(inputData.feeToken, inputData.availableAmount, inputData.dfsFeeDivider);
+
         uint256 txCost = calcGasCost(inputData.gasUsed, inputData.feeToken, 0);
-        console.log(txCost);
-        console.log(inputData.feeToken.getBalance(address(this)));
         /// @dev This means inputData.availableAmount is not being piped into
         /// @dev To stop sender from sending any value here, if not piped take proxy balance
         if (_paramMapping[1] == 0) {
             inputData.availableAmount = inputData.feeToken.getBalance(address(this));
         }
-        console.log(inputData.availableAmount );
         // cap at 20% of the max amount
         if (txCost >= (inputData.availableAmount / 5)) {
             txCost = inputData.availableAmount / 5;
         }
-console.log(txCost);
         if (inputData.dfsFeeDivider != 0) {
             /// @dev If divider is lower the fee is greater, should be max 5 bps
             if (inputData.dfsFeeDivider < MAX_DFS_FEE) {
@@ -56,11 +51,8 @@ console.log(txCost);
             // add amount we take for dfs fee as well
             txCost += inputData.availableAmount / inputData.dfsFeeDivider;
         }
-        console.log("HERE");
         uint256 amountLeft = sub(inputData.availableAmount, txCost);
-        console.log(amountLeft);
         inputData.feeToken.withdrawTokens(feeRecipient.getFeeAddr(), txCost);
-        console.log("DONE");
         emit ActionEvent("GasFeeTaker", abi.encode(inputData, amountLeft));
         return bytes32(amountLeft);
     }

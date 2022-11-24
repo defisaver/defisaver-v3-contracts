@@ -12,7 +12,6 @@ import "./strategy/BundleStorage.sol";
 import "./strategy/SubStorage.sol";
 import "../interfaces/flashloan/IFlashLoanBase.sol";
 import "../interfaces/ITrigger.sol";
-import "hardhat/console.sol";
 
 /// @title Entry point into executing recipes/checking triggers directly and as part of a strategy
 contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper {
@@ -61,7 +60,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
         if (!triggered) {
             revert TriggerNotActiveError(errIndex);
         }
-        console.log("TRIGGERED");
+
         // if this is a one time strategy
         if (!strategy.continuous) {
             SubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
@@ -157,11 +156,8 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
         uint256 _index,
         bytes32[] memory _returnValues
     ) internal returns (bytes32 response) {
-        console.log(_index);
 
         address actionAddr = registry.getAddr(_currRecipe.actionIds[_index]);
-        console.log(actionAddr);
-        console.logBytes4(_currRecipe.actionIds[_index]);
         
         response = IDSProxy(address(this)).execute(
             actionAddr,

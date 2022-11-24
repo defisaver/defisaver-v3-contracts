@@ -6,7 +6,6 @@ import "../auth/AdminAuth.sol";
 import "../auth/ProxyPermission.sol";
 import "../core/strategy/SubStorage.sol";
 import "../actions/liquity/helpers/LiquityHelper.sol";
-import "hardhat/console.sol";
 
 /// @title SubProxy to inject subId during subscription for the Liquty CB Payback strategy
 contract LiquityCBPaybackSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper, LiquityHelper {
@@ -23,13 +22,9 @@ contract LiquityCBPaybackSubProxy is StrategyModel, AdminAuth, ProxyPermission, 
         givePermission(PROXY_AUTH_ADDR);
         
         StrategySub memory repaySub;
-        console.log("HERE");
-        console.log(sourceId);
-        console.log(sourceType);
-        console.log(triggerRatio);
-        console.log(triggerState);
+
         repaySub = formatLiquityCBPaybackSub(sourceId, sourceType, triggerRatio, triggerState);
-        console.log("HERE");
+
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
     }
 
