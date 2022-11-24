@@ -158,7 +158,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
     ) internal returns (bytes32 response) {
 
         address actionAddr = registry.getAddr(_currRecipe.actionIds[_index]);
-        
+
         response = IDSProxy(address(this)).execute(
             actionAddr,
             abi.encodeWithSignature(

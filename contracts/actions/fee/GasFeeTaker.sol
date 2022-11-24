@@ -33,15 +33,18 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
         inputData.dfsFeeDivider = _parseParamUint(inputData.dfsFeeDivider, _paramMapping[2], _subData, _returnValues);
 
         uint256 txCost = calcGasCost(inputData.gasUsed, inputData.feeToken, 0);
+
         /// @dev This means inputData.availableAmount is not being piped into
         /// @dev To stop sender from sending any value here, if not piped take proxy balance
         if (_paramMapping[1] == 0) {
             inputData.availableAmount = inputData.feeToken.getBalance(address(this));
         }
+
         // cap at 20% of the max amount
         if (txCost >= (inputData.availableAmount / 5)) {
             txCost = inputData.availableAmount / 5;
         }
+
         if (inputData.dfsFeeDivider != 0) {
             /// @dev If divider is lower the fee is greater, should be max 5 bps
             if (inputData.dfsFeeDivider < MAX_DFS_FEE) {
@@ -51,8 +54,11 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
             // add amount we take for dfs fee as well
             txCost += inputData.availableAmount / inputData.dfsFeeDivider;
         }
+
         uint256 amountLeft = sub(inputData.availableAmount, txCost);
+
         inputData.feeToken.withdrawTokens(feeRecipient.getFeeAddr(), txCost);
+
         emit ActionEvent("GasFeeTaker", abi.encode(inputData, amountLeft));
         return bytes32(amountLeft);
     }
