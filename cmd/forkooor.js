@@ -489,6 +489,19 @@ const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState,
     let bundleId = await getLatestBundleId();
 
     console.log(parseInt(bundleId, 10));
+    let formattedPriceState;
+
+    if (triggerState.toLowerCase() === 'over') {
+        formattedPriceState = 0;
+    } else if (triggerState.toLowerCase() === 'under') {
+        formattedPriceState = 1;
+    }
+    let formattedSourceType;
+    if (sourceType.toLowerCase() === 'bond') {
+        formattedSourceType = 0;
+    } else if (sourceType.toLowerCase() === 'sub') {
+        formattedSourceType = 1;
+    }
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
@@ -515,7 +528,7 @@ const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState,
     const targetRatioWei = hre.ethers.utils.parseUnits(triggerRatio, '16');
 
     const { subId } = await subLiquityCBPaybackStrategy(
-        proxy, bundleId, sourceId, sourceType, targetRatioWei, triggerState,
+        proxy, bundleId, sourceId, formattedSourceType, targetRatioWei, formattedPriceState,
     );
 
     console.log(`Sub created #${subId}!`);
@@ -2037,10 +2050,10 @@ const createCompV3Position = async (
         .command('sub-liquity-cb-payback <sourceId> <sourceType> <triggerRatio> <triggerState> [senderAddr]')
         .description('Subscribes a bond to the rebonding strategy')
         .action(async (sourceId, sourceType, triggerRatio, triggerState, senderAddr) => {
+            // sourceId : Id of the bond or of strategy sub
+            // sourceType : bond / sub
             // triggerRatio should be [110 - 1000] (in that format)
-            // triggerState, 0 for OVER, 1 for UNDER
-            // if sourceId is BondID - sourceType is 0
-            // if sourceId is subId - sourceType is 1
+            // triggerState : over/under
             // When executing strategy from bundle, ChickenIn strategy index is 0, ChickenOut is 1
             // eslint-disable-next-line max-len
             await liqCBPaybackSub(sourceId, sourceType, triggerRatio, triggerState, senderAddr);
