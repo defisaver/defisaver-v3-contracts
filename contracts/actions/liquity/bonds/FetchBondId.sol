@@ -2,13 +2,13 @@
 
 pragma solidity =0.8.10;
 
-import "../ActionBase.sol";
-import "../../core/strategy/SubStorage.sol";
-import "../../core/strategy/StrategyModel.sol";
-import "../../actions/liquity/helpers/CBHelper.sol";
+import "../../ActionBase.sol";
+import "../../../core/strategy/SubStorage.sol";
+import "../../../core/strategy/StrategyModel.sol";
+import "../../../actions/liquity/helpers/CBHelper.sol";
 
-/// @title Special action to fetch Bond Id for the Liquity payback from CB strategy and to deactivate strategy
-contract FetchBondIdSingle is ActionBase, CBHelper {
+/// @title Special action to fetch BondId for the Liquity payback from CB strategy and to deactivate rebond strategy if bond from rebond strat was used
+contract FetchBondId is ActionBase, CBHelper {
 
     error WrongSourceType(SourceType);
     error SubDatHashMismatch(uint256, bytes32, bytes32);
@@ -18,8 +18,8 @@ contract FetchBondIdSingle is ActionBase, CBHelper {
         SUB
     }
 
-    /// @param paybackSourceId
-    /// @param sourceType 
+    /// @param paybackSourceId Id of the payback source, can be either bondId or rebond strat subId
+    /// @param sourceType number indicating if sourceId refers to a bondId or subId
     /// @param cbRebondBondId Id of the current bond in the Rebond sub (only used if paybackSourceId is of a sub, otherwise 0)
     struct Params {
         uint256 paybackSourceId; // this would be piped from sub data
@@ -44,7 +44,7 @@ contract FetchBondIdSingle is ActionBase, CBHelper {
         );
         params.sourceType = _parseParamUint(
             params.sourceType,
-            _paramMapping[0],
+            _paramMapping[1],
             _subData,
             _returnValues
         );
@@ -64,7 +64,8 @@ contract FetchBondIdSingle is ActionBase, CBHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function getBondId(Params memory _params) internal view returns (uint256) {
+    /// @dev depending on sourceType passed from users subData fetch BondId and return it
+    function getBondId(Params memory _params) internal returns (uint256) {
         if (SourceType(_params.sourceType) == SourceType.BOND){
             return _params.paybackSourceId;
         }
@@ -73,12 +74,13 @@ contract FetchBondIdSingle is ActionBase, CBHelper {
             StrategyModel.StoredSubData memory storedCBSubData = SubStorage(SUB_STORAGE_ADDR).getSub(_params.paybackSourceId);
             StrategyModel.StrategySub memory rebondSub = formatRebondSub(_params.paybackSourceId, _params.cbRebondBondId);
             bytes32 cbSubDataHash = keccak256(abi.encode(rebondSub));
+
             // data sent from the caller must match the stored hash of the data
             if (cbSubDataHash != storedCBSubData.strategySubHash) {
                 revert SubDatHashMismatch(_params.paybackSourceId, cbSubDataHash, storedCBSubData.strategySubHash);
             }
             // TODO: maybe this isn't needed because bond will be used and CB Rebond strat won't be executable (will revert)
-            //SubStorage(SUB_STORAGE_ADDR).deactivateSub(paybackSourceId);
+            SubStorage(SUB_STORAGE_ADDR).deactivateSub(_params.paybackSourceId);
 
             return _params.cbRebondBondId;
         }

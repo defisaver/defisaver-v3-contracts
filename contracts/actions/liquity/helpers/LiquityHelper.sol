@@ -13,9 +13,12 @@ import "../../../interfaces/liquity/IStabilityPool.sol";
 import "../../../interfaces/liquity/ILQTYStaking.sol";
 import "../../../interfaces/liquity/IChickenBondManager.sol";
 import "./MainnetLiquityAddresses.sol";
+import "../../../core/strategy/StrategyModel.sol";
 
 contract LiquityHelper is MainnetLiquityAddresses {
     using TokenUtils for address;
+
+    uint64 constant LIQUITY_PAYBACK_BUNDLE_ID = 0;
 
     uint constant public LUSD_GAS_COMPENSATION = 200e18;
     uint constant public MIN_DEBT = 2000e18; // MIN_NET_DEBT (1800e18) + LUSD_GAS_COMP (200e18)
@@ -48,5 +51,20 @@ contract LiquityHelper is MainnetLiquityAddresses {
         if (_lqtyGain > 0) {
             LQTY_TOKEN_ADDRESS.withdrawTokens(_lqtyTo, _lqtyGain);
         }
+    }
+
+    function formatLiquityCBPaybackSub(uint256 _sourceId, uint256 _sourceType, uint256 _ratio, uint256 _state) public view returns (StrategyModel.StrategySub memory paybackSub) {
+        paybackSub.strategyOrBundleId = LIQUITY_PAYBACK_BUNDLE_ID;
+        paybackSub.isBundle = true;
+
+        bytes memory triggerData = abi.encode(address(this), _ratio, _state);
+        paybackSub.triggerData =  new bytes[](1);
+        paybackSub.triggerData[0] = triggerData;
+
+        paybackSub.subData =  new bytes32[](2);
+        paybackSub.subData[0] = bytes32(_sourceId);
+        paybackSub.subData[1] = bytes32(_sourceType);
+        paybackSub.subData[2] = bytes32(uint256(uint160(LUSD_TOKEN_ADDRESS)));
+        paybackSub.subData[3] = bytes32(uint256(uint160(BLUSD_ADDRESS)));
     }
 }

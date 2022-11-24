@@ -269,7 +269,7 @@ const liquityRepayStrategyTest = async () => {
     });
 };
 
-const liquityPartialPaybackTest = async () => {
+const liquityCBPaybackTest = async () => {
 
 };
 
@@ -493,4 +493,5 @@ module.exports = {
     liquityBoostStrategyTest,
     liquityRepayStrategyTest,
     liquityCloseToCollStrategyTest,
+    liquityCBPaybackTest,
 };
