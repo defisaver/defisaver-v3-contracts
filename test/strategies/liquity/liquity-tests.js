@@ -387,7 +387,7 @@ const liquityCBPaybackTest = async () => {
             console.log(`Bundle Id is ${bundleId} and should be 7`);
         });
 
-        it('... should subscribe to LiquityCBPaybackStrategy and trigger ChickenOut from bond and payback to MIN_DEBT and send rest to eoa', async () => {
+        it('... should sub to strategy and trigger ChickenOut from bond with bond > debt - min_debt', async () => {
             snapshot = await takeSnapshot();
 
             await createChickenBond(proxy, Float2BN(lusdDebt), senderAcc.address, senderAcc);
@@ -418,7 +418,7 @@ const liquityCBPaybackTest = async () => {
             console.log(`Paid back ${(debtBefore.sub(debtAfter)) / 1e18} and user received ${(lusdEOAAfter.sub(lusdEOABefore) / 1e18)} LUSD to his eoa`);
             await revertToSnapshot(snapshot);
         });
-        it('... should subscribe to LiquityCBPaybackStrategy and trigger ChickenOut from bond and payback half (bond is smaller)', async () => {
+        it('... should sub to strategy and trigger ChickenOut from bond with bond < debt - min_debt', async () => {
             snapshot = await takeSnapshot();
 
             await createChickenBond(proxy, Float2BN(lusdDebtHalf), senderAcc.address, senderAcc);
@@ -450,7 +450,7 @@ const liquityCBPaybackTest = async () => {
             await revertToSnapshot(snapshot);
         });
 
-        it('... should subscribe to LiquityCBPaybackStrategy and trigger ChickenOut from rebond Sub to MIN_DEBT and return rest to eoa', async () => {
+        it('... should sub to strategy and trigger ChickenOut from rebond sub with bond > debt - min_debt', async () => {
             snapshot = await takeSnapshot();
 
             await createChickenBond(proxy, Float2BN(lusdDebt), senderAcc.address, senderAcc);
@@ -482,7 +482,7 @@ const liquityCBPaybackTest = async () => {
             console.log(`Paid back ${(debtBefore.sub(debtAfter)) / 1e18} and user received ${(lusdEOAAfter.sub(lusdEOABefore) / 1e18)} LUSD to his eoa`);
             await revertToSnapshot(snapshot);
         });
-        it('... should subscribe to LiquityCBPaybackStrategy and trigger ChickenOut from rebond Sub (smaller bond size)', async () => {
+        it('... should sub to strategy and trigger ChickenOut from rebond sub with bond < debt - min_debt', async () => {
             snapshot = await takeSnapshot();
 
             await createChickenBond(proxy, Float2BN(lusdDebtHalf), senderAcc.address, senderAcc);
