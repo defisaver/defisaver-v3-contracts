@@ -397,14 +397,14 @@
     },
     {
         "name": "CBUpdateRebondSub",
-        "address": "0x2709Fd59a27F35997dFf618E3C68ABA1c9e91465",
+        "address": "0x23789427ECCea5d1ED033D50694Eeb16cF79C4F8",
         "id": "0x291d78d0",
         "path": "contracts/actions/liquity/bonds/CBUpdateRebondSub.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x2709Fd59a27F35997dFf618E3C68ABA1c9e91465"]
     },
     {
         "name": "CBRebondTrigger",

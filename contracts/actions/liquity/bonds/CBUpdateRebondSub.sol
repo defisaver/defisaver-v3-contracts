@@ -10,7 +10,6 @@ import "../../../actions/liquity/helpers/CBHelper.sol";
 /// @title Special action to update rebond strategy data (Only use in that context)
 contract CBUpdateRebondSub is ActionBase, CBHelper {
 
-    error SubDatHashMismatch(uint256, bytes32, bytes32);
     error ImpactTooHigh(uint256, uint256);
 
     /// @param subId Id of the sub we are changing (user must be owner)
@@ -61,17 +60,16 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function updateRebondSub(Params memory _params, uint256 previousBondId) internal {
-
-        if (previousBondId != 0) {
-
-            uint256 previousBondLUSDDeposited = CBManager.getBondData(previousBondId).lusdAmount;
+    function updateRebondSub(Params memory _params, uint256 _previousBondId) internal {
+        if (_previousBondId != 0) {
+            uint256 previousBondLUSDDeposited = CBManager.getBondData(_previousBondId).lusdAmount;
             uint256 newBondLUSDDeposited = CBManager.getBondData(_params.bondId).lusdAmount;
 
             if (newBondLUSDDeposited <= previousBondLUSDDeposited) {
                 revert ImpactTooHigh(previousBondLUSDDeposited, newBondLUSDDeposited);
             }
         }
+
         StrategyModel.StrategySub memory rebondSub = formatRebondSub(_params.subId, _params.bondId);
 
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_params.subId, rebondSub);
