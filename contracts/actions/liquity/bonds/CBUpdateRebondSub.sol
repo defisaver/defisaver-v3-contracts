@@ -11,7 +11,7 @@ import "../../../actions/liquity/helpers/CBHelper.sol";
 contract CBUpdateRebondSub is ActionBase, CBHelper {
 
     error SubDatHashMismatch(uint256, bytes32, bytes32);
-    error ImpactTooHigh();
+    error ImpactTooHigh(uint256, uint256);
 
     /// @param subId Id of the sub we are changing (user must be owner)
     /// @param bondId Id of the chicken bond NFT we just created
@@ -64,23 +64,14 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
     function updateRebondSub(Params memory _params, uint256 previousBondId) internal {
 
         if (previousBondId != 0) {
-            StrategyModel.StoredSubData memory storedCBSubData = SubStorage(SUB_STORAGE_ADDR).getSub(_params.subId);
-            StrategyModel.StrategySub memory previousRebondSub = formatRebondSub(_params.subId, previousBondId);
-            bytes32 cbSubDataHash = keccak256(abi.encode(previousRebondSub));
-
-            // data sent from the caller must match the stored hash of the data
-            if (cbSubDataHash != storedCBSubData.strategySubHash) {
-                revert SubDatHashMismatch(_params.subId, cbSubDataHash, storedCBSubData.strategySubHash);
-            }
 
             uint256 previousBondLUSDDeposited = CBManager.getBondData(previousBondId).lusdAmount;
             uint256 newBondLUSDDeposited = CBManager.getBondData(_params.bondId).lusdAmount;
 
             if (newBondLUSDDeposited <= previousBondLUSDDeposited) {
-                revert ImpactTooHigh();
+                revert ImpactTooHigh(previousBondLUSDDeposited, newBondLUSDDeposited);
             }
         }
-
         StrategyModel.StrategySub memory newRebondSub = formatRebondSub(_params.subId, _params.bondId);
 
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_params.subId, newRebondSub);
