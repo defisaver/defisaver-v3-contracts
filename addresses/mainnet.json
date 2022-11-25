@@ -34,7 +34,7 @@
     },
     {
         "name": "SubProxy",
-        "address": "0x29474FdaC7142f9aB7773B8e38264FA15E3805ed",
+        "address": "0xd18d4756bbf848674cc35f1a0b86afef20787382",
         "id": "0x15c87229",
         "path": "contracts/core/strategy/SubProxy.sol",
         "version": "1.0.0",

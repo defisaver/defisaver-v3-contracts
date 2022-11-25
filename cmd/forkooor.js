@@ -779,7 +779,7 @@ const deactivateSub = async (subId, sender) => {
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
+    const subProxyAddr = '0xd18d4756bbf848674cc35f1a0b86afef20787382';
     const subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
 
     const subStorageAddr = await getAddrFromRegistry('SubStorage', REGISTRY_ADDR);
