@@ -64,6 +64,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
         (
             DepositTargetType depositTargetType,
             bool explicitUnderlying,
+            bool removeOneCoin,
             bool withdrawExact
         ) = parseFlags(_params.flags);
         (
@@ -82,9 +83,17 @@ contract CurveWithdraw is ActionBase, CurveHelper {
             balances[i] = tokens[i].getBalance(address(this));
         }
 
-        bytes memory payload = _constructPayload(_params.amounts, _params.burnAmount, withdrawExact, explicitUnderlying);
-        (bool success, ) = _params.depositTarget.call(payload);
-        if (!success) revert CurveWithdrawPoolReverted();
+        {   // stack too deep, maybe refactor if possible
+            bytes memory payload = _constructPayload(
+                _params.amounts,
+                _params.burnAmount,
+                removeOneCoin,
+                withdrawExact,
+                explicitUnderlying
+            );
+            (bool success, ) = _params.depositTarget.call(payload);
+            if (!success) revert CurveWithdrawPoolReverted();
+        }
 
         for (uint256 i = 0; i < N_COINS; i++) {
             uint256 balanceDelta = tokens[i].getBalance(address(this)) - balances[i];
@@ -106,24 +115,28 @@ contract CurveWithdraw is ActionBase, CurveHelper {
     }
 
     /// @notice Constructs payload for external contract call
-    function _constructPayload(uint256[] memory _amounts, uint256 _burnAmount, bool _withdrawExact, bool _explicitUnderlying) internal pure returns (bytes memory payload) {
+    function _constructPayload(uint256[] memory _amounts, uint256 _burnAmount, bool _removeOneCoin, bool _withdrawExact, bool _explicitUnderlying) internal pure returns (bytes memory payload) {
         bytes memory sig;
         bytes4 selector;
         bytes memory optional;
         assert(_amounts.length < 9); // sanity check
-        if (_withdrawExact) {
+        if (_removeOneCoin) {
+            uint256 tokenIndex;
+            for (; tokenIndex < _amounts.length; tokenIndex++) {
+                if (_amounts[tokenIndex] != 0) break;
+            }
+
             if (_explicitUnderlying) {
-                sig = "remove_liquidity_imbalance(uint256[0],uint256,bool)";
-                //                             index = 35 ^
+                sig = "remove_liquidity_one_coin(uint256,int128,uint256,bool)";
                 optional = abi.encode(uint256(1));
             } else {
-                sig = "remove_liquidity_imbalance(uint256[0],uint256)";
+                sig = "remove_liquidity_one_coin(uint256,int128,uint256)";
             }
-            sig[35] = bytes1(uint8(sig[35]) + uint8(_amounts.length));
+
             selector = bytes4(keccak256(sig));
 
-            payload = bytes.concat(abi.encodePacked(selector, _amounts, _burnAmount), optional);
-        } else {
+            payload = bytes.concat(abi.encodePacked(selector, _burnAmount, tokenIndex, _amounts[tokenIndex]), optional);
+        } else if (!_withdrawExact) {
             if (_explicitUnderlying) {
                 sig = "remove_liquidity(uint256,uint256[0],bool)";
                 //                           index = 33 ^
@@ -135,6 +148,18 @@ contract CurveWithdraw is ActionBase, CurveHelper {
             selector = bytes4(keccak256(sig));
 
             payload = bytes.concat(abi.encodePacked(selector, _burnAmount, _amounts), optional);
+        } else {
+            if (_explicitUnderlying) {
+                sig = "remove_liquidity_imbalance(uint256[0],uint256,bool)";
+                //                             index = 35 ^
+                optional = abi.encode(uint256(1));
+            } else {
+                sig = "remove_liquidity_imbalance(uint256[0],uint256)";
+            }
+            sig[35] = bytes1(uint8(sig[35]) + uint8(_amounts.length));
+            selector = bytes4(keccak256(sig));
+
+            payload = bytes.concat(abi.encodePacked(selector, _amounts, _burnAmount), optional);
         }
     }
 

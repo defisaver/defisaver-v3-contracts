@@ -10,7 +10,7 @@ describe('CompV3-Allow', function () {
         await redeploy('CompV3Allow');
     });
 
-    it('... should test CompoundV3 transfer', async () => {
+    it('... should test CompoundV3 allow', async () => {
         await compV3AllowTest();
     });
 });

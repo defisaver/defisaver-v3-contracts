@@ -4,6 +4,9 @@ const { expect } = require('chai');
 const hre = require('hardhat');
 // const axios = require('axios');
 
+const dfs = require('@defisaver/sdk');
+
+const defisaverSdk = require('@defisaver/sdk');
 const {
     getProxy,
     redeploy,
@@ -18,6 +21,9 @@ const {
     formatExchangeObjCurve,
     REGISTRY_ADDR,
     addrs,
+    placeHolderAddr,
+    getAddrFromRegistry,
+    approve,
 } = require('../utils');
 
 const {
@@ -143,6 +149,65 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
         `);
     }
     return rate;
+};
+
+const dfsSellSameAssetTest = async () => {
+    describe('Dfs-same asset sell', function () {
+        this.timeout(140000);
+
+        let senderAcc;
+        let proxy;
+        let recipeExecutorAddr;
+
+        const network = hre.network.config.name;
+
+        before(async () => {
+            await redeploy('DFSSell');
+            await redeploy('RecipeExecutor');
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+            recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
+        });
+
+        it('... should try to test how same asset swap works', async () => {
+            const amount = hre.ethers.utils.parseUnits('100', 18);
+            const daiAddr = addrs[network].DAI_ADDRESS;
+            const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+                daiAddr,
+                senderAcc.address,
+                amount.toString(),
+            );
+            const dfsSellAction = new dfs.actions.basic.SellAction(
+                formatExchangeObj(
+                    daiAddr,
+                    daiAddr,
+                    amount.toString(),
+                    placeHolderAddr,
+                ),
+                proxy.address,
+                proxy.address,
+            );
+            const sendTokenAction = new dfs.actions.basic.SendTokenAction(
+                daiAddr,
+                senderAcc.address,
+                '$2',
+            );
+            const dfsSellSameAssetRecipe = new dfs.Recipe('SameAssetSell', [
+                pullTokenAction,
+                dfsSellAction,
+                sendTokenAction,
+            ]);
+
+            await setBalance(daiAddr, senderAcc.address, amount);
+            await approve(daiAddr, proxy.address);
+            const functionData = dfsSellSameAssetRecipe.encodeForDsProxyCall();
+            await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], {
+                gasLimit: 3000000,
+            });
+            const daiBalanceAfter = await balanceOf(daiAddr, senderAcc.address);
+            expect(daiBalanceAfter).to.be.eq(amount);
+        });
+    });
 };
 
 const dfsSellTest = async () => {
@@ -312,5 +377,6 @@ const dfsExchangeFullTest = async () => {
 
 module.exports = {
     dfsExchangeFullTest,
+    dfsSellSameAssetTest,
     dfsSellTest,
 };

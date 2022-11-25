@@ -56,6 +56,12 @@ const createGasPriceTrigger = async (maxGasPrice) => {
     return param;
 };
 
+const createCbRebondTrigger = async (bondID) => {
+    const param = abiCoder.encode(['uint256'], [bondID]);
+
+    return param;
+};
+
 module.exports = {
     createUniV3RangeOrderTrigger,
     createMcdTrigger,
@@ -66,6 +72,7 @@ module.exports = {
     createReflexerTrigger,
     createLiquityTrigger,
     createTrailingStopTrigger,
+    createCbRebondTrigger,
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
 };

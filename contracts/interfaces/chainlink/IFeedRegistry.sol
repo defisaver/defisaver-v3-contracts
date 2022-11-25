@@ -250,4 +250,6 @@ interface IFeedRegistry {
     returns (
       uint16 currentPhaseId
     );
+
+    function getFeed(address base, address quote) external view returns (address);
 }

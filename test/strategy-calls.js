@@ -33,6 +33,8 @@ const {
     BN2Float,
     USDC_ADDR,
     LUSD_ADDR,
+    formatMockExchangeObj,
+    MAX_UINT,
 } = require('./utils');
 
 const { ADAPTER_ADDRESS } = require('./utils-reflexer');
@@ -1689,6 +1691,77 @@ const callLiquityCloseToCollStrategy = async (
     );
 };
 
+// eslint-disable-next-line max-len
+const callCbRebondStrategy = async (
+    botAcc,
+    strategyExecutor,
+    subId,
+    strategySub,
+) => {
+    const actionsCallData = [];
+    const cbChickenInAction = new dfs.actions.chickenBonds.CBChickenInAction(
+        '0', // bondID hardcoded from sub slot
+        placeHolderAddr, // _to hardcoded to proxy
+    );
+
+    const bLUSDInfo = getAssetInfo('bLUSD');
+    const lusdInfo = getAssetInfo('LUSD');
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        await formatMockExchangeObj(
+            bLUSDInfo,
+            lusdInfo,
+            MAX_UINT,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const gasCost = 1_600_000;
+    const gasFee = new dfs.actions.basic.GasFeeAction(gasCost, placeHolderAddr, 0);
+
+    const cbCreateAction = new dfs.actions.chickenBonds.CBCreateAction(
+        '0', // lusdAmount from the gas fee action
+        placeHolderAddr, // from hardcoded proxy
+    );
+
+    const cbUpdateRebondSubAction = new dfs.actions.chickenBonds.CBUpdateRebondSubAction(
+        '0', // hardcoded subId from subscription
+        '0', // hardcoded bondId from return value
+    );
+
+    actionsCallData.push(cbChickenInAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(gasFee.encodeForRecipe()[0]);
+    actionsCallData.push(cbCreateAction.encodeForRecipe()[0]);
+    actionsCallData.push(cbUpdateRebondSubAction.encodeForRecipe()[0]);
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    const strategyIndex = 0;
+    const triggerCallData = [];
+
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(
+        `GasUsed callCbRebondStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
 module.exports = {
     callDcaStrategy,
     callMcdRepayStrategy,
@@ -1717,4 +1790,5 @@ module.exports = {
     callMcdRepayFromMstableWithExchangeStrategy,
     callMcdRepayFromRariStrategy,
     callMcdRepayFromRariStrategyWithExchange,
+    callCbRebondStrategy,
 };

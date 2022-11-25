@@ -1,11 +1,14 @@
+const { defaultAbiCoder } = require('ethers/lib/utils');
 const {
     subToAaveProxy,
     updateAaveProxy,
+    subToStrategy,
 } = require('./utils-strategies');
 
 const {
     addrs,
     network,
+    nullAddress,
 } = require('./utils');
 
 const subAaveV3L2AutomationStrategy = async (
@@ -75,7 +78,33 @@ const updateAaveV3L2AutomationStrategy = async (
     return { firstSub: subId1, secondSub: subId2 };
 };
 
+const subAaveV3CloseBundle = async (
+    proxy,
+    bundleId,
+    triggerBaseAsset,
+    triggerQuoteAsset,
+    targetPrice,
+    priceState,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+) => {
+    const triggerData = defaultAbiCoder.encode(['address', 'address', 'uint256', 'uint8'], [triggerBaseAsset, triggerQuoteAsset, targetPrice, priceState]);
+
+    const strategySub = [bundleId, true, [triggerData], [
+        defaultAbiCoder.encode(['address'], [collAsset]),
+        defaultAbiCoder.encode(['uint16'], [collAssetId.toString()]),
+        defaultAbiCoder.encode(['address'], [debtAsset]),
+        defaultAbiCoder.encode(['uint16'], [debtAssetId.toString()]),
+        defaultAbiCoder.encode(['address'], [nullAddress]), // needed so we dont have to trust injection
+    ]];
+
+    return subToStrategy(proxy, strategySub);
+};
+
 module.exports = {
     subAaveV3L2AutomationStrategy,
     updateAaveV3L2AutomationStrategy,
+    subAaveV3CloseBundle,
 };

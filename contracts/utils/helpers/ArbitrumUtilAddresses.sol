@@ -8,6 +8,7 @@ contract ArbitrumUtilAddresses {
     address internal constant DEFAULT_BOT = 0x3b20F1394f4cf46c6f460Fd8D2799F88c23c37EA;
     address internal constant BOT_REGISTRY_ADDRESS = 0x75E2F915B37D49716365346b1E3E273Cb3E0cC33;
     address internal constant FEE_RECIPIENT = 0xe000e3c9428D539566259cCd89ed5fb85e655A01;
+    address internal constant AAVE_MARKET = 0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb;
 
 
     address internal constant UNI_V3_ROUTER = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
@@ -30,4 +31,5 @@ contract ArbitrumUtilAddresses {
     address internal constant STETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
     address internal constant CHAINLINK_FEED_REGISTRY = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
 }

@@ -55,7 +55,7 @@ contract SendToken is ActionBase {
     /// @notice Sends a token to the specified addr, works with Eth also
     /// @dev If amount is type(uint).max it will send proxy balance
     function _sendToken(address _tokenAddr, address _to, uint _amount) internal returns (uint) {
-        _tokenAddr.withdrawTokens(_to, _amount);
+        _amount = _tokenAddr.withdrawTokens(_to, _amount);
 
         return _amount;
     }
