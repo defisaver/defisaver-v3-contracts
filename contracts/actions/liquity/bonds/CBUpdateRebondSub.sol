@@ -15,11 +15,9 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
 
     /// @param subId Id of the sub we are changing (user must be owner)
     /// @param bondId Id of the chicken bond NFT we just created
-    /// @param previousBondId Id of the chicken bond NFT that was chickened In
     struct Params {
         uint256 subId;
         uint256 newBondId;
-        uint256 previousBondId;
     }
 
     /// @inheritdoc ActionBase
@@ -45,7 +43,7 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
             _returnValues
         );
 
-        updateRebondSub(params);
+        updateRebondSub(params, uint256(_subData[1]));
 
         return(bytes32(params.subId));
     }
@@ -53,7 +51,7 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
     function executeActionDirect(bytes memory _callData) public override payable {
         Params memory params = parseInputs(_callData);
 
-        updateRebondSub(params);
+        updateRebondSub(params, 0);
     }
 
     /// @inheritdoc ActionBase
@@ -63,10 +61,11 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function updateRebondSub(Params memory _params) internal {
-        if (_params.previousBondId != 0) {
+    function updateRebondSub(Params memory _params, uint256 previousBondId) internal {
+
+        if (previousBondId != 0) {
             StrategyModel.StoredSubData memory storedCBSubData = SubStorage(SUB_STORAGE_ADDR).getSub(_params.subId);
-            StrategyModel.StrategySub memory previousRebondSub = formatRebondSub(_params.subId, _params.previousBondId);
+            StrategyModel.StrategySub memory previousRebondSub = formatRebondSub(_params.subId, previousBondId);
             bytes32 cbSubDataHash = keccak256(abi.encode(previousRebondSub));
 
             // data sent from the caller must match the stored hash of the data
@@ -74,13 +73,14 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
                 revert SubDatHashMismatch(_params.subId, cbSubDataHash, storedCBSubData.strategySubHash);
             }
 
-            uint256 previousBondLUSDDeposited = CBManager.getBondData(_params.previousBondId).lusdAmount;
+            uint256 previousBondLUSDDeposited = CBManager.getBondData(previousBondId).lusdAmount;
             uint256 newBondLUSDDeposited = CBManager.getBondData(_params.newBondId).lusdAmount;
 
             if (newBondLUSDDeposited <= previousBondLUSDDeposited) {
                 revert ImpactTooHigh();
             }
         }
+
         StrategyModel.StrategySub memory newRebondSub = formatRebondSub(_params.subId, _params.newBondId);
 
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_params.subId, newRebondSub);
