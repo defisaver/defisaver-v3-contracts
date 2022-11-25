@@ -72,9 +72,9 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
                 revert ImpactTooHigh(previousBondLUSDDeposited, newBondLUSDDeposited);
             }
         }
-        StrategyModel.StrategySub memory newRebondSub = formatRebondSub(_params.subId, _params.bondId);
+        StrategyModel.StrategySub memory rebondSub = formatRebondSub(_params.subId, _params.bondId);
 
-        SubStorage(SUB_STORAGE_ADDR).updateSubData(_params.subId, newRebondSub);
+        SubStorage(SUB_STORAGE_ADDR).updateSubData(_params.subId, rebondSub);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
