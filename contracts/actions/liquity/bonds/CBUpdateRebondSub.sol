@@ -17,7 +17,7 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
     /// @param bondId Id of the chicken bond NFT we just created
     struct Params {
         uint256 subId;
-        uint256 newBondId;
+        uint256 bondId;
     }
 
     /// @inheritdoc ActionBase
@@ -36,8 +36,8 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
             _returnValues
         );
 
-        params.newBondId = _parseParamUint(
-            params.newBondId,
+        params.bondId = _parseParamUint(
+            params.bondId,
             _paramMapping[1],
             _subData,
             _returnValues
@@ -74,14 +74,14 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
             }
 
             uint256 previousBondLUSDDeposited = CBManager.getBondData(previousBondId).lusdAmount;
-            uint256 newBondLUSDDeposited = CBManager.getBondData(_params.newBondId).lusdAmount;
+            uint256 newBondLUSDDeposited = CBManager.getBondData(_params.bondId).lusdAmount;
 
             if (newBondLUSDDeposited <= previousBondLUSDDeposited) {
                 revert ImpactTooHigh();
             }
         }
 
-        StrategyModel.StrategySub memory newRebondSub = formatRebondSub(_params.subId, _params.newBondId);
+        StrategyModel.StrategySub memory newRebondSub = formatRebondSub(_params.subId, _params.bondId);
 
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_params.subId, newRebondSub);
     }
