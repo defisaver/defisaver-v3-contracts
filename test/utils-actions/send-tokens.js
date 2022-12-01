@@ -3,7 +3,7 @@ const {
 } = require('../utils');
 const { sendTokensTest } = require('./utils-actions-tests');
 
-describe('Send-Token', function () {
+describe('Send-Tokens-multiple-action', function () {
     this.timeout(80000);
 
     before(async () => {
