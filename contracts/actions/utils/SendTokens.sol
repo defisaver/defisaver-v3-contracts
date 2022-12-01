@@ -4,11 +4,14 @@ pragma solidity =0.8.10;
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 
-/// @title Helper action to send a token to the specified address
+/// @title Helper action to send tokens to the specified addresses
 contract SendTokens is ActionBase {
 
     using TokenUtils for address;
 
+    /// @param tokens list of tokens to send
+    /// @param receivers list of addresses that will receive corresponding tokens
+    /// @param amounts list of amounts of corresponding tokens that will be sent
     struct Params {
         address[] tokens;
         address[] receivers;
@@ -49,14 +52,12 @@ contract SendTokens is ActionBase {
 
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
-    
 
     /// @notice Sends tokens to the specified addresses, works with Eth also
     function _sendTokens(Params memory _inputData, uint256 arrayLength) internal {
         for (uint256 i = 0; i < arrayLength; i++){
             _inputData.tokens[i].withdrawTokens(_inputData.receivers[i], _inputData.amounts[i]);
         }
-
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params, uint256 arrayLength) {
