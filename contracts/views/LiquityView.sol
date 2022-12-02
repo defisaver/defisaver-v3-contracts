@@ -138,7 +138,7 @@ contract LiquityView is LiquityHelper {
         uint256 _debtAmount,
         uint256 _numTrials,
         uint256 _inputRandomSeed,
-        uint256 _troveOwner
+        address _troveOwner
     ) external view returns (address upperHint, address lowerHint) {
         uint256 NICR = _collAmount.mul(1e20).div(_debtAmount);
         (address hintAddress, , ) = HintHelpers.getApproxHint(NICR, _numTrials, _inputRandomSeed);
