@@ -331,14 +331,14 @@
     },
     {
         "name": "LiquityView",
-        "address": "0xd1913b977737c9505b8ecfedb8121546096d3393",
+        "address": "0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C",
         "id": "0xe23de5c6",
         "path": "contracts/views/LiquityView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xd1913b977737c9505b8ecfedb8121546096d3393"]
     },
     {
         "name": "ChickenBondsView",
