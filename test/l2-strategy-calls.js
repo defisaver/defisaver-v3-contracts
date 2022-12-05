@@ -32,11 +32,11 @@ const callAaveV3RepayL2Strategy = async (
     const triggerCallData = [];
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        ethAssetId,
         true, // useDefaultMarket
+        placeHolderAddr, // market
         repayAmount.toString(),
         placeHolderAddr,
-        placeHolderAddr, // market
+        ethAssetId,
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -170,11 +170,11 @@ const callAaveFLV3RepayL2Strategy = async (
     );
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        collAssetId,
         true, // useDefaultMarket
+        placeHolderAddr, // market
         0, // fl amount
         flAddr, // flAddr
-        placeHolderAddr, // market
+        collAssetId,
     );
 
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
@@ -266,14 +266,14 @@ const callAaveV3BoostL2Strategy = async (
     );
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        true, // hardcoded default market
+        placeHolderAddr, // hardcoded with a flag default market
         0, // amount hardcoded from fee taker
         placeHolderAddr, // proxy hardcoded
         collAddr, // is variable as it can change
         collAssetId, // must be variable
         true, // hardcoded always enable as coll
-        true, // hardcoded default market
         false, // hardcoded false use on behalf
-        placeHolderAddr, // hardcoded with a flag default market
         placeHolderAddr, // hardcoded onBehalf
     );
 
@@ -362,14 +362,14 @@ const callAaveFLV3BoostL2Strategy = async (
     );
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        true, // hardcoded default market
+        placeHolderAddr, // hardcoded with a flag default market
         0, // amount hardcoded from fee taker
         placeHolderAddr, // proxy hardcoded
         collAddr, // is variable as it can change
         collAssetId, // must be variable
         true, // hardcoded always enable as coll
-        true, // hardcoded default market
         false, // hardcoded false use on behalf
-        placeHolderAddr, // hardcoded with a flag default market
         placeHolderAddr, // hardcoded onBehalf
     );
 
@@ -447,11 +447,11 @@ const aaveV3CloseActionsEncoded = {
     )).encodeForRecipe()[0],
 
     withdrawAction: ({ withdrawAmount }) => (new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        '0',
         true,
+        nullAddress,
         withdrawAmount,
         placeHolderAddr,
-        nullAddress,
+        '0',
     )).encodeForRecipe()[0],
 
     // eslint-disable-next-line max-len
