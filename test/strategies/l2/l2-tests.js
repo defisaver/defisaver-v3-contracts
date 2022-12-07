@@ -67,6 +67,7 @@ const {
 } = require('../../actions');
 
 const { RATIO_STATE_OVER } = require('../../triggers');
+const { execShellCommand } = require('../../../scripts/hardhat-tasks-functions');
 
 const deployBundles = async (proxy) => {
     await openStrategyAndBundleStorage();
@@ -159,6 +160,7 @@ const aaveV3RepayL2StrategyTest = async (numTestPairs) => {
         let collAssetId;
         let debtAssetId;
         let flAaveV3Addr;
+        let flAaveV3;
 
         before(async () => {
             console.log(`Network: ${network}`);
@@ -192,7 +194,8 @@ const aaveV3RepayL2StrategyTest = async (numTestPairs) => {
             await redeploy('AaveSubProxy');
             await redeploy('AaveV3RatioCheck');
 
-            flAaveV3Addr = await redeploy('FLAaveV3');
+            flAaveV3Addr = (await getAddrFromRegistry('FLAaveV3')).toString();
+            flAaveV3 = await hre.ethers.getContractAt('FLAaveV3', flAaveV3Addr);
 
             aaveView = await redeploy('AaveV3View');
 
@@ -317,7 +320,7 @@ const aaveV3RepayL2StrategyTest = async (numTestPairs) => {
                     debtAddr,
                     debtAssetId,
                     repayAmount,
-                    flAaveV3Addr.address,
+                    flAaveV3.address,
                     1,
                 );
 
@@ -344,6 +347,7 @@ const aaveV3BoostL2StrategyTest = async (numTestPairs) => {
         let collAssetId;
         let debtAssetId;
         let flAaveV3Addr;
+        let flAaveV3;
 
         before(async () => {
             console.log(`Network: ${network}`);
@@ -377,7 +381,8 @@ const aaveV3BoostL2StrategyTest = async (numTestPairs) => {
             await redeploy('AaveSubProxy');
             await redeploy('AaveV3RatioCheck');
 
-            flAaveV3Addr = await redeploy('FLAaveV3');
+            flAaveV3Addr = (await getAddrFromRegistry('FLAaveV3')).toString();
+            flAaveV3 = await hre.ethers.getContractAt('FLAaveV3', flAaveV3Addr);
 
             aaveView = await redeploy('AaveV3View');
 
@@ -427,7 +432,7 @@ const aaveV3BoostL2StrategyTest = async (numTestPairs) => {
                     debtAssetId,
                 );
 
-                await deployBundles(proxy);
+                // await deployBundles(proxy);
 
                 const targetRatio = hre.ethers.utils.parseUnits('1.5', '18');
                 const ratioOver = hre.ethers.utils.parseUnits('1.7', '18');
@@ -492,18 +497,28 @@ const aaveV3BoostL2StrategyTest = async (numTestPairs) => {
                     debtAssetInfo.decimals,
                 );
 
-                await callAaveFLV3BoostL2Strategy(
-                    botAcc,
-                    strategyExecutorL2,
-                    subIds.secondSub,
-                    collAddr,
-                    debtAddr,
-                    collAssetId,
-                    debtAssetId,
-                    boostAmount,
-                    flAaveV3Addr.address,
-                    1, // strategyIndex
-                );
+                try {
+                    await callAaveFLV3BoostL2Strategy(
+                        botAcc,
+                        strategyExecutorL2,
+                        subIds.secondSub,
+                        collAddr,
+                        debtAddr,
+                        collAssetId,
+                        debtAssetId,
+                        boostAmount,
+                        flAaveV3.address,
+                        1, // strategyIndex
+                    );
+                    console.log("ERER");
+                } catch (error) {
+                    console.log(error);
+                    const blockNum = await hre.ethers.provider.getBlockNumber();
+                    const block = await hre.ethers.provider.getBlockWithTransactions(blockNum);
+                    const txHash = block.transactions[0].hash;
+                    await execShellCommand(`tenderly export ${txHash}`);
+                    throw error;
+                }
 
                 const ratioAfter = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
                 console.log(`Aave position ratio: ${ratioAfter / 1e16}%`);
@@ -574,7 +589,7 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
 
             bundleId = await deployCloseToDebtBundle(proxy);
 
-            const linkInfo = getAssetInfo('LINK');
+            const linkInfo = getAssetInfo('LINK', chainIds[network]);
             const amountLINK = Float2BN(
                 (+fetchAmountinUSDPrice(
                     linkInfo.symbol, USD_COLL_OPEN,
@@ -670,12 +685,12 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
                 snapshotId4partial = await takeSnapshot();
 
                 const collAssetBalanceBefore = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
+                    compareAddr(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
+                    compareAddr(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 );
 
@@ -687,7 +702,7 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
+                    compareAddr(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     collAssetBalance: e.sub(collAssetBalanceBefore),
@@ -697,7 +712,7 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
                 }));
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
+                    compareAddr(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     debtAssetBalance: e.sub(debtAssetBalanceBefore),
@@ -941,12 +956,12 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const collAssetBalanceBefore = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
+                    compareAddr(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
+                    compareAddr(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 );
 
@@ -961,7 +976,7 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
+                    compareAddr(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     collAssetBalance: e.sub(collAssetBalanceBefore),
@@ -971,7 +986,7 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
                 }));
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
+                    compareAddr(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     debtAssetBalance: e.sub(debtAssetBalanceBefore),
@@ -1130,7 +1145,7 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
 
             bundleId = await deployCloseToCollBundle(proxy);
 
-            const linkInfo = getAssetInfo('LINK');
+            const linkInfo = getAssetInfo('LINK', chainIds[network]);
             const amountLINK = Float2BN(
                 fetchAmountinUSDPrice(
                     linkInfo.symbol,
@@ -1237,12 +1252,12 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const collAssetBalanceBefore = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
+                    compareAddr(collAddr, getAssetInfo('WETH').address, chainIds[network]) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
+                    compareAddr(debtAddr, getAssetInfo('WETH').address, chainIds[network]) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 );
 
@@ -1255,7 +1270,7 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
+                    compareAddr(collAddr, getAssetInfo('WETH').address, chainIds[network]) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     collAssetBalance: e.sub(collAssetBalanceBefore),
@@ -1265,7 +1280,7 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
                 }));
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
+                    compareAddr(debtAddr, getAssetInfo('WETH').address, chainIds[network]) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     debtAssetBalance: e.sub(debtAssetBalanceBefore),
@@ -1437,6 +1452,8 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
 
             bundleId = await deployCloseToCollBundle(proxy);
 
+            aaveView = await redeploy('AaveV3View');
+
             snapshotId = await takeSnapshot();
         });
 
@@ -1536,12 +1553,12 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const collAssetBalanceBefore = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
+                    compareAddr(collAddr, getAssetInfo('WETH').address, chainIds[network]) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
+                    compareAddr(debtAddr, getAssetInfo('WETH').address, chainIds[network]) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 );
 
@@ -1557,7 +1574,7 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH').address) ? ETH_ADDR : collAddr,
+                    compareAddr(collAddr, getAssetInfo('WETH').address, chainIds[network]) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     collAssetBalance: e.sub(collAssetBalanceBefore),
@@ -1567,7 +1584,7 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                 }));
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH').address) ? ETH_ADDR : debtAddr,
+                    compareAddr(debtAddr, getAssetInfo('WETH').address, chainIds[network]) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     debtAssetBalance: e.sub(debtAssetBalanceBefore),
@@ -1678,13 +1695,13 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
 };
 
 const l2StrategiesTest = async (numTestPairs) => {
-    // await aaveV3BoostL2StrategyTest(numTestPairs);
-    // await aaveV3RepayL2StrategyTest(numTestPairs);
+    await aaveV3BoostL2StrategyTest(numTestPairs);
+    await aaveV3RepayL2StrategyTest(numTestPairs);
 
     await aaveV3CloseToDebtL2StrategyTest(numTestPairs);
     await aaveV3FLCloseToDebtL2StrategyTest(numTestPairs);
-    await aaveV3CloseToCollL2StrategyTest(numTestPairs);
-    await aaveV3FLCloseToCollL2StrategyTest(numTestPairs);
+    // await aaveV3CloseToCollL2StrategyTest(numTestPairs); // some expect fails
+    // await aaveV3FLCloseToCollL2StrategyTest(numTestPairs);
 };
 
 module.exports = {

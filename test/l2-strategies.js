@@ -81,8 +81,8 @@ const createAaveFLV3RepayL2Strategy = () => {
     aaveV3RepayL2Strategy.addTrigger(aaveV3Trigger);
 
     const flAction = new dfs.actions.flashloan.AaveV3FlashLoanAction(
-        ['%repayAmount'],
         ['%collAsset'],
+        ['%repayAmount'],
         ['%AAVE_NO_DEBT_MODE'],
         nullAddress,
     );
@@ -222,8 +222,8 @@ const createAaveFLV3BoostL2Strategy = () => {
     aaveV3BoostL2Strategy.addTrigger(aaveV3Trigger);
 
     const flAction = new dfs.actions.flashloan.AaveV3FlashLoanAction(
-        ['%repayAmount'],
         ['%collAsset'],
+        ['%repayAmount'],
         ['%AAVE_NO_DEBT_MODE'],
         nullAddress,
     );
@@ -287,8 +287,8 @@ const createAaveFLV3BoostL2Strategy = () => {
 
 const aaveV3CloseActions = {
     flAction: () => new dfs.actions.flashloan.AaveV3FlashLoanAction(
-        ['%repayAmount'], // cant pipe in FL actions :(
         ['%debtAsset'],
+        ['%repayAmount'], // cant pipe in FL actions :(
         ['%AAVE_NO_DEBT_MODE'],
         '%nullAddress',
     ),
