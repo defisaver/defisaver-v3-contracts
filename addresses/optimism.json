@@ -646,5 +646,16 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
-    }
+      },
+      {
+        "name": "ParaswapWrapper",
+        "address": "0xD90Ebd5E551d7451FA289b033755e74588230063",
+        "id": "0x115fa27e",
+        "path": "contracts/exchangeV3/offchainWrappersV3/ParaswapWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      }
   ]
