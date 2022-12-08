@@ -2407,6 +2407,19 @@ const createCompV3Position = async (
 
             process.exit(0);
         });
+    program
+        .command('redeploy <contractName>')
+        .description('Sets price in a mock chainlink oracle used on fork')
+        .action(async (contractName) => {
+            let network = 'mainnet';
+
+            if (process.env.TEST_CHAIN_ID) {
+                network = process.env.TEST_CHAIN_ID;
+            }
+            await redeploy(contractName.toString(), addrs[network].REGISTRY_ADDR, false, true);
+
+            process.exit(0);
+        });
 
     program.parse(process.argv);
 })();
