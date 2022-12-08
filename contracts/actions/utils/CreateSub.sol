@@ -9,7 +9,7 @@ import "../../core/strategy/SubStorage.sol";
 import "../../core/strategy/StrategyModel.sol";
 
 /// @title Action to create a new subscription
-contract UpdateSub is ActionBase, ProxyPermission{
+contract CreateSub is ActionBase, ProxyPermission{
 
     /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
     struct Params {
