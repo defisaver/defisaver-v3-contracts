@@ -113,7 +113,7 @@ contract AaveV3TrailingQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3R
 
         // compare if the max round ids of both assets are around the same time
         /// @dev The caller chooses which asset (base or quote) is the anchor around we are comparing
-        if (triggerCallData.quoteMaxRoundIdNext != 0) {
+        if (triggerCallData.quoteMaxRoundIdNext == 0) {
             (, uint256 baseMaxRoundIdNextTimestamp) = getRoundInfo(
                 triggerSubData.baseTokenAddr,
                 triggerCallData.baseMaxRoundIdNext,

@@ -225,8 +225,8 @@ const compBoostRecipeTest = async () => {
             const recipe = new dfs.Recipe('Compound FL Boost', [
             // Flashloan BAT
                 new dfs.actions.flashloan.AaveV2FlashLoanAction(
-                    [assetAmountInWei(debtAmount, debtAsset)],
                     [getAssetInfo(debtAsset).address],
+                    [assetAmountInWei(debtAmount, debtAsset)],
                     [0],
                     nullAddress,
                     nullAddress,

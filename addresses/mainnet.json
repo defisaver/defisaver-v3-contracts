@@ -34,7 +34,7 @@
     },
     {
         "name": "SubProxy",
-        "address": "0x29474FdaC7142f9aB7773B8e38264FA15E3805ed",
+        "address": "0xd18d4756bbf848674cc35f1a0b86afef20787382",
         "id": "0x15c87229",
         "path": "contracts/core/strategy/SubProxy.sol",
         "version": "1.0.0",
@@ -331,14 +331,14 @@
     },
     {
         "name": "LiquityView",
-        "address": "0xd1913b977737c9505b8ecfedb8121546096d3393",
+        "address": "0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C",
         "id": "0xe23de5c6",
         "path": "contracts/views/LiquityView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xd1913b977737c9505b8ecfedb8121546096d3393"]
     },
     {
         "name": "ChickenBondsView",
@@ -397,14 +397,14 @@
     },
     {
         "name": "CBUpdateRebondSub",
-        "address": "0x2709Fd59a27F35997dFf618E3C68ABA1c9e91465",
+        "address": "0x23789427ECCea5d1ED033D50694Eeb16cF79C4F8",
         "id": "0x291d78d0",
         "path": "contracts/actions/liquity/bonds/CBUpdateRebondSub.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x2709Fd59a27F35997dFf618E3C68ABA1c9e91465"]
     },
     {
         "name": "CBRebondTrigger",
@@ -732,14 +732,14 @@
     },
     {
         "name": "DFSSell",
-        "address": "0xB744474Bdd7226736ACa4Ba87593e32d8315e5c9",
+        "address": "0x951D7B421f45FF0e4A8ddE0288aE3f9C2C69b784",
         "id": "0x7f2a0f35",
         "path": "contracts/actions/exchange/DFSSell.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x1abDDCae131ce200e66140d9fBd0C37F7a40e642"]
+        "history": ["0x1abDDCae131ce200e66140d9fBd0C37F7a40e642", "0xB744474Bdd7226736ACa4Ba87593e32d8315e5c9"]
     },
     {
         "name": "McdGenerate",

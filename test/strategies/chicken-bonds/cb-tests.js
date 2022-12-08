@@ -6,7 +6,6 @@ const {
     getProxy,
     redeploy,
     redeployCore,
-    openStrategyAndBundleStorage,
     setBalance,
     timeTravel,
     setNewExchangeWrapper,
@@ -20,11 +19,7 @@ const {
 
 const { createChickenBond } = require('../../actions');
 
-const { createStrategy, addBotCaller } = require('../../utils-strategies');
-
-const {
-    createCbRebondStrategy,
-} = require('../../strategies');
+const { addBotCaller } = require('../../utils-strategies');
 
 const { callCbRebondStrategy } = require('../../strategy-calls');
 const { subCbRebondStrategy } = require('../../strategy-subs');
@@ -47,9 +42,14 @@ const cbRebondStrategyTest = async () => {
         let rebondTrigger;
         let lusdAmountWei;
         let newLusdAmount;
+        let smallBondId;
+        let smallBondSubId;
+        let smallBondStrategySub;
+
         const strategyId = '31';
 
         const lusdAmount = '50000';
+        const smallLusdAmount = '1000';
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -73,18 +73,27 @@ const cbRebondStrategyTest = async () => {
 
             await addBotCaller(botAcc.address);
 
+            lusdAmountWei = hre.ethers.utils.parseUnits(smallLusdAmount, 18);
+            await setBalance(LUSD_ADDR, senderAcc.address, lusdAmountWei);
+            await createChickenBond(proxy, lusdAmountWei, senderAcc.address);
+            let bonds = await chickenBondsView.getUsersBonds(proxy.address);
+            smallBondId = bonds[bonds.length - 1].bondID.toString();
+
             lusdAmountWei = hre.ethers.utils.parseUnits(lusdAmount, 18);
             await setBalance(LUSD_ADDR, senderAcc.address, lusdAmountWei);
 
             await createChickenBond(proxy, lusdAmountWei, senderAcc.address);
 
-            const bonds = await chickenBondsView.getUsersBonds(proxy.address);
+            bonds = await chickenBondsView.getUsersBonds(proxy.address);
             bondID = bonds[bonds.length - 1].bondID.toString();
         });
 
         it('... should make a Chicken Bond Rebond strategy and subscribe', async () => {
             // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subCbRebondStrategy(proxy, bondID, strategyId));
+            const smallBondObject = await subCbRebondStrategy(proxy, smallBondId, strategyId);
+            smallBondSubId = smallBondObject.subId;
+            smallBondStrategySub = smallBondObject.strategySub;
         });
 
         it('... should trigger a Chicken Bond rebond strategy', async () => {
@@ -129,6 +138,14 @@ const cbRebondStrategyTest = async () => {
 
             expect(bonds[bonds.length - 1].lusdAmount).to.be.gt(newLusdAmountWei);
             expect(+bondIDNew).to.be.eq(+bondID + 2);
+        });
+
+        it('... should trigger a Chicken Bond rebond strategy and fail because Price and Gas impact was too high', async () => {
+            const time = await getRebondTime(chickenBondsView, rebondTrigger, smallLusdAmount);
+
+            await timeTravel(time);
+
+            await expect(callCbRebondStrategy(botAcc, strategyExecutor, smallBondSubId, smallBondStrategySub)).to.be.reverted;
         });
     });
 };
