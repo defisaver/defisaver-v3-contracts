@@ -1,0 +1,56 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity =0.8.10;
+
+import "../ActionBase.sol";
+import "../../auth/ProxyPermission.sol";
+import "../../utils/TokenUtils.sol";
+import "../../core/strategy/SubStorage.sol";
+import "../../core/strategy/StrategyModel.sol";
+
+/// @title Action to create a new subscription
+contract UpdateSub is ActionBase, ProxyPermission{
+
+    /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
+    struct Params {
+        StrategyModel.StrategySub sub;
+    }
+
+    /// @inheritdoc ActionBase
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public virtual override payable returns (bytes32) {
+        Params memory inputData = parseInputs(_callData);
+
+        uint256 subId = updateSubData(inputData);
+
+        return(bytes32(subId));
+    }
+
+    function executeActionDirect(bytes memory _callData) public override payable {
+        Params memory inputData = parseInputs(_callData);
+
+        updateSubData(inputData);
+    }
+
+    /// @inheritdoc ActionBase
+    function actionType() public virtual override pure returns (uint8) {
+        return uint8(ActionType.STANDARD_ACTION);
+    }
+
+    //////////////////////////// ACTION LOGIC ////////////////////////////
+   
+    /// @notice Gives DSProxy permission if needed and registers a new sub
+    function updateSubData(Params memory _inputData) internal returns (uint256 subId) {
+        givePermission(PROXY_AUTH_ADDR);
+
+        subId = SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(_inputData.sub);
+    }
+
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
+    }
+}
