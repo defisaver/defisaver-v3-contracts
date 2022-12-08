@@ -1129,7 +1129,7 @@ const callReflexerFLBoostStrategy = async (botAcc, strategyExecutor, subId, stra
     const actionsCallData = [];
 
     const AAVE_NO_DEBT_MODE = 0;
-    const flAction = new dfs.actions.flashloan.AaveV2FlashLoanAction([boostAmount], [getAssetInfo('RAI').address], [AAVE_NO_DEBT_MODE], nullAddress);
+    const flAction = new dfs.actions.flashloan.AaveV2FlashLoanAction([getAssetInfo('RAI').address], [boostAmount], [AAVE_NO_DEBT_MODE], nullAddress);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(

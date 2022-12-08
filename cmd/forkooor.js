@@ -1220,8 +1220,8 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
 
     setNetwork(network);
 
-    const { address: collAddr, ...collAssetInfo } = getAssetInfo(collSymbol);
-    const { address: debtAddr, ...debtAssetInfo } = getAssetInfo(debtSymbol);
+    const { address: collAddr, ...collAssetInfo } = getAssetInfo(collSymbol, chainIds[network]);
+    const { address: debtAddr, ...debtAssetInfo } = getAssetInfo(debtSymbol, chainIds[network]);
 
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
