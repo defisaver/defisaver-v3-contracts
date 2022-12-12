@@ -19,11 +19,15 @@ contract CreateSub is ActionBase, ProxyPermission{
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
-        bytes32[] memory,
-        uint8[] memory,
-        bytes32[] memory
+        bytes32[] memory _subData,
+        uint8[] memory _paramMapping,
+        bytes32[] memory _returnValues
     ) public virtual override payable returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
+
+        for (uint256 i = 0; i < inputData.sub.subData.length; i++){
+            inputData.sub.subData[i] = _parseParamABytes32(inputData.sub.subData[i], _paramMapping[1+i], _subData, _returnValues);
+        }
 
         uint256 subId = updateSubData(inputData);
 
