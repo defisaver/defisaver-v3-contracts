@@ -515,10 +515,10 @@ const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState,
     if (parseInt(bundleId, 10) < 7) {
         await openStrategyAndBundleStorage(true);
         const liqInStrategyEncoded = createLiquityPaybackChickenInStrategy();
-        const liqOutFLStrategyEncoded = createLiquityPaybackChickenOutStrategy();
+        const liqOutStrategyEncoded = createLiquityPaybackChickenOutStrategy();
 
         const strategyId1 = await createStrategy(proxy, ...liqInStrategyEncoded, false);
-        const strategyId2 = await createStrategy(proxy, ...liqOutFLStrategyEncoded, false);
+        const strategyId2 = await createStrategy(proxy, ...liqOutStrategyEncoded, false);
 
         bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
         console.log(`Bundle Id is ${bundleId} and should be 7`);
