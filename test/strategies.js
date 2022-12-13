@@ -1877,7 +1877,7 @@ const createLiquityPaybackChickenInStrategy = () => {
 };
 
 const createLiquityPaybackChickenOutStrategy = () => {
-    const strategy = new dfs.Strategy('LiquityPaybackChickenInStrategy');
+    const strategy = new dfs.Strategy('LiquityPaybackChickenOutStrategy');
     strategy.addSubSlot('&paybackSourceId', 'uint256');
     strategy.addSubSlot('&paybackSourceType', 'uint256');
     strategy.addSubSlot('&LUSD', 'address');

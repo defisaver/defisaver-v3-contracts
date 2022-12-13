@@ -29,7 +29,7 @@ contract CreateSub is ActionBase, ProxyPermission{
             inputData.sub.subData[i] = _parseParamABytes32(inputData.sub.subData[i], _paramMapping[i], _subData, _returnValues);
         }
 
-        uint256 subId = updateSubData(inputData);
+        uint256 subId = createSub(inputData);
 
         return(bytes32(subId));
     }
@@ -37,7 +37,7 @@ contract CreateSub is ActionBase, ProxyPermission{
     function executeActionDirect(bytes memory _callData) public override payable {
         Params memory inputData = parseInputs(_callData);
 
-        updateSubData(inputData);
+        createSub(inputData);
     }
 
     /// @inheritdoc ActionBase
@@ -48,7 +48,7 @@ contract CreateSub is ActionBase, ProxyPermission{
     //////////////////////////// ACTION LOGIC ////////////////////////////
    
     /// @notice Gives DSProxy permission if needed and registers a new sub
-    function updateSubData(Params memory _inputData) internal returns (uint256 subId) {
+    function createSub(Params memory _inputData) internal returns (uint256 subId) {
         givePermission(PROXY_AUTH_ADDR);
 
         subId = SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(_inputData.sub);
