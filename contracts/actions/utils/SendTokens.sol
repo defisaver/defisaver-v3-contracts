@@ -27,10 +27,12 @@ contract SendTokens is ActionBase {
     ) public virtual payable override returns (bytes32) {
         (Params memory inputData, uint256 arrayLength) = parseInputs(_callData);
         
-        for (uint256 i = 0; i < arrayLength; i++){
+        for (uint256 i = 0; i < arrayLength;) {
             inputData.tokens[i] = _parseParamAddr(inputData.tokens[i], _paramMapping[i], _subData, _returnValues);
             inputData.receivers[i] = _parseParamAddr(inputData.receivers[i], _paramMapping[arrayLength + i], _subData, _returnValues);
             inputData.amounts[i] = _parseParamUint(inputData.amounts[i], _paramMapping[2 * arrayLength + i], _subData, _returnValues);
+
+            unchecked { ++i; }
         }
 
         _sendTokens(inputData, arrayLength);
@@ -55,8 +57,10 @@ contract SendTokens is ActionBase {
 
     /// @notice Sends tokens to the specified addresses, works with Eth also
     function _sendTokens(Params memory _inputData, uint256 arrayLength) internal {
-        for (uint256 i = 0; i < arrayLength; i++){
+        for (uint256 i = 0; i < arrayLength;) {
             _inputData.tokens[i].withdrawTokens(_inputData.receivers[i], _inputData.amounts[i]);
+
+            unchecked { ++i; }
         }
     }
 
