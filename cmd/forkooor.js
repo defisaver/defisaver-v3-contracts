@@ -105,6 +105,8 @@ const {
     createCompV3EOAFlBoostStrategy,
     createCompV3EOARepayStrategy,
     createFlCompV3EOARepayStrategy,
+    createLiquityPaybackChickenInStrategy,
+    createLiquityPaybackChickenOutStrategy,
 } = require('../test/strategies');
 
 const {
@@ -117,6 +119,7 @@ const {
     subLiquityTrailingCloseToCollStrategy,
     subCompV3AutomationStrategy,
     subCbRebondStrategy,
+    subLiquityCBPaybackStrategy,
 } = require('../test/strategy-subs');
 
 const { getTroveInfo } = require('../test/utils-liquity');
@@ -475,6 +478,59 @@ const cbRebondSub = async (bondId, sender) => {
 
     // eslint-disable-next-line no-unused-vars
     const { subId, strategySub } = await subCbRebondStrategy(proxy, bondId, strategyId);
+
+    console.log(`Sub created #${subId}!`);
+};
+
+const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+    await redeploy('FetchBondId', REGISTRY_ADDR, false, true);
+    await redeploy('LiquityPayback', REGISTRY_ADDR, false, true);
+    await redeploy('CBCreateRebondSub', REGISTRY_ADDR, false, true);
+    let bundleId = await getLatestBundleId();
+
+    console.log(parseInt(bundleId, 10));
+    let formattedPriceState;
+
+    if (triggerState.toLowerCase() === 'over') {
+        formattedPriceState = 0;
+    } else if (triggerState.toLowerCase() === 'under') {
+        formattedPriceState = 1;
+    }
+    let formattedSourceType;
+    if (sourceType.toLowerCase() === 'bond') {
+        formattedSourceType = 0;
+    } else if (sourceType.toLowerCase() === 'sub') {
+        formattedSourceType = 1;
+    }
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    if (parseInt(bundleId, 10) < 7) {
+        await openStrategyAndBundleStorage(true);
+        const liqInStrategyEncoded = createLiquityPaybackChickenInStrategy();
+        const liqOutStrategyEncoded = createLiquityPaybackChickenOutStrategy();
+
+        const strategyId1 = await createStrategy(proxy, ...liqInStrategyEncoded, false);
+        const strategyId2 = await createStrategy(proxy, ...liqOutStrategyEncoded, false);
+
+        bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+        console.log(`Bundle Id is ${bundleId} and should be 7`);
+        console.log('Chicken in strat - 0, Chicken out strat - 1');
+    }
+
+    bundleId = '7';
+    const targetRatioWei = hre.ethers.utils.parseUnits(triggerRatio, '16');
+
+    const { subId } = await subLiquityCBPaybackStrategy(
+        proxy, bundleId, sourceId, formattedSourceType, targetRatioWei, formattedPriceState,
+    );
 
     console.log(`Sub created #${subId}!`);
 };
@@ -1992,6 +2048,20 @@ const createCompV3Position = async (
         });
 
     program
+        .command('sub-liquity-cb-payback <sourceId> <sourceType> <triggerRatio> <triggerState> [senderAddr]')
+        .description('Subscribes a bond to the rebonding strategy')
+        .action(async (sourceId, sourceType, triggerRatio, triggerState, senderAddr) => {
+            // sourceId : Id of the bond or of strategy sub
+            // sourceType : bond / sub
+            // triggerRatio should be [110 - 1000] (in that format)
+            // triggerState : over/under
+            // When executing strategy from bundle, ChickenIn strategy index is 0, ChickenOut is 1
+            // eslint-disable-next-line max-len
+            await liqCBPaybackSub(sourceId, sourceType, triggerRatio, triggerState, senderAddr);
+            process.exit(0);
+        });
+
+    program
         .command('sub-mcd-trailing-close-to-coll <vaultId> <type> <percentage> [senderAddr]')
         .description('Subscribes to a Trailing Mcd close to coll strategy')
         .action(async (vaultId, type, percentage, senderAddr) => {
@@ -2334,6 +2404,19 @@ const createCompV3Position = async (
         .description('Sets price in a mock chainlink oracle used on fork')
         .action(async (tokenLabel, priceId) => {
             await setMockChainlinkPrice(tokenLabel, priceId);
+
+            process.exit(0);
+        });
+    program
+        .command('redeploy <contractName>')
+        .description('Sets price in a mock chainlink oracle used on fork')
+        .action(async (contractName) => {
+            let network = 'mainnet';
+
+            if (process.env.TEST_CHAIN_ID) {
+                network = process.env.TEST_CHAIN_ID;
+            }
+            await redeploy(contractName.toString(), addrs[network].REGISTRY_ADDR, false, true);
 
             process.exit(0);
         });

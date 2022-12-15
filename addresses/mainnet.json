@@ -374,6 +374,17 @@
         "history": []
     },
     {
+        "name": "CreateSub",
+        "address": "0x7308e88BB21B934478E75bB6A2143b8cfDFf2961",
+        "id": "0xf41e543f",
+        "path": "contracts/actions/utils/CreateSub.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CBCreate",
         "address": "0xAB38eCb27aBc1d75cb83725a4c408C22F426A1c1",
         "id": "0xb5b50f23",
@@ -405,6 +416,17 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": ["0x2709Fd59a27F35997dFf618E3C68ABA1c9e91465"]
+    },
+    {
+        "name": "CBCreateRebondSub",
+        "address": "0xe4bD188cc2e2787518D6762F22E5afe5A21b30E4",
+        "id": "0xa6fede6f",
+        "path": "contracts/actions/liquity/bonds/CBCreateRebondSub.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     },
     {
         "name": "CBRebondTrigger",
@@ -1182,6 +1204,17 @@
         "history": []
     },
     {
+        "name": "FetchBondId",
+        "address": "0xA3331A6aE1BC901b8136E6Fe622890B3Fa3dC80e",
+        "id": "0x60481c98",
+        "path": "/contracts/actions/liquity/bonds/FetchBondId.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "LiquityClose",
         "address": "0x4B2d174129789a88e92D46342201F207132144b7",
         "id": "0xfaf0f6a9",
@@ -1216,14 +1249,14 @@
     },
     {
         "name": "LiquityPayback",
-        "address": "0x8fc7D24414e9740ed9841d9205D458e3677e71f7",
+        "address": "0xe686Fd57D93Ee713Ba974bC5540FF740fb6DB94F",
         "id": "0x0761723e",
         "path": "contracts/actions/liquity/trove/LiquityPayback.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x8fc7D24414e9740ed9841d9205D458e3677e71f7"]
     },
     {
         "name": "LiquityWithdraw",
@@ -1625,14 +1658,14 @@
     },
     {
         "name": "UpdateSub",
-        "address": "0x94D707f411B852082a5ce49C3f47c49c7757761f",
+        "address": "0xF6Cb8f7e61a64075ec8FAC3f298745605E543233",
         "id": "0xa985d903",
         "path": "contracts/actions/utils/UpdateSub.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x94D707f411B852082a5ce49C3f47c49c7757761f"]
     },
     {
         "name": "ConvexClaim",
