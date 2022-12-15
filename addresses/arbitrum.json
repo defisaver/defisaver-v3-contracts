@@ -264,6 +264,17 @@
       "history": ["0xb022BaFfcEdc0ceA15aF6B2B744795A12D21F2a9"]
     },
     {
+      "name": "SendTokens",
+      "address": "0x20D23C724A9A9d8195d67fba2A7789E9A9683228",
+      "id": "0xa87d9d0e",
+      "path": "contracts/actions/utils/SendTokens.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "AaveV3Supply",
       "address": "0xF159c79077001E2a2C1a178BE68DB7F69a6Da486",
       "id": "0xfc33bf00",

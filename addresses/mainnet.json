@@ -676,6 +676,17 @@
         "history": ["0x5612e490c9549486dF16b34EBfD0E8b6cF6a1717"]
     },
     {
+        "name": "SendTokens",
+        "address": "0x228857fBDdc79e3AE298076C4568189eA32a22cB",
+        "id": "0xa87d9d0e",
+        "path": "contracts/actions/utils/SendTokens.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "SumInputs",
         "address": "0x70907d840aBBc984Fd949311d2f005e6aC4a4D7a",
         "id": "0xb49404ac",
