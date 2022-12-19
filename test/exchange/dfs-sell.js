@@ -1,4 +1,4 @@
-const { dfsSellTest } = require('./exchange-tests');
+const { dfsSellTest, dfsSellSameAssetTest } = require('./exchange-tests');
 
 // TODO: check stuff like price and slippage
 // TODO: can we make it work with 0x?
@@ -8,5 +8,6 @@ describe('Dfs-Sell', function () {
 
     it('... should check best price from DFSPrices contract', async () => {
         await dfsSellTest();
+        dfsSellSameAssetTest();
     });
 });

@@ -19,8 +19,8 @@ contract FetchBondId is ActionBase, CBHelper {
     }
 
     /// @param paybackSourceId Id of the payback source, can be either bondId or rebond strat subId
-    /// @param sourceType number indicating if sourceId refers to a bondId or subId
-    /// @param cbRebondBondId Id of the current bond in the Rebond sub (only used if paybackSourceId is of a sub, otherwise 0)
+    /// @param sourceType if paybackSourceId refers to a bondId or subId
+    /// @param cbRebondBondId Id of the current bond in the Rebond sub (only used if sourceType is SUB, otherwise 0)
     struct Params {
         uint256 paybackSourceId;
         uint256 sourceType;
@@ -65,6 +65,8 @@ contract FetchBondId is ActionBase, CBHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @dev depending on sourceType passed from users subData fetch BondId and return it
+    /// @notice _params.cbRebondBondId is sent externally so we can hash the sub object and compare it with what's stored in onchain storage
+    /// @notice if sourceType is SUB, we deactivate the rebond strategy
     function getBondId(Params memory _params) internal returns (uint256) {
         if (SourceType(_params.sourceType) == SourceType.BOND){
             return _params.paybackSourceId;

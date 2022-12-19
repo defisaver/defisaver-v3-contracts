@@ -9,4 +9,6 @@ contract ArbitrumActionsUtilAddresses {
 
     address internal constant REGISTRY_ADDR = 0xBF1CaC12DB60819Bfa71A328282ecbc1D40443aA;
     address internal constant DFS_LOGGER_ADDR = 0xE6f9A5C850dbcD12bc64f40d692F537250aDEC38;
+    address internal constant PROXY_AUTH_ADDR = 0xF3A8479538319756e100C386b3E60BF783680d8f;
+
 }

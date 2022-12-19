@@ -486,6 +486,7 @@ const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState,
     let senderAcc = (await hre.ethers.getSigners())[0];
     await redeploy('FetchBondId', REGISTRY_ADDR, false, true);
     await redeploy('LiquityPayback', REGISTRY_ADDR, false, true);
+    await redeploy('CBCreateRebondSub', REGISTRY_ADDR, false, true);
     let bundleId = await getLatestBundleId();
 
     console.log(parseInt(bundleId, 10));
@@ -514,10 +515,10 @@ const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState,
     if (parseInt(bundleId, 10) < 7) {
         await openStrategyAndBundleStorage(true);
         const liqInStrategyEncoded = createLiquityPaybackChickenInStrategy();
-        const liqOutFLStrategyEncoded = createLiquityPaybackChickenOutStrategy();
+        const liqOutStrategyEncoded = createLiquityPaybackChickenOutStrategy();
 
         const strategyId1 = await createStrategy(proxy, ...liqInStrategyEncoded, false);
-        const strategyId2 = await createStrategy(proxy, ...liqOutFLStrategyEncoded, false);
+        const strategyId2 = await createStrategy(proxy, ...liqOutStrategyEncoded, false);
 
         bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
         console.log(`Bundle Id is ${bundleId} and should be 7`);
@@ -834,7 +835,7 @@ const deactivateSub = async (subId, sender) => {
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
+    const subProxyAddr = '0xd18d4756bbf848674cc35f1a0b86afef20787382';
     const subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
 
     const subStorageAddr = await getAddrFromRegistry('SubStorage', REGISTRY_ADDR);
@@ -2416,6 +2417,19 @@ const createCompV3Position = async (
         .description('Sets price in a mock chainlink oracle used on fork')
         .action(async (tokenLabel, priceId) => {
             await setMockChainlinkPrice(tokenLabel, priceId);
+
+            process.exit(0);
+        });
+    program
+        .command('redeploy <contractName>')
+        .description('Sets price in a mock chainlink oracle used on fork')
+        .action(async (contractName) => {
+            let network = 'mainnet';
+
+            if (process.env.TEST_CHAIN_ID) {
+                network = process.env.TEST_CHAIN_ID;
+            }
+            await redeploy(contractName.toString(), addrs[network].REGISTRY_ADDR, false, true);
 
             process.exit(0);
         });

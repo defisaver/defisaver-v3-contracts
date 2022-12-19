@@ -176,8 +176,8 @@ describe('CompoundV3 Boost recipe test', function () {
             );
 
             const flAaveV2Action = new dfs.actions.flashloan.AaveV2FlashLoanAction(
-                assetAmountInWei(boostAmount, 'USDC'),
                 [fromToken],
+                assetAmountInWei(boostAmount, 'USDC'),
                 [0],
                 nullAddress,
                 nullAddress,

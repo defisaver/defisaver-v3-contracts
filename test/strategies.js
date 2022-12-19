@@ -565,7 +565,7 @@ const createReflexerFLBoostStrategy = () => {
     const reflexerRatioTrigger = new dfs.triggers.ReflexerRatioTrigger('0', '0', '0');
     reflexerFLBoostStrategy.addTrigger(reflexerRatioTrigger);
 
-    const flAction = new dfs.actions.flashloan.AaveV2FlashLoanAction(['%boostAmount'], ['%raiAddr'], ['%AAVE_NO_DEBT_MODE'], nullAddress);
+    const flAction = new dfs.actions.flashloan.AaveV2FlashLoanAction(['%raiAddr'], ['%boostAmount'], ['%AAVE_NO_DEBT_MODE'], nullAddress);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -1877,7 +1877,7 @@ const createLiquityPaybackChickenInStrategy = () => {
 };
 
 const createLiquityPaybackChickenOutStrategy = () => {
-    const strategy = new dfs.Strategy('LiquityPaybackChickenInStrategy');
+    const strategy = new dfs.Strategy('LiquityPaybackChickenOutStrategy');
     strategy.addSubSlot('&paybackSourceId', 'uint256');
     strategy.addSubSlot('&paybackSourceType', 'uint256');
     strategy.addSubSlot('&LUSD', 'address');

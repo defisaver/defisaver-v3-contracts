@@ -880,8 +880,8 @@ const mcdRepayTest = async () => {
                 );
 
                 const flAaveV2Action = new dfs.actions.flashloan.AaveV2FlashLoanAction(
-                    [flAmount],
                     [collToken],
+                    [flAmount],
                     [0],
                     nullAddress,
                     nullAddress,

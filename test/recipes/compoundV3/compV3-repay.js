@@ -166,8 +166,8 @@ describe('CompoundV3 Repay recipe test', function () {
             );
 
             const flAaveV2Action = new dfs.actions.flashloan.AaveV2FlashLoanAction(
-                [flAmount],
                 [collToken],
+                [flAmount],
                 [0],
                 nullAddress,
                 nullAddress,

@@ -177,14 +177,14 @@
     },
     {
       "name": "AaveV3TrailingQuotePriceTrigger",
-      "address": "0x3471c7bAcB3470E7a2FAA1D4A64c6805c665d903",
+      "address": "0x40C62c354e47ba5e30C2B2Afe6920A93f9EbAA0F",
       "id": "0x0e31244d",
       "path": "contracts/triggers/AaveV3TrailingQuotePriceTrigger.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0x3471c7bAcB3470E7a2FAA1D4A64c6805c665d903"]
     },
     {
         "name": "ERC20View",
@@ -221,14 +221,14 @@
       },
     {
       "name": "DFSSell",
-      "address": "0x49E1574Ba6b8134c29B1EbC010784A01D91b794F",
+      "address": "0x9109F34AB28D369cF894aF45C50E976B8E312a82",
       "id": "0x7f2a0f35",
       "path": "contracts/actions/exchange/DFSSell.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0x49E1574Ba6b8134c29B1EbC010784A01D91b794F"]
     },
     {
       "name": "WrapEth",

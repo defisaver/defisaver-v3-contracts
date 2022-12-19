@@ -133,6 +133,21 @@ contract LiquityView is LiquityHelper {
         (upperHint, lowerHint) = SortedTroves.findInsertPosition(NICR, hintAddress, hintAddress);
     }
 
+    function getInsertPositionForTrove(
+        uint256 _collAmount,
+        uint256 _debtAmount,
+        uint256 _numTrials,
+        uint256 _inputRandomSeed,
+        address _troveOwner
+    ) external view returns (address upperHint, address lowerHint) {
+        uint256 NICR = _collAmount.mul(1e20).div(_debtAmount);
+        (address hintAddress, , ) = HintHelpers.getApproxHint(NICR, _numTrials, _inputRandomSeed);
+        (upperHint, lowerHint) = SortedTroves.findInsertPosition(NICR, hintAddress, hintAddress);
+
+        if (upperHint == _troveOwner) upperHint = SortedTroves.getPrev(_troveOwner);
+        if (lowerHint == _troveOwner) lowerHint = SortedTroves.getNext(_troveOwner);
+    }
+
     function getRedemptionHints(
         uint _LUSDamount, 
         uint _price,

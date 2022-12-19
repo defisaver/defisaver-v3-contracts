@@ -301,7 +301,7 @@ const liquityCBPaybackTest = async () => {
         let lowerHintFull;
         let upperHintHalf;
         let lowerHintHalf;
-        const ratioUnder = Float2BN('1.8');
+        const ratioUnder = Float2BN('3');
         const maxFeePercentage = Float2BN('5', 16);
         const lusdDebt = '10000';
         const lusdDebtHalf = (lusdDebt / 2).toString();
