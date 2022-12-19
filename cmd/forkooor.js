@@ -1067,20 +1067,33 @@ const getCdp = async (cdpId, type) => {
     }
 };
 
-const getTrove = async (acc) => {
-    if (!acc) {
-        const senderAcc = (await hre.ethers.getSigners())[0];
+const getTrove = async (sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
 
-        const proxy = await getProxy(senderAcc.address);
-        // eslint-disable-next-line no-param-reassign
-        acc = proxy.address;
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
     }
 
-    await redeploy('LiquityView');
-    const proxy = await getProxy(acc);
+    await topUp(senderAcc.address);
 
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    await redeploy('LiquityView', addrs[network].REGISTRY_ADDR, false, true);
+    const proxy = await getProxy(sender);
     const troveInfo = await getTroveInfo(proxy.address);
-
     console.log(`Coll amount ${troveInfo.collAmount / 1e18}`);
     console.log(`Debt amount ${troveInfo.debtAmount / 1e18}`);
 };
@@ -1275,8 +1288,8 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
 
     setNetwork(network);
 
-    const { address: collAddr, ...collAssetInfo } = getAssetInfo(collSymbol);
-    const { address: debtAddr, ...debtAssetInfo } = getAssetInfo(debtSymbol);
+    const { address: collAddr, ...collAssetInfo } = getAssetInfo(collSymbol, chainIds[network]);
+    const { address: debtAddr, ...debtAssetInfo } = getAssetInfo(debtSymbol, chainIds[network]);
 
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;

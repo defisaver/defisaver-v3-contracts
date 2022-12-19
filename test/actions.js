@@ -1890,7 +1890,7 @@ const aaveV3Supply = async (
     const aaveSupplyAddr = await getAddrFromRegistry('AaveV3Supply');
 
     const aaveSupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-        amount.toString(), from, tokenAddr, assetId, true, true, false, nullAddress, nullAddress,
+        true, nullAddress, amount.toString(), from, tokenAddr, assetId, true, false, nullAddress,
     );
 
     await approve(tokenAddr, proxy.address, signer);
