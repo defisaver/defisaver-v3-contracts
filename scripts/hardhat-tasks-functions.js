@@ -293,6 +293,8 @@ async function encryptPrivateKey() {
 
 async function changeNetworkNameForAddresses(oldNetworkName, newNetworkName) {
     files = getAllFiles('./contracts');
+    oldNetworkName = oldNetworkName.charAt(0).toUpperCase() + oldNetworkName.slice(1)
+    newNetworkName = newNetworkName.charAt(0).toUpperCase() + newNetworkName.slice(1)
     files.map(async (file) => {
         const helperRegex = 'Helper(.*)sol';
         if (file.toString().match(helperRegex)) {
