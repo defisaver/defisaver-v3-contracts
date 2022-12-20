@@ -1963,6 +1963,7 @@ const createCompV3Position = async (
             console.log(`Fork id: ${forkId}   |   Rpc url https://rpc.tenderly.co/fork/${forkId}`);
             console.log('chainlink oracle', MOCK_CHAINLINK_ORACLE);
             console.log('blockNumber', currentBlockNum.toString());
+            console.log(`*Command to copy*: make fork-automation-delete-db rpc=https://rpc.tenderly.co/fork/${forkId} env=dev block=${currentBlockNum.toString()} net=${network} publickey=asd`)
             if (options.bots.length > 0) {
                 // setting this so we can do topUp and addBotCaller from this script
                 for (let i = 0; i < options.bots.length; i++) {
