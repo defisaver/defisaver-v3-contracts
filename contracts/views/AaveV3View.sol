@@ -321,7 +321,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         }
     }
 
-    function getLtv(DataTypes.ReserveConfigurationMap memory self) public view returns (uint256) {
+    function getLtv(DataTypes.ReserveConfigurationMap memory self) public pure returns (uint256) {
         return self.data & ~LTV_MASK;
     }
 

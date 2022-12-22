@@ -37,15 +37,15 @@ contract AaveV3Helper is OptimismAaveV3Addresses {
         return x != bytes1(0x00);
     }
     
-    function getWholeDebt(address _market, address _tokenAddr, uint _borrowType, address _debtOwner) internal view returns (uint256) {
+    function getWholeDebt(address _market, address _tokenAddr, uint _borrowType, address _debtOwner) internal view returns (uint256 debt) {
         IAaveProtocolDataProvider dataProvider = getDataProvider(_market);
         (, uint256 borrowsStable, uint256 borrowsVariable, , , , , , ) =
             dataProvider.getUserReserveData(_tokenAddr, _debtOwner);
 
         if (_borrowType == STABLE_ID) {
-            return borrowsStable;
+            debt = borrowsStable;
         } else if (_borrowType == VARIABLE_ID) {
-            return borrowsVariable;
+            debt = borrowsVariable;
         }
     }
 }
