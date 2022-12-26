@@ -3,15 +3,16 @@
 pragma solidity =0.8.10;
 
 import "../ActionBase.sol";
+import "../../auth/ProxyPermission.sol";
 import "../../utils/TokenUtils.sol";
 import "../../core/strategy/SubStorage.sol";
 import "../../core/strategy/StrategyModel.sol";
 
-/// @title Updates users sub information on SubStorage contract
-/// @dev user can only change his own subscriptions
-contract UpdateSub is ActionBase {
+/// @title Action to create a new subscription
+contract CreateSub is ActionBase, ProxyPermission{
+
+    /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
     struct Params {
-        uint256 subId;
         StrategyModel.StrategySub sub;
     }
 
@@ -24,21 +25,19 @@ contract UpdateSub is ActionBase {
     ) public virtual override payable returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.subId = _parseParamUint(inputData.subId, _paramMapping[0], _subData, _returnValues);
-
         for (uint256 i = 0; i < inputData.sub.subData.length; i++){
-            inputData.sub.subData[i] = _parseParamABytes32(inputData.sub.subData[i], _paramMapping[1+i], _subData, _returnValues);
+            inputData.sub.subData[i] = _parseParamABytes32(inputData.sub.subData[i], _paramMapping[i], _subData, _returnValues);
         }
 
-        updateSubData(inputData);
+        uint256 subId = createSub(inputData);
 
-        return(bytes32(inputData.subId));
+        return(bytes32(subId));
     }
 
     function executeActionDirect(bytes memory _callData) public override payable {
         Params memory inputData = parseInputs(_callData);
 
-        updateSubData(inputData);
+        createSub(inputData);
     }
 
     /// @inheritdoc ActionBase
@@ -47,9 +46,12 @@ contract UpdateSub is ActionBase {
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
+   
+    /// @notice Gives DSProxy permission if needed and registers a new sub
+    function createSub(Params memory _inputData) internal returns (uint256 subId) {
+        givePermission(PROXY_AUTH_ADDR);
 
-    function updateSubData(Params memory _inputData) internal {
-        SubStorage(SUB_STORAGE_ADDR).updateSubData(_inputData.subId, _inputData.sub);
+        subId = SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(_inputData.sub);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

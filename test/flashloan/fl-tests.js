@@ -78,8 +78,8 @@ const aaveFlTest = async (generalisedFLFlag) => {
 
                 await approve(assetInfo.address, proxy.address);
                 let flAction = new dfs.actions.flashloan.AaveV2FlashLoanAction(
-                    [loanAmount],
                     [assetInfo.address],
+                    [loanAmount],
                     [AAVE_NO_DEBT_MODE],
                     nullAddress,
                     nullAddress,
@@ -171,8 +171,8 @@ const aaveV3FlTest = async (generalisedFLFlag) => {
 
                 await approve(assetInfo.address, proxy.address);
                 let flAction = new dfs.actions.flashloan.AaveV3FlashLoanAction(
-                    [loanAmount],
                     [assetInfo.address],
+                    [loanAmount],
                     [AAVE_NO_DEBT_MODE],
                     nullAddress,
                     nullAddress,

@@ -1260,7 +1260,7 @@ const callReflexerFLBoostStrategy = async (botAcc, strategyExecutor, subId, stra
     const actionsCallData = [];
 
     const AAVE_NO_DEBT_MODE = 0;
-    const flAction = new dfs.actions.flashloan.AaveV2FlashLoanAction([boostAmount], [getAssetInfo('RAI').address], [AAVE_NO_DEBT_MODE], nullAddress);
+    const flAction = new dfs.actions.flashloan.AaveV2FlashLoanAction([getAssetInfo('RAI').address], [boostAmount], [AAVE_NO_DEBT_MODE], nullAddress);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -1893,6 +1893,143 @@ const callCbRebondStrategy = async (
     );
 };
 
+const callLiquityPaybackChickenOutStrategy = async (
+    botAcc,
+    strategyExecutor,
+    subId,
+    strategySub,
+    bondIdIfRebondSub,
+    lusdDepositedInBond,
+    upperHint,
+    lowerHint,
+) => {
+    const actionsCallData = [];
+    const fetchBondIdAction = new dfs.actions.chickenBonds.FetchBondIdAction(
+        '0',
+        '0',
+        bondIdIfRebondSub,
+    );
+    const cbChickenOutAction = new dfs.actions.chickenBonds.CBChickenOutAction(
+        '0',
+        lusdDepositedInBond, // sent from backend to support emergency repayments, but should default to bond.lusdAmountDeposited almost always
+        placeHolderAddr,
+    );
+    const gasCost = 1_000_000;
+    const feeAction = new dfs.actions.basic.GasFeeAction(
+        gasCost, placeHolderAddr, '0',
+    );
+    const paybackAction = new dfs.actions.liquity.LiquityPaybackAction(
+        hre.ethers.constants.MaxUint256, placeHolderAddr, upperHint, lowerHint,
+    );
+    const sendTokenAction = new dfs.actions.basic.SendTokenAction(
+        placeHolderAddr, placeHolderAddr, hre.ethers.constants.MaxUint256,
+    );
+
+    actionsCallData.push(fetchBondIdAction.encodeForRecipe()[0]);
+    actionsCallData.push(cbChickenOutAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(sendTokenAction.encodeForRecipe()[0]);
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    const strategyIndex = 1;
+    const triggerCallData = [];
+
+    triggerCallData.push(abiCoder.encode(['address', 'uint256', 'uint8'], [nullAddress, '0', '0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(
+        `GasUsed callLiquityPaybackChickenOutStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
+const callLiquityPaybackChickenInStrategy = async (
+    botAcc,
+    strategyExecutor,
+    subId,
+    strategySub,
+    bondIdIfRebondSub,
+    lusdDepositedInBond,
+    upperHint,
+    lowerHint,
+) => {
+    const actionsCallData = [];
+    const fetchBondIdAction = new dfs.actions.chickenBonds.FetchBondIdAction(
+        '0',
+        '0',
+        bondIdIfRebondSub,
+    );
+    const cbChickenOutAction = new dfs.actions.chickenBonds.CBChickenInAction(
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+    const bLUSDInfo = getAssetInfo('bLUSD');
+    const lusdInfo = getAssetInfo('LUSD');
+    const sellAction = new dfs.actions.basic.SellAction(
+        await formatMockExchangeObj(
+            bLUSDInfo,
+            lusdInfo,
+            MAX_UINT,
+        ),
+        placeHolderAddr, // hardcoded
+        placeHolderAddr, // hardcoded
+    );
+    const gasCost = 1_000_000;
+    const feeAction = new dfs.actions.basic.GasFeeAction(
+        gasCost, placeHolderAddr, '0',
+    );
+    const paybackAction = new dfs.actions.liquity.LiquityPaybackAction(
+        hre.ethers.constants.MaxUint256, placeHolderAddr, upperHint, lowerHint,
+    );
+    const sendTokenAction = new dfs.actions.basic.SendTokenAction(
+        placeHolderAddr, placeHolderAddr, hre.ethers.constants.MaxUint256,
+    );
+
+    actionsCallData.push(fetchBondIdAction.encodeForRecipe()[0]);
+    actionsCallData.push(cbChickenOutAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(sendTokenAction.encodeForRecipe()[0]);
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    const strategyIndex = 0;
+    const triggerCallData = [];
+
+    triggerCallData.push(abiCoder.encode(['address', 'uint256', 'uint8'], [nullAddress, '0', '0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(
+        `GasUsed callLiquityPaybackChickenInStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
 module.exports = {
     callDcaStrategy,
     callMcdRepayStrategy,
@@ -1926,4 +2063,6 @@ module.exports = {
     callMcdBoostCompositeStrategy,
     callMcdFLBoostCompositeStrategy,
     callCbRebondStrategy,
+    callLiquityPaybackChickenOutStrategy,
+    callLiquityPaybackChickenInStrategy,
 };

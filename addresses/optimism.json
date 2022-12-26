@@ -234,6 +234,17 @@
       "history": ["0xEbA499702856f1EFda2546e9fEFC1319A3b40538"]
     },
     {
+      "name": "SendTokens",
+      "address": "0xdAd9f0aE49F8E769D45d8639e5F11CA1bCa23487",
+      "id": "0xa87d9d0e",
+      "path": "contracts/actions/utils/SendTokens.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "AaveV3Supply",
       "address": "0xD087509490a84C22f3B831Ef09F919061220C876",
       "id": "0xfc33bf00",
@@ -344,14 +355,14 @@
     },
     {
       "name": "AaveV3TrailingQuotePriceTrigger",
-      "address": "0xE1d1c35f8c60001096964A0260b88F6B1c606b68",
+      "address": "0xB1550a97D3B5B5b5b5F685c06FcB24aCd125cED7",
       "id": "0x0e31244d",
       "path": "contracts/triggers/AaveV3TrailingQuotePriceTrigger.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0xE1d1c35f8c60001096964A0260b88F6B1c606b68"]
     },
     {
       "name": "FLAaveV3",
@@ -445,14 +456,14 @@
     },
     {
       "name": "DFSSell",
-      "address": "0xfA015aD97E25247c2144F1C89AeD449cc3Fd1FCB",
+      "address": "0xC6c601fcAa870efd26C624F8c65fbc54cBe533b1",
       "id": "0x7f2a0f35",
       "path": "contracts/actions/exchange/DFSSell.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0xfA015aD97E25247c2144F1C89AeD449cc3Fd1FCB"]
     },
     {
       "name": "StrategyExecutor",

@@ -59,8 +59,11 @@ const updateAaveV3L2AutomationStrategy = async (
 ) => {
     let subInput = '0x';
 
-    subInput = subInput.concat(subId1.toString().padStart(8, '0'));
-    subInput = subInput.concat(subId2.toString().padStart(8, '0'));
+    const subId1Hex = (+subId1).toString(16);
+    const subId2Hex = (+subId2).toString(16);
+
+    subInput = subInput.concat(subId1Hex.padStart(8, '0'));
+    subInput = subInput.concat(subId2Hex.padStart(8, '0'));
 
     subInput = subInput.concat(minRatio.padStart(32, '0'));
     subInput = subInput.concat(maxRatio.padStart(32, '0'));

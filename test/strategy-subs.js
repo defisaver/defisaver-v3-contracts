@@ -396,6 +396,21 @@ const subCbRebondStrategy = async (proxy, bondID, strategyId, regAddr = REGISTRY
     return { subId, strategySub };
 };
 
+const subLiquityCBPaybackStrategy = async (proxy, bundleId, sourceId, sourceType, triggerRatio, triggerState) => {
+    const isBundle = true;
+    const sourceIdEncoded = abiCoder.encode(['uint256'], [sourceId.toString()]);
+    const sourceTypeEncoded = abiCoder.encode(['uint256'], [sourceType.toString()]);
+    const lusdTokenEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
+    const bLusdTokenEncoded = abiCoder.encode(['address'], [BLUSD_ADDR]);
+
+    const triggerData = await createLiquityTrigger(proxy.address, triggerRatio.toString(), triggerState.toString());
+
+    const strategySub = [bundleId, isBundle, [triggerData], [sourceIdEncoded, sourceTypeEncoded, lusdTokenEncoded, bLusdTokenEncoded]];
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdRepayStrategy,
@@ -418,4 +433,5 @@ module.exports = {
     subMcdTrailingCloseToCollStrategy,
     subCompV3AutomationStrategy,
     subCbRebondStrategy,
+    subLiquityCBPaybackStrategy,
 };

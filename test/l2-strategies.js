@@ -17,11 +17,11 @@ const createAaveV3RepayL2Strategy = () => {
     aaveV3RepayL2Strategy.addTrigger(aaveV3Trigger);
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        '%assetId', // must stay variable can choose diff. asset
         '&useDefaultMarket', // set to true hardcoded
+        '%market', // hardcoded because default market is true
         '%amount', // must stay variable
         '&proxy', // hardcoded
-        '%market', // hardcoded because default market is true
+        '%assetId', // must stay variable can choose diff. asset
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -81,8 +81,8 @@ const createAaveFLV3RepayL2Strategy = () => {
     aaveV3RepayL2Strategy.addTrigger(aaveV3Trigger);
 
     const flAction = new dfs.actions.flashloan.AaveV3FlashLoanAction(
-        ['%repayAmount'],
         ['%collAsset'],
+        ['%repayAmount'],
         ['%AAVE_NO_DEBT_MODE'],
         nullAddress,
     );
@@ -119,11 +119,11 @@ const createAaveFLV3RepayL2Strategy = () => {
     );
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        '%assetId', // must stay variable can choose diff. asset
         '&useDefaultMarket', // set to true hardcoded
+        '%market', // hardcoded because default market is true
         '$1', // repay fl amount
         '%flAddr', // flAddr not hardcoded (tx will fail if not returned to correct addr)
-        '%market', // hardcoded because default market is true
+        '%assetId', // must stay variable can choose diff. asset
     );
 
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
@@ -184,14 +184,14 @@ const createAaveV3BoostL2Strategy = () => {
     );
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        '&useDefaultMarket', // hardcoded default market
+        '%market', // hardcoded 0
         '$3', // amount hardcoded
         '&proxy', // proxy hardcoded
         '%collAddr', // is variable as it can change
         '%assetId', // must be variable
         '&enableAsColl', // hardcoded always enable as coll
-        '&useDefaultMarket', // hardcoded default market
         '&useOnBehalf', // hardcoded false use on behalf
-        '%market', // hardcoded 0
         '%onBehalf', // hardcoded 0 as its false
     );
 
@@ -222,8 +222,8 @@ const createAaveFLV3BoostL2Strategy = () => {
     aaveV3BoostL2Strategy.addTrigger(aaveV3Trigger);
 
     const flAction = new dfs.actions.flashloan.AaveV3FlashLoanAction(
-        ['%repayAmount'],
         ['%collAsset'],
+        ['%repayAmount'],
         ['%AAVE_NO_DEBT_MODE'],
         nullAddress,
     );
@@ -248,16 +248,15 @@ const createAaveFLV3BoostL2Strategy = () => {
     );
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        '&useDefaultMarket', // hardcoded default market
+        '%market', // hardcoded 0
         '$3', // amount hardcoded
         '&proxy', // proxy hardcoded
         '%collAddr', // is variable as it can change
         '%assetId', // must be variable
         '&enableAsColl', // hardcoded always enable as coll
-        '&useDefaultMarket', // hardcoded default market
         '&useOnBehalf', // hardcoded false use on behalf
-        '%market', // hardcoded 0
         '%onBehalf', // hardcoded 0 as its false
-
     );
 
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
@@ -288,8 +287,8 @@ const createAaveFLV3BoostL2Strategy = () => {
 
 const aaveV3CloseActions = {
     flAction: () => new dfs.actions.flashloan.AaveV3FlashLoanAction(
-        ['%repayAmount'], // cant pipe in FL actions :(
         ['%debtAsset'],
+        ['%repayAmount'], // cant pipe in FL actions :(
         ['%AAVE_NO_DEBT_MODE'],
         '%nullAddress',
     ),
@@ -307,11 +306,11 @@ const aaveV3CloseActions = {
     ),
 
     withdrawAction: () => new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        '&collAssetId', // one subscription - one token pair
         '%true', // useDefaultMarket - true or will revert
+        '&nullAddress', // market
         '%withdrawAmount', // kept variable (can support partial close later)
         '&proxy',
-        '&nullAddress', // market
+        '&collAssetId', // one subscription - one token pair
     ),
 
     sellAction: () => new dfs.actions.basic.SellAction(

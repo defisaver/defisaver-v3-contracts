@@ -10,6 +10,8 @@ import "../../../actions/liquity/helpers/CBHelper.sol";
 /// @title Special action to update rebond strategy data (Only use in that context)
 contract CBUpdateRebondSub is ActionBase, CBHelper {
 
+    error ImpactTooHigh(uint256, uint256);
+
     /// @param subId Id of the sub we are changing (user must be owner)
     /// @param bondId Id of the chicken bond NFT we just created
     struct Params {
@@ -40,7 +42,7 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
             _returnValues
         );
 
-        updateRebondSub(params);
+        updateRebondSub(params, uint256(_subData[1]));
 
         return(bytes32(params.subId));
     }
@@ -48,7 +50,7 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
     function executeActionDirect(bytes memory _callData) public override payable {
         Params memory params = parseInputs(_callData);
 
-        updateRebondSub(params);
+        updateRebondSub(params, 0);
     }
 
     /// @inheritdoc ActionBase
@@ -58,7 +60,16 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function updateRebondSub(Params memory _params) internal {
+    function updateRebondSub(Params memory _params, uint256 _previousBondId) internal {
+        if (_previousBondId != 0) {
+            uint256 previousBondLUSDDeposited = CBManager.getBondData(_previousBondId).lusdAmount;
+            uint256 newBondLUSDDeposited = CBManager.getBondData(_params.bondId).lusdAmount;
+
+            if (newBondLUSDDeposited <= previousBondLUSDDeposited) {
+                revert ImpactTooHigh(previousBondLUSDDeposited, newBondLUSDDeposited);
+            }
+        }
+
         StrategyModel.StrategySub memory rebondSub = formatRebondSub(_params.subId, _params.bondId);
 
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_params.subId, rebondSub);

@@ -621,7 +621,7 @@ const createReflexerFLBoostStrategy = () => {
     const reflexerRatioTrigger = new dfs.triggers.ReflexerRatioTrigger('0', '0', '0');
     reflexerFLBoostStrategy.addTrigger(reflexerRatioTrigger);
 
-    const flAction = new dfs.actions.flashloan.AaveV2FlashLoanAction(['%boostAmount'], ['%raiAddr'], ['%AAVE_NO_DEBT_MODE'], nullAddress);
+    const flAction = new dfs.actions.flashloan.AaveV2FlashLoanAction(['%raiAddr'], ['%boostAmount'], ['%AAVE_NO_DEBT_MODE'], nullAddress);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -1938,6 +1938,91 @@ const createCompV3EOAFlBoostStrategy = () => {
     return compV3BoostStrategy.encodeForDsProxyCall();
 };
 
+const createLiquityPaybackChickenInStrategy = () => {
+    const strategy = new dfs.Strategy('LiquityPaybackChickenInStrategy');
+    strategy.addSubSlot('&paybackSourceId', 'uint256');
+    strategy.addSubSlot('&paybackSourceType', 'uint256');
+    strategy.addSubSlot('&LUSD', 'address');
+    strategy.addSubSlot('&BLUSD', 'address');
+
+    const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
+    strategy.addTrigger(liquityRatioTrigger);
+
+    const fetchBondIdAction = new dfs.actions.chickenBonds.FetchBondIdAction(
+        '&paybackSourceId',
+        '&paybackSourceType',
+        '%bondIdIfRebondSub',
+    );
+    const cbChickenInAction = new dfs.actions.chickenBonds.CBChickenInAction(
+        '$1', // bondId received from FetchBondId
+        '&proxy',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&BLUSD',
+            '&LUSD',
+            '$2', //  bluds amount received from Chicken In
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+    const feeAction = new dfs.actions.basic.GasFeeAction(
+        '0', '&LUSD', '$3',
+    );
+    const paybackAction = new dfs.actions.liquity.LiquityPaybackAction(
+        '%paybackAmount(maxUint)', '&proxy', '%upperHint', '%lowerHint',
+    );
+    const sendTokenAction = new dfs.actions.basic.SendTokenAction(
+        '&LUSD', '&eoa', '%lusdAmountLeft(maxUint)',
+    );
+    strategy.addAction(fetchBondIdAction);
+    strategy.addAction(cbChickenInAction);
+    strategy.addAction(sellAction);
+    strategy.addAction(feeAction);
+    strategy.addAction(paybackAction);
+    strategy.addAction(sendTokenAction);
+
+    return strategy.encodeForDsProxyCall();
+};
+
+const createLiquityPaybackChickenOutStrategy = () => {
+    const strategy = new dfs.Strategy('LiquityPaybackChickenOutStrategy');
+    strategy.addSubSlot('&paybackSourceId', 'uint256');
+    strategy.addSubSlot('&paybackSourceType', 'uint256');
+    strategy.addSubSlot('&LUSD', 'address');
+    strategy.addSubSlot('&BLUSD', 'address');
+
+    const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
+    strategy.addTrigger(liquityRatioTrigger);
+    const fetchBondIdAction = new dfs.actions.chickenBonds.FetchBondIdAction(
+        '&paybackSourceId',
+        '&paybackSourceType',
+        '%bondIdIfRebondSub',
+    );
+    const cbChickenOutAction = new dfs.actions.chickenBonds.CBChickenOutAction(
+        '$1',
+        '%minLusd', // sent from backend to support emergency repayments, but should default to bond.lusdAmountDeposited almost always
+        '&proxy',
+    );
+    const feeAction = new dfs.actions.basic.GasFeeAction(
+        '0', '&LUSD', '$2',
+    );
+    const paybackAction = new dfs.actions.liquity.LiquityPaybackAction(
+        '%paybackAmount(maxUint)', '&proxy', '%upperHint', '%lowerHint',
+    );
+    const sendTokenAction = new dfs.actions.basic.SendTokenAction(
+        '&LUSD', '&eoa', '%lusdAmountLeft(maxUint)',
+    );
+    strategy.addAction(fetchBondIdAction);
+    strategy.addAction(cbChickenOutAction);
+    strategy.addAction(feeAction);
+    strategy.addAction(paybackAction);
+    strategy.addAction(sendTokenAction);
+
+    return strategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
@@ -1979,4 +2064,6 @@ module.exports = {
     createCompV3FlBoostStrategy,
     createCbRebondStrategy,
     createCompV3EOAFlBoostStrategy,
+    createLiquityPaybackChickenInStrategy,
+    createLiquityPaybackChickenOutStrategy,
 };
