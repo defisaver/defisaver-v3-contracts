@@ -182,7 +182,7 @@ const mcdBoostStrategyTest = async (numTests) => {
         it('... should create boost and repay bundle', async () => {
             const repayBundleId = await createRepayBundle(proxy);
             const boostBundleId = await createBoostBundle(proxy);
-            await redeploy('McdSubProxy', undefined, undefined, undefined, undefined, repayBundleId, boostBundleId);
+            await redeploy('McdSubProxy', undefined, undefined, undefined, repayBundleId, boostBundleId);
         });
 
         const ilkSubset = ilks.reduce((acc, curr) => {
@@ -363,7 +363,7 @@ const mcdRepayStrategyTest = async (numTests) => {
 
         it('... should create a repay bundle', async () => {
             const repayBundleId = await createRepayBundle(proxy);
-            await redeploy('McdSubProxy', undefined, undefined, undefined, undefined, repayBundleId, 0);
+            await redeploy('McdSubProxy', undefined, undefined, undefined, repayBundleId, 0);
         });
 
         const ilkSubset = ilks.reduce((acc, curr) => {
@@ -399,7 +399,7 @@ const mcdRepayStrategyTest = async (numTests) => {
 
                 console.log('Vault id: ', vaultId);
 
-                const ratioUnder = Float2BN('2.2');
+                const ratioUnder = Float2BN('2.3');
                 const targetRatioRepay = Float2BN('2.5');
 
                 ({ repaySubId: subId, repaySub: strategySub } = await subToMcdProxy(
@@ -1221,8 +1221,6 @@ const mcdCloseToCollStrategyTest = async () => {
             // enough eth to payback whole dai debt + 5% because of slippage
             const debtEstimate = (parseInt(daiDebt, 10) * 1.05).toString();
             const sellAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', debtEstimate), '18');
-
-            console.log(sellAmount);
 
             // mock chainlink price after sub
             let roundId = 2;
