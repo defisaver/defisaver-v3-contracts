@@ -31,6 +31,9 @@ const {
     DAI_ADDR,
     LUSD_ADDR,
     BOND_NFT_ADDR,
+    takeSnapshot,
+    revertToSnapshot,
+    WBTC_ADDR,
 } = require('../utils');
 
 const { fetchMakerAddresses } = require('../utils-mcd');
@@ -308,6 +311,70 @@ const sendTokenTest = async () => {
             await executeAction('SendToken', sendTokenData, proxy);
             expect(await balanceOf(WETH_ADDRESS, senderAcc.address)).to.be.eq(hre.ethers.utils.parseUnits('4', 18));
         });
+    });
+};
+
+const sendTokensTest = async () => {
+    describe('Send-Tokens', function () {
+        this.timeout(80000);
+
+        let senderAcc; let proxy; let snapshotId;
+        const tokens = [WETH_ADDRESS, DAI_ADDR, LUSD_ADDR, WBTC_ADDR];
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+            await setBalance(WETH_ADDRESS, proxy.address, hre.ethers.utils.parseUnits('10', 18));
+            await setBalance(DAI_ADDR, proxy.address, hre.ethers.utils.parseUnits('100', 18));
+            await setBalance(LUSD_ADDR, proxy.address, hre.ethers.utils.parseUnits('100', 18));
+            await setBalance(WBTC_ADDR, proxy.address, hre.ethers.utils.parseUnits('1', 8));
+        });
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
+        });
+        for (let i = 0; i < tokens.length; i++) {
+            it(`... should send ${i + 1} tokens using recipe made out of SendToken Actions`, async () => {
+                const recipe = new dfs.Recipe('SendTokenRecipe');
+                // This is here only so on both sides it's recipe
+                recipe.addAction(
+                    new dfs.actions.basic.TokenBalanceAction(DAI_ADDR, senderAcc.address),
+                );
+                for (let j = 0; j <= i; j++) {
+                    const sendTokenAction = new dfs.actions.basic.SendTokenAction(
+                        tokens[j], senderAcc.address, hre.ethers.constants.MaxUint256,
+                    );
+                    recipe.addAction(sendTokenAction);
+                }
+
+                const functionData = recipe.encodeForDsProxyCall();
+                await executeAction('RecipeExecutor', functionData[1], proxy);
+            });
+            it(`... should send ${i + 1} tokens using one SendTokens action`, async () => {
+                const recipe = new dfs.Recipe('SendTokensRecipe');
+                recipe.addAction(
+                    new dfs.actions.basic.TokenBalanceAction(DAI_ADDR, senderAcc.address),
+                );
+                const tokensToUse = [];
+                const receiversToUse = [];
+                const amountsToUse = [];
+
+                for (let j = 0; j <= i; j++) {
+                    tokensToUse.push(tokens[j]);
+                    receiversToUse.push(senderAcc.address);
+                    amountsToUse.push(hre.ethers.constants.MaxUint256);
+                }
+                const sendTokensAction = new dfs.actions.basic.SendTokensAction(
+                    tokensToUse, receiversToUse, amountsToUse,
+                );
+                recipe.addAction(sendTokensAction);
+
+                const functionData = recipe.encodeForDsProxyCall();
+                await executeAction('RecipeExecutor', functionData[1], proxy);
+            });
+        }
     });
 };
 
@@ -874,4 +941,5 @@ module.exports = {
     updateSubDataTest,
     toggleSubDataTest,
     transferNFTTest,
+    sendTokensTest,
 };
