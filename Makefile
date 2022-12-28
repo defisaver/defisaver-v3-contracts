@@ -36,6 +36,10 @@ init = \
 	npx hardhat changeRepoNetwork Optimism ${network} && npx hardhat changeRepoNetwork Mainnet ${network} && npx hardhat changeRepoNetwork Arbitrum ${network} &&\
 	node cmd/forkooor.js new-fork ${network}
 
+top-up:
+	$(call check_defined, acc, set acc)
+	$(call gib_money,${acc})
+
 new-fork:
 	$(call check_defined, network, set network)
 	$(call init,${network})
