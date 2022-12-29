@@ -194,6 +194,8 @@ const standardAmounts = {
 };
 
 const coinGeckoHelper = {
+    STETH: 'staked-ether',
+    CRV: 'curve-dao-token',
     ETH: 'ethereum',
     WETH: 'weth',
     AAVE: 'aave',
@@ -564,6 +566,12 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
     }
 
     return c;
+};
+
+const getContractFromRegistry = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR) => {
+    const contractAddr = await getAddrFromRegistry(name, regAddr);
+    if (contractAddr !== nullAddress) return hre.ethers.getContractAt(name, contractAddr);
+    return redeploy(name, regAddr);
 };
 
 const setCode = async (addr, code) => {
@@ -1217,6 +1225,7 @@ module.exports = {
     formatMockExchangeObj,
     expectCloseEq,
     setContractAt,
+    getContractFromRegistry,
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),
