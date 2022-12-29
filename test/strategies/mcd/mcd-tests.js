@@ -161,18 +161,21 @@ const mcdBoostStrategyTest = async (numTests) => {
         let vaultId;
         let mcdView;
         let flBalancer;
+        let flActionAddr;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
 
             flBalancer = await getAddrFromRegistry('FLBalancer').then((address) => ({ address }));
+            // await redeploy('FLAction');
+
+            flActionAddr = await getAddrFromRegistry('FLAction');
             strategyExecutor = await redeployCore();
             mcdView = await redeploy('McdView');
             await redeploy('MockExchangeWrapper').then(({ address }) => setNewExchangeWrapper(senderAcc, address));
             await redeploy('McdRatio');
             await redeploy('McdBoostComposite');
-            await redeploy('McdFLBoostComposite');
 
             await addBotCaller(botAcc.address);
 
@@ -188,8 +191,8 @@ const mcdBoostStrategyTest = async (numTests) => {
         const ilkSubset = ilks.reduce((acc, curr) => {
             if ([
                 'ETH',
-                'WBTC',
-                'wstETH',
+                // 'WBTC',
+                // 'wstETH',
             ].includes(curr.asset)) acc.push(curr);
             return acc;
         }, []).sort((a, b) => (a.ilkLabel < b.ilkLabel ? (-1) : 1)).slice(0, numTests);
@@ -309,7 +312,7 @@ const mcdBoostStrategyTest = async (numTests) => {
                 const ratioBefore = await getRatio(mcdView, vaultId);
 
                 // eslint-disable-next-line max-len
-                await callMcdFLBoostCompositeStrategy(botAcc, strategyExecutor, 3, subId, strategySub, joinAddr, tokenData, boostAmount);
+                await callMcdFLBoostCompositeStrategy(botAcc, strategyExecutor, 3, subId, strategySub, joinAddr, tokenData, boostAmount, flActionAddr);
 
                 const ratioAfter = await getRatio(mcdView, vaultId);
 
@@ -341,6 +344,7 @@ const mcdRepayStrategyTest = async (numTests) => {
         let mcdView;
         let mcdRatioTriggerAddr;
         let strategySub;
+        let flActionAddr;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -349,11 +353,12 @@ const mcdRepayStrategyTest = async (numTests) => {
             flBalancer = await getAddrFromRegistry('FLBalancer').then((address) => ({ address }));
             strategyExecutor = await redeployCore();
             mcdRatioTriggerAddr = (await redeploy('McdRatioTrigger')).address;
+            await redeploy('FLAction');
+            flActionAddr = await getAddrFromRegistry('FLAction');
             mcdView = await redeploy('McdView');
             await redeploy('MockExchangeWrapper').then(({ address }) => setNewExchangeWrapper(senderAcc, address));
             await redeploy('McdRatio');
             await redeploy('McdRepayComposite');
-            await redeploy('McdFLRepayComposite');
 
             await addBotCaller(botAcc.address);
             await setMCDPriceVerifier(mcdRatioTriggerAddr);
@@ -369,8 +374,8 @@ const mcdRepayStrategyTest = async (numTests) => {
         const ilkSubset = ilks.reduce((acc, curr) => {
             if ([
                 'ETH',
-                'WBTC',
-                'wstETH',
+                // 'WBTC',
+                // 'wstETH',
             ].includes(curr.asset)) acc.push(curr);
             return acc;
         }, []).sort((a, b) => (a.ilkLabel < b.ilkLabel ? (-1) : 1)).slice(0, numTests);
@@ -505,6 +510,7 @@ const mcdRepayStrategyTest = async (numTests) => {
                     joinAddr,
                     tokenData,
                     repayAmount,
+                    flActionAddr,
                 );
 
                 const ratioAfter = await getRatio(mcdView, vaultId);

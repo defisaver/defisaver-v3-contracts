@@ -170,6 +170,7 @@ const createMcdRepayCompositeStrategy = () => {
         '&vaultId',
         '%joinAddr',
         '%gasUsed',
+        '%flAddr',
         formatExchangeObj(
             '%wethAddr',
             '&daiAddr',
@@ -193,10 +194,20 @@ const createMcdFLRepayCompositeStrategy = () => {
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     repayStrategy.addTrigger(mcdRatioTrigger);
 
-    const repayCompositeAction = new dfs.actions.maker.MakerFLRepayCompositeAction(
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%collAddr'],
+        ['%loanAmount'],
+        nullAddress,
+        [],
+    );
+
+    repayStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+
+    const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
         '&vaultId',
         '%joinAddr',
         '%gasUsed',
+        '%flAddr',
         formatExchangeObj(
             '%wethAddr',
             '&daiAddr',
@@ -1408,6 +1419,7 @@ const createMcdBoostCompositeStrategy = () => {
         '&vaultId',
         '%joinAddr',
         '%gasUsed',
+        '%flAddr',
         formatExchangeObj(
             '&daiAddr',
             '%wethAddr',
@@ -1430,10 +1442,19 @@ const createMcdFLBoostCompositeStrategy = () => {
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     mcdBoostStrategy.addTrigger(mcdRatioTrigger);
 
-    const boostCompositeAction = new dfs.actions.maker.MakerFLBoostCompositeAction(
+    const flAction = new dfs.actions.flashloan.MakerFlashLoanAction(
+        '%loanAmount',
+        nullAddress,
+        [],
+    );
+
+    mcdBoostStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+
+    const boostCompositeAction = new dfs.actions.maker.MakerBoostCompositeAction(
         '&vaultId',
         '%joinAddr',
         '%gasUsed',
+        '%flAddr',
         formatExchangeObj(
             '&daiAddr',
             '%wethAddr',

@@ -618,6 +618,7 @@ const callMcdRepayCompositeStrategy = async (botAcc, strategyExecutor, strategyI
         '0', // '&vaultId'
         joinAddr,
         repayGasCost,
+        nullAddress,
         await formatMockExchangeObj(
             collAsset,
             getAssetInfo('DAI'),
@@ -640,16 +641,26 @@ const callMcdRepayCompositeStrategy = async (botAcc, strategyExecutor, strategyI
     console.log(`GasUsed callMcdRepayCompositeStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callMcdFLRepayCompositeStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, joinAddr, collAsset, repayAmount) => {
+const callMcdFLRepayCompositeStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, joinAddr, collAsset, repayAmount, flAddr) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
     const repayGasCost = 800000; // .8 mil gas
 
-    const repayCompositeAction = new dfs.actions.maker.MakerFLRepayCompositeAction(
+    let flashLoanAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        [collAsset.address],
+        [repayAmount],
+        nullAddress,
+        [],
+    );
+
+    flashLoanAction = new dfs.actions.flashloan.FLAction(flashLoanAction);
+
+    const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
         '0', // '&vaultId'
         joinAddr,
         repayGasCost,
+        flAddr,
         await formatMockExchangeObj(
             collAsset,
             getAssetInfo('DAI'),
@@ -657,6 +668,7 @@ const callMcdFLRepayCompositeStrategy = async (botAcc, strategyExecutor, strateg
         ),
     );
 
+    actionsCallData.push(flashLoanAction.encodeForRecipe()[0]);
     actionsCallData.push(repayCompositeAction.encodeForRecipe()[0]);
     triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
 
@@ -682,6 +694,7 @@ const callMcdBoostCompositeStrategy = async (botAcc, strategyExecutor, strategyI
         '0', // &vaultId
         joinAddr,
         boostGasCost,
+        nullAddress,
         await formatMockExchangeObj(
             getAssetInfo('DAI'),
             collAsset,
@@ -705,16 +718,25 @@ const callMcdBoostCompositeStrategy = async (botAcc, strategyExecutor, strategyI
     console.log(`GasUsed callMcdBoostCompositeStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callMcdFLBoostCompositeStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, joinAddr, collAsset, boostAmount) => {
+const callMcdFLBoostCompositeStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, joinAddr, collAsset, boostAmount, flAddr) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
     const boostGasCost = 800000; // .8 mil gas
 
-    const boostCompositeAction = new dfs.actions.maker.MakerFLBoostCompositeAction(
+    let flashLoanAction = new dfs.actions.flashloan.MakerFlashLoanAction(
+        boostAmount,
+        nullAddress,
+        [],
+    );
+
+    flashLoanAction = new dfs.actions.flashloan.FLAction(flashLoanAction);
+
+    const boostCompositeAction = new dfs.actions.maker.MakerBoostCompositeAction(
         '0', // &vaultId
         joinAddr,
         boostGasCost,
+        flAddr,
         await formatMockExchangeObj(
             getAssetInfo('DAI'),
             collAsset,
@@ -722,6 +744,7 @@ const callMcdFLBoostCompositeStrategy = async (botAcc, strategyExecutor, strateg
         ),
     );
 
+    actionsCallData.push(flashLoanAction.encodeForRecipe()[0]);
     actionsCallData.push(boostCompositeAction.encodeForRecipe()[0]);
 
     triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));

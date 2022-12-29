@@ -971,7 +971,7 @@ const mcdFLRepayCompositeTest = async () => {
         before(async () => {
             mockWrapper = await redeploy('MockExchangeWrapper');
             mcdView = await redeploy('McdView');
-            repayComposite = await redeploy('McdFLRepayComposite');
+            repayComposite = await redeploy('McdRepayComposite');
 
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
