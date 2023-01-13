@@ -2087,7 +2087,7 @@ const createCompV3Position = async (
         });
 
     program
-        .command('sub-mcd-boost-repay <vaultId> <minRatio> <maxRatio> <targetRatioBoost> <targetRatioRepay> [senderAddr]')
+        .command('sub-mcd-automation <vaultId> <minRatio> <maxRatio> <targetRatioBoost> <targetRatioRepay> [senderAddr]')
         .description('Subscribes to Maker repay and (optionaly) boost bundles')
         .action(async (
             vaultId,

@@ -1,38 +1,34 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
+import "../../interfaces/mcd/IDaiJoin.sol";
+
 import "../ActionBase.sol";
 import "../exchange/DFSSell.sol";
 import "../fee/GasFeeTaker.sol";
 
-import "../../interfaces/balancer/IFlashLoanRecipient.sol";
-import "../../interfaces/balancer/IFlashLoans.sol";
-import "../../interfaces/mcd/IManager.sol";
-import "../../interfaces/mcd/IDaiJoin.sol";
-
-import "../../utils/ReentrancyGuard.sol";
-import "../../utils/TokenUtils.sol";
-import "../../core/strategy/StrategyModel.sol";
-
 import "./helpers/McdHelper.sol";
-import "../balancer/helpers/MainnetBalancerV2Addresses.sol";
 import "./helpers/McdRatioHelper.sol";
 
+/// @title Single mcd repay action can use flashloan or not
 contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRatioHelper {
     using TokenUtils for address;
 
     error RatioNotLowerThanBefore(uint256, uint256);
+    error WrongAsset(address);
 
     /// @param vaultId Id of the vault
     /// @param joinAddr Collateral join address
     /// @param gasUsed Gas amount to charge in strategies
     /// @param flAddress Flashloan address 0x0 if we're not using flashloan
+    /// @param flAmount Amount that the flashloan actions returns if used (must have it because of fee)
     /// @param exchangeData Data needed for swap
     struct RepayParams {
         uint256 vaultId;
         address joinAddr;
         uint256 gasUsed;
-        address flAddress;
+        address flAddr;
+        uint256 flAmount;
         ExchangeData exchangeData;
     }
 
@@ -59,22 +55,29 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
             _returnValues
         );
 
+        repayParams.flAmount = _parseParamUint(
+            repayParams.flAmount,
+            _paramMapping[2],
+            _subData,
+            _returnValues
+        );
+
         repayParams.exchangeData.srcAddr = _parseParamAddr(
             repayParams.exchangeData.srcAddr,
-            _paramMapping[2],
+            _paramMapping[3],
             _subData,
             _returnValues
         );
         repayParams.exchangeData.destAddr = _parseParamAddr(
             repayParams.exchangeData.destAddr,
-            _paramMapping[3],
+            _paramMapping[4],
             _subData,
             _returnValues
         );
 
         repayParams.exchangeData.srcAmount = _parseParamUint(
             repayParams.exchangeData.srcAmount,
-            _paramMapping[4],
+            _paramMapping[5],
             _subData,
             _returnValues
         );
@@ -99,8 +102,10 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
 
     /// @notice Executes repay logic
     function _repay(RepayParams memory _repayParams) internal returns (bytes memory logData, uint256 paybackAmount) {
-        assert(_repayParams.exchangeData.destAddr == DAI_ADDR);
-        
+        if (_repayParams.exchangeData.destAddr != DAI_ADDR) {
+            revert WrongAsset(_repayParams.exchangeData.destAddr);
+        }
+    
         uint256 ratioBefore;
         // is part of strategy so check before ratio
         if (_repayParams.gasUsed != 0) {
@@ -110,7 +115,7 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         uint256 repayAmount = _repayParams.exchangeData.srcAmount;
 
         // Withdraw collateral if not using flashloan
-        if (_repayParams.flAddress == address(0)) {
+        if (_repayParams.flAddr == address(0)) {
             _withdrawColl(_repayParams, repayAmount);
         }
 
@@ -154,9 +159,10 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
             IManager(MCD_MANAGER_ADDR).frob(_repayParams.vaultId, 0, paybackAmountNormalized);
         }
 
-        if (_repayParams.flAddress != address(0)) {
-            _withdrawColl(_repayParams, repayAmount);
-            _repayParams.exchangeData.srcAddr.withdrawTokens(_repayParams.flAddress, repayAmount);
+        // return fl amount if used
+        if (_repayParams.flAddr != address(0)) {
+            _withdrawColl(_repayParams, _repayParams.flAmount);
+            _repayParams.exchangeData.srcAddr.withdrawTokens(_repayParams.flAddr, _repayParams.flAmount);
         }
 
         // is part of strategy so check after ratio
@@ -168,7 +174,7 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
             }
         }
 
-        logData = abi.encode(address(this), repayAmount, exchangedAmount, paybackAmount, _repayParams.flAddress);
+        logData = abi.encode(address(this), repayAmount, exchangedAmount, paybackAmount, _repayParams.flAddr);
     }
 
     function _withdrawColl(RepayParams memory _repayParams, uint256 _repayAmount) internal {

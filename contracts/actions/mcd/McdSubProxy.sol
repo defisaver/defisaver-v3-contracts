@@ -7,7 +7,7 @@ import "../../auth/ProxyPermission.sol";
 import "../../core/strategy/SubStorage.sol";
 import "../../utils/helpers/UtilHelper.sol";
 
-/// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
+/// @title Subscribes users to boost/repay strategies for Maker
 contract McdSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper, UtilHelper {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID; 

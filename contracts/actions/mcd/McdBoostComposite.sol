@@ -5,30 +5,30 @@ import "../ActionBase.sol";
 import "../exchange/DFSSell.sol";
 import "../fee/GasFeeTaker.sol";
 
-import "../../interfaces/mcd/IManager.sol";
 import "../../interfaces/mcd/IDaiJoin.sol";
 import "../../interfaces/mcd/IJug.sol";
 
-import "../../utils/TokenUtils.sol";
-import "../../core/strategy/StrategyModel.sol";
-
 import "./helpers/McdHelper.sol";
 
+/// @title Single mcd boost action can use flashloan or not
 contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper {
     using TokenUtils for address;
 
     error CollateralNotHigher(uint256, uint256);
+    error WrongAsset(address);
 
     /// @param vaultId Id of the vault
     /// @param joinAddr Collateral join address
     /// @param gasUsed Gas amount to charge in strategies
     /// @param flAddr Flashloan address 0x0 if we're not using flashloan
+    /// @param flAmount Amount that the flashloan actions returns if used (must have it because of fee)
     /// @param exchangeData Data needed for swap
     struct BoostParams {
         uint256 vaultId;
         address joinAddr;
         uint256 gasUsed;
         address flAddr;
+        uint256 flAmount;
         ExchangeData exchangeData;
     }
 
@@ -55,22 +55,29 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper {
             _returnValues
         );
 
+        boostParams.flAmount = _parseParamUint(
+            boostParams.flAmount,
+            _paramMapping[2],
+            _subData,
+            _returnValues
+        );
+
         boostParams.exchangeData.srcAddr = _parseParamAddr(
             boostParams.exchangeData.srcAddr,
-            _paramMapping[2],
+            _paramMapping[3],
             _subData,
             _returnValues
         );
         boostParams.exchangeData.destAddr = _parseParamAddr(
             boostParams.exchangeData.destAddr,
-            _paramMapping[3],
+            _paramMapping[4],
             _subData,
             _returnValues
         );
 
         boostParams.exchangeData.srcAmount = _parseParamUint(
             boostParams.exchangeData.srcAmount,
-            _paramMapping[4],
+            _paramMapping[5],
             _subData,
             _returnValues
         );
@@ -98,7 +105,10 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper {
         internal
         returns (bytes memory logData, uint256 supplyAmount)
     {
-        assert(_boostParams.exchangeData.srcAddr == DAI_ADDR);
+        if (_boostParams.exchangeData.srcAddr != DAI_ADDR) {
+            revert WrongAsset(_boostParams.exchangeData.srcAddr);
+        }
+
         (address urn, bytes32 ilk) = getUrnAndIlk(MCD_MANAGER_ADDR, _boostParams.vaultId);
 
         uint256 collateralBefore;
@@ -114,7 +124,7 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper {
         uint256 boostAmount = _boostParams.exchangeData.srcAmount;
 
         if (_boostParams.flAddr == address(0)) {
-            _drawDebt(_boostParams, urn, ilk);
+            _drawDebt(boostAmount, _boostParams.vaultId, urn, ilk);
         }
 
         // Sell debt asset for collateral asset
@@ -152,7 +162,7 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper {
 
         // if we're using flashloan draw debt and repay fl
         if (_boostParams.flAddr != address(0)) {
-            uint256 daiAmount = _drawDebt(_boostParams, urn, ilk);
+            uint256 daiAmount = _drawDebt(_boostParams.flAmount, _boostParams.vaultId, urn, ilk);
             DAI_ADDR.withdrawTokens(_boostParams.flAddr, daiAmount);
         }
 
@@ -173,23 +183,22 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper {
     }
 
     function _drawDebt(
-        BoostParams memory _boostParams,
+        uint256 _drawAmount,
+        uint256 _vaultId,
         address _urn,
         bytes32 _ilk
     ) internal returns (uint256) {
-        uint256 drawAmount = _boostParams.exchangeData.srcAmount;
-
         uint256 daiVatBalance = vat.dai(_urn);
         uint256 rate = IJug(JUG_ADDRESS).drip(_ilk);
-        int256 drawAmountNormalized = normalizeDrawAmount(drawAmount, rate, daiVatBalance);
+        int256 drawAmountNormalized = normalizeDrawAmount(_drawAmount, rate, daiVatBalance);
 
-        IManager(MCD_MANAGER_ADDR).frob(_boostParams.vaultId, 0, drawAmountNormalized);
-        IManager(MCD_MANAGER_ADDR).move(_boostParams.vaultId, address(this), toRad(drawAmount));
+        IManager(MCD_MANAGER_ADDR).frob(_vaultId, 0, drawAmountNormalized);
+        IManager(MCD_MANAGER_ADDR).move(_vaultId, address(this), toRad(_drawAmount));
         vat.hope(DAI_JOIN_ADDR);
-        IDaiJoin(DAI_JOIN_ADDR).exit(address(this), drawAmount);
+        IDaiJoin(DAI_JOIN_ADDR).exit(address(this), _drawAmount);
         vat.nope(DAI_JOIN_ADDR);
 
-        return drawAmount;
+        return _drawAmount;
     }
 
     /// @inheritdoc ActionBase
