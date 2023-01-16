@@ -2224,16 +2224,16 @@ const aaveV3SwitchCollateralCallDataOptimised = async (
     return receipt;
 };
 
-const morphoSupply = async (
+const morphoAaveV2Supply = async (
     proxy,
     tokenAddr,
     amount,
     from,
     onBehalf,
 ) => {
-    const actionAddress = await getAddrFromRegistry('MorphoSupply');
+    const actionAddress = await getAddrFromRegistry('MorphoAaveV2Supply');
 
-    const action = new dfs.actions.morpho.MorphoSupplyAction(
+    const action = new dfs.actions.morpho.MorphoAaveV2SupplyAction(
         tokenAddr, amount.toString(), from, onBehalf,
     );
 
@@ -2241,19 +2241,19 @@ const morphoSupply = async (
     const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed morphoSupply: ${gasUsed}`);
+    console.log(`GasUsed morphoAaveV2Supply: ${gasUsed}`);
     return receipt;
 };
 
-const morphoWithdraw = async (
+const morphoAaveV2Withdraw = async (
     proxy,
     tokenAddr,
     amount,
     to,
 ) => {
-    const actionAddress = await getAddrFromRegistry('MorphoWithdraw');
+    const actionAddress = await getAddrFromRegistry('MorphoAaveV2Withdraw');
 
-    const action = new dfs.actions.morpho.MorphoWithdrawAction(
+    const action = new dfs.actions.morpho.MorphoAaveV2WithdrawAction(
         tokenAddr, amount.toString(), to,
     );
 
@@ -2261,19 +2261,19 @@ const morphoWithdraw = async (
     const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed morphoWithdraw: ${gasUsed}`);
+    console.log(`GasUsed morphoAaveV2Withdraw: ${gasUsed}`);
     return receipt;
 };
 
-const morphoBorrow = async (
+const morphoAaveV2Borrow = async (
     proxy,
     tokenAddr,
     amount,
     to,
 ) => {
-    const actionAddress = await getAddrFromRegistry('MorphoBorrow');
+    const actionAddress = await getAddrFromRegistry('MorphoAaveV2Borrow');
 
-    const action = new dfs.actions.morpho.MorphoBorrowAction(
+    const action = new dfs.actions.morpho.MorphoAaveV2BorrowAction(
         tokenAddr, amount.toString(), to,
     );
 
@@ -2281,20 +2281,20 @@ const morphoBorrow = async (
     const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed morphoBorrow: ${gasUsed}`);
+    console.log(`GasUsed morphoAaveV2Borrow: ${gasUsed}`);
     return receipt;
 };
 
-const morphoPayback = async (
+const morphoAaveV2Payback = async (
     proxy,
     tokenAddr,
     amount,
     from,
     onBehalf,
 ) => {
-    const actionAddress = await getAddrFromRegistry('MorphoPayback');
+    const actionAddress = await getAddrFromRegistry('MorphoAaveV2Payback');
 
-    const action = new dfs.actions.morpho.MorphoPaybackAction(
+    const action = new dfs.actions.morpho.MorphoAaveV2PaybackAction(
         tokenAddr, amount.toString(), from, onBehalf,
     );
 
@@ -2302,7 +2302,7 @@ const morphoPayback = async (
     const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed morphoPayback: ${gasUsed}`);
+    console.log(`GasUsed morphoAaveV2Payback: ${gasUsed}`);
     return receipt;
 };
 
@@ -2448,8 +2448,8 @@ module.exports = {
     chickenRedeem,
     transferNFT,
 
-    morphoSupply,
-    morphoWithdraw,
-    morphoBorrow,
-    morphoPayback,
+    morphoAaveV2Supply,
+    morphoAaveV2Withdraw,
+    morphoAaveV2Borrow,
+    morphoAaveV2Payback,
 };

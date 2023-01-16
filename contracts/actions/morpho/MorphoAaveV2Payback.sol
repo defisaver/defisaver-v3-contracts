@@ -7,9 +7,14 @@ import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "./helpers/MorphoHelper.sol";
 
-contract MorphoPayback is ActionBase, MorphoHelper {
+/// @title Payback a token to Morpho
+contract MorphoAaveV2Payback is ActionBase, MorphoHelper {
     using TokenUtils for address;
 
+    /// @param tokenAddr The address of the token to be payed back
+    /// @param amount Amount of tokens to be payed back
+    /// @param from Where are we pulling the payback tokens amount from
+    /// @param onBehalf For what user we are paying back the debt, defaults to proxy
     struct Params {
         address tokenAddr;
         uint256 amount;
@@ -30,14 +35,14 @@ contract MorphoPayback is ActionBase, MorphoHelper {
         params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
 
         (uint256 amount, bytes memory logData) = _repay(params);
-        emit ActionEvent("MorphoPayback", logData);
+        emit ActionEvent("MorphoAaveV2Payback", logData);
         return bytes32(amount);
     }
 
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
         (, bytes memory logData) = _repay(params);
-        logger.logActionDirectEvent("MorphoPayback", logData);
+        logger.logActionDirectEvent("MorphoAaveV2Payback", logData);
     }
 
     function actionType() public pure virtual override returns (uint8) {
@@ -46,7 +51,7 @@ contract MorphoPayback is ActionBase, MorphoHelper {
 
     function _repay(Params memory _params) internal returns (uint256, bytes memory) {
         _params.amount = _params.tokenAddr.pullTokensIfNeeded(_params.from, _params.amount);
-        _params.tokenAddr.approveToken(MORPHO_ADDR, _params.amount);
+        _params.tokenAddr.approveToken(MORPHO_AAVEV2_ADDR, _params.amount);
 
         // needed because amount > debt is safe
         uint256 tokensBefore = _params.tokenAddr.getBalance(address(this));
@@ -60,7 +65,7 @@ contract MorphoPayback is ActionBase, MorphoHelper {
             DEFAULT_MARKET_DATA_PROVIDER
         ).getReserveTokensAddresses(_params.tokenAddr);
 
-        IMorpho(MORPHO_ADDR).repay(aTokenAddress, _params.onBehalf, _params.amount);
+        IMorpho(MORPHO_AAVEV2_ADDR).repay(aTokenAddress, _params.onBehalf, _params.amount);
 
         // accurate return amount but dust stays on proxy
         _params.amount = tokensBefore - _params.tokenAddr.getBalance(address(this));
