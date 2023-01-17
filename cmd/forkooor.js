@@ -669,7 +669,7 @@ const mcdBoostRepaySub = async ({
         if (await registry.isRegistered(hre.ethers.utils.id('McdSubProxy').slice(0, 10)).then((e) => !e)) {
             const repayBundleId = await createRepayBundle(proxy, true);
             const boostBundleId = await createBoostBundle(proxy, true);
-            await redeploy('McdSubProxy', undefined, undefined, undefined, repayBundleId, boostBundleId);
+            await redeploy('McdSubProxy', REGISTRY_ADDR, false, true, repayBundleId, boostBundleId);
             console.log({ repayBundleId, boostBundleId });
         }
     }
