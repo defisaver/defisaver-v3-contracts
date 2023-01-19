@@ -10,7 +10,7 @@ import "./helpers/MorphoHelper.sol";
 contract MorphoClaim is ActionBase, MorphoHelper {
     using TokenUtils for address;
 
-    /// @param to Where the claimed will be sent
+    /// @param to Where the claimed tokens will be sent
     /// @param claimable The overall claimable amount of token rewards
     /// @param proof The merkle proof that validates this claim
     struct Params {
