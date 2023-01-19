@@ -2,7 +2,9 @@
 
 pragma solidity =0.8.10;
 
-contract MainnetUtilAddresses {
+import "./MainnetDAIAddress.sol";
+
+contract MainnetUtilAddresses is MainnetDAIAddress {
     address internal refillCaller = 0x33fDb79aFB4456B604f376A45A546e7ae700e880;
     address internal feeAddr = 0x76720aC2574631530eC8163e4085d6F98513fb27;
 
@@ -14,7 +16,6 @@ contract MainnetUtilAddresses {
     address internal constant PROXY_FACTORY_ADDR = 0xA26e15C895EFc0616177B7c1e7270A4C7D51C997;
     address internal constant DFS_PROXY_REGISTRY_ADDR = 0x29474FdaC7142f9aB7773B8e38264FA15E3805ed;
 
-    address internal constant DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address internal constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address internal constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant WSTETH_ADDR = 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;

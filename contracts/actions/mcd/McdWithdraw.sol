@@ -123,29 +123,6 @@ contract McdWithdraw is ActionBase, McdHelper {
         ICropper(CROPPER).exit(_joinAddr, address(this), _amount);
     }
 
-    /// @notice Returns all the collateral of the vault, formatted in the correct decimal
-    /// @dev Will fail if token is over 18 decimals
-    function getAllColl(IManager _mcdManager, address _joinAddr, uint _vaultId) internal view returns (uint amount) {
-        bytes32 ilk;
-
-        if (address(_mcdManager) == CROPPER) {
-            ilk = ICdpRegistry(CDP_REGISTRY).ilks(_vaultId);
-        } else {
-            ilk = _mcdManager.ilks(_vaultId);
-        }
-
-        (amount, ) = getCdpInfo(
-            _mcdManager,
-            _vaultId,
-            ilk
-        );
-
-        if (IJoin(_joinAddr).dec() != 18) {
-            return div(amount, 10 ** sub(18, IJoin(_joinAddr).dec()));
-        }
-
-    }
-
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
