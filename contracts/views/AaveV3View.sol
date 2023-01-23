@@ -18,6 +18,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant RESERVE_FACTOR_MASK =            0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant LIQUIDATION_THRESHOLD_MASK =     0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFF; // prettier-ignore
     uint256 internal constant DEBT_CEILING_MASK =              0xF0000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
+    uint256 internal constant FLASHLOAN_ENABLED_MASK =         0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF; // prettier-ignore
 
     
     uint256 internal constant LIQUIDATION_THRESHOLD_START_BIT_POSITION = 16;
@@ -28,6 +29,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant SUPPLY_CAP_START_BIT_POSITION = 116;
     uint256 internal constant EMODE_CATEGORY_START_BIT_POSITION = 168;
     uint256 internal constant DEBT_CEILING_START_BIT_POSITION = 212;
+    uint256 internal constant FLASHLOAN_ENABLED_START_BIT_POSITION = 63;
 
     using TokenUtils for address;
 
@@ -84,6 +86,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         bool isolationModeBorrowingEnabled; //pool.config
         bool isSiloedForBorrowing; //AaveProtocolDataProvider.getSiloedBorrowing
         uint256 eModeCollateralFactor; //pool.getEModeCategoryData.ltv
+        bool isFlashLoanEnabled;
     }
 
     function getHealthFactor(address _market, address _user)
@@ -234,7 +237,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             debtCeilingForIsolationMode: getDebtCeiling(config),
             isolationModeTotalDebt: reserveData.isolationModeTotalDebt,
             isSiloedForBorrowing: isSiloedForBorrowing(_market, _tokenAddr),
-            eModeCollateralFactor: getEModeCollateralFactor(uint8(getEModeCategory(config)), lendingPool)
+            eModeCollateralFactor: getEModeCollateralFactor(uint8(getEModeCategory(config)), lendingPool),
+            isFlashLoanEnabled: getFlashLoanEnabled(config)
         });
     }
 
@@ -432,5 +436,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         return categoryData.ltv;
     }
 
+    function getFlashLoanEnabled(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
+        return (self.data & ~FLASHLOAN_ENABLED_MASK) != 0;
+    }
 
 }
