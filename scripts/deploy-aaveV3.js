@@ -21,6 +21,7 @@ async function main() {
     const aaveV3SwapBorrowRateMode = await redeploy('AaveV3SwapBorrowRateMode', addrs[network].REGISTRY_ADDR, true, true);
     const aaveV3Withdraw = await redeploy('AaveV3Withdraw', addrs[network].REGISTRY_ADDR, true, true);
     const aaveV3View = await redeploy('AaveV3View', addrs[network].REGISTRY_ADDR, true, true);
+    const aaveFL = await redeploy('FLAaveV3', addrs[network].REGISTRY_ADDR, true, true);
 
     console.log(`AaveV3ATokenPayback: ${aaveV3ATokenPayback.address}`);
     console.log(`AaveV3Borrow: ${aaveV3Borrow.address}`);
@@ -32,6 +33,7 @@ async function main() {
     console.log(`AaveV3SwapBorrowRateMode: ${aaveV3SwapBorrowRateMode.address}`);
     console.log(`AaveV3Withdraw: ${aaveV3Withdraw.address}`);
     console.log(`AaveV3View: ${aaveV3View.address}`);
+    console.log(`FLAaveV3: ${aaveFL.address}`);
 
     process.exit(0);
 }
