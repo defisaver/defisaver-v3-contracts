@@ -221,12 +221,12 @@ const updateAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGIST
 
 const addBotCaller = async (
     botAddr,
-    regAddr = addrs[network].REGISTRY_ADDR,
+    regAddr = addrs[getNetwork()].REGISTRY_ADDR,
     isFork = false,
-    networkInjected = network,
+    networkInjected = getNetwork(),
 ) => {
-    if (regAddr === addrs[network].REGISTRY_ADDR && !isFork) {
-        await impersonateAccount(addrs[network].OWNER_ACC);
+    if (regAddr === addrs[getNetwork()].REGISTRY_ADDR && !isFork) {
+        await impersonateAccount(addrs[getNetwork()].OWNER_ACC);
     }
 
     const signer = await hre.ethers.provider.getSigner(addrs[networkInjected].OWNER_ACC);
@@ -239,8 +239,8 @@ const addBotCaller = async (
 
     await botAuth.addCaller(botAddr, { gasLimit: 400000 });
 
-    if (regAddr === addrs[network].REGISTRY_ADDR && !isFork) {
-        await stopImpersonatingAccount(addrs[network].OWNER_ACC);
+    if (regAddr === addrs[getNetwork()].REGISTRY_ADDR && !isFork) {
+        await stopImpersonatingAccount(addrs[getNetwork()].OWNER_ACC);
     }
 };
 

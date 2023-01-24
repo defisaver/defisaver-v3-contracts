@@ -1913,6 +1913,132 @@ const createLiquityPaybackChickenOutStrategy = () => {
     return strategy.encodeForDsProxyCall();
 };
 
+const createMorphoAaveV2FLBoostStrategy = () => {
+    const strategy = new dfs.Strategy('MorphoAaveV2FLBoostStrategy');
+
+    strategy.addTrigger(new dfs.triggers.MorphoAaveV2RatioTrigger(
+        '%nullAddr', '%0', '%0',
+    ));
+    strategy.addAction(new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.EulerFlashLoanAction(
+            '%dAsset', '%flAmount',
+        ),
+    ));
+    strategy.addAction(new dfs.actions.basic.GasFeeAction(
+        '%0', '%dAsset', '$1',
+    ));
+    strategy.addAction(new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%dAsset',
+            '%cAsset',
+            '$2',
+            '%exchangeWrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    ));
+    strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
+        '%cAsset', '$3', '%nullAddr', '%nullAddr',
+    ));
+    strategy.addAction(new dfs.actions.morpho.MorphoAaveV2BorrowAction(
+        '%dAsset', '$1', '%flAddress',
+    ));
+
+    return strategy.encodeForDsProxyCall();
+};
+
+const createMorphoAaveV2BoostStrategy = () => {
+    const strategy = new dfs.Strategy('MorphoAaveV2BoostStrategy');
+
+    strategy.addTrigger(new dfs.triggers.MorphoAaveV2RatioTrigger(
+        '%nullAddr', '%0', '%0',
+    ));
+    strategy.addAction(new dfs.actions.morpho.MorphoAaveV2BorrowAction(
+        '%dAsset', '%boostAmount', '%nullAddr',
+    ));
+    strategy.addAction(new dfs.actions.basic.GasFeeAction(
+        '%0', '%dAsset', '$1',
+    ));
+    strategy.addAction(new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%dAsset',
+            '%cAsset',
+            '$2',
+            '%exchangeWrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    ));
+    strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
+        '%cAsset', '$3', '%nullAddr', '%nullAddr',
+    ));
+
+    return strategy.encodeForDsProxyCall();
+};
+
+const createMorphoAaveV2FLRepayStrategy = () => {
+    const strategy = new dfs.Strategy('MorphoAaveV2FLRepayStrategy');
+
+    strategy.addTrigger(new dfs.triggers.MorphoAaveV2RatioTrigger(
+        '%nullAddr', '%0', '%0',
+    ));
+    strategy.addAction(new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.EulerFlashLoanAction(
+            '%cAsset', '%flAmount',
+        ),
+    ));
+    strategy.addAction(new dfs.actions.basic.GasFeeAction(
+        '%0', '%cAsset', '$1',
+    ));
+    strategy.addAction(new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%cAsset',
+            '%dAsset',
+            '$2',
+            '%exchangeWrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    ));
+    strategy.addAction(new dfs.actions.morpho.MorphoAaveV2PaybackAction(
+        '%dAsset', '$3', '%nullAddr', '%nullAddr',
+    ));
+    strategy.addAction(new dfs.actions.morpho.MorphoAaveV2WithdrawAction(
+        '%cAsset', '$1', '%flAddr',
+    ));
+
+    return strategy.encodeForDsProxyCall();
+};
+
+const createMorphoAaveV2RepayStrategy = () => {
+    const strategy = new dfs.Strategy('MorphoAaveV2RepayStrategy');
+
+    strategy.addTrigger(new dfs.triggers.MorphoAaveV2RatioTrigger(
+        '%nullAddr', '%0', '%0',
+    ));
+    strategy.addAction(new dfs.actions.morpho.MorphoAaveV2WithdrawAction(
+        '%cAsset', '%repayAmount', '&proxy',
+    ));
+    strategy.addAction(new dfs.actions.basic.GasFeeAction(
+        '%0', '%cAsset', '$1',
+    ));
+    strategy.addAction(new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%cAsset',
+            '%dAsset',
+            '$2',
+            '%exchangeWrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    ));
+    strategy.addAction(new dfs.actions.morpho.MorphoAaveV2PaybackAction(
+        '%dAsset', '$3', '%nullAddr', '%nullAddr',
+    ));
+
+    return strategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
@@ -1952,4 +2078,8 @@ module.exports = {
     createCompV3EOAFlBoostStrategy,
     createLiquityPaybackChickenInStrategy,
     createLiquityPaybackChickenOutStrategy,
+    createMorphoAaveV2FLBoostStrategy,
+    createMorphoAaveV2BoostStrategy,
+    createMorphoAaveV2FLRepayStrategy,
+    createMorphoAaveV2RepayStrategy,
 };
