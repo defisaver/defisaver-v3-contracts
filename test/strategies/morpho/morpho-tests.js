@@ -295,8 +295,6 @@ const morphoAaveV2StrategiesTest = () => {
     morphoAaveV2RepayTest();
 };
 
-morphoAaveV2StrategiesTest();
-
 module.exports = {
     morphoAaveV2StrategiesTest,
     morphoAaveV2BoostTest,
