@@ -55,27 +55,32 @@ const callDcaStrategy = async (botAcc, strategyExecutor, subId, strategySub) => 
         placeHolderAddr, placeHolderAddr, placeHolderAddr,
     );
 
-    const gasCost = 500_000;
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        gasCost, placeHolderAddr, '$1',
-    );
-
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            WETH_ADDRESS, // TODO: Why we need to hardcode this, can't be passed as &
+            WETH_ADDRESS,
             DAI_ADDR,
-            '$2',
+            '0',
             UNISWAP_WRAPPER,
         ),
         placeHolderAddr,
         placeHolderAddr,
     );
 
+    const gasCost = 500_000;
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        gasCost, placeHolderAddr, '0',
+    );
+
+    const sendTokenAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        placeHolderAddr, placeHolderAddr, 0,
+    );
+
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
     actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
-    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(sendTokenAction.encodeForRecipe()[0]);
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len

@@ -119,8 +119,6 @@ const limitOrderStrategyTest = async () => {
 };
 
 const dcaStrategyTest = async () => {
-    // TESTED FROM BLOCK: 13146320
-
     // Convert ETH -> DAI, every N Days
     describe('DCA Strategy', function () {
         this.timeout(120000);
