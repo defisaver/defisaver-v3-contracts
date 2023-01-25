@@ -107,6 +107,7 @@ const {
     createFlCompV3EOARepayStrategy,
     createLiquityPaybackChickenInStrategy,
     createLiquityPaybackChickenOutStrategy,
+    createDCAStrategy,
 } = require('../test/strategies');
 
 const {
@@ -120,6 +121,7 @@ const {
     subCompV3AutomationStrategy,
     subCbRebondStrategy,
     subLiquityCBPaybackStrategy,
+    subDcaStrategy,
 } = require('../test/strategy-subs');
 
 const { getTroveInfo } = require('../test/utils-liquity');
@@ -1931,6 +1933,66 @@ const createCompV3Position = async (
     }
 };
 
+const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    await topUp(senderAcc.address);
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const strategyData = createDCAStrategy();
+    await openStrategyAndBundleStorage(true);
+
+    const strategyId = await createStrategy(proxy, ...strategyData, true);
+
+    await redeploy('TimestampTrigger', REGISTRY_ADDR, false, true);
+
+    const srcToken = getAssetInfo(srcTokenLabel);
+    const destToken = getAssetInfo(destTokenLabel);
+
+    const DAY = 1 * 24 * 60 * 60;
+
+    const intervalInSeconds = interval * DAY;
+    const lastTimestamp = Math.floor(Date.now() / 1000) + intervalInSeconds;
+
+    const amountInDecimals = hre.ethers.utils.parseUnits(amount, srcToken.decimals);
+
+    const sub = await subDcaStrategy(
+        proxy,
+        srcToken.address,
+        destToken.address,
+        amountInDecimals,
+        intervalInSeconds,
+        lastTimestamp,
+        senderAcc.address,
+        strategyId,
+    );
+
+    console.log(`Subscribed to DCA strategy with sub id ${sub.subId}`);
+};
+
 (async () => {
     program
         .command('new-fork <network>')
@@ -2208,6 +2270,14 @@ const createCompV3Position = async (
         .action(async (price, priceState, senderAddr) => {
             // eslint-disable-next-line max-len
             await liquityCloseToCollStrategySub(price, priceState, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('sub-dca <srcTokenLabel> <buyTokenLabel> <amount> <interval> [senderAddr]')
+        .description('Subscribes to a DCA strategy')
+        .action(async (srcTokenLabel, buyTokenLabel, amount, interval, senderAddr) => {
+            await dcaStrategySub(srcTokenLabel, buyTokenLabel, amount, interval, senderAddr);
             process.exit(0);
         });
 

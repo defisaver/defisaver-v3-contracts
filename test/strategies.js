@@ -1080,7 +1080,6 @@ const createDCAStrategy = () => {
     dcaStrategy.addSubSlot('&buyToken', 'address');
     dcaStrategy.addSubSlot('&amount', 'uint256');
     dcaStrategy.addSubSlot('&interval', 'uint256');
-    dcaStrategy.addSubSlot('&lastTimestamp', 'uint256');
 
     const timestampTrigger = new dfs.triggers.TimestampTrigger('0');
     dcaStrategy.addTrigger(timestampTrigger);
