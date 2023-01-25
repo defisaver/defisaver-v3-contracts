@@ -107,6 +107,10 @@ const {
     createFlCompV3EOARepayStrategy,
     createLiquityPaybackChickenInStrategy,
     createLiquityPaybackChickenOutStrategy,
+    createAaveV3BoostStrategy,
+    createAaveV3RepayStrategy,
+    createAaveFLV3BoostStrategy,
+    createAaveFLV3RepayStrategy,
 } = require('../test/strategies');
 
 const {
@@ -1405,6 +1409,84 @@ const subAaveAutomation = async (
     console.log(`Aave position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
 };
 
+const subAaveV3MainnetAutomation = async (
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    sender,
+) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    await topUp(senderAcc.address);
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+    await topUp(getOwnerAddr());
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await openStrategyAndBundleStorage(true);
+    const aaveRepayStrategyEncoded = createAaveV3RepayStrategy();
+    const aaveRepayFLStrategyEncoded = createAaveFLV3RepayStrategy();
+
+    const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
+    const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
+
+    await createBundle(proxy, [strategyId1, strategyId2]);
+
+    const aaveBoostStrategyEncoded = createAaveV3BoostStrategy();
+    const aaveBoostFLStrategyEncoded = createAaveFLV3BoostStrategy();
+
+    const strategyId11 = await createStrategy(proxy, ...aaveBoostStrategyEncoded, true);
+    const strategyId22 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
+
+    await createBundle(proxy, [strategyId11, strategyId22]);
+
+    await redeploy('AaveSubProxy', addrs[network].REGISTRY_ADDR, false, true);
+    await redeploy('AaveV3RatioTrigger', addrs[network].REGISTRY_ADDR, false, true);
+    await redeploy('AaveV3RatioCheck', addrs[network].REGISTRY_ADDR, false, true);
+
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
+
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
+
+    // same as in L1
+    const subIds = await subAaveV3L2AutomationStrategy(
+        proxy,
+        minRatioFormatted.toHexString().slice(2),
+        maxRatioFormatted.toHexString().slice(2),
+        optimalRatioBoostFormatted.toHexString().slice(2),
+        optimalRatioRepayFormatted.toHexString().slice(2),
+        boostEnabled,
+        addrs[network].REGISTRY_ADDR,
+    );
+
+    console.log(`Aave position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
+};
+
 const subAaveClose = async (
     collSymbol,
     debtSymbol,
@@ -2095,6 +2177,33 @@ const createCompV3Position = async (
             ) => {
                 // eslint-disable-next-line max-len
                 await subAaveAutomation(
+                    minRatio,
+                    maxRatio,
+                    optimalRatioBoost,
+                    optimalRatioRepay,
+                    boostEnabled,
+                    senderAcc,
+                );
+                process.exit(0);
+            },
+        );
+
+    program
+        .command(
+            'sub-aaveV3-mainnet-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+        )
+        .description('Subscribes to aave automation can be both b/r')
+        .action(
+            async (
+                minRatio,
+                maxRatio,
+                optimalRatioBoost,
+                optimalRatioRepay,
+                boostEnabled,
+                senderAcc,
+            ) => {
+                // eslint-disable-next-line max-len
+                await subAaveV3MainnetAutomation(
                     minRatio,
                     maxRatio,
                     optimalRatioBoost,
