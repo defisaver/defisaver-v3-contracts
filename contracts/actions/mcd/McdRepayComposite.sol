@@ -14,14 +14,20 @@ import "./helpers/McdRatioHelper.sol";
 contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRatioHelper {
     using TokenUtils for address;
 
-    error RatioNotLowerThanBefore(uint256, uint256);
+    error RatioNotHigherThanBefore(uint256, uint256);
     error WrongAsset(address);
+    error TargetRatioMiss(uint256, uint256);
+
+    /// @dev 2% offset acceptable
+    uint256 internal constant RATIO_OFFSET = 20000000000000000;
 
     /// @param vaultId Id of the vault
     /// @param joinAddr Collateral join address
     /// @param gasUsed Gas amount to charge in strategies
     /// @param flAddress Flashloan address 0x0 if we're not using flashloan
     /// @param flAmount Amount that the flashloan actions returns if used (must have it because of fee)
+    /// @param nextPrice Maker OSM next price if 0 we're using current price (used for ratio check)
+    /// @param targetRatio Target ratio to repay if 0 we are not checking the ratio
     /// @param exchangeData Data needed for swap
     struct RepayParams {
         uint256 vaultId;
@@ -29,6 +35,8 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         uint256 gasUsed;
         address flAddr;
         uint256 flAmount;
+        uint256 nextPrice;
+        uint256 targetRatio;
         ExchangeData exchangeData;
     }
 
@@ -109,7 +117,7 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         uint256 ratioBefore;
         // is part of strategy so check before ratio
         if (_repayParams.gasUsed != 0) {
-            ratioBefore = getRatio(_repayParams.vaultId, 0);
+            ratioBefore = getRatio(_repayParams.vaultId, _repayParams.nextPrice);
         }
 
         uint256 repayAmount = _repayParams.exchangeData.srcAmount;
@@ -167,10 +175,16 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
 
         // is part of strategy so check after ratio
         if (_repayParams.gasUsed != 0) {    
-            uint256 ratioAfter = getRatio(_repayParams.vaultId, 0);
+            uint256 ratioAfter = getRatio(_repayParams.vaultId, _repayParams.nextPrice);
 
+            // ratio worst off than before
             if (ratioAfter < ratioBefore) {
-                revert RatioNotLowerThanBefore(ratioBefore, ratioAfter);
+                revert RatioNotHigherThanBefore(ratioBefore, ratioAfter);
+            }
+
+            // can't repay too much over targetRatio so we don't trigger boost after
+            if (_repayParams.targetRatio != 0 && ratioAfter > (_repayParams.targetRatio + RATIO_OFFSET)) {
+                revert TargetRatioMiss(ratioAfter, _repayParams.targetRatio);
             }
         }
 

@@ -6,11 +6,15 @@ import "../../auth/AdminAuth.sol";
 import "../../auth/ProxyPermission.sol";
 import "../../core/strategy/SubStorage.sol";
 import "../../utils/helpers/UtilHelper.sol";
+import "../../interfaces/ISubscriptions.sol";
 
 /// @title Subscribes users to boost/repay strategies for Maker
 contract McdSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper, UtilHelper {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID; 
+
+    address public constant MCD_SUB_ADDRESS = 0xC45d4f6B6bf41b6EdAA58B01c4298B8d9078269a;
+    address public constant LEGACY_PROXY_AUTH_ADDR = 0x1816A86C4DA59395522a42b871bf11A4E96A1C7a;
 
     constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
         REPAY_BUNDLE_ID = _repayBundleId;
@@ -19,8 +23,8 @@ contract McdSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper, U
 
     enum RatioState { OVER, UNDER }
 
-    /// @dev 5% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 50000000000000000;
+    /// @dev 2% offset acceptable
+    uint256 internal constant RATIO_OFFSET = 20000000000000000;
 
     error WrongSubParams(uint256 minRatio, uint256 maxRatio);
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
@@ -40,8 +44,16 @@ contract McdSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper, U
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToMcdAutomation(
-        McdSubData calldata _subData
+        McdSubData calldata _subData,
+        bool _shouldLegacyUnsub
     ) public {
+        if (_shouldLegacyUnsub) {
+            ISubscriptions(MCD_SUB_ADDRESS).unsubscribe(_subData.vaultId);
+
+            removePermission(LEGACY_PROXY_AUTH_ADDR);
+
+        }
+
         givePermission(PROXY_AUTH_ADDR);
         StrategySub memory repaySub = formatRepaySub(_subData);
 
