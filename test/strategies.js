@@ -2086,7 +2086,7 @@ const createAaveV3RepayStrategy = () => {
         '&proxy', // hardcoded
     );
 
-    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '0', // must stay variable backend sets gasCost
         '%debtAddr', // must stay variable as debt can differ
         '$2', // hardcoded output from withdraw action
