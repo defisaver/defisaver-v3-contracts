@@ -9,19 +9,26 @@ import "../../interfaces/mcd/IDaiJoin.sol";
 import "../../interfaces/mcd/IJug.sol";
 
 import "./helpers/McdHelper.sol";
+import "./helpers/McdRatioHelper.sol";
 
 /// @title Single mcd boost action can use flashloan or not
-contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper {
+contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRatioHelper {
     using TokenUtils for address;
 
-    error CollateralNotHigher(uint256, uint256);
+    error RatioNotLowerThanBefore(uint256, uint256);
     error WrongAsset(address);
+    error TargetRatioMiss(uint256, uint256);
+
+    /// @dev 2% offset acceptable
+    uint256 internal constant RATIO_OFFSET = 20000000000000000;
 
     /// @param vaultId Id of the vault
     /// @param joinAddr Collateral join address
     /// @param gasUsed Gas amount to charge in strategies
     /// @param flAddr Flashloan address 0x0 if we're not using flashloan
     /// @param flAmount Amount that the flashloan actions returns if used (must have it because of fee)
+    /// @param nextPrice Maker OSM next price if 0 we're using current price (used for ratio check)
+    /// @param targetRatio Target ratio to repay if 0 we are not checking the ratio
     /// @param exchangeData Data needed for swap
     struct BoostParams {
         uint256 vaultId;
@@ -29,6 +36,8 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper {
         uint256 gasUsed;
         address flAddr;
         uint256 flAmount;
+        uint256 nextPrice;
+        uint256 targetRatio;
         ExchangeData exchangeData;
     }
 
@@ -111,13 +120,9 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper {
 
         (address urn, bytes32 ilk) = getUrnAndIlk(MCD_MANAGER_ADDR, _boostParams.vaultId);
 
-        uint256 collateralBefore;
+        uint256 ratioBefore;
         if (_boostParams.gasUsed != 0) {
-            (collateralBefore, ) = getCdpInfo(
-                    IManager(MCD_MANAGER_ADDR),
-                    _boostParams.vaultId,
-                    ilk
-                );
+             ratioBefore = getRatio(_boostParams.vaultId, _boostParams.nextPrice);
         }
 
         address collateralAsset = _boostParams.exchangeData.destAddr;
@@ -168,14 +173,16 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper {
 
         // check if collateral is higher, only if part of strategy
         if (_boostParams.gasUsed != 0) {
-            (uint256 collateralAfter, ) = getCdpInfo(
-                IManager(MCD_MANAGER_ADDR),
-                _boostParams.vaultId,
-                ilk
-            );
+            uint256 ratioAfter = getRatio(_boostParams.vaultId, _boostParams.nextPrice);
 
-            if (collateralBefore >= collateralAfter) {
-                revert CollateralNotHigher(collateralBefore, collateralAfter);
+            // ratio worst off than before
+            if (ratioAfter >= ratioBefore) {
+                revert RatioNotLowerThanBefore(ratioBefore, ratioAfter);
+            }
+
+            // check if ratio is in the target range
+            if (_boostParams.targetRatio != 0 && ratioAfter < (_boostParams.targetRatio - RATIO_OFFSET)) {
+                revert TargetRatioMiss(ratioAfter, _boostParams.targetRatio);
             }
         }
 

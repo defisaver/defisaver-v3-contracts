@@ -620,6 +620,8 @@ const callMcdRepayCompositeStrategy = async (botAcc, strategyExecutor, strategyI
         repayGasCost,
         nullAddress,
         0,
+        0,
+        0,
         await formatMockExchangeObj(
             collAsset,
             getAssetInfo('DAI'),
@@ -663,6 +665,8 @@ const callMcdFLRepayCompositeStrategy = async (botAcc, strategyExecutor, strateg
         repayGasCost,
         flAddr,
         0,
+        0,
+        0,
         await formatMockExchangeObj(
             collAsset,
             getAssetInfo('DAI'),
@@ -697,6 +701,8 @@ const callMcdBoostCompositeStrategy = async (botAcc, strategyExecutor, strategyI
         joinAddr,
         boostGasCost,
         nullAddress,
+        0,
+        0,
         0,
         await formatMockExchangeObj(
             getAssetInfo('DAI'),
@@ -741,6 +747,8 @@ const callMcdFLBoostCompositeStrategy = async (botAcc, strategyExecutor, strateg
         boostGasCost,
         flAddr,
         0, // flAmount is injected
+        0,
+        0,
         await formatMockExchangeObj(
             getAssetInfo('DAI'),
             collAsset,

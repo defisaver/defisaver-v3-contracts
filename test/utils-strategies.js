@@ -225,7 +225,7 @@ const subToMcdProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY
 
     const functionData = subProxy.interface.encodeFunctionData(
         'subToMcdAutomation',
-        [inputData],
+        [inputData, false],
     );
 
     const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
