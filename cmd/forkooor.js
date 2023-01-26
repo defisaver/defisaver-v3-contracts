@@ -1446,22 +1446,22 @@ const subAaveV3MainnetAutomation = async (
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    await openStrategyAndBundleStorage(true);
-    const aaveRepayStrategyEncoded = createAaveV3RepayStrategy();
-    const aaveRepayFLStrategyEncoded = createAaveFLV3RepayStrategy();
+    // await openStrategyAndBundleStorage(true);
+    // const aaveRepayStrategyEncoded = createAaveV3RepayStrategy();
+    // const aaveRepayFLStrategyEncoded = createAaveFLV3RepayStrategy();
 
-    const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
-    const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
+    // const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
+    // const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
 
-    await createBundle(proxy, [strategyId1, strategyId2]);
+    // await createBundle(proxy, [strategyId1, strategyId2]);
 
-    const aaveBoostStrategyEncoded = createAaveV3BoostStrategy();
-    const aaveBoostFLStrategyEncoded = createAaveFLV3BoostStrategy();
+    // const aaveBoostStrategyEncoded = createAaveV3BoostStrategy();
+    // const aaveBoostFLStrategyEncoded = createAaveFLV3BoostStrategy();
 
-    const strategyId11 = await createStrategy(proxy, ...aaveBoostStrategyEncoded, true);
-    const strategyId22 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
+    // const strategyId11 = await createStrategy(proxy, ...aaveBoostStrategyEncoded, true);
+    // const strategyId22 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
 
-    await createBundle(proxy, [strategyId11, strategyId22]);
+    // await createBundle(proxy, [strategyId11, strategyId22]);
 
     await redeploy('AaveSubProxy', addrs[network].REGISTRY_ADDR, false, true);
     await redeploy('AaveV3RatioTrigger', addrs[network].REGISTRY_ADDR, false, true);

@@ -13,7 +13,7 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
 
     enum RatioState { OVER, UNDER }
 
-    address public constant AAVE_MARKET = 0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb;
+    address public constant AAVE_MARKET = 0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e;
 
     /// @dev 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
