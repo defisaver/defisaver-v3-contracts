@@ -51,9 +51,9 @@ const callDcaStrategy = async (botAcc, strategyExecutor, subId, strategySub) => 
     const triggerCallData = [];
     const actionsCallData = [];
 
-    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-        placeHolderAddr, placeHolderAddr, placeHolderAddr,
-    );
+    // const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+    //     placeHolderAddr, placeHolderAddr, placeHolderAddr,
+    // );
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -77,7 +77,7 @@ const callDcaStrategy = async (botAcc, strategyExecutor, subId, strategySub) => 
 
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
-    actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
+    // actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(sendTokenAction.encodeForRecipe()[0]);

@@ -23,12 +23,12 @@ const { createDCAStrategy } = require('../../strategies');
 
 const { createStrategy, addBotCaller } = require('../../utils-strategies');
 
-const TWO_DAYS = 2 * 24 * 60 * 60;
-const START_TIMESTAMP = 1630489138;
-
 const { callLimitOrderStrategy } = require('../../strategy-calls');
 const { subLimitOrderStrategy } = require('../../strategy-subs');
 const { createLimitOrderStrategy } = require('../../strategies');
+
+const DAY = 1 * 24 * 60 * 60;
+const TWO_DAYS = 2 * 24 * 60 * 60;
 
 const limitOrderStrategyTest = async () => {
     describe('Limit-Order-Strategy', function () {
@@ -123,6 +123,22 @@ const dcaStrategyTest = async () => {
     describe('DCA Strategy', function () {
         this.timeout(120000);
 
+        const getUpdatedStrategySub = async (subStorage, subStorageAddr) => {
+            const events = (await subStorage.queryFilter({
+                address: subStorageAddr,
+                topics: [
+                    hre.ethers.utils.id('UpdateData(uint256,bytes32,(uint64,bool,bytes[],bytes32[]))'),
+                ],
+            }));
+
+            const lastEvent = events.at(-1);
+
+            const abiCoder = hre.ethers.utils.defaultAbiCoder;
+            const strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], lastEvent.data)[0];
+
+            return strategySub;
+        };
+
         let senderAcc;
         let proxy;
         let botAcc;
@@ -143,7 +159,6 @@ const dcaStrategyTest = async () => {
             await redeploy('GasFeeTaker');
             await redeploy('DFSSell');
             await redeploy('TimestampTrigger');
-            await redeploy('PullToken');
 
             subStorageAddr = getAddrFromRegistry('SubStorage');
             subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
@@ -151,6 +166,7 @@ const dcaStrategyTest = async () => {
             await addBotCaller(botAcc.address);
 
             proxy = await getProxy(senderAcc.address);
+            await approve(WETH_ADDRESS, proxy.address);
         });
 
         it('... should make a new DCA Strategy for selling eth into dai', async () => {
@@ -163,7 +179,14 @@ const dcaStrategyTest = async () => {
             const tokenAddrBuy = DAI_ADDR;
 
             const interval = TWO_DAYS;
-            lastTimestamp = START_TIMESTAMP;
+            // lastTimestamp = Math.floor(Date.now() / 1000) + interval;
+
+            const latestBlock = await hre.ethers.provider.getBlock('latest');
+
+            console.log('Latest block timestamp: ', latestBlock.timestamp);
+            console.log('Start timestamp: ', lastTimestamp);
+
+            lastTimestamp = latestBlock.timestamp + interval;
 
             amount = hre.ethers.utils.parseUnits('1', 18); // Sell 1 eth
 
@@ -180,9 +203,9 @@ const dcaStrategyTest = async () => {
         });
 
         it('... should trigger DCA strategy', async () => {
-        // get weth and approve dsproxy to pull
+            await timeTravel(TWO_DAYS);
+            // get weth and approve dsproxy to pull
             await depositToWeth(amount.toString());
-            await approve(WETH_ADDRESS, proxy.address);
 
             const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
             const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
@@ -192,17 +215,7 @@ const dcaStrategyTest = async () => {
             // eslint-disable-next-line max-len
             await callDcaStrategy(botAcc, strategyExecutor, subId, strategySub, subStorage.address, newTimestamp);
 
-            const events = (await subStorage.queryFilter({
-                address: subStorageAddr,
-                topics: [
-                    hre.ethers.utils.id('UpdateData(uint256,bytes32,(uint64,bool,bytes[],bytes32[]))'),
-                ],
-            }));
-
-            const lastEvent = events.at(-1);
-
-            const abiCoder = hre.ethers.utils.defaultAbiCoder;
-            strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], lastEvent.data)[0];
+            strategySub = await getUpdatedStrategySub(subStorage, subStorageAddr);
 
             const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
             const wethBalanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
@@ -213,23 +226,37 @@ const dcaStrategyTest = async () => {
 
         it('... should trigger DCA strategy again after 2 days', async () => {
             await timeTravel(TWO_DAYS);
+
             // get weth and approve dsproxy to pull
             await depositToWeth(amount.toString());
-            await approve(WETH_ADDRESS, proxy.address);
 
             const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
             const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
 
-            const newTimestamp = lastTimestamp + TWO_DAYS;
-
             // eslint-disable-next-line max-len
-            await callDcaStrategy(botAcc, strategyExecutor, subId, strategySub, subStorage.address, newTimestamp);
+            await callDcaStrategy(botAcc, strategyExecutor, subId, strategySub, subStorage.address);
+
+            strategySub = await getUpdatedStrategySub(subStorage, subStorageAddr);
 
             const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
             const wethBalanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
 
             expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
             expect(wethBalanceBefore).to.be.gt(wethBalanceAfter);
+        });
+
+        it('... should fail to trigger DCA strategy again after 1 day', async () => {
+            await timeTravel(DAY);
+            // get weth and approve dsproxy to pull
+            await depositToWeth(amount.toString());
+
+            try {
+                // eslint-disable-next-line max-len
+                await callDcaStrategy(botAcc, strategyExecutor, subId, strategySub, subStorage.address);
+                expect(true).to.be.equal(false);
+            } catch (err) {
+                expect(true).to.be.equal(true);
+            }
         });
     });
 };

@@ -1975,7 +1975,9 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
     const DAY = 1 * 24 * 60 * 60;
 
     const intervalInSeconds = interval * DAY;
-    const lastTimestamp = Math.floor(Date.now() / 1000) + intervalInSeconds;
+    const latestBlock = await hre.ethers.provider.getBlock('latest');
+
+    const lastTimestamp = latestBlock.timestamp + intervalInSeconds;
 
     const amountInDecimals = hre.ethers.utils.parseUnits(amount, srcToken.decimals);
 

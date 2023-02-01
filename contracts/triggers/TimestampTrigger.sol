@@ -11,8 +11,8 @@ import "../interfaces/strategy/ISubStorage.sol";
 /// and also helps change the timestamp for next execution
 contract TimestampTrigger is ITrigger, AdminAuth {
 
-    /// @param timestamp the next timestamp in which it should trigger
-    /// @param interval how much to increase the next timestamp after executing strategy
+    /// @param timestamp The next timestamp in which it should trigger
+    /// @param interval How much to increase the next timestamp after executing strategy
     struct SubParams {
         uint256 timestamp;
         uint256 interval;

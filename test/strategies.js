@@ -1084,30 +1084,25 @@ const createDCAStrategy = () => {
     const timestampTrigger = new dfs.triggers.TimestampTrigger('0');
     dcaStrategy.addTrigger(timestampTrigger);
 
-    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-        '&sellToken', '&eoa', '&amount',
-    );
-
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '&sellToken',
             '&buyToken',
-            '$1',
+            '&amount',
             '%exchangeWrapper',
         ),
-        '&proxy',
+        '&eoa',
         '&proxy',
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '&buyToken', '$2',
+        '0', '&buyToken', '$1',
     );
 
     const sendTokenAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
-        '&buyToken', '&eoa', '$3',
+        '&buyToken', '&eoa', '$2',
     );
 
-    dcaStrategy.addAction(pullTokenAction);
     dcaStrategy.addAction(sellAction);
     dcaStrategy.addAction(feeTakingAction);
     dcaStrategy.addAction(sendTokenAction);
