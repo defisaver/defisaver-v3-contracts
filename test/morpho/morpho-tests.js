@@ -446,6 +446,7 @@ const morphoFullTest = (testLength) => describe('Morpho-Full-Test', () => {
     morphoAaveV2WithdrawTest(testLength);
     morphoAaveV2BorrowTest(testLength);
     morphoAaveV2PaybackTest(testLength);
+    morphoClaimTest();
 });
 
 module.exports = {
