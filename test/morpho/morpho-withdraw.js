@@ -1,6 +1,6 @@
-const { morphoWithdrawTest } = require('./morpho-tests');
+const { morphoAaveV2WithdrawTest } = require('./morpho-tests');
 const config = require('../../hardhat.config');
 
 let testLength = 10;
 if (config.lightTesting) testLength = 2;
-morphoWithdrawTest(testLength);
+morphoAaveV2WithdrawTest(testLength);

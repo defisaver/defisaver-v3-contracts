@@ -4,6 +4,7 @@ pragma solidity =0.8.10;
 import "../interfaces/aave/IAToken.sol";
 import "../interfaces/morpho/IMorpho.sol";
 import "../interfaces/morpho/IMorphoAaveV2Lens.sol";
+import "../interfaces/morpho/IRewardsDistributor.sol";
 import "../interfaces/morpho/MorphoTypes.sol";
 import "../actions/morpho/helpers/MorphoHelper.sol";
 import "../DS/DSMath.sol";
@@ -21,6 +22,7 @@ contract MorphoAaveV2View is MorphoHelper, DSMath {
 
     struct UserInfo {
         uint256 userHealthFactor;
+        uint256 morphoClaimed;
         UserBalance[] userBalances;
     }
 
@@ -66,6 +68,7 @@ contract MorphoAaveV2View is MorphoHelper, DSMath {
         address[] memory markets = IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getEnteredMarkets(_usr);
         userInfo = UserInfo({
             userHealthFactor: IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getUserHealthFactor(_usr),
+            morphoClaimed: IRewardsDistributor(REWARDS_DISTRIBUTOR_ADDR).claimed(_usr),
             userBalances: new UserBalance[](markets.length)
         });
         

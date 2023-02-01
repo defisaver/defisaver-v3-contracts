@@ -2306,6 +2306,26 @@ const morphoAaveV2Payback = async (
     return receipt;
 };
 
+const morphoClaim = async (
+    proxy,
+    onBehalfOf,
+    claimable,
+    proof,
+) => {
+    const actionAddress = await getAddrFromRegistry('MorphoClaim');
+
+    const action = new dfs.actions.morpho.MorphoClaimAction(
+        onBehalfOf, claimable.toString(), proof,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed morphoClaim: ${gasUsed}`);
+    return receipt;
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -2452,4 +2472,5 @@ module.exports = {
     morphoAaveV2Withdraw,
     morphoAaveV2Borrow,
     morphoAaveV2Payback,
+    morphoClaim,
 };
