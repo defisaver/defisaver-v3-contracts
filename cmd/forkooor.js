@@ -1718,7 +1718,6 @@ const subMorphoAaveV2Automation = async (
     optimalRatioBoost,
     optimalRatioRepay,
     boostEnabled,
-    isEOA,
     sender,
 ) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
