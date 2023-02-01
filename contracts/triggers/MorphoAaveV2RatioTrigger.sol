@@ -5,6 +5,7 @@ pragma solidity =0.8.10;
 import "../interfaces/ITrigger.sol";
 import "../interfaces/morpho/IMorphoAaveV2Lens.sol";
 import "../actions/morpho/helpers/MorphoHelper.sol";
+import "../utils/TransientStorage.sol";
 
 contract MorphoAaveV2RatioTrigger is ITrigger, MorphoHelper {
 
@@ -21,7 +22,6 @@ contract MorphoAaveV2RatioTrigger is ITrigger, MorphoHelper {
     
     function isTriggered(bytes memory, bytes memory _subData)
         public
-        view
         override
         returns (bool)
     {
@@ -29,6 +29,8 @@ contract MorphoAaveV2RatioTrigger is ITrigger, MorphoHelper {
         uint256 currRatio = IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getUserHealthFactor(triggerSubData.user);
         
         if (currRatio == 0) return false;
+
+        TransientStorage(TRANSIENT_STORAGE).setBytes32("MORPHO_AAVEV2_RATIO", bytes32(currRatio));
         
         if (RatioState(triggerSubData.state) == RatioState.OVER) {
             if (currRatio > triggerSubData.ratio) return true;
