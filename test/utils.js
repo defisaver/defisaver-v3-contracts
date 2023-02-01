@@ -32,6 +32,7 @@ const addrs = {
         StrategyProxy: '0x0822902D30CC9c77404e6eB140dC1E98aF5b559A',
         SubProxy: '0xd18d4756bbf848674cc35f1a0B86afEF20787382',
         UNISWAP_WRAPPER: '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54',
+        UNIV3_WRAPPER: '0xA250D449e8246B0be1ecF66E21bB98678448DEF5',
         FEED_REGISTRY: '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf',
         COMET_USDC_ADDR: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
         COMET_USDC_REWARDS_ADDR: '0x1B0e765F6224C21223AeA2af16c1C46E38885a40',
@@ -234,6 +235,8 @@ const coinGeckoHelper = {
     SUSHI: 'sushi',
     bLUSD: 'boosted-lusd',
 };
+
+const compareAddr = (addrA, addrB) => addrA.toLowerCase() === addrB.toLowerCase();
 
 const BN2Float = hre.ethers.utils.formatUnits;
 
@@ -810,7 +813,7 @@ const formatExchangeObjCurve = async (
 
 const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
     console.log({ srcAddr, destAddr });
-    const { AlphaRouter } = await import('@uniswap/smart-order-router');
+    const { AlphaRouter, SwapType } = await import('@uniswap/smart-order-router');
     const {
         CurrencyAmount,
         Token,
@@ -838,18 +841,20 @@ const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
     const swapAmount = CurrencyAmount.fromRawAmount(srcToken, amount.toString());
 
     const router = new AlphaRouter({ chainId, provider: hre.ethers.provider });
-    const route = await router.route(
+    const { path } = await router.route(
         swapAmount, destToken, TradeType.EXACT_INPUT,
         {
+            type: SwapType.SWAP_ROUTER_02,
             slippageTolerance: new Percent(5, 100),
         },
-    ).then((_route) => _route.trade.swaps[0].route);
+        {
+            maxSplits: 0,
+        },
+    ).then(({ methodParameters }) => hre.ethers.utils.defaultAbiCoder.decode(
+        ['(bytes path,address,uint256,uint256)'],
+        `0x${methodParameters.calldata.slice(10)}`,
+    )[0]);
 
-    const path = route.tokenPath.reduce((acc, curr, index) => {
-        const poolInput = curr.address;
-        const poolFee = poolInput.toLowerCase() === destAddr.toLowerCase() ? '' : (route.pools[index].fee).toString(16).padStart(6, 0);
-        return `${acc}${poolInput.slice(2)}${poolFee}`;
-    }, '0x');
     console.log({ path });
 
     return [
@@ -1141,8 +1146,6 @@ const filterEthersObject = (obj) => {
     }
     return keys.map((key) => filterEthersObject(obj[key]));
 };
-
-const compareAddr = (addrA, addrB) => addrA.toLowerCase() === addrB.toLowerCase();
 
 module.exports = {
     addToZRXAllowlist,

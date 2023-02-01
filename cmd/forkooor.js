@@ -113,6 +113,10 @@ const {
     createFlCompV3EOARepayStrategy,
     createLiquityPaybackChickenInStrategy,
     createLiquityPaybackChickenOutStrategy,
+    createMorphoAaveV2BoostStrategy,
+    createMorphoAaveV2FLBoostStrategy,
+    createMorphoAaveV2RepayStrategy,
+    createMorphoAaveV2FLRepayStrategy,
 } = require('../test/strategies');
 
 const {
@@ -126,6 +130,7 @@ const {
     subCompV3AutomationStrategy,
     subCbRebondStrategy,
     subLiquityCBPaybackStrategy,
+    subMorphoAaveV2AutomationStrategy,
 } = require('../test/strategy-subs');
 
 const { getTroveInfo } = require('../test/utils-liquity');
@@ -1353,6 +1358,15 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
     );
 };
 
+const deployMorphoContracts = async () => {
+    await getContractFromRegistry('MorphoAaveV2Supply', undefined, false, true);
+    await getContractFromRegistry('MorphoAaveV2Borrow', undefined, false, true);
+    await getContractFromRegistry('MorphoAaveV2Withdraw', undefined, false, true);
+    await getContractFromRegistry('MorphoAaveV2Payback', undefined, false, true);
+    await getContractFromRegistry('MorphoClaim', undefined, false, true);
+    await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
+};
+
 const createMorphoPosition = async (collSymbol, debtSymbol, collAmount, debtAmount, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
@@ -1377,8 +1391,7 @@ const createMorphoPosition = async (collSymbol, debtSymbol, collAmount, debtAmou
 
     setNetwork(network);
 
-    await getContractFromRegistry('MorphoAaveV2Supply', undefined, false, true);
-    await getContractFromRegistry('MorphoAaveV2Borrow', undefined, false, true);
+    await deployMorphoContracts();
     const view = await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
 
     const { address: collAddr, ...collAssetInfo } = getAssetInfo(collSymbol, chainIds[network]);
@@ -1401,7 +1414,7 @@ const createMorphoPosition = async (collSymbol, debtSymbol, collAmount, debtAmou
                 addrs[network].WETH_ADDRESS,
                 collAddr,
                 Float2BN(sellAmount),
-                addrs[network].UNISWAP_WRAPPER,
+                addrs[network].UNIV3_WRAPPER,
                 senderAcc.address,
                 senderAcc.address,
                 0,
@@ -1697,6 +1710,96 @@ const subCompV3Automation = async (
     );
 
     console.log(`CompV3 position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
+};
+
+const subMorphoAaveV2Automation = async (
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    isEOA,
+    sender,
+) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    await topUp(senderAcc.address);
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const latestBundleId = await getLatestBundleId().then((e) => parseInt(e, 10));
+
+    console.log({ latestBundleId });
+
+    let repayBundleId = latestBundleId - 1;
+    let boostBundleId = latestBundleId;
+
+    if (latestBundleId < 12) {
+        {
+            await openStrategyAndBundleStorage(true);
+            const strategyData = createMorphoAaveV2RepayStrategy();
+            const flStrategyData = createMorphoAaveV2FLRepayStrategy();
+
+            const strategyId = await createStrategy(undefined, ...strategyData, false);
+            const flStrategyId = await createStrategy(undefined, ...flStrategyData, false);
+            repayBundleId = await createBundle(proxy, [strategyId, flStrategyId]);
+        }
+
+        {
+            await openStrategyAndBundleStorage(true);
+            const strategyData = createMorphoAaveV2BoostStrategy();
+            const flStrategyData = createMorphoAaveV2FLBoostStrategy();
+
+            const strategyId = await createStrategy(undefined, ...strategyData, false);
+            const flStrategyId = await createStrategy(undefined, ...flStrategyData, false);
+            boostBundleId = await createBundle(proxy, [strategyId, flStrategyId]);
+        }
+
+        await deployMorphoContracts();
+        await redeploy('MorphoAaveV2SubProxy', undefined, undefined, true, repayBundleId, boostBundleId);
+    }
+    console.log({ repayBundleId, boostBundleId });
+
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
+
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
+
+    const {
+        repaySubId, boostSubId,
+    } = await subMorphoAaveV2AutomationStrategy(
+        proxy,
+        minRatioFormatted,
+        maxRatioFormatted,
+        optimalRatioBoostFormatted,
+        optimalRatioRepayFormatted,
+        boostEnabled,
+    );
+
+    console.log('MorphoAaveV2 position subed', { repaySubId, boostSubId });
 };
 
 const getAavePos = async (
@@ -2285,6 +2388,31 @@ const createCompV3Position = async (
             },
         );
 
+    program
+        .command(
+            'sub-morphoAaveV2-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+        )
+        .description('Subscribes to morphoAaveV2 automation can be both b/r')
+        .action(
+            async (
+                minRatio,
+                maxRatio,
+                optimalRatioBoost,
+                optimalRatioRepay,
+                boostEnabled,
+                senderAcc,
+            ) => {
+                await subMorphoAaveV2Automation(
+                    minRatio,
+                    maxRatio,
+                    optimalRatioBoost,
+                    optimalRatioRepay,
+                    boostEnabled,
+                    senderAcc,
+                );
+                process.exit(0);
+            },
+        );
     program
         .command('sub-mcd-close-to-coll <vaultId> <type> <price> <priceState> [senderAddr]')
         .description('Subscribes to a Mcd close to coll strategy')
