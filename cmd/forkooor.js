@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 /* eslint-disable no-use-before-define */
 /* eslint-disable import/no-extraneous-dependencies */
 const hre = require('hardhat');
@@ -43,6 +44,9 @@ const {
     Float2BN,
     LUSD_ADDR,
     timeTravel,
+    nullAddress,
+    getContractFromRegistry,
+    filterEthersObject,
 } = require('../test/utils');
 
 const {
@@ -73,6 +77,8 @@ const {
     supplyCompV3,
     borrowCompV3,
     createChickenBond,
+    morphoAaveV2Supply,
+    morphoAaveV2Borrow,
 } = require('../test/actions');
 
 const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy, subAaveV3CloseBundle } = require('../test/l2-strategy-subs');
@@ -1347,6 +1353,93 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
     );
 };
 
+const createMorphoPosition = async (collSymbol, debtSymbol, collAmount, debtAmount, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    await getContractFromRegistry('MorphoAaveV2Supply', undefined, false, true);
+    await getContractFromRegistry('MorphoAaveV2Borrow', undefined, false, true);
+    const view = await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
+
+    const { address: collAddr, ...collAssetInfo } = getAssetInfo(collSymbol, chainIds[network]);
+    const { address: debtAddr, ...debtAssetInfo } = getAssetInfo(debtSymbol, chainIds[network]);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    if (collSymbol === 'WETH') {
+        await depositToWeth(Float2BN(collAmount), senderAcc);
+    } else {
+        try {
+            const sellAmount = (
+                (collAmount * 1.1 * getLocalTokenPrice(collSymbol)) / getLocalTokenPrice('WETH')
+            ).toFixed(18);
+            console.log(`selling ${sellAmount} WETH for ${collSymbol}`);
+
+            await sell(
+                proxy,
+                addrs[network].WETH_ADDRESS,
+                collAddr,
+                Float2BN(sellAmount),
+                addrs[network].UNISWAP_WRAPPER,
+                senderAcc.address,
+                senderAcc.address,
+                0,
+                senderAcc,
+                undefined,
+                undefined,
+                true,
+            );
+            console.log(`Buying ${collSymbol} succeeded`);
+        } catch (err) {
+            console.log(err);
+            console.log(`Buying ${collSymbol} failed`);
+        }
+    }
+
+    await approve(collAddr, proxy.address, senderAcc);
+    await morphoAaveV2Supply(
+        proxy,
+        collAddr,
+        Float2BN(collAmount, collAssetInfo.decimals),
+        senderAcc.address,
+        nullAddress,
+    );
+
+    await morphoAaveV2Borrow(
+        proxy,
+        debtAddr,
+        Float2BN(debtAmount, debtAssetInfo.decimals),
+        senderAcc.address,
+    );
+
+    const userInfo = await view.getUserInfo(
+        proxy.address,
+    ).then((userInfo) => filterEthersObject(userInfo));
+
+    console.dir(userInfo, { depth: null });
+};
+
 const subAaveAutomation = async (
     minRatio,
     maxRatio,
@@ -2009,6 +2102,14 @@ const createCompV3Position = async (
         .description('Creates a Liquity trove')
         .action(async (coll, debt, senderAddr) => {
             await createLiquityTrove(coll, debt, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('create-morpho-position <collType> <debtType> <collAmount> <debtAmount> [senderAddr]')
+        .description('Creates Morpho-AaveV2 position ')
+        .action(async (collSymbol, debtSymbol, collAmount, debtAmount, senderAddr) => {
+            await createMorphoPosition(collSymbol, debtSymbol, collAmount, debtAmount, senderAddr);
             process.exit(0);
         });
 

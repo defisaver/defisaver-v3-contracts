@@ -1916,6 +1916,9 @@ const createLiquityPaybackChickenOutStrategy = () => {
 const createMorphoAaveV2FLBoostStrategy = () => {
     const strategy = new dfs.Strategy('MorphoAaveV2FLBoostStrategy');
 
+    strategy.addSubSlot('&ratioState', 'uint256');
+    strategy.addSubSlot('&targetRatio', 'uint256');
+
     strategy.addTrigger(new dfs.triggers.MorphoAaveV2RatioTrigger(
         '%nullAddr', '%0', '%0',
     ));
@@ -1943,12 +1946,18 @@ const createMorphoAaveV2FLBoostStrategy = () => {
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2BorrowAction(
         '%dAsset', '$1', '%flAddress',
     ));
+    strategy.addAction(new dfs.actions.checkers.MorphoAaveV2RatioCheckAction(
+        '&ratioState', '&targetRatio', '&proxy',
+    ));
 
     return strategy.encodeForDsProxyCall();
 };
 
 const createMorphoAaveV2BoostStrategy = () => {
     const strategy = new dfs.Strategy('MorphoAaveV2BoostStrategy');
+
+    strategy.addSubSlot('&ratioState', 'uint256');
+    strategy.addSubSlot('&targetRatio', 'uint256');
 
     strategy.addTrigger(new dfs.triggers.MorphoAaveV2RatioTrigger(
         '%nullAddr', '%0', '%0',
@@ -1972,12 +1981,18 @@ const createMorphoAaveV2BoostStrategy = () => {
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
         '%cAsset', '$3', '%nullAddr', '%nullAddr',
     ));
+    strategy.addAction(new dfs.actions.checkers.MorphoAaveV2RatioCheckAction(
+        '&ratioState', '&targetRatio', '&proxy',
+    ));
 
     return strategy.encodeForDsProxyCall();
 };
 
 const createMorphoAaveV2FLRepayStrategy = () => {
     const strategy = new dfs.Strategy('MorphoAaveV2FLRepayStrategy');
+
+    strategy.addSubSlot('&ratioState', 'uint256');
+    strategy.addSubSlot('&targetRatio', 'uint256');
 
     strategy.addTrigger(new dfs.triggers.MorphoAaveV2RatioTrigger(
         '%nullAddr', '%0', '%0',
@@ -2006,12 +2021,18 @@ const createMorphoAaveV2FLRepayStrategy = () => {
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2WithdrawAction(
         '%cAsset', '$1', '%flAddr',
     ));
+    strategy.addAction(new dfs.actions.checkers.MorphoAaveV2RatioCheckAction(
+        '&ratioState', '&targetRatio', '&proxy',
+    ));
 
     return strategy.encodeForDsProxyCall();
 };
 
 const createMorphoAaveV2RepayStrategy = () => {
     const strategy = new dfs.Strategy('MorphoAaveV2RepayStrategy');
+
+    strategy.addSubSlot('&ratioState', 'uint256');
+    strategy.addSubSlot('&targetRatio', 'uint256');
 
     strategy.addTrigger(new dfs.triggers.MorphoAaveV2RatioTrigger(
         '%nullAddr', '%0', '%0',
@@ -2034,6 +2055,9 @@ const createMorphoAaveV2RepayStrategy = () => {
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2PaybackAction(
         '%dAsset', '$3', '%nullAddr', '%nullAddr',
+    ));
+    strategy.addAction(new dfs.actions.checkers.MorphoAaveV2RatioCheckAction(
+        '&ratioState', '&targetRatio', '&proxy',
     ));
 
     return strategy.encodeForDsProxyCall();

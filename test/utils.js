@@ -568,10 +568,16 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
     return c;
 };
 
-const getContractFromRegistry = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR) => {
+const getContractFromRegistry = async (
+    name,
+    regAddr = addrs[getNetwork()].REGISTRY_ADDR,
+    saveOnTenderly = undefined,
+    isFork = undefined,
+    ...args
+) => {
     const contractAddr = await getAddrFromRegistry(name, regAddr);
     if (contractAddr !== nullAddress) return hre.ethers.getContractAt(name, contractAddr);
-    return redeploy(name, regAddr);
+    return redeploy(name, regAddr, saveOnTenderly, isFork, ...args);
 };
 
 const setCode = async (addr, code) => {
@@ -1120,6 +1126,24 @@ const setMockPrice = async (mockContract, roundId, token, price) => {
     await c.setRoundData(token, USD_QUOTE, roundId, formattedPrice);
 };
 
+const filterEthersObject = (obj) => {
+    if (typeof obj !== 'object') return obj;
+    if (obj instanceof hre.ethers.BigNumber) return obj.toString();
+
+    const keys = Object.keys(obj);
+    const stringKeys = keys.filter((key, i) => +key !== i);
+
+    if (stringKeys.length !== 0) {
+        return stringKeys.reduce(
+            (acc, key) => ({ ...acc, [key]: filterEthersObject(obj[key]) }),
+            {},
+        );
+    }
+    return keys.map((key) => filterEthersObject(obj[key]));
+};
+
+const compareAddr = (addrA, addrB) => addrA.toLowerCase() === addrB.toLowerCase();
+
 module.exports = {
     addToZRXAllowlist,
     getAddrFromRegistry,
@@ -1226,6 +1250,8 @@ module.exports = {
     expectCloseEq,
     setContractAt,
     getContractFromRegistry,
+    filterEthersObject,
+    compareAddr,
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),

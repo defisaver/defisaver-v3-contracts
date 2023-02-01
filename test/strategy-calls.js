@@ -1938,6 +1938,9 @@ const callMorphoAaveV2FLBoostStrategy = async ({
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2BorrowAction(
         dAsset, '0', flAddress,
     ));
+    strategy.addAction(new dfs.actions.checkers.MorphoAaveV2RatioCheckAction(
+        '0', '0', nullAddress,
+    ));
 
     const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
     const actionsCallData = strategy.actions.map((e) => e.encodeForRecipe()[0]);
@@ -1987,6 +1990,9 @@ const callMorphoAaveV2BoostStrategy = async ({
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
         cAsset, '0', nullAddress, nullAddress,
+    ));
+    strategy.addAction(new dfs.actions.checkers.MorphoAaveV2RatioCheckAction(
+        '0', '0', nullAddress,
     ));
 
     const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
@@ -2044,6 +2050,9 @@ const callMorphoAaveV2FLRepayStrategy = async ({
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2WithdrawAction(
         cAsset, flAmount, flAddress,
     ));
+    strategy.addAction(new dfs.actions.checkers.MorphoAaveV2RatioCheckAction(
+        '0', '0', nullAddress,
+    ));
 
     const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
     const actionsCallData = strategy.actions.map((e) => e.encodeForRecipe()[0]);
@@ -2093,6 +2102,9 @@ const callMorphoAaveV2RepayStrategy = async ({
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2PaybackAction(
         dAsset, '0', nullAddress, nullAddress,
+    ));
+    strategy.addAction(new dfs.actions.checkers.MorphoAaveV2RatioCheckAction(
+        '0', '0', nullAddress,
     ));
 
     const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];

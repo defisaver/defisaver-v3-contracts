@@ -15,7 +15,7 @@ const {
     callMorphoAaveV2FLBoostStrategy,
     callMorphoAaveV2FLRepayStrategy,
 } = require('../../strategy-calls');
-const { subMorphoAaveV2BoostStrategy, subMorphoAaveV2RepayStrategy } = require('../../strategy-subs');
+const { subMorphoAaveV2AutomationStrategy } = require('../../strategy-subs');
 const {
     getContractFromRegistry,
     setNetwork,
@@ -66,6 +66,7 @@ const morphoAaveV2BoostTest = () => describe('Morpho-AaveV2-Boost-Strategy', () 
         await getContractFromRegistry('MorphoAaveV2Borrow');
         await getContractFromRegistry('MorphoAaveV2Supply');
         await getContractFromRegistry('MorphoAaveV2RatioTrigger');
+        await getContractFromRegistry('MorphoAaveV2RatioCheck');
         view = await getContractFromRegistry('MorphoAaveV2View');
         ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));
         await setNewExchangeWrapper(senderAcc, exchangeWrapper);
@@ -100,13 +101,20 @@ const morphoAaveV2BoostTest = () => describe('Morpho-AaveV2-Boost-Strategy', () 
         const flStrategyId = await createStrategy(undefined, ...flStrategyData, false);
         bundleId = await createBundle(proxy, [strategyId, flStrategyId]);
 
+        await getContractFromRegistry('MorphoAaveV2SubProxy', undefined, undefined, undefined, '0', bundleId);
         triggerRatio = ethers.utils.parseUnits('2.5', '18');
-        ({ subId, strategySub } = await subMorphoAaveV2BoostStrategy({
+        const minRatio = ethers.utils.parseUnits('1', '18');
+        const targetRepay = ethers.utils.parseUnits('2', '18');
+        const targetRatio = ethers.utils.parseUnits('2', '18');
+
+        ({ boostSubId: subId, boostSub: strategySub } = await subMorphoAaveV2AutomationStrategy(
             proxy,
-            bundleId,
-            user: proxy.address,
+            minRatio,
             triggerRatio,
-        }));
+            targetRatio,
+            targetRepay,
+            true,
+        ));
 
         snapshot = await takeSnapshot();
     });
@@ -192,6 +200,7 @@ const morphoAaveV2RepayTest = () => describe('Morpho-AaveV2-Repay-Strategy', () 
         await getContractFromRegistry('MorphoAaveV2Withdraw');
         await getContractFromRegistry('MorphoAaveV2Payback');
         await getContractFromRegistry('MorphoAaveV2RatioTrigger');
+        await getContractFromRegistry('MorphoAaveV2RatioCheck');
         view = await getContractFromRegistry('MorphoAaveV2View');
         ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));
         await setNewExchangeWrapper(senderAcc, exchangeWrapper);
@@ -226,14 +235,18 @@ const morphoAaveV2RepayTest = () => describe('Morpho-AaveV2-Repay-Strategy', () 
         const flStrategyId = await createStrategy(undefined, ...flStrategyData, false);
         const bundleId = await createBundle(proxy, [strategyId, flStrategyId]);
 
+        await getContractFromRegistry('MorphoAaveV2SubProxy', undefined, undefined, undefined, bundleId, '0');
         triggerRatio = ethers.utils.parseUnits('3', '18');
+        const targetRatio = ethers.utils.parseUnits('3.5', '18');
 
-        ({ subId, strategySub } = await subMorphoAaveV2RepayStrategy({
+        ({ repaySubId: subId, repaySub: strategySub } = await subMorphoAaveV2AutomationStrategy(
             proxy,
-            bundleId,
-            user: proxy.address,
             triggerRatio,
-        }));
+            '0',
+            '0',
+            targetRatio,
+            false,
+        ));
 
         snapshot = await takeSnapshot();
     });
