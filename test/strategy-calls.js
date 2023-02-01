@@ -1910,6 +1910,7 @@ const callMorphoAaveV2FLBoostStrategy = async ({
     dAsset,
     flAddress,
     flAmount,
+    exchangeAmount,
     exchangeWrapper,
 }) => {
     const strategy = new dfs.Strategy('');
@@ -1919,18 +1920,18 @@ const callMorphoAaveV2FLBoostStrategy = async ({
             dAsset, flAmount,
         ),
     ));
-    strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '0', dAsset, '0',
-    ));
     strategy.addAction(new dfs.actions.basic.SellAction(
         formatExchangeObj(
             dAsset,
             cAsset,
-            '0',
+            exchangeAmount,
             exchangeWrapper,
         ),
         placeHolderAddr,
         placeHolderAddr,
+    ));
+    strategy.addAction(new dfs.actions.basic.GasFeeAction(
+        '0', cAsset, '0',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
         cAsset, '0', nullAddress, nullAddress,
@@ -1975,9 +1976,6 @@ const callMorphoAaveV2BoostStrategy = async ({
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2BorrowAction(
         dAsset, boostAmount, nullAddress,
     ));
-    strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '0', dAsset, '0',
-    ));
     strategy.addAction(new dfs.actions.basic.SellAction(
         formatExchangeObj(
             dAsset,
@@ -1987,6 +1985,9 @@ const callMorphoAaveV2BoostStrategy = async ({
         ),
         placeHolderAddr,
         placeHolderAddr,
+    ));
+    strategy.addAction(new dfs.actions.basic.GasFeeAction(
+        '0', cAsset, '0',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
         cAsset, '0', nullAddress, nullAddress,
@@ -2022,6 +2023,7 @@ const callMorphoAaveV2FLRepayStrategy = async ({
     dAsset,
     flAmount,
     flAddress,
+    exchangeAmount,
     exchangeWrapper,
 }) => {
     const strategy = new dfs.Strategy('');
@@ -2031,18 +2033,18 @@ const callMorphoAaveV2FLRepayStrategy = async ({
             cAsset, flAmount,
         ),
     ));
-    strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '0', cAsset, '0',
-    ));
     strategy.addAction(new dfs.actions.basic.SellAction(
         formatExchangeObj(
             cAsset,
             dAsset,
-            '0',
+            exchangeAmount,
             exchangeWrapper,
         ),
         placeHolderAddr,
         placeHolderAddr,
+    ));
+    strategy.addAction(new dfs.actions.basic.GasFeeAction(
+        '0', dAsset, '0',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2PaybackAction(
         dAsset, '0', nullAddress, nullAddress,
@@ -2087,9 +2089,6 @@ const callMorphoAaveV2RepayStrategy = async ({
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2WithdrawAction(
         cAsset, repayAmount, nullAddress,
     ));
-    strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '0', cAsset, '0',
-    ));
     strategy.addAction(new dfs.actions.basic.SellAction(
         formatExchangeObj(
             cAsset,
@@ -2099,6 +2098,9 @@ const callMorphoAaveV2RepayStrategy = async ({
         ),
         placeHolderAddr,
         placeHolderAddr,
+    ));
+    strategy.addAction(new dfs.actions.basic.GasFeeAction(
+        '0', dAsset, '0',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2PaybackAction(
         dAsset, '0', nullAddress, nullAddress,

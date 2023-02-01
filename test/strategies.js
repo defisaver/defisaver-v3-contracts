@@ -1927,18 +1927,18 @@ const createMorphoAaveV2FLBoostStrategy = () => {
             '%dAsset', '%flAmount',
         ),
     ));
-    strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '%0', '%dAsset', '$1',
-    ));
     strategy.addAction(new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%dAsset',
             '%cAsset',
-            '$2',
+            '%exchangeAmount',
             '%exchangeWrapper',
         ),
         '&proxy',
         '&proxy',
+    ));
+    strategy.addAction(new dfs.actions.basic.GasFeeAction(
+        '%0', '%cAsset', '$2',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
         '%cAsset', '$3', '%nullAddr', '%nullAddr',
@@ -1965,18 +1965,18 @@ const createMorphoAaveV2BoostStrategy = () => {
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2BorrowAction(
         '%dAsset', '%boostAmount', '%nullAddr',
     ));
-    strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '%0', '%dAsset', '$1',
-    ));
     strategy.addAction(new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%dAsset',
             '%cAsset',
-            '$2',
+            '$1',
             '%exchangeWrapper',
         ),
         '&proxy',
         '&proxy',
+    ));
+    strategy.addAction(new dfs.actions.basic.GasFeeAction(
+        '%0', '%cAsset', '$2',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
         '%cAsset', '$3', '%nullAddr', '%nullAddr',
@@ -2002,18 +2002,18 @@ const createMorphoAaveV2FLRepayStrategy = () => {
             '%cAsset', '%flAmount',
         ),
     ));
-    strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '%0', '%cAsset', '$1',
-    ));
     strategy.addAction(new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%cAsset',
             '%dAsset',
-            '$2',
+            '%exchangeAmount',
             '%exchangeWrapper',
         ),
         '&proxy',
         '&proxy',
+    ));
+    strategy.addAction(new dfs.actions.basic.GasFeeAction(
+        '%0', '%dAsset', '$2',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2PaybackAction(
         '%dAsset', '$3', '%nullAddr', '%nullAddr',
@@ -2040,18 +2040,18 @@ const createMorphoAaveV2RepayStrategy = () => {
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2WithdrawAction(
         '%cAsset', '%repayAmount', '&proxy',
     ));
-    strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '%0', '%cAsset', '$1',
-    ));
     strategy.addAction(new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%cAsset',
             '%dAsset',
-            '$2',
+            '$1',
             '%exchangeWrapper',
         ),
         '&proxy',
         '&proxy',
+    ));
+    strategy.addAction(new dfs.actions.basic.GasFeeAction(
+        '%0', '%dAsset', '$2',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2PaybackAction(
         '%dAsset', '$3', '%nullAddr', '%nullAddr',

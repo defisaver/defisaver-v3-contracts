@@ -162,6 +162,7 @@ const morphoAaveV2BoostTest = () => describe('Morpho-AaveV2-Boost-Strategy', () 
             dAsset: dAsset.address,
             flAmount: boostAmount,
             flAddress: await getContractFromRegistry('FLAction').then(({ address }) => address),
+            exchangeAmount: boostAmount,
             exchangeWrapper,
         });
 
@@ -294,6 +295,7 @@ const morphoAaveV2RepayTest = () => describe('Morpho-AaveV2-Repay-Strategy', () 
             dAsset: dAsset.address,
             flAmount: repayAmount,
             flAddress: await getContractFromRegistry('FLAction').then(({ address }) => address),
+            exchangeAmount: repayAmount,
             exchangeWrapper,
         });
 
