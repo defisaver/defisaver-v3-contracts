@@ -4,7 +4,7 @@ const compare = tokens.utils.compare;
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const {
-    morphoAaveV2Supply, morphoAaveV2Withdraw, morphoAaveV2Borrow, morphoAaveV2Payback,
+    morphoAaveV2Supply, morphoAaveV2Withdraw, morphoAaveV2Borrow, morphoAaveV2Payback, morphoClaim,
 } = require('../actions');
 const {
     getContractFromRegistry,
@@ -17,6 +17,8 @@ const {
     balanceOf,
     takeSnapshot,
     revertToSnapshot,
+    resetForkToBlock,
+    BN2Float,
 } = require('../utils');
 
 const morphoMarkets = [
@@ -384,6 +386,61 @@ const morphoAaveV2PaybackTest = (testLength) => describe('Morpho-Payback-Test', 
     }));
 });
 
+const morphoClaimTest = () => describe('Morpho-Claim-Test', () => {
+    const claimTxHash = '0xac1559f67f74569197f4279fc5493b3b4d752e66dd663fc2ea20deb96b6f23b1';
+
+    let senderAcc;
+    let proxy;
+
+    let onBehalfOf;
+    let claimable;
+    let proof;
+
+    let snapshotId;
+
+    beforeEach(async () => {
+        snapshotId = await takeSnapshot();
+    });
+
+    afterEach(async () => revertToSnapshot(snapshotId));
+
+    before(async () => {
+        setNetwork('mainnet');
+
+        const claimTx = await ethers.provider.getTransaction(claimTxHash);
+        ({ onBehalfOf, claimable, proof } = ethers.utils.defaultAbiCoder.decode(
+            ['address onBehalfOf', 'uint256 claimable', 'bytes32[] proof'],
+            `0x${claimTx.data.slice(10)}`,
+        ));
+
+        const blockNumber = claimTx.blockNumber;
+        await resetForkToBlock(blockNumber - 1);
+        console.log({ blockNumber, onBehalfOf, claimable });
+
+        const view = await getContractFromRegistry('MorphoAaveV2View');
+        const { morphoClaimed } = await view.getUserInfo(onBehalfOf);
+        expect(morphoClaimed).to.be.lt(claimable);
+
+        await getContractFromRegistry('MorphoClaim');
+        ([senderAcc] = await ethers.getSigners());
+        proxy = await getProxy(senderAcc.address);
+    });
+
+    it('... should claim rewards on behalf of eoa', async () => {
+        const morphoToken = '0x9994E35Db50125E0DF82e4c2dde62496CE330999';
+
+        const balanceBefore = await balanceOf(morphoToken, onBehalfOf);
+        await morphoClaim(
+            proxy, onBehalfOf, claimable, proof,
+        );
+        const balanceAfter = await balanceOf(morphoToken, onBehalfOf);
+        const claimed = balanceAfter.sub(balanceBefore);
+        expect(claimed).to.be.eq(claimable);
+
+        console.log(`claimed ${(+BN2Float(claimed)).toFixed(2)} Morpho`);
+    });
+});
+
 const morphoFullTest = (testLength) => describe('Morpho-Full-Test', () => {
     morphoAaveV2SupplyTest(testLength);
     morphoAaveV2WithdrawTest(testLength);
@@ -397,4 +454,5 @@ module.exports = {
     morphoAaveV2WithdrawTest,
     morphoAaveV2BorrowTest,
     morphoAaveV2PaybackTest,
+    morphoClaimTest,
 };
