@@ -1603,27 +1603,20 @@ const subAaveClose = async (
     const collAssetId = collReserveData.id;
     const debtAssetId = debtReserveData.id;
 
-    let bundleId = await getLatestBundleId();
-    if (bundleId < 2) {
-        const triggerAddr = await redeploy(
-            'AaveV3QuotePriceTrigger', undefined, false, true,
-        ).then((c) => c.address);
-        const viewAddr = await redeploy(
-            'AaveV3OracleView', undefined, false, true,
-        ).then((c) => c.address);
+    // const triggerAddr = await redeploy(
+    //     'AaveV3QuotePriceTrigger', undefined, false, true,
+    // ).then((c) => c.address);
+    // const viewAddr = await redeploy(
+    //     'AaveV3OracleView', undefined, false, true,
+    // ).then((c) => c.address);
 
-        console.log('AaveQuotePriceTrigger address:', triggerAddr);
-        console.log('AaveV3OracleView address:', viewAddr);
+    // console.log('AaveQuotePriceTrigger address:', triggerAddr);
+    // console.log('AaveV3OracleView address:', viewAddr);
 
-        const closeToDebtId = await deployCloseToDebtBundle(proxy, true);
-        const closeToCollId = await deployCloseToCollBundle(proxy, true);
+    // const closeToDebtId = await deployCloseToDebtBundle(proxy, true);
+    // const closeToCollId = await deployCloseToCollBundle(proxy, true);
 
-        console.log(`close-to-debt-Id: ${closeToDebtId}, close-to-coll-Id: ${closeToCollId}`);
-
-        bundleId = closeToColl ? closeToCollId : closeToDebtId;
-    } else {
-        bundleId = closeToColl ? bundleId : bundleId - 1;
-    }
+    const bundleId = closeToColl ? '12' : '13';
 
     const formattedPrice = (targetQuotePrice * 1e8).toString();
 
