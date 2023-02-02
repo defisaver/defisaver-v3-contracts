@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 /* eslint-disable no-await-in-loop */
 const { default: curve } = require('@curvefi/api');
 const hre = require('hardhat');
@@ -98,6 +99,7 @@ const KYBER_WRAPPER = '0x71C8dc1d6315a48850E88530d18d3a97505d2065';
 const UNISWAP_WRAPPER = '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54';
 const OASIS_WRAPPER = '0x2aD7D86C56b7a09742213e1e649C727cB4991A54';
 const ETH_ADDR = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+const BTC_ADDR = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
 const DAI_ADDR = '0x6b175474e89094c44da98b954eedeac495271d0f';
 const USDC_ADDR = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 const RAI_ADDR = '0x03ab458634910AaD20eF5f1C8ee96F1D6ac54919';
@@ -216,6 +218,7 @@ const coinGeckoHelper = {
     KNCL: 'kyber-network',
     MANA: 'decentraland',
     PAXUSD: 'paxos-standard',
+    USDP: 'paxos-standard',
     COMP: 'compound-governance-token',
     LRC: 'loopring',
     LINK: 'chainlink',
@@ -233,6 +236,7 @@ const coinGeckoHelper = {
     MATIC: 'matic-network',
     SUSHI: 'sushi',
     bLUSD: 'boosted-lusd',
+    wstETH: 'wrapped-steth',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;
@@ -390,29 +394,26 @@ const setBalance = async (tokenAddr, userAddr, value) => {
     );
 };
 
-const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {
-    const { decimals } = getAssetInfo(tokenSign);
+let cachedTokenPrices = {};
+const getLocalTokenPrice = (tokenSymbol) => {
+    const cachedPrice = cachedTokenPrices[tokenSymbol];
+    if (cachedPrice) return cachedPrice;
 
     const data = JSON.parse(fs.readFileSync('test/prices.json', 'utf8'));
     const tokenNames = Object.keys(data);
     for (let i = 0; i < tokenNames.length; i++) {
-        if (tokenNames[i] === coinGeckoHelper[tokenSign]) {
-            const amountNumber = (amountUSD / data[tokenNames[i]].usd);
-            return amountNumber.toFixed(decimals);
+        if (tokenNames[i] === coinGeckoHelper[tokenSymbol]) {
+            const tokenPrice = data[tokenNames[i]].usd;
+            return tokenPrice;
         }
     }
     return 0;
 };
 
-const getLocalTokenPrice = (tokenSymbol) => {
-    const data = JSON.parse(fs.readFileSync('test/prices.json', 'utf8'));
-    const tokenNames = Object.keys(data);
-    for (let i = 0; i < tokenNames.length; i++) {
-        if (tokenNames[i] === coinGeckoHelper[tokenSymbol]) {
-            return data[tokenNames[i]].usd;
-        }
-    }
-    return 0;
+const fetchAmountinUSDPrice = (tokenSymbol, amountUSD) => {
+    const { decimals } = getAssetInfo(tokenSymbol);
+    const tokenPrice = getLocalTokenPrice(tokenSymbol);
+    return (amountUSD / tokenPrice).toFixed(decimals);
 };
 
 const fetchStandardAmounts = async () => standardAmounts;
@@ -1009,6 +1010,35 @@ const getChainLinkPrice = async (tokenAddr) => {
     return data.answer.toString();
 };
 
+const cacheChainlinkPrice = async (tokenSymbol, tokenAddr) => {
+    try {
+        if (cachedTokenPrices[tokenSymbol]) return cachedTokenPrices[tokenSymbol];
+
+        // eslint-disable-next-line no-param-reassign
+        if (tokenAddr.toLowerCase() === WBTC_ADDR.toLowerCase()) tokenAddr = BTC_ADDR;
+
+        let wstethMultiplier = '1';
+        if (tokenAddr.toLowerCase() === WSTETH_ADDRESS.toLowerCase()) {
+            // eslint-disable-next-line no-param-reassign
+            tokenAddr = STETH_ADDRESS;
+            wstethMultiplier = BN2Float(await hre.ethers.provider.call({
+                to: WSTETH_ADDRESS,
+                data: hre.ethers.utils.id('stEthPerToken()').slice(0, 10),
+            }));
+        }
+
+        let tokenPrice = BN2Float(await getChainLinkPrice(tokenAddr), 8);
+        tokenPrice = (+wstethMultiplier * +tokenPrice).toFixed(2);
+        cachedTokenPrices[tokenSymbol] = tokenPrice;
+
+        return tokenPrice;
+    } catch (e) {
+        console.log(e);
+        console.log(`no chainlink feed found ${tokenSymbol} ${tokenAddr}`);
+        return undefined;
+    }
+};
+
 const takeSnapshot = async () => hre.network.provider.request({
     method: 'evm_snapshot',
 });
@@ -1062,6 +1092,7 @@ async function setForkForTesting() {
 }
 
 const resetForkToBlock = async (block) => {
+    cachedTokenPrices = {};
     let rpcUrl = process.env.ETHEREUM_NODE;
 
     if (network !== 'mainnet') {
@@ -1217,6 +1248,7 @@ module.exports = {
     balanceOfOnTokenInBlock,
     formatExchangeObjCurve,
     formatMockExchangeObj,
+    cacheChainlinkPrice,
     expectCloseEq,
     setContractAt,
     curveApiInit: async () => curve.init('Alchemy', {
