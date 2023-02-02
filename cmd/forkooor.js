@@ -47,6 +47,7 @@ const {
     nullAddress,
     getContractFromRegistry,
     filterEthersObject,
+    compareAddr,
 } = require('../test/utils');
 
 const {
@@ -166,6 +167,37 @@ function setEnv(key, value) {
     // eslint-disable-next-line consistent-return
     fs.writeFileSync(pathToEnv, stringify(result));
 }
+
+const forkSetup = async (sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    console.log({ sender: senderAcc.address, proxy: proxy.address });
+    return { senderAcc, proxy, network };
+};
 
 // TODO: support more than dai?
 const supplyInSS = async (protocol, daiAmount, sender) => {
@@ -1368,37 +1400,13 @@ const deployMorphoContracts = async () => {
 };
 
 const createMorphoPosition = async (collSymbol, debtSymbol, collAmount, debtAmount, sender) => {
-    let senderAcc = (await hre.ethers.getSigners())[0];
-
-    if (sender) {
-        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
-        senderAcc.address = senderAcc._address;
-    }
-
-    await topUp(senderAcc.address);
-
-    let network = 'mainnet';
-
-    if (process.env.TEST_CHAIN_ID) {
-        network = process.env.TEST_CHAIN_ID;
-    }
-
-    configure({
-        chainId: chainIds[network],
-        testMode: true,
-    });
-
-    setNetwork(network);
+    const { senderAcc, proxy, network } = await forkSetup(sender);
 
     await deployMorphoContracts();
     const view = await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
 
     const { address: collAddr, ...collAssetInfo } = getAssetInfo(collSymbol, chainIds[network]);
     const { address: debtAddr, ...debtAssetInfo } = getAssetInfo(debtSymbol, chainIds[network]);
-
-    let proxy = await getProxy(senderAcc.address);
-    proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     if (collSymbol === 'WETH') {
         await depositToWeth(Float2BN(collAmount), senderAcc);
@@ -1446,6 +1454,7 @@ const createMorphoPosition = async (collSymbol, debtSymbol, collAmount, debtAmou
         senderAcc.address,
     );
 
+    console.log(`Position of ${proxy.address}`);
     const userInfo = await view.getUserInfo(
         proxy.address,
     ).then((userInfo) => filterEthersObject(userInfo));
@@ -1720,37 +1729,15 @@ const subMorphoAaveV2Automation = async (
     boostEnabled,
     sender,
 ) => {
-    let senderAcc = (await hre.ethers.getSigners())[0];
+    const { proxy } = await forkSetup(sender);
 
-    await topUp(senderAcc.address);
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
 
-    if (sender) {
-        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
-        senderAcc.address = senderAcc._address;
-    }
-
-    await topUp(senderAcc.address);
-
-    let network = 'mainnet';
-
-    if (process.env.TEST_CHAIN_ID) {
-        network = process.env.TEST_CHAIN_ID;
-    }
-
-    configure({
-        chainId: chainIds[network],
-        testMode: true,
-    });
-
-    setNetwork(network);
-
-    let proxy = await getProxy(senderAcc.address);
-    proxy = sender ? proxy.connect(senderAcc) : proxy;
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
 
     const latestBundleId = await getLatestBundleId().then((e) => parseInt(e, 10));
-
-    console.log({ latestBundleId });
 
     let repayBundleId = latestBundleId - 1;
     let boostBundleId = latestBundleId;
@@ -1763,7 +1750,7 @@ const subMorphoAaveV2Automation = async (
 
             const strategyId = await createStrategy(undefined, ...strategyData, false);
             const flStrategyId = await createStrategy(undefined, ...flStrategyData, false);
-            repayBundleId = await createBundle(proxy, [strategyId, flStrategyId]);
+            repayBundleId = await createBundle(undefined, [strategyId, flStrategyId]);
         }
 
         {
@@ -1773,19 +1760,16 @@ const subMorphoAaveV2Automation = async (
 
             const strategyId = await createStrategy(undefined, ...strategyData, false);
             const flStrategyId = await createStrategy(undefined, ...flStrategyData, false);
-            boostBundleId = await createBundle(proxy, [strategyId, flStrategyId]);
+            boostBundleId = await createBundle(undefined, [strategyId, flStrategyId]);
         }
 
         await deployMorphoContracts();
-        await redeploy('MorphoAaveV2SubProxy', undefined, undefined, true, repayBundleId, boostBundleId);
+        await getContractFromRegistry(
+            'MorphoAaveV2SubProxy', undefined, undefined, true, repayBundleId, boostBundleId,
+        );
     }
+
     console.log({ repayBundleId, boostBundleId });
-
-    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
-    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
-
-    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
-    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
 
     const {
         repaySubId, boostSubId,
@@ -2606,6 +2590,25 @@ const createCompV3Position = async (
         .description('CompV3 position view, default to proxy')
         .action(async (isEOA, addr) => {
             await getCompV3Pos(isEOA, addr);
+            process.exit(0);
+        });
+
+    program
+        .command('get-morphoAaveV2-position <isEOA> [addr]')
+        .description('MorphoAaveV2 position view, default to proxy')
+        .action(async (isEOA, addr) => {
+            const { senderAcc, proxy } = await forkSetup(addr);
+            const view = await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
+
+            // compareAddr is just a string compare
+            const user = compareAddr(isEOA, 'false') ? proxy.address : senderAcc.address;
+            console.log(`Fetching position for ${user}`);
+
+            const userInfo = await view.getUserInfo(
+                user,
+            ).then((userInfo) => filterEthersObject(userInfo));
+
+            console.dir(userInfo, { depth: null });
             process.exit(0);
         });
 
