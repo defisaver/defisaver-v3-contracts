@@ -1879,6 +1879,8 @@ const setBotAuth = async (addr) => {
 
     setNetwork(network);
 
+    await topUp(addrs[network].OWNER_ACC);
+
     await addBotCaller(addr, addrs[network].REGISTRY_ADDR, true, network);
 };
 
