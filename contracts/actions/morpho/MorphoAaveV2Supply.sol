@@ -66,7 +66,6 @@ contract MorphoAaveV2Supply is ActionBase, MorphoHelper {
 
         bytes memory logData = abi.encode(_params);
 
-        // return (_params.amount - 1, logData); CONSIDER FIX
         return (_params.amount, logData);
     }
 

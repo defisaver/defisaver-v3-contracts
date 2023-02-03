@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
+import "../../interfaces/morpho/IMorphoAaveV2Lens.sol";
 import "../../interfaces/morpho/IMorpho.sol";
 import "../../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
 import "../ActionBase.sol";
@@ -50,12 +51,6 @@ contract MorphoAaveV2Payback is ActionBase, MorphoHelper {
     }
 
     function _repay(Params memory _params) internal returns (uint256, bytes memory) {
-        _params.amount = _params.tokenAddr.pullTokensIfNeeded(_params.from, _params.amount);
-        _params.tokenAddr.approveToken(MORPHO_AAVEV2_ADDR, _params.amount);
-
-        // needed because amount > debt is safe
-        uint256 tokensBefore = _params.tokenAddr.getBalance(address(this));
-
         // default to onBehalf of proxy
         if (_params.onBehalf == address(0)) {
             _params.onBehalf = address(this);
@@ -65,10 +60,18 @@ contract MorphoAaveV2Payback is ActionBase, MorphoHelper {
             DEFAULT_MARKET_DATA_PROVIDER
         ).getReserveTokensAddresses(_params.tokenAddr);
 
-        IMorpho(MORPHO_AAVEV2_ADDR).repay(aTokenAddress, _params.onBehalf, _params.amount);
+        (
+            uint256 borrowBalanceInP2P,
+            uint256 borrowBalanceOnPool,
+        ) =  IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getCurrentBorrowBalanceInOf(aTokenAddress, _params.onBehalf);
 
-        // accurate return amount but dust stays on proxy
-        _params.amount = tokensBefore - _params.tokenAddr.getBalance(address(this));
+        uint256 totalDebt = borrowBalanceInP2P + borrowBalanceOnPool;
+        if (_params.amount > totalDebt) _params.amount = totalDebt;
+
+        _params.amount = _params.tokenAddr.pullTokensIfNeeded(_params.from, _params.amount);
+        _params.tokenAddr.approveToken(MORPHO_AAVEV2_ADDR, _params.amount);
+
+        IMorpho(MORPHO_AAVEV2_ADDR).repay(aTokenAddress, _params.onBehalf, _params.amount);
 
         bytes memory logData = abi.encode(_params);
         return (_params.amount, logData);

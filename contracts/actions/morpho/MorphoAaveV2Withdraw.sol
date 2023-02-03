@@ -31,14 +31,14 @@ contract MorphoAaveV2Withdraw is ActionBase, MorphoHelper {
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 amount, bytes memory logData) = _withdraw(params);
+        (uint256 amount, bytes memory logData) = _withdraw(params, false);
         emit ActionEvent("MorphoAaveV2Withdraw", logData);
         return bytes32(amount);
     }
 
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _withdraw(params);
+        (, bytes memory logData) = _withdraw(params, true);
         logger.logActionDirectEvent("MorphoAaveV2Withdraw", logData);
     }
 
@@ -46,9 +46,10 @@ contract MorphoAaveV2Withdraw is ActionBase, MorphoHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    function _withdraw(Params memory _params) internal returns (uint256, bytes memory) {
+    function _withdraw(Params memory _params, bool isDirect) internal returns (uint256, bytes memory) {
         // needed because amount > collateral is safe
-        uint256 tokensBefore = _params.tokenAddr.getBalance(_params.to);
+        uint256 tokensBefore;
+        if (!isDirect)  tokensBefore = _params.tokenAddr.getBalance(_params.to);
 
         (address aTokenAddress,,) = IAaveProtocolDataProviderV2(
             DEFAULT_MARKET_DATA_PROVIDER
@@ -56,7 +57,7 @@ contract MorphoAaveV2Withdraw is ActionBase, MorphoHelper {
 
         IMorpho(MORPHO_AAVEV2_ADDR).withdraw(aTokenAddress, _params.amount, _params.to);
 
-        _params.amount = _params.tokenAddr.getBalance(_params.to) - tokensBefore;
+        if (!isDirect) _params.amount = _params.tokenAddr.getBalance(_params.to) - tokensBefore;
 
         bytes memory logData = abi.encode(_params);
         return (_params.amount, logData);
