@@ -1616,7 +1616,7 @@ const subAaveClose = async (
     // const closeToDebtId = await deployCloseToDebtBundle(proxy, true);
     // const closeToCollId = await deployCloseToCollBundle(proxy, true);
 
-    const bundleId = closeToColl ? '12' : '13';
+    const bundleId = closeToColl ? '13' : '12';
 
     const formattedPrice = (targetQuotePrice * 1e8).toString();
 
