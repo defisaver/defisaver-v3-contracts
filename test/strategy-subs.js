@@ -18,6 +18,7 @@ const {
     createLiquityTrigger,
     createTrailingStopTrigger,
     createCbRebondTrigger,
+    createOffchainPriceTrigger,
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
 } = require('./triggers');
@@ -283,7 +284,7 @@ const subLiquityTrailingCloseToCollStrategy = async (proxy, percentage, roundId,
 };
 
 // eslint-disable-next-line max-len
-const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrBuy, amount, targetPrice, strategyId) => {
+const subLimitOrderStrategy = async (proxy, tokenAddrSell, tokenAddrBuy, amount, targetPrice, goodUntil, orderType, strategyId) => {
     const isBundle = false;
 
     const tokenAddrSellEncoded = abiCoder.encode(['address'], [tokenAddrSell]);
@@ -291,7 +292,7 @@ const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrB
     const amountEncoded = abiCoder.encode(['uint256'], [amount.toString()]);
 
     // eslint-disable-next-line max-len
-    const triggerData = await createChainLinkPriceTrigger(tokenAddrSell, targetPrice, RATIO_STATE_OVER);
+    const triggerData = await createOffchainPriceTrigger(targetPrice, goodUntil, orderType);
     const strategySub = [strategyId, isBundle, [triggerData], [tokenAddrSellEncoded, tokenAddrBuyEncoded, amountEncoded]];
     const subId = await subToStrategy(proxy, strategySub);
 

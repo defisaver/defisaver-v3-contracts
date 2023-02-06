@@ -3,6 +3,9 @@ const hre = require('hardhat');
 const RATIO_STATE_OVER = 0;
 const RATIO_STATE_UNDER = 1;
 
+const BUY_ORDER = 0;
+const SELL_ORDER = 1;
+
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
 const createMcdTrigger = async (vaultId, ratio, ratioState) => {
@@ -31,6 +34,11 @@ const createLiquityTrigger = async (user, ratio, ratioState) => {
 
 const createChainLinkPriceTrigger = async (tokenAddr, price, state) => {
     const param = abiCoder.encode(['address', 'uint256', 'uint8'], [tokenAddr, price, state]);
+    return param;
+};
+
+const createOffchainPriceTrigger = async (targetPrice, goodUntil, orderType) => {
+    const param = abiCoder.encode(['uint256', 'uint256', 'uint8'], [targetPrice, goodUntil, orderType]);
     return param;
 };
 
@@ -73,6 +81,9 @@ module.exports = {
     createLiquityTrigger,
     createTrailingStopTrigger,
     createCbRebondTrigger,
+    createOffchainPriceTrigger,
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
+    BUY_ORDER,
+    SELL_ORDER,
 };

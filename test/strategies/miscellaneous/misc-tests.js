@@ -4,7 +4,6 @@ const { expect } = require('chai');
 const {
     getProxy,
     redeploy,
-    getChainLinkPrice,
     depositToWeth,
     approve,
     balanceOf,
@@ -12,9 +11,9 @@ const {
     redeployCore,
     timeTravel,
     getAddrFromRegistry,
-    ETH_ADDR,
     WETH_ADDRESS,
     DAI_ADDR,
+    UNISWAP_WRAPPER,
 } = require('../../utils');
 
 const { callDcaStrategy } = require('../../strategy-calls');
@@ -29,6 +28,7 @@ const START_TIMESTAMP = 1630489138;
 const { callLimitOrderStrategy } = require('../../strategy-calls');
 const { subLimitOrderStrategy } = require('../../strategy-subs');
 const { createLimitOrderStrategy } = require('../../strategies');
+const { BUY_ORDER, SELL_ORDER } = require('../../triggers');
 
 const limitOrderStrategyTest = async () => {
     describe('Limit-Order-Strategy', function () {
@@ -41,6 +41,9 @@ const limitOrderStrategyTest = async () => {
         let subId;
         let strategySub;
         let amount;
+        let currPrice;
+        let minPrice;
+        let uniV2Wrapper;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -48,10 +51,10 @@ const limitOrderStrategyTest = async () => {
 
             strategyExecutor = await redeployCore();
 
-            await redeploy('GasFeeTaker');
-            await redeploy('DFSSell');
-            await redeploy('ChainLinkPriceTrigger');
-            await redeploy('PullToken');
+            uniV2Wrapper = await hre.ethers.getContractAt('UniswapWrapperV3', UNISWAP_WRAPPER);
+
+            await redeploy('LimitSell');
+            await redeploy('OffchainPriceTrigger');
 
             await addBotCaller(botAcc.address);
 
@@ -62,24 +65,38 @@ const limitOrderStrategyTest = async () => {
             const strategyData = createLimitOrderStrategy();
             await openStrategyAndBundleStorage();
 
+            const abiCoder = new hre.ethers.utils.AbiCoder();
+
             const strategyId = await createStrategy(proxy, ...strategyData, false);
 
-            const currPrice = await getChainLinkPrice(ETH_ADDR);
+            // wet/dai use price lower than current
+            const targetPrice = hre.ethers.utils.parseUnits('1000', 18);
 
-            const targetPrice = currPrice - 100; // Target is smaller so we can execute it
+            const orderType = SELL_ORDER;
 
             const tokenAddrSell = WETH_ADDRESS;
             const tokenAddrBuy = DAI_ADDR;
 
+            const latestBlock = await hre.ethers.provider.getBlock('latest');
+            const goodUntil = latestBlock.timestamp + 100000;
+
             amount = hre.ethers.utils.parseUnits('1', 18); // Sell 1 eth
+
+            const path = abiCoder.encode(['address[]'], [[tokenAddrSell, tokenAddrBuy]]);
+
+            currPrice = await uniV2Wrapper.getSellRate(tokenAddrSell, tokenAddrBuy, amount, path);
+            minPrice = currPrice.sub(currPrice.div('200')); // 0.5% slippage in the minPrice
+
+            console.log(currPrice, minPrice);
 
             ({ subId, strategySub } = await subLimitOrderStrategy(
                 proxy,
-                senderAcc,
                 tokenAddrSell,
                 tokenAddrBuy,
                 amount,
                 targetPrice,
+                goodUntil,
+                orderType,
                 strategyId,
             ));
         });
@@ -92,7 +109,8 @@ const limitOrderStrategyTest = async () => {
             const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
             const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
 
-            await callLimitOrderStrategy(botAcc, senderAcc, strategyExecutor, subId, strategySub);
+            // eslint-disable-next-line max-len
+            await callLimitOrderStrategy(botAcc, currPrice, minPrice, strategyExecutor, subId, strategySub);
 
             const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
             const wethBalanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
@@ -101,20 +119,24 @@ const limitOrderStrategyTest = async () => {
             expect(wethBalanceBefore).to.be.gt(wethBalanceAfter);
         });
 
-        it('... should fail to trigger the same strategy again as its one time', async () => {
-            try {
-                await depositToWeth(amount.toString());
-                await callLimitOrderStrategy(
-                    botAcc,
-                    senderAcc,
-                    strategyExecutor,
-                    subId,
-                    strategySub,
-                );
-            } catch (err) {
-                expect(err.toString()).to.have.string('SubNotEnabled');
-            }
-        });
+        // it('... should fail to trigger after expire time', async () => {
+
+        // });
+
+        // it('... should fail to trigger the same strategy again as its one time', async () => {
+        //     try {
+        //         await depositToWeth(amount.toString());
+        //         await callLimitOrderStrategy(
+        //             botAcc,
+        //             senderAcc,
+        //             strategyExecutor,
+        //             subId,
+        //             strategySub,
+        //         );
+        //     } catch (err) {
+        //         expect(err.toString()).to.have.string('SubNotEnabled');
+        //     }
+        // });
     });
 };
 

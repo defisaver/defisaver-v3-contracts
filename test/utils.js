@@ -711,7 +711,7 @@ const formatMockExchangeObj = async (
     ];
 };
 
-const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee) => {
+const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee, minPrice = 0) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
     let firstPath = srcAddr;
@@ -744,7 +744,7 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, u
         destAddr,
         amount,
         destAmount,
-        0,
+        minPrice,
         0,
         nullAddress,
         wrapper,

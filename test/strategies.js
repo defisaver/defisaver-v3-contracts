@@ -1113,34 +1113,25 @@ const createLiquityCloseToCollStrategy = (isTrailing = false) => {
 const createLimitOrderStrategy = () => {
     const limitOrderStrategy = new dfs.Strategy('LimitOrderStrategy');
 
-    const chainLinkPriceTrigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
-    limitOrderStrategy.addTrigger(chainLinkPriceTrigger);
+    const offchainPriceTrigger = new dfs.triggers.OffchainPriceTrigger('0', '0');
+    limitOrderStrategy.addTrigger(offchainPriceTrigger);
 
     limitOrderStrategy.addSubSlot('&tokenAddrSell', 'address');
     limitOrderStrategy.addSubSlot('&tokenAddrBuy', 'address');
     limitOrderStrategy.addSubSlot('&amount', 'uint256');
 
-    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-        '%wethAddr', '&eoa', '&amount',
-    );
-
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '%wethAddr', '$1',
-    );
-
-    const sellAction = new dfs.actions.basic.SellAction(
+    const sellAction = new dfs.actions.basic.LimitSellAction(
         formatExchangeObj(
             '&tokenAddrSell',
             '&tokenAddrBuy',
-            '$2',
+            '&amount',
             '%exchangeWrapper',
         ),
-        '&proxy',
         '&eoa',
+        '&eoa',
+        '%gasUsed',
     );
 
-    limitOrderStrategy.addAction(pullTokenAction);
-    limitOrderStrategy.addAction(feeTakingAction);
     limitOrderStrategy.addAction(sellAction);
 
     return limitOrderStrategy.encodeForDsProxyCall();

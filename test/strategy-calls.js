@@ -1012,36 +1012,33 @@ const callCompBoostStrategy = async (botAcc, strategyExecutor, subId, strategySu
     console.log(`GasUsed callCompBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callLimitOrderStrategy = async (botAcc, senderAcc, strategyExecutor, subId, strategySub) => {
+const callLimitOrderStrategy = async (botAcc, currPrice, minPrice, strategyExecutor, subId, strategySub) => {
     const actionsCallData = [];
-
-    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-        WETH_ADDRESS, placeHolderAddr, '0',
-    );
+    const triggerCallData = [];
 
     const txGasCost = 500000; // 500k gas
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        txGasCost, WETH_ADDRESS, '0',
-    );
 
-    const sellAction = new dfs.actions.basic.SellAction(
+    const sellAction = new dfs.actions.basic.LimitSellAction(
         formatExchangeObj(
             WETH_ADDRESS, // can't be placeholder because of proper formatting of uni path
             DAI_ADDR,
             '0',
             UNISWAP_WRAPPER,
+            0,
+            0,
+            minPrice.toString(),
         ),
         placeHolderAddr,
         placeHolderAddr,
+        txGasCost,
     );
 
-    actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
-    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    triggerCallData.push(abiCoder.encode(['uint256'], [currPrice]));
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, 0, [[0]], actionsCallData, strategySub, {
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, 0, triggerCallData, actionsCallData, strategySub, {
         gasLimit: 8000000,
     });
 
