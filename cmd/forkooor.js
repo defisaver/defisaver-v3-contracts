@@ -1613,8 +1613,8 @@ const subAaveClose = async (
     // console.log('AaveQuotePriceTrigger address:', triggerAddr);
     // console.log('AaveV3OracleView address:', viewAddr);
 
-    // const closeToDebtId = await deployCloseToDebtBundle(proxy, true);
-    // const closeToCollId = await deployCloseToCollBundle(proxy, true);
+    // const closeToDebtId = await deployCloseToDebtBundle(proxy, true, true);
+    // const closeToCollId = await deployCloseToCollBundle(proxy, true, true);
 
     const bundleId = closeToColl ? '13' : '12';
 
