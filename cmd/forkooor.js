@@ -109,6 +109,7 @@ const {
     createFlCompV3EOARepayStrategy,
     createLiquityPaybackChickenInStrategy,
     createLiquityPaybackChickenOutStrategy,
+    createLimitOrderStrategy,
 } = require('../test/strategies');
 
 const {
@@ -122,6 +123,7 @@ const {
     subCompV3AutomationStrategy,
     subCbRebondStrategy,
     subLiquityCBPaybackStrategy,
+    subLimitOrderStrategy,
 } = require('../test/strategy-subs');
 
 const { getTroveInfo } = require('../test/utils-liquity');
@@ -1672,6 +1674,87 @@ const subCompV3Automation = async (
     console.log(`CompV3 position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
 };
 
+const subLimitOrder = async (
+    srcTokenLabel,
+    destTokenLabel,
+    srcAmount,
+    targetPrice,
+    orderType,
+    expireDays,
+    sender,
+) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    await topUp(senderAcc.address);
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    // deploy contracts and strategy
+    await redeploy('OffchainPriceTrigger', addrs[network].REGISTRY_ADDR, false, true);
+    await redeploy('LimitSell', addrs[network].REGISTRY_ADDR, false, true);
+
+    const strategyData = createLimitOrderStrategy();
+    await openStrategyAndBundleStorage(true);
+
+    const strategyId = await createStrategy(proxy, ...strategyData, false);
+
+    // format sub data
+    const srcToken = getAssetInfo(srcTokenLabel);
+    const destToken = getAssetInfo(destTokenLabel);
+
+    const amountInWei = hre.ethers.utils.parseUnits(srcAmount, srcToken.decimals);
+    const targetPriceInWei = hre.ethers.utils.parseUnits(targetPrice, srcToken.decimals);
+
+    const latestBlock = await hre.ethers.provider.getBlock('latest');
+    const goodUntil = latestBlock.timestamp + (expireDays * 24 * 60 * 60);
+
+    let orderTypeUint;
+    if (orderType.toLowerCase() === 'buy') {
+        orderTypeUint = 0;
+    } else if (orderType.toLowerCase() === 'sell') {
+        orderTypeUint = 1;
+    }
+
+    // give token approval
+    await approve(srcToken.address, proxy.address, sender);
+
+    // sub
+    const subData = await subLimitOrderStrategy(
+        proxy,
+        srcToken.address,
+        destToken.address,
+        amountInWei,
+        targetPriceInWei,
+        goodUntil,
+        orderTypeUint,
+        strategyId,
+    );
+
+    console.log(`Limit order subed, subId ${subData.subId}`);
+};
+
 const getAavePos = async (
     sender,
 ) => {
@@ -2296,6 +2379,16 @@ const createCompV3Position = async (
         .action(async (price, priceState, senderAddr) => {
             // eslint-disable-next-line max-len
             await liquityCloseToCollStrategySub(price, priceState, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('sub-limit-order <srcTokenLabel> <destTokenLabel> <srcAmount> <targetPrice> <orderType> <expireDays> [senderAddr]')
+        .description('Subscribes to a limit order')
+        // eslint-disable-next-line max-len
+        .action(async (srcTokenLabel, destTokenLabel, srcAmount, targetPrice, orderType, expireDays, senderAddr) => {
+            // eslint-disable-next-line max-len
+            await subLimitOrder(srcTokenLabel, destTokenLabel, srcAmount, targetPrice, orderType, expireDays, senderAddr);
             process.exit(0);
         });
 

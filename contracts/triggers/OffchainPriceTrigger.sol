@@ -7,8 +7,6 @@ import "../interfaces/ITrigger.sol";
 import "../utils/TransientStorage.sol";
 import "./helpers/TriggerHelper.sol";
 
-import "hardhat/console.sol";
-
 contract OffchainPriceTrigger is ITrigger, AdminAuth, TriggerHelper {
 
     enum OrderType { BUY, SELL }
@@ -28,11 +26,7 @@ contract OffchainPriceTrigger is ITrigger, AdminAuth, TriggerHelper {
     function isTriggered(bytes memory _callData, bytes memory _subData) public override returns (bool) {
         SubParams memory triggerSubData = parseInputs(_subData);
         CallParams memory callParams = parseCallInputs(_callData);
-
-        console.log("currentPrice: %s", callParams.currentPrice);
-        console.log("limitPrice: %s", triggerSubData.limitPrice);
-        console.log("goodUntilTimestamp: %s", triggerSubData.goodUntilTimestamp);
-
+        
         // Limit order has expired
         if (block.timestamp > triggerSubData.goodUntilTimestamp) return false;
 
@@ -41,7 +35,6 @@ contract OffchainPriceTrigger is ITrigger, AdminAuth, TriggerHelper {
 
         // if sell order execute if current price is equal or higher than limit price
         if (callParams.currentPrice >= triggerSubData.limitPrice && triggerSubData.orderType == OrderType.SELL) {
-            console.log("executing sell order");
             tempStorage.setBytes32("CURR_PRICE", bytes32(callParams.currentPrice));
 
             return true;
