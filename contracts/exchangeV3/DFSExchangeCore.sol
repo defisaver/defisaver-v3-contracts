@@ -23,9 +23,6 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
     //Zerox exchange invalid
     error InvalidExchangeZeroXError();
 
-    FeeRecipient public constant feeRecipient =
-        FeeRecipient(FEE_RECIPIENT_ADDRESS);
-
     /// @notice Internal method that preforms a sell on 0x/on-chain
     /// @dev Useful for other DFS contract to integrate for exchanging
     /// @param exData Exchange data struct
@@ -204,7 +201,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
                 feeAmount = _amount / 10;
             }
 
-            address walletAddr = feeRecipient.getFeeAddr();
+            address walletAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();
 
             _token.withdrawTokens(walletAddr, feeAmount);
         }

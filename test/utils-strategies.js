@@ -219,6 +219,39 @@ const updateAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGIST
     return latestSubId;
 };
 
+const subToMcdProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const subProxyAddr = await getAddrFromRegistry('McdSubProxy', regAddr);
+    const subProxy = await hre.ethers.getContractAt('McdSubProxy', subProxyAddr);
+
+    const functionData = subProxy.interface.encodeFunctionData(
+        'subToMcdAutomation',
+        [inputData, false],
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToMcdProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    let repaySubId;
+    let boostSubId;
+    if (inputData.slice(-1)[0]) {
+        boostSubId = +await getLatestSubId(regAddr);
+        repaySubId = boostSubId - 1;
+    } else {
+        repaySubId = +await getLatestSubId(regAddr);
+    }
+
+    const repaySub = await subProxy.formatRepaySub(inputData);
+    const boostSub = await subProxy.formatBoostSub(inputData);
+    return {
+        repaySubId, boostSubId, repaySub, boostSub,
+    };
+};
+
 const addBotCaller = async (
     botAddr,
     regAddr = addrs[network].REGISTRY_ADDR,
@@ -237,7 +270,7 @@ const addBotCaller = async (
 
     botAuth = botAuth.connect(signer);
 
-    await botAuth.addCaller(botAddr, { gasLimit: 400000 });
+    await botAuth.addCaller(botAddr, { gasLimit: 800000 });
 
     if (regAddr === addrs[network].REGISTRY_ADDR && !isFork) {
         await stopImpersonatingAccount(addrs[network].OWNER_ACC);
@@ -283,4 +316,5 @@ module.exports = {
     setMCDPriceVerifier,
     getSubHash,
     subToCBRebondProxy,
+    subToMcdProxy,
 };

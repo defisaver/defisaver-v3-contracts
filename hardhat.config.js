@@ -70,6 +70,7 @@ module.exports = {
                 gasPrice: 50000000000,
                 // blockNumber: 12068716
             },
+            name: 'mainnet',
         },
         // NETWORKS FOR DEPLOYING
         mainnet: {
