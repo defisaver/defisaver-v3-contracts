@@ -14,10 +14,12 @@ contract MorphoAaveV2Borrow is ActionBase, MorphoHelper {
     /// @param tokenAddr The address of the token to be borrowed
     /// @param amount Amount of tokens to be borrowed
     /// @param to The address we are sending the borrowed tokens to
+    /// @param maxGasForMatching - Max gas to spend on p2p matching
     struct Params {
         address tokenAddr;
         uint256 amount;
         address to;
+        uint256 maxGasForMatching;
     }
 
     function executeAction(
@@ -51,7 +53,11 @@ contract MorphoAaveV2Borrow is ActionBase, MorphoHelper {
             DEFAULT_MARKET_DATA_PROVIDER
         ).getReserveTokensAddresses(_params.tokenAddr);
 
-        IMorpho(MORPHO_AAVEV2_ADDR).borrow(aTokenAddress, _params.amount);
+        if (_params.maxGasForMatching == 0) {
+            IMorpho(MORPHO_AAVEV2_ADDR).borrow(aTokenAddress, _params.amount);
+        } else {
+            IMorpho(MORPHO_AAVEV2_ADDR).borrow(aTokenAddress, _params.amount, _params.maxGasForMatching);
+        }
         _params.amount = _params.tokenAddr.withdrawTokens(_params.to, _params.amount);
 
         bytes memory logData = abi.encode(_params);

@@ -15,11 +15,13 @@ contract MorphoAaveV2Supply is ActionBase, MorphoHelper {
     /// @param amount Amount of tokens to be deposited
     /// @param from Where are we pulling the supply tokens amount from
     /// @param onBehalf For what user we are supplying the tokens, defaults to proxy
+    /// @param maxGasForMatching Max gas to spend on p2p matching
     struct Params {
         address tokenAddr;
         uint256 amount;
         address from;
         address onBehalf;
+        uint256 maxGasForMatching;
     }
 
     function executeAction(
@@ -62,7 +64,11 @@ contract MorphoAaveV2Supply is ActionBase, MorphoHelper {
             DEFAULT_MARKET_DATA_PROVIDER
         ).getReserveTokensAddresses(_params.tokenAddr);
 
-        IMorpho(MORPHO_AAVEV2_ADDR).supply(aTokenAddress, _params.onBehalf, _params.amount);
+        if (_params.maxGasForMatching == 0) {
+            IMorpho(MORPHO_AAVEV2_ADDR).supply(aTokenAddress, _params.onBehalf, _params.amount);
+        } else {
+            IMorpho(MORPHO_AAVEV2_ADDR).supply(aTokenAddress, _params.onBehalf, _params.amount, _params.maxGasForMatching);
+        }
 
         bytes memory logData = abi.encode(_params);
 
