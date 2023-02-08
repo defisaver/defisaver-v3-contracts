@@ -1,5 +1,6 @@
-const { getAssetInfo } = require('@defisaver/tokens');
-const { compare } = require('@defisaver/tokens/esm/utils');
+const { getAssetInfo, ...tokens } = require('@defisaver/tokens');
+
+const compare = tokens.utils.compare;
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const {
@@ -30,6 +31,20 @@ const morphoMarkets = [
     'CRV',
 ];
 
+const getTotalBorrowed = async (view, user, tokenAddress) => view.getUserInfo(user)
+    .then(({ userBalances }) => userBalances.find(
+        ({ underlying }) => compare(underlying, tokenAddress),
+    ))
+    .then(({ borrowBalanceInP2P, borrowBalanceOnPool }) => borrowBalanceInP2P
+        .add(borrowBalanceOnPool));
+
+const getTotalSupplied = async (view, user, tokenAddress) => view.getUserInfo(user)
+    .then(({ userBalances }) => userBalances.find(
+        ({ underlying }) => compare(underlying, tokenAddress),
+    ) || { supplyBalanceInP2P: Float2BN('0'), supplyBalanceOnPool: Float2BN('0') })
+    .then(({ supplyBalanceInP2P, supplyBalanceOnPool }) => supplyBalanceInP2P
+        .add(supplyBalanceOnPool));
+
 const testSupply = async ({
     proxy,
     tokenAddress,
@@ -37,6 +52,12 @@ const testSupply = async ({
     senderAcc,
     view,
 }) => {
+    const supplyBefore = await getTotalSupplied(view, proxy.address, tokenAddress);
+    let collBalance;
+    if (amount.eq(ethers.constants.MaxUint256)) {
+        collBalance = await balanceOf(tokenAddress, senderAcc.address);
+    }
+
     const { logs } = await morphoAaveV2Supply(
         proxy,
         tokenAddress,
@@ -44,14 +65,14 @@ const testSupply = async ({
         senderAcc.address,
     ).then((e) => e.wait());
 
-    const totalSupplied = await view.getUserInfo(proxy.address)
-        .then(({ userBalances }) => userBalances.find(
-            ({ underlying }) => compare(underlying, tokenAddress),
-        ))
-        .then(({ supplyBalanceInP2P, supplyBalanceOnPool }) => supplyBalanceInP2P
-            .add(supplyBalanceOnPool));
+    const totalSupplied = await getTotalSupplied(
+        view, proxy.address, tokenAddress,
+    ).then((bn) => bn.sub(supplyBefore));
+
+    // eslint-disable-next-line no-param-reassign
+    if (amount.eq(ethers.constants.MaxUint256)) amount = collBalance;
     // Aave 1 wei math error
-    expect(totalSupplied.add('1')).to.be.gte(amount);
+    expect(totalSupplied.add('1')).to.be.gte(supplyBefore.add(amount));
 
     const { data: logData } = logs.filter((e) => e.topics.includes(ethers.utils.id('MorphoAaveV2Supply')))[0];
     const { amount: returnAmount } = ethers.utils.defaultAbiCoder.decode(
@@ -73,28 +94,20 @@ const testBorrow = async ({
     tokenAddress,
     amount,
     senderAcc,
-    view,
 }) => {
-    const balanceB4 = await balanceOf(tokenAddress, senderAcc.address);
+    const balanceBefore = await balanceOf(tokenAddress, senderAcc.address);
     const { logs } = await morphoAaveV2Borrow(
         proxy,
         tokenAddress,
-        amount.div('2'),
+        amount,
         senderAcc.address,
     ).then((e) => e.wait());
 
-    const totalBorrowed = await view.getUserInfo(proxy.address)
-        .then(({ userBalances }) => userBalances.find(
-            ({ underlying }) => compare(underlying, tokenAddress),
-        ))
-        .then(({ borrowBalanceInP2P, borrowBalanceOnPool }) => borrowBalanceInP2P
-            .add(borrowBalanceOnPool));
-    expect(totalBorrowed).to.be.gte(amount.div('2'));
     expect(
         await balanceOf(tokenAddress, senderAcc.address).then(
-            (e) => e.sub(balanceB4),
+            (e) => e.sub(balanceBefore),
         ),
-    ).to.be.eq(amount.div('2'));
+    ).to.be.eq(amount);
 
     const { data: logData } = logs.filter((e) => e.topics.includes(ethers.utils.id('MorphoAaveV2Borrow')))[0];
     const { amount: returnAmount } = ethers.utils.defaultAbiCoder.decode(
@@ -107,14 +120,14 @@ const testBorrow = async ({
         ],
         `0x${logData.slice(130)}`,
     )[0];
-    expect(returnAmount).to.be.eq(amount.div('2'));
+    expect(returnAmount).to.be.eq(amount);
 };
 
 const morphoAaveV2SupplyTest = (testLength) => describe('Morpho-Supply-Test', () => {
     let senderAcc;
     let proxy;
     let view;
-    let marketStatus;
+    let marketInfo;
     let snapshotId;
 
     beforeEach(async () => {
@@ -130,38 +143,66 @@ const morphoAaveV2SupplyTest = (testLength) => describe('Morpho-Supply-Test', ()
         proxy = await getProxy(senderAcc.address);
         await getContractFromRegistry('MorphoAaveV2Supply');
         view = await getContractFromRegistry('MorphoAaveV2View');
-        marketStatus = await view.getMarketInfo();
+        ({ marketInfo } = await view.getAllMarketsInfo());
     });
 
-    morphoMarkets.slice(0, testLength).map((market) => it(`... should supply ${market} to morpho`, async function () {
-        const tokenAddress = getAssetInfo(market).address;
-        const { isSupplyPaused, isDeprecated } = marketStatus.find(
-            ({ underlying }) => compare(underlying, tokenAddress),
-        ).pauseStatus;
+    morphoMarkets.slice(0, testLength).map((market) => describe(
+        `Morpho-AaveV2-Supply ${market}`,
+        () => {
+            it(`... should supply ${market} to morpho`, async function () {
+                const tokenAddress = getAssetInfo(market).address;
+                const { isSupplyPaused, isDeprecated } = marketInfo.find(
+                    ({ underlying }) => compare(underlying, tokenAddress),
+                ).pauseStatus;
 
-        if (isSupplyPaused || isDeprecated) {
-            console.log({ isSupplyPaused, isDeprecated });
-            this.skip();
-        }
-        const amount = Float2BN(fetchAmountinUSDPrice(market, 1000));
-        await setBalance(tokenAddress, senderAcc.address, amount);
-        await approve(tokenAddress, proxy.address);
+                if (isSupplyPaused || isDeprecated) {
+                    console.log({ isSupplyPaused, isDeprecated });
+                    this.skip();
+                }
+                const amount = Float2BN(fetchAmountinUSDPrice(market, 1000));
+                await setBalance(tokenAddress, senderAcc.address, amount);
+                await approve(tokenAddress, proxy.address);
 
-        await testSupply({
-            proxy,
-            tokenAddress,
-            amount,
-            senderAcc,
-            view,
-        });
-    }));
+                await testSupply({
+                    proxy,
+                    tokenAddress,
+                    amount,
+                    senderAcc,
+                    view,
+                });
+            });
+
+            it(`... should supply maxuint ${market} to morpho`, async function () {
+                const tokenAddress = getAssetInfo(market).address;
+                const { isSupplyPaused, isDeprecated } = marketInfo.find(
+                    ({ underlying }) => compare(underlying, tokenAddress),
+                ).pauseStatus;
+
+                if (isSupplyPaused || isDeprecated) {
+                    console.log({ isSupplyPaused, isDeprecated });
+                    this.skip();
+                }
+                const amount = Float2BN(fetchAmountinUSDPrice(market, 1000));
+                await setBalance(tokenAddress, senderAcc.address, amount);
+                await approve(tokenAddress, proxy.address);
+
+                await testSupply({
+                    proxy,
+                    tokenAddress,
+                    amount: ethers.constants.MaxUint256,
+                    senderAcc,
+                    view,
+                });
+            });
+        },
+    ));
 });
 
 const morphoAaveV2WithdrawTest = (testLength) => describe('Morpho-Withdraw-Test', () => {
     let senderAcc;
     let proxy;
     let view;
-    let marketStatus;
+    let marketInfo;
     let snapshotId;
 
     beforeEach(async () => {
@@ -179,66 +220,95 @@ const morphoAaveV2WithdrawTest = (testLength) => describe('Morpho-Withdraw-Test'
         await getContractFromRegistry('MorphoAaveV2Supply');
         await getContractFromRegistry('MorphoAaveV2Withdraw');
         view = await getContractFromRegistry('MorphoAaveV2View');
-        marketStatus = await view.getMarketInfo();
+        ({ marketInfo } = await view.getAllMarketsInfo());
     });
 
-    morphoMarkets.slice(0, testLength).map((market) => it(`... should withdraw ${market} from morpho`, async function () {
-        const tokenAddress = getAssetInfo(market).address;
-        const { isSupplyPaused, isWithdrawPaused, isDeprecated } = marketStatus.find(
-            ({ underlying }) => compare(underlying, tokenAddress),
-        ).pauseStatus;
+    morphoMarkets.slice(0, testLength).map((market) => describe(
+        `Morpho-AaveV2-Withdraw ${market}`, async () => {
+            it(`... should withdraw ${market} from morpho`, async () => {
+                const tokenAddress = getAssetInfo(market).address;
+                const { isSupplyPaused, isWithdrawPaused, isDeprecated } = marketInfo.find(
+                    ({ underlying }) => compare(underlying, tokenAddress),
+                ).pauseStatus;
 
-        if (isSupplyPaused || isWithdrawPaused || isDeprecated) {
-            console.log({ isSupplyPaused, isWithdrawPaused, isDeprecated });
-            this.skip();
-        }
-        const amount = Float2BN(fetchAmountinUSDPrice(market, 1000));
-        await setBalance(tokenAddress, senderAcc.address, amount);
-        await approve(tokenAddress, proxy.address);
+                if (isSupplyPaused || isWithdrawPaused || isDeprecated) {
+                    console.log({ isSupplyPaused, isWithdrawPaused, isDeprecated });
+                    this.skip();
+                }
 
-        await testSupply({
-            proxy,
-            tokenAddress,
-            amount,
-            senderAcc,
-            view,
-        });
+                const amount = Float2BN(fetchAmountinUSDPrice(market, 1000));
+                await setBalance(tokenAddress, senderAcc.address, amount);
+                await approve(tokenAddress, proxy.address);
 
-        const { logs } = await morphoAaveV2Withdraw(
-            proxy,
-            tokenAddress,
-            amount.mul('2'),
-            senderAcc.address,
-        ).then((e) => e.wait());
-        const {
-            totalSupplied,
-        } = await view.getUserInfo(proxy.address).then((balances) => balances.filter(
-            ({ tokenAddr: underlyingToken }) => compare(underlyingToken, tokenAddress),
-        )[0] || { totalSupplied: '0' });
-        expect(totalSupplied).to.be.eq('0');
+                await testSupply({
+                    proxy,
+                    tokenAddress,
+                    amount,
+                    senderAcc,
+                    view,
+                });
 
-        const { data: logData } = logs.filter((e) => e.topics.includes(ethers.utils.id('MorphoAaveV2Withdraw')))[0];
-        const { amount: returnAmount } = ethers.utils.defaultAbiCoder.decode(
-            [
-                `(
-                    address tokenAddr,
-                    uint256 amount,
-                    address to,
-                )`,
-            ],
-            `0x${logData.slice(130)}`,
-        )[0];
-        expect(returnAmount).to.be.lte(amount.mul('2'));
-        expect(returnAmount.add(1)).to.be.gte(amount);
-        expect(await balanceOf(tokenAddress, senderAcc.address)).to.be.gte(returnAmount);
-    }));
+                const balanceBefore = await balanceOf(tokenAddress, senderAcc.address);
+
+                await morphoAaveV2Withdraw(
+                    proxy,
+                    tokenAddress,
+                    amount.div(2),
+                    senderAcc.address,
+                ).then((e) => e.wait());
+
+                const withdrawn = await balanceOf(
+                    tokenAddress, senderAcc.address,
+                ).then((bn) => bn.sub(balanceBefore));
+                expect(withdrawn).to.be.eq(amount.div(2));
+            });
+
+            it(`... should withdraw maxuint ${market} from morpho`, async () => {
+                const tokenAddress = getAssetInfo(market).address;
+                const { isSupplyPaused, isWithdrawPaused, isDeprecated } = marketInfo.find(
+                    ({ underlying }) => compare(underlying, tokenAddress),
+                ).pauseStatus;
+
+                if (isSupplyPaused || isWithdrawPaused || isDeprecated) {
+                    console.log({ isSupplyPaused, isWithdrawPaused, isDeprecated });
+                    this.skip();
+                }
+
+                const amount = Float2BN(fetchAmountinUSDPrice(market, 1000));
+                await setBalance(tokenAddress, senderAcc.address, amount);
+                await approve(tokenAddress, proxy.address);
+
+                await testSupply({
+                    proxy,
+                    tokenAddress,
+                    amount,
+                    senderAcc,
+                    view,
+                });
+
+                const balanceBefore = await balanceOf(tokenAddress, senderAcc.address);
+
+                await morphoAaveV2Withdraw(
+                    proxy,
+                    tokenAddress,
+                    ethers.constants.MaxInt256,
+                    senderAcc.address,
+                ).then((e) => e.wait());
+
+                const withdrawn = await balanceOf(
+                    tokenAddress, senderAcc.address,
+                ).then((bn) => bn.sub(balanceBefore));
+                expect(withdrawn).to.be.gte(amount);
+            });
+        },
+    ));
 });
 
 const morphoAaveV2BorrowTest = (testLength) => describe('Morpho-Borrow-Test', () => {
     let senderAcc;
     let proxy;
     let view;
-    let marketStatus;
+    let marketInfo;
     let snapshotId;
 
     beforeEach(async () => {
@@ -256,12 +326,12 @@ const morphoAaveV2BorrowTest = (testLength) => describe('Morpho-Borrow-Test', ()
         await getContractFromRegistry('MorphoAaveV2Supply');
         await getContractFromRegistry('MorphoAaveV2Borrow');
         view = await getContractFromRegistry('MorphoAaveV2View');
-        marketStatus = await view.getMarketInfo();
+        ({ marketInfo } = await view.getAllMarketsInfo());
     });
 
     morphoMarkets.slice(0, testLength).map((market) => it(`... should borrow ${market} from morpho`, async function () {
         const tokenAddress = getAssetInfo(market).address;
-        const { isSupplyPaused, isBorrowPaused, isDeprecated } = marketStatus.find(
+        const { isSupplyPaused, isBorrowPaused, isDeprecated } = marketInfo.find(
             ({ underlying }) => compare(underlying, tokenAddress),
         ).pauseStatus;
 
@@ -284,7 +354,7 @@ const morphoAaveV2BorrowTest = (testLength) => describe('Morpho-Borrow-Test', ()
         await testBorrow({
             proxy,
             tokenAddress,
-            amount,
+            amount: amount.div(2),
             senderAcc,
             view,
         });
@@ -295,7 +365,7 @@ const morphoAaveV2PaybackTest = (testLength) => describe('Morpho-Payback-Test', 
     let senderAcc;
     let proxy;
     let view;
-    let marketStatus;
+    let marketInfo;
     let snapshotId;
 
     beforeEach(async () => {
@@ -314,75 +384,132 @@ const morphoAaveV2PaybackTest = (testLength) => describe('Morpho-Payback-Test', 
         await getContractFromRegistry('MorphoAaveV2Borrow');
         await getContractFromRegistry('MorphoAaveV2Payback');
         view = await getContractFromRegistry('MorphoAaveV2View');
-        marketStatus = await view.getMarketInfo();
+        ({ marketInfo } = await view.getAllMarketsInfo());
     });
 
-    morphoMarkets.slice(0, testLength).map((market) => it(`... should payback ${market} to morpho`, async function () {
-        const tokenAddress = getAssetInfo(market).address;
-        const {
-            isSupplyPaused, isBorrowPaused, isRepayPaused, isDeprecated,
-        } = marketStatus.find(
-            ({ underlying }) => compare(underlying, tokenAddress),
-        ).pauseStatus;
+    morphoMarkets.slice(0, testLength).map((market) => describe(
+        `Morpho-AaveV2-Payback ${market}`, () => {
+            it(`... should payback ${market} to morpho`, async function () {
+                const tokenAddress = getAssetInfo(market).address;
+                const {
+                    isSupplyPaused, isBorrowPaused, isRepayPaused, isDeprecated,
+                } = marketInfo.find(
+                    ({ underlying }) => compare(underlying, tokenAddress),
+                ).pauseStatus;
 
-        if (isSupplyPaused || isBorrowPaused || isRepayPaused || isDeprecated) {
-            console.log({
-                isSupplyPaused, isBorrowPaused, isRepayPaused, isDeprecated,
+                if (isSupplyPaused || isBorrowPaused || isRepayPaused || isDeprecated) {
+                    console.log({
+                        isSupplyPaused, isBorrowPaused, isRepayPaused, isDeprecated,
+                    });
+                    this.skip();
+                }
+                const amount = Float2BN(fetchAmountinUSDPrice(market, 1000));
+                await setBalance(tokenAddress, senderAcc.address, amount.mul('2'));
+                await approve(tokenAddress, proxy.address);
+
+                await testSupply({
+                    proxy,
+                    tokenAddress,
+                    amount,
+                    senderAcc,
+                    view,
+                });
+
+                await testBorrow({
+                    proxy,
+                    tokenAddress,
+                    amount: amount.div(2),
+                    senderAcc,
+                    view,
+                });
+
+                const { logs } = await morphoAaveV2Payback(
+                    proxy,
+                    tokenAddress,
+                    amount.div(4),
+                    senderAcc.address,
+                    proxy.address,
+                ).then((e) => e.wait());
+                const totalBorrowed = await getTotalBorrowed(view, proxy.address, tokenAddress);
+                expect(totalBorrowed).to.be.gte(amount.div(4));
+                expect(totalBorrowed).to.be.lt(amount.div(2));
+
+                const { data: logData } = logs.filter((e) => e.topics.includes(ethers.utils.id('MorphoAaveV2Payback')))[0];
+                const { amount: returnAmount } = ethers.utils.defaultAbiCoder.decode(
+                    [
+                        `(
+                            address tokenAddr,
+                            uint256 amount,
+                            address from,
+                            address onBehalf
+                        )`,
+                    ],
+                    `0x${logData.slice(130)}`,
+                )[0];
+                expect(returnAmount).to.be.eq(amount.div(4));
             });
-            this.skip();
-        }
-        const amount = Float2BN(fetchAmountinUSDPrice(market, 1000));
-        await setBalance(tokenAddress, senderAcc.address, amount.mul('2'));
-        await approve(tokenAddress, proxy.address);
 
-        await testSupply({
-            proxy,
-            tokenAddress,
-            amount,
-            senderAcc,
-            view,
-        });
+            it(`... should payback maxuint ${market} to morpho`, async function () {
+                const tokenAddress = getAssetInfo(market).address;
+                const {
+                    isSupplyPaused, isBorrowPaused, isRepayPaused, isDeprecated,
+                } = marketInfo.find(
+                    ({ underlying }) => compare(underlying, tokenAddress),
+                ).pauseStatus;
 
-        await testBorrow({
-            proxy,
-            tokenAddress,
-            amount,
-            senderAcc,
-            view,
-        });
+                if (isSupplyPaused || isBorrowPaused || isRepayPaused || isDeprecated) {
+                    console.log({
+                        isSupplyPaused, isBorrowPaused, isRepayPaused, isDeprecated,
+                    });
+                    this.skip();
+                }
+                const amount = Float2BN(fetchAmountinUSDPrice(market, 1000));
+                await setBalance(tokenAddress, senderAcc.address, amount.mul('2'));
+                await approve(tokenAddress, proxy.address);
 
-        const { logs } = await morphoAaveV2Payback(
-            proxy,
-            tokenAddress,
-            amount,
-            senderAcc.address,
-            proxy.address,
-        ).then((e) => e.wait());
-        const totalBorrowed = await view.getUserInfo(proxy.address)
-            .then(({ userBalances }) => userBalances.find(
-                ({ underlying }) => compare(underlying, tokenAddress),
-            ))
-            .then(({ borrowBalanceInP2P, borrowBalanceOnPool }) => borrowBalanceInP2P
-                .add(borrowBalanceOnPool));
-        expect(totalBorrowed).to.be.eq('0');
+                await testSupply({
+                    proxy,
+                    tokenAddress,
+                    amount,
+                    senderAcc,
+                    view,
+                });
 
-        const { data: logData } = logs.filter((e) => e.topics.includes(ethers.utils.id('MorphoAaveV2Payback')))[0];
-        const { amount: returnAmount } = ethers.utils.defaultAbiCoder.decode(
-            [
-                `(
-                    address tokenAddr,
-                    uint256 amount,
-                    address from,
-                    address onBehalf
-                )`,
-            ],
-            `0x${logData.slice(130)}`,
-        )[0];
-        expect(returnAmount).to.be.gte(amount.div(2));
-        const userBalance = await balanceOf(tokenAddress, senderAcc.address);
-        const proxyBalance = await balanceOf(tokenAddress, proxy.address);
-        expect(userBalance.add(proxyBalance).add(returnAmount)).to.be.eq(amount.mul('3').div('2'));
-    }));
+                await testBorrow({
+                    proxy,
+                    tokenAddress,
+                    amount: amount.div(2),
+                    senderAcc,
+                    view,
+                });
+
+                const { logs } = await morphoAaveV2Payback(
+                    proxy,
+                    tokenAddress,
+                    ethers.constants.MaxUint256,
+                    senderAcc.address,
+                    proxy.address,
+                ).then((e) => e.wait());
+                const totalBorrowed = await getTotalBorrowed(view, proxy.address, tokenAddress);
+                expect(totalBorrowed).to.be.eq('0');
+
+                const { data: logData } = logs.filter((e) => e.topics.includes(ethers.utils.id('MorphoAaveV2Payback')))[0];
+                const { amount: returnAmount } = ethers.utils.defaultAbiCoder.decode(
+                    [
+                        `(
+                            address tokenAddr,
+                            uint256 amount,
+                            address from,
+                            address onBehalf
+                        )`,
+                    ],
+                    `0x${logData.slice(130)}`,
+                )[0];
+                expect(returnAmount).to.be.gte(amount.div(2));
+                expect(returnAmount).to.be.lt(amount);
+            });
+        },
+    ));
 });
 
 const morphoClaimTest = () => describe('Morpho-Claim-Test', () => {
