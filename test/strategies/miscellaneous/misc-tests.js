@@ -28,7 +28,6 @@ const START_TIMESTAMP = 1630489138;
 const { callLimitOrderStrategy } = require('../../strategy-calls');
 const { subLimitOrderStrategy } = require('../../strategy-subs');
 const { createLimitOrderStrategy } = require('../../strategies');
-const { BUY_ORDER, SELL_ORDER } = require('../../triggers');
 
 const limitOrderStrategyTest = async () => {
     describe('Limit-Order-Strategy', function () {
@@ -72,8 +71,6 @@ const limitOrderStrategyTest = async () => {
             // wet/dai use price lower than current
             const targetPrice = hre.ethers.utils.parseUnits('1000', 18);
 
-            const orderType = SELL_ORDER;
-
             const tokenAddrSell = WETH_ADDRESS;
             const tokenAddrBuy = DAI_ADDR;
 
@@ -96,7 +93,6 @@ const limitOrderStrategyTest = async () => {
                 amount,
                 targetPrice,
                 goodUntil,
-                orderType,
                 strategyId,
             ));
         });
@@ -110,7 +106,7 @@ const limitOrderStrategyTest = async () => {
             const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
 
             // eslint-disable-next-line max-len
-            await callLimitOrderStrategy(botAcc, currPrice, minPrice, strategyExecutor, subId, strategySub);
+            await callLimitOrderStrategy(botAcc, minPrice, strategyExecutor, subId, strategySub);
 
             const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
             const wethBalanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
@@ -119,24 +115,24 @@ const limitOrderStrategyTest = async () => {
             expect(wethBalanceBefore).to.be.gt(wethBalanceAfter);
         });
 
-        // it('... should fail to trigger after expire time', async () => {
+        it('... should fail to trigger after expire time', async () => {
 
-        // });
+        });
 
-        // it('... should fail to trigger the same strategy again as its one time', async () => {
-        //     try {
-        //         await depositToWeth(amount.toString());
-        //         await callLimitOrderStrategy(
-        //             botAcc,
-        //             senderAcc,
-        //             strategyExecutor,
-        //             subId,
-        //             strategySub,
-        //         );
-        //     } catch (err) {
-        //         expect(err.toString()).to.have.string('SubNotEnabled');
-        //     }
-        // });
+        it('... should fail to trigger the same strategy again as its one time', async () => {
+            try {
+                await depositToWeth(amount.toString());
+                await callLimitOrderStrategy(
+                    botAcc,
+                    minPrice,
+                    strategyExecutor,
+                    subId,
+                    strategySub,
+                );
+            } catch (err) {
+                expect(err.toString()).to.have.string('SubNotEnabled');
+            }
+        });
     });
 };
 

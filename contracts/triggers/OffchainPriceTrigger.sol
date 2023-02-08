@@ -9,12 +9,9 @@ import "./helpers/TriggerHelper.sol";
 
 contract OffchainPriceTrigger is ITrigger, AdminAuth, TriggerHelper {
 
-    enum OrderType { BUY, SELL }
-
     struct SubParams {
         uint256 limitPrice;
         uint256 goodUntilTimestamp;
-        OrderType orderType;
     }
 
     struct CallParams {
@@ -34,14 +31,7 @@ contract OffchainPriceTrigger is ITrigger, AdminAuth, TriggerHelper {
         if (callParams.currentPrice == 0) return false;
 
         // if sell order execute if current price is equal or higher than limit price
-        if (callParams.currentPrice >= triggerSubData.limitPrice && triggerSubData.orderType == OrderType.SELL) {
-            tempStorage.setBytes32("CURR_PRICE", bytes32(callParams.currentPrice));
-
-            return true;
-        }
-
-        // if buy order execute if current price is equal or lower than limit price
-        if (callParams.currentPrice <= triggerSubData.limitPrice && triggerSubData.orderType == OrderType.BUY) {
+        if (callParams.currentPrice >= triggerSubData.limitPrice) {
             tempStorage.setBytes32("CURR_PRICE", bytes32(callParams.currentPrice));
 
             return true;

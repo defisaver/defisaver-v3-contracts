@@ -37,8 +37,8 @@ const createChainLinkPriceTrigger = async (tokenAddr, price, state) => {
     return param;
 };
 
-const createOffchainPriceTrigger = async (targetPrice, goodUntil, orderType) => {
-    const param = abiCoder.encode(['uint256', 'uint256', 'uint8'], [targetPrice, goodUntil, orderType]);
+const createOffchainPriceTrigger = async (targetPrice, goodUntil) => {
+    const param = abiCoder.encode(['uint256', 'uint256'], [targetPrice, goodUntil]);
     return param;
 };
 

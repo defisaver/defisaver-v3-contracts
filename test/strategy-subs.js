@@ -284,7 +284,7 @@ const subLiquityTrailingCloseToCollStrategy = async (proxy, percentage, roundId,
 };
 
 // eslint-disable-next-line max-len
-const subLimitOrderStrategy = async (proxy, tokenAddrSell, tokenAddrBuy, amount, targetPrice, goodUntil, orderType, strategyId) => {
+const subLimitOrderStrategy = async (proxy, tokenAddrSell, tokenAddrBuy, amount, targetPrice, goodUntil, strategyId) => {
     const isBundle = false;
 
     const tokenAddrSellEncoded = abiCoder.encode(['address'], [tokenAddrSell]);
@@ -292,7 +292,7 @@ const subLimitOrderStrategy = async (proxy, tokenAddrSell, tokenAddrBuy, amount,
     const amountEncoded = abiCoder.encode(['uint256'], [amount.toString()]);
 
     // eslint-disable-next-line max-len
-    const triggerData = await createOffchainPriceTrigger(targetPrice, goodUntil, orderType);
+    const triggerData = await createOffchainPriceTrigger(targetPrice, goodUntil);
     const strategySub = [strategyId, isBundle, [triggerData], [tokenAddrSellEncoded, tokenAddrBuyEncoded, amountEncoded]];
     const subId = await subToStrategy(proxy, strategySub);
 

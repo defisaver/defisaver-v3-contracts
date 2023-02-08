@@ -15,6 +15,8 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
+    error WrongPriceFromTrigger(uint256 expected, uint256 actual);
+
     struct Params {
         ExchangeData exchangeData;
         address from;
@@ -93,8 +95,9 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         tempStorage.setBytes32("CURR_PRICE", bytes32(0));
         _exchangeData.dfsFeeDivider = 0;
 
-        // TODO: See if we want to set this to minPrice or execution price?
-        // _exchangeData.minPrice = currPrice;
+        if (_exchangeData.minPrice != currPrice) {
+            revert WrongPriceFromTrigger(currPrice, _exchangeData.minPrice);
+        }
      
         _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
 

@@ -1012,7 +1012,7 @@ const callCompBoostStrategy = async (botAcc, strategyExecutor, subId, strategySu
     console.log(`GasUsed callCompBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callLimitOrderStrategy = async (botAcc, currPrice, minPrice, strategyExecutor, subId, strategySub) => {
+const callLimitOrderStrategy = async (botAcc, minPrice, strategyExecutor, subId, strategySub) => {
     const actionsCallData = [];
     const triggerCallData = [];
 
@@ -1033,7 +1033,7 @@ const callLimitOrderStrategy = async (botAcc, currPrice, minPrice, strategyExecu
         txGasCost,
     );
 
-    triggerCallData.push(abiCoder.encode(['uint256'], [currPrice]));
+    triggerCallData.push(abiCoder.encode(['uint256'], [minPrice.toString()]));
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);

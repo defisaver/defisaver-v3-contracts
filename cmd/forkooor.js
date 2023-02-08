@@ -1738,7 +1738,7 @@ const subLimitOrder = async (
     }
 
     // give token approval
-    await approve(srcToken.address, proxy.address, sender);
+    await approve(srcToken.address, proxy.address, senderAcc);
 
     // sub
     const subData = await subLimitOrderStrategy(
