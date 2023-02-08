@@ -2230,11 +2230,12 @@ const morphoAaveV2Supply = async (
     amount,
     from,
     onBehalf,
+    maxGasForMatching = '0',
 ) => {
     const actionAddress = await getAddrFromRegistry('MorphoAaveV2Supply');
 
     const action = new dfs.actions.morpho.MorphoAaveV2SupplyAction(
-        tokenAddr, amount.toString(), from, onBehalf,
+        tokenAddr, amount.toString(), from, onBehalf, maxGasForMatching,
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
@@ -2270,11 +2271,12 @@ const morphoAaveV2Borrow = async (
     tokenAddr,
     amount,
     to,
+    maxGasForMatching = '0',
 ) => {
     const actionAddress = await getAddrFromRegistry('MorphoAaveV2Borrow');
 
     const action = new dfs.actions.morpho.MorphoAaveV2BorrowAction(
-        tokenAddr, amount.toString(), to,
+        tokenAddr, amount.toString(), to, maxGasForMatching,
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
