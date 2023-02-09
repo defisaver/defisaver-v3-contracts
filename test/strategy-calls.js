@@ -1934,10 +1934,10 @@ const callMorphoAaveV2FLBoostStrategy = async ({
         '0', cAsset, '0',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
-        cAsset, '0', nullAddress, nullAddress,
+        cAsset, '0', nullAddress, nullAddress, '0',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2BorrowAction(
-        dAsset, '0', flAddress,
+        dAsset, '0', flAddress, '0',
     ));
     strategy.addAction(new dfs.actions.checkers.MorphoAaveV2RatioCheckAction(
         '0', '0', nullAddress,
@@ -1974,7 +1974,7 @@ const callMorphoAaveV2BoostStrategy = async ({
     const strategy = new dfs.Strategy('');
 
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2BorrowAction(
-        dAsset, boostAmount, nullAddress,
+        dAsset, boostAmount, nullAddress, '0',
     ));
     strategy.addAction(new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -1990,7 +1990,7 @@ const callMorphoAaveV2BoostStrategy = async ({
         '0', cAsset, '0',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
-        cAsset, '0', nullAddress, nullAddress,
+        cAsset, '0', nullAddress, nullAddress, '0',
     ));
     strategy.addAction(new dfs.actions.checkers.MorphoAaveV2RatioCheckAction(
         '0', '0', nullAddress,
