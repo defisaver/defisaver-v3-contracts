@@ -56,7 +56,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
         // check if all the triggers are true
         (bool triggered, uint256 errIndex) 
             = _checkTriggers(strategy, _sub, _triggerCallData, _subId, SUB_STORAGE_ADDR);
-
+        
         if (!triggered) {
             revert TriggerNotActiveError(errIndex);
         }

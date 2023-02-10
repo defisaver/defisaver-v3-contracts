@@ -36,6 +36,7 @@ const {
     WBTC_ADDR,
     redeploy,
     setNetwork,
+    getNetwork,
     addrs,
     ETH_ADDR,
     getOwnerAddr,
@@ -100,6 +101,7 @@ const {
     createStrategy,
     createBundle,
     getLatestBundleId,
+    subToMcdProxy,
 } = require('../test/utils-strategies');
 
 const {
@@ -143,6 +145,7 @@ const {
     RATIO_STATE_UNDER,
 } = require('../test/triggers');
 const { deployCloseToDebtBundle, deployCloseToCollBundle } = require('../test/strategies/l2/l2-tests');
+const { createRepayBundle, createBoostBundle } = require('../test/strategies/mcd/mcd-tests');
 
 program.version('0.0.1');
 // let forkedAddresses = '';
@@ -682,6 +685,69 @@ const mcdCloseToCollStrategySub = async (vaultId, type, price, priceState, sende
     );
 
     console.log(`Subscribed to mcd close strategy with sub id #${subId}`);
+};
+
+const mcdBoostRepaySub = async ({
+    vaultId,
+    minRatio,
+    maxRatio,
+    targetRatioBoost,
+    targetRatioRepay,
+    senderAddr,
+}) => {
+    setNetwork('mainnet');
+    let [senderAcc] = await hre.ethers.getSigners();
+
+    if (senderAddr) {
+        senderAcc = hre.ethers.provider.getSigner(senderAddr.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = senderAddr ? proxy.connect(senderAcc) : proxy;
+
+    { // deploy if not live
+        const registry = await hre.ethers.getContractAt('DFSRegistry', addrs[getNetwork()].REGISTRY_ADDR);
+        if (await registry.isRegistered(hre.ethers.utils.id('McdSubProxy').slice(0, 10)).then((e) => !e)) {
+            const repayBundleId = await createRepayBundle(proxy, true);
+            const boostBundleId = await createBoostBundle(proxy, true);
+            await redeploy('McdSubProxy', REGISTRY_ADDR, false, true, repayBundleId, boostBundleId);
+            console.log({ repayBundleId, boostBundleId });
+        }
+    }
+
+    const encodeSub = (sub) => hre.ethers.utils.defaultAbiCoder.encode(
+        [
+            `(
+                uint64 strategyOrBundleId,
+                bool isBundle,
+                bytes[] triggerData,
+                bytes32[] subData
+            )`,
+        ],
+        [sub],
+    );
+
+    const {
+        repaySubId, boostSubId, repaySub, boostSub,
+    } = await subToMcdProxy(
+        proxy,
+        [
+            vaultId,
+            Float2BN(minRatio, 16),
+            Float2BN(maxRatio, 16),
+            Float2BN(targetRatioBoost, 16),
+            Float2BN(targetRatioRepay, 16),
+            maxRatio > 0,
+        ],
+    );
+    console.log({
+        repaySubEncoded: encodeSub(repaySub),
+        boostSubEncoded: encodeSub(boostSub),
+        repaySubId,
+        boostSubId,
+    });
 };
 
 const liquityTrailingCloseToCollStrategySub = async (percentage, sender) => {
@@ -1992,6 +2058,8 @@ const setBotAuth = async (addr) => {
 
     setNetwork(network);
 
+    await topUp(addrs[network].OWNER_ACC);
+
     await addBotCaller(addr, addrs[network].REGISTRY_ADDR, true, network);
 };
 
@@ -2204,6 +2272,28 @@ const createCompV3Position = async (
         .description('Deposits dai in smart savings')
         .action(async (protocol, amount, senderAddr) => {
             await supplyInSS(protocol, amount, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('sub-mcd-automation <vaultId> <minRatio> <maxRatio> <targetRatioBoost> <targetRatioRepay> [senderAddr]')
+        .description('Subscribes to Maker repay and (optionaly) boost bundles')
+        .action(async (
+            vaultId,
+            minRatio,
+            maxRatio,
+            targetRatioBoost,
+            targetRatioRepay,
+            senderAddr,
+        ) => {
+            await mcdBoostRepaySub({
+                vaultId,
+                minRatio,
+                maxRatio,
+                targetRatioBoost,
+                targetRatioRepay,
+                senderAddr,
+            });
             process.exit(0);
         });
 
