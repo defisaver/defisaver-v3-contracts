@@ -1808,7 +1808,7 @@ const subMorphoAaveV2Automation = async (
     let repayBundleId = latestBundleId - 1;
     let boostBundleId = latestBundleId;
 
-    if (latestBundleId < 12) {
+    if (latestBundleId < 15) {
         {
             await openStrategyAndBundleStorage(true);
             const strategyData = createMorphoAaveV2RepayStrategy();
