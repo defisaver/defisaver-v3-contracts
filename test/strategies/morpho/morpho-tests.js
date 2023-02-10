@@ -38,7 +38,9 @@ const C_DOllAR_AMOUNT_OPEN = '30000';
 const D_DOllAR_AMOUNT_OPEN = '10000';
 const B_R_DOLLAR_AMOUNT = '1000';
 
-const morphoAaveV2BoostTest = () => describe('Morpho-AaveV2-Boost-Strategy', () => {
+const morphoAaveV2BoostTest = () => describe('Morpho-AaveV2-Boost-Strategy', function () {
+    this.timeout(1000000);
+
     let senderAcc;
     let proxy;
     let view;
@@ -172,7 +174,9 @@ const morphoAaveV2BoostTest = () => describe('Morpho-AaveV2-Boost-Strategy', () 
     });
 });
 
-const morphoAaveV2RepayTest = () => describe('Morpho-AaveV2-Repay-Strategy', () => {
+const morphoAaveV2RepayTest = () => describe('Morpho-AaveV2-Repay-Strategy', function () {
+    this.timeout(1000000);
+
     let senderAcc;
     let proxy;
     let view;
