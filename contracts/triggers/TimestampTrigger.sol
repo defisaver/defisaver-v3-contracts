@@ -20,14 +20,17 @@ contract TimestampTrigger is ITrigger, AdminAuth {
 
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerSubData = parseInputs(_subData);
+
+        if (triggerSubData.timestamp == 0) return false;
+
         if (triggerSubData.timestamp < block.timestamp) return true;
 
         return false;
     }
 
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {
+    function changedSubData(bytes memory _subData) public view override returns (bytes memory) {
         SubParams memory triggerSubData = parseInputs(_subData);
-        triggerSubData.timestamp += triggerSubData.interval;
+        triggerSubData.timestamp = block.timestamp + triggerSubData.interval;
         return abi.encode(triggerSubData);
     }
     
