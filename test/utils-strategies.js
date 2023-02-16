@@ -237,7 +237,7 @@ const addBotCaller = async (
 
     botAuth = botAuth.connect(signer);
 
-    await botAuth.addCaller(botAddr, { gasLimit: 400000 });
+    await botAuth.addCaller(botAddr, { gasLimit: 800000 });
 
     if (regAddr === addrs[network].REGISTRY_ADDR && !isFork) {
         await stopImpersonatingAccount(addrs[network].OWNER_ACC);

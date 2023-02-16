@@ -50,6 +50,7 @@ const {
     createAaveFLV3RepayL2Strategy,
     createAaveV3BoostL2Strategy,
     createAaveFLV3BoostL2Strategy,
+    createDCAL2Strategy,
 } = require('../test/l2-strategies');
 
 const {
@@ -1808,6 +1809,8 @@ const setBotAuth = async (addr) => {
         network = process.env.TEST_CHAIN_ID;
     }
 
+    await topUp(addrs[network].OWNER_ACC);
+
     configure({
         chainId: chainIds[network],
         testMode: true,
@@ -1962,12 +1965,12 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    const strategyData = createDCAStrategy();
+    const strategyData = network === 'mainnet' ? createDCAStrategy() : createDCAL2Strategy();
     await openStrategyAndBundleStorage(true);
 
     const strategyId = await createStrategy(proxy, ...strategyData, true);
 
-    await redeploy('TimestampTrigger', REGISTRY_ADDR, false, true);
+    await redeploy('TimestampTrigger', addrs[network].REGISTRY_ADDR, false, true);
 
     const srcToken = getAssetInfo(srcTokenLabel);
     const destToken = getAssetInfo(destTokenLabel);
@@ -1988,7 +1991,6 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
         amountInDecimals,
         intervalInSeconds,
         lastTimestamp,
-        senderAcc.address,
         strategyId,
     );
 

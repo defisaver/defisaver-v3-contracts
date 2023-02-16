@@ -12,14 +12,19 @@ const {
     redeployCore,
     timeTravel,
     getAddrFromRegistry,
+    getNetwork,
     ETH_ADDR,
     WETH_ADDRESS,
     DAI_ADDR,
+    addrs,
+    sendEther,
+    getOwnerAddr,
 } = require('../../utils');
 
 const { callDcaStrategy } = require('../../strategy-calls');
 const { subDcaStrategy } = require('../../strategy-subs');
 const { createDCAStrategy } = require('../../strategies');
+const { createDCAL2Strategy } = require('../../l2-strategies');
 
 const { createStrategy, addBotCaller } = require('../../utils-strategies');
 
@@ -149,12 +154,20 @@ const dcaStrategyTest = async () => {
         let subStorage;
         let lastTimestamp;
         let subStorageAddr;
+        let network;
+        let tokenAddrSell;
+        let tokenAddrBuy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
 
-            strategyExecutor = await redeployCore();
+            network = getNetwork();
+
+            // Send eth to owner acc, needed for l2s who don't hold eth
+            await sendEther(senderAcc, getOwnerAddr(), '1');
+
+            strategyExecutor = await redeployCore(network !== 'mainnet');
 
             await redeploy('GasFeeTaker');
             await redeploy('DFSSell');
@@ -166,26 +179,22 @@ const dcaStrategyTest = async () => {
             await addBotCaller(botAcc.address);
 
             proxy = await getProxy(senderAcc.address);
-            await approve(WETH_ADDRESS, proxy.address);
+            await approve(addrs[network].WETH_ADDRESS, proxy.address);
+
+            tokenAddrSell = addrs[network].WETH_ADDRESS;
+            tokenAddrBuy = addrs[network].DAI_ADDRESS;
         });
 
         it('... should make a new DCA Strategy for selling eth into dai', async () => {
-            const strategyData = createDCAStrategy();
+            const strategyData = network === 'mainnet' ? createDCAStrategy() : createDCAL2Strategy();
             await openStrategyAndBundleStorage();
 
             const strategyId = await createStrategy(proxy, ...strategyData, true);
 
-            const tokenAddrSell = WETH_ADDRESS;
-            const tokenAddrBuy = DAI_ADDR;
-
             const interval = TWO_DAYS;
-            // lastTimestamp = Math.floor(Date.now() / 1000) + interval;
-
             const latestBlock = await hre.ethers.provider.getBlock('latest');
 
             console.log('Latest block timestamp: ', latestBlock.timestamp);
-            console.log('Start timestamp: ', lastTimestamp);
-
             lastTimestamp = latestBlock.timestamp + interval;
 
             amount = hre.ethers.utils.parseUnits('1', 18); // Sell 1 eth
@@ -197,7 +206,6 @@ const dcaStrategyTest = async () => {
                 amount,
                 interval,
                 lastTimestamp,
-                senderAcc.address,
                 strategyId,
             ));
         });
@@ -207,18 +215,22 @@ const dcaStrategyTest = async () => {
             // get weth and approve dsproxy to pull
             await depositToWeth(amount.toString());
 
-            const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
-            const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
+            const daiBalanceBefore = await balanceOf(tokenAddrBuy, senderAcc.address);
+            const wethBalanceBefore = await balanceOf(tokenAddrSell, senderAcc.address);
 
-            const newTimestamp = lastTimestamp + TWO_DAYS;
-
-            // eslint-disable-next-line max-len
-            await callDcaStrategy(botAcc, strategyExecutor, subId, strategySub, subStorage.address, newTimestamp);
+            await callDcaStrategy(
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                tokenAddrSell,
+                tokenAddrBuy,
+            );
 
             strategySub = await getUpdatedStrategySub(subStorage, subStorageAddr);
 
-            const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
-            const wethBalanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
+            const daiBalanceAfter = await balanceOf(tokenAddrBuy, senderAcc.address);
+            const wethBalanceAfter = await balanceOf(tokenAddrSell, senderAcc.address);
 
             expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
             expect(wethBalanceBefore).to.be.gt(wethBalanceAfter);
@@ -230,16 +242,22 @@ const dcaStrategyTest = async () => {
             // get weth and approve dsproxy to pull
             await depositToWeth(amount.toString());
 
-            const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
-            const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
+            const daiBalanceBefore = await balanceOf(tokenAddrBuy, senderAcc.address);
+            const wethBalanceBefore = await balanceOf(tokenAddrSell, senderAcc.address);
 
-            // eslint-disable-next-line max-len
-            await callDcaStrategy(botAcc, strategyExecutor, subId, strategySub, subStorage.address);
+            await callDcaStrategy(
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                tokenAddrSell,
+                tokenAddrBuy,
+            );
 
             strategySub = await getUpdatedStrategySub(subStorage, subStorageAddr);
 
-            const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
-            const wethBalanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
+            const daiBalanceAfter = await balanceOf(tokenAddrBuy, senderAcc.address);
+            const wethBalanceAfter = await balanceOf(tokenAddrSell, senderAcc.address);
 
             expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
             expect(wethBalanceBefore).to.be.gt(wethBalanceAfter);
@@ -251,8 +269,14 @@ const dcaStrategyTest = async () => {
             await depositToWeth(amount.toString());
 
             try {
-                // eslint-disable-next-line max-len
-                await callDcaStrategy(botAcc, strategyExecutor, subId, strategySub, subStorage.address);
+                await callDcaStrategy(
+                    botAcc,
+                    strategyExecutor,
+                    subId,
+                    strategySub,
+                    tokenAddrSell,
+                    tokenAddrBuy,
+                );
                 expect(true).to.be.equal(false);
             } catch (err) {
                 expect(true).to.be.equal(true);

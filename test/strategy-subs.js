@@ -58,7 +58,6 @@ const subDcaStrategy = async (
     amount,
     interval,
     lastTimestamp,
-    eoa,
     strategyId,
 ) => {
     const isBundle = false;
