@@ -34,6 +34,7 @@ const createRepayStrategy = () => {
 
     repayStrategy.addSubSlot('&vaultId', 'uint256');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&daiAddr', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     repayStrategy.addTrigger(mcdRatioTrigger);
@@ -57,7 +58,7 @@ const createRepayStrategy = () => {
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%wethAddr',
-            '%daiAddr',
+            '&daiAddr',
             '$3',
             '%exchangeWrapper',
         ),
@@ -95,11 +96,12 @@ const createFLRepayStrategy = () => {
 
     repayStrategy.addSubSlot('&vaultId', 'uint256');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&daiAddr', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     repayStrategy.addTrigger(mcdRatioTrigger);
 
-    const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction('%amount', '%wethAddr');
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%wethAddr'], ['%amount']);
 
     const ratioAction = new dfs.actions.maker.MakerRatioAction(
         '&vaultId',
@@ -108,7 +110,7 @@ const createFLRepayStrategy = () => {
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%wethAddr',
-            '%daiAddr',
+            '&daiAddr',
             '$1',
             '%exchangeWrapper',
         ),
@@ -117,7 +119,7 @@ const createFLRepayStrategy = () => {
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '%daiAddr', '$3',
+        '0', '&daiAddr', '$3',
     );
 
     const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
@@ -150,6 +152,77 @@ const createFLRepayStrategy = () => {
     repayStrategy.addAction(mcdPaybackAction);
     repayStrategy.addAction(withdrawAction);
     repayStrategy.addAction(mcdRatioCheckAction);
+
+    return repayStrategy.encodeForDsProxyCall();
+};
+
+const createMcdRepayCompositeStrategy = () => {
+    const repayStrategy = new dfs.Strategy('MakerRepayCompositeStrategy');
+
+    repayStrategy.addSubSlot('&vaultId', 'uint256');
+    repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&daiAddr', 'address');
+
+    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
+    repayStrategy.addTrigger(mcdRatioTrigger);
+
+    const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
+        '&vaultId',
+        '%joinAddr',
+        '%gasUsed',
+        '%flAddr',
+        '%flAmount',
+        '%nextPrice',
+        '%targetRatio',
+        formatExchangeObj(
+            '%wethAddr',
+            '&daiAddr',
+            '%repayAmount',
+            '%exchangeWrapper',
+        ),
+    );
+
+    repayStrategy.addAction(repayCompositeAction);
+
+    return repayStrategy.encodeForDsProxyCall();
+};
+
+const createMcdFLRepayCompositeStrategy = () => {
+    const repayStrategy = new dfs.Strategy('MakerFLRepayCompositeStrategy');
+
+    repayStrategy.addSubSlot('&vaultId', 'uint256');
+    repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&daiAddr', 'address');
+
+    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
+    repayStrategy.addTrigger(mcdRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%collAddr'],
+        ['%loanAmount'],
+        nullAddress,
+        [],
+    );
+
+    repayStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+
+    const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
+        '&vaultId',
+        '%joinAddr',
+        '%gasUsed',
+        '%flAddr',
+        '$1',
+        '%nextPrice',
+        '%targetRatio',
+        formatExchangeObj(
+            '%wethAddr',
+            '&daiAddr',
+            '%repayAmount',
+            '%exchangeWrapper',
+        ),
+    );
+
+    repayStrategy.addAction(repayCompositeAction);
 
     return repayStrategy.encodeForDsProxyCall();
 };
@@ -1215,6 +1288,7 @@ const createMcdBoostStrategy = () => {
     const mcdBoostStrategy = new dfs.Strategy('MakerBoostStrategy');
     mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
     mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    mcdBoostStrategy.addSubSlot('&daiAddr', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     mcdBoostStrategy.addTrigger(mcdRatioTrigger);
@@ -1232,7 +1306,7 @@ const createMcdBoostStrategy = () => {
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%daiAddr',
+            '&daiAddr',
             '%wethAddr',
             '$2',
             '%wrapper',
@@ -1275,11 +1349,12 @@ const createFlMcdBoostStrategy = () => {
     const mcdBoostStrategy = new dfs.Strategy('MakerFLBoostStrategy');
     mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
     mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    mcdBoostStrategy.addSubSlot('&daiAddr', 'address');
 
     const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
     mcdBoostStrategy.addTrigger(mcdRatioTrigger);
 
-    const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction('%amount', '%daiAddr');
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%daiAddr'], ['%amount']);
 
     const ratioAction = new dfs.actions.maker.MakerRatioAction(
         '&vaultId',
@@ -1287,9 +1362,9 @@ const createFlMcdBoostStrategy = () => {
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%daiAddr',
+            '&daiAddr',
             '%wethAddr',
-            '%flAmountWeGotBack',
+            '$1',
             '%wrapper',
         ),
         '&proxy',
@@ -1330,6 +1405,74 @@ const createFlMcdBoostStrategy = () => {
     mcdBoostStrategy.addAction(mcdSupplyAction);
     mcdBoostStrategy.addAction(generateAction);
     mcdBoostStrategy.addAction(mcdRatioCheckAction);
+
+    return mcdBoostStrategy.encodeForDsProxyCall();
+};
+
+const createMcdBoostCompositeStrategy = () => {
+    const mcdBoostStrategy = new dfs.Strategy('MakerBoostCompositeStrategy');
+    mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
+    mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    mcdBoostStrategy.addSubSlot('&daiAddr', 'address');
+
+    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
+    mcdBoostStrategy.addTrigger(mcdRatioTrigger);
+
+    const boostCompositeAction = new dfs.actions.maker.MakerBoostCompositeAction(
+        '&vaultId',
+        '%joinAddr',
+        '%gasUsed',
+        '%flAddr',
+        '%0',
+        '%nextPrice',
+        '%targetRatio',
+        formatExchangeObj(
+            '&daiAddr',
+            '%wethAddr',
+            '%boostAmount',
+            '%wrapper',
+        ),
+    );
+
+    mcdBoostStrategy.addAction(boostCompositeAction);
+
+    return mcdBoostStrategy.encodeForDsProxyCall();
+};
+
+const createMcdFLBoostCompositeStrategy = () => {
+    const mcdBoostStrategy = new dfs.Strategy('MakerFLBoostCompositeStrategy');
+    mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
+    mcdBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    mcdBoostStrategy.addSubSlot('&daiAddr', 'address');
+
+    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
+    mcdBoostStrategy.addTrigger(mcdRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.MakerFlashLoanAction(
+        '%loanAmount',
+        nullAddress,
+        [],
+    );
+
+    mcdBoostStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+
+    const boostCompositeAction = new dfs.actions.maker.MakerBoostCompositeAction(
+        '&vaultId',
+        '%joinAddr',
+        '%gasUsed',
+        '%flAddr',
+        '$1',
+        '%nextPrice',
+        '%targetRatio',
+        formatExchangeObj(
+            '&daiAddr',
+            '%wethAddr',
+            '%boostAmount',
+            '%wrapper',
+        ),
+    );
+
+    mcdBoostStrategy.addAction(boostCompositeAction);
 
     return mcdBoostStrategy.encodeForDsProxyCall();
 };
@@ -1938,6 +2081,10 @@ module.exports = {
     createMcdBoostStrategy,
     createFlMcdBoostStrategy,
     createMcdCloseToCollStrategy,
+    createMcdRepayCompositeStrategy,
+    createMcdFLRepayCompositeStrategy,
+    createMcdBoostCompositeStrategy,
+    createMcdFLBoostCompositeStrategy,
     createCompV3RepayStrategy,
     createCompV3EOARepayStrategy,
     createFlCompV3RepayStrategy,
