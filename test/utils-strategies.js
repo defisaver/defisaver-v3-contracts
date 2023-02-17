@@ -268,6 +268,22 @@ const getSubHash = (subData) => {
     return subDataHash;
 };
 
+const getUpdatedStrategySub = async (subStorage, subStorageAddr) => {
+    const events = (await subStorage.queryFilter({
+        address: subStorageAddr,
+        topics: [
+            hre.ethers.utils.id('UpdateData(uint256,bytes32,(uint64,bool,bytes[],bytes32[]))'),
+        ],
+    }));
+
+    const lastEvent = events.at(-1);
+
+    const abiCoder = hre.ethers.utils.defaultAbiCoder;
+    const strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], lastEvent.data)[0];
+
+    return strategySub;
+};
+
 module.exports = {
     subToStrategy,
     activateSub,
@@ -283,4 +299,5 @@ module.exports = {
     setMCDPriceVerifier,
     getSubHash,
     subToCBRebondProxy,
+    getUpdatedStrategySub,
 };

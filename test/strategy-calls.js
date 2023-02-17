@@ -49,7 +49,7 @@ const {
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
 // eslint-disable-next-line max-len
-const callDcaStrategy = async (botAcc, strategyExecutor, subId, strategySub, srcToken, destToken) => {
+const callDcaStrategy = async (botAcc, strategyExecutor, subId, strategySub, srcToken, destToken, uniV3Fee) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
@@ -58,9 +58,9 @@ const callDcaStrategy = async (botAcc, strategyExecutor, subId, strategySub, src
             srcToken,
             destToken,
             '0',
-            addrs[network].UNISWAP_WRAPPER,
+            addrs[network].UNISWAP_V3_WRAPPER,
             0,
-            3000,
+            uniV3Fee,
         ),
         placeHolderAddr,
         placeHolderAddr,

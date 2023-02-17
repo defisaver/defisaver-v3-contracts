@@ -1,6 +1,8 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
+const { getAssetInfo, set } = require('@defisaver/tokens');
+
 const {
     getProxy,
     redeploy,
@@ -13,12 +15,14 @@ const {
     timeTravel,
     getAddrFromRegistry,
     getNetwork,
+    sendEther,
+    getOwnerAddr,
+    setBalance,
     ETH_ADDR,
     WETH_ADDRESS,
     DAI_ADDR,
     addrs,
-    sendEther,
-    getOwnerAddr,
+    chainIds,
 } = require('../../utils');
 
 const { callDcaStrategy } = require('../../strategy-calls');
@@ -26,7 +30,7 @@ const { subDcaStrategy } = require('../../strategy-subs');
 const { createDCAStrategy } = require('../../strategies');
 const { createDCAL2Strategy } = require('../../l2-strategies');
 
-const { createStrategy, addBotCaller } = require('../../utils-strategies');
+const { createStrategy, addBotCaller, getUpdatedStrategySub } = require('../../utils-strategies');
 
 const { callLimitOrderStrategy } = require('../../strategy-calls');
 const { subLimitOrderStrategy } = require('../../strategy-subs');
@@ -124,25 +128,26 @@ const limitOrderStrategyTest = async () => {
 };
 
 const dcaStrategyTest = async () => {
-    // Convert ETH -> DAI, every N Days
+    const tokenPairs = [
+        {
+            srcTokenSymbol: 'WETH', destTokenSymbol: 'DAI', amount: '1', uniV3Fee: '3000',
+        },
+        {
+            srcTokenSymbol: 'WETH', destTokenSymbol: 'USDC', amount: '2', uniV3Fee: '3000',
+        },
+        {
+            srcTokenSymbol: 'DAI', destTokenSymbol: 'WETH', amount: '1000', uniV3Fee: '3000',
+        },
+        {
+            srcTokenSymbol: 'WBTC', destTokenSymbol: 'WETH', amount: '1', uniV3Fee: '3000',
+        },
+        {
+            srcTokenSymbol: 'USDC', destTokenSymbol: 'WBTC', amount: '3400', uniV3Fee: '3000',
+        },
+    ];
+
     describe('DCA Strategy', function () {
         this.timeout(120000);
-
-        const getUpdatedStrategySub = async (subStorage, subStorageAddr) => {
-            const events = (await subStorage.queryFilter({
-                address: subStorageAddr,
-                topics: [
-                    hre.ethers.utils.id('UpdateData(uint256,bytes32,(uint64,bool,bytes[],bytes32[]))'),
-                ],
-            }));
-
-            const lastEvent = events.at(-1);
-
-            const abiCoder = hre.ethers.utils.defaultAbiCoder;
-            const strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], lastEvent.data)[0];
-
-            return strategySub;
-        };
 
         let senderAcc;
         let proxy;
@@ -150,19 +155,22 @@ const dcaStrategyTest = async () => {
         let strategyExecutor;
         let subId;
         let strategySub;
-        let amount;
         let subStorage;
         let lastTimestamp;
         let subStorageAddr;
         let network;
         let tokenAddrSell;
         let tokenAddrBuy;
+        let sellAmountWei;
+        let strategyId;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
 
             network = getNetwork();
+
+            set('network', chainIds[network]);
 
             // Send eth to owner acc, needed for l2s who don't hold eth
             await sendEther(senderAcc, getOwnerAddr(), '1');
@@ -179,96 +187,59 @@ const dcaStrategyTest = async () => {
             await addBotCaller(botAcc.address);
 
             proxy = await getProxy(senderAcc.address);
-            await approve(addrs[network].WETH_ADDRESS, proxy.address);
 
-            tokenAddrSell = addrs[network].WETH_ADDRESS;
-            tokenAddrBuy = addrs[network].DAI_ADDRESS;
-        });
-
-        it('... should make a new DCA Strategy for selling eth into dai', async () => {
             const strategyData = network === 'mainnet' ? createDCAStrategy() : createDCAL2Strategy();
             await openStrategyAndBundleStorage();
 
-            const strategyId = await createStrategy(proxy, ...strategyData, true);
-
-            const interval = TWO_DAYS;
-            const latestBlock = await hre.ethers.provider.getBlock('latest');
-
-            console.log('Latest block timestamp: ', latestBlock.timestamp);
-            lastTimestamp = latestBlock.timestamp + interval;
-
-            amount = hre.ethers.utils.parseUnits('1', 18); // Sell 1 eth
-
-            ({ subId, strategySub } = await subDcaStrategy(
-                proxy,
-                tokenAddrSell,
-                tokenAddrBuy,
-                amount,
-                interval,
-                lastTimestamp,
-                strategyId,
-            ));
+            strategyId = await createStrategy(proxy, ...strategyData, true);
         });
 
-        it('... should trigger DCA strategy', async () => {
-            await timeTravel(TWO_DAYS);
-            // get weth and approve dsproxy to pull
-            await depositToWeth(amount.toString());
+        for (let i = 0; i < tokenPairs.length; i++) {
+            const {
+                srcTokenSymbol, destTokenSymbol, amount, uniV3Fee,
+            } = tokenPairs[i];
 
-            const daiBalanceBefore = await balanceOf(tokenAddrBuy, senderAcc.address);
-            const wethBalanceBefore = await balanceOf(tokenAddrSell, senderAcc.address);
+            it(`... should make a new DCA Strategy for selling ${srcTokenSymbol} into ${destTokenSymbol}`, async () => {
+                const srcToken = getAssetInfo(srcTokenSymbol);
+                const destToken = getAssetInfo(destTokenSymbol);
 
-            await callDcaStrategy(
-                botAcc,
-                strategyExecutor,
-                subId,
-                strategySub,
-                tokenAddrSell,
-                tokenAddrBuy,
-            );
+                const interval = TWO_DAYS;
+                const latestBlock = await hre.ethers.provider.getBlock('latest');
 
-            strategySub = await getUpdatedStrategySub(subStorage, subStorageAddr);
+                lastTimestamp = latestBlock.timestamp + interval;
 
-            const daiBalanceAfter = await balanceOf(tokenAddrBuy, senderAcc.address);
-            const wethBalanceAfter = await balanceOf(tokenAddrSell, senderAcc.address);
+                sellAmountWei = hre.ethers.utils.parseUnits(amount, srcToken.decimals);
 
-            expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
-            expect(wethBalanceBefore).to.be.gt(wethBalanceAfter);
-        });
+                await approve(srcToken.address, proxy.address);
 
-        it('... should trigger DCA strategy again after 2 days', async () => {
-            await timeTravel(TWO_DAYS);
+                tokenAddrSell = srcToken.address;
+                tokenAddrBuy = destToken.address;
 
-            // get weth and approve dsproxy to pull
-            await depositToWeth(amount.toString());
+                ({ subId, strategySub } = await subDcaStrategy(
+                    proxy,
+                    tokenAddrSell,
+                    tokenAddrBuy,
+                    sellAmountWei,
+                    interval,
+                    lastTimestamp,
+                    strategyId,
+                ));
+            });
 
-            const daiBalanceBefore = await balanceOf(tokenAddrBuy, senderAcc.address);
-            const wethBalanceBefore = await balanceOf(tokenAddrSell, senderAcc.address);
+            it('... should trigger DCA strategy', async () => {
+                await timeTravel(TWO_DAYS);
 
-            await callDcaStrategy(
-                botAcc,
-                strategyExecutor,
-                subId,
-                strategySub,
-                tokenAddrSell,
-                tokenAddrBuy,
-            );
+                await setBalance(tokenAddrSell, senderAcc.address, sellAmountWei);
 
-            strategySub = await getUpdatedStrategySub(subStorage, subStorageAddr);
+                let destAddrTransformed = tokenAddrBuy;
 
-            const daiBalanceAfter = await balanceOf(tokenAddrBuy, senderAcc.address);
-            const wethBalanceAfter = await balanceOf(tokenAddrSell, senderAcc.address);
+                if (destTokenSymbol === 'WETH') {
+                    destAddrTransformed = addrs[network].ETH_ADDR;
+                }
 
-            expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
-            expect(wethBalanceBefore).to.be.gt(wethBalanceAfter);
-        });
+                const buyBalanceBefore = await balanceOf(destAddrTransformed, senderAcc.address);
+                const sellBalanceBefore = await balanceOf(tokenAddrSell, senderAcc.address);
 
-        it('... should fail to trigger DCA strategy again after 1 day', async () => {
-            await timeTravel(DAY);
-            // get weth and approve dsproxy to pull
-            await depositToWeth(amount.toString());
-
-            try {
                 await callDcaStrategy(
                     botAcc,
                     strategyExecutor,
@@ -276,12 +247,72 @@ const dcaStrategyTest = async () => {
                     strategySub,
                     tokenAddrSell,
                     tokenAddrBuy,
+                    uniV3Fee,
+
                 );
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                expect(true).to.be.equal(true);
-            }
-        });
+
+                strategySub = await getUpdatedStrategySub(subStorage, subStorageAddr);
+
+                const buyBalanceAfter = await balanceOf(destAddrTransformed, senderAcc.address);
+                const sellBalanceAfter = await balanceOf(tokenAddrSell, senderAcc.address);
+
+                expect(buyBalanceAfter).to.be.gt(buyBalanceBefore);
+                expect(sellBalanceBefore).to.be.gt(sellBalanceAfter);
+            });
+
+            it('... should trigger DCA strategy again after 2 days', async () => {
+                await timeTravel(TWO_DAYS);
+
+                await setBalance(tokenAddrSell, senderAcc.address, sellAmountWei);
+
+                let destAddrTransformed = tokenAddrBuy;
+
+                if (destTokenSymbol === 'WETH') {
+                    destAddrTransformed = addrs[network].ETH_ADDR;
+                }
+
+                const buyBalanceBefore = await balanceOf(destAddrTransformed, senderAcc.address);
+                const sellBalanceBefore = await balanceOf(tokenAddrSell, senderAcc.address);
+
+                await callDcaStrategy(
+                    botAcc,
+                    strategyExecutor,
+                    subId,
+                    strategySub,
+                    tokenAddrSell,
+                    tokenAddrBuy,
+                    uniV3Fee,
+                );
+
+                strategySub = await getUpdatedStrategySub(subStorage, subStorageAddr);
+
+                const buyBalanceAfter = await balanceOf(destAddrTransformed, senderAcc.address);
+                const sellBalanceAfter = await balanceOf(tokenAddrSell, senderAcc.address);
+
+                expect(buyBalanceAfter).to.be.gt(buyBalanceBefore);
+                expect(sellBalanceBefore).to.be.gt(sellBalanceAfter);
+            });
+
+            it('... should fail to trigger DCA strategy again after 1 day', async () => {
+                await timeTravel(DAY);
+                await setBalance(tokenAddrSell, senderAcc.address, sellAmountWei);
+
+                try {
+                    await callDcaStrategy(
+                        botAcc,
+                        strategyExecutor,
+                        subId,
+                        strategySub,
+                        tokenAddrSell,
+                        tokenAddrBuy,
+                        uniV3Fee,
+                    );
+                    expect(true).to.be.equal(false);
+                } catch (err) {
+                    expect(true).to.be.equal(true);
+                }
+            });
+        }
     });
 };
 
