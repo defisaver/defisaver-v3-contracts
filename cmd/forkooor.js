@@ -4,7 +4,9 @@ const hre = require('hardhat');
 require('dotenv-safe').config();
 const fs = require('fs');
 const { spawnSync } = require('child_process');
-const { getAssetInfo, ilks, assets } = require('@defisaver/tokens');
+const {
+    getAssetInfo, ilks, assets, set,
+} = require('@defisaver/tokens');
 const { configure } = require('@defisaver/sdk');
 const dfs = require('@defisaver/sdk');
 
@@ -2015,8 +2017,6 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
         senderAcc.address = senderAcc._address;
     }
 
-    await topUp(senderAcc.address);
-
     let network = 'mainnet';
 
     if (process.env.TEST_CHAIN_ID) {
@@ -2028,6 +2028,7 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
         testMode: true,
     });
 
+    set('network', chainIds[network]);
     setNetwork(network);
 
     let proxy = await getProxy(senderAcc.address);
@@ -2035,8 +2036,9 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
 
     const strategyData = network === 'mainnet' ? createDCAStrategy() : createDCAL2Strategy();
     await openStrategyAndBundleStorage(true);
-
     const strategyId = await createStrategy(proxy, ...strategyData, true);
+
+    console.log('Strategy created: ', strategyId);
 
     await redeploy('TimestampTrigger', addrs[network].REGISTRY_ADDR, false, true);
 
@@ -2051,6 +2053,13 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
     const lastTimestamp = latestBlock.timestamp + intervalInSeconds;
 
     const amountInDecimals = hre.ethers.utils.parseUnits(amount, srcToken.decimals);
+
+    console.log(srcToken.address,
+        destToken.address,
+        amountInDecimals,
+        intervalInSeconds,
+        lastTimestamp,
+        strategyId);
 
     const sub = await subDcaStrategy(
         proxy,
