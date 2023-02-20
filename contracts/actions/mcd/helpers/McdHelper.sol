@@ -104,7 +104,7 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
     function getTokenFromJoin(address _joinAddr) internal view returns (address) {
         // if it's dai_join_addr don't check gem() it will fail, return dai addr
         if (_joinAddr == DAI_JOIN_ADDR) {
-            return DAI_ADDR;
+            return DAI_ADDRESS;
         }
 
         return address(IJoin(_joinAddr).gem());
