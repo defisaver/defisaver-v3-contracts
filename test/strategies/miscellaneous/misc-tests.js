@@ -17,7 +17,6 @@ const {
     sendEther,
     getOwnerAddr,
     setBalance,
-    UNISWAP_WRAPPER,
     WETH_ADDRESS,
     DAI_ADDR,
     addrs,
@@ -51,18 +50,26 @@ const limitOrderStrategyTest = async () => {
         let amount;
         let currPrice;
         let minPrice;
-        let uniV2Wrapper;
+        let uniV3Wrapper;
+        let network;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
 
-            strategyExecutor = await redeployCore();
+            network = getNetwork();
 
-            uniV2Wrapper = await hre.ethers.getContractAt('UniswapWrapperV3', UNISWAP_WRAPPER);
+            set('network', chainIds[network]);
+
+            // Send eth to owner acc, needed for l2s who don't hold eth
+            await sendEther(senderAcc, getOwnerAddr(), '1');
+
+            strategyExecutor = await redeployCore(network !== 'mainnet');
 
             await redeploy('LimitSell');
             await redeploy('OffchainPriceTrigger');
+
+            uniV3Wrapper = await hre.ethers.getContractAt('UniswapWrapperV3', addrs[network].UNISWAP_V3_WRAPPER);
 
             await addBotCaller(botAcc.address);
 
@@ -88,9 +95,9 @@ const limitOrderStrategyTest = async () => {
 
             amount = hre.ethers.utils.parseUnits('1', 18); // Sell 1 eth
 
-            const path = abiCoder.encode(['address[]'], [[tokenAddrSell, tokenAddrBuy]]);
+            const path = hre.ethers.utils.solidityPack(['address', 'uint24', 'address'], [tokenAddrSell, 3000, tokenAddrBuy]);
 
-            currPrice = await uniV2Wrapper.getSellRate(tokenAddrSell, tokenAddrBuy, amount, path);
+            currPrice = await uniV3Wrapper.getSellRate(tokenAddrSell, tokenAddrBuy, amount, path);
             minPrice = currPrice.sub(currPrice.div('200')); // 0.5% slippage in the minPrice
 
             console.log(currPrice, minPrice);

@@ -723,6 +723,7 @@ const formatMockExchangeObj = async (
     ];
 };
 
+// eslint-disable-next-line max-len
 const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee, minPrice = 0) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
