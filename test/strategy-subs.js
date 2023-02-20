@@ -59,7 +59,6 @@ const subDcaStrategy = async (
     amount,
     interval,
     lastTimestamp,
-    eoa,
     strategyId,
 ) => {
     const isBundle = false;
@@ -68,9 +67,6 @@ const subDcaStrategy = async (
     const tokenAddrBuyEncoded = abiCoder.encode(['address'], [tokenAddrBuy]);
     const amountEncoded = abiCoder.encode(['uint256'], [amount]);
     const intervalEncoded = abiCoder.encode(['uint256'], [interval]);
-    const lastTimestampEncoded = abiCoder.encode(['uint256'], [lastTimestamp]);
-    const proxyEncoded = abiCoder.encode(['address'], [proxy.address]);
-    const eoaEncoded = abiCoder.encode(['address'], [eoa]);
 
     const triggerData = await createTimestampTrigger(lastTimestamp, interval);
 
@@ -83,9 +79,6 @@ const subDcaStrategy = async (
             tokenAddrBuyEncoded,
             amountEncoded,
             intervalEncoded,
-            lastTimestampEncoded,
-            proxyEncoded,
-            eoaEncoded,
         ],
     ];
     const subId = await subToStrategy(proxy, strategySub);

@@ -25,6 +25,7 @@ const addrs = {
         OWNER_ACC: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
         WETH_ADDRESS: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         DAI_ADDRESS: '0x6b175474e89094c44da98b954eedeac495271d0f',
+        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         TOKEN_GROUP_REGISTRY: '0xcA49e64FE1FE8be40ED30F682edA1b27a6c8611c',
         FEE_RECEIVER: '0x6467e807dB1E71B9Ef04E0E3aFb962E4B0900B2B',
         USDC_ADDR: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
@@ -33,6 +34,7 @@ const addrs = {
         StrategyProxy: '0x0822902D30CC9c77404e6eB140dC1E98aF5b559A',
         SubProxy: '0xd18d4756bbf848674cc35f1a0B86afEF20787382',
         UNISWAP_WRAPPER: '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54',
+        UNISWAP_V3_WRAPPER: '0xA250D449e8246B0be1ecF66E21bB98678448DEF5',
         FEED_REGISTRY: '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf',
         COMET_USDC_ADDR: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
         COMET_USDC_REWARDS_ADDR: '0x1B0e765F6224C21223AeA2af16c1C46E38885a40',
@@ -54,10 +56,11 @@ const addrs = {
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
         StrategyProxy: '0xEe0C404FD30E289c305E760b3AE1d1Ae6503350f',
         SubProxy: '0x163c08d3F6d916AD6Af55b37728D547e968103F8',
-        UNISWAP_WRAPPER: '0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357',
+        UNISWAP_V3_WRAPPER: '0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357',
         AAVE_V3_VIEW: '0x5aD16e393615bfeF64e15210C370dd4b8f2753Cb',
         AVG_GAS_PRICE: 0.001,
         TOKEN_GROUP_REGISTRY: '0x566b2a957D8FCE39D2744059d558F27aF52a70c0',
+        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -75,7 +78,8 @@ const addrs = {
         SubProxy: '0x275A8f98dBA07Ad6380D3ea3F36B665DD6E02F25',
         StrategyProxy: '0x8F62B8Cd1189dB92ba4CBd4dBE64D03C54fD079B',
         AAVE_V3_VIEW: '0x710f01037018Daad969B8FeFe69b4823Ef788bc6',
-        UNISWAP_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
+        UNISWAP_V3_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
+        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         AVG_GAS_PRICE: 0.5,
     },
     kovan: {
@@ -196,6 +200,8 @@ const standardAmounts = {
 };
 
 const coinGeckoHelper = {
+    STETH: 'staked-ether',
+    CRV: 'curve-dao-token',
     ETH: 'ethereum',
     WETH: 'weth',
     AAVE: 'aave',
@@ -565,6 +571,12 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
     }
 
     return c;
+};
+
+const getContractFromRegistry = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR) => {
+    const contractAddr = await getAddrFromRegistry(name, regAddr);
+    if (contractAddr !== nullAddress) return hre.ethers.getContractAt(name, contractAddr);
+    return redeploy(name, regAddr);
 };
 
 const setCode = async (addr, code) => {
@@ -1249,6 +1261,7 @@ module.exports = {
     cacheChainlinkPrice,
     expectCloseEq,
     setContractAt,
+    getContractFromRegistry,
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),

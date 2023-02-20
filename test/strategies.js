@@ -1140,39 +1140,36 @@ const createLimitOrderStrategy = () => {
 const createDCAStrategy = () => {
     const dcaStrategy = new dfs.Strategy('DCAStrategy');
 
-    dcaStrategy.addSubSlot('&tokenAddrSell', 'address');
-    dcaStrategy.addSubSlot('&tokenAddrBuy', 'address');
+    dcaStrategy.addSubSlot('&sellToken', 'address');
+    dcaStrategy.addSubSlot('&buyToken', 'address');
     dcaStrategy.addSubSlot('&amount', 'uint256');
     dcaStrategy.addSubSlot('&interval', 'uint256');
-    dcaStrategy.addSubSlot('&lastTimestamp', 'uint256');
-    dcaStrategy.addSubSlot('&proxy', 'address');
-    dcaStrategy.addSubSlot('&eoa', 'address');
 
     const timestampTrigger = new dfs.triggers.TimestampTrigger('0');
     dcaStrategy.addTrigger(timestampTrigger);
 
-    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-        '&tokenAddrSell', '&eoa', '&amount',
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&sellToken',
+            '&buyToken',
+            '&amount',
+            '%exchangeWrapper',
+        ),
+        '&eoa',
+        '&proxy',
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '&tokenAddrSell', '$1',
+        '0', '&buyToken', '$1',
     );
 
-    const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            '&tokenAddrSell',
-            '&tokenAddrBuy',
-            '$2',
-            '%exchangeWrapper',
-        ),
-        '&proxy',
-        '&eoa',
+    const sendTokenAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&buyToken', '&eoa', '$2',
     );
 
-    dcaStrategy.addAction(pullTokenAction);
-    dcaStrategy.addAction(feeTakingAction);
     dcaStrategy.addAction(sellAction);
+    dcaStrategy.addAction(feeTakingAction);
+    dcaStrategy.addAction(sendTokenAction);
 
     return dcaStrategy.encodeForDsProxyCall();
 };

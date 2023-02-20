@@ -2,9 +2,7 @@
 
 pragma solidity =0.8.10;
 
-import "./MainnetDAIAddress.sol";
-
-contract MainnetUtilAddresses is MainnetDAIAddress {
+contract MainnetUtilAddresses {
     address internal refillCaller = 0x33fDb79aFB4456B604f376A45A546e7ae700e880;
     address internal feeAddr = 0x76720aC2574631530eC8163e4085d6F98513fb27;
 
@@ -22,6 +20,7 @@ contract MainnetUtilAddresses is MainnetDAIAddress {
     address internal constant STETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
     address internal constant WBTC_ADDR = 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599;
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
+    address internal constant DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
     address internal constant FEE_RECEIVER_ADMIN_ADDR = 0xA74e9791D7D66c6a14B2C571BdA0F2A1f6D64E06;
 
@@ -33,5 +32,5 @@ contract MainnetUtilAddresses is MainnetDAIAddress {
     // not needed on mainnet
     address internal constant DEFAULT_BOT = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    address internal constant CHAINLINK_FEED_REGISTRY = 0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf;
+    address public constant CHAINLINK_FEED_REGISTRY = 0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf;
 }

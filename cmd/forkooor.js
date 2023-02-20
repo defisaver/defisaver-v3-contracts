@@ -4,7 +4,9 @@ const hre = require('hardhat');
 require('dotenv-safe').config();
 const fs = require('fs');
 const { spawnSync } = require('child_process');
-const { getAssetInfo, ilks, assets } = require('@defisaver/tokens');
+const {
+    getAssetInfo, ilks, assets, set,
+} = require('@defisaver/tokens');
 const { configure } = require('@defisaver/sdk');
 const dfs = require('@defisaver/sdk');
 
@@ -51,6 +53,7 @@ const {
     createAaveFLV3RepayL2Strategy,
     createAaveV3BoostL2Strategy,
     createAaveFLV3BoostL2Strategy,
+    createDCAL2Strategy,
 } = require('../test/l2-strategies');
 
 const {
@@ -110,6 +113,7 @@ const {
     createLiquityPaybackChickenInStrategy,
     createLiquityPaybackChickenOutStrategy,
     createLimitOrderStrategy,
+    createDCAStrategy,
 } = require('../test/strategies');
 
 const {
@@ -124,6 +128,7 @@ const {
     subCbRebondStrategy,
     subLiquityCBPaybackStrategy,
     subLimitOrderStrategy,
+    subDcaStrategy,
 } = require('../test/strategy-subs');
 
 const { getTroveInfo } = require('../test/utils-liquity');
@@ -1955,12 +1960,16 @@ const setBotAuth = async (addr) => {
         network = process.env.TEST_CHAIN_ID;
     }
 
+    await topUp(addrs[network].OWNER_ACC);
+
     configure({
         chainId: chainIds[network],
         testMode: true,
     });
 
     setNetwork(network);
+
+    await topUp(addrs[network].OWNER_ACC);
 
     await addBotCaller(addr, addrs[network].REGISTRY_ADDR, true, network);
 };
@@ -2078,6 +2087,74 @@ const createCompV3Position = async (
     } catch (err) {
         console.log(err);
     }
+};
+
+const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    await topUp(senderAcc.address);
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    set('network', chainIds[network]);
+    setNetwork(network);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    const strategyData = network === 'mainnet' ? createDCAStrategy() : createDCAL2Strategy();
+    await openStrategyAndBundleStorage(true);
+    const strategyId = await createStrategy(proxy, ...strategyData, true);
+
+    console.log('Strategy created: ', strategyId);
+
+    await redeploy('TimestampTrigger', addrs[network].REGISTRY_ADDR, false, true);
+
+    const srcToken = getAssetInfo(srcTokenLabel);
+    const destToken = getAssetInfo(destTokenLabel);
+
+    const DAY = 1 * 24 * 60 * 60;
+
+    const intervalInSeconds = interval * DAY;
+    const latestBlock = await hre.ethers.provider.getBlock('latest');
+
+    const lastTimestamp = latestBlock.timestamp + intervalInSeconds;
+
+    const amountInDecimals = hre.ethers.utils.parseUnits(amount, srcToken.decimals);
+
+    console.log(srcToken.address,
+        destToken.address,
+        amountInDecimals,
+        intervalInSeconds,
+        lastTimestamp,
+        strategyId);
+
+    const sub = await subDcaStrategy(
+        proxy,
+        srcToken.address,
+        destToken.address,
+        amountInDecimals,
+        intervalInSeconds,
+        lastTimestamp,
+        strategyId,
+    );
+
+    console.log(`Subscribed to DCA strategy with sub id ${sub.subId}`);
 };
 
 (async () => {
@@ -2389,6 +2466,13 @@ const createCompV3Position = async (
         .action(async (srcTokenLabel, destTokenLabel, srcAmount, targetPrice, orderType, expireDays, senderAddr) => {
             // eslint-disable-next-line max-len
             await subLimitOrder(srcTokenLabel, destTokenLabel, srcAmount, targetPrice, orderType, expireDays, senderAddr);
+        });
+
+    program
+        .command('sub-dca <srcTokenLabel> <buyTokenLabel> <amount> <interval> [senderAddr]')
+        .description('Subscribes to a DCA strategy')
+        .action(async (srcTokenLabel, buyTokenLabel, amount, interval, senderAddr) => {
+            await dcaStrategySub(srcTokenLabel, buyTokenLabel, amount, interval, senderAddr);
             process.exit(0);
         });
 

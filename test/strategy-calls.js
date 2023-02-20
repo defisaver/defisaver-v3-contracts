@@ -35,6 +35,8 @@ const {
     LUSD_ADDR,
     formatMockExchangeObj,
     MAX_UINT,
+    addrs,
+    network,
 } = require('./utils');
 
 const {
@@ -51,41 +53,59 @@ const {
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
 // eslint-disable-next-line max-len
-const callDcaStrategy = async (botAcc, strategyExecutor, subId, strategySub) => {
+const callDcaStrategy = async (botAcc, strategyExecutor, subId, strategySub, srcToken, destToken, uniV3Fee) => {
     const triggerCallData = [];
     const actionsCallData = [];
 
-    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-        placeHolderAddr, placeHolderAddr, placeHolderAddr,
-    );
-
-    const gasCost = 500_000;
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        gasCost, placeHolderAddr, '$1',
-    );
-
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            WETH_ADDRESS, // TODO: Why we need to hardcode this, can't be passed as &
-            DAI_ADDR,
-            '$2',
-            UNISWAP_WRAPPER,
+            srcToken,
+            destToken,
+            '0',
+            addrs[network].UNISWAP_V3_WRAPPER,
+            0,
+            uniV3Fee,
         ),
         placeHolderAddr,
         placeHolderAddr,
     );
 
+    const gasCost = 500_000;
+    let feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        gasCost, placeHolderAddr, '0',
+    );
+
+    if (network !== 'mainnet') {
+        feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+            gasCost, placeHolderAddr, '0', '0',
+        );
+    }
+
+    const sendTokenAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        placeHolderAddr, placeHolderAddr, 0,
+    );
+
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
-    actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
-    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(sendTokenAction.encodeForRecipe()[0]);
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+
+    let receipt;
+
+    if (network === 'mainnet') {
     // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, 0, triggerCallData, actionsCallData, strategySub, {
-        gasLimit: 8000000,
-    });
+        receipt = await strategyExecutorByBot.executeStrategy(subId, 0, triggerCallData, actionsCallData, strategySub, {
+            gasLimit: 8000000,
+        });
+    } else {
+        // eslint-disable-next-line max-len
+        receipt = await strategyExecutorByBot.executeStrategy(subId, 0, triggerCallData, actionsCallData, {
+            gasLimit: 8000000,
+        });
+    }
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
