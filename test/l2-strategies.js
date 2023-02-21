@@ -489,6 +489,34 @@ const createDCAL2Strategy = () => {
     return dcaStrategy.encodeForDsProxyCall();
 };
 
+const createLimitOrderL2Strategy = () => {
+    const limitOrderStrategy = new dfs.Strategy('LimitOrderL2Strategy');
+
+    const offchainPriceTrigger = new dfs.triggers.OffchainPriceTrigger('0', '0');
+    limitOrderStrategy.addTrigger(offchainPriceTrigger);
+
+    limitOrderStrategy.addSubSlot('&tokenAddrSell', 'address');
+    limitOrderStrategy.addSubSlot('&tokenAddrBuy', 'address');
+    limitOrderStrategy.addSubSlot('&amount', 'uint256');
+
+    const sellAction = new dfs.actions.basic.LimitSellActionL2(
+        formatExchangeObj(
+            '&tokenAddrSell',
+            '&tokenAddrBuy',
+            '&amount',
+            '%exchangeWrapper',
+        ),
+        '&eoa',
+        '&eoa',
+        '%gasUsed',
+        '%l1GasUsed',
+    );
+
+    limitOrderStrategy.addAction(sellAction);
+
+    return limitOrderStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createAaveV3RepayL2Strategy,
     createAaveFLV3RepayL2Strategy,
@@ -500,4 +528,5 @@ module.exports = {
     createAaveV3FLCloseToCollL2Strategy,
     aaveV3CloseActions,
     createDCAL2Strategy,
+    createLimitOrderL2Strategy,
 };

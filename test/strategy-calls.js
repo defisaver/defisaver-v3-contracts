@@ -1032,20 +1032,30 @@ const callCompBoostStrategy = async (botAcc, strategyExecutor, subId, strategySu
     console.log(`GasUsed callCompBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callLimitOrderStrategy = async (botAcc, minPrice, strategyExecutor, subId, strategySub) => {
+const callLimitOrderStrategy = async (
+    botAcc,
+    minPrice,
+    strategyExecutor,
+    subId,
+    strategySub,
+    tokenAddrSell,
+    tokenAddrBuy,
+    uniV3Fee,
+) => {
     const actionsCallData = [];
     const triggerCallData = [];
 
     const txGasCost = 500000; // 500k gas
+    const l1GasCost = 30000; // 30k gas (just an estimate should be dynamic)
 
-    const sellAction = new dfs.actions.basic.LimitSellAction(
+    let sellAction = new dfs.actions.basic.LimitSellAction(
         formatExchangeObj(
-            WETH_ADDRESS, // can't be placeholder because of proper formatting of uni path
-            DAI_ADDR,
+            tokenAddrSell,
+            tokenAddrBuy,
             '0',
-            UNISWAP_WRAPPER,
+            addrs[network].UNISWAP_V3_WRAPPER,
             0,
-            0,
+            uniV3Fee,
             minPrice.toString(),
         ),
         placeHolderAddr,
@@ -1053,14 +1063,40 @@ const callLimitOrderStrategy = async (botAcc, minPrice, strategyExecutor, subId,
         txGasCost,
     );
 
+    if (network !== 'mainnet') {
+        sellAction = new dfs.actions.basic.LimitSellActionL2(
+            formatExchangeObj(
+                tokenAddrSell,
+                tokenAddrBuy,
+                '0',
+                addrs[network].UNISWAP_V3_WRAPPER,
+                0,
+                uniV3Fee,
+                minPrice.toString(),
+            ),
+            placeHolderAddr,
+            placeHolderAddr,
+            txGasCost,
+            l1GasCost,
+        );
+    }
+
     triggerCallData.push(abiCoder.encode(['uint256'], [minPrice.toString()]));
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
-    const receipt = await strategyExecutorByBot.executeStrategy(subId, 0, triggerCallData, actionsCallData, strategySub, {
-        gasLimit: 8000000,
-    });
+    let receipt;
+    if (network === 'mainnet') {
+        // eslint-disable-next-line max-len
+        receipt = await strategyExecutorByBot.executeStrategy(subId, 0, triggerCallData, actionsCallData, strategySub, {
+            gasLimit: 8000000,
+        });
+    } else {
+        // eslint-disable-next-line max-len
+        receipt = await strategyExecutorByBot.executeStrategy(subId, 0, triggerCallData, actionsCallData, {
+            gasLimit: 8000000,
+        });
+    }
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
