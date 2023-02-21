@@ -25,6 +25,7 @@ const {
     revertToSnapshot,
     getAddrFromRegistry,
     ETH_ADDR,
+    compareAddr,
 } = require('../../utils');
 
 const {
@@ -142,8 +143,6 @@ const testPairs = [
         debtAsset: 'WETH',
     },
 ];
-
-const compareAddr = (addrA, addrB) => addrA.toLowerCase() === addrB.toLowerCase();
 
 const aaveV3RepayL2StrategyTest = async (numTestPairs) => {
     describe('AaveV3-Repay-L2-Strategy-Test', function () {

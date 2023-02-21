@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 /* eslint-disable no-use-before-define */
 /* eslint-disable import/no-extraneous-dependencies */
 const hre = require('hardhat');
@@ -44,6 +45,10 @@ const {
     Float2BN,
     LUSD_ADDR,
     timeTravel,
+    nullAddress,
+    getContractFromRegistry,
+    filterEthersObject,
+    compareAddr,
 } = require('../test/utils');
 
 const {
@@ -74,6 +79,8 @@ const {
     supplyCompV3,
     borrowCompV3,
     createChickenBond,
+    morphoAaveV2Supply,
+    morphoAaveV2Borrow,
 } = require('../test/actions');
 
 const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy, subAaveV3CloseBundle } = require('../test/l2-strategy-subs');
@@ -109,6 +116,10 @@ const {
     createFlCompV3EOARepayStrategy,
     createLiquityPaybackChickenInStrategy,
     createLiquityPaybackChickenOutStrategy,
+    createMorphoAaveV2BoostStrategy,
+    createMorphoAaveV2FLBoostStrategy,
+    createMorphoAaveV2RepayStrategy,
+    createMorphoAaveV2FLRepayStrategy,
 } = require('../test/strategies');
 
 const {
@@ -122,6 +133,7 @@ const {
     subCompV3AutomationStrategy,
     subCbRebondStrategy,
     subLiquityCBPaybackStrategy,
+    subMorphoAaveV2AutomationStrategy,
 } = require('../test/strategy-subs');
 
 const { getTroveInfo } = require('../test/utils-liquity');
@@ -158,6 +170,37 @@ function setEnv(key, value) {
     // eslint-disable-next-line consistent-return
     fs.writeFileSync(pathToEnv, stringify(result));
 }
+
+const forkSetup = async (sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    if (sender) {
+        senderAcc = hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    console.log({ sender: senderAcc.address, proxy: proxy.address });
+    return { senderAcc, proxy, network };
+};
 
 // TODO: support more than dai?
 const supplyInSS = async (protocol, daiAmount, sender) => {
@@ -1426,6 +1469,78 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
     );
 };
 
+const deployMorphoContracts = async () => {
+    await getContractFromRegistry('MorphoAaveV2Supply', undefined, false, true);
+    await getContractFromRegistry('MorphoAaveV2Borrow', undefined, false, true);
+    await getContractFromRegistry('MorphoAaveV2Withdraw', undefined, false, true);
+    await getContractFromRegistry('MorphoAaveV2Payback', undefined, false, true);
+    await getContractFromRegistry('MorphoClaim', undefined, false, true);
+    await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
+};
+
+const createMorphoPosition = async (collSymbol, debtSymbol, collAmount, debtAmount, sender) => {
+    const { senderAcc, proxy, network } = await forkSetup(sender);
+
+    await deployMorphoContracts();
+    const view = await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
+
+    const { address: collAddr, ...collAssetInfo } = getAssetInfo(collSymbol, chainIds[network]);
+    const { address: debtAddr, ...debtAssetInfo } = getAssetInfo(debtSymbol, chainIds[network]);
+
+    if (collSymbol === 'WETH') {
+        await depositToWeth(Float2BN(collAmount), senderAcc);
+    } else {
+        try {
+            const sellAmount = (
+                (collAmount * 1.1 * getLocalTokenPrice(collSymbol)) / getLocalTokenPrice('WETH')
+            ).toFixed(18);
+            console.log(`selling ${sellAmount} WETH for ${collSymbol}`);
+
+            await sell(
+                proxy,
+                addrs[network].WETH_ADDRESS,
+                collAddr,
+                Float2BN(sellAmount),
+                addrs[network].UNIV3_WRAPPER,
+                senderAcc.address,
+                senderAcc.address,
+                0,
+                senderAcc,
+                undefined,
+                undefined,
+                true,
+            );
+            console.log(`Buying ${collSymbol} succeeded`);
+        } catch (err) {
+            console.log(err);
+            console.log(`Buying ${collSymbol} failed`);
+        }
+    }
+
+    await approve(collAddr, proxy.address, senderAcc);
+    await morphoAaveV2Supply(
+        proxy,
+        collAddr,
+        Float2BN(collAmount, collAssetInfo.decimals),
+        senderAcc.address,
+        nullAddress,
+    );
+
+    await morphoAaveV2Borrow(
+        proxy,
+        debtAddr,
+        Float2BN(debtAmount, debtAssetInfo.decimals),
+        senderAcc.address,
+    );
+
+    console.log(`Position of ${proxy.address}`);
+    const userInfo = await view.getUserInfo(
+        proxy.address,
+    ).then((userInfo) => filterEthersObject(userInfo));
+
+    console.dir(userInfo, { depth: null });
+};
+
 const subAaveAutomation = async (
     minRatio,
     maxRatio,
@@ -1683,6 +1798,70 @@ const subCompV3Automation = async (
     );
 
     console.log(`CompV3 position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
+};
+
+const subMorphoAaveV2Automation = async (
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    sender,
+) => {
+    const { proxy } = await forkSetup(sender);
+
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
+
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
+
+    const latestBundleId = await getLatestBundleId().then((e) => parseInt(e, 10));
+
+    let repayBundleId = latestBundleId - 1;
+    let boostBundleId = latestBundleId;
+
+    if (latestBundleId < 15) {
+        {
+            await openStrategyAndBundleStorage(true);
+            const strategyData = createMorphoAaveV2RepayStrategy();
+            const flStrategyData = createMorphoAaveV2FLRepayStrategy();
+
+            const strategyId = await createStrategy(undefined, ...strategyData, false);
+            const flStrategyId = await createStrategy(undefined, ...flStrategyData, false);
+            repayBundleId = await createBundle(undefined, [strategyId, flStrategyId]);
+        }
+
+        {
+            await openStrategyAndBundleStorage(true);
+            const strategyData = createMorphoAaveV2BoostStrategy();
+            const flStrategyData = createMorphoAaveV2FLBoostStrategy();
+
+            const strategyId = await createStrategy(undefined, ...strategyData, false);
+            const flStrategyId = await createStrategy(undefined, ...flStrategyData, false);
+            boostBundleId = await createBundle(undefined, [strategyId, flStrategyId]);
+        }
+
+        await deployMorphoContracts();
+        await getContractFromRegistry(
+            'MorphoAaveV2SubProxy', undefined, undefined, true, repayBundleId, boostBundleId,
+        );
+    }
+
+    console.log({ repayBundleId, boostBundleId });
+
+    const {
+        repaySubId, boostSubId,
+    } = await subMorphoAaveV2AutomationStrategy(
+        proxy,
+        minRatioFormatted,
+        maxRatioFormatted,
+        optimalRatioBoostFormatted,
+        optimalRatioRepayFormatted,
+        boostEnabled,
+    );
+
+    console.log('MorphoAaveV2 position subed', { repaySubId, boostSubId });
 };
 
 const getAavePos = async (
@@ -2095,6 +2274,14 @@ const createCompV3Position = async (
         });
 
     program
+        .command('create-morpho-position <collType> <debtType> <collAmount> <debtAmount> [senderAddr]')
+        .description('Creates Morpho-AaveV2 position ')
+        .action(async (collSymbol, debtSymbol, collAmount, debtAmount, senderAddr) => {
+            await createMorphoPosition(collSymbol, debtSymbol, collAmount, debtAmount, senderAddr);
+            process.exit(0);
+        });
+
+    program
         .command('deposit-in-ss <protocol> <amount> [senderAddr]')
         .description('Deposits dai in smart savings')
         .action(async (protocol, amount, senderAddr) => {
@@ -2289,6 +2476,31 @@ const createCompV3Position = async (
         );
 
     program
+        .command(
+            'sub-morphoAaveV2-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+        )
+        .description('Subscribes to morphoAaveV2 automation can be both b/r')
+        .action(
+            async (
+                minRatio,
+                maxRatio,
+                optimalRatioBoost,
+                optimalRatioRepay,
+                boostEnabled,
+                senderAcc,
+            ) => {
+                await subMorphoAaveV2Automation(
+                    minRatio,
+                    maxRatio,
+                    optimalRatioBoost,
+                    optimalRatioRepay,
+                    boostEnabled,
+                    senderAcc,
+                );
+                process.exit(0);
+            },
+        );
+    program
         .command('sub-mcd-close-to-coll <vaultId> <type> <price> <priceState> [senderAddr]')
         .description('Subscribes to a Mcd close to coll strategy')
         .action(async (vaultId, type, price, priceState, senderAddr) => {
@@ -2482,6 +2694,25 @@ const createCompV3Position = async (
         .description('CompV3 position view, default to proxy')
         .action(async (isEOA, addr) => {
             await getCompV3Pos(isEOA, addr);
+            process.exit(0);
+        });
+
+    program
+        .command('get-morphoAaveV2-position <isEOA> [addr]')
+        .description('MorphoAaveV2 position view, default to proxy')
+        .action(async (isEOA, addr) => {
+            const { senderAcc, proxy } = await forkSetup(addr);
+            const view = await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
+
+            // compareAddr is just a string compare
+            const user = compareAddr(isEOA, 'false') ? proxy.address : senderAcc.address;
+            console.log(`Fetching position for ${user}`);
+
+            const userInfo = await view.getUserInfo(
+                user,
+            ).then((userInfo) => filterEthersObject(userInfo));
+
+            console.dir(userInfo, { depth: null });
             process.exit(0);
         });
 

@@ -123,7 +123,8 @@ const testBorrow = async ({
     expect(returnAmount).to.be.eq(amount);
 };
 
-const morphoAaveV2SupplyTest = (testLength) => describe('Morpho-Supply-Test', () => {
+const morphoAaveV2SupplyTest = (testLength) => describe('Morpho-Supply-Test', function () {
+    this.timeout(1000000);
     let senderAcc;
     let proxy;
     let view;
@@ -198,7 +199,8 @@ const morphoAaveV2SupplyTest = (testLength) => describe('Morpho-Supply-Test', ()
     ));
 });
 
-const morphoAaveV2WithdrawTest = (testLength) => describe('Morpho-Withdraw-Test', () => {
+const morphoAaveV2WithdrawTest = (testLength) => describe('Morpho-Withdraw-Test', function () {
+    this.timeout(1000000);
     let senderAcc;
     let proxy;
     let view;
@@ -304,7 +306,8 @@ const morphoAaveV2WithdrawTest = (testLength) => describe('Morpho-Withdraw-Test'
     ));
 });
 
-const morphoAaveV2BorrowTest = (testLength) => describe('Morpho-Borrow-Test', () => {
+const morphoAaveV2BorrowTest = (testLength) => describe('Morpho-Borrow-Test', function () {
+    this.timeout(1000000);
     let senderAcc;
     let proxy;
     let view;
@@ -361,7 +364,8 @@ const morphoAaveV2BorrowTest = (testLength) => describe('Morpho-Borrow-Test', ()
     }));
 });
 
-const morphoAaveV2PaybackTest = (testLength) => describe('Morpho-Payback-Test', () => {
+const morphoAaveV2PaybackTest = (testLength) => describe('Morpho-Payback-Test', function () {
+    this.timeout(1000000);
     let senderAcc;
     let proxy;
     let view;

@@ -9,6 +9,7 @@ const {
     addrs,
     network,
     getNetwork,
+    getContractFromRegistry,
 } = require('./utils');
 
 const getLatestBundleId = async () => {
@@ -197,6 +198,30 @@ const subToCBRebondProxy = async (proxy, inputData, regAddr = addrs[network].REG
     return latestSubId;
 };
 
+const subToMorphoAaveV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const subProxyAddr = await getAddrFromRegistry('MorphoAaveV2SubProxy', regAddr);
+
+    const subProxyFactory = await hre.ethers.getContractFactory('MorphoAaveV2SubProxy');
+    const functionData = subProxyFactory.interface.encodeFunctionData(
+        'subToMorphoAaveV2Automation',
+        inputData,
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToMorphoAaveV2Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+    const subProxy = await getContractFromRegistry('MorphoAaveV2SubProxy');
+    const repaySub = await subProxy.formatRepaySub(...inputData, proxy.address);
+    const boostSub = await subProxy.formatBoostSub(...inputData, proxy.address);
+    return { latestSubId, repaySub, boostSub };
+};
+
 const updateAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
     const aaveSubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
 
@@ -254,12 +279,12 @@ const subToMcdProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY
 
 const addBotCaller = async (
     botAddr,
-    regAddr = addrs[network].REGISTRY_ADDR,
+    regAddr = addrs[getNetwork()].REGISTRY_ADDR,
     isFork = false,
-    networkInjected = network,
+    networkInjected = getNetwork(),
 ) => {
-    if (regAddr === addrs[network].REGISTRY_ADDR && !isFork) {
-        await impersonateAccount(addrs[network].OWNER_ACC);
+    if (regAddr === addrs[getNetwork()].REGISTRY_ADDR && !isFork) {
+        await impersonateAccount(addrs[getNetwork()].OWNER_ACC);
     }
 
     const signer = await hre.ethers.provider.getSigner(addrs[networkInjected].OWNER_ACC);
@@ -272,8 +297,8 @@ const addBotCaller = async (
 
     await botAuth.addCaller(botAddr, { gasLimit: 800000 });
 
-    if (regAddr === addrs[network].REGISTRY_ADDR && !isFork) {
-        await stopImpersonatingAccount(addrs[network].OWNER_ACC);
+    if (regAddr === addrs[getNetwork()].REGISTRY_ADDR && !isFork) {
+        await stopImpersonatingAccount(addrs[getNetwork()].OWNER_ACC);
     }
 };
 
@@ -316,5 +341,6 @@ module.exports = {
     setMCDPriceVerifier,
     getSubHash,
     subToCBRebondProxy,
+    subToMorphoAaveV2Proxy,
     subToMcdProxy,
 };
