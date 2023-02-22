@@ -106,9 +106,17 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
 
-        uint256 amountAfterFee = _takeGasFee(_gasUsed, exchangedAmount, _exchangeData.destAddr);
+        {
+            uint256 amountAfterFee = _takeGasFee(_gasUsed, exchangedAmount, _exchangeData.destAddr);
 
-        _exchangeData.destAddr.withdrawTokens(_to, amountAfterFee);
+            address tokenAddr = _exchangeData.destAddr;
+            if (tokenAddr == WETH_ADDR) {
+                TokenUtils.withdrawWeth(amountAfterFee);
+                tokenAddr = ETH_ADDR;
+            }
+
+            tokenAddr.withdrawTokens(_to, amountAfterFee);
+        }
 
         bytes memory logData = abi.encode(
             wrapper,

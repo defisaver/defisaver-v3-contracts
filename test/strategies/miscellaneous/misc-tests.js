@@ -142,7 +142,13 @@ const limitOrderStrategyTest = async () => {
             it('... should trigger a limit order strategy', async () => {
                 await setBalance(tokenAddrSell, senderAcc.address, sellAmountWei);
 
-                const buyBalanceBefore = await balanceOf(tokenAddrBuy, senderAcc.address);
+                let destAddrTransformed = tokenAddrBuy;
+
+                if (destTokenSymbol === 'WETH') {
+                    destAddrTransformed = addrs[network].ETH_ADDR;
+                }
+
+                const buyBalanceBefore = await balanceOf(destAddrTransformed, senderAcc.address);
                 const sellBalanceBefore = await balanceOf(tokenAddrSell, senderAcc.address);
 
                 // eslint-disable-next-line max-len
@@ -157,7 +163,7 @@ const limitOrderStrategyTest = async () => {
                     uniV3Fee,
                 );
 
-                const buyBalanceAfter = await balanceOf(tokenAddrBuy, senderAcc.address);
+                const buyBalanceAfter = await balanceOf(destAddrTransformed, senderAcc.address);
                 const sellBalanceAfter = await balanceOf(tokenAddrSell, senderAcc.address);
 
                 expect(buyBalanceAfter).to.be.gt(buyBalanceBefore);

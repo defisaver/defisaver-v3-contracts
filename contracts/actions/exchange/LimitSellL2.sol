@@ -121,8 +121,15 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
                 _l1GasUsed
             );
 
-            _exchangeData.destAddr.withdrawTokens(_to, amountAfterFee);
+            address tokenAddr = _exchangeData.destAddr;
+            if (tokenAddr == TokenUtils.WETH_ADDR) {
+                TokenUtils.withdrawWeth(amountAfterFee);
+                tokenAddr = TokenUtils.ETH_ADDR;
+            }
+
+            tokenAddr.withdrawTokens(_to, amountAfterFee);
         }
+        
 
         bytes memory logData = abi.encode(
             wrapper,
