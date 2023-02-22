@@ -1464,6 +1464,7 @@ const deployMorphoContracts = async () => {
     await getContractFromRegistry('MorphoAaveV2Payback', undefined, false, true);
     await getContractFromRegistry('MorphoClaim', undefined, false, true);
     await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
+    await getContractFromRegistry('MorphoAaveV2RatioTrigger', undefined, false, true);
 };
 
 const createMorphoPosition = async (collSymbol, debtSymbol, collAmount, debtAmount, sender) => {
