@@ -42,6 +42,12 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint256[] collAmounts;
         uint256[] borrowStableAmounts;
         uint256[] borrowVariableAmounts;
+        // emode category data
+        uint16 ltv;
+        uint16 liquidationThreshold;
+        uint16 liquidationBonus;
+        address priceSource;
+        string label;
     }
 
     struct UserToken {
@@ -261,15 +267,24 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     function getLoanData(address _market, address _user) public view returns (LoanData memory data) {
         IPoolV3 lendingPool = getLendingPool(_market);
         address[] memory reserveList = lendingPool.getReservesList();
+        uint256 eMode = lendingPool.getUserEMode(_user);
+        
+        DataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(eMode));
+        
         data = LoanData({
-            eMode: lendingPool.getUserEMode(_user),
+            eMode: eMode,
             user: _user,
             ratio: 0,
             collAddr: new address[](reserveList.length),
             borrowAddr: new address[](reserveList.length),
             collAmounts: new uint[](reserveList.length),
             borrowStableAmounts: new uint[](reserveList.length),
-            borrowVariableAmounts: new uint[](reserveList.length)
+            borrowVariableAmounts: new uint[](reserveList.length),
+            ltv: categoryData.ltv,
+            liquidationThreshold: categoryData.liquidationThreshold,
+            liquidationBonus: categoryData.liquidationBonus,
+            priceSource: categoryData.priceSource,
+            label: categoryData.label
         });
 
         uint64 collPos = 0;

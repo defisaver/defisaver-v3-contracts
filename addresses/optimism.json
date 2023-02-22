@@ -155,14 +155,14 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
+        "address": "0x2B57742C12B8cd48805c1Dbab83F83E8f6a5aA42",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4"]
     },
     {
         "name": "ERC20View",
