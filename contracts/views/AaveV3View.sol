@@ -93,6 +93,12 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         bool isSiloedForBorrowing; //AaveProtocolDataProvider.getSiloedBorrowing
         uint256 eModeCollateralFactor; //pool.getEModeCategoryData.ltv
         bool isFlashLoanEnabled;
+        // emode category data
+        uint16 ltv;
+        uint16 liquidationThreshold;
+        uint16 liquidationBonus;
+        address priceSource;
+        string label;
     }
 
     function getHealthFactor(address _market, address _user)
@@ -218,6 +224,10 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint256 totalVariableBorrow = IERC20(reserveData.variableDebtTokenAddress).totalSupply();
         uint256 totalStableBorrow = IERC20(reserveData.stableDebtTokenAddress).totalSupply();
 
+
+        uint256 eMode = getEModeCategory(config);
+        DataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(eMode));
+
         _tokenInfo = TokenInfoFull({
             aTokenAddress: reserveData.aTokenAddress,
             underlyingTokenAddress: _tokenAddr,
@@ -235,7 +245,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             price: getAssetPrice(_market, _tokenAddr),
             supplyCap: getSupplyCap(config),
             borrowCap: getBorrowCap(config),
-            emodeCategory: getEModeCategory(config),
+            emodeCategory: eMode,
             usageAsCollateralEnabled: getLiquidationThreshold(config) > 0,
             borrowingEnabled: getBorrowingEnabled(config),
             stableBorrowRateEnabled: getStableRateBorrowingEnabled(config),
@@ -244,7 +254,12 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             isolationModeTotalDebt: reserveData.isolationModeTotalDebt,
             isSiloedForBorrowing: isSiloedForBorrowing(_market, _tokenAddr),
             eModeCollateralFactor: getEModeCollateralFactor(uint8(getEModeCategory(config)), lendingPool),
-            isFlashLoanEnabled: getFlashLoanEnabled(config)
+            isFlashLoanEnabled: getFlashLoanEnabled(config),
+            ltv: categoryData.ltv,
+            liquidationThreshold: categoryData.liquidationThreshold,
+            liquidationBonus: categoryData.liquidationBonus,
+            priceSource: categoryData.priceSource,
+            label: categoryData.label
         });
     }
 
