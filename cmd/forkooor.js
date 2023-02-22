@@ -54,6 +54,7 @@ const {
     createAaveV3BoostL2Strategy,
     createAaveFLV3BoostL2Strategy,
     createDCAL2Strategy,
+    createLimitOrderL2Strategy,
 } = require('../test/l2-strategies');
 
 const {
@@ -1684,7 +1685,6 @@ const subLimitOrder = async (
     destTokenLabel,
     srcAmount,
     targetPrice,
-    orderType,
     expireDays,
     sender,
 ) => {
@@ -1712,15 +1712,23 @@ const subLimitOrder = async (
     });
 
     setNetwork(network);
+    set('network', chainIds[network]);
 
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
+    await topUp(addrs[network].OWNER_ACC);
+
     // deploy contracts and strategy
     await redeploy('OffchainPriceTrigger', addrs[network].REGISTRY_ADDR, false, true);
-    await redeploy('LimitSell', addrs[network].REGISTRY_ADDR, false, true);
 
-    const strategyData = createLimitOrderStrategy();
+    console.log(network);
+    // eslint-disable-next-line no-unused-expressions
+    network === 'mainnet'
+        ? (await redeploy('LimitSell', addrs[network].REGISTRY_ADDR, false, true))
+        : (await redeploy('LimitSellL2', addrs[network].REGISTRY_ADDR, false, true));
+
+    const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
     await openStrategyAndBundleStorage(true);
 
     const strategyId = await createStrategy(proxy, ...strategyData, false);
@@ -1735,13 +1743,6 @@ const subLimitOrder = async (
     const latestBlock = await hre.ethers.provider.getBlock('latest');
     const goodUntil = latestBlock.timestamp + (expireDays * 24 * 60 * 60);
 
-    let orderTypeUint;
-    if (orderType.toLowerCase() === 'buy') {
-        orderTypeUint = 0;
-    } else if (orderType.toLowerCase() === 'sell') {
-        orderTypeUint = 1;
-    }
-
     // give token approval
     await approve(srcToken.address, proxy.address, senderAcc);
 
@@ -1753,7 +1754,6 @@ const subLimitOrder = async (
         amountInWei,
         targetPriceInWei,
         goodUntil,
-        orderTypeUint,
         strategyId,
     );
 
@@ -2460,12 +2460,12 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
         });
 
     program
-        .command('sub-limit-order <srcTokenLabel> <destTokenLabel> <srcAmount> <targetPrice> <orderType> <expireDays> [senderAddr]')
+        .command('sub-limit-order <srcTokenLabel> <destTokenLabel> <srcAmount> <targetPrice> <expireDays> [senderAddr]')
         .description('Subscribes to a limit order')
         // eslint-disable-next-line max-len
-        .action(async (srcTokenLabel, destTokenLabel, srcAmount, targetPrice, orderType, expireDays, senderAddr) => {
+        .action(async (srcTokenLabel, destTokenLabel, srcAmount, targetPrice, expireDays, senderAddr) => {
             // eslint-disable-next-line max-len
-            await subLimitOrder(srcTokenLabel, destTokenLabel, srcAmount, targetPrice, orderType, expireDays, senderAddr);
+            await subLimitOrder(srcTokenLabel, destTokenLabel, srcAmount, targetPrice, expireDays, senderAddr);
         });
 
     program
