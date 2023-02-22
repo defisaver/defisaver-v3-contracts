@@ -102,6 +102,7 @@ const {
     createBundle,
     getLatestBundleId,
     subToMcdProxy,
+    updateSubDataMorphoAaveV2Proxy,
 } = require('../test/utils-strategies');
 
 const {
@@ -1851,6 +1852,38 @@ const subMorphoAaveV2Automation = async (
     console.log('MorphoAaveV2 position subed', { repaySubId, boostSubId });
 };
 
+const updateSubDataMorphoAaveV2 = async (
+    subIdRepay,
+    subIdBoost,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    sender,
+) => {
+    const { proxy } = await forkSetup(sender);
+
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
+
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
+
+    await updateSubDataMorphoAaveV2Proxy(
+        proxy,
+        subIdRepay,
+        subIdBoost,
+        minRatioFormatted,
+        maxRatioFormatted,
+        optimalRatioBoostFormatted,
+        optimalRatioRepayFormatted,
+        boostEnabled,
+    );
+
+    console.log('MorphoAaveV2 position sub updated');
+};
+
 const getAavePos = async (
     sender,
 ) => {
@@ -2548,6 +2581,37 @@ const createCompV3Position = async (
             ) => {
                 // eslint-disable-next-line max-len
                 await updateAaveV3AutomationSub(
+                    subIdRepay,
+                    subIdBoost,
+                    minRatio,
+                    maxRatio,
+                    optimalRatioBoost,
+                    optimalRatioRepay,
+                    boostEnabled,
+                    senderAcc,
+                );
+                process.exit(0);
+            },
+        );
+
+    program
+        .command(
+            'update-morpho-automation <subIdRepay> <subIdBoost> <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+        )
+        .description('Updates MorphoAaveV2 automation bundles')
+        .action(
+            async (
+                subIdRepay,
+                subIdBoost,
+                minRatio,
+                maxRatio,
+                optimalRatioBoost,
+                optimalRatioRepay,
+                boostEnabled,
+                senderAcc,
+            ) => {
+                // eslint-disable-next-line max-len
+                await updateSubDataMorphoAaveV2(
                     subIdRepay,
                     subIdBoost,
                     minRatio,
