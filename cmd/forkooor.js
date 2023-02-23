@@ -2510,6 +2510,8 @@ const createCompV3Position = async (
                 boostEnabled,
                 senderAcc,
             ) => {
+                // eslint-disable-next-line no-param-reassign
+                boostEnabled = boostEnabled === 'true';
                 await subMorphoAaveV2Automation(
                     minRatio,
                     maxRatio,
@@ -2612,7 +2614,8 @@ const createCompV3Position = async (
                 boostEnabled,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line max-len
+                // eslint-disable-next-line no-param-reassign
+                boostEnabled = boostEnabled === 'true';
                 await updateSubDataMorphoAaveV2(
                     subIdRepay,
                     subIdBoost,
