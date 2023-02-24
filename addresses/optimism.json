@@ -626,6 +626,17 @@
       "history": []
     },
     {
+      "name": "TimestampTrigger",
+      "address": "0x4D2D2dB27b00863d6A49F5a060D7858411b85744",
+      "id": "0xa051d9a9",
+      "path": "contracts/triggers/TimestampTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
         "name": "TokenBalance",
         "address": "0xC6FF5b01f7c7b35b6e093fF70D2332B361C5Be5A",
         "id": "0x019d9978",

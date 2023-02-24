@@ -1821,6 +1821,17 @@
         "history": ["0x575C0Cfe52016B4CfeFb3134Bc6A3eEEf7718B07"]
     },
     {
+        "name": "TimestampTrigger",
+        "address": "0x9D6bDFd3c565C146F6676F710B8Ee957139349FA",
+        "id": "0xa051d9a9",
+        "path": "contracts/triggers/TimestampTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+      },
+    {
         "name": "CompV3Allow",
         "address": "0xC4a80f22bf56E0dFa2CB378561B934F41E14bc9f",
         "id": "0xf2bccef8",
