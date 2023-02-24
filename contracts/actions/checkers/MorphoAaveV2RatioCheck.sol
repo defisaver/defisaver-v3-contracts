@@ -49,7 +49,7 @@ contract MorphoAaveV2RatioCheck is ActionBase, MorphoHelper {
             user = address(this);
         }
 
-        uint256 currRatio = IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getUserHealthFactor(user);
+        uint256 currRatio = getSafetyRatio(user);
 
         uint256 startRatio = uint256(tempStorage.getBytes32("MORPHO_AAVEV2_RATIO"));
         

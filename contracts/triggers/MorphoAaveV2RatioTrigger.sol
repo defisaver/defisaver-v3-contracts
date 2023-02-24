@@ -26,7 +26,7 @@ contract MorphoAaveV2RatioTrigger is ITrigger, MorphoHelper {
         returns (bool)
     {
         SubParams memory triggerSubData = parseInputs(_subData);
-        uint256 currRatio = IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getUserHealthFactor(triggerSubData.user);
+        uint256 currRatio = getSafetyRatio(triggerSubData.user);
         
         if (currRatio == 0) return false;
 

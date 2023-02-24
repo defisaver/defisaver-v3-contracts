@@ -10,7 +10,7 @@ import "../actions/morpho/helpers/MorphoHelper.sol";
 import "../DS/DSMath.sol";
 import "./AaveView.sol";
 
-contract MorphoAaveV2View is MorphoHelper, DSMath {
+contract MorphoAaveV2View is MorphoHelper {
     address constant public AAVE_VIEW_ADDR = 0xEDf1087544a01596b70Da746F861B878F245B08f;
 
     struct MarketInfo {
