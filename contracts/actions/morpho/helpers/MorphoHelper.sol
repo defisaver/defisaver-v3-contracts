@@ -9,6 +9,6 @@ import "./MainnetMorphoAddresses.sol";
 contract MorphoHelper is MainnetMorphoAddresses, DSMath {
     function getSafetyRatio(address _usr) public view returns (uint256) {
         Types.LiquidityData memory liqData = IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getUserHypotheticalBalanceStates(_usr, address(0), 0, 0);
-        return wdiv(add(liqData.borrowableEth, liqData.debtEth), liqData.debtEth);
+        return wdiv(liqData.borrowableEth, liqData.debtEth);
     }
 }
