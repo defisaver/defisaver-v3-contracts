@@ -969,7 +969,7 @@
         "name": "MorphoAaveV2Borrow",
         "address": "0xa85C3E41Bf9F75a381927e1Aa9b00f77C4631109",
         "id": "0xb6af4eff",
-        "path": "contracts/actions/morpho/MorphoAaveV2Withdraw.sol",
+        "path": "contracts/actions/morpho/MorphoAaveV2Borrow.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
