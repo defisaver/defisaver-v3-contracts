@@ -104,7 +104,7 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
     function getTokenFromJoin(address _joinAddr) internal view returns (address) {
         // if it's dai_join_addr don't check gem() it will fail, return dai addr
         if (_joinAddr == DAI_JOIN_ADDR) {
-            return DAI_ADDR;
+            return DAI_ADDRESS;
         }
 
         return address(IJoin(_joinAddr).gem());
@@ -156,5 +156,27 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
         DSProxy proxy = DSProxy(payable(address(uint160(owner))));
 
         return proxy.owner();
+    }
+
+    /// @notice Returns all the collateral of the vault, formatted in the correct decimal
+    /// @dev Will fail if token is over 18 decimals
+    function getAllColl(IManager _mcdManager, address _joinAddr, uint _vaultId) internal view returns (uint amount) {
+        bytes32 ilk;
+
+        if (address(_mcdManager) == CROPPER) {
+            ilk = ICdpRegistry(CDP_REGISTRY).ilks(_vaultId);
+        } else {
+            ilk = _mcdManager.ilks(_vaultId);
+        }
+
+        (amount, ) = getCdpInfo(
+            _mcdManager,
+            _vaultId,
+            ilk
+        );
+
+        if (IJoin(_joinAddr).dec() != 18) {
+            return div(amount, 10 ** sub(18, IJoin(_joinAddr).dec()));
+        }
     }
 }

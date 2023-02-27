@@ -5,13 +5,13 @@ const CoinGeckoClient = new CoinGecko();
 
 const req = CoinGeckoClient.simple.price({
     ids:
-        'ethereum,aave,basic-attention-token,usd-coin,'
+        'staked-ether,curve-dao-token,ethereum,aave,basic-attention-token,usd-coin,'
         + 'uniswap,nusd,binance-usd,augur,havven,'
         + 'republic-protocol,maker,enjincoin,dai,wrapped-bitcoin,weth,'
         + 'renbtc,0x,kyber-network,decentraland,paxos-standard,compound-governance-token,'
         + 'gemini-dollar,yearn-finance,liquity-usd,liquity,tornado-cash,musd,imusd,rai,'
         + 'loopring,chainlink,tether,true-usd,balancer,musd,imusd,pax-dollar,'
-        + 'gemini-dollar,yearn-finance,liquity-usd,liquity,tornado-cash,sushi,matic-network,boosted-lusd,',
+        + 'gemini-dollar,yearn-finance,liquity-usd,liquity,tornado-cash,sushi,matic-network,boosted-lusd,wrapped-steth',
     vs_currencies: 'usd',
 });
 

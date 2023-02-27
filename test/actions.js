@@ -55,9 +55,8 @@ const executeAction = async (actionName, functionData, proxy, regAddr = addrs[ne
         receipt = await proxy['execute(address,bytes)'](actionAddr, functionData, {
             gasLimit: 10000000,
         });
-
         const gasUsed = await getGasUsed(receipt);
-        console.log(`Gas used by ${actionName} action: ${gasUsed}`);
+        console.log(`Gas used by ${actionName} action; ${gasUsed}`);
         return receipt;
     } catch (error) {
         console.log(error);
@@ -667,6 +666,87 @@ const mcdMerge = async (proxy, srcVaultId, destVaultId) => {
     const functionData = mcdMergeAction.encodeForDsProxyCall()[1];
 
     const tx = await executeAction('McdMerge', functionData, proxy);
+    return tx;
+};
+
+// TODO: change to recipe
+const mcdFLRepayComposite = async (
+    proxy,
+    vaultId,
+    joinAddr,
+    gasUsed,
+    exchangeParams,
+) => {
+    const repayCompositeAction = new dfs.actions.maker.MakerFLRepayCompositeAction(
+        vaultId,
+        joinAddr,
+        gasUsed,
+        exchangeParams,
+    );
+
+    const functionData = repayCompositeAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('McdFLRepayComposite', functionData, proxy);
+    return tx;
+};
+
+const mcdRepayComposite = async (
+    proxy,
+    vaultId,
+    joinAddr,
+    gasUsed,
+    exchangeParams,
+) => {
+    const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
+        vaultId,
+        joinAddr,
+        gasUsed,
+        exchangeParams,
+    );
+
+    const functionData = repayCompositeAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('McdRepayComposite', functionData, proxy);
+    return tx;
+};
+
+const mcdFLBoostComposite = async (
+    proxy,
+    vaultId,
+    joinAddr,
+    gasUsed,
+    exchangeParams,
+) => {
+    const boostCompositeAction = new dfs.actions.maker.MakerFLBoostCompositeAction(
+        vaultId,
+        joinAddr,
+        gasUsed,
+        exchangeParams,
+    );
+
+    const functionData = boostCompositeAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('McdFLBoostComposite', functionData, proxy);
+    return tx;
+};
+
+const mcdBoostComposite = async (
+    proxy,
+    vaultId,
+    joinAddr,
+    gasUsed,
+    exchangeParams,
+) => {
+    const boostCompositeAction = new dfs.actions.maker.MakerBoostCompositeAction(
+        vaultId,
+        joinAddr,
+        gasUsed,
+        exchangeParams,
+    );
+
+    const functionData = boostCompositeAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('McdBoostComposite', functionData, proxy);
     return tx;
 };
 
@@ -2224,6 +2304,110 @@ const aaveV3SwitchCollateralCallDataOptimised = async (
     return receipt;
 };
 
+const morphoAaveV2Supply = async (
+    proxy,
+    tokenAddr,
+    amount,
+    from,
+    onBehalf,
+    maxGasForMatching = '0',
+) => {
+    const actionAddress = await getAddrFromRegistry('MorphoAaveV2Supply');
+
+    const action = new dfs.actions.morpho.MorphoAaveV2SupplyAction(
+        tokenAddr, amount.toString(), from, onBehalf, maxGasForMatching,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed morphoAaveV2Supply: ${gasUsed}`);
+    return receipt;
+};
+
+const morphoAaveV2Withdraw = async (
+    proxy,
+    tokenAddr,
+    amount,
+    to,
+) => {
+    const actionAddress = await getAddrFromRegistry('MorphoAaveV2Withdraw');
+
+    const action = new dfs.actions.morpho.MorphoAaveV2WithdrawAction(
+        tokenAddr, amount.toString(), to,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed morphoAaveV2Withdraw: ${gasUsed}`);
+    return receipt;
+};
+
+const morphoAaveV2Borrow = async (
+    proxy,
+    tokenAddr,
+    amount,
+    to,
+    maxGasForMatching = '0',
+) => {
+    const actionAddress = await getAddrFromRegistry('MorphoAaveV2Borrow');
+
+    const action = new dfs.actions.morpho.MorphoAaveV2BorrowAction(
+        tokenAddr, amount.toString(), to, maxGasForMatching,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed morphoAaveV2Borrow: ${gasUsed}`);
+    return receipt;
+};
+
+const morphoAaveV2Payback = async (
+    proxy,
+    tokenAddr,
+    amount,
+    from,
+    onBehalf,
+) => {
+    const actionAddress = await getAddrFromRegistry('MorphoAaveV2Payback');
+
+    const action = new dfs.actions.morpho.MorphoAaveV2PaybackAction(
+        tokenAddr, amount.toString(), from, onBehalf,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed morphoAaveV2Payback: ${gasUsed}`);
+    return receipt;
+};
+
+const morphoClaim = async (
+    proxy,
+    onBehalfOf,
+    claimable,
+    proof,
+) => {
+    const actionAddress = await getAddrFromRegistry('MorphoClaim');
+
+    const action = new dfs.actions.morpho.MorphoClaimAction(
+        onBehalfOf, claimable.toString(), proof,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed morphoClaim: ${gasUsed}`);
+    return receipt;
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -2365,4 +2549,15 @@ module.exports = {
     chickenOut,
     chickenRedeem,
     transferNFT,
+
+    mcdFLRepayComposite,
+    mcdRepayComposite,
+    mcdFLBoostComposite,
+    mcdBoostComposite,
+
+    morphoAaveV2Supply,
+    morphoAaveV2Withdraw,
+    morphoAaveV2Borrow,
+    morphoAaveV2Payback,
+    morphoClaim,
 };

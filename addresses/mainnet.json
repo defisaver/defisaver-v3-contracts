@@ -962,6 +962,72 @@
         "history": []
     },
     {
+        "name": "MorphoAaveV2Borrow",
+        "address": "0xa85C3E41Bf9F75a381927e1Aa9b00f77C4631109",
+        "id": "0xb6af4eff",
+        "path": "contracts/actions/morpho/MorphoAaveV2Borrow.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoAaveV2Payback",
+        "address": "0x5dd0E0835acbb08aa4A4599d70fB2d93969fa7b7",
+        "id": "0xe7eeb647",
+        "path": "contracts/actions/morpho/MorphoAaveV2Payback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoAaveV2Supply",
+        "address": "0x60ED1Cf5Da785AA4FD4A4fF3f8cFc0682d60E0F3",
+        "id": "0x59717250",
+        "path": "contracts/actions/morpho/MorphoAaveV2Supply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoAaveV2Withdraw",
+        "address": "0x29a8b5A8889F465c85b778eDCcf984E44Ad70F12",
+        "id": "0x914eb1c7",
+        "path": "contracts/actions/morpho/MorphoAaveV2Withdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoClaim",
+        "address": "0xa269C841E26EA8Ee1F0350a2E5905F71446998dC",
+        "id": "0x50967400",
+        "path": "contracts/actions/morpho/MorphoClaim.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoAaveV2View",
+        "address": "0x6518a138Da4ecE07cC6263FB2e7c4Ae773360302",
+        "id": "0x9b2558f5",
+        "path": "contracts/views/MorphoAaveV2View.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompBorrow",
         "address": "0x8495579BF6Ae848f7E59686536F834f1d2CCd79C",
         "id": "0x82875a6c",

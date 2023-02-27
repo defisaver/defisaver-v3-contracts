@@ -88,8 +88,8 @@ contract McdPayback is ActionBase, McdHelper {
         uint256 debt = getAllDebt(address(vat), urn, urn, ilk);
         _inputData.amount = _inputData.amount > debt ? debt : _inputData.amount;
         // pull Dai from user and join the maker pool
-        DAI_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
-        DAI_ADDR.approveToken(DAI_JOIN_ADDR, _inputData.amount);
+        DAI_ADDRESS.pullTokensIfNeeded(_inputData.from, _inputData.amount);
+        DAI_ADDRESS.approveToken(DAI_JOIN_ADDR, _inputData.amount);
 
         if (_inputData.mcdManager == CROPPER) {
             _cropperPayback(_inputData.vaultId, urn, ilk, _inputData.amount);
