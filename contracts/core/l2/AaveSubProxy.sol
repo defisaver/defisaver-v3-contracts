@@ -8,8 +8,13 @@ import "../strategy/SubStorage.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
 contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
-    uint64 public constant REPAY_BUNDLE_ID = 8; 
-    uint64 public constant BOOST_BUNDLE_ID = 9; 
+    uint64 public immutable REPAY_BUNDLE_ID; 
+    uint64 public immutable BOOST_BUNDLE_ID; 
+
+    constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
+        REPAY_BUNDLE_ID = _repayBundleId;
+        BOOST_BUNDLE_ID = _boostBundleId;
+    }
 
     enum RatioState { OVER, UNDER }
 

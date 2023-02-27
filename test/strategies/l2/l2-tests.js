@@ -211,7 +211,6 @@ const aaveV3RepayL2StrategyTest = async (numTestPairs) => {
             await redeploy('DFSSell');
             await redeploy('AaveV3Payback');
             await redeploy('AaveV3Withdraw');
-            await redeploy('AaveSubProxy');
             await redeploy('AaveV3RatioCheck');
 
             flAaveV3Addr = (await getAddrFromRegistry('FLAaveV3')).toString();
@@ -268,8 +267,8 @@ const aaveV3RepayL2StrategyTest = async (numTestPairs) => {
 
                 await deployBundles(proxy);
 
-                const targetRatio = hre.ethers.utils.parseUnits('1.8', '18');
-                const ratioUnder = hre.ethers.utils.parseUnits('1.7', '18');
+                const targetRatio = hre.ethers.utils.parseUnits('2.3', '18');
+                const ratioUnder = hre.ethers.utils.parseUnits('2.2', '18');
 
                 subIds = await subAaveV3L2AutomationStrategy(
                     proxy,
@@ -398,7 +397,6 @@ const aaveV3BoostL2StrategyTest = async (numTestPairs) => {
             await redeploy('DFSSell');
             await redeploy('AaveV3Supply');
             await redeploy('AaveV3Borrow');
-            await redeploy('AaveSubProxy');
             await redeploy('AaveV3RatioCheck');
 
             flAaveV3Addr = (await getAddrFromRegistry('FLAaveV3')).toString();

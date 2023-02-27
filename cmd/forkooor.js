@@ -1454,8 +1454,6 @@ const subAaveAutomation = async (
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    await redeploy('AaveSubProxy', addrs[network].REGISTRY_ADDR, false, true);
-
     const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
     const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
 
@@ -1529,7 +1527,6 @@ const subAaveV3MainnetAutomation = async (
 
     // await createBundle(proxy, [strategyId11, strategyId22]);
 
-    await redeploy('AaveSubProxy', addrs[network].REGISTRY_ADDR, false, true);
     await redeploy('AaveV3RatioTrigger', addrs[network].REGISTRY_ADDR, false, true);
     await redeploy('AaveV3RatioCheck', addrs[network].REGISTRY_ADDR, false, true);
 
@@ -1899,8 +1896,6 @@ const updateAaveV3AutomationSub = async (
 
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
-
-    await redeploy('AaveSubProxy', addrs[network].REGISTRY_ADDR, false, true);
 
     await openStrategyAndBundleStorage(true);
     const aaveRepayStrategyEncoded = createAaveV3RepayL2Strategy();
