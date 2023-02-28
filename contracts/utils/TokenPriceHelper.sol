@@ -69,6 +69,7 @@ contract TokenPriceHelper is DSMath, UtilHelper {
         }
 
         if (_inputTokenAddr == WSTETH_ADDR) price = getWStEthPrice(price);
+        if (_inputTokenAddr == WBTC_ADDR) price = getWBtcPrice(price);
 
         return uint256(price);
     }
@@ -107,6 +108,11 @@ contract TokenPriceHelper is DSMath, UtilHelper {
 
     function getWStEthPrice(int256 _stEthPrice) public view returns (int256 wStEthPrice) {
         wStEthPrice = int256(wmul(uint256(_stEthPrice), IWStEth(WSTETH_ADDR).stEthPerToken()));
+    }
+
+    function getWBtcPrice(int256 _btcPrice) public view returns (int256 wBtcPrice) {
+        (, int256 wBtcPriceToPeg, , , ) = feedRegistry.latestRoundData(WBTC_ADDR, CHAINLINK_WBTC_ADDR);
+        wBtcPrice = (_btcPrice * wBtcPriceToPeg + 1e8 / 2) / 1e8;
     }
 
     function getAaveTokenPriceInETH(address _tokenAddr) public view returns (uint256 price) {
