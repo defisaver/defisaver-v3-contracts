@@ -1491,14 +1491,14 @@ const createMorphoPosition = async (collSymbol, debtSymbol, collAmount, debtAmou
                 addrs[network].WETH_ADDRESS,
                 collAddr,
                 Float2BN(sellAmount),
-                addrs[network].UNIV3_WRAPPER,
+                addrs[network].UNISWAP_WRAPPER,
                 senderAcc.address,
                 senderAcc.address,
                 0,
                 senderAcc,
                 undefined,
                 undefined,
-                true,
+                undefined,
             );
             console.log(`Buying ${collSymbol} succeeded`);
         } catch (err) {
@@ -1817,8 +1817,8 @@ const subMorphoAaveV2Automation = async (
             const strategyData = createMorphoAaveV2RepayStrategy();
             const flStrategyData = createMorphoAaveV2FLRepayStrategy();
 
-            const strategyId = await createStrategy(undefined, ...strategyData, false);
-            const flStrategyId = await createStrategy(undefined, ...flStrategyData, false);
+            const strategyId = await createStrategy(undefined, ...strategyData, true);
+            const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
             repayBundleId = await createBundle(undefined, [strategyId, flStrategyId]);
         }
 
@@ -1827,8 +1827,8 @@ const subMorphoAaveV2Automation = async (
             const strategyData = createMorphoAaveV2BoostStrategy();
             const flStrategyData = createMorphoAaveV2FLBoostStrategy();
 
-            const strategyId = await createStrategy(undefined, ...strategyData, false);
-            const flStrategyId = await createStrategy(undefined, ...flStrategyData, false);
+            const strategyId = await createStrategy(undefined, ...strategyData, true);
+            const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
             boostBundleId = await createBundle(undefined, [strategyId, flStrategyId]);
         }
 
