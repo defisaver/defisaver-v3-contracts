@@ -34,7 +34,7 @@ const { createStrategy, addBotCaller, createBundle } = require('../../utils-stra
 
 const cAsset = getAssetInfo('WETH');
 const dAsset = getAssetInfo('DAI');
-const C_DOllAR_AMOUNT_OPEN = '30000';
+const C_DOllAR_AMOUNT_OPEN = '29000';
 const D_DOllAR_AMOUNT_OPEN = '10000';
 const B_R_DOLLAR_AMOUNT = '1000';
 
@@ -104,7 +104,7 @@ const morphoAaveV2BoostTest = () => describe('Morpho-AaveV2-Boost-Strategy', fun
         bundleId = await createBundle(proxy, [strategyId, flStrategyId]);
 
         await getContractFromRegistry('MorphoAaveV2SubProxy', undefined, undefined, undefined, '0', bundleId);
-        triggerRatio = ethers.utils.parseUnits('2.5', '18');
+        triggerRatio = ethers.utils.parseUnits('2.3', '18');
         const minRatio = ethers.utils.parseUnits('1', '18');
         const targetRepay = ethers.utils.parseUnits('2', '18');
         const targetRatio = ethers.utils.parseUnits('2', '18');
@@ -241,8 +241,8 @@ const morphoAaveV2RepayTest = () => describe('Morpho-AaveV2-Repay-Strategy', fun
         const bundleId = await createBundle(proxy, [strategyId, flStrategyId]);
 
         await getContractFromRegistry('MorphoAaveV2SubProxy', undefined, undefined, undefined, bundleId, '0');
-        triggerRatio = ethers.utils.parseUnits('3', '18');
-        const targetRatio = ethers.utils.parseUnits('3.5', '18');
+        triggerRatio = ethers.utils.parseUnits('2.8', '18');
+        const targetRatio = ethers.utils.parseUnits('3', '18');
 
         ({ repaySubId: subId, repaySub: strategySub } = await subMorphoAaveV2AutomationStrategy(
             proxy,

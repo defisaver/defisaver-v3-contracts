@@ -2096,8 +2096,10 @@ const callMorphoAaveV2FLBoostStrategy = async ({
         placeHolderAddr,
         placeHolderAddr,
     ));
+
+    const gasCost = 2_300_000;
     strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '0', cAsset, '0',
+        gasCost, cAsset, '0',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
         cAsset, '0', nullAddress, nullAddress, '0',
@@ -2152,8 +2154,9 @@ const callMorphoAaveV2BoostStrategy = async ({
         placeHolderAddr,
         placeHolderAddr,
     ));
+    const gasCost = 2_000_000;
     strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '0', cAsset, '0',
+        gasCost, cAsset, '0',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
         cAsset, '0', nullAddress, nullAddress, '0',
@@ -2209,14 +2212,16 @@ const callMorphoAaveV2FLRepayStrategy = async ({
         placeHolderAddr,
         placeHolderAddr,
     ));
+
+    const gasCost = 2_400_000;
     strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '0', dAsset, '0',
+        gasCost, dAsset, '0',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2PaybackAction(
         dAsset, '0', nullAddress, nullAddress,
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2WithdrawAction(
-        cAsset, flAmount, flAddress,
+        cAsset, '0', flAddress,
     ));
     strategy.addAction(new dfs.actions.checkers.MorphoAaveV2RatioCheckAction(
         '0', '0', nullAddress,
@@ -2235,7 +2240,7 @@ const callMorphoAaveV2FLRepayStrategy = async ({
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
-    console.log(`GasUsed callMorphoAaveV2RepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+    console.log(`GasUsed callMorphoAaveV2FLRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 const callMorphoAaveV2RepayStrategy = async ({
@@ -2265,8 +2270,10 @@ const callMorphoAaveV2RepayStrategy = async ({
         placeHolderAddr,
         placeHolderAddr,
     ));
+
+    const gasCost = 0;
     strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '0', dAsset, '0',
+        gasCost, dAsset, '0',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2PaybackAction(
         dAsset, '0', nullAddress, nullAddress,
@@ -2288,7 +2295,7 @@ const callMorphoAaveV2RepayStrategy = async ({
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
-    console.log(`GasUsed callMorphoAaveV2FLRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+    console.log(`GasUsed callMorphoAaveV2RepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 module.exports = {

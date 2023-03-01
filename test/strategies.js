@@ -2081,7 +2081,7 @@ const createMorphoAaveV2FLBoostStrategy = () => {
         '&proxy',
     ));
     strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '%0', '%cAsset', '$2',
+        '%gasCost', '%cAsset', '$2',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
         '%cAsset', '$3', '%nullAddr', '%nullAddr',
@@ -2119,7 +2119,7 @@ const createMorphoAaveV2BoostStrategy = () => {
         '&proxy',
     ));
     strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '%0', '%cAsset', '$2',
+        '%gasCost', '%cAsset', '$2',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
         '%cAsset', '$3', '%nullAddr', '%nullAddr',
@@ -2156,7 +2156,7 @@ const createMorphoAaveV2FLRepayStrategy = () => {
         '&proxy',
     ));
     strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '%0', '%dAsset', '$2',
+        '%gasCost', '%dAsset', '$2',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2PaybackAction(
         '%dAsset', '$3', '%nullAddr', '%nullAddr',
@@ -2194,7 +2194,7 @@ const createMorphoAaveV2RepayStrategy = () => {
         '&proxy',
     ));
     strategy.addAction(new dfs.actions.basic.GasFeeAction(
-        '%0', '%dAsset', '$2',
+        '%gasCost', '%dAsset', '$2',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2PaybackAction(
         '%dAsset', '$3', '%nullAddr', '%nullAddr',
