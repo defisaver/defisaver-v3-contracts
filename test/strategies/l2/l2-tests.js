@@ -2,7 +2,7 @@ const hre = require('hardhat');
 const { expect } = require('chai');
 
 const { configure } = require('@defisaver/sdk');
-const { assets, getAssetInfo } = require('@defisaver/tokens');
+const { assets, getAssetInfo, utils: { compare }} = require('@defisaver/tokens');
 
 const {
     getProxy,
@@ -25,7 +25,6 @@ const {
     revertToSnapshot,
     getAddrFromRegistry,
     ETH_ADDR,
-    compareAddr,
 } = require('../../utils');
 
 const {
@@ -683,12 +682,12 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
                 snapshotId4partial = await takeSnapshot();
 
                 const collAssetBalanceBefore = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 );
 
@@ -700,7 +699,7 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     collAssetBalance: e.sub(collAssetBalanceBefore),
@@ -710,7 +709,7 @@ const aaveV3CloseToDebtL2StrategyTest = async (numTestPairs) => {
                 }));
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     debtAssetBalance: e.sub(debtAssetBalanceBefore),
@@ -954,12 +953,12 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const collAssetBalanceBefore = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 );
 
@@ -974,7 +973,7 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     collAssetBalance: e.sub(collAssetBalanceBefore),
@@ -984,7 +983,7 @@ const aaveV3FLCloseToDebtL2StrategyTest = async (numTestPairs) => {
                 }));
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     debtAssetBalance: e.sub(debtAssetBalanceBefore),
@@ -1250,12 +1249,12 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const collAssetBalanceBefore = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH', chainIds[network]).address, chainIds[network]) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address, chainIds[network]) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 );
 
@@ -1268,7 +1267,7 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     collAssetBalance: e.sub(collAssetBalanceBefore),
@@ -1278,7 +1277,7 @@ const aaveV3CloseToCollL2StrategyTest = async (numTestPairs) => {
                 }));
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH', chainIds[network]).address, chainIds[network]) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address, chainIds[network]) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     debtAssetBalance: e.sub(debtAssetBalanceBefore),
@@ -1549,12 +1548,12 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const collAssetBalanceBefore = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 );
 
@@ -1570,7 +1569,7 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    compareAddr(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     collAssetBalance: e.sub(collAssetBalanceBefore),
@@ -1580,7 +1579,7 @@ const aaveV3FLCloseToCollL2StrategyTest = async (numTestPairs) => {
                 }));
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    compareAddr(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
                     senderAcc.address,
                 ).then((e) => Object({
                     debtAssetBalance: e.sub(debtAssetBalanceBefore),

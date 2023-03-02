@@ -5,7 +5,9 @@ const hre = require('hardhat');
 require('dotenv-safe').config();
 const fs = require('fs');
 const { spawnSync } = require('child_process');
-const { getAssetInfo, ilks, assets } = require('@defisaver/tokens');
+const {
+    getAssetInfo, ilks, assets, utils: { compare },
+} = require('@defisaver/tokens');
 const { configure } = require('@defisaver/sdk');
 const dfs = require('@defisaver/sdk');
 
@@ -48,7 +50,6 @@ const {
     nullAddress,
     getContractFromRegistry,
     filterEthersObject,
-    compareAddr,
 } = require('../test/utils');
 
 const {
@@ -2759,8 +2760,7 @@ const createCompV3Position = async (
             const { senderAcc, proxy } = await forkSetup(addr);
             const view = await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
 
-            // compareAddr is just a string compare
-            const user = compareAddr(isEOA, 'false') ? proxy.address : senderAcc.address;
+            const user = compare(isEOA, 'false') ? proxy.address : senderAcc.address;
             console.log(`Fetching position for ${user}`);
 
             const userInfo = await view.getUserInfo(

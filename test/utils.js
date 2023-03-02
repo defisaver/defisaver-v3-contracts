@@ -240,8 +240,6 @@ const coinGeckoHelper = {
     wstETH: 'wrapped-steth',
 };
 
-const compareAddr = (addrA, addrB) => addrA.toLowerCase() === addrB.toLowerCase();
-
 const BN2Float = hre.ethers.utils.formatUnits;
 
 const Float2BN = hre.ethers.utils.parseUnits;
@@ -1286,7 +1284,6 @@ module.exports = {
     setContractAt,
     getContractFromRegistry,
     filterEthersObject,
-    compareAddr,
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),
