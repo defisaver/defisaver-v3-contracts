@@ -1,6 +1,5 @@
-const { getAssetInfo, ...tokens } = require('@defisaver/tokens');
+const { getAssetInfo, utils: { compare } } = require('@defisaver/tokens');
 
-const compare = tokens.utils.compare;
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const {

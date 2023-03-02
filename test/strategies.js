@@ -2084,7 +2084,7 @@ const createMorphoAaveV2FLBoostStrategy = () => {
         '%gasCost', '%cAsset', '$2',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
-        '%cAsset', '$3', '%nullAddr', '%nullAddr',
+        '%cAsset', '$3', '&proxy', '&proxy',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2BorrowAction(
         '%dAsset', '$1', '%flAddress',
@@ -2106,7 +2106,7 @@ const createMorphoAaveV2BoostStrategy = () => {
         '%nullAddr', '%0', '%0',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2BorrowAction(
-        '%dAsset', '%boostAmount', '%nullAddr',
+        '%dAsset', '%boostAmount', '&proxy',
     ));
     strategy.addAction(new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -2122,7 +2122,7 @@ const createMorphoAaveV2BoostStrategy = () => {
         '%gasCost', '%cAsset', '$2',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2SupplyAction(
-        '%cAsset', '$3', '%nullAddr', '%nullAddr',
+        '%cAsset', '$3', '&proxy', '&proxy',
     ));
     strategy.addAction(new dfs.actions.checkers.MorphoAaveV2RatioCheckAction(
         '&ratioState', '&targetRatio', '&proxy',
@@ -2159,7 +2159,7 @@ const createMorphoAaveV2FLRepayStrategy = () => {
         '%gasCost', '%dAsset', '$2',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2PaybackAction(
-        '%dAsset', '$3', '%nullAddr', '%nullAddr',
+        '%dAsset', '$3', '&proxy', '&proxy',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2WithdrawAction(
         '%cAsset', '$1', '%flAddr',
@@ -2197,7 +2197,7 @@ const createMorphoAaveV2RepayStrategy = () => {
         '%gasCost', '%dAsset', '$2',
     ));
     strategy.addAction(new dfs.actions.morpho.MorphoAaveV2PaybackAction(
-        '%dAsset', '$3', '%nullAddr', '%nullAddr',
+        '%dAsset', '$3', '&proxy', '&proxy',
     ));
     strategy.addAction(new dfs.actions.checkers.MorphoAaveV2RatioCheckAction(
         '&ratioState', '&targetRatio', '&proxy',
