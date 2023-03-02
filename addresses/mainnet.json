@@ -1028,6 +1028,50 @@
         "history": []
     },
     {
+        "name": "MorphoAaveV2RatioCheck",
+        "address": "0x904C30Dad119cfF4527d1E4E2aFaF79ac6c05e10",
+        "id": "0xb22cb584",
+        "path": "contracts/actions/checkers/MorphoAaveV2RatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoAaveV2RatioTrigger",
+        "address": "0xa9ebacAAA232f5679144fc128a8212ceD6FB331e",
+        "id": "0x429242d7",
+        "path": "contracts/triggers/MorphoAaveV2RatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoAaveV2SubProxy",
+        "address": "0x7E681F029b3c2FFA79c637963180E0D78626fB24",
+        "id": "0xd3479164",
+        "path": "contracts/actions/morpho/MorphoAaveV2SubProxy.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoAaveV2View",
+        "address": "0x3667d1DB1f47F2c3a2f2411895d3476cc515b687",
+        "id": "0x9b2558f5",
+        "path": "contracts/views/MorphoAaveV2View.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompBorrow",
         "address": "0x8495579BF6Ae848f7E59686536F834f1d2CCd79C",
         "id": "0x82875a6c",
