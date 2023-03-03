@@ -6,6 +6,7 @@ import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
+/// @title Adjusts a Trove by depositing or withdrawing collateral and borrowing or repaying debt.
 contract LiquityAdjust is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
@@ -67,7 +68,7 @@ contract LiquityAdjust is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _liquityAdjust(Params memory _params) internal returns (uint256, bytes memory) {
-        uint collAmount = 0;
+        uint supplyAmount = 0;
 
         if (_params.collChange == CollChange.SUPPLY) {
             if (_params.collAmount == type(uint256).max) {
@@ -77,18 +78,26 @@ contract LiquityAdjust is ActionBase, LiquityHelper {
             TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.collAmount);
             TokenUtils.withdrawWeth(_params.collAmount);
 
-            collAmount = _params.collAmount;
+            supplyAmount = _params.collAmount;
+            _params.collAmount = 0; // when supplying it's sent as eth this should be 0
         }
 
         if (_params.debtChange == DebtChange.PAYBACK) {
-        //     if (_params.lusdAmount == type(uint256).max) {
-        //         _params.lusdAmount = lusdToken.balanceOf(_params.from);
-        //     }
+            uint256 wholeDebt = TroveManager.getTroveDebt(address(this));
 
-        //     lusdToken.pullTokensIfNeeded(_params.from, _params.lusdAmount);
+            if (_params.lusdAmount == type(uint256).max) {
+                _params.lusdAmount = LUSD_TOKEN_ADDRESS.getBalance(_params.from);
+            }
+
+            // can't close with payback, pull amount to payback to MIN_DEBT
+            if (wholeDebt < (_params.lusdAmount + MIN_DEBT)) {
+                _params.lusdAmount = wholeDebt - MIN_DEBT;
+            }
+
+            LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
         }
 
-        BorrowerOperations.adjustTrove{value: collAmount}(
+        BorrowerOperations.adjustTrove{value: supplyAmount}(
             _params.maxFeePercentage,
             _params.collAmount,
             _params.lusdAmount,
