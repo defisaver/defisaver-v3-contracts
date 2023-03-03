@@ -34,8 +34,8 @@ contract LiquityAdjust is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.maxFeePercentage = _parseParamUint(
-            params.maxFeePercentage,
+        params.collAmount = _parseParamUint(
+            params.collAmount,
             _paramMapping[0],
             _subData,
             _returnValues
@@ -46,7 +46,20 @@ contract LiquityAdjust is ActionBase, LiquityHelper {
             _subData,
             _returnValues
         );
-        params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
+        params.collChange = CollChange(_parseParamUint(
+            uint8(params.collChange),
+            _paramMapping[2],
+            _subData,
+            _returnValues
+        ));
+        params.debtChange = DebtChange(_parseParamUint(
+            uint8(params.debtChange),
+            _paramMapping[3],
+            _subData,
+            _returnValues
+        ));
+        params.from = _parseParamAddr(params.from, _paramMapping[4], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[5], _subData, _returnValues);
 
         (uint256 borrowedAmount, bytes memory logData) = _liquityAdjust(params);
         emit ActionEvent("LiquityAdjust", logData);
