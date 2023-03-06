@@ -26,7 +26,7 @@
         "address": "0x29a172f04CF9C6a79EdF4dD2744F2d260b8b8FE4",
         "id": "0xd11b2581",
         "path": "contracts/core/l2/AaveSubProxy.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
@@ -155,14 +155,14 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x8EF42fF40e9a9dD3E1ae81e7947D4E89e6d9f968",
+        "address": "0xA74a85407D5A940542915458616aC3cf3f404E3b",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x8EF42fF40e9a9dD3E1ae81e7947D4E89e6d9f968"]
     },
     {
       "name": "AaveV3QuotePriceTrigger",

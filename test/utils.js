@@ -35,11 +35,15 @@ const addrs = {
         SubProxy: '0xd18d4756bbf848674cc35f1a0B86afEF20787382',
         UNISWAP_WRAPPER: '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54',
         UNISWAP_V3_WRAPPER: '0xA250D449e8246B0be1ecF66E21bB98678448DEF5',
+        UNIV3_WRAPPER: '0xA250D449e8246B0be1ecF66E21bB98678448DEF5',
         FEED_REGISTRY: '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf',
         COMET_USDC_ADDR: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
         COMET_USDC_REWARDS_ADDR: '0x1B0e765F6224C21223AeA2af16c1C46E38885a40',
         COMP_ADDR: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
         CHICKEN_BONDS_VIEW: '0x809a93fd4a0d7d7906Ef6176f0b5518b418Da08f',
+        AAVE_MARKET: '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e',
+        AAVE_V3_VIEW: '0x9ECB0645b357fDD7B92789B91595160862Bd45d0',
+        AAVE_SUB_PROXY: '',
         AVG_GAS_PRICE: 100,
 
     },
@@ -58,6 +62,7 @@ const addrs = {
         SubProxy: '0x163c08d3F6d916AD6Af55b37728D547e968103F8',
         UNISWAP_V3_WRAPPER: '0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357',
         AAVE_V3_VIEW: '0x5aD16e393615bfeF64e15210C370dd4b8f2753Cb',
+        AAVE_SUB_PROXY: '0x9E8aE909Af8A391b58f45819f0d36e4256991D19',
         AVG_GAS_PRICE: 0.001,
         TOKEN_GROUP_REGISTRY: '0x566b2a957D8FCE39D2744059d558F27aF52a70c0',
         ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
@@ -80,6 +85,8 @@ const addrs = {
         AAVE_V3_VIEW: '0x710f01037018Daad969B8FeFe69b4823Ef788bc6',
         UNISWAP_V3_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
         ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        AAVE_SUB_PROXY: '0x29a172f04CF9C6a79EdF4dD2744F2d260b8b8FE4',
+        UNISWAP_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
         AVG_GAS_PRICE: 0.5,
     },
     kovan: {
@@ -573,10 +580,16 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
     return c;
 };
 
-const getContractFromRegistry = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR) => {
+const getContractFromRegistry = async (
+    name,
+    regAddr = addrs[getNetwork()].REGISTRY_ADDR,
+    saveOnTenderly = undefined,
+    isFork = undefined,
+    ...args
+) => {
     const contractAddr = await getAddrFromRegistry(name, regAddr);
     if (contractAddr !== nullAddress) return hre.ethers.getContractAt(name, contractAddr);
-    return redeploy(name, regAddr);
+    return redeploy(name, regAddr, saveOnTenderly, isFork, ...args);
 };
 
 const setCode = async (addr, code) => {
@@ -809,7 +822,7 @@ const formatExchangeObjCurve = async (
 
 const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
     console.log({ srcAddr, destAddr });
-    const { AlphaRouter } = await import('@uniswap/smart-order-router');
+    const { AlphaRouter, SwapType } = await import('@uniswap/smart-order-router');
     const {
         CurrencyAmount,
         Token,
@@ -837,18 +850,20 @@ const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
     const swapAmount = CurrencyAmount.fromRawAmount(srcToken, amount.toString());
 
     const router = new AlphaRouter({ chainId, provider: hre.ethers.provider });
-    const route = await router.route(
+    const { path } = await router.route(
         swapAmount, destToken, TradeType.EXACT_INPUT,
         {
+            type: SwapType.SWAP_ROUTER_02,
             slippageTolerance: new Percent(5, 100),
         },
-    ).then((_route) => _route.trade.swaps[0].route);
+        {
+            maxSplits: 0,
+        },
+    ).then(({ methodParameters }) => hre.ethers.utils.defaultAbiCoder.decode(
+        ['(bytes path,address,uint256,uint256)'],
+        `0x${methodParameters.calldata.slice(10)}`,
+    )[0]);
 
-    const path = route.tokenPath.reduce((acc, curr, index) => {
-        const poolInput = curr.address;
-        const poolFee = poolInput.toLowerCase() === destAddr.toLowerCase() ? '' : (route.pools[index].fee).toString(16).padStart(6, 0);
-        return `${acc}${poolInput.slice(2)}${poolFee}`;
-    }, '0x');
     console.log({ path });
 
     return [
@@ -1155,6 +1170,22 @@ const setMockPrice = async (mockContract, roundId, token, price) => {
     await c.setRoundData(token, USD_QUOTE, roundId, formattedPrice);
 };
 
+const filterEthersObject = (obj) => {
+    if (typeof obj !== 'object') return obj;
+    if (obj instanceof hre.ethers.BigNumber) return obj.toString();
+
+    const keys = Object.keys(obj);
+    const stringKeys = keys.filter((key, i) => +key !== i);
+
+    if (stringKeys.length !== 0) {
+        return stringKeys.reduce(
+            (acc, key) => ({ ...acc, [key]: filterEthersObject(obj[key]) }),
+            {},
+        );
+    }
+    return keys.map((key) => filterEthersObject(obj[key]));
+};
+
 module.exports = {
     addToZRXAllowlist,
     getAddrFromRegistry,
@@ -1262,6 +1293,7 @@ module.exports = {
     expectCloseEq,
     setContractAt,
     getContractFromRegistry,
+    filterEthersObject,
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),

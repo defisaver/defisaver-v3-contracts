@@ -5,6 +5,7 @@ const { mcdStrategiesTest } = require('./mcd/mcd-tests');
 const { reflexerStrategiesTest } = require('./reflexer/reflexer-tests');
 const { miscStrategiesTest } = require('./miscellaneous/misc-tests');
 const { uniStrategiesTest } = require('./uni/uni-tests');
+const { morphoAaveV2StrategiesTest } = require('./morpho/morpho-tests');
 
 describe('Strategies full test', () => {
     it('... should do full Strategies test', async () => {
@@ -15,5 +16,6 @@ describe('Strategies full test', () => {
         await miscStrategiesTest();
         await reflexerStrategiesTest();
         await uniStrategiesTest();
+        await morphoAaveV2StrategiesTest();
     });
 });

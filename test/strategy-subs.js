@@ -5,6 +5,7 @@ const {
     subToStrategy,
     subToCompV3Proxy,
     subToCBRebondProxy,
+    subToMorphoAaveV2Proxy,
 } = require('./utils-strategies');
 
 const {
@@ -18,6 +19,7 @@ const {
     createLiquityTrigger,
     createTrailingStopTrigger,
     createCbRebondTrigger,
+    createMorphoTrigger,
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
 } = require('./triggers');
@@ -404,6 +406,74 @@ const subLiquityCBPaybackStrategy = async (proxy, bundleId, sourceId, sourceType
     return { subId, strategySub };
 };
 
+const subMorphoAaveV2AutomationStrategy = async (
+    proxy,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    regAddr = REGISTRY_ADDR,
+) => {
+    const subInput = [[minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled]];
+
+    const { latestSubId: subId, repaySub, boostSub } = await subToMorphoAaveV2Proxy(proxy, subInput, regAddr);
+
+    let repaySubId = '0';
+    let boostSubId = '0';
+
+    if (boostEnabled) {
+        repaySubId = (parseInt(subId, 10) - 1).toString();
+        boostSubId = subId;
+    } else {
+        repaySubId = subId;
+        boostSubId = '0';
+    }
+
+    return {
+        repaySubId,
+        boostSubId,
+        repaySub,
+        boostSub,
+    };
+};
+
+const subMorphoAaveV2BoostStrategy = async ({
+    proxy,
+    bundleId,
+    user,
+    triggerRatio,
+}) => {
+    const triggerData = await createMorphoTrigger(user, triggerRatio, RATIO_STATE_OVER);
+    const strategySub = [
+        bundleId,
+        true,
+        [triggerData],
+        [],
+    ];
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+
+const subMorphoAaveV2RepayStrategy = async ({
+    proxy,
+    bundleId,
+    user,
+    triggerRatio,
+}) => {
+    const triggerData = await createMorphoTrigger(user, triggerRatio, RATIO_STATE_UNDER);
+    const strategySub = [
+        bundleId,
+        true,
+        [triggerData],
+        [],
+    ];
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdRepayStrategy,
@@ -427,4 +497,7 @@ module.exports = {
     subCompV3AutomationStrategy,
     subCbRebondStrategy,
     subLiquityCBPaybackStrategy,
+    subMorphoAaveV2BoostStrategy,
+    subMorphoAaveV2RepayStrategy,
+    subMorphoAaveV2AutomationStrategy,
 };
