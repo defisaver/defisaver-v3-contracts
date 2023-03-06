@@ -79,9 +79,10 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
 
     /// @notice Sells a specified srcAmount for the dest token
     /// @param _exchangeData DFS Exchange data struct
-    /// @param _from Address from which we"ll pull the srcTokens
-    /// @param _to Address where we"ll send the _to token
+    /// @param _from Address from which we'll pull the srcTokens
+    /// @param _to Address where we'll send the _to token
     /// @param _gasUsed Gas used for this strategy so we can take the fee
+    /// @param _l1GasUsed Gas spent on L1 to post data for L2 network
     function _dfsSell(
         ExchangeData memory _exchangeData,
         address _from,
