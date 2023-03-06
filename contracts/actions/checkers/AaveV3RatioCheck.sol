@@ -65,7 +65,7 @@ contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
 
             // can't boost too much under targetRatio so we don't trigger repay after
             if (currRatio < (targetRatio - RATIO_OFFSET)) {
-                revert BadAfterRatio(startRatio, currRatio);
+                revert BadAfterRatio(targetRatio, currRatio);
             }
         }
 

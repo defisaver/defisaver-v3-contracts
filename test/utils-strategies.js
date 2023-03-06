@@ -133,7 +133,7 @@ const activateSub = async (proxy, subId, regAddr = addrs[network].REGISTRY_ADDR)
 };
 
 const subToAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const aaveSubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
+    const aaveSubProxyAddr = addrs[network].AAVE_SUB_PROXY;
 
     const AaveSubProxy = await hre.ethers.getContractFactory('AaveSubProxy');
     const functionData = AaveSubProxy.interface.encodeFunctionData(
@@ -256,7 +256,7 @@ const updateSubDataMorphoAaveV2Proxy = async (
 };
 
 const updateAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const aaveSubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
+    const aaveSubProxyAddr = addrs[network].AAVE_SUB_PROXY;
 
     const AaveSubProxy = await hre.ethers.getContractFactory('AaveSubProxy');
     const functionData = AaveSubProxy.interface.encodeFunctionData(

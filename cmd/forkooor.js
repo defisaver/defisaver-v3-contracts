@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-shadow */
 /* eslint-disable no-use-before-define */
 /* eslint-disable import/no-extraneous-dependencies */
@@ -146,7 +147,7 @@ const {
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
 } = require('../test/triggers');
-const { deployCloseToDebtBundle, deployCloseToCollBundle } = require('../test/strategies/l2/l2-tests');
+// const { deployCloseToDebtBundle, deployCloseToCollBundle } = require('../test/strategies/l2/l2-tests');
 const { createRepayBundle, createBoostBundle } = require('../test/strategies/mcd/mcd-tests');
 
 program.version('0.0.1');
@@ -1569,7 +1570,81 @@ const subAaveAutomation = async (
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    await redeploy('AaveSubProxy', addrs[network].REGISTRY_ADDR, false, true);
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
+
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
+
+    const subIds = await subAaveV3L2AutomationStrategy(
+        proxy,
+        minRatioFormatted.toHexString().slice(2),
+        maxRatioFormatted.toHexString().slice(2),
+        optimalRatioBoostFormatted.toHexString().slice(2),
+        optimalRatioRepayFormatted.toHexString().slice(2),
+        boostEnabled,
+        addrs[network].REGISTRY_ADDR,
+    );
+
+    console.log(`Aave position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
+};
+
+const subAaveV3MainnetAutomation = async (
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    sender,
+) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    await topUp(senderAcc.address);
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+    await topUp(getOwnerAddr());
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    // await openStrategyAndBundleStorage(true);
+    // const aaveRepayStrategyEncoded = createAaveV3RepayStrategy();
+    // const aaveRepayFLStrategyEncoded = createAaveFLV3RepayStrategy();
+
+    // const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
+    // const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
+
+    // await createBundle(proxy, [strategyId1, strategyId2]);
+
+    // const aaveBoostStrategyEncoded = createAaveV3BoostStrategy();
+    // const aaveBoostFLStrategyEncoded = createAaveFLV3BoostStrategy();
+
+    // const strategyId11 = await createStrategy(proxy, ...aaveBoostStrategyEncoded, true);
+    // const strategyId22 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
+
+    // await createBundle(proxy, [strategyId11, strategyId22]);
+
+    await redeploy('AaveV3RatioTrigger', addrs[network].REGISTRY_ADDR, false, true);
+    await redeploy('AaveV3RatioCheck', addrs[network].REGISTRY_ADDR, false, true);
 
     const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
     const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
@@ -1577,6 +1652,7 @@ const subAaveAutomation = async (
     const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
     const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
 
+    // same as in L1
     const subIds = await subAaveV3L2AutomationStrategy(
         proxy,
         minRatioFormatted.toHexString().slice(2),
@@ -1640,27 +1716,20 @@ const subAaveClose = async (
     const collAssetId = collReserveData.id;
     const debtAssetId = debtReserveData.id;
 
-    let bundleId = await getLatestBundleId();
-    if (bundleId < 2) {
-        const triggerAddr = await redeploy(
-            'AaveV3QuotePriceTrigger', undefined, false, true,
-        ).then((c) => c.address);
-        const viewAddr = await redeploy(
-            'AaveV3OracleView', undefined, false, true,
-        ).then((c) => c.address);
+    // const triggerAddr = await redeploy(
+    //     'AaveV3QuotePriceTrigger', undefined, false, true,
+    // ).then((c) => c.address);
+    // const viewAddr = await redeploy(
+    //     'AaveV3OracleView', undefined, false, true,
+    // ).then((c) => c.address);
 
-        console.log('AaveQuotePriceTrigger address:', triggerAddr);
-        console.log('AaveV3OracleView address:', viewAddr);
+    // console.log('AaveQuotePriceTrigger address:', triggerAddr);
+    // console.log('AaveV3OracleView address:', viewAddr);
 
-        const closeToDebtId = await deployCloseToDebtBundle(proxy, true);
-        const closeToCollId = await deployCloseToCollBundle(proxy, true);
+    // const closeToDebtId = await deployCloseToDebtBundle(proxy, true, true);
+    // const closeToCollId = await deployCloseToCollBundle(proxy, true, true);
 
-        console.log(`close-to-debt-Id: ${closeToDebtId}, close-to-coll-Id: ${closeToCollId}`);
-
-        bundleId = closeToColl ? closeToCollId : closeToDebtId;
-    } else {
-        bundleId = closeToColl ? bundleId : bundleId - 1;
-    }
+    const bundleId = closeToColl ? '13' : '12';
 
     const formattedPrice = (targetQuotePrice * 1e8).toString();
 
@@ -2040,8 +2109,6 @@ const updateAaveV3AutomationSub = async (
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    await redeploy('AaveSubProxy', addrs[network].REGISTRY_ADDR, false, true);
-
     await openStrategyAndBundleStorage(true);
     const aaveRepayStrategyEncoded = createAaveV3RepayL2Strategy();
     const aaveRepayFLStrategyEncoded = createAaveFLV3RepayL2Strategy();
@@ -2408,6 +2475,33 @@ const createCompV3Position = async (
             ) => {
                 // eslint-disable-next-line max-len
                 await subAaveAutomation(
+                    minRatio,
+                    maxRatio,
+                    optimalRatioBoost,
+                    optimalRatioRepay,
+                    boostEnabled,
+                    senderAcc,
+                );
+                process.exit(0);
+            },
+        );
+
+    program
+        .command(
+            'sub-aaveV3-mainnet-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+        )
+        .description('Subscribes to aave automation can be both b/r')
+        .action(
+            async (
+                minRatio,
+                maxRatio,
+                optimalRatioBoost,
+                optimalRatioRepay,
+                boostEnabled,
+                senderAcc,
+            ) => {
+                // eslint-disable-next-line max-len
+                await subAaveV3MainnetAutomation(
                     minRatio,
                     maxRatio,
                     optimalRatioBoost,

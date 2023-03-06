@@ -58,7 +58,6 @@ contract AaveV3SwapBorrowRateMode is ActionBase, AaveV3Helper {
         internal
         returns (uint256, bytes memory)
     {
-
         IPoolV3 lendingPool = getLendingPool(_inputData.market);
         address tokenAddr = lendingPool.getReserveAddressById(_inputData.assetId);
         lendingPool.swapBorrowRateMode(tokenAddr, _inputData.rateMode);

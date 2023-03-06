@@ -4,16 +4,21 @@ pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
 import "../../auth/ProxyPermission.sol";
-import "./SubStorageL2.sol";
+import "../strategy/SubStorage.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
 contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
-    uint64 public constant REPAY_BUNDLE_ID = 0; 
-    uint64 public constant BOOST_BUNDLE_ID = 1; 
+    uint64 public immutable REPAY_BUNDLE_ID; 
+    uint64 public immutable BOOST_BUNDLE_ID; 
+
+    constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
+        REPAY_BUNDLE_ID = _repayBundleId;
+        BOOST_BUNDLE_ID = _boostBundleId;
+    }
 
     enum RatioState { OVER, UNDER }
 
-    address public constant AAVE_MARKET = 0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb;
+    address public constant AAVE_MARKET = 0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e;
 
     /// @dev 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
@@ -42,13 +47,13 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         AaveSubData memory subData = parseSubData(encodedInput);
 
         StrategySub memory repaySub = formatRepaySub(subData);
-        SubStorageL2(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
+        SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
 
         if (subData.boostEnabled) {
             _validateSubData(subData);
 
             StrategySub memory boostSub = formatBoostSub(subData);
-            SubStorageL2(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
+            SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
         }
     }
 
@@ -64,8 +69,8 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
 
         // update repay as we must have a subId, it's ok if it's the same data
         StrategySub memory repaySub = formatRepaySub(subData);
-        SubStorageL2(SUB_STORAGE_ADDR).updateSubData(subId1, repaySub);
-        SubStorageL2(SUB_STORAGE_ADDR).activateSub(subId1);
+        SubStorage(SUB_STORAGE_ADDR).updateSubData(subId1, repaySub);
+        SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);
 
         if (subData.boostEnabled) {
             _validateSubData(subData);
@@ -74,14 +79,14 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
 
             // if we don't have a boost bundleId, create one
             if (subId2 == 0) {
-                SubStorageL2(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
+                SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
             } else {
-                SubStorageL2(SUB_STORAGE_ADDR).updateSubData(subId2, boostSub);
-                SubStorageL2(SUB_STORAGE_ADDR).activateSub(subId2);
+                SubStorage(SUB_STORAGE_ADDR).updateSubData(subId2, boostSub);
+                SubStorage(SUB_STORAGE_ADDR).activateSub(subId2);
             }
         } else {
             if (subId2 != 0) {
-                SubStorageL2(SUB_STORAGE_ADDR).deactivateSub(subId2);
+                SubStorage(SUB_STORAGE_ADDR).deactivateSub(subId2);
             }
         }
     }
@@ -92,10 +97,10 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     ) public {
         (uint32 subId1, uint32 subId2) = parseSubIds(encodedInput[0:8]);
 
-        SubStorageL2(SUB_STORAGE_ADDR).activateSub(subId1);
+        SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);
 
         if (subId2 != 0) {
-            SubStorageL2(SUB_STORAGE_ADDR).activateSub(subId2);
+            SubStorage(SUB_STORAGE_ADDR).activateSub(subId2);
         }
     }
 
@@ -105,10 +110,10 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     ) public {
         (uint32 subId1, uint32 subId2) = parseSubIds(encodedInput[0:8]);
 
-        SubStorageL2(SUB_STORAGE_ADDR).deactivateSub(subId1);
+        SubStorage(SUB_STORAGE_ADDR).deactivateSub(subId1);
 
         if (subId2 != 0) {
-            SubStorageL2(SUB_STORAGE_ADDR).deactivateSub(subId2);
+            SubStorage(SUB_STORAGE_ADDR).deactivateSub(subId2);
         }
     }
 
