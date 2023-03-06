@@ -33,6 +33,7 @@ const addrs = {
         StrategyProxy: '0x0822902D30CC9c77404e6eB140dC1E98aF5b559A',
         SubProxy: '0xd18d4756bbf848674cc35f1a0B86afEF20787382',
         UNISWAP_WRAPPER: '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54',
+        UNIV3_WRAPPER: '0xA250D449e8246B0be1ecF66E21bB98678448DEF5',
         FEED_REGISTRY: '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf',
         COMET_USDC_ADDR: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
         COMET_USDC_REWARDS_ADDR: '0x1B0e765F6224C21223AeA2af16c1C46E38885a40',
@@ -574,10 +575,16 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
     return c;
 };
 
-const getContractFromRegistry = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR) => {
+const getContractFromRegistry = async (
+    name,
+    regAddr = addrs[getNetwork()].REGISTRY_ADDR,
+    saveOnTenderly = undefined,
+    isFork = undefined,
+    ...args
+) => {
     const contractAddr = await getAddrFromRegistry(name, regAddr);
     if (contractAddr !== nullAddress) return hre.ethers.getContractAt(name, contractAddr);
-    return redeploy(name, regAddr);
+    return redeploy(name, regAddr, saveOnTenderly, isFork, ...args);
 };
 
 const setCode = async (addr, code) => {
@@ -810,7 +817,7 @@ const formatExchangeObjCurve = async (
 
 const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
     console.log({ srcAddr, destAddr });
-    const { AlphaRouter } = await import('@uniswap/smart-order-router');
+    const { AlphaRouter, SwapType } = await import('@uniswap/smart-order-router');
     const {
         CurrencyAmount,
         Token,
@@ -838,18 +845,20 @@ const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
     const swapAmount = CurrencyAmount.fromRawAmount(srcToken, amount.toString());
 
     const router = new AlphaRouter({ chainId, provider: hre.ethers.provider });
-    const route = await router.route(
+    const { path } = await router.route(
         swapAmount, destToken, TradeType.EXACT_INPUT,
         {
+            type: SwapType.SWAP_ROUTER_02,
             slippageTolerance: new Percent(5, 100),
         },
-    ).then((_route) => _route.trade.swaps[0].route);
+        {
+            maxSplits: 0,
+        },
+    ).then(({ methodParameters }) => hre.ethers.utils.defaultAbiCoder.decode(
+        ['(bytes path,address,uint256,uint256)'],
+        `0x${methodParameters.calldata.slice(10)}`,
+    )[0]);
 
-    const path = route.tokenPath.reduce((acc, curr, index) => {
-        const poolInput = curr.address;
-        const poolFee = poolInput.toLowerCase() === destAddr.toLowerCase() ? '' : (route.pools[index].fee).toString(16).padStart(6, 0);
-        return `${acc}${poolInput.slice(2)}${poolFee}`;
-    }, '0x');
     console.log({ path });
 
     return [
@@ -1156,6 +1165,22 @@ const setMockPrice = async (mockContract, roundId, token, price) => {
     await c.setRoundData(token, USD_QUOTE, roundId, formattedPrice);
 };
 
+const filterEthersObject = (obj) => {
+    if (typeof obj !== 'object') return obj;
+    if (obj instanceof hre.ethers.BigNumber) return obj.toString();
+
+    const keys = Object.keys(obj);
+    const stringKeys = keys.filter((key, i) => +key !== i);
+
+    if (stringKeys.length !== 0) {
+        return stringKeys.reduce(
+            (acc, key) => ({ ...acc, [key]: filterEthersObject(obj[key]) }),
+            {},
+        );
+    }
+    return keys.map((key) => filterEthersObject(obj[key]));
+};
+
 module.exports = {
     addToZRXAllowlist,
     getAddrFromRegistry,
@@ -1263,6 +1288,7 @@ module.exports = {
     expectCloseEq,
     setContractAt,
     getContractFromRegistry,
+    filterEthersObject,
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),

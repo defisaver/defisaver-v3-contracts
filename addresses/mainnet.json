@@ -1186,17 +1186,6 @@
         "history": []
     },
     {
-        "name": "AaveSubProxy",
-        "address": "0xb9F73625AA64D46A9b2f0331712e9bEE19e4C3f7",
-        "id": "0xd11b2581",
-        "path": "contracts/core/l2/AaveSubProxy.sol",
-        "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
-        "registryIds": [],
-        "history": []
-    },
-    {
         "name": "CompBorrow",
         "address": "0x8495579BF6Ae848f7E59686536F834f1d2CCd79C",
         "id": "0x82875a6c",
