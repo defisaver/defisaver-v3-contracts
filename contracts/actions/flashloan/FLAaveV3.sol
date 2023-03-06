@@ -32,7 +32,7 @@ contract FLAaveV3 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlas
 
     ILendingPoolAddressesProviderV2
         public constant addressesProvider = ILendingPoolAddressesProviderV2(
-            AAVE_LENDING_POOL_ADDRESS_PROVIDER
+            AAVE_V3_LENDING_POOL_ADDRESS_PROVIDER
     );
 
     bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
@@ -73,7 +73,7 @@ contract FLAaveV3 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlas
     /// @param _params Rest of the data we have in the recipe
     function _flAaveV3(FlashLoanParams memory _flData, bytes memory _params) internal returns (uint) {
 
-        ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
+        ILendingPoolV2(AAVE_V3_LENDING_POOL).flashLoan(
             address(this),
             _flData.tokens,
             _flData.amounts,
@@ -99,7 +99,7 @@ contract FLAaveV3 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlas
         address _initiator,
         bytes memory _params
     ) public nonReentrant returns (bool) {
-        if (msg.sender != AAVE_LENDING_POOL){
+        if (msg.sender != AAVE_V3_LENDING_POOL){
             revert OnlyAaveCallerError();
         }
         if (_initiator != address(this)){
@@ -135,7 +135,7 @@ contract FLAaveV3 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlas
 
             require(correctAmount, ERR_WRONG_PAYBACK_AMOUNT);
             
-            _assets[i].approveToken(address(AAVE_LENDING_POOL), paybackAmount);
+            _assets[i].approveToken(address(AAVE_V3_LENDING_POOL), paybackAmount);
 
         }
 

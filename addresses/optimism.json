@@ -26,7 +26,7 @@
         "address": "0x9E8aE909Af8A391b58f45819f0d36e4256991D19",
         "id": "0xd11b2581",
         "path": "contracts/core/l2/AaveSubProxy.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
@@ -155,14 +155,14 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
+        "address": "0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4"]
     },
     {
         "name": "ERC20View",
@@ -619,6 +619,17 @@
       "address": "0xBE8e8cea67085F869C1C0040fD52F9F3115E962e",
       "id": "0x3c4556e9",
       "path": "contracts/actions/aaveV3/AaveV3ClaimRewards.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "TimestampTrigger",
+      "address": "0x4D2D2dB27b00863d6A49F5a060D7858411b85744",
+      "id": "0xa051d9a9",
+      "path": "contracts/triggers/TimestampTrigger.sol",
       "version": "1.0.0",
       "inRegistry": true,
       "changeTime": "86400",

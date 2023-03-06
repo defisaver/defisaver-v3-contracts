@@ -10,12 +10,13 @@ import "../actions/morpho/helpers/MorphoHelper.sol";
 import "../DS/DSMath.sol";
 import "./AaveView.sol";
 
-contract MorphoAaveV2View is MorphoHelper, DSMath {
+contract MorphoAaveV2View is MorphoHelper {
     address constant public AAVE_VIEW_ADDR = 0xEDf1087544a01596b70Da746F861B878F245B08f;
 
     struct MarketInfo {
         address market; // aToken
         address underlying;
+        uint8 decimals;
         uint256 p2pSupplyAmount;
         uint256 poolSupplyAmount;
         uint256 p2pBorrowAmount;
@@ -37,6 +38,7 @@ contract MorphoAaveV2View is MorphoHelper, DSMath {
     struct UserBalance {
         address market;
         address underlying;
+        uint8 decimals;
         uint256 userSupplyRate;
         uint256 userBorrowRate;
         uint256 supplyBalanceInP2P;
@@ -61,6 +63,7 @@ contract MorphoAaveV2View is MorphoHelper, DSMath {
         return MarketInfo({
             market: _market,
             underlying: underlying,
+            decimals: uint8(IERC20(underlying).decimals()),
             p2pSupplyAmount: p2pSupplyAmount,
             poolSupplyAmount: poolSupplyAmount,
             p2pBorrowAmount: p2pBorrowAmount,
@@ -111,9 +114,11 @@ contract MorphoAaveV2View is MorphoHelper, DSMath {
                 uint256 borrowBalanceOnPool,
             ) =  IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getCurrentBorrowBalanceInOf(markets[i], _usr);
 
+            address underlying = IAToken(markets[i]).UNDERLYING_ASSET_ADDRESS();
             userInfo.userBalances[i] = UserBalance({
                 market: markets[i],
-                underlying: IAToken(markets[i]).UNDERLYING_ASSET_ADDRESS(),
+                underlying: underlying,
+                decimals: uint8(IERC20(underlying).decimals()),
                 userSupplyRate: IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getCurrentUserSupplyRatePerYear(markets[i], _usr),
                 userBorrowRate: IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getCurrentUserBorrowRatePerYear(markets[i], _usr),
                 supplyBalanceInP2P: supplyBalanceInP2P,

@@ -4,11 +4,11 @@ pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
-import "../aaveV3/helpers/AaveV3RatioHelper.sol";
-import "../../core/helpers/CoreHelper.sol";
+import "../../interfaces/morpho/IMorphoAaveV2Lens.sol";
+import "../../actions/morpho/helpers/MorphoHelper.sol";
 import "../../utils/TransientStorage.sol";
 
-contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
+contract MorphoAaveV2RatioCheck is ActionBase, MorphoHelper {
 
     /// @dev 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
@@ -25,6 +25,7 @@ contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
     struct Params {
         RatioState ratioState;
         uint256 targetRatio;
+        address user;
     }
 
     /// @inheritdoc ActionBase
@@ -39,9 +40,18 @@ contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
         uint256 ratioState = _parseParamUint(uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues);
         uint256 targetRatio = _parseParamUint(uint256(inputData.targetRatio), _paramMapping[1], _subData, _returnValues);
 
-        uint256 currRatio = getRatio(DEFAULT_AAVE_MARKET, address(this));
+        address user;
+        if (_paramMapping.length == 3) {
+            user = _parseParamAddr(address(inputData.user), _paramMapping[2], _subData, _returnValues);
+        }
 
-        uint256 startRatio = uint256(tempStorage.getBytes32("AAVE_RATIO"));
+        if (user == address(0)) {
+            user = address(this);
+        }
+
+        uint256 currRatio = getSafetyRatio(user);
+
+        uint256 startRatio = uint256(tempStorage.getBytes32("MORPHO_AAVEV2_RATIO"));
         
         // if we are doing repay
         if (RatioState(ratioState) == RatioState.IN_REPAY) {
@@ -65,11 +75,11 @@ contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
 
             // can't boost too much under targetRatio so we don't trigger repay after
             if (currRatio < (targetRatio - RATIO_OFFSET)) {
-                revert BadAfterRatio(targetRatio, currRatio);
+                revert BadAfterRatio(startRatio, currRatio);
             }
         }
 
-        emit ActionEvent("AaveV3RatioCheck", abi.encode(currRatio));
+        emit ActionEvent("MorphoAaveV2RatioCheck", abi.encode(currRatio));
         return bytes32(currRatio);
     }
 

@@ -26,7 +26,7 @@
   "devDependencies": {
     "@commitlint/cli": "^12.1.1",
     "@commitlint/config-conventional": "^12.1.1",
-    "@defisaver/sdk": "github:DecenterApps/defisaver-sdk#feature/mcd-composit-actions",
+    "@defisaver/sdk": "github:DecenterApps/defisaver-sdk#feature/morpho-aaveV2-ratio-trigger",
     "@defisaver/tokens": "^1.4.23",
     "@nomiclabs/hardhat-ethers": "^2.0.0",
     "@nomiclabs/hardhat-etherscan": "2.0.2-rc.2",
@@ -68,6 +68,8 @@
   },
   "dependencies": {
     "@curvefi/api": "^1.25.0",
+    "@uniswap/sdk-core": "^3.1.1",
+    "@uniswap/smart-order-router": "^3.5.0",
     "coingecko-api": "^1.0.10",
     "commander": "^8.3.0",
     "decimal.js": "^10.3.1",

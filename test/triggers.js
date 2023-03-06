@@ -70,6 +70,12 @@ const createCbRebondTrigger = async (bondID) => {
     return param;
 };
 
+const createMorphoTrigger = async (user, ratio, ratioState) => {
+    const param = abiCoder.encode(['address', 'uint256', 'uint8'], [user, ratio, ratioState]);
+
+    return param;
+};
+
 module.exports = {
     createUniV3RangeOrderTrigger,
     createMcdTrigger,
@@ -82,6 +88,7 @@ module.exports = {
     createTrailingStopTrigger,
     createCbRebondTrigger,
     createOffchainPriceTrigger,
+    createMorphoTrigger,
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
     BUY_ORDER,
