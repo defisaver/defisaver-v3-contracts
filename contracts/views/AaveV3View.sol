@@ -18,6 +18,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant RESERVE_FACTOR_MASK =            0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant LIQUIDATION_THRESHOLD_MASK =     0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFF; // prettier-ignore
     uint256 internal constant DEBT_CEILING_MASK =              0xF0000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
+    uint256 internal constant FLASHLOAN_ENABLED_MASK =         0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF; // prettier-ignore
 
     
     uint256 internal constant LIQUIDATION_THRESHOLD_START_BIT_POSITION = 16;
@@ -28,6 +29,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant SUPPLY_CAP_START_BIT_POSITION = 116;
     uint256 internal constant EMODE_CATEGORY_START_BIT_POSITION = 168;
     uint256 internal constant DEBT_CEILING_START_BIT_POSITION = 212;
+    uint256 internal constant FLASHLOAN_ENABLED_START_BIT_POSITION = 63;
 
     using TokenUtils for address;
 
@@ -40,6 +42,12 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint256[] collAmounts;
         uint256[] borrowStableAmounts;
         uint256[] borrowVariableAmounts;
+        // emode category data
+        uint16 ltv;
+        uint16 liquidationThreshold;
+        uint16 liquidationBonus;
+        address priceSource;
+        string label;
     }
 
     struct UserToken {
@@ -84,6 +92,13 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         bool isolationModeBorrowingEnabled; //pool.config
         bool isSiloedForBorrowing; //AaveProtocolDataProvider.getSiloedBorrowing
         uint256 eModeCollateralFactor; //pool.getEModeCategoryData.ltv
+        bool isFlashLoanEnabled;
+        // emode category data
+        uint16 ltv;
+        uint16 liquidationThreshold;
+        uint16 liquidationBonus;
+        address priceSource;
+        string label;
     }
 
     function getHealthFactor(address _market, address _user)
@@ -209,6 +224,10 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint256 totalVariableBorrow = IERC20(reserveData.variableDebtTokenAddress).totalSupply();
         uint256 totalStableBorrow = IERC20(reserveData.stableDebtTokenAddress).totalSupply();
 
+
+        uint256 eMode = getEModeCategory(config);
+        DataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(eMode));
+
         _tokenInfo = TokenInfoFull({
             aTokenAddress: reserveData.aTokenAddress,
             underlyingTokenAddress: _tokenAddr,
@@ -226,7 +245,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             price: getAssetPrice(_market, _tokenAddr),
             supplyCap: getSupplyCap(config),
             borrowCap: getBorrowCap(config),
-            emodeCategory: getEModeCategory(config),
+            emodeCategory: eMode,
             usageAsCollateralEnabled: getLiquidationThreshold(config) > 0,
             borrowingEnabled: getBorrowingEnabled(config),
             stableBorrowRateEnabled: getStableRateBorrowingEnabled(config),
@@ -234,7 +253,13 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             debtCeilingForIsolationMode: getDebtCeiling(config),
             isolationModeTotalDebt: reserveData.isolationModeTotalDebt,
             isSiloedForBorrowing: isSiloedForBorrowing(_market, _tokenAddr),
-            eModeCollateralFactor: getEModeCollateralFactor(uint8(getEModeCategory(config)), lendingPool)
+            eModeCollateralFactor: getEModeCollateralFactor(uint8(getEModeCategory(config)), lendingPool),
+            isFlashLoanEnabled: getFlashLoanEnabled(config),
+            ltv: categoryData.ltv,
+            liquidationThreshold: categoryData.liquidationThreshold,
+            liquidationBonus: categoryData.liquidationBonus,
+            priceSource: categoryData.priceSource,
+            label: categoryData.label
         });
     }
 
@@ -257,15 +282,24 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     function getLoanData(address _market, address _user) public view returns (LoanData memory data) {
         IPoolV3 lendingPool = getLendingPool(_market);
         address[] memory reserveList = lendingPool.getReservesList();
+        uint256 eMode = lendingPool.getUserEMode(_user);
+        
+        DataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(eMode));
+        
         data = LoanData({
-            eMode: lendingPool.getUserEMode(_user),
+            eMode: eMode,
             user: _user,
             ratio: 0,
             collAddr: new address[](reserveList.length),
             borrowAddr: new address[](reserveList.length),
             collAmounts: new uint[](reserveList.length),
             borrowStableAmounts: new uint[](reserveList.length),
-            borrowVariableAmounts: new uint[](reserveList.length)
+            borrowVariableAmounts: new uint[](reserveList.length),
+            ltv: categoryData.ltv,
+            liquidationThreshold: categoryData.liquidationThreshold,
+            liquidationBonus: categoryData.liquidationBonus,
+            priceSource: categoryData.priceSource,
+            label: categoryData.label
         });
 
         uint64 collPos = 0;
@@ -321,7 +355,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         }
     }
 
-    function getLtv(DataTypes.ReserveConfigurationMap memory self) public view returns (uint256) {
+    function getLtv(DataTypes.ReserveConfigurationMap memory self) public pure returns (uint256) {
         return self.data & ~LTV_MASK;
     }
 
@@ -432,5 +466,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         return categoryData.ltv;
     }
 
+    function getFlashLoanEnabled(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
+        return (self.data & ~FLASHLOAN_ENABLED_MASK) != 0;
+    }
 
 }

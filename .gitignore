@@ -9,6 +9,8 @@ lerna-debug.log*
 .vscode
 bin/*
 
+aaveV3-proposal.json
+
 artifacts
 cache
 .DS_Store
