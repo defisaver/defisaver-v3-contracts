@@ -5,6 +5,7 @@ const {
     subToStrategy,
     subToCompV3Proxy,
     subToCBRebondProxy,
+    subToLimitOrderProxy,
 } = require('./utils-strategies');
 
 const {
@@ -277,17 +278,10 @@ const subLiquityTrailingCloseToCollStrategy = async (proxy, percentage, roundId,
 };
 
 // eslint-disable-next-line max-len
-const subLimitOrderStrategy = async (proxy, tokenAddrSell, tokenAddrBuy, amount, targetPrice, goodUntil, strategyId) => {
-    const isBundle = false;
+const subLimitOrderStrategy = async (proxy, tokenAddrSell, tokenAddrBuy, amount, targetPrice, goodUntilDuration, regAddr = REGISTRY_ADDR) => {
+    const subInput = [[tokenAddrSell, tokenAddrBuy, amount, targetPrice, goodUntilDuration]];
 
-    const tokenAddrSellEncoded = abiCoder.encode(['address'], [tokenAddrSell]);
-    const tokenAddrBuyEncoded = abiCoder.encode(['address'], [tokenAddrBuy]);
-    const amountEncoded = abiCoder.encode(['uint256'], [amount.toString()]);
-
-    // eslint-disable-next-line max-len
-    const triggerData = await createOffchainPriceTrigger(targetPrice, goodUntil);
-    const strategySub = [strategyId, isBundle, [triggerData], [tokenAddrSellEncoded, tokenAddrBuyEncoded, amountEncoded]];
-    const subId = await subToStrategy(proxy, strategySub);
+    const { subId, strategySub } = await subToLimitOrderProxy(proxy, subInput, regAddr);
 
     return { subId, strategySub };
 };

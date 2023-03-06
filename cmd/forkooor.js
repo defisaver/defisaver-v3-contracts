@@ -1728,10 +1728,17 @@ const subLimitOrder = async (
         ? (await redeploy('LimitSell', addrs[network].REGISTRY_ADDR, false, true))
         : (await redeploy('LimitSellL2', addrs[network].REGISTRY_ADDR, false, true));
 
-    const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
+    // eslint-disable-next-line max-len
+    // const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
     await openStrategyAndBundleStorage(true);
 
-    const strategyId = await createStrategy(proxy, ...strategyData, false);
+    let strategyId = '46'; // await createStrategy(proxy, ...strategyData, false);
+
+    if (network !== 'mainnet') {
+        strategyId = '9';
+    }
+
+    await redeploy('LimitOrderSubProxy', addrs[network].REGISTRY_ADDR, false, true, strategyId);
 
     // format sub data
     const srcToken = getAssetInfo(srcTokenLabel);
@@ -1740,8 +1747,7 @@ const subLimitOrder = async (
     const amountInWei = hre.ethers.utils.parseUnits(srcAmount, srcToken.decimals);
     const targetPriceInWei = hre.ethers.utils.parseUnits(targetPrice, srcToken.decimals);
 
-    const latestBlock = await hre.ethers.provider.getBlock('latest');
-    const goodUntil = latestBlock.timestamp + (expireDays * 24 * 60 * 60);
+    const goodUntilDuration = expireDays * 24 * 60 * 60;
 
     // give token approval
     await approve(srcToken.address, proxy.address, senderAcc);
@@ -1753,8 +1759,8 @@ const subLimitOrder = async (
         destToken.address,
         amountInWei,
         targetPriceInWei,
-        goodUntil,
-        strategyId,
+        goodUntilDuration,
+        addrs[network].REGISTRY_ADDR,
     );
 
     console.log(`Limit order subed, subId ${subData.subId}`);

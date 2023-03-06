@@ -252,6 +252,34 @@ const subToMcdProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY
     };
 };
 
+const subToLimitOrderProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const limitOrderSubProxyAddr = await getAddrFromRegistry('LimitOrderSubProxy', regAddr);
+
+    const LimitOrderSubProxy = await hre.ethers.getContractFactory('LimitOrderSubProxy');
+    const functionData = LimitOrderSubProxy.interface.encodeFunctionData(
+        'subToLimitOrder',
+        inputData,
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](limitOrderSubProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const parsed = await receipt.wait();
+    const lastEvent = parsed.events.at(-1);
+
+    const abiCoder = hre.ethers.utils.defaultAbiCoder;
+    const strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], lastEvent.data)[0];
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToLimitOrderProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+
+    return { subId: latestSubId, strategySub };
+};
+
 const addBotCaller = async (
     botAddr,
     regAddr = addrs[network].REGISTRY_ADDR,
@@ -334,4 +362,5 @@ module.exports = {
     subToCBRebondProxy,
     getUpdatedStrategySub,
     subToMcdProxy,
+    subToLimitOrderProxy,
 };

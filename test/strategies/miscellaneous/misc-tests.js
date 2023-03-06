@@ -16,6 +16,7 @@ const {
     sendEther,
     getOwnerAddr,
     setBalance,
+    resetForkToBlock,
     addrs,
     chainIds,
 } = require('../../utils');
@@ -70,8 +71,11 @@ const limitOrderStrategyTest = async () => {
         let sellAmountWei;
         let tokenAddrSell;
         let tokenAddrBuy;
+        const goodUntilDuration = 24 * 60 * 60;
 
         before(async () => {
+            await resetForkToBlock(16728856);
+
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
 
@@ -97,6 +101,8 @@ const limitOrderStrategyTest = async () => {
             await openStrategyAndBundleStorage();
 
             strategyId = await createStrategy(proxy, ...strategyData, false);
+
+            await redeploy('LimitOrderSubProxy', addrs[getNetwork()].REGISTRY_ADDR, false, false, strategyId);
         });
 
         for (let i = 0; i < tokenPairs.length; i++) {
@@ -110,9 +116,6 @@ const limitOrderStrategyTest = async () => {
 
                 tokenAddrSell = srcToken.address;
                 tokenAddrBuy = destToken.address;
-
-                const latestBlock = await hre.ethers.provider.getBlock('latest');
-                const goodUntil = latestBlock.timestamp + 100000;
 
                 sellAmountWei = hre.ethers.utils.parseUnits(amount, srcToken.decimals);
 
@@ -134,8 +137,8 @@ const limitOrderStrategyTest = async () => {
                     tokenAddrBuy,
                     sellAmountWei,
                     targetPrice,
-                    goodUntil,
-                    strategyId,
+                    goodUntilDuration,
+                    addrs[getNetwork()].REGISTRY_ADDR,
                 ));
             });
 
