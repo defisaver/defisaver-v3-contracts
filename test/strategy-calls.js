@@ -1466,6 +1466,7 @@ const callLiquityBoostStrategy = async (
     strategySub,
     boostAmount,
     proxyAddr,
+    maxFeePercentage,
 ) => {
     const triggerCallData = [];
     const actionsCallData = [];
@@ -1476,7 +1477,7 @@ const callLiquityBoostStrategy = async (
     let { upperHint, lowerHint } = await findInsertPosition(collAmount, newDebtAmount);
 
     const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
-        '0', // &maxFeePercentage
+        maxFeePercentage,
         boostAmount,
         placeHolderAddr,
         upperHint,
@@ -1545,6 +1546,7 @@ const callLiquityFLBoostStrategy = async (
     boostAmount,
     proxyAddr,
     flAddr,
+    maxFeePercentage,
 ) => {
     const triggerCallData = [];
     const actionsCallData = [];
@@ -1593,7 +1595,7 @@ const callLiquityFLBoostStrategy = async (
 
     ({ upperHint, lowerHint } = await findInsertPosition(newCollAmount, newDebtAmount));
     const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
-        0, // maxFeePercentage set in subData
+        maxFeePercentage,
         0,
         flAddr,
         upperHint,
@@ -1635,6 +1637,7 @@ const callLiquityBigFLBoostStrategy = async (
     boostAmount,
     proxyAddr,
     flAddr,
+    maxFeePercentage,
 ) => {
     const triggerCallData = [];
     const actionsCallData = [];
@@ -1666,7 +1669,7 @@ const callLiquityBigFLBoostStrategy = async (
 
     ({ upperHint, lowerHint } = await findInsertPosition(newCollAmount, newDebtAmount));
     const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
-        0, // maxFeePercentage set in subData
+        maxFeePercentage,
         boostAmount,
         placeHolderAddr, // proxy
         upperHint,

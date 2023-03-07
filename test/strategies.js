@@ -947,13 +947,12 @@ const createLiquityBoostStrategy = () => {
     const liquityBoostStrategy = new dfs.Strategy('LiquityBoostStrategy');
     liquityBoostStrategy.addSubSlot('&ratioState', 'uint8');
     liquityBoostStrategy.addSubSlot('&targetRatio', 'uint256');
-    liquityBoostStrategy.addSubSlot('&maxFeePercentage', 'uint256');
 
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityBoostStrategy.addTrigger(liquityRatioTrigger);
 
     const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
-        '&maxFeePercentage',
+        '%maxFeePercentage',
         '%boostAmount',
         '&proxy',
         '%upperHint',
@@ -999,7 +998,6 @@ const createLiquityFLBoostStrategy = () => {
     const liquityFLBoostStrategy = new dfs.Strategy('LiquityFLBoostStrategy');
     liquityFLBoostStrategy.addSubSlot('&ratioState', 'uint8');
     liquityFLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
-    liquityFLBoostStrategy.addSubSlot('&maxFeePercentage', 'uint256');
 
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityFLBoostStrategy.addTrigger(liquityRatioTrigger);
@@ -1032,7 +1030,7 @@ const createLiquityFLBoostStrategy = () => {
     );
 
     const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
-        '&maxFeePercentage',
+        '%maxFeePercentage',
         '$1',
         '%flAddr',
         '%upperHint',
@@ -1057,7 +1055,6 @@ const createLiquityBigFLBoostStrategy = () => {
     const liquityBigFLBoostStrategy = new dfs.Strategy('LiquityBigFLBoostStrategy');
     liquityBigFLBoostStrategy.addSubSlot('&ratioState', 'uint8');
     liquityBigFLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
-    liquityBigFLBoostStrategy.addSubSlot('&maxFeePercentage', 'uint256');
 
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityBigFLBoostStrategy.addTrigger(liquityRatioTrigger);
@@ -1075,7 +1072,7 @@ const createLiquityBigFLBoostStrategy = () => {
     );
 
     const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
-        '&maxFeePercentage',
+        '%maxFeePercentage',
         '%boostAmount',
         '&proxy',
         '%upperHint',

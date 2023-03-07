@@ -326,15 +326,14 @@ const subReflexerRepayStrategy = async (proxy, safeId, ratioUnder, targetRatio, 
     return { subId, strategySub };
 };
 
-const subLiquityBoostStrategy = async (proxy, maxFeePercentage, ratioOver, targetRatio, bundleId) => {
+const subLiquityBoostStrategy = async (proxy, ratioOver, targetRatio, bundleId) => {
     const isBundle = true;
 
     const ratioState = abiCoder.encode(['uint8'], ['0']);
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
-    const maxFeePercentageEncoded = abiCoder.encode(['uint256'], [maxFeePercentage.toString()]);
 
     const triggerData = await createLiquityTrigger(proxy.address, ratioOver, RATIO_STATE_OVER);
-    const strategySub = [bundleId, isBundle, [triggerData], [ratioState, targetRatioEncoded, maxFeePercentageEncoded]];
+    const strategySub = [bundleId, isBundle, [triggerData], [ratioState, targetRatioEncoded]];
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };

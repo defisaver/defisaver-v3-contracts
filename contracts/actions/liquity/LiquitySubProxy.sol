@@ -29,7 +29,6 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelpe
         uint128 targetRatioBoost;
         uint128 targetRatioRepay;
         bool boostEnabled;
-        uint256 maxFeePercentage;
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
@@ -154,9 +153,8 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelpe
         boostSub.triggerData =  new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
-        boostSub.subData =  new bytes32[](3);
+        boostSub.subData =  new bytes32[](2);
         boostSub.subData[0] = bytes32(uint256(0)); // ratioState = boost
         boostSub.subData[1] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
-        boostSub.subData[2] = bytes32(_subData.maxFeePercentage);
     }
 }
