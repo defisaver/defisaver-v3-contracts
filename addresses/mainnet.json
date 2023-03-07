@@ -2131,6 +2131,17 @@
         "history": ["0xb460c044Cb2ECA74c713b8504Fe5aF360764b38d"]
     },
     {
+        "name": "LimitOrderSubProxy",
+        "address": "0x37434dcb2DC049c0068d4b8F95497311F44c5d9e",
+        "id": "0x82fc0e77",
+        "path": "contracts/actions/exchange/LimitOrderSubProxy.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompoundMonitorProxy",
         "address": "0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a",
         "path": "old_contracts"

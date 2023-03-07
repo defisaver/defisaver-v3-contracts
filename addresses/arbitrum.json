@@ -22,6 +22,17 @@
         "history": []
     },
     {
+      "name": "LimitOrderSubProxy",
+      "address": "0x43Af8734096941271eC637549661DCeA64052575",
+      "id": "0x82fc0e77",
+      "path": "contracts/actions/exchange/LimitOrderSubProxy.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
         "name": "AaveSubProxy",
         "address": "0x29a172f04CF9C6a79EdF4dD2744F2d260b8b8FE4",
         "id": "0xd11b2581",

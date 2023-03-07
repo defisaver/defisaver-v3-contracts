@@ -33,6 +33,17 @@
         "history": ["0x4D93E49B8989222571c2D171B988c5A3C04C6621"]
     },
     {
+      "name": "LimitOrderSubProxy",
+      "address": "0x11747a0821cF3300C8d9CF5Ac2405b545d623767",
+      "id": "0x82fc0e77",
+      "path": "contracts/actions/exchange/LimitOrderSubProxy.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
         "name": "ZrxAllowlist",
         "address": "0x52F6ae5aE5a8a6316c970d3a02C50b74c1a50bB8",
         "id": "0x0c33e794",
