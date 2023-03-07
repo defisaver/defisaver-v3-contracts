@@ -41,12 +41,11 @@ const {
 } = require('../../strategy-calls');
 
 const {
-    subLiquityBoostStrategy,
-    subLiquityRepayStrategy,
     subLiquityCloseToCollStrategy,
     subLiquityTrailingCloseToCollStrategy,
     subCbRebondStrategy,
     subLiquityCBPaybackStrategy,
+    subLiquityAutomation,
 } = require('../../strategy-subs');
 
 const {
@@ -107,7 +106,6 @@ const liquityBoostStrategyTest = async () => {
             await getContractFromRegistry('DFSSell');
             await getContractFromRegistry('GasFeeTaker');
             strategyExecutor = await getContractFromRegistry('StrategyExecutor');
-            // strategyExecutor = await redeployCore();
 
             liquityView = await getContractFromRegistry('LiquityView');
             await getContractFromRegistry('LiquityOpen');
@@ -149,10 +147,9 @@ const liquityBoostStrategyTest = async () => {
             const ratioOver = Float2BN(MAX_RATIO);
             const targetRatio = Float2BN(TARGET_BOOST);
 
-            console.log(bundleId);
+            await getContractFromRegistry('LiquitySubProxy', undefined, undefined, undefined, '0', bundleId);
+            ({ boostSubId: subId, boostSub: strategySub } = await subLiquityAutomation(proxy, '0', ratioOver, targetRatio, '0', true));
 
-            // eslint-disable-next-line max-len
-            ({ subId, strategySub } = await subLiquityBoostStrategy(proxy, ratioOver, targetRatio, bundleId));
             snapshotId = await takeSnapshot();
         });
 
@@ -238,7 +235,6 @@ const liquityRepayStrategyTest = async () => {
             console.log(proxyAddr);
 
             strategyExecutor = await getContractFromRegistry('StrategyExecutor');
-            // strategyExecutor = await redeployCore();
 
             balancerFL = await getContractFromRegistry('FLBalancer');
 
@@ -283,8 +279,9 @@ const liquityRepayStrategyTest = async () => {
             const ratioUnder = Float2BN(MIN_RATIO);
             const targetRatio = Float2BN(TARGET_REPAY);
 
-            // eslint-disable-next-line max-len
-            ({ subId, strategySub } = await subLiquityRepayStrategy(proxy, ratioUnder, targetRatio, bundleId));
+            await getContractFromRegistry('LiquitySubProxy', undefined, undefined, undefined, bundleId, '0');
+            ({ repaySubId: subId, repaySub: strategySub } = await subLiquityAutomation(proxy, ratioUnder, '0', '0', targetRatio, false));
+
             snapshotId = await takeSnapshot();
         });
 

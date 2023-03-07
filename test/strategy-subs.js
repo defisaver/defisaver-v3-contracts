@@ -6,6 +6,7 @@ const {
     subToCompV3Proxy,
     subToCBRebondProxy,
     subToMorphoAaveV2Proxy,
+    subToLiquityProxy,
 } = require('./utils-strategies');
 
 const {
@@ -482,6 +483,38 @@ const subMorphoAaveV2RepayStrategy = async ({
     return { subId, strategySub };
 };
 
+const subLiquityAutomationStrategy = async (
+    proxy,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    regAddr = REGISTRY_ADDR,
+) => {
+    const subInput = [[minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled]];
+
+    const { latestSubId: subId, repaySub, boostSub } = await subToLiquityProxy(proxy, subInput, regAddr);
+
+    let repaySubId = '0';
+    let boostSubId = '0';
+
+    if (boostEnabled) {
+        repaySubId = (parseInt(subId, 10) - 1).toString();
+        boostSubId = subId;
+    } else {
+        repaySubId = subId;
+        boostSubId = '0';
+    }
+
+    return {
+        repaySubId,
+        boostSubId,
+        repaySub,
+        boostSub,
+    };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdRepayStrategy,
@@ -508,4 +541,5 @@ module.exports = {
     subMorphoAaveV2BoostStrategy,
     subMorphoAaveV2RepayStrategy,
     subMorphoAaveV2AutomationStrategy,
+    subLiquityAutomationStrategy,
 };
