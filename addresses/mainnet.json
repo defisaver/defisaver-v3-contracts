@@ -437,7 +437,10 @@
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0x74368A4a3892349837F198795CDaA12CB0B66763", "0xC5379a785a7cE010f54c35484d83FA7f462f8a3B"]
+        "history": [
+            "0x74368A4a3892349837F198795CDaA12CB0B66763",
+            "0xC5379a785a7cE010f54c35484d83FA7f462f8a3B"
+        ]
     },
     {
         "name": "CBRebondSubProxy",
@@ -503,9 +506,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0x4D81E17ce35A81b70b2E5eD4a0592e1C2C01219d"
-        ]
+        "history": ["0x4D81E17ce35A81b70b2E5eD4a0592e1C2C01219d"]
     },
     {
         "name": "CompV3View",
@@ -572,7 +573,7 @@
         "changeTime": "0",
         "registryIds": [],
         "history": []
-      },
+    },
     {
         "name": "SubStorage",
         "address": "0x1612fc28Ee0AB882eC99842Cde0Fc77ff0691e90",
@@ -772,7 +773,10 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x1abDDCae131ce200e66140d9fBd0C37F7a40e642", "0xB744474Bdd7226736ACa4Ba87593e32d8315e5c9"]
+        "history": [
+            "0x1abDDCae131ce200e66140d9fBd0C37F7a40e642",
+            "0xB744474Bdd7226736ACa4Ba87593e32d8315e5c9"
+        ]
     },
     {
         "name": "McdGenerate",
@@ -1028,6 +1032,160 @@
         "history": []
     },
     {
+        "name": "AaveV3Supply",
+        "address": "0x2d10281757ca0a716311A6C5eb456A098cD14Cd7",
+        "id": "0xfc33bf00",
+        "path": "contracts/actions/aaveV3/AaveV3Supply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3ATokenPayback",
+        "address": "0xDe5c012cd1878D86E91309593764895a3adb380E",
+        "id": "0x62c722e3",
+        "path": "contracts/actions/aaveV3/AaveV3ATokenPayback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3Borrow",
+        "address": "0x7079ba1Bd00EeFCD2a260BbD6D088230505e3858",
+        "id": "0x9e9290b1",
+        "path": "contracts/actions/aaveV3/AaveV3Borrow.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": ["0x4d3F58460aE2bC71fFaeb33838BFA3b5610083Db"]
+    },
+    {
+        "name": "AaveV3ClaimRewards",
+        "address": "0x998A2E9aaE03c11b7A9863C1F59c42A21fcf47D0",
+        "id": "0x3c4556e9",
+        "path": "contracts/actions/aaveV3/AaveV3ClaimRewards.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+      },
+    {
+        "name": "AaveV3CollateralSwitch",
+        "address": "0x54A4d6cB567B2C6CDe4687c361b24fd912695DAb",
+        "id": "0xbffa4e35",
+        "path": "contracts/actions/aaveV3/AaveV3CollateralSwitch.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3Payback",
+        "address": "0xe29265217D65F5a2ae41972E09C13E107D049004",
+        "id": "0x17683e81",
+        "path": "contracts/actions/aaveV3/AaveV3Payback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3SetEMode",
+        "address": "0xBe7F735d7955e0461579E34266f41F928AE06D78",
+        "id": "0x3d35d254",
+        "path": "contracts/actions/aaveV3/AaveV3SetEMode.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3SwapBorrowRateMode",
+        "address": "0x630F530Ac523C935cf2528E62D0A06F8900C5b1B",
+        "id": "0xd5baf3f8",
+        "path": "contracts/actions/aaveV3/AaveV3SwapBorrowRateMode.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3Withdraw",
+        "address": "0x9D4e4b26A5E2e6Dad30C5d95F5cE78A8310F04C2",
+        "id": "0x72a6498a",
+        "path": "contracts/actions/aaveV3/AaveV3Withdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3QuotePriceTrigger",
+        "address": "0xc8c5c66c9f147d3F6a47733D468912967616c3F7",
+        "id": "0xda3df4c8",
+        "path": "contracts/triggers/AaveV3QuotePriceTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FLAaveV3",
+        "address": "0xd9D8e68717Ce24CCbf162868aaad7E38d81b05d1",
+        "id": "0x8d7fb192",
+        "path": "contracts/actions/flashloan/FLAaveV3.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3RatioTrigger",
+        "address": "0xC1b97aB9eF18EeE338a381c6f74470AA5C567283",
+        "id": "0x21a42a26",
+        "path": "contracts/triggers/AaveV3RatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3RatioCheck",
+        "address": "0x8a975A9fB0d77b8d9e7E1694CC868e704D0Ef0fD",
+        "id": "0x71ef3d4e",
+        "path": "contracts/actions/checkers/AaveV3RatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3View",
+        "address": "0xf4B715BB788cC4071061bd67dC8B56681460A2fF",
+        "id": "0x026c569e",
+        "path": "contracts/views/AaveV3View.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompBorrow",
         "address": "0x8495579BF6Ae848f7E59686536F834f1d2CCd79C",
         "id": "0x82875a6c",
@@ -1113,7 +1271,10 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0xa4d52ED15018a5be4adE5796899e5d75cc8759C1", "0x6fE6B0eeeeC7B05d663A99C0805E1A18FbdC6E59"]
+        "history": [
+            "0xa4d52ED15018a5be4adE5796899e5d75cc8759C1",
+            "0x6fE6B0eeeeC7B05d663A99C0805E1A18FbdC6E59"
+        ]
     },
     {
         "name": "FLDyDx",
@@ -1135,7 +1296,10 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x5DCf600C35ae2752A8a11eB7C489EF3D93126fB4", "0xd393582bE148A45585aB202Fa7Cc789Fa5127223"]
+        "history": [
+            "0x5DCf600C35ae2752A8a11eB7C489EF3D93126fB4",
+            "0xd393582bE148A45585aB202Fa7Cc789Fa5127223"
+        ]
     },
     {
         "name": "FLBalancer",
@@ -1620,7 +1784,7 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
-        "registryIds": [{"name": "StrategyExecutorID", "id": "0x0c1dc439"}],
+        "registryIds": [{ "name": "StrategyExecutorID", "id": "0x0c1dc439" }],
         "history": []
     },
     {
@@ -1632,7 +1796,10 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0xb14226c3FD41e9B1FF85b4f7144CB4096a5D1Ec9", "0xe3457797c543AD91bd36023d2EE600305ee89195"]
+        "history": [
+            "0xb14226c3FD41e9B1FF85b4f7144CB4096a5D1Ec9",
+            "0xe3457797c543AD91bd36023d2EE600305ee89195"
+        ]
     },
     {
         "name": "CompoundRatioTrigger",
@@ -1784,7 +1951,7 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
-        "registryIds": [{"name": "CompPaybackNew", "id": "0x9ea2a2cc"}],
+        "registryIds": [{ "name": "CompPaybackNew", "id": "0x9ea2a2cc" }],
         "history": []
     },
     {

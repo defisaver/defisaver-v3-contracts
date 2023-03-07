@@ -26,7 +26,7 @@
         "address": "0x9E8aE909Af8A391b58f45819f0d36e4256991D19",
         "id": "0xd11b2581",
         "path": "contracts/core/l2/AaveSubProxy.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
@@ -155,14 +155,14 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
+        "address": "0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4"]
     },
     {
         "name": "ERC20View",
