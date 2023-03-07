@@ -231,6 +231,17 @@
       "history": ["0x49E1574Ba6b8134c29B1EbC010784A01D91b794F"]
     },
     {
+      "name": "LimitSellL2",
+      "address": "0xC941B49Aaa9743a5EA4Ccd60Bf9a980861bA5201",
+      "id": "0x5cc47139",
+      "path": "contracts/actions/exchange/LimitSellL2.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "WrapEth",
       "address": "0x35136b25bFA7CCC8f5b94E3181a16B61c06980F0",
       "id": "0x11135183",
@@ -557,6 +568,17 @@
       "address": "0x4E7a0c9AD860248A1e4a7C6e7729207908a8B8C7",
       "id": "0xa051d9a9",
       "path": "contracts/triggers/TimestampTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "OffchainPriceTrigger",
+      "address": "0x846087C427d3637199c2b76A80c6BAA7666919c0",
+      "id": "0x3ef9c07c",
+      "path": "contracts/triggers/OffchainPriceTrigger.sol",
       "version": "1.0.0",
       "inRegistry": true,
       "changeTime": "86400",

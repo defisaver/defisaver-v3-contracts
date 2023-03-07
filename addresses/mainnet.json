@@ -779,6 +779,17 @@
         ]
     },
     {
+        "name": "LimitSell",
+        "address": "0x555C5B5d3e49ae015d5dA5C0476f984386e906BD",
+        "id": "0x8c712c04",
+        "path": "contracts/actions/exchange/LimitSell.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "McdGenerate",
         "address": "0xCb50a91C0f12f439b8bf11E9474B9c1ED62Bf7a3",
         "id": "0xad463b00",
@@ -1992,6 +2003,17 @@
         "address": "0x9D6bDFd3c565C146F6676F710B8Ee957139349FA",
         "id": "0xa051d9a9",
         "path": "contracts/triggers/TimestampTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "OffchainPriceTrigger",
+        "address": "0x052761E045260F82f8f2B09063Bfae2299487797",
+        "id": "0x3ef9c07c",
+        "path": "contracts/triggers/OffchainPriceTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
