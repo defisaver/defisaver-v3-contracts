@@ -1914,7 +1914,7 @@ const subLimitOrder = async (
     // const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
     await openStrategyAndBundleStorage(true);
 
-    let strategyId = '46'; // await createStrategy(proxy, ...strategyData, false);
+    let strategyId = '51'; // await createStrategy(proxy, ...strategyData, false);
 
     if (network !== 'mainnet') {
         strategyId = '9';
