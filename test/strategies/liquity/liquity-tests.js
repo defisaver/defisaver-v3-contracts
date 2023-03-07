@@ -1,4 +1,4 @@
-const hre = require('hardhat');
+const { ethers } = require('hardhat');
 const { expect } = require('chai');
 
 const {
@@ -22,6 +22,7 @@ const {
     setNewExchangeWrapper,
     takeSnapshot,
     revertToSnapshot,
+    getContractFromRegistry,
 } = require('../../utils');
 
 const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
@@ -36,6 +37,7 @@ const {
     callLiquityCloseToCollStrategy,
     callLiquityPaybackChickenOutStrategy,
     callLiquityPaybackChickenInStrategy,
+    callLiquityBigFLBoostStrategy,
 } = require('../../strategy-calls');
 
 const {
@@ -55,11 +57,26 @@ const {
     createLiquityCloseToCollStrategy,
     createLiquityPaybackChickenInStrategy,
     createLiquityPaybackChickenOutStrategy,
+    createLiquityBigFLBoostStrategy,
 } = require('../../strategies');
 
 const { RATIO_STATE_OVER } = require('../../triggers');
 
 const { liquityOpen, createChickenBond } = require('../../actions');
+
+const BLOCKS_PER_6H = 1662;
+
+const MAX_FEE_PERCENTAGE = Float2BN('5', 16);
+const COLL_OPEN_AMOUNT_USD = '30000';
+const DEBT_OPEN_AMOUNT_USD = '12000';
+
+const BOOST_AMOUNT_USD = '2000';
+const REPAY_AMOUNT_USD = '2000';
+
+const MAX_RATIO = '2.3';
+const TARGET_BOOST = '2';
+const MIN_RATIO = '2.7';
+const TARGET_REPAY = '3';
 
 const liquityBoostStrategyTest = async () => {
     describe('Liquity-Boost-Bundle', function () {
@@ -75,39 +92,42 @@ const liquityBoostStrategyTest = async () => {
         let subId;
         let liquityView;
         let strategySub;
-
-        const maxFeePercentage = Float2BN('5', 16);
-        const collAmount = Float2BN(fetchAmountinUSDPrice('WETH', '30000'));
+        let snapshotId;
 
         before(async () => {
-            await resetForkToBlock(14430140);
+            await ethers.provider.getBlockNumber()
+                .then((e) => resetForkToBlock(Math.floor(e / BLOCKS_PER_6H) * BLOCKS_PER_6H));
 
-            senderAcc = (await hre.ethers.getSigners())[0];
+            senderAcc = (await ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             proxyAddr = proxy.address;
-            botAcc = (await hre.ethers.getSigners())[1];
+            botAcc = (await ethers.getSigners())[1];
 
-            balancerFL = await redeploy('FLBalancer');
-            await redeploy('DFSSell');
-            await redeploy('GasFeeTaker');
-            strategyExecutor = await redeployCore();
+            balancerFL = await getContractFromRegistry('FLBalancer');
+            await getContractFromRegistry('DFSSell');
+            await getContractFromRegistry('GasFeeTaker');
+            strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+            // strategyExecutor = await redeployCore();
 
-            liquityView = await redeploy('LiquityView');
-            await redeploy('LiquityOpen');
-            await redeploy('LiquitySupply');
-            await redeploy('LiquityBorrow');
+            liquityView = await getContractFromRegistry('LiquityView');
+            await getContractFromRegistry('LiquityOpen');
+            await getContractFromRegistry('LiquitySupply');
+            await getContractFromRegistry('LiquityBorrow');
             await redeploy('LiquityRatioTrigger');
+            await getContractFromRegistry('LiquityRatioCheck');
 
             await addBotCaller(botAcc.address);
 
+            const collAmount = Float2BN(fetchAmountinUSDPrice('WETH', COLL_OPEN_AMOUNT_USD));
+            const debtAmount = Float2BN(fetchAmountinUSDPrice('LUSD', DEBT_OPEN_AMOUNT_USD));
             await depositToWeth(collAmount);
             await send(WETH_ADDRESS, proxyAddr, collAmount);
 
             await liquityOpen(
                 proxy,
-                maxFeePercentage,
+                MAX_FEE_PERCENTAGE,
                 collAmount,
-                Float2BN(fetchAmountinUSDPrice('LUSD', '12000')),
+                debtAmount,
                 proxyAddr,
                 proxyAddr,
             );
@@ -116,27 +136,30 @@ const liquityBoostStrategyTest = async () => {
         it('... should make a Liquity Boost bundle and subscribe', async () => {
             const liquityBoostStrategy = createLiquityBoostStrategy();
             const liquityFLBoostStrategy = createLiquityFLBoostStrategy();
+            const liquityBigFLBoostStrategy = createLiquityBigFLBoostStrategy();
 
             await openStrategyAndBundleStorage();
 
             const strategyId1 = await createStrategy(proxy, ...liquityBoostStrategy, true);
             const strategyId2 = await createStrategy(proxy, ...liquityFLBoostStrategy, true);
+            const strategyId3 = await createStrategy(proxy, ...liquityBigFLBoostStrategy, true);
 
-            const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+            const bundleId = await createBundle(proxy, [strategyId1, strategyId2, strategyId3]);
 
-            const ratioOver = Float2BN('1.8');
-            const targetRatio = Float2BN('1.5');
+            const ratioOver = Float2BN(MAX_RATIO);
+            const targetRatio = Float2BN(TARGET_BOOST);
 
             console.log(bundleId);
 
             // eslint-disable-next-line max-len
-            ({ subId, strategySub } = await subLiquityBoostStrategy(proxy, maxFeePercentage, ratioOver, targetRatio, bundleId));
+            ({ subId, strategySub } = await subLiquityBoostStrategy(proxy, MAX_FEE_PERCENTAGE, ratioOver, targetRatio, bundleId));
+            snapshotId = await takeSnapshot();
         });
 
         it('... should trigger a Liquity Boost strategy', async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
 
-            const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', '5000'));
+            const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', BOOST_AMOUNT_USD));
 
             // eslint-disable-next-line max-len
             await callLiquityBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr);
@@ -148,14 +171,33 @@ const liquityBoostStrategyTest = async () => {
             );
 
             expect(ratioBefore).to.be.gt(ratioAfter);
+            await revertToSnapshot(snapshotId);
+            snapshotId = await takeSnapshot();
         });
 
         it('... should trigger a Liquity FL Boost strategy', async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
-            const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', '2000'));
+            const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', BOOST_AMOUNT_USD));
 
             // eslint-disable-next-line max-len
             await callLiquityFLBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr, balancerFL.address);
+
+            const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
+
+            console.log(
+                `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+            );
+
+            expect(ratioBefore).to.be.gt(ratioAfter);
+            await revertToSnapshot(snapshotId);
+        });
+
+        it('... should trigger a Liquity BigFL Boost strategy', async () => {
+            const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
+            const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', BOOST_AMOUNT_USD));
+
+            // eslint-disable-next-line max-len
+            await callLiquityBigFLBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr, balancerFL.address);
 
             const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 
@@ -182,45 +224,46 @@ const liquityRepayStrategyTest = async () => {
         let subId;
         let liquityView;
         let strategySub;
-
-        const maxFeePercentage = Float2BN('5', 16);
-        const collAmount = Float2BN(fetchAmountinUSDPrice('WETH', '30000'));
+        let snapshotId;
 
         before(async () => {
-            await resetForkToBlock(14430140);
+            await ethers.provider.getBlockNumber()
+                .then((e) => resetForkToBlock(Math.floor(e / BLOCKS_PER_6H) * BLOCKS_PER_6H));
 
-            senderAcc = (await hre.ethers.getSigners())[0];
+            senderAcc = (await ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             proxyAddr = proxy.address;
-            botAcc = (await hre.ethers.getSigners())[1];
+            botAcc = (await ethers.getSigners())[1];
 
             console.log(proxyAddr);
 
-            strategyExecutor = await redeployCore();
+            strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+            // strategyExecutor = await redeployCore();
 
-            balancerFL = await redeploy('FLBalancer');
+            balancerFL = await getContractFromRegistry('FLBalancer');
 
-            await redeploy('DFSSell');
-            await redeploy('GasFeeTaker');
+            await getContractFromRegistry('DFSSell');
+            await getContractFromRegistry('GasFeeTaker');
 
-            liquityView = await redeploy('LiquityView');
-            await redeploy('LiquityOpen');
-            await redeploy('LiquityWithdraw');
-            await redeploy('LiquityPayback');
+            liquityView = await getContractFromRegistry('LiquityView');
+            await getContractFromRegistry('LiquityOpen');
+            await getContractFromRegistry('LiquityWithdraw');
+            await getContractFromRegistry('LiquityPayback');
             await redeploy('LiquityRatioTrigger');
+            await getContractFromRegistry('LiquityRatioCheck');
 
             await addBotCaller(botAcc.address);
 
+            const collAmount = Float2BN(fetchAmountinUSDPrice('WETH', COLL_OPEN_AMOUNT_USD));
+            const debtAmount = Float2BN(fetchAmountinUSDPrice('LUSD', DEBT_OPEN_AMOUNT_USD));
             await depositToWeth(collAmount);
             await send(WETH_ADDRESS, proxyAddr, collAmount);
 
-            console.log('val: ', Float2BN(fetchAmountinUSDPrice('LUSD', '12000')));
-
             await liquityOpen(
                 proxy,
-                maxFeePercentage,
+                MAX_FEE_PERCENTAGE,
                 collAmount,
-                Float2BN(fetchAmountinUSDPrice('LUSD', '12000')),
+                debtAmount,
                 proxyAddr,
                 proxyAddr,
             );
@@ -237,16 +280,17 @@ const liquityRepayStrategyTest = async () => {
 
             const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
 
-            const ratioUnder = Float2BN('3');
-            const targetRatio = Float2BN('3');
+            const ratioUnder = Float2BN(MIN_RATIO);
+            const targetRatio = Float2BN(TARGET_REPAY);
 
             // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subLiquityRepayStrategy(proxy, ratioUnder, targetRatio, bundleId));
+            snapshotId = await takeSnapshot();
         });
 
         it('... should trigger a Liquity Repay strategy', async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
-            const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', '1000'));
+            const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', REPAY_AMOUNT_USD));
 
             // eslint-disable-next-line max-len
             await callLiquityRepayStrategy(botAcc, strategyExecutor, subId, strategySub, repayAmount, proxyAddr);
@@ -258,11 +302,12 @@ const liquityRepayStrategyTest = async () => {
             );
 
             expect(ratioBefore).to.be.lt(ratioAfter);
+            await revertToSnapshot(snapshotId);
         });
 
         it('... should trigger a Liquity FL Repay strategy', async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
-            const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', '1000'));
+            const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', REPAY_AMOUNT_USD));
 
             // eslint-disable-next-line max-len
             await callLiquityFLRepayStrategy(botAcc, strategyExecutor, subId, strategySub, repayAmount, proxyAddr, balancerFL.address);
@@ -302,7 +347,7 @@ const liquityCBPaybackTest = async () => {
         let upperHintHalf;
         let lowerHintHalf;
         const ratioUnder = Float2BN('3');
-        const maxFeePercentage = Float2BN('5', 16);
+
         const lusdDebt = '10000';
         const lusdDebtHalf = (lusdDebt / 2).toString();
         const troveAmount = Float2BN(fetchAmountinUSDPrice('WETH', '20000'));
@@ -310,10 +355,10 @@ const liquityCBPaybackTest = async () => {
 
         before(async () => {
             await resetForkToBlock(forkedBlock);
-            senderAcc = (await hre.ethers.getSigners())[0];
+            senderAcc = (await ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             proxyAddr = proxy.address;
-            botAcc = (await hre.ethers.getSigners())[1];
+            botAcc = (await ethers.getSigners())[1];
 
             console.log(proxyAddr);
 
@@ -347,7 +392,7 @@ const liquityCBPaybackTest = async () => {
 
             await liquityOpen(
                 proxy,
-                maxFeePercentage,
+                MAX_FEE_PERCENTAGE,
                 troveAmount,
                 Float2BN(lusdDebt),
                 proxyAddr,
@@ -596,7 +641,6 @@ const liquityCloseToCollStrategyTest = async () => {
         let strategySub;
         let mockedPriceFeed;
 
-        const maxFeePercentage = Float2BN('5', 16);
         const lusdDebt = '12000';
         const troveAmount = Float2BN(fetchAmountinUSDPrice('WETH', '30000'));
         const forkedBlock = 15313530; // doing this to optimize hints fetching
@@ -604,10 +648,10 @@ const liquityCloseToCollStrategyTest = async () => {
         before(async () => {
             await resetForkToBlock(forkedBlock);
 
-            senderAcc = (await hre.ethers.getSigners())[0];
+            senderAcc = (await ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             proxyAddr = proxy.address;
-            botAcc = (await hre.ethers.getSigners())[1];
+            botAcc = (await ethers.getSigners())[1];
 
             console.log(proxyAddr);
 
@@ -637,7 +681,7 @@ const liquityCloseToCollStrategyTest = async () => {
 
             await liquityOpen(
                 proxy,
-                maxFeePercentage,
+                MAX_FEE_PERCENTAGE,
                 troveAmount,
                 Float2BN(lusdDebt),
                 proxyAddr,
@@ -718,7 +762,7 @@ const liquityCloseToCollStrategyTest = async () => {
 
             await liquityOpen(
                 proxy,
-                maxFeePercentage,
+                MAX_FEE_PERCENTAGE,
                 troveAmount,
                 Float2BN(lusdDebt),
                 proxyAddr,
