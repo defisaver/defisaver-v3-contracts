@@ -19,12 +19,15 @@ contract LimitOrderSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHe
         LIMIT_ORDER_ID = _limitOrderId;
     }
 
+    enum OrderType { TAKE_PROFIT, STOP_LOSS }
+
     struct LimitOrderSub {
         address tokenSellAddr; // erc20 sell token address
         address tokenBuyAddr; // erc20 buy token address
         uint256 amount; // amount in wei we are selling
         uint256 limitPrice; // price of execution, minimal price we are willing to accept
         uint256 goodUntilDuration; // amount of time in seconds that the order is valid for
+        OrderType orderType; // type of order, take profit or stop loss
     }
 
     function subToLimitOrder(LimitOrderSub memory _subData) external {
@@ -43,7 +46,7 @@ contract LimitOrderSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHe
 
         uint256 goodUntilTimestamp = block.timestamp + _subData.goodUntilDuration;
 
-        bytes memory triggerData = abi.encode(_subData.limitPrice, goodUntilTimestamp);
+        bytes memory triggerData = abi.encode(_subData.limitPrice, goodUntilTimestamp, _subData.orderType);
         limitOrderSub.triggerData =  new bytes[](1);
         limitOrderSub.triggerData[0] = triggerData;
 

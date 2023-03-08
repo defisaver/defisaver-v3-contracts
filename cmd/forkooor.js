@@ -1868,6 +1868,7 @@ const subLimitOrder = async (
     srcAmount,
     targetPrice,
     expireDays,
+    orderType,
     sender,
 ) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
@@ -1934,6 +1935,14 @@ const subLimitOrder = async (
     // give token approval
     await approve(srcToken.address, proxy.address, senderAcc);
 
+    let orderTypeFormatted;
+
+    if (orderType.toLowerCase() === 'take_profit') {
+        orderTypeFormatted = 0;
+    } else if (orderType.toLowerCase() === 'stop_loss') {
+        orderTypeFormatted = 1;
+    }
+
     // sub
     const subData = await subLimitOrderStrategy(
         proxy,
@@ -1942,6 +1951,7 @@ const subLimitOrder = async (
         amountInWei,
         targetPriceInWei,
         goodUntilDuration,
+        orderTypeFormatted,
         addrs[network].REGISTRY_ADDR,
     );
 
@@ -2808,12 +2818,12 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
         });
 
     program
-        .command('sub-limit-order <srcTokenLabel> <destTokenLabel> <srcAmount> <targetPrice> <expireDays> [senderAddr]')
+        .command('sub-limit-order <srcTokenLabel> <destTokenLabel> <srcAmount> <targetPrice> <expireDays> <orderType> [senderAddr]')
         .description('Subscribes to a limit order')
         // eslint-disable-next-line max-len
-        .action(async (srcTokenLabel, destTokenLabel, srcAmount, targetPrice, expireDays, senderAddr) => {
+        .action(async (srcTokenLabel, destTokenLabel, srcAmount, targetPrice, expireDays, orderType, senderAddr) => {
             // eslint-disable-next-line max-len
-            await subLimitOrder(srcTokenLabel, destTokenLabel, srcAmount, targetPrice, expireDays, senderAddr);
+            await subLimitOrder(srcTokenLabel, destTokenLabel, srcAmount, targetPrice, expireDays, orderType, senderAddr);
         });
 
     program

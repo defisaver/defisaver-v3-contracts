@@ -279,8 +279,8 @@ const subLiquityTrailingCloseToCollStrategy = async (proxy, percentage, roundId,
 };
 
 // eslint-disable-next-line max-len
-const subLimitOrderStrategy = async (proxy, tokenAddrSell, tokenAddrBuy, amount, targetPrice, goodUntilDuration, regAddr = REGISTRY_ADDR) => {
-    const subInput = [[tokenAddrSell, tokenAddrBuy, amount, targetPrice, goodUntilDuration]];
+const subLimitOrderStrategy = async (proxy, tokenAddrSell, tokenAddrBuy, amount, targetPrice, goodUntilDuration, orderType, regAddr = REGISTRY_ADDR) => {
+    const subInput = [[tokenAddrSell, tokenAddrBuy, amount, targetPrice, goodUntilDuration, orderType]];
 
     const { subId, strategySub } = await subToLimitOrderProxy(proxy, subInput, regAddr);
 
