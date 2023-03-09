@@ -84,11 +84,8 @@ contract LiquityAdjust is ActionBase, LiquityHelper {
         uint supplyAmount = 0;
 
         if (_params.collChange == CollChange.SUPPLY) {
-            if (_params.collAmount == type(uint256).max) {
-                _params.collAmount = TokenUtils.WETH_ADDR.getBalance(_params.from);
-            }
-
-            TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.collAmount);
+            // max.uint handled in pull tokens
+            _params.collAmount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.collAmount);
             TokenUtils.withdrawWeth(_params.collAmount);
 
             supplyAmount = _params.collAmount;
@@ -128,7 +125,7 @@ contract LiquityAdjust is ActionBase, LiquityHelper {
             LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, _params.lusdAmount);
         }
 
-        bytes memory logData = abi.encode(_params.maxFeePercentage, _params.lusdAmount, _params.to);
+        bytes memory logData = abi.encode(_params);
         return (_params.lusdAmount, logData);
     }
 
