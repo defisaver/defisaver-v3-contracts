@@ -1522,6 +1522,17 @@
         "history": []
     },
     {
+        "name": "LiquityAdjust",
+        "address": "0x0A398f6B97677192A5d5e7Ea8A937383FFf9304c",
+        "id": "0xe4562a9c",
+        "path": "contracts/actions/liquity/trove/LiquityAdjust.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "LiquitySPDeposit",
         "address": "0x5aB0244a00a733f16E6b238B462bdF3538C698E1",
         "id": "0x78b3246a",
