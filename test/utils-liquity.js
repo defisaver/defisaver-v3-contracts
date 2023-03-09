@@ -55,7 +55,7 @@ const prefetchedHints = {
     },
 };
 
-const getHints = async (troveOwner, actionId, from, collAmount, LUSDamount) => {
+const getHints = async (troveOwner, actionId, from, collAmount, LUSDamount, actionId2) => {
     const blockNum = hre.ethers.provider.blockNumber;
     const paramsSerialized = JSON.stringify(
         {
@@ -71,8 +71,18 @@ const getHints = async (troveOwner, actionId, from, collAmount, LUSDamount) => {
 
     if (hints !== undefined) return hints;
 
-    const liquityView = await hre.ethers.getContractAt('LiquityView', getAddrFromRegistry('LiquityView'));
-    const NICR = await liquityView['predictNICR(address,uint8,address,uint256,uint256)'](troveOwner, actionId, from, collAmount, LUSDamount);
+    const liquityView = await hre.ethers.getContractAt('LiquityView', (await getAddrFromRegistry('LiquityView')));
+
+    let NICR = 0;
+
+    if (actionId2 !== undefined) {
+        NICR = await liquityView['predictNICRForAdjust(address,uint8,uint8,address,uint256,uint256)'](troveOwner, actionId, actionId2, from, collAmount, LUSDamount);
+    } else {
+        NICR = await liquityView['predictNICR(address,uint8,address,uint256,uint256)'](troveOwner, actionId, from, collAmount, LUSDamount);
+    }
+
+    console.log('NICR: ', NICR.toString());
+
     const approxHint = (await liquityView['getApproxHint(uint256,uint256,uint256)'](NICR, 20, 42)).hintAddress;
     hints = await liquityView['findInsertPosition(uint256,address,address)'](NICR, approxHint, approxHint);
 

@@ -5,13 +5,14 @@ const {
     balanceOf,
     getProxy,
     redeploy,
-    WETH_ADDRESS,
     Float2BN,
     BN2Float,
     setBalance,
     approve,
     resetForkToBlock,
     fetchAmountinUSDPrice,
+    MAX_UINT,
+    WETH_ADDRESS,
 } = require('../utils');
 
 const {
@@ -21,6 +22,7 @@ const {
     liquityWithdraw,
     liquityPayback,
     liquityClose,
+    liquityAdjust,
 
     liquitySPDeposit,
     liquitySPWithdraw,
@@ -30,12 +32,12 @@ const {
     liquityUnstake,
 
     liquityRedeem,
-} = require('../actions.js');
+} = require('../actions');
 
 const lusdAddr = getAssetInfo('LUSD').address;
 const lqtyAddr = getAssetInfo('LQTY').address;
 
-const wethAmountTotalValue = 20000;
+const wethAmountTotalValue = 100000;
 const collAmountOpenValue = 12000;
 const collAmountSupplyValue = 4000;
 const collAmountWithdrawValue = 4000;
@@ -53,6 +55,11 @@ const lusdAmountWithdraw = Float2BN('4000', 18);
 const lqtyAmountTotal = Float2BN(fetchAmountinUSDPrice('LQTY', 10000), 18);
 const lqtyAmountStake = Float2BN(fetchAmountinUSDPrice('LQTY', 6000), 18);
 const lqtyAmountUnstake = Float2BN(fetchAmountinUSDPrice('LQTY', 5000), 18);
+
+const lqtyMinDebt = Float2BN('2000');
+
+const collChangeId  = { SUPPLY: 0, WITHDRAW: 1 };
+const debtChangeId = { PAYBACK: 0, BORROW: 1 };
 
 const lusdAmountRedeem = Float2BN('4000', 18);
 
@@ -882,6 +889,221 @@ const liquityRedeemTest = async () => {
     });
 };
 
+const liquityAdjustTest = async () => {
+    describe('Liquity-Adjust', function () {
+        this.timeout(1000000);
+
+        let wethAmountTotal;
+        let collAmountOpen;
+        let collAmountSupply;
+        let debtAmountGenerate;
+        let debtAmountPayback;
+        let collAmountWithdraw;
+
+        let senderAcc; let senderAddr;
+        let proxy; let proxyAddr;
+        let liquityView;
+
+        before(async () => {
+            await resetForkToBlock(forkBlokNum);
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            senderAddr = senderAcc.address;
+            proxy = await getProxy(senderAcc.address);
+            proxyAddr = proxy.address;
+
+            liquityView = await redeploy('LiquityView');
+            await redeploy('LiquityOpen');
+            await redeploy('LiquitySupply');
+            await redeploy('LiquityAdjust');
+
+            const priceFeed = await hre.ethers.getContractAt('IPriceFeed', '0x4c517D4e2C851CA76d7eC94B805269Df0f2201De');
+            const collPrice = BN2Float(await priceFeed.callStatic.fetchPrice());
+            wethAmountTotal = Float2BN(`${wethAmountTotalValue / collPrice}`);
+            collAmountOpen = Float2BN(`${collAmountOpenValue / collPrice}`);
+            collAmountSupply = Float2BN(`${collAmountSupplyValue / collPrice}`);
+            debtAmountGenerate = Float2BN('1000', 18);
+            debtAmountPayback = Float2BN('500', 18);
+            collAmountWithdraw = Float2BN('1', 18);
+
+            await setBalance(WETH_ADDRESS, senderAddr, wethAmountTotal);
+            await approve(WETH_ADDRESS, proxyAddr);
+            await approve(lusdAddr, proxyAddr);
+        });
+
+        afterEach(async () => {
+            // eslint-disable-next-line object-curly-newline
+            const { troveStatus, collAmount, debtAmount, collPrice } = await liquityView['getTroveInfo(address)'](proxyAddr);
+            console.log(`\tTrove status: ${troveStatus}`);
+            // eslint-disable-next-line eqeqeq
+            if (troveStatus != 1) {
+                console.log('\tTrove not active');
+                return;
+            }
+            const CR = collAmount.mul(collPrice).div(debtAmount);
+
+            console.log(`\tTrove coll:\t${BN2Float(collAmount)} ETH`);
+            console.log(`\tTrove debt:\t${BN2Float(debtAmount)} LUSD`);
+            console.log(`\tTrove CR:\t${BN2Float(CR.mul(100))}%`);
+            console.log(`\tETH price:\t${BN2Float(collPrice)}`);
+        });
+
+        it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD net debt`, async () => {
+            // eslint-disable-next-line max-len
+            await liquityOpen(proxy, maxFeePercentage, collAmountOpen, lusdAmountOpen, senderAddr, senderAddr);
+
+            const { collAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
+            expect(collAmount).to.equal(collAmountOpen);
+            expect(await balanceOf(lusdAddr, senderAddr)).to.equal(lusdAmountOpen);
+        });
+
+        it('... should supply WETH and generate new LUSD debt', async () => {
+            const lusdBalanceBefore = await balanceOf(lusdAddr, senderAddr);
+
+            await liquityAdjust(
+                proxy,
+                maxFeePercentage,
+                collAmountSupply,
+                debtAmountGenerate,
+                collChangeId.SUPPLY,
+                debtChangeId.BORROW,
+                senderAddr,
+                senderAddr,
+            );
+
+            const { collAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
+            expect(collAmount).to.equal(collAmountOpen.add(collAmountSupply));
+
+            const lusdBalanceAfter = await balanceOf(lusdAddr, senderAddr);
+            expect(lusdBalanceAfter).to.equal(lusdBalanceBefore.add(debtAmountGenerate));
+        });
+
+        it('... should supply WETH and payback LUSD debt', async () => {
+            const troveInfoBefore = await liquityView['getTroveInfo(address)'](proxyAddr);
+
+            await liquityAdjust(
+                proxy,
+                maxFeePercentage,
+                collAmountSupply,
+                debtAmountPayback,
+                collChangeId.SUPPLY,
+                debtChangeId.PAYBACK,
+                senderAddr,
+                senderAddr,
+            );
+
+            const troveInfoAfter = await liquityView['getTroveInfo(address)'](proxyAddr);
+
+            expect(troveInfoAfter.collAmount).to
+                .equal(troveInfoBefore.collAmount.add(collAmountSupply));
+
+            expect(troveInfoAfter.debtAmount).to
+                .equal(troveInfoBefore.debtAmount.sub(debtAmountPayback));
+        });
+
+        it('... should withdraw WETH and generate LUSD debt', async () => {
+            const troveInfoBefore = await liquityView['getTroveInfo(address)'](proxyAddr);
+            const lusdBalanceBefore = await balanceOf(lusdAddr, senderAddr);
+
+            await liquityAdjust(
+                proxy,
+                maxFeePercentage,
+                collAmountWithdraw,
+                debtAmountGenerate,
+                collChangeId.WITHDRAW,
+                debtChangeId.BORROW,
+                senderAddr,
+                senderAddr,
+            );
+
+            const troveInfoAfter = await liquityView['getTroveInfo(address)'](proxyAddr);
+
+            expect(troveInfoAfter.collAmount).to
+                .equal(troveInfoBefore.collAmount.sub(collAmountWithdraw));
+
+            const lusdBalanceAfter = await balanceOf(lusdAddr, senderAddr);
+            expect(lusdBalanceAfter).to.equal(lusdBalanceBefore.add(debtAmountGenerate));
+        });
+
+        it('... should payback lusd and withdraw eth', async () => {
+            const troveInfoBefore = await liquityView['getTroveInfo(address)'](proxyAddr);
+
+            await liquityAdjust(
+                proxy,
+                maxFeePercentage,
+                collAmountWithdraw,
+                debtAmountPayback,
+                collChangeId.WITHDRAW,
+                debtChangeId.PAYBACK,
+                senderAddr,
+                senderAddr,
+            );
+
+            const troveInfoAfter = await liquityView['getTroveInfo(address)'](proxyAddr);
+
+            expect(troveInfoAfter.collAmount).to
+                .equal(troveInfoBefore.collAmount.sub(collAmountWithdraw));
+
+            expect(troveInfoAfter.debtAmount).to
+                .equal(troveInfoBefore.debtAmount.sub(debtAmountPayback));
+        });
+
+        it('... should payback max.uint lusd amount and withdraw eth', async () => {
+            const troveInfoBefore = await liquityView['getTroveInfo(address)'](proxyAddr);
+
+            await liquityAdjust(
+                proxy,
+                maxFeePercentage,
+                collAmountWithdraw,
+                MAX_UINT,
+                collChangeId.WITHDRAW,
+                debtChangeId.PAYBACK,
+                senderAddr,
+                senderAddr,
+            );
+
+            const troveInfoAfter = await liquityView['getTroveInfo(address)'](proxyAddr);
+
+            expect(troveInfoAfter.collAmount).to
+                .equal(troveInfoBefore.collAmount.sub(collAmountWithdraw));
+
+            expect(troveInfoAfter.debtAmount).to
+                .equal(lqtyMinDebt);
+        });
+
+        it('... should supply max weth and generate some lusd debt', async () => {
+            const sender2WethAmount = Float2BN('3', 18);
+
+            const lusdBalanceBefore = await balanceOf(lusdAddr, senderAddr);
+
+            const sender2 = (await hre.ethers.getSigners())[0];
+            await setBalance(WETH_ADDRESS, sender2.address, sender2WethAmount);
+            await approve(WETH_ADDRESS, proxyAddr, sender2);
+
+            const troveInfoBefore = await liquityView['getTroveInfo(address)'](proxyAddr);
+
+            await liquityAdjust(
+                proxy,
+                maxFeePercentage,
+                MAX_UINT,
+                debtAmountGenerate,
+                collChangeId.SUPPLY,
+                debtChangeId.BORROW,
+                sender2.address,
+                senderAddr,
+            );
+
+            const troveInfoAfter = await liquityView['getTroveInfo(address)'](proxyAddr);
+
+            expect(troveInfoAfter.collAmount).to
+                .equal(troveInfoBefore.collAmount.add(sender2WethAmount));
+
+            const lusdBalanceAfter = await balanceOf(lusdAddr, senderAddr);
+            expect(lusdBalanceAfter).to.equal(lusdBalanceBefore.add(debtAmountGenerate));
+        });
+    });
+};
+
 const liquityFullTest = async () => {
     await liquityOpenTest();
     await liquitySupplyTest();
@@ -898,6 +1120,7 @@ const liquityFullTest = async () => {
     await liquityUnstakeTest();
 
     await liquityRedeemTest();
+    await liquityAdjustTest();
 };
 
 module.exports = {
@@ -918,4 +1141,5 @@ module.exports = {
     liquityUnstakeTest,
 
     liquityRedeemTest,
+    liquityAdjustTest,
 };

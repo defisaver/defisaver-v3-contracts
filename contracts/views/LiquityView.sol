@@ -12,6 +12,9 @@ contract LiquityView is LiquityHelper {
 
     enum LiquityActionId {Open, Borrow, Payback, Supply, Withdraw}
 
+    enum CollChange { SUPPLY, WITHDRAW }
+    enum DebtChange { PAYBACK, BORROW }
+
     function isRecoveryMode() public view returns (bool) {
         uint256 price = PriceFeed.lastGoodPrice();
         return TroveManager.checkRecoveryMode(price);
@@ -76,6 +79,64 @@ contract LiquityView is LiquityHelper {
         if (_action == LiquityActionId.Withdraw) {
             return computeNICR(coll.sub(_collAmount), debt);
         }
+    }
+
+    function predictNICRForAdjust(
+        address _troveOwner,
+        CollChange collChangeAction,
+        DebtChange debtChangeAction,
+        address _from,
+        uint256 _collAmount,
+        uint256 _lusdAmount
+    ) external view returns (uint256 NICR) {
+
+        (uint256 debt, uint256 coll, , ) = TroveManager.getEntireDebtAndColl(_troveOwner);
+        uint256 wholeDebt = TroveManager.getTroveDebt(_troveOwner);
+
+        uint256 newColl;
+        uint256 newDebt;
+
+        //  LiquitySupply
+        if (collChangeAction == CollChange.SUPPLY) {
+            if (_collAmount == type(uint256).max)
+                _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
+
+            newColl = coll.add(_collAmount);
+            newDebt = debt;
+        }
+
+        //  LiquityWithdraw
+        if (collChangeAction == CollChange.WITHDRAW) {
+            newColl = coll.sub(_collAmount);
+            newDebt = debt;
+        }
+              
+        //  LiquityBorrow
+        if (debtChangeAction == DebtChange.BORROW) {
+            if (!isRecoveryMode())
+                _lusdAmount = _lusdAmount.add(TroveManager.getBorrowingFeeWithDecay(_lusdAmount));
+
+            newColl = coll;
+            newDebt = debt.add(_lusdAmount);
+        }
+
+        //  LiquityPayback
+        if (debtChangeAction == DebtChange.PAYBACK) {
+            newColl = coll;
+
+            if (_lusdAmount == type(uint256).max) {
+                _lusdAmount = LUSD_TOKEN_ADDRESS.getBalance(_from);
+            }
+
+            // can't close with payback, pull amount to payback to MIN_DEBT
+            if (wholeDebt < (_lusdAmount + MIN_DEBT)) {
+                _lusdAmount = wholeDebt - MIN_DEBT;
+            }
+
+            newDebt = debt.sub(_lusdAmount);
+        }
+
+        return computeNICR(newColl, newDebt);
     }
 
     function getApproxHint(

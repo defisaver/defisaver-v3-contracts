@@ -1230,6 +1230,34 @@ const liquityWithdraw = async (proxy, collAmount, to) => {
     return tx;
 };
 
+const liquityAdjust = async (proxy, maxFeePercentage, collAmount, LUSDAmount, collChangeAction, debtChangeAction, from, to) => {
+    const { upperHint, lowerHint } = await getHints(
+        proxy.address,
+        collChangeAction,
+        from,
+        collAmount,
+        LUSDAmount,
+        debtChangeAction,
+    );
+
+    const liquityPaybackAction = new dfs.actions.liquity.LiquityAdjustAction(
+        maxFeePercentage,
+        collAmount,
+        LUSDAmount,
+        collChangeAction,
+        debtChangeAction,
+        from,
+        to,
+        upperHint,
+        lowerHint,
+    );
+
+    const functionData = liquityPaybackAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('LiquityAdjust', functionData, proxy);
+    return tx;
+};
+
 const liquityClose = async (proxy, from, to) => {
     const LiquityCloseAction = new dfs.actions.liquity.LiquityCloseAction(from, to);
 
@@ -2459,6 +2487,7 @@ module.exports = {
     liquityPayback,
     liquitySupply,
     liquityWithdraw,
+    liquityAdjust,
     liquityClose,
     liquityRedeem,
     liquityStake,
