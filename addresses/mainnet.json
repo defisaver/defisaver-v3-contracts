@@ -44,6 +44,17 @@
         "history": []
     },
     {
+        "name": "McdSubProxy",
+        "address": "0xded2752728227c502e08e51023b1ce0a37f907a2",
+        "id": "0x72fb2f08",
+        "path": "contracts/actions/mcd/McdSubProxy.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "ZrxAllowlist",
         "address": "0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F",
         "id": "0x0c33e794",
