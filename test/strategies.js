@@ -915,15 +915,13 @@ const createLiquityFLRepayStrategy = () => {
         '%repayGasCost', '%lusdAddr', '$2',
     );
 
-    const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
-        '$3',
-        '&proxy',
-        '%upperHint',
-        '%lowerHint',
-    );
-
-    const liquityWithdrawAction = new dfs.actions.liquity.LiquityWithdrawAction(
+    const liquityAdjustAction = new dfs.actions.liquity.LiquityAdjustAction(
+        '%0', // no liquity fee charged in recipe
         '$1',
+        '$3',
+        '%collChangeId.WITHDRAW',
+        '%debtChangeId.PAYBACK',
+        '&proxy',
         '%FLAddr',
         '%upperHint',
         '%lowerHint',
@@ -936,8 +934,7 @@ const createLiquityFLRepayStrategy = () => {
     liquityFLRepayStrategy.addAction(flAction);
     liquityFLRepayStrategy.addAction(sellAction);
     liquityFLRepayStrategy.addAction(feeTakingAction);
-    liquityFLRepayStrategy.addAction(liquityPaybackAction);
-    liquityFLRepayStrategy.addAction(liquityWithdrawAction);
+    liquityFLRepayStrategy.addAction(liquityAdjustAction);
     liquityFLRepayStrategy.addAction(liquityRatioCheckAction);
 
     return liquityFLRepayStrategy.encodeForDsProxyCall();
@@ -1022,17 +1019,14 @@ const createLiquityFLBoostStrategy = () => {
         '%boostGasCost', '%wethAddr', '$2',
     );
 
-    const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
-        '$3',
-        '&proxy',
-        '%upperHint',
-        '%lowerHint',
-    );
-
-    const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
+    const liquityAdjustAction = new dfs.actions.liquity.LiquityAdjustAction(
         '%maxFeePercentage',
+        '$3',
         '$1',
-        '%flAddr',
+        '%collChangeId.SUPPLY',
+        '%debtChangeId.BORROW',
+        '&proxy',
+        '%FLAddr',
         '%upperHint',
         '%lowerHint',
     );
@@ -1044,8 +1038,7 @@ const createLiquityFLBoostStrategy = () => {
     liquityFLBoostStrategy.addAction(flAction);
     liquityFLBoostStrategy.addAction(sellAction);
     liquityFLBoostStrategy.addAction(feeTakingAction);
-    liquityFLBoostStrategy.addAction(liquitySupplyAction);
-    liquityFLBoostStrategy.addAction(liquityBorrowAction);
+    liquityFLBoostStrategy.addAction(liquityAdjustAction);
     liquityFLBoostStrategy.addAction(liquityRatioCheckAction);
 
     return liquityFLBoostStrategy.encodeForDsProxyCall();
@@ -1064,16 +1057,13 @@ const createLiquityBigFLBoostStrategy = () => {
         ['%flAmount'],
     );
 
-    const liquitySupplyFLAction = new dfs.actions.liquity.LiquitySupplyAction(
-        '%flAmountWeGotBack', // cant pipe because of exact hints
-        '&proxy',
-        '%upperHint',
-        '%lowerHint',
-    );
-
-    const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
+    const liquityAdjustAction = new dfs.actions.liquity.LiquityAdjustAction(
         '%maxFeePercentage',
+        '%flAmountWeGotBack',
         '%boostAmount',
+        '%collChangeId.SUPPLY',
+        '%debtChangeId.BORROW',
+        '&proxy',
         '&proxy',
         '%upperHint',
         '%lowerHint',
@@ -1083,7 +1073,7 @@ const createLiquityBigFLBoostStrategy = () => {
         formatExchangeObj(
             '%lusdAddr',
             '%wethAddr',
-            '$3',
+            '$2',
             '%wrapper',
         ),
         '&proxy',
@@ -1091,11 +1081,11 @@ const createLiquityBigFLBoostStrategy = () => {
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '%boostGasCost', '%wethAddr', '$4',
+        '%boostGasCost', '%wethAddr', '$3',
     );
 
     const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
-        '$5',
+        '$4',
         '&proxy',
         '%upperHint',
         '%lowerHint',
@@ -1113,8 +1103,7 @@ const createLiquityBigFLBoostStrategy = () => {
     );
 
     liquityBigFLBoostStrategy.addAction(flAction);
-    liquityBigFLBoostStrategy.addAction(liquitySupplyFLAction);
-    liquityBigFLBoostStrategy.addAction(liquityBorrowAction);
+    liquityBigFLBoostStrategy.addAction(liquityAdjustAction);
     liquityBigFLBoostStrategy.addAction(sellAction);
     liquityBigFLBoostStrategy.addAction(feeTakingAction);
     liquityBigFLBoostStrategy.addAction(liquitySupplyAction);

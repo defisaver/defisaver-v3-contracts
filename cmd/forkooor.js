@@ -106,7 +106,6 @@ const {
     subToMcdProxy,
     updateSubDataMorphoAaveV2Proxy,
     updateLiquityProxy,
-    subToLiquityProxy,
 } = require('../test/utils-strategies');
 
 const {

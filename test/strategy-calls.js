@@ -47,6 +47,7 @@ const {
     getTroveInfo,
     findInsertPosition,
 } = require('./utils-liquity');
+const { collChangeId, debtChangeId } = require('./liquity/liquity-tests');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -1585,18 +1586,14 @@ const callLiquityFLBoostStrategy = async (
         boostGasCost, WETH_ADDRESS, '0',
     );
 
-    let { upperHint, lowerHint } = await findInsertPosition(newCollAmount, debtAmount);
-    const liquitySupplyFLAction = new dfs.actions.liquity.LiquitySupplyAction(
-        0,
-        placeHolderAddr, // proxy
-        upperHint,
-        lowerHint,
-    );
-
-    ({ upperHint, lowerHint } = await findInsertPosition(newCollAmount, newDebtAmount));
-    const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
+    const { upperHint, lowerHint } = await findInsertPosition(newCollAmount, newDebtAmount);
+    const liquityAdjustAction = new dfs.actions.liquity.LiquityAdjustAction(
         maxFeePercentage,
-        0,
+        '0',
+        '0',
+        collChangeId.SUPPLY,
+        debtChangeId.BORROW,
+        placeHolderAddr,
         flAddr,
         upperHint,
         lowerHint,
@@ -1609,8 +1606,7 @@ const callLiquityFLBoostStrategy = async (
     actionsCallData.push(flAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
-    actionsCallData.push(liquitySupplyFLAction.encodeForRecipe()[0]);
-    actionsCallData.push(liquityBorrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityAdjustAction.encodeForRecipe()[0]);
     actionsCallData.push(liquityRatioCheckAction.encodeForRecipe()[0]);
 
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
@@ -1659,19 +1655,15 @@ const callLiquityBigFLBoostStrategy = async (
         [flAmount],
     );
 
-    let { upperHint, lowerHint } = await findInsertPosition(newCollAmount, debtAmount);
-    const liquitySupplyFLAction = new dfs.actions.liquity.LiquitySupplyAction(
-        flAmountWeGotBack,
-        placeHolderAddr, // proxy
-        upperHint,
-        lowerHint,
-    );
-
-    ({ upperHint, lowerHint } = await findInsertPosition(newCollAmount, newDebtAmount));
-    const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
+    let { upperHint, lowerHint } = await findInsertPosition(newCollAmount, newDebtAmount);
+    const liquityAdjustAction = new dfs.actions.liquity.LiquityAdjustAction(
         maxFeePercentage,
+        flAmountWeGotBack,
         boostAmount,
-        placeHolderAddr, // proxy
+        collChangeId.SUPPLY,
+        debtChangeId.BORROW,
+        placeHolderAddr,
+        placeHolderAddr,
         upperHint,
         lowerHint,
     );
@@ -1715,8 +1707,7 @@ const callLiquityBigFLBoostStrategy = async (
     );
 
     actionsCallData.push(flAction.encodeForRecipe()[0]);
-    actionsCallData.push(liquitySupplyFLAction.encodeForRecipe()[0]);
-    actionsCallData.push(liquityBorrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityAdjustAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(liquitySupplyAction.encodeForRecipe()[0]);
@@ -1860,17 +1851,14 @@ const callLiquityFLRepayStrategy = async (
         repayGasCost, getAssetInfo('LUSD').address, '0',
     );
 
-    let { upperHint, lowerHint } = await findInsertPosition(collAmount, newDebtAmount);
-    const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
+    const { upperHint, lowerHint } = await findInsertPosition(newCollAmount, newDebtAmount);
+    const liquityAdjustAction = new dfs.actions.liquity.LiquityAdjustAction(
+        '0', // no liquity fee charged in recipe
         '0',
+        '0',
+        collChangeId.WITHDRAW,
+        debtChangeId.PAYBACK,
         placeHolderAddr,
-        upperHint,
-        lowerHint,
-    );
-
-    ({ upperHint, lowerHint } = await findInsertPosition(newCollAmount, newDebtAmount));
-    const liquityWithdrawAction = new dfs.actions.liquity.LiquityWithdrawAction(
-        '0',
         flAddr,
         upperHint,
         lowerHint,
@@ -1883,8 +1871,7 @@ const callLiquityFLRepayStrategy = async (
     actionsCallData.push(flAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
-    actionsCallData.push(liquityPaybackAction.encodeForRecipe()[0]);
-    actionsCallData.push(liquityWithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityAdjustAction.encodeForRecipe()[0]);
     actionsCallData.push(liquityRatioCheckAction.encodeForRecipe()[0]);
 
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
