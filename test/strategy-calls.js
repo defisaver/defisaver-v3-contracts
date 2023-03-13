@@ -47,7 +47,6 @@ const {
     getTroveInfo,
     findInsertPosition,
 } = require('./utils-liquity');
-const { collChangeId, debtChangeId } = require('./liquity/liquity-tests');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -1593,8 +1592,8 @@ const callLiquityFLBoostStrategy = async (
         maxFeePercentage,
         '0',
         '0',
-        collChangeId.SUPPLY,
-        debtChangeId.BORROW,
+        '0',
+        '0',
         placeHolderAddr,
         flAddr,
         upperHint,
@@ -1664,8 +1663,8 @@ const callLiquityBigFLBoostStrategy = async (
         maxFeePercentage,
         flAmountWeGotBack,
         boostAmount,
-        collChangeId.SUPPLY,
-        debtChangeId.BORROW,
+        '0',
+        '0',
         placeHolderAddr,
         placeHolderAddr,
         upperHint,
@@ -1862,8 +1861,8 @@ const callLiquityFLRepayStrategy = async (
         '0', // no liquity fee charged in recipe
         '0',
         '0',
-        collChangeId.WITHDRAW,
-        debtChangeId.PAYBACK,
+        '0',
+        '0',
         placeHolderAddr,
         flAddr,
         upperHint,

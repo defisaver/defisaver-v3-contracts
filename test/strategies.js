@@ -891,6 +891,8 @@ const createLiquityFLRepayStrategy = () => {
     const liquityFLRepayStrategy = new dfs.Strategy('LiquityFLRepayStrategy');
     liquityFLRepayStrategy.addSubSlot('&ratioState', 'uint8');
     liquityFLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityFLRepayStrategy.addSubSlot('&collChangeId.WITHDRAW', 'uint8');
+    liquityFLRepayStrategy.addSubSlot('&debtChangeId.PAYBACK', 'uint8');
 
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityFLRepayStrategy.addTrigger(liquityRatioTrigger);
@@ -921,8 +923,8 @@ const createLiquityFLRepayStrategy = () => {
         '%0', // no liquity fee charged in recipe
         '$1',
         '$3',
-        '%collChangeId.WITHDRAW',
-        '%debtChangeId.PAYBACK',
+        '&collChangeId.WITHDRAW',
+        '&debtChangeId.PAYBACK',
         '&proxy',
         '%FLAddr',
         '%upperHint',
@@ -997,6 +999,8 @@ const createLiquityFLBoostStrategy = () => {
     const liquityFLBoostStrategy = new dfs.Strategy('LiquityFLBoostStrategy');
     liquityFLBoostStrategy.addSubSlot('&ratioState', 'uint8');
     liquityFLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityFLBoostStrategy.addSubSlot('&collChangeId.SUPPLY', 'uint8');
+    liquityFLBoostStrategy.addSubSlot('&debtChangeId.BORROW', 'uint8');
 
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityFLBoostStrategy.addTrigger(liquityRatioTrigger);
@@ -1027,8 +1031,8 @@ const createLiquityFLBoostStrategy = () => {
         '%maxFeePercentage',
         '$3',
         '$1',
-        '%collChangeId.SUPPLY',
-        '%debtChangeId.BORROW',
+        '&collChangeId.SUPPLY',
+        '&debtChangeId.BORROW',
         '&proxy',
         '%FLAddr',
         '%upperHint',
@@ -1052,6 +1056,8 @@ const createLiquityBigFLBoostStrategy = () => {
     const liquityBigFLBoostStrategy = new dfs.Strategy('LiquityBigFLBoostStrategy');
     liquityBigFLBoostStrategy.addSubSlot('&ratioState', 'uint8');
     liquityBigFLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityBigFLBoostStrategy.addSubSlot('&collChangeId.SUPPLY', 'uint8');
+    liquityBigFLBoostStrategy.addSubSlot('&debtChangeId.BORROW', 'uint8');
 
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityBigFLBoostStrategy.addTrigger(liquityRatioTrigger);
@@ -1067,8 +1073,8 @@ const createLiquityBigFLBoostStrategy = () => {
         '%maxFeePercentage',
         '%flAmountWeGotBack',
         '%boostAmount',
-        '%collChangeId.SUPPLY',
-        '%debtChangeId.BORROW',
+        '&collChangeId.SUPPLY',
+        '&debtChangeId.BORROW',
         '&proxy',
         '&proxy',
         '%upperHint',
