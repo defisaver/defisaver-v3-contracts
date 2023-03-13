@@ -81,7 +81,7 @@ const liquityBoostStrategyTest = async () => {
     describe('Liquity-Boost-Bundle', function () {
         this.timeout(1200000);
 
-        let balancerFL;
+        let flAction;
 
         let senderAcc;
         let proxy;
@@ -102,7 +102,7 @@ const liquityBoostStrategyTest = async () => {
             proxyAddr = proxy.address;
             botAcc = (await ethers.getSigners())[1];
 
-            balancerFL = await getContractFromRegistry('FLBalancer');
+            flAction = await getContractFromRegistry('FLAction');
             await getContractFromRegistry('DFSSell');
             await getContractFromRegistry('GasFeeTaker');
 
@@ -179,7 +179,7 @@ const liquityBoostStrategyTest = async () => {
             const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', BOOST_AMOUNT_USD));
 
             // eslint-disable-next-line max-len
-            await callLiquityFLBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr, balancerFL.address, MAX_FEE_PERCENTAGE);
+            await callLiquityFLBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr, flAction.address, MAX_FEE_PERCENTAGE);
 
             const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 
@@ -196,7 +196,7 @@ const liquityBoostStrategyTest = async () => {
             const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', BOOST_AMOUNT_USD));
 
             // eslint-disable-next-line max-len
-            await callLiquityBigFLBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr, balancerFL.address, MAX_FEE_PERCENTAGE);
+            await callLiquityBigFLBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr, flAction.address, MAX_FEE_PERCENTAGE);
 
             const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 
@@ -213,7 +213,7 @@ const liquityRepayStrategyTest = async () => {
     describe('Liquity-Repay-Bundle', function () {
         this.timeout(1200000);
 
-        let balancerFL;
+        let flAction;
 
         let senderAcc;
         let proxy;
@@ -238,7 +238,7 @@ const liquityRepayStrategyTest = async () => {
 
             strategyExecutor = await getContractFromRegistry('StrategyExecutor');
 
-            balancerFL = await getContractFromRegistry('FLBalancer');
+            flAction = await getContractFromRegistry('FLAction');
 
             await getContractFromRegistry('DFSSell');
             await getContractFromRegistry('GasFeeTaker');
@@ -310,7 +310,7 @@ const liquityRepayStrategyTest = async () => {
             const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', REPAY_AMOUNT_USD));
 
             // eslint-disable-next-line max-len
-            await callLiquityFLRepayStrategy(botAcc, strategyExecutor, subId, strategySub, repayAmount, proxyAddr, balancerFL.address, MAX_FEE_PERCENTAGE);
+            await callLiquityFLRepayStrategy(botAcc, strategyExecutor, subId, strategySub, repayAmount, proxyAddr, flAction.address, MAX_FEE_PERCENTAGE);
 
             const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 

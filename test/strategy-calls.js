@@ -1563,9 +1563,11 @@ const callLiquityFLBoostStrategy = async (
     const flAmount = boostAmount;
     const exchangeAmount = boostAmount;
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        [getAssetInfo('LUSD').address],
-        [flAmount],
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            [getAssetInfo('LUSD').address],
+            [flAmount],
+        ),
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -1650,9 +1652,11 @@ const callLiquityBigFLBoostStrategy = async (
     const newCollAmountAfterSell = newCollAmount.add(flAmountWeGotBack);
     const newCollAmountAfterSellAndSupply = newCollAmount;
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        [getAssetInfo('WETH').address],
-        [flAmount],
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            [getAssetInfo('WETH').address],
+            [flAmount],
+        ),
     );
 
     let { upperHint, lowerHint } = await findInsertPosition(newCollAmount, newDebtAmount);
@@ -1828,9 +1832,11 @@ const callLiquityFLRepayStrategy = async (
     const flAmount = repayAmount;
     const exchangeAmount = repayAmount;
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        [getAssetInfo('WETH').address],
-        [flAmount],
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            [getAssetInfo('WETH').address],
+            [flAmount],
+        ),
     );
 
     const sellAction = new dfs.actions.basic.SellAction(

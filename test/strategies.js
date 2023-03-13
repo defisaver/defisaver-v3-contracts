@@ -895,9 +895,11 @@ const createLiquityFLRepayStrategy = () => {
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityFLRepayStrategy.addTrigger(liquityRatioTrigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        ['%wethAddr'],
-        ['%flAmount'],
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%wethAddr'],
+            ['%flAmount'],
+        ),
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -999,9 +1001,11 @@ const createLiquityFLBoostStrategy = () => {
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityFLBoostStrategy.addTrigger(liquityRatioTrigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        ['%lusdAddr'],
-        ['%flAmount'],
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%lusdAddr'],
+            ['%flAmount'],
+        ),
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -1052,9 +1056,11 @@ const createLiquityBigFLBoostStrategy = () => {
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityBigFLBoostStrategy.addTrigger(liquityRatioTrigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        ['%wethAddr'],
-        ['%flAmount'],
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%wethAddr'],
+            ['%flAmount'],
+        ),
     );
 
     const liquityAdjustAction = new dfs.actions.liquity.LiquityAdjustAction(
