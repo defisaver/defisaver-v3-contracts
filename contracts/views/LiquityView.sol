@@ -172,6 +172,7 @@ contract LiquityView is LiquityHelper {
             uint256 debtAmount,
             uint256 collPrice,
             uint256 TCRatio,
+            uint256 borrowingFeeWithDecay,
             bool recoveryMode
         )
     {
@@ -180,6 +181,7 @@ contract LiquityView is LiquityHelper {
         debtAmount = TroveManager.getTroveDebt(_troveOwner);
         collPrice = PriceFeed.lastGoodPrice();
         TCRatio = TroveManager.getTCR(collPrice);
+        borrowingFeeWithDecay = TroveManager.getBorrowingRateWithDecay();
         recoveryMode = TroveManager.checkRecoveryMode(collPrice);
     }
 
