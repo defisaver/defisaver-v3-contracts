@@ -128,7 +128,7 @@ const {
     createLiquityFLRepayStrategy,
     createLiquityBoostStrategy,
     createLiquityFLBoostStrategy,
-    createLiquityBigFLBoostStrategy,
+    createLiquityFLBoostWithCollStrategy,
 } = require('../test/strategies');
 
 const {
@@ -2008,7 +2008,7 @@ const subLiquityAutomation = async (
         {
             const strategyData = createLiquityBoostStrategy();
             const flStrategyData = createLiquityFLBoostStrategy();
-            const bigFlStrategyData = createLiquityBigFLBoostStrategy();
+            const bigFlStrategyData = createLiquityFLBoostWithCollStrategy();
 
             const strategyId = await createStrategy(undefined, ...strategyData, true);
             const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);

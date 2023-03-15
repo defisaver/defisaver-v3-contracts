@@ -1626,7 +1626,7 @@ const callLiquityFLBoostStrategy = async (
     console.log(`GasUsed callLiquityFLBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callLiquityBigFLBoostStrategy = async (
+const callLiquityFLBoostWithCollStrategy = async (
     botAcc,
     strategyExecutor,
     subId,
@@ -1730,7 +1730,7 @@ const callLiquityBigFLBoostStrategy = async (
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
-    console.log(`GasUsed callLiquityBigFLBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+    console.log(`GasUsed callLiquityFLBoostWithCollStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 const callLiquityRepayStrategy = async (
@@ -2439,7 +2439,7 @@ module.exports = {
     callReflexerFLRepayStrategy,
     callLiquityBoostStrategy,
     callLiquityFLBoostStrategy,
-    callLiquityBigFLBoostStrategy,
+    callLiquityFLBoostWithCollStrategy,
     callLiquityRepayStrategy,
     callLiquityFLRepayStrategy,
     callLiquityCloseToCollStrategy,

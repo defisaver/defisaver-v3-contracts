@@ -37,7 +37,7 @@ const {
     callLiquityCloseToCollStrategy,
     callLiquityPaybackChickenOutStrategy,
     callLiquityPaybackChickenInStrategy,
-    callLiquityBigFLBoostStrategy,
+    callLiquityFLBoostWithCollStrategy,
 } = require('../../strategy-calls');
 
 const {
@@ -56,7 +56,7 @@ const {
     createLiquityCloseToCollStrategy,
     createLiquityPaybackChickenInStrategy,
     createLiquityPaybackChickenOutStrategy,
-    createLiquityBigFLBoostStrategy,
+    createLiquityFLBoostWithCollStrategy,
 } = require('../../strategies');
 
 const { RATIO_STATE_OVER } = require('../../triggers');
@@ -136,13 +136,13 @@ const liquityBoostStrategyTest = async () => {
         it('... should make a Liquity Boost bundle and subscribe', async () => {
             const liquityBoostStrategy = createLiquityBoostStrategy();
             const liquityFLBoostStrategy = createLiquityFLBoostStrategy();
-            const liquityBigFLBoostStrategy = createLiquityBigFLBoostStrategy();
+            const LiquityFLBoostWithCollStrategy = createLiquityFLBoostWithCollStrategy();
 
             await openStrategyAndBundleStorage();
 
             const strategyId1 = await createStrategy(proxy, ...liquityBoostStrategy, true);
             const strategyId2 = await createStrategy(proxy, ...liquityFLBoostStrategy, true);
-            const strategyId3 = await createStrategy(proxy, ...liquityBigFLBoostStrategy, true);
+            const strategyId3 = await createStrategy(proxy, ...LiquityFLBoostWithCollStrategy, true);
 
             const bundleId = await createBundle(proxy, [strategyId1, strategyId2, strategyId3]);
 
@@ -191,12 +191,12 @@ const liquityBoostStrategyTest = async () => {
             await revertToSnapshot(snapshotId);
         });
 
-        it('... should trigger a Liquity BigFL Boost strategy', async () => {
+        it('... should trigger a Liquity FL Boost with Coll strategy', async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
             const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', BOOST_AMOUNT_USD));
 
             // eslint-disable-next-line max-len
-            await callLiquityBigFLBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr, flAction.address, MAX_FEE_PERCENTAGE);
+            await callLiquityFLBoostWithCollStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr, flAction.address, MAX_FEE_PERCENTAGE);
 
             const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 
