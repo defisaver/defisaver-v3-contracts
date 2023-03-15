@@ -21,8 +21,6 @@ contract LiquityRatioHelper is DSMath, MainnetLiquityAddresses {
         if (!isActive) return (ratio, isActive);
 
         uint256 debtAmount = TroveManager.getTroveDebt(_troveOwner);
-        if (debtAmount == 0) return (ratio, isActive);
-
         uint256 collAmount = TroveManager.getTroveColl(_troveOwner);
         uint256 collPrice = PriceFeed.fetchPrice();
 

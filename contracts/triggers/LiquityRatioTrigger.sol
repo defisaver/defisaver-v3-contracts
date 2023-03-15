@@ -32,7 +32,7 @@ contract LiquityRatioTrigger is ITrigger, AdminAuth, LiquityRatioHelper {
 
         (uint256 currRatio, bool isActive) = getRatio(triggerSubData.troveOwner);
         
-        if (isActive == false) return false;
+        if (isActive == false || currRatio == 0) return false;
 
         tempStorage.setBytes32("LIQUITY_RATIO", bytes32(currRatio));
         
