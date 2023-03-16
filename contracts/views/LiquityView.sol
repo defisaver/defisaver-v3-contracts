@@ -31,56 +31,6 @@ contract LiquityView is LiquityHelper {
         }
     }
 
-    /// @notice Predict the resulting nominal collateral ratio after a trove modifying action
-    /// @param _troveOwner Address of the trove owner, if the action specified is LiquityOpen this argument is ignored
-    /// @param _action LiquityActionIds
-    function predictNICR(
-        address _troveOwner,
-        LiquityActionId _action,
-        address _from,
-        uint256 _collAmount,
-        uint256 _lusdAmount
-    ) external view returns (uint256 NICR) {
-        //  LiquityOpen
-        if (_action == LiquityActionId.Open) {
-            if (!isRecoveryMode())
-                _lusdAmount = _lusdAmount.add(TroveManager.getBorrowingFeeWithDecay(_lusdAmount));
-            _lusdAmount = BorrowerOperations.getCompositeDebt(_lusdAmount);
-
-            if (_collAmount == type(uint256).max)
-                _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
-
-            return computeNICR(_collAmount, _lusdAmount);
-        }
-
-        (uint256 debt, uint256 coll, , ) = TroveManager.getEntireDebtAndColl(_troveOwner);
-
-        //  LiquityBorrow
-        if (_action == LiquityActionId.Borrow) {
-            if (!isRecoveryMode())
-                _lusdAmount = _lusdAmount.add(TroveManager.getBorrowingFeeWithDecay(_lusdAmount));
-            return computeNICR(coll, debt.add(_lusdAmount));
-        }
-
-        //  LiquityPayback
-        if (_action == LiquityActionId.Payback) {
-            return computeNICR(coll, debt.sub(_lusdAmount));
-        }
-
-        //  LiquitySupply
-        if (_action == LiquityActionId.Supply) {
-            if (_collAmount == type(uint256).max)
-                _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
-
-            return computeNICR(coll.add(_collAmount), debt);
-        }
-
-        //  LiquityWithdraw
-        if (_action == LiquityActionId.Withdraw) {
-            return computeNICR(coll.sub(_collAmount), debt);
-        }
-    }
-
     function predictNICRForAdjust(
         address _troveOwner,
         CollChange collChangeAction,
