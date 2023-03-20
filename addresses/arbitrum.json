@@ -23,14 +23,14 @@
     },
     {
       "name": "LimitOrderSubProxy",
-      "address": "0x43Af8734096941271eC637549661DCeA64052575",
+      "address": "0x576FFD606F4fF71E8ca29c1b59a02e080708F5Ac",
       "id": "0x82fc0e77",
       "path": "contracts/actions/exchange/LimitOrderSubProxy.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": false,
       "changeTime": 0,
       "registryIds": [],
-      "history": []
+      "history": ["0x43Af8734096941271eC637549661DCeA64052575"]
     },
     {
         "name": "AaveSubProxy",
@@ -587,14 +587,14 @@
     },
     {
       "name": "OffchainPriceTrigger",
-      "address": "0x846087C427d3637199c2b76A80c6BAA7666919c0",
+      "address": "0x3BdBA547F8e7F0047142Bf713611a78B6d7D4E93",
       "id": "0x3ef9c07c",
       "path": "contracts/triggers/OffchainPriceTrigger.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0x846087C427d3637199c2b76A80c6BAA7666919c0"]
     },
     {
       "name": "ToggleSub",

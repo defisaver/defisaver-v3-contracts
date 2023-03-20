@@ -2011,14 +2011,14 @@
     },
     {
         "name": "OffchainPriceTrigger",
-        "address": "0x052761E045260F82f8f2B09063Bfae2299487797",
+        "address": "0x185037ced70CB8e45096EBB9d98397f9e462c90a",
         "id": "0x3ef9c07c",
         "path": "contracts/triggers/OffchainPriceTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x052761E045260F82f8f2B09063Bfae2299487797"]
       },
     {
         "name": "CompV3Allow",
@@ -2132,14 +2132,14 @@
     },
     {
         "name": "LimitOrderSubProxy",
-        "address": "0x37434dcb2DC049c0068d4b8F95497311F44c5d9e",
+        "address": "0x14387701a5df90a7c1B4A384783e512E7FCd8711",
         "id": "0x82fc0e77",
         "path": "contracts/actions/exchange/LimitOrderSubProxy.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x37434dcb2DC049c0068d4b8F95497311F44c5d9e"]
     },
     {
         "name": "CompoundMonitorProxy",

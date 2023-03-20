@@ -34,14 +34,14 @@
     },
     {
       "name": "LimitOrderSubProxy",
-      "address": "0x11747a0821cF3300C8d9CF5Ac2405b545d623767",
+      "address": "0xC6755F57d7bC279CBd84C96932a0611CB998E6B7",
       "id": "0x82fc0e77",
       "path": "contracts/actions/exchange/LimitOrderSubProxy.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": false,
       "changeTime": 0,
       "registryIds": [],
-      "history": []
+      "history": ["0x11747a0821cF3300C8d9CF5Ac2405b545d623767"]
     },
     {
         "name": "ZrxAllowlist",
@@ -660,14 +660,14 @@
     },
     {
       "name": "OffchainPriceTrigger",
-      "address": "0x3e0512Fac6Ad430eCE9b560861826d4e66D131F7",
+      "address": "0x43e1932473a2a5D4e5BfD28Bde548bF4857c0bf4",
       "id": "0x3ef9c07c",
       "path": "contracts/triggers/OffchainPriceTrigger.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0x3e0512Fac6Ad430eCE9b560861826d4e66D131F7"]
     },
     {
         "name": "TokenBalance",
