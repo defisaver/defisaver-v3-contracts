@@ -106,7 +106,7 @@ module.exports = {
             name: 'optimistic',
             txType: 0,
             blockExplorer: 'etherscan',
-            contractVerification: false,
+            contractVerification: true,
         },
         rinkebyArbitrum: {
             url: process.env.RINKEBY_ARBITRUM_NODE,

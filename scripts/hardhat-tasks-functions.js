@@ -101,12 +101,14 @@ async function deployContract(contractName, args) {
     const addressesUsed = contractString.match(helperRegex);
     console.log(addressesUsed);
     const networkFormatted = network === 'optimistic' ? 'optimism' : network;
-    for (let i = 0; i < addressesUsed.length; i++) {
-        if (!(addressesUsed[i].toLowerCase().includes(networkFormatted.toLowerCase()))) {
-            console.log('ERROR! Check if addresses are matching!');
-            console.log(addressesUsed[i]);
-            console.log(network);
-            process.exit(1);
+    if (addressesUsed) {
+        for (let i = 0; i < addressesUsed.length; i++) {
+            if (!(addressesUsed[i].toLowerCase().includes(networkFormatted.toLowerCase()))) {
+                console.log('ERROR! Check if addresses are matching!');
+                console.log(addressesUsed[i]);
+                console.log(network);
+                process.exit(1);
+            }
         }
     }
 
@@ -174,7 +176,7 @@ async function verifyContract(contractAddress, contractName) {
 
     if (network === 'arbitrum') {
         apiKey = process.env.ARBISCAN_API_KEY;
-    } else if (network === 'optimism') {
+    } else if (network === 'optimistic') {
         apiKey = process.env.OPTIMISTIC_ETHERSCAN_API_KEY;
     }
 
