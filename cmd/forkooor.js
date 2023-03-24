@@ -7,7 +7,7 @@ require('dotenv-safe').config();
 const fs = require('fs');
 const { spawnSync } = require('child_process');
 const {
-    getAssetInfo, ilks, assets, utils: { compare },
+    getAssetInfo, ilks, assets, set, utils: { compare },
 } = require('@defisaver/tokens');
 const { configure } = require('@defisaver/sdk');
 const dfs = require('@defisaver/sdk');
@@ -136,6 +136,8 @@ const {
     subCompV3AutomationStrategy,
     subCbRebondStrategy,
     subLiquityCBPaybackStrategy,
+    subLimitOrderStrategy,
+    subDcaStrategy,
     subMorphoAaveV2AutomationStrategy,
 } = require('../test/strategy-subs');
 
@@ -1860,6 +1862,102 @@ const subCompV3Automation = async (
     console.log(`CompV3 position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
 };
 
+const subLimitOrder = async (
+    srcTokenLabel,
+    destTokenLabel,
+    srcAmount,
+    targetPrice,
+    expireDays,
+    orderType,
+    sender,
+) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    await topUp(senderAcc.address);
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+    set('network', chainIds[network]);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await topUp(addrs[network].OWNER_ACC);
+
+    // deploy contracts and strategy
+    await redeploy('OffchainPriceTrigger', addrs[network].REGISTRY_ADDR, false, true);
+
+    console.log(network);
+    // eslint-disable-next-line no-unused-expressions
+    network === 'mainnet'
+        ? (await redeploy('LimitSell', addrs[network].REGISTRY_ADDR, false, true))
+        : (await redeploy('LimitSellL2', addrs[network].REGISTRY_ADDR, false, true));
+
+    // eslint-disable-next-line max-len
+    // const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
+    await openStrategyAndBundleStorage(true);
+
+    let strategyId = '51'; // await createStrategy(proxy, ...strategyData, false);
+
+    if (network !== 'mainnet') {
+        strategyId = '9';
+    }
+
+    await redeploy('LimitOrderSubProxy', addrs[network].REGISTRY_ADDR, false, true, strategyId);
+
+    // format sub data
+    const srcToken = getAssetInfo(srcTokenLabel);
+    const destToken = getAssetInfo(destTokenLabel);
+
+    const amountInWei = hre.ethers.utils.parseUnits(srcAmount, srcToken.decimals);
+    const targetPriceInWei = hre.ethers.utils.parseUnits(targetPrice, srcToken.decimals);
+
+    const goodUntilDuration = expireDays * 24 * 60 * 60;
+
+    // give token approval
+    await approve(srcToken.address, proxy.address, senderAcc);
+
+    let orderTypeFormatted;
+
+    if (orderType.toLowerCase() === 'take_profit') {
+        orderTypeFormatted = 0;
+    } else if (orderType.toLowerCase() === 'stop_loss') {
+        orderTypeFormatted = 1;
+    }
+
+    // sub
+    const subData = await subLimitOrderStrategy(
+        proxy,
+        srcToken.address,
+        destToken.address,
+        amountInWei,
+        targetPriceInWei,
+        goodUntilDuration,
+        orderTypeFormatted,
+        addrs[network].REGISTRY_ADDR,
+    );
+
+    console.log(`Limit order subed, subId ${subData.subId}`);
+};
+
 const subMorphoAaveV2Automation = async (
     minRatio,
     maxRatio,
@@ -2154,6 +2252,8 @@ const setBotAuth = async (addr) => {
         network = process.env.TEST_CHAIN_ID;
     }
 
+    await topUp(addrs[network].OWNER_ACC);
+
     configure({
         chainId: chainIds[network],
         testMode: true,
@@ -2279,6 +2379,78 @@ const createCompV3Position = async (
     } catch (err) {
         console.log(err);
     }
+};
+
+const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    await topUp(senderAcc.address);
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    set('network', chainIds[network]);
+    setNetwork(network);
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    // const strategyData = network === 'mainnet' ? createDCAStrategy() : createDCAL2Strategy();
+    // await openStrategyAndBundleStorage(true);
+    let strategyId = '46';
+
+    if (network !== 'mainnet') {
+        strategyId = '8';
+    }
+
+    await redeploy('TimestampTrigger', addrs[network].REGISTRY_ADDR, false, true);
+
+    const srcToken = getAssetInfo(srcTokenLabel);
+    const destToken = getAssetInfo(destTokenLabel);
+
+    await approve(srcToken.address, proxy.address, senderAcc);
+
+    const DAY = 1 * 24 * 60 * 60;
+
+    const intervalInSeconds = interval * DAY;
+    const latestBlock = await hre.ethers.provider.getBlock('latest');
+
+    const lastTimestamp = latestBlock.timestamp + intervalInSeconds;
+
+    const amountInDecimals = hre.ethers.utils.parseUnits(amount, srcToken.decimals);
+
+    console.log(srcToken.address,
+        destToken.address,
+        amountInDecimals,
+        intervalInSeconds,
+        lastTimestamp,
+        strategyId);
+
+    const sub = await subDcaStrategy(
+        proxy,
+        srcToken.address,
+        destToken.address,
+        amountInDecimals,
+        intervalInSeconds,
+        lastTimestamp,
+        strategyId,
+    );
+
+    console.log(`Subscribed to DCA strategy with sub id ${sub.subId}`);
 };
 
 (async () => {
@@ -2642,6 +2814,23 @@ const createCompV3Position = async (
         .action(async (price, priceState, senderAddr) => {
             // eslint-disable-next-line max-len
             await liquityCloseToCollStrategySub(price, priceState, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('sub-limit-order <srcTokenLabel> <destTokenLabel> <srcAmount> <targetPrice> <expireDays> <orderType> [senderAddr]')
+        .description('Subscribes to a limit order')
+        // eslint-disable-next-line max-len
+        .action(async (srcTokenLabel, destTokenLabel, srcAmount, targetPrice, expireDays, orderType, senderAddr) => {
+            // eslint-disable-next-line max-len
+            await subLimitOrder(srcTokenLabel, destTokenLabel, srcAmount, targetPrice, expireDays, orderType, senderAddr);
+        });
+
+    program
+        .command('sub-dca <srcTokenLabel> <buyTokenLabel> <amount> <interval> [senderAddr]')
+        .description('Subscribes to a DCA strategy')
+        .action(async (srcTokenLabel, buyTokenLabel, amount, interval, senderAddr) => {
+            await dcaStrategySub(srcTokenLabel, buyTokenLabel, amount, interval, senderAddr);
             process.exit(0);
         });
 

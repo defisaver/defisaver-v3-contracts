@@ -33,6 +33,17 @@
         "history": ["0x4D93E49B8989222571c2D171B988c5A3C04C6621"]
     },
     {
+      "name": "LimitOrderSubProxy",
+      "address": "0xC6755F57d7bC279CBd84C96932a0611CB998E6B7",
+      "id": "0x82fc0e77",
+      "path": "contracts/actions/exchange/LimitOrderSubProxy.sol",
+      "version": "1.0.1",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": ["0x11747a0821cF3300C8d9CF5Ac2405b545d623767"]
+    },
+    {
         "name": "ZrxAllowlist",
         "address": "0x52F6ae5aE5a8a6316c970d3a02C50b74c1a50bB8",
         "id": "0x0c33e794",
@@ -466,6 +477,17 @@
       "history": ["0xfA015aD97E25247c2144F1C89AeD449cc3Fd1FCB"]
     },
     {
+      "name": "LimitSellL2",
+      "address": "0x08426bE896D68C4e37441D60d6EA43865CcF8B5C",
+      "id": "0x5cc47139",
+      "path": "contracts/actions/exchange/LimitSellL2.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "StrategyExecutor",
       "address": "0xf9c0A56c4c2D40C13d9D377b5E1Cdfe3Cb0C9FF7",
       "id": "0x0c1dc439",
@@ -624,6 +646,28 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": []
+    },
+    {
+      "name": "TimestampTrigger",
+      "address": "0x4D2D2dB27b00863d6A49F5a060D7858411b85744",
+      "id": "0xa051d9a9",
+      "path": "contracts/triggers/TimestampTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "OffchainPriceTrigger",
+      "address": "0x43e1932473a2a5D4e5BfD28Bde548bF4857c0bf4",
+      "id": "0x3ef9c07c",
+      "path": "contracts/triggers/OffchainPriceTrigger.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": ["0x3e0512Fac6Ad430eCE9b560861826d4e66D131F7"]
     },
     {
         "name": "TokenBalance",

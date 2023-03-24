@@ -452,6 +452,71 @@ const createAaveV3FLCloseToCollL2Strategy = () => {
     return aaveCloseStrategy.encodeForDsProxyCall();
 };
 
+const createDCAL2Strategy = () => {
+    const dcaStrategy = new dfs.Strategy('DCAL2Strategy');
+
+    dcaStrategy.addSubSlot('&sellToken', 'address');
+    dcaStrategy.addSubSlot('&buyToken', 'address');
+    dcaStrategy.addSubSlot('&amount', 'uint256');
+    dcaStrategy.addSubSlot('&interval', 'uint256');
+
+    const timestampTrigger = new dfs.triggers.TimestampTrigger('0');
+    dcaStrategy.addTrigger(timestampTrigger);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&sellToken',
+            '&buyToken',
+            '&amount',
+            '%exchangeWrapper',
+        ),
+        '&eoa',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '0', '&buyToken', '$1', '%l1GasCostInEth',
+    );
+
+    const sendTokenAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&buyToken', '&eoa', '$2',
+    );
+
+    dcaStrategy.addAction(sellAction);
+    dcaStrategy.addAction(feeTakingAction);
+    dcaStrategy.addAction(sendTokenAction);
+
+    return dcaStrategy.encodeForDsProxyCall();
+};
+
+const createLimitOrderL2Strategy = () => {
+    const limitOrderStrategy = new dfs.Strategy('LimitOrderL2Strategy');
+
+    const offchainPriceTrigger = new dfs.triggers.OffchainPriceTrigger('0', '0');
+    limitOrderStrategy.addTrigger(offchainPriceTrigger);
+
+    limitOrderStrategy.addSubSlot('&tokenAddrSell', 'address');
+    limitOrderStrategy.addSubSlot('&tokenAddrBuy', 'address');
+    limitOrderStrategy.addSubSlot('&amount', 'uint256');
+
+    const sellAction = new dfs.actions.basic.LimitSellActionL2(
+        formatExchangeObj(
+            '&tokenAddrSell',
+            '&tokenAddrBuy',
+            '&amount',
+            '%exchangeWrapper',
+        ),
+        '&eoa',
+        '&eoa',
+        '%gasUsed',
+        '%l1GasUsed',
+    );
+
+    limitOrderStrategy.addAction(sellAction);
+
+    return limitOrderStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createAaveV3RepayL2Strategy,
     createAaveFLV3RepayL2Strategy,
@@ -462,4 +527,6 @@ module.exports = {
     createAaveV3CloseToCollL2Strategy,
     createAaveV3FLCloseToCollL2Strategy,
     aaveV3CloseActions,
+    createDCAL2Strategy,
+    createLimitOrderL2Strategy,
 };

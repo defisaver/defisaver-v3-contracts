@@ -10,4 +10,5 @@ contract OptimismExchangeAddresses {
     address internal constant ZRX_ALLOWLIST_ADDR = 0x52F6ae5aE5a8a6316c970d3a02C50b74c1a50bB8;
     address internal constant ETH_ADDRESS = 0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000;
     address internal constant GROUP_REGISTRY = 0x566b2a957D8FCE39D2744059d558F27aF52a70c0;
+    address internal constant TRANSIENT_STORAGE = 0x491f0858Ef9e6987e260587322149Ac33D762e6e;
 }

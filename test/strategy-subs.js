@@ -5,6 +5,7 @@ const {
     subToStrategy,
     subToCompV3Proxy,
     subToCBRebondProxy,
+    subToLimitOrderProxy,
     subToMorphoAaveV2Proxy,
 } = require('./utils-strategies');
 
@@ -60,7 +61,6 @@ const subDcaStrategy = async (
     amount,
     interval,
     lastTimestamp,
-    eoa,
     strategyId,
 ) => {
     const isBundle = false;
@@ -69,9 +69,6 @@ const subDcaStrategy = async (
     const tokenAddrBuyEncoded = abiCoder.encode(['address'], [tokenAddrBuy]);
     const amountEncoded = abiCoder.encode(['uint256'], [amount]);
     const intervalEncoded = abiCoder.encode(['uint256'], [interval]);
-    const lastTimestampEncoded = abiCoder.encode(['uint256'], [lastTimestamp]);
-    const proxyEncoded = abiCoder.encode(['address'], [proxy.address]);
-    const eoaEncoded = abiCoder.encode(['address'], [eoa]);
 
     const triggerData = await createTimestampTrigger(lastTimestamp, interval);
 
@@ -84,9 +81,6 @@ const subDcaStrategy = async (
             tokenAddrBuyEncoded,
             amountEncoded,
             intervalEncoded,
-            lastTimestampEncoded,
-            proxyEncoded,
-            eoaEncoded,
         ],
     ];
     const subId = await subToStrategy(proxy, strategySub);
@@ -285,17 +279,10 @@ const subLiquityTrailingCloseToCollStrategy = async (proxy, percentage, roundId,
 };
 
 // eslint-disable-next-line max-len
-const subLimitOrderStrategy = async (proxy, senderAcc, tokenAddrSell, tokenAddrBuy, amount, targetPrice, strategyId) => {
-    const isBundle = false;
+const subLimitOrderStrategy = async (proxy, tokenAddrSell, tokenAddrBuy, amount, targetPrice, goodUntilDuration, orderType, regAddr = REGISTRY_ADDR) => {
+    const subInput = [[tokenAddrSell, tokenAddrBuy, amount, targetPrice, goodUntilDuration, orderType]];
 
-    const tokenAddrSellEncoded = abiCoder.encode(['address'], [tokenAddrSell]);
-    const tokenAddrBuyEncoded = abiCoder.encode(['address'], [tokenAddrBuy]);
-    const amountEncoded = abiCoder.encode(['uint256'], [amount.toString()]);
-
-    // eslint-disable-next-line max-len
-    const triggerData = await createChainLinkPriceTrigger(tokenAddrSell, targetPrice, RATIO_STATE_OVER);
-    const strategySub = [strategyId, isBundle, [triggerData], [tokenAddrSellEncoded, tokenAddrBuyEncoded, amountEncoded]];
-    const subId = await subToStrategy(proxy, strategySub);
+    const { subId, strategySub } = await subToLimitOrderProxy(proxy, subInput, regAddr);
 
     return { subId, strategySub };
 };
