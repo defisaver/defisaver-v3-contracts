@@ -478,14 +478,14 @@
     },
     {
       "name": "LimitSellL2",
-      "address": "0x08426bE896D68C4e37441D60d6EA43865CcF8B5C",
+      "address": "0xdbEE7981c45acA9444FA98bf3bf9769A4FeAfe74",
       "id": "0x5cc47139",
       "path": "contracts/actions/exchange/LimitSellL2.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0x08426bE896D68C4e37441D60d6EA43865CcF8B5C"]
     },
     {
       "name": "StrategyExecutor",

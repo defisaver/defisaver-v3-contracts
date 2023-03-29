@@ -243,14 +243,14 @@
     },
     {
       "name": "LimitSellL2",
-      "address": "0xC941B49Aaa9743a5EA4Ccd60Bf9a980861bA5201",
+      "address": "0x2D5d36e458eB151D30B189805fF2517863A41c25",
       "id": "0x5cc47139",
       "path": "contracts/actions/exchange/LimitSellL2.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0xC941B49Aaa9743a5EA4Ccd60Bf9a980861bA5201"]
     },
     {
       "name": "WrapEth",
