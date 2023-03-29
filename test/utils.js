@@ -362,7 +362,13 @@ const timeTravel = async (timeIncrease) => {
 };
 
 const setStorageAt = async (address, index, value) => {
-    await hre.ethers.provider.send('hardhat_setStorageAt', [address, index, value]);
+    let prefix = 'hardhat';
+
+    if (hre.network.config.type === 'tenderly') {
+        prefix = 'tenderly';
+    }
+
+    await hre.ethers.provider.send(`${prefix}_setStorageAt`, [address, index, value]);
     await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
 };
 

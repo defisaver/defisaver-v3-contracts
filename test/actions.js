@@ -1992,6 +1992,30 @@ const convexClaim = async (
     return executeAction('ConvexClaim', functionData, proxy);
 };
 
+const morphoAaveV3Supply = async (
+    proxy, emodeId, tokenAddr, amount, from, onBehalf, supplyAsColl = true, maxIterations = 0,
+) => {
+    const supplyAddr = await getAddrFromRegistry('MorphoAaveV3Supply');
+
+    const aaveSupplyAction = new dfs.actions.morpho.MorphoAaveV3SupplyAction(
+        emodeId,
+        tokenAddr,
+        amount,
+        from,
+        onBehalf,
+        supplyAsColl,
+        maxIterations,
+    );
+
+    const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
+
+    const receipt = await proxy['execute(address,bytes)'](supplyAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed morphoAaveV3Supply: ${gasUsed}`);
+    return receipt;
+};
+
 const aaveV3Supply = async (
     proxy, market, amount, tokenAddr, assetId, from, signer,
 ) => {
@@ -2589,4 +2613,6 @@ module.exports = {
     morphoAaveV2Borrow,
     morphoAaveV2Payback,
     morphoClaim,
+
+    morphoAaveV3Supply,
 };

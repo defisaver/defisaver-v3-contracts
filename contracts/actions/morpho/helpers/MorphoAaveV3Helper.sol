@@ -20,4 +20,9 @@ contract MorphoAaveV3Helper is MainnetMorphoAaveV3Addresses, DSMath {
         return morphoAddr;
     }
 
+    function getSafetyRatio(address _morphoAddr, address _usr) internal view returns (uint256) {
+        Types.LiquidityData memory liqData = IMorphoAaveV3(_morphoAddr).liquidityData(_usr);
+        return wdiv(liqData.borrowable, liqData.debt);
+    }
+
 }
