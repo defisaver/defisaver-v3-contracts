@@ -10,8 +10,6 @@ contract LiquityView is LiquityHelper {
     using TokenUtils for address;
     using SafeMath for uint256;
 
-    enum LiquityActionId {Open, Borrow, Payback, Supply, Withdraw}
-
     enum CollChange { SUPPLY, WITHDRAW }
     enum DebtChange { PAYBACK, BORROW }
 
@@ -52,13 +50,11 @@ contract LiquityView is LiquityHelper {
                 _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
 
             newColl = coll.add(_collAmount);
-            newDebt = debt;
         }
 
         //  LiquityWithdraw
         if (collChangeAction == CollChange.WITHDRAW) {
             newColl = coll.sub(_collAmount);
-            newDebt = debt;
         }
               
         //  LiquityBorrow
@@ -66,14 +62,11 @@ contract LiquityView is LiquityHelper {
             if (!isRecoveryMode())
                 _lusdAmount = _lusdAmount.add(TroveManager.getBorrowingFeeWithDecay(_lusdAmount));
 
-            newColl = coll;
             newDebt = debt.add(_lusdAmount);
         }
 
         //  LiquityPayback
         if (debtChangeAction == DebtChange.PAYBACK) {
-            newColl = coll;
-
             if (_lusdAmount == type(uint256).max) {
                 _lusdAmount = LUSD_TOKEN_ADDRESS.getBalance(_from);
             }
@@ -85,7 +78,6 @@ contract LiquityView is LiquityHelper {
 
             newDebt = debt.sub(_lusdAmount);
         }
-
         return computeNICR(newColl, newDebt);
     }
 
