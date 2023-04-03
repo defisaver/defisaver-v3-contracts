@@ -1012,7 +1012,6 @@ const createLiquityTrove = async (coll, debt, sender) => {
 
     await depositToWeth(amountColl, senderAcc);
     await approve(WETH_ADDRESS, proxy.address, senderAcc);
-    await redeploy('LiquityView', addrs[network].REGISTRY_ADDR, false, true);
 
     const maxFeePercentage = hre.ethers.utils.parseUnits('5', 16);
 
