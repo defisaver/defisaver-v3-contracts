@@ -256,7 +256,8 @@ const updateSubDataMorphoAaveV2Proxy = async (
 };
 
 const subToLiquityProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const subProxyAddr = await getAddrFromRegistry('LiquitySubProxy', regAddr);
+    const subProxyAddr = '0xE2f4A4629FbbC444964A16438329288C66551c30'; // hardcoded here for now
+    console.log({ subProxyAddr });
 
     const subProxyFactory = await hre.ethers.getContractFactory('LiquitySubProxy');
     const functionData = subProxyFactory.interface.encodeFunctionData(
@@ -273,7 +274,7 @@ const subToLiquityProxy = async (proxy, inputData, regAddr = addrs[network].REGI
     console.log(`GasUsed subToLiquityProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 
     const latestSubId = await getLatestSubId(regAddr);
-    const subProxy = await getContractFromRegistry('LiquitySubProxy');
+    const subProxy = await hre.ethers.getContractAt('LiquitySubProxy', subProxyAddr);
     const repaySub = await subProxy.formatRepaySub(...inputData, proxy.address);
     const boostSub = await subProxy.formatBoostSub(...inputData, proxy.address);
     return { latestSubId, repaySub, boostSub };
