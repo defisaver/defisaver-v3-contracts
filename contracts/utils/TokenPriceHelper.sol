@@ -16,11 +16,6 @@ import "../interfaces/chainlink/IAggregatorV3.sol";
 contract TokenPriceHelper is DSMath, UtilHelper {
     IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
-    TokenPriceHelper private immutable _this;
-    constructor() {
-        _this = this;
-    }
-
     /// @dev Helper function that returns chainlink price data
     /// @param _inputTokenAddr Token address we are looking the usd price for
     /// @param _roundId Chainlink roundId, if 0 uses the latest
