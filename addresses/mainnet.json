@@ -791,14 +791,14 @@
     },
     {
         "name": "LimitSell",
-        "address": "0x555C5B5d3e49ae015d5dA5C0476f984386e906BD",
+        "address": "0x02b0eE3b52e8E0749444a7255B9D86c50d18D19A",
         "id": "0x8c712c04",
         "path": "contracts/actions/exchange/LimitSell.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x555C5B5d3e49ae015d5dA5C0476f984386e906BD"]
     },
     {
         "name": "McdGenerate",
@@ -1820,16 +1820,17 @@
     },
     {
         "name": "GasFeeTaker",
-        "address": "0x80536cb79341972a5Ef679dF5B70bB4A40a53d96",
+        "address": "0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b",
         "id": "0x4571b8b3",
         "path": "contracts/actions/fee/GasFeeTaker.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
             "0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d",
-            "0xcCFFC73347B05cBDCCe7c3de2a0AdEcDAa8AEf51"
+            "0xcCFFC73347B05cBDCCe7c3de2a0AdEcDAa8AEf51",
+            "0x80536cb79341972a5Ef679dF5B70bB4A40a53d96"
         ]
     },
     {
@@ -1844,16 +1845,16 @@
     },
     {
         "name": "ChainLinkPriceTrigger",
-        "address": "0xAbf52Fc6e5C0e6E44Daac7C6ca79498302D9B0CA",
+        "address": "0x484c78cf4a3C5bAb2174931E0A451e0E1B5b08F7",
         "id": "0xac6bb72a",
         "path": "contracts/triggers/ChainLinkPriceTrigger.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
             "0xb14226c3FD41e9B1FF85b4f7144CB4096a5D1Ec9",
-            "0xe3457797c543AD91bd36023d2EE600305ee89195"
+            "0xAbf52Fc6e5C0e6E44Daac7C6ca79498302D9B0CA"
         ]
     },
     {
