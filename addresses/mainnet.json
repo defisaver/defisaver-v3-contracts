@@ -878,6 +878,28 @@
         "history": ["0x773b3454C5d4Afff8938748816d7E92d25841927"]
     },
     {
+        "name": "McdBoostComposite",
+        "address": "0x592F4d59DB7841fF4317601b70Ce2786784E90ae",
+        "id": "0x310b34c6",
+        "path": "contracts/actions/mcd/McdBoostComposite.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "McdRepayComposite",
+        "address": "0xf85573e483786de9aad70DfEA869345C313019D9",
+        "id": "0xb732e076",
+        "path": "contracts/actions/mcd/McdRepayComposite.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "ReflexerSupply",
         "address": "0xd7a36CD4ce7CCc2F1376Dc5C48BaC84380A4f698",
         "id": "0x1b6b9da7",
