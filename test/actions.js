@@ -750,6 +750,18 @@ const mcdBoostComposite = async (
     return tx;
 };
 
+const mcdDsrDeposit = async (proxy, amount, from) => {
+    const action = new dfs.actions.maker.MakerDsrDepositAction(amount, from);
+    const [, functionData] = action.encodeForDsProxyCall();
+    return executeAction('McdDsrDeposit', functionData, proxy);
+};
+
+const mcdDsrWithdraw = async (proxy, amount, to) => {
+    const action = new dfs.actions.maker.MakerDsrWithdrawAction(amount, to);
+    const [, functionData] = action.encodeForDsProxyCall();
+    return executeAction('McdDsrWithdraw', functionData, proxy);
+};
+
 /*
   _______  __    __  .__   __.  __
  /  _____||  |  |  | |  \ |  | |  |
@@ -2583,6 +2595,8 @@ module.exports = {
     mcdRepayComposite,
     mcdFLBoostComposite,
     mcdBoostComposite,
+    mcdDsrDeposit,
+    mcdDsrWithdraw,
 
     morphoAaveV2Supply,
     morphoAaveV2Withdraw,

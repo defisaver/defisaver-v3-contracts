@@ -18,6 +18,8 @@ const {
     mcdBoostComposite,
     mcdFLBoostComposite,
     mcdFLRepayComposite,
+    mcdDsrDeposit,
+    mcdDsrWithdraw,
 } = require('../actions');
 const {
     getProxy,
@@ -40,6 +42,10 @@ const {
     formatMockExchangeObj,
     cacheChainlinkPrice,
     LOGGER_ADDR,
+    getContractFromRegistry,
+    approve,
+    resetForkToBlock,
+    expectCloseEq,
 } = require('../utils');
 const {
     getVaultsForUser,
@@ -1599,6 +1605,128 @@ const mcdBoostCompositeTest = async () => {
     });
 };
 
+const mcdDsrDepositTest = async () => {
+    describe('Mcd-Dsr-Deposit', async function () {
+        this.timeout(80000);
+
+        const DSR_DEPOSIT_AMOUNT = Float2BN('3000');
+        const { address: daiAddr } = getAssetInfo('DAI');
+
+        let senderAcc;
+        let proxy;
+        let snapshot;
+        let view;
+
+        before(async () => {
+            [senderAcc] = await hre.ethers.getSigners();
+            proxy = await getProxy(senderAcc.address);
+
+            await getContractFromRegistry('McdDsrDeposit');
+            view = await redeploy('McdView');
+        });
+
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        it('... should deposit DAI into Maker DSR', async () => {
+            await setBalance(daiAddr, senderAcc.address, DSR_DEPOSIT_AMOUNT);
+            await approve(daiAddr, proxy.address);
+            await mcdDsrDeposit(proxy, DSR_DEPOSIT_AMOUNT, senderAcc.address);
+            const dsrBalance = await view.callStatic.getUserDsrBalance(proxy.address);
+            expect(dsrBalance).to.be.closeTo(DSR_DEPOSIT_AMOUNT, 1); // off by one wei
+
+            const vatDust = await hre.ethers.getContractAt('IVat', '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B').then(
+                (vat) => vat.dai(proxy.address),
+            );
+            expect(vatDust).to.be.lt(Float2BN('1', 27)); // vat balances are multiplied by RAY, anything less cannot be withdrawn
+        });
+
+        it('... should deposit MAXUINT DAI into Maker DSR', async () => {
+            await setBalance(daiAddr, senderAcc.address, DSR_DEPOSIT_AMOUNT);
+            await approve(daiAddr, proxy.address);
+            await mcdDsrDeposit(proxy, hre.ethers.constants.MaxUint256, senderAcc.address);
+            const dsrBalance = await view.callStatic.getUserDsrBalance(proxy.address);
+            expect(dsrBalance).to.be.closeTo(DSR_DEPOSIT_AMOUNT, 1); // off by one wei
+
+            const vatDust = await hre.ethers.getContractAt('IVat', '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B').then(
+                (vat) => vat.dai(proxy.address),
+            );
+            expect(vatDust).to.be.lt(Float2BN('1', 27)); // vat balances are multiplied by RAY, anything less cannot be withdrawn
+        });
+    });
+};
+
+const mcdDsrWithdrawTest = async () => {
+    describe('Mcd-Dsr-Withdraw', async function () {
+        this.timeout(80000);
+
+        const DSR_DEPOSIT_AMOUNT = Float2BN('3000');
+        const { address: daiAddr } = getAssetInfo('DAI');
+
+        let senderAcc;
+        let proxy;
+        let view;
+
+        before(async () => {
+            [senderAcc] = await hre.ethers.getSigners();
+            proxy = await getProxy(senderAcc.address);
+
+            await getContractFromRegistry('McdDsrDeposit');
+            await getContractFromRegistry('McdDsrWithdraw');
+            view = await getContractFromRegistry('McdView');
+        });
+
+        it('... should deposit DAI to Maker DSR', async () => {
+            await setBalance(daiAddr, senderAcc.address, DSR_DEPOSIT_AMOUNT);
+            await approve(daiAddr, proxy.address);
+            await mcdDsrDeposit(proxy, DSR_DEPOSIT_AMOUNT, senderAcc.address);
+            const dsrBalance = await view.callStatic.getUserDsrBalance(proxy.address);
+            expect(dsrBalance).to.be.closeTo(DSR_DEPOSIT_AMOUNT, 1); // off by one wei
+
+            const vatDust = await hre.ethers.getContractAt('IVat', '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B').then(
+                (vat) => vat.dai(proxy.address),
+            );
+            expect(vatDust).to.be.lt(Float2BN('1', 27)); // vat balances are multiplied by RAY, anything less cannot be withdrawn
+        });
+
+        it('... should withdraw half of deposited DAI from Maker DSR', async () => {
+            await mcdDsrWithdraw(proxy, DSR_DEPOSIT_AMOUNT.div(2), senderAcc.address);
+            expect(await balanceOf(daiAddr, senderAcc.address)).to.be.eq(DSR_DEPOSIT_AMOUNT.div(2));
+
+            const dsrBalance = await view.callStatic.getUserDsrBalance(proxy.address);
+            expect(dsrBalance).to.be.gte(DSR_DEPOSIT_AMOUNT.div(2));
+
+            const vatDust = await hre.ethers.getContractAt('IVat', '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B').then(
+                (vat) => vat.dai(proxy.address),
+            );
+            expect(vatDust).to.be.lt(Float2BN('1', 27)); // vat balances are multiplied by RAY, anything less cannot be withdrawn
+        });
+
+        it('... should withdraw MAXUINT DAI from Maker DSR', async () => {
+            await mcdDsrWithdraw(proxy, hre.ethers.constants.MaxUint256, senderAcc.address);
+            expect(await balanceOf(daiAddr, senderAcc.address)).to.be.gte(DSR_DEPOSIT_AMOUNT);
+
+            const dsrBalance = await view.callStatic.getUserDsrBalance(proxy.address);
+            expect(dsrBalance).to.be.eq(0);
+
+            const pieLeft = await hre.ethers.getContractAt('IPot', '0x197E90f9FAD81970bA7976f33CbD77088E5D7cf7').then(
+                (pot) => pot.pie(proxy.address),
+            );
+            expect(pieLeft).to.be.eq(0);
+
+            const vatDust = await hre.ethers.getContractAt('IVat', '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B').then(
+                (vat) => vat.dai(proxy.address),
+            );
+            expect(vatDust).to.be.lt(Float2BN('1', 27)); // vat balances are multiplied by RAY, anything less cannot be withdrawn
+        });
+    });
+};
+
 const mcdDeployContracts = async () => {
     await redeploy('McdOpen');
     await redeploy('McdSupply');
@@ -1638,5 +1766,7 @@ module.exports = {
     mcdRepayCompositeTest,
     mcdFLBoostCompositeTest,
     mcdBoostCompositeTest,
+    mcdDsrDepositTest,
+    mcdDsrWithdrawTest,
     GENERATE_AMOUNT_IN_USD,
 };
