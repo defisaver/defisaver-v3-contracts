@@ -328,6 +328,85 @@ const dfsSellTest = async () => {
             const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
             expect(buyBalanceBefore).is.lt(buyBalanceAfter);
         });
+        // it('... should try to sell WETH for DAI with offchain calldata (Paraswap)', async () => {
+        //     const sellAssetInfo = getAssetInfo('WETH');
+        //     const buyAssetInfo = getAssetInfo('USDC');
+
+        //     const buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
+
+        //     await depositToWeth(hre.ethers.utils.parseUnits('10', 18));
+        //     await approve(sellAssetInfo.address, proxy.address);
+
+        //     const options = {
+        //         method: 'GET',
+        //         baseURL: 'https://apiv5.paraswap.io',
+        //         url: '/prices?srcToken=0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2&srcDecimals=18&destToken=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&destDecimals=6&amount=1000000000000000000&side=SELL&network=1'
+        //         + '&excludeDEXS=Balancer'
+        //         + '&excludeContractMethods=simpleSwap'
+        //         + `&userAddress=${paraswapWrapper.address}`,
+        //     };
+        //     // console.log(options.baseURL + options.url);
+        //     const priceObject = await axios(options).then((response) => response.data.priceRoute);
+        //     // console.log(priceObject);
+        //     const secondOptions = {
+        //         method: 'POST',
+        //         baseURL: 'https://apiv5.paraswap.io/transactions/1?ignoreChecks=true',
+        //         data: {
+        //             priceRoute: priceObject,
+        //             srcToken: priceObject.srcToken,
+        //             destToken: priceObject.destToken,
+        //             srcAmount: priceObject.srcAmount,
+        //             userAddress: paraswapWrapper.address,
+        //             partner: 'paraswap.io',
+        //             srcDecimals: priceObject.srcDecimals,
+        //             destDecimals: priceObject.destDecimals,
+        //             slippage: 1000,
+        //             txOrigin: senderAcc.address,
+        //         },
+        //     };
+        //     // console.log(secondOptions.data);
+        //     const resultObject = await axios(secondOptions).then((response) => response.data);
+        //     // console.log(resultObject);
+        //     // THIS IS CHANGEABLE WITH API INFORMATION
+        //     const allowanceTarget = priceObject.tokenTransferProxy;
+        //     const price = 1; // just for testing, anything bigger than 0 triggers offchain if
+        //     const protocolFee = 0;
+        //     const callData = resultObject.data;
+        //     // console.log(callData);
+        //     let amountInHex = hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [priceObject.srcAmount]);
+        //     amountInHex = amountInHex.slice(2);
+        //     // console.log(amountInHex.toString());
+        //     let offset = callData.toString().indexOf(amountInHex);
+        //     // console.log(offset);
+        //     offset = offset / 2 - 1;
+        //     // console.log(offset);
+        //     const paraswapSpecialCalldata = hre.ethers.utils.defaultAbiCoder.encode(['(bytes,uint256)'], [[callData, offset]]);
+
+        //     const exchangeObject = formatExchangeObjForOffchain(
+        //         sellAssetInfo.address,
+        //         buyAssetInfo.address,
+        //         hre.ethers.utils.parseUnits('1', 18),
+        //         paraswapWrapper.address,
+        //         priceObject.contractAddress,
+        //         allowanceTarget,
+        //         price,
+        //         protocolFee,
+        //         paraswapSpecialCalldata,
+        //     );
+
+        //     await addToZRXAllowlist(senderAcc, priceObject.contractAddress);
+        //     const sellAction = new dfs.actions.basic.SellAction(
+        //         exchangeObject, senderAcc.address, senderAcc.address,
+        //     );
+
+        //     const functionData = sellAction.encodeForDsProxyCall()[1];
+
+        //     await executeAction('DFSSell', functionData, proxy);
+
+        //     const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
+
+        //     expect(buyBalanceBefore).is.lt(buyBalanceAfter);
+        // });
         /*
         for (let i = 0; i < trades.length; ++i) {
             const trade = trades[i];
