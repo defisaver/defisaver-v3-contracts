@@ -28,6 +28,8 @@ const {
     formatExchangeObjForOffchain,
     addToZRXAllowlist,
     chainIds,
+    takeSnapshot,
+    revertToSnapshot,
 } = require('../utils');
 
 const {
@@ -317,15 +319,33 @@ const dfsSellTest = async () => {
             );
 
             await addToZRXAllowlist(senderAcc, priceObject.routerAddress);
-            const sellAction = new dfs.actions.basic.SellAction(
-                exchangeObject, senderAcc.address, senderAcc.address,
-            );
-
-            const functionData = sellAction.encodeForDsProxyCall()[1];
-
-            await executeAction('DFSSell', functionData, proxy);
-
+            // test single action so no changing of amount
+            {
+                const snapshot = await takeSnapshot();
+                const sellAction = new dfs.actions.basic.SellAction(
+                    exchangeObject, senderAcc.address, senderAcc.address,
+                );
+                const functionData = sellAction.encodeForDsProxyCall()[1];
+                await executeAction('DFSSell', functionData, proxy);
+                const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
+                expect(buyBalanceBefore).is.lt(buyBalanceAfter);
+                await revertToSnapshot(snapshot);
+            }
+            // test recipe
+            const sellRecipe = new dfs.Recipe('SellRecipe', [
+                new dfs.actions.basic.WrapEthAction(amount.toString()),
+                new dfs.actions.basic.SellAction(
+                    exchangeObject, proxy.address, senderAcc.address,
+                ),
+            ]);
+            const functionData = sellRecipe.encodeForDsProxyCall()[1];
+            const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
+            await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData, {
+                value: amount,
+                gasLimit: 5000000,
+            });
             const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
+            console.log(buyBalanceAfter.toString());
             expect(buyBalanceBefore).is.lt(buyBalanceAfter);
         });
         // it('... should try to sell WETH for DAI with offchain calldata (Paraswap)', async () => {
