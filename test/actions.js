@@ -42,12 +42,6 @@ const { execShellCommand } = require('../scripts/hardhat-tasks-functions');
 const network = hre.network.config.name;
 
 const executeAction = async (actionName, functionData, proxy, regAddr = addrs[network].REGISTRY_ADDR) => {
-    if (hre.network.config.type !== 'tenderly') {
-        await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
-            '0x1', // 1 wei
-        ]);
-    }
-
     const actionAddr = await getAddrFromRegistry(actionName, regAddr);
     let receipt;
     try {

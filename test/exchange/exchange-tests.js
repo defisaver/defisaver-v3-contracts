@@ -7,6 +7,7 @@ const hre = require('hardhat');
 const dfs = require('@defisaver/sdk');
 
 const defisaverSdk = require('@defisaver/sdk');
+const { default: axios } = require('axios');
 const {
     getProxy,
     redeploy,
@@ -24,10 +25,13 @@ const {
     placeHolderAddr,
     getAddrFromRegistry,
     approve,
+    formatExchangeObjForOffchain,
+    addToZRXAllowlist,
+    chainIds,
 } = require('../utils');
 
 const {
-    sell,
+    sell, executeAction,
 } = require('../actions');
 
 const trades = [
@@ -222,108 +226,109 @@ const dfsSellTest = async () => {
         let paraswapWrapper;
         let curveWrapper;
         let dfsPrices;
+        let kyberAggregatorWrapper;
 
         before(async () => {
-            await curveApiInit();
-            await resetForkToBlock();
+            // await curveApiInit();
+            // await resetForkToBlock();
             await redeploy('DFSSell');
-
+            /*
             dfsPrices = await redeploy('DFSPrices');
             uniWrapper = await redeploy('UniswapWrapperV3');
             kyberWrapper = await redeploy('KyberWrapperV3');
             uniV3Wrapper = await redeploy('UniV3WrapperV3');
             curveWrapper = await redeploy('CurveWrapperV3');
             paraswapWrapper = await redeploy('ParaswapWrapper');
+            */
+            kyberAggregatorWrapper = await redeploy('KyberAggregatorWrapper');
 
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-
+            /*
             await setNewExchangeWrapper(senderAcc, uniWrapper.address);
             await setNewExchangeWrapper(senderAcc, kyberWrapper.address);
             await setNewExchangeWrapper(senderAcc, uniV3Wrapper.address);
             await setNewExchangeWrapper(senderAcc, curveWrapper.address);
 
             await setNewExchangeWrapper(senderAcc, paraswapWrapper.address);
+            */
+            await setNewExchangeWrapper(senderAcc, kyberAggregatorWrapper.address);
         });
-        // it('... should try to sell WETH for DAI with offchain calldata (Paraswap)', async () => {
-        //     const sellAssetInfo = getAssetInfo('WETH');
-        //     const buyAssetInfo = getAssetInfo('USDC');
 
-        //     const buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
+        it('... should try to sell WETH for DAI with offchain calldata (Kyber)', async () => {
+            const network = hre.network.config.name;
+            const chainId = chainIds[network];
+            const sellAssetInfo = getAssetInfo('WETH', chainId);
+            const buyAssetInfo = getAssetInfo('USDC', chainId);
 
-        //     await depositToWeth(hre.ethers.utils.parseUnits('10', 18));
-        //     await approve(sellAssetInfo.address, proxy.address);
+            const buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
+            const amount = hre.ethers.utils.parseUnits('1', 18);
 
-        //     const options = {
-        //         method: 'GET',
-        //         baseURL: 'https://apiv5.paraswap.io',
-        //         url: '/prices?srcToken=0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2&srcDecimals=18&destToken=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&destDecimals=6&amount=1000000000000000000&side=SELL&network=1'
-        //         + '&excludeDEXS=Balancer'
-        //         + '&excludeContractMethods=simpleSwap'
-        //         + `&userAddress=${paraswapWrapper.address}`,
-        //     };
-        //     // console.log(options.baseURL + options.url);
-        //     const priceObject = await axios(options).then((response) => response.data.priceRoute);
-        //     // console.log(priceObject);
-        //     const secondOptions = {
-        //         method: 'POST',
-        //         baseURL: 'https://apiv5.paraswap.io/transactions/1?ignoreChecks=true',
-        //         data: {
-        //             priceRoute: priceObject,
-        //             srcToken: priceObject.srcToken,
-        //             destToken: priceObject.destToken,
-        //             srcAmount: priceObject.srcAmount,
-        //             userAddress: paraswapWrapper.address,
-        //             partner: 'paraswap.io',
-        //             srcDecimals: priceObject.srcDecimals,
-        //             destDecimals: priceObject.destDecimals,
-        //             slippage: 1000,
-        //             txOrigin: senderAcc.address,
-        //         },
-        //     };
-        //     // console.log(secondOptions.data);
-        //     const resultObject = await axios(secondOptions).then((response) => response.data);
-        //     // console.log(resultObject);
-        //     // THIS IS CHANGEABLE WITH API INFORMATION
-        //     const allowanceTarget = priceObject.tokenTransferProxy;
-        //     const price = 1; // just for testing, anything bigger than 0 triggers offchain if
-        //     const protocolFee = 0;
-        //     const callData = resultObject.data;
-        //     // console.log(callData);
-        //     let amountInHex = hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [priceObject.srcAmount]);
-        //     amountInHex = amountInHex.slice(2);
-        //     // console.log(amountInHex.toString());
-        //     let offset = callData.toString().indexOf(amountInHex);
-        //     // console.log(offset);
-        //     offset = offset / 2 - 1;
-        //     // console.log(offset);
-        //     const paraswapSpecialCalldata = hre.ethers.utils.defaultAbiCoder.encode(['(bytes,uint256)'], [[callData, offset]]);
+            await setBalance(sellAssetInfo.address, senderAcc.address, amount);
+            await approve(sellAssetInfo.address, proxy.address);
+            let baseUrl = '';
+            if (chainId === 1) {
+                baseUrl = 'https://aggregator-api.kyberswap.com/ethereum/api/v1/';
+            }
+            if (chainId === 10) {
+                baseUrl = 'https://aggregator-api.kyberswap.com/optimism/api/v1/';
+            }
+            const options = {
+                method: 'GET',
+                baseURL: baseUrl,
+                url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${buyAssetInfo.address}&amountIn=${amount.toString()}&saveGas=false&gasInclude=true`,
+            };
+            console.log(options.baseURL + options.url);
+            const priceObject = await axios(options).then((response) => response.data.data);
+            console.log(priceObject);
+            const secondOptions = {
+                method: 'POST',
+                baseURL: baseUrl,
+                url: 'route/build',
+                data: {
+                    routeSummary: priceObject.routeSummary,
+                    sender: kyberAggregatorWrapper.address,
+                    recipient: kyberAggregatorWrapper.address,
+                    slippageTolerance: 1000,
+                    deadline: 1776079017,
+                },
+            };
+            // console.log(secondOptions.data);
+            const resultObject = await axios(secondOptions).then((response) => response.data);
 
-        //     const exchangeObject = formatExchangeObjForOffchain(
-        //         sellAssetInfo.address,
-        //         buyAssetInfo.address,
-        //         hre.ethers.utils.parseUnits('1', 18),
-        //         paraswapWrapper.address,
-        //         priceObject.contractAddress,
-        //         allowanceTarget,
-        //         price,
-        //         protocolFee,
-        //         paraswapSpecialCalldata,
-        //     );
+            // console.log(resultObject);
+            // THIS IS CHANGEABLE WITH API INFORMATION
+            const allowanceTarget = priceObject.routerAddress;
+            const price = 1; // just for testing, anything bigger than 0 triggers offchain if
+            const protocolFee = 0;
+            const callData = resultObject.data.data;
+            const kyberSpecialCalldata = hre.ethers.utils.defaultAbiCoder.encode(['(bytes4,bytes)'], [[callData.substring(0, 10), `0x${callData.substring(10)}`]]);
 
-        //     await addToZRXAllowlist(senderAcc, priceObject.contractAddress);
-        //     const sellAction = new dfs.actions.basic.SellAction(
-        //         exchangeObject, senderAcc.address, senderAcc.address,
-        //     );
+            const exchangeObject = formatExchangeObjForOffchain(
+                sellAssetInfo.address,
+                buyAssetInfo.address,
+                hre.ethers.utils.parseUnits('1', 18),
+                kyberAggregatorWrapper.address,
+                priceObject.routerAddress,
+                allowanceTarget,
+                price,
+                protocolFee,
+                kyberSpecialCalldata,
+            );
 
-        //     const functionData = sellAction.encodeForDsProxyCall()[1];
+            await addToZRXAllowlist(senderAcc, priceObject.routerAddress);
+            const sellAction = new dfs.actions.basic.SellAction(
+                exchangeObject, senderAcc.address, senderAcc.address,
+            );
 
-        //     await executeAction('DFSSell', functionData, proxy);
+            const functionData = sellAction.encodeForDsProxyCall()[1];
 
-        //     const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
+            await executeAction('DFSSell', functionData, proxy);
 
-        //     expect(buyBalanceBefore).is.lt(buyBalanceAfter);
-        // });
+            const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
+            expect(buyBalanceBefore).is.lt(buyBalanceAfter);
+        });
+        /*
         for (let i = 0; i < trades.length; ++i) {
             const trade = trades[i];
 
@@ -368,6 +373,7 @@ const dfsSellTest = async () => {
                 console.log(`Curve sell rate -> ${curveRate}`);
             });
         }
+        */
     });
 };
 

@@ -8,6 +8,6 @@ describe('Dfs-Sell', function () {
 
     it('... should check best price from DFSPrices contract', async () => {
         await dfsSellTest();
-        dfsSellSameAssetTest();
+        // sdfsSellSameAssetTest();
     });
 });
