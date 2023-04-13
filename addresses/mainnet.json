@@ -1836,8 +1836,19 @@
     },
     {
         "name": "LiquityRatioTrigger",
-        "address": "0x7dDA9F944c3Daf27fbe3B8f27EC5f14FE3fa94BF",
+        "address": "0x7B0B42dC9bBc6e751c1aAA01A9CD16830F5B0276",
         "id": "0x26ef9c60",
+        "path": "contracts/triggers/LiquityRatioTrigger.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": ["0x7dDA9F944c3Daf27fbe3B8f27EC5f14FE3fa94BF"]
+    },
+    {
+        "name": "LiquityRatioCheck",
+        "address": "0x4AE38243936FAcb0f42993D676b7df1Bb31082d9",
+        "id": "0xafe610df",
         "path": "contracts/triggers/LiquityRatioTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
