@@ -22,6 +22,17 @@
         "history": []
     },
     {
+      "name": "LimitOrderSubProxy",
+      "address": "0x576FFD606F4fF71E8ca29c1b59a02e080708F5Ac",
+      "id": "0x82fc0e77",
+      "path": "contracts/actions/exchange/LimitOrderSubProxy.sol",
+      "version": "1.0.1",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": ["0x43Af8734096941271eC637549661DCeA64052575"]
+    },
+    {
         "name": "AaveSubProxy",
         "address": "0x29a172f04CF9C6a79EdF4dD2744F2d260b8b8FE4",
         "id": "0xd11b2581",
@@ -229,6 +240,17 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": ["0x49E1574Ba6b8134c29B1EbC010784A01D91b794F"]
+    },
+    {
+      "name": "LimitSellL2",
+      "address": "0x2D5d36e458eB151D30B189805fF2517863A41c25",
+      "id": "0x5cc47139",
+      "path": "contracts/actions/exchange/LimitSellL2.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": ["0xC941B49Aaa9743a5EA4Ccd60Bf9a980861bA5201"]
     },
     {
       "name": "WrapEth",
@@ -551,6 +573,28 @@
       "history": [
         "0xBF1CaC12DB60819Bfa71A328282ecbc1D40443aA"
       ]
+    },
+    {
+      "name": "TimestampTrigger",
+      "address": "0x4E7a0c9AD860248A1e4a7C6e7729207908a8B8C7",
+      "id": "0xa051d9a9",
+      "path": "contracts/triggers/TimestampTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "OffchainPriceTrigger",
+      "address": "0x3BdBA547F8e7F0047142Bf713611a78B6d7D4E93",
+      "id": "0x3ef9c07c",
+      "path": "contracts/triggers/OffchainPriceTrigger.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": ["0x846087C427d3637199c2b76A80c6BAA7666919c0"]
     },
     {
       "name": "ToggleSub",

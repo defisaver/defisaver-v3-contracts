@@ -40,6 +40,11 @@ contract GasFeeHelperL2 is DSMath, MainnetFeeAddresses {
         // convert to token amount
         if (_feeToken != TokenUtils.WETH_ADDR) {
             uint256 tokenPriceInUSD = getTokenPrice(_feeToken);
+
+            if (tokenPriceInUSD == 0) {
+                return 0;
+            }
+            
             uint256 wethPriceInUSD = getTokenPrice(TokenUtils.WETH_ADDR);
             uint256 tokenDecimals = _feeToken.getTokenDecimals();
 
@@ -56,6 +61,10 @@ contract GasFeeHelperL2 is DSMath, MainnetFeeAddresses {
         address priceOracleAddress =
             ILendingPoolAddressesProviderV2(AAVE_MARKET).getPriceOracle();
 
-        price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr);
+        try IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr) returns (uint256 result) {
+            price = result;
+        } catch {
+            price = 0;
+        }
     }
 }

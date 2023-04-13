@@ -790,6 +790,17 @@
         ]
     },
     {
+        "name": "LimitSell",
+        "address": "0x555C5B5d3e49ae015d5dA5C0476f984386e906BD",
+        "id": "0x8c712c04",
+        "path": "contracts/actions/exchange/LimitSell.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "McdGenerate",
         "address": "0xCb50a91C0f12f439b8bf11E9474B9c1ED62Bf7a3",
         "id": "0xad463b00",
@@ -865,6 +876,28 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": ["0x773b3454C5d4Afff8938748816d7E92d25841927"]
+    },
+    {
+        "name": "McdBoostComposite",
+        "address": "0x592F4d59DB7841fF4317601b70Ce2786784E90ae",
+        "id": "0x310b34c6",
+        "path": "contracts/actions/mcd/McdBoostComposite.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "McdRepayComposite",
+        "address": "0xf85573e483786de9aad70DfEA869345C313019D9",
+        "id": "0xb732e076",
+        "path": "contracts/actions/mcd/McdRepayComposite.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     },
     {
         "name": "ReflexerSupply",
@@ -2021,6 +2054,28 @@
         "history": ["0x575C0Cfe52016B4CfeFb3134Bc6A3eEEf7718B07"]
     },
     {
+        "name": "TimestampTrigger",
+        "address": "0x9D6bDFd3c565C146F6676F710B8Ee957139349FA",
+        "id": "0xa051d9a9",
+        "path": "contracts/triggers/TimestampTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "OffchainPriceTrigger",
+        "address": "0x185037ced70CB8e45096EBB9d98397f9e462c90a",
+        "id": "0x3ef9c07c",
+        "path": "contracts/triggers/OffchainPriceTrigger.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": ["0x052761E045260F82f8f2B09063Bfae2299487797"]
+      },
+    {
         "name": "CompV3Allow",
         "address": "0xC4a80f22bf56E0dFa2CB378561B934F41E14bc9f",
         "id": "0xf2bccef8",
@@ -2129,6 +2184,17 @@
         "changeTime": 0,
         "registryIds": [],
         "history": ["0xb460c044Cb2ECA74c713b8504Fe5aF360764b38d"]
+    },
+    {
+        "name": "LimitOrderSubProxy",
+        "address": "0x14387701a5df90a7c1B4A384783e512E7FCd8711",
+        "id": "0x82fc0e77",
+        "path": "contracts/actions/exchange/LimitOrderSubProxy.sol",
+        "version": "1.0.1",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": ["0x37434dcb2DC049c0068d4b8F95497311F44c5d9e"]
     },
     {
         "name": "CompoundMonitorProxy",

@@ -10,4 +10,5 @@ contract MainnetExchangeAddresses {
     address internal constant ZRX_ALLOWLIST_ADDR = 0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F;
     address internal constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant GROUP_REGISTRY = 0xcA49e64FE1FE8be40ED30F682edA1b27a6c8611c;
+    address internal constant TRANSIENT_STORAGE = 0x2F7Ef2ea5E8c97B8687CA703A0e50Aa5a49B7eb2;
 }
