@@ -1197,6 +1197,17 @@
         "history": []
     },
     {
+        "name": "FLAaveV3WithFee",
+        "address": "0x5021d70aB7D757D61E0230c472ff89b8B2B8705e",
+        "id": "0xe10b7b9d",
+        "path": "contracts/actions/flashloan/FLAaveV3.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AaveV3RatioTrigger",
         "address": "0xC1b97aB9eF18EeE338a381c6f74470AA5C567283",
         "id": "0x21a42a26",
@@ -1369,14 +1380,14 @@
     },
     {
         "name": "FLAction",
-        "address": "0x9eC9E483Edb2dACA782222fF32b261AD56e43879",
+        "address": "0x72915D41982DfCAf30b871290618E59C45Edba7F",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x9eC9E483Edb2dACA782222fF32b261AD56e43879"]
     },
     {
         "name": "UniSupply",
