@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import {IERC20} from '../interfaces/IERC20.sol';
-import {IExecutorHelper} from '../interfaces/kyber/IExecutorHelper.sol';
-import {IMetaAggregationRouterV2} from '../interfaces/kyber/IMetaAggregationRouterV2.sol';
+import {IERC20} from "../interfaces/IERC20.sol";
+import {IExecutorHelper} from "../interfaces/kyber/IExecutorHelper.sol";
+import {IMetaAggregationRouterV2} from "../interfaces/kyber/IMetaAggregationRouterV2.sol";
 
 contract KyberInputScalingHelper {
     uint256 private constant _PARTIAL_FILL = 0x01;
@@ -69,7 +69,7 @@ contract KyberInputScalingHelper {
 
             (desc, targetData) = _getScaledInputDataV2(desc, targetData, newAmount, true);
             return abi.encodeWithSelector(selector, callTarget, desc, targetData, clientData);
-        } else revert('InputScalingHelper: Invalid selector');
+        } else revert("InputScalingHelper: Invalid selector");
     }
 
     function _getScaledInputDataV2(
@@ -149,7 +149,7 @@ contract KyberInputScalingHelper {
             } else if (functionSelector == IExecutorHelper.executeUniV3ProMMSwap.selector) {
                 swap.data = newUniV3ProMM(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeRfqSwap.selector) {
-                revert('InputScalingHelper: Can not scale RFQ swap');
+                revert("InputScalingHelper: Can not scale RFQ swap");
             } else if (functionSelector == IExecutorHelper.executeBalV2Swap.selector) {
                 swap.data = newBalancerV2(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeDODOSwap.selector) {
@@ -161,11 +161,11 @@ contract KyberInputScalingHelper {
             } else if (functionSelector == IExecutorHelper.executeSynthetixSwap.selector) {
                 swap.data = newSynthetix(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeHashflowSwap.selector) {
-                revert('InputScalingHelper: Can not scale RFQ swap');
+                revert("InputScalingHelper: Can not scale RFQ swap");
             } else if (functionSelector == IExecutorHelper.executeCamelotSwap.selector) {
                 swap.data = newCamelot(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeKyberLimitOrder.selector) {
-                revert('InputScalingHelper: Can not scale RFQ swap');
+                revert("InputScalingHelper: Can not scale RFQ swap");
             } else if (functionSelector == IExecutorHelper.executeWrappedstETHSwap.selector) {
                 swap.data = newWrappedstETHSwap(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executePSMSwap.selector) {
@@ -174,7 +174,7 @@ contract KyberInputScalingHelper {
                 swap.data = newFrax(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executePlatypusSwap.selector) {
                 swap.data = newPlatypus(swap.data, oldAmount, newAmount);
-            } else revert('AggregationExecutor: Dex type not supported');
+            } else revert("AggregationExecutor: Dex type not supported");
         }
         return abi.encode(executorDesc);
     }
