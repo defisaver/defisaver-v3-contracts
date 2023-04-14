@@ -47,6 +47,10 @@ contract McdDsrWithdraw is DSMath, McdHelper, ActionBase {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
+    function rdivup(uint256 x, uint256 y) internal pure returns (uint256) {
+        return (x * RAY + y - 1) / y;
+    }
+
     /// @notice Withdraws DAI from Maker DSR
     function _withdraw(Params memory _params) internal returns (uint256 withdrawn, bytes memory logData) {
         IPot pot = IPot(POT_ADDR);
@@ -56,9 +60,9 @@ contract McdDsrWithdraw is DSMath, McdHelper, ActionBase {
 
         if (_params.amount == type(uint256).max) {
             pie = pot.pie(address(this));
-            _params.amount = rmul(pie, chi);
+            _params.amount = pie * chi / RAY;
         } else {
-            pie = rdiv(_params.amount, chi);
+            pie = rdivup(_params.amount, chi);
         }
 
         pot.exit(pie);

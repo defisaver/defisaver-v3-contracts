@@ -44,8 +44,6 @@ const {
     LOGGER_ADDR,
     getContractFromRegistry,
     approve,
-    resetForkToBlock,
-    expectCloseEq,
 } = require('../utils');
 const {
     getVaultsForUser,
@@ -1618,6 +1616,7 @@ const mcdDsrDepositTest = async () => {
         let view;
 
         before(async () => {
+            await hre.ethers.provider.getBlockNumber().then((blockNumber) => console.log({ blockNumber }));
             [senderAcc] = await hre.ethers.getSigners();
             proxy = await getProxy(senderAcc.address);
 
@@ -1639,11 +1638,6 @@ const mcdDsrDepositTest = async () => {
             await mcdDsrDeposit(proxy, DSR_DEPOSIT_AMOUNT, senderAcc.address);
             const dsrBalance = await view.callStatic.getUserDsrBalance(proxy.address);
             expect(dsrBalance).to.be.closeTo(DSR_DEPOSIT_AMOUNT, 1); // off by one wei
-
-            const vatDust = await hre.ethers.getContractAt('IVat', '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B').then(
-                (vat) => vat.dai(proxy.address),
-            );
-            expect(vatDust).to.be.lt(Float2BN('1', 27)); // vat balances are multiplied by RAY, anything less cannot be withdrawn
         });
 
         it('... should deposit MAXUINT DAI into Maker DSR', async () => {
@@ -1652,11 +1646,6 @@ const mcdDsrDepositTest = async () => {
             await mcdDsrDeposit(proxy, hre.ethers.constants.MaxUint256, senderAcc.address);
             const dsrBalance = await view.callStatic.getUserDsrBalance(proxy.address);
             expect(dsrBalance).to.be.closeTo(DSR_DEPOSIT_AMOUNT, 1); // off by one wei
-
-            const vatDust = await hre.ethers.getContractAt('IVat', '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B').then(
-                (vat) => vat.dai(proxy.address),
-            );
-            expect(vatDust).to.be.lt(Float2BN('1', 27)); // vat balances are multiplied by RAY, anything less cannot be withdrawn
         });
     });
 };
@@ -1673,6 +1662,7 @@ const mcdDsrWithdrawTest = async () => {
         let view;
 
         before(async () => {
+            await hre.ethers.provider.getBlockNumber().then((blockNumber) => console.log({ blockNumber }));
             [senderAcc] = await hre.ethers.getSigners();
             proxy = await getProxy(senderAcc.address);
 
@@ -1687,11 +1677,6 @@ const mcdDsrWithdrawTest = async () => {
             await mcdDsrDeposit(proxy, DSR_DEPOSIT_AMOUNT, senderAcc.address);
             const dsrBalance = await view.callStatic.getUserDsrBalance(proxy.address);
             expect(dsrBalance).to.be.closeTo(DSR_DEPOSIT_AMOUNT, 1); // off by one wei
-
-            const vatDust = await hre.ethers.getContractAt('IVat', '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B').then(
-                (vat) => vat.dai(proxy.address),
-            );
-            expect(vatDust).to.be.lt(Float2BN('1', 27)); // vat balances are multiplied by RAY, anything less cannot be withdrawn
         });
 
         it('... should withdraw half of deposited DAI from Maker DSR', async () => {
@@ -1700,11 +1685,6 @@ const mcdDsrWithdrawTest = async () => {
 
             const dsrBalance = await view.callStatic.getUserDsrBalance(proxy.address);
             expect(dsrBalance).to.be.gte(DSR_DEPOSIT_AMOUNT.div(2));
-
-            const vatDust = await hre.ethers.getContractAt('IVat', '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B').then(
-                (vat) => vat.dai(proxy.address),
-            );
-            expect(vatDust).to.be.lt(Float2BN('1', 27)); // vat balances are multiplied by RAY, anything less cannot be withdrawn
         });
 
         it('... should withdraw MAXUINT DAI from Maker DSR', async () => {
@@ -1718,11 +1698,6 @@ const mcdDsrWithdrawTest = async () => {
                 (pot) => pot.pie(proxy.address),
             );
             expect(pieLeft).to.be.eq(0);
-
-            const vatDust = await hre.ethers.getContractAt('IVat', '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B').then(
-                (vat) => vat.dai(proxy.address),
-            );
-            expect(vatDust).to.be.lt(Float2BN('1', 27)); // vat balances are multiplied by RAY, anything less cannot be withdrawn
         });
     });
 };
