@@ -304,7 +304,6 @@ const dfsSellTest = async () => {
             const price = 1; // just for testing, anything bigger than 0 triggers offchain if
             const protocolFee = 0;
             const callData = resultObject.data.data;
-            const kyberSpecialCalldata = hre.ethers.utils.defaultAbiCoder.encode(['(bytes4,bytes)'], [[callData.substring(0, 10), `0x${callData.substring(10)}`]]);
 
             const exchangeObject = formatExchangeObjForOffchain(
                 sellAssetInfo.address,
@@ -315,7 +314,7 @@ const dfsSellTest = async () => {
                 allowanceTarget,
                 price,
                 protocolFee,
-                kyberSpecialCalldata,
+                callData,
             );
 
             await addToZRXAllowlist(senderAcc, priceObject.routerAddress);
