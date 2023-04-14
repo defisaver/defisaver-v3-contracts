@@ -4,13 +4,10 @@ pragma solidity =0.8.10;
 
 import "../ActionBase.sol";
 import "../../interfaces/mcd/IPot.sol";
-import "../../interfaces/mcd/IVat.sol";
 import "../../interfaces/mcd/IDaiJoin.sol";
-import "../../DS/DSMath.sol";
-import "../../utils/TokenUtils.sol";
 import "./helpers/McdHelper.sol";
 
-contract McdDsrDeposit is DSMath, McdHelper, ActionBase {
+contract McdDsrDeposit is McdHelper, ActionBase {
     using TokenUtils for address;
 
     struct Params {
