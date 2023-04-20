@@ -1,9 +1,10 @@
+const hre = require('hardhat');
 const {
     redeploy,
 } = require('../utils');
 
 const {
-    aaveFlTest, balancerFLTest, eulerFLTest, makerFLTest, aaveV3FlTest,
+    aaveFlTest, balancerFLTest, makerFLTest, aaveV3FlTest,
 } = require('./fl-tests');
 
 describe('Generalised flashloan test', function () {
@@ -14,14 +15,15 @@ describe('Generalised flashloan test', function () {
     });
 
     it('... should test generalised flash loan', async () => {
-        // Mainnet only
-
-        await aaveFlTest(true);
-        await eulerFLTest(true);
-        await makerFLTest(true);
+        const network = hre.network.config.name;
+        if (network === 'mainnet') {
+            await aaveFlTest(true);
+            await makerFLTest(true);
+        }
+        // euler hacked do we remove?
+        // await eulerFLTest(true);
 
         await balancerFLTest(true);
-        // L2 only
-        //await aaveV3FlTest(true);
+        await aaveV3FlTest(true);
     });
 });

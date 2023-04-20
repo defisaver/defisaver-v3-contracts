@@ -399,11 +399,22 @@
       "address": "0x219ac6dA971dE6d943cffD1BD62abde71525d382",
       "id": "0x8d7fb192",
       "path": "contracts/actions/flashloan/FLAaveV3.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
       "history": ["0x3Cc0d5DAE1B94e294152C3150aA732b97af603E1"]
+    },
+    {
+      "name": "FLAaveV3WithFee",
+      "address": "0x53953aCEe438c083e4299F7976f03Ff3cb862161",
+      "id": "0xe10b7b9d",
+      "path": "contracts/actions/flashloan/FLAaveV3.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
     },
     {
       "name": "RecipeExecutor",
@@ -442,14 +453,14 @@
     },
     {
       "name": "FLAction",
-      "address": "0xFbd213073FC4f597C840B1ee202678d210d765fb",
+      "address": "0x1561EAF39c98d45C55C7dC605E627672F4406819",
       "id": "0xbcab5e2a",
       "path": "contracts/actions/flashloan/FLAction.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0xFbd213073FC4f597C840B1ee202678d210d765fb"]
     },
     {
       "name": "TokenBalance",
