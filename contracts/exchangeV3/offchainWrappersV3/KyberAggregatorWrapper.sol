@@ -14,8 +14,7 @@ contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAut
 
     //Not enough funds
     error InsufficientFunds(uint256 available, uint256 required);
-    //Not enough eth for protocol fee
-    error InsufficientFeeFunds(uint256 available, uint256 required);
+
     //Order success but amount 0
     error ZeroTokensSwapped();
 
@@ -32,10 +31,6 @@ contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAut
         uint256 tokenBalance = _exData.srcAddr.getBalance(address(this));
         if (tokenBalance < _exData.srcAmount){
             revert InsufficientFunds(tokenBalance, _exData.srcAmount);
-        }
-        uint256 ethBalance = TokenUtils.ETH_ADDR.getBalance(address(this));
-        if (ethBalance < _exData.offchainData.protocolFee){
-            revert InsufficientFeeFunds(ethBalance, _exData.offchainData.protocolFee);
         }
 
         /// @dev safeApprove is modified to always first set approval to 0, then to exact amount

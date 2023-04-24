@@ -209,6 +209,17 @@
         "history": []
     },
     {
+        "name": "KyberAggregatorWrapper",
+        "address": "0x25A1c8C54018F198D8BdfB3a410D812b4ad312e4",
+        "id": "0x1abf4ed0",
+        "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+    {
         "name": "ScpWrapper",
         "address": "0x5f3e654EdeeDF8F236b8a8BC4B459Ae4fED7f44d",
         "id": "0x14335a03",
