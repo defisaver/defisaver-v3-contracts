@@ -55,6 +55,28 @@
         "history": []
     },
     {
+      "name": "ParaswapWrapper",
+      "address": "0xD90Ebd5E551d7451FA289b033755e74588230063",
+      "id": "0x115fa27e",
+      "path": "contracts/exchangeV3/offchainWrappersV3/ParaswapWrapper.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "KyberAggregatorWrapper",
+      "address": "0xB7EAa93C69b6450D6dF0CDb00307A5136392eCF8",
+      "id": "0x1abf4ed0",
+      "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
         "name": "Discount",
         "address": "0xeDac92a2cF88fF9178D461d152D5C7Cb85a2eF3B",
         "id": "0x88f9bc1a",
