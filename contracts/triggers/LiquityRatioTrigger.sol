@@ -5,9 +5,12 @@ pragma solidity =0.8.10;
 import "../auth/AdminAuth.sol";
 import "../actions/liquity/helpers/LiquityRatioHelper.sol";
 import "../interfaces/ITrigger.sol";
+import "../utils/TransientStorage.sol";
 
 /// @title Trigger contract that verifies if current Liquity position ratio went over/under the subbed ratio
 contract LiquityRatioTrigger is ITrigger, AdminAuth, LiquityRatioHelper {
+
+    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
     enum RatioState { OVER, UNDER }
 
@@ -29,7 +32,9 @@ contract LiquityRatioTrigger is ITrigger, AdminAuth, LiquityRatioHelper {
 
         (uint256 currRatio, bool isActive) = getRatio(triggerSubData.troveOwner);
         
-        if (isActive == false) return false;
+        if (isActive == false || currRatio == 0) return false;
+
+        tempStorage.setBytes32("LIQUITY_RATIO", bytes32(currRatio));
         
         if (RatioState(triggerSubData.state) == RatioState.OVER) {
             if (currRatio > triggerSubData.ratio) return true;
