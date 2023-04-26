@@ -978,8 +978,6 @@ const addToZRXAllowlist = async (acc, newAddr) => {
 
     const registryInstance = await hre.ethers.getContractFactory('ZrxAllowlist');
     const zrxAllowlistAddr = addrs[network].ZRX_ALLOWLIST_ADDR;
-    console.log(zrxAllowlistAddr);
-    console.log(exchangeOwnerAddr);
     const registry = await registryInstance.attach(zrxAllowlistAddr);
     const registryByOwner = await registry.connect(signer);
 
