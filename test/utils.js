@@ -78,7 +78,7 @@ const addrs = {
         WETH_ADDRESS: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
         DAI_ADDRESS: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
         USDC_ADDR: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
-        EXCHANGE_OWNER_ADDR: '0x322d58b9E75a6918f7e7849AEe0fF09369977e08',
+        EXCHANGE_OWNER_ADDR: '0x926516e60521556f4ab5e7bf16a4d41a8539c7d1',
         SAVER_EXCHANGE_ADDR: '0xaB1E4b72BC2f3890F052df111EE626c1c7229F26',
         FEE_RECEIVER: '0xe000e3c9428D539566259cCd89ed5fb85e655A01',
         TOKEN_GROUP_REGISTRY: '0xb03fe103f54841821C080C124312059c9A3a7B5c',
@@ -91,7 +91,8 @@ const addrs = {
         ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         AAVE_SUB_PROXY: '0x29a172f04CF9C6a79EdF4dD2744F2d260b8b8FE4',
         UNISWAP_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
-        ZRX_ALLOWLIST_ADDR: '0x926516E60521556F4ab5e7BF16A4d41a8539c7d1',
+        ZRX_ALLOWLIST_ADDR: '0x5eD8e74b1caE57B0c68B3278B88589991FBa0750',
+        ZRX_ALLOWLIST_OWNER: '0x926516e60521556f4ab5e7bf16a4d41a8539c7d1',
         AVG_GAS_PRICE: 0.5,
     },
     kovan: {
@@ -977,6 +978,8 @@ const addToZRXAllowlist = async (acc, newAddr) => {
 
     const registryInstance = await hre.ethers.getContractFactory('ZrxAllowlist');
     const zrxAllowlistAddr = addrs[network].ZRX_ALLOWLIST_ADDR;
+    console.log(zrxAllowlistAddr);
+    console.log(exchangeOwnerAddr);
     const registry = await registryInstance.attach(zrxAllowlistAddr);
     const registryByOwner = await registry.connect(signer);
 
