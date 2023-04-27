@@ -112,6 +112,18 @@ const BprotocolLiquitySPWithdrawTest = () => describe('Bprotocol-LiquitySP-Withd
     beforeEach(() => takeSnapshot().then((e) => { snapshot = e; }));
     afterEach(() => revertToSnapshot(snapshot));
 
+    it(`... should deposit ${BN2Float(DEPOSIT_AMOUNT)} LUSD then withdraw zero (LQTY reward claim only)`, async () => {
+        await testDeposit(
+            proxy, DEPOSIT_AMOUNT, senderAcc.address, senderAcc.address,
+        );
+        const { lusdReturned, wethReturnedValue } = await testWithdraw(
+            proxy, '0', senderAcc.address, senderAcc.address,
+        );
+
+        const withdrawnValue = lusdReturned.add(wethReturnedValue);
+        console.log({ withdrawnValue: BN2Float(withdrawnValue) });
+    });
+
     it(`... should deposit ${BN2Float(DEPOSIT_AMOUNT)} LUSD then withdraw half from Bprotocol`, async () => {
         const sharesMinted = await testDeposit(
             proxy, DEPOSIT_AMOUNT, senderAcc.address, senderAcc.address,

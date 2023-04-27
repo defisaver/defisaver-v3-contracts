@@ -10,6 +10,7 @@ import "../../utils/TokenUtils.sol";
 /// @title BprotocolLiquitySPWithdraw - Action that withdraws LUSD from Bprotocol
 /// @dev LQTY rewards accrue over time and are paid out each time the user interacts with the protocol
 /// @dev Idealy the WETH returned amount will be zero (shares paid out in LUSD in full) but depends on the protocol usage
+/// @dev Withdraw amount can be set to zero, only LQTY reward will be claimed
 contract BprotocolLiquitySPWithdraw is ActionBase, BprotocolLiquitySPHelper {
     using TokenUtils for address;
 
