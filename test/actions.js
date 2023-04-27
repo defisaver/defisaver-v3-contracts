@@ -2438,14 +2438,14 @@ const morphoClaim = async (
 
 const bprotocolLiquitySPDeposit = async (
     proxy,
+    lusdAmount,
     from,
     lqtyTo,
-    amount,
 ) => {
     const actionAddress = await getAddrFromRegistry('BprotocolLiquitySPDeposit');
 
     const action = new dfs.actions.bprotocol.BprotocolLiquitySPDepositAction(
-        from, lqtyTo, amount,
+        lusdAmount, from, lqtyTo,
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
@@ -2458,14 +2458,14 @@ const bprotocolLiquitySPDeposit = async (
 
 const bprotocolLiquitySPWithdraw = async (
     proxy,
+    shareAmount,
     to,
     lqtyTo,
-    amount,
 ) => {
     const actionAddress = await getAddrFromRegistry('BprotocolLiquitySPWithdraw');
 
     const action = new dfs.actions.bprotocol.BprotocolLiquitySPWithdrawAction(
-        to, lqtyTo, amount,
+        shareAmount, to, lqtyTo,
     );
 
     const functionData = action.encodeForDsProxyCall()[1];

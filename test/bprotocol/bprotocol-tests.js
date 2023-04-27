@@ -20,15 +20,15 @@ const lusdAddress = getAssetInfo('LUSD').address;
 const lqtyAddress = getAssetInfo('LQTY').address;
 const BAMMAddress = '0x00FF66AB8699AAfa050EE5EF5041D1503aa0849a';
 
-const testDeposit = async (proxy, from, lqtyTo, amount, uintmax = false) => {
-    await setBalance(lusdAddress, from, amount);
+const testDeposit = async (proxy, lusdAmount, from, lqtyTo, uintmax = false) => {
+    await setBalance(lusdAddress, from, lusdAmount);
     await approve(lusdAddress, proxy.address);
 
     const sharesBefore = await balanceOf(BAMMAddress, proxy.address);
     const lqtyBalanceBefore = await balanceOf(lqtyAddress, lqtyTo);
 
     await bprotocolLiquitySPDeposit(
-        proxy, from, lqtyTo, uintmax ? ethers.constants.MaxUint256 : amount,
+        proxy, uintmax ? ethers.constants.MaxUint256 : lusdAmount, from, lqtyTo,
     );
 
     const sharesMinted = await balanceOf(BAMMAddress, proxy.address)
@@ -42,12 +42,12 @@ const testDeposit = async (proxy, from, lqtyTo, amount, uintmax = false) => {
     return sharesMinted;
 };
 
-const testWithdraw = async (proxy, to, lqtyTo, amount) => {
+const testWithdraw = async (proxy, shareAmount, to, lqtyTo) => {
     const wethBalanceBefore = await balanceOf(WETH_ADDRESS, to);
     const lusdBalanceBefore = await balanceOf(lusdAddress, to);
     const lqtyBalanceBefore = await balanceOf(lqtyAddress, lqtyTo);
     await bprotocolLiquitySPWithdraw(
-        proxy, to, lqtyTo, amount,
+        proxy, shareAmount, to, lqtyTo,
     );
     const wethReturned = await balanceOf(WETH_ADDRESS, to)
         .then((balance) => balance.sub(wethBalanceBefore));
@@ -87,11 +87,11 @@ const BprotocolLiquitySPDepositTest = () => describe('Bprotocol-LiquitySP-Deposi
     afterEach(() => revertToSnapshot(snapshot));
 
     it(`... should deposit ${BN2Float(DEPOSIT_AMOUNT)} LUSD to Bprotocol`, async () => {
-        await testDeposit(proxy, senderAcc.address, senderAcc.address, DEPOSIT_AMOUNT);
+        await testDeposit(proxy, DEPOSIT_AMOUNT, senderAcc.address, senderAcc.address);
     });
 
     it('... should deposit MAXUINT LUSD to Bprotocol', async () => {
-        await testDeposit(proxy, senderAcc.address, senderAcc.address, DEPOSIT_AMOUNT, true);
+        await testDeposit(proxy, DEPOSIT_AMOUNT, senderAcc.address, senderAcc.address, true);
     });
 });
 
@@ -114,10 +114,10 @@ const BprotocolLiquitySPWithdrawTest = () => describe('Bprotocol-LiquitySP-Withd
 
     it(`... should deposit ${BN2Float(DEPOSIT_AMOUNT)} LUSD then withdraw half from Bprotocol`, async () => {
         const sharesMinted = await testDeposit(
-            proxy, senderAcc.address, senderAcc.address, DEPOSIT_AMOUNT,
+            proxy, DEPOSIT_AMOUNT, senderAcc.address, senderAcc.address,
         );
         const { lusdReturned, wethReturnedValue } = await testWithdraw(
-            proxy, senderAcc.address, senderAcc.address, sharesMinted.div(2n),
+            proxy, sharesMinted.div(2n), senderAcc.address, senderAcc.address,
         );
 
         const withdrawnValue = lusdReturned.add(wethReturnedValue);
@@ -127,11 +127,11 @@ const BprotocolLiquitySPWithdrawTest = () => describe('Bprotocol-LiquitySP-Withd
 
     it('... should deposit then withdraw MAXUINT from Bprotocol', async () => {
         await testDeposit(
-            proxy, senderAcc.address, senderAcc.address, DEPOSIT_AMOUNT, true,
+            proxy, DEPOSIT_AMOUNT, senderAcc.address, senderAcc.address, true,
         );
 
         const { lusdReturned, wethReturnedValue } = await testWithdraw(
-            proxy, senderAcc.address, senderAcc.address, ethers.constants.MaxUint256,
+            proxy, ethers.constants.MaxUint256, senderAcc.address, senderAcc.address,
         );
 
         const withdrawnValue = lusdReturned.add(wethReturnedValue);

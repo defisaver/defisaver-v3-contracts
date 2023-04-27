@@ -7,13 +7,18 @@ import "./helpers/BprotocolLiquitySPHelper.sol";
 import "../../utils/TokenUtils.sol";
 
 
+/// @title BprotocolLiquitySPDeposit - Action that deposits LUSD into Bprotocol
+/// @dev LQTY rewards accrue over time and are paid out each time the user interacts with the protocol
 contract BprotocolLiquitySPDeposit is ActionBase, BprotocolLiquitySPHelper {
     using TokenUtils for address;
 
+    /// @param lusdAmount Amount of LUSD to deposit into Bprotocol
+    /// @param from Address from where the LUSD is being pulled
+    /// @param lqtyTo Address that will recieve LQTY rewards
     struct Params {
+        uint256 lusdAmount;
         address from;
         address lqtyTo;
-        uint256 amount;
     }
 
     function executeAction(
@@ -23,9 +28,9 @@ contract BprotocolLiquitySPDeposit is ActionBase, BprotocolLiquitySPHelper {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
-        params.from = _parseParamAddr(params.from, _paramMapping[0], _subData, _returnValues);
-        params.lqtyTo = _parseParamAddr(params.lqtyTo, _paramMapping[1], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
+        params.lusdAmount = _parseParamUint(params.lusdAmount, _paramMapping[0], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
+        params.lqtyTo = _parseParamAddr(params.lqtyTo, _paramMapping[2], _subData, _returnValues);
 
         (uint256 deposited, bytes memory logData) = _deposit(params);
         emit ActionEvent('BprotocolLiquitySPDeposit', logData);
@@ -44,13 +49,13 @@ contract BprotocolLiquitySPDeposit is ActionBase, BprotocolLiquitySPHelper {
     }
 
     function _deposit(Params memory _params) internal returns (uint256, bytes memory) {
-        _params.amount = LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.amount);
+        _params.lusdAmount = LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
 
         uint256 sharesBefore = BAMM_ADDRESS.getBalance(address(this));
         uint256 lqtyBefore = LQTY_TOKEN_ADDRESS.getBalance(address(this));
 
-        LUSD_TOKEN_ADDRESS.approveToken(BAMM_ADDRESS, _params.amount);
-        IBAMM(BAMM_ADDRESS).deposit(_params.amount);
+        LUSD_TOKEN_ADDRESS.approveToken(BAMM_ADDRESS, _params.lusdAmount);
+        IBAMM(BAMM_ADDRESS).deposit(_params.lusdAmount);
 
         uint256 sharesMinted = BAMM_ADDRESS.getBalance(address(this)) - sharesBefore;
         uint256 lqtyRewarded = LQTY_TOKEN_ADDRESS.getBalance(address(this)) - lqtyBefore;
