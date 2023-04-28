@@ -34,7 +34,7 @@ contract BprotocolLiquitySPDeposit is ActionBase, BprotocolLiquitySPHelper {
         params.lqtyTo = _parseParamAddr(params.lqtyTo, _paramMapping[2], _subData, _returnValues);
 
         (uint256 deposited, bytes memory logData) = _deposit(params);
-        emit ActionEvent('BprotocolLiquitySPDeposit', logData);
+        emit ActionEvent("BprotocolLiquitySPDeposit", logData);
         return bytes32(deposited);
     }
 
@@ -42,7 +42,7 @@ contract BprotocolLiquitySPDeposit is ActionBase, BprotocolLiquitySPHelper {
         Params memory params = parseInputs(_callData);
 
         (, bytes memory logData) = _deposit(params);
-        logger.logActionDirectEvent('BprotocolLiquitySPDeposit', logData);
+        logger.logActionDirectEvent("BprotocolLiquitySPDeposit", logData);
     }
 
     function actionType() public pure virtual override returns (uint8) {

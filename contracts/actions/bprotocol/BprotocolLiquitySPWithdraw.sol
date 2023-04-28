@@ -35,7 +35,7 @@ contract BprotocolLiquitySPWithdraw is ActionBase, BprotocolLiquitySPHelper {
         params.lqtyTo = _parseParamAddr(params.lqtyTo, _paramMapping[2], _subData, _returnValues);
 
         (uint256 lusdWithdrawn, bytes memory logData) = _withdraw(params);
-        emit ActionEvent('BprotocolLiquitySPWithdraw', logData);
+        emit ActionEvent("BprotocolLiquitySPWithdraw", logData);
         return bytes32(lusdWithdrawn);
     }
 
@@ -43,7 +43,7 @@ contract BprotocolLiquitySPWithdraw is ActionBase, BprotocolLiquitySPHelper {
         Params memory params = parseInputs(_callData);
 
         (, bytes memory logData) = _withdraw(params);
-        logger.logActionDirectEvent('BprotocolLiquitySPWithdraw', logData);
+        logger.logActionDirectEvent("BprotocolLiquitySPWithdraw", logData);
     }
 
     function actionType() public pure virtual override returns (uint8) {
