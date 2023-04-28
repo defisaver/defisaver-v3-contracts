@@ -2435,6 +2435,46 @@ const morphoClaim = async (
     return receipt;
 };
 
+const bprotocolLiquitySPDeposit = async (
+    proxy,
+    lusdAmount,
+    from,
+    lqtyTo,
+) => {
+    const actionAddress = await getAddrFromRegistry('BprotocolLiquitySPDeposit');
+
+    const action = new dfs.actions.bprotocol.BprotocolLiquitySPDepositAction(
+        lusdAmount, from, lqtyTo,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed bprotocolLiquitySPDeposit: ${gasUsed}`);
+    return receipt;
+};
+
+const bprotocolLiquitySPWithdraw = async (
+    proxy,
+    shareAmount,
+    to,
+    lqtyTo,
+) => {
+    const actionAddress = await getAddrFromRegistry('BprotocolLiquitySPWithdraw');
+
+    const action = new dfs.actions.bprotocol.BprotocolLiquitySPWithdrawAction(
+        shareAmount, to, lqtyTo,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed bprotocolLiquitySPWithdraw: ${gasUsed}`);
+    return receipt;
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -2588,4 +2628,7 @@ module.exports = {
     morphoAaveV2Borrow,
     morphoAaveV2Payback,
     morphoClaim,
+
+    bprotocolLiquitySPDeposit,
+    bprotocolLiquitySPWithdraw,
 };
