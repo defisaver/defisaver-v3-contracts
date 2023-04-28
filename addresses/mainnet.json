@@ -889,10 +889,32 @@
         "history": ["0x773b3454C5d4Afff8938748816d7E92d25841927"]
     },
     {
+        "name": "McdDsrWithdraw",
+        "address": "0x96190d1f1c040fd8449250b90778Aa360f2e0Ec1",
+        "id": "0x546cac0c",
+        "path": "contracts/actions/mcd/McdDsrWithdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "McdBoostComposite",
         "address": "0x592F4d59DB7841fF4317601b70Ce2786784E90ae",
         "id": "0x310b34c6",
         "path": "contracts/actions/mcd/McdBoostComposite.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "McdDsrDeposit",
+        "address": "0x64bde7F73e05c6a28b701D7f569f0c0Ae4f6aD33",
+        "id": "0x17b217d0",
+        "path": "contracts/actions/mcd/McdDsrDeposit.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
