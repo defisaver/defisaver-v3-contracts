@@ -1500,6 +1500,28 @@
         "history": []
     },
     {
+        "name": "BprotocolLiquitySPDeposit",
+        "address": "0x5A0436c7559e37da8cD24B0f66C155a0a2fd6309",
+        "id": "0x226d4a83",
+        "path": "contracts/actions/bprotocol/BprotocolLiquitySPDeposit.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "BprotocolLiquitySPWithdraw",
+        "address": "0x20Ece7CB4463bB1DbA4C4fA800E321A05dfB028B",
+        "id": "0xe1434471",
+        "path": "contracts/actions/bprotocol/BprotocolLiquitySPWithdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "FetchBondId",
         "address": "0xA3331A6aE1BC901b8136E6Fe622890B3Fa3dC80e",
         "id": "0x60481c98",
