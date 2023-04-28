@@ -7,6 +7,7 @@ const {
     subToCBRebondProxy,
     subToLimitOrderProxy,
     subToMorphoAaveV2Proxy,
+    subToLiquityProxy,
 } = require('./utils-strategies');
 
 const {
@@ -313,31 +314,6 @@ const subReflexerRepayStrategy = async (proxy, safeId, ratioUnder, targetRatio, 
     return { subId, strategySub };
 };
 
-const subLiquityBoostStrategy = async (proxy, maxFeePercentage, ratioOver, targetRatio, bundleId) => {
-    const isBundle = true;
-
-    const maxFeePercentageEncoded = abiCoder.encode(['uint256'], [maxFeePercentage.toString()]);
-    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
-
-    const triggerData = await createLiquityTrigger(proxy.address, ratioOver, RATIO_STATE_OVER);
-    const strategySub = [bundleId, isBundle, [triggerData], [maxFeePercentageEncoded, targetRatioEncoded]];
-    const subId = await subToStrategy(proxy, strategySub);
-
-    return { subId, strategySub };
-};
-
-const subLiquityRepayStrategy = async (proxy, ratioUnder, targetRatio, bundleId) => {
-    const isBundle = true;
-
-    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
-    const triggerData = await createLiquityTrigger(proxy.address, ratioUnder, RATIO_STATE_UNDER);
-
-    const strategySub = [bundleId, isBundle, [triggerData], [targetRatioEncoded]];
-    const subId = await subToStrategy(proxy, strategySub);
-
-    return { subId, strategySub };
-};
-
 const subCompV3AutomationStrategy = async (
     proxy,
     market,
@@ -468,6 +444,38 @@ const subMorphoAaveV2RepayStrategy = async ({
     return { subId, strategySub };
 };
 
+const subLiquityAutomationStrategy = async (
+    proxy,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    regAddr = REGISTRY_ADDR,
+) => {
+    const subInput = [[minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled]];
+
+    const { latestSubId: subId, repaySub, boostSub } = await subToLiquityProxy(proxy, subInput, regAddr);
+
+    let repaySubId = '0';
+    let boostSubId = '0';
+
+    if (boostEnabled) {
+        repaySubId = (parseInt(subId, 10) - 1).toString();
+        boostSubId = subId;
+    } else {
+        repaySubId = subId;
+        boostSubId = '0';
+    }
+
+    return {
+        repaySubId,
+        boostSubId,
+        repaySub,
+        boostSub,
+    };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdRepayStrategy,
@@ -483,8 +491,6 @@ module.exports = {
     subCompRepayStrategy,
     subReflexerBoostStrategy,
     subReflexerRepayStrategy,
-    subLiquityBoostStrategy,
-    subLiquityRepayStrategy,
     subLiquityCloseToCollStrategy,
     subLiquityTrailingCloseToCollStrategy,
     subMcdTrailingCloseToCollStrategy,
@@ -494,4 +500,5 @@ module.exports = {
     subMorphoAaveV2BoostStrategy,
     subMorphoAaveV2RepayStrategy,
     subMorphoAaveV2AutomationStrategy,
+    subLiquityAutomationStrategy,
 };

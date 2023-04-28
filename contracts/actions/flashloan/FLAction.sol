@@ -34,10 +34,11 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
 
     enum FLSource {
         EMPTY,
-        AAVE,
+        AAVEV2,
         BALANCER,
         EULER,
-        MAKER
+        MAKER,
+        AAVEV3
     }
 
     /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
@@ -68,20 +69,23 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     ) public payable override returns (bytes32) {
         FlashLoanParams memory params = abi.decode(_callData, (FlashLoanParams));
         FLSource flSource = FLSource(uint8(bytes1(params.flParamGetterData)));
+
         handleFlashloan(params, flSource);
 
         return bytes32(params.amounts[0]);
     }
 
     function handleFlashloan(FlashLoanParams memory _flParams, FLSource _source) internal {
-        if (_source == FLSource.AAVE) {
-            _flAave(_flParams);
+        if (_source == FLSource.AAVEV2) {
+            _flAaveV2(_flParams);
         } else if (_source == FLSource.BALANCER) {
             _flBalancer(_flParams);
         } else if (_source == FLSource.EULER) {
             _flEuler(_flParams);
         } else if (_source == FLSource.MAKER) {
             _flMaker(_flParams);
+        } else if (_source == FLSource.AAVEV3) {
+            _flAaveV3(_flParams);
         } else {
             revert NonexistentFLSource();
         }
@@ -89,7 +93,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
 
     /// @notice Gets a Fl from Aave and returns back the execution to the action address
     /// @param _flParams All the amounts/tokens and related aave fl data
-    function _flAave(FlashLoanParams memory _flParams) internal {
+    function _flAaveV2(FlashLoanParams memory _flParams) internal {
         ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
             address(this),
             _flParams.tokens,
@@ -103,7 +107,32 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         emit ActionEvent(
             "FLAction",
             abi.encode(
-                "AAVE",
+                "AAVEV2",
+                _flParams.tokens,
+                _flParams.amounts,
+                _flParams.modes,
+                _flParams.onBehalfOf
+            )
+        );
+    }
+
+    /// @notice Gets a Fl from Aave V3 and returns back the execution to the action address
+    /// @param _flParams All the amounts/tokens and related aave fl data
+    function _flAaveV3(FlashLoanParams memory _flParams) internal {
+        ILendingPoolV2(AAVE_V3_LENDING_POOL).flashLoan(
+            address(this),
+            _flParams.tokens,
+            _flParams.amounts,
+            _flParams.modes,
+            _flParams.onBehalfOf,
+            _flParams.recipeData,
+            AAVE_REFERRAL_CODE
+        );
+
+        emit ActionEvent(
+            "FLAction",
+            abi.encode(
+                "AAVEV3",
                 _flParams.tokens,
                 _flParams.amounts,
                 _flParams.modes,
@@ -161,7 +190,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         address _initiator,
         bytes memory _params
     ) public nonReentrant returns (bool) {
-        if (msg.sender != AAVE_LENDING_POOL) {
+        if (msg.sender != AAVE_LENDING_POOL && msg.sender != AAVE_V3_LENDING_POOL) {
             revert UntrustedLender();
         }
         if (_initiator != address(this)) {
@@ -187,7 +216,6 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
             uint256 paybackAmount = _amounts[i] + _fees[i];
-
             bool correctAmount = _assets[i].getBalance(address(this)) ==
                 paybackAmount + balancesBefore[i];
 
@@ -195,12 +223,11 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
                 flFeeFaucet.my2Wei(ST_ETH_ADDR);
                 correctAmount = true;
             }
-
             if (!correctAmount) {
                 revert WrongPaybackAmountError();
             }
 
-            _assets[i].approveToken(address(AAVE_LENDING_POOL), paybackAmount);
+            _assets[i].approveToken(address(msg.sender), paybackAmount);
         }
 
         return true;

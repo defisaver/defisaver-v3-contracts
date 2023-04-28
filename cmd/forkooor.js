@@ -105,6 +105,7 @@ const {
     getLatestBundleId,
     subToMcdProxy,
     updateSubDataMorphoAaveV2Proxy,
+    updateLiquityProxy,
 } = require('../test/utils-strategies');
 
 const {
@@ -123,6 +124,11 @@ const {
     createMorphoAaveV2FLBoostStrategy,
     createMorphoAaveV2RepayStrategy,
     createMorphoAaveV2FLRepayStrategy,
+    createLiquityRepayStrategy,
+    createLiquityFLRepayStrategy,
+    createLiquityBoostStrategy,
+    createLiquityFLBoostStrategy,
+    createLiquityFLBoostWithCollStrategy,
 } = require('../test/strategies');
 
 const {
@@ -139,6 +145,7 @@ const {
     subLimitOrderStrategy,
     subDcaStrategy,
     subMorphoAaveV2AutomationStrategy,
+    subLiquityAutomationStrategy,
 } = require('../test/strategy-subs');
 
 const { getTroveInfo } = require('../test/utils-liquity');
@@ -1007,7 +1014,6 @@ const createLiquityTrove = async (coll, debt, sender) => {
 
     await depositToWeth(amountColl, senderAcc);
     await approve(WETH_ADDRESS, proxy.address, senderAcc);
-    await redeploy('LiquityView', addrs[network].REGISTRY_ADDR, false, true);
 
     const maxFeePercentage = hre.ethers.utils.parseUnits('5', 16);
 
@@ -2054,6 +2060,113 @@ const updateSubDataMorphoAaveV2 = async (
     console.log('MorphoAaveV2 position sub updated');
 };
 
+const deployLiquityContracts = async () => {
+    await getContractFromRegistry('LiquityRatioTrigger', undefined, undefined, true).then(({ address }) => {
+        if (compare(address, '0x7dDA9F944c3Daf27fbe3B8f27EC5f14FE3fa94BF')) {
+            return redeploy('LiquityRatioTrigger', undefined, undefined, true);
+        }
+        return address;
+    });
+    await getContractFromRegistry('LiquityRatioCheck', undefined, undefined, true);
+};
+
+const subLiquityAutomation = async (
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    sender,
+) => {
+    const { proxy } = await forkSetup(sender);
+
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
+
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
+
+    const latestBundleId = await getLatestBundleId().then((e) => parseInt(e, 10));
+
+    let repayBundleId = latestBundleId - 1;
+    let boostBundleId = latestBundleId;
+
+    if (latestBundleId < 17) {
+        await openStrategyAndBundleStorage(true);
+        {
+            const strategyData = createLiquityRepayStrategy();
+            const flStrategyData = createLiquityFLRepayStrategy();
+
+            const strategyId = await createStrategy(undefined, ...strategyData, true);
+            const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
+            repayBundleId = await createBundle(undefined, [strategyId, flStrategyId]);
+        }
+
+        {
+            const strategyData = createLiquityBoostStrategy();
+            const flStrategyData = createLiquityFLBoostStrategy();
+            const bigFlStrategyData = createLiquityFLBoostWithCollStrategy();
+
+            const strategyId = await createStrategy(undefined, ...strategyData, true);
+            const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
+            const bigFlStrategyId = await createStrategy(undefined, ...bigFlStrategyData, true);
+            boostBundleId = await createBundle(undefined, [strategyId, flStrategyId, bigFlStrategyId]);
+        }
+
+        await deployLiquityContracts();
+        await getContractFromRegistry(
+            'LiquitySubProxy', undefined, undefined, true, repayBundleId, boostBundleId,
+        );
+    }
+
+    console.log({ repayBundleId, boostBundleId });
+
+    const {
+        repaySubId, boostSubId,
+    } = await subLiquityAutomationStrategy(
+        proxy,
+        minRatioFormatted,
+        maxRatioFormatted,
+        optimalRatioBoostFormatted,
+        optimalRatioRepayFormatted,
+        boostEnabled,
+    );
+
+    console.log('Liquity position subed', { repaySubId, boostSubId });
+};
+
+const updateLiquity = async (
+    subIdRepay,
+    subIdBoost,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    sender,
+) => {
+    const { proxy } = await forkSetup(sender);
+
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
+
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
+
+    await updateLiquityProxy(
+        proxy,
+        subIdRepay,
+        subIdBoost,
+        minRatioFormatted,
+        maxRatioFormatted,
+        optimalRatioBoostFormatted,
+        optimalRatioRepayFormatted,
+        boostEnabled,
+    );
+
+    console.log('Liquity position sub updated');
+};
+
 const getAavePos = async (
     sender,
 ) => {
@@ -2818,6 +2931,34 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
         });
 
     program
+        .command(
+            'sub-liquity-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+        )
+        .description('Subscribes to liquity automation can be both b/r')
+        .action(
+            async (
+                minRatio,
+                maxRatio,
+                optimalRatioBoost,
+                optimalRatioRepay,
+                boostEnabled,
+                senderAcc,
+            ) => {
+                // eslint-disable-next-line no-param-reassign
+                boostEnabled = boostEnabled === 'true';
+                await subLiquityAutomation(
+                    minRatio,
+                    maxRatio,
+                    optimalRatioBoost,
+                    optimalRatioRepay,
+                    boostEnabled,
+                    senderAcc,
+                );
+                process.exit(0);
+            },
+        );
+
+    program
         .command('sub-limit-order <srcTokenLabel> <destTokenLabel> <srcAmount> <targetPrice> <expireDays> <orderType> [senderAddr]')
         .description('Subscribes to a limit order')
         // eslint-disable-next-line max-len
@@ -2901,6 +3042,38 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
                 // eslint-disable-next-line no-param-reassign
                 boostEnabled = boostEnabled === 'true';
                 await updateSubDataMorphoAaveV2(
+                    subIdRepay,
+                    subIdBoost,
+                    minRatio,
+                    maxRatio,
+                    optimalRatioBoost,
+                    optimalRatioRepay,
+                    boostEnabled,
+                    senderAcc,
+                );
+                process.exit(0);
+            },
+        );
+
+    program
+        .command(
+            'update-liquity-automation <subIdRepay> <subIdBoost> <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+        )
+        .description('Updates liquity automation bundles')
+        .action(
+            async (
+                subIdRepay,
+                subIdBoost,
+                minRatio,
+                maxRatio,
+                optimalRatioBoost,
+                optimalRatioRepay,
+                boostEnabled,
+                senderAcc,
+            ) => {
+                // eslint-disable-next-line no-param-reassign
+                boostEnabled = boostEnabled === 'true';
+                await updateLiquity(
                     subIdRepay,
                     subIdBoost,
                     minRatio,

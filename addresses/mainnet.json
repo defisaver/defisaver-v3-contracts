@@ -209,6 +209,17 @@
         "history": []
     },
     {
+        "name": "KyberAggregatorWrapper",
+        "address": "0x25A1c8C54018F198D8BdfB3a410D812b4ad312e4",
+        "id": "0x1abf4ed0",
+        "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+    {
         "name": "ScpWrapper",
         "address": "0x5f3e654EdeeDF8F236b8a8BC4B459Ae4fED7f44d",
         "id": "0x14335a03",
@@ -791,14 +802,14 @@
     },
     {
         "name": "LimitSell",
-        "address": "0x555C5B5d3e49ae015d5dA5C0476f984386e906BD",
+        "address": "0x02b0eE3b52e8E0749444a7255B9D86c50d18D19A",
         "id": "0x8c712c04",
         "path": "contracts/actions/exchange/LimitSell.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x555C5B5d3e49ae015d5dA5C0476f984386e906BD"]
     },
     {
         "name": "McdGenerate",
@@ -889,10 +900,32 @@
         "history": []
     },
     {
+        "name": "McdBoostComposite",
+        "address": "0x592F4d59DB7841fF4317601b70Ce2786784E90ae",
+        "id": "0x310b34c6",
+        "path": "contracts/actions/mcd/McdBoostComposite.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "McdDsrDeposit",
         "address": "0x64bde7F73e05c6a28b701D7f569f0c0Ae4f6aD33",
         "id": "0x17b217d0",
         "path": "contracts/actions/mcd/McdDsrDeposit.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "McdRepayComposite",
+        "address": "0xf85573e483786de9aad70DfEA869345C313019D9",
+        "id": "0xb732e076",
+        "path": "contracts/actions/mcd/McdRepayComposite.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
@@ -1197,6 +1230,17 @@
         "history": []
     },
     {
+        "name": "FLAaveV3WithFee",
+        "address": "0x5021d70aB7D757D61E0230c472ff89b8B2B8705e",
+        "id": "0xe10b7b9d",
+        "path": "contracts/actions/flashloan/FLAaveV3.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AaveV3RatioTrigger",
         "address": "0xC1b97aB9eF18EeE338a381c6f74470AA5C567283",
         "id": "0x21a42a26",
@@ -1369,14 +1413,14 @@
     },
     {
         "name": "FLAction",
-        "address": "0x9eC9E483Edb2dACA782222fF32b261AD56e43879",
+        "address": "0x72915D41982DfCAf30b871290618E59C45Edba7F",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x9eC9E483Edb2dACA782222fF32b261AD56e43879"]
     },
     {
         "name": "UniSupply",
@@ -1820,16 +1864,17 @@
     },
     {
         "name": "GasFeeTaker",
-        "address": "0x80536cb79341972a5Ef679dF5B70bB4A40a53d96",
+        "address": "0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b",
         "id": "0x4571b8b3",
         "path": "contracts/actions/fee/GasFeeTaker.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
             "0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d",
-            "0xcCFFC73347B05cBDCCe7c3de2a0AdEcDAa8AEf51"
+            "0xcCFFC73347B05cBDCCe7c3de2a0AdEcDAa8AEf51",
+            "0x80536cb79341972a5Ef679dF5B70bB4A40a53d96"
         ]
     },
     {
@@ -1844,16 +1889,16 @@
     },
     {
         "name": "ChainLinkPriceTrigger",
-        "address": "0xAbf52Fc6e5C0e6E44Daac7C6ca79498302D9B0CA",
+        "address": "0x484c78cf4a3C5bAb2174931E0A451e0E1B5b08F7",
         "id": "0xac6bb72a",
         "path": "contracts/triggers/ChainLinkPriceTrigger.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
             "0xb14226c3FD41e9B1FF85b4f7144CB4096a5D1Ec9",
-            "0xe3457797c543AD91bd36023d2EE600305ee89195"
+            "0xAbf52Fc6e5C0e6E44Daac7C6ca79498302D9B0CA"
         ]
     },
     {
@@ -1869,8 +1914,19 @@
     },
     {
         "name": "LiquityRatioTrigger",
-        "address": "0x7dDA9F944c3Daf27fbe3B8f27EC5f14FE3fa94BF",
+        "address": "0x7B0B42dC9bBc6e751c1aAA01A9CD16830F5B0276",
         "id": "0x26ef9c60",
+        "path": "contracts/triggers/LiquityRatioTrigger.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": ["0x7dDA9F944c3Daf27fbe3B8f27EC5f14FE3fa94BF"]
+    },
+    {
+        "name": "LiquityRatioCheck",
+        "address": "0x4AE38243936FAcb0f42993D676b7df1Bb31082d9",
+        "id": "0xafe610df",
         "path": "contracts/triggers/LiquityRatioTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,

@@ -36,18 +36,12 @@ const {
     MCD_MANAGER_ADDR,
 } = require('./utils-mcd');
 const { getSecondTokenAmount } = require('./utils-uni');
-const { LiquityActionIds, getHints, getRedemptionHints } = require('./utils-liquity');
+const { LiquityActionIds, getHints, getRedemptionHints, collChangeId, debtChangeId } = require('./utils-liquity');
 const { execShellCommand } = require('../scripts/hardhat-tasks-functions');
 
 const network = hre.network.config.name;
 
 const executeAction = async (actionName, functionData, proxy, regAddr = addrs[network].REGISTRY_ADDR) => {
-    if (hre.network.config.type !== 'tenderly') {
-        await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
-            '0x1', // 1 wei
-        ]);
-    }
-
     const actionAddr = await getAddrFromRegistry(actionName, regAddr);
     let receipt;
     try {
@@ -1133,10 +1127,11 @@ const yearnWithdraw = async (token, amount, from, to, proxy) => {
 const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from, to) => {
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
-        LiquityActionIds.Open,
+        collChangeId.SUPPLY,
         from,
         collAmount,
         LUSDAmount,
+        debtChangeId.BORROW,
     );
 
     const liquityOpenAction = new dfs.actions.liquity.LiquityOpenAction(
@@ -1157,10 +1152,11 @@ const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from
 const liquityBorrow = async (proxy, maxFeePercentage, LUSDAmount, to) => {
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
-        LiquityActionIds.Borrow,
+        collChangeId.SUPPLY,
         hre.ethers.constants.AddressZero,
         0,
         LUSDAmount,
+        debtChangeId.BORROW,
     );
 
     const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
@@ -1180,10 +1176,11 @@ const liquityBorrow = async (proxy, maxFeePercentage, LUSDAmount, to) => {
 const liquityPayback = async (proxy, LUSDAmount, from) => {
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
-        LiquityActionIds.Payback,
+        collChangeId.SUPPLY,
         from,
         0,
         LUSDAmount,
+        debtChangeId.PAYBACK,
     );
 
     const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
@@ -1202,10 +1199,11 @@ const liquityPayback = async (proxy, LUSDAmount, from) => {
 const liquitySupply = async (proxy, collAmount, from) => {
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
-        LiquityActionIds.Supply,
+        collChangeId.Supply,
         from,
         collAmount,
         0,
+        debtChangeId.PAYBACK,
     );
 
     const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
@@ -1223,10 +1221,11 @@ const liquitySupply = async (proxy, collAmount, from) => {
 const liquityWithdraw = async (proxy, collAmount, to) => {
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
-        LiquityActionIds.Withdraw,
+        collChangeId.WITHDRAW,
         hre.ethers.constants.AddressZero,
         collAmount,
         0,
+        debtChangeId.PAYBACK,
     );
 
     const liquityWithdrawAction = new dfs.actions.liquity.LiquityWithdrawAction(

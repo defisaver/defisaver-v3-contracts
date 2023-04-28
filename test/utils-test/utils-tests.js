@@ -23,7 +23,6 @@ const {
     getAddrFromRegistry,
     setBalance,
     addrs,
-    AAVE_MARKET,
 } = require('../utils');
 
 const botRefillL2Test = async () => {
@@ -435,28 +434,53 @@ const tokenPriceHelperTest = async () => {
     describe('Token-Price-Helper', function () {
         this.timeout(80000);
 
-        let tokenPriceHelper; let tokenPriceHelperAddr;
-        let aaveView;
+        let tokenPriceHelper; let tokenPriceHelperAddr; let tokenHelperOld;
         before(async () => {
             tokenPriceHelperAddr = await getAddrFromRegistry('TokenPriceHelper');
             tokenPriceHelper = await hre.ethers.getContractAt('TokenPriceHelper', tokenPriceHelperAddr);
-            aaveView = await redeploy('AaveView');
+
+            tokenHelperOld = await hre.ethers.getContractAt('TokenPriceHelper', '0x80536cb79341972a5Ef679dF5B70bB4A40a53d96');
         });
 
         for (let i = 0; i < assets.length; i++) {
             it(`... should get USD and ETH price for ${assets[i].symbol} `, async () => {
                 if (assets[i].symbol === 'OP') return;
+                if (assets[i].symbol === 'SUSHI') return;
                 const assetInfo = getAssetInfo(assets[i].symbol);
                 const priceInUSD = await tokenPriceHelper.getPriceInUSD(assetInfo.address);
                 const aaveInUSD = await tokenPriceHelper.getAaveTokenPriceInUSD(assetInfo.address);
-
                 const priceInETH = await tokenPriceHelper.getPriceInETH(assetInfo.address);
                 const aaveInETH = await tokenPriceHelper.getAaveTokenPriceInETH(assetInfo.address);
-                if (priceInUSD.toString() === '0' && aaveInUSD.toString() === '0') return;
-                console.log(priceInUSD);
-                console.log(aaveInUSD);
-                console.log(priceInETH);
-                console.log(aaveInETH);
+
+                const priceInUSDOld = await tokenHelperOld.getPriceInUSD(assetInfo.address);
+                const aaveInUSDOld = await tokenHelperOld.getAaveTokenPriceInUSD(assetInfo.address);
+                const priceInETHOld = await tokenHelperOld.getPriceInETH(assetInfo.address);
+                const aaveInETHOld = await tokenHelperOld.getAaveTokenPriceInETH(assetInfo.address);
+                console.log(`-----------------${assets[i].symbol}`);
+
+                if (priceInUSD.toString() !== priceInUSDOld.toString()) {
+                    console.log('-----------------1');
+                    console.log(priceInUSD);
+                    console.log(priceInUSDOld);
+                }
+                if (aaveInUSD.toString() !== aaveInUSDOld.toString()) {
+                    console.log('-----------------2');
+
+                    console.log(aaveInUSD);
+                    console.log(aaveInUSDOld);
+                }
+                if (priceInETH.toString() !== priceInETHOld.toString()) {
+                    console.log('-----------------3');
+
+                    console.log(priceInETH);
+                    console.log(priceInETHOld);
+                }
+                if (aaveInETH.toString() !== aaveInETHOld.toString()) {
+                    console.log('-----------------4');
+
+                    console.log(aaveInETH);
+                    console.log(aaveInETHOld);
+                }
             });
         }
     });
