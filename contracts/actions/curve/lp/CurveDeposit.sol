@@ -3,6 +3,7 @@ pragma solidity =0.8.10;
 
 import "../helpers/CurveHelper.sol";
 import "../../../utils/TokenUtils.sol";
+import "../../../interfaces/curve/ICurve3PoolZap.sol";
 import "../../ActionBase.sol";
 
 contract CurveDeposit is ActionBase, CurveHelper {
@@ -16,7 +17,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
     struct Params {
         address from;         // address where to pull tokens from
         address to;       // address that will receive the LP tokens
-        address depositTarget;  // pool contract or zap deposit contract in which to deposit
+        address depositTargetOrPool;  // pool contract or zap deposit contract in which to deposit
         uint256 minMintAmount;  // minimum amount of LP tokens to accept
         uint8 flags;
         uint256[] amounts;      // amount of each token to deposit
@@ -32,7 +33,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
 
         params.from = _parseParamAddr(params.from, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
-        params.depositTarget = _parseParamAddr(params.depositTarget, _paramMapping[2], _subData, _returnValues);
+        params.depositTargetOrPool = _parseParamAddr(params.depositTargetOrPool, _paramMapping[2], _subData, _returnValues);
         params.minMintAmount = _parseParamUint(params.minMintAmount, _paramMapping[3], _subData, _returnValues);
         params.flags = uint8(_parseParamUint(params.flags, _paramMapping[4], _subData, _returnValues));
         for (uint256 i = 0; i < params.amounts.length; i++) {
@@ -65,35 +66,40 @@ contract CurveDeposit is ActionBase, CurveHelper {
             DepositTargetType depositTargetType,
             bool explicitUnderlying,,
         ) = parseFlags(_params.flags);
-        (
-            address lpToken,
-            uint256 N_COINS,
-            address[8] memory tokens
-        ) = _getPoolParams(_params.depositTarget, depositTargetType, explicitUnderlying);
-        if (_params.amounts.length != N_COINS) revert CurveDepositWrongArraySize();
 
-        uint256 tokensBefore = lpToken.getBalance(address(this));
+        CurveCache memory cache = _getPoolParams(_params.depositTargetOrPool, depositTargetType, explicitUnderlying);
+
+        if (_params.amounts.length != cache.N_COINS) revert CurveDepositWrongArraySize();
+
+        uint256 tokensBefore = cache.lpToken.getBalance(address(this));
         uint256 msgValue;
-        for (uint256 i = 0; i < N_COINS; i++) {
-            if (tokens[i] == TokenUtils.ETH_ADDR) {
+        for (uint256 i = 0; i < cache.N_COINS; i++) {
+            if (_params.amounts[i] == 0) continue;
+            if (cache.tokens[i] == TokenUtils.ETH_ADDR) {
                 _params.amounts[i] = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.amounts[i]);
                 TokenUtils.withdrawWeth(_params.amounts[i]);
                 msgValue = _params.amounts[i];
-                continue;
+            } else {
+                _params.amounts[i] = cache.tokens[i].pullTokensIfNeeded(_params.from, _params.amounts[i]);
+                cache.tokens[i].approveToken(cache.depositTarget, _params.amounts[i]);
             }
-            _params.amounts[i] = tokens[i].pullTokensIfNeeded(_params.from, _params.amounts[i]);
-            tokens[i].approveToken(_params.depositTarget, _params.amounts[i]);
         }
 
-        bytes memory payload = _constructPayload(_params.amounts, _params.minMintAmount, explicitUnderlying);
-        (bool success, ) = _params.depositTarget.call{ value: msgValue }(payload);
-        if (!success) revert CurveDepositPoolReverted();
+        if (depositTargetType == DepositTargetType.ZAP_3POOL) {
+            uint256[4] memory fixedSizeAmounts;
+            for (uint256 i = 0; i < 4; i++) fixedSizeAmounts[i] = _params.amounts[i];
+            ICurve3PoolZap(cache.depositTarget).add_liquidity(cache.pool, fixedSizeAmounts, _params.minMintAmount);
+        } else {
+            bytes memory payload = _constructPayload(_params.amounts, _params.minMintAmount, explicitUnderlying);
+            (bool success, ) = cache.depositTarget.call{ value: msgValue }(payload);
+            if (!success) revert CurveDepositPoolReverted();
+        }
 
-        received = lpToken.getBalance(address(this)) - tokensBefore;
+        received = cache.lpToken.getBalance(address(this)) - tokensBefore;
         // pool contract should revert on its own, but we cant check if a deposit zap is legit on-chain
         // so we need this check
         if (received < _params.minMintAmount) revert CurveDepositSlippageHit(_params.minMintAmount, received);
-        lpToken.withdrawTokens(_params.to, received);
+        cache.lpToken.withdrawTokens(_params.to, received);
 
         logData = abi.encode(_params, received);
     }
