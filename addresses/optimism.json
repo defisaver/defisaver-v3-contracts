@@ -557,7 +557,7 @@
     },
     {
       "name": "GasFeeTakerL2",
-      "address": "0xB3dB299622A9DB0E944ccda2Ef899d6fF365B082",
+      "address": "0xB6A3c8cB320bB809f1ACdCB971Da551Fa3A56334",
       "id": "0x7ec82077",
       "path": "contracts/actions/fee/GasFeeTakerL2.sol",
       "version": "1.0.2",
@@ -565,6 +565,7 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0xB3dB299622A9DB0E944ccda2Ef899d6fF365B082",
         "0x62689439B7C54CB104B0a38f59F5e0383078c09F",
         "0x0a712026eeB86f3daE538308852215f19D4b769C"
       ]
