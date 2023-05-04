@@ -839,31 +839,32 @@ const createMcdCloseToCollStrategy = (isTrailing = false) => {
 
 const createLiquityRepayStrategy = () => {
     const liquityRepayStrategy = new dfs.Strategy('LiquityRepayStrategy');
+    liquityRepayStrategy.addSubSlot('&ratioState', 'uint8');
     liquityRepayStrategy.addSubSlot('&targetRatio', 'uint256');
 
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityRepayStrategy.addTrigger(liquityRatioTrigger);
 
     const liquityWithdrawAction = new dfs.actions.liquity.LiquityWithdrawAction(
-        '%withdrawAmount',
+        '%repayAmount',
         '&proxy',
         '%upperHint',
         '%lowerHint',
-    );
-
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '%repayGasCost', '%wethAddr', '$1',
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%wethAddr',
             '%lusdAddr',
-            '$2',
+            '$1',
             '%wrapper',
         ),
         '&proxy',
         '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%repayGasCost', '%lusdAddr', '$2',
     );
 
     const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
@@ -873,71 +874,86 @@ const createLiquityRepayStrategy = () => {
         '%lowerHint',
     );
 
+    const liquityRatioCheckAction = new dfs.actions.checkers.LiquityRatioCheckAction(
+        '&ratioState', '&targetRatio',
+    );
+
     liquityRepayStrategy.addAction(liquityWithdrawAction);
-    liquityRepayStrategy.addAction(feeTakingAction);
     liquityRepayStrategy.addAction(sellAction);
+    liquityRepayStrategy.addAction(feeTakingAction);
     liquityRepayStrategy.addAction(liquityPaybackAction);
+    liquityRepayStrategy.addAction(liquityRatioCheckAction);
 
     return liquityRepayStrategy.encodeForDsProxyCall();
 };
 
 const createLiquityFLRepayStrategy = () => {
     const liquityFLRepayStrategy = new dfs.Strategy('LiquityFLRepayStrategy');
+    liquityFLRepayStrategy.addSubSlot('&ratioState', 'uint8');
     liquityFLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityFLRepayStrategy.addSubSlot('&collChangeId.WITHDRAW', 'uint8');
+    liquityFLRepayStrategy.addSubSlot('&debtChangeId.PAYBACK', 'uint8');
 
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityFLRepayStrategy.addTrigger(liquityRatioTrigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%wethAddr'], ['%repayAmount']);
-
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '%repayGasCost', '%wethAddr', '%flAmountWeGotBack',
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%wethAddr'],
+            ['%flAmount'],
+        ),
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '%wethAddr',
             '%lusdAddr',
-            '$2',
+            '%exchangeAmount',
             '%wrapper',
         ),
         '&proxy',
         '&proxy',
     );
 
-    const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
-        '$3',
-        '&proxy',
-        '%upperHint',
-        '%lowerHint',
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%repayGasCost', '%lusdAddr', '$2',
     );
 
-    const liquityWithdrawAction = new dfs.actions.liquity.LiquityWithdrawAction(
+    const liquityAdjustAction = new dfs.actions.liquity.LiquityAdjustAction(
+        '%0', // no liquity fee charged in recipe
         '$1',
+        '$3',
+        '&collChangeId.WITHDRAW',
+        '&debtChangeId.PAYBACK',
+        '&proxy',
         '%FLAddr',
         '%upperHint',
         '%lowerHint',
     );
 
+    const liquityRatioCheckAction = new dfs.actions.checkers.LiquityRatioCheckAction(
+        '&ratioState', '&targetRatio',
+    );
+
     liquityFLRepayStrategy.addAction(flAction);
-    liquityFLRepayStrategy.addAction(feeTakingAction);
     liquityFLRepayStrategy.addAction(sellAction);
-    liquityFLRepayStrategy.addAction(liquityPaybackAction);
-    liquityFLRepayStrategy.addAction(liquityWithdrawAction);
+    liquityFLRepayStrategy.addAction(feeTakingAction);
+    liquityFLRepayStrategy.addAction(liquityAdjustAction);
+    liquityFLRepayStrategy.addAction(liquityRatioCheckAction);
 
     return liquityFLRepayStrategy.encodeForDsProxyCall();
 };
 
 const createLiquityBoostStrategy = () => {
     const liquityBoostStrategy = new dfs.Strategy('LiquityBoostStrategy');
-    liquityBoostStrategy.addSubSlot('&maxFeePercentage', 'uint256');
+    liquityBoostStrategy.addSubSlot('&ratioState', 'uint8');
     liquityBoostStrategy.addSubSlot('&targetRatio', 'uint256');
 
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityBoostStrategy.addTrigger(liquityRatioTrigger);
 
     const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
-        '&maxFeePercentage',
+        '%maxFeePercentage',
         '%boostAmount',
         '&proxy',
         '%upperHint',
@@ -948,7 +964,7 @@ const createLiquityBoostStrategy = () => {
         formatExchangeObj(
             '%lusdAddr',
             '%wethAddr',
-            '%flAmountWeGotBack',
+            '$1',
             '%wrapper',
         ),
         '&proxy',
@@ -966,34 +982,100 @@ const createLiquityBoostStrategy = () => {
         '%lowerHint',
     );
 
+    const liquityRatioCheckAction = new dfs.actions.checkers.LiquityRatioCheckAction(
+        '&ratioState', '&targetRatio',
+    );
+
     liquityBoostStrategy.addAction(liquityBorrowAction);
     liquityBoostStrategy.addAction(sellAction);
     liquityBoostStrategy.addAction(feeTakingAction);
     liquityBoostStrategy.addAction(liquitySupplyAction);
+    liquityBoostStrategy.addAction(liquityRatioCheckAction);
 
     return liquityBoostStrategy.encodeForDsProxyCall();
 };
 
 const createLiquityFLBoostStrategy = () => {
     const liquityFLBoostStrategy = new dfs.Strategy('LiquityFLBoostStrategy');
-    liquityFLBoostStrategy.addSubSlot('&maxFeePercentage', 'uint256');
+    liquityFLBoostStrategy.addSubSlot('&ratioState', 'uint8');
     liquityFLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityFLBoostStrategy.addSubSlot('&collChangeId.SUPPLY', 'uint8');
+    liquityFLBoostStrategy.addSubSlot('&debtChangeId.BORROW', 'uint8');
 
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityFLBoostStrategy.addTrigger(liquityRatioTrigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%wethAddr'], ['%flAmount']);
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%lusdAddr'],
+            ['%flAmount'],
+        ),
+    );
 
-    const liquitySupplyFLAction = new dfs.actions.liquity.LiquitySupplyAction(
-        '%flAmountWeGotBack',
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%lusdAddr',
+            '%wethAddr',
+            '%exchangeAmount',
+            '%wrapper',
+        ),
         '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%boostGasCost', '%wethAddr', '$2',
+    );
+
+    const liquityAdjustAction = new dfs.actions.liquity.LiquityAdjustAction(
+        '%maxFeePercentage',
+        '$3',
+        '$1',
+        '&collChangeId.SUPPLY',
+        '&debtChangeId.BORROW',
+        '&proxy',
+        '%FLAddr',
         '%upperHint',
         '%lowerHint',
     );
 
-    const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
-        '&maxFeePercentage',
+    const liquityRatioCheckAction = new dfs.actions.checkers.LiquityRatioCheckAction(
+        '&ratioState', '&targetRatio',
+    );
+
+    liquityFLBoostStrategy.addAction(flAction);
+    liquityFLBoostStrategy.addAction(sellAction);
+    liquityFLBoostStrategy.addAction(feeTakingAction);
+    liquityFLBoostStrategy.addAction(liquityAdjustAction);
+    liquityFLBoostStrategy.addAction(liquityRatioCheckAction);
+
+    return liquityFLBoostStrategy.encodeForDsProxyCall();
+};
+
+const createLiquityFLBoostWithCollStrategy = () => {
+    const LiquityFLBoostWithCollStrategy = new dfs.Strategy('LiquityFLBoostWithCollStrategy');
+    LiquityFLBoostWithCollStrategy.addSubSlot('&ratioState', 'uint8');
+    LiquityFLBoostWithCollStrategy.addSubSlot('&targetRatio', 'uint256');
+    LiquityFLBoostWithCollStrategy.addSubSlot('&collChangeId.SUPPLY', 'uint8');
+    LiquityFLBoostWithCollStrategy.addSubSlot('&debtChangeId.BORROW', 'uint8');
+
+    const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
+    LiquityFLBoostWithCollStrategy.addTrigger(liquityRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%wethAddr'],
+            ['%flAmount'],
+        ),
+    );
+
+    const liquityAdjustAction = new dfs.actions.liquity.LiquityAdjustAction(
+        '%maxFeePercentage',
+        '%flAmountWeGotBack',
         '%boostAmount',
+        '&collChangeId.SUPPLY',
+        '&debtChangeId.BORROW',
+        '&proxy',
         '&proxy',
         '%upperHint',
         '%lowerHint',
@@ -1003,7 +1085,7 @@ const createLiquityFLBoostStrategy = () => {
         formatExchangeObj(
             '%lusdAddr',
             '%wethAddr',
-            '$3',
+            '$2',
             '%wrapper',
         ),
         '&proxy',
@@ -1011,11 +1093,11 @@ const createLiquityFLBoostStrategy = () => {
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '%boostGasCost', '%wethAddr', '$4',
+        '%boostGasCost', '%wethAddr', '$3',
     );
 
     const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
-        '$5',
+        '$4',
         '&proxy',
         '%upperHint',
         '%lowerHint',
@@ -1028,15 +1110,19 @@ const createLiquityFLBoostStrategy = () => {
         '%lowerHint',
     );
 
-    liquityFLBoostStrategy.addAction(flAction);
-    liquityFLBoostStrategy.addAction(liquitySupplyFLAction);
-    liquityFLBoostStrategy.addAction(liquityBorrowAction);
-    liquityFLBoostStrategy.addAction(sellAction);
-    liquityFLBoostStrategy.addAction(feeTakingAction);
-    liquityFLBoostStrategy.addAction(liquitySupplyAction);
-    liquityFLBoostStrategy.addAction(liquityWithdrawAction);
+    const liquityRatioCheckAction = new dfs.actions.checkers.LiquityRatioCheckAction(
+        '&ratioState', '&targetRatio',
+    );
 
-    return liquityFLBoostStrategy.encodeForDsProxyCall();
+    LiquityFLBoostWithCollStrategy.addAction(flAction);
+    LiquityFLBoostWithCollStrategy.addAction(liquityAdjustAction);
+    LiquityFLBoostWithCollStrategy.addAction(sellAction);
+    LiquityFLBoostWithCollStrategy.addAction(feeTakingAction);
+    LiquityFLBoostWithCollStrategy.addAction(liquitySupplyAction);
+    LiquityFLBoostWithCollStrategy.addAction(liquityWithdrawAction);
+    LiquityFLBoostWithCollStrategy.addAction(liquityRatioCheckAction);
+
+    return LiquityFLBoostWithCollStrategy.encodeForDsProxyCall();
 };
 
 const createLiquityCloseToCollStrategy = (isTrailing = false) => {
@@ -2655,6 +2741,7 @@ module.exports = {
     createLiquityRepayStrategy,
     createLiquityFLRepayStrategy,
     createLiquityFLBoostStrategy,
+    createLiquityFLBoostWithCollStrategy,
     createLiquityBoostStrategy,
     createLiquityCloseToCollStrategy,
     createLimitOrderStrategy,

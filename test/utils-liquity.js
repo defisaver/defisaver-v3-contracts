@@ -1,6 +1,10 @@
 const { getAssetInfo } = require('@defisaver/tokens');
 const hre = require('hardhat');
-const { getAddrFromRegistry, balanceOf } = require('./utils');
+const { getAddrFromRegistry, balanceOf, getContractFromRegistry, BN2Float } = require('./utils');
+
+
+const collChangeId = { SUPPLY: 0, WITHDRAW: 1 };
+const debtChangeId = { PAYBACK: 0, BORROW: 1 };
 
 const LiquityActionIds = {
     Open: 0,
@@ -71,17 +75,11 @@ const getHints = async (troveOwner, actionId, from, collAmount, LUSDamount, acti
 
     if (hints !== undefined) return hints;
 
-    const liquityView = await hre.ethers.getContractAt('LiquityView', (await getAddrFromRegistry('LiquityView')));
+    const liquityView = await getContractFromRegistry('LiquityView', undefined, undefined, true);
 
-    let NICR = 0;
+    const NICR = await liquityView['predictNICRForAdjust(address,uint8,uint8,address,uint256,uint256)'](troveOwner, actionId, actionId2, from, collAmount, LUSDamount);
 
-    if (actionId2 !== undefined) {
-        NICR = await liquityView['predictNICRForAdjust(address,uint8,uint8,address,uint256,uint256)'](troveOwner, actionId, actionId2, from, collAmount, LUSDamount);
-    } else {
-        NICR = await liquityView['predictNICR(address,uint8,address,uint256,uint256)'](troveOwner, actionId, from, collAmount, LUSDamount);
-    }
-
-    console.log('NICR: ', NICR.toString());
+    console.log('NICR: ', BN2Float(NICR, 16));
 
     const approxHint = (await liquityView['getApproxHint(uint256,uint256,uint256)'](NICR, 20, 42)).hintAddress;
     hints = await liquityView['findInsertPosition(uint256,address,address)'](NICR, approxHint, approxHint);
@@ -174,4 +172,6 @@ module.exports = {
     getTroveInfo,
     findInsertPosition,
     getRatio,
+    collChangeId,
+    debtChangeId,
 };

@@ -335,6 +335,9 @@ const kyberAggregatorDFSSellTest = async () => {
                 if (chainId === 10) {
                     baseUrl = 'https://aggregator-api.kyberswap.com/optimism/api/v1/';
                 }
+                if (chainId === 42161) {
+                    baseUrl = 'https://aggregator-api.kyberswap.com/arbitrum/api/v1/';
+                }
                 const options = {
                     method: 'GET',
                     baseURL: baseUrl,

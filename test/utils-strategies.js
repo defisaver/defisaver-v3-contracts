@@ -255,6 +255,64 @@ const updateSubDataMorphoAaveV2Proxy = async (
     return { latestSubId, repaySub, boostSub };
 };
 
+const subToLiquityProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const subProxyAddr = '0xE2f4A4629FbbC444964A16438329288C66551c30'; // hardcoded here for now
+    console.log({ subProxyAddr });
+
+    const subProxyFactory = await hre.ethers.getContractFactory('LiquitySubProxy');
+    const functionData = subProxyFactory.interface.encodeFunctionData(
+        'subToLiquityAutomation',
+        inputData,
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToLiquityProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+    const subProxy = await hre.ethers.getContractAt('LiquitySubProxy', subProxyAddr);
+    const repaySub = await subProxy.formatRepaySub(...inputData, proxy.address);
+    const boostSub = await subProxy.formatBoostSub(...inputData, proxy.address);
+    return { latestSubId, repaySub, boostSub };
+};
+
+const updateLiquityProxy = async (
+    proxy, subIdRepay, subIdBoost,
+    minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled,
+    regAddr = addrs[network].REGISTRY_ADDR,
+) => {
+    const subInput = [minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled];
+
+    const subProxyAddr = await getAddrFromRegistry('LiquitySubProxy', regAddr);
+
+    const subProxyFactory = await hre.ethers.getContractFactory('LiquitySubProxy');
+
+    const functionData = subProxyFactory.interface.encodeFunctionData(
+        'updateSubData',
+        [
+            subIdRepay, subIdBoost, subInput,
+        ],
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed updateLiquityProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+    const subProxy = await getContractFromRegistry('LiquitySubProxy');
+    const repaySub = await subProxy.formatRepaySub(subInput, proxy.address);
+    const boostSub = await subProxy.formatBoostSub(subInput, proxy.address);
+    return { latestSubId, repaySub, boostSub };
+};
+
 const updateAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
     const aaveSubProxyAddr = addrs[network].AAVE_SUB_PROXY;
 
@@ -421,6 +479,8 @@ module.exports = {
     getUpdatedStrategySub,
     subToMorphoAaveV2Proxy,
     updateSubDataMorphoAaveV2Proxy,
+    subToLiquityProxy,
+    updateLiquityProxy,
     subToMcdProxy,
     subToLimitOrderProxy,
 };
