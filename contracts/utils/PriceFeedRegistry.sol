@@ -5,7 +5,7 @@ pragma solidity =0.8.10;
 import "../interfaces/chainlink/IAggregatorV3.sol";
 import "../auth/AdminAuth.sol";
 
-contract PriceFeedRegistryL2 is AdminAuth{
+contract PriceFeedRegistry is AdminAuth{
 
   mapping(address => mapping(address => address)) public aggregators;
 

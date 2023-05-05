@@ -14,7 +14,7 @@ import "../interfaces/chainlink/IAggregatorV3.sol";
 
 /// @title TokenPriceHelperL2 Fetches prices from chainlink/aave and formats tokens properly on L2 (Arbi and Mainnet)
 contract TokenPriceHelperL2 is DSMath, UtilHelper {
-    IFeedRegistry public constant feedRegistry = IFeedRegistry(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
     /// @dev Helper function that returns chainlink price data
     /// @param _roundId Chainlink roundId, if 0 uses the latest

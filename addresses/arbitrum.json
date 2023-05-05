@@ -716,5 +716,17 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": []
+    },
+    {
+      "name": "PriceFeedRegistry",
+      "address": "0x158E27De8B5E5bC3FA1C6D5b365a291c54f6b0Fd",
+      "id": "0x6f51c997",
+      "path": "contracts/utils/PriceFeedRegistry.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
     } 
+    
   ]
