@@ -10,8 +10,6 @@ import "../../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../../../interfaces/aaveV2/IPriceOracleGetterAave.sol";
 import "../../../utils/TokenPriceHelper.sol";
 
-import "../helpers/MainnetFeeAddresses.sol";
-
 contract GasFeeHelper is DSMath, TokenPriceHelper {
     using TokenUtils for address;
 

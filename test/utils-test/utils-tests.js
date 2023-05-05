@@ -489,6 +489,48 @@ const tokenPriceHelperTest = async () => {
         }
     });
 };
+const tokenPriceHelperL2Test = async () => {
+    describe('Token-Price-Helper-L2 (Using GasFeeTakerL2)', function () {
+        this.timeout(80000);
+
+        let tokenPriceHelper; let tokenPriceHelperAddr;
+        before(async () => {
+            tokenPriceHelperAddr = await getAddrFromRegistry('GasFeeTakerL2');
+            tokenPriceHelper = await hre.ethers.getContractAt('GasFeeTakerL2', tokenPriceHelperAddr);
+        });
+
+        for (let i = 0; i < assets.length; i++) {
+            it(`... should get USD and ETH price for ${assets[i].symbol} `, async () => {
+                const network = hre.network.config.name;
+                const chainId = chainIds[network];
+                if (assets[i].symbol === 'rETH') {
+                    assets[i].addresses[42161] = '0xEC70Dcb4A1EFa46b8F2D97C310C9c4790ba5ffA8';
+                }
+                if (assets[i].addresses[chainId] === undefined) {
+                    return;
+                }
+                const assetInfo = getAssetInfo(assets[i].symbol, chainId);
+                const address = assetInfo.address;
+                const priceInUSD = await tokenPriceHelper.getPriceInUSD(address);
+                const aaveInUSD = await tokenPriceHelper.getAaveTokenPriceInUSD(address);
+                const chainlinkInUSD = await tokenPriceHelper.getChainlinkPriceInUSD(
+                    address, false,
+                );
+                const priceInETH = await tokenPriceHelper.getPriceInETH(address);
+                const aaveInETH = await tokenPriceHelper.getAaveTokenPriceInETH(address);
+                const chainlinkInETH = await tokenPriceHelper.getChainlinkPriceInETH(address);
+
+                console.log(`-----------------${assets[i].symbol}`);
+                console.log(priceInUSD);
+                console.log(aaveInUSD);
+                console.log(chainlinkInUSD);
+                console.log(priceInETH);
+                console.log(aaveInETH);
+                console.log(chainlinkInETH);
+            });
+        }
+    });
+};
 const priceFeedTest = async () => {
     describe('Price feed test', function () {
         this.timeout(80000);
@@ -567,5 +609,6 @@ module.exports = {
     feeReceiverTest,
     dfsRegistryControllerTest,
     tokenPriceHelperTest,
+    tokenPriceHelperL2Test,
     priceFeedTest,
 };

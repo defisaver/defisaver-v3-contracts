@@ -12,7 +12,7 @@ import "../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../interfaces/aaveV2/IPriceOracleGetterAave.sol";
 import "../interfaces/chainlink/IAggregatorV3.sol";
 
-/// @title TokenPriceHelperL2 Fetches prices from chainlink/aave and formats tokens properly on L2 (Arbi and Mainnet)
+/// @title TokenPriceHelperL2 Fetches prices from chainlink/aave and formats tokens properly on L2
 contract TokenPriceHelperL2 is DSMath, UtilHelper {
     IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
