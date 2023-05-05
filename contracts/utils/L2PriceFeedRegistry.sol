@@ -51,4 +51,21 @@ contract PriceFeedRegistryL2 is AdminAuth{
   {
     aggregators[base][quote] = aggregator;
   }
+
+  function setFeeds(
+    address[] memory bases,
+    address[] memory quotes,
+    address[] memory aggregator  
+  )
+    public
+    onlyOwner
+  {
+    require(
+      bases.length == quotes.length && quotes.length == aggregator.length,
+      "Invalid input length"
+    );
+    for (uint i = 0; i < bases.length; i++) {
+      setFeed(bases[i], quotes[i], aggregator[i]);
+    }
+  }
 }
