@@ -573,14 +573,15 @@
     },
     {
       "name": "GasFeeTakerL2",
-      "address": "0xD684Efb6a7c1ADE7298Dde28A2057E8EaF5D61fc",
+      "address": "0x560ECFEd1EfABf9EE19C47Dc93AAd973e03A7C42",
       "id": "0x7ec82077",
       "path": "contracts/actions/fee/GasFeeTakerL2.sol",
-      "version": "1.0.1",
+      "version": "1.0.3",
       "inRegistry": true,
       "changeTime": "0",
       "registryIds": [],
       "history": [
+        "0xD684Efb6a7c1ADE7298Dde28A2057E8EaF5D61fc",
         "0x2F64f73B222B4978CAfd0295c0fa106cE5f34996",
         "0x5AF1f885064CFeC4EdfF2cbb23Dbe4DeC1ad7E50"
       ]
@@ -717,5 +718,16 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": []
+    },
+    {
+      "name": "PriceFeedRegistry",
+      "address": "0x158E27De8B5E5bC3FA1C6D5b365a291c54f6b0Fd",
+      "id": "0x6f51c997",
+      "path": "contracts/utils/PriceFeedRegistry.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
     } 
-  ]
+]

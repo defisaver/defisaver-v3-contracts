@@ -30,6 +30,7 @@ contract ArbitrumUtilAddresses {
     address internal constant WSTETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant STETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
-    address internal constant CHAINLINK_FEED_REGISTRY = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    // TODO: Replace this with our own registry
+    address internal constant CHAINLINK_FEED_REGISTRY = 0x158E27De8B5E5bC3FA1C6D5b365a291c54f6b0Fd;
 
 }
