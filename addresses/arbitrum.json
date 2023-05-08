@@ -573,7 +573,7 @@
     },
     {
       "name": "GasFeeTakerL2",
-      "address": "0xD684Efb6a7c1ADE7298Dde28A2057E8EaF5D61fc",
+      "address": "0x560ECFEd1EfABf9EE19C47Dc93AAd973e03A7C42",
       "id": "0x7ec82077",
       "path": "contracts/actions/fee/GasFeeTakerL2.sol",
       "version": "1.0.3",
