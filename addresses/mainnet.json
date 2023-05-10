@@ -499,14 +499,14 @@
     },
     {
         "name": "CurveView",
-        "address": "0xe088a5005Bb995A9554bD3FE7F47e80f8F182389",
+        "address": "0x18893df1341d42F54e0242f7785C0b6968dDE04a",
         "id": "0x7da42156",
         "path": "contracts/views/CurveView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xe088a5005Bb995A9554bD3FE7F47e80f8F182389"]
     },
     {
         "name": "CompView",
@@ -1989,25 +1989,30 @@
     },
     {
         "name": "CurveDeposit",
-        "address": "0x160225c24300bD9fAA03Bc007D5e72bDbbcA9257",
+        "address": "0xf46aCCE6d2559971bF5Aea03A10B3679709CE43d",
         "id": "0xeae20b37",
         "path": "contracts/actions/curve/lp/CurveDeposit.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "CurveWithdraw",
-        "address": "0xb6Be5c486dD65c2cb18A388671b348E62307F0B3",
-        "id": "0x7633d6dc",
-        "path": "contracts/actions/curve/lp/CurveWithdraw.sol",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0xA2A6D75417807ebAf8364613018D697f88021771"]
+        "history": [
+            "0x160225c24300bD9fAA03Bc007D5e72bDbbcA9257"
+        ]
+    },
+    {
+        "name": "CurveWithdraw",
+        "address": "0x7Fb9234E349F85678F6a02A291684A7008Ad78e2",
+        "id": "0x7633d6dc",
+        "path": "contracts/actions/curve/lp/CurveWithdraw.sol",
+        "version": "1.0.2",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0xA2A6D75417807ebAf8364613018D697f88021771",
+            "0xb6Be5c486dD65c2cb18A388671b348E62307F0B3"
+        ]
     },
     {
         "name": "TrailingStopTrigger",
