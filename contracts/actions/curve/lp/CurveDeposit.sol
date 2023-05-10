@@ -67,7 +67,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
             bool explicitUnderlying,,
         ) = parseFlags(_params.flags);
 
-        CurveCache memory cache = _getPoolParams(_params.depositTargetOrPool, depositTargetType, explicitUnderlying);
+        CurveCache memory cache = _getPoolInfo(_params.depositTargetOrPool, depositTargetType, explicitUnderlying);
 
         if (_params.amounts.length != cache.N_COINS) revert CurveDepositWrongArraySize();
 

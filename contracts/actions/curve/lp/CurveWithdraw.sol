@@ -69,7 +69,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
             bool withdrawExact
         ) = parseFlags(_params.flags);
 
-        CurveCache memory cache = _getPoolParams(_params.depositTarget, depositTargetType, explicitUnderlying);
+        CurveCache memory cache = _getPoolInfo(_params.depositTarget, depositTargetType, explicitUnderlying);
 
         if (_params.amounts.length != cache.N_COINS) revert CurveWithdrawWrongArraySize();
 

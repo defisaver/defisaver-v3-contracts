@@ -71,7 +71,7 @@ contract CurveHelper is MainnetCurveAddresses {
         return IRegistry(AddressProvider.get_registry());
     }
 
-    function _getPoolParams(address _depositTargetOrPool, DepositTargetType _depositTargetType, bool _explicitUnderlying) internal view returns (
+    function _getPoolInfo(address _depositTargetOrPool, DepositTargetType _depositTargetType, bool _explicitUnderlying) internal view returns (
         CurveCache memory cache
     ) {
         bool underlying = false;
