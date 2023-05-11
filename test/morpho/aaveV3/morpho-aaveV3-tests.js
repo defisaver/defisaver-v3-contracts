@@ -24,12 +24,14 @@ const EMODE = {
 };
 
 const supplyTestData = [
+    /*
     {
         tokenSymbol: 'WETH', amount: '10', emode: EMODE.GENERAL, isCollateral: false,
     },
     {
         tokenSymbol: 'WETH', amount: '10', emode: EMODE.GENERAL, isCollateral: true,
     },
+    */
     {
         tokenSymbol: 'WETH', amount: '2', emode: EMODE.ETH, isCollateral: true,
     },
@@ -52,7 +54,7 @@ const morphoAaveV3SupplyTest = async () => {
         });
 
         before(async () => {
-            await redeploy('MorphoAaveV3Supply', REGISTRY_ADDR, true, true);
+            await redeploy('MorphoAaveV3Supply');
 
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);

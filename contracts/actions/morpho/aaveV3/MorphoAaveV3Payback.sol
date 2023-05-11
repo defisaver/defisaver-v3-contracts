@@ -3,7 +3,7 @@ pragma solidity =0.8.10;
 
 import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
-import "../helpers/MorphoAaveV3Helper.sol";
+import "./helpers/MorphoAaveV3Helper.sol";
 
 /// @title Payback a token to Morpho AaveV3
 contract MorphoAaveV3Payback is ActionBase, MorphoAaveV3Helper {

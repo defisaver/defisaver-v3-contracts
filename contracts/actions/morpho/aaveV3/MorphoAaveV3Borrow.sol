@@ -2,7 +2,7 @@
 pragma solidity =0.8.10;
 
 import "../../ActionBase.sol";
-import "../helpers/MorphoAaveV3Helper.sol";
+import "./helpers/MorphoAaveV3Helper.sol";
 
 /// @title Borrow a token from Morpho
 contract MorphoAaveV3Borrow is ActionBase, MorphoAaveV3Helper {

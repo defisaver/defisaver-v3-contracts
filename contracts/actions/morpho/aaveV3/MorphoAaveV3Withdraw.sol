@@ -3,7 +3,7 @@ pragma solidity =0.8.10;
 
 import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
-import "../helpers/MorphoAaveV3Helper.sol";
+import "./helpers/MorphoAaveV3Helper.sol";
 
 /// @title Withdraw a token from Morpho AaveV3
 contract MorphoAaveV3Withdraw is ActionBase, MorphoAaveV3Helper {

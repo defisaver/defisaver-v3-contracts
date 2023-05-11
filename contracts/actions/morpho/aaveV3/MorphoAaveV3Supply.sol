@@ -4,9 +4,7 @@ pragma solidity =0.8.10;
 import "../../../interfaces/morpho/IMorphoAaveV3.sol";
 import "../../ActionBase.sol";
 import "../../../utils/TokenUtils.sol";
-import "../helpers/MorphoAaveV3Helper.sol";
-
-import "hardhat/console.sol";
+import "./helpers/MorphoAaveV3Helper.sol";
 
 /// @title Supply a token to Morpho AaveV3
 contract MorphoAaveV3Supply is ActionBase, MorphoAaveV3Helper {
@@ -77,7 +75,6 @@ contract MorphoAaveV3Supply is ActionBase, MorphoAaveV3Helper {
     }
 
     function _supply(Params memory _params) internal returns (uint256, bytes memory) {
-        console.log("_supply");
         address morphoAddress = getMorphoAddressByEmode(_params.emodeId);
 
         _params.amount = _params.tokenAddr.pullTokensIfNeeded(_params.from, _params.amount);
