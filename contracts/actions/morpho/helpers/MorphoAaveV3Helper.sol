@@ -13,6 +13,8 @@ contract MorphoAaveV3Helper is MainnetMorphoAaveV3Addresses, DSMath {
     error InvalidEModeId(uint256 _emodeId);
 
     function getMorphoAddressByEmode(uint256 _emodeId) public view returns (address) {
+        /// @dev once MorphoMarketStorage is up and running change this
+        if (_emodeId == 1) return MORPHO_AAVEV3_ETH_MARKET;
         address morphoAddr = morphoMarketStorage.getMorphoAddress(_emodeId);
 
         if (morphoAddr == address(0)) revert InvalidEModeId(_emodeId);
