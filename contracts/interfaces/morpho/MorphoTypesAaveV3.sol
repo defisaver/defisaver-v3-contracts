@@ -749,11 +749,6 @@ interface IPoolAddressesProvider {
   function setPoolDataProvider(address newDataProvider) external;
 }
 
-/**
- * @title IAaveOracle
- * @author Aave
- * @notice Defines the basic interface for the Aave Oracle
- */
 interface IAaveOracle is IPriceOracleGetter {
   /**
    * @dev Emitted after the base currency is set
