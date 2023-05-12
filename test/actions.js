@@ -1601,18 +1601,20 @@ const curveWithdraw = async (
     sender,
     receiver,
     poolAddr,
-    minMintAmount,
+    burnAmount,
     useUnderlying,
     withdrawExact,
+    removeOneCoin,
     amounts,
 ) => {
     const curveWithdrawAction = new dfs.actions.curve.CurveWithdrawAction(
         sender,
         receiver,
         poolAddr,
-        minMintAmount,
+        burnAmount,
         useUnderlying,
         withdrawExact,
+        removeOneCoin,
         amounts,
     );
 
