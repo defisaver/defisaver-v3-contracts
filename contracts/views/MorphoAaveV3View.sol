@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import "../actions/morpho/aaveV3/helpers/MorphoAaveV3Helper.sol";
+import '../actions/morpho/aaveV3/helpers/MorphoAaveV3Helper.sol';
+
+
+
 
 contract MorphoAaveV3View is MorphoAaveV3Helper {
-
     struct UserInfo {
         uint256 userHealthFactor;
         uint256 morphoClaimed;
@@ -38,9 +40,10 @@ contract MorphoAaveV3View is MorphoAaveV3Helper {
         Types.PauseStatuses pauseStatus;
     }
 
-    function getUserInfo(address _morphoAddr, address _userAddr) external view returns (
-        UserInfo memory userInfo
-    ) {
+    function getUserInfo(
+        address _morphoAddr,
+        address _userAddr
+    ) external view returns (UserInfo memory userInfo) {
         IMorphoAaveV3 morpho = IMorphoAaveV3(_morphoAddr);
 
         address[] memory allMarkets = morpho.marketsCreated();
@@ -53,11 +56,10 @@ contract MorphoAaveV3View is MorphoAaveV3Helper {
             userBalances: new UserBalance[](allMarkets.length)
         });
 
-        for(uint256 i = 0; i < allMarkets.length; ++i) {
-
+        for (uint256 i = 0; i < allMarkets.length; ++i) {
             Types.Market memory marketData = morpho.market(allMarkets[i]);
 
-             userInfo.userBalances[i] = UserBalance({
+            userInfo.userBalances[i] = UserBalance({
                 market: allMarkets[i],
                 underlying: marketData.underlying,
                 decimals: uint8(IERC20(marketData.underlying).decimals()),
@@ -66,18 +68,60 @@ contract MorphoAaveV3View is MorphoAaveV3Helper {
                 supplyBalance: morpho.supplyBalance(marketData.underlying, _userAddr),
                 borrowBalance: morpho.borrowBalance(marketData.underlying, _userAddr),
                 collateralBalance: morpho.collateralBalance(marketData.underlying, _userAddr)
-             });
+            });
         }
-
     }
 
-    function getMarketInfo(address _morphoAddr, address _market) public view returns (MarketInfo memory) {
+    function getMarketInfo(
+        address _morphoAddr,
+        address _market
+    ) public view returns (MarketInfo memory) {
         IMorphoAaveV3 morpho = IMorphoAaveV3(_morphoAddr);
-
         Types.Market memory marketData = morpho.market(_market);
-
         Types.Indexes256 memory updatedIndexes = morpho.updatedIndexes(marketData.underlying);
-
+        /*
+        Indexes indexes;
+                MarketSideIndexes supply;
+                        uint256 poolIndex;
+                        uint256 p2pIndex;
+                MarketSideIndexes borrow;
+                        uint256 poolIndex;
+                        uint256 p2pIndex;
+        Deltas deltas;
+                MarketSideDelta supply;
+                        uint256 scaledDelta; // In pool unit.
+                        uint256 scaledP2PTotal; // In peer-to-peer unit.
+                MarketSideDelta borrow;
+                        uint256 scaledDelta; // In pool unit.
+                        uint256 scaledP2PTotal; // In peer-to-peer unit.
+        address underlying;
+        PauseStatuses pauseStatuses;
+                bool isP2PDisabled;
+                bool isSupplyPaused;
+                bool isSupplyCollateralPaused;
+                bool isBorrowPaused;
+                bool isWithdrawPaused;
+                bool isWithdrawCollateralPaused;
+                bool isRepayPaused;
+                bool isLiquidateCollateralPaused;
+                bool isLiquidateBorrowPaused;
+                bool isDeprecated;
+        bool isCollateral
+        address variableDebtToken;
+        uint32 lastUpdateTimestamp;
+        uint16 reserveFactor;
+        uint16 p2pIndexCursor; 
+        address aToken; 
+        address stableDebtToken; 
+        uint256 idleSupply; 
+        Indexes256 memory updatedIndexes 
+                MarketSideIndexes256 supply;
+                        uint256 poolIndex;
+                        uint256 p2pIndex;
+                MarketSideIndexes256 borrow;
+                        uint256 poolIndex;
+                        uint256 p2pIndex;
+        */
         uint256 proportionIdle = marketData.idleSupply; 
         if (proportionIdle > 0) {
             proportionIdle = min( 
@@ -112,28 +156,42 @@ contract MorphoAaveV3View is MorphoAaveV3Helper {
         }
 
         uint256 morphoBorrowInP2P = rmul(updatedIndexes.borrow.p2pIndex, marketData.deltas.borrow.scaledP2PTotal);
+        uint256 morphoBorrowOnPool = rmul(updatedIndexes.borrow.poolIndex, marketData.deltas.borrow.scaledDelta);
+        uint256 morphoSupplyInP2P = rmul(updatedIndexes.supply.p2pIndex, marketData.deltas.supply.scaledP2PTotal);
+        uint256 morphoSupplyOnPool = rmul(updatedIndexes.supply.poolIndex, marketData.deltas.supply.scaledDelta);
+
+        uint256 totalMorphoSupply = morphoSupplyInP2P + morphoSupplyOnPool;
+        uint256 totalMorphoBorrow = morphoBorrowInP2P + morphoBorrowOnPool;
+
         
-        /*
         return MarketInfo({
             market: _market,
             underlying: marketData.underlying,
             decimals: uint8(IERC20(marketData.underlying).decimals()),
-            p2pSupplyAmount: p2pSupplyAmount,
-            poolSupplyAmount: poolSupplyAmount,
-            p2pBorrowAmount: p2pBorrowAmount,
-            poolBorrowAmount: poolBorrowAmount,
-            p2pSupplyRate: p2pSupplyRate,
-            p2pBorrowRate: p2pBorrowRate,
-            poolSupplyRate: poolSupplyRate,
-            poolBorrowRate: poolBorrowRate,
+            p2pSupplyAmount: morphoSupplyInP2P,
+            poolSupplyAmount: morphoSupplyOnPool,
+            p2pBorrowAmount: morphoBorrowInP2P,
+            poolBorrowAmount: morphoBorrowOnPool,
+            p2pSupplyRate: 0,
+            p2pBorrowRate: 0,
+            poolSupplyRate: 0,
+            poolBorrowRate: 0,
             reserveFactor: marketData.reserveFactor,
             pauseStatus: marketData.pauseStatuses
         });
-        */
+    
     }
 
-
-    function getAllMarkets(address _morphoAddr) external view returns (address[] memory) {
+    function getAllMarkets(address _morphoAddr) public view returns (address[] memory) {
         return IMorphoAaveV3(_morphoAddr).marketsCreated();
+    }
+
+    function getAllMarketsInfo(address _morphoAddr) external view returns (MarketInfo[] memory) {
+        address[] memory allMarkets = getAllMarkets(_morphoAddr);
+        MarketInfo[] memory allMarketsInfo = new MarketInfo[](allMarkets.length);
+        for (uint256 i; i < allMarkets.length; i++) {
+            allMarketsInfo[i] = getMarketInfo(_morphoAddr, allMarkets[i]);
+        }
+        return allMarketsInfo;
     }
 }

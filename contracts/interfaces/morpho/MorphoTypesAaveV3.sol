@@ -870,6 +870,7 @@ library Types {
         // SLOT 6
         address underlying; // 160 bits
         PauseStatuses pauseStatuses; // 80 bits
+        bool isCollateral; // 8 bits
         // SLOT 7
         address variableDebtToken; // 160 bits
         uint32 lastUpdateTimestamp; // 32 bits
