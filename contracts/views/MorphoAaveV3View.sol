@@ -3,7 +3,7 @@ pragma solidity =0.8.10;
 
 import "../actions/morpho/aaveV3/helpers/MorphoAaveV3Helper.sol";
 
-contract MorphoAaveV2View is MorphoAaveV3Helper {
+contract MorphoAaveV3View is MorphoAaveV3Helper {
 
     struct UserInfo {
         uint256 userHealthFactor;
@@ -113,22 +113,23 @@ contract MorphoAaveV2View is MorphoAaveV3Helper {
 
         uint256 morphoBorrowInP2P = rmul(updatedIndexes.borrow.p2pIndex, marketData.deltas.borrow.scaledP2PTotal);
         
-
-        // return MarketInfo({
-        //     market: _market,
-        //     underlying: marketData.underlying,
-        //     decimals: uint8(IERC20(marketData.underlying).decimals()),
-        //     p2pSupplyAmount: p2pSupplyAmount,
-        //     poolSupplyAmount: poolSupplyAmount,
-        //     p2pBorrowAmount: p2pBorrowAmount,
-        //     poolBorrowAmount: poolBorrowAmount,
-        //     p2pSupplyRate: p2pSupplyRate,
-        //     p2pBorrowRate: p2pBorrowRate,
-        //     poolSupplyRate: poolSupplyRate,
-        //     poolBorrowRate: poolBorrowRate,
-        //     reserveFactor: marketData.reserveFactor,
-        //     pauseStatus: marketData.pauseStatuses
-        // });
+        /*
+        return MarketInfo({
+            market: _market,
+            underlying: marketData.underlying,
+            decimals: uint8(IERC20(marketData.underlying).decimals()),
+            p2pSupplyAmount: p2pSupplyAmount,
+            poolSupplyAmount: poolSupplyAmount,
+            p2pBorrowAmount: p2pBorrowAmount,
+            poolBorrowAmount: poolBorrowAmount,
+            p2pSupplyRate: p2pSupplyRate,
+            p2pBorrowRate: p2pBorrowRate,
+            poolSupplyRate: poolSupplyRate,
+            poolBorrowRate: poolBorrowRate,
+            reserveFactor: marketData.reserveFactor,
+            pauseStatus: marketData.pauseStatuses
+        });
+        */
     }
 
 

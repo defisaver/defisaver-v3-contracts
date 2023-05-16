@@ -977,6 +977,17 @@
         "history": []
     },
     {
+        "name": "MorphoMarketStorage",
+        "address": "0x56EE33811a6C8c1Fd443E53685ed1605E43b3971",
+        "id": "0x9600f04b",
+        "path": "contracts/utils/MorphoMarketStorage",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "MorphoAaveV2Borrow",
         "address": "0xa85C3E41Bf9F75a381927e1Aa9b00f77C4631109",
         "id": "0xb6af4eff",

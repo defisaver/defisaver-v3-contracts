@@ -7,9 +7,9 @@ contract MorphoMarketStorage is AdminAuth {
 
     mapping (uint256 => address) public morphoAddresses;
 
-    constructor(address _morphoGeneralAddress, address _morphoEthAddress) {
-        morphoAddresses[0] = _morphoGeneralAddress;
-        morphoAddresses[1] = _morphoEthAddress;
+    constructor() {
+        address morpho_aaveV3_eth = 0x33333aea097c193e66081E930c33020272b33333;
+        morphoAddresses[1] = morpho_aaveV3_eth;
     }
 
     function getMorphoAddress(uint256 _emodeId) public view returns (address) {
