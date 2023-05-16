@@ -5,7 +5,6 @@ import '../actions/morpho/aaveV3/helpers/MorphoAaveV3Helper.sol';
 
 
 
-
 contract MorphoAaveV3View is MorphoAaveV3Helper {
     struct UserInfo {
         uint256 userHealthFactor;
@@ -40,6 +39,10 @@ contract MorphoAaveV3View is MorphoAaveV3Helper {
         Types.PauseStatuses pauseStatus;
     }
 
+    function getAllMarkets(address _morphoAddr) public view returns (address[] memory) {
+        return IMorphoAaveV3(_morphoAddr).marketsCreated();
+    }
+
     function getUserInfo(
         address _morphoAddr,
         address _userAddr
@@ -71,7 +74,7 @@ contract MorphoAaveV3View is MorphoAaveV3Helper {
             });
         }
     }
-
+    /*
     function getMarketInfo(
         address _morphoAddr,
         address _market
@@ -79,49 +82,7 @@ contract MorphoAaveV3View is MorphoAaveV3Helper {
         IMorphoAaveV3 morpho = IMorphoAaveV3(_morphoAddr);
         Types.Market memory marketData = morpho.market(_market);
         Types.Indexes256 memory updatedIndexes = morpho.updatedIndexes(marketData.underlying);
-        /*
-        Indexes indexes;
-                MarketSideIndexes supply;
-                        uint256 poolIndex;
-                        uint256 p2pIndex;
-                MarketSideIndexes borrow;
-                        uint256 poolIndex;
-                        uint256 p2pIndex;
-        Deltas deltas;
-                MarketSideDelta supply;
-                        uint256 scaledDelta; // In pool unit.
-                        uint256 scaledP2PTotal; // In peer-to-peer unit.
-                MarketSideDelta borrow;
-                        uint256 scaledDelta; // In pool unit.
-                        uint256 scaledP2PTotal; // In peer-to-peer unit.
-        address underlying;
-        PauseStatuses pauseStatuses;
-                bool isP2PDisabled;
-                bool isSupplyPaused;
-                bool isSupplyCollateralPaused;
-                bool isBorrowPaused;
-                bool isWithdrawPaused;
-                bool isWithdrawCollateralPaused;
-                bool isRepayPaused;
-                bool isLiquidateCollateralPaused;
-                bool isLiquidateBorrowPaused;
-                bool isDeprecated;
-        bool isCollateral
-        address variableDebtToken;
-        uint32 lastUpdateTimestamp;
-        uint16 reserveFactor;
-        uint16 p2pIndexCursor; 
-        address aToken; 
-        address stableDebtToken; 
-        uint256 idleSupply; 
-        Indexes256 memory updatedIndexes 
-                MarketSideIndexes256 supply;
-                        uint256 poolIndex;
-                        uint256 p2pIndex;
-                MarketSideIndexes256 borrow;
-                        uint256 poolIndex;
-                        uint256 p2pIndex;
-        */
+        
         uint256 proportionIdle = marketData.idleSupply; 
         if (proportionIdle > 0) {
             proportionIdle = min( 
@@ -182,10 +143,6 @@ contract MorphoAaveV3View is MorphoAaveV3Helper {
     
     }
 
-    function getAllMarkets(address _morphoAddr) public view returns (address[] memory) {
-        return IMorphoAaveV3(_morphoAddr).marketsCreated();
-    }
-
     function getAllMarketsInfo(address _morphoAddr) external view returns (MarketInfo[] memory) {
         address[] memory allMarkets = getAllMarkets(_morphoAddr);
         MarketInfo[] memory allMarketsInfo = new MarketInfo[](allMarkets.length);
@@ -194,4 +151,5 @@ contract MorphoAaveV3View is MorphoAaveV3Helper {
         }
         return allMarketsInfo;
     }
+    */    
 }

@@ -6,6 +6,7 @@ const { morphoAaveV3BorrowTest } = require('./morpho-aaveV3-tests');
 describe('Morpho-Aave-V3-Borrow', function () {
     this.timeout(80000);
     before(async () => {
+        await redeploy('MorphoAaveV3Supply');
         await redeploy('MorphoAaveV3Borrow');
     });
 

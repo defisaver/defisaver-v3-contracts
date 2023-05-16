@@ -3,14 +3,13 @@ const { expect } = require('chai');
 const hre = require('hardhat');
 
 const {
-    redeploy,
     getProxy,
     takeSnapshot,
     revertToSnapshot,
-    resetForkToBlock,
     setBalance,
     approve,
     WETH_ADDRESS,
+    redeploy,
 } = require('../../utils');
 
 const {
@@ -27,6 +26,9 @@ const EMODE = {
 
 const supplyTestData = [
     {
+        tokenSymbol: 'WETH', amount: '100', emode: EMODE.ETH, isCollateral: false,
+    },
+    {
         tokenSymbol: 'wstETH', amount: '5', emode: EMODE.ETH, isCollateral: true,
     },
     {
@@ -38,9 +40,6 @@ const supplyTestData = [
     {
         tokenSymbol: 'WBTC', amount: '2', emode: EMODE.ETH, isCollateral: true,
     },
-    {
-        tokenSymbol: 'WETH', amount: '2', emode: EMODE.ETH, isCollateral: false,
-    },
 ];
 
 const morphoAaveV3SupplyTest = async () => {
@@ -50,6 +49,7 @@ const morphoAaveV3SupplyTest = async () => {
         let senderAcc;
         let proxy;
         let snapshot;
+        let view;
 
         beforeEach(async () => {
             snapshot = await takeSnapshot();
@@ -60,8 +60,7 @@ const morphoAaveV3SupplyTest = async () => {
         });
 
         before(async () => {
-            await redeploy('MorphoAaveV3Supply');
-
+            view = await redeploy('MorphoAaveV3View');
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
@@ -89,6 +88,16 @@ const morphoAaveV3SupplyTest = async () => {
                     isCollateral,
                     4,
                 );
+                const morpho = await view.getMorphoAddressByEmode(1);
+                const userInfo = await view.getUserInfo(morpho, proxy.address);
+
+                // seems to be one wei off
+                if (isCollateral) {
+                    // eslint-disable-next-line max-len
+                    expect(userInfo[2][i].collateralBalance).to.be.closeTo(amountFormatted, 1);
+                } else {
+                    expect(userInfo[2][i].supplyBalance).to.be.closeTo(amountFormatted, 1);
+                }
             });
         }
     });
@@ -101,6 +110,7 @@ const morphoAaveV3WithdrawTest = async () => {
         let senderAcc;
         let proxy;
         let snapshot;
+        let view;
 
         beforeEach(async () => {
             snapshot = await takeSnapshot();
@@ -111,9 +121,7 @@ const morphoAaveV3WithdrawTest = async () => {
         });
 
         before(async () => {
-            await redeploy('MorphoAaveV3Supply');
-            await redeploy('MorphoAaveV3Withdraw');
-
+            view = await redeploy('MorphoAaveV3View');
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
@@ -127,6 +135,8 @@ const morphoAaveV3WithdrawTest = async () => {
                 const token = getAssetInfo(tokenSymbol);
 
                 const amountFormatted = hre.ethers.utils.parseUnits(amount, token.decimals);
+
+                const amountFirstWithdraw = hre.ethers.utils.parseUnits('0.01', token.decimals);
 
                 await setBalance(token.address, senderAcc.address, amountFormatted);
                 await approve(token.address, proxy.address);
@@ -146,12 +156,35 @@ const morphoAaveV3WithdrawTest = async () => {
                     proxy,
                     emode,
                     token.address,
-                    amountFormatted,
+                    amountFirstWithdraw,
                     senderAcc.address,
                     proxy.address,
                     isCollateral,
                     4,
                 );
+                const morpho = await view.getMorphoAddressByEmode(1);
+                const userInfo = await view.getUserInfo(morpho, proxy.address);
+                console.log(userInfo[2][i].collateralBalance);
+                console.log(userInfo[2][i].supplyBalance);
+
+                await morphoAaveV3Withdraw(
+                    proxy,
+                    emode,
+                    token.address,
+                    hre.ethers.constants.MaxUint256,
+                    senderAcc.address,
+                    proxy.address,
+                    isCollateral,
+                    4,
+                );
+                const userInfoLast = await view.getUserInfo(morpho, proxy.address);
+
+                // seems to be one wei off
+                if (isCollateral) {
+                    expect(userInfoLast[2][i].collateralBalance).to.be.eq(0);
+                } else {
+                    expect(userInfoLast[2][i].supplyBalance).to.be.eq(0);
+                }
             });
         }
     });
@@ -164,6 +197,7 @@ const morphoAaveV3BorrowTest = async () => {
         let senderAcc;
         let proxy;
         let snapshot;
+        let view;
 
         beforeEach(async () => {
             snapshot = await takeSnapshot();
@@ -174,10 +208,7 @@ const morphoAaveV3BorrowTest = async () => {
         });
 
         before(async () => {
-            await resetForkToBlock();
-            await redeploy('MorphoAaveV3Supply');
-            await redeploy('MorphoAaveV3Borrow');
-
+            view = await redeploy('MorphoAaveV3View');
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
@@ -195,6 +226,8 @@ const morphoAaveV3BorrowTest = async () => {
                 await setBalance(token.address, senderAcc.address, amountFormatted);
                 await approve(token.address, proxy.address);
 
+                const borrowAmount = hre.ethers.utils.parseUnits('1', 18);
+
                 await morphoAaveV3Supply(
                     proxy,
                     emode,
@@ -208,12 +241,16 @@ const morphoAaveV3BorrowTest = async () => {
                 await morphoAaveV3Borrow(
                     proxy,
                     emode,
-                    '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-                    hre.ethers.utils.parseUnits('1', 18),
+                    WETH_ADDRESS,
+                    borrowAmount,
                     senderAcc.address,
                     proxy.address,
                     4,
                 );
+
+                const morpho = await view.getMorphoAddressByEmode(1);
+                const userInfo = await view.getUserInfo(morpho, proxy.address);
+                expect(userInfo[2][0].borrowBalance).to.be.closeTo(borrowAmount, 1);
             });
         }
     });
@@ -226,6 +263,7 @@ const morphoAaveV3PaybackTest = async () => {
         let senderAcc;
         let proxy;
         let snapshot;
+        let view;
 
         beforeEach(async () => {
             snapshot = await takeSnapshot();
@@ -236,12 +274,7 @@ const morphoAaveV3PaybackTest = async () => {
         });
 
         before(async () => {
-            await resetForkToBlock();
-
-            await redeploy('MorphoAaveV3Supply');
-            await redeploy('MorphoAaveV3Borrow');
-            await redeploy('MorphoAaveV3Payback');
-
+            view = await redeploy('MorphoAaveV3View');
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
@@ -279,17 +312,34 @@ const morphoAaveV3PaybackTest = async () => {
                     proxy.address,
                     4,
                 );
-
+                await setBalance(WETH_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('2', 18));
                 await approve(WETH_ADDRESS, proxy.address);
+
+                const morpho = await view.getMorphoAddressByEmode(1);
+                const userInfo = await view.getUserInfo(morpho, proxy.address);
+                console.log(userInfo[2][0].borrowBalance);
 
                 await morphoAaveV3Payback(
                     proxy,
                     emode,
                     WETH_ADDRESS,
-                    hre.ethers.utils.parseUnits('1', 18),
+                    hre.ethers.utils.parseUnits('0.5', 18),
                     senderAcc.address,
                     proxy.address,
                 );
+                const userInfoPartialPayback = await view.getUserInfo(morpho, proxy.address);
+                console.log(userInfoPartialPayback[2][0].borrowBalance);
+
+                await morphoAaveV3Payback(
+                    proxy,
+                    emode,
+                    WETH_ADDRESS,
+                    hre.ethers.constants.MaxUint256,
+                    senderAcc.address,
+                    proxy.address,
+                );
+                const userInfoFullPayback = await view.getUserInfo(morpho, proxy.address);
+                expect(userInfoFullPayback[2][0].borrowBalance).to.be.eq(0);
             });
         }
     });
