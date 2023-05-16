@@ -34,6 +34,8 @@ const {
     liquityRedeem,
 } = require('../actions');
 
+const { collChangeId, debtChangeId } = require('../utils-liquity');
+
 const lusdAddr = getAssetInfo('LUSD').address;
 const lqtyAddr = getAssetInfo('LQTY').address;
 
@@ -57,9 +59,6 @@ const lqtyAmountStake = Float2BN(fetchAmountinUSDPrice('LQTY', 6000), 18);
 const lqtyAmountUnstake = Float2BN(fetchAmountinUSDPrice('LQTY', 5000), 18);
 
 const lqtyMinDebt = Float2BN('2000');
-
-const collChangeId  = { SUPPLY: 0, WITHDRAW: 1 };
-const debtChangeId = { PAYBACK: 0, BORROW: 1 };
 
 const lusdAmountRedeem = Float2BN('4000', 18);
 
@@ -1142,4 +1141,7 @@ module.exports = {
 
     liquityRedeemTest,
     liquityAdjustTest,
+
+    collChangeId,
+    debtChangeId,
 };

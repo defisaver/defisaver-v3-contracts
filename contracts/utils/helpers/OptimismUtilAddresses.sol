@@ -29,5 +29,6 @@ contract OptimismUtilAddresses {
     address internal constant STETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
 
-    address internal constant CHAINLINK_FEED_REGISTRY = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    // TODO: Replace this with our own registry
+    address internal constant CHAINLINK_FEED_REGISTRY = 0x7E3D9e4E620842d61aB111a6DbF1be5a8cc91774;
 }

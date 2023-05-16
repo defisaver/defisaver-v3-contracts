@@ -18,6 +18,8 @@ const {
     mcdBoostComposite,
     mcdFLBoostComposite,
     mcdFLRepayComposite,
+    mcdDsrDeposit,
+    mcdDsrWithdraw,
 } = require('../actions');
 const {
     getProxy,
@@ -40,6 +42,8 @@ const {
     formatMockExchangeObj,
     cacheChainlinkPrice,
     LOGGER_ADDR,
+    getContractFromRegistry,
+    approve,
 } = require('../utils');
 const {
     getVaultsForUser,
@@ -1599,6 +1603,105 @@ const mcdBoostCompositeTest = async () => {
     });
 };
 
+const mcdDsrDepositTest = async () => {
+    describe('Mcd-Dsr-Deposit', async function () {
+        this.timeout(80000);
+
+        const DSR_DEPOSIT_AMOUNT = Float2BN('3000');
+        const { address: daiAddr } = getAssetInfo('DAI');
+
+        let senderAcc;
+        let proxy;
+        let snapshot;
+        let view;
+
+        before(async () => {
+            await hre.ethers.provider.getBlockNumber().then((blockNumber) => console.log({ blockNumber }));
+            [senderAcc] = await hre.ethers.getSigners();
+            proxy = await getProxy(senderAcc.address);
+
+            await getContractFromRegistry('McdDsrDeposit');
+            view = await redeploy('McdView');
+        });
+
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        it('... should deposit DAI into Maker DSR', async () => {
+            await setBalance(daiAddr, senderAcc.address, DSR_DEPOSIT_AMOUNT);
+            await approve(daiAddr, proxy.address);
+            await mcdDsrDeposit(proxy, DSR_DEPOSIT_AMOUNT, senderAcc.address);
+            const dsrBalance = await view.callStatic.getUserDsrBalance(proxy.address);
+            expect(dsrBalance).to.be.closeTo(DSR_DEPOSIT_AMOUNT, 1); // off by one wei
+        });
+
+        it('... should deposit MAXUINT DAI into Maker DSR', async () => {
+            await setBalance(daiAddr, senderAcc.address, DSR_DEPOSIT_AMOUNT);
+            await approve(daiAddr, proxy.address);
+            await mcdDsrDeposit(proxy, hre.ethers.constants.MaxUint256, senderAcc.address);
+            const dsrBalance = await view.callStatic.getUserDsrBalance(proxy.address);
+            expect(dsrBalance).to.be.closeTo(DSR_DEPOSIT_AMOUNT, 1); // off by one wei
+        });
+    });
+};
+
+const mcdDsrWithdrawTest = async () => {
+    describe('Mcd-Dsr-Withdraw', async function () {
+        this.timeout(80000);
+
+        const DSR_DEPOSIT_AMOUNT = Float2BN('3000');
+        const { address: daiAddr } = getAssetInfo('DAI');
+
+        let senderAcc;
+        let proxy;
+        let view;
+
+        before(async () => {
+            await hre.ethers.provider.getBlockNumber().then((blockNumber) => console.log({ blockNumber }));
+            [senderAcc] = await hre.ethers.getSigners();
+            proxy = await getProxy(senderAcc.address);
+
+            await getContractFromRegistry('McdDsrDeposit');
+            await getContractFromRegistry('McdDsrWithdraw');
+            view = await getContractFromRegistry('McdView');
+        });
+
+        it('... should deposit DAI to Maker DSR', async () => {
+            await setBalance(daiAddr, senderAcc.address, DSR_DEPOSIT_AMOUNT);
+            await approve(daiAddr, proxy.address);
+            await mcdDsrDeposit(proxy, DSR_DEPOSIT_AMOUNT, senderAcc.address);
+            const dsrBalance = await view.callStatic.getUserDsrBalance(proxy.address);
+            expect(dsrBalance).to.be.closeTo(DSR_DEPOSIT_AMOUNT, 1); // off by one wei
+        });
+
+        it('... should withdraw half of deposited DAI from Maker DSR', async () => {
+            await mcdDsrWithdraw(proxy, DSR_DEPOSIT_AMOUNT.div(2), senderAcc.address);
+            expect(await balanceOf(daiAddr, senderAcc.address)).to.be.eq(DSR_DEPOSIT_AMOUNT.div(2));
+
+            const dsrBalance = await view.callStatic.getUserDsrBalance(proxy.address);
+            expect(dsrBalance).to.be.gte(DSR_DEPOSIT_AMOUNT.div(2));
+        });
+
+        it('... should withdraw MAXUINT DAI from Maker DSR', async () => {
+            await mcdDsrWithdraw(proxy, hre.ethers.constants.MaxUint256, senderAcc.address);
+            expect(await balanceOf(daiAddr, senderAcc.address)).to.be.gte(DSR_DEPOSIT_AMOUNT);
+
+            const dsrBalance = await view.callStatic.getUserDsrBalance(proxy.address);
+            expect(dsrBalance).to.be.eq(0);
+
+            const pieLeft = await hre.ethers.getContractAt('IPot', '0x197E90f9FAD81970bA7976f33CbD77088E5D7cf7').then(
+                (pot) => pot.pie(proxy.address),
+            );
+            expect(pieLeft).to.be.eq(0);
+        });
+    });
+};
+
 const mcdDeployContracts = async () => {
     await redeploy('McdOpen');
     await redeploy('McdSupply');
@@ -1638,5 +1741,7 @@ module.exports = {
     mcdRepayCompositeTest,
     mcdFLBoostCompositeTest,
     mcdBoostCompositeTest,
+    mcdDsrDepositTest,
+    mcdDsrWithdrawTest,
     GENERATE_AMOUNT_IN_USD,
 };

@@ -25,6 +25,7 @@ const addrs = {
         OWNER_ACC: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
         WETH_ADDRESS: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         DAI_ADDRESS: '0x6b175474e89094c44da98b954eedeac495271d0f',
+        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         TOKEN_GROUP_REGISTRY: '0xcA49e64FE1FE8be40ED30F682edA1b27a6c8611c',
         FEE_RECEIVER: '0x6467e807dB1E71B9Ef04E0E3aFb962E4B0900B2B',
         USDC_ADDR: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
@@ -33,6 +34,7 @@ const addrs = {
         StrategyProxy: '0x0822902D30CC9c77404e6eB140dC1E98aF5b559A',
         SubProxy: '0xd18d4756bbf848674cc35f1a0B86afEF20787382',
         UNISWAP_WRAPPER: '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54',
+        UNISWAP_V3_WRAPPER: '0xA250D449e8246B0be1ecF66E21bB98678448DEF5',
         UNIV3_WRAPPER: '0xA250D449e8246B0be1ecF66E21bB98678448DEF5',
         FEED_REGISTRY: '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf',
         COMET_USDC_ADDR: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
@@ -41,6 +43,8 @@ const addrs = {
         CHICKEN_BONDS_VIEW: '0x809a93fd4a0d7d7906Ef6176f0b5518b418Da08f',
         AAVE_MARKET: '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e',
         AAVE_V3_VIEW: '0x9ECB0645b357fDD7B92789B91595160862Bd45d0',
+        ZRX_ALLOWLIST_ADDR: '0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F',
+        ZRX_ALLOWLIST_OWNER: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
         AAVE_SUB_PROXY: '',
         AVG_GAS_PRICE: 100,
 
@@ -58,11 +62,14 @@ const addrs = {
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
         StrategyProxy: '0xEe0C404FD30E289c305E760b3AE1d1Ae6503350f',
         SubProxy: '0x163c08d3F6d916AD6Af55b37728D547e968103F8',
-        UNISWAP_WRAPPER: '0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357',
+        UNISWAP_V3_WRAPPER: '0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357',
         AAVE_V3_VIEW: '0x5aD16e393615bfeF64e15210C370dd4b8f2753Cb',
         AAVE_SUB_PROXY: '0x9E8aE909Af8A391b58f45819f0d36e4256991D19',
         AVG_GAS_PRICE: 0.001,
         TOKEN_GROUP_REGISTRY: '0x566b2a957D8FCE39D2744059d558F27aF52a70c0',
+        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        ZRX_ALLOWLIST_ADDR: '0x52F6ae5aE5a8a6316c970d3a02C50b74c1a50bB8',
+        ZRX_ALLOWLIST_OWNER: '0xc9a956923bfb5f141f1cd4467126b3ae91e5cc33',
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -71,7 +78,7 @@ const addrs = {
         WETH_ADDRESS: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
         DAI_ADDRESS: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
         USDC_ADDR: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
-        EXCHANGE_OWNER_ADDR: '0x322d58b9E75a6918f7e7849AEe0fF09369977e08',
+        EXCHANGE_OWNER_ADDR: '0x926516e60521556f4ab5e7bf16a4d41a8539c7d1',
         SAVER_EXCHANGE_ADDR: '0xaB1E4b72BC2f3890F052df111EE626c1c7229F26',
         FEE_RECEIVER: '0xe000e3c9428D539566259cCd89ed5fb85e655A01',
         TOKEN_GROUP_REGISTRY: '0xb03fe103f54841821C080C124312059c9A3a7B5c',
@@ -80,8 +87,12 @@ const addrs = {
         SubProxy: '0x275A8f98dBA07Ad6380D3ea3F36B665DD6E02F25',
         StrategyProxy: '0x8F62B8Cd1189dB92ba4CBd4dBE64D03C54fD079B',
         AAVE_V3_VIEW: '0x710f01037018Daad969B8FeFe69b4823Ef788bc6',
+        UNISWAP_V3_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
+        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         AAVE_SUB_PROXY: '0x29a172f04CF9C6a79EdF4dD2744F2d260b8b8FE4',
         UNISWAP_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
+        ZRX_ALLOWLIST_ADDR: '0x5eD8e74b1caE57B0c68B3278B88589991FBa0750',
+        ZRX_ALLOWLIST_OWNER: '0x926516e60521556f4ab5e7bf16a4d41a8539c7d1',
         AVG_GAS_PRICE: 0.5,
     },
     kovan: {
@@ -737,7 +748,8 @@ const formatMockExchangeObj = async (
     ];
 };
 
-const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee) => {
+// eslint-disable-next-line max-len
+const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee, minPrice = 0) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
     let firstPath = srcAddr;
@@ -770,7 +782,7 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, u
         destAddr,
         amount,
         destAmount,
-        0,
+        minPrice,
         0,
         nullAddress,
         wrapper,
@@ -964,14 +976,15 @@ const formatExchangeObjForOffchain = (
 ];
 
 const addToZRXAllowlist = async (acc, newAddr) => {
-    const exchangeOwnerAddr = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
+    const exchangeOwnerAddr = addrs[network].ZRX_ALLOWLIST_OWNER;
     await sendEther(acc, exchangeOwnerAddr, '1');
     await impersonateAccount(exchangeOwnerAddr);
 
     const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
 
     const registryInstance = await hre.ethers.getContractFactory('ZrxAllowlist');
-    const registry = await registryInstance.attach('0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F');
+    const zrxAllowlistAddr = addrs[network].ZRX_ALLOWLIST_ADDR;
+    const registry = await registryInstance.attach(zrxAllowlistAddr);
     const registryByOwner = await registry.connect(signer);
 
     await registryByOwner.setAllowlistAddr(newAddr, true);

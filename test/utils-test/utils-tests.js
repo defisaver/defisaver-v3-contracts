@@ -1,6 +1,9 @@
+/* eslint-disable no-await-in-loop */
 const { expect } = require('chai');
 const hre = require('hardhat');
 const { getAssetInfo, assets } = require('@defisaver/tokens');
+const path = require('path');
+const fs = require('fs');
 
 const {
     redeploy,
@@ -23,7 +26,7 @@ const {
     getAddrFromRegistry,
     setBalance,
     addrs,
-    AAVE_MARKET,
+    chainIds,
 } = require('../utils');
 
 const botRefillL2Test = async () => {
@@ -435,30 +438,158 @@ const tokenPriceHelperTest = async () => {
     describe('Token-Price-Helper', function () {
         this.timeout(80000);
 
-        let tokenPriceHelper; let tokenPriceHelperAddr;
-        let aaveView;
+        let tokenPriceHelper; let tokenPriceHelperAddr; let tokenHelperOld;
         before(async () => {
             tokenPriceHelperAddr = await getAddrFromRegistry('TokenPriceHelper');
             tokenPriceHelper = await hre.ethers.getContractAt('TokenPriceHelper', tokenPriceHelperAddr);
-            aaveView = await redeploy('AaveView');
+
+            tokenHelperOld = await hre.ethers.getContractAt('TokenPriceHelper', '0x80536cb79341972a5Ef679dF5B70bB4A40a53d96');
         });
 
         for (let i = 0; i < assets.length; i++) {
             it(`... should get USD and ETH price for ${assets[i].symbol} `, async () => {
                 if (assets[i].symbol === 'OP') return;
+                if (assets[i].symbol === 'SUSHI') return;
                 const assetInfo = getAssetInfo(assets[i].symbol);
                 const priceInUSD = await tokenPriceHelper.getPriceInUSD(assetInfo.address);
                 const aaveInUSD = await tokenPriceHelper.getAaveTokenPriceInUSD(assetInfo.address);
-
                 const priceInETH = await tokenPriceHelper.getPriceInETH(assetInfo.address);
                 const aaveInETH = await tokenPriceHelper.getAaveTokenPriceInETH(assetInfo.address);
-                if (priceInUSD.toString() === '0' && aaveInUSD.toString() === '0') return;
-                console.log(priceInUSD);
-                console.log(aaveInUSD);
-                console.log(priceInETH);
-                console.log(aaveInETH);
+
+                const priceInUSDOld = await tokenHelperOld.getPriceInUSD(assetInfo.address);
+                const aaveInUSDOld = await tokenHelperOld.getAaveTokenPriceInUSD(assetInfo.address);
+                const priceInETHOld = await tokenHelperOld.getPriceInETH(assetInfo.address);
+                const aaveInETHOld = await tokenHelperOld.getAaveTokenPriceInETH(assetInfo.address);
+                console.log(`-----------------${assets[i].symbol}`);
+
+                if (priceInUSD.toString() !== priceInUSDOld.toString()) {
+                    console.log('-----------------1');
+                    console.log(priceInUSD);
+                    console.log(priceInUSDOld);
+                }
+                if (aaveInUSD.toString() !== aaveInUSDOld.toString()) {
+                    console.log('-----------------2');
+
+                    console.log(aaveInUSD);
+                    console.log(aaveInUSDOld);
+                }
+                if (priceInETH.toString() !== priceInETHOld.toString()) {
+                    console.log('-----------------3');
+
+                    console.log(priceInETH);
+                    console.log(priceInETHOld);
+                }
+                if (aaveInETH.toString() !== aaveInETHOld.toString()) {
+                    console.log('-----------------4');
+
+                    console.log(aaveInETH);
+                    console.log(aaveInETHOld);
+                }
             });
         }
+    });
+};
+const tokenPriceHelperL2Test = async () => {
+    describe('Token-Price-Helper-L2 (Using GasFeeTakerL2)', function () {
+        this.timeout(80000);
+
+        let tokenPriceHelper; let tokenPriceHelperAddr;
+        before(async () => {
+            tokenPriceHelperAddr = await getAddrFromRegistry('GasFeeTakerL2');
+            tokenPriceHelper = await hre.ethers.getContractAt('GasFeeTakerL2', tokenPriceHelperAddr);
+        });
+
+        for (let i = 0; i < assets.length; i++) {
+            it(`... should get USD and ETH price for ${assets[i].symbol} `, async () => {
+                const network = hre.network.config.name;
+                const chainId = chainIds[network];
+                if (assets[i].symbol === 'rETH') {
+                    assets[i].addresses[42161] = '0xEC70Dcb4A1EFa46b8F2D97C310C9c4790ba5ffA8';
+                }
+                if (assets[i].addresses[chainId] === undefined) {
+                    return;
+                }
+                const assetInfo = getAssetInfo(assets[i].symbol, chainId);
+                const address = assetInfo.address;
+                const priceInUSD = await tokenPriceHelper.getPriceInUSD(address);
+                const aaveInUSD = await tokenPriceHelper.getAaveTokenPriceInUSD(address);
+                const chainlinkInUSD = await tokenPriceHelper.getChainlinkPriceInUSD(
+                    address, false,
+                );
+                const priceInETH = await tokenPriceHelper.getPriceInETH(address);
+                const aaveInETH = await tokenPriceHelper.getAaveTokenPriceInETH(address);
+                const chainlinkInETH = await tokenPriceHelper.getChainlinkPriceInETH(address);
+
+                console.log(`-----------------${assets[i].symbol}`);
+                console.log(priceInUSD);
+                console.log(aaveInUSD);
+                console.log(chainlinkInUSD);
+                console.log(priceInETH);
+                console.log(aaveInETH);
+                console.log(chainlinkInETH);
+            });
+        }
+    });
+};
+const priceFeedTest = async () => {
+    describe('Price feed test', function () {
+        this.timeout(80000);
+
+        let priceFeedContract;
+        let priceFeeds;
+        before(async () => {
+            console.log(priceFeeds);
+
+            const network = hre.network.config.name;
+            const chainId = chainIds[network];
+
+            let priceFeedAddr;
+            if (chainId === 10) {
+                priceFeedAddr = '0x7E3D9e4E620842d61aB111a6DbF1be5a8cc91774';
+                const filePath = path.join(__dirname, '../../addresses/priceFeeds/optimism.json');
+                fs.readFile(filePath, 'utf-8', (err, data) => {
+                    if (err) {
+                        console.error(err);
+                        return;
+                    }
+                    priceFeeds = JSON.parse(data);
+                });
+            }
+            if (chainId === 42161) {
+                priceFeedAddr = '0x158E27De8B5E5bC3FA1C6D5b365a291c54f6b0Fd';
+                const filePath = path.join(__dirname, '../../addresses/priceFeeds/arbitrum.json');
+                fs.readFile(filePath, 'utf-8', (err, data) => {
+                    if (err) {
+                        console.error(err);
+                        return;
+                    }
+                    priceFeeds = JSON.parse(data);
+                });
+            }
+            priceFeedContract = await hre.ethers.getContractAt('PriceFeedRegistry', priceFeedAddr);
+        });
+
+        it('... should check priceFeed for any changes', async () => {
+            for (let i = 0; i < priceFeeds.length; i++) {
+                const feedAddressLive = await priceFeedContract.getFeed(
+                    priceFeeds[i].base, priceFeeds[i].quote,
+                );
+                const feed = await hre.ethers.getContractAt('IAggregatorV3', feedAddressLive);
+                const latestData = await feed.latestRoundData();
+                const currTimestamp = Math.floor(Date.now() / 1000);
+                const lastUpdatedTimestamp = latestData.updatedAt;
+                const diffInHours = (currTimestamp - lastUpdatedTimestamp) / 3600;
+                if (diffInHours > 24) {
+                    console.log("ALERT: Price feed hasn't been updated in 24 hours");
+                }
+                if (feedAddressLive !== priceFeeds[i].feedAddress) {
+                    console.log(priceFeeds[i].name);
+                    console.log(await feed.description());
+                    console.log(priceFeeds[i]);
+                    console.log(feedAddressLive);
+                }
+            }
+        });
     });
 };
 
@@ -478,4 +609,6 @@ module.exports = {
     feeReceiverTest,
     dfsRegistryControllerTest,
     tokenPriceHelperTest,
+    tokenPriceHelperL2Test,
+    priceFeedTest,
 };

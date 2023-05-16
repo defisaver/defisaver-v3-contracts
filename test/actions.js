@@ -36,18 +36,12 @@ const {
     MCD_MANAGER_ADDR,
 } = require('./utils-mcd');
 const { getSecondTokenAmount } = require('./utils-uni');
-const { LiquityActionIds, getHints, getRedemptionHints } = require('./utils-liquity');
+const { LiquityActionIds, getHints, getRedemptionHints, collChangeId, debtChangeId } = require('./utils-liquity');
 const { execShellCommand } = require('../scripts/hardhat-tasks-functions');
 
 const network = hre.network.config.name;
 
 const executeAction = async (actionName, functionData, proxy, regAddr = addrs[network].REGISTRY_ADDR) => {
-    if (hre.network.config.type !== 'tenderly') {
-        await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
-            '0x1', // 1 wei
-        ]);
-    }
-
     const actionAddr = await getAddrFromRegistry(actionName, regAddr);
     let receipt;
     try {
@@ -750,6 +744,18 @@ const mcdBoostComposite = async (
     return tx;
 };
 
+const mcdDsrDeposit = async (proxy, amount, from) => {
+    const action = new dfs.actions.maker.MakerDsrDepositAction(amount, from);
+    const [, functionData] = action.encodeForDsProxyCall();
+    return executeAction('McdDsrDeposit', functionData, proxy);
+};
+
+const mcdDsrWithdraw = async (proxy, amount, to) => {
+    const action = new dfs.actions.maker.MakerDsrWithdrawAction(amount, to);
+    const [, functionData] = action.encodeForDsProxyCall();
+    return executeAction('McdDsrWithdraw', functionData, proxy);
+};
+
 /*
   _______  __    __  .__   __.  __
  /  _____||  |  |  | |  \ |  | |  |
@@ -1121,10 +1127,11 @@ const yearnWithdraw = async (token, amount, from, to, proxy) => {
 const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from, to) => {
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
-        LiquityActionIds.Open,
+        collChangeId.SUPPLY,
         from,
         collAmount,
         LUSDAmount,
+        debtChangeId.BORROW,
     );
 
     const liquityOpenAction = new dfs.actions.liquity.LiquityOpenAction(
@@ -1145,10 +1152,11 @@ const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from
 const liquityBorrow = async (proxy, maxFeePercentage, LUSDAmount, to) => {
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
-        LiquityActionIds.Borrow,
+        collChangeId.SUPPLY,
         hre.ethers.constants.AddressZero,
         0,
         LUSDAmount,
+        debtChangeId.BORROW,
     );
 
     const liquityBorrowAction = new dfs.actions.liquity.LiquityBorrowAction(
@@ -1168,10 +1176,11 @@ const liquityBorrow = async (proxy, maxFeePercentage, LUSDAmount, to) => {
 const liquityPayback = async (proxy, LUSDAmount, from) => {
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
-        LiquityActionIds.Payback,
+        collChangeId.SUPPLY,
         from,
         0,
         LUSDAmount,
+        debtChangeId.PAYBACK,
     );
 
     const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
@@ -1190,10 +1199,11 @@ const liquityPayback = async (proxy, LUSDAmount, from) => {
 const liquitySupply = async (proxy, collAmount, from) => {
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
-        LiquityActionIds.Supply,
+        collChangeId.Supply,
         from,
         collAmount,
         0,
+        debtChangeId.PAYBACK,
     );
 
     const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
@@ -1211,10 +1221,11 @@ const liquitySupply = async (proxy, collAmount, from) => {
 const liquityWithdraw = async (proxy, collAmount, to) => {
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
-        LiquityActionIds.Withdraw,
+        collChangeId.WITHDRAW,
         hre.ethers.constants.AddressZero,
         collAmount,
         0,
+        debtChangeId.PAYBACK,
     );
 
     const liquityWithdrawAction = new dfs.actions.liquity.LiquityWithdrawAction(
@@ -1590,18 +1601,20 @@ const curveWithdraw = async (
     sender,
     receiver,
     poolAddr,
-    minMintAmount,
+    burnAmount,
     useUnderlying,
     withdrawExact,
+    removeOneCoin,
     amounts,
 ) => {
     const curveWithdrawAction = new dfs.actions.curve.CurveWithdrawAction(
         sender,
         receiver,
         poolAddr,
-        minMintAmount,
+        burnAmount,
         useUnderlying,
         withdrawExact,
+        removeOneCoin,
         amounts,
     );
 
@@ -2529,6 +2542,46 @@ const morphoClaim = async (
     return receipt;
 };
 
+const bprotocolLiquitySPDeposit = async (
+    proxy,
+    lusdAmount,
+    from,
+    lqtyTo,
+) => {
+    const actionAddress = await getAddrFromRegistry('BprotocolLiquitySPDeposit');
+
+    const action = new dfs.actions.bprotocol.BprotocolLiquitySPDepositAction(
+        lusdAmount, from, lqtyTo,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed bprotocolLiquitySPDeposit: ${gasUsed}`);
+    return receipt;
+};
+
+const bprotocolLiquitySPWithdraw = async (
+    proxy,
+    shareAmount,
+    to,
+    lqtyTo,
+) => {
+    const actionAddress = await getAddrFromRegistry('BprotocolLiquitySPWithdraw');
+
+    const action = new dfs.actions.bprotocol.BprotocolLiquitySPWithdrawAction(
+        shareAmount, to, lqtyTo,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed bprotocolLiquitySPWithdraw: ${gasUsed}`);
+    return receipt;
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -2676,6 +2729,8 @@ module.exports = {
     mcdRepayComposite,
     mcdFLBoostComposite,
     mcdBoostComposite,
+    mcdDsrDeposit,
+    mcdDsrWithdraw,
 
     morphoAaveV2Supply,
     morphoAaveV2Withdraw,
@@ -2687,4 +2742,7 @@ module.exports = {
     morphoAaveV3Withdraw,
     morphoAaveV3Payback,
     morphoAaveV3Borrow,
+    
+    bprotocolLiquitySPDeposit,
+    bprotocolLiquitySPWithdraw,
 };

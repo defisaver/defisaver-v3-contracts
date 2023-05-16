@@ -1,0 +1,116 @@
+[
+    {
+        "name": "BTC / USD",
+        "base": "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x6ce185860a4963106506C203335A2910413708e9"
+    },
+    {
+        "name": "ETH / USD",
+        "base": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612"
+    },
+    {
+        "name": "WETH / USD",
+        "base": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612"
+    },
+    {
+        "name": "DAI / USD",
+        "base": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xc5C8E77B397E531B8EC06BFb0048328B30E9eCfB"
+    },
+    {
+        "name": "USDC / USD",
+        "base": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x50834F3163758fcC1Df9973b6e91f0F0F0434aD3"
+    },
+    {
+        "name": "USDT / USD",
+        "base": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x3f3f5dF88dC9F13eac63DF89EC16ef6e7E25DdE7"
+    },
+    {
+        "name": "CRV / USD",
+        "base": "0x11cDb42B0EB46D95f990BeDD4695A6e3fA034978",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xaebDA2c976cfd1eE1977Eac079B4382acb849325"
+    },
+    {
+        "name": "GMX / USD",
+        "base": "0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xDB98056FecFff59D032aB628337A4887110df3dB"
+    },
+    {
+        "name": "BAL / USD",
+        "base": "0x040d1EdC9569d4Bab2D15287Dc5A4F10F56a56B8",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xBE5eA816870D11239c543F84b71439511D70B94f"
+    },
+    {
+        "name": "LUSD / USD",
+        "base": "0x93b346b6BC2548dA6A1E7d98E9a421B42541425b",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x0411D28c94d85A36bC72Cb0f875dfA8371D8fFfF"
+    },
+    {
+        "name": "KNC / USD",
+        "base": "0xe4DDDfe67E7164b0FE14E218d80dC4C08eDC01cB",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xbF539d4c2106dd4D9AB6D56aed3d9023529Db145"
+    },
+    {
+        "name": "SUSHI / USD",
+        "base": "0xd4d42F0b6DEF4CE0383636770eF773390d85c61A",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xb2A8BA74cbca38508BA1632761b56C897060147C"
+    },
+    {
+        "name": "LINK / USD",
+        "base": "0xf97f4df75117a78c1A5a0DBb814Af92458539FB4",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x86E53CF1B870786351Da77A57575e79CB55812CB"
+    },
+    {
+        "name": "ARB / USD",
+        "base": "0x912CE59144191C1204E64559FE8253a0e49E6548",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xb2A824043730FE05F3DA2efaFa1CBbe83fa548D6"
+    },
+    {
+        "name": "UNI / USD",
+        "base": "0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x9C917083fDb403ab5ADbEC26Ee294f6EcAda2720"
+    },
+    {
+        "name": "FRAX / USD",
+        "base": "0x17FC002b466eEc40DaE837Fc4bE5c67993ddBd6F",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x0809E3d38d1B4214958faf06D8b1B1a2b73f2ab8"
+    },
+    {
+        "name": "WBTC / USD",
+        "base": "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xd0C7101eACbB49F3deCcCc166d238410D6D46d57"
+    },
+    {
+        "name": "cbETH / ETH",
+        "base": "0x1DEBd73E752bEaF79865Fd6446b0c970EaE7732f",
+        "quote": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+        "feedAddress": "0xa668682974E3f121185a3cD94f00322beC674275"
+    },
+    {
+        "name": "rETH / ETH",
+        "base": "0xEC70Dcb4A1EFa46b8F2D97C310C9c4790ba5ffA8",
+        "quote": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+        "feedAddress": "0xF3272CAfe65b190e76caAF483db13424a3e23dD2"
+    }
+]

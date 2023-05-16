@@ -22,6 +22,7 @@ const {
     Float2BN,
     addrs,
     AAVE_V3_FL_FEE,
+    chainIds,
 } = require('../utils');
 
 const { sell, executeAction } = require('../actions');
@@ -124,7 +125,7 @@ const aaveFlTest = async (generalisedFLFlag) => {
 };
 
 const aaveV3FlTest = async (generalisedFLFlag) => {
-    describe('FL-AaveV2', function () {
+    describe('FL-AaveV3', function () {
         this.timeout(60000);
 
         let senderAcc; let proxy; let
@@ -150,7 +151,9 @@ const aaveV3FlTest = async (generalisedFLFlag) => {
                     aaveFl = await hre.ethers.getContractAt('FLAction', flActionAddr);
                 }
                 // hardcoded optimism chain ID
-                const assetInfo = getAssetInfo(tokenSymbol, 10);
+                const network = hre.network.config.name;
+                console.log(network);
+                const assetInfo = getAssetInfo(tokenSymbol, chainIds[network]);
 
                 // test if balance will brick fl action
                 await setBalance(assetInfo.address, aaveFl.address, Float2BN('1', 0));
@@ -164,7 +167,7 @@ const aaveV3FlTest = async (generalisedFLFlag) => {
                     .mul(AAVE_V3_FL_FEE)
                     .mul(10 ** assetInfo.decimals)
                     .div(100)
-                    .toFixed(0)
+                    .toFixed(0, 7)
                     .toString();
 
                 console.log(loanAmount.toString(), feeAmount.toString());
@@ -199,17 +202,19 @@ const aaveV3FlTest = async (generalisedFLFlag) => {
                 } else {
                     // buy token so we have it for fee
                     const tokenBalance = await balanceOf(assetInfo.address, senderAcc.address);
-
+                    console.log(hre.ethers.utils.parseUnits(feeAmount, 0));
                     if (tokenBalance.lt(feeAmount)) {
                         await setBalance(
                             assetInfo.address,
                             senderAcc.address,
-                            hre.ethers.utils.parseUnits(feeAmount, 1),
+                            hre.ethers.utils.parseUnits(feeAmount, 0),
                         );
                     }
                 }
                 await setBalance(assetInfo.address, proxy.address, hre.ethers.utils.parseUnits('0', 18));
                 await send(assetInfo.address, proxy.address, feeAmount);
+                const tokenBalance = await balanceOf(assetInfo.address, proxy.address);
+                console.log(tokenBalance);
                 await executeAction('RecipeExecutor', functionData[1], proxy);
             });
         }

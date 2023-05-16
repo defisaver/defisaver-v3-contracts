@@ -122,6 +122,7 @@ async function main() {
     await redeploy('GasFeeTaker', reg.address);
 
     await addBotCaller('0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4', reg.address);
+    await addBotCaller('0x660B3515F493200C47Ef3DF195abEAfc57Bd6496', reg.address);
     await addBotCaller('0x4E4cF1Cc07C7A1bA00740434004163ac2821efa7', reg.address);
 
     // exchange
