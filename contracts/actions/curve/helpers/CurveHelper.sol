@@ -19,7 +19,8 @@ contract CurveHelper is MainnetCurveAddresses {
     IFeeDistributor public constant FeeDistributor = IFeeDistributor(FEE_DISTRIBUTOR_ADDR);
 
     error CurveHelperInvalidLPToken(address);
-    error CurveWithdrawOneCoinAmbiguousIndex();
+    error CurveHelperOneCoinAmbiguousIndex();
+    error CurveHelperInvalidFlags();
 
     enum DepositTargetType {
         SWAP,
@@ -43,6 +44,7 @@ contract CurveHelper is MainnetCurveAddresses {
         bool removeOneCoin,
         bool withdrawExact
     ) public pure returns (uint8 flags) {
+        if (withdrawExact && removeOneCoin) revert CurveHelperInvalidFlags();
         flags = uint8(depositTargetType);
         flags |= (explicitUnderlying ? 1 : 0) << 2;
         flags |= (withdrawExact ? 1 : 0) << 3;
@@ -61,6 +63,7 @@ contract CurveHelper is MainnetCurveAddresses {
         explicitUnderlying = flags & (1 << 2) > 0;
         withdrawExact = flags & (1 << 3) > 0;
         removeOneCoin = flags & (1 << 4) > 0;
+        if (withdrawExact && removeOneCoin) revert CurveHelperInvalidFlags();
     }
 
     function getSwaps() internal view returns (ISwaps) {
@@ -136,6 +139,6 @@ contract CurveHelper is MainnetCurveAddresses {
             }
         }
 
-        if (_removeOneCoin && (firstIndex != lastIndex)) revert CurveWithdrawOneCoinAmbiguousIndex();
+        if (_removeOneCoin && (firstIndex != lastIndex)) revert CurveHelperOneCoinAmbiguousIndex();
     }
 }

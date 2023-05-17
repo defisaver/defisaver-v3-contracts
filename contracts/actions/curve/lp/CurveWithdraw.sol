@@ -86,9 +86,18 @@ contract CurveWithdraw is ActionBase, CurveHelper {
         }
 
         if (depositTargetType == DepositTargetType.ZAP_3POOL) {
-            uint256[4] memory fixedSizeAmounts;
-            for (uint256 i = firstIndex; i <= lastIndex; i++) fixedSizeAmounts[i] = _params.amounts[i];
-            ICurve3PoolZap(cache.depositTarget).remove_liquidity(cache.pool, _params.burnAmount, fixedSizeAmounts);
+            if (removeOneCoin) {
+                ICurve3PoolZap(cache.depositTarget).remove_liquidity_one_coin(cache.pool, _params.burnAmount, int128(int256(firstIndex)), _params.amounts[firstIndex]);
+            } else {
+                uint256[4] memory fixedSizeAmounts;
+                for (uint256 i = firstIndex; i <= lastIndex; i++) fixedSizeAmounts[i] = _params.amounts[i];
+
+                if (withdrawExact) {
+                    ICurve3PoolZap(cache.depositTarget).remove_liquidity_imbalance(cache.pool, fixedSizeAmounts, _params.burnAmount);
+                } else {
+                    ICurve3PoolZap(cache.depositTarget).remove_liquidity(cache.pool, _params.burnAmount, fixedSizeAmounts);
+                }
+            }
         } else {
             (bytes memory payload) = _constructPayload(
                 _params.amounts,
