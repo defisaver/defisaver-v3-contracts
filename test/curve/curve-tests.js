@@ -20,6 +20,7 @@ const {
     takeSnapshot,
     setNetwork,
     getContractFromRegistry,
+    ETH_ADDR,
 } = require('../utils');
 
 const {
@@ -93,8 +94,16 @@ const testWithdraw = async (
     const amounts = (useUnderlying ? pool.underlyingDecimals : pool.decimals).map(
         (e, i) => ((!removeOneCoin || i === 0) ? Float2BN(amountEach, e) : Float2BN('0')),
     );
-
     await approve(pool.lpToken, proxy.address);
+
+    const balancesBefore = await Promise.all(
+        (useUnderlying ? pool.underlyingCoins : pool.coins)
+            .map(async (c) => {
+                // eslint-disable-next-line no-param-reassign
+                if (c === ETH_ADDR) c = WETH_ADDRESS;
+                return balanceOf(c, receiver);
+            }),
+    );
 
     await curveWithdraw(
         proxy,
@@ -109,9 +118,21 @@ const testWithdraw = async (
     );
 
     await Promise.all(
-        (useUnderlying ? pool.underlyingCoins : pool.coins).map(async (c, i) => expect(
-            await balanceOf(c, receiver),
-        ).to.be.gte(amounts[i].sub(amounts[i].div(1000)))),
+        (useUnderlying ? pool.underlyingCoins : pool.coins).map(async (c, i) => {
+            // eslint-disable-next-line no-param-reassign
+            if (c === ETH_ADDR) c = WETH_ADDRESS;
+            const balance = await balanceOf(c, receiver).then((e) => e.sub(balancesBefore[i]));
+            expect(
+                balance,
+            ).to.be.gte(amounts[i].sub(
+                amounts[i].div(1_00_00), // max allowed slippage hardcoded in CurveWithdraw
+            ));
+            if (withdrawExact || (removeOneCoin && i !== 0)) {
+                expect(balance).to.be.lte(amounts[i]);
+                // if we are getting tokens we arent expecting something is probably wrong
+                // this check would have prevented ca7d7080cc3488038ed2b56783d18ea23391c425
+            }
+        }),
     );
 };
 
