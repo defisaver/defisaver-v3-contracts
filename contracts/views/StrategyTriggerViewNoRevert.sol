@@ -6,7 +6,7 @@ import "../core/strategy/BundleStorage.sol";
 import "../core/strategy/StrategyStorage.sol";
 import "../interfaces/ITrigger.sol";
 
-contract StrategyTriggerView is StrategyModel, CoreHelper {
+contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     enum TriggerStatus {
