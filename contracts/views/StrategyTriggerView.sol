@@ -46,8 +46,8 @@ contract StrategyTriggerView is StrategyModel, CoreHelper {
     }
 
     enum TriggerStatus {
-        TRUE,
         FALSE,
+        TRUE,
         REVERT
     }
 
