@@ -21,6 +21,8 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
     ) public returns (TriggerStatus) {
         address triggerAddr = registry.getAddr(triggerId);
 
+        if (triggerAddr == address(0)) return TriggerStatus.REVERT;
+
         (bool success, bytes memory data) = triggerAddr.call(txData);
         
         if (success){
