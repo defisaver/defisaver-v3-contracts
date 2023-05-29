@@ -286,6 +286,17 @@
         "history": []
     },
     {
+        "name": "StrategyTriggerViewNoRevert",
+        "address": "0x9B75882AAf599d198F56Fa19560c98b94B104DcE",
+        "id": "0x37a21cb5",
+        "path": "contracts/views/StrategyTriggerViewNoRevert.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "YearnView",
         "address": "0x36314D468E1da48Fb637fFB7c7DBDF222eC3FFe7",
         "id": "0x19238650",
