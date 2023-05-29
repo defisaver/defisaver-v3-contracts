@@ -17,6 +17,28 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
 
     function checkSingleTrigger(
         bytes4 triggerId,
+        bytes memory triggerCalldata,
+        bytes memory triggerSubData
+    ) public returns (TriggerStatus) {
+        address triggerAddr = registry.getAddr(triggerId);
+
+        if (triggerAddr == address(0)) return TriggerStatus.REVERT;
+
+        try ITrigger(triggerAddr).isTriggered(triggerCalldata, triggerSubData) returns (
+            bool isTriggered
+        ) {
+            if (!isTriggered) {
+                return TriggerStatus.FALSE;
+            } else {
+                return TriggerStatus.TRUE;
+            }
+        } catch {
+            return TriggerStatus.REVERT;
+        }
+    }
+
+    function checkSingleTriggerLowLevel(
+        bytes4 triggerId,
         bytes memory txData
     ) public returns (TriggerStatus) {
         address triggerAddr = registry.getAddr(triggerId);
@@ -24,8 +46,8 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
         if (triggerAddr == address(0)) return TriggerStatus.REVERT;
 
         (bool success, bytes memory data) = triggerAddr.call(txData);
-        
-        if (success){
+
+        if (success) {
             bool isTriggered = abi.decode(data, (bool));
             if (isTriggered) {
                 return TriggerStatus.TRUE;
