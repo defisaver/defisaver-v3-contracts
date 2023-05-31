@@ -44,6 +44,17 @@
         "history": []
     },
     {
+        "name": "AaveSubProxy",
+        "address": "0xb9F73625AA64D46A9b2f0331712e9bEE19e4C3f7",
+        "id": "0xd11b2581",
+        "path": "contracts/core/l2/AaveSubProxy.sol",
+        "version": "1.0.1",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "McdSubProxy",
         "address": "0xded2752728227c502e08e51023b1ce0a37f907a2",
         "id": "0x72fb2f08",
