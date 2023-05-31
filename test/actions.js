@@ -2011,7 +2011,7 @@ const aaveV3Supply = async (
     const aaveSupplyAddr = await getAddrFromRegistry('AaveV3Supply');
 
     const aaveSupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-        true, nullAddress, amount.toString(), from, tokenAddr, assetId, true, false, nullAddress,
+        true, market, amount.toString(), from, tokenAddr, assetId, true, false, nullAddress,
     );
 
     await approve(tokenAddr, proxy.address, signer);
@@ -2058,7 +2058,7 @@ const aaveV3Withdraw = async (
     const aaveWithdrawAddr = await getAddrFromRegistry('AaveV3Withdraw');
 
     const aaveWithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        true, nullAddress, amount.toString(), to, assetId,
+        true, market, amount.toString(), to, assetId,
     );
 
     const functionData = aaveWithdrawAction.encodeForDsProxyCall()[1];
@@ -2098,7 +2098,7 @@ const aaveV3Borrow = async (
     const aaveBorrowAddr = await getAddrFromRegistry('AaveV3Borrow');
 
     const aaveBorrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
-        true, nullAddress, amount.toString(), to, rateMode, assetId, true, nullAddress,
+        true, market, amount.toString(), to, rateMode, assetId, true, nullAddress,
     );
     const functionData = aaveBorrowAction.encodeForDsProxyCall()[1];
     const receipt = await proxy['execute(address,bytes)'](aaveBorrowAddr, functionData, { gasLimit: 3000000 });
@@ -2177,7 +2177,7 @@ const aaveV3Payback = async (
     const aavePaybackAddr = await getAddrFromRegistry('AaveV3Payback');
 
     const aavePaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        true, nullAddress, amount.toString(), from, rateMode, tokenAddr, assetId, false, nullAddress,
+        true, market, amount.toString(), from, rateMode, tokenAddr, assetId, false, nullAddress,
     );
     const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
     const receipt = await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, { gasLimit: 3000000 });
@@ -2216,7 +2216,7 @@ const aaveV3ATokenPayback = async (
     const aavePaybackAddr = await getAddrFromRegistry('AaveV3ATokenPayback');
 
     const aavePaybackAction = new dfs.actions.aaveV3.AaveV3ATokenPaybackAction(
-        true, nullAddress, amount.toString(), from, rateMode, aTokenAddr, assetId,
+        true, market, amount.toString(), from, rateMode, aTokenAddr, assetId,
     );
     const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
     const receipt = await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, { gasLimit: 3000000 });
@@ -2255,7 +2255,7 @@ const aaveV3SetEMode = async (
     const aaveSetEModeAddr = await getAddrFromRegistry('AaveV3SetEMode');
 
     const aaveSetEModeAction = new dfs.actions.aaveV3.AaveV3SetEModeAction(
-        true, nullAddress, categoryId,
+        true, market, categoryId,
     );
     const functionData = aaveSetEModeAction.encodeForDsProxyCall()[1];
     const receipt = await proxy['execute(address,bytes)'](aaveSetEModeAddr, functionData, { gasLimit: 3000000 });
@@ -2308,7 +2308,7 @@ const aaveV3SwitchCollateral = async (
 ) => {
     const aaveSwitchCollateralAddr = await getAddrFromRegistry('AaveV3CollateralSwitch');
     const aaveSwithCollAction = new dfs.actions.aaveV3.AaveV3CollateralSwitchAction(
-        true, nullAddress, arrayLength, tokens, useAsCollateral,
+        true, market, arrayLength, tokens, useAsCollateral,
     );
     const functionData = aaveSwithCollAction.encodeForDsProxyCall()[1];
     const receipt = await proxy['execute(address,bytes)'](aaveSwitchCollateralAddr, functionData, { gasLimit: 3000000 });
