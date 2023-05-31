@@ -2034,11 +2034,11 @@ const aaveV3SupplyCalldataOptimised = async (
     const signer = (await hre.ethers.getSigners())[0];
     contract = await contract.connect(signer);
     const encodedInput = await contract.encodeInputs(
-        [amount, from, assetId, true, true, false, nullAddress, nullAddress],
+        [amount, from, assetId, true, true, false, market, nullAddress],
     );
 
     const aaveSupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-        true, nullAddress, amount.toString(), from, tokenAddr, assetId, true, false, nullAddress,
+        true, market, amount.toString(), from, tokenAddr, assetId, true, false, nullAddress,
     );
 
     const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
@@ -2077,11 +2077,11 @@ const aaveV3WithdrawCalldataOptimised = async (
     contract = await contract.connect(signer);
 
     const encodedInput = await contract.encodeInputs(
-        [assetId, true, amount, to, nullAddress],
+        [assetId, true, amount, to, market],
     );
 
     const aaveWithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        true, nullAddress, amount.toString(), to, assetId,
+        true, market, amount.toString(), to, assetId,
     );
     const functionData = aaveWithdrawAction.encodeForDsProxyCall()[1];
     console.log(functionData.toLowerCase() === encodedInput);
@@ -2116,10 +2116,10 @@ const aaveV3BorrowCalldataOptimised = async (
     contract = await contract.connect(signer);
 
     const encodedInput = await contract.encodeInputs(
-        [amount, to, rateMode, assetId, true, true, nullAddress, nullAddress],
+        [amount, to, rateMode, assetId, true, true, market, nullAddress],
     );
     const aaveBorrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
-        true, nullAddress, amount.toString(), to, rateMode, assetId, true, nullAddress,
+        true, market, amount.toString(), to, rateMode, assetId, true, nullAddress,
     );
     const functionData = aaveBorrowAction.encodeForDsProxyCall()[1];
 
@@ -2195,11 +2195,11 @@ const aaveV3PaybackCalldataOptimised = async (
     contract = await contract.connect(signer);
 
     const encodedInput = await contract.encodeInputs(
-        [amount, from, rateMode, assetId, true, false, nullAddress, nullAddress],
+        [amount, from, rateMode, assetId, true, false, market, nullAddress],
     );
 
     const aavePaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        true, nullAddress, amount.toString(), from, rateMode, tokenAddr, assetId, false, nullAddress,
+        true, market, amount.toString(), from, rateMode, tokenAddr, assetId, false, nullAddress,
     );
     const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
     console.log(functionData.toLowerCase() === encodedInput);
@@ -2234,11 +2234,11 @@ const aaveV3ATokenPaybackCalldataOptimised = async (
     contract = await contract.connect(signer);
 
     const encodedInput = await contract.encodeInputs(
-        [amount, from, rateMode, assetId, true, nullAddress],
+        [amount, from, rateMode, assetId, true, market],
     );
 
     const aavePaybackAction = new dfs.actions.aaveV3.AaveV3ATokenPaybackAction(
-        true, nullAddress, amount.toString(), from, rateMode, aTokenAddr, assetId,
+        true, market, amount.toString(), from, rateMode, aTokenAddr, assetId,
     );
     const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
     console.log(functionData.toLowerCase() === encodedInput);
@@ -2273,10 +2273,10 @@ const aaveV3SetEModeCalldataOptimised = async (
     contract = await contract.connect(signer);
 
     const encodedInput = await contract.encodeInputs(
-        [categoryId, true, nullAddress],
+        [categoryId, true, market],
     );
     const aaveSetEModeAction = new dfs.actions.aaveV3.AaveV3SetEModeAction(
-        true, nullAddress, categoryId,
+        true, market, categoryId,
     );
     const functionData = aaveSetEModeAction.encodeForDsProxyCall()[1];
     console.log(functionData.toLowerCase() === encodedInput);
@@ -2326,11 +2326,11 @@ const aaveV3SwitchCollateralCallDataOptimised = async (
     contract = await contract.connect(signer);
 
     const encodedInput = await contract.encodeInputs(
-        [arrayLength, true, tokens, useAsCollateral, nullAddress],
+        [arrayLength, true, tokens, useAsCollateral, market],
     );
 
     const aaveSwithCollAction = new dfs.actions.aaveV3.AaveV3CollateralSwitchAction(
-        true, nullAddress, arrayLength, tokens, useAsCollateral,
+        true, market, arrayLength, tokens, useAsCollateral,
     );
     const functionData = aaveSwithCollAction.encodeForDsProxyCall()[1];
 
