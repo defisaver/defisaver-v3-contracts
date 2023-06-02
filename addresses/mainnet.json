@@ -199,14 +199,14 @@
     },
     {
         "name": "ZeroxWrapper",
-        "address": "0x8C82d963eb282cB7A751E551E3997ba66c2C8237",
+        "address": "0x0c4e16899f2059f4e41ddb164317414a5c0d2988",
         "id": "0x6eddecea",
         "path": "contracts/exchangeV3/offchainWrappersV3/ZeroxWrapper.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x8C82d963eb282cB7A751E551E3997ba66c2C8237"]
     },
     {
         "name": "ParaswapWrapper",
