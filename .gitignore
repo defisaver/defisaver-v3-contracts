@@ -119,3 +119,6 @@ contracts/flattened/
 
 forked-addr.json
 deployments/
+
+# hardhat-tenderly plugin
+deployments
