@@ -187,6 +187,17 @@
         "history": []
     },
     {
+      "name": "StrategyTriggerViewNoRevert",
+      "address": "0x6583C8d4e8A4984780E76cF042540eb10C4b5c05",
+      "id": "0x37a21cb5",
+      "path": "contracts/views/StrategyTriggerViewNoRevert.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
         "name": "AaveV3View",
         "address": "0xA74a85407D5A940542915458616aC3cf3f404E3b",
         "id": "0x026c569e",

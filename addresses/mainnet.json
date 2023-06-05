@@ -44,6 +44,17 @@
         "history": []
     },
     {
+        "name": "AaveSubProxy",
+        "address": "0xb9F73625AA64D46A9b2f0331712e9bEE19e4C3f7",
+        "id": "0xd11b2581",
+        "path": "contracts/core/l2/AaveSubProxy.sol",
+        "version": "1.0.1",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "McdSubProxy",
         "address": "0xded2752728227c502e08e51023b1ce0a37f907a2",
         "id": "0x72fb2f08",
@@ -279,6 +290,17 @@
         "address": "0x7e048c89D7e6adA900AE53daBA742e6CCCFC54f6",
         "id": "0x5e0ef18c",
         "path": "contracts/views/StrategyTriggerView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "StrategyTriggerViewNoRevert",
+        "address": "0x9B75882AAf599d198F56Fa19560c98b94B104DcE",
+        "id": "0x37a21cb5",
+        "path": "contracts/views/StrategyTriggerViewNoRevert.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -2113,7 +2135,7 @@
     },
     {
         "name": "CurveWithdraw",
-        "address": "0x7Fb9234E349F85678F6a02A291684A7008Ad78e2",
+        "address": "0x97616a969daaa8e1f27c4902745c88357e54ad6c",
         "id": "0x7633d6dc",
         "path": "contracts/actions/curve/lp/CurveWithdraw.sol",
         "version": "1.0.2",
@@ -2121,6 +2143,7 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x7Fb9234E349F85678F6a02A291684A7008Ad78e2",
             "0xA2A6D75417807ebAf8364613018D697f88021771",
             "0xb6Be5c486dD65c2cb18A388671b348E62307F0B3"
         ]
