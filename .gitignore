@@ -10,6 +10,8 @@ lerna-debug.log*
 bin/*
 docs/
 
+aaveV3-proposal.json
+
 artifacts
 cache
 .DS_Store

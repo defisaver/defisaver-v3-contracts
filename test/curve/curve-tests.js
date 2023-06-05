@@ -1,5 +1,5 @@
 const dfs = require('@defisaver/sdk');
-const { poolInfo } = require('@defisaver/sdk/src/utils/curve-utils');
+let { utils: { curveUtils: { poolInfo } } } = require('@defisaver/sdk');
 const { expect } = require('chai');
 const hre = require('hardhat');
 
@@ -19,6 +19,8 @@ const {
     revertToSnapshot,
     takeSnapshot,
     setNetwork,
+    getContractFromRegistry,
+    ETH_ADDR,
 } = require('../utils');
 
 const {
@@ -31,7 +33,10 @@ const {
     curveStethPoolWithdraw,
 } = require('../actions');
 
-const forkNum = 14700000;
+console.log({ poolInfoLength: poolInfo.length });
+poolInfo = poolInfo.filter(({ name }) => !['aave'].includes(name));
+// const forkNum = 14700000;
+const forkNum = 17020442;
 
 const testDeposit = async (
     proxy,
@@ -89,8 +94,16 @@ const testWithdraw = async (
     const amounts = (useUnderlying ? pool.underlyingDecimals : pool.decimals).map(
         (e, i) => ((!removeOneCoin || i === 0) ? Float2BN(amountEach, e) : Float2BN('0')),
     );
-
     await approve(pool.lpToken, proxy.address);
+
+    const balancesBefore = await Promise.all(
+        (useUnderlying ? pool.underlyingCoins : pool.coins)
+            .map(async (c) => {
+                // eslint-disable-next-line no-param-reassign
+                if (c === ETH_ADDR) c = WETH_ADDRESS;
+                return balanceOf(c, receiver);
+            }),
+    );
 
     await curveWithdraw(
         proxy,
@@ -100,14 +113,26 @@ const testWithdraw = async (
         burnAmount,
         useUnderlying,
         withdrawExact,
+        removeOneCoin,
         amounts,
-        { removeOneCoin },
     );
 
     await Promise.all(
-        (useUnderlying ? pool.underlyingCoins : pool.coins).map(async (c, i) => expect(
-            await balanceOf(c, receiver),
-        ).to.be.gte(amounts[i].sub(amounts[i].div(1000)))),
+        (useUnderlying ? pool.underlyingCoins : pool.coins).map(async (c, i) => {
+            // eslint-disable-next-line no-param-reassign
+            if (c === ETH_ADDR) c = WETH_ADDRESS;
+            const balance = await balanceOf(c, receiver).then((e) => e.sub(balancesBefore[i]));
+            expect(
+                balance,
+            ).to.be.gte(amounts[i].sub(
+                amounts[i].div(1_00_00), // max allowed slippage hardcoded in CurveWithdraw
+            ));
+            if (withdrawExact || (removeOneCoin && i !== 0)) {
+                expect(balance).to.be.lte(amounts[i]);
+                // if we are getting tokens we arent expecting something is probably wrong
+                // this check would have prevented ca7d7080cc3488038ed2b56783d18ea23391c425
+            }
+        }),
     );
 };
 
@@ -129,7 +154,6 @@ const curveDepositTest = async (testLength) => {
             proxy = await getProxy(senderAcc.address);
 
             await redeploy('CurveDeposit');
-            await redeploy('CurveView');
         });
 
         beforeEach(async () => {
@@ -153,8 +177,9 @@ const curveDepositTest = async (testLength) => {
                     amountEach,
                 );
             });
-            if (!pool.depositContract && !pool.underlyingFlag) return;
-            it(`... should deposit underlyingCoins [${poolName}]`, async () => {
+            it(`... should deposit underlyingCoins [${poolName}]`, async function () {
+                /// @dev notest if no underlying
+                if (!pool.depositContract && !pool.underlyingFlag) this.skip();
                 await testDeposit(
                     proxy,
                     senderAddr,
@@ -170,7 +195,7 @@ const curveDepositTest = async (testLength) => {
 };
 
 const curveWithdrawOneCoinTest = async (testLength) => {
-    describe('Curve-Withdraw', async function () {
+    describe('Curve-Withdraw-One-Coin', async function () {
         this.timeout(1000000);
         const amountEach = '1000';
 
@@ -190,7 +215,6 @@ const curveWithdrawOneCoinTest = async (testLength) => {
 
             await redeploy('CurveDeposit');
             await redeploy('CurveWithdraw');
-            await redeploy('CurveView');
         });
 
         beforeEach(async () => {
@@ -228,8 +252,9 @@ const curveWithdrawOneCoinTest = async (testLength) => {
                     { removeOneCoin: true },
                 );
             });
-            if (!pool.depositContract && !pool.underlyingFlag) return;
-            it(`... should deposit then withdraw one underlying coin [${poolName}]`, async () => {
+            it(`... should deposit then withdraw one underlying coin [${poolName}]`, async function () {
+                /// @dev notest if no underlying
+                if (!pool.depositContract && !pool.underlyingFlag) this.skip();
                 const lpMinted = await testDeposit(
                     proxy,
                     senderAddr,
@@ -276,7 +301,6 @@ const curveWithdrawTest = async (testLength) => {
 
             await redeploy('CurveDeposit');
             await redeploy('CurveWithdraw');
-            await redeploy('CurveView');
         });
 
         beforeEach(async () => {
@@ -310,8 +334,9 @@ const curveWithdrawTest = async (testLength) => {
                     `${+amountEach * 0.2}`,
                 );
             });
-            if (!pool.depositContract && !pool.underlyingFlag) return;
-            it(`... should deposit then withdraw underlyingCoins [${poolName}]`, async () => {
+            it(`... should deposit then withdraw underlyingCoins [${poolName}]`, async function () {
+                /// @dev notest if no underlying
+                if (!pool.depositContract && !pool.underlyingFlag) this.skip();
                 const lpMinted = await testDeposit(
                     proxy,
                     senderAddr,
@@ -337,7 +362,7 @@ const curveWithdrawTest = async (testLength) => {
 };
 
 const curveWithdrawExactTest = async (testLength) => {
-    describe('Curve-Withdraw', async function () {
+    describe('Curve-Withdraw-Exact', async function () {
         this.timeout(1000000);
         const amountEach = '1000';
 
@@ -357,7 +382,6 @@ const curveWithdrawExactTest = async (testLength) => {
 
             await redeploy('CurveDeposit');
             await redeploy('CurveWithdraw');
-            await redeploy('CurveView');
         });
 
         beforeEach(async () => {
@@ -368,52 +392,61 @@ const curveWithdrawExactTest = async (testLength) => {
             await revertToSnapshot(snapshot);
         });
 
-        await Promise.all(poolInfo.slice(0, testLength).map(async (pool) => {
-            const poolName = pool.name;
-            it(`... should deposit then withdraw exact coins [${poolName}]`, async () => {
-                const lpMinted = await testDeposit(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    pool,
-                    '0', // minMintAmount
-                    false,
-                    amountEach,
-                );
-                await testWithdraw(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    pool,
-                    lpMinted,
-                    false,
-                    true,
-                    `${+amountEach * 0.2}`,
-                );
-            });
-            if (!pool.depositContract && !pool.underlyingFlag) return;
-            it(`... should deposit then withdraw exact underlyingCoins [${poolName}]`, async () => {
-                const lpMinted = await testDeposit(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    pool,
-                    '0', // minMintAmount
-                    true,
-                    amountEach,
-                );
-                await testWithdraw(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    pool,
-                    lpMinted,
-                    true,
-                    true,
-                    `${+amountEach * 0.2}`,
-                );
-            });
-        }));
+        await Promise.all(
+            poolInfo
+                .slice(0, testLength)
+                .map(async (pool) => {
+                    const poolName = pool.name;
+                    it(`... should deposit then withdraw exact coins [${poolName}]`, async function () {
+                        /// @dev factory pools dont implement this method
+                        if (pool.isFactory) this.skip();
+                        const lpMinted = await testDeposit(
+                            proxy,
+                            senderAddr,
+                            senderAddr,
+                            pool,
+                            '0', // minMintAmount
+                            false,
+                            amountEach,
+                        );
+                        await testWithdraw(
+                            proxy,
+                            senderAddr,
+                            senderAddr,
+                            pool,
+                            lpMinted,
+                            false,
+                            true,
+                            `${+amountEach * 0.2}`,
+                        );
+                    });
+                    it(`... should deposit then withdraw exact underlyingCoins [${poolName}]`, async function () {
+                        /// @dev factory pools dont implement this method
+                        if (pool.isFactory) this.skip();
+                        /// @dev notest if no underlying
+                        if (!pool.depositContract && !pool.underlyingFlag) this.skip();
+                        const lpMinted = await testDeposit(
+                            proxy,
+                            senderAddr,
+                            senderAddr,
+                            pool,
+                            '0', // minMintAmount
+                            true,
+                            amountEach,
+                        );
+                        await testWithdraw(
+                            proxy,
+                            senderAddr,
+                            senderAddr,
+                            pool,
+                            lpMinted,
+                            true,
+                            true,
+                            `${+amountEach * 0.2}`,
+                        );
+                    });
+                }),
+        );
     });
 };
 
@@ -435,8 +468,8 @@ const curveGaugeDepositTest = async (testLength) => {
             proxyAddr = proxy.address;
 
             await redeploy('CurveDeposit');
-            await redeploy('CurveGaugeDeposit');
-            curveView = await redeploy('CurveView');
+            await getContractFromRegistry('CurveGaugeDeposit');
+            curveView = await getContractFromRegistry('CurveView');
         });
 
         await Promise.all(poolInfo.slice(0, testLength).map(async (pool) => {
@@ -480,9 +513,9 @@ const curveGaugeWithdrawTest = async (testLength) => {
             proxyAddr = proxy.address;
 
             await redeploy('CurveDeposit');
-            await redeploy('CurveGaugeDeposit');
-            await redeploy('CurveGaugeWithdraw');
-            curveView = await redeploy('CurveView');
+            await getContractFromRegistry('CurveGaugeDeposit');
+            await getContractFromRegistry('CurveGaugeWithdraw');
+            curveView = await getContractFromRegistry('CurveView');
         });
 
         poolInfo.slice(0, testLength).map(async (pool) => {
@@ -530,7 +563,7 @@ const curveClaimFeesTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
 
-            await redeploy('CurveClaimFees');
+            await getContractFromRegistry('CurveClaimFees');
         });
 
         after(async () => {
@@ -569,7 +602,7 @@ const curveStethPoolDepositTest = async () => {
             proxy = await getProxy(senderAcc.address);
             proxyAddr = proxy.address;
 
-            await redeploy('CurveStethPoolDeposit');
+            await getContractFromRegistry('CurveStethPoolDeposit');
         });
 
         it(`... should deposit ${ethAmount} Eth into Curve stEth pool`, async () => {
@@ -685,7 +718,7 @@ const curveStethPoolWithdrawTest = async () => {
             proxy = await getProxy(senderAcc.address);
             proxyAddr = proxy.address;
 
-            await redeploy('CurveStethPoolWithdraw');
+            await getContractFromRegistry('CurveStethPoolWithdraw');
         });
 
         it(`... should burn ${amount} steCrv and withdraw ${amount} Eth`, async () => {

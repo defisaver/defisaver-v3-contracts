@@ -1,0 +1,110 @@
+[
+    {
+        "name": "BTC / USD",
+        "base": "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xD702DD976Fb76Fffc2D3963D037dfDae5b04E593"
+    },
+    {
+        "name": "ETH / USD",
+        "base": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x13e3Ee699D1909E989722E753853AE30b17e08c5"
+    },
+    {
+        "name": "WETH / USD",
+        "base": "0x4200000000000000000000000000000000000006",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x13e3Ee699D1909E989722E753853AE30b17e08c5"
+    },
+    {
+        "name": "DAI / USD",
+        "base": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x8dBa75e83DA73cc766A7e5a0ee71F656BAb470d6"
+    },
+    {
+        "name": "USDC / USD",
+        "base": "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x16a9FA2FDa030272Ce99B29CF780dFA30361E0f3"
+    },
+    {
+        "name": "USDT / USD",
+        "base": "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xECef79E109e997bCA29c1c0897ec9d7b03647F5E"
+    },
+    {
+        "name": "AAVE / USD",
+        "base": "0x76FB31fb4af56892A25e32cFC43De717950c9278",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x338ed6787f463394D24813b297401B9F05a8C9d1"
+    },
+    {
+        "name": "CRV / USD",
+        "base": "0x0994206dfE8De6Ec6920FF4D779B0d950605Fb53",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xbD92C6c284271c227a1e0bF1786F468b539f51D9"
+    },
+    {
+        "name": "KNC / USD",
+        "base": "0xa00E3A3511aAC35cA78530c85007AFCd31753819",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xCB24d22aF35986aC1feb8874AdBbDF68f6dC2e96"
+    },
+    {
+        "name": "LINK / USD",
+        "base": "0x350a791Bfc2C21F9Ed5d10980Dad2e2638ffa7f6",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xCc232dcFAAE6354cE191Bd574108c1aD03f86450"
+    },
+    {
+        "name": "SNX / USD",
+        "base": "0x8700dAec35aF8Ff88c16BdF0418774CB3D7599B4",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x2FCF37343e916eAEd1f1DdaaF84458a359b53877"
+    },
+    {
+        "name": "UNI / USD",
+        "base": "0x6fd9d7AD17242c41f7131d257212c54A0e816691",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x11429eE838cC01071402f21C219870cbAc0a59A0"
+    },
+    {
+        "name": "BUSD / USD",
+        "base": "0x9C9e5fD8bbc25984B178FdCE6117Defa39d2db39",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xC1cB3b7cbB3e786aB85ea28489f332f4FAEd5Bc4"
+    },
+    {
+        "name": "FRAX / USD",
+        "base": "0x2E3D870790dC77A83DD1d18184Acc7439A53f475",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xc7D132BeCAbE7Dcc4204841F33bae45841e41D9C"
+    },
+    {
+        "name": "OP / USD",
+        "base": "0x4200000000000000000000000000000000000042",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x0D276FC14719f9292D5C1eA2198673d1f4269246"
+    },
+    {
+        "name": "SUSD / USD",
+        "base": "0x8c6f28f2F1A3C87F0f938b96d27520d9751ec8d9",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x7f99817d87baD03ea21E05112Ca799d715730efe"
+    },
+    {
+        "name": "WBTC / USD",
+        "base": "0x68f180fcCe6836688e9084f035309E29Bf0A2095",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x718A5788b89454aAE3A028AE9c111A29Be6c2a6F"
+    },
+    {
+        "name": "wstETH / USD",
+        "base": "0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x698B585CbC4407e2D54aa898B2600B53C68958f7"
+    }
+]

@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 /* eslint-disable no-await-in-loop */
 const { default: curve } = require('@curvefi/api');
 const hre = require('hardhat');
@@ -24,6 +25,7 @@ const addrs = {
         OWNER_ACC: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
         WETH_ADDRESS: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         DAI_ADDRESS: '0x6b175474e89094c44da98b954eedeac495271d0f',
+        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         TOKEN_GROUP_REGISTRY: '0xcA49e64FE1FE8be40ED30F682edA1b27a6c8611c',
         FEE_RECEIVER: '0x6467e807dB1E71B9Ef04E0E3aFb962E4B0900B2B',
         USDC_ADDR: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
@@ -32,13 +34,19 @@ const addrs = {
         StrategyProxy: '0x0822902D30CC9c77404e6eB140dC1E98aF5b559A',
         SubProxy: '0xd18d4756bbf848674cc35f1a0B86afEF20787382',
         UNISWAP_WRAPPER: '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54',
+        UNISWAP_V3_WRAPPER: '0xA250D449e8246B0be1ecF66E21bB98678448DEF5',
+        UNIV3_WRAPPER: '0xA250D449e8246B0be1ecF66E21bB98678448DEF5',
         FEED_REGISTRY: '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf',
         COMET_USDC_ADDR: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
         COMET_USDC_REWARDS_ADDR: '0x1B0e765F6224C21223AeA2af16c1C46E38885a40',
         COMP_ADDR: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
         CHICKEN_BONDS_VIEW: '0x809a93fd4a0d7d7906Ef6176f0b5518b418Da08f',
+        AAVE_MARKET: '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e',
+        AAVE_V3_VIEW: '0x9ECB0645b357fDD7B92789B91595160862Bd45d0',
+        ZRX_ALLOWLIST_ADDR: '0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F',
+        ZRX_ALLOWLIST_OWNER: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
+        AAVE_SUB_PROXY: '0xb9F73625AA64D46A9b2f0331712e9bEE19e4C3f7',
         AVG_GAS_PRICE: 100,
-
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -53,10 +61,14 @@ const addrs = {
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
         StrategyProxy: '0xEe0C404FD30E289c305E760b3AE1d1Ae6503350f',
         SubProxy: '0x163c08d3F6d916AD6Af55b37728D547e968103F8',
-        UNISWAP_WRAPPER: '0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357',
+        UNISWAP_V3_WRAPPER: '0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357',
         AAVE_V3_VIEW: '0x5aD16e393615bfeF64e15210C370dd4b8f2753Cb',
+        AAVE_SUB_PROXY: '0x9E8aE909Af8A391b58f45819f0d36e4256991D19',
         AVG_GAS_PRICE: 0.001,
         TOKEN_GROUP_REGISTRY: '0x566b2a957D8FCE39D2744059d558F27aF52a70c0',
+        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        ZRX_ALLOWLIST_ADDR: '0x52F6ae5aE5a8a6316c970d3a02C50b74c1a50bB8',
+        ZRX_ALLOWLIST_OWNER: '0xc9a956923bfb5f141f1cd4467126b3ae91e5cc33',
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -65,7 +77,7 @@ const addrs = {
         WETH_ADDRESS: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
         DAI_ADDRESS: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
         USDC_ADDR: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
-        EXCHANGE_OWNER_ADDR: '0x322d58b9E75a6918f7e7849AEe0fF09369977e08',
+        EXCHANGE_OWNER_ADDR: '0x926516e60521556f4ab5e7bf16a4d41a8539c7d1',
         SAVER_EXCHANGE_ADDR: '0xaB1E4b72BC2f3890F052df111EE626c1c7229F26',
         FEE_RECEIVER: '0xe000e3c9428D539566259cCd89ed5fb85e655A01',
         TOKEN_GROUP_REGISTRY: '0xb03fe103f54841821C080C124312059c9A3a7B5c',
@@ -74,7 +86,12 @@ const addrs = {
         SubProxy: '0x275A8f98dBA07Ad6380D3ea3F36B665DD6E02F25',
         StrategyProxy: '0x8F62B8Cd1189dB92ba4CBd4dBE64D03C54fD079B',
         AAVE_V3_VIEW: '0x710f01037018Daad969B8FeFe69b4823Ef788bc6',
+        UNISWAP_V3_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
+        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        AAVE_SUB_PROXY: '0x29a172f04CF9C6a79EdF4dD2744F2d260b8b8FE4',
         UNISWAP_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
+        ZRX_ALLOWLIST_ADDR: '0x5eD8e74b1caE57B0c68B3278B88589991FBa0750',
+        ZRX_ALLOWLIST_OWNER: '0x926516e60521556f4ab5e7bf16a4d41a8539c7d1',
         AVG_GAS_PRICE: 0.5,
     },
     kovan: {
@@ -96,6 +113,7 @@ const KYBER_WRAPPER = '0x71C8dc1d6315a48850E88530d18d3a97505d2065';
 const UNISWAP_WRAPPER = '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54';
 const OASIS_WRAPPER = '0x2aD7D86C56b7a09742213e1e649C727cB4991A54';
 const ETH_ADDR = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+const BTC_ADDR = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
 const DAI_ADDR = '0x6b175474e89094c44da98b954eedeac495271d0f';
 const USDC_ADDR = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 const RAI_ADDR = '0x03ab458634910AaD20eF5f1C8ee96F1D6ac54919';
@@ -194,6 +212,8 @@ const standardAmounts = {
 };
 
 const coinGeckoHelper = {
+    STETH: 'staked-ether',
+    CRV: 'curve-dao-token',
     ETH: 'ethereum',
     WETH: 'weth',
     AAVE: 'aave',
@@ -214,6 +234,7 @@ const coinGeckoHelper = {
     KNCL: 'kyber-network',
     MANA: 'decentraland',
     PAXUSD: 'paxos-standard',
+    USDP: 'paxos-standard',
     COMP: 'compound-governance-token',
     LRC: 'loopring',
     LINK: 'chainlink',
@@ -230,7 +251,8 @@ const coinGeckoHelper = {
     RAI: 'rai',
     MATIC: 'matic-network',
     SUSHI: 'sushi',
-    bLUSD: 'bLUSD',
+    bLUSD: 'boosted-lusd',
+    wstETH: 'wrapped-steth',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;
@@ -388,29 +410,26 @@ const setBalance = async (tokenAddr, userAddr, value) => {
     );
 };
 
-const fetchAmountinUSDPrice = (tokenSign, amountUSD) => {
-    const { decimals } = getAssetInfo(tokenSign);
+let cachedTokenPrices = {};
+const getLocalTokenPrice = (tokenSymbol) => {
+    const cachedPrice = cachedTokenPrices[tokenSymbol];
+    if (cachedPrice) return cachedPrice;
 
     const data = JSON.parse(fs.readFileSync('test/prices.json', 'utf8'));
     const tokenNames = Object.keys(data);
     for (let i = 0; i < tokenNames.length; i++) {
-        if (tokenNames[i] === coinGeckoHelper[tokenSign]) {
-            const amountNumber = (amountUSD / data[tokenNames[i]].usd);
-            return amountNumber.toFixed(decimals);
+        if (tokenNames[i] === coinGeckoHelper[tokenSymbol]) {
+            const tokenPrice = data[tokenNames[i]].usd;
+            return tokenPrice;
         }
     }
     return 0;
 };
 
-const getLocalTokenPrice = (tokenSymbol) => {
-    const data = JSON.parse(fs.readFileSync('test/prices.json', 'utf8'));
-    const tokenNames = Object.keys(data);
-    for (let i = 0; i < tokenNames.length; i++) {
-        if (tokenNames[i] === coinGeckoHelper[tokenSymbol]) {
-            return data[tokenNames[i]].usd;
-        }
-    }
-    return 0;
+const fetchAmountinUSDPrice = (tokenSymbol, amountUSD) => {
+    const { decimals } = getAssetInfo(tokenSymbol);
+    const tokenPrice = getLocalTokenPrice(tokenSymbol);
+    return (amountUSD / tokenPrice).toFixed(decimals);
 };
 
 const fetchStandardAmounts = async () => standardAmounts;
@@ -566,6 +585,18 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
     return c;
 };
 
+const getContractFromRegistry = async (
+    name,
+    regAddr = addrs[getNetwork()].REGISTRY_ADDR,
+    saveOnTenderly = undefined,
+    isFork = undefined,
+    ...args
+) => {
+    const contractAddr = await getAddrFromRegistry(name, regAddr);
+    if (contractAddr !== nullAddress) return hre.ethers.getContractAt(name, contractAddr);
+    return redeploy(name, regAddr, saveOnTenderly, isFork, ...args);
+};
+
 const setCode = async (addr, code) => {
     await hre.network.provider.send('hardhat_setCode', [addr, code]);
 };
@@ -710,7 +741,8 @@ const formatMockExchangeObj = async (
     ];
 };
 
-const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee) => {
+// eslint-disable-next-line max-len
+const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee, minPrice = 0) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
     let firstPath = srcAddr;
@@ -743,7 +775,7 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, u
         destAddr,
         amount,
         destAmount,
-        0,
+        minPrice,
         0,
         nullAddress,
         wrapper,
@@ -796,7 +828,7 @@ const formatExchangeObjCurve = async (
 
 const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
     console.log({ srcAddr, destAddr });
-    const { AlphaRouter } = await import('@uniswap/smart-order-router');
+    const { AlphaRouter, SwapType } = await import('@uniswap/smart-order-router');
     const {
         CurrencyAmount,
         Token,
@@ -824,18 +856,20 @@ const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
     const swapAmount = CurrencyAmount.fromRawAmount(srcToken, amount.toString());
 
     const router = new AlphaRouter({ chainId, provider: hre.ethers.provider });
-    const route = await router.route(
+    const { path } = await router.route(
         swapAmount, destToken, TradeType.EXACT_INPUT,
         {
+            type: SwapType.SWAP_ROUTER_02,
             slippageTolerance: new Percent(5, 100),
         },
-    ).then((_route) => _route.trade.swaps[0].route);
+        {
+            maxSplits: 0,
+        },
+    ).then(({ methodParameters }) => hre.ethers.utils.defaultAbiCoder.decode(
+        ['(bytes path,address,uint256,uint256)'],
+        `0x${methodParameters.calldata.slice(10)}`,
+    )[0]);
 
-    const path = route.tokenPath.reduce((acc, curr, index) => {
-        const poolInput = curr.address;
-        const poolFee = poolInput.toLowerCase() === destAddr.toLowerCase() ? '' : (route.pools[index].fee).toString(16).padStart(6, 0);
-        return `${acc}${poolInput.slice(2)}${poolFee}`;
-    }, '0x');
     console.log({ path });
 
     return [
@@ -935,14 +969,15 @@ const formatExchangeObjForOffchain = (
 ];
 
 const addToZRXAllowlist = async (acc, newAddr) => {
-    const exchangeOwnerAddr = '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00';
+    const exchangeOwnerAddr = addrs[network].ZRX_ALLOWLIST_OWNER;
     await sendEther(acc, exchangeOwnerAddr, '1');
     await impersonateAccount(exchangeOwnerAddr);
 
     const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
 
     const registryInstance = await hre.ethers.getContractFactory('ZrxAllowlist');
-    const registry = await registryInstance.attach('0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F');
+    const zrxAllowlistAddr = addrs[network].ZRX_ALLOWLIST_ADDR;
+    const registry = await registryInstance.attach(zrxAllowlistAddr);
     const registryByOwner = await registry.connect(signer);
 
     await registryByOwner.setAllowlistAddr(newAddr, true);
@@ -1007,6 +1042,35 @@ const getChainLinkPrice = async (tokenAddr) => {
     return data.answer.toString();
 };
 
+const cacheChainlinkPrice = async (tokenSymbol, tokenAddr) => {
+    try {
+        if (cachedTokenPrices[tokenSymbol]) return cachedTokenPrices[tokenSymbol];
+
+        // eslint-disable-next-line no-param-reassign
+        if (tokenAddr.toLowerCase() === WBTC_ADDR.toLowerCase()) tokenAddr = BTC_ADDR;
+
+        let wstethMultiplier = '1';
+        if (tokenAddr.toLowerCase() === WSTETH_ADDRESS.toLowerCase()) {
+            // eslint-disable-next-line no-param-reassign
+            tokenAddr = STETH_ADDRESS;
+            wstethMultiplier = BN2Float(await hre.ethers.provider.call({
+                to: WSTETH_ADDRESS,
+                data: hre.ethers.utils.id('stEthPerToken()').slice(0, 10),
+            }));
+        }
+
+        let tokenPrice = BN2Float(await getChainLinkPrice(tokenAddr), 8);
+        tokenPrice = (+wstethMultiplier * +tokenPrice).toFixed(2);
+        cachedTokenPrices[tokenSymbol] = tokenPrice;
+
+        return tokenPrice;
+    } catch (e) {
+        console.log(e);
+        console.log(`no chainlink feed found ${tokenSymbol} ${tokenAddr}`);
+        return undefined;
+    }
+};
+
 const takeSnapshot = async () => hre.network.provider.request({
     method: 'evm_snapshot',
 });
@@ -1060,6 +1124,7 @@ async function setForkForTesting() {
 }
 
 const resetForkToBlock = async (block) => {
+    cachedTokenPrices = {};
     let rpcUrl = process.env.ETHEREUM_NODE;
 
     if (network !== 'mainnet') {
@@ -1110,6 +1175,22 @@ const setMockPrice = async (mockContract, roundId, token, price) => {
         addrs[network].FEED_REGISTRY,
     );
     await c.setRoundData(token, USD_QUOTE, roundId, formattedPrice);
+};
+
+const filterEthersObject = (obj) => {
+    if (typeof obj !== 'object') return obj;
+    if (obj instanceof hre.ethers.BigNumber) return obj.toString();
+
+    const keys = Object.keys(obj);
+    const stringKeys = keys.filter((key, i) => +key !== i);
+
+    if (stringKeys.length !== 0) {
+        return stringKeys.reduce(
+            (acc, key) => ({ ...acc, [key]: filterEthersObject(obj[key]) }),
+            {},
+        );
+    }
+    return keys.map((key) => filterEthersObject(obj[key]));
 };
 
 module.exports = {
@@ -1215,8 +1296,11 @@ module.exports = {
     balanceOfOnTokenInBlock,
     formatExchangeObjCurve,
     formatMockExchangeObj,
+    cacheChainlinkPrice,
     expectCloseEq,
     setContractAt,
+    getContractFromRegistry,
+    filterEthersObject,
     curveApiInit: async () => curve.init('Alchemy', {
         url: hre.network.url,
     }),

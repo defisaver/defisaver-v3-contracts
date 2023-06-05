@@ -9,4 +9,6 @@ contract OptimismActionsUtilAddresses {
 
     address internal constant REGISTRY_ADDR = 0xAf707Ee480204Ed6e2640B53cE86F680D28Afcbd;
     address internal constant DFS_LOGGER_ADDR = 0xFc2f1355296ab7dd98a1260E3Ff5E906999d4Acb;
+    address internal constant PROXY_AUTH_ADDR = 0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043;
+
 }

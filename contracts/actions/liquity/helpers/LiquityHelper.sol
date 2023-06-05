@@ -13,11 +13,15 @@ import "../../../interfaces/liquity/IStabilityPool.sol";
 import "../../../interfaces/liquity/ILQTYStaking.sol";
 import "../../../interfaces/liquity/IChickenBondManager.sol";
 import "./MainnetLiquityAddresses.sol";
+import "../../../core/strategy/StrategyModel.sol";
 
 contract LiquityHelper is MainnetLiquityAddresses {
     using TokenUtils for address;
 
+    uint64 constant LIQUITY_PAYBACK_BUNDLE_ID = 7;
+
     uint constant public LUSD_GAS_COMPENSATION = 200e18;
+    uint constant public MIN_DEBT = 2000e18; // MIN_NET_DEBT (1800e18) + LUSD_GAS_COMP (200e18)
 
     IPriceFeed constant public PriceFeed = IPriceFeed(PRICE_FEED_ADDRESS);
     IBorrowerOperations constant public BorrowerOperations = IBorrowerOperations(BORROWER_OPERATIONS_ADDRESS);

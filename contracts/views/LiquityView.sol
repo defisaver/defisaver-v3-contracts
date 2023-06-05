@@ -10,7 +10,8 @@ contract LiquityView is LiquityHelper {
     using TokenUtils for address;
     using SafeMath for uint256;
 
-    enum LiquityActionId {Open, Borrow, Payback, Supply, Withdraw}
+    enum CollChange { SUPPLY, WITHDRAW }
+    enum DebtChange { PAYBACK, BORROW }
 
     function isRecoveryMode() public view returns (bool) {
         uint256 price = PriceFeed.lastGoodPrice();
@@ -28,54 +29,56 @@ contract LiquityView is LiquityHelper {
         }
     }
 
-    /// @notice Predict the resulting nominal collateral ratio after a trove modifying action
-    /// @param _troveOwner Address of the trove owner, if the action specified is LiquityOpen this argument is ignored
-    /// @param _action LiquityActionIds
-    function predictNICR(
+    function predictNICRForAdjust(
         address _troveOwner,
-        LiquityActionId _action,
+        CollChange collChangeAction,
+        DebtChange debtChangeAction,
         address _from,
         uint256 _collAmount,
         uint256 _lusdAmount
     ) external view returns (uint256 NICR) {
-        //  LiquityOpen
-        if (_action == LiquityActionId.Open) {
-            if (!isRecoveryMode())
-                _lusdAmount = _lusdAmount.add(TroveManager.getBorrowingFeeWithDecay(_lusdAmount));
-            _lusdAmount = BorrowerOperations.getCompositeDebt(_lusdAmount);
-
-            if (_collAmount == type(uint256).max)
-                _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
-
-            return computeNICR(_collAmount, _lusdAmount);
-        }
 
         (uint256 debt, uint256 coll, , ) = TroveManager.getEntireDebtAndColl(_troveOwner);
+        uint256 wholeDebt = TroveManager.getTroveDebt(_troveOwner);
 
-        //  LiquityBorrow
-        if (_action == LiquityActionId.Borrow) {
-            if (!isRecoveryMode())
-                _lusdAmount = _lusdAmount.add(TroveManager.getBorrowingFeeWithDecay(_lusdAmount));
-            return computeNICR(coll, debt.add(_lusdAmount));
-        }
-
-        //  LiquityPayback
-        if (_action == LiquityActionId.Payback) {
-            return computeNICR(coll, debt.sub(_lusdAmount));
-        }
+        uint256 newColl;
+        uint256 newDebt;
 
         //  LiquitySupply
-        if (_action == LiquityActionId.Supply) {
+        if (collChangeAction == CollChange.SUPPLY) {
             if (_collAmount == type(uint256).max)
                 _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
 
-            return computeNICR(coll.add(_collAmount), debt);
+            newColl = coll.add(_collAmount);
         }
 
         //  LiquityWithdraw
-        if (_action == LiquityActionId.Withdraw) {
-            return computeNICR(coll.sub(_collAmount), debt);
+        if (collChangeAction == CollChange.WITHDRAW) {
+            newColl = coll.sub(_collAmount);
         }
+              
+        //  LiquityBorrow
+        if (debtChangeAction == DebtChange.BORROW) {
+            if (!isRecoveryMode())
+                _lusdAmount = _lusdAmount.add(TroveManager.getBorrowingFeeWithDecay(_lusdAmount));
+
+            newDebt = debt.add(_lusdAmount);
+        }
+
+        //  LiquityPayback
+        if (debtChangeAction == DebtChange.PAYBACK) {
+            if (_lusdAmount == type(uint256).max) {
+                _lusdAmount = LUSD_TOKEN_ADDRESS.getBalance(_from);
+            }
+
+            // can't close with payback, pull amount to payback to MIN_DEBT
+            if (wholeDebt < (_lusdAmount + MIN_DEBT)) {
+                _lusdAmount = wholeDebt - MIN_DEBT;
+            }
+
+            newDebt = debt.sub(_lusdAmount);
+        }
+        return computeNICR(newColl, newDebt);
     }
 
     function getApproxHint(
@@ -111,6 +114,7 @@ contract LiquityView is LiquityHelper {
             uint256 debtAmount,
             uint256 collPrice,
             uint256 TCRatio,
+            uint256 borrowingFeeWithDecay,
             bool recoveryMode
         )
     {
@@ -119,6 +123,7 @@ contract LiquityView is LiquityHelper {
         debtAmount = TroveManager.getTroveDebt(_troveOwner);
         collPrice = PriceFeed.lastGoodPrice();
         TCRatio = TroveManager.getTCR(collPrice);
+        borrowingFeeWithDecay = TroveManager.getBorrowingRateWithDecay();
         recoveryMode = TroveManager.checkRecoveryMode(collPrice);
     }
 

@@ -9,6 +9,7 @@ const {
     addrs,
     network,
     getNetwork,
+    getContractFromRegistry,
 } = require('./utils');
 
 const getLatestBundleId = async () => {
@@ -132,7 +133,7 @@ const activateSub = async (proxy, subId, regAddr = addrs[network].REGISTRY_ADDR)
 };
 
 const subToAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const aaveSubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
+    const aaveSubProxyAddr = addrs[network].AAVE_SUB_PROXY;
 
     const AaveSubProxy = await hre.ethers.getContractFactory('AaveSubProxy');
     const functionData = AaveSubProxy.interface.encodeFunctionData(
@@ -197,8 +198,123 @@ const subToCBRebondProxy = async (proxy, inputData, regAddr = addrs[network].REG
     return latestSubId;
 };
 
+const subToMorphoAaveV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const subProxyAddr = await getAddrFromRegistry('MorphoAaveV2SubProxy', regAddr);
+
+    const subProxyFactory = await hre.ethers.getContractFactory('MorphoAaveV2SubProxy');
+    const functionData = subProxyFactory.interface.encodeFunctionData(
+        'subToMorphoAaveV2Automation',
+        inputData,
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToMorphoAaveV2Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+    const subProxy = await getContractFromRegistry('MorphoAaveV2SubProxy');
+    const repaySub = await subProxy.formatRepaySub(...inputData, proxy.address);
+    const boostSub = await subProxy.formatBoostSub(...inputData, proxy.address);
+    return { latestSubId, repaySub, boostSub };
+};
+
+const updateSubDataMorphoAaveV2Proxy = async (
+    proxy, subIdRepay, subIdBoost,
+    minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled,
+    regAddr = addrs[network].REGISTRY_ADDR,
+) => {
+    const subInput = [minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled];
+
+    const subProxyAddr = await getAddrFromRegistry('MorphoAaveV2SubProxy', regAddr);
+
+    const subProxyFactory = await hre.ethers.getContractFactory('MorphoAaveV2SubProxy');
+
+    const functionData = subProxyFactory.interface.encodeFunctionData(
+        'updateSubData',
+        [
+            subIdRepay, subIdBoost, subInput,
+        ],
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed updateMorphoAaveV2Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+    const subProxy = await getContractFromRegistry('MorphoAaveV2SubProxy');
+    const repaySub = await subProxy.formatRepaySub(subInput, proxy.address);
+    const boostSub = await subProxy.formatBoostSub(subInput, proxy.address);
+    return { latestSubId, repaySub, boostSub };
+};
+
+const subToLiquityProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const subProxyAddr = '0xE2f4A4629FbbC444964A16438329288C66551c30'; // hardcoded here for now
+    console.log({ subProxyAddr });
+
+    const subProxyFactory = await hre.ethers.getContractFactory('LiquitySubProxy');
+    const functionData = subProxyFactory.interface.encodeFunctionData(
+        'subToLiquityAutomation',
+        inputData,
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToLiquityProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+    const subProxy = await hre.ethers.getContractAt('LiquitySubProxy', subProxyAddr);
+    const repaySub = await subProxy.formatRepaySub(...inputData, proxy.address);
+    const boostSub = await subProxy.formatBoostSub(...inputData, proxy.address);
+    return { latestSubId, repaySub, boostSub };
+};
+
+const updateLiquityProxy = async (
+    proxy, subIdRepay, subIdBoost,
+    minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled,
+    regAddr = addrs[network].REGISTRY_ADDR,
+) => {
+    const subInput = [minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled];
+
+    const subProxyAddr = await getAddrFromRegistry('LiquitySubProxy', regAddr);
+
+    const subProxyFactory = await hre.ethers.getContractFactory('LiquitySubProxy');
+
+    const functionData = subProxyFactory.interface.encodeFunctionData(
+        'updateSubData',
+        [
+            subIdRepay, subIdBoost, subInput,
+        ],
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed updateLiquityProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+    const subProxy = await getContractFromRegistry('LiquitySubProxy');
+    const repaySub = await subProxy.formatRepaySub(subInput, proxy.address);
+    const boostSub = await subProxy.formatBoostSub(subInput, proxy.address);
+    return { latestSubId, repaySub, boostSub };
+};
+
 const updateAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const aaveSubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
+    const aaveSubProxyAddr = addrs[network].AAVE_SUB_PROXY;
 
     const AaveSubProxy = await hre.ethers.getContractFactory('AaveSubProxy');
     const functionData = AaveSubProxy.interface.encodeFunctionData(
@@ -219,14 +335,75 @@ const updateAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGIST
     return latestSubId;
 };
 
+const subToMcdProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const subProxyAddr = await getAddrFromRegistry('McdSubProxy', regAddr);
+    const subProxy = await hre.ethers.getContractAt('McdSubProxy', subProxyAddr);
+
+    const functionData = subProxy.interface.encodeFunctionData(
+        'subToMcdAutomation',
+        [inputData, false],
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToMcdProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    let repaySubId;
+    let boostSubId;
+    if (inputData.slice(-1)[0]) {
+        boostSubId = +await getLatestSubId(regAddr);
+        repaySubId = boostSubId - 1;
+    } else {
+        repaySubId = +await getLatestSubId(regAddr);
+    }
+
+    const repaySub = await subProxy.formatRepaySub(inputData);
+    const boostSub = await subProxy.formatBoostSub(inputData);
+    return {
+        repaySubId, boostSubId, repaySub, boostSub,
+    };
+};
+
+const subToLimitOrderProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const limitOrderSubProxyAddr = await getAddrFromRegistry('LimitOrderSubProxy', regAddr);
+
+    const LimitOrderSubProxy = await hre.ethers.getContractFactory('LimitOrderSubProxy');
+    const functionData = LimitOrderSubProxy.interface.encodeFunctionData(
+        'subToLimitOrder',
+        inputData,
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](limitOrderSubProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const parsed = await receipt.wait();
+    const lastEvent = parsed.events.at(-1);
+
+    const abiCoder = hre.ethers.utils.defaultAbiCoder;
+    const strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], lastEvent.data)[0];
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToLimitOrderProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+
+    return { subId: latestSubId, strategySub };
+};
+
 const addBotCaller = async (
     botAddr,
-    regAddr = addrs[network].REGISTRY_ADDR,
+    regAddr = addrs[getNetwork()].REGISTRY_ADDR,
     isFork = false,
-    networkInjected = network,
+    networkInjected = getNetwork(),
 ) => {
-    if (regAddr === addrs[network].REGISTRY_ADDR && !isFork) {
-        await impersonateAccount(addrs[network].OWNER_ACC);
+    if (regAddr === addrs[getNetwork()].REGISTRY_ADDR && !isFork) {
+        await impersonateAccount(addrs[getNetwork()].OWNER_ACC);
     }
 
     const signer = await hre.ethers.provider.getSigner(addrs[networkInjected].OWNER_ACC);
@@ -237,10 +414,10 @@ const addBotCaller = async (
 
     botAuth = botAuth.connect(signer);
 
-    await botAuth.addCaller(botAddr, { gasLimit: 400000 });
+    await botAuth.addCaller(botAddr, { gasLimit: 800000 });
 
-    if (regAddr === addrs[network].REGISTRY_ADDR && !isFork) {
-        await stopImpersonatingAccount(addrs[network].OWNER_ACC);
+    if (regAddr === addrs[getNetwork()].REGISTRY_ADDR && !isFork) {
+        await stopImpersonatingAccount(addrs[getNetwork()].OWNER_ACC);
     }
 };
 
@@ -268,6 +445,22 @@ const getSubHash = (subData) => {
     return subDataHash;
 };
 
+const getUpdatedStrategySub = async (subStorage, subStorageAddr) => {
+    const events = (await subStorage.queryFilter({
+        address: subStorageAddr,
+        topics: [
+            hre.ethers.utils.id('UpdateData(uint256,bytes32,(uint64,bool,bytes[],bytes32[]))'),
+        ],
+    }));
+
+    const lastEvent = events.at(-1);
+
+    const abiCoder = hre.ethers.utils.defaultAbiCoder;
+    const strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], lastEvent.data)[0];
+
+    return strategySub;
+};
+
 module.exports = {
     subToStrategy,
     activateSub,
@@ -283,4 +476,11 @@ module.exports = {
     setMCDPriceVerifier,
     getSubHash,
     subToCBRebondProxy,
+    getUpdatedStrategySub,
+    subToMorphoAaveV2Proxy,
+    updateSubDataMorphoAaveV2Proxy,
+    subToLiquityProxy,
+    updateLiquityProxy,
+    subToMcdProxy,
+    subToLimitOrderProxy,
 };

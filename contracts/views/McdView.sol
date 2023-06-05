@@ -8,6 +8,7 @@ import "../interfaces/mcd/IManager.sol";
 import "../interfaces/mcd/ICropper.sol";
 import "../interfaces/mcd/ISpotter.sol";
 import "../interfaces/mcd/IVat.sol";
+import "../interfaces/mcd/IPot.sol";
 import "../interfaces/IDSProxy.sol";
 
 /// @title Getter contract for Vault info from Maker protocol
@@ -114,5 +115,9 @@ contract McdView is DSMath, McdHelper {
 
             ilks[i] = _ilks[i];
         }
+    }
+
+    function getUserDsrBalance(address _user) external returns (uint256) {
+        return IPot(POT_ADDR).pie(_user) * IPot(POT_ADDR).drip() / RAY;
     }
 }

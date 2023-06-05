@@ -26,11 +26,22 @@
         "address": "0x9E8aE909Af8A391b58f45819f0d36e4256991D19",
         "id": "0xd11b2581",
         "path": "contracts/core/l2/AaveSubProxy.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": ["0x4D93E49B8989222571c2D171B988c5A3C04C6621"]
+    },
+    {
+      "name": "LimitOrderSubProxy",
+      "address": "0xC6755F57d7bC279CBd84C96932a0611CB998E6B7",
+      "id": "0x82fc0e77",
+      "path": "contracts/actions/exchange/LimitOrderSubProxy.sol",
+      "version": "1.0.1",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": ["0x11747a0821cF3300C8d9CF5Ac2405b545d623767"]
     },
     {
         "name": "ZrxAllowlist",
@@ -42,6 +53,28 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+      "name": "ParaswapWrapper",
+      "address": "0xD90Ebd5E551d7451FA289b033755e74588230063",
+      "id": "0x115fa27e",
+      "path": "contracts/exchangeV3/offchainWrappersV3/ParaswapWrapper.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "KyberAggregatorWrapper",
+      "address": "0xB7EAa93C69b6450D6dF0CDb00307A5136392eCF8",
+      "id": "0x1abf4ed0",
+      "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
     },
     {
         "name": "Discount",
@@ -154,15 +187,26 @@
         "history": []
     },
     {
+      "name": "StrategyTriggerViewNoRevert",
+      "address": "0x817Bc725a96d73Cf73a4e20bd2Fa8e358Ed387D8",
+      "id": "0x37a21cb5",
+      "path": "contracts/views/StrategyTriggerViewNoRevert.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
         "name": "AaveV3View",
-        "address": "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
+        "address": "0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4"]
     },
     {
         "name": "ERC20View",
@@ -232,6 +276,17 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": ["0xEbA499702856f1EFda2546e9fEFC1319A3b40538"]
+    },
+    {
+      "name": "SendTokens",
+      "address": "0xdAd9f0aE49F8E769D45d8639e5F11CA1bCa23487",
+      "id": "0xa87d9d0e",
+      "path": "contracts/actions/utils/SendTokens.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
     },
     {
       "name": "AaveV3Supply",
@@ -358,22 +413,33 @@
       "address": "0xfbcF23D2BeF8A2C491cfa4dD409D8dF12d431c85",
       "id": "0x8d7fb192",
       "path": "contracts/actions/flashloan/FLAaveV3.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
       "history": ["0x352D4a1622f2DC34c738F542934372855f219F05"]
     },
     {
-      "name": "FLAction",
-      "address": "0x5fA356C700F0C8A6f445B8a36Eb6e108590919D4",
-      "id": "0xbcab5e2a",
-      "path": "contracts/actions/flashloan/FLAction.sol",
+      "name": "FLAaveV3WithFee",
+      "address": "0x8A07E93d2B74A80D726eE4E4A0aC1F906aB5Cc63",
+      "id": "0xe10b7b9d",
+      "path": "contracts/actions/flashloan/FLAaveV3.sol",
       "version": "1.0.0",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
       "history": []
+    },
+    {
+      "name": "FLAction",
+      "address": "0xE668197A175E7A2143222a028470c6ABBBD183F6",
+      "id": "0xbcab5e2a",
+      "path": "contracts/actions/flashloan/FLAction.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": ["0x5fA356C700F0C8A6f445B8a36Eb6e108590919D4"]
     },
     {
       "name": "BotAuth",
@@ -455,6 +521,17 @@
       "history": ["0xfA015aD97E25247c2144F1C89AeD449cc3Fd1FCB"]
     },
     {
+      "name": "LimitSellL2",
+      "address": "0xdbEE7981c45acA9444FA98bf3bf9769A4FeAfe74",
+      "id": "0x5cc47139",
+      "path": "contracts/actions/exchange/LimitSellL2.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": ["0x08426bE896D68C4e37441D60d6EA43865CcF8B5C"]
+    },
+    {
       "name": "StrategyExecutor",
       "address": "0xf9c0A56c4c2D40C13d9D377b5E1Cdfe3Cb0C9FF7",
       "id": "0x0c1dc439",
@@ -491,14 +568,16 @@
     },
     {
       "name": "GasFeeTakerL2",
-      "address": "0xB3dB299622A9DB0E944ccda2Ef899d6fF365B082",
+      "address": "0x116bDD4ac57c83Bc5bB6ec7e8d00f787f3D2CA0d",
       "id": "0x7ec82077",
       "path": "contracts/actions/fee/GasFeeTakerL2.sol",
-      "version": "1.0.2",
+      "version": "1.0.4",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0xB6A3c8cB320bB809f1ACdCB971Da551Fa3A56334",
+        "0xB3dB299622A9DB0E944ccda2Ef899d6fF365B082",
         "0x62689439B7C54CB104B0a38f59F5e0383078c09F",
         "0x0a712026eeB86f3daE538308852215f19D4b769C"
       ]
@@ -615,6 +694,28 @@
       "history": []
     },
     {
+      "name": "TimestampTrigger",
+      "address": "0x4D2D2dB27b00863d6A49F5a060D7858411b85744",
+      "id": "0xa051d9a9",
+      "path": "contracts/triggers/TimestampTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "OffchainPriceTrigger",
+      "address": "0x43e1932473a2a5D4e5BfD28Bde548bF4857c0bf4",
+      "id": "0x3ef9c07c",
+      "path": "contracts/triggers/OffchainPriceTrigger.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": ["0x3e0512Fac6Ad430eCE9b560861826d4e66D131F7"]
+    },
+    {
         "name": "TokenBalance",
         "address": "0xC6FF5b01f7c7b35b6e093fF70D2332B361C5Be5A",
         "id": "0x019d9978",
@@ -646,5 +747,16 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
-    }
-  ]
+    },
+    {
+      "name": "PriceFeedRegistry",
+      "address": "0x7E3D9e4E620842d61aB111a6DbF1be5a8cc91774",
+      "id": "0x6f51c997",
+      "path": "contracts/utils/PriceFeedRegistry.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    } 
+]
