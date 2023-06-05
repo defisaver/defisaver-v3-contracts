@@ -1914,11 +1914,12 @@
         "name": "StrategyExecutor",
         "address": "0x252025dF8680C275D0bA80D084e5967D8BD26caf",
         "id": "0xdcb15eef",
-        "version": "1.0.0",
+        "path": "contracts/core/strategy/StrategyExecutor.sol",
+        "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [{ "name": "StrategyExecutorID", "id": "0x0c1dc439" }],
-        "history": []
+        "changeTime": "604800",
+        "registryIds": [],
+        "history": ["0x6a1C1B8a27E7613a595Ffb7cCE225bdda7e04832"]
     },
     {
         "name": "ChainLinkPriceTrigger",
