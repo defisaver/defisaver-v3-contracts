@@ -323,18 +323,18 @@ async function changeNetworkNameForAddresses(oldNetworkName, newNetworkName) {
 async function tdlySpawn(networkName) {
     let result = await execShellCommand(`tenderly devnet spawn-rpc --project solidity-team-forks --template ${networkName} --account defisaver-v2`);
     result = result.toString().trim();
-    const fileContent = fs.readFileSync('./hardhat.config.js', 'utf8');
+    const fileContent = fs.readFileSync('./.env', 'utf8');
     let modifiedFile;
     if (networkName === 'mainnet') {
-        modifiedFile = fileContent.replace(/url: 'https:\/\/rpc\.vnet\.tenderly\.co\/devnet\/mainnet\/[a-f0-9-]+?',/, `url: '${result}',`);
+        modifiedFile = fileContent.replace(/(TDLY_MAINNET_DEVNET=https:\/\/rpc\.vnet\.tenderly\.co\/devnet\/mainnet\/)[a-f0-9-]+/, `TDLY_MAINNET_DEVNET=${result}`);
     }
     if (networkName === 'optimism') {
-        modifiedFile = fileContent.replace(/url: 'https:\/\/rpc\.vnet\.tenderly\.co\/devnet\/optimism\/[a-f0-9-]+?',/, `url: '${result}',`);
+        modifiedFile = fileContent.replace(/(TDLY_OPTIMISM_DEVNET=https:\/\/rpc\.vnet\.tenderly\.co\/devnet\/optimism\/)[a-f0-9-]+/, `TDLY_OPTIMISM_DEVNET=${result}`);
     }
     if (networkName === 'arbitrum') {
-        modifiedFile = fileContent.replace(/url: 'https:\/\/rpc\.vnet\.tenderly\.co\/devnet\/arbitrum\/[a-f0-9-]+?',/, `url: '${result}',`);
+        modifiedFile = fileContent.replace(/(TDLY_ARBITRUM_DEVNET=https:\/\/rpc\.vnet\.tenderly\.co\/devnet\/arbitrum\/)[a-f0-9-]+/, `TDLY_ARBITRUM_DEVNET=${result}`);
     }
-    fs.writeFileSync('./hardhat.config.js', modifiedFile.toString());
+    fs.writeFileSync('./.env', modifiedFile.toString());
 }
 
 module.exports = {

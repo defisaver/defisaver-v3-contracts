@@ -1,4 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
+
 require('dotenv-safe').config();
 require('@nomiclabs/hardhat-waffle');
 require('@nomiclabs/hardhat-etherscan');
@@ -7,6 +8,10 @@ require('@nomiclabs/hardhat-ethers');
 require('@tenderly/hardhat-tenderly');
 // require("hardhat-gas-reporter");
 require('hardhat-log-remover');
+
+const tdly = require('@tenderly/hardhat-tenderly');
+
+tdly.setup({ automaticVerifications: false });
 
 const Dec = require('decimal.js');
 const dfs = require('@defisaver/sdk');
@@ -34,7 +39,7 @@ const testNetworks = Object.fromEntries([...Array(MAX_NODE_COUNT).keys()].map((c
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-    saveOnTenderly: false,
+    saveOnTenderly: true,
     defaultNetwork: 'fork',
     lightTesting: true,
     networks: {
@@ -128,22 +133,25 @@ module.exports = {
         },
         // Tenderly devnets networks
         tdlyMainnet: {
-            url: 'https://rpc.vnet.tenderly.co/devnet/mainnet/ab3fd395-cc42-4011-b402-b852713da6bb',
+            url: process.env.TDLY_MAINNET_DEVNET,
             timeout: 1000000,
             name: 'mainnet',
             type: 'tenderly',
+            chainId: 1,
         },
         tdlyOptimism: {
-            url: 'https://rpc.vnet.tenderly.co/devnet/optimism/124531a7-a500-4842-8564-0da949703621',
+            url: process.env.TDLY_OPTIMISM_DEVNET,
             timeout: 1000000,
             name: 'optimism',
             type: 'tenderly',
+            chainId: 10,
         },
         tdlyArbitrum: {
-            url: 'https://rpc.vnet.tenderly.co/devnet/arbitrum/e5ab6f59-1619-44c8-b9a1-a02755f15c90',
+            url: process.env.TDLY_ARBITRUM_DEVNET,
             timeout: 1000000,
             name: 'arbitrum',
             type: 'tenderly',
+            chainId: 42161,
         },
     },
     solidity: {
