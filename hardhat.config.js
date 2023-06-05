@@ -126,6 +126,25 @@ module.exports = {
             blockExplorer: 'arbiscan',
             contractVerification: true,
         },
+        // Tenderly devnets networks
+        tdlyMainnet: {
+            url: 'https://rpc.vnet.tenderly.co/devnet/mainnet/ab3fd395-cc42-4011-b402-b852713da6bb',
+            timeout: 1000000,
+            name: 'mainnet',
+            type: 'tenderly',
+        },
+        tdlyOptimism: {
+            url: 'https://rpc.vnet.tenderly.co/devnet/optimism/124531a7-a500-4842-8564-0da949703621',
+            timeout: 1000000,
+            name: 'optimism',
+            type: 'tenderly',
+        },
+        tdlyArbitrum: {
+            url: 'https://rpc.vnet.tenderly.co/devnet/arbitrum/e5ab6f59-1619-44c8-b9a1-a02755f15c90',
+            timeout: 1000000,
+            name: 'arbitrum',
+            type: 'tenderly',
+        },
     },
     solidity: {
         version: '0.8.10',

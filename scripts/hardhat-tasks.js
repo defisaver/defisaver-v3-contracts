@@ -8,6 +8,7 @@ const {
     findPathByContractName,
     encryptPrivateKey,
     changeNetworkNameForAddresses,
+    tdlySpawn,
 } = require('./hardhat-tasks-functions');
 
 const {
@@ -62,4 +63,10 @@ task('gib-fork-money', 'Gives specified account 100 Eth on fork')
     .setAction(async (args) => {
         await topUp(args.account);
         console.log(`Acc: ${args.account} credited with 100 Eth`);
+    });
+
+task('tdly-spawn', 'Spawns a new tenderly devnet for a network')
+    .addOptionalPositionalParam('networkName', 'Name of the network (mainnet/optimism/arbitrum)')
+    .setAction(async (args) => {
+        await tdlySpawn(args.networkName);
     });

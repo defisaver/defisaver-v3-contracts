@@ -320,6 +320,23 @@ async function changeNetworkNameForAddresses(oldNetworkName, newNetworkName) {
     await execShellCommand('npx hardhat compile');
 }
 
+async function tdlySpawn(networkName) {
+    let result = await execShellCommand(`tenderly devnet spawn-rpc --project solidity-team-forks --template ${networkName} --account defisaver-v2`);
+    result = result.toString().trim();
+    const fileContent = fs.readFileSync('./hardhat.config.js', 'utf8');
+    let modifiedFile;
+    if (networkName === 'mainnet') {
+        modifiedFile = fileContent.replace(/url: 'https:\/\/rpc\.vnet\.tenderly\.co\/devnet\/mainnet\/[a-f0-9-]+?',/, `url: '${result}',`);
+    }
+    if (networkName === 'optimism') {
+        modifiedFile = fileContent.replace(/url: 'https:\/\/rpc\.vnet\.tenderly\.co\/devnet\/optimism\/[a-f0-9-]+?',/, `url: '${result}',`);
+    }
+    if (networkName === 'arbitrum') {
+        modifiedFile = fileContent.replace(/url: 'https:\/\/rpc\.vnet\.tenderly\.co\/devnet\/arbitrum\/[a-f0-9-]+?',/, `url: '${result}',`);
+    }
+    fs.writeFileSync('./hardhat.config.js', modifiedFile.toString());
+}
+
 module.exports = {
     flatten,
     verifyContract,
@@ -330,4 +347,5 @@ module.exports = {
     encryptPrivateKey,
     changeNetworkNameForAddresses,
     execShellCommand,
+    tdlySpawn,
 };

@@ -36,7 +36,9 @@ const {
     MCD_MANAGER_ADDR,
 } = require('./utils-mcd');
 const { getSecondTokenAmount } = require('./utils-uni');
-const { LiquityActionIds, getHints, getRedemptionHints, collChangeId, debtChangeId } = require('./utils-liquity');
+const {
+    LiquityActionIds, getHints, getRedemptionHints, collChangeId, debtChangeId,
+} = require('./utils-liquity');
 const { execShellCommand } = require('../scripts/hardhat-tasks-functions');
 
 const network = hre.network.config.name;
@@ -54,10 +56,7 @@ const executeAction = async (actionName, functionData, proxy, regAddr = addrs[ne
         return receipt;
     } catch (error) {
         console.log(error);
-        const blockNum = await hre.ethers.provider.getBlockNumber();
-        const block = await hre.ethers.provider.getBlockWithTransactions(blockNum);
-        const txHash = block.transactions[0].hash;
-        await execShellCommand(`tenderly export ${txHash}`);
+        console.log(`Transaction failed : ${actionName}`);
         throw error;
     }
 };

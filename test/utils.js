@@ -282,6 +282,9 @@ async function findBalancesSlot(tokenAddress) {
         'IERC20',
         tokenAddress,
     );
+
+    const type = hre.network.config.type;
+    const prefix = type === 'tenderly' ? 'tenderly' : 'hardhat';
     for (let i = 0; i < 100; i++) {
         {
             let probedSlot = hre.ethers.utils.keccak256(
@@ -296,7 +299,8 @@ async function findBalancesSlot(tokenAddress) {
             // make sure the probe will change the slot value
             const probe = prev === probeA ? probeB : probeA;
 
-            await hre.ethers.provider.send('hardhat_setStorageAt', [
+
+            await hre.ethers.provider.send(`${prefix}_setStorageAt`, [
                 tokenAddress,
                 probedSlot,
                 probe,
@@ -304,7 +308,7 @@ async function findBalancesSlot(tokenAddress) {
 
             const balance = await token.balanceOf(account);
             // reset to previous value
-            await hre.ethers.provider.send('hardhat_setStorageAt', [
+            await hre.ethers.provider.send(`${prefix}_setStorageAt`, [
                 tokenAddress,
                 probedSlot,
                 prev,
@@ -329,8 +333,7 @@ async function findBalancesSlot(tokenAddress) {
             );
             // make sure the probe will change the slot value
             const probe = prev === probeA ? probeB : probeA;
-
-            await hre.ethers.provider.send('hardhat_setStorageAt', [
+            await hre.ethers.provider.send(`${prefix}_setStorageAt`, [
                 tokenAddress,
                 probedSlot,
                 probe,
@@ -338,7 +341,7 @@ async function findBalancesSlot(tokenAddress) {
 
             const balance = await token.balanceOf(account);
             // reset to previous value
-            await hre.ethers.provider.send('hardhat_setStorageAt', [
+            await hre.ethers.provider.send(`${prefix}_setStorageAt`, [
                 tokenAddress,
                 probedSlot,
                 prev,
@@ -373,7 +376,9 @@ const timeTravel = async (timeIncrease) => {
 };
 
 const setStorageAt = async (address, index, value) => {
-    await hre.ethers.provider.send('hardhat_setStorageAt', [address, index, value]);
+    const type = hre.network.config.type;
+    const prefix = type === 'tenderly' ? 'tenderly' : 'hardhat';
+    await hre.ethers.provider.send(`${prefix}_setStorageAt`, [address, index, value]);
     await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
 };
 
@@ -436,6 +441,10 @@ const fetchAmountinUSDPrice = (tokenSymbol, amountUSD) => {
 const fetchStandardAmounts = async () => standardAmounts;
 
 const impersonateAccount = async (account) => {
+    const type = hre.network.config.type;
+    if (type === 'tenderly') {
+        return;
+    }
     await hre.network.provider.request({
         method: 'hardhat_impersonateAccount',
         params: [account],
@@ -443,6 +452,10 @@ const impersonateAccount = async (account) => {
 };
 
 const stopImpersonatingAccount = async (account) => {
+    const type = hre.network.config.type;
+    if (type === 'tenderly') {
+        return;
+    }
     await hre.network.provider.request({
         method: 'hardhat_stopImpersonatingAccount',
         params: [account],
@@ -488,6 +501,13 @@ const getProxyWithSigner = async (signer, addr) => {
 };
 
 const getProxy = async (acc) => {
+    const type = hre.network.config.type;
+    if (type === 'tenderly') {
+        await hre.network.provider.send('tenderly_setBalance', [
+            acc,
+            '0xC9F2C9CD04674EDEA40000000',
+        ]);
+    }
     const proxyRegistry = await
     hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
     let proxyAddr = await proxyRegistry.proxies(acc);
@@ -512,7 +532,9 @@ const sendEther = async (signer, toAddress, amount) => {
 
 // eslint-disable-next-line max-len
 const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveOnTenderly = config.saveOnTenderly, isFork = false, ...args) => {
-    if (!isFork) {
+    const type = hre.network.config.type;
+
+    if (!isFork && type !== 'tenderly') {
         await hre.network.provider.send('hardhat_setBalance', [
             getOwnerAddr(),
             '0xC9F2C9CD04674EDEA40000000',
@@ -526,15 +548,18 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
 
         const ethSender = (await hre.ethers.getSigners())[0];
         await sendEther(ethSender, getOwnerAddr(), '100');
+    } else {
+        await hre.network.provider.send('tenderly_setBalance', [
+            getOwnerAddr(),
+            '0xC9F2C9CD04674EDEA40000000',
+        ]);
     }
-
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
     const registryInstance = await hre.ethers.getContractFactory('contracts/core/DFSRegistry.sol:DFSRegistry', signer);
     let registry = await registryInstance.attach(regAddr);
 
     registry = registry.connect(signer);
-
-    const c = await deployAsOwner(name, undefined, ...args);
+    const c = await deployAsOwner(name, signer, ...args);
 
     if (name === 'StrategyExecutor' || name === 'StrategyExecutorL2') {
         // eslint-disable-next-line no-param-reassign
@@ -599,6 +624,10 @@ const getContractFromRegistry = async (
 };
 
 const setCode = async (addr, code) => {
+    const type = hre.network.config.type;
+    if (type === 'tenderly') {
+        throw new Error('Tenderly_setCode - Action not supported');
+    }
     await hre.network.provider.send('hardhat_setCode', [addr, code]);
 };
 
@@ -933,7 +962,6 @@ const setNewExchangeWrapper = async (acc, newAddr) => {
 
 const depositToWeth = async (amount, signer) => {
     const weth = await hre.ethers.getContractAt('IWETH', addrs[network].WETH_ADDRESS);
-
     if (signer) {
         const wethWithSigner = weth.connect(signer);
         await wethWithSigner.deposit({ value: amount });
@@ -1111,16 +1139,17 @@ const openStrategyAndBundleStorage = async (isFork) => {
 
 async function setForkForTesting() {
     const senderAcc = (await hre.ethers.getSigners())[0];
-    await hre.network.provider.send('hardhat_setBalance', [
+    const type = hre.network.config.type;
+
+    const prefix = type === 'tenderly' ? 'tenderly' : 'hardhat';
+
+    await hre.network.provider.send(`${prefix}_setBalance`, [
         senderAcc.address,
         '0xC9F2C9CD04674EDEA40000000',
     ]);
-    await hre.network.provider.send('hardhat_setBalance', [
+    await hre.network.provider.send(`${prefix}_setBalance`, [
         OWNER_ACC,
         '0xC9F2C9CD04674EDEA40000000',
-    ]);
-    await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
-        '0x1', // 1 wei
     ]);
 }
 
@@ -1130,6 +1159,10 @@ const resetForkToBlock = async (block) => {
 
     if (network !== 'mainnet') {
         rpcUrl = process.env[`${network.toUpperCase()}_NODE`];
+    }
+    const type = hre.network.config.type;
+    if (type === 'tenderly') {
+        throw new Error('Tenderly_reset - Action not supported');
     }
 
     if (block) {
