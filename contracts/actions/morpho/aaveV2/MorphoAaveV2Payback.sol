@@ -12,8 +12,8 @@ import "./helpers/MorphoAaveV2Helper.sol";
 contract MorphoAaveV2Payback is ActionBase, MorphoAaveV2Helper {
     using TokenUtils for address;
 
-    /// @param tokenAddr The address of the token to be payed back
-    /// @param amount Amount of tokens to be payed back
+    /// @param tokenAddr The address of the token to be paid back
+    /// @param amount Amount of tokens to be paid back
     /// @param from Where are we pulling the payback tokens amount from
     /// @param onBehalf For what user we are paying back the debt, defaults to proxy
     struct Params {
