@@ -50,6 +50,7 @@ const { addBotCaller, createStrategy, subToStrategy } = require('../utils-strate
 const { createMcdCloseStrategy } = require('../strategies');
 const { subMcdCloseStrategy } = require('../strategy-subs');
 const { RATIO_STATE_OVER, createChainLinkPriceTrigger } = require('../triggers');
+const { getNameId } = require('../utils');
 
 const wrapEthTest = async () => {
     describe('Wrap-Eth', function () {
@@ -521,20 +522,37 @@ const changeOwnerTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAcc2 = (await hre.ethers.getSigners())[1];
             proxy = await getProxy(senderAcc.address);
-            await sendEther(senderAcc, ADMIN_ACC, '1');
-            await impersonateAccount(ADMIN_ACC);
 
-            const signer = await hre.ethers.provider.getSigner(ADMIN_ACC);
+            if (network === 'mainnet') {
+                // DFSProxyRegistry must be owned by DFSProxyRegistryController on mainnet
+                await sendEther(senderAcc, ADMIN_ACC, '1');
+                await impersonateAccount(ADMIN_ACC);
 
-            const adminVaultInstance = await hre.ethers.getContractFactory('AdminVault', signer);
-            const adminVault = await adminVaultInstance.attach(ADMIN_VAULT);
+                const signer = await hre.ethers.provider.getSigner(ADMIN_ACC);
 
-            adminVault.connect(signer);
+                const adminVaultInstance = await hre.ethers.getContractFactory('AdminVault', signer);
+                const adminVault = await adminVaultInstance.attach(ADMIN_VAULT);
+                adminVault.connect(signer);
+                // change owner in registry to dfsRegController
+                await adminVault.changeOwner(addrs[network].DFS_REG_CONTROLLER);
+                await stopImpersonatingAccount(ADMIN_ACC);
+            } else {
+                // temporary until DFSProxyRegistryController is added to DFSRegistry
+                const signer = await hre.ethers.getImpersonatedSigner(addrs[network].OWNER_ACC);
+                const registryInstance = await hre.ethers.getContractFactory('contracts/core/DFSRegistry.sol:DFSRegistry', signer);
+                let registry = await registryInstance.attach(addrs[network].REGISTRY_ADDR);
 
-            // change owner in registry to dfsRegController
-            await adminVault.changeOwner(addrs[network].DFS_REG_CONTROLLER);
+                registry = registry.connect(signer);
 
-            await stopImpersonatingAccount(ADMIN_ACC);
+                const id = getNameId('DFSProxyRegistryController');
+                const controllerAddress = addrs[network].DFS_REG_CONTROLLER;
+
+                console.log(id);
+
+                if (!(await registry.isRegistered(id))) {
+                    await registry.addNewContract(id, controllerAddress, 0, { gasLimit: 2000000 });
+                }
+            }
         });
 
         it('... should change owner of users DSProxy', async () => {

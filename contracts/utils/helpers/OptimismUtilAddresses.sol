@@ -21,7 +21,7 @@ contract OptimismUtilAddresses {
 
     address internal constant MKR_PROXY_REGISTRY = 0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895;
     address internal constant PROXY_FACTORY_ADDR = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
-    address internal constant DFS_PROXY_REGISTRY_ADDR = 0x04F3d9365bBabeaac5D361439777d7658f82A65A;
+    address internal constant DFS_PROXY_REGISTRY_ADDR = 0x06D96693C348e23A236157d7091868A0A7CAd550;
 
     // TODO: not needed now
     address internal constant FEE_RECEIVER_ADMIN_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

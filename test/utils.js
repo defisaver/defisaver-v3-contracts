@@ -74,7 +74,7 @@ const addrs = {
         ZRX_ALLOWLIST_OWNER: '0xc9a956923bfb5f141f1cd4467126b3ae91e5cc33',
         ADMIN_VAULT: '0x136b1bEAfff362530F98f10E3D8C38f3a3F3d38C',
         ADMIN_ACC: '0x98118fD1Da4b3369AEe87778168e97044980632F',
-        DFS_REG_CONTROLLER: '0xEc2ffD06c5DA709815c76b64b8a9179110d0f916',
+        DFS_REG_CONTROLLER: '0x538b4c2044AA77b377ee19360AB901C64Be8E9f4',
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -498,7 +498,6 @@ const getProxyWithSigner = async (signer, addr) => {
 const getProxy = async (acc) => {
     const proxyRegistry = await
     hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
-    console.log(proxyRegistry.address);
     let proxyAddr = await proxyRegistry.proxies(acc);
 
     if (proxyAddr === nullAddress) {

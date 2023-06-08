@@ -3,7 +3,7 @@
 pragma solidity =0.8.10;
 
 contract OptimismActionsUtilAddresses {
-    address internal constant DFS_REG_CONTROLLER_ADDR = 0xEc2ffD06c5DA709815c76b64b8a9179110d0f916;
+    address internal constant DFS_REG_CONTROLLER_ADDR = 0x538b4c2044AA77b377ee19360AB901C64Be8E9f4;
     address internal constant SUB_STORAGE_ADDR = 0xb944291Ed31886b20030d0d4C47c7838d1d9eb97;
 
     address internal constant REGISTRY_ADDR = 0xAf707Ee480204Ed6e2640B53cE86F680D28Afcbd;
