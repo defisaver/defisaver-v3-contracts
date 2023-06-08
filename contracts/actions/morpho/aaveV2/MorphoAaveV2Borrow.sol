@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import "../../interfaces/morpho/IMorpho.sol";
-import "../../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
-import "../ActionBase.sol";
-import "../../utils/TokenUtils.sol";
-import "./helpers/MorphoHelper.sol";
+import "../../../interfaces/morpho/IMorpho.sol";
+import "../../../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
+import "../../ActionBase.sol";
+import "../../../utils/TokenUtils.sol";
+import "./helpers/MorphoAaveV2Helper.sol";
 
 /// @title Borrow a token from Morpho
-contract MorphoAaveV2Borrow is ActionBase, MorphoHelper {
+contract MorphoAaveV2Borrow is ActionBase, MorphoAaveV2Helper {
     using TokenUtils for address;
 
     /// @param tokenAddr The address of the token to be borrowed

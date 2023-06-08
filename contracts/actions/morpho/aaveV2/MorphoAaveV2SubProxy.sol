@@ -2,9 +2,9 @@
 
 pragma solidity =0.8.10;
 
-import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
-import "../../core/strategy/SubStorage.sol";
+import "../../../auth/AdminAuth.sol";
+import "../../../auth/ProxyPermission.sol";
+import "../../../core/strategy/SubStorage.sol";
 
 contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     uint64 public immutable REPAY_BUNDLE_ID;

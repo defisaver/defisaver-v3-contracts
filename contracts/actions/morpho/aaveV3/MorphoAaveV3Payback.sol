@@ -1,22 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import "../../interfaces/morpho/IMorphoAaveV2Lens.sol";
-import "../../interfaces/morpho/IMorpho.sol";
-import "../../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
-import "../ActionBase.sol";
-import "../../utils/TokenUtils.sol";
-import "./helpers/MorphoHelper.sol";
+import "../../ActionBase.sol";
+import "../../../utils/TokenUtils.sol";
+import "./helpers/MorphoAaveV3Helper.sol";
 
-/// @title Payback a token to Morpho
-contract MorphoAaveV2Payback is ActionBase, MorphoHelper {
+/// @title Payback a token to Morpho AaveV3
+contract MorphoAaveV3Payback is ActionBase, MorphoAaveV3Helper {
     using TokenUtils for address;
 
-    /// @param tokenAddr The address of the token to be payed back
-    /// @param amount Amount of tokens to be payed back
+    /// @param emodeId Type of emode we are entering in, each one is different deployment on Morpho
+    /// @param tokenAddr The address of the token to be paid back
+    /// @param amount Amount of tokens to be paid back
     /// @param from Where are we pulling the payback tokens amount from
     /// @param onBehalf For what user we are paying back the debt, defaults to proxy
     struct Params {
+        uint256 emodeId;
         address tokenAddr;
         uint256 amount;
         address from;
@@ -30,20 +29,32 @@ contract MorphoAaveV2Payback is ActionBase, MorphoHelper {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
-        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[0], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
-        params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
+
+        params.emodeId = _parseParamUint(params.emodeId, _paramMapping[0], _subData, _returnValues);
+        params.tokenAddr = _parseParamAddr(
+            params.tokenAddr,
+            _paramMapping[1],
+            _subData,
+            _returnValues
+        );
+        params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
+        params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
+        params.onBehalf = _parseParamAddr(
+            params.onBehalf,
+            _paramMapping[4],
+            _subData,
+            _returnValues
+        );
 
         (uint256 amount, bytes memory logData) = _repay(params);
-        emit ActionEvent("MorphoAaveV2Payback", logData);
+        emit ActionEvent("MorphoAaveV3Payback", logData);
         return bytes32(amount);
     }
 
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
         (, bytes memory logData) = _repay(params);
-        logger.logActionDirectEvent("MorphoAaveV2Payback", logData);
+        logger.logActionDirectEvent("MorphoAaveV3Payback", logData);
     }
 
     function actionType() public pure virtual override returns (uint8) {
@@ -51,27 +62,25 @@ contract MorphoAaveV2Payback is ActionBase, MorphoHelper {
     }
 
     function _repay(Params memory _params) internal returns (uint256, bytes memory) {
+        address morphoAddress = getMorphoAddressByEmode(_params.emodeId);
+
         // default to onBehalf of proxy
         if (_params.onBehalf == address(0)) {
             _params.onBehalf = address(this);
         }
 
-        (address aTokenAddress,,) = IAaveProtocolDataProviderV2(
-            DEFAULT_MARKET_DATA_PROVIDER
-        ).getReserveTokensAddresses(_params.tokenAddr);
+        uint256 totalDebt = IMorphoAaveV3(morphoAddress).borrowBalance(
+            _params.tokenAddr,
+            _params.onBehalf
+        );
 
-        (
-            uint256 borrowBalanceInP2P,
-            uint256 borrowBalanceOnPool,
-        ) =  IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getCurrentBorrowBalanceInOf(aTokenAddress, _params.onBehalf);
-
-        uint256 totalDebt = borrowBalanceInP2P + borrowBalanceOnPool;
+        // if amount bigger than max user debt, pull and repay just the max debt
         if (_params.amount > totalDebt) _params.amount = totalDebt;
 
         _params.amount = _params.tokenAddr.pullTokensIfNeeded(_params.from, _params.amount);
-        _params.tokenAddr.approveToken(MORPHO_AAVEV2_ADDR, _params.amount);
+        _params.tokenAddr.approveToken(morphoAddress, _params.amount);
 
-        IMorpho(MORPHO_AAVEV2_ADDR).repay(aTokenAddress, _params.onBehalf, _params.amount);
+        IMorphoAaveV3(morphoAddress).repay(_params.tokenAddr, _params.amount, _params.onBehalf);
 
         bytes memory logData = abi.encode(_params);
         return (_params.amount, logData);
