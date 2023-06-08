@@ -10,8 +10,8 @@ contract MorphoAaveV3Payback is ActionBase, MorphoAaveV3Helper {
     using TokenUtils for address;
 
     /// @param emodeId Type of emode we are entering in, each one is different deployment on Morpho
-    /// @param tokenAddr The address of the token to be payed back
-    /// @param amount Amount of tokens to be payed back
+    /// @param tokenAddr The address of the token to be paid back
+    /// @param amount Amount of tokens to be paid back
     /// @param from Where are we pulling the payback tokens amount from
     /// @param onBehalf For what user we are paying back the debt, defaults to proxy
     struct Params {
