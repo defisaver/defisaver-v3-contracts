@@ -50,7 +50,6 @@ const { addBotCaller, createStrategy, subToStrategy } = require('../utils-strate
 const { createMcdCloseStrategy } = require('../strategies');
 const { subMcdCloseStrategy } = require('../strategy-subs');
 const { RATIO_STATE_OVER, createChainLinkPriceTrigger } = require('../triggers');
-const { getNameId } = require('../utils');
 
 const wrapEthTest = async () => {
     describe('Wrap-Eth', function () {
@@ -536,22 +535,6 @@ const changeOwnerTest = async () => {
                 // change owner in registry to dfsRegController
                 await adminVault.changeOwner(addrs[network].DFS_REG_CONTROLLER);
                 await stopImpersonatingAccount(ADMIN_ACC);
-            } else {
-                // temporary until DFSProxyRegistryController is added to DFSRegistry
-                const signer = await hre.ethers.getImpersonatedSigner(addrs[network].OWNER_ACC);
-                const registryInstance = await hre.ethers.getContractFactory('contracts/core/DFSRegistry.sol:DFSRegistry', signer);
-                let registry = await registryInstance.attach(addrs[network].REGISTRY_ADDR);
-
-                registry = registry.connect(signer);
-
-                const id = getNameId('DFSProxyRegistryController');
-                const controllerAddress = addrs[network].DFS_REG_CONTROLLER;
-
-                console.log(id);
-
-                if (!(await registry.isRegistered(id))) {
-                    await registry.addNewContract(id, controllerAddress, 0, { gasLimit: 2000000 });
-                }
             }
         });
 

@@ -24,7 +24,6 @@ contract DFSProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
     /// @dev Used when the user changed DSProxy ownership himself
     function changeMcdOwner(address _user, address _proxy) public {
         address dfsProxyRegistryController = registry.getAddr(DFS_PROXY_REGISTRY_CONTROLLER_ID);
-
         require(msg.sender == dfsProxyRegistryController);
         
         if (IDSProxy(_proxy).owner() == _user) {
@@ -45,7 +44,10 @@ contract DFSProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
         return proxyAddr;
     }
 
-    function addAdditionalProxy(address _user, address _proxy) public onlyOwner {
+    function addAdditionalProxy(address _user, address _proxy) public {
+        address dfsProxyRegistryController = registry.getAddr(DFS_PROXY_REGISTRY_CONTROLLER_ID);
+        require(msg.sender == dfsProxyRegistryController);
+
         if (IDSProxy(_proxy).owner() == _user) {
             additionalProxies[_user].push(_proxy);
         }

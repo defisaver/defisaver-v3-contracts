@@ -12,7 +12,7 @@
     },
     {
       "name": "DFSProxyRegistry",
-      "address": "0x06D96693C348e23A236157d7091868A0A7CAd550",
+      "address": "0x7cB647205ec73A026fe3566777e5c73Cd5A11b38",
       "id": "0xc83e4f5e",
       "path": "contracts/utils/DFSProxyRegistry.sol",
       "version": "1.0.0",
@@ -23,12 +23,12 @@
     },
     {
       "name": "DFSProxyRegistryController",
-      "address": "0x538b4c2044aa77b377ee19360ab901c64be8e9f4",
+      "address": "0x493C0dE902E6916128A223F66F37d3b6ee8fA408",
       "id": "0xcbbb53f2",
       "path": "contracts/utils/DFSProxyRegistryController.sol",
       "version": "1.0.0",
-      "inRegistry": false,
-      "changeTime": 0,
+      "inRegistry": true,
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -783,7 +783,7 @@
     },
     {
       "name": "ChangeProxyOwner",
-      "address": "0xA61ca0a252638438F73AEa584d2Dae9eF691b5c5",
+      "address": "0x6df854D8f784C7917Ca91968C59C3d591Aa10300",
       "id": "0x67314f12",
       "path": "contracts/actions/utils/ChangeProxyOwner.sol",
       "version": "1.0.0",
