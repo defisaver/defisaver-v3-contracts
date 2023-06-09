@@ -2,9 +2,8 @@
 require('dotenv-safe').config();
 require('@nomiclabs/hardhat-waffle');
 require('@nomiclabs/hardhat-etherscan');
-require('@tenderly/hardhat-tenderly');
-require('@nomiclabs/hardhat-ethers');
 const tdly = require('@tenderly/hardhat-tenderly');
+require('@nomiclabs/hardhat-ethers');
 // require("hardhat-gas-reporter");
 require('hardhat-log-remover');
 
@@ -12,6 +11,7 @@ const Dec = require('decimal.js');
 const dfs = require('@defisaver/sdk');
 
 tdly.setup({ automaticVerifications: false });
+
 dfs.configure({
     testingMode: true,
 });
