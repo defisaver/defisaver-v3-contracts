@@ -529,7 +529,7 @@ interface IPriceOracleGetter {
   function getAssetPrice(address asset) external view returns (uint256);
 }
 
-interface IPoolAddressesProvider {
+interface IAavePoolAddressesProvider {
   /**
    * @dev Emitted when the market identifier is updated.
    * @param oldMarketId The old id of the market
@@ -774,7 +774,7 @@ interface IAaveOracle is IPriceOracleGetter {
    * @notice Returns the PoolAddressesProvider
    * @return The address of the PoolAddressesProvider contract
    */
-  function ADDRESSES_PROVIDER() external view returns (IPoolAddressesProvider);
+  function ADDRESSES_PROVIDER() external view returns (IAavePoolAddressesProvider);
 
   /**
    * @notice Sets or replaces price sources of assets
