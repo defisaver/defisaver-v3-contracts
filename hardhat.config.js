@@ -4,13 +4,14 @@ require('@nomiclabs/hardhat-waffle');
 require('@nomiclabs/hardhat-etherscan');
 require('@tenderly/hardhat-tenderly');
 require('@nomiclabs/hardhat-ethers');
-require('@tenderly/hardhat-tenderly');
+const tdly = require('@tenderly/hardhat-tenderly');
 // require("hardhat-gas-reporter");
 require('hardhat-log-remover');
 
 const Dec = require('decimal.js');
 const dfs = require('@defisaver/sdk');
 
+tdly.setup({ automaticVerifications: false });
 dfs.configure({
     testingMode: true,
 });
