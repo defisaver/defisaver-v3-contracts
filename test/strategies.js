@@ -737,7 +737,7 @@ const createMcdCloseToDaiStrategy = (isTrailing = false) => {
     mcdCloseStrategy.addAction(
         new dfs.actions.basic.SendTokenAction(
             '&daiAddr', // hardcoded only can borrow Dai
-            '%makerFlAddr', // kept variable this can change (FL must be payed back to work)
+            '%makerFlAddr', // kept variable this can change (FL must be paid back to work)
             '$1', // hardcoded output from FL action
         ),
     );
@@ -815,7 +815,7 @@ const createMcdCloseToCollStrategy = (isTrailing = false) => {
     mcdCloseStrategy.addAction(
         new dfs.actions.basic.SendTokenAction(
             '&daiAddr', // hardcoded only can borrow Dai
-            '%makerFlAddr', // kept variable this can change (FL must be payed back to work)
+            '%makerFlAddr', // kept variable this can change (FL must be paid back to work)
             '$1', // hardcoded output from FL action
         ),
     );
@@ -1167,7 +1167,7 @@ const createLiquityCloseToCollStrategy = (isTrailing = false) => {
 
     const sendFL = new dfs.actions.basic.SendTokenAction(
         '&weth', // hardcoded only can send weth
-        '%balancerFlAddr', // kept variable this can change (FL must be payed back to work)
+        '%balancerFlAddr', // kept variable this can change (FL must be paid back to work)
         '$1', // hardcoded output from FL action
     );
 
@@ -2629,7 +2629,7 @@ const aaveV3CloseActions = {
 
     sendRepayFL: () => new dfs.actions.basic.SendTokenAction(
         '&debtAsset',
-        '%flAddr', // kept variable this can change (FL must be payed back to work)
+        '%flAddr', // kept variable this can change (FL must be paid back to work)
         '$1', // hardcoded output from FL action
     ),
 

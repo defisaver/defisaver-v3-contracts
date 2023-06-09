@@ -16,7 +16,7 @@ contract McdPayback is ActionBase, McdHelper {
     using TokenUtils for address;
 
     /// @param _vaultId Id of the vault
-    /// @param _amount Amount of dai to be payed back
+    /// @param _amount Amount of dai to be paid back
     /// @param _from Where the Dai is pulled from
     /// @param _mcdManager The manager address we are using
     struct Params {

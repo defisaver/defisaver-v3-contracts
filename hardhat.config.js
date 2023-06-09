@@ -4,7 +4,6 @@ require('@nomiclabs/hardhat-waffle');
 require('@nomiclabs/hardhat-etherscan');
 const tdly = require('@tenderly/hardhat-tenderly');
 require('@nomiclabs/hardhat-ethers');
-require('@tenderly/hardhat-tenderly');
 // require("hardhat-gas-reporter");
 require('hardhat-log-remover');
 

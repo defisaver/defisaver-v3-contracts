@@ -2005,6 +2005,99 @@ const convexClaim = async (
     return executeAction('ConvexClaim', functionData, proxy);
 };
 
+const morphoAaveV3Supply = async (
+    proxy, emodeId, tokenAddr, amount, from, onBehalf, supplyAsColl = true, maxIterations = 0,
+) => {
+    const supplyAddr = await getAddrFromRegistry('MorphoAaveV3Supply');
+
+    const morphoAaveSupplyAction = new dfs.actions.morpho.MorphoAaveV3SupplyAction(
+        emodeId,
+        tokenAddr,
+        amount,
+        from,
+        onBehalf,
+        supplyAsColl,
+        maxIterations,
+    );
+
+    const functionData = morphoAaveSupplyAction.encodeForDsProxyCall()[1];
+
+    const receipt = await proxy['execute(address,bytes)'](supplyAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed morphoAaveV3Supply: ${gasUsed}`);
+    return receipt;
+};
+
+const morphoAaveV3Withdraw = async (
+    proxy, emodeId, tokenAddr, amount, to, onBehalf, withdrawAsColl = true, maxIterations = 0,
+) => {
+    const withdrawAddr = await getAddrFromRegistry('MorphoAaveV3Withdraw');
+
+    const morphoAaveWithdrawAction = new dfs.actions.morpho.MorphoAaveV3WithdrawAction(
+        emodeId,
+        tokenAddr,
+        amount,
+        to,
+        onBehalf,
+        withdrawAsColl,
+        maxIterations,
+    );
+
+    const functionData = morphoAaveWithdrawAction.encodeForDsProxyCall()[1];
+
+    const receipt = await proxy['execute(address,bytes)'](withdrawAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed morphoAaveV3Withdraw: ${gasUsed}`);
+    return receipt;
+};
+
+const morphoAaveV3Payback = async (
+    proxy, emodeId, tokenAddr, amount, from, onBehalf,
+) => {
+    const paybackAddr = await getAddrFromRegistry('MorphoAaveV3Payback');
+
+    const morphoAavePaybackAction = new dfs.actions.morpho.MorphoAaveV3PaybackAction(
+        emodeId,
+        tokenAddr,
+        amount,
+        from,
+        onBehalf,
+    );
+
+    const functionData = morphoAavePaybackAction.encodeForDsProxyCall()[1];
+
+    const receipt = await proxy['execute(address,bytes)'](paybackAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed morphoAaveV3Payback: ${gasUsed}`);
+    return receipt;
+};
+
+const morphoAaveV3Borrow = async (
+    proxy, emodeId, tokenAddr, amount, to, onBehalf, maxIterations = 0,
+) => {
+    const borrowAddr = await getAddrFromRegistry('MorphoAaveV3Borrow');
+
+    const morphoAaveBorrowAction = new dfs.actions.morpho.MorphoAaveV3BorrowAction(
+        emodeId,
+        tokenAddr,
+        amount,
+        to,
+        onBehalf,
+        maxIterations,
+    );
+
+    const functionData = morphoAaveBorrowAction.encodeForDsProxyCall()[1];
+
+    const receipt = await proxy['execute(address,bytes)'](borrowAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed morphoAaveV3Borrow: ${gasUsed}`);
+    return receipt;
+};
+
 const aaveV3Supply = async (
     proxy, market, amount, tokenAddr, assetId, from, signer,
 ) => {
@@ -2645,6 +2738,11 @@ module.exports = {
     morphoAaveV2Payback,
     morphoClaim,
 
+    morphoAaveV3Supply,
+    morphoAaveV3Withdraw,
+    morphoAaveV3Payback,
+    morphoAaveV3Borrow,
+    
     bprotocolLiquitySPDeposit,
     bprotocolLiquitySPWithdraw,
 };

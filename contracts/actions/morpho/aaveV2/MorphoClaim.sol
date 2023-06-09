@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import "../../interfaces/morpho/IRewardsDistributor.sol";
-import "../ActionBase.sol";
-import "../../utils/TokenUtils.sol";
-import "./helpers/MorphoHelper.sol";
+import "../../../interfaces/morpho/IRewardsDistributor.sol";
+import "../../ActionBase.sol";
+import "../../../utils/TokenUtils.sol";
+import "./helpers/MorphoAaveV2Helper.sol";
 
 /// @title Claims Morpho rewards for any address
-contract MorphoClaim is ActionBase, MorphoHelper {
+contract MorphoClaim is ActionBase, MorphoAaveV2Helper {
     using TokenUtils for address;
 
     /// @param onBehalfOf address for which to claim
