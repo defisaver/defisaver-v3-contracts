@@ -28,11 +28,17 @@ interface ICrvUsdController {
 
     /// GETTERS
     function amm() external view returns (address);
+    function monetary_policy() external view returns (address);
+    function collateral_token() external view returns (address);
     function debt(address) external view returns (uint256);
     function total_debt() external view returns (uint256);
-    function collateral_token() external view returns (address);
+    function health_calculator(address, int256, int256, bool, uint256) external view returns (int256);
+    function health_calculator(address, int256, int256, bool) external view returns (int256);
+    function health(address) external view returns (int256);
+    function health(address, bool) external view returns (int256);
     function max_borrowable(uint256 collateralAmount, uint256 nBands) external view returns (uint256);
     function min_collateral(uint256 debtAmount, uint256 nBands) external view returns (uint256);
+    function calculate_debt_n1(uint256, uint256, uint256) external view returns (int256);
 }
 
 interface ICrvUsdControllerFactory {
@@ -44,4 +50,10 @@ interface ILLAMMA {
     function active_band_with_skip() external view returns (int256);
     function get_sum_xy(address) external view returns (uint256[2] memory);
     function read_user_tick_numbers(address) external view returns (int256[2] memory);
+    function p_oracle_up(int256) external view returns (uint256);
+    function p_oracle_down(int256) external view returns (uint256);
+    function p_current_up(int256) external view returns (uint256);
+    function p_current_down(int256) external view returns (uint256);
+    function bands_x(int256) external view returns (uint256);
+    function bands_y(int256) external view returns (uint256);
 }

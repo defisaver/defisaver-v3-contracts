@@ -2,8 +2,7 @@
 pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
-import "../interfaces/curve/ICrvUSDController.sol";
-import "../interfaces/curve/ILlamma.sol";
+import "../interfaces/curveusd/ICurveUsd.sol";
 
 contract CurveusdView {
   struct Band {
@@ -22,8 +21,8 @@ contract CurveusdView {
   }
     
   function createLoanData(address market, uint256 collateral, uint256 debt, uint256 N) external view returns (CreateLoanData memory) {
-    ICrvUSDController ctrl = ICrvUSDController(market);
-    ILlamma lama = ILlamma(ctrl.amm());
+    ICrvUSDController ctrl = ICrvUsdController(market);
+    ILLAMA lama = ILLAMMA(ctrl.amm());
 
     int256 health = ctrl.health_calculator(address(0x00), int256(collateral), int256(debt), true, N);
     uint256 min_coll = ctrl.min_collateral(debt, N);
