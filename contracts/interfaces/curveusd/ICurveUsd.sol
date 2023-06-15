@@ -39,6 +39,13 @@ interface ICrvUsdController {
     function max_borrowable(uint256 collateralAmount, uint256 nBands) external view returns (uint256);
     function min_collateral(uint256 debtAmount, uint256 nBands) external view returns (uint256);
     function calculate_debt_n1(uint256, uint256, uint256) external view returns (int256);
+    function minted() external view returns (uint256);
+    function redeemed() external view returns (uint256);
+    function amm_price() external view returns (uint256);
+    function user_state(address) external view returns (uint256[4] memory);
+    function user_prices(address) external view returns (uint256[2] memory);
+    function loan_exists(address) external view returns (bool);
+    function liquidation_discount() external view returns (uint256);
 }
 
 interface ICrvUsdControllerFactory {
@@ -56,4 +63,15 @@ interface ILLAMMA {
     function p_current_down(int256) external view returns (uint256);
     function bands_x(int256) external view returns (uint256);
     function bands_y(int256) external view returns (uint256);
+    function base_price() external view returns (uint256);
+    function oracle_price() external view returns (uint256);
+    function active_band() external view returns (int256);
+    function A() external view returns (uint256);
+}
+
+interface IAGG {
+    function rate() external view returns (uint256);
+    function rate0() external view returns (uint256);
+    function target_debt_fraction() external view returns (uint256);
+    function sigma() external view returns (int256);
 }
