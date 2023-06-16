@@ -36,11 +36,14 @@ contract CurveusdView {
     uint256 rate;
     uint256 rate0;
     uint256 targetDebtFraction;
-    int256 min_band;
-    int256 max_band;
+    int256 minBand;
+    int256 maxBand;
+    uint256 pegKeeperDebt;
   }
 
   struct UserData {
+    bool loanExists;
+    uint256 collateralPrice;
     uint256 marketCollateralAmount;
     uint256 curveUsdCollateralAmount;
     uint256 debtAmount;
@@ -57,6 +60,8 @@ contract CurveusdView {
       uint256[2] memory prices = ctrl.user_prices(user);
 
       return UserData(
+        ctrl.loan_exists(user),
+        ctrl.amm_price(),
         amounts[0],
         amounts[1],
         amounts[2],
@@ -64,7 +69,7 @@ contract CurveusdView {
         prices[0],
         prices[1],
         ctrl.liquidation_discount(),
-        ctrl.health(user)
+        ctrl.health(user, true)
       );
   }
 
@@ -73,6 +78,17 @@ contract CurveusdView {
       IAGG agg = IAGG(ctrl.monetary_policy());
       ILLAMMA amm = ILLAMMA(ctrl.amm());
       address ct = ctrl.collateral_token();
+
+      uint256 pkDebt = 0;
+      for (uint256 i = 0; i <= 1000; i++) {
+          address pk = agg.peg_keepers(i);
+          if (pk == address(0x00)) {
+              break;
+          }
+
+        pkDebt += IPegKeeper(pk).debt();
+      } 
+
       return GlobalData(
         ct,
         IERC20(ct).decimals(),
@@ -89,7 +105,8 @@ contract CurveusdView {
         agg.rate0(),
         agg.target_debt_fraction(),
         amm.min_band(),
-        amm.max_band()
+        amm.max_band(),
+        pkDebt
     );
   }
 
