@@ -63,10 +63,12 @@ interface ILLAMMA {
     function p_current_down(int256) external view returns (uint256);
     function bands_x(int256) external view returns (uint256);
     function bands_y(int256) external view returns (uint256);
-    function base_price() external view returns (uint256);
-    function oracle_price() external view returns (uint256);
+    function get_base_price() external view returns (uint256);
+    function price_oracle() external view returns (uint256);
     function active_band() external view returns (int256);
     function A() external view returns (uint256);
+    function min_band() external view returns (int256);
+    function max_band() external view returns (int256);
 }
 
 interface IAGG {
