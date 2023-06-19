@@ -2619,6 +2619,29 @@ const curveUsdPayback = async (
     return { receipt, approveObj };
 };
 
+const curveUsdRepay = async (
+    proxy,
+    controllerAddresss,
+    debtAmount,
+    to,
+) => {
+    const actionAddress = await getAddrFromRegistry('CurveUsdRepay');
+
+    const action = new dfs.actions.curveusd.CurveUsdRepayAction(
+        controllerAddresss,
+        debtAmount,
+        to,
+        [0, 0, 0, 0, 0],
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed curveUsdPayback: ${gasUsed}`);
+    return receipt;
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -2783,4 +2806,5 @@ module.exports = {
     curveUsdWithdraw,
     curveUsdBorrow,
     curveUsdPayback,
+    curveUsdRepay,
 };

@@ -14,9 +14,12 @@ const {
     resetForkToBlock,
     takeSnapshot,
     revertToSnapshot,
+    addrs,
+    formatExchangeObjCurve,
+    redeploy,
 } = require('../utils');
 const {
-    curveUsdCreate, curveUsdSupply, curveUsdWithdraw, curveUsdBorrow, curveUsdPayback,
+    curveUsdCreate, curveUsdSupply, curveUsdWithdraw, curveUsdBorrow, curveUsdPayback, curveUsdRepay,
 } = require('../actions');
 
 const crvusdAddress = getAssetInfo('crvUSD').address;
@@ -535,12 +538,73 @@ const curveUsdPaybackTest = () => describe('CurveUsd-Payback', () => {
         });
 });
 
+const curveUsdRepayTest = () => describe('CurveUsd-Repay', () => {
+    Object.entries(curveusdMarkets).slice(1)
+        .map(([assetSymbol, { controllerAddress, debtAvailableBlock }]) => {
+            let snapshot;
+            let senderAcc;
+            let proxy;
+            const collateralAsset = getAssetInfo(assetSymbol).address;
+            it(`... should test create for ${assetSymbol} market`, async () => {
+                await resetForkToBlock(debtAvailableBlock);
+                await debtCeilCheck(controllerAddress);
+                await getContractFromRegistry('CurveUsdCreate');
+
+                await redeploy('CurveUsdRepay');
+                await redeploy('CurveUsdSwapper');
+
+                [senderAcc] = await ethers.getSigners();
+                proxy = await getProxy(senderAcc.address);
+
+                const collateralAmount = ethers.utils.parseUnits('10');
+                const debtAmount = ethers.utils.parseUnits('5000');
+                const nBands = 5;
+
+                await setBalance(collateralAsset, senderAcc.address, collateralAmount);
+                await testCreate({
+                    proxy,
+                    collateralAsset: getAssetInfo(assetSymbol).address,
+                    controllerAddress,
+                    from: senderAcc.address,
+                    to: senderAcc.address,
+                    collateralAmount,
+                    debtAmount,
+                    nBands,
+                });
+
+                snapshot = await takeSnapshot();
+
+                // const exchangeObj = await formatExchangeObjCurve(getAssetInfo(assetSymbol).address, crvusdAddress, collateralAmount, addrs['mainnet'].CURVE_USD_WRAPPER);
+            });
+
+            it(`... should test single repay action with callback ${senderAcc}`, async () => {
+                const debtAmount = ethers.utils.parseUnits('1');
+
+                await curveUsdRepay(
+                    proxy,
+                    controllerAddress,
+                    debtAmount,
+                    senderAcc.address,
+                );
+            });
+
+            // it(`... should test repay recipe without FL ${senderAcc}`, async () => {
+            //     await revertToSnapshot(snapshot);
+
+            //     const debtAmount = ethers.utils.parseUnits('1');
+
+                
+            // });
+        });
+});
+
 const curveUsdFullTest = () => {
     curveUsdCreateTest();
     curveUsdSupplyTest();
     curveUsdWithdrawTest();
     curveUsdBorrowTest();
     curveUsdPaybackTest();
+    curveUsdRepayTest();
 };
 
 module.exports = {
@@ -549,6 +613,6 @@ module.exports = {
     curveUsdWithdrawTest,
     curveUsdBorrowTest,
     curveUsdPaybackTest,
-
+    curveUsdRepayTest,
     curveUsdFullTest,
 };

@@ -1,6 +1,8 @@
 /* eslint-disable import/no-unresolved */
 /* eslint-disable no-await-in-loop */
-const { default: curve } = require('@curvefi/api');
+// const { default: curve } = require('@curvefi/api');
+const curve = import('@curvefi/api');
+
 const hre = require('hardhat');
 const fs = require('fs');
 const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
@@ -46,6 +48,7 @@ const addrs = {
         ZRX_ALLOWLIST_ADDR: '0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F',
         ZRX_ALLOWLIST_OWNER: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
         AAVE_SUB_PROXY: '0xb9F73625AA64D46A9b2f0331712e9bEE19e4C3f7',
+        CURVE_USD_WRAPPER: '0x3788B4Db5e99fF555e22a08241EB3cFc3a0ac149',
         AVG_GAS_PRICE: 100,
     },
     optimism: {
@@ -790,10 +793,19 @@ const formatExchangeObjCurve = async (
     amount,
     wrapper,
 ) => {
-    const { route: sdkRoute } = await curve.getBestRouteAndOutput(
+    const curveObj = ((await curve).default);
+    await curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
+
+    await curveObj.factory.fetchPools();
+    await curveObj.crvUSDFactory.fetchPools();
+    await curveObj.EYWAFactory.fetchPools();
+    await curveObj.cryptoFactory.fetchPools();
+    await curveObj.tricryptoFactory.fetchPools();
+
+    const { route: sdkRoute } = await curveObj.router.getBestRouteAndOutput(
         srcAddr,
         destAddr,
-        '1000', // this is fine
+        '1000',
     );
     const swapParams = sdkRoute.map((e) => [e.i, e.j, e.swapType]).concat(
         [...Array(4 - sdkRoute.length).keys()].map(
@@ -811,6 +823,8 @@ const formatExchangeObjCurve = async (
         ['address[9]', 'uint256[3][4]'],
         [route, swapParams],
     );
+
+    console.log(route, swapParams);
 
     return [
         srcAddr,
