@@ -28,11 +28,24 @@ interface ICrvUsdController {
 
     /// GETTERS
     function amm() external view returns (address);
+    function monetary_policy() external view returns (address);
+    function collateral_token() external view returns (address);
     function debt(address) external view returns (uint256);
     function total_debt() external view returns (uint256);
-    function collateral_token() external view returns (address);
+    function health_calculator(address, int256, int256, bool, uint256) external view returns (int256);
+    function health_calculator(address, int256, int256, bool) external view returns (int256);
+    function health(address) external view returns (int256);
+    function health(address, bool) external view returns (int256);
     function max_borrowable(uint256 collateralAmount, uint256 nBands) external view returns (uint256);
     function min_collateral(uint256 debtAmount, uint256 nBands) external view returns (uint256);
+    function calculate_debt_n1(uint256, uint256, uint256) external view returns (int256);
+    function minted() external view returns (uint256);
+    function redeemed() external view returns (uint256);
+    function amm_price() external view returns (uint256);
+    function user_state(address) external view returns (uint256[4] memory);
+    function user_prices(address) external view returns (uint256[2] memory);
+    function loan_exists(address) external view returns (bool);
+    function liquidation_discount() external view returns (uint256);
 }
 
 interface ICrvUsdControllerFactory {
@@ -44,4 +57,28 @@ interface ILLAMMA {
     function active_band_with_skip() external view returns (int256);
     function get_sum_xy(address) external view returns (uint256[2] memory);
     function read_user_tick_numbers(address) external view returns (int256[2] memory);
+    function p_oracle_up(int256) external view returns (uint256);
+    function p_oracle_down(int256) external view returns (uint256);
+    function p_current_up(int256) external view returns (uint256);
+    function p_current_down(int256) external view returns (uint256);
+    function bands_x(int256) external view returns (uint256);
+    function bands_y(int256) external view returns (uint256);
+    function get_base_price() external view returns (uint256);
+    function price_oracle() external view returns (uint256);
+    function active_band() external view returns (int256);
+    function A() external view returns (uint256);
+    function min_band() external view returns (int256);
+    function max_band() external view returns (int256);
+}
+
+interface IAGG {
+    function rate() external view returns (uint256);
+    function rate0() external view returns (uint256);
+    function target_debt_fraction() external view returns (uint256);
+    function sigma() external view returns (int256);
+    function peg_keepers(uint256) external view returns (address); 
+}
+
+interface IPegKeeper {
+    function debt() external view returns (uint256);
 }
