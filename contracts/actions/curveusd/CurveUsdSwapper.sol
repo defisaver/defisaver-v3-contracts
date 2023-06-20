@@ -53,7 +53,7 @@ contract CurveUsdSwapper is CurveUsdHelper {
     }
 
    
-    // receives the fl amount and swaps for curve
+    // receives the collateral amount which we swap for crvUSD
     function callback_repay(
         address _user,
         uint256 _stableCollAmount,

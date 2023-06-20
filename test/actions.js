@@ -2635,7 +2635,7 @@ const curveUsdRepay = async (
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
 
     const gasUsed = await getGasUsed(receipt);
     console.log(`GasUsed curveUsdPayback: ${gasUsed}`);

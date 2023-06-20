@@ -3,6 +3,8 @@
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
+const dfs = require('@defisaver/sdk');
+
 const { utils: { curveusdUtils: { curveusdMarkets, controllerFactoryAddress } } } = require('@defisaver/sdk');
 const {
     getContractFromRegistry,
@@ -17,7 +19,9 @@ const {
     addrs,
     formatExchangeObjCurve,
     redeploy,
+    getAddrFromRegistry,
 } = require('../utils');
+
 const {
     curveUsdCreate, curveUsdSupply, curveUsdWithdraw, curveUsdBorrow, curveUsdPayback, curveUsdRepay,
 } = require('../actions');
@@ -544,21 +548,32 @@ const curveUsdRepayTest = () => describe('CurveUsd-Repay', () => {
             let snapshot;
             let senderAcc;
             let proxy;
+            let recipeExecutorAddr;
+            let flAddr;
             const collateralAsset = getAssetInfo(assetSymbol).address;
+
             it(`... should test create for ${assetSymbol} market`, async () => {
                 await resetForkToBlock(debtAvailableBlock);
                 await debtCeilCheck(controllerAddress);
                 await getContractFromRegistry('CurveUsdCreate');
 
+                await redeploy('CurveUsdWithdraw');
+                await redeploy('CurveUsdPayback');
                 await redeploy('CurveUsdRepay');
                 await redeploy('CurveUsdSwapper');
+                await redeploy('DFSSell');
+                await redeploy('FLAction');
+                await redeploy('RecipeExecutor');
+
+                recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
+                flAddr = await getAddrFromRegistry('FLAction');
 
                 [senderAcc] = await ethers.getSigners();
                 proxy = await getProxy(senderAcc.address);
 
                 const collateralAmount = ethers.utils.parseUnits('10');
                 const debtAmount = ethers.utils.parseUnits('5000');
-                const nBands = 5;
+                const nBands = 40;
 
                 await setBalance(collateralAsset, senderAcc.address, collateralAmount);
                 await testCreate({
@@ -578,23 +593,107 @@ const curveUsdRepayTest = () => describe('CurveUsd-Repay', () => {
             });
 
             it(`... should test single repay action with callback ${senderAcc}`, async () => {
-                const debtAmount = ethers.utils.parseUnits('1');
+                const collAmount = ethers.utils.parseUnits('1');
 
                 await curveUsdRepay(
                     proxy,
                     controllerAddress,
-                    debtAmount,
+                    collAmount,
                     senderAcc.address,
                 );
             });
 
-            // it(`... should test repay recipe without FL ${senderAcc}`, async () => {
-            //     await revertToSnapshot(snapshot);
+            it('... should test repay recipe without FL', async () => {
+                await revertToSnapshot(snapshot);
 
-            //     const debtAmount = ethers.utils.parseUnits('1');
+                const collAmount = ethers.utils.parseUnits('1');
 
-                
-            // });
+                const repayCurveUsd = new dfs.Recipe('RepayCurveUsd', [
+                    // withdraw
+                    new dfs.actions.curveusd.CurveUsdWithdrawAction(
+                        controllerAddress,
+                        proxy.address,
+                        collAmount,
+                    ),
+                    // sell
+                    new dfs.actions.basic.SellAction(
+                        (await formatExchangeObjCurve(
+                            getAssetInfo(assetSymbol).address,
+                            crvusdAddress,
+                            '$1',
+                            addrs.mainnet.CURVE_USD_WRAPPER,
+                        )),
+                        proxy.address,
+                        proxy.address,
+                    ),
+                    // payback
+                    new dfs.actions.curveusd.CurveUsdPaybackAction(
+                        controllerAddress,
+                        proxy.address,
+                        proxy.address,
+                        senderAcc.address,
+                        '$2',
+                        100,
+                    ),
+                ]);
+
+                console.log(recipeExecutorAddr);
+
+                const functionData = repayCurveUsd.encodeForDsProxyCall();
+                await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], {
+                    gasLimit: 6000000,
+                });
+            });
+
+            it('... should test repay recipe with FL', async () => {
+                await revertToSnapshot(snapshot);
+
+                const collAmount = ethers.utils.parseUnits('1');
+
+                const repayFl = new dfs.Recipe('RepayFl', [
+                    new dfs.actions.flashloan.FLAction(
+                        new dfs.actions.flashloan.AaveV3FlashLoanAction(
+                            [getAssetInfo(assetSymbol).address],
+                            [collAmount],
+                            [0],
+                            nullAddress,
+                            nullAddress,
+                            [],
+                        ),
+                    ),
+                    // sell
+                    new dfs.actions.basic.SellAction(
+                        (await formatExchangeObjCurve(
+                            getAssetInfo(assetSymbol).address,
+                            crvusdAddress,
+                            collAmount,
+                            addrs.mainnet.CURVE_USD_WRAPPER,
+                        )),
+                        proxy.address,
+                        proxy.address,
+                    ),
+                    // payback
+                    new dfs.actions.curveusd.CurveUsdPaybackAction(
+                        controllerAddress,
+                        proxy.address,
+                        proxy.address,
+                        senderAcc.address,
+                        '$2',
+                        100,
+                    ),
+                    // withdraw
+                    new dfs.actions.curveusd.CurveUsdWithdrawAction(
+                        controllerAddress,
+                        flAddr,
+                        '$1',
+                    ),
+                ]);
+
+                const functionData = repayFl.encodeForDsProxyCall();
+                await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], {
+                    gasLimit: 9000000,
+                });
+            });
         });
 });
 

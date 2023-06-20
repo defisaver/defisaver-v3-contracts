@@ -12,7 +12,7 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
 
     struct Params {
         address controllerAddress;
-        uint256 debtAmount;
+        uint256 collAmount;
         address to;
         uint256[] swapData;
     }
@@ -30,7 +30,7 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
 
         params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
-        params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[2], _subData, _returnValues);
+        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[2], _subData, _returnValues);
 
         (uint256 generatedAmount, bytes memory logData) = _repay(params);
         emit ActionEvent("CurveUsdRepay", logData);
@@ -54,12 +54,12 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
 
     function _repay(Params memory _params) internal returns (uint256, bytes memory) {
         /// @dev see ICrvUsdController natspec
-        if (_params.debtAmount == 0) revert();
+        if (_params.collAmount == 0) revert();
 
         // TODO: change this currently drawn from registry
         address crvUsdSwapper = registry.getAddr(CURVE_SWAPPER_ID);
 
-        _params.swapData[0] = _params.debtAmount;
+        _params.swapData[0] = _params.collAmount;
         _params.swapData[1] = 0;// hardcoded route for now
 
         console.log("Call repay with callback");
@@ -69,7 +69,7 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
         console.log("After callback");
 
         return (
-            _params.debtAmount,
+            _params.collAmount,
             abi.encode(_params)
         );
     }
