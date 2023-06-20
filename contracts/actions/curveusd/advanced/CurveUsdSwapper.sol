@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import { ICrvUsdController, ICrvUsdControllerFactory } from "../../interfaces/curveusd/ICurveUsd.sol";
-import "./helpers/CurveUsdHelper.sol";
-import "../../interfaces/curve/ISwaps.sol";
-import "../../interfaces/curve/IAddressProvider.sol";
-import "../../interfaces/IERC20.sol";
-import "../../utils/SafeERC20.sol";
-
-import "hardhat/console.sol";
+import { ICrvUsdController, ICrvUsdControllerFactory } from "../../../interfaces/curveusd/ICurveUsd.sol";
+import "../helpers/CurveUsdHelper.sol";
+import "../../../interfaces/curve/ISwaps.sol";
+import "../../../interfaces/curve/IAddressProvider.sol";
+import "../../../interfaces/IERC20.sol";
+import "../../../utils/SafeERC20.sol";
 
 contract CurveUsdSwapper is CurveUsdHelper {
     using SafeERC20 for IERC20;
@@ -82,16 +80,12 @@ contract CurveUsdSwapper is CurveUsdHelper {
 
         SwapRoutes memory swapRoutes = swapRoutesMap[swapRouteId];
 
-        console.log("Swap start: ", gasleft());
-        console.log(swapAmount);
         uint256 amountOut = exchangeContract.exchange_multiple(
             swapRoutes.route,
             swapRoutes.swap_params,
             swapAmount,
             minAmountOut   // _minAmountOut
         );
-
-        console.log("Swap done: ", gasleft());
 
         // how many crvUsd we got after the trade that will be the repay amount
         cb.stablecoins = amountOut;

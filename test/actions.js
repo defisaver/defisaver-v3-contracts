@@ -2638,7 +2638,31 @@ const curveUsdRepay = async (
     const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed curveUsdPayback: ${gasUsed}`);
+    console.log(`GasUsed curveUsdRepay: ${gasUsed}`);
+    return receipt;
+};
+
+const curveUsdSelfLiquidate = async (
+    proxy,
+    controllerAddresss,
+    minCrvUsdExpected,
+    from,
+    to,
+) => {
+    const actionAddress = await getAddrFromRegistry('CurveUsdSelfLiquidate');
+
+    const action = new dfs.actions.curveusd.CurveUsdSelfLiquidateAction(
+        controllerAddresss,
+        minCrvUsdExpected,
+        from,
+        to,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed curveUsdSelfLiquidate: ${gasUsed}`);
     return receipt;
 };
 
@@ -2807,4 +2831,5 @@ module.exports = {
     curveUsdBorrow,
     curveUsdPayback,
     curveUsdRepay,
+    curveUsdSelfLiquidate,
 };

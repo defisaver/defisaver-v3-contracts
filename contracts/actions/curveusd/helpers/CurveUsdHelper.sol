@@ -31,4 +31,11 @@ contract CurveUsdHelper is MainnetCurveUsdAddresses {
 
         return ICrvUsdController(_controllerAddress).max_borrowable(collateral, nBands) - debt;
     }
+
+    function getCollAmountsFromAMM(address _controllerAddress, address _user) public view returns (uint256 crvUsdAmount, uint256 collAmount) {
+        address llammaAddress = ICrvUsdController(_controllerAddress).amm();
+        uint256[2] memory xy = ILLAMMA(llammaAddress).get_sum_xy(address(this));
+        crvUsdAmount = xy[0];
+        collAmount = xy[1];
+    }
 }

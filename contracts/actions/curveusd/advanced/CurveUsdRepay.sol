@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import { ICrvUsdController, ICrvUsdControllerFactory, ILLAMMA } from "../../interfaces/curveusd/ICurveUsd.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/CurveUsdHelper.sol";
-import "hardhat/console.sol";
+import { ICrvUsdController, ICrvUsdControllerFactory, ILLAMMA } from "../../../interfaces/curveusd/ICurveUsd.sol";
+import "../../../utils/TokenUtils.sol";
+import "../../ActionBase.sol";
+import "../helpers/CurveUsdHelper.sol";
 
 contract CurveUsdRepay is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
@@ -61,12 +60,10 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
 
         _params.swapData[0] = _params.collAmount;
         _params.swapData[1] = 0;// hardcoded route for now
-
-        console.log("Call repay with callback");
         
         ICrvUsdController(_params.controllerAddress).repay_extended(crvUsdSwapper, _params.swapData);
 
-        console.log("After callback");
+        // TODO: cleanup???
 
         return (
             _params.collAmount,

@@ -25,6 +25,9 @@ interface ICrvUsdController {
     function repay(uint256 _debtAmount, address _for, int256 _maxActiveBand, bool _useEth) external payable;
     function repay_extended(address _callbacker, uint256[] memory _callbackArgs) external;
 
+    function liquidate(address user, uint256 min_x) external;
+    function liquidate_extended(address user, uint256 min_x, uint256 frac, bool use_eth, address callbacker, uint256[] memory _callbackArgs) external;
+
 
     /// GETTERS
     function amm() external view returns (address);
@@ -56,6 +59,7 @@ interface ICrvUsdControllerFactory {
 interface ILLAMMA {
     function active_band_with_skip() external view returns (int256);
     function get_sum_xy(address) external view returns (uint256[2] memory);
+    function get_p() external view returns (uint256);
     function read_user_tick_numbers(address) external view returns (int256[2] memory);
     function p_oracle_up(int256) external view returns (uint256);
     function p_oracle_down(int256) external view returns (uint256);
@@ -69,6 +73,7 @@ interface ILLAMMA {
     function A() external view returns (uint256);
     function min_band() external view returns (int256);
     function max_band() external view returns (int256);
+    function exchange(uint256 i, uint256 j, uint256 in_amount, uint256 min_amount) external returns (uint256[2] memory);
 }
 
 interface IAGG {
