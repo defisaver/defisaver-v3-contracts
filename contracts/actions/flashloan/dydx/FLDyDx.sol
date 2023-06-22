@@ -3,10 +3,7 @@
 pragma solidity =0.8.10;
 
 import "../../../interfaces/IDSProxy.sol";
-import "../../../interfaces/ILendingPool.sol";
-import "../../../interfaces/IWETH.sol";
 import "../../../interfaces/IFLParamGetter.sol";
-import "../../../interfaces/aave/ILendingPoolAddressesProvider.sol";
 import "../../../core/strategy/StrategyModel.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../../utils/FLFeeFaucet.sol";
@@ -14,7 +11,6 @@ import "../../../utils/ReentrancyGuard.sol";
 import "../../ActionBase.sol";
 import "./DydxFlashLoanBase.sol";
 import "../../../interfaces/flashloan/IFlashLoanBase.sol";
-import "../helpers/FLHelper.sol";
 
 /// @title Action that gets and receives a FL from DyDx protocol
 contract FLDyDx is ActionBase, StrategyModel, DydxFlashLoanBase, ReentrancyGuard, IFlashLoanBase {

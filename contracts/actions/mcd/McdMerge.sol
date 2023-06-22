@@ -2,9 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../../interfaces/IProxyRegistry.sol";
-import "../../interfaces/mcd/IJoin.sol";
-import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/mcd/IManager.sol";
 import "../ActionBase.sol";
 import "./helpers/McdHelper.sol";

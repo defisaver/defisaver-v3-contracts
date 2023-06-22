@@ -3,15 +3,13 @@
 pragma solidity =0.8.10;
 
 import "../../interfaces/IProxyRegistry.sol";
-import "../../interfaces/mcd/IJoin.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/mcd/IManager.sol";
 import "./helpers/McdHelper.sol";
 import "../ActionBase.sol";
 
 /// @title Give a vault to a different address
-contract McdGive is ActionBase {
-    address public constant PROXY_REGISTRY_ADDR = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
+contract McdGive is ActionBase, McdHelper{
 
     //Can't send vault to 0x0
     error NoBurnVaultError();

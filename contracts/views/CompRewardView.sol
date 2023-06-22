@@ -4,7 +4,6 @@ pragma solidity =0.8.10;
 
 import "../interfaces/compound/IComptroller.sol";
 import "../interfaces/IERC20.sol";
-import "../interfaces/compound/ICToken.sol";
 import "../utils/Exponential.sol";
 
 contract CompRewardView is Exponential {

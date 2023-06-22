@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import {IERC20} from "../interfaces/IERC20.sol";
 import {IExecutorHelper} from "../interfaces/kyber/IExecutorHelper.sol";
 import {IMetaAggregationRouterV2} from "../interfaces/kyber/IMetaAggregationRouterV2.sol";
 

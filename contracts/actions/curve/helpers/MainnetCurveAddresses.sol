@@ -13,4 +13,8 @@ contract MainnetCurveAddresses {
     address internal constant GAUGE_CONTROLLER_ADDR = 0x2F50D538606Fa9EDD2B11E2446BEb18C9D5846bB;
 
     address internal constant CURVE_3POOL_ZAP_ADDR = 0xA79828DF1850E8a3A3064576f380D90aECDD3359;
+
+    address constant internal CURVE_STETH_POOL_ADDR = 0xDC24316b9AE028F1497c275EB9192a3Ea0f67022;
+    address constant internal STE_CRV_ADDR = 0x06325440D014e39736583c165C2963BA99fAf14E;
+    address constant internal STETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
 }

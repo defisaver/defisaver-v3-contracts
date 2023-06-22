@@ -4,7 +4,6 @@ pragma solidity =0.8.10;
 
 import "../auth/AdminAuth.sol";
 import "../interfaces/ITrigger.sol";
-import "../interfaces/IERC20.sol";
 import "../actions/liquity/helpers/LiquityHelper.sol";
 
 /// @title Checks if total amount of debt in front of a specified trove is over a limit

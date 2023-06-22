@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../DFSRegistry.sol";
 
 /// @title StrategyModel - contract that implements the structs used in the core system
 contract StrategyModel {

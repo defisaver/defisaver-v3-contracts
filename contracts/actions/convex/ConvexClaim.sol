@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import "../../interfaces/convex/IBooster.sol";
 import "../../interfaces/convex/IBaseRewardPool.sol";
-import "../../interfaces/convex/IRewardPool.sol";
 import "../../utils/TokenUtils.sol";
 import "./helpers/ConvexHelper.sol";
 import "../ActionBase.sol";
