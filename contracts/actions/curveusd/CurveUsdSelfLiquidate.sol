@@ -6,6 +6,7 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CurveUsdHelper.sol";
 
+/// @title CurveUsdSelfLiquidate Closes the users position while he's in soft liquidation
 contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 
@@ -35,7 +36,7 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
 
         (uint256 debtAmount, bytes memory logData) = _execute(params);
-        emit ActionEvent("CurveUsdLiquidate", logData);
+        emit ActionEvent("CurveUsdSelfLiquidate", logData);
         return bytes32(debtAmount);
     }
 
@@ -44,7 +45,7 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
         Params memory params = parseInputs(_callData);
 
         (, bytes memory logData) = _execute(params);
-        logger.logActionDirectEvent("CurveUsdLiquidate", logData);
+        logger.logActionDirectEvent("CurveUsdSelfLiquidate", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -77,6 +78,7 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
         collateralAsset.withdrawTokens(_params.to, collInDepositAsset);
 
+        // send leftover crvUsd to user
         if (collInCrvUsd > userWholeDebt) {
             CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, (collInCrvUsd - userWholeDebt));
         }

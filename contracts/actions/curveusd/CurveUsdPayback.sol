@@ -6,7 +6,6 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/CurveUsdHelper.sol";
 
-
 /// @title Action that pays back crvUSD to a curveusd position
 /// @dev debtAmount must be non-zero
 /// @dev if debtAmount >= debt will repay whole debt and close the position, transfering collateral

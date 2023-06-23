@@ -73,6 +73,7 @@ interface ILLAMMA {
     function A() external view returns (uint256);
     function min_band() external view returns (int256);
     function max_band() external view returns (int256);
+    function rate() external view returns (uint256);
     function exchange(uint256 i, uint256 j, uint256 in_amount, uint256 min_amount) external returns (uint256[2] memory);
 }
 
@@ -86,4 +87,9 @@ interface IAGG {
 
 interface IPegKeeper {
     function debt() external view returns (uint256);
+}
+
+interface ICurveUsdSwapper {
+    function encodeSwapParams(uint256[3][4] memory swapParams) external pure returns (uint256 encoded);
+    function setAdditionalRoutes(address[6] memory _additionalRoutes) external;
 }

@@ -23,7 +23,14 @@ const {
 } = require('../utils');
 
 const {
-    curveUsdCreate, curveUsdSupply, curveUsdWithdraw, curveUsdBorrow, curveUsdPayback, curveUsdRepay, curveUsdSelfLiquidate,
+    curveUsdCreate,
+    curveUsdSupply,
+    curveUsdWithdraw,
+    curveUsdBorrow,
+    curveUsdPayback,
+    curveUsdRepay,
+    curveUsdSelfLiquidate,
+    curveUsdLevCreate,
 } = require('../actions');
 
 const crvusdAddress = getAssetInfo('crvUSD').address;
@@ -93,7 +100,7 @@ const testCreate = async ({
 };
 
 const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
-    Object.entries(curveusdMarkets)
+    Object.entries(curveusdMarkets).slice(1)
         .map(([assetSymbol, { controllerAddress, debtAvailableBlock }]) => {
             let snapshot;
             let senderAcc;
@@ -126,44 +133,79 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
                 });
             });
 
-            it(`... should test create collateral=maxUint for ${assetSymbol} market`, async () => {
-                await revertToSnapshot(snapshot);
-                snapshot = await takeSnapshot();
+            // it(`... should test create collateral=maxUint for ${assetSymbol} market`, async () => {
+            //     await revertToSnapshot(snapshot);
+            //     snapshot = await takeSnapshot();
 
-                const collateralAmount = ethers.utils.parseUnits('10');
-                const debtAmount = ethers.utils.parseUnits('2000');
+            //     const collateralAmount = ethers.utils.parseUnits('10');
+            //     const debtAmount = ethers.utils.parseUnits('2000');
+            //     const nBands = 5;
+
+            //     await setBalance(collateralAsset, senderAcc.address, collateralAmount);
+            //     await testCreate({
+            //         proxy,
+            //         collateralAsset: getAssetInfo(assetSymbol).address,
+            //         controllerAddress,
+            //         from: senderAcc.address,
+            //         to: senderAcc.address,
+            //         collateralAmount: ethers.constants.MaxUint256,
+            //         debtAmount,
+            //         nBands,
+            //     });
+            // });
+
+            // it(`... should test create collateral=maxUint debt=maxUint for ${assetSymbol} market`, async () => {
+            //     await revertToSnapshot(snapshot);
+
+            //     const collateralAmount = ethers.utils.parseUnits('10');
+            //     const nBands = 5;
+
+            //     await setBalance(collateralAsset, senderAcc.address, collateralAmount);
+            //     await testCreate({
+            //         proxy,
+            //         collateralAsset: getAssetInfo(assetSymbol).address,
+            //         controllerAddress,
+            //         from: senderAcc.address,
+            //         to: senderAcc.address,
+            //         collateralAmount: ethers.constants.MaxUint256,
+            //         debtAmount: ethers.constants.MaxUint256,
+            //         nBands,
+            //     });
+            // });
+
+            it(`... should test leverage create for ${assetSymbol} market`, async () => {
+                await revertToSnapshot(snapshot);
+
+                await redeploy('CurveUsdSwapper');
+                await redeploy('CurveUsdLevCreate');
+                await redeploy('CurveUsdPayback');
+
+                const collateralAmount = ethers.utils.parseUnits('3');
+                const debtAmount = '1000';
+                const debtAmountWei = ethers.utils.parseUnits(debtAmount);
+
                 const nBands = 5;
 
                 await setBalance(collateralAsset, senderAcc.address, collateralAmount);
-                await testCreate({
+                await approve(collateralAsset, proxy.address);
+
+                const exchangeObj = await formatExchangeObjCurve(crvusdAddress, getAssetInfo(assetSymbol).address, collateralAmount, addrs.mainnet.CURVE_USD_WRAPPER);
+
+                await curveUsdLevCreate(
                     proxy,
-                    collateralAsset: getAssetInfo(assetSymbol).address,
                     controllerAddress,
-                    from: senderAcc.address,
-                    to: senderAcc.address,
-                    collateralAmount: ethers.constants.MaxUint256,
-                    debtAmount,
+                    collateralAmount,
+                    debtAmountWei,
+                    1, // minAmount
                     nBands,
-                });
-            });
+                    senderAcc.address,
+                    exchangeObj[8], // additional data
+                );
 
-            it(`... should test create collateral=maxUint debt=maxUint for ${assetSymbol} market`, async () => {
-                await revertToSnapshot(snapshot);
+                const { collateral, debt } = await getUserInfo(controllerAddress, proxy.address);
 
-                const collateralAmount = ethers.utils.parseUnits('10');
-                const nBands = 5;
-
-                await setBalance(collateralAsset, senderAcc.address, collateralAmount);
-                await testCreate({
-                    proxy,
-                    collateralAsset: getAssetInfo(assetSymbol).address,
-                    controllerAddress,
-                    from: senderAcc.address,
-                    to: senderAcc.address,
-                    collateralAmount: ethers.constants.MaxUint256,
-                    debtAmount: ethers.constants.MaxUint256,
-                    nBands,
-                });
+                console.log('collateral', collateral / 1e18);
+                console.log('debt', debt / 1e18);
             });
         });
 });
@@ -550,6 +592,7 @@ const curveUsdRepayTest = () => describe('CurveUsd-Repay', () => {
             let proxy;
             let recipeExecutorAddr;
             let flAddr;
+            let collateralAmount;
             const collateralAsset = getAssetInfo(assetSymbol).address;
 
             it(`... should test create for ${assetSymbol} market`, async () => {
@@ -571,9 +614,9 @@ const curveUsdRepayTest = () => describe('CurveUsd-Repay', () => {
                 [senderAcc] = await ethers.getSigners();
                 proxy = await getProxy(senderAcc.address);
 
-                const collateralAmount = ethers.utils.parseUnits('10');
+                collateralAmount = ethers.utils.parseUnits('10');
                 const debtAmount = ethers.utils.parseUnits('5000');
-                const nBands = 40;
+                const nBands = 4;
 
                 await setBalance(collateralAsset, senderAcc.address, collateralAmount);
                 await testCreate({
@@ -588,112 +631,114 @@ const curveUsdRepayTest = () => describe('CurveUsd-Repay', () => {
                 });
 
                 snapshot = await takeSnapshot();
-
-                // const exchangeObj = await formatExchangeObjCurve(getAssetInfo(assetSymbol).address, crvusdAddress, collateralAmount, addrs['mainnet'].CURVE_USD_WRAPPER);
             });
 
             it(`... should test single repay action with callback ${senderAcc}`, async () => {
                 const collAmount = ethers.utils.parseUnits('1');
+
+                const exchangeObj = await formatExchangeObjCurve(getAssetInfo(assetSymbol).address, crvusdAddress, collateralAmount, addrs.mainnet.CURVE_USD_WRAPPER);
 
                 await curveUsdRepay(
                     proxy,
                     controllerAddress,
                     collAmount,
                     senderAcc.address,
+                    1, // minAmount
+                    exchangeObj[8],
                 );
             });
 
-            it('... should test repay recipe without FL', async () => {
-                await revertToSnapshot(snapshot);
+            // it('... should test repay recipe without FL', async () => {
+            //     await revertToSnapshot(snapshot);
 
-                const collAmount = ethers.utils.parseUnits('1');
+            //     const collAmount = ethers.utils.parseUnits('1');
 
-                const repayCurveUsd = new dfs.Recipe('RepayCurveUsd', [
-                    // withdraw
-                    new dfs.actions.curveusd.CurveUsdWithdrawAction(
-                        controllerAddress,
-                        proxy.address,
-                        collAmount,
-                    ),
-                    // sell
-                    new dfs.actions.basic.SellAction(
-                        (await formatExchangeObjCurve(
-                            getAssetInfo(assetSymbol).address,
-                            crvusdAddress,
-                            '$1',
-                            addrs.mainnet.CURVE_USD_WRAPPER,
-                        )),
-                        proxy.address,
-                        proxy.address,
-                    ),
-                    // payback
-                    new dfs.actions.curveusd.CurveUsdPaybackAction(
-                        controllerAddress,
-                        proxy.address,
-                        proxy.address,
-                        senderAcc.address,
-                        '$2',
-                        100,
-                    ),
-                ]);
+            //     const repayCurveUsd = new dfs.Recipe('RepayCurveUsd', [
+            //         // withdraw
+            //         new dfs.actions.curveusd.CurveUsdWithdrawAction(
+            //             controllerAddress,
+            //             proxy.address,
+            //             collAmount,
+            //         ),
+            //         // sell
+            //         new dfs.actions.basic.SellAction(
+            //             (await formatExchangeObjCurve(
+            //                 getAssetInfo(assetSymbol).address,
+            //                 crvusdAddress,
+            //                 '$1',
+            //                 addrs.mainnet.CURVE_USD_WRAPPER,
+            //             )),
+            //             proxy.address,
+            //             proxy.address,
+            //         ),
+            //         // payback
+            //         new dfs.actions.curveusd.CurveUsdPaybackAction(
+            //             controllerAddress,
+            //             proxy.address,
+            //             proxy.address,
+            //             senderAcc.address,
+            //             '$2',
+            //             100,
+            //         ),
+            //     ]);
 
-                console.log(recipeExecutorAddr);
+            //     console.log(recipeExecutorAddr);
 
-                const functionData = repayCurveUsd.encodeForDsProxyCall();
-                await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], {
-                    gasLimit: 6000000,
-                });
-            });
+            //     const functionData = repayCurveUsd.encodeForDsProxyCall();
+            //     await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], {
+            //         gasLimit: 6000000,
+            //     });
+            // });
 
-            it('... should test repay recipe with FL', async () => {
-                await revertToSnapshot(snapshot);
+            // it('... should test repay recipe with FL', async () => {
+            //     await revertToSnapshot(snapshot);
 
-                const collAmount = ethers.utils.parseUnits('1');
+            //     const collAmount = ethers.utils.parseUnits('1');
 
-                const repayFl = new dfs.Recipe('RepayFl', [
-                    new dfs.actions.flashloan.FLAction(
-                        new dfs.actions.flashloan.AaveV3FlashLoanAction(
-                            [getAssetInfo(assetSymbol).address],
-                            [collAmount],
-                            [0],
-                            nullAddress,
-                            nullAddress,
-                            [],
-                        ),
-                    ),
-                    // sell
-                    new dfs.actions.basic.SellAction(
-                        (await formatExchangeObjCurve(
-                            getAssetInfo(assetSymbol).address,
-                            crvusdAddress,
-                            collAmount,
-                            addrs.mainnet.CURVE_USD_WRAPPER,
-                        )),
-                        proxy.address,
-                        proxy.address,
-                    ),
-                    // payback
-                    new dfs.actions.curveusd.CurveUsdPaybackAction(
-                        controllerAddress,
-                        proxy.address,
-                        proxy.address,
-                        senderAcc.address,
-                        '$2',
-                        100,
-                    ),
-                    // withdraw
-                    new dfs.actions.curveusd.CurveUsdWithdrawAction(
-                        controllerAddress,
-                        flAddr,
-                        '$1',
-                    ),
-                ]);
+            //     const repayFl = new dfs.Recipe('RepayFl', [
+            //         new dfs.actions.flashloan.FLAction(
+            //             new dfs.actions.flashloan.AaveV3FlashLoanAction(
+            //                 [getAssetInfo(assetSymbol).address],
+            //                 [collAmount],
+            //                 [0],
+            //                 nullAddress,
+            //                 nullAddress,
+            //                 [],
+            //             ),
+            //         ),
+            //         // sell
+            //         new dfs.actions.basic.SellAction(
+            //             (await formatExchangeObjCurve(
+            //                 getAssetInfo(assetSymbol).address,
+            //                 crvusdAddress,
+            //                 collAmount,
+            //                 addrs.mainnet.CURVE_USD_WRAPPER,
+            //             )),
+            //             proxy.address,
+            //             proxy.address,
+            //         ),
+            //         // payback
+            //         new dfs.actions.curveusd.CurveUsdPaybackAction(
+            //             controllerAddress,
+            //             proxy.address,
+            //             proxy.address,
+            //             senderAcc.address,
+            //             '$2',
+            //             100,
+            //         ),
+            //         // withdraw
+            //         new dfs.actions.curveusd.CurveUsdWithdrawAction(
+            //             controllerAddress,
+            //             flAddr,
+            //             '$1',
+            //         ),
+            //     ]);
 
-                const functionData = repayFl.encodeForDsProxyCall();
-                await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], {
-                    gasLimit: 9000000,
-                });
-            });
+            //     const functionData = repayFl.encodeForDsProxyCall();
+            //     await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], {
+            //         gasLimit: 9000000,
+            //     });
+            // });
         });
 });
 

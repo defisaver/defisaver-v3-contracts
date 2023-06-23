@@ -32,13 +32,10 @@ contract CurveusdView {
     uint256 oraclePrice;
     uint256 minted;
     uint256 redeemed;
-    int256 sigma;
-    uint256 rate;
-    uint256 rate0;
-    uint256 targetDebtFraction;
+    uint256 monetaryPolicyRate;
+    uint256 ammRate;
     int256 minBand;
     int256 maxBand;
-    uint256 pegKeeperDebt;
   }
 
   struct UserData {
@@ -52,10 +49,13 @@ contract CurveusdView {
     uint256 priceHigh;
     uint256 liquidationDiscount;
     int256 health;
+    int256[2] bandRange;
   }
 
   function userData(address market, address user) external view returns (UserData memory) {
       ICrvUsdController ctrl = ICrvUsdController(market);
+      ILLAMMA amm = ILLAMMA(ctrl.amm());
+
       uint256[4] memory amounts = ctrl.user_state(user);
       uint256[2] memory prices = ctrl.user_prices(user);
 
@@ -66,10 +66,11 @@ contract CurveusdView {
         amounts[1],
         amounts[2],
         amounts[3],
-        prices[0],
         prices[1],
+        prices[0],
         ctrl.liquidation_discount(),
-        ctrl.health(user, true)
+        ctrl.health(user, true),
+        amm.read_user_tick_numbers(user)
       );
   }
 
@@ -78,16 +79,6 @@ contract CurveusdView {
       IAGG agg = IAGG(ctrl.monetary_policy());
       ILLAMMA amm = ILLAMMA(ctrl.amm());
       address ct = ctrl.collateral_token();
-
-      uint256 pkDebt = 0;
-      for (uint256 i = 0; i <= 1000; i++) {
-          address pk = agg.peg_keepers(i);
-          if (pk == address(0x00)) {
-              break;
-          }
-
-        pkDebt += IPegKeeper(pk).debt();
-      } 
 
       return GlobalData(
         ct,
@@ -100,13 +91,10 @@ contract CurveusdView {
         amm.price_oracle(),
         ctrl.minted(),
         ctrl.redeemed(),
-        agg.sigma(),
         agg.rate(),
-        agg.rate0(),
-        agg.target_debt_fraction(),
+        amm.rate(),
         amm.min_band(),
-        amm.max_band(),
-        pkDebt
+        amm.max_band()
     );
   }
 
@@ -114,7 +102,7 @@ contract CurveusdView {
       ICrvUsdController ctrl = ICrvUsdController(market);
       ILLAMMA lama = ILLAMMA(ctrl.amm());
 
-      return Band(n, lama.p_oracle_down(n), lama.p_oracle_up(n), lama.bands_x(n), lama.bands_y(n));
+      return Band(n, lama.p_oracle_down(n), lama.p_oracle_up(n), lama.bands_y(n), lama.bands_x(n));
   }
   
   function getBandsData(address market, int256 from, int256 to) public view returns (Band[] memory) {
@@ -122,7 +110,7 @@ contract CurveusdView {
       ILLAMMA lama = ILLAMMA(ctrl.amm());
       Band[] memory bands = new Band[](uint256(to-from+1));
       for (int256 i = from; i <= to; i++) {
-          bands[uint256(i-from)] = Band(i, lama.p_oracle_down(i), lama.p_oracle_up(i), lama.bands_x(i), lama.bands_y(i));
+          bands[uint256(i-from)] = Band(i, lama.p_oracle_down(i), lama.p_oracle_up(i), lama.bands_y(i), lama.bands_x(i));
       }
 
       return bands;
@@ -146,5 +134,10 @@ contract CurveusdView {
       maxBorr,
       bands
     );
+  }
+
+  function healthCalculator(address market, address user, int256 collChange, int256 debtChange, bool isFull, uint256 numBands) external view returns (int256) {
+    ICrvUsdController ctrl = ICrvUsdController(market);
+    return ctrl.health_calculator(user, collChange, debtChange, isFull, numBands);
   }
 }
