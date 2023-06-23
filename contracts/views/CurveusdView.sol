@@ -136,6 +136,25 @@ contract CurveusdView {
     );
   }
 
+  function maxBorrow(address market, uint256 collateral, uint256 N) external view returns (uint256) {
+    ICrvUsdController ctrl = ICrvUsdController(market);
+    return ctrl.max_borrowable(collateral, N);
+  }
+
+  function minCollateral(address market, uint256 debt, uint256 N) external view returns (uint256) {
+    ICrvUsdController ctrl = ICrvUsdController(market);
+    return ctrl.min_collateral(debt, N);
+  }
+
+  function getBandsData(address market, uint256 collateral, uint256 debt, uint256 N) external view returns (Band[] memory bands) {
+    ICrvUsdController ctrl = ICrvUsdController(market);
+
+    int256 n1 = ctrl.calculate_debt_n1(collateral, debt, N);
+    int256 n2 = n1 + int256(N) - 1;
+
+    bands = getBandsData(market, n1, n2);
+  }
+
   function healthCalculator(address market, address user, int256 collChange, int256 debtChange, bool isFull, uint256 numBands) external view returns (int256) {
     ICrvUsdController ctrl = ICrvUsdController(market);
     return ctrl.health_calculator(user, collChange, debtChange, isFull, numBands);
