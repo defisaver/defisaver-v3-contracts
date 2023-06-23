@@ -1,11 +1,12 @@
-// SPDX-Licence-Identifier: MIT
+// SPDX-License-Identifier: MIT
+
 pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../interfaces/curveusd/ICurveUsd.sol";
 import "../interfaces/IERC20.sol";
 
-contract CurveusdView {
+contract CurveUsdView {
   struct Band {
     int256 id;
     uint256 lowPrice;
@@ -17,7 +18,7 @@ contract CurveusdView {
   struct CreateLoanData {
     int256 health;
     uint256 minColl;
-    uint256 maxBorr;
+    uint256 maxBorrow;
     Band[] bands;
   }
 
@@ -59,43 +60,43 @@ contract CurveusdView {
       uint256[4] memory amounts = ctrl.user_state(user);
       uint256[2] memory prices = ctrl.user_prices(user);
 
-      return UserData(
-        ctrl.loan_exists(user),
-        ctrl.amm_price(),
-        amounts[0],
-        amounts[1],
-        amounts[2],
-        amounts[3],
-        prices[1],
-        prices[0],
-        ctrl.liquidation_discount(),
-        ctrl.health(user, true),
-        amm.read_user_tick_numbers(user)
-      );
+      return UserData({
+        loanExists: ctrl.loan_exists(user),
+        collateralPrice: ctrl.amm_price(),
+        marketCollateralAmount: amounts[0],
+        curveUsdCollateralAmount: amounts[1],
+        debtAmount: amounts[2],
+        N: amounts[3],
+        priceLow: prices[1],
+        priceHigh: prices[0],
+        liquidationDiscount: ctrl.liquidation_discount(),
+        health: ctrl.health(user, true),
+        bandRange: amm.read_user_tick_numbers(user)
+      });
   }
 
   function globalData(address market) external view returns (GlobalData memory) {
       ICrvUsdController ctrl = ICrvUsdController(market);
       IAGG agg = IAGG(ctrl.monetary_policy());
       ILLAMMA amm = ILLAMMA(ctrl.amm());
-      address ct = ctrl.collateral_token();
+      address collTokenAddr = ctrl.collateral_token();
 
-      return GlobalData(
-        ct,
-        IERC20(ct).decimals(),
-        amm.active_band(),
-        amm.A(),
-        ctrl.total_debt(),
-        ctrl.amm_price(),
-        amm.get_base_price(),
-        amm.price_oracle(),
-        ctrl.minted(),
-        ctrl.redeemed(),
-        agg.rate(),
-        amm.rate(),
-        amm.min_band(),
-        amm.max_band()
-    );
+      return GlobalData({
+        collateral: collTokenAddr,
+        decimals: IERC20(collTokenAddr).decimals(),
+        activeBand: amm.active_band(),
+        A: amm.A(),
+        totalDebt: ctrl.total_debt(),
+        ammPrice: ctrl.amm_price(),
+        basePrice: amm.get_base_price(),
+        oraclePrice: amm.price_oracle(),
+        minted: ctrl.minted(),
+        redeemed: ctrl.redeemed(),
+        monetaryPolicyRate: agg.rate(),
+        ammRate: amm.rate(),
+        minBand: amm.min_band(),
+        maxBand: amm.max_band()
+    });
   }
 
   function getBandData(address market, int256 n) external view returns (Band memory) {
@@ -120,20 +121,18 @@ contract CurveusdView {
     ICrvUsdController ctrl = ICrvUsdController(market);
 
     int256 health = ctrl.health_calculator(address(0x00), int256(collateral), int256(debt), true, N);
-    uint256 minColl = ctrl.min_collateral(debt, N);
-    uint256 maxBorr = ctrl.max_borrowable(collateral, N);
 
     int256 n1 = ctrl.calculate_debt_n1(collateral, debt, N);
     int256 n2 = n1 + int256(N) - 1;
 
     Band[] memory bands = getBandsData(market, n1, n2);
 
-    return CreateLoanData(
-      health,
-      minColl,
-      maxBorr,
-      bands
-    );
+    return CreateLoanData({
+      health: health,
+      minColl: ctrl.min_collateral(debt, N),
+      maxBorrow: ctrl.max_borrowable(collateral, N),
+      bands: bands
+    });
   }
 
   function maxBorrow(address market, uint256 collateral, uint256 N) external view returns (uint256) {
