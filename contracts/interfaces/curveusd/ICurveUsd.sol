@@ -75,6 +75,7 @@ interface ILLAMMA {
     function max_band() external view returns (int256);
     function rate() external view returns (uint256);
     function exchange(uint256 i, uint256 j, uint256 in_amount, uint256 min_amount) external returns (uint256[2] memory);
+    function coins(uint256 i) external view returns (address);
 }
 
 interface IAGG {
