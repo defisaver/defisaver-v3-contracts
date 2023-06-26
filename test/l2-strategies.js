@@ -358,7 +358,7 @@ const aaveV3CloseActions = {
 
     sendRepayFL: () => new dfs.actions.basic.SendTokenAction(
         '&debtAsset',
-        '%flAddr', // kept variable this can change (FL must be payed back to work)
+        '%flAddr', // kept variable this can change (FL must be paid back to work)
         '$1', // hardcoded output from FL action
     ),
 

@@ -6,11 +6,11 @@ import "../interfaces/morpho/IMorpho.sol";
 import "../interfaces/morpho/IMorphoAaveV2Lens.sol";
 import "../interfaces/morpho/IRewardsDistributor.sol";
 import "../interfaces/morpho/MorphoTypes.sol";
-import "../actions/morpho/helpers/MorphoHelper.sol";
+import "../actions/morpho/aaveV2/helpers/MorphoAaveV2Helper.sol";
 import "../DS/DSMath.sol";
 import "./AaveView.sol";
 
-contract MorphoAaveV2View is MorphoHelper {
+contract MorphoAaveV2View is MorphoAaveV2Helper {
     address constant public AAVE_VIEW_ADDR = 0xEDf1087544a01596b70Da746F861B878F245B08f;
 
     struct MarketInfo {
