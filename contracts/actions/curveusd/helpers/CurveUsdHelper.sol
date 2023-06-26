@@ -46,7 +46,7 @@ contract CurveUsdHelper is MainnetCurveUsdAddresses {
 
     function getCollAmountsFromAMM(address _controllerAddress, address _user) public view returns (uint256 crvUsdAmount, uint256 collAmount) {
         address llammaAddress = ICrvUsdController(_controllerAddress).amm();
-        uint256[2] memory xy = ILLAMMA(llammaAddress).get_sum_xy(address(this));
+        uint256[2] memory xy = ILLAMMA(llammaAddress).get_sum_xy(_user);
         crvUsdAmount = xy[0];
         collAmount = xy[1];
     }

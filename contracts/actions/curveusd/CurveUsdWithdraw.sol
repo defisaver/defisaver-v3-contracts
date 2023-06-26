@@ -12,6 +12,8 @@ import "./helpers/CurveUsdHelper.sol";
 contract CurveUsdWithdraw is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 
+    error ZeroAmountWithdraw();
+
     /// @param controllerAddress Address of the curveusd market controller
     /// @param to Address that will receive the withdrawn collateral, will default to proxy
     /// @param collateralAmount Amount of collateral to withdraw
@@ -34,7 +36,7 @@ contract CurveUsdWithdraw is ActionBase, CurveUsdHelper {
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.collateralAmount = _parseParamUint(params.collateralAmount, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 generatedAmount, bytes memory logData) = _execute(params);
+        (uint256 generatedAmount, bytes memory logData) = _curveUsdWithdraw(params);
         emit ActionEvent("CurveUsdWithdraw", logData);
         return bytes32(generatedAmount);
     }
@@ -43,7 +45,7 @@ contract CurveUsdWithdraw is ActionBase, CurveUsdHelper {
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
-        (, bytes memory logData) = _execute(params);
+        (, bytes memory logData) = _curveUsdWithdraw(params);
         logger.logActionDirectEvent("CurveUsdWithdraw", logData);
     }
 
@@ -54,9 +56,9 @@ contract CurveUsdWithdraw is ActionBase, CurveUsdHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _execute(Params memory _params) internal returns (uint256, bytes memory) {
+    function _curveUsdWithdraw(Params memory _params) internal returns (uint256, bytes memory) {
         /// @dev see ICrvUsdController natspec
-        if (_params.collateralAmount == 0) revert();
+        if (_params.collateralAmount == 0) revert ZeroAmountWithdraw();
  
         /// @dev one of the few ways we can check if the controller address is an actual controller
         if (ICrvUsdControllerFactory(CRVUSD_CONTROLLER_FACTORY_ADDR).debt_ceiling(_params.controllerAddress) == 0) revert CurveUsdInvalidController();
@@ -65,9 +67,14 @@ contract CurveUsdWithdraw is ActionBase, CurveUsdHelper {
         if (_params.collateralAmount == type(uint256).max) {
             _params.collateralAmount = userMaxWithdraw(_params.controllerAddress, address(this));
         }
-        ICrvUsdController(_params.controllerAddress).remove_collateral(_params.collateralAmount);
-
+        
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
+        if (collateralAsset != TokenUtils.WETH_ADDR){
+            ICrvUsdController(_params.controllerAddress).remove_collateral(_params.collateralAmount);
+        } else {
+            ICrvUsdController(_params.controllerAddress).remove_collateral(_params.collateralAmount, false);
+        }
+
         collateralAsset.withdrawTokens(_params.to, _params.collateralAmount);
 
         return (

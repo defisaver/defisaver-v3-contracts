@@ -42,7 +42,7 @@ contract CurveUsdCreate is ActionBase, CurveUsdHelper {
         params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[4], _subData, _returnValues);
         params.nBands = _parseParamUint(params.nBands, _paramMapping[5], _subData, _returnValues);
 
-        (uint256 generatedAmount, bytes memory logData) = _execute(params);
+        (uint256 generatedAmount, bytes memory logData) = _curveUsdCreate(params);
         emit ActionEvent("CurveUsdCreate", logData);
         return bytes32(generatedAmount);
     }
@@ -51,7 +51,7 @@ contract CurveUsdCreate is ActionBase, CurveUsdHelper {
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
-        (, bytes memory logData) = _execute(params);
+        (, bytes memory logData) = _curveUsdCreate(params);
         logger.logActionDirectEvent("CurveUsdCreate", logData);
     }
 
@@ -62,7 +62,7 @@ contract CurveUsdCreate is ActionBase, CurveUsdHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _execute(Params memory _params) internal returns (uint256, bytes memory) {
+    function _curveUsdCreate(Params memory _params) internal returns (uint256, bytes memory) {
         /// @dev one of the few ways we can check if the controller address is an actual controller
         if (ICrvUsdControllerFactory(CRVUSD_CONTROLLER_FACTORY_ADDR).debt_ceiling(_params.controllerAddress) == 0) revert CurveUsdInvalidController();
 

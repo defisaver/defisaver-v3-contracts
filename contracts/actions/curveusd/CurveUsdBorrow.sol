@@ -12,6 +12,8 @@ import "./helpers/CurveUsdHelper.sol";
 contract CurveUsdBorrow is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 
+    error ZeroAmountBorrowed();
+
     /// @param controllerAddress Address of the curveusd market controller
     /// @param to Address that will receive the borrowed crvUSD, will default to proxy
     /// @param debtAmount Amount of crvUSD to borrow
@@ -34,7 +36,7 @@ contract CurveUsdBorrow is ActionBase, CurveUsdHelper {
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 generatedAmount, bytes memory logData) = _execute(params);
+        (uint256 generatedAmount, bytes memory logData) = _curveUsdBorrow(params);
         emit ActionEvent("CurveUsdBorrow", logData);
         return bytes32(generatedAmount);
     }
@@ -43,7 +45,7 @@ contract CurveUsdBorrow is ActionBase, CurveUsdHelper {
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
-        (, bytes memory logData) = _execute(params);
+        (, bytes memory logData) = _curveUsdBorrow(params);
         logger.logActionDirectEvent("CurveUsdBorrow", logData);
     }
 
@@ -54,9 +56,9 @@ contract CurveUsdBorrow is ActionBase, CurveUsdHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _execute(Params memory _params) internal returns (uint256, bytes memory) {
+    function _curveUsdBorrow(Params memory _params) internal returns (uint256, bytes memory) {
         /// @dev see ICrvUsdController natspec
-        if (_params.debtAmount == 0) revert();
+        if (_params.debtAmount == 0) revert ZeroAmountBorrowed();
         
         /// @dev one of the few ways we can check if the controller address is an actual controller
         if (ICrvUsdControllerFactory(CRVUSD_CONTROLLER_FACTORY_ADDR).debt_ceiling(_params.controllerAddress) == 0) revert CurveUsdInvalidController();

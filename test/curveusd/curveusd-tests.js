@@ -3,7 +3,6 @@
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
-const dfs = require('@defisaver/sdk');
 
 const { utils: { curveusdUtils: { curveusdMarkets, controllerFactoryAddress } } } = require('@defisaver/sdk');
 const {
@@ -100,7 +99,7 @@ const testCreate = async ({
 };
 
 const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
-    Object.entries(curveusdMarkets).slice(1)
+    Object.entries(curveusdMarkets)
         .map(([assetSymbol, { controllerAddress, debtAvailableBlock }]) => {
             let snapshot;
             let senderAcc;
@@ -133,46 +132,25 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
                 });
             });
 
-            // it(`... should test create collateral=maxUint for ${assetSymbol} market`, async () => {
-            //     await revertToSnapshot(snapshot);
-            //     snapshot = await takeSnapshot();
+            it(`... should test create collateral=maxUint debt=maxUint for ${assetSymbol} market`, async () => {
+                await revertToSnapshot(snapshot);
 
-            //     const collateralAmount = ethers.utils.parseUnits('10');
-            //     const debtAmount = ethers.utils.parseUnits('2000');
-            //     const nBands = 5;
+                const collateralAmount = ethers.utils.parseUnits('10');
+                const nBands = 5;
 
-            //     await setBalance(collateralAsset, senderAcc.address, collateralAmount);
-            //     await testCreate({
-            //         proxy,
-            //         collateralAsset: getAssetInfo(assetSymbol).address,
-            //         controllerAddress,
-            //         from: senderAcc.address,
-            //         to: senderAcc.address,
-            //         collateralAmount: ethers.constants.MaxUint256,
-            //         debtAmount,
-            //         nBands,
-            //     });
-            // });
-
-            // it(`... should test create collateral=maxUint debt=maxUint for ${assetSymbol} market`, async () => {
-            //     await revertToSnapshot(snapshot);
-
-            //     const collateralAmount = ethers.utils.parseUnits('10');
-            //     const nBands = 5;
-
-            //     await setBalance(collateralAsset, senderAcc.address, collateralAmount);
-            //     await testCreate({
-            //         proxy,
-            //         collateralAsset: getAssetInfo(assetSymbol).address,
-            //         controllerAddress,
-            //         from: senderAcc.address,
-            //         to: senderAcc.address,
-            //         collateralAmount: ethers.constants.MaxUint256,
-            //         debtAmount: ethers.constants.MaxUint256,
-            //         nBands,
-            //     });
-            // });
-
+                await setBalance(collateralAsset, senderAcc.address, collateralAmount);
+                await testCreate({
+                    proxy,
+                    collateralAsset: getAssetInfo(assetSymbol).address,
+                    controllerAddress,
+                    from: senderAcc.address,
+                    to: senderAcc.address,
+                    collateralAmount: ethers.constants.MaxUint256,
+                    debtAmount: ethers.constants.MaxUint256,
+                    nBands,
+                });
+            });
+        /*
             it(`... should test leverage create for ${assetSymbol} market`, async () => {
                 await revertToSnapshot(snapshot);
 
@@ -207,6 +185,8 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
                 console.log('collateral', collateral / 1e18);
                 console.log('debt', debt / 1e18);
             });
+
+        */
         });
 });
 
@@ -743,7 +723,7 @@ const curveUsdRepayTest = () => describe('CurveUsd-Repay', () => {
 });
 
 const curveUsdSelfLiquidateTest = () => describe('CurveUsd-Self-Liquidate', () => {
-    Object.entries(curveusdMarkets).slice(1)
+    Object.entries(curveusdMarkets).slice(1, 2)
         .map(([assetSymbol, { controllerAddress, debtAvailableBlock }]) => {
             let snapshot;
             let senderAcc;

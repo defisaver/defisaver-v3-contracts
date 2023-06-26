@@ -11,6 +11,8 @@ import "./helpers/CurveUsdHelper.sol";
 contract CurveUsdSupply is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 
+    error ZeroAmountSupplied();
+
     /// @param controllerAddress Address of the curveusd market controller
     /// @param from Address from which to pull collateral asset, will default to proxy
     /// @param onBehalfOf Address for which we are supplying, will default to proxy
@@ -36,16 +38,16 @@ contract CurveUsdSupply is ActionBase, CurveUsdHelper {
         params.onBehalfOf = _parseParamAddr(params.onBehalfOf, _paramMapping[2], _subData, _returnValues);
         params.collateralAmount = _parseParamUint(params.collateralAmount, _paramMapping[3], _subData, _returnValues);
 
-        (uint256 generatedAmount, bytes memory logData) = _execute(params);
+        (uint256 suppliedAmount, bytes memory logData) = _curveUsdSupply(params);
         emit ActionEvent("CurveUsdSupply", logData);
-        return bytes32(generatedAmount);
+        return bytes32(suppliedAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
-        (, bytes memory logData) = _execute(params);
+        (, bytes memory logData) = _curveUsdSupply(params);
         logger.logActionDirectEvent("CurveUsdSupply", logData);
     }
 
@@ -56,9 +58,9 @@ contract CurveUsdSupply is ActionBase, CurveUsdHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _execute(Params memory _params) internal returns (uint256, bytes memory) {
+    function _curveUsdSupply(Params memory _params) internal returns (uint256, bytes memory) {
         /// @dev see ICrvUsdController natspec
-        if (_params.collateralAmount == 0) revert();
+        if (_params.collateralAmount == 0) revert ZeroAmountSupplied();
         
         /// @dev one of the few ways we can check if the controller address is an actual controller
         if (ICrvUsdControllerFactory(CRVUSD_CONTROLLER_FACTORY_ADDR).debt_ceiling(_params.controllerAddress) == 0) revert CurveUsdInvalidController();

@@ -26,6 +26,7 @@ interface ICrvUsdController {
     function repay_extended(address _callbacker, uint256[] memory _callbackArgs) external;
 
     function liquidate(address user, uint256 min_x) external;
+    function liquidate(address user, uint256 min_x, bool _useEth) external;
     function liquidate_extended(address user, uint256 min_x, uint256 frac, bool use_eth, address callbacker, uint256[] memory _callbackArgs) external;
 
 

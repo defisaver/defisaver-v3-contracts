@@ -34,16 +34,17 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
 
-        (uint256 debtAmount, bytes memory logData) = _execute(params);
+        ///@dev returning amount of crvUSD pulled because it's not known precisely before the execution and can be used with Sub/Sum Inputs Actions later
+        (uint256 amountPulled, bytes memory logData) = _curveUsdSelfLiquidate(params);
         emit ActionEvent("CurveUsdSelfLiquidate", logData);
-        return bytes32(debtAmount);
+        return bytes32(amountPulled);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
-        (, bytes memory logData) = _execute(params);
+        (, bytes memory logData) = _curveUsdSelfLiquidate(params);
         logger.logActionDirectEvent("CurveUsdSelfLiquidate", logData);
     }
 
@@ -54,7 +55,7 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _execute(Params memory _params) internal returns (uint256, bytes memory) {      
+    function _curveUsdSelfLiquidate(Params memory _params) internal returns (uint256, bytes memory) {      
         /// @dev one of the few ways we can check if the controller address is an actual controller
         if (ICrvUsdControllerFactory(CRVUSD_CONTROLLER_FACTORY_ADDR).debt_ceiling(_params.controllerAddress) == 0) revert CurveUsdInvalidController();
 
@@ -66,15 +67,19 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
         // if we don't have enough crvUsd in coll, pull the rest from the user
         if (collInCrvUsd < userWholeDebt) {
             amountToPull = userWholeDebt - collInCrvUsd;
+            // pull and approve if needed
+            amountToPull = CRVUSD_TOKEN_ADDR.pullTokensIfNeeded(_params.from, amountToPull);
+            CRVUSD_TOKEN_ADDR.approveToken(_params.controllerAddress, amountToPull);
         }
 
-        // pull and approve if needed
-        amountToPull = CRVUSD_TOKEN_ADDR.pullTokensIfNeeded(_params.from, amountToPull);
-        CRVUSD_TOKEN_ADDR.approveToken(_params.controllerAddress, amountToPull);
-
-        ICrvUsdController(_params.controllerAddress).liquidate(address(this), _params.minCrvUsdExpected);
-
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
+
+        if (collateralAsset != TokenUtils.WETH_ADDR){
+            ICrvUsdController(_params.controllerAddress).liquidate(address(this), _params.minCrvUsdExpected);
+        } else {
+            ICrvUsdController(_params.controllerAddress).liquidate(address(this), _params.minCrvUsdExpected, false);
+        }
+
         collateralAsset.withdrawTokens(_params.to, collInDepositAsset);
 
         // send leftover crvUsd to user
@@ -83,7 +88,7 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
         }
 
         return (
-            userWholeDebt,
+            amountToPull,
             abi.encode(_params, collInCrvUsd, collInDepositAsset, userWholeDebt)
         );
     }
