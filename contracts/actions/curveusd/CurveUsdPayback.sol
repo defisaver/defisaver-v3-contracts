@@ -8,7 +8,7 @@ import "./helpers/CurveUsdHelper.sol";
 
 /// @title Action that pays back crvUSD to a curveusd position
 /// @dev debtAmount must be non-zero
-/// @dev if debtAmount >= debt will repay whole debt and close the position, transfering collateral
+/// @dev if debtAmount >= debt will repay whole debt and close the position, transferring collateral
 contract CurveUsdPayback is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 
@@ -72,7 +72,7 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
 
         if (_params.onBehalfOf == address(0)) _params.onBehalfOf = address(this);
 
-        /// @dev debtAmount > debt is safe, need to make sure we dont pull more than needed
+        /// @dev debtAmount > debt is safe, need to make sure we don't pull more than needed
         /// @dev this also closes the position
         bool isClose;
         uint256 closeCrvUsdAmount;

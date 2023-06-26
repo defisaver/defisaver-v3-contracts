@@ -57,6 +57,24 @@ contract CurveUsdView {
       ICrvUsdController ctrl = ICrvUsdController(market);
       ILLAMMA amm = ILLAMMA(ctrl.amm());
 
+      if (!ctrl.loan_exists(user)) {
+        int256[2] memory bandRange = [int256(0), int256(0)];
+
+        return UserData({
+          loanExists: false,
+          collateralPrice: 0,
+          marketCollateralAmount: 0,
+          curveUsdCollateralAmount: 0,
+          debtAmount: 0,
+          N: 0,
+          priceLow: 0,
+          priceHigh: 0,
+          liquidationDiscount: 0,
+          health: 0,
+          bandRange: bandRange
+        });
+      }
+
       uint256[4] memory amounts = ctrl.user_state(user);
       uint256[2] memory prices = ctrl.user_prices(user);
 
