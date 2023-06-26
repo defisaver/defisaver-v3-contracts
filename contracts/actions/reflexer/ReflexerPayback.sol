@@ -52,7 +52,7 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
 
     /// @notice Paybacks the debt for a specified safe
     /// @param _safeId Id of the safe
-    /// @param _amount Amount of rai to be payed back
+    /// @param _amount Amount of rai to be paid back
     /// @param _from Where the rai is pulled from
     function _reflexerPayback(
         uint256 _safeId,

@@ -11,6 +11,28 @@
         "history": []
     },
     {
+      "name": "DFSProxyRegistry",
+      "address": "0xeCF15D0aE171F757175c6aBDD2C70e9a8806984C",
+      "id": "0xc83e4f5e",
+      "path": "contracts/utils/DFSProxyRegistry.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "DFSProxyRegistryController",
+      "address": "0x6F6DaE1bCB60F67B2Cb939dBE565e8fD03F6F002",
+      "id": "0xcbbb53f2",
+      "path": "contracts/utils/DFSProxyRegistryController.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
         "name": "SubProxy",
         "address": "0x275A8f98dBA07Ad6380D3ea3F36B665DD6E02F25",
         "id": "0x15c87229",
@@ -740,5 +762,16 @@
       "changeTime": "0",
       "registryIds": [],
       "history": []
-    } 
+    },
+    {
+      "name": "ChangeProxyOwner",
+      "address": "0xa64D3BE0e6F8e7Cf74690Ed528abbA41Ce0fcd05",
+      "id": "0x67314f12",
+      "path": "contracts/actions/utils/ChangeProxyOwner.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    }
 ]

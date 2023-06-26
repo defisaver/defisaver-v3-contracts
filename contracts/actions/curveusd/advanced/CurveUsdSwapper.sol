@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import { ICrvUsdController, ICrvUsdControllerFactory } from "../../../interfaces/curveusd/ICurveUsd.sol";
 import "../../../interfaces/curve/ISwaps.sol";
 import "../../../interfaces/IERC20.sol";
 

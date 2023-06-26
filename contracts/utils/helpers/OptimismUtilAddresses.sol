@@ -19,16 +19,16 @@ contract OptimismUtilAddresses {
     address internal constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant WBTC_ADDR = 0x68f180fcCe6836688e9084f035309E29Bf0A2095;
 
+    address internal constant MKR_PROXY_REGISTRY = 0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895;
+    address internal constant PROXY_FACTORY_ADDR = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
+    address internal constant DFS_PROXY_REGISTRY_ADDR = 0x7cB647205ec73A026fe3566777e5c73Cd5A11b38;
+
     // TODO: not needed now
     address internal constant FEE_RECEIVER_ADMIN_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address internal constant MKR_PROXY_REGISTRY = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address internal constant PROXY_FACTORY_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address internal constant DFS_PROXY_REGISTRY_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant UNI_V2_ROUTER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant WSTETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant STETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
 
-    // TODO: Replace this with our own registry
     address internal constant CHAINLINK_FEED_REGISTRY = 0x7E3D9e4E620842d61aB111a6DbF1be5a8cc91774;
 }

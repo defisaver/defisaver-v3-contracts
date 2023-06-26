@@ -2,13 +2,13 @@
 pragma solidity =0.8.10;
 
 import { ICrvUsdController, ILLAMMA, ICrvUsdControllerFactory, ICurveUsdSwapper } from "../../../interfaces/curveusd/ICurveUsd.sol";
-import "../../../core/DFSRegistry.sol";
 import "../../../interfaces/curve/IAddressProvider.sol";
 
 import "./MainnetCurveUsdAddresses.sol";
+import "../../../utils/TokenUtils.sol";
 
 contract CurveUsdHelper is MainnetCurveUsdAddresses {
-    using SafeERC20 for IERC20;
+    using TokenUtils for address;
 
     error CurveUsdInvalidController();
 
@@ -52,17 +52,10 @@ contract CurveUsdHelper is MainnetCurveUsdAddresses {
     }
 
     function _sendLeftoverFunds(address _controllerAddress, address _to) internal {
-         address collToken = ICrvUsdController(_controllerAddress).collateral_token();
+        address collToken = ICrvUsdController(_controllerAddress).collateral_token();
 
-        uint256 crvUsdBalance = IERC20(CRVUSD_TOKEN_ADDR).balanceOf(address(this));
-        if (crvUsdBalance > 0) {
-            IERC20(CRVUSD_TOKEN_ADDR).safeTransfer(_to, crvUsdBalance);
-        }
-
-        uint256 collBalance = IERC20(collToken).balanceOf(address(this));
-        if (collBalance > 0) {
-            IERC20(collToken).safeTransfer(_to, collBalance);
-        }
+        CRVUSD_TOKEN_ADDR.withdrawTokens(_to, type(uint256).max);
+        collToken.withdrawTokens(_to, type(uint256).max);
     }
 
     /// @dev Helper method for advanced actions to setup the curve path and write to transient storage in CurveUsdSwapper

@@ -102,7 +102,7 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
     /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     /// @param _market Address provider for specific market
     /// @param _assetId The id of the underlying asset to be repaid
-    /// @param _amount Amount of tokens to be payed back
+    /// @param _amount Amount of tokens to be paid back
     /// @param _rateMode Type of borrow debt [Stable: 1, Variable: 2]
     /// @param _from Where are we pulling the payback tokens amount from
     /// @param _onBehalf For what user we are paying back the debt, defaults to proxy

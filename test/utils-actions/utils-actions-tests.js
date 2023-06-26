@@ -26,14 +26,14 @@ const {
     getNftOwner,
     WETH_ADDRESS,
     ETH_ADDR,
-    DFS_REG_CONTROLLER,
-    ADMIN_ACC,
     DAI_ADDR,
     LUSD_ADDR,
     BOND_NFT_ADDR,
     takeSnapshot,
     revertToSnapshot,
     WBTC_ADDR,
+    addrs,
+    getNetwork,
 } = require('../utils');
 
 const { fetchMakerAddresses } = require('../utils-mcd');
@@ -512,27 +512,30 @@ const changeOwnerTest = async () => {
         this.timeout(80000);
 
         let senderAcc; let senderAcc2; let proxy;
+        const network = getNetwork();
 
-        const ADMIN_VAULT = '0xCCf3d848e08b94478Ed8f46fFead3008faF581fD';
+        const ADMIN_VAULT = addrs[network].ADMIN_VAULT;
+        const ADMIN_ACC = addrs[network].ADMIN_ACC;
 
         before(async () => {
-            await impersonateAccount(ADMIN_ACC);
-
-            const signer = await hre.ethers.provider.getSigner(ADMIN_ACC);
-
-            const adminVaultInstance = await hre.ethers.getContractFactory('AdminVault', signer);
-            const adminVault = await adminVaultInstance.attach(ADMIN_VAULT);
-
-            adminVault.connect(signer);
-
-            // change owner in registry to dfsRegController
-            await adminVault.changeOwner(DFS_REG_CONTROLLER);
-
-            await stopImpersonatingAccount(ADMIN_ACC);
-
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAcc2 = (await hre.ethers.getSigners())[1];
             proxy = await getProxy(senderAcc.address);
+
+            if (network === 'mainnet') {
+                // DFSProxyRegistry must be owned by DFSProxyRegistryController on mainnet
+                await sendEther(senderAcc, ADMIN_ACC, '1');
+                await impersonateAccount(ADMIN_ACC);
+
+                const signer = await hre.ethers.provider.getSigner(ADMIN_ACC);
+
+                const adminVaultInstance = await hre.ethers.getContractFactory('AdminVault', signer);
+                const adminVault = await adminVaultInstance.attach(ADMIN_VAULT);
+                adminVault.connect(signer);
+                // change owner in registry to dfsRegController
+                await adminVault.changeOwner(addrs[network].DFS_REG_CONTROLLER);
+                await stopImpersonatingAccount(ADMIN_ACC);
+            }
         });
 
         it('... should change owner of users DSProxy', async () => {
