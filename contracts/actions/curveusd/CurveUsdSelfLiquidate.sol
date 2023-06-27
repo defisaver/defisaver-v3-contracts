@@ -56,8 +56,7 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _curveUsdSelfLiquidate(Params memory _params) internal returns (uint256, bytes memory) {      
-        /// @dev one of the few ways we can check if the controller address is an actual controller
-        if (ICrvUsdControllerFactory(CRVUSD_CONTROLLER_FACTORY_ADDR).debt_ceiling(_params.controllerAddress) == 0) revert CurveUsdInvalidController();
+        if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
         uint256 userWholeDebt = ICrvUsdController(_params.controllerAddress).debt(address(this));
         (uint256 collInCrvUsd, uint256 collInDepositAsset) = getCollAmountsFromAMM(_params.controllerAddress, address(this));

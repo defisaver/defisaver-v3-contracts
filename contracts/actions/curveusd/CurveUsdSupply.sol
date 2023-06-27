@@ -62,8 +62,7 @@ contract CurveUsdSupply is ActionBase, CurveUsdHelper {
         /// @dev see ICrvUsdController natspec
         if (_params.collateralAmount == 0) revert ZeroAmountSupplied();
         
-        /// @dev one of the few ways we can check if the controller address is an actual controller
-        if (ICrvUsdControllerFactory(CRVUSD_CONTROLLER_FACTORY_ADDR).debt_ceiling(_params.controllerAddress) == 0) revert CurveUsdInvalidController();
+        if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
         _params.collateralAmount = collateralAsset.pullTokensIfNeeded(_params.from, _params.collateralAmount);

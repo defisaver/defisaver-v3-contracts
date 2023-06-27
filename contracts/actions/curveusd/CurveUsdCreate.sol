@@ -63,8 +63,7 @@ contract CurveUsdCreate is ActionBase, CurveUsdHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _curveUsdCreate(Params memory _params) internal returns (uint256, bytes memory) {
-        /// @dev one of the few ways we can check if the controller address is an actual controller
-        if (ICrvUsdControllerFactory(CRVUSD_CONTROLLER_FACTORY_ADDR).debt_ceiling(_params.controllerAddress) == 0) revert CurveUsdInvalidController();
+        if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
         _params.collateralAmount = collateralAsset.pullTokensIfNeeded(_params.from, _params.collateralAmount);

@@ -68,8 +68,7 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
         /// @dev see ICrvUsdController natspec
         if (_params.paybackAmount == 0) revert ZeroAmountPayback();
         
-        /// @dev one of the few ways we can check if the controller address is an actual controller
-        if (ICrvUsdControllerFactory(CRVUSD_CONTROLLER_FACTORY_ADDR).debt_ceiling(_params.controllerAddress) == 0) revert CurveUsdInvalidController();
+        if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
         if (_params.onBehalfOf == address(0)) _params.onBehalfOf = address(this);
 

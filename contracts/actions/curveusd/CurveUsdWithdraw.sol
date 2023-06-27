@@ -60,9 +60,8 @@ contract CurveUsdWithdraw is ActionBase, CurveUsdHelper {
         /// @dev see ICrvUsdController natspec
         if (_params.collateralAmount == 0) revert ZeroAmountWithdraw();
  
-        /// @dev one of the few ways we can check if the controller address is an actual controller
-        if (ICrvUsdControllerFactory(CRVUSD_CONTROLLER_FACTORY_ADDR).debt_ceiling(_params.controllerAddress) == 0) revert CurveUsdInvalidController();
-
+        if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
+        
         /// @dev figure out if we need this calculated on-chain
         if (_params.collateralAmount == type(uint256).max) {
             _params.collateralAmount = userMaxWithdraw(_params.controllerAddress, address(this));
