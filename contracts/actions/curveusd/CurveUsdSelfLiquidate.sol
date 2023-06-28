@@ -62,16 +62,13 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
         (uint256 collInCrvUsd, uint256 collInDepositAsset) = getCollAmountsFromAMM(_params.controllerAddress, address(this));
 
         uint256 amountToPull;
-        uint256 startingCrvUsdBalance;
 
-        // if we don't have enough crvUsd in coll, pull the rest from the user
+        
         if (collInCrvUsd < userWholeDebt) {
+            // if we don't have enough crvUsd in coll, pull the rest from the user
             amountToPull = userWholeDebt - collInCrvUsd;
-            // pull and approve if needed
             amountToPull = CRVUSD_TOKEN_ADDR.pullTokensIfNeeded(_params.from, amountToPull);
             CRVUSD_TOKEN_ADDR.approveToken(_params.controllerAddress, amountToPull);
-        } else {
-            startingCrvUsdBalance = CRVUSD_TOKEN_ADDR.getBalance(address(this));
         }
 
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
@@ -86,8 +83,7 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
 
         // send leftover crvUsd to user
         if (collInCrvUsd > userWholeDebt) {
-            uint256 crvUsdBalanceAfter = CRVUSD_TOKEN_ADDR.getBalance(address(this));
-            CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, (crvUsdBalanceAfter - startingCrvUsdBalance));
+            CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, (collInCrvUsd - userWholeDebt));
         }
 
         return (
