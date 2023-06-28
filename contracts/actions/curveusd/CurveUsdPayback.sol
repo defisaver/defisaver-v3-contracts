@@ -75,17 +75,11 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
         /// @dev debtAmount > debt is safe, need to make sure we dont pull more than needed
         /// @dev this also closes the position
         bool isClose;
-        uint256 closeCrvUsdAmount;
-        uint256 closeCollateralAmount;
         uint256 debt = ICrvUsdController(_params.controllerAddress).debt(_params.onBehalfOf);
+        
         if (_params.paybackAmount >= debt) {
             _params.paybackAmount = debt;
             isClose = true;
-
-            address llammaAddress = ICrvUsdController(_params.controllerAddress).amm();
-            uint256[2] memory xy = ILLAMMA(llammaAddress).get_sum_xy(address(this));
-            closeCrvUsdAmount = xy[0];
-            closeCollateralAmount = xy[1];
         }
 
         _params.paybackAmount = CRVUSD_TOKEN_ADDR.pullTokensIfNeeded(_params.from, _params.paybackAmount);
@@ -93,21 +87,34 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
 
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
 
-        if (collateralAsset == TokenUtils.WETH_ADDR && isClose){
+
+        uint256 startingBaseCollBalance;
+        uint256 startingCrvUsdBalance;
+        if (isClose) {
+            startingBaseCollBalance = collateralAsset.getBalance(address(this));
+            startingCrvUsdBalance = CRVUSD_TOKEN_ADDR.getBalance(address(this)) - debt;
+        }
+
+        if (collateralAsset == TokenUtils.WETH_ADDR){
             ICrvUsdController(_params.controllerAddress).repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand, false);
         } else {
             ICrvUsdController(_params.controllerAddress).repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand);
         }
 
+        uint256 baseReceivedFromColl;
+        uint256 crvUsdReceivedFromColl;
         if (isClose) {
-            collateralAsset.withdrawTokens(_params.to, closeCollateralAmount);
-            CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, closeCrvUsdAmount);
+            baseReceivedFromColl = collateralAsset.getBalance(address(this)) - startingBaseCollBalance;
+            crvUsdReceivedFromColl = CRVUSD_TOKEN_ADDR.getBalance(address(this)) - startingCrvUsdBalance;
+
+            collateralAsset.withdrawTokens(_params.to, baseReceivedFromColl);
+            CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, crvUsdReceivedFromColl);
         }
 
         /// @dev figure out what to return here, as this action can also close, transfering tokens
         return (
             _params.paybackAmount,
-            abi.encode(_params, closeCollateralAmount, closeCrvUsdAmount)
+            abi.encode(_params, baseReceivedFromColl, crvUsdReceivedFromColl)
         );
     }
 

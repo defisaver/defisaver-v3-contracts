@@ -65,29 +65,44 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
 
         
         if (collInCrvUsd < userWholeDebt) {
+            /// @dev in some cases debt - collInCrvUsd will fall few wei short of closing the position
+            uint256 EXTRA_BUFFER_VALUE = 1000;
             // if we don't have enough crvUsd in coll, pull the rest from the user
-            amountToPull = userWholeDebt - collInCrvUsd;
+            amountToPull = userWholeDebt - collInCrvUsd + EXTRA_BUFFER_VALUE;
             amountToPull = CRVUSD_TOKEN_ADDR.pullTokensIfNeeded(_params.from, amountToPull);
             CRVUSD_TOKEN_ADDR.approveToken(_params.controllerAddress, amountToPull);
         }
 
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
+        
+        uint256 collAssetBalancePreLiq = collateralAsset.getBalance(address(this));
+        uint256 crvUsdBalancePreLiq = CRVUSD_TOKEN_ADDR.getBalance(address(this));
 
-        if (collateralAsset != TokenUtils.WETH_ADDR){
-            ICrvUsdController(_params.controllerAddress).liquidate(address(this), _params.minCrvUsdExpected);
-        } else {
+        if (collateralAsset == TokenUtils.WETH_ADDR){
             ICrvUsdController(_params.controllerAddress).liquidate(address(this), _params.minCrvUsdExpected, false);
+        } else {
+            ICrvUsdController(_params.controllerAddress).liquidate(address(this), _params.minCrvUsdExpected);
         }
 
-        collateralAsset.withdrawTokens(_params.to, collInDepositAsset);
+        uint256 collAssetBalanceAfterLiq = collateralAsset.getBalance(address(this));
+        uint256 crvUsdBalanceAfterLiq = CRVUSD_TOKEN_ADDR.getBalance(address(this));
 
-        // send leftover crvUsd to user
+        uint256 collAssetReceivedFromLiq = collAssetBalanceAfterLiq - collAssetBalancePreLiq;
+        collateralAsset.withdrawTokens(_params.to, collAssetReceivedFromLiq);
+        
         if (collInCrvUsd > userWholeDebt) {
-            CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, (collInCrvUsd - userWholeDebt));
+            // we return any extra CrvUSD that was left in coll after liquidation
+            uint256 extraCrvUsdFromColl = crvUsdBalanceAfterLiq - crvUsdBalancePreLiq;
+            CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, extraCrvUsdFromColl);
+        } else {
+            // we return any extra CrvUSD that was not needed in debt and remove any extra approval
+            uint256 unneededPulledCrvUSD = amountToPull - (crvUsdBalancePreLiq - crvUsdBalanceAfterLiq);
+            CRVUSD_TOKEN_ADDR.withdrawTokens(_params.from, unneededPulledCrvUSD);
+            CRVUSD_TOKEN_ADDR.approveToken(_params.controllerAddress, 0);
         }
 
         return (
-            amountToPull,
+            collAssetReceivedFromLiq,
             abi.encode(_params, collInCrvUsd, collInDepositAsset, userWholeDebt)
         );
     }

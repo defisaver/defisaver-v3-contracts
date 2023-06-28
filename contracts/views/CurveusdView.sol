@@ -51,6 +51,7 @@ contract CurveUsdView {
     uint256 liquidationDiscount;
     int256 health;
     int256[2] bandRange;
+    uint256[][2] usersBands;
   }
 
   function userData(address market, address user) external view returns (UserData memory) {
@@ -59,6 +60,7 @@ contract CurveUsdView {
 
       if (!ctrl.loan_exists(user)) {
         int256[2] memory bandRange = [int256(0), int256(0)];
+        uint256[][2] memory usersBands;
 
         return UserData({
           loanExists: false,
@@ -71,7 +73,8 @@ contract CurveUsdView {
           priceHigh: 0,
           liquidationDiscount: 0,
           health: 0,
-          bandRange: bandRange
+          bandRange: bandRange,
+          usersBands: usersBands
         });
       }
 
@@ -89,7 +92,8 @@ contract CurveUsdView {
         priceHigh: prices[0],
         liquidationDiscount: ctrl.liquidation_discount(),
         health: ctrl.health(user, true),
-        bandRange: amm.read_user_tick_numbers(user)
+        bandRange: amm.read_user_tick_numbers(user),
+        usersBands: amm.get_xy(user)
       });
   }
 

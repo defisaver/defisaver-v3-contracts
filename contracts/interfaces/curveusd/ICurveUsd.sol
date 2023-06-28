@@ -60,6 +60,7 @@ interface ICrvUsdControllerFactory {
 interface ILLAMMA {
     function active_band_with_skip() external view returns (int256);
     function get_sum_xy(address) external view returns (uint256[2] memory);
+    function get_xy(address) external view returns (uint256[][2] memory);
     function get_p() external view returns (uint256);
     function read_user_tick_numbers(address) external view returns (int256[2] memory);
     function p_oracle_up(int256) external view returns (uint256);
