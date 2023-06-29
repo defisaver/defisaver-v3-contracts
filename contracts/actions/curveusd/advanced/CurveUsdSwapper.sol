@@ -6,10 +6,9 @@ import "../../../interfaces/IERC20.sol";
 
 import "../../../utils/SafeERC20.sol";
 import "../helpers/CurveUsdHelper.sol";
-import "../../frax/helpers/FraxHelper.sol";
 
 /// @title CurveUsdSwapper Callback contract for CurveUsd extended actions, swaps directly on curve
-contract CurveUsdSwapper is CurveUsdHelper, FraxHelper {
+contract CurveUsdSwapper is CurveUsdHelper {
     using SafeERC20 for IERC20;
 
     struct CallbackData {
@@ -117,15 +116,9 @@ contract CurveUsdSwapper is CurveUsdHelper, FraxHelper {
         uint256 swapAmount = _swapData[0];
         uint256 minAmountOut = _swapData[1];
 
-        // if srcToken is sfrxETH we need to unstake it to frxETH to swap
         address srcToken = _collToUsd ? _collToken : CRVUSD_TOKEN_ADDR;
-        if (srcToken == SFRXETH_ADDR) {
-            srcToken = FRXETH_ADDR;
-            swapAmount = unstakeSfrxETH(swapAmount);
-        }
-
         IERC20(srcToken).safeApprove(address(exchangeContract), swapAmount);
-        
+
         SwapRoutes memory swapRoutes = getSwapPath(_swapData, _collToken, _collToUsd);
 
         amountOut = exchangeContract.exchange_multiple(
@@ -135,10 +128,6 @@ contract CurveUsdSwapper is CurveUsdHelper, FraxHelper {
             minAmountOut
         );
 
-        // if coll is sfrxETH, we need to stake our received frxETH
-        if (!_collToUsd && _collToken == SFRXETH_ADDR){
-            amountOut = stakeFrxETH(amountOut);
-        }
         // free the storage only needed inside tx as transient storage
         delete additionalRoutes;
     }
