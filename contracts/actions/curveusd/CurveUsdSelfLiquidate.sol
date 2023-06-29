@@ -9,6 +9,9 @@ import "./helpers/CurveUsdHelper.sol";
 contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 
+    /// @dev we pull 1000 wei more of crvUsd because sometimes AMM.withdraw() math is off by few wei
+    uint256 internal constant EXTRA_BUFFER = 1000;
+
     /// @param controllerAddress Address of the curveusd market controller
     /// @param minCrvUsdExpected Minimum amount of crvUsd as collateral for the user to have
     /// @param from Address from which to pull crvUSD if needed
@@ -62,13 +65,11 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
         (uint256 collInCrvUsd, uint256 collInDepositAsset) = getCollAmountsFromAMM(_params.controllerAddress, address(this));
 
         uint256 amountToPull;
-
         
         if (collInCrvUsd < userWholeDebt) {
             /// @dev in some cases debt - collInCrvUsd will fall few wei short of closing the position
-            uint256 EXTRA_BUFFER_VALUE = 1000;
             // if we don't have enough crvUsd in coll, pull the rest from the user
-            amountToPull = userWholeDebt - collInCrvUsd + EXTRA_BUFFER_VALUE;
+            amountToPull = userWholeDebt - collInCrvUsd + EXTRA_BUFFER;
             amountToPull = CRVUSD_TOKEN_ADDR.pullTokensIfNeeded(_params.from, amountToPull);
             CRVUSD_TOKEN_ADDR.approveToken(_params.controllerAddress, amountToPull);
         }
@@ -96,8 +97,9 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
             CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, extraCrvUsdFromColl);
         } else {
             // we return any extra CrvUSD that was not needed in debt and remove any extra approval
-            uint256 unneededPulledCrvUSD = amountToPull - (crvUsdBalancePreLiq - crvUsdBalanceAfterLiq);
-            CRVUSD_TOKEN_ADDR.withdrawTokens(_params.from, unneededPulledCrvUSD);
+            uint256 crvUsdPulledForLiq = crvUsdBalancePreLiq - crvUsdBalanceAfterLiq;
+            uint256 leftoverPulledCrvUsd = amountToPull - crvUsdPulledForLiq;
+            CRVUSD_TOKEN_ADDR.withdrawTokens(_params.from, leftoverPulledCrvUsd);
             CRVUSD_TOKEN_ADDR.approveToken(_params.controllerAddress, 0);
         }
 
