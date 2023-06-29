@@ -85,8 +85,6 @@ contract CurveUsdLevCreate is ActionBase, CurveUsdHelper {
             swapData
         );
 
-        // TODO: cleanup???
-
         return (
             _params.debtAmount,
             abi.encode(_params)

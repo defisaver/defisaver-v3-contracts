@@ -65,9 +65,8 @@ contract CurveUsdSwapper is CurveUsdHelper {
         // check if controller is valid
         if (!isControllerValid(controllerAddr)) revert CurveUsdInvalidController();
 
-        // we get _ethCollAmount in tokens from curve
         address collToken = ICrvUsdController(controllerAddr).collateral_token();
-
+        // controller sent swapData[0] of crvUSD to swapper
         uint256 swappedAmount = _curveSwap(swapData, collToken, false);
 
         // set collAmount and approve for controller to pull
