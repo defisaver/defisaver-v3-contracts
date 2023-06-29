@@ -135,6 +135,8 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
             it(`... should test create collateral=maxUint debt=maxUint for ${assetSymbol} market`, async () => {
                 await revertToSnapshot(snapshot);
 
+                snapshot = await takeSnapshot();
+
                 const collateralAmount = ethers.utils.parseUnits('10');
                 const nBands = 5;
 
@@ -150,7 +152,6 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
                     nBands,
                 });
             });
-        /*
             it(`... should test leverage create for ${assetSymbol} market`, async () => {
                 await revertToSnapshot(snapshot);
 
@@ -185,8 +186,6 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
                 console.log('collateral', collateral / 1e18);
                 console.log('debt', debt / 1e18);
             });
-
-        */
         });
 });
 
