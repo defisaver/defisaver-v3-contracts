@@ -79,11 +79,7 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
         uint256 collAssetBalancePreLiq = collateralAsset.getBalance(address(this));
         uint256 crvUsdBalancePreLiq = CRVUSD_TOKEN_ADDR.getBalance(address(this));
 
-        if (collateralAsset == TokenUtils.WETH_ADDR){
-            ICrvUsdController(_params.controllerAddress).liquidate(address(this), _params.minCrvUsdExpected, false);
-        } else {
-            ICrvUsdController(_params.controllerAddress).liquidate(address(this), _params.minCrvUsdExpected);
-        }
+        ICrvUsdController(_params.controllerAddress).liquidate(address(this), _params.minCrvUsdExpected, false);
 
         uint256 collAssetBalanceAfterLiq = collateralAsset.getBalance(address(this));
         uint256 crvUsdBalanceAfterLiq = CRVUSD_TOKEN_ADDR.getBalance(address(this));

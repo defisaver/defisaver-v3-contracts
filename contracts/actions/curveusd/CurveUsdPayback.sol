@@ -7,7 +7,7 @@ import "./helpers/CurveUsdHelper.sol";
 
 /// @title Action that pays back crvUSD to a curveusd position
 /// @dev paybackAmount must be non-zero
-/// @dev if paybackAmount >= debt will repay whole debt and close the position, transfering collateral
+/// @dev if paybackAmount >= debt will repay whole debt and close the position, transferring collateral
 contract CurveUsdPayback is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 
@@ -89,29 +89,24 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
 
 
         uint256 startingBaseCollBalance;
-        uint256 startingCrvUsdBalance;
+        uint256 startingCrvUsdBalanceWithoutDebt;
         if (isClose) {
             startingBaseCollBalance = collateralAsset.getBalance(address(this));
-            startingCrvUsdBalance = CRVUSD_TOKEN_ADDR.getBalance(address(this)) - debt;
+            startingCrvUsdBalanceWithoutDebt = CRVUSD_TOKEN_ADDR.getBalance(address(this)) - debt;
         }
 
-        if (collateralAsset == TokenUtils.WETH_ADDR){
-            ICrvUsdController(_params.controllerAddress).repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand, false);
-        } else {
-            ICrvUsdController(_params.controllerAddress).repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand);
-        }
-
+        ICrvUsdController(_params.controllerAddress).repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand, false);
+        
         uint256 baseReceivedFromColl;
         uint256 crvUsdReceivedFromColl;
         if (isClose) {
             baseReceivedFromColl = collateralAsset.getBalance(address(this)) - startingBaseCollBalance;
-            crvUsdReceivedFromColl = CRVUSD_TOKEN_ADDR.getBalance(address(this)) - startingCrvUsdBalance;
+            crvUsdReceivedFromColl = CRVUSD_TOKEN_ADDR.getBalance(address(this)) - startingCrvUsdBalanceWithoutDebt;
 
             collateralAsset.withdrawTokens(_params.to, baseReceivedFromColl);
             CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, crvUsdReceivedFromColl);
         }
 
-        /// @dev figure out what to return here, as this action can also close, transfering tokens
         return (
             _params.paybackAmount,
             abi.encode(_params, baseReceivedFromColl, crvUsdReceivedFromColl)

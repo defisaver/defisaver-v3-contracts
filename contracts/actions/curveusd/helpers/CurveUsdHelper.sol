@@ -21,27 +21,13 @@ contract CurveUsdHelper is MainnetCurveUsdAddresses {
     }
 
     function userMaxWithdraw(address _controllerAddress, address _user) public view returns (uint256 maxWithdraw) {
-        address llammaAddress = ICrvUsdController(_controllerAddress).amm();
-        int256[2] memory ticks = ILLAMMA(llammaAddress).read_user_tick_numbers(_user);
-        uint256[2] memory xy = ILLAMMA(llammaAddress).get_sum_xy(_user);
-        
-        uint256 collateral = xy[1];
-        uint256 debt = ICrvUsdController(_controllerAddress).debt(_user);
-        uint256 nBands = uint256(ticks[1] - ticks[0]) + 1;
-
-        return collateral - ICrvUsdController(_controllerAddress).min_collateral(debt, nBands);
+        uint256[4] memory userState = ICrvUsdController(_controllerAddress).user_state(_user);
+        return userState[0] - ICrvUsdController(_controllerAddress).min_collateral(userState[2], userState[3]);
     }
 
     function userMaxBorrow(address _controllerAddress, address _user) public view returns (uint256 maxBorrow) {
-        address llammaAddress = ICrvUsdController(_controllerAddress).amm();
-        int256[2] memory ticks = ILLAMMA(llammaAddress).read_user_tick_numbers(_user);
-        uint256[2] memory xy = ILLAMMA(llammaAddress).get_sum_xy(_user);
-        
-        uint256 collateral = xy[1];
-        uint256 debt = ICrvUsdController(_controllerAddress).debt(_user);
-        uint256 nBands = uint256(ticks[1] - ticks[0]) + 1;
-
-        return ICrvUsdController(_controllerAddress).max_borrowable(collateral, nBands) - debt;
+        uint256[4] memory userState = ICrvUsdController(_controllerAddress).user_state(_user);
+        return ICrvUsdController(_controllerAddress).max_borrowable(userState[0], userState[3]) - userState[2];
     }
 
     function getCollAmountsFromAMM(address _controllerAddress, address _user) public view returns (uint256 crvUsdAmount, uint256 collAmount) {

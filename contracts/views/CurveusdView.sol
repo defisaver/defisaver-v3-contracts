@@ -148,7 +148,7 @@ contract CurveUsdView {
     uint256 assetDec = IERC20(collAsset).decimals();
     uint256 collForHealthCalc = collateral;
 
-    assetDec > 18 ? (collateral / 10 ** (assetDec - 18)) : (collateral * 10 ** (18 - assetDec));
+    collForHealthCalc = assetDec > 18 ? (collateral / 10 ** (assetDec - 18)) : (collateral * 10 ** (18 - assetDec));
 
     int256 health = ctrl.health_calculator(address(0x00), int256(collForHealthCalc), int256(debt), true, N);
 
