@@ -134,6 +134,7 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
 
             it(`... should test create collateral=maxUint debt=maxUint for ${assetSymbol} market`, async () => {
                 await revertToSnapshot(snapshot);
+                snapshot = await takeSnapshot();
 
                 const collateralAmount = ethers.utils.parseUnits('10');
                 const nBands = 5;
@@ -150,25 +151,26 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
                     nBands,
                 });
             });
-        /*
+
             it(`... should test leverage create for ${assetSymbol} market`, async () => {
                 await revertToSnapshot(snapshot);
 
                 await redeploy('CurveUsdSwapper');
                 await redeploy('CurveUsdLevCreate');
-                await redeploy('CurveUsdPayback');
 
-                const collateralAmount = ethers.utils.parseUnits('3');
+                const collateralAmount = ethers.utils.parseUnits('10');
                 const debtAmount = '1000';
                 const debtAmountWei = ethers.utils.parseUnits(debtAmount);
 
                 const nBands = 5;
-
                 await setBalance(collateralAsset, senderAcc.address, collateralAmount);
                 await approve(collateralAsset, proxy.address);
 
-                const exchangeObj = await formatExchangeObjCurve(crvusdAddress, getAssetInfo(assetSymbol).address, collateralAmount, addrs.mainnet.CURVE_USD_WRAPPER);
-
+                let collAddr = getAssetInfo(assetSymbol).address;
+                if (assetSymbol === 'sfrxETH') {
+                    collAddr = '0x5E8422345238F34275888049021821E8E08CAa1f';
+                }
+                const exchangeObj = await formatExchangeObjCurve(crvusdAddress, collAddr, debtAmount, addrs.mainnet.CURVE_USD_WRAPPER);
                 await curveUsdLevCreate(
                     proxy,
                     controllerAddress,
@@ -185,8 +187,6 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
                 console.log('collateral', collateral / 1e18);
                 console.log('debt', debt / 1e18);
             });
-
-        */
         });
 });
 
