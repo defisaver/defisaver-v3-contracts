@@ -67,8 +67,10 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
         
         ICrvUsdController(_params.controllerAddress).repay_extended(curveUsdSwapper, swapData);
 
-        // TODO: CurveSwapper cleanup???
+        // cleanup after the callback if any funds are left over
+        CurveUsdSwapper(curveUsdSwapper).withdrawAll(_params.controllerAddress);
 
+        // send funds to user
         _sendLeftoverFunds(_params.controllerAddress, _params.to);
 
         return (

@@ -4,12 +4,17 @@ pragma solidity =0.8.10;
 import "../../../interfaces/curve/ISwaps.sol";
 import "../../../interfaces/IERC20.sol";
 
+import "../../../auth/AdminAuth.sol";
 import "../../../utils/SafeERC20.sol";
 import "../helpers/CurveUsdHelper.sol";
+import "../../../utils/Discount.sol";
+import "../../../utils/FeeRecipient.sol";
+import "../../../exchangeV3/helpers/ExchangeHelper.sol";
 
 /// @title CurveUsdSwapper Callback contract for CurveUsd extended actions, swaps directly on curve
-contract CurveUsdSwapper is CurveUsdHelper {
+contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, AdminAuth {
     using SafeERC20 for IERC20;
+    using TokenUtils for address;
 
     struct CallbackData {
         uint256 stablecoins;
@@ -26,7 +31,7 @@ contract CurveUsdSwapper is CurveUsdHelper {
 
     ///@dev Called by curve controller from repay_extended method, sends collateral tokens to this contract
     function callback_repay(
-        address,
+        address _user,
         uint256,
         uint256,
         uint256,
@@ -40,7 +45,7 @@ contract CurveUsdSwapper is CurveUsdHelper {
         // we get _ethCollAmount in tokens from curve
         address collToken = ICrvUsdController(controllerAddr).collateral_token();
 
-       uint256 swappedAmount = _curveSwap(swapData, collToken, true);
+       uint256 swappedAmount = _curveSwap(_user, swapData, collToken, true);
 
         // how many crvUsd we got after the trade that will be the repay amount
         cb.stablecoins = swappedAmount;
@@ -54,7 +59,7 @@ contract CurveUsdSwapper is CurveUsdHelper {
     }
 
     function callback_deposit(
-        address,
+        address _user,
         uint256,
         uint256,
         uint256,
@@ -67,7 +72,7 @@ contract CurveUsdSwapper is CurveUsdHelper {
 
         address collToken = ICrvUsdController(controllerAddr).collateral_token();
         // controller sent swapData[0] of crvUSD to swapper
-        uint256 swappedAmount = _curveSwap(swapData, collToken, false);
+        uint256 swappedAmount = _curveSwap(_user, swapData, collToken, false);
 
         // set collAmount and approve for controller to pull
         cb.collateral = swappedAmount;
@@ -75,7 +80,7 @@ contract CurveUsdSwapper is CurveUsdHelper {
     }
 
     function callback_liquidate(
-        address,
+        address _user,
         uint256,
         uint256,
         uint256,
@@ -89,7 +94,7 @@ contract CurveUsdSwapper is CurveUsdHelper {
         // we get _ethCollAmount in tokens from curve
         address collToken = ICrvUsdController(controllerAddr).collateral_token();
 
-        uint256 swappedAmount = _curveSwap(swapData, collToken, true);
+        uint256 swappedAmount = _curveSwap(_user, swapData, collToken, true);
 
         // how many crvUsd we got after the trade that will be the repay amount
         cb.stablecoins = swappedAmount;
@@ -106,9 +111,17 @@ contract CurveUsdSwapper is CurveUsdHelper {
         additionalRoutes = _additionalRoutes;
     }
 
+    /// @dev No funds should be stored on this contract, but if anything is left send back to the user
+    function withdrawAll(address _controllerAddress) external {
+        address collToken = ICrvUsdController(_controllerAddress).collateral_token();
+
+        CRVUSD_TOKEN_ADDR.withdrawTokens(msg.sender, type(uint256).max);
+        collToken.withdrawTokens(msg.sender, type(uint256).max);
+    }
+
     /////////////////////////////// INTERNAL FUNCTIONS ///////////////////////////////
 
-    function _curveSwap(uint256[] memory _swapData, address _collToken, bool _collToUsd) internal returns (uint256 amountOut) {
+    function _curveSwap(address _user, uint256[] memory _swapData, address _collToken, bool _collToUsd) internal returns (uint256 amountOut) {
         ISwaps exchangeContract = ISwaps(
                 addressProvider.get_address(2)
         );
@@ -117,6 +130,15 @@ contract CurveUsdSwapper is CurveUsdHelper {
         uint256 minAmountOut = _swapData[1];
 
         address srcToken = _collToUsd ? _collToken : CRVUSD_TOKEN_ADDR;
+
+        // get dfs fee and update swap amount
+        swapAmount -= getFee(
+            swapAmount,
+            _user,
+            srcToken,
+            400
+        );
+
         IERC20(srcToken).safeApprove(address(exchangeContract), swapAmount);
 
         SwapRoutes memory swapRoutes = getSwapPath(_swapData, _collToken, _collToUsd);
@@ -132,7 +154,7 @@ contract CurveUsdSwapper is CurveUsdHelper {
         delete additionalRoutes;
     }
 
-    /// @dev Unpack the curve swap path from calldata and additonalRoutes
+    /// @dev Unpack the curve swap path from calldata and additionalRoutes
     function getSwapPath(uint256[] memory swapData, address _collToken, bool _collToUsd) public view returns (SwapRoutes memory swapRoutes) {
         swapRoutes.swap_params = decodeSwapParams(swapData[2]);
 
@@ -148,6 +170,32 @@ contract CurveUsdSwapper is CurveUsdHelper {
         swapRoutes.route[6] = additionalRoutes[3];
         swapRoutes.route[7] = additionalRoutes[4];
         swapRoutes.route[8] = additionalRoutes[5];
+    }
+
+    function getFee(
+        uint256 _amount,
+        address _user,
+        address _token,
+        uint256 _dfsFeeDivider
+    ) internal returns (uint256 feeAmount) {
+        if (_dfsFeeDivider != 0 && Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_user)) {
+            _dfsFeeDivider = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_user);
+        }
+
+        if (_dfsFeeDivider == 0) {
+            feeAmount = 0;
+        } else {
+            feeAmount = _amount / _dfsFeeDivider;
+
+            // fee can't go over 10% of the whole amount
+            if (feeAmount > (_amount / 10)) {
+                feeAmount = _amount / 10;
+            }
+
+            address walletAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();
+
+            _token.withdrawTokens(walletAddr, feeAmount);
+        }
     }
 
     /// @dev Encode swapParams in 1 uint256 as the values are small

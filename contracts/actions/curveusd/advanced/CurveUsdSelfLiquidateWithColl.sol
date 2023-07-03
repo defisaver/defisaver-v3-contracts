@@ -74,6 +74,10 @@ contract CurveUsdSelfLiquidateWithColl is ActionBase, CurveUsdHelper {
             .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, false, curveUsdSwapper, swapData);
 
 
+        // cleanup after the callback if any funds are left over
+        CurveUsdSwapper(curveUsdSwapper).withdrawAll(_params.controllerAddress);
+
+        // send funds to user
         _sendLeftoverFunds(_params.controllerAddress, _params.to);
 
         return (
