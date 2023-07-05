@@ -2438,6 +2438,346 @@ const aaveV3SwitchCollateralCallDataOptimised = async (
     return receipt;
 };
 
+const sparkSupply = async (
+    proxy, market, amount, tokenAddr, assetId, from, signer,
+) => {
+    const aaveSupplyAddr = await getAddrFromRegistry('SparkSupply');
+
+    const aaveSupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        true, market, amount.toString(), from, tokenAddr, assetId, true, false, nullAddress,
+    );
+
+    await approve(tokenAddr, proxy.address, signer);
+    const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
+
+    console.log('call supply');
+
+    const receipt = await proxy['execute(address,bytes)'](aaveSupplyAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkSupply: ${gasUsed}`);
+    return receipt;
+};
+const sparkSupplyCalldataOptimised = async (
+    proxy, market, amount, tokenAddr, assetId, from,
+) => {
+    console.log(from);
+    const aaveSupplyAddr = await getAddrFromRegistry('SparkSupply');
+    let contract = await hre.ethers.getContractAt('SparkSupply', aaveSupplyAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+    const encodedInput = await contract.encodeInputs(
+        [amount, from, assetId, true, true, false, market, nullAddress],
+    );
+
+    const aaveSupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        true, market, amount.toString(), from, tokenAddr, assetId, true, false, nullAddress,
+    );
+
+    const functionData = aaveSupplyAction.encodeForDsProxyCall()[1];
+    console.log(functionData.toLowerCase() === encodedInput);
+
+    await approve(tokenAddr, proxy.address);
+
+    const receipt = await proxy['execute(address,bytes)'](aaveSupplyAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkSupplyCalldataOptimised: ${gasUsed}`);
+    return receipt;
+};
+const sparkWithdraw = async (
+    proxy, market, assetId, amount, to,
+) => {
+    const aaveWithdrawAddr = await getAddrFromRegistry('SparkWithdraw');
+
+    const aaveWithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        true, market, amount.toString(), to, assetId,
+    );
+
+    const functionData = aaveWithdrawAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](aaveWithdrawAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkWithdraw: ${gasUsed}`);
+    return receipt;
+};
+const sparkWithdrawCalldataOptimised = async (
+    proxy, market, assetId, amount, to,
+) => {
+    const aaveWithdrawAddr = await getAddrFromRegistry('SparkWithdraw');
+    let contract = await hre.ethers.getContractAt('SparkWithdraw', aaveWithdrawAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+
+    const encodedInput = await contract.encodeInputs(
+        [assetId, true, amount, to, market],
+    );
+
+    const aaveWithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        true, market, amount.toString(), to, assetId,
+    );
+    const functionData = aaveWithdrawAction.encodeForDsProxyCall()[1];
+    console.log(functionData.toLowerCase() === encodedInput);
+
+    const receipt = await proxy['execute(address,bytes)'](aaveWithdrawAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkWithdrawCalldataOptimised: ${gasUsed}`);
+    return receipt;
+};
+const sparkBorrow = async (
+    proxy, market, amount, to, rateMode, assetId,
+) => {
+    const aaveBorrowAddr = await getAddrFromRegistry('SparkBorrow');
+
+    const aaveBorrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
+        true, market, amount.toString(), to, rateMode, assetId, true, nullAddress,
+    );
+    const functionData = aaveBorrowAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](aaveBorrowAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkBorrow: ${gasUsed}`);
+    return receipt;
+};
+const sparkBorrowCalldataOptimised = async (
+    proxy, market, amount, to, rateMode, assetId,
+) => {
+    const aaveBorrowAddr = await getAddrFromRegistry('SparkBorrow');
+    let contract = await hre.ethers.getContractAt('SparkBorrow', aaveBorrowAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+
+    const encodedInput = await contract.encodeInputs(
+        [amount, to, rateMode, assetId, true, true, market, nullAddress],
+    );
+    const aaveBorrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
+        true, market, amount.toString(), to, rateMode, assetId, true, nullAddress,
+    );
+    const functionData = aaveBorrowAction.encodeForDsProxyCall()[1];
+
+    console.log(functionData.toLowerCase() === encodedInput);
+
+    const receipt = await proxy['execute(address,bytes)'](aaveBorrowAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkBorrowCalldataOptimised: ${gasUsed}`);
+    return receipt;
+};
+const sparkSwapBorrowRate = async (
+    proxy, assetId, rateMode,
+) => {
+    const aaveSwapRateAddr = await getAddrFromRegistry('SparkSwapBorrowRateMode');
+
+    const aaveSwapRateAction = new dfs.actions.aaveV3.AaveV3SwapBorrowRateModeAction(
+        true, nullAddress, rateMode, assetId,
+    );
+    const functionData = aaveSwapRateAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](aaveSwapRateAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkSwapRate: ${gasUsed}`);
+    return receipt;
+};
+const sparkSwapBorrowRateCalldataOptimised = async (
+    proxy, assetId, rateMode,
+) => {
+    const aaveSwapRateAddr = await getAddrFromRegistry('SparkSwapBorrowRateMode');
+    let contract = await hre.ethers.getContractAt('SparkSwapBorrowRateMode', aaveSwapRateAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+
+    const encodedInput = await contract.encodeInputs(
+        [rateMode, assetId, true, nullAddress],
+    );
+    const aaveSwapRateAction = new dfs.actions.aaveV3.AaveV3SwapBorrowRateModeAction(
+        true, nullAddress, rateMode, assetId,
+    );
+    const functionData = aaveSwapRateAction.encodeForDsProxyCall()[1];
+
+    console.log(functionData.toLowerCase() === encodedInput);
+
+    const receipt = await proxy['execute(address,bytes)'](aaveSwapRateAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkSwapRateOptimised: ${gasUsed}`);
+    return receipt;
+};
+
+const sparkPayback = async (
+    proxy, market, amount, from, rateMode, assetId, tokenAddr,
+) => {
+    const aavePaybackAddr = await getAddrFromRegistry('SparkPayback');
+
+    const aavePaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        true, market, amount.toString(), from, rateMode, tokenAddr, assetId, false, nullAddress,
+    );
+    const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkPayback: ${gasUsed}`);
+    return receipt;
+};
+const sparkPaybackCalldataOptimised = async (
+    proxy, market, amount, from, rateMode, assetId, tokenAddr,
+) => {
+    const aavePaybackAddr = await getAddrFromRegistry('SparkPayback');
+    let contract = await hre.ethers.getContractAt('SparkPayback', aavePaybackAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+
+    const encodedInput = await contract.encodeInputs(
+        [amount, from, rateMode, assetId, true, false, market, nullAddress],
+    );
+
+    const aavePaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        true, market, amount.toString(), from, rateMode, tokenAddr, assetId, false, nullAddress,
+    );
+    const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
+    console.log(functionData.toLowerCase() === encodedInput);
+
+    const receipt = await proxy['execute(address,bytes)'](aavePaybackAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkPaybackCalldataOptimised: ${gasUsed}`);
+    return receipt;
+};
+const sparkATokenPayback = async (
+    proxy, market, amount, from, rateMode, assetId, aTokenAddr,
+) => {
+    const aavePaybackAddr = await getAddrFromRegistry('SparkATokenPayback');
+
+    const aavePaybackAction = new dfs.actions.aaveV3.AaveV3ATokenPaybackAction(
+        true, market, amount.toString(), from, rateMode, aTokenAddr, assetId,
+    );
+    const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkATokenPayback: ${gasUsed}`);
+    return receipt;
+};
+const sparkATokenPaybackCalldataOptimised = async (
+    proxy, market, amount, from, rateMode, assetId, aTokenAddr,
+) => {
+    const aavePaybackAddr = await getAddrFromRegistry('SparkATokenPayback');
+    let contract = await hre.ethers.getContractAt('SparkATokenPayback', aavePaybackAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+
+    const encodedInput = await contract.encodeInputs(
+        [amount, from, rateMode, assetId, true, market],
+    );
+
+    const aavePaybackAction = new dfs.actions.aaveV3.AaveV3ATokenPaybackAction(
+        true, market, amount.toString(), from, rateMode, aTokenAddr, assetId,
+    );
+    const functionData = aavePaybackAction.encodeForDsProxyCall()[1];
+    console.log(functionData.toLowerCase() === encodedInput);
+
+    const receipt = await proxy['execute(address,bytes)'](aavePaybackAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkATokenPaybackCalldataOptimised: ${gasUsed}`);
+    return receipt;
+};
+const sparkSetEMode = async (
+    proxy, market, categoryId,
+) => {
+    const aaveSetEModeAddr = await getAddrFromRegistry('SparkSetEMode');
+
+    const aaveSetEModeAction = new dfs.actions.aaveV3.AaveV3SetEModeAction(
+        true, market, categoryId,
+    );
+    const functionData = aaveSetEModeAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](aaveSetEModeAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkSetEMode: ${gasUsed}`);
+    return receipt;
+};
+const sparkSetEModeCalldataOptimised = async (
+    proxy, market, categoryId,
+) => {
+    const aaveSetEModeAddr = await getAddrFromRegistry('SparkSetEMode');
+    let contract = await hre.ethers.getContractAt('SparkSetEMode', aaveSetEModeAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+
+    const encodedInput = await contract.encodeInputs(
+        [categoryId, true, market],
+    );
+    const aaveSetEModeAction = new dfs.actions.aaveV3.AaveV3SetEModeAction(
+        true, market, categoryId,
+    );
+    const functionData = aaveSetEModeAction.encodeForDsProxyCall()[1];
+    console.log(functionData.toLowerCase() === encodedInput);
+
+    const receipt = await proxy['execute(address,bytes)'](aaveSetEModeAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkSetEModeCalldataOptimised: ${gasUsed}`);
+    return receipt;
+};
+const sparkClaimRewards = async (
+    proxy, assets, amount, to, rewardsAsset,
+) => {
+    const aaveClaimRewardsAction = new dfs.actions.aaveV3.AaveV3ClaimRewardsAction(
+        assets.length,
+        amount,
+        to,
+        rewardsAsset,
+        assets,
+    );
+
+    const functionData = aaveClaimRewardsAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('SparkClaimRewards', functionData, proxy);
+    return tx;
+};
+
+const sparkSwitchCollateral = async (
+    proxy, market, arrayLength, tokens, useAsCollateral,
+) => {
+    const aaveSwitchCollateralAddr = await getAddrFromRegistry('SparkCollateralSwitch');
+    const aaveSwithCollAction = new dfs.actions.aaveV3.AaveV3CollateralSwitchAction(
+        true, market, arrayLength, tokens, useAsCollateral,
+    );
+    const functionData = aaveSwithCollAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](aaveSwitchCollateralAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkSwitchCollateral: ${gasUsed}`);
+    return receipt;
+};
+const sparkSwitchCollateralCallDataOptimised = async (
+    proxy, market, arrayLength, tokens, useAsCollateral,
+) => {
+    const aaveSwitchCollateralAddr = await getAddrFromRegistry('SparkCollateralSwitch');
+    let contract = await hre.ethers.getContractAt('SparkCollateralSwitch', aaveSwitchCollateralAddr);
+    const signer = (await hre.ethers.getSigners())[0];
+    contract = await contract.connect(signer);
+
+    const encodedInput = await contract.encodeInputs(
+        [arrayLength, true, tokens, useAsCollateral, market],
+    );
+
+    const aaveSwithCollAction = new dfs.actions.aaveV3.AaveV3CollateralSwitchAction(
+        true, market, arrayLength, tokens, useAsCollateral,
+    );
+    const functionData = aaveSwithCollAction.encodeForDsProxyCall()[1];
+
+    console.log(encodedInput);
+    console.log(functionData);
+    console.log(functionData.toLowerCase() === encodedInput);
+
+    const receipt = await proxy['execute(address,bytes)'](aaveSwitchCollateralAddr, encodedInput, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkSwitchCollateralCallDataOptimised: ${gasUsed}`);
+    return receipt;
+};
+
 const morphoAaveV2Supply = async (
     proxy,
     tokenAddr,
@@ -2713,6 +3053,24 @@ module.exports = {
     aaveV3SwapBorrowRateCalldataOptimised,
     aaveV3ClaimRewards,
 
+    sparkSupply,
+    sparkSupplyCalldataOptimised,
+    sparkWithdraw,
+    sparkWithdrawCalldataOptimised,
+    sparkBorrow,
+    sparkBorrowCalldataOptimised,
+    sparkPayback,
+    sparkPaybackCalldataOptimised,
+    sparkATokenPayback,
+    sparkATokenPaybackCalldataOptimised,
+    sparkSetEMode,
+    sparkSetEModeCalldataOptimised,
+    sparkSwitchCollateral,
+    sparkSwitchCollateralCallDataOptimised,
+    sparkSwapBorrowRate,
+    sparkSwapBorrowRateCalldataOptimised,
+    sparkClaimRewards,
+
     updateSubData,
 
     convexDeposit,
@@ -2742,7 +3100,7 @@ module.exports = {
     morphoAaveV3Withdraw,
     morphoAaveV3Payback,
     morphoAaveV3Borrow,
-    
+
     bprotocolLiquitySPDeposit,
     bprotocolLiquitySPWithdraw,
 };
