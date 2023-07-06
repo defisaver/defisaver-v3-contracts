@@ -16,6 +16,9 @@ contract CurveUsdLevCreate is ActionBase, CurveUsdHelper {
     /// @param nBands Number of bands in which the collateral will be supplied for soft liquidation
     /// @param from Address from which to pull collateral asset, will default to proxy
     /// @param additionalData Additional data where curve swap path is encoded
+    /// @param gasUsed Only used as part of a strategy, estimated gas used for this tx
+    /// @param dfsFeeDivider Fee divider, if a non standard fee is set it will check for custom fee
+    /// @param useSteth If the collateral is wsteth, can set this flag to true for it to use steth instead
     struct Params {
         address controllerAddress;
         uint256 collAmount;

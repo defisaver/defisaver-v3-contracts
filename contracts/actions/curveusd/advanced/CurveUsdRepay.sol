@@ -15,6 +15,9 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
     /// @param to Where to send the leftover funds if full close
     /// @param minAmount Minimum amount of crvUSD to receive after sell
     /// @param additionalData Additional data where curve swap path is encoded
+    /// @param gasUsed Only used as part of a strategy, estimated gas used for this tx
+    /// @param dfsFeeDivider Fee divider, if a non standard fee is set it will check for custom fee
+    /// @param useSteth If the collateral is wsteth, can set this flag to true for it to use steth instead
     struct Params {
         address controllerAddress;
         uint256 collAmount;
