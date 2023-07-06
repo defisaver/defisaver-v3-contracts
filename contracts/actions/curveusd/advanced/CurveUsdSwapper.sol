@@ -149,7 +149,7 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
 
         // if we are doing coll -> usd trade and the unwrap is true convert wsteth -> steth
         if (useSteth && _collToUsd) {
-            IWStEth(WSTETH_ADDR).unwrap(swapAmount);
+            swapAmount = IWStEth(WSTETH_ADDR).unwrap(swapAmount);
 
             srcToken = STETH_ADDR;
             swapRoutes.route[0] = STETH_ADDR;
@@ -174,10 +174,11 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
             minAmountOut
         );
 
-        if (useSteth) {
+        if (useSteth && !_collToUsd) {
             // wrap any leftover steth
             uint256 stethBalance = IERC20(STETH_ADDR).balanceOf(address(this));
             IERC20(STETH_ADDR).safeApprove(WSTETH_ADDR, stethBalance);
+
             amountOut = IWStEth(WSTETH_ADDR).wrap(stethBalance);
         }
 

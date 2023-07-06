@@ -30,6 +30,7 @@ const {
     curveUsdPayback,
     curveUsdRepay,
     curveUsdSelfLiquidate,
+    curveUsdSelfLiquidateWithColl,
     curveUsdLevCreate,
 } = require('../actions');
 
@@ -100,7 +101,7 @@ const testCreate = async ({
 };
 
 const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
-    Object.entries(curveusdMarkets)
+    Object.entries(curveusdMarkets).slice(0, 1)
         .map(([assetSymbol, { controllerAddress, debtAvailableBlock }]) => {
             let snapshot;
             let senderAcc;
@@ -133,26 +134,26 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
                 });
             });
 
-            // it(`... should test create collateral=maxUint debt=maxUint for ${assetSymbol} market`, async () => {
-            //     await revertToSnapshot(snapshot);
+            it(`... should test create collateral=maxUint debt=maxUint for ${assetSymbol} market`, async () => {
+                await revertToSnapshot(snapshot);
 
-            //     snapshot = await takeSnapshot();
+                snapshot = await takeSnapshot();
 
-            //     const collateralAmount = ethers.utils.parseUnits('10');
-            //     const nBands = 5;
+                const collateralAmount = ethers.utils.parseUnits('10');
+                const nBands = 5;
 
-            //     await setBalance(collateralAsset, senderAcc.address, collateralAmount);
-            //     await testCreate({
-            //         proxy,
-            //         collateralAsset: getAssetInfo(assetSymbol).address,
-            //         controllerAddress,
-            //         from: senderAcc.address,
-            //         to: senderAcc.address,
-            //         collateralAmount: ethers.constants.MaxUint256,
-            //         debtAmount: ethers.constants.MaxUint256,
-            //         nBands,
-            //     });
-            // });
+                await setBalance(collateralAsset, senderAcc.address, collateralAmount);
+                await testCreate({
+                    proxy,
+                    collateralAsset: getAssetInfo(assetSymbol).address,
+                    controllerAddress,
+                    from: senderAcc.address,
+                    to: senderAcc.address,
+                    collateralAmount: ethers.constants.MaxUint256,
+                    debtAmount: ethers.constants.MaxUint256,
+                    nBands,
+                });
+            });
 
             it(`... should test leverage create for ${assetSymbol} market`, async () => {
                 await revertToSnapshot(snapshot);
@@ -206,10 +207,6 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
                         addrs.mainnet.CURVE_USD_WRAPPER,
                     );
 
-                    const objUser = await getUserInfo(controllerAddress, proxy.address);
-
-                    console.log('objUser', objUser);
-
                     await curveUsdLevCreate(
                         proxy,
                         controllerAddress,
@@ -224,10 +221,12 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
                         true, // do we want to unwrap wsteth
                     );
 
-                    // const { collateral, debt } = await getUserInfo(controllerAddress, proxy.address);
+                    const userPos = await getUserInfo(controllerAddress, proxy.address);
 
-                    // expect(debt).to.be.eq(debtAmountWei);
-                    // expect(collateral).to.be.gt(collateralAmount);
+                    console.log('userPos', userPos);
+
+                    expect(userPos.debt).to.be.eq(debtAmountWei);
+                    expect(userPos.collateral).to.be.gt(collateralAmount);
                 }
             });
         });
@@ -803,7 +802,7 @@ const curveUsdRepayTest = () => describe('CurveUsd-Repay', () => {
 });
 
 const curveUsdSelfLiquidateTest = () => describe('CurveUsd-Self-Liquidate', () => {
-    Object.entries(curveusdMarkets)
+    Object.entries(curveusdMarkets).slice(1, 2)
         .map(([assetSymbol, { controllerAddress, debtAvailableBlock }]) => {
             let snapshot;
             let senderAcc;
@@ -811,13 +810,16 @@ const curveUsdSelfLiquidateTest = () => describe('CurveUsd-Self-Liquidate', () =
             let llammaExchange;
             let debtAmount;
             let llammaAddress;
-            const collateralAsset = getAssetInfo(assetSymbol).address;
+            let collateralAmount;
+            const collateralAsset = getAssetInfo(assetSymbol);
 
             it(`... should test create for ${assetSymbol} market`, async () => {
                 await resetForkToBlock(debtAvailableBlock);
                 await debtCeilCheck(controllerAddress);
                 await getContractFromRegistry('CurveUsdCreate');
                 await redeploy('CurveUsdSelfLiquidate');
+                await redeploy('CurveUsdSelfLiquidateWithColl');
+                await redeploy('CurveUsdSwapper');
 
                 const crvController = await ethers.getContractAt('ICrvUsdController', controllerAddress);
                 llammaAddress = await crvController.amm();
@@ -826,19 +828,15 @@ const curveUsdSelfLiquidateTest = () => describe('CurveUsd-Self-Liquidate', () =
                 [senderAcc] = await ethers.getSigners();
                 proxy = await getProxy(senderAcc.address);
 
-                const collateralAmount = ethers.utils.parseUnits('3');
+                collateralAmount = ethers.utils.parseUnits('3', collateralAsset.decimals);
                 const nBands = 4;
 
                 debtAmount = await crvController.max_borrowable(collateralAmount, nBands);
 
-                console.log('Debt: ', debtAmount / 1e18);
-
-                // const debtAmount = ethers.utils.parseUnits('4300');
-
-                await setBalance(collateralAsset, senderAcc.address, collateralAmount);
+                await setBalance(collateralAsset.address, senderAcc.address, collateralAmount);
                 await testCreate({
                     proxy,
-                    collateralAsset: getAssetInfo(assetSymbol).address,
+                    collateralAsset: collateralAsset.address,
                     controllerAddress,
                     from: senderAcc.address,
                     to: senderAcc.address,
@@ -847,14 +845,9 @@ const curveUsdSelfLiquidateTest = () => describe('CurveUsd-Self-Liquidate', () =
                     nBands,
                 });
 
-                const ticks = await llammaExchange.read_user_tick_numbers(proxy.address);
-
-                console.log(ticks);
                 snapshot = await takeSnapshot();
 
-                // const exchangeObj = await formatExchangeObjCurve(getAssetInfo(assetSymbol).address, crvusdAddress, collateralAmount, addrs['mainnet'].CURVE_USD_WRAPPER);
-
-                // move the active band
+                // move the user in soft liquidation
 
                 const currPrice = await llammaExchange.get_p();
                 const currActiveBand = await llammaExchange.active_band_with_skip();
@@ -882,37 +875,62 @@ const curveUsdSelfLiquidateTest = () => describe('CurveUsd-Self-Liquidate', () =
                 console.log(collateral / 1e18);
             });
 
-            it('... should test liquidate action where additional crvUsd is needed from the user', async () => {
-                // can give only the (wholeDebt - crvUsdColl) balance but we give wholeDebt here because it's easier
-                await setBalance(crvusdAddress, senderAcc.address, debtAmount);
-                await approve(crvusdAddress, proxy.address);
+            // it('... should test liquidate action where additional crvUsd is needed from the user', async () => {
+            //     // can give only the (wholeDebt - crvUsdColl) balance but we give wholeDebt here because it's easier
+            //     await setBalance(crvusdAddress, senderAcc.address, debtAmount);
+            //     await approve(crvusdAddress, proxy.address);
 
-                await curveUsdSelfLiquidate(
-                    proxy,
-                    controllerAddress,
-                    0, // min expected collateral in crvUsd
-                    senderAcc.address,
-                    senderAcc.address,
+            //     await curveUsdSelfLiquidate(
+            //         proxy,
+            //         controllerAddress,
+            //         0, // min expected collateral in crvUsd
+            //         senderAcc.address,
+            //         senderAcc.address,
+            //     );
+
+            //     revertToSnapshot(snapshot);
+            // });
+
+            // it('... should test liquidate action where we have enough in crvUsd', async () => {
+            //     const swapAmount = ethers.utils.parseUnits('8000000', 18);
+
+            //     await setBalance(crvusdAddress, senderAcc.address, swapAmount);
+            //     await approve(crvusdAddress, llammaAddress);
+            //     const minAmount = 1;
+
+            //     await llammaExchange.exchange(0, 1, swapAmount, minAmount, { gasLimit: 5000000 });
+
+            //     await curveUsdSelfLiquidate(
+            //         proxy,
+            //         controllerAddress,
+            //         0, // min expected collateral in crvUsd
+            //         senderAcc.address,
+            //         senderAcc.address,
+            //     );
+
+            //     revertToSnapshot(snapshot);
+            // });
+
+            it(`... should test liquidate with collateral for ${assetSymbol}`, async () => {
+                const exchangeObj = await formatExchangeObjCurve(
+                    getAssetInfo(assetSymbol).address,
+                    crvusdAddress,
+                    collateralAmount,
+                    addrs.mainnet.CURVE_USD_WRAPPER,
                 );
 
-                revertToSnapshot(snapshot);
-            });
-
-            it('... should test liquidate action where we have enough in crvUsd', async () => {
-                const swapAmount = ethers.utils.parseUnits('8000000', 18);
-
-                await setBalance(crvusdAddress, senderAcc.address, swapAmount);
-                await approve(crvusdAddress, llammaAddress);
-                const minAmount = 1;
-
-                await llammaExchange.exchange(0, 1, swapAmount, minAmount, { gasLimit: 5000000 });
-
-                await curveUsdSelfLiquidate(
+                await curveUsdSelfLiquidateWithColl(
                     proxy,
                     controllerAddress,
+                    ethers.utils.parseUnits('1', 18),
                     0, // min expected collateral in crvUsd
+                    collateralAmount,
+                    1, // min amount
                     senderAcc.address,
-                    senderAcc.address,
+                    exchangeObj[8],
+                    0,
+                    400,
+                    false,
                 );
 
                 revertToSnapshot(snapshot);
