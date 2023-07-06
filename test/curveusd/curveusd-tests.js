@@ -133,26 +133,27 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
                 });
             });
 
-            it(`... should test create collateral=maxUint debt=maxUint for ${assetSymbol} market`, async () => {
-                await revertToSnapshot(snapshot);
+            // it(`... should test create collateral=maxUint debt=maxUint for ${assetSymbol} market`, async () => {
+            //     await revertToSnapshot(snapshot);
 
-                snapshot = await takeSnapshot();
+            //     snapshot = await takeSnapshot();
 
-                const collateralAmount = ethers.utils.parseUnits('10');
-                const nBands = 5;
+            //     const collateralAmount = ethers.utils.parseUnits('10');
+            //     const nBands = 5;
 
-                await setBalance(collateralAsset, senderAcc.address, collateralAmount);
-                await testCreate({
-                    proxy,
-                    collateralAsset: getAssetInfo(assetSymbol).address,
-                    controllerAddress,
-                    from: senderAcc.address,
-                    to: senderAcc.address,
-                    collateralAmount: ethers.constants.MaxUint256,
-                    debtAmount: ethers.constants.MaxUint256,
-                    nBands,
-                });
-            });
+            //     await setBalance(collateralAsset, senderAcc.address, collateralAmount);
+            //     await testCreate({
+            //         proxy,
+            //         collateralAsset: getAssetInfo(assetSymbol).address,
+            //         controllerAddress,
+            //         from: senderAcc.address,
+            //         to: senderAcc.address,
+            //         collateralAmount: ethers.constants.MaxUint256,
+            //         debtAmount: ethers.constants.MaxUint256,
+            //         nBands,
+            //     });
+            // });
+
             it(`... should test leverage create for ${assetSymbol} market`, async () => {
                 await revertToSnapshot(snapshot);
 
@@ -187,8 +188,47 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
 
                 const { collateral, debt } = await getUserInfo(controllerAddress, proxy.address);
 
-                console.log('collateral', collateral / 1e18);
-                console.log('debt', debt / 1e18);
+                expect(debt).to.be.eq(debtAmountWei);
+                expect(collateral).to.be.gt(collateralAmount);
+
+                if (assetSymbol === 'wstETH') {
+                    await resetForkToBlock(debtAvailableBlock);
+
+                    await setBalance(collateralAsset, senderAcc.address, collateralAmount);
+                    await approve(collateralAsset, proxy.address);
+
+                    console.log('Test steth wrapping while create');
+
+                    const exchangeObjSteth = await formatExchangeObjCurve(
+                        crvusdAddress,
+                        STETH_ADDRESS,
+                        collateralAmount,
+                        addrs.mainnet.CURVE_USD_WRAPPER,
+                    );
+
+                    const objUser = await getUserInfo(controllerAddress, proxy.address);
+
+                    console.log('objUser', objUser);
+
+                    await curveUsdLevCreate(
+                        proxy,
+                        controllerAddress,
+                        collateralAmount,
+                        debtAmountWei,
+                        1, // minAmount
+                        nBands,
+                        senderAcc.address,
+                        exchangeObjSteth[8], // additional data
+                        0, // gasUsed
+                        400, // dfsFeeDivider
+                        true, // do we want to unwrap wsteth
+                    );
+
+                    // const { collateral, debt } = await getUserInfo(controllerAddress, proxy.address);
+
+                    // expect(debt).to.be.eq(debtAmountWei);
+                    // expect(collateral).to.be.gt(collateralAmount);
+                }
             });
         });
 });
@@ -568,7 +608,7 @@ const curveUsdPaybackTest = () => describe('CurveUsd-Payback', () => {
 });
 
 const curveUsdRepayTest = () => describe('CurveUsd-Repay', () => {
-    Object.entries(curveusdMarkets).splice(0, 1)
+    Object.entries(curveusdMarkets)
         .map(([assetSymbol, { controllerAddress, debtAvailableBlock }]) => {
             let snapshot;
             let senderAcc;
@@ -674,51 +714,96 @@ const curveUsdRepayTest = () => describe('CurveUsd-Repay', () => {
                 }
             });
 
-            // it(`... should test full repay for ${assetSymbol} position`, async () => {
-            //     const collAmountRepay = fetchAmountinUSDPrice(assetSymbol, '20000');
+            it(`... should test full repay for ${assetSymbol} position`, async () => {
+                const collAmountRepay = fetchAmountinUSDPrice(assetSymbol, '20000');
 
-            //     const collAmountRepayWei = ethers.utils.parseUnits(collAmountRepay, collateralAsset.decimals);
+                const collAmountRepayWei = ethers.utils.parseUnits(collAmountRepay, collateralAsset.decimals);
 
-            //     console.log('collAmountRepayWei', collAmountRepayWei.toString());
+                console.log('collAmountRepayWei', collAmountRepayWei.toString());
 
-            //     const exchangeObj = await formatExchangeObjCurve(
-            //         collateralAsset.address,
-            //         crvusdAddress,
-            //         collAmountRepay,
-            //         addrs.mainnet.CURVE_USD_WRAPPER,
-            //     );
+                const exchangeObj = await formatExchangeObjCurve(
+                    collateralAsset.address,
+                    crvusdAddress,
+                    collAmountRepay,
+                    addrs.mainnet.CURVE_USD_WRAPPER,
+                );
 
-            //     const userBalanceBefore = await balanceOf(collateralAsset.address, senderAcc.address);
-            //     const userCrvUsdBalanceBefore = await balanceOf(crvusdAddress, senderAcc.address);
+                const userBalanceBefore = await balanceOf(collateralAsset.address, senderAcc.address);
+                const userCrvUsdBalanceBefore = await balanceOf(crvusdAddress, senderAcc.address);
 
-            //     await curveUsdRepay(
-            //         proxy,
-            //         controllerAddress,
-            //         collAmountRepayWei,
-            //         senderAcc.address,
-            //         1, // minAmount
-            //         exchangeObj[8],
-            //         0, // gasUsed
-            //         400, // dfsFeeDivider
-            //         false, // do we want to unwrap wsteth
-            //     );
+                await curveUsdRepay(
+                    proxy,
+                    controllerAddress,
+                    collAmountRepayWei,
+                    senderAcc.address,
+                    1, // minAmount
+                    exchangeObj[8],
+                    0, // gasUsed
+                    400, // dfsFeeDivider
+                    false, // do we want to unwrap wsteth
+                );
 
-            //     const userBalanceAfter = await balanceOf(collateralAsset.address, senderAcc.address);
-            //     const userCrvUsdBalanceAfter = await balanceOf(crvusdAddress, senderAcc.address);
+                const userBalanceAfter = await balanceOf(collateralAsset.address, senderAcc.address);
+                const userCrvUsdBalanceAfter = await balanceOf(crvusdAddress, senderAcc.address);
 
-            //     const userInfoAfter = await getUserInfo(controllerAddress, proxy.address);
-            //     expect(userInfoAfter.debt).to.be.eq(0);
+                const userInfoAfter = await getUserInfo(controllerAddress, proxy.address);
+                expect(userInfoAfter.debt).to.be.eq(0);
 
-            //     expect(userBalanceAfter).to.be.gt(userBalanceBefore);
-            //     expect(userCrvUsdBalanceAfter).to.be.gt(userCrvUsdBalanceBefore);
+                expect(userBalanceAfter).to.be.gt(userBalanceBefore);
+                expect(userCrvUsdBalanceAfter).to.be.gt(userCrvUsdBalanceBefore);
 
-            //     await revertToSnapshot(snapshot);
-            // });
+                if (assetSymbol === 'wstETH') {
+                    console.log('Test wsteth unwrap in repay as well');
+
+                    const debtAmount = ethers.utils.parseUnits('10000');
+                    const nBands = 4;
+
+                    await setBalance(collateralAsset.address, senderAcc.address, collateralAmount);
+                    await testCreate({
+                        proxy,
+                        collateralAsset: collateralAsset.address,
+                        controllerAddress,
+                        from: senderAcc.address,
+                        to: senderAcc.address,
+                        collateralAmount,
+                        debtAmount,
+                        nBands,
+                    });
+
+                    const exchangeObjSteth = await formatExchangeObjCurve(
+                        STETH_ADDRESS,
+                        crvusdAddress,
+                        collAmountRepay,
+                        addrs.mainnet.CURVE_USD_WRAPPER,
+                    );
+
+                    const userInfoBeforeSteth = await getUserInfo(controllerAddress, proxy.address);
+
+                    await curveUsdRepay(
+                        proxy,
+                        controllerAddress,
+                        collAmountRepayWei,
+                        senderAcc.address,
+                        1, // minAmount
+                        exchangeObjSteth[8],
+                        0, // gasUsed
+                        400, // dfsFeeDivider
+                        true, // do we want to unwrap wsteth
+                    );
+
+                    const userInfoAfterSteth = await getUserInfo(controllerAddress, proxy.address);
+
+                    expect(userInfoAfterSteth.collateral).to.be.lt(userInfoBeforeSteth.collateral);
+                    expect(userInfoAfterSteth.debt).to.be.lt(userInfoBeforeSteth.debt);
+
+                    await revertToSnapshot(snapshot);
+                }
+            });
         });
 });
 
 const curveUsdSelfLiquidateTest = () => describe('CurveUsd-Self-Liquidate', () => {
-    Object.entries(curveusdMarkets).slice(1, 2)
+    Object.entries(curveusdMarkets)
         .map(([assetSymbol, { controllerAddress, debtAvailableBlock }]) => {
             let snapshot;
             let senderAcc;

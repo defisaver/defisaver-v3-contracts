@@ -839,7 +839,7 @@ const formatExchangeObjCurve = async (
         [route, swapParams],
     );
 
-    console.log(swapParams);
+    console.log(route, swapParams);
 
     return [
         srcAddr,
