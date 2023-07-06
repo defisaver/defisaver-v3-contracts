@@ -21,6 +21,9 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
         address to;
         uint256 minAmount;
         bytes additionalData;
+        uint32 gasUsed;
+        uint32 dfsFeeDivider;
+        bool useSteth;
     }
 
     /// @inheritdoc ActionBase
@@ -62,7 +65,15 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
 
         address curveUsdSwapper = registry.getAddr(CURVE_SWAPPER_ID);
         uint256[] memory swapData =
-             _setupCurvePath(curveUsdSwapper, _params.additionalData, _params.collAmount, _params.minAmount);
+             _setupCurvePath(
+                curveUsdSwapper,
+                _params.additionalData,
+                _params.collAmount,
+                _params.minAmount,
+                _params.gasUsed, 
+                _params.dfsFeeDivider, 
+                _params.useSteth ? 1 : 0
+        );
         
         
         ICrvUsdController(_params.controllerAddress).repay_extended(curveUsdSwapper, swapData);

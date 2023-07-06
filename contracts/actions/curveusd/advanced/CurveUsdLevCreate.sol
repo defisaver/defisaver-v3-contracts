@@ -24,6 +24,9 @@ contract CurveUsdLevCreate is ActionBase, CurveUsdHelper {
         uint256 nBands;
         address from;
         bytes additionalData;
+        uint32 gasUsed;
+        uint32 dfsFeeDivider;
+        bool useSteth;
     }
 
     /// @inheritdoc ActionBase
@@ -74,7 +77,15 @@ contract CurveUsdLevCreate is ActionBase, CurveUsdHelper {
         // get swapData formatted and write part of curve path in storage for use in curveUsdSwapper
         address curveUsdSwapper = registry.getAddr(CURVE_SWAPPER_ID);
         uint256[] memory swapData =
-             _setupCurvePath(curveUsdSwapper, _params.additionalData, _params.debtAmount, _params.minAmount);
+             _setupCurvePath(
+                curveUsdSwapper,
+                _params.additionalData,
+                _params.debtAmount,
+                _params.minAmount,
+                _params.gasUsed, 
+                _params.dfsFeeDivider, 
+                _params.useSteth ? 1 : 0
+        );
         
         // create loan
         ICrvUsdController(_params.controllerAddress).create_loan_extended(

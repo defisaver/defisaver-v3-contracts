@@ -24,6 +24,9 @@ contract CurveUsdSelfLiquidateWithColl is ActionBase, CurveUsdHelper {
         uint256 minAmount;
         address to;
         bytes additionalData;
+        uint32 gasUsed;
+        uint32 dfsFeeDivider;
+        bool useSteth;
     }
 
     /// @inheritdoc ActionBase
@@ -68,7 +71,15 @@ contract CurveUsdSelfLiquidateWithColl is ActionBase, CurveUsdHelper {
         address curveUsdSwapper = registry.getAddr(CURVE_SWAPPER_ID);
 
         uint256[] memory swapData =
-             _setupCurvePath(curveUsdSwapper, _params.additionalData, _params.swapAmount, _params.minAmount);
+             _setupCurvePath(
+                curveUsdSwapper,
+                _params.additionalData,
+                _params.swapAmount,
+                _params.minAmount,
+                _params.gasUsed,
+                _params.dfsFeeDivider, 
+                _params.useSteth ? 1 : 0
+            );
         
         ICrvUsdController(_params.controllerAddress)
             .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, false, curveUsdSwapper, swapData);
