@@ -8,4 +8,5 @@ contract MainnetActionsUtilAddresses {
     address internal constant DFS_LOGGER_ADDR = 0xcE7a977Cac4a481bc84AC06b2Da0df614e621cf3;
     address internal constant SUB_STORAGE_ADDR = 0x1612fc28Ee0AB882eC99842Cde0Fc77ff0691e90;
     address internal constant PROXY_AUTH_ADDR = 0x149667b6FAe2c63D1B4317C716b0D0e4d3E2bD70;
+    address internal constant LSV_PROXY_REGISTRY_ADDRESS = 0xe1CD0CEC94CdF239Be7b3320D301bEA5875fa84b;
 }
