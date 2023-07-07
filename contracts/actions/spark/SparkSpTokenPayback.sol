@@ -8,8 +8,8 @@ import "../ActionBase.sol";
 import "./helpers/SparkHelper.sol";
 import "../../interfaces/aave/IAToken.sol";
 
-/// @title Allows user to repay with aTokens of the underlying debt asset eg. Pay DAI debt using aDAI tokens.
-contract SparkATokenPayback is ActionBase, SparkHelper {
+/// @title Allows user to repay with spTokens of the underlying debt asset eg. Pay DAI debt using spDAI tokens.
+contract SparkSpTokenPayback is ActionBase, SparkHelper {
     using TokenUtils for address;
 
     struct Params {
@@ -34,40 +34,40 @@ contract SparkATokenPayback is ActionBase, SparkHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.market = _parseParamAddr(params.market, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 paybackAmount, bytes memory logData) = _paybackWithATokens(
+        (uint256 paybackAmount, bytes memory logData) = _paybackWithSpTokens(
             params.market,
             params.assetId,
             params.amount,
             params.rateMode,
             params.from
         );
-        emit ActionEvent("SparkATokenPayback", logData);
+        emit ActionEvent("SparkSpTokenPayback", logData);
         return bytes32(paybackAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _paybackWithATokens(
+        (, bytes memory logData) = _paybackWithSpTokens(
             params.market,
             params.assetId,
             params.amount,
             params.rateMode,
             params.from
         );
-        logger.logActionDirectEvent("SparkATokenPayback", logData);
+        logger.logActionDirectEvent("SparkSpTokenPayback", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
-        (, bytes memory logData) = _paybackWithATokens(
+        (, bytes memory logData) = _paybackWithSpTokens(
             params.market,
             params.assetId,
             params.amount,
             params.rateMode,
             params.from
         );
-        logger.logActionDirectEvent("SparkATokenPayback", logData);
+        logger.logActionDirectEvent("SparkSpTokenPayback", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -77,14 +77,14 @@ contract SparkATokenPayback is ActionBase, SparkHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Allows user to repay with aTokens of the underlying debt asset eg. Pay DAI debt using aDAI tokens.
-    /// @dev User needs to approve the DSProxy to pull aTokens
+    /// @notice Allows user to repay with spTokens of the underlying debt asset eg. Pay DAI debt using spDAI tokens.
+    /// @dev User needs to approve the DSProxy to pull spTokens
     /// @param _market Address provider for specific market
     /// @param _assetId The id of the underlying asset to be repaid
     /// @param _amount Amount of tokens to be paid back (uint.max for full debt)
     /// @param _rateMode Type of borrow debt [Stable: 1, Variable: 2]
-    /// @param _from Where are we pulling the payback aTokens from
-    function _paybackWithATokens(
+    /// @param _from Where are we pulling the payback spTokens from
+    function _paybackWithSpTokens(
         address _market,
         uint16 _assetId,
         uint256 _amount,
@@ -99,9 +99,9 @@ contract SparkATokenPayback is ActionBase, SparkHelper {
         _amount = _amount > maxDebt ? maxDebt : _amount;
 
         DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(tokenAddr);
-        address aTokenAddr = reserveData.aTokenAddress;
+        address spTokenAddr = reserveData.aTokenAddress;
 
-        _amount = aTokenAddr.pullTokensIfNeeded(_from, _amount);
+        _amount = spTokenAddr.pullTokensIfNeeded(_from, _amount);
 
         lendingPool.repayWithATokens(tokenAddr, _amount, _rateMode);
 

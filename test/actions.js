@@ -2645,10 +2645,10 @@ const sparkPaybackCalldataOptimised = async (
     console.log(`GasUsed sparkPaybackCalldataOptimised: ${gasUsed}`);
     return receipt;
 };
-const sparkATokenPayback = async (
+const sparkSpTokenPayback = async (
     proxy, market, amount, from, rateMode, assetId, aTokenAddr,
 ) => {
-    const aavePaybackAddr = await getAddrFromRegistry('SparkATokenPayback');
+    const aavePaybackAddr = await getAddrFromRegistry('SparkSpTokenPayback');
 
     const aavePaybackAction = new dfs.actions.aaveV3.AaveV3ATokenPaybackAction(
         true, market, amount.toString(), from, rateMode, aTokenAddr, assetId,
@@ -2657,14 +2657,14 @@ const sparkATokenPayback = async (
     const receipt = await proxy['execute(address,bytes)'](aavePaybackAddr, functionData, { gasLimit: 3000000 });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed sparkATokenPayback: ${gasUsed}`);
+    console.log(`GasUsed sparkSpTokenPayback: ${gasUsed}`);
     return receipt;
 };
-const sparkATokenPaybackCalldataOptimised = async (
+const sparkSpTokenPaybackCalldataOptimised = async (
     proxy, market, amount, from, rateMode, assetId, aTokenAddr,
 ) => {
-    const aavePaybackAddr = await getAddrFromRegistry('SparkATokenPayback');
-    let contract = await hre.ethers.getContractAt('SparkATokenPayback', aavePaybackAddr);
+    const aavePaybackAddr = await getAddrFromRegistry('SparkSpTokenPayback');
+    let contract = await hre.ethers.getContractAt('SparkSpTokenPayback', aavePaybackAddr);
     const signer = (await hre.ethers.getSigners())[0];
     contract = await contract.connect(signer);
 
@@ -2681,7 +2681,7 @@ const sparkATokenPaybackCalldataOptimised = async (
     const receipt = await proxy['execute(address,bytes)'](aavePaybackAddr, encodedInput, { gasLimit: 3000000 });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed sparkATokenPaybackCalldataOptimised: ${gasUsed}`);
+    console.log(`GasUsed sparkSpTokenPaybackCalldataOptimised: ${gasUsed}`);
     return receipt;
 };
 const sparkSetEMode = async (
@@ -3093,8 +3093,8 @@ module.exports = {
     sparkBorrowCalldataOptimised,
     sparkPayback,
     sparkPaybackCalldataOptimised,
-    sparkATokenPayback,
-    sparkATokenPaybackCalldataOptimised,
+    sparkSpTokenPayback,
+    sparkSpTokenPaybackCalldataOptimised,
     sparkSetEMode,
     sparkSetEModeCalldataOptimised,
     sparkSwitchCollateral,

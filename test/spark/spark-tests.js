@@ -16,7 +16,7 @@ const {
     sparkWithdrawCalldataOptimised, sparkPayback, sparkPaybackCalldataOptimised,
     sparkSwapBorrowRateCalldataOptimised, sparkSwapBorrowRate, sparkSetEModeCalldataOptimised,
     sparkSetEMode, sparkSwitchCollateral, sparkSwitchCollateralCallDataOptimised,
-    sparkATokenPaybackCalldataOptimised, sparkATokenPayback,
+    sparkSpTokenPaybackCalldataOptimised, sparkSpTokenPayback,
     sparkBorrowCalldataOptimised, sparkClaimRewards, sparkDsrWrap, sparkDsrUnwrap,
 } = require('../actions');
 
@@ -25,7 +25,7 @@ const sparkSupplyTest = async () => {
         this.timeout(150000);
 
         let senderAcc; let proxy; let pool; let snapshotId;
-        let WETH_ADDRESS; let aWETH;
+        let WETH_ADDRESS; let spWETH;
         const network = hre.network.config.name;
 
         before(async () => {
@@ -37,7 +37,7 @@ const sparkSupplyTest = async () => {
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
 
-            aWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
+            spWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
         });
 
         beforeEach(async () => {
@@ -59,12 +59,12 @@ const sparkSupplyTest = async () => {
             const assetId = reserveData.id;
             const from = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
             expect(balanceAfter).to.be.gt(balanceBefore);
         });
 
@@ -79,15 +79,15 @@ const sparkSupplyTest = async () => {
             const assetId = reserveData.id;
             const from = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
 
             await sparkSupplyCalldataOptimised(
                 proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from,
             );
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
             expect(balanceAfter).to.be.gt(balanceBefore);
         });
     });
@@ -99,7 +99,7 @@ const sparkBorrowTest = async () => {
 
         let senderAcc; let proxy; let pool; let snapshotId;
 
-        let WETH_ADDRESS; let aWETH; let DAI_ADDRESS;
+        let WETH_ADDRESS; let spWETH; let DAI_ADDRESS;
         const network = hre.network.config.name;
 
         before(async () => {
@@ -112,7 +112,7 @@ const sparkBorrowTest = async () => {
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             DAI_ADDRESS = addrs[network].DAI_ADDRESS;
 
-            aWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
+            spWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
         });
         beforeEach(async () => {
             snapshotId = await takeSnapshot();
@@ -134,12 +134,12 @@ const sparkBorrowTest = async () => {
             const from = senderAcc.address;
             const to = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
 
             const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
             const amountDai = hre.ethers.utils.parseUnits('1000', 18);
@@ -164,12 +164,12 @@ const sparkBorrowTest = async () => {
             const from = senderAcc.address;
             const to = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
 
             const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
             const amountDai = hre.ethers.utils.parseUnits('1000', 18);
@@ -192,7 +192,7 @@ const sparkWithdrawTest = async () => {
         this.timeout(150000);
 
         let senderAcc; let proxy; let pool; let snapshotId;
-        let WETH_ADDRESS; let aWETH;
+        let WETH_ADDRESS; let spWETH;
         const network = hre.network.config.name;
 
         before(async () => {
@@ -204,7 +204,7 @@ const sparkWithdrawTest = async () => {
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
 
-            aWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
+            spWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
         });
 
         beforeEach(async () => {
@@ -227,25 +227,25 @@ const sparkWithdrawTest = async () => {
             const from = senderAcc.address;
             const to = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
             // ----------------------------------------------------------------
 
             const wethBalanceBeforeWithdraw = await balanceOf(WETH_ADDRESS, senderAcc.address);
             console.log(`WETH on EOA before withdraw:${wethBalanceBeforeWithdraw.toString()}`);
             await sparkWithdraw(proxy, sparkMarket, assetId, amount, to);
 
-            const awethEOAbalanceAfterWithdraw = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const spwethEOAbalanceAfterWithdraw = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
 
             const wethBalanceAfterWithdraw = await balanceOf(WETH_ADDRESS, senderAcc.address);
             console.log(`WETH on EOA after withdraw:${wethBalanceAfterWithdraw.toString()}`);
             expect(wethBalanceAfterWithdraw).to.be.gt(wethBalanceBeforeWithdraw);
-            expect(awethEOAbalanceAfterWithdraw).to.be.lt(balanceAfter);
+            expect(spwethEOAbalanceAfterWithdraw).to.be.lt(balanceAfter);
         });
         it('... should supply WETH and then withdraw it on Spark using optimised calldata', async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
@@ -259,25 +259,25 @@ const sparkWithdrawTest = async () => {
             const from = senderAcc.address;
             const to = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
             // ----------------------------------------------------------------
 
             const wethBalanceBeforeWithdraw = await balanceOf(WETH_ADDRESS, senderAcc.address);
             console.log(`WETH on EOA before withdraw:${wethBalanceBeforeWithdraw.toString()}`);
             await sparkWithdrawCalldataOptimised(proxy, sparkMarket, assetId, amount, to);
 
-            const awethEOAbalanceAfterWithdraw = await balanceOf(aWETH, proxy.address);
+            const spwethEOAbalanceAfterWithdraw = await balanceOf(spWETH, proxy.address);
 
             const wethBalanceAfterWithdraw = await balanceOf(WETH_ADDRESS, senderAcc.address);
             console.log(`WETH on EOA after withdraw:${wethBalanceAfterWithdraw.toString()}`);
 
             expect(wethBalanceAfterWithdraw).to.be.gt(wethBalanceBeforeWithdraw);
-            expect(awethEOAbalanceAfterWithdraw).to.be.lt(balanceAfter);
+            expect(spwethEOAbalanceAfterWithdraw).to.be.lt(balanceAfter);
         });
     });
 };
@@ -288,7 +288,7 @@ const sparkPaybackTest = async () => {
 
         let senderAcc; let proxy; let pool; let snapshotId;
 
-        let WETH_ADDRESS; let aWETH; let DAI_ADDRESS;
+        let WETH_ADDRESS; let spWETH; let DAI_ADDRESS;
         const network = hre.network.config.name;
 
         before(async () => {
@@ -301,7 +301,7 @@ const sparkPaybackTest = async () => {
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             DAI_ADDRESS = addrs[network].DAI_ADDRESS;
 
-            aWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
+            spWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
         });
         beforeEach(async () => {
             snapshotId = await takeSnapshot();
@@ -323,12 +323,12 @@ const sparkPaybackTest = async () => {
             const from = senderAcc.address;
             const to = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
 
             const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
             const amountDai = hre.ethers.utils.parseUnits('1000', 18);
@@ -368,12 +368,12 @@ const sparkPaybackTest = async () => {
             const from = senderAcc.address;
             const to = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
 
             const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
             const amountDai = hre.ethers.utils.parseUnits('1000', 18);
@@ -414,12 +414,12 @@ const sparkPaybackTest = async () => {
             const from = senderAcc.address;
             const to = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
 
             const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
             const amountDai = hre.ethers.utils.parseUnits('1000', 18);
@@ -465,7 +465,7 @@ const sparkSwapBorrowRateTest = async () => {
 
         let senderAcc; let proxy; let pool; let snapshotId;
 
-        let WETH_ADDRESS; let aWETH; let DAI_ADDRESS;
+        let WETH_ADDRESS; let spWETH; let DAI_ADDRESS;
         const network = hre.network.config.name;
 
         before(async () => {
@@ -478,7 +478,7 @@ const sparkSwapBorrowRateTest = async () => {
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             DAI_ADDRESS = addrs[network].DAI_ADDRESS;
 
-            aWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
+            spWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
         });
         beforeEach(async () => {
             snapshotId = await takeSnapshot();
@@ -502,12 +502,12 @@ const sparkSwapBorrowRateTest = async () => {
             const from = senderAcc.address;
             const to = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
 
             const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
             const amountDai = hre.ethers.utils.parseUnits('1000', 18);
@@ -550,12 +550,12 @@ const sparkSwapBorrowRateTest = async () => {
             const from = senderAcc.address;
             const to = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
 
             const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
             const amountDai = hre.ethers.utils.parseUnits('1000', 18);
@@ -592,7 +592,7 @@ const sparkSetEModeTest = async () => {
         this.timeout(150000);
 
         let senderAcc; let proxy; let snapshotId; let pool;
-        let WETH_ADDRESS; let aWETH;
+        let WETH_ADDRESS; let spWETH;
         const network = hre.network.config.name;
 
         before(async () => {
@@ -604,7 +604,7 @@ const sparkSetEModeTest = async () => {
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
 
-            aWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
+            spWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
         });
         beforeEach(async () => {
             snapshotId = await takeSnapshot();
@@ -625,12 +625,12 @@ const sparkSetEModeTest = async () => {
             const assetId = reserveData.id;
             const from = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
 
             let userEmode = await pool.getUserEMode(proxy.address);
             console.log(`Users emode before changing: ${userEmode}`);
@@ -654,12 +654,12 @@ const sparkSetEModeTest = async () => {
             const assetId = reserveData.id;
             const from = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
 
             let userEmode = await pool.getUserEMode(proxy.address);
             console.log(`Users emode before changing: ${userEmode}`);
@@ -679,7 +679,7 @@ const sparkCollSwitchTest = async () => {
 
         let senderAcc; let proxy; let pool; let snapshotId;
 
-        let WETH_ADDRESS; let aWETH; let DAI_ADDRESS; let aDAI;
+        let WETH_ADDRESS; let spWETH; let DAI_ADDRESS; let spDai;
         const network = hre.network.config.name;
 
         before(async () => {
@@ -692,8 +692,8 @@ const sparkCollSwitchTest = async () => {
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             DAI_ADDRESS = addrs[network].DAI_ADDRESS;
 
-            aWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
-            aDAI = (await pool.getReserveData(DAI_ADDRESS)).aTokenAddress;
+            spWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
+            spDai = (await pool.getReserveData(DAI_ADDRESS)).aTokenAddress;
         });
 
         beforeEach(async () => {
@@ -715,12 +715,12 @@ const sparkCollSwitchTest = async () => {
             const assetId = reserveData.id;
             const from = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
 
             const amountDai = hre.ethers.utils.parseUnits('1000', 18);
             await setBalance(DAI_ADDRESS, senderAcc.address, amountDai);
@@ -731,11 +731,11 @@ const sparkCollSwitchTest = async () => {
             const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
             const daiAssetId = reserveDataDAI.id;
 
-            const balanceBeforeADAI = await balanceOf(aDAI, proxy.address);
+            const balanceBeforeADAI = await balanceOf(spDai, proxy.address);
             console.log(`aDAI on proxy before: ${balanceBeforeADAI.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, DAI_ADDRESS, daiAssetId, from);
 
-            const balanceAfterADAI = await balanceOf(aDAI, proxy.address);
+            const balanceAfterADAI = await balanceOf(spDai, proxy.address);
             console.log(`aDAI on proxy after: ${balanceAfterADAI.toString()}`);
 
             //-----------------------------------------------------
@@ -754,12 +754,12 @@ const sparkCollSwitchTest = async () => {
             const assetId = reserveData.id;
             const from = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
 
             const amountDai = hre.ethers.utils.parseUnits('1000', 18);
             await setBalance(DAI_ADDRESS, senderAcc.address, amountDai);
@@ -770,11 +770,11 @@ const sparkCollSwitchTest = async () => {
             const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
             const daiAssetId = reserveDataDAI.id;
 
-            const balanceBeforeADAI = await balanceOf(aDAI, proxy.address);
+            const balanceBeforeADAI = await balanceOf(spDai, proxy.address);
             console.log(`aDAI on proxy before: ${balanceBeforeADAI.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, DAI_ADDRESS, daiAssetId, from);
 
-            const balanceAfterADAI = await balanceOf(aDAI, proxy.address);
+            const balanceAfterADAI = await balanceOf(spDai, proxy.address);
             console.log(`aDAI on proxy after: ${balanceAfterADAI.toString()}`);
 
             //-----------------------------------------------------
@@ -784,13 +784,13 @@ const sparkCollSwitchTest = async () => {
         });
     });
 };
-const sparkATokenPaybackTest = async () => {
-    describe('Spark-ATokenPayback', function () {
+const sparkSpTokenPaybackTest = async () => {
+    describe('Spark-SpTokenPayback', function () {
         this.timeout(150000);
 
         let senderAcc; let proxy; let pool; let snapshotId;
 
-        let WETH_ADDRESS; let aWETH; let DAI_ADDRESS;
+        let WETH_ADDRESS; let spWETH; let DAI_ADDRESS;
         const network = hre.network.config.name;
 
         before(async () => {
@@ -803,7 +803,7 @@ const sparkATokenPaybackTest = async () => {
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             DAI_ADDRESS = addrs[network].DAI_ADDRESS;
 
-            aWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
+            spWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
         });
         beforeEach(async () => {
             snapshotId = await takeSnapshot();
@@ -813,7 +813,7 @@ const sparkATokenPaybackTest = async () => {
             await revertToSnapshot(snapshotId);
         });
 
-        it('... should supply WETH and borrow DAI then repay part of debt using aDAI on Spark', async () => {
+        it('... should supply WETH and borrow DAI then repay part of debt using spDai on Spark', async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -825,12 +825,12 @@ const sparkATokenPaybackTest = async () => {
             const from = senderAcc.address;
             const to = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
 
             const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
             const amountDai = hre.ethers.utils.parseUnits('1000', 18);
@@ -842,7 +842,7 @@ const sparkATokenPaybackTest = async () => {
             const daiBalanceAfter = await balanceOf(DAI_ADDRESS, senderAcc.address);
             console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
 
-            const aDAI = reserveDataDAI.aTokenAddress;
+            const spDai = reserveDataDAI.aTokenAddress;
 
             const daiVariableTokenDebt = reserveDataDAI.variableDebtTokenAddress;
             const debtAmountBefore = await balanceOf(daiVariableTokenDebt, proxy.address);
@@ -850,24 +850,24 @@ const sparkATokenPaybackTest = async () => {
 
             const paybackAmount = hre.ethers.utils.parseUnits('500', 18);
 
-            await setBalance(aDAI, from, paybackAmount);
+            await setBalance(spDai, from, paybackAmount);
 
-            await approve(aDAI, proxy.address);
-            const aDaiBalanceBefore = await balanceOf(aDAI, senderAcc.address);
-            console.log(`aDAI on EOA before ATokenPayback: ${aDaiBalanceBefore.toString()}`);
-            await sparkATokenPayback(
-                proxy, sparkMarket, paybackAmount, from, 2, reserveDataDAI.id, aDAI,
+            await approve(spDai, proxy.address);
+            const spDaiBalanceBefore = await balanceOf(spDai, senderAcc.address);
+            console.log(`aDAI on EOA before SpTokenPayback: ${spDaiBalanceBefore.toString()}`);
+            await sparkSpTokenPayback(
+                proxy, sparkMarket, paybackAmount, from, 2, reserveDataDAI.id, spDai,
             );
 
-            const aDaiBalanceAfter = await balanceOf(aDAI, senderAcc.address);
-            console.log(`aDAI on EOA after ATokenPayback: ${aDaiBalanceAfter.toString()}`);
+            const spDaiBalanceAfter = await balanceOf(spDai, senderAcc.address);
+            console.log(`aDAI on EOA after SpTokenPayback: ${spDaiBalanceAfter.toString()}`);
 
             const debtAmountAfter = await balanceOf(daiVariableTokenDebt, proxy.address);
             console.log(`Debt after payback ${debtAmountAfter.toString()}`);
             expect(debtAmountAfter).to.be.lt(debtAmountBefore);
         });
 
-        it('... should supply WETH and borrow DAI then repay part of debt using aDAI on Spark using optimised calldata', async () => {
+        it('... should supply WETH and borrow DAI then repay part of debt using spDai on Spark using optimised calldata', async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -879,12 +879,12 @@ const sparkATokenPaybackTest = async () => {
             const from = senderAcc.address;
             const to = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
 
             const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
             const amountDai = hre.ethers.utils.parseUnits('1000', 18);
@@ -896,7 +896,7 @@ const sparkATokenPaybackTest = async () => {
             const daiBalanceAfter = await balanceOf(DAI_ADDRESS, senderAcc.address);
             console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
 
-            const aDAI = reserveDataDAI.aTokenAddress;
+            const spDai = reserveDataDAI.aTokenAddress;
 
             const daiVariableTokenDebt = reserveDataDAI.variableDebtTokenAddress;
             const debtAmountBefore = await balanceOf(daiVariableTokenDebt, proxy.address);
@@ -904,24 +904,24 @@ const sparkATokenPaybackTest = async () => {
 
             const paybackAmount = hre.ethers.utils.parseUnits('500', 18);
 
-            await setBalance(aDAI, from, paybackAmount);
+            await setBalance(spDai, from, paybackAmount);
 
-            await approve(aDAI, proxy.address);
-            const aDaiBalanceBefore = await balanceOf(aDAI, senderAcc.address);
-            console.log(`aDAI on EOA before ATokenPayback: ${aDaiBalanceBefore.toString()}`);
-            await sparkATokenPaybackCalldataOptimised(
-                proxy, sparkMarket, paybackAmount, from, 2, reserveDataDAI.id, aDAI,
+            await approve(spDai, proxy.address);
+            const spDaiBalanceBefore = await balanceOf(spDai, senderAcc.address);
+            console.log(`aDAI on EOA before SpTokenPayback: ${spDaiBalanceBefore.toString()}`);
+            await sparkSpTokenPaybackCalldataOptimised(
+                proxy, sparkMarket, paybackAmount, from, 2, reserveDataDAI.id, spDai,
             );
 
-            const aDaiBalanceAfter = await balanceOf(aDAI, senderAcc.address);
-            console.log(`aDAI on EOA after ATokenPayback: ${aDaiBalanceAfter.toString()}`);
+            const spDaiBalanceAfter = await balanceOf(spDai, senderAcc.address);
+            console.log(`aDAI on EOA after SpTokenPayback: ${spDaiBalanceAfter.toString()}`);
 
             const debtAmountAfter = await balanceOf(daiVariableTokenDebt, proxy.address);
             console.log(`Debt after payback ${debtAmountAfter.toString()}`);
 
             expect(debtAmountAfter).to.be.lt(debtAmountBefore);
         });
-        it('... should supply WETH and borrow DAI then repay ALL debt using aDAI on Spark using optimised calldata', async () => {
+        it('... should supply WETH and borrow DAI then repay ALL debt using spDai on Spark using optimised calldata', async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -933,12 +933,12 @@ const sparkATokenPaybackTest = async () => {
             const from = senderAcc.address;
             const to = senderAcc.address;
 
-            const balanceBefore = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy before: ${balanceBefore.toString()}`);
+            const balanceBefore = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
             await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
 
-            const balanceAfter = await balanceOf(aWETH, proxy.address);
-            console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
+            const balanceAfter = await balanceOf(spWETH, proxy.address);
+            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
 
             const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
             const amountDai = hre.ethers.utils.parseUnits('1000', 18);
@@ -950,7 +950,7 @@ const sparkATokenPaybackTest = async () => {
             const daiBalanceAfter = await balanceOf(DAI_ADDRESS, senderAcc.address);
             console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
 
-            const aDAI = reserveDataDAI.aTokenAddress;
+            const spDai = reserveDataDAI.aTokenAddress;
 
             const daiVariableTokenDebt = reserveDataDAI.variableDebtTokenAddress;
             const debtAmountBefore = await balanceOf(daiVariableTokenDebt, proxy.address);
@@ -958,17 +958,17 @@ const sparkATokenPaybackTest = async () => {
 
             const paybackAmount = hre.ethers.utils.parseUnits('1500', 18);
 
-            await setBalance(aDAI, from, paybackAmount);
+            await setBalance(spDai, from, paybackAmount);
 
-            await approve(aDAI, proxy.address);
-            const aDaiBalanceBefore = await balanceOf(aDAI, senderAcc.address);
-            console.log(`aDAI on EOA before ATokenPayback: ${aDaiBalanceBefore.toString()}`);
-            await sparkATokenPaybackCalldataOptimised(
+            await approve(spDai, proxy.address);
+            const spDaiBalanceBefore = await balanceOf(spDai, senderAcc.address);
+            console.log(`aDAI on EOA before SpTokenPayback: ${spDaiBalanceBefore.toString()}`);
+            await sparkSpTokenPaybackCalldataOptimised(
                 proxy, sparkMarket, paybackAmount, from, 2, reserveDataDAI.id,
             );
 
-            const aDaiBalanceAfter = await balanceOf(aDAI, senderAcc.address);
-            console.log(`aDAI on EOA after ATokenPayback: ${aDaiBalanceAfter.toString()}`);
+            const spDaiBalanceAfter = await balanceOf(spDai, senderAcc.address);
+            console.log(`aDAI on EOA after SpTokenPayback: ${spDaiBalanceAfter.toString()}`);
 
             const debtAmountAfter = await balanceOf(daiVariableTokenDebt, proxy.address);
             console.log(`Debt after payback ${debtAmountAfter.toString()}`);
@@ -999,7 +999,7 @@ const sparkClaimRewardsTest = async () => {
             await impersonateAccount(ownerAcc);
             proxy = proxy.connect(await hre.ethers.provider.getSigner(ownerAcc));
             const aWBTC = '0x078f358208685046a11C85e8ad32895DED33A249';
-            const aWETH = '0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8';
+            const spWETH = '0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8';
             const aVariableUSDC = '0xFCCf3cAbbe80101232d343252614b6A3eE81C989';
 
             const opAmount = '2168856438217507949';
@@ -1009,7 +1009,7 @@ const sparkClaimRewardsTest = async () => {
             console.log(balanceBefore.toString());
 
             await sparkClaimRewards(
-                proxy, [aWBTC, aWETH, aVariableUSDC], opAmount, ownerAcc, opToken,
+                proxy, [aWBTC, spWETH, aVariableUSDC], opAmount, ownerAcc, opToken,
             );
 
             const balanceAfter = await balanceOf(opToken, ownerAcc);
@@ -1125,7 +1125,7 @@ const sparkDsrUnwrapTest = async () => describe('Spark-Dsr-Unwrap', () => {
 const sparkDeployContracts = async () => {
     await redeploy('SparkSupply');
     await redeploy('SparkBorrow');
-    await redeploy('SparkATokenPayback');
+    await redeploy('SparkSpTokenPayback');
     await redeploy('SparkCollateralSwitch');
     await redeploy('SparkPayback');
     await redeploy('SparkSetEMode');
@@ -1149,7 +1149,7 @@ const sparkFullTest = async () => {
     await sparkSetEModeTest();
     await sparkPaybackTest();
     await sparkCollSwitchTest();
-    await sparkATokenPaybackTest();
+    await sparkSpTokenPaybackTest();
 };
 module.exports = {
     sparkFullTest,
@@ -1160,7 +1160,7 @@ module.exports = {
     sparkSetEModeTest,
     sparkPaybackTest,
     sparkCollSwitchTest,
-    sparkATokenPaybackTest,
+    sparkSpTokenPaybackTest,
     sparkClaimRewardsTest,
     sparkDsrWrapTest,
     sparkDsrUnwrapTest,
