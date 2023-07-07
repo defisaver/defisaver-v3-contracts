@@ -28,12 +28,13 @@ contract MorphoAaveV3LSVProfitTracker is MorphoAaveV3Helper, LSVUtilHelper{
         unrealisedProfit[msg.sender] -= downCastUintToInt(_amount); 
     }
 
-    function withdraw(address _token, uint256 _amount, address _morphoAddr) public returns (uint256 feeAmount){
+    function withdraw(address _token, uint256 _amount, address _morphoAddr) public returns (uint256 feeAmountInLST){
         uint256 amountInETH = getAmountInETHFromLST(_token, _amount);
         unrealisedProfit[msg.sender] += downCastUintToInt(amountInETH);
         
         if (unrealisedProfit[msg.sender] > 0){
-            feeAmount = uint256(unrealisedProfit[msg.sender]) / 10;
+            uint256 feeAmountInETH = uint256(unrealisedProfit[msg.sender]) / 10;
+            feeAmountInLST = getAmountInLSTFromETH(_token, feeAmountInETH);
             unrealisedProfit[msg.sender] = 0;
         } else if (isPositionClosed(msg.sender, _token, _morphoAddr)) {
             unrealisedProfit[msg.sender] = 0;
@@ -54,6 +55,22 @@ contract MorphoAaveV3LSVProfitTracker is MorphoAaveV3Helper, LSVUtilHelper{
         }
         
         return lstAmount;
+    }
+
+    function getAmountInLSTFromETH(address lstAddress, uint256 ethAmount) public view returns (uint256 lstAmount) {
+
+        if (lstAddress == RETH_ADDRESS){
+            return IRETH(RETH_ADDRESS).getRethValue(ethAmount);
+        }
+        if (lstAddress == CBETH_ADDRESS){
+            uint256 rate = ICBETH(CBETH_ADDRESS).exchangeRate();
+            return wdiv(ethAmount, rate);
+        }
+        if (lstAddress == WSTETH_ADDRESS){
+            return IWstETH(WSTETH_ADDRESS).getWstETHByStETH(ethAmount);
+        }
+        
+        return ethAmount;
     }
 
     function downCastUintToInt(uint256 uintAmount) internal pure returns(int256 amount){
