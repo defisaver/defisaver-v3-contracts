@@ -6,9 +6,11 @@ import "./MainnetAaveV3Addresses.sol";
 import "../../../interfaces/aaveV3/IL2PoolV3.sol";
 import "../../../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
 import "../../../interfaces/aaveV3/IPoolAddressesProvider.sol";
+import "../../../utils/TokenUtils.sol";
 
 /// @title Utility functions and data used in AaveV3 actions
 contract AaveV3Helper is MainnetAaveV3Addresses {
+    using TokenUtils for address;
     
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
@@ -46,6 +48,16 @@ contract AaveV3Helper is MainnetAaveV3Addresses {
             debt = borrowsStable;
         } else if (_borrowType == VARIABLE_ID) {
             debt = borrowsVariable;
+        }
+    }
+    function isPositionClosed(address _user, address _collToken, address _market) internal view returns(bool){
+        IL2PoolV3 lendingPool = getLendingPool(_market);
+        DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_collToken);
+        uint256 aTokenBalance = reserveData.aTokenAddress.getBalance(_user);
+        if (aTokenBalance == 0) {
+            return true;
+        } else {
+            return false;
         }
     }
 }

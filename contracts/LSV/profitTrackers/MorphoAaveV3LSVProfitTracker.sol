@@ -2,15 +2,14 @@
 
 pragma solidity =0.8.10;
 
-import "../../actions/aaveV3/helpers/AaveV3Helper.sol";
+import "../../actions/morpho/aaveV3/helpers/MorphoAaveV3Helper.sol";
 import "../helpers/LSVUtilHelper.sol";
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/LSTs/ICBETH.sol";
 import "../../interfaces/LSTs/IRETH.sol";
 import "../../interfaces/LSTs/IWstETH.sol";
-import "../../DS/DSMath.sol";
 
-contract AaveV3LSVProfitTracker is AaveV3Helper, LSVUtilHelper, DSMath{
+contract MorphoAaveV3LSVProfitTracker is MorphoAaveV3Helper, LSVUtilHelper{
     using TokenUtils for address;
 
     mapping(address => int256) public unrealisedProfit;
@@ -29,14 +28,14 @@ contract AaveV3LSVProfitTracker is AaveV3Helper, LSVUtilHelper, DSMath{
         unrealisedProfit[msg.sender] -= downCastUintToInt(_amount); 
     }
 
-    function withdraw(address _token, uint256 _amount, address _market) public returns (uint256 feeAmount){
+    function withdraw(address _token, uint256 _amount, address _morphoAddr) public returns (uint256 feeAmount){
         uint256 amountInETH = getAmountInETHFromLST(_token, _amount);
         unrealisedProfit[msg.sender] += downCastUintToInt(amountInETH);
         
         if (unrealisedProfit[msg.sender] > 0){
             feeAmount = uint256(unrealisedProfit[msg.sender]) / 10;
             unrealisedProfit[msg.sender] = 0;
-        } else if (isPositionClosed(msg.sender, _token, _market)) {
+        } else if (isPositionClosed(msg.sender, _token, _morphoAddr)) {
             unrealisedProfit[msg.sender] = 0;
         }
     }

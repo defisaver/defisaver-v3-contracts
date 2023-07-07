@@ -111,7 +111,7 @@ contract AaveV3LSVWithdraw is ActionBase, AaveV3Helper, AaveV3LSVHelper, LSVUtil
         }
 
         address profitTrackerAddr = registry.getAddr(AAVEV3_PROFIT_TRACKER_ID);
-        uint256 performanceFee = ILSVProfitTracker(profitTrackerAddr).withdraw(tokenAddr, _amount);
+        uint256 performanceFee = ILSVProfitTracker(profitTrackerAddr).withdraw(tokenAddr, _amount, _market);
 
         address walletAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();
         tokenAddr.withdrawTokens(walletAddr, performanceFee);

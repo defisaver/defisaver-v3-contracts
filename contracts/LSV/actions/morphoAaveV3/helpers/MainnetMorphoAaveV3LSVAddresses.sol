@@ -2,5 +2,5 @@
 
 pragma solidity =0.8.10;
 
-contract MainnetAaveV3LSVAddresses {
+contract MainnetMorphoAaveV3LSVAddresses {
 }
