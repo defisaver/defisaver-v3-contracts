@@ -98,6 +98,11 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         // we get _ethCollAmount in tokens from curve
         address collToken = ICrvUsdController(controllerAddr).collateral_token();
 
+        // if we want to sell the whole coll amount we take the whole balance
+        if (swapData[0] == type(uint256).max) {
+            swapData[0] = IERC20(collToken).balanceOf(address(this));
+        }
+
         uint256 swappedAmount = _curveSwap(_user, swapData, collToken, true);
 
         // how many crvUsd we got after the trade that will be the repay amount
