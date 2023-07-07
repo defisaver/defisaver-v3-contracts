@@ -177,6 +177,12 @@ const dydxTokens = ['WETH', 'USDC', 'DAI'];
 
 let network = hre.network.config.name;
 
+const setNetwork = (networkName) => {
+    network = networkName;
+};
+
+const getNetwork = () => network;
+
 const chainIds = {
     mainnet: 1,
     optimism: 10,
@@ -187,6 +193,14 @@ const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
 const AAVE_V3_FL_FEE = 0.05;
 const MIN_VAULT_DAI_AMOUNT = '45010'; // TODO: can we fetch this dynamically
 const MIN_VAULT_RAI_AMOUNT = '3000'; // TODO: can we fetch this dynamically
+
+const getSparkFLFee = async () => {
+    console.log(getNetwork(), addrs[getNetwork()].SPARK_MARKET);
+    return hre.ethers.getContractAt('IPoolAddressesProvider', addrs[getNetwork()].SPARK_MARKET)
+        .then((addressProvider) => addressProvider.getPool())
+        .then((poolAddr) => hre.ethers.getContractAt('IPoolV3', poolAddr))
+        .then((pool) => pool.FLASHLOAN_PREMIUM_TOTAL());
+};
 
 const AVG_GAS_PRICE = 100; // gwei
 
@@ -222,6 +236,8 @@ const standardAmounts = {
 };
 
 const coinGeckoHelper = {
+    GNO: 'gnosis',
+    rETH: 'rocket-pool-eth',
     STETH: 'staked-ether',
     CRV: 'curve-dao-token',
     ETH: 'ethereum',
@@ -268,12 +284,6 @@ const coinGeckoHelper = {
 const BN2Float = hre.ethers.utils.formatUnits;
 
 const Float2BN = hre.ethers.utils.parseUnits;
-
-const setNetwork = (networkName) => {
-    network = networkName;
-};
-
-const getNetwork = () => network;
 
 const getOwnerAddr = () => addrs[network].OWNER_ACC;
 
@@ -1266,6 +1276,7 @@ module.exports = {
     USDC_ADDR,
     AAVE_FL_FEE,
     AAVE_V3_FL_FEE,
+    getSparkFLFee,
     MIN_VAULT_DAI_AMOUNT,
     MIN_VAULT_RAI_AMOUNT,
     RAI_ADDR,
