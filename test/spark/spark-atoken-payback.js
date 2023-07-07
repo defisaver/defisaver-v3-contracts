@@ -1,7 +1,7 @@
 const { redeploy } = require('../utils');
 const { sparkATokenPaybackTest } = require('./spark-tests');
 
-describe('Spark-ATokenPayback-L2', function () {
+describe('Spark-ATokenPayback', function () {
     this.timeout(150000);
 
     before(async () => {
@@ -9,7 +9,7 @@ describe('Spark-ATokenPayback-L2', function () {
         await redeploy('SparkBorrow');
         await redeploy('SparkATokenPayback');
     });
-    it('... should run full aave atoken payback test', async () => {
+    it('... should run full spark atoken payback test', async () => {
         await sparkATokenPaybackTest();
     });
 });

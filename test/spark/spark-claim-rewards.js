@@ -1,7 +1,7 @@
 const { redeploy } = require('../utils');
 const { sparkClaimRewardsTest } = require('./spark-tests');
 
-describe('Spark-ClaimRewards-L2', function () {
+describe('Spark-ClaimRewards', function () {
     this.timeout(150000);
 
     before(async () => {

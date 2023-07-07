@@ -2,11 +2,11 @@ const { expect } = require('chai');
 
 const hre = require('hardhat');
 
-const { configure } = require('@defisaver/sdk');
+const { getAssetInfo } = require('@defisaver/tokens');
 const {
     getProxy,
     balanceOf, setBalance, redeploy,
-    takeSnapshot, revertToSnapshot, addrs, approve, impersonateAccount, getNetwork,
+    takeSnapshot, revertToSnapshot, addrs, approve, impersonateAccount, getNetwork, Float2BN,
 } = require('../utils');
 
 const sparkMarket = addrs[getNetwork()].SPARK_MARKET;
@@ -17,14 +17,11 @@ const {
     sparkSwapBorrowRateCalldataOptimised, sparkSwapBorrowRate, sparkSetEModeCalldataOptimised,
     sparkSetEMode, sparkSwitchCollateral, sparkSwitchCollateralCallDataOptimised,
     sparkATokenPaybackCalldataOptimised, sparkATokenPayback,
-    sparkBorrowCalldataOptimised, sparkClaimRewards,
+    sparkBorrowCalldataOptimised, sparkClaimRewards, sparkDsrWrap, sparkDsrUnwrap,
 } = require('../actions');
 
 const sparkSupplyTest = async () => {
-    describe('Spark-Supply-L2', function () {
-        configure({
-            chainId: 10,
-        });
+    describe('Spark-Supply', function () {
         this.timeout(150000);
 
         let senderAcc; let proxy; let pool; let snapshotId;
@@ -34,8 +31,8 @@ const sparkSupplyTest = async () => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-            const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await aaveMarketContract.getPool();
+            const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
+            const poolAddres = await sparkMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
@@ -71,7 +68,7 @@ const sparkSupplyTest = async () => {
             expect(balanceAfter).to.be.gt(balanceBefore);
         });
 
-        it('... should supply WETH to Sparkusing optimised calldata', async () => {
+        it('... should supply WETH to Spark using optimised calldata', async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -97,10 +94,7 @@ const sparkSupplyTest = async () => {
 };
 
 const sparkBorrowTest = async () => {
-    describe('Spark-Borrow-L2', function () {
-        configure({
-            chainId: 10,
-        });
+    describe('Spark-Borrow', function () {
         this.timeout(150000);
 
         let senderAcc; let proxy; let pool; let snapshotId;
@@ -111,8 +105,8 @@ const sparkBorrowTest = async () => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-            const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await aaveMarketContract.getPool();
+            const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
+            const poolAddres = await sparkMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
@@ -128,7 +122,7 @@ const sparkBorrowTest = async () => {
             await revertToSnapshot(snapshotId);
         });
 
-        it('... should supply WETH and borrow DAI on Spark Optimism', async () => {
+        it('... should supply WETH and borrow DAI on Spark', async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -158,7 +152,7 @@ const sparkBorrowTest = async () => {
             console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
             expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
         });
-        it('... should supply WETH and borrow DAI on Spark Optimism using optimised calldata', async () => {
+        it('... should supply WETH and borrow DAI on Spark using optimised calldata', async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -194,12 +188,9 @@ const sparkBorrowTest = async () => {
 };
 
 const sparkWithdrawTest = async () => {
-    describe('Spark-Withdraw-L2', function () {
+    describe('Spark-Withdraw', function () {
         this.timeout(150000);
 
-        configure({
-            chainId: 10,
-        });
         let senderAcc; let proxy; let pool; let snapshotId;
         let WETH_ADDRESS; let aWETH;
         const network = hre.network.config.name;
@@ -207,8 +198,8 @@ const sparkWithdrawTest = async () => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-            const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await aaveMarketContract.getPool();
+            const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
+            const poolAddres = await sparkMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
@@ -256,7 +247,7 @@ const sparkWithdrawTest = async () => {
             expect(wethBalanceAfterWithdraw).to.be.gt(wethBalanceBeforeWithdraw);
             expect(awethEOAbalanceAfterWithdraw).to.be.lt(balanceAfter);
         });
-        it('... should supply WETH and then withdraw it on Sparkusing optimised calldata', async () => {
+        it('... should supply WETH and then withdraw it on Spark using optimised calldata', async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -292,12 +283,9 @@ const sparkWithdrawTest = async () => {
 };
 
 const sparkPaybackTest = async () => {
-    describe('Spark-Payback-L2', function () {
+    describe('Spark-Payback', function () {
         this.timeout(150000);
 
-        configure({
-            chainId: 10,
-        });
         let senderAcc; let proxy; let pool; let snapshotId;
 
         let WETH_ADDRESS; let aWETH; let DAI_ADDRESS;
@@ -306,8 +294,8 @@ const sparkPaybackTest = async () => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-            const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await aaveMarketContract.getPool();
+            const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
+            const poolAddres = await sparkMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
@@ -472,12 +460,9 @@ const sparkPaybackTest = async () => {
 };
 
 const sparkSwapBorrowRateTest = async () => {
-    describe('Spark-Swap-Borrow-Rate-L2', function () {
+    describe('Spark-Swap-Borrow-Rate', function () {
         this.timeout(150000);
 
-        configure({
-            chainId: 10,
-        });
         let senderAcc; let proxy; let pool; let snapshotId;
 
         let WETH_ADDRESS; let aWETH; let DAI_ADDRESS;
@@ -486,8 +471,8 @@ const sparkSwapBorrowRateTest = async () => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-            const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await aaveMarketContract.getPool();
+            const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
+            const poolAddres = await sparkMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
@@ -505,7 +490,7 @@ const sparkSwapBorrowRateTest = async () => {
 
         // TODO - find assets that can be stable borrowed at test runtime
         // at the time of this commit no asset can be stable borrowed
-        it.skip('... should supply WETH and borrow variable rate DAI then change it to stable on Spark Optimism', async () => {
+        it.skip('... should supply WETH and borrow variable rate DAI then change it to stable on Spark', async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -553,7 +538,7 @@ const sparkSwapBorrowRateTest = async () => {
 
         // TODO - find assets that can be stable borrowed at test runtime
         // at the time of this commit no asset can be stable borrowed
-        it.skip('... should supply WETH and borrow variable rate DAI then change it to stable on Spark Optimism using optimised calldata', async () => {
+        it.skip('... should supply WETH and borrow variable rate DAI then change it to stable on Spark using optimised calldata', async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -603,12 +588,9 @@ const sparkSwapBorrowRateTest = async () => {
     });
 };
 const sparkSetEModeTest = async () => {
-    describe('Spark-Set-EMode-L2', function () {
+    describe('Spark-Set-EMode', function () {
         this.timeout(150000);
 
-        configure({
-            chainId: 10,
-        });
         let senderAcc; let proxy; let snapshotId; let pool;
         let WETH_ADDRESS; let aWETH;
         const network = hre.network.config.name;
@@ -616,8 +598,8 @@ const sparkSetEModeTest = async () => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-            const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await aaveMarketContract.getPool();
+            const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
+            const poolAddres = await sparkMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
@@ -692,12 +674,9 @@ const sparkSetEModeTest = async () => {
     });
 };
 const sparkCollSwitchTest = async () => {
-    describe('Spark-Coll-Switch-L2', function () {
+    describe('Spark-Coll-Switch', function () {
         this.timeout(150000);
 
-        configure({
-            chainId: 10,
-        });
         let senderAcc; let proxy; let pool; let snapshotId;
 
         let WETH_ADDRESS; let aWETH; let DAI_ADDRESS; let aDAI;
@@ -706,8 +685,8 @@ const sparkCollSwitchTest = async () => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-            const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await aaveMarketContract.getPool();
+            const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
+            const poolAddres = await sparkMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
@@ -725,7 +704,7 @@ const sparkCollSwitchTest = async () => {
             await revertToSnapshot(snapshotId);
         });
 
-        it('... should supply WETH and DAI to Sparkthen turn off collateral for them', async () => {
+        it('... should supply WETH and DAI to Spark then turn off collateral for them', async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -764,7 +743,7 @@ const sparkCollSwitchTest = async () => {
                 proxy, sparkMarket, 2, [assetId, daiAssetId], [false, false],
             );
         });
-        it('... should supply WETH and DAI to Sparkthen turn off collateral for them', async () => {
+        it('... should supply WETH and DAI to Spark then turn off collateral for them', async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -806,12 +785,9 @@ const sparkCollSwitchTest = async () => {
     });
 };
 const sparkATokenPaybackTest = async () => {
-    describe('Spark-ATokenPayback-L2', function () {
+    describe('Spark-ATokenPayback', function () {
         this.timeout(150000);
 
-        configure({
-            chainId: 10,
-        });
         let senderAcc; let proxy; let pool; let snapshotId;
 
         let WETH_ADDRESS; let aWETH; let DAI_ADDRESS;
@@ -820,8 +796,8 @@ const sparkATokenPaybackTest = async () => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-            const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await aaveMarketContract.getPool();
+            const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
+            const poolAddres = await sparkMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
@@ -1002,13 +978,12 @@ const sparkATokenPaybackTest = async () => {
         });
     });
 };
+
+// TODO : find owner to impersonate
 const sparkClaimRewardsTest = async () => {
-    describe('Spark-ClaimRewards-L2', function () {
+    describe('Spark-ClaimRewards', function () {
         this.timeout(150000);
 
-        configure({
-            chainId: 10,
-        });
         let snapshotId;
 
         beforeEach(async () => {
@@ -1018,8 +993,7 @@ const sparkClaimRewardsTest = async () => {
         afterEach(async () => {
             await revertToSnapshot(snapshotId);
         });
-        // TODO : hardcode block number on L2 chains? tested on 15281577
-        it('... should claim OP rewards on Optimism DSProxy position', async () => {
+        it('... should claim rewards', async () => {
             const ownerAcc = '0xEA57Dc30959eb17c506E4dA095fa9181f3E0Ac6D';
             let proxy = await getProxy(ownerAcc);
             await impersonateAccount(ownerAcc);
@@ -1046,6 +1020,108 @@ const sparkClaimRewardsTest = async () => {
     });
 };
 
+const sparkDsrWrapTest = async () => describe('Spark-Dsr-Wrap', () => {
+    const daiAddr = getAssetInfo('DAI').address;
+    const sDaiAddr = getAssetInfo('sDAI').address;
+    const depositAmount = Float2BN('5000');
+
+    it('... should deposit dai and mint sDai', async () => {
+        const [senderAcc] = await hre.ethers.getSigners();
+        const proxy = await getProxy(senderAcc.address);
+
+        await setBalance(sDaiAddr, senderAcc.address, Float2BN('0'));
+        await setBalance(daiAddr, senderAcc.address, depositAmount);
+        await approve(daiAddr, proxy.address);
+        await sparkDsrWrap(
+            proxy,
+            depositAmount,
+            senderAcc.address,
+            senderAcc.address,
+        );
+
+        const sdaiPrice = await hre.ethers
+            .getContractAt('IAggregatorV3', '0xb9E6DBFa4De19CCed908BcbFe1d015190678AB5f')
+            .then((c) => c.latestAnswer());
+
+        const expectedSDaiAmount = depositAmount.mul(1e8).div(sdaiPrice).mul(99).div(100);
+
+        expect(await balanceOf(sDaiAddr, senderAcc.address)).to.be.gt(expectedSDaiAmount);
+    });
+
+    it('... should deposit maxUint dai and mint sDai', async () => {
+        const [senderAcc] = await hre.ethers.getSigners();
+        const proxy = await getProxy(senderAcc.address);
+
+        await setBalance(sDaiAddr, senderAcc.address, Float2BN('0'));
+        await setBalance(daiAddr, senderAcc.address, depositAmount);
+        await approve(daiAddr, proxy.address);
+        await sparkDsrWrap(
+            proxy,
+            hre.ethers.constants.MaxUint256,
+            senderAcc.address,
+            senderAcc.address,
+        );
+
+        const sdaiPrice = await hre.ethers
+            .getContractAt('IAggregatorV3', '0xb9E6DBFa4De19CCed908BcbFe1d015190678AB5f')
+            .then((c) => c.latestAnswer());
+
+        const expectedSDaiAmount = depositAmount.mul(1e8).div(sdaiPrice).mul(99).div(100);
+
+        expect(await balanceOf(sDaiAddr, senderAcc.address)).to.be.gt(expectedSDaiAmount);
+    });
+});
+
+const sparkDsrUnwrapTest = async () => describe('Spark-Dsr-Unwrap', () => {
+    const daiAddr = getAssetInfo('DAI').address;
+    const sDaiAddr = getAssetInfo('sDAI').address;
+    const redeemAmount = Float2BN('5000');
+
+    it('... should redeem sDai for dai', async () => {
+        const [senderAcc] = await hre.ethers.getSigners();
+        const proxy = await getProxy(senderAcc.address);
+
+        await setBalance(daiAddr, senderAcc.address, Float2BN('0'));
+        await setBalance(sDaiAddr, senderAcc.address, redeemAmount);
+        await approve(sDaiAddr, proxy.address);
+        await sparkDsrUnwrap(
+            proxy,
+            redeemAmount,
+            senderAcc.address,
+            senderAcc.address,
+        );
+
+        const sdaiPrice = await hre.ethers
+            .getContractAt('IAggregatorV3', '0xb9E6DBFa4De19CCed908BcbFe1d015190678AB5f')
+            .then((c) => c.latestAnswer());
+
+        const expectedSDaiAmount = redeemAmount.mul(sdaiPrice).div(1e8).mul(99).div(100);
+        expect(await balanceOf(daiAddr, senderAcc.address)).to.be.gt(expectedSDaiAmount);
+    });
+
+    it('... should redeem maxUint sDai for dai', async () => {
+        const [senderAcc] = await hre.ethers.getSigners();
+        const proxy = await getProxy(senderAcc.address);
+
+        await setBalance(daiAddr, senderAcc.address, Float2BN('0'));
+        await setBalance(sDaiAddr, senderAcc.address, redeemAmount);
+        await approve(sDaiAddr, proxy.address);
+        await sparkDsrUnwrap(
+            proxy,
+            hre.ethers.constants.MaxUint256,
+            senderAcc.address,
+            senderAcc.address,
+        );
+
+        const sdaiPrice = await hre.ethers
+            .getContractAt('IAggregatorV3', '0xb9E6DBFa4De19CCed908BcbFe1d015190678AB5f')
+            .then((c) => c.latestAnswer());
+
+        const expectedSDaiAmount = redeemAmount.mul(sdaiPrice).div(1e8).mul(99).div(100);
+        expect(await balanceOf(daiAddr, senderAcc.address)).to.be.gt(expectedSDaiAmount);
+    });
+});
+
 const sparkDeployContracts = async () => {
     await redeploy('SparkSupply');
     await redeploy('SparkBorrow');
@@ -1055,10 +1131,16 @@ const sparkDeployContracts = async () => {
     await redeploy('SparkSetEMode');
     await redeploy('SparkSwapBorrowRateMode');
     await redeploy('SparkWithdraw');
+
+    await redeploy('SparkDsrWrap');
+    await redeploy('SparkDsrUnwrap');
 };
 
 const sparkFullTest = async () => {
     await sparkDeployContracts();
+
+    await sparkDsrWrapTest();
+    await sparkDsrUnwrapTest();
 
     await sparkSupplyTest();
     await sparkBorrowTest();
@@ -1080,4 +1162,6 @@ module.exports = {
     sparkCollSwitchTest,
     sparkATokenPaybackTest,
     sparkClaimRewardsTest,
+    sparkDsrWrapTest,
+    sparkDsrUnwrapTest,
 };

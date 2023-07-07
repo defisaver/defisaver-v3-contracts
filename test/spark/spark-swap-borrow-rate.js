@@ -1,7 +1,7 @@
 const { redeploy } = require('../utils');
 const { sparkSwapBorrowRateTest } = require('./spark-tests');
 
-describe('Spark-Borrow-L2', function () {
+describe('Spark-Borrow', function () {
     this.timeout(150000);
 
     before(async () => {
@@ -9,7 +9,7 @@ describe('Spark-Borrow-L2', function () {
         await redeploy('SparkBorrow');
         await redeploy('SparkSwapBorrowRateMode');
     });
-    it('... should run full aave swap borrow rate test', async () => {
+    it('... should run full spark swap borrow rate test', async () => {
         await sparkSwapBorrowRateTest();
     });
 });

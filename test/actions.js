@@ -36,7 +36,9 @@ const {
     MCD_MANAGER_ADDR,
 } = require('./utils-mcd');
 const { getSecondTokenAmount } = require('./utils-uni');
-const { LiquityActionIds, getHints, getRedemptionHints, collChangeId, debtChangeId } = require('./utils-liquity');
+const {
+    LiquityActionIds, getHints, getRedemptionHints, collChangeId, debtChangeId,
+} = require('./utils-liquity');
 const { execShellCommand } = require('../scripts/hardhat-tasks-functions');
 
 const network = hre.network.config.name;
@@ -2778,6 +2780,36 @@ const sparkSwitchCollateralCallDataOptimised = async (
     return receipt;
 };
 
+const sparkDsrWrap = async (
+    proxy, daiAmount, from, to,
+) => {
+    const actionAddress = await getAddrFromRegistry('SparkDsrWrap');
+    const action = new dfs.actions.spark.SparkDsrWrapAction(
+        daiAmount, from, to,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkDsrWrap: ${gasUsed}`);
+    return receipt;
+};
+
+const sparkDsrUnwrap = async (
+    proxy, sDaiAmount, from, to,
+) => {
+    const actionAddress = await getAddrFromRegistry('SparkDsrUnwrap');
+    const action = new dfs.actions.spark.SparkDsrUnwrapAction(
+        sDaiAmount, from, to,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkDsrUnwrap: ${gasUsed}`);
+    return receipt;
+};
+
 const morphoAaveV2Supply = async (
     proxy,
     tokenAddr,
@@ -3070,6 +3102,8 @@ module.exports = {
     sparkSwapBorrowRate,
     sparkSwapBorrowRateCalldataOptimised,
     sparkClaimRewards,
+    sparkDsrWrap,
+    sparkDsrUnwrap,
 
     updateSubData,
 

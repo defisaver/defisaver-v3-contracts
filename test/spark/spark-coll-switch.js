@@ -1,7 +1,7 @@
 const { redeploy } = require('../utils');
 const { sparkCollSwitchTest } = require('./spark-tests');
 
-describe('Spark-Coll-Switch-L2', function () {
+describe('Spark-Coll-Switch', function () {
     this.timeout(150000);
 
     before(async () => {
@@ -9,7 +9,7 @@ describe('Spark-Coll-Switch-L2', function () {
         await redeploy('SparkCollateralSwitch');
     });
 
-    it('... should run full aave coll switch test', async () => {
+    it('... should run full spark coll switch test', async () => {
         await sparkCollSwitchTest();
     });
 });
