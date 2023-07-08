@@ -32,8 +32,13 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
     /// @notice User calls from EOA if he wants to execute something with DSProxy bundled with build tx
     function addNewProxyAndExecute(address _target, bytes memory _data) public payable returns (address) {
         address newProxy = getFromPoolOrBuild(address(this));
+
         DSProxy(payable(newProxy)).execute{value: msg.value}(_target, _data);
-        DSAuth(newProxy).setOwner(msg.sender);
+
+        // if we didn't execute changeLSVProxyOwner in recipe
+        if (DSAuth(newProxy).owner() == address(this)){
+            DSAuth(newProxy).setOwner(msg.sender);
+        }
         proxies[msg.sender].push(newProxy);
 
         emit NewProxy(msg.sender, newProxy);
@@ -48,8 +53,8 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
     
     /// @dev function to be called by proxy that will be changing owner
     function changeProxyOwner(address _oldOwner, address _newOwner, uint256 _noInProxiesArr) public {
-        require (msg.sender == proxies[_oldOwner][_noInProxiesArr]);
-        proxies[_oldOwner][_noInProxiesArr] = address(0);
+        require (_oldOwner == address(this) || msg.sender == proxies[_oldOwner][_noInProxiesArr]);
+        if (_oldOwner != address(this)) proxies[_oldOwner][_noInProxiesArr] = address(0);
         proxies[_newOwner].push(msg.sender);
         emit ChangedOwner(_oldOwner, _newOwner, msg.sender);
     }
