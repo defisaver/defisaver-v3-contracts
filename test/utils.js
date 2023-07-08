@@ -1,6 +1,6 @@
 /* eslint-disable import/no-unresolved */
 /* eslint-disable no-await-in-loop */
-// const { default: curve } = require('@curvefi/api');
+const { default: curve } = require('@curvefi/api');
 const hre = require('hardhat');
 const fs = require('fs');
 const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
