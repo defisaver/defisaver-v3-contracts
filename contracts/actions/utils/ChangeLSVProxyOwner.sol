@@ -2,8 +2,9 @@
 
 pragma solidity =0.8.10;
 
-import "../../../actions/ActionBase.sol";
-import "../../../LSV/LSVProxyRegistry.sol";
+import "../ActionBase.sol";
+import "../../utils/LSVProxyRegistry.sol";
+
 
 /// @title Changes the owner of the DSProxy and updated the DFSRegistry
 contract ChangeLSVProxyOwner is ActionBase {

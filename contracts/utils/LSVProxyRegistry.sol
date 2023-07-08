@@ -7,7 +7,7 @@ import "../utils/helpers/UtilHelper.sol";
 import "../actions/utils/helpers/ActionsUtilHelper.sol";
 import "../DS/DSProxyFactoryInterface.sol";
 
-/// @title Checks Mcd registry and replaces the proxy addr if owner changed
+/// @title Registry of proxies related to LSV
 contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
 
     /// @dev List of proxies a user owns
@@ -19,7 +19,7 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
     event NewProxy(address, address);
     event ChangedOwner(address oldOwner, address newOwner, address proxy);
     
-    /// @notice User calls from EOA to build a new DFS registered proxy
+    /// @notice User calls from EOA to build a new LSV registered proxy
     function addNewProxy() public returns (address) {
         address newProxy = getFromPoolOrBuild(msg.sender);
         proxies[msg.sender].push(newProxy);
@@ -27,6 +27,19 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
         emit NewProxy(msg.sender, newProxy);
 
         return newProxy;
+    }
+
+    /// @notice User calls from EOA if he wants to execute something with DSProxy bundled with build tx
+    function addNewProxyAndExecute(address _target, bytes memory _data) public payable returns (address) {
+        address newProxy = getFromPoolOrBuild(address(this));
+        DSProxy(payable(newProxy)).execute{value: msg.value}(_target, _data);
+        DSAuth(newProxy).setOwner(msg.sender);
+        proxies[msg.sender].push(newProxy);
+
+        emit NewProxy(msg.sender, newProxy);
+
+        return newProxy;
+
     }
 
     function getProxyPoolCount() public view returns (uint256) {
@@ -62,8 +75,9 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
         if (proxyPool.length > 0) {
             address newProxy = proxyPool[proxyPool.length - 1];
             proxyPool.pop();
-
-            DSAuth(newProxy).setOwner(_user);
+            if (_user != (address(this))){
+                DSAuth(newProxy).setOwner(_user);
+            }
 
             return newProxy;
         } else {
