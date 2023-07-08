@@ -25,10 +25,4 @@ contract MorphoAaveV3Helper is MainnetMorphoAaveV3Addresses, DSMath {
         if (liqData.debt == 0) return 0;
         return wdiv(liqData.borrowable, liqData.debt);
     }
-
-    function isPositionClosed(address _user, address _collToken, address _morphoAddr) internal view returns(bool) {
-        uint256 supplyBalance = IMorphoAaveV3(_morphoAddr).supplyBalance(_collToken, _user);
-        return supplyBalance == 0;
-    }
-
 }
