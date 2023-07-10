@@ -3,7 +3,6 @@
 pragma solidity =0.8.10;
 
 import "../../interfaces/mcd/IManager.sol";
-import "../../interfaces/mcd/IVat.sol";
 import "../../interfaces/mcd/IDaiJoin.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
@@ -16,7 +15,7 @@ contract McdPayback is ActionBase, McdHelper {
     using TokenUtils for address;
 
     /// @param _vaultId Id of the vault
-    /// @param _amount Amount of dai to be payed back
+    /// @param _amount Amount of dai to be paid back
     /// @param _from Where the Dai is pulled from
     /// @param _mcdManager The manager address we are using
     struct Params {

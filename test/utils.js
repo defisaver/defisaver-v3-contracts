@@ -42,12 +42,14 @@ const addrs = {
         COMP_ADDR: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
         CHICKEN_BONDS_VIEW: '0x809a93fd4a0d7d7906Ef6176f0b5518b418Da08f',
         AAVE_MARKET: '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e',
-        AAVE_V3_VIEW: '0x9ECB0645b357fDD7B92789B91595160862Bd45d0',
+        AAVE_V3_VIEW: '0xf4B715BB788cC4071061bd67dC8B56681460A2fF',
         ZRX_ALLOWLIST_ADDR: '0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F',
         ZRX_ALLOWLIST_OWNER: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
-        AAVE_SUB_PROXY: '',
+        AAVE_SUB_PROXY: '0xb9F73625AA64D46A9b2f0331712e9bEE19e4C3f7',
+        ADMIN_VAULT: '0xCCf3d848e08b94478Ed8f46fFead3008faF581fD',
+        ADMIN_ACC: '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9',
+        DFS_REG_CONTROLLER: '0x6F6DaE1bCB60F67B2Cb939dBE565e8fD03F6F002',
         AVG_GAS_PRICE: 100,
-
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -63,13 +65,16 @@ const addrs = {
         StrategyProxy: '0xEe0C404FD30E289c305E760b3AE1d1Ae6503350f',
         SubProxy: '0x163c08d3F6d916AD6Af55b37728D547e968103F8',
         UNISWAP_V3_WRAPPER: '0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357',
-        AAVE_V3_VIEW: '0x5aD16e393615bfeF64e15210C370dd4b8f2753Cb',
+        AAVE_V3_VIEW: '0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc',
         AAVE_SUB_PROXY: '0x9E8aE909Af8A391b58f45819f0d36e4256991D19',
         AVG_GAS_PRICE: 0.001,
         TOKEN_GROUP_REGISTRY: '0x566b2a957D8FCE39D2744059d558F27aF52a70c0',
         ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         ZRX_ALLOWLIST_ADDR: '0x52F6ae5aE5a8a6316c970d3a02C50b74c1a50bB8',
         ZRX_ALLOWLIST_OWNER: '0xc9a956923bfb5f141f1cd4467126b3ae91e5cc33',
+        ADMIN_VAULT: '0x136b1bEAfff362530F98f10E3D8C38f3a3F3d38C',
+        ADMIN_ACC: '0x98118fD1Da4b3369AEe87778168e97044980632F',
+        DFS_REG_CONTROLLER: '0x493C0dE902E6916128A223F66F37d3b6ee8fA408',
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -86,7 +91,7 @@ const addrs = {
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
         SubProxy: '0x275A8f98dBA07Ad6380D3ea3F36B665DD6E02F25',
         StrategyProxy: '0x8F62B8Cd1189dB92ba4CBd4dBE64D03C54fD079B',
-        AAVE_V3_VIEW: '0x710f01037018Daad969B8FeFe69b4823Ef788bc6',
+        AAVE_V3_VIEW: '0xA74a85407D5A940542915458616aC3cf3f404E3b',
         UNISWAP_V3_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
         ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         AAVE_SUB_PROXY: '0x29a172f04CF9C6a79EdF4dD2744F2d260b8b8FE4',
@@ -96,6 +101,9 @@ const addrs = {
         COMET_USDC_ADDR: '0xA5EDBDD9646f8dFF606d7448e414884C7d905dCA',
         COMET_USDC_REWARDS_ADDR: '0x88730d254A2f7e6AC8388c3198aFd694bA9f7fae',
         COMP_ADDR: '0x354A6dA3fcde098F8389cad84b0182725c6C91dE',
+        ADMIN_VAULT: '0xd47D8D97cAd12A866900eEc6Cde1962529F25351',
+        ADMIN_ACC: '0x6AFEA85cFAB61e3a55Ad2e4537252Ec05796BEfa',
+        DFS_REG_CONTROLLER: '0x7702fa16b0cED7e44fF7Baeed04bF165f58eE51D',
         AVG_GAS_PRICE: 0.5,
     },
     kovan: {
@@ -378,7 +386,13 @@ const timeTravel = async (timeIncrease) => {
 };
 
 const setStorageAt = async (address, index, value) => {
-    await hre.ethers.provider.send('hardhat_setStorageAt', [address, index, value]);
+    let prefix = 'hardhat';
+
+    if (hre.network.config.type === 'tenderly') {
+        prefix = 'tenderly';
+    }
+
+    await hre.ethers.provider.send(`${prefix}_setStorageAt`, [address, index, value]);
     await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
 };
 

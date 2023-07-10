@@ -3,7 +3,6 @@
 pragma solidity =0.8.10;
 
 import "./DFSProxyRegistry.sol";
-import "../interfaces/IDSProxy.sol";
 import "../DS/DSProxyFactoryInterface.sol";
 import "./helpers/UtilHelper.sol";
 

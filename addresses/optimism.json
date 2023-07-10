@@ -11,6 +11,28 @@
         "history": []
     },
     {
+      "name": "DFSProxyRegistry",
+      "address": "0x7cB647205ec73A026fe3566777e5c73Cd5A11b38",
+      "id": "0xc83e4f5e",
+      "path": "contracts/utils/DFSProxyRegistry.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "DFSProxyRegistryController",
+      "address": "0x493C0dE902E6916128A223F66F37d3b6ee8fA408",
+      "id": "0xcbbb53f2",
+      "path": "contracts/utils/DFSProxyRegistryController.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
         "name": "SubProxy",
         "address": "0x163c08d3F6d916AD6Af55b37728D547e968103F8",
         "id": "0x15c87229",
@@ -187,15 +209,29 @@
         "history": []
     },
     {
+      "name": "StrategyTriggerViewNoRevert",
+      "address": "0x817Bc725a96d73Cf73a4e20bd2Fa8e358Ed387D8",
+      "id": "0x37a21cb5",
+      "path": "contracts/views/StrategyTriggerViewNoRevert.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
         "name": "AaveV3View",
-        "address": "0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc",
+        "address": "0x05f8Ba4Db7F7C65a61881297D86Aea3c83C26304",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4"]
+        "history": [
+          "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
+          "0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc"
+        ]
     },
     {
         "name": "ERC20View",
@@ -747,5 +783,16 @@
       "changeTime": "0",
       "registryIds": [],
       "history": []
-    } 
+    },
+    {
+      "name": "ChangeProxyOwner",
+      "address": "0x6df854D8f784C7917Ca91968C59C3d591Aa10300",
+      "id": "0x67314f12",
+      "path": "contracts/actions/utils/ChangeProxyOwner.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    }
 ]

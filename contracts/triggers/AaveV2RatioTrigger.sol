@@ -5,7 +5,6 @@ pragma solidity =0.8.10;
 import "../auth/AdminAuth.sol";
 import "../actions/aave/helpers/AaveRatioHelper.sol";
 import "../interfaces/ITrigger.sol";
-import "../utils/TransientStorage.sol";
 
 contract AaveV2RatioTrigger is ITrigger, AdminAuth, AaveRatioHelper {
 

@@ -6,7 +6,6 @@ import "../../auth/AdminAuth.sol";
 import "../../auth/ProxyPermission.sol";
 import "../../core/strategy/SubStorage.sol";
 import "../../utils/helpers/UtilHelper.sol";
-import "../../interfaces/ISubscriptions.sol";
 
 contract LimitOrderSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper, UtilHelper {
 
