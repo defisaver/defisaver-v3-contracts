@@ -29,6 +29,14 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
         return newProxy;
     }
 
+    function getProxies(address _user) public view returns (address[] memory){
+        address[] memory resultProxies = new address[](proxies[_user].length);
+        for (uint256 i = 0; i < proxies[_user].length; i++){
+            resultProxies[i] = proxies[_user][i];
+        }
+        return resultProxies;
+    }
+
     /// @notice User calls from EOA if he wants to execute something with DSProxy bundled with build tx
     function addNewProxyAndExecute(address _target, bytes memory _data) public payable returns (address) {
         address newProxy = getFromPoolOrBuild(address(this));
