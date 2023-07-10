@@ -4,7 +4,6 @@ pragma solidity =0.8.10;
 
 import "../../interfaces/mcd/IManager.sol";
 import "../../interfaces/mcd/ISpotter.sol";
-import "../../interfaces/mcd/IVat.sol";
 import "../../interfaces/mcd/IDaiJoin.sol";
 import "../../interfaces/mcd/IJug.sol";
 import "../../interfaces/mcd/ICropper.sol";

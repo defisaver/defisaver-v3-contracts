@@ -5,7 +5,6 @@ pragma solidity =0.8.10;
 import "../interfaces/ITrigger.sol";
 import "../interfaces/aaveV3/IAaveV3Oracle.sol";
 import "../interfaces/chainlink/IAggregatorV3.sol";
-import "../interfaces/lido/IWStEth.sol";
 import "../auth/AdminAuth.sol";
 import "../DS/DSMath.sol";
 import "../utils/TokenUtils.sol";

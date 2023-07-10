@@ -5,7 +5,6 @@ pragma experimental ABIEncoderV2;
 
 import "./../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
-import "../../interfaces/mcd/IManager.sol";
 
 // @title Action for withdrawing tokens from DSA
 contract InstPullTokens is ActionBase {

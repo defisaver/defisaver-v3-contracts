@@ -101,6 +101,9 @@ const addrs = {
         UNISWAP_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
         ZRX_ALLOWLIST_ADDR: '0x5eD8e74b1caE57B0c68B3278B88589991FBa0750',
         ZRX_ALLOWLIST_OWNER: '0x926516e60521556f4ab5e7bf16a4d41a8539c7d1',
+        COMET_USDC_ADDR: '0xA5EDBDD9646f8dFF606d7448e414884C7d905dCA',
+        COMET_USDC_REWARDS_ADDR: '0x88730d254A2f7e6AC8388c3198aFd694bA9f7fae',
+        COMP_ADDR: '0x354A6dA3fcde098F8389cad84b0182725c6C91dE',
         ADMIN_VAULT: '0xd47D8D97cAd12A866900eEc6Cde1962529F25351',
         ADMIN_ACC: '0x6AFEA85cFAB61e3a55Ad2e4537252Ec05796BEfa',
         DFS_REG_CONTROLLER: '0x7702fa16b0cED7e44fF7Baeed04bF165f58eE51D',
@@ -265,6 +268,8 @@ const coinGeckoHelper = {
     SUSHI: 'sushi',
     bLUSD: 'boosted-lusd',
     wstETH: 'wrapped-steth',
+    GMX: 'gmx',
+    ARB: 'arbitrum',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;

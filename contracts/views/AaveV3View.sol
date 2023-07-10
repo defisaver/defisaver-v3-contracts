@@ -6,6 +6,7 @@ import "../actions/aaveV3/helpers/AaveV3Helper.sol";
 import "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 import "../utils/TokenUtils.sol";
 import "../interfaces/aaveV3/IAaveV3Oracle.sol";
+import "../interfaces/aaveV3/IPriceOracleSentinel.sol";
 
 contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
@@ -468,6 +469,11 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
 
     function getFlashLoanEnabled(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
         return (self.data & ~FLASHLOAN_ENABLED_MASK) != 0;
+    }
+
+    function isBorrowAllowed(address _market) public view returns (bool) {
+        address priceOracleSentinelAddress = IPoolAddressesProvider(_market).getPriceOracleSentinel();
+        return (priceOracleSentinelAddress == address(0) || IPriceOracleSentinel(priceOracleSentinelAddress).isBorrowAllowed());
     }
 
 }

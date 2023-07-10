@@ -8,12 +8,8 @@ import "../helpers/CurveHelper.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 
-contract CurveStethPoolDeposit is ActionBase {
+contract CurveStethPoolDeposit is ActionBase, CurveHelper {
     using TokenUtils for address;
-
-    address constant internal CURVE_STETH_POOL_ADDR = 0xDC24316b9AE028F1497c275EB9192a3Ea0f67022;
-    address constant internal STE_CRV_ADDR = 0x06325440D014e39736583c165C2963BA99fAf14E;
-    address constant internal STETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
 
     struct Params {
         address from;           // address where to pull tokens from

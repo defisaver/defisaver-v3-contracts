@@ -2,11 +2,9 @@
 
 pragma solidity =0.8.10;
 
-import "../utils/TokenUtils.sol";
 import "../actions/liquity/helpers/LiquityHelper.sol";
 import "../interfaces/liquity/IChickenBondManager.sol";
 import "../interfaces/liquity/IBondNFT.sol";
-import "../interfaces/liquity/IBondNFTArtwork.sol";
 
 contract ChickenBondsView is LiquityHelper {
 

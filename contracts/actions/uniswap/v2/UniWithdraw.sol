@@ -2,8 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../../../interfaces/uniswap/IUniswapV2Factory.sol";
-import "../../../interfaces/exchange/IUniswapRouter.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../ActionBase.sol";
 import "./helpers/UniV2Helper.sol";

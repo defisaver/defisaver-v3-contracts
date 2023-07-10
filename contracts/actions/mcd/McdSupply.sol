@@ -3,9 +3,7 @@
 pragma solidity =0.8.10;
 
 import "../../interfaces/mcd/IManager.sol";
-import "../../interfaces/mcd/IVat.sol";
 import "../../interfaces/mcd/IJoin.sol";
-import "../../interfaces/mcd/ICropJoin.sol";
 import "../../interfaces/mcd/ICropper.sol";
 import "../../interfaces/mcd/ICdpRegistry.sol";
 import "../../utils/TokenUtils.sol";

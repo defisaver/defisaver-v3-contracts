@@ -479,7 +479,7 @@ const claimCompV3 = async (market, proxy, src, to, shouldAccrue) => {
 };
 
 const paybackCompV3 = async (market, proxy, amount, from, onBehalf, token) => {
-    await approve(USDC_ADDR, proxy.address);
+    await approve(token, proxy.address);
     const paybackCompV3Action = new dfs.actions.compoundV3.CompoundV3PaybackAction(market, amount, from, onBehalf, token);
 
     const functionData = paybackCompV3Action.encodeForDsProxyCall()[1];
