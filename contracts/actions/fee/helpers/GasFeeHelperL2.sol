@@ -6,8 +6,6 @@ pragma experimental ABIEncoderV2;
 import "../../../DS/DSMath.sol";
 import "../../../utils/TokenUtils.sol";
 import "../../../utils/FeeRecipient.sol";
-import "../../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
-import "../../../interfaces/aaveV2/IPriceOracleGetterAave.sol";
 import "../../../utils/TokenPriceHelperL2.sol";
 
 contract GasFeeHelperL2 is DSMath, TokenPriceHelperL2 {

@@ -4,7 +4,6 @@ pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
-import "../../interfaces/morpho/IMorphoAaveV2Lens.sol";
 import "../../actions/morpho/aaveV2/helpers/MorphoAaveV2Helper.sol";
 import "../../utils/TransientStorage.sol";
 

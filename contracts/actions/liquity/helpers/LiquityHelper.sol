@@ -13,7 +13,6 @@ import "../../../interfaces/liquity/IStabilityPool.sol";
 import "../../../interfaces/liquity/ILQTYStaking.sol";
 import "../../../interfaces/liquity/IChickenBondManager.sol";
 import "./MainnetLiquityAddresses.sol";
-import "../../../core/strategy/StrategyModel.sol";
 
 contract LiquityHelper is MainnetLiquityAddresses {
     using TokenUtils for address;

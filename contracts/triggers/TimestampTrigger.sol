@@ -4,8 +4,6 @@ pragma solidity =0.8.10;
 
 import "../auth/AdminAuth.sol";
 import "../interfaces/ITrigger.sol";
-import "../interfaces/IERC20.sol";
-import "../interfaces/strategy/ISubStorage.sol";
 
 /// @title Trigger contract that verifies if current timestamp is higher than the one in sub data,
 /// and also helps change the timestamp for next execution

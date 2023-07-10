@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../interfaces/IDFSRegistry.sol";
 import "../utils/SafeERC20.sol";
 import "./AdminVault.sol";
 import "./helpers/AuthHelper.sol";

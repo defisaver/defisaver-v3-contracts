@@ -5,7 +5,6 @@ import "../ActionBase.sol";
 import "../../DS/DSMath.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/IFLParamGetter.sol";
-import "../../interfaces/ILendingPool.sol";
 import "../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../core/strategy/StrategyModel.sol";
