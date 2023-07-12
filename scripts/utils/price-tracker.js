@@ -10,9 +10,9 @@ const req = CoinGeckoClient.simple.price({
         + 'republic-protocol,maker,enjincoin,dai,wrapped-bitcoin,weth,'
         + 'renbtc,0x,kyber-network,decentraland,paxos-standard,compound-governance-token,'
         + 'gemini-dollar,yearn-finance,liquity-usd,liquity,tornado-cash,musd,imusd,rai,'
-        + 'loopring,chainlink,tether,true-usd,balancer,musd,imusd,pax-dollar,'
-        + 'gemini-dollar,yearn-finance,liquity-usd,liquity,tornado-cash,sushi'
-        + 'matic-network,boosted-lusd,wrapped-steth,gnosis,rocket-pool-eth',
+        + 'loopring,chainlink,tether,true-usd,balancer,musd,imusd,pax-dollar,arbitrum,gmx,'
+        + 'gemini-dollar,yearn-finance,liquity-usd,liquity,tornado-cash,sushi,matic-network,boosted-lusd,wrapped-steth'
+        + 'gnosis,rocket-pool-eth',
     vs_currencies: 'usd',
 });
 

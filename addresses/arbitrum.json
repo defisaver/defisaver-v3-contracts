@@ -221,14 +221,17 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xA74a85407D5A940542915458616aC3cf3f404E3b",
+        "address": "0x401E66549DF354a21B3CC95e3F548Df6854d6DEE",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x8EF42fF40e9a9dD3E1ae81e7947D4E89e6d9f968"]
+        "history": [
+          "0x8EF42fF40e9a9dD3E1ae81e7947D4E89e6d9f968",
+          "0xA74a85407D5A940542915458616aC3cf3f404E3b"
+      ]
     },
     {
       "name": "AaveV3QuotePriceTrigger",

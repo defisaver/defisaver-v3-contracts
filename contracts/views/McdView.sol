@@ -7,7 +7,6 @@ import "../actions/mcd/helpers/McdHelper.sol";
 import "../interfaces/mcd/IManager.sol";
 import "../interfaces/mcd/ICropper.sol";
 import "../interfaces/mcd/ISpotter.sol";
-import "../interfaces/mcd/IVat.sol";
 import "../interfaces/mcd/IPot.sol";
 import "../interfaces/IDSProxy.sol";
 
