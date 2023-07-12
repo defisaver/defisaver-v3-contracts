@@ -6,7 +6,6 @@ const { assets, getAssetInfo, utils: { compare } } = require('@defisaver/tokens'
 
 const {
     getProxy,
-    redeploy,
     redeployCore,
     setBalance,
     openStrategyAndBundleStorage,
@@ -70,8 +69,8 @@ const {
 const { RATIO_STATE_OVER } = require('../../triggers');
 const { execShellCommand } = require('../../../scripts/hardhat-tasks-functions');
 
-const deployBundles = async (proxy) => {
-    await openStrategyAndBundleStorage();
+const deployBundles = async (proxy, isFork) => {
+    await openStrategyAndBundleStorage(isFork);
     const sparkRepayStrategyEncoded = createSparkRepayStrategy();
     const sparkRepayFLStrategyEncoded = createSparkFLRepayStrategy();
 
@@ -87,7 +86,8 @@ const deployBundles = async (proxy) => {
 
     const boostBundleId = await createBundle(proxy, [strategyId11, strategyId22]);
 
-    await getContractFromRegistry('SparkSubProxy', undefined, undefined, undefined, repayBundleId, boostBundleId);
+    await getContractFromRegistry('SparkSubProxy', undefined, undefined, isFork, repayBundleId, boostBundleId);
+    return { repayBundleId, boostBundleId };
 };
 
 const deployCloseToDebtBundle = async (proxy, isFork = undefined, isL1 = true) => {
@@ -1763,6 +1763,7 @@ module.exports = {
     sparkCloseToCollStrategyTest,
     sparkFLCloseToCollStrategyTest,
 
+    deployBundles,
     deployCloseToDebtBundle,
     deployCloseToCollBundle,
 };
