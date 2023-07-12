@@ -70,7 +70,7 @@ contract SparkCollateralSwitch is ActionBase, SparkHelper {
     function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
         if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
+            params.market = DEFAULT_SPARK_MARKET;
         }
     }
 
@@ -103,7 +103,7 @@ contract SparkCollateralSwitch is ActionBase, SparkHelper {
         params.useAsCollateral = useAsCollateral;
 
         if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
+            params.market = DEFAULT_SPARK_MARKET;
         } else {
             params.market = address(
                 bytes20(

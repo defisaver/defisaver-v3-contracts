@@ -46,7 +46,7 @@ contract SparkPayback is ActionBase, SparkHelper {
         );
 
         if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
+            params.market = DEFAULT_SPARK_MARKET;
         }
         if (!params.useOnBehalf) {
             params.onBehalf = address(0);
@@ -167,7 +167,7 @@ contract SparkPayback is ActionBase, SparkHelper {
         uint256 mark = 57;
 
         if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
+            params.market = DEFAULT_SPARK_MARKET;
         } else {
             params.market = address(bytes20(encodedInput[mark:mark + 20]));
             mark += 20;

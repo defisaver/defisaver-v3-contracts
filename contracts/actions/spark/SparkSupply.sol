@@ -45,7 +45,7 @@ contract SparkSupply is ActionBase, SparkHelper {
         );
 
         if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
+            params.market = DEFAULT_SPARK_MARKET;
         }
         if (!params.useOnBehalf) {
             params.onBehalf = address(0);
@@ -132,7 +132,7 @@ contract SparkSupply is ActionBase, SparkHelper {
         // approve spark pool to pull tokens
         tokenAddr.approveToken(address(lendingPool), _amount);
 
-        lendingPool.supply(tokenAddr, _amount, _onBehalf, AAVE_REFERRAL_CODE);
+        lendingPool.supply(tokenAddr, _amount, _onBehalf, SPARK_REFERRAL_CODE);
 
         if (_enableAsColl) {
             lendingPool.setUserUseReserveAsCollateral(tokenAddr, true);
@@ -181,7 +181,7 @@ contract SparkSupply is ActionBase, SparkHelper {
         uint256 mark = 57;
 
         if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
+            params.market = DEFAULT_SPARK_MARKET;
         } else {
             params.market = address(bytes20(encodedInput[mark:mark + 20]));
             mark += 20;

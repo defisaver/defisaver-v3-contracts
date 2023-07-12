@@ -44,7 +44,7 @@ contract SparkBorrow is ActionBase, SparkHelper {
         );
 
         if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
+            params.market = DEFAULT_SPARK_MARKET;
         }
         if (!params.useOnBehalf) {
             params.onBehalf = address(0);
@@ -118,7 +118,7 @@ contract SparkBorrow is ActionBase, SparkHelper {
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }
-        lendingPool.borrow(tokenAddr, _amount, _rateMode, AAVE_REFERRAL_CODE, _onBehalf);
+        lendingPool.borrow(tokenAddr, _amount, _rateMode, SPARK_REFERRAL_CODE, _onBehalf);
         _amount = tokenAddr.withdrawTokens(_to, _amount);
 
         bytes memory logData = abi.encode(_market, tokenAddr, _amount, _rateMode, _to, _onBehalf);
@@ -155,7 +155,7 @@ contract SparkBorrow is ActionBase, SparkHelper {
         uint256 mark = 57;
 
         if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
+            params.market = DEFAULT_SPARK_MARKET;
         } else {
             params.market = address(bytes20(encodedInput[mark:mark + 20]));
             mark += 20;

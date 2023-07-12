@@ -10,7 +10,7 @@ import "../../../interfaces/aaveV3/IPoolAddressesProvider.sol";
 /// @title Utility functions and data used in Spark actions
 contract SparkHelper is MainnetSparkAddresses {
     
-    uint16 public constant AAVE_REFERRAL_CODE = 64;
+    uint16 public constant SPARK_REFERRAL_CODE = 0;
 
     uint256 public constant STABLE_ID = 1;
     uint256 public constant VARIABLE_ID = 2;

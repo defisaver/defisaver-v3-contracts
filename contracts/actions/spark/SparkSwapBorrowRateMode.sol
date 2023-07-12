@@ -68,7 +68,7 @@ contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
     function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
         if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
+            params.market = DEFAULT_SPARK_MARKET;
         }
     }
 
@@ -88,7 +88,7 @@ contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
         params.useDefaultMarket = bytesToBool(bytes1(encodedInput[34:35]));
 
         if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
+            params.market = DEFAULT_SPARK_MARKET;
         } else {
             params.market = address(bytes20(encodedInput[35:55]));
         }

@@ -7,6 +7,7 @@ import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/SparkHelper.sol";
 
+
 /// @title Withdraw a token from an Spark market
 contract SparkWithdraw is ActionBase, SparkHelper {
     using TokenUtils for address;
@@ -35,7 +36,7 @@ contract SparkWithdraw is ActionBase, SparkHelper {
         params.market = _parseParamAddr(params.market, _paramMapping[4], _subData, _returnValues);
 
         if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
+            params.market = DEFAULT_SPARK_MARKET;
         }
 
         (uint256 withdrawnAmount, bytes memory logData) = _withdraw(
@@ -132,7 +133,7 @@ contract SparkWithdraw is ActionBase, SparkHelper {
         params.amount = uint256(bytes32(encodedInput[3:35]));
         params.to = address(bytes20(encodedInput[35:55]));
         if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
+            params.market = DEFAULT_SPARK_MARKET;
         } else {
             params.market = address(bytes20(encodedInput[55:75]));
         }

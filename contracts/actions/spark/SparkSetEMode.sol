@@ -69,7 +69,7 @@ contract SparkSetEMode is ActionBase, SparkHelper {
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
         if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
+            params.market = DEFAULT_SPARK_MARKET;
         }
     }
 
@@ -86,7 +86,7 @@ contract SparkSetEMode is ActionBase, SparkHelper {
         params.categoryId = uint8(bytes1(encodedInput[0:1]));
         params.useDefaultMarket = bytesToBool(bytes1(encodedInput[1:2]));
         if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
+            params.market = DEFAULT_SPARK_MARKET;
         } else {
             params.market = address(bytes20(encodedInput[2:22]));
         }
