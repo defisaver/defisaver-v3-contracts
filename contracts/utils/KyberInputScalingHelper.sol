@@ -74,7 +74,7 @@ contract KyberInputScalingHelper {
 
             (desc, targetData) = _getScaledInputDataV2(desc, targetData, newAmount, true);
             return abi.encodeWithSelector(selector, callTarget, desc, targetData, clientData);
-        } else revert('InputScalingHelper: Invalid selector');
+        } else revert("InputScalingHelper: Invalid selector");
     }
 
     function _getScaledInputDataV2(
@@ -175,7 +175,7 @@ contract KyberInputScalingHelper {
             } else if (functionSelector == IExecutorHelper.executeUniV3KSElastic.selector) {
                 swap.data = newUniV3ProMM(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeRfq.selector) {
-                revert('InputScalingHelper: Can not scale RFQ swap');
+                revert("InputScalingHelper: Can not scale RFQ swap");
             } else if (functionSelector == IExecutorHelper.executeBalV2.selector) {
                 swap.data = newBalancerV2(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeWrappedstETH.selector) {
@@ -191,11 +191,11 @@ contract KyberInputScalingHelper {
             } else if (functionSelector == IExecutorHelper.executeSynthetix.selector) {
                 swap.data = newSynthetix(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeHashflow.selector) {
-                revert('InputScalingHelper: Can not scale RFQ swap');
+                revert("InputScalingHelper: Can not scale RFQ swap");
             } else if (functionSelector == IExecutorHelper.executeCamelot.selector) {
                 swap.data = newCamelot(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeKyberLimitOrder.selector) {
-                revert('InputScalingHelper: Can not scale RFQ swap');
+                revert("InputScalingHelper: Can not scale RFQ swap");
             } else if (functionSelector == IExecutorHelper.executePSM.selector) {
                 swap.data = newPSM(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeFrax.selector) {
@@ -204,7 +204,7 @@ contract KyberInputScalingHelper {
                 swap.data = newPlatypus(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeMaverick.selector) {
                 swap.data = newMaverick(swap.data, oldAmount, newAmount);
-            } else revert('AggregationExecutor: Dex type not supported');
+            } else revert("AggregationExecutor: Dex type not supported");
             unchecked {
                 ++i;
             }
