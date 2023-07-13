@@ -54,6 +54,9 @@ contract CurveUsdView {
     uint256[][2] usersBands;
   }
 
+  address public constant WBTC_MARKET = 0x4e59541306910aD6dC1daC0AC9dFB29bD9F15c67;
+  address public constant WBTC_HEALTH_ZAP = 0xCF61Ee62b136e3553fB545bd8fEc11fb7f830d6A;
+
   function userData(address market, address user) external view returns (UserData memory) {
       ICrvUsdController ctrl = ICrvUsdController(market);
       ILLAMMA amm = ILLAMMA(ctrl.amm());
@@ -150,7 +153,7 @@ contract CurveUsdView {
 
     collForHealthCalc = assetDec > 18 ? (collateral / 10 ** (assetDec - 18)) : (collateral * 10 ** (18 - assetDec));
 
-    int256 health = ctrl.health_calculator(address(0x00), int256(collForHealthCalc), int256(debt), true, N);
+    int health = healthCalculator(market, address(0x00), int256(collForHealthCalc), int256(debt), true, N);
 
     int256 n1 = ctrl.calculate_debt_n1(collateral, debt, N);
     int256 n2 = n1 + int256(N) - 1;
@@ -184,8 +187,15 @@ contract CurveUsdView {
     bands = getBandsData(market, n1, n2);
   }
 
-  function healthCalculator(address market, address user, int256 collChange, int256 debtChange, bool isFull, uint256 numBands) external view returns (int256) {
+  function healthCalculator(address market, address user, int256 collChange, int256 debtChange, bool isFull, uint256 numBands) public view returns (int256 health) {
     ICrvUsdController ctrl = ICrvUsdController(market);
-    return ctrl.health_calculator(user, collChange, debtChange, isFull, numBands);
+
+    // handle special health_calc if WBTC is collateral
+    if (market == WBTC_MARKET) {
+      ICrvUsdController healthZap = ICrvUsdController(WBTC_HEALTH_ZAP);
+      health = healthZap.health_calculator(address(0x00), int256(collChange), int256(debtChange), isFull, numBands);
+    } else {
+      health =  ctrl.health_calculator(user, collChange, debtChange, isFull, numBands);
+    }
   }
 }
