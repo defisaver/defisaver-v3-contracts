@@ -10,6 +10,7 @@ import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/IFLParamGetter.sol";
 
 import "../../interfaces/uniswap/v3/IUniswapV3Pool.sol";
+import "../../interfaces/uniswap/v3/IUniswapV3Factory.sol";
 import "../../interfaces/uniswap/v3/IUniswapV3FlashCallback.sol";
 
 import "../../utils/TokenUtils.sol";
@@ -55,7 +56,7 @@ contract FLUniV3 is ActionBase, ReentrancyGuard, IFlashLoanBase, IUniswapV3Flash
     }
 
     function _flUniV3(FlashLoanParams memory _params) internal returns (uint256) {
-        // modes aren't used so we set them to later know startinb balances
+        // modes aren't used so we set them to later know starting balances
         _params.modes = new uint256[](2);
         _params.modes[0] = _params.tokens[0].getBalance(address(this));
         _params.modes[1] = _params.tokens[1].getBalance(address(this));
@@ -67,12 +68,16 @@ contract FLUniV3 is ActionBase, ReentrancyGuard, IFlashLoanBase, IUniswapV3Flash
             _params.amounts[1],
             abi.encode(_params)
         );
-
+        return (_params.amounts[0] > 0 ? _params.amounts[0] : _params.amounts[1]);
     }
 
     function uniswapV3FlashCallback(uint256 _fee0, uint256 _fee1, bytes memory _params) external override nonReentrant {
         FlashLoanParams memory params = abi.decode(_params, (FlashLoanParams));
-        if (msg.sender != params.tokens[2]) revert UntrustedLender();
+        {
+            uint24 fee = IUniswapV3Pool(msg.sender).fee();
+            address realPool = IUniswapV3Factory(UNI_V3_FACTORY).getPool(params.tokens[0], params.tokens[1], uint24(fee));
+            if (msg.sender != realPool) revert UntrustedLender();
+        }
 
         (Recipe memory currRecipe, address proxy) = abi.decode(params.recipeData, (Recipe, address));
         address payable recipeExecutorAddr = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
@@ -95,11 +100,11 @@ contract FLUniV3 is ActionBase, ReentrancyGuard, IFlashLoanBase, IUniswapV3Flash
         bool isCorrectAmount0 = currBalance0 == expectedBalance0;
         bool isCorrectAmount1 = currBalance1 == expectedBalance1;
 
-        if (params.tokens[0] == ST_ETH_ADDR && !isCorrectAmount0) {
+        if (params.amounts[0] > 0 && params.tokens[0] == ST_ETH_ADDR && !isCorrectAmount0) {
             flFeeFaucet.my2Wei(ST_ETH_ADDR);
             isCorrectAmount0 = true;
         }
-        if (params.tokens[1] == ST_ETH_ADDR && !isCorrectAmount1) {
+        if (params.amounts[1] > 1 && params.tokens[1] == ST_ETH_ADDR && !isCorrectAmount1) {
             flFeeFaucet.my2Wei(ST_ETH_ADDR);
             isCorrectAmount1 = true;
         }
