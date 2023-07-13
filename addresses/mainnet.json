@@ -2178,14 +2178,14 @@
     },
     {
         "name": "CurveUsdView",
-        "address": "0xa81430a4eC71466264b9ee50403F8d63E8c72B95",
+        "address": "0x512460CF2Bb80823C135F5DC04D2a1fF258FAA1e",
         "id": "0xe19de022",
         "path": "contracts/views/CurveUsdView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xa81430a4eC71466264b9ee50403F8d63E8c72B95"]
     },
     {
         "name": "CurveStethPoolDeposit",
