@@ -24,6 +24,8 @@ const {
     revertToSnapshot,
     takeSnapshot,
     redeploy,
+    setBalance,
+    approve,
 } = require('../utils');
 
 const {
@@ -32,6 +34,8 @@ const {
     withdrawAave,
     paybackAave,
     claimStkAave,
+    startUnstakeAave,
+    finalizeUnstakeAave,
 } = require('../actions');
 
 const aaveSupplyTest = async (testLength) => {
@@ -496,6 +500,55 @@ const aaveClaimStkAaveTest = async () => {
     });
 };
 
+const aaveUnstakeTest = async () => {
+    describe('Aave-stake on behalf of proxy and unstake test', function () {
+        this.timeout(150000);
+
+        const stkAaveAddr = '0x4da27a545c0c5B758a6BA100e3a049001de870f5';
+
+        let senderAcc; let proxy; let aaveToken; let stkAaveContract; let snapshot;
+        before(async () => {
+            stkAaveContract = await hre.ethers.getContractAt('IStkAave', stkAaveAddr);
+            aaveToken = await stkAaveContract.REWARD_TOKEN();
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+            snapshot = await takeSnapshot();
+        });
+        it('... should accrue rewards over time', async () => {
+        });
+
+        it('... should stake 100 AAVE on behalf of DSProxy', async () => {
+            const amount = hre.ethers.utils.parseUnits('100', 18);
+            await setBalance(aaveToken, senderAcc.address, amount);
+            await approve(aaveToken, stkAaveAddr, senderAcc);
+            await stkAaveContract.stake(proxy.address, amount);
+        });
+        it('... should accrue rewards over time', async () => {
+            const secondsInMonth = 2592000;
+            await timeTravel(secondsInMonth);
+        });
+
+        it('... should start the process of unstaking', async () => {
+            await startUnstakeAave(proxy);
+            const aaveUnstakeCooldown = 1728001;
+            await timeTravel(aaveUnstakeCooldown);
+        });
+
+        it('... should unstake 50 stkAave', async () => {
+            const startingBalance = await balanceOf(aaveToken, senderAcc.address);
+            let amount = hre.ethers.utils.parseUnits('50', 18);
+            await finalizeUnstakeAave(proxy, senderAcc.address, amount);
+            const midBalance = await balanceOf(aaveToken, senderAcc.address);
+            amount = hre.ethers.constants.MaxUint256;
+            await finalizeUnstakeAave(proxy, senderAcc.address, amount);
+            const endingBalance = await balanceOf(aaveToken, senderAcc.address);
+            expect(midBalance).to.be.gt(startingBalance);
+            expect(endingBalance).to.be.gt(midBalance);
+            await revertToSnapshot(snapshot);
+        });
+    });
+};
+
 const aaveDeployContracts = async () => {
     await redeploy('AaveWithdraw');
     await redeploy('AaveBorrow');
@@ -525,6 +578,7 @@ module.exports = {
     aaveWithdrawTest,
     aavePaybackTest,
     aaveClaimStkAaveTest,
+    aaveUnstakeTest,
     aaveFullTest,
     aaveDeployContracts,
 };
