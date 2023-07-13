@@ -145,13 +145,7 @@ contract CurveUsdView {
   function createLoanData(address market, uint256 collateral, uint256 debt, uint256 N) external view returns (CreateLoanData memory) {
     ICrvUsdController ctrl = ICrvUsdController(market);
 
-    address collAsset = ctrl.collateral_token();
-
-    // health_calculator needs to receive assets in 18 decimals
-    uint256 assetDec = IERC20(collAsset).decimals();
     uint256 collForHealthCalc = collateral;
-
-    collForHealthCalc = assetDec > 18 ? (collateral / 10 ** (assetDec - 18)) : (collateral * 10 ** (18 - assetDec));
 
     int health = healthCalculator(market, address(0x00), int256(collForHealthCalc), int256(debt), true, N);
 
