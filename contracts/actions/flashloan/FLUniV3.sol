@@ -58,8 +58,8 @@ contract FLUniV3 is ActionBase, ReentrancyGuard, IFlashLoanBase, IUniswapV3Flash
     function _flUniV3(FlashLoanParams memory _params) internal returns (uint256) {
         // modes aren't used so we set them to later know starting balances
         _params.modes = new uint256[](2);
-        _params.modes[0] = _params.tokens[0].getBalance(address(this));
-        _params.modes[1] = _params.tokens[1].getBalance(address(this));
+        _params.modes[0] = _params.amounts[0] > 0 ? _params.tokens[0].getBalance(address(this)) : 0; 
+        _params.modes[1] = _params.amounts[1] > 0 ? _params.tokens[1].getBalance(address(this)) : 0; 
 
         /// @dev FlashLoanParams.tokens, first two array indexes contain tokens, third index contains pool address
         IUniswapV3Pool(_params.tokens[2]).flash(
@@ -94,8 +94,8 @@ contract FLUniV3 is ActionBase, ReentrancyGuard, IFlashLoanBase, IUniswapV3Flash
         uint256 expectedBalance0 = params.modes[0] + params.amounts[0] + _fee0;
         uint256 expectedBalance1 = params.modes[1] + params.amounts[1] + _fee1;
 
-        uint256 currBalance0 = params.tokens[0].getBalance(address(this));
-        uint256 currBalance1 = params.tokens[1].getBalance(address(this));
+        uint256 currBalance0 = params.amounts[0] > 0 ? params.tokens[0].getBalance(address(this)) : 0;
+        uint256 currBalance1 = params.amounts[1] > 0 ? params.tokens[1].getBalance(address(this)) : 0;
 
         bool isCorrectAmount0 = currBalance0 == expectedBalance0;
         bool isCorrectAmount1 = currBalance1 == expectedBalance1;
@@ -104,7 +104,7 @@ contract FLUniV3 is ActionBase, ReentrancyGuard, IFlashLoanBase, IUniswapV3Flash
             flFeeFaucet.my2Wei(ST_ETH_ADDR);
             isCorrectAmount0 = true;
         }
-        if (params.amounts[1] > 1 && params.tokens[1] == ST_ETH_ADDR && !isCorrectAmount1) {
+        if (params.amounts[1] > 0 && params.tokens[1] == ST_ETH_ADDR && !isCorrectAmount1) {
             flFeeFaucet.my2Wei(ST_ETH_ADDR);
             isCorrectAmount1 = true;
         }
