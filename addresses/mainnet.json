@@ -1478,6 +1478,17 @@
         ]
     },
     {
+        "name": "FLUniV3",
+        "address": "0x9CAdAC8Be718572F82B672b950c53F0b58483A35",
+        "id": "0x44957903",
+        "path": "contracts/actions/flashloan/FLUniV3.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "FLBalancer",
         "address": "0x540a83E36E5E6Aa916A6c591934d800e17115048",
         "id": "0xf97d044f",

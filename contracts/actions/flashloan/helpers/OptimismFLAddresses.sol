@@ -26,4 +26,5 @@ contract OptimismFLAddresses {
 
     address internal constant VAULT_ADDR = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
 
+    address internal constant UNI_V3_FACTORY = 0x1F98431c8aD98523631AE4a59f267346ea31F984;
 }
