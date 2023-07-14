@@ -1065,6 +1065,17 @@
         "history": []
     },
     {
+        "name": "AaveUnstake",
+        "address": "0x2FE4024e350cD2c64D2fd0Db5d16F5cE54Ca0E09",
+        "id": "0x887729ae",
+        "path": "contracts/actions/aave/AaveUnstake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "MorphoMarketStorage",
         "address": "0x56EE33811a6C8c1Fd443E53685ed1605E43b3971",
         "id": "0x9600f04b",

@@ -30,7 +30,7 @@ contract AaveUnstake is ActionBase, AaveHelper {
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
 
         (uint256 claimedAmount, bytes memory logData) = _unstake(params);
-        emit ActionEvent("AaveStake", logData);
+        emit ActionEvent("AaveUnstake", logData);
         return bytes32(claimedAmount);
     }
 
@@ -38,7 +38,7 @@ contract AaveUnstake is ActionBase, AaveHelper {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
         (, bytes memory logData) = _unstake(params);
-        logger.logActionDirectEvent("AaveStake", logData);
+        logger.logActionDirectEvent("AaveUnstake", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -48,22 +48,23 @@ contract AaveUnstake is ActionBase, AaveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _unstake(Params memory _params) internal returns (uint256 unstakedAmount, bytes memory logData) {
-
-        if (_params.amount == 0){
+    function _unstake(
+        Params memory _params
+    ) internal returns (uint256 unstakedAmount, bytes memory logData) {
+        if (_params.amount == 0) {
             IStkAave(STAKED_TOKEN_ADDR).cooldown();
         } else {
-            uint256 startingAAVEBalance = IStkAave(STAKED_TOKEN_ADDR).REWARD_TOKEN().getBalance(_params.to);
+            address rewardToken = IStkAave(STAKED_TOKEN_ADDR).REWARD_TOKEN();
+            uint256 startingAAVEBalance = rewardToken.getBalance(_params.to);
             IStkAave(STAKED_TOKEN_ADDR).redeem(_params.to, _params.amount);
-            uint256 endingAAVEBalance = IStkAave(STAKED_TOKEN_ADDR).REWARD_TOKEN().getBalance(_params.to);
+            uint256 endingAAVEBalance = rewardToken.getBalance(_params.to);
 
             logData = abi.encode(_params, endingAAVEBalance - startingAAVEBalance);
             return (endingAAVEBalance - startingAAVEBalance, logData);
         }
-        
     }
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory params)
-    {
+
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
 }
