@@ -636,6 +636,66 @@ const uniswapV3FlashloanTest = async () => {
     });
 };
 
+const ghoFLTest = async (generalisedFLFlag) => {
+    describe('FL-Gho', function () {
+        this.timeout(60000);
+
+        let senderAcc; let proxy;
+        let flGho;
+
+        before(async () => {
+            const flGhoAddress = await getAddrFromRegistry('FLGho');
+            flGho = await hre.ethers.getContractAt('FLGho', flGhoAddress);
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+
+        const tokenSymbol = 'GHO';
+
+        it(`... should get a ${tokenSymbol} flash loan`, async () => {
+            if (generalisedFLFlag) {
+                const flActionAddr = await getAddrFromRegistry('FLAction');
+                console.log(flActionAddr);
+                flGho = await hre.ethers.getContractAt('FLAction', flActionAddr);
+            }
+            const assetInfo = getAssetInfo(tokenSymbol);
+
+            // test if balance will brick fl action
+            await setBalance(assetInfo.address, flGho.address, Float2BN('1', 0));
+
+            const amount = fetchAmountinUSDPrice(tokenSymbol, '1000');
+            const loanAmount = hre.ethers.utils.parseUnits(
+                amount,
+                assetInfo.decimals,
+            );
+            let flAction = new dfs.actions.flashloan.GhoFlashLoanAction(
+                loanAmount,
+                nullAddress,
+                [],
+            );
+            console.log(flAction.args);
+            if (generalisedFLFlag) {
+                flAction = new dfs.actions.flashloan.FLAction(
+                    flAction,
+                );
+            }
+
+            const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
+                flAction,
+                new dfs.actions.basic.SendTokenAction(
+                    assetInfo.address,
+                    flGho.address,
+                    loanAmount,
+                ),
+            ]);
+
+            const functionData = basicFLRecipe.encodeForDsProxyCall();
+            await executeAction('RecipeExecutor', functionData[1], proxy);
+        });
+    });
+};
+
 const deployFLContracts = async () => {
     await redeploy('FLMaker');
     await redeploy('SendToken');
@@ -644,6 +704,8 @@ const deployFLContracts = async () => {
     await redeploy('FLBalancer');
     await redeploy('FLAaveV2');
     await redeploy('FLEuler');
+    await redeploy('FLUniV3');
+    await redeploy('FLGho');
 };
 
 const fullFLTest = async () => {
@@ -653,6 +715,8 @@ const fullFLTest = async () => {
     await dydxFLTest();
     await makerFLTest();
     await eulerFLTest();
+    await uniswapV3FlashloanTest();
+    await ghoFLTest();
 };
 module.exports = {
     fullFLTest,
@@ -663,4 +727,5 @@ module.exports = {
     eulerFLTest,
     aaveV3FlTest,
     uniswapV3FlashloanTest,
+    ghoFLTest,
 };
