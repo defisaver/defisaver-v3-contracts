@@ -664,7 +664,7 @@ const ghoFLTest = async (generalisedFLFlag) => {
             // test if balance will brick fl action
             await setBalance(assetInfo.address, flGho.address, Float2BN('1', 0));
 
-            const amount = fetchAmountinUSDPrice(tokenSymbol, '1000');
+            const amount = '10000';
             const loanAmount = hre.ethers.utils.parseUnits(
                 amount,
                 assetInfo.decimals,
@@ -674,7 +674,6 @@ const ghoFLTest = async (generalisedFLFlag) => {
                 nullAddress,
                 [],
             );
-            console.log(flAction.args);
             if (generalisedFLFlag) {
                 flAction = new dfs.actions.flashloan.FLAction(
                     flAction,
