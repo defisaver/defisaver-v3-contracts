@@ -1065,6 +1065,17 @@
         "history": []
     },
     {
+        "name": "AaveUnstake",
+        "address": "0x2FE4024e350cD2c64D2fd0Db5d16F5cE54Ca0E09",
+        "id": "0x887729ae",
+        "path": "contracts/actions/aave/AaveUnstake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "MorphoMarketStorage",
         "address": "0x56EE33811a6C8c1Fd443E53685ed1605E43b3971",
         "id": "0x9600f04b",
@@ -1465,6 +1476,17 @@
             "0x5DCf600C35ae2752A8a11eB7C489EF3D93126fB4",
             "0xd393582bE148A45585aB202Fa7Cc789Fa5127223"
         ]
+    },
+    {
+        "name": "FLUniV3",
+        "address": "0x9CAdAC8Be718572F82B672b950c53F0b58483A35",
+        "id": "0x44957903",
+        "path": "contracts/actions/flashloan/FLUniV3.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     },
     {
         "name": "FLBalancer",
