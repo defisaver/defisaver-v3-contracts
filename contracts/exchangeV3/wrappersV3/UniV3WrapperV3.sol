@@ -31,7 +31,7 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
                 recipient: msg.sender,
                 deadline: block.timestamp + 1,
                 amountIn: _srcAmount,
-                amountOutMinimum: 1
+                amountOutMinimum: 1 /// @dev DFSExchangeCore contains slippage check
             });
         uint amountOut = router.exactInput(params);
         return amountOut;

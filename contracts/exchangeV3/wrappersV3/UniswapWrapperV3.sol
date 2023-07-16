@@ -26,7 +26,7 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         address[] memory path = abi.decode(_additionalData, (address[]));
 
         IERC20(_srcAddr).safeApprove(address(router), _srcAmount);
-
+        /// @dev DFSExchangeCore contains slippage check instead of writing it here (minOutput = 1)
         amounts = router.swapExactTokensForTokens(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
 
         return amounts[amounts.length - 1];
