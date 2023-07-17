@@ -1464,6 +1464,17 @@
         "history": []
     },
     {
+        "name": "FLGho",
+        "address": "0xbb67b81dD080a406227A38965d0393f396ddECBc",
+        "id": "0xa3dba3d5",
+        "path": "contracts/actions/flashloan/FLGho.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "FLMaker",
         "address": "0x672DE08e36A1698fD5e9E34045F81558dB4c1AFE",
         "id": "0x354c4555",
