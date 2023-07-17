@@ -746,6 +746,7 @@ const deployFLContracts = async () => {
     await redeploy('FLBalancer');
     await redeploy('FLAaveV2');
     await redeploy('FLEuler');
+    await redeploy('FLSpark');
 };
 
 const fullFLTest = async () => {
@@ -755,7 +756,9 @@ const fullFLTest = async () => {
     await dydxFLTest();
     await makerFLTest();
     await eulerFLTest();
+    await sparkFlTest();
 };
+
 module.exports = {
     fullFLTest,
     aaveFlTest,
