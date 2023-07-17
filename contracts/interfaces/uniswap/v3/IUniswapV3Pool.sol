@@ -22,4 +22,8 @@ abstract contract IUniswapV3Pool {
     }
 
     function slot0() external virtual view returns (Slot0 memory);
+
+    function fee() external virtual view returns (uint24 fee);
+
+    function flash(address recipient, uint256 amount0, uint256 amount1, bytes memory data) external virtual;
 }
