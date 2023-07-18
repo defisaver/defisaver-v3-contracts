@@ -35,7 +35,6 @@ contract KyberInputScalingHelper {
         Swap[][] swapSequences;
         address tokenIn;
         address tokenOut;
-        uint256 minTotalAmountOut;
         address to;
         uint256 deadline;
         bytes positiveSlippageData;
@@ -152,7 +151,7 @@ contract KyberInputScalingHelper {
         uint256 newAmount
     ) internal pure returns (bytes memory) {
         SwapExecutorDescription memory executorDesc = abi.decode(data, (SwapExecutorDescription));
-        executorDesc.minTotalAmountOut = (executorDesc.minTotalAmountOut * newAmount) / oldAmount;
+
         executorDesc.positiveSlippageData = _scaledPositiveSlippageFeeData(
             executorDesc.positiveSlippageData,
             oldAmount,
