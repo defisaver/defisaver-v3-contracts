@@ -2590,11 +2590,13 @@ const callSparkFLRepayStrategy = async (
     const actionsCallData = [];
     const triggerCallData = [];
 
-    const flAction = new dfs.actions.flashloan.SparkFlashLoanAction(
-        [collAssetAddr],
-        [repayAmount],
-        [AAVE_NO_DEBT_MODE],
-        nullAddress,
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.SparkFlashLoanAction(
+            [collAssetAddr],
+            [repayAmount],
+            [AAVE_NO_DEBT_MODE],
+            nullAddress,
+        ),
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -2800,11 +2802,13 @@ const callSparkFLBoostStrategy = async (
     const actionsCallData = [];
     const triggerCallData = [];
 
-    const flAction = new dfs.actions.flashloan.SparkFlashLoanAction(
-        [debtAddr],
-        [boostAmount],
-        [AAVE_NO_DEBT_MODE],
-        nullAddress,
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.SparkFlashLoanAction(
+            [debtAddr],
+            [boostAmount],
+            [AAVE_NO_DEBT_MODE],
+            nullAddress,
+        ),
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -2897,11 +2901,13 @@ const callSparkFLBoostStrategy = async (
 
 const sparkCloseActionsEncoded = {
     // eslint-disable-next-line max-len
-    flAction: ({ repayAmount, flAsset }) => (new dfs.actions.flashloan.SparkFlashLoanAction(
-        [flAsset],
-        [repayAmount],
-        [AAVE_NO_DEBT_MODE],
-        nullAddress,
+    flAction: ({ repayAmount, flAsset }) => (new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.SparkFlashLoanAction(
+            [flAsset],
+            [repayAmount],
+            [AAVE_NO_DEBT_MODE],
+            nullAddress,
+        ),
     )).encodeForRecipe()[0],
 
     paybackAction: ({ repayAmount, rateMode = 2 }) => (new dfs.actions.spark.SparkPaybackAction(

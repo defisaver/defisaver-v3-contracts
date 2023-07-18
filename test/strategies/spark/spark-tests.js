@@ -22,9 +22,9 @@ const {
     BN2Float,
     takeSnapshot,
     revertToSnapshot,
-    getAddrFromRegistry,
     ETH_ADDR,
     getContractFromRegistry,
+    redeploy,
 } = require('../../utils');
 
 const {
@@ -173,8 +173,7 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
         let subIds;
         let collAssetId;
         let debtAssetId;
-        let flSparkAddr;
-        let flSpark;
+        let flAddr;
 
         before(async () => {
             console.log(`Network: ${network}`);
@@ -210,8 +209,7 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
             await getContractFromRegistry('SparkWithdraw');
             await getContractFromRegistry('SparkRatioCheck');
 
-            flSparkAddr = (await getAddrFromRegistry('FLSpark')).toString();
-            flSpark = await hre.ethers.getContractAt('FLSpark', flSparkAddr);
+            ({ address: flAddr } = await redeploy('FLAction'));
 
             sparkView = await getContractFromRegistry('SparkView');
 
@@ -338,7 +336,7 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
                     debtAddr,
                     debtAssetId,
                     repayAmount,
-                    flSpark.address,
+                    flAddr,
                     1,
                     subIds.repaySub,
                 );
@@ -365,8 +363,7 @@ const sparkBoostStrategyTest = async (numTestPairs) => {
         let subIds;
         let collAssetId;
         let debtAssetId;
-        let flSparkAddr;
-        let flSpark;
+        let flAddr;
 
         before(async () => {
             console.log(`Network: ${network}`);
@@ -403,8 +400,7 @@ const sparkBoostStrategyTest = async (numTestPairs) => {
             await getContractFromRegistry('SparkBorrow');
             await getContractFromRegistry('SparkRatioCheck');
 
-            flSparkAddr = (await getAddrFromRegistry('FLSpark')).toString();
-            flSpark = await hre.ethers.getContractAt('FLSpark', flSparkAddr);
+            ({ address: flAddr } = await redeploy('FLAction'));
 
             sparkView = await getContractFromRegistry('SparkView');
 
@@ -531,7 +527,7 @@ const sparkBoostStrategyTest = async (numTestPairs) => {
                         collAssetId,
                         debtAssetId,
                         boostAmount,
-                        flSpark.address,
+                        flAddr,
                         1, // strategyIndex
                         subIds.boostSub,
                     );
@@ -857,7 +853,7 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
         let sub;
         let collAssetId;
         let debtAssetId;
-        let flSpark;
+        let flAddr;
         let bundleId;
         let snapshotId;
         let snapshotId4partial;
@@ -897,7 +893,7 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
 
             await setNewExchangeWrapper(senderAcc, mockWrapperAddr);
 
-            flSpark = await getAddrFromRegistry('FLSpark');
+            ({ address: flAddr } = await redeploy('FLAction'));
 
             botAcc = (await hre.ethers.getSigners())[1];
             await addBotCaller(botAcc.address);
@@ -1006,7 +1002,7 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
                     subId,
                     repayAmount,
                     debtAddr,
-                    flSpark,
+                    flAddr,
                     collAssetInfo,
                     debtAssetInfo,
                     undefined,
@@ -1077,7 +1073,7 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
                     subId,
                     repayAmount,
                     debtAddr,
-                    flSpark,
+                    flAddr,
                     collAssetInfo,
                     debtAssetInfo,
                     withdrawAmount,
@@ -1453,7 +1449,7 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
         let sub;
         let collAssetId;
         let debtAssetId;
-        let flSpark;
+        let flAddr;
         let bundleId;
         let snapshotId;
         let snapshotId4partial;
@@ -1492,7 +1488,7 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
 
             await setNewExchangeWrapper(senderAcc, mockWrapperAddr);
 
-            flSpark = await getAddrFromRegistry('FLSpark');
+            ({ address: flAddr } = await redeploy('FLAction'));
 
             botAcc = (await hre.ethers.getSigners())[1];
             await addBotCaller(botAcc.address);
@@ -1614,7 +1610,7 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
                     subId,
                     repayAmount,
                     debtAddr,
-                    flSpark,
+                    flAddr,
                     swapAmount,
                     collAssetInfo,
                     debtAssetInfo,
@@ -1698,7 +1694,7 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
                     subId,
                     repayAmount,
                     debtAddr,
-                    flSpark,
+                    flAddr,
                     0, // will be maxuint
                     collAssetInfo,
                     debtAssetInfo,

@@ -2802,11 +2802,13 @@ const createSparkFLBoostStrategy = () => {
     const sparkTrigger = new dfs.triggers.SparkRatioTrigger('0', '0', '0');
     sparkBoostStrategy.addTrigger(sparkTrigger);
 
-    const flAction = new dfs.actions.flashloan.SparkFlashLoanAction(
-        ['%collAddr'],
-        ['%loanAmount'],
-        nullAddress,
-        [],
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.SparkFlashLoanAction(
+            ['%collAddr'],
+            ['%loanAmount'],
+            nullAddress,
+            [],
+        ),
     );
 
     sparkBoostStrategy.addAction(flAction);
@@ -2940,11 +2942,13 @@ const createSparkFLRepayStrategy = () => {
     const sparkTrigger = new dfs.triggers.SparkRatioTrigger('0', '0', '0');
     sparkRepayStrategy.addTrigger(sparkTrigger);
 
-    const flAction = new dfs.actions.flashloan.SparkFlashLoanAction(
-        ['%collAddr'],
-        ['%loanAmount'],
-        nullAddress,
-        [],
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.SparkFlashLoanAction(
+            ['%collAddr'],
+            ['%loanAmount'],
+            nullAddress,
+            [],
+        ),
     );
 
     sparkRepayStrategy.addAction(flAction);
@@ -3004,11 +3008,13 @@ const createSparkFLRepayStrategy = () => {
 const sparkCloseActions = {
 
     // eslint-disable-next-line max-len
-    flAction: () => new dfs.actions.flashloan.SparkFlashLoanAction(
-        ['%debtAsset'],
-        ['%repayAmount'], // cant pipe in FL actions :(
-        ['%AAVE_NO_DEBT_MODE'],
-        '%nullAddress',
+    flAction: () => new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.SparkFlashLoanAction(
+            ['%debtAsset'],
+            ['%repayAmount'], // cant pipe in FL actions :(
+            ['%AAVE_NO_DEBT_MODE'],
+            '%nullAddress',
+        ),
     ),
 
     paybackAction: () => new dfs.actions.spark.SparkPaybackAction(
