@@ -136,7 +136,7 @@ const aaveV3FlTest = async (generalisedFLFlag) => {
         const FLASHLOAN_TOKENS = ['WETH', 'DAI', 'USDC', 'USDT'];
 
         before(async () => {
-            const flAaveAddr = await getAddrFromRegistry('FLAaveV3WithFee');
+            const flAaveAddr = await getAddrFromRegistry('FLAaveV3');
             aaveFl = await hre.ethers.getContractAt('FLAaveV3', flAaveAddr);
 
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -175,7 +175,7 @@ const aaveV3FlTest = async (generalisedFLFlag) => {
                 console.log(loanAmount.toString(), feeAmount.toString());
 
                 await approve(assetInfo.address, proxy.address);
-                let flAction = new dfs.actions.flashloan.AaveV3FlashLoanAction(
+                let flAction = new dfs.actions.flashloan.AaveV3FlashLoanNoFeeAction(
                     [assetInfo.address],
                     [loanAmount],
                     [AAVE_NO_DEBT_MODE],
@@ -224,7 +224,7 @@ const aaveV3FlTest = async (generalisedFLFlag) => {
 };
 
 let SPARK_FL_FEE;
-const sparkFlTest = async () => {
+const sparkFlTest = async (generalisedFLFlag) => {
     describe('FL-Spark', function () {
         this.timeout(60000);
 
@@ -247,6 +247,12 @@ const sparkFlTest = async () => {
             const tokenSymbol = FLASHLOAN_TOKENS[i];
 
             it(`... should get an ${tokenSymbol} Spark flash loan`, async () => {
+                if (generalisedFLFlag) {
+                    const flActionAddr = await getAddrFromRegistry('FLAction');
+                    console.log(flActionAddr);
+                    sparkFl = await hre.ethers.getContractAt('FLAction', flActionAddr);
+                }
+
                 const assetInfo = getAssetInfo(tokenSymbol, chainIds[getNetwork()]);
 
                 // test if balance will brick fl action
@@ -279,7 +285,7 @@ const sparkFlTest = async () => {
                 console.log(loanAmount.toString(), feeAmount.toString());
 
                 await approve(assetInfo.address, proxy.address);
-                const flAction = new dfs.actions.flashloan.SparkFlashLoanAction(
+                let flAction = new dfs.actions.flashloan.SparkFlashLoanAction(
                     [assetInfo.address],
                     [loanAmount],
                     [AAVE_NO_DEBT_MODE],
@@ -287,6 +293,11 @@ const sparkFlTest = async () => {
                     nullAddress,
                     [],
                 );
+                if (generalisedFLFlag) {
+                    flAction = new dfs.actions.flashloan.FLAction(
+                        flAction,
+                    );
+                }
 
                 const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
                     flAction,
@@ -615,7 +626,7 @@ const eulerFLTest = async (generalisedFLFlag) => {
     });
 };
 
-const uniswapV3FlashloanTest = async () => {
+const uniswapV3FlashloanTest = async (generalisedFLFlag) => {
     describe('FL-UniV3', function () {
         this.timeout(60000);
 
@@ -644,19 +655,33 @@ const uniswapV3FlashloanTest = async () => {
 
         for (let i = 0; i < uniPoolInfo.length; i++) {
             it(`... should get a ${uniPoolInfo[i].token0} and ${uniPoolInfo[i].token1} UniV3 flash loan`, async () => {
+                let flContract = flUni;
+
+                if (generalisedFLFlag) {
+                    const flActionAddr = await getAddrFromRegistry('FLAction');
+                    console.log(flActionAddr);
+                    flContract = await hre.ethers.getContractAt('FLAction', flActionAddr);
+                }
+
                 const assetInfo0 = getAssetInfo(uniPoolInfo[i].token0);
                 const assetInfo1 = getAssetInfo(uniPoolInfo[i].token1);
 
                 const amount0 = hre.ethers.utils.parseUnits('1000', assetInfo0.decimals);
                 const amount1 = hre.ethers.utils.parseUnits('1000', assetInfo1.decimals);
 
-                const flAction = new dfs.actions.flashloan.UniV3FlashLoanAction(
+                let flAction = new dfs.actions.flashloan.UniV3FlashLoanAction(
                     assetInfo0.address,
                     assetInfo1.address,
                     uniPoolInfo[i].pool,
                     amount0,
                     amount1,
                 );
+                if (generalisedFLFlag) {
+                    flAction = new dfs.actions.flashloan.FLAction(
+                        flAction,
+                    );
+                }
+
                 const fees = await flUni.calculateFee(uniPoolInfo[i].pool, amount0, amount1);
 
                 await setBalance(assetInfo0.address, proxy.address, fees.fee0);
@@ -666,7 +691,7 @@ const uniswapV3FlashloanTest = async () => {
                     flAction,
                     new dfs.actions.basic.SendTokensAction(
                         [assetInfo0.address, assetInfo1.address],
-                        [flUni.address, flUni.address],
+                        [flContract.address, flContract.address],
                         [hre.ethers.constants.MaxUint256, hre.ethers.constants.MaxUint256],
                     ),
                 ]);
@@ -675,19 +700,33 @@ const uniswapV3FlashloanTest = async () => {
                 await executeAction('RecipeExecutor', functionData[1], proxy);
             });
             it(`... should get a ${uniPoolInfo[i].token0} only token (token0) from UniV3 flash loan`, async () => {
+                let flContract = flUni;
+
+                if (generalisedFLFlag) {
+                    const flActionAddr = await getAddrFromRegistry('FLAction');
+                    console.log(flActionAddr);
+                    flContract = await hre.ethers.getContractAt('FLAction', flActionAddr);
+                }
+
                 const assetInfo0 = getAssetInfo(uniPoolInfo[i].token0);
                 const assetInfo1 = getAssetInfo(uniPoolInfo[i].token1);
 
                 const amount0 = hre.ethers.utils.parseUnits('1000', assetInfo0.decimals);
                 const amount1 = hre.ethers.utils.parseUnits('0', assetInfo1.decimals);
 
-                const flAction = new dfs.actions.flashloan.UniV3FlashLoanAction(
+                let flAction = new dfs.actions.flashloan.UniV3FlashLoanAction(
                     assetInfo0.address,
                     assetInfo1.address,
                     uniPoolInfo[i].pool,
                     amount0,
                     amount1,
                 );
+                if (generalisedFLFlag) {
+                    flAction = new dfs.actions.flashloan.FLAction(
+                        flAction,
+                    );
+                }
+
                 const fees = await flUni.calculateFee(uniPoolInfo[i].pool, amount0, amount1);
 
                 await setBalance(assetInfo0.address, proxy.address, fees.fee0);
@@ -696,7 +735,7 @@ const uniswapV3FlashloanTest = async () => {
                     flAction,
                     new dfs.actions.basic.SendTokensAction(
                         [assetInfo0.address, assetInfo1.address],
-                        [flUni.address, flUni.address],
+                        [flContract.address, flContract.address],
                         [hre.ethers.constants.MaxUint256, hre.ethers.constants.MaxUint256],
                     ),
                 ]);
@@ -705,19 +744,33 @@ const uniswapV3FlashloanTest = async () => {
                 await executeAction('RecipeExecutor', functionData[1], proxy);
             });
             it(`... should get a ${uniPoolInfo[i].token1} only token (token1) from UniV3 flash loan`, async () => {
+                let flContract = flUni;
+
+                if (generalisedFLFlag) {
+                    const flActionAddr = await getAddrFromRegistry('FLAction');
+                    console.log(flActionAddr);
+                    flContract = await hre.ethers.getContractAt('FLAction', flActionAddr);
+                }
+
                 const assetInfo0 = getAssetInfo(uniPoolInfo[i].token0);
                 const assetInfo1 = getAssetInfo(uniPoolInfo[i].token1);
 
                 const amount0 = hre.ethers.utils.parseUnits('0', assetInfo0.decimals);
                 const amount1 = hre.ethers.utils.parseUnits('1000', assetInfo1.decimals);
 
-                const flAction = new dfs.actions.flashloan.UniV3FlashLoanAction(
+                let flAction = new dfs.actions.flashloan.UniV3FlashLoanAction(
                     assetInfo0.address,
                     assetInfo1.address,
                     uniPoolInfo[i].pool,
                     amount0,
                     amount1,
                 );
+                if (generalisedFLFlag) {
+                    flAction = new dfs.actions.flashloan.FLAction(
+                        flAction,
+                    );
+                }
+
                 const fees = await flUni.calculateFee(uniPoolInfo[i].pool, amount0, amount1);
 
                 await setBalance(assetInfo1.address, proxy.address, fees.fee1);
@@ -726,7 +779,7 @@ const uniswapV3FlashloanTest = async () => {
                     flAction,
                     new dfs.actions.basic.SendTokensAction(
                         [assetInfo0.address, assetInfo1.address],
-                        [flUni.address, flUni.address],
+                        [flContract.address, flContract.address],
                         [hre.ethers.constants.MaxUint256, hre.ethers.constants.MaxUint256],
                     ),
                 ]);
