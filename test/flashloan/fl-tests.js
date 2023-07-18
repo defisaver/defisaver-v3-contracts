@@ -98,7 +98,7 @@ const aaveFlTest = async (generalisedFLFlag) => {
                     new dfs.actions.basic.SendTokenAction(
                         assetInfo.address,
                         aaveFl.address,
-                        hre.ethers.constants.MaxUint256,
+                        '$1',
                     ),
                 ]);
 
