@@ -2156,14 +2156,14 @@
     },
     {
         "name": "CurveUsdSwapper",
-        "address": "0xef8Aa00f824360236b6F586CeF8e4071Bd4448b6",
+        "address": "0xFa2dfE6AF842e3184D305a85d09cfcf220ed4CBd",
         "id": "0x83a67cc0",
         "path": "contracts/actions/curveusd/advanced/CurveUsdSwapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xef8Aa00f824360236b6F586CeF8e4071Bd4448b6"]
     },
     {
         "name": "CurveUsdSelfLiquidateWithColl",
