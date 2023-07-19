@@ -20,6 +20,15 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
 
     uint256 internal constant STANDARD_DFS_FEE = 400;
 
+    event LogCurveUsdSwapper(
+        address indexed user,
+        address srcToken,
+        address dstToken,
+        uint256 srcAmount,
+        uint256 destAmount,
+        uint256 minPrice
+    );
+
     struct CallbackData {
         uint256 stablecoins;
         uint256 collateral;
@@ -189,6 +198,8 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
 
         // free the storage only needed inside tx as transient storage
         delete additionalRoutes;
+
+        emit LogCurveUsdSwapper(_user, srcToken, destToken, swapAmount, amountOut, minAmountOut);
     }
 
     /// @dev Unpack the curve swap path from calldata and additionalRoutes
