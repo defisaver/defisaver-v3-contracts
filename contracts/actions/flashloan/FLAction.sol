@@ -12,8 +12,6 @@ import "../../interfaces/flashloan/IERC3156FlashLender.sol";
 import "../../interfaces/flashloan/IERC3156FlashBorrower.sol";
 import "../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../interfaces/balancer/IFlashLoans.sol";
-import "../../interfaces/euler/IEulerMarkets.sol";
-import "../../interfaces/euler/IDToken.sol";
 import "../../interfaces/uniswap/v3/IUniswapV3Pool.sol";
 import "../../interfaces/uniswap/v3/IUniswapV3Factory.sol";
 
@@ -306,39 +304,6 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
 
             _tokens[i].withdrawTokens(address(VAULT_ADDR), paybackAmount);
         }
-    }
-
-    /// @notice Euler callback function that formats and calls back RecipeExecutor
-    /// FLSource = EULER
-    function onFlashLoan(bytes calldata _data) external nonReentrant {
-        (uint256 balanceBefore, uint256 amount, address token, bytes memory recipeData) = abi
-            .decode(_data, (uint256, uint256, address, bytes));
-
-        if (msg.sender != EULER_ADDR) {
-            revert UntrustedLender();
-        }
-
-        (Recipe memory currRecipe, address proxy) = abi.decode(recipeData, (Recipe, address));
-        address payable recipeExecutorAddr = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
-        token.withdrawTokens(proxy, amount);
-
-        // call Action execution
-        IDSProxy(proxy).execute{value: address(this).balance}(
-            recipeExecutorAddr,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, amount)
-        );
-        bool isCorrectAmount = token.getBalance(address(this)) == amount + balanceBefore;
-
-        if (token == ST_ETH_ADDR && !isCorrectAmount) {
-            flFeeFaucet.my2Wei(ST_ETH_ADDR);
-            isCorrectAmount = true;
-        }
-
-        if (!isCorrectAmount) {
-            revert WrongPaybackAmountError();
-        }
-
-        token.withdrawTokens(msg.sender, amount);
     }
 
     /// @notice ERC3156 callback function that formats and calls back RecipeExecutor
