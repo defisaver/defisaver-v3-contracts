@@ -2100,6 +2100,127 @@
         "history": []
     },
     {
+        "name": "CurveUsdBorrow",
+        "address": "0x2512A976227a82Ef0F6bDdb463cBcD5B732596BF",
+        "id": "0x2f22c507",
+        "path": "contracts/actions/curveusd/CurveUsdBorrow.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdCreate",
+        "address": "0x715B40970dac1cfAf0bB85C4Fe64921b44b3f73e",
+        "id": "0x269ac704",
+        "path": "contracts/actions/curveusd/CurveUsdCreate.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdPayback",
+        "address": "0xbcAd628159ab0f3d7F391dBb4c3553aFCD61CA80",
+        "id": "0xf0b33d69",
+        "path": "contracts/actions/curveusd/CurveUsdPayback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdSupply",
+        "address": "0xa55B3CE5ae7E59002f53b2153ABe326823ccCDE2",
+        "id": "0xd5293b35",
+        "path": "contracts/actions/curveusd/CurveUsdSupply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdWithdraw",
+        "address": "0x54B8D984fc79B000D7B6F6E0f52CD054E965120f",
+        "id": "0xd593ef63",
+        "path": "contracts/actions/curveusd/CurveUsdWithdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdSelfLiquidate",
+        "address": "0xd90d8a4955DfE9D4f45F7f60595313B0925ee1da",
+        "id": "0x77f22040",
+        "path": "contracts/actions/curveusd/CurveUsdSelfLiquidate.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdLevCreate",
+        "address": "0x8B5ACd4ce0a43327aaDfc5c42be029898e242393",
+        "id": "0x2465d76e",
+        "path": "contracts/actions/curveusd/advanced/CurveUsdLevCreate.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdRepay",
+        "address": "0xDaDFC60207C17be005ECf2B03f3B31885D22F908",
+        "id": "0x42cd8e33",
+        "path": "contracts/actions/curveusd/advanced/CurveUsdRepay.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdSwapper",
+        "address": "0xFa2dfE6AF842e3184D305a85d09cfcf220ed4CBd",
+        "id": "0x83a67cc0",
+        "path": "contracts/actions/curveusd/advanced/CurveUsdSwapper.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": ["0xef8Aa00f824360236b6F586CeF8e4071Bd4448b6"]
+    },
+    {
+        "name": "CurveUsdSelfLiquidateWithColl",
+        "address": "0x6d02300C1A68c63C60AFD713b744bA750aB33aB0",
+        "id": "0xe17ef895",
+        "path": "contracts/actions/curveusd/advanced/CurveUsdSelfLiquidateWithColl.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdView",
+        "address": "0x512460CF2Bb80823C135F5DC04D2a1fF258FAA1e",
+        "id": "0xe19de022",
+        "path": "contracts/views/CurveUsdView.sol",
+        "version": "1.0.1",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": ["0xa81430a4eC71466264b9ee50403F8d63E8c72B95"]
+    },
+    {
         "name": "CurveStethPoolDeposit",
         "address": "0x5Ae5870dC0C780e9eb68bE7a223eCd7F3BDad12B",
         "id": "0x584de7d4",
