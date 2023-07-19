@@ -221,15 +221,15 @@
     },
     {
         "name": "KyberAggregatorWrapper",
-        "address": "0x25A1c8C54018F198D8BdfB3a410D812b4ad312e4",
+        "address": "0xBfb05d97FE87DCbc7Ff6F2e4f83FcA0861318A4E",
         "id": "0x1abf4ed0",
         "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
-      },
+        "history": ["0x25A1c8C54018F198D8BdfB3a410D812b4ad312e4"]
+    },
     {
         "name": "ScpWrapper",
         "address": "0x5f3e654EdeeDF8F236b8a8BC4B459Ae4fED7f44d",
@@ -1065,6 +1065,17 @@
         "history": []
     },
     {
+        "name": "AaveUnstake",
+        "address": "0x2FE4024e350cD2c64D2fd0Db5d16F5cE54Ca0E09",
+        "id": "0x887729ae",
+        "path": "contracts/actions/aave/AaveUnstake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "MorphoMarketStorage",
         "address": "0x56EE33811a6C8c1Fd443E53685ed1605E43b3971",
         "id": "0x9600f04b",
@@ -1453,6 +1464,17 @@
         "history": []
     },
     {
+        "name": "FLGho",
+        "address": "0xbb67b81dD080a406227A38965d0393f396ddECBc",
+        "id": "0xa3dba3d5",
+        "path": "contracts/actions/flashloan/FLGho.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "FLMaker",
         "address": "0x672DE08e36A1698fD5e9E34045F81558dB4c1AFE",
         "id": "0x354c4555",
@@ -1465,6 +1487,17 @@
             "0x5DCf600C35ae2752A8a11eB7C489EF3D93126fB4",
             "0xd393582bE148A45585aB202Fa7Cc789Fa5127223"
         ]
+    },
+    {
+        "name": "FLUniV3",
+        "address": "0x9CAdAC8Be718572F82B672b950c53F0b58483A35",
+        "id": "0x44957903",
+        "path": "contracts/actions/flashloan/FLUniV3.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     },
     {
         "name": "FLBalancer",

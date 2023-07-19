@@ -513,6 +513,188 @@ const eulerFLTest = async (generalisedFLFlag) => {
     });
 };
 
+const uniswapV3FlashloanTest = async () => {
+    describe('FL-UniV3', function () {
+        this.timeout(60000);
+
+        let senderAcc; let proxy; let flUni;
+
+        before(async () => {
+            const flUniAddr = await getAddrFromRegistry('FLUniV3');
+            console.log(flUniAddr);
+            flUni = await hre.ethers.getContractAt('FLUniV3', flUniAddr);
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+
+        const uniPoolInfo = [
+            {
+                token0: 'DAI', token1: 'USDC', pool: '0x5777d92f208679DB4b9778590Fa3CAB3aC9e2168',
+            },
+            {
+                token0: 'WBTC', token1: 'WETH', pool: '0xCBCdF9626bC03E24f779434178A73a0B4bad62eD',
+            },
+            {
+                token0: 'USDC', token1: 'WETH', pool: '0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640',
+            },
+        ];
+
+        for (let i = 0; i < uniPoolInfo.length; i++) {
+            it(`... should get a ${uniPoolInfo[i].token0} and ${uniPoolInfo[i].token1} UniV3 flash loan`, async () => {
+                const assetInfo0 = getAssetInfo(uniPoolInfo[i].token0);
+                const assetInfo1 = getAssetInfo(uniPoolInfo[i].token1);
+
+                const amount0 = hre.ethers.utils.parseUnits('1000', assetInfo0.decimals);
+                const amount1 = hre.ethers.utils.parseUnits('1000', assetInfo1.decimals);
+
+                const flAction = new dfs.actions.flashloan.UniV3FlashLoanAction(
+                    assetInfo0.address,
+                    assetInfo1.address,
+                    uniPoolInfo[i].pool,
+                    amount0,
+                    amount1,
+                );
+                const fees = await flUni.calculateFee(uniPoolInfo[i].pool, amount0, amount1);
+
+                await setBalance(assetInfo0.address, proxy.address, fees.fee0);
+                await setBalance(assetInfo1.address, proxy.address, fees.fee1);
+
+                const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
+                    flAction,
+                    new dfs.actions.basic.SendTokensAction(
+                        [assetInfo0.address, assetInfo1.address],
+                        [flUni.address, flUni.address],
+                        [hre.ethers.constants.MaxUint256, hre.ethers.constants.MaxUint256],
+                    ),
+                ]);
+
+                const functionData = basicFLRecipe.encodeForDsProxyCall();
+                await executeAction('RecipeExecutor', functionData[1], proxy);
+            });
+            it(`... should get a ${uniPoolInfo[i].token0} only token (token0) from UniV3 flash loan`, async () => {
+                const assetInfo0 = getAssetInfo(uniPoolInfo[i].token0);
+                const assetInfo1 = getAssetInfo(uniPoolInfo[i].token1);
+
+                const amount0 = hre.ethers.utils.parseUnits('1000', assetInfo0.decimals);
+                const amount1 = hre.ethers.utils.parseUnits('0', assetInfo1.decimals);
+
+                const flAction = new dfs.actions.flashloan.UniV3FlashLoanAction(
+                    assetInfo0.address,
+                    assetInfo1.address,
+                    uniPoolInfo[i].pool,
+                    amount0,
+                    amount1,
+                );
+                const fees = await flUni.calculateFee(uniPoolInfo[i].pool, amount0, amount1);
+
+                await setBalance(assetInfo0.address, proxy.address, fees.fee0);
+
+                const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
+                    flAction,
+                    new dfs.actions.basic.SendTokensAction(
+                        [assetInfo0.address, assetInfo1.address],
+                        [flUni.address, flUni.address],
+                        [hre.ethers.constants.MaxUint256, hre.ethers.constants.MaxUint256],
+                    ),
+                ]);
+
+                const functionData = basicFLRecipe.encodeForDsProxyCall();
+                await executeAction('RecipeExecutor', functionData[1], proxy);
+            });
+            it(`... should get a ${uniPoolInfo[i].token1} only token (token1) from UniV3 flash loan`, async () => {
+                const assetInfo0 = getAssetInfo(uniPoolInfo[i].token0);
+                const assetInfo1 = getAssetInfo(uniPoolInfo[i].token1);
+
+                const amount0 = hre.ethers.utils.parseUnits('0', assetInfo0.decimals);
+                const amount1 = hre.ethers.utils.parseUnits('1000', assetInfo1.decimals);
+
+                const flAction = new dfs.actions.flashloan.UniV3FlashLoanAction(
+                    assetInfo0.address,
+                    assetInfo1.address,
+                    uniPoolInfo[i].pool,
+                    amount0,
+                    amount1,
+                );
+                const fees = await flUni.calculateFee(uniPoolInfo[i].pool, amount0, amount1);
+
+                await setBalance(assetInfo1.address, proxy.address, fees.fee1);
+
+                const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
+                    flAction,
+                    new dfs.actions.basic.SendTokensAction(
+                        [assetInfo0.address, assetInfo1.address],
+                        [flUni.address, flUni.address],
+                        [hre.ethers.constants.MaxUint256, hre.ethers.constants.MaxUint256],
+                    ),
+                ]);
+
+                const functionData = basicFLRecipe.encodeForDsProxyCall();
+                await executeAction('RecipeExecutor', functionData[1], proxy);
+            });
+        }
+    });
+};
+
+const ghoFLTest = async (generalisedFLFlag) => {
+    describe('FL-Gho', function () {
+        this.timeout(60000);
+
+        let senderAcc; let proxy;
+        let flGho;
+
+        before(async () => {
+            const flGhoAddress = await getAddrFromRegistry('FLGho');
+            flGho = await hre.ethers.getContractAt('FLGho', flGhoAddress);
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+
+        const tokenSymbol = 'GHO';
+
+        it(`... should get a ${tokenSymbol} flash loan`, async () => {
+            if (generalisedFLFlag) {
+                const flActionAddr = await getAddrFromRegistry('FLAction');
+                console.log(flActionAddr);
+                flGho = await hre.ethers.getContractAt('FLAction', flActionAddr);
+            }
+            const assetInfo = getAssetInfo(tokenSymbol);
+
+            // test if balance will brick fl action
+            await setBalance(assetInfo.address, flGho.address, Float2BN('1', 0));
+
+            const amount = '10000';
+            const loanAmount = hre.ethers.utils.parseUnits(
+                amount,
+                assetInfo.decimals,
+            );
+            let flAction = new dfs.actions.flashloan.GhoFlashLoanAction(
+                loanAmount,
+                nullAddress,
+                [],
+            );
+            if (generalisedFLFlag) {
+                flAction = new dfs.actions.flashloan.FLAction(
+                    flAction,
+                );
+            }
+
+            const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
+                flAction,
+                new dfs.actions.basic.SendTokenAction(
+                    assetInfo.address,
+                    flGho.address,
+                    loanAmount,
+                ),
+            ]);
+
+            const functionData = basicFLRecipe.encodeForDsProxyCall();
+            await executeAction('RecipeExecutor', functionData[1], proxy);
+        });
+    });
+};
+
 const deployFLContracts = async () => {
     await redeploy('FLMaker');
     await redeploy('SendToken');
@@ -521,6 +703,8 @@ const deployFLContracts = async () => {
     await redeploy('FLBalancer');
     await redeploy('FLAaveV2');
     await redeploy('FLEuler');
+    await redeploy('FLUniV3');
+    await redeploy('FLGho');
 };
 
 const fullFLTest = async () => {
@@ -530,6 +714,8 @@ const fullFLTest = async () => {
     await dydxFLTest();
     await makerFLTest();
     await eulerFLTest();
+    await uniswapV3FlashloanTest();
+    await ghoFLTest();
 };
 module.exports = {
     fullFLTest,
@@ -539,4 +725,6 @@ module.exports = {
     makerFLTest,
     eulerFLTest,
     aaveV3FlTest,
+    uniswapV3FlashloanTest,
+    ghoFLTest,
 };

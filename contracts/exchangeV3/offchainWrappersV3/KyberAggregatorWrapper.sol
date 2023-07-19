@@ -41,7 +41,7 @@ contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAut
             IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, srcAmount);
         }
 
-        bytes memory scaledCalldata = getScaledInputData(bytes4(_exData.offchainData.callData[:4]), _exData.offchainData.callData[4:], _exData.srcAmount);
+        bytes memory scaledCalldata = getScaledInputData(_exData.offchainData.callData, _exData.srcAmount);
         
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
         (success, ) = _exData.offchainData.exchangeAddr.call(scaledCalldata);

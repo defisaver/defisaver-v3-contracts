@@ -37,7 +37,7 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
             _route,
             _swap_params,
             _srcAmount,
-            1   // _expected
+            1   /// @dev DFSExchangeCore contains slippage check instead of writing it here
         );
         _destAddr.withdrawTokens(msg.sender, amountOut);
 
