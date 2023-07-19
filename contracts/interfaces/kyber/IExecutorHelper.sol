@@ -23,7 +23,6 @@ interface IExecutorHelper {
     address tokenOut;
     address recipient;
     uint256 collectAmount; // amount that should be transferred to the pool
-    uint256 limitReturnAmount;
     uint32 swapFee;
     uint32 feePrecision;
     uint32 tokenWeightInput;
@@ -36,7 +35,6 @@ interface IExecutorHelper {
     uint8 tokenIndexFrom;
     uint8 tokenIndexTo;
     uint256 dx;
-    uint256 minDy;
     uint256 poolLength;
     address poolLp;
     bool isSaddle; // true: saddle, false: stable
@@ -49,20 +47,18 @@ interface IExecutorHelper {
     int128 tokenIndexFrom;
     int128 tokenIndexTo;
     uint256 dx;
-    uint256 minDy;
     bool usePoolUnderlying;
     bool useTriCrypto;
   }
 
-  struct UniSwapV3ProMM {
+  struct UniswapV3KSElastic {
     address recipient;
     address pool;
     address tokenIn;
     address tokenOut;
     uint256 swapAmount;
-    uint256 limitReturnAmount;
     uint160 sqrtPriceLimitX96;
-    bool isUniV3; // true = UniV3, false = ProMM
+    bool isUniV3; // true = UniV3, false = KSElastic
   }
 
   struct BalancerV2 {
@@ -71,7 +67,6 @@ interface IExecutorHelper {
     address assetIn;
     address assetOut;
     uint256 amount;
-    uint256 limit;
   }
 
   struct DODO {
@@ -80,7 +75,6 @@ interface IExecutorHelper {
     address tokenFrom;
     address tokenTo;
     uint256 amount;
-    uint256 minReceiveQuote;
     address sellHelper;
     bool isSellBase;
     bool isVersion2;
@@ -91,7 +85,6 @@ interface IExecutorHelper {
     address tokenIn;
     address tokenOut;
     uint256 amount;
-    uint256 minOut;
     address receiver;
   }
 
@@ -102,7 +95,6 @@ interface IExecutorHelper {
     bytes32 sourceCurrencyKey;
     uint256 sourceAmount;
     bytes32 destinationCurrencyKey;
-    uint256 minAmount;
     bool useAtomicExchange;
   }
 
@@ -112,7 +104,6 @@ interface IExecutorHelper {
     address tokenOut;
     address recipient;
     uint256 collectAmount; // amount that should be transferred to the pool
-    uint256 limitReturnAmount;
   }
 
   struct PSM {
@@ -129,113 +120,112 @@ interface IExecutorHelper {
     bool isWrapping;
   }
 
-  function executeUniSwap(
-    uint256 index,
+  struct Maverick {
+    address pool;
+    address tokenIn;
+    address tokenOut;
+    address recipient;
+    uint256 swapAmount;
+    uint256 sqrtPriceLimitD18;
+  }
+
+  function executeUniswap(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
   function executeStableSwap(
-    uint256 index,
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function executeCurveSwap(
-    uint256 index,
+  function executeCurve(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function executeKyberDMMSwap(
-    uint256 index,
+  function executeKSClassic(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function executeUniV3ProMMSwap(
-    uint256 index,
+  function executeUniV3KSElastic(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function executeRfqSwap(
-    uint256 index,
+  function executeRfq(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function executeBalV2Swap(
-    uint256 index,
+  function executeBalV2(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function executeDODOSwap(
-    uint256 index,
+  function executeDODO(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function executeVelodromeSwap(
-    uint256 index,
+  function executeVelodrome(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function executeGMXSwap(
-    uint256 index,
+  function executeGMX(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function executePlatypusSwap(
-    uint256 index,
+  function executePlatypus(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function executeWrappedstETHSwap(
-    uint256 index,
+  function executeWrappedstETH(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function executeSynthetixSwap(
-    uint256 index,
+  function executeStEth(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function executeHashflowSwap(
-    uint256 index,
+  function executeSynthetix(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function executePSMSwap(
-    uint256 index,
+  function executeHashflow(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function executeFraxSwap(
-    uint256 index,
+  function executePSM(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function executeCamelotSwap(
-    uint256 index,
+  function executeFrax(
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeCamelot(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
   function executeKyberLimitOrder(
-    uint256 index,
     bytes memory data,
-    uint256 previousAmountOut
+    uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
 
-  function callBytes(bytes calldata data) external payable; // 0xd9c45357
+  function executeMaverick(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
 }
