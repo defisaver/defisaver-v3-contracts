@@ -83,7 +83,6 @@ contract FLGho is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlashLo
     }
 
     /// @notice ERC3156 callback function that formats and calls back RecipeExecutor
-    /// FLSource == MAKER
     function onFlashLoan(
         address _initiator,
         address _token,

@@ -221,15 +221,15 @@
     },
     {
         "name": "KyberAggregatorWrapper",
-        "address": "0x25A1c8C54018F198D8BdfB3a410D812b4ad312e4",
+        "address": "0xBfb05d97FE87DCbc7Ff6F2e4f83FcA0861318A4E",
         "id": "0x1abf4ed0",
         "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
-      },
+        "history": ["0x25A1c8C54018F198D8BdfB3a410D812b4ad312e4"]
+    },
     {
         "name": "ScpWrapper",
         "address": "0x5f3e654EdeeDF8F236b8a8BC4B459Ae4fED7f44d",
@@ -1457,6 +1457,17 @@
         "address": "0x08AC78B418fCB0DDF1096533856A757C28d430d7",
         "id": "0x768ff4da",
         "path": "contracts/actions/flashloan/dydx/FLDyDx.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FLGho",
+        "address": "0xbb67b81dD080a406227A38965d0393f396ddECBc",
+        "id": "0xa3dba3d5",
+        "path": "contracts/actions/flashloan/FLGho.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
