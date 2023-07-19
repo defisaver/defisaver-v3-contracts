@@ -89,14 +89,14 @@
     },
     {
       "name": "KyberAggregatorWrapper",
-      "address": "0xB7EAa93C69b6450D6dF0CDb00307A5136392eCF8",
+      "address": "0x59aD138C43b63Be18363630eF8Ab8b78Ada2c3e0",
       "id": "0x1abf4ed0",
       "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
       "version": "1.0.0",
       "inRegistry": false,
       "changeTime": 0,
       "registryIds": [],
-      "history": []
+      "history": ["0xB7EAa93C69b6450D6dF0CDb00307A5136392eCF8"]
     },
     {
         "name": "Discount",
