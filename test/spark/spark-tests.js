@@ -17,7 +17,7 @@ const {
     sparkSwapBorrowRateCalldataOptimised, sparkSwapBorrowRate, sparkSetEModeCalldataOptimised,
     sparkSetEMode, sparkSwitchCollateral, sparkSwitchCollateralCallDataOptimised,
     sparkSpTokenPaybackCalldataOptimised, sparkSpTokenPayback,
-    sparkBorrowCalldataOptimised, sparkClaimRewards, sparkDsrWrap, sparkDsrUnwrap,
+    sparkBorrowCalldataOptimised, sparkClaimRewards, sDaiWrap, sDaiUnwrap,
 } = require('../actions');
 
 const sparkSupplyTest = async () => {
@@ -1020,7 +1020,7 @@ const sparkClaimRewardsTest = async () => {
     });
 };
 
-const sparkDsrWrapTest = async () => describe('Spark-Dsr-Wrap', () => {
+const sDaiWrapTest = async () => describe('sDai-Wrap', () => {
     const daiAddr = getAssetInfo('DAI').address;
     const sDaiAddr = getAssetInfo('sDAI').address;
     const depositAmount = Float2BN('5000');
@@ -1032,7 +1032,7 @@ const sparkDsrWrapTest = async () => describe('Spark-Dsr-Wrap', () => {
         await setBalance(sDaiAddr, senderAcc.address, Float2BN('0'));
         await setBalance(daiAddr, senderAcc.address, depositAmount);
         await approve(daiAddr, proxy.address);
-        await sparkDsrWrap(
+        await sDaiWrap(
             proxy,
             depositAmount,
             senderAcc.address,
@@ -1055,7 +1055,7 @@ const sparkDsrWrapTest = async () => describe('Spark-Dsr-Wrap', () => {
         await setBalance(sDaiAddr, senderAcc.address, Float2BN('0'));
         await setBalance(daiAddr, senderAcc.address, depositAmount);
         await approve(daiAddr, proxy.address);
-        await sparkDsrWrap(
+        await sDaiWrap(
             proxy,
             hre.ethers.constants.MaxUint256,
             senderAcc.address,
@@ -1072,7 +1072,7 @@ const sparkDsrWrapTest = async () => describe('Spark-Dsr-Wrap', () => {
     });
 });
 
-const sparkDsrUnwrapTest = async () => describe('Spark-Dsr-Unwrap', () => {
+const sDaiUnwrapTest = async () => describe('sDai-Unwrap', () => {
     const daiAddr = getAssetInfo('DAI').address;
     const sDaiAddr = getAssetInfo('sDAI').address;
     const redeemAmount = Float2BN('5000');
@@ -1084,7 +1084,7 @@ const sparkDsrUnwrapTest = async () => describe('Spark-Dsr-Unwrap', () => {
         await setBalance(daiAddr, senderAcc.address, Float2BN('0'));
         await setBalance(sDaiAddr, senderAcc.address, redeemAmount);
         await approve(sDaiAddr, proxy.address);
-        await sparkDsrUnwrap(
+        await sDaiUnwrap(
             proxy,
             redeemAmount,
             senderAcc.address,
@@ -1106,7 +1106,7 @@ const sparkDsrUnwrapTest = async () => describe('Spark-Dsr-Unwrap', () => {
         await setBalance(daiAddr, senderAcc.address, Float2BN('0'));
         await setBalance(sDaiAddr, senderAcc.address, redeemAmount);
         await approve(sDaiAddr, proxy.address);
-        await sparkDsrUnwrap(
+        await sDaiUnwrap(
             proxy,
             hre.ethers.constants.MaxUint256,
             senderAcc.address,
@@ -1132,15 +1132,15 @@ const sparkDeployContracts = async () => {
     await redeploy('SparkSwapBorrowRateMode');
     await redeploy('SparkWithdraw');
 
-    await redeploy('SparkDsrWrap');
-    await redeploy('SparkDsrUnwrap');
+    await redeploy('SDaiWrap');
+    await redeploy('SDaiUnwrap');
 };
 
 const sparkFullTest = async () => {
     await sparkDeployContracts();
 
-    await sparkDsrWrapTest();
-    await sparkDsrUnwrapTest();
+    await sDaiWrapTest();
+    await sDaiUnwrapTest();
 
     await sparkSupplyTest();
     await sparkBorrowTest();
@@ -1162,6 +1162,6 @@ module.exports = {
     sparkCollSwitchTest,
     sparkSpTokenPaybackTest,
     sparkClaimRewardsTest,
-    sparkDsrWrapTest,
-    sparkDsrUnwrapTest,
+    sDaiWrapTest,
+    sDaiUnwrapTest,
 };

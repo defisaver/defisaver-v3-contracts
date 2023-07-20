@@ -3568,8 +3568,8 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 network = process.env.TEST_CHAIN_ID;
             }
             const sparkContracts = [
-                'SparkDsrWrap',
-                'SparkDsrUnwrap',
+                'SDaiWrap',
+                'SDaiUnwrap',
                 'SparkBorrow',
                 'SparkClaimRewards',
                 'SparkCollateralSwitch',
