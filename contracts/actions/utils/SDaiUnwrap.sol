@@ -2,18 +2,18 @@
 pragma solidity =0.8.10;
 
 import "../ActionBase.sol";
-import "./helpers/SparkHelper.sol";
+import "../spark/helpers/SparkHelper.sol";
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/spark/IsDAI.sol";
 
 
-/// @title Action that deposits dai into sDai
-contract SparkDsrWrap is ActionBase, SparkHelper {
+/// @title Action that redeems sDai for dai
+contract SDaiUnwrap is ActionBase, SparkHelper {
     using TokenUtils for address;
 
-    /// @param amount - Amount of dai to deposit
+    /// @param amount - Amount of sDai to redeem
     /// @param from - Address from which the tokens will be pulled
-    /// @param to - Address that will receive the sDai
+    /// @param to - Address that will receive the dai
     struct Params {
         uint256 amount;
         address from;
@@ -33,17 +33,17 @@ contract SparkDsrWrap is ActionBase, SparkHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 shares, bytes memory logData) = _wrap(params);
-        emit ActionEvent('SparkDsrWrap', logData);
-        return bytes32(shares);
+        (uint256 daiAmount, bytes memory logData) = _unwrap(params);
+        emit ActionEvent('SDaiUnwrap', logData);
+        return bytes32(daiAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
 
-        (, bytes memory logData) = _wrap(params);
-        logger.logActionDirectEvent('SparkDsrWrap', logData);
+        (, bytes memory logData) = _unwrap(params);
+        logger.logActionDirectEvent('SDaiUnwrap', logData);
     }
 
     /// @inheritdoc ActionBase
@@ -51,16 +51,18 @@ contract SparkDsrWrap is ActionBase, SparkHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    function _wrap(Params memory _params) internal returns (uint256 shares, bytes memory logData) {
-        _params.amount = DAI_ADDR.pullTokensIfNeeded(_params.from, _params.amount);
-        shares = SDAI_ADDR.getBalance(_params.to);
+    function _unwrap(Params memory _params) internal returns (uint256 daiAmount, bytes memory logData) {
+        if (_params.from == address(0)) _params.from = address(this);
 
-        DAI_ADDR.approveToken(SDAI_ADDR, _params.amount);
-        IsDAI(SDAI_ADDR).deposit(_params.amount, _params.to);
+        uint256 sDaiBalance = SDAI_ADDR.getBalance(_params.from);
+        if (_params.amount > sDaiBalance) _params.amount = sDaiBalance;
 
-        shares = SDAI_ADDR.getBalance(_params.to) - shares;
+        daiAmount = DAI_ADDR.getBalance(_params.to);
+        IsDAI(SDAI_ADDR).redeem(_params.amount, _params.to, _params.from);
+        daiAmount = DAI_ADDR.getBalance(_params.to) - daiAmount;
+
         logData = abi.encode(
-            _params, shares
+            _params, daiAmount
         );
     }
 

@@ -2794,33 +2794,33 @@ const sparkSwitchCollateralCallDataOptimised = async (
     return receipt;
 };
 
-const sparkDsrWrap = async (
+const sDaiWrap = async (
     proxy, daiAmount, from, to,
 ) => {
-    const actionAddress = await getAddrFromRegistry('SparkDsrWrap');
-    const action = new dfs.actions.spark.SparkDsrWrapAction(
+    const actionAddress = await getAddrFromRegistry('SDaiWrap');
+    const action = new dfs.actions.basic.SDaiWrapAction(
         daiAmount, from, to,
     );
     const functionData = action.encodeForDsProxyCall()[1];
     const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed sparkDsrWrap: ${gasUsed}`);
+    console.log(`GasUsed sDaiWrap: ${gasUsed}`);
     return receipt;
 };
 
-const sparkDsrUnwrap = async (
+const sDaiUnwrap = async (
     proxy, sDaiAmount, from, to,
 ) => {
-    const actionAddress = await getAddrFromRegistry('SparkDsrUnwrap');
-    const action = new dfs.actions.spark.SparkDsrUnwrapAction(
+    const actionAddress = await getAddrFromRegistry('SDaiUnwrap');
+    const action = new dfs.actions.basic.SDaiUnwrapAction(
         sDaiAmount, from, to,
     );
     const functionData = action.encodeForDsProxyCall()[1];
     const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
 
     const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed sparkDsrUnwrap: ${gasUsed}`);
+    console.log(`GasUsed sDaiUnwrap: ${gasUsed}`);
     return receipt;
 };
 
@@ -3118,8 +3118,8 @@ module.exports = {
     sparkSwapBorrowRate,
     sparkSwapBorrowRateCalldataOptimised,
     sparkClaimRewards,
-    sparkDsrWrap,
-    sparkDsrUnwrap,
+    sDaiWrap,
+    sDaiUnwrap,
 
     updateSubData,
 
