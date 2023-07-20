@@ -7,7 +7,7 @@ const axios = require('axios');
 const path = require('path');
 const readline = require('readline');
 const readlineSync = require('readline-sync');
-const hardhatSettings = require('../hardhat.config');
+const hardhatSettings = require('../hardhat.config.js');
 const { encrypt, decrypt } = require('./utils/crypto');
 
 async function changeWethAddress(oldNetworkName, newNetworkName) {

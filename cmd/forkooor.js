@@ -51,6 +51,8 @@ const {
     nullAddress,
     getContractFromRegistry,
     filterEthersObject,
+    setBalance,
+    crvusdAddress,
 } = require('../test/utils');
 
 const {
@@ -2716,6 +2718,61 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
     console.log(`Subscribed to DCA strategy with sub id ${sub.subId}`);
 };
 
+const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    const crvusdAddress = getAssetInfo('crvUSD').address;
+
+    await topUp(senderAcc.address);
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    const crvController = await hre.ethers.getContractAt('ICrvUsdController', controllerAddress);
+    const llammaAddress = await crvController.amm();
+    const llammaExchange = await hre.ethers.getContractAt('ILLAMMA', llammaAddress);
+
+    const sellAddrId = sellCrvUsd === 'true' ? 0 : 1;
+
+    const sellAddr = await llammaExchange.coins(sellAddrId);
+    const sellToken = await hre.ethers.getContractAt('IERC20', sellAddr);
+    const sellDecimals = await sellToken.decimals();
+
+    const swapAmountWei = hre.ethers.utils.parseUnits(swapAmount, sellDecimals);
+
+    await setBalance(crvusdAddress, senderAcc.address, swapAmountWei);
+    await approve(crvusdAddress, llammaAddress);
+
+    const minAmount = 1;
+
+    let sellId = 0;
+    let buyId = 1;
+
+    if (sellCrvUsd === 'false') {
+        sellId = 1;
+        buyId = 0;
+        console.log('Selling coll asset');
+
+        await setBalance(sellAddr, senderAcc.address, swapAmountWei);
+        await approve(sellAddr, llammaAddress);
+    }
+
+    const beforePrice = await llammaExchange.get_p();
+    console.log(`Price before swap ${beforePrice / 1e18}`);
+
+    try {
+        await llammaExchange.exchange(sellId, buyId, swapAmountWei, minAmount, { gasLimit: 5000000 });
+    } catch (err) {
+        console.log(err);
+    }
+
+    const afterPrice = await llammaExchange.get_p();
+    console.log(`Price after swap ${afterPrice / 1e18}`);
+};
+
 (async () => {
     program
         .command('new-fork <network>')
@@ -3343,6 +3400,14 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
         .description('Calls sell operation to get tokens other than eth')
         .action(async (srcTokenLabel, destTokenLabel, srcAmount, senderAddr) => {
             await callSell(srcTokenLabel, destTokenLabel, srcAmount, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('sell-llamma <controllerAddr> <swapAmount> <sellCrvUsd> [senderAddr]')
+        .description('Sells one token for another on a specific lamma curve pool')
+        .action(async (controllerAddr, swapAmount, sellCrvUsd, senderAddr) => {
+            await llammaSell(controllerAddr, swapAmount, sellCrvUsd, senderAddr);
             process.exit(0);
         });
 
