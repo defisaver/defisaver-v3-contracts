@@ -34,7 +34,7 @@ contract SDaiUnwrap is ActionBase, SparkHelper {
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
         (uint256 daiAmount, bytes memory logData) = _unwrap(params);
-        emit ActionEvent('SDaiUnwrap', logData);
+        emit ActionEvent("SDaiUnwrap", logData);
         return bytes32(daiAmount);
     }
 
@@ -43,7 +43,7 @@ contract SDaiUnwrap is ActionBase, SparkHelper {
         Params memory params = parseInputs(_callData);
 
         (, bytes memory logData) = _unwrap(params);
-        logger.logActionDirectEvent('SDaiUnwrap', logData);
+        logger.logActionDirectEvent("SDaiUnwrap", logData);
     }
 
     /// @inheritdoc ActionBase
