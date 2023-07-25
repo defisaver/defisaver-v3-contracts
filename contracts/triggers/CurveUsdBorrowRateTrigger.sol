@@ -4,32 +4,43 @@ pragma solidity =0.8.10;
 
 import "../auth/AdminAuth.sol";
 import "../interfaces/ITrigger.sol";
-import "../DS/DSMath.sol";
 import "../interfaces/curveusd/ICurveUsd.sol";
 
-contract CurveUsdBorrowRateTrigger is ITrigger, DSMath, AdminAuth {
+contract CurveUsdBorrowRateTrigger is ITrigger, AdminAuth {
  
     enum TargetRateState { OVER, UNDER }
     
-    /// @param user address of the user whose position we check
-    /// @param _market Main Comet proxy contract that is different for each compound market
-    /// @param ratio ratio that represents the triggerable point
-    /// @param state represents if we want the current state to be higher or lower than ratio param
+    /// @param market - CurveUsd market
+    /// @param targetRate - Rate that represents the triggerable point
+    /// @param state - Represents if we want the current state to be higher or lower than targetRate
     struct SubParams {
         address market;
         uint256 targetRate;
         uint8 state;
     }
     
-    /// @dev checks current safety ratio of a CompoundV3 position and triggers if it's in a correct state
+    /// @dev checks current borrow rate for CurveUsd market and triggers if it's in a correct state
     function isTriggered(bytes memory, bytes memory _subData)
         public
+        view
         override
         returns (bool)
     {   
         SubParams memory triggerSubData = parseInputs(_subData);
 
-        
+        uint256 currentRate = _calcBorrowRate(triggerSubData.market);
+
+        if (TargetRateState(triggerSubData.state) == TargetRateState.OVER) {
+            if (currentRate > triggerSubData.targetRate) {
+                return true;
+            }
+        }
+
+        if (TargetRateState(triggerSubData.state) == TargetRateState.UNDER) {
+            if (currentRate < triggerSubData.targetRate) {
+                return true;
+            }
+        }
 
         return false;
     }
