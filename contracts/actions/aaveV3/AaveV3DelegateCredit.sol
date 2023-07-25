@@ -14,9 +14,9 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
     error NonExistantRateMode();
 
     struct Params {
-        address delegatee;
-        address token;
         uint256 amount;
+        address delegatee;
+        uint16 assetId;
         uint8 rateMode;
         bool useDefaultMarket;
         address market;
@@ -33,22 +33,29 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
 
-        (uint256 categoryId, bytes memory logData) = _delegate(params);
+        params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
+        params.delegatee = _parseParamAddr(params.delegatee, _paramMapping[1], _subData, _returnValues);
+        params.assetId = uint16(_parseParamUint(uint16(params.assetId), _paramMapping[2], _subData, _returnValues));
+        params.rateMode = uint8(_parseParamUint(uint8(params.rateMode), _paramMapping[3], _subData, _returnValues));
+        params.useDefaultMarket = _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
+        params.market = _parseParamAddr(params.market, _paramMapping[5], _subData, _returnValues);
+
+        (bytes memory logData) = _delegate(params);
         emit ActionEvent("AaveV3DelegateCredit", logData);
-        return bytes32(categoryId);
+        return bytes32(params.amount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes calldata _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _delegate(params);
+        (bytes memory logData) = _delegate(params);
         logger.logActionDirectEvent("AaveV3DelegateCredit", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
-        (, bytes memory logData) = _delegate(params);
-        logger.logActionDirectEvent("AaveV3DelegateCredit", logData);
+        (bytes memory logData) = _delegate(params);
+        logger.logActionDirectEvent("SparkDelegateCredit", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -60,10 +67,11 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
 
     function _delegate(Params memory _params)
         internal
-        returns (uint256, bytes memory)
+        returns (bytes memory logData)
     {
         IPoolV3 lendingPool = getLendingPool(_params.market);
-        DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_params.token);
+        address tokenAddr = lendingPool.getReserveAddressById(_params.assetId);
+        DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(tokenAddr);
 
         if (_params.rateMode == VARIABLE_ID){
             IDebtToken(reserveData.variableDebtTokenAddress).approveDelegation(_params.delegatee, _params.amount);
@@ -72,9 +80,7 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
         } else {
             revert NonExistantRateMode();
         }
-        bytes memory logData = abi.encode(_params);
-
-        return (_params.amount, logData);
+        logData = abi.encode(_params);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
@@ -84,11 +90,43 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
         }
     }
 
+
     function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
-        
+        encodedInput = bytes.concat(this.executeActionDirectL2.selector);
+        encodedInput = bytes.concat(encodedInput, bytes32(params.amount));
+        encodedInput = bytes.concat(encodedInput, bytes20(params.delegatee));
+        encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
+        encodedInput = bytes.concat(encodedInput, bytes1(params.rateMode));
+        encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
+        if (!params.useDefaultMarket) {
+            encodedInput = bytes.concat(encodedInput, bytes20(params.market));
+        }
     }
 
     function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        
+        params.amount = uint256(bytes32(encodedInput[0:32]));
+        params.delegatee = address(bytes20(encodedInput[32:52]));
+        params.assetId = uint16(bytes2(encodedInput[52:54]));
+        params.rateMode = uint8(bytes1(encodedInput[54:55]));
+        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[55:56]));
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        } else {
+            params.market = address(bytes20(encodedInput[56:76]));
+        }
+    }
+    
+    function getCreditDelegation(address _market, uint16 _assetId, uint8 _rateMode, address _delegator, address _delegatee) public view returns (uint256 creditAvailable){
+        IPoolV3 lendingPool = getLendingPool(_market);
+        address tokenAddr = lendingPool.getReserveAddressById(_assetId);
+        DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(tokenAddr);
+
+        if (_rateMode == VARIABLE_ID){
+            return IDebtToken(reserveData.variableDebtTokenAddress).borrowAllowance(_delegator, _delegatee);
+        } else if (_rateMode == STABLE_ID){
+            return IDebtToken(reserveData.stableDebtTokenAddress).borrowAllowance(_delegator, _delegatee);
+        } else {
+            revert NonExistantRateMode();
+        }
     }
 }
