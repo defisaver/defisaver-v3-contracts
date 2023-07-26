@@ -20,23 +20,26 @@ contract CurveUsdSoftLiquidationTrigger is ITrigger, AdminAuth {
     /// @dev if the user is fully soft liquidated "percentage" is ignored and returns false
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerSubData = parseInputs(_subData);
+        uint256 percentage = calcPercentage(triggerSubData.market, triggerSubData.user);
 
-        ICrvUsdController ctrl = ICrvUsdController(triggerSubData.market);
+        return percentage <= triggerSubData.percentage;
+    }
+
+    function calcPercentage(address _market, address _user) public view returns (uint256) {
+        ICrvUsdController ctrl = ICrvUsdController(_market);
         ILLAMMA amm = ILLAMMA(ctrl.amm());
 
-        int256[2] memory bandRange = amm.read_user_tick_numbers(triggerSubData.user);
+        int256[2] memory bandRange = amm.read_user_tick_numbers(_user);
         int256 activeBand = amm.active_band();
 
-        if (activeBand > bandRange[1]) return false;
-        if (activeBand >= bandRange[0]) return true;
+        if (activeBand > bandRange[1]) return type(uint256).max;
+        if (activeBand >= bandRange[0]) return 0;
 
         uint256 highBandPrice = amm.p_oracle_up(bandRange[0]);
         uint256 ammPrice = amm.get_p();
-        uint256 thresholdPrice = (highBandPrice * (1e18 + triggerSubData.percentage)) / 1e18;
 
-        if (ammPrice < thresholdPrice) return true;
-
-        return false;
+        uint256 percentage = ammPrice * 1e18 / highBandPrice - 1e18;
+        return percentage;
     }
 
     function parseInputs(bytes memory _subData) internal pure returns (SubParams memory params) {

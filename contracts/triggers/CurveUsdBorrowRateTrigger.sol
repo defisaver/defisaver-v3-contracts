@@ -28,7 +28,7 @@ contract CurveUsdBorrowRateTrigger is ITrigger, AdminAuth {
     {   
         SubParams memory triggerSubData = parseInputs(_subData);
 
-        uint256 currentRate = _calcBorrowRate(triggerSubData.market);
+        uint256 currentRate = calcBorrowRate(triggerSubData.market);
 
         if (TargetRateState(triggerSubData.state) == TargetRateState.OVER) {
             if (currentRate > triggerSubData.targetRate) {
@@ -45,7 +45,7 @@ contract CurveUsdBorrowRateTrigger is ITrigger, AdminAuth {
         return false;
     }
 
-    function _calcBorrowRate(address _market) public view returns (uint256) {
+    function calcBorrowRate(address _market) public view returns (uint256) {
         ICrvUsdController ctrl = ICrvUsdController(_market);
         ILLAMMA amm = ILLAMMA(ctrl.amm());
 
