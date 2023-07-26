@@ -28,7 +28,7 @@ contract CurveUsdSoftLiquidationTrigger is ITrigger, AdminAuth {
         int256 activeBand = amm.active_band();
 
         if (activeBand > bandRange[1]) return false;
-        if (activeBand <= bandRange[0]) return true;
+        if (activeBand >= bandRange[0]) return true;
 
         uint256 highBandPrice = amm.p_oracle_up(bandRange[0]);
         uint256 ammPrice = amm.get_p();
