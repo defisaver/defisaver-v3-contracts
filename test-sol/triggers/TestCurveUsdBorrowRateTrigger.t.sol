@@ -15,7 +15,7 @@ contract TestCurveUsdBorrowRateTrigger is DSTest {
     }
 
     function testWstethRateSub() public {
-        uint256 rate = trigger._calcBorrowRate(WSTETH_MARKET);
+        uint256 rate = trigger.calcBorrowRate(WSTETH_MARKET);
 
         CurveUsdBorrowRateTrigger.SubParams memory subEqualOverFail = CurveUsdBorrowRateTrigger.SubParams(
             WSTETH_MARKET,
