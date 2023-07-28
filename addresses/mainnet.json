@@ -2210,6 +2210,28 @@
         "history": []
     },
     {
+        "name": "CurveUsdBorrowRateTrigger",
+        "address": "0xeFDDFCB515417908BF6619727aB688da27d5F03c",
+        "id": "0x2198133a",
+        "path": "contracts/triggers/CurveUsdBorrowRateTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdSoftLiquidationTrigger",
+        "address": "0x5D037963b2822a2B13B542477b8706C313b47821",
+        "id": "0x7ff68c12",
+        "path": "contracts/triggers/CurveUsdSoftLiquidationTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveUsdView",
         "address": "0x512460CF2Bb80823C135F5DC04D2a1fF258FAA1e",
         "id": "0xe19de022",
