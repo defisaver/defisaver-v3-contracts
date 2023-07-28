@@ -148,6 +148,8 @@ const {
     subDcaStrategy,
     subMorphoAaveV2AutomationStrategy,
     subLiquityAutomationStrategy,
+    subSparkCloseBundle,
+    subSparkAutomationStrategy,
 } = require('../test/strategy-subs');
 
 const { getTroveInfo } = require('../test/utils-liquity');
@@ -160,6 +162,12 @@ const {
 } = require('../test/triggers');
 // const { deployCloseToDebtBundle, deployCloseToCollBundle } = require('../test/strategies/l2/l2-tests');
 const { createRepayBundle, createBoostBundle } = require('../test/strategies/mcd/mcd-tests');
+
+const {
+    deployBundles: deploySparkBundles,
+    deployCloseToCollBundle: deploySparkCloseToCollBundle,
+    deployCloseToDebtBundle: deploySparkCloseToDebtBundle,
+} = require('../test/strategies/spark/spark-tests');
 
 program.version('0.0.1');
 // let forkedAddresses = '';
@@ -1758,6 +1766,148 @@ const subAaveClose = async (
     ).then((subId) => console.log(`subId: ${subId}`));
 };
 
+const subSparkAutomation = async (
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    sender,
+) => {
+    let senderAcc = (await hre.ethers.getSigners())[0];
+
+    await topUp(senderAcc.address);
+
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    await topUp(senderAcc.address);
+
+    let network = 'mainnet';
+
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+    await topUp(getOwnerAddr());
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    if (await getLatestBundleId() < 18) {
+        await deploySparkBundles(proxy, true)
+            .then(({ repayBundleId, boostBundleId }) => console.log({ repayBundleId, boostBundleId }));
+
+        const closeToCollId = await deploySparkCloseToCollBundle(proxy, true);
+        const closeToDebtId = await deploySparkCloseToDebtBundle(proxy, true);
+
+        console.log({ closeToCollId, closeToDebtId });
+    }
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
+
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
+
+    // same as in L1
+    const subIds = await subSparkAutomationStrategy(
+        proxy,
+        minRatioFormatted.toHexString().slice(2),
+        maxRatioFormatted.toHexString().slice(2),
+        optimalRatioBoostFormatted.toHexString().slice(2),
+        optimalRatioRepayFormatted.toHexString().slice(2),
+        boostEnabled,
+        addrs[network].REGISTRY_ADDR,
+    );
+
+    console.log(`Spark position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
+};
+
+const subSparkClose = async (
+    collSymbol,
+    debtSymbol,
+    triggerBaseSymbol,
+    triggerQuoteSymbol,
+    targetQuotePrice,
+    priceState,
+    sender,
+    closeToColl = false,
+) => {
+    let network = 'mainnet';
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy;
+    let senderAcc = (await hre.ethers.getSigners())[0];
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+    proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await topUp(getOwnerAddr());
+    await topUp(senderAcc.address);
+
+    const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].SPARK_MARKET);
+    const poolAddress = await sparkMarketContract.getPool();
+    const pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
+
+    const baseAssetInfo = getAssetInfo(triggerBaseSymbol);
+    const quoteAssetInfo = getAssetInfo(triggerQuoteSymbol);
+    const collAssetInfo = getAssetInfo(collSymbol);
+    const debtAssetInfo = getAssetInfo(debtSymbol);
+    const collReserveData = await pool.getReserveData(collAssetInfo.address);
+    const debtReserveData = await pool.getReserveData(debtAssetInfo.address);
+    const collAssetId = collReserveData.id;
+    const debtAssetId = debtReserveData.id;
+
+    if (await getLatestBundleId() < 18) {
+        await deploySparkBundles(proxy, true)
+            .then(({ repayBundleId, boostBundleId }) => console.log({ repayBundleId, boostBundleId }));
+
+        const closeToCollId = await deploySparkCloseToCollBundle(proxy, true);
+        const closeToDebtId = await deploySparkCloseToDebtBundle(proxy, true);
+
+        console.log({ closeToCollId, closeToDebtId });
+    }
+
+    const bundleId = closeToColl ? '20' : '21';
+
+    const formattedPrice = (targetQuotePrice * 1e8).toString();
+
+    await subSparkCloseBundle(
+        proxy,
+        bundleId,
+        baseAssetInfo.address,
+        quoteAssetInfo.address,
+        formattedPrice,
+        priceState,
+        collAssetInfo.address,
+        collAssetId,
+        debtAssetInfo.address,
+        debtAssetId,
+    ).then(({ subId }) => console.log(`subId: ${subId}`));
+};
+
 const subCompV3Automation = async (
     minRatio,
     maxRatio,
@@ -2906,6 +3056,82 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
 
     program
         .command(
+            'sub-spark-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+        )
+        .description('Subscribes to Spark automation can be both b/r')
+        .action(
+            async (
+                minRatio,
+                maxRatio,
+                optimalRatioBoost,
+                optimalRatioRepay,
+                boostEnabled,
+                senderAcc,
+            ) => {
+                // eslint-disable-next-line max-len
+                await subSparkAutomation(
+                    minRatio,
+                    maxRatio,
+                    optimalRatioBoost,
+                    optimalRatioRepay,
+                    boostEnabled,
+                    senderAcc,
+                );
+                process.exit(0);
+            },
+        );
+
+    program
+        .command('sub-spark-close-to-debt <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
+        .description('Subscribes to Spark close to debt bundle')
+        .action(async (
+            collSymbol,
+            debtSymbol,
+            triggerBaseSymbol,
+            triggerQuoteSymbol,
+            triggerTargetPrice,
+            triggerState,
+            senderAddr,
+        ) => {
+            await subSparkClose(
+                collSymbol,
+                debtSymbol,
+                triggerBaseSymbol,
+                triggerQuoteSymbol,
+                triggerTargetPrice,
+                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                senderAddr,
+            );
+            process.exit(0);
+        });
+
+    program
+        .command('sub-spark-close-to-coll <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
+        .description('Subscribes to Spark close to collateral bundle')
+        .action(async (
+            collSymbol,
+            debtSymbol,
+            triggerBaseSymbol,
+            triggerQuoteSymbol,
+            triggerTargetPrice,
+            triggerState,
+            senderAddr,
+        ) => {
+            await subSparkClose(
+                collSymbol,
+                debtSymbol,
+                triggerBaseSymbol,
+                triggerQuoteSymbol,
+                triggerTargetPrice,
+                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                senderAddr,
+                true,
+            );
+            process.exit(0);
+        });
+
+    program
+        .command(
             'sub-compV3-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> <isEOA> [senderAddr]',
         )
         .description('Subscribes to compV3 automation can be both b/r')
@@ -3332,5 +3558,38 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
             process.exit(0);
         });
 
+    program
+        .command('deploy-spark-contracts')
+        .description('Deploys all Spark contracts on fork')
+        .action(async () => {
+            let network = 'mainnet';
+
+            if (process.env.TEST_CHAIN_ID) {
+                network = process.env.TEST_CHAIN_ID;
+            }
+            const sparkContracts = [
+                'SDaiWrap',
+                'SDaiUnwrap',
+                'SparkBorrow',
+                'SparkClaimRewards',
+                'SparkCollateralSwitch',
+                'SparkPayback',
+                'SparkSetEMode',
+                'SparkSpTokenPayback',
+                'SparkSupply',
+                'SparkSwapBorrowRateMode',
+                'SparkWithdraw',
+                'FLSpark',
+                'SparkView',
+                'SparkRatioTrigger',
+                'SparkRatioCheck',
+                'SparkQuotePriceTrigger',
+            ];
+
+            const deployments = await sparkContracts.reduce(async (acc, name) => ({ ...(await acc), [name]: await redeploy(name, addrs[network].REGISTRY_ADDR, false, true).then((c) => c.address) }), {});
+            console.log(deployments);
+
+            process.exit(0);
+        });
     program.parse(process.argv);
 })();

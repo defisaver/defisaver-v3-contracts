@@ -8,6 +8,8 @@ const {
     subToLimitOrderProxy,
     subToMorphoAaveV2Proxy,
     subToLiquityProxy,
+    subToSparkProxy,
+    updateSparkProxy,
 } = require('./utils-strategies');
 
 const {
@@ -34,6 +36,10 @@ const {
     LUSD_ADDR,
     USDC_ADDR,
     BLUSD_ADDR,
+    addrs,
+    getNetwork,
+    getContractFromRegistry,
+    nullAddress,
 } = require('./utils');
 
 const { MCD_MANAGER_ADDR } = require('./utils-mcd');
@@ -476,6 +482,129 @@ const subLiquityAutomationStrategy = async (
     };
 };
 
+const subSparkAutomationStrategy = async (
+    proxy,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    regAddr = addrs[getNetwork()].REGISTRY_ADDR,
+) => {
+    let subInput = '0x';
+
+    subInput = subInput.concat(minRatio.padStart(32, '0'));
+    subInput = subInput.concat(maxRatio.padStart(32, '0'));
+    subInput = subInput.concat(optimalRatioBoost.padStart(32, '0'));
+    subInput = subInput.concat(optimalRatioRepay.padStart(32, '0'));
+    subInput = subInput.concat(boostEnabled ? '01' : '00');
+
+    const { latestSubId: subId, boostSub, repaySub } = await subToSparkProxy(
+        proxy, subInput, regAddr,
+    );
+
+    let subId1 = '0';
+    let subId2 = '0';
+
+    if (boostEnabled) {
+        subId1 = (parseInt(subId, 10) - 1).toString();
+        subId2 = subId;
+    } else {
+        subId1 = subId;
+        subId2 = '0';
+    }
+
+    console.log('Subs: ', subId1, subId2);
+
+    return {
+        firstSub: subId1, secondSub: subId2, boostSub, repaySub,
+    };
+};
+
+const updateSparkAutomationStrategy = async (
+    proxy,
+    subId1,
+    subId2,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    regAddr = addrs[getNetwork()].REGISTRY_ADDR,
+) => {
+    let subInput = '0x';
+
+    const subId1Hex = (+subId1).toString(16);
+    const subId2Hex = (+subId2).toString(16);
+
+    subInput = subInput.concat(subId1Hex.padStart(8, '0'));
+    subInput = subInput.concat(subId2Hex.padStart(8, '0'));
+
+    subInput = subInput.concat(minRatio.padStart(32, '0'));
+    subInput = subInput.concat(maxRatio.padStart(32, '0'));
+    subInput = subInput.concat(optimalRatioBoost.padStart(32, '0'));
+    subInput = subInput.concat(optimalRatioRepay.padStart(32, '0'));
+    subInput = subInput.concat(boostEnabled ? '01' : '00');
+
+    const subId = await updateSparkProxy(proxy, subInput, regAddr);
+
+    if (subId2 === '0' && boostEnabled === true) {
+        // eslint-disable-next-line no-param-reassign
+        subId2 = subId;
+    }
+
+    const sparkSubProxyAddr = await getContractFromRegistry('SparkSubProxy').then((e) => e.address);
+    const { repaySub, boostSub } = await hre.ethers.getContractAt('SparkSubProxy', sparkSubProxyAddr)
+        .then((c) => [c, c.parseSubData('0x'.concat(subInput.slice(18)))])
+        .then(async ([c, subData]) => {
+            // eslint-disable-next-line no-param-reassign
+            subData = await subData;
+
+            return ({
+                repaySub: await c.formatRepaySub(subData).then((s) => {
+                    const triggerData = [s.triggerData[0]
+                        .replace(sparkSubProxyAddr.slice(2).toLowerCase(), proxy.address.slice(2))];
+                    return { ...s, triggerData, 2: triggerData };
+                }),
+                boostSub: await c.formatBoostSub(subData).then((s) => {
+                    const triggerData = [s.triggerData[0]
+                        .replace(sparkSubProxyAddr.slice(2).toLowerCase(), proxy.address.slice(2))];
+                    return { ...s, triggerData, 2: triggerData };
+                }),
+            });
+        });
+
+    return {
+        firstSub: subId1, secondSub: subId2, boostSub, repaySub,
+    };
+};
+
+const subSparkCloseBundle = async (
+    proxy,
+    bundleId,
+    triggerBaseAsset,
+    triggerQuoteAsset,
+    targetPrice,
+    priceState,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+) => {
+    const triggerData = abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [triggerBaseAsset, triggerQuoteAsset, targetPrice, priceState]);
+
+    const strategySub = [bundleId, true, [triggerData], [
+        abiCoder.encode(['address'], [collAsset]),
+        abiCoder.encode(['uint16'], [collAssetId.toString()]),
+        abiCoder.encode(['address'], [debtAsset]),
+        abiCoder.encode(['uint16'], [debtAssetId.toString()]),
+        abiCoder.encode(['address'], [nullAddress]), // needed so we dont have to trust injection
+    ]];
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdRepayStrategy,
@@ -501,4 +630,7 @@ module.exports = {
     subMorphoAaveV2RepayStrategy,
     subMorphoAaveV2AutomationStrategy,
     subLiquityAutomationStrategy,
+    subSparkAutomationStrategy,
+    updateSparkAutomationStrategy,
+    subSparkCloseBundle,
 };
