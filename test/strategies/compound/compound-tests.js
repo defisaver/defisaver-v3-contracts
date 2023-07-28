@@ -52,8 +52,6 @@ const compBoostStrategyTest = async () => {
             strategyExecutor = await redeployCore();
 
             await redeploy('DFSSell');
-            await redeploy('FLDyDx');
-            await redeploy('FLAaveV2');
             await redeploy('GasFeeTaker');
             await redeploy('CompSupply');
             await redeploy('CompBorrow');
