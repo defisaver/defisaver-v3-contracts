@@ -1044,14 +1044,14 @@
     },
     {
         "name": "AaveWithdraw",
-        "address": "0x754C58fA92246414a448c1ed44ea3D1AD446d482",
+        "address": "0xee274301e8b06d2284c4c7ebfbd8f3a368ce24f2",
         "id": "0x4a76aaa3",
         "path": "contracts/actions/aave/AaveWithdraw.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x754C58fA92246414a448c1ed44ea3D1AD446d482"]
     },
     {
         "name": "AaveCollateralSwitch",
