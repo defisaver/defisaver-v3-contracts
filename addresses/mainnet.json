@@ -1044,14 +1044,14 @@
     },
     {
         "name": "AaveWithdraw",
-        "address": "0x754C58fA92246414a448c1ed44ea3D1AD446d482",
+        "address": "0xee274301e8b06d2284c4c7ebfbd8f3a368ce24f2",
         "id": "0x4a76aaa3",
         "path": "contracts/actions/aave/AaveWithdraw.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x754C58fA92246414a448c1ed44ea3D1AD446d482"]
     },
     {
         "name": "AaveCollateralSwitch",
@@ -2205,6 +2205,28 @@
         "path": "contracts/actions/curveusd/advanced/CurveUsdSelfLiquidateWithColl.sol",
         "version": "1.0.0",
         "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdBorrowRateTrigger",
+        "address": "0xeFDDFCB515417908BF6619727aB688da27d5F03c",
+        "id": "0x2198133a",
+        "path": "contracts/triggers/CurveUsdBorrowRateTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdSoftLiquidationTrigger",
+        "address": "0x5D037963b2822a2B13B542477b8706C313b47821",
+        "id": "0x7ff68c12",
+        "path": "contracts/triggers/CurveUsdSoftLiquidationTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
         "history": []
