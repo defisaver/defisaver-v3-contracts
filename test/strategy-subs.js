@@ -9,6 +9,7 @@ const {
     subToLimitOrderProxy,
     subToMorphoAaveV2Proxy,
     subToLiquityProxy,
+    subToAaveV2Proxy,
 } = require('./utils-strategies');
 
 const {
@@ -17,7 +18,6 @@ const {
     createChainLinkPriceTrigger,
     createTimestampTrigger,
     createGasPriceTrigger,
-    createCompTrigger,
     createReflexerTrigger,
     createLiquityTrigger,
     createTrailingStopTrigger,
@@ -126,32 +126,6 @@ const subRepayFromSavingsStrategy = async (proxy, bundleId, vaultId, rationUnder
     const strategySub = [bundleId, isBundle, [triggerData], [vaultIdEncoded, targetRatioEncoded, daiAddrEncoded, mcdManagerAddrEncoded]];
 
     const subId = await subToStrategy(proxy, strategySub, regAddr);
-
-    return { subId, strategySub };
-};
-
-const subCompBoostStrategy = async (proxy, ratioOver, targetRatio, strategyId) => {
-    const isBundle = false;
-
-    const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
-    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
-    const triggerData = await createCompTrigger(proxy.address, ratioOver, RATIO_STATE_OVER);
-
-    const strategySub = [strategyId, isBundle, [triggerData], [proxyAddrEncoded, targetRatioEncoded]];
-    const subId = await subToStrategy(proxy, strategySub);
-
-    return { subId, strategySub };
-};
-
-const subCompRepayStrategy = async (proxy, ratioUnder, targetRatio, strategyId) => {
-    const isBundle = false;
-
-    const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
-    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
-    const triggerData = await createCompTrigger(proxy.address, ratioUnder, RATIO_STATE_UNDER);
-
-    const strategySub = [strategyId, isBundle, [triggerData], [proxyAddrEncoded, targetRatioEncoded]];
-    const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };
 };
@@ -351,12 +325,11 @@ const subAaveV2AutomationStrategy = async (
     optimalRatioBoost,
     optimalRatioRepay,
     boostEnabled,
-    market,
     regAddr = REGISTRY_ADDR,
 ) => {
-    const subInput = [[minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled, market]];
+    const subInput = [[minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled]];
 
-    const subId = await subToCompV2Proxy(proxy, subInput, regAddr);
+    const subId = await subToAaveV2Proxy(proxy, subInput, regAddr);
 
     let subId1 = '0';
     let subId2 = '0';
@@ -379,10 +352,9 @@ const subCompV2AutomationStrategy = async (
     optimalRatioBoost,
     optimalRatioRepay,
     boostEnabled,
-    enableAsColl,
     regAddr = REGISTRY_ADDR,
 ) => {
-    const subInput = [[minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled, enableAsColl]];
+    const subInput = [[minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled]];
 
     const subId = await subToCompV2Proxy(proxy, subInput, regAddr);
 
@@ -544,8 +516,6 @@ module.exports = {
     subMcdCloseToDaiStrategy,
     subMcdTrailingCloseToDaiStrategy,
     subUniContinuousCollectStrategy,
-    subCompBoostStrategy,
-    subCompRepayStrategy,
     subReflexerBoostStrategy,
     subReflexerRepayStrategy,
     subLiquityCloseToCollStrategy,

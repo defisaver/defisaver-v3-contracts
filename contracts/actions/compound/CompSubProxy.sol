@@ -30,7 +30,6 @@ contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         uint128 targetRatioBoost;
         uint128 targetRatioRepay;
         bool boostEnabled;
-        bool enableAsColl;
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
@@ -137,8 +136,8 @@ contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         repaySub.triggerData[0] = triggerData;
 
         repaySub.subData = new bytes32[](2);
-        repaySub.subData[2] = bytes32(uint256(1)); // ratioState = repay
-        repaySub.subData[3] = bytes32(uint256(_subData.targetRatioRepay)); // targetRatio
+        repaySub.subData[0] = bytes32(uint256(_subData.targetRatioRepay)); // targetRatio
+        repaySub.subData[1] = bytes32(uint256(1)); // ratioState = repay
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized comp sub
@@ -152,8 +151,8 @@ contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         boostSub.triggerData[0] = triggerData;
 
         boostSub.subData =  new bytes32[](3);
-        boostSub.subData[0] = bytes32(uint256(_subData.enableAsColl ? 1 : 0)); // enableAsColl
-        boostSub.subData[2] = bytes32(uint256(0)); // ratioState = boost
-        boostSub.subData[3] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
+        boostSub.subData[0] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
+        boostSub.subData[1] = bytes32(uint256(0)); // ratioState = boost
+        boostSub.subData[2] = bytes32(uint256(1)); // enableAsColl = true
     }
 }

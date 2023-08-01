@@ -3015,7 +3015,7 @@ const createAaveV2BoostStrategy = () => {
     aaveV2BoostStrategy.addTrigger(aaveV2Trigger);
 
     const borrowAction = new dfs.actions.aave.AaveBorrowAction(
-        '&marketAddr', // hardcoded market only main one is used
+        '&market', // hardcoded market only main one is used
         '%debtAddr', // variable debt address
         '%amount', // amount to borrow (variable)
         '%rateMode', // depends on type of debt we want
@@ -3112,7 +3112,7 @@ const createAaveFLV2BoostStrategy = () => {
     );
 
     const borrowAction = new dfs.actions.aave.AaveBorrowAction(
-        '&marketAddr', // hardcoded market only main one is used
+        '&market', // hardcoded market only main one is used
         '%debtAddr', // variable debt address
         '$1', // amount to borrow (variable)
         '%rateMode', // depends on type of debt we want

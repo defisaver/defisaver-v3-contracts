@@ -132,10 +132,10 @@ const activateSub = async (proxy, subId, regAddr = addrs[network].REGISTRY_ADDR)
     return subId;
 };
 
-const subToAaveProxy = async (proxy, inputData, regAddr = addrs[getNetwork()].REGISTRY_ADDR) => {
+const subToAaveV3Proxy = async (proxy, inputData, regAddr = addrs[getNetwork()].REGISTRY_ADDR) => {
     const aaveSubProxyAddr = addrs[getNetwork()].AAVE_SUB_PROXY;
 
-    const AaveSubProxy = await hre.ethers.getContractFactory('AaveSubProxy');
+    const AaveSubProxy = await hre.ethers.getContractFactory('AaveV3SubProxy');
     const functionData = AaveSubProxy.interface.encodeFunctionData(
         'subToAaveAutomation',
         [inputData],
@@ -147,7 +147,7 @@ const subToAaveProxy = async (proxy, inputData, regAddr = addrs[getNetwork()].RE
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
-    console.log(`GasUsed subToAaveProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+    console.log(`GasUsed subToAaveV3Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 
     const latestSubId = await getLatestSubId(regAddr);
 
@@ -203,7 +203,7 @@ const subToAaveV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGIS
 
     const AaveV2SubProxy = await hre.ethers.getContractFactory('AaveSubProxy');
     const functionData = AaveV2SubProxy.interface.encodeFunctionData(
-        'subToCompAutomation',
+        'subToAaveAutomation',
         inputData,
     );
 
@@ -508,7 +508,7 @@ const getUpdatedStrategySub = async (subStorage, subStorageAddr) => {
 module.exports = {
     subToStrategy,
     activateSub,
-    subToAaveProxy,
+    subToAaveV2Proxy,
     subToCompV3Proxy,
     updateAaveProxy,
     createStrategy,
@@ -528,5 +528,5 @@ module.exports = {
     subToMcdProxy,
     subToLimitOrderProxy,
     subToCompV2Proxy,
-    subToAaveV2Proxy,
+    subToAaveV3Proxy,
 };
