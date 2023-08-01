@@ -176,6 +176,50 @@ const subToCompV3Proxy = async (proxy, inputData, regAddr = addrs[network].REGIS
     return latestSubId;
 };
 
+const subToCompV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const compV2SubProxyAddr = await getAddrFromRegistry('CompSubProxy', regAddr);
+
+    const CompV2SubProxy = await hre.ethers.getContractFactory('CompSubProxy');
+    const functionData = CompV2SubProxy.interface.encodeFunctionData(
+        'subToCompAutomation',
+        inputData,
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](compV2SubProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToCompV2Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+
+    return latestSubId;
+};
+
+const subToAaveV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const aaveV2SubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
+
+    const AaveV2SubProxy = await hre.ethers.getContractFactory('AaveSubProxy');
+    const functionData = AaveV2SubProxy.interface.encodeFunctionData(
+        'subToCompAutomation',
+        inputData,
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](aaveV2SubProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToAaveV2Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+
+    return latestSubId;
+};
+
 const subToCBRebondProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
     const cbRebondSubProxyAddr = await getAddrFromRegistry('CBRebondSubProxy', regAddr);
 
@@ -483,4 +527,6 @@ module.exports = {
     updateLiquityProxy,
     subToMcdProxy,
     subToLimitOrderProxy,
+    subToCompV2Proxy,
+    subToAaveV2Proxy,
 };

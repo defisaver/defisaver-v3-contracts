@@ -6,8 +6,8 @@ import "../../auth/AdminAuth.sol";
 import "../../auth/ProxyPermission.sol";
 import "../../core/strategy/SubStorage.sol";
 
-/// @title Contract that subscribes users to Compound V2 automation bundles
-contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+/// @title Contract that subscribes users to Aave V2 automation bundles
+contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID;
 
@@ -24,21 +24,21 @@ contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     error WrongSubParams(uint256 minRatio, uint256 maxRatio);
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
 
-    struct CompSubData {
+    struct AaveSubData {
         uint128 minRatio;
         uint128 maxRatio;
         uint128 targetRatioBoost;
         uint128 targetRatioRepay;
         bool boostEnabled;
-        bool enableAsColl;
+        address market;
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
     /// @dev Gives DSProxy permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
-    function subToCompAutomation(
-        CompSubData calldata _subData
+    function subToAaveAutomation(
+        AaveSubData calldata _subData
     ) public {
         givePermission(PROXY_AUTH_ADDR);
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
@@ -58,7 +58,7 @@ contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     function updateSubData(
         uint32 _subId1,
         uint32 _subId2,
-        CompSubData calldata _subData
+        AaveSubData calldata _subData
     ) public {
 
         // update repay as we must have a subId, it's ok if it's the same data
@@ -112,7 +112,7 @@ contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
 
     ///////////////////////////////// HELPER FUNCTIONS /////////////////////////////////
 
-    function _validateSubData(CompSubData memory _subData) internal pure {
+    function _validateSubData(AaveSubData memory _subData) internal pure {
         if (_subData.minRatio > _subData.maxRatio) {
             revert WrongSubParams(_subData.minRatio, _subData.maxRatio);
         }
@@ -126,8 +126,8 @@ contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         }
     }
 
-    /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized comp sub
-    function formatRepaySub(CompSubData memory _subData, address _proxy) public view returns (StrategySub memory repaySub) {
+    /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized aave sub
+    function formatRepaySub(AaveSubData memory _subData, address _proxy) public view returns (StrategySub memory repaySub) {
         repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
@@ -136,13 +136,14 @@ contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         repaySub.triggerData =  new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
-        repaySub.subData = new bytes32[](2);
-        repaySub.subData[2] = bytes32(uint256(1)); // ratioState = repay
-        repaySub.subData[3] = bytes32(uint256(_subData.targetRatioRepay)); // targetRatio
+        repaySub.subData = new bytes32[](3);
+        repaySub.subData[0] = bytes32(uint256(uint160(_subData.market))); // market
+        repaySub.subData[1] = bytes32(uint256(1)); // ratioState = repay
+        repaySub.subData[2] = bytes32(uint256(_subData.targetRatioRepay)); // targetRatio
     }
 
-    /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized comp sub
-    function formatBoostSub(CompSubData memory _subData, address _proxy) public view returns (StrategySub memory boostSub) {
+    /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized aave sub
+    function formatBoostSub(AaveSubData memory _subData, address _proxy) public view returns (StrategySub memory boostSub) {
         boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
@@ -151,8 +152,8 @@ contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         boostSub.triggerData =  new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
-        boostSub.subData =  new bytes32[](3);
-        boostSub.subData[0] = bytes32(uint256(_subData.enableAsColl ? 1 : 0)); // enableAsColl
+        boostSub.subData = new bytes32[](3);
+        boostSub.subData[0] = bytes32(uint256(uint160(_subData.market)));  // market
         boostSub.subData[2] = bytes32(uint256(0)); // ratioState = boost
         boostSub.subData[3] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
     }

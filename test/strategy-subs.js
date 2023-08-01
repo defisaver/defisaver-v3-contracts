@@ -4,6 +4,7 @@ const hre = require('hardhat');
 const {
     subToStrategy,
     subToCompV3Proxy,
+    subToCompV2Proxy,
     subToCBRebondProxy,
     subToLimitOrderProxy,
     subToMorphoAaveV2Proxy,
@@ -343,6 +344,62 @@ const subCompV3AutomationStrategy = async (
     return { firstSub: subId1, secondSub: subId2 };
 };
 
+const subAaveV2AutomationStrategy = async (
+    proxy,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    market,
+    regAddr = REGISTRY_ADDR,
+) => {
+    const subInput = [[minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled, market]];
+
+    const subId = await subToCompV2Proxy(proxy, subInput, regAddr);
+
+    let subId1 = '0';
+    let subId2 = '0';
+
+    if (boostEnabled) {
+        subId1 = (parseInt(subId, 10) - 1).toString();
+        subId2 = subId;
+    } else {
+        subId1 = subId;
+        subId2 = '0';
+    }
+
+    return { firstSub: subId1, secondSub: subId2 };
+};
+
+const subCompV2AutomationStrategy = async (
+    proxy,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    enableAsColl,
+    regAddr = REGISTRY_ADDR,
+) => {
+    const subInput = [[minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled, enableAsColl]];
+
+    const subId = await subToCompV2Proxy(proxy, subInput, regAddr);
+
+    let subId1 = '0';
+    let subId2 = '0';
+
+    if (boostEnabled) {
+        subId1 = (parseInt(subId, 10) - 1).toString();
+        subId2 = subId;
+    } else {
+        subId1 = subId;
+        subId2 = '0';
+    }
+
+    return { firstSub: subId1, secondSub: subId2 };
+};
+
 const subCbRebondStrategy = async (proxy, bondID, strategyId, regAddr = REGISTRY_ADDR) => {
     const inputData = [bondID.toString()];
 
@@ -501,4 +558,6 @@ module.exports = {
     subMorphoAaveV2RepayStrategy,
     subMorphoAaveV2AutomationStrategy,
     subLiquityAutomationStrategy,
+    subAaveV2AutomationStrategy,
+    subCompV2AutomationStrategy,
 };
