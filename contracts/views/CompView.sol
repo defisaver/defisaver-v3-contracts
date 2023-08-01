@@ -39,6 +39,8 @@ contract CompView is Exponential, DSMath {
         uint compBorrowSpeeds;
         uint compSupplySpeeds;
         uint borrowCap;
+        bool canMint;
+        bool canBorrow;
     }
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -259,7 +261,9 @@ contract CompView is Exponential, DSMath {
                 price: ICompoundOracle(oracleAddr).getUnderlyingPrice(_cTokenAddresses[i]),
                 compSupplySpeeds: comp.compSupplySpeeds(_cTokenAddresses[i]),
                 compBorrowSpeeds: comp.compBorrowSpeeds(_cTokenAddresses[i]),
-                borrowCap: comp.borrowCaps(_cTokenAddresses[i])
+                borrowCap: comp.borrowCaps(_cTokenAddresses[i]),
+                canMint: !comp.mintGuardianPaused(_cTokenAddresses[i]),
+                canBorrow: !comp.borrowGuardianPaused(_cTokenAddresses[i])
             });
         }
     }

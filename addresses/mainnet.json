@@ -543,14 +543,17 @@
     },
     {
         "name": "CompView",
-        "address": "0x19c76C1EdECd4551Fa8e49D1f96598dCDFF7A65F",
+        "address": "0xb25b98d3cA2Dde635829870f852472Bdd0b01B7e",
         "id": "0x316f2b89",
         "path": "contracts/views/CompView.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x4D81E17ce35A81b70b2E5eD4a0592e1C2C01219d"]
+        "history": [
+            "0x19c76C1EdECd4551Fa8e49D1f96598dCDFF7A65F",
+            "0x4D81E17ce35A81b70b2E5eD4a0592e1C2C01219d"
+        ]
     },
     {
         "name": "CompV3View",
