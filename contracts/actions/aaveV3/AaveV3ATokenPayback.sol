@@ -2,11 +2,9 @@
 
 pragma solidity =0.8.10;
 
-import "../../interfaces/IWETH.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveV3Helper.sol";
-import "../../interfaces/aave/IAToken.sol";
 
 /// @title Allows user to repay with aTokens of the underlying debt asset eg. Pay DAI debt using aDAI tokens.
 contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {

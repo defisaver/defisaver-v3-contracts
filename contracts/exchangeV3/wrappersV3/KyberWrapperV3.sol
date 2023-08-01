@@ -34,7 +34,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
             destToken,
             msg.sender,
             type(uint).max,
-            0,
+            0, /// @dev DFSExchangeCore contains slippage check instead of writing it here
             WALLET_ID
         );
 

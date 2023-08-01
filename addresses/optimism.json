@@ -89,14 +89,14 @@
     },
     {
       "name": "KyberAggregatorWrapper",
-      "address": "0xB7EAa93C69b6450D6dF0CDb00307A5136392eCF8",
+      "address": "0x59aD138C43b63Be18363630eF8Ab8b78Ada2c3e0",
       "id": "0x1abf4ed0",
       "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
       "version": "1.0.0",
       "inRegistry": false,
       "changeTime": 0,
       "registryIds": [],
-      "history": []
+      "history": ["0xB7EAa93C69b6450D6dF0CDb00307A5136392eCF8"]
     },
     {
         "name": "Discount",
@@ -221,14 +221,17 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc",
+        "address": "0x05f8Ba4Db7F7C65a61881297D86Aea3c83C26304",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4"]
+        "history": [
+          "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
+          "0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc"
+        ]
     },
     {
         "name": "ERC20View",

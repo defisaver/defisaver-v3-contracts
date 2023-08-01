@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../../interfaces/IWETH.sol";
 import "../../interfaces/compound/ICToken.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";

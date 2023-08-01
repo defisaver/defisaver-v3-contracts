@@ -151,7 +151,60 @@ const subToAaveProxy = async (proxy, inputData, regAddr = addrs[getNetwork()].RE
 
     const latestSubId = await getLatestSubId(regAddr);
 
-    return latestSubId;
+    const { repaySub, boostSub } = await hre.ethers.getContractAt('AaveSubProxy', aaveSubProxyAddr)
+        .then((c) => [c, c.parseSubData(inputData)])
+        .then(async ([c, subData]) => {
+            // eslint-disable-next-line no-param-reassign
+            subData = await subData;
+            return ({
+                boostSub: await c.formatBoostSub(subData),
+                repaySub: await c.formatRepaySub(subData),
+            });
+        });
+
+    return { latestSubId, repaySub, boostSub };
+};
+
+const subToSparkProxy = async (proxy, inputData, regAddr = addrs[getNetwork()].REGISTRY_ADDR) => {
+    const sparkSubProxyAddr = await getAddrFromRegistry('SparkSubProxy'); // addrs[getNetwork()].AAVE_SUB_PROXY;
+
+    const SparkSubProxy = await hre.ethers.getContractFactory('SparkSubProxy');
+    const functionData = SparkSubProxy.interface.encodeFunctionData(
+        'subToSparkAutomation',
+        [inputData],
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](sparkSubProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToSparkProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+
+    const { repaySub, boostSub } = await hre.ethers.getContractAt('SparkSubProxy', sparkSubProxyAddr)
+        .then((c) => [c, c.parseSubData(inputData)])
+        .then(async ([c, subData]) => {
+            // eslint-disable-next-line no-param-reassign
+            subData = await subData;
+
+            return ({
+                repaySub: await c.formatRepaySub(subData).then((s) => {
+                    const triggerData = [s.triggerData[0]
+                        .replace(sparkSubProxyAddr.slice(2).toLowerCase(), proxy.address.slice(2))];
+                    return { ...s, triggerData, 2: triggerData };
+                }),
+                boostSub: await c.formatBoostSub(subData).then((s) => {
+                    const triggerData = [s.triggerData[0]
+                        .replace(sparkSubProxyAddr.slice(2).toLowerCase(), proxy.address.slice(2))];
+                    return { ...s, triggerData, 2: triggerData };
+                }),
+            });
+        });
+
+    return { latestSubId, repaySub, boostSub };
 };
 
 const subToCompV3Proxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
@@ -335,6 +388,29 @@ const updateAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGIST
     return latestSubId;
 };
 
+const updateSparkProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const sparkSubProxyAddr = await getAddrFromRegistry('SparkSubProxy'); // addrs[network].SPARK_SUB_PROXY;
+
+    const SparkSubProxy = await hre.ethers.getContractFactory('SparkSubProxy');
+
+    const functionData = SparkSubProxy.interface.encodeFunctionData(
+        'updateSubData',
+        [inputData],
+    );
+
+    const receipt = await proxy['execute(address,bytes)'](sparkSubProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed updateSubDataSparkProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId(regAddr);
+
+    return latestSubId;
+};
+
 const subToMcdProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
     const subProxyAddr = await getAddrFromRegistry('McdSubProxy', regAddr);
     const subProxy = await hre.ethers.getContractAt('McdSubProxy', subProxyAddr);
@@ -483,4 +559,6 @@ module.exports = {
     updateLiquityProxy,
     subToMcdProxy,
     subToLimitOrderProxy,
+    subToSparkProxy,
+    updateSparkProxy,
 };

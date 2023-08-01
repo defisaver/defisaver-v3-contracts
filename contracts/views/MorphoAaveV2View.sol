@@ -5,9 +5,7 @@ import "../interfaces/aave/IAToken.sol";
 import "../interfaces/morpho/IMorpho.sol";
 import "../interfaces/morpho/IMorphoAaveV2Lens.sol";
 import "../interfaces/morpho/IRewardsDistributor.sol";
-import "../interfaces/morpho/MorphoTypes.sol";
 import "../actions/morpho/aaveV2/helpers/MorphoAaveV2Helper.sol";
-import "../DS/DSMath.sol";
 import "./AaveView.sol";
 
 contract MorphoAaveV2View is MorphoAaveV2Helper {

@@ -1,6 +1,8 @@
 /* eslint-disable import/no-unresolved */
 /* eslint-disable no-await-in-loop */
 // const { default: curve } = require('@curvefi/api');
+const curve = import('@curvefi/api');
+
 const hre = require('hardhat');
 const fs = require('fs');
 const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
@@ -42,10 +44,12 @@ const addrs = {
         COMP_ADDR: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
         CHICKEN_BONDS_VIEW: '0x809a93fd4a0d7d7906Ef6176f0b5518b418Da08f',
         AAVE_MARKET: '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e',
+        SPARK_MARKET: '0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE',
         AAVE_V3_VIEW: '0xf4B715BB788cC4071061bd67dC8B56681460A2fF',
         ZRX_ALLOWLIST_ADDR: '0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F',
         ZRX_ALLOWLIST_OWNER: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
         AAVE_SUB_PROXY: '0xb9F73625AA64D46A9b2f0331712e9bEE19e4C3f7',
+        CURVE_USD_WRAPPER: '0x3788B4Db5e99fF555e22a08241EB3cFc3a0ac149',
         ADMIN_VAULT: '0xCCf3d848e08b94478Ed8f46fFead3008faF581fD',
         ADMIN_ACC: '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9',
         DFS_REG_CONTROLLER: '0x6F6DaE1bCB60F67B2Cb939dBE565e8fD03F6F002',
@@ -98,6 +102,9 @@ const addrs = {
         UNISWAP_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
         ZRX_ALLOWLIST_ADDR: '0x5eD8e74b1caE57B0c68B3278B88589991FBa0750',
         ZRX_ALLOWLIST_OWNER: '0x926516e60521556f4ab5e7bf16a4d41a8539c7d1',
+        COMET_USDC_ADDR: '0xA5EDBDD9646f8dFF606d7448e414884C7d905dCA',
+        COMET_USDC_REWARDS_ADDR: '0x88730d254A2f7e6AC8388c3198aFd694bA9f7fae',
+        COMP_ADDR: '0x354A6dA3fcde098F8389cad84b0182725c6C91dE',
         ADMIN_VAULT: '0xd47D8D97cAd12A866900eEc6Cde1962529F25351',
         ADMIN_ACC: '0x6AFEA85cFAB61e3a55Ad2e4537252Ec05796BEfa',
         DFS_REG_CONTROLLER: '0x7702fa16b0cED7e44fF7Baeed04bF165f58eE51D',
@@ -176,6 +183,12 @@ const dydxTokens = ['WETH', 'USDC', 'DAI'];
 
 let network = hre.network.config.name;
 
+const setNetwork = (networkName) => {
+    network = networkName;
+};
+
+const getNetwork = () => network;
+
 const chainIds = {
     mainnet: 1,
     optimism: 10,
@@ -186,6 +199,14 @@ const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
 const AAVE_V3_FL_FEE = 0.05;
 const MIN_VAULT_DAI_AMOUNT = '45010'; // TODO: can we fetch this dynamically
 const MIN_VAULT_RAI_AMOUNT = '3000'; // TODO: can we fetch this dynamically
+
+const getSparkFLFee = async () => {
+    console.log(getNetwork(), addrs[getNetwork()].SPARK_MARKET);
+    return hre.ethers.getContractAt('IPoolAddressesProvider', addrs[getNetwork()].SPARK_MARKET)
+        .then((addressProvider) => addressProvider.getPool())
+        .then((poolAddr) => hre.ethers.getContractAt('IPoolV3', poolAddr))
+        .then((pool) => pool.FLASHLOAN_PREMIUM_TOTAL());
+};
 
 const AVG_GAS_PRICE = 100; // gwei
 
@@ -221,6 +242,8 @@ const standardAmounts = {
 };
 
 const coinGeckoHelper = {
+    GNO: 'gnosis',
+    rETH: 'rocket-pool-eth',
     STETH: 'staked-ether',
     CRV: 'curve-dao-token',
     ETH: 'ethereum',
@@ -262,17 +285,13 @@ const coinGeckoHelper = {
     SUSHI: 'sushi',
     bLUSD: 'boosted-lusd',
     wstETH: 'wrapped-steth',
+    GMX: 'gmx',
+    ARB: 'arbitrum',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;
 
 const Float2BN = hre.ethers.utils.parseUnits;
-
-const setNetwork = (networkName) => {
-    network = networkName;
-};
-
-const getNetwork = () => network;
 
 const getOwnerAddr = () => addrs[network].OWNER_ACC;
 
@@ -805,10 +824,19 @@ const formatExchangeObjCurve = async (
     amount,
     wrapper,
 ) => {
-    const { route: sdkRoute } = await curve.getBestRouteAndOutput(
+    const curveObj = ((await curve).default);
+    await curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
+
+    await curveObj.factory.fetchPools();
+    await curveObj.crvUSDFactory.fetchPools();
+    await curveObj.EYWAFactory.fetchPools();
+    await curveObj.cryptoFactory.fetchPools();
+    await curveObj.tricryptoFactory.fetchPools();
+
+    const { route: sdkRoute } = await curveObj.router.getBestRouteAndOutput(
         srcAddr,
         destAddr,
-        '1000', // this is fine
+        amount,
     );
     const swapParams = sdkRoute.map((e) => [e.i, e.j, e.swapType]).concat(
         [...Array(4 - sdkRoute.length).keys()].map(
@@ -827,6 +855,8 @@ const formatExchangeObjCurve = async (
         [route, swapParams],
     );
 
+    console.log(route, swapParams);
+
     return [
         srcAddr,
         destAddr,
@@ -840,6 +870,47 @@ const formatExchangeObjCurve = async (
         [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
     ];
 };
+
+// const getRouteForCurveSwapper = async (
+//     srcAddr,
+//     destAddr,
+//     amount,
+//     wrapper,
+// ) => {
+//     const curveObj = ((await curve).default);
+//     await curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
+
+//     await curveObj.factory.fetchPools();
+//     await curveObj.crvUSDFactory.fetchPools();
+//     await curveObj.EYWAFactory.fetchPools();
+//     await curveObj.cryptoFactory.fetchPools();
+//     await curveObj.tricryptoFactory.fetchPools();
+
+//     const { route: sdkRoute } = await curveObj.router.getBestRouteAndOutput(
+//         srcAddr,
+//         destAddr,
+//         '1000',
+//     );
+//     const swapParams = sdkRoute.map((e) => [e.i, e.j, e.swapType]).concat(
+//         [...Array(4 - sdkRoute.length).keys()].map(
+//             () => [0, 0, 0],
+//         ),
+//     );
+//     const route = [srcAddr].concat(
+//         ...sdkRoute.map((e) => [e.poolAddress, e.outputCoinAddress]),
+//         ...[...Array(8 - (sdkRoute.length) * 2).keys()].map(
+//             () => [nullAddress],
+//         ),
+//     );
+
+//     return {
+//         swapParamsCompact,
+//         secondAddr:
+//         thirdAddr:
+
+//     }
+
+// };
 
 const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
     console.log({ srcAddr, destAddr });
@@ -1265,6 +1336,7 @@ module.exports = {
     USDC_ADDR,
     AAVE_FL_FEE,
     AAVE_V3_FL_FEE,
+    getSparkFLFee,
     MIN_VAULT_DAI_AMOUNT,
     MIN_VAULT_RAI_AMOUNT,
     RAI_ADDR,

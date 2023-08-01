@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import {IERC20} from "../interfaces/IERC20.sol";
 import {IExecutorHelper} from "../interfaces/kyber/IExecutorHelper.sol";
 import {IMetaAggregationRouterV2} from "../interfaces/kyber/IMetaAggregationRouterV2.sol";
 
@@ -13,9 +12,15 @@ contract KyberInputScalingHelper {
     uint256 private constant _BURN_FROM_TX_ORIGIN = 0x10;
     uint256 private constant _SIMPLE_SWAP = 0x20;
 
+    // fee data in case taking in dest token
+    struct PositiveSlippageFeeData {
+        uint256 partnerPSInfor; // [partnerReceiver (160 bit) + partnerPercent(96bits)]
+        uint256 expectedReturnAmount;
+    }
+
     struct Swap {
         bytes data;
-        bytes4 functionSelector;
+        bytes32 selectorAndFlags; // [selector (32 bits) + flags (224 bits)]; selector is 4 most significant bytes; flags are stored in 4 least significant bytes.
     }
 
     struct SimpleSwapData {
@@ -23,29 +28,28 @@ contract KyberInputScalingHelper {
         uint256[] firstSwapAmounts;
         bytes[] swapDatas;
         uint256 deadline;
-        bytes destTokenFeeData;
+        bytes positiveSlippageData;
     }
 
     struct SwapExecutorDescription {
         Swap[][] swapSequences;
         address tokenIn;
         address tokenOut;
-        uint256 minTotalAmountOut;
         address to;
         uint256 deadline;
-        bytes destTokenFeeData;
+        bytes positiveSlippageData;
     }
 
-    /// @dev if selector is 0, we need to decode the selector from the data and copy the rest of the data (L2 network)
-    /// @dev if selector is filled, it means data is already split (L1 network)
     function getScaledInputData(
-        bytes4 selector,
-        bytes memory inputData,
+        bytes calldata inputData,
         uint256 newAmount
     ) public pure returns (bytes memory) {
+        bytes4 selector = bytes4(inputData[:4]);
+        bytes calldata dataToDecode = inputData[4:];
+
         if (selector == IMetaAggregationRouterV2.swap.selector) {
             IMetaAggregationRouterV2.SwapExecutionParams memory params = abi.decode(
-                inputData,
+                dataToDecode,
                 (IMetaAggregationRouterV2.SwapExecutionParams)
             );
 
@@ -63,7 +67,7 @@ contract KyberInputScalingHelper {
                 bytes memory targetData,
                 bytes memory clientData
             ) = abi.decode(
-                    inputData,
+                    dataToDecode,
                     (address, IMetaAggregationRouterV2.SwapDescriptionV2, bytes, bytes)
                 );
 
@@ -107,8 +111,13 @@ contract KyberInputScalingHelper {
         desc.minReturnAmount = (desc.minReturnAmount * newAmount) / oldAmount;
         if (desc.minReturnAmount == 0) desc.minReturnAmount = 1;
         desc.amount = newAmount;
-        for (uint256 i = 0; i < desc.srcReceivers.length; i++) {
+
+        uint256 nReceivers = desc.srcReceivers.length;
+        for (uint256 i = 0; i < nReceivers; ) {
             desc.srcAmounts[i] = (desc.srcAmounts[i] * newAmount) / oldAmount;
+            unchecked {
+                ++i;
+            }
         }
         return desc;
     }
@@ -120,61 +129,84 @@ contract KyberInputScalingHelper {
         uint256 newAmount
     ) internal pure returns (bytes memory) {
         SimpleSwapData memory swapData = abi.decode(data, (SimpleSwapData));
-        for (uint256 i = 0; i < swapData.firstPools.length; i++) {
+
+        uint256 nPools = swapData.firstPools.length;
+        for (uint256 i = 0; i < nPools; ) {
             swapData.firstSwapAmounts[i] = (swapData.firstSwapAmounts[i] * newAmount) / oldAmount;
+            unchecked {
+                ++i;
+            }
         }
+        swapData.positiveSlippageData = _scaledPositiveSlippageFeeData(
+            swapData.positiveSlippageData,
+            oldAmount,
+            newAmount
+        );
         return abi.encode(swapData);
     }
 
-    /// @dev Scale the executorData in case normal swap
     function _scaledExecutorCallBytesData(
         bytes memory data,
         uint256 oldAmount,
         uint256 newAmount
     ) internal pure returns (bytes memory) {
         SwapExecutorDescription memory executorDesc = abi.decode(data, (SwapExecutorDescription));
-        executorDesc.minTotalAmountOut = (executorDesc.minTotalAmountOut * newAmount) / oldAmount;
-        for (uint256 i = 0; i < executorDesc.swapSequences.length; i++) {
-            Swap memory swap = executorDesc.swapSequences[i][0];
-            bytes4 functionSelector = swap.functionSelector;
 
-            if (functionSelector == IExecutorHelper.executeUniSwap.selector) {
+        executorDesc.positiveSlippageData = _scaledPositiveSlippageFeeData(
+            executorDesc.positiveSlippageData,
+            oldAmount,
+            newAmount
+        );
+
+        uint256 nSequences = executorDesc.swapSequences.length;
+        for (uint256 i = 0; i < nSequences; ) {
+            Swap memory swap = executorDesc.swapSequences[i][0];
+            bytes4 functionSelector = bytes4(swap.selectorAndFlags);
+
+            if (functionSelector == IExecutorHelper.executeUniswap.selector) {
                 swap.data = newUniSwap(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeStableSwap.selector) {
                 swap.data = newStableSwap(swap.data, oldAmount, newAmount);
-            } else if (functionSelector == IExecutorHelper.executeCurveSwap.selector) {
+            } else if (functionSelector == IExecutorHelper.executeCurve.selector) {
                 swap.data = newCurveSwap(swap.data, oldAmount, newAmount);
-            } else if (functionSelector == IExecutorHelper.executeKyberDMMSwap.selector) {
+            } else if (functionSelector == IExecutorHelper.executeKSClassic.selector) {
                 swap.data = newKyberDMM(swap.data, oldAmount, newAmount);
-            } else if (functionSelector == IExecutorHelper.executeUniV3ProMMSwap.selector) {
+            } else if (functionSelector == IExecutorHelper.executeUniV3KSElastic.selector) {
                 swap.data = newUniV3ProMM(swap.data, oldAmount, newAmount);
-            } else if (functionSelector == IExecutorHelper.executeRfqSwap.selector) {
+            } else if (functionSelector == IExecutorHelper.executeRfq.selector) {
                 revert("InputScalingHelper: Can not scale RFQ swap");
-            } else if (functionSelector == IExecutorHelper.executeBalV2Swap.selector) {
+            } else if (functionSelector == IExecutorHelper.executeBalV2.selector) {
                 swap.data = newBalancerV2(swap.data, oldAmount, newAmount);
-            } else if (functionSelector == IExecutorHelper.executeDODOSwap.selector) {
+            } else if (functionSelector == IExecutorHelper.executeWrappedstETH.selector) {
+                swap.data = newWrappedstETHSwap(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeStEth.selector) {
+                swap.data = newStETHSwap(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeDODO.selector) {
                 swap.data = newDODO(swap.data, oldAmount, newAmount);
-            } else if (functionSelector == IExecutorHelper.executeVelodromeSwap.selector) {
+            } else if (functionSelector == IExecutorHelper.executeVelodrome.selector) {
                 swap.data = newVelodrome(swap.data, oldAmount, newAmount);
-            } else if (functionSelector == IExecutorHelper.executeGMXSwap.selector) {
+            } else if (functionSelector == IExecutorHelper.executeGMX.selector) {
                 swap.data = newGMX(swap.data, oldAmount, newAmount);
-            } else if (functionSelector == IExecutorHelper.executeSynthetixSwap.selector) {
+            } else if (functionSelector == IExecutorHelper.executeSynthetix.selector) {
                 swap.data = newSynthetix(swap.data, oldAmount, newAmount);
-            } else if (functionSelector == IExecutorHelper.executeHashflowSwap.selector) {
+            } else if (functionSelector == IExecutorHelper.executeHashflow.selector) {
                 revert("InputScalingHelper: Can not scale RFQ swap");
-            } else if (functionSelector == IExecutorHelper.executeCamelotSwap.selector) {
+            } else if (functionSelector == IExecutorHelper.executeCamelot.selector) {
                 swap.data = newCamelot(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeKyberLimitOrder.selector) {
                 revert("InputScalingHelper: Can not scale RFQ swap");
-            } else if (functionSelector == IExecutorHelper.executeWrappedstETHSwap.selector) {
-                swap.data = newWrappedstETHSwap(swap.data, oldAmount, newAmount);
-            } else if (functionSelector == IExecutorHelper.executePSMSwap.selector) {
+            } else if (functionSelector == IExecutorHelper.executePSM.selector) {
                 swap.data = newPSM(swap.data, oldAmount, newAmount);
-            } else if (functionSelector == IExecutorHelper.executeFraxSwap.selector) {
+            } else if (functionSelector == IExecutorHelper.executeFrax.selector) {
                 swap.data = newFrax(swap.data, oldAmount, newAmount);
-            } else if (functionSelector == IExecutorHelper.executePlatypusSwap.selector) {
+            } else if (functionSelector == IExecutorHelper.executePlatypus.selector) {
                 swap.data = newPlatypus(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeMaverick.selector) {
+                swap.data = newMaverick(swap.data, oldAmount, newAmount);
             } else revert("AggregationExecutor: Dex type not supported");
+            unchecked {
+                ++i;
+            }
         }
         return abi.encode(executorDesc);
     }
@@ -227,9 +259,9 @@ contract KyberInputScalingHelper {
         uint256 oldAmount,
         uint256 newAmount
     ) internal pure returns (bytes memory) {
-        IExecutorHelper.UniSwapV3ProMM memory uniSwapV3ProMM = abi.decode(
+        IExecutorHelper.UniswapV3KSElastic memory uniSwapV3ProMM = abi.decode(
             data,
-            (IExecutorHelper.UniSwapV3ProMM)
+            (IExecutorHelper.UniswapV3KSElastic)
         );
         uniSwapV3ProMM.swapAmount = (uniSwapV3ProMM.swapAmount * newAmount) / oldAmount;
 
@@ -337,6 +369,43 @@ contract KyberInputScalingHelper {
         IExecutorHelper.UniSwap memory frax = abi.decode(data, (IExecutorHelper.UniSwap));
         frax.collectAmount = (frax.collectAmount * newAmount) / oldAmount;
         return abi.encode(frax);
+    }
+
+    function newStETHSwap(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        uint256 amount = abi.decode(data, (uint256));
+        amount = (amount * newAmount) / oldAmount;
+        return abi.encode(amount);
+    }
+
+    function newMaverick(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.Maverick memory maverick = abi.decode(data, (IExecutorHelper.Maverick));
+        maverick.swapAmount = (maverick.swapAmount * newAmount) / oldAmount;
+        return abi.encode(maverick);
+    }
+
+    function _scaledPositiveSlippageFeeData(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory newData) {
+        if (data.length > 32) {
+            PositiveSlippageFeeData memory psData = abi.decode(data, (PositiveSlippageFeeData));
+            psData.expectedReturnAmount = (psData.expectedReturnAmount * newAmount) / oldAmount;
+            data = abi.encode(psData);
+        } else if (data.length == 32) {
+            uint256 expectedReturnAmount = abi.decode(data, (uint256));
+            expectedReturnAmount = (expectedReturnAmount * newAmount) / oldAmount;
+            data = abi.encode(expectedReturnAmount);
+        }
+        return data;
     }
 
     function _flagsChecked(uint256 number, uint256 flag) internal pure returns (bool) {

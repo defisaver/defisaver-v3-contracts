@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.10;
 
-import "../../interfaces/IWETH.sol";
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
+import "../../utils/FLFeeFaucet.sol";
 
 /// @title Withdraw a token from an Aave market
 contract AaveWithdraw is ActionBase, AaveHelper {
@@ -64,14 +64,31 @@ contract AaveWithdraw is ActionBase, AaveHelper {
     ) internal returns (uint256, bytes memory) {
         ILendingPoolV2 lendingPool = getLendingPool(_market);
         uint256 tokenBefore;
+        uint256 amountToWithdraw = _amount;
 
         // only need to remember this is _amount is max, no need to waste gas otherwise
         if (_amount == type(uint256).max) {
             tokenBefore = _tokenAddr.getBalance(_to);
+        } else {
+            /// @dev sometimes aave eats one wei when supplying, this breaks our recipes
+            /// @dev here we do the check and send the difference to the receiving address
+            address aToken = lendingPool.getReserveData(_tokenAddr).aTokenAddress;
+            uint256 aTokenBalance = aToken.getBalance(address(this));
+
+            if (aTokenBalance < _amount) {
+                uint256 difference = _amount - aTokenBalance;
+
+                if (difference < 3) {
+                    FLFeeFaucet(DYDX_FL_FEE_FAUCET).my2Wei(_tokenAddr);
+                    _tokenAddr.withdrawTokens(_to, difference);
+                    _tokenAddr.withdrawTokens(DYDX_FL_FEE_FAUCET, 2 - difference);
+                    amountToWithdraw = aTokenBalance;
+                }
+            }
         }
 
         // withdraw underlying tokens from aave and send _to address
-        lendingPool.withdraw(_tokenAddr, _amount, _to);
+        lendingPool.withdraw(_tokenAddr, amountToWithdraw, _to);
 
         // if the input amount is max calc. what was the exact _amount
         if (_amount == type(uint256).max) {
