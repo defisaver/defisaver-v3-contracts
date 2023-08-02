@@ -133,7 +133,7 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData = abi.encode(_proxy, uint256(_subData.minRatio), uint8(RatioState.UNDER));
+        bytes memory triggerData = abi.encode(_proxy, AAVE_MARKET, uint256(_subData.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData =  new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
@@ -149,7 +149,7 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(_proxy, uint256(_subData.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData = abi.encode(_proxy, AAVE_MARKET, uint256(_subData.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData =  new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
