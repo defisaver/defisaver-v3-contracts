@@ -135,4 +135,6 @@ interface IMorphoAaveV3 is IMorphoGetters, IMorphoSetters {
     function claimRewards(address[] calldata assets, address onBehalf)
         external
         returns (address[] memory rewardTokens, uint256[] memory claimedAmounts);
+    
+    function allow(address manager, bool isAllowed) external;
 }

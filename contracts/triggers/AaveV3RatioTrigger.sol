@@ -6,8 +6,9 @@ import "../auth/AdminAuth.sol";
 import "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 import "../interfaces/ITrigger.sol";
 import "../utils/TransientStorage.sol";
+import "./helpers/TriggerHelper.sol";
 
-contract AaveV3RatioTrigger is ITrigger, AdminAuth, AaveV3RatioHelper {
+contract AaveV3RatioTrigger is ITrigger, AdminAuth, AaveV3RatioHelper, TriggerHelper {
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
