@@ -2734,7 +2734,7 @@ const createCompFLV2RepayStrategy = () => {
     );
 
     const paybackAction = new dfs.actions.compound.CompoundPaybackAction(
-        '%cCollAddr', // variable cToken coll address
+        '%cDebtAddr', // variable cToken debt address
         '$3', // amount hardcoded
         '&proxy', // hardcoded from address
         '&proxy', // hardcoded onBehalf address
@@ -2751,10 +2751,10 @@ const createCompFLV2RepayStrategy = () => {
         '&targetRatio', // hardcoded target ratio
     );
 
-    compV2RepayStrategy.addAction(withdrawAction);
     compV2RepayStrategy.addAction(sellAction);
     compV2RepayStrategy.addAction(feeTakingAction);
     compV2RepayStrategy.addAction(paybackAction);
+    compV2RepayStrategy.addAction(withdrawAction);
     compV2RepayStrategy.addAction(checkerAction);
 
     return compV2RepayStrategy.encodeForDsProxyCall();
@@ -2826,7 +2826,7 @@ const createCompFLV2BoostStrategy = () => {
     compV2BoostStrategy.addTrigger(compV2Trigger);
 
     const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        ['%collAddr'],
+        ['%debtAddr'],
         ['%loanAmount'],
         nullAddress,
         [],
@@ -2994,10 +2994,10 @@ const createAaveFLV2RepayStrategy = () => {
         '&targetRatio', // hardcoded target ratio
     );
 
-    aaveV2RepayStrategy.addAction(withdrawAction);
     aaveV2RepayStrategy.addAction(sellAction);
     aaveV2RepayStrategy.addAction(feeTakingAction);
     aaveV2RepayStrategy.addAction(paybackAction);
+    aaveV2RepayStrategy.addAction(withdrawAction);
     aaveV2RepayStrategy.addAction(checkerAction);
 
     return aaveV2RepayStrategy.encodeForDsProxyCall();
@@ -3076,7 +3076,7 @@ const createAaveFLV2BoostStrategy = () => {
     aaveV2BoostStrategy.addTrigger(aaveV2Trigger);
 
     const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        ['%collAddr'],
+        ['%debtAddr'],
         ['%loanAmount'],
         nullAddress,
         [],

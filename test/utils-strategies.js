@@ -195,7 +195,11 @@ const subToCompV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGIS
 
     const latestSubId = await getLatestSubId(regAddr);
 
-    return latestSubId;
+    const subProxy = await getContractFromRegistry('CompSubProxy');
+    const repaySub = await subProxy.formatRepaySub(...inputData, proxy.address);
+    const boostSub = await subProxy.formatBoostSub(...inputData, proxy.address);
+
+    return { subId: latestSubId, repaySub, boostSub };
 };
 
 const subToAaveV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
@@ -217,7 +221,11 @@ const subToAaveV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGIS
 
     const latestSubId = await getLatestSubId(regAddr);
 
-    return latestSubId;
+    const subProxy = await getContractFromRegistry('AaveSubProxy');
+    const repaySub = await subProxy.formatRepaySub(...inputData, proxy.address);
+    const boostSub = await subProxy.formatBoostSub(...inputData, proxy.address);
+
+    return { subId: latestSubId, repaySub, boostSub };
 };
 
 const subToCBRebondProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {

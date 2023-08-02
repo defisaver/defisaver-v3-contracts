@@ -821,10 +821,12 @@ const aaveAutomationSub = async ({
             );
             await redeploy('AaveSubProxy', REGISTRY_ADDR, false, true, repayBundleId, boostBundleId);
             console.log({ repayBundleId, boostBundleId });
+
+            await redeploy('AaveV2RatioCheck', REGISTRY_ADDR, false, true);
         }
     }
 
-    const { firstSub, secondSub } = await subAaveV2AutomationStrategy(
+    const subData = await subAaveV2AutomationStrategy(
         proxy,
         Float2BN(minRatio, 16).toString(),
         Float2BN(maxRatio, 16).toString(),
@@ -833,8 +835,8 @@ const aaveAutomationSub = async ({
         maxRatio > 0,
     );
     console.log('Subscribed to Aave automation');
-    console.log(`Repay sub id: ${firstSub}`);
-    console.log(`Boost sub id: ${secondSub}`);
+    console.log(`Repay sub id: ${subData.repaySubId}`);
+    console.log(`Boost sub id: ${subData.boostSubId}`);
 };
 
 const compAutomationSub = async ({
@@ -884,10 +886,13 @@ const compAutomationSub = async ({
             );
             await redeploy('CompSubProxy', REGISTRY_ADDR, false, true, repayBundleId, boostBundleId);
             console.log({ repayBundleId, boostBundleId });
+
+            await redeploy('CompV2RatioCheck', REGISTRY_ADDR, false, true);
+            await redeploy('CompoundRatioTrigger', REGISTRY_ADDR, false, true);
         }
     }
 
-    const { firstSub, secondSub } = await subCompV2AutomationStrategy(
+    const subData = await subCompV2AutomationStrategy(
         proxy,
         Float2BN(minRatio, 16).toString(),
         Float2BN(maxRatio, 16).toString(),
@@ -896,8 +901,8 @@ const compAutomationSub = async ({
         maxRatio > 0,
     );
     console.log('Subscribed to Comp automation');
-    console.log(`Repay sub id: ${firstSub}`);
-    console.log(`Boost sub id: ${secondSub}`);
+    console.log(`Repay sub id: ${subData.repaySubId}`);
+    console.log(`Boost sub id: ${subData.boostSubId}`);
 };
 
 const liquityTrailingCloseToCollStrategySub = async (percentage, sender) => {

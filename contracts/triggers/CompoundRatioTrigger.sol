@@ -5,11 +5,14 @@ pragma solidity =0.8.10;
 import "../auth/AdminAuth.sol";
 import "../actions/compound/helpers/CompRatioHelper.sol";
 import "../interfaces/ITrigger.sol";
+import "../utils/TransientStorage.sol";
 
 /// @title Trigger contract that verifies if the Compound position went over/under the subbed ratio
 contract CompoundRatioTrigger is ITrigger, AdminAuth, CompRatioHelper {
 
     enum RatioState { OVER, UNDER }
+
+    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
     
     /// @param user address of the user whose position we check
     /// @param ratio ratio that represents the triggerable point
@@ -23,13 +26,16 @@ contract CompoundRatioTrigger is ITrigger, AdminAuth, CompRatioHelper {
     /// @dev checks current safety ratio of a Compound position and triggers if it's in a correct state
     function isTriggered(bytes memory, bytes memory _subData)
         public
-        view
         override
         returns (bool)
     {   
         SubParams memory triggerSubData = parseInputs(_subData);
 
         uint256 currRatio = getSafetyRatio(triggerSubData.user);
+
+        if (currRatio == 0) return false;
+
+        tempStorage.setBytes32("COMP_V2_RATIO", bytes32(currRatio));
 
         if (RatioState(triggerSubData.state) == RatioState.OVER) {
             if (currRatio > triggerSubData.ratio) return true;
