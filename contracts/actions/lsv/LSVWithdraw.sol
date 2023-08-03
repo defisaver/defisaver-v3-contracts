@@ -39,7 +39,7 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper {
         );
 
         (uint256 remainingAmount, bytes memory logData) = _lsvWithdraw(inputData);
-        emit ActionEvent("LSVSupply", logData);
+        emit ActionEvent("LSVWithdraw", logData);
         return bytes32(remainingAmount);
     }
 
@@ -47,7 +47,7 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
         (, bytes memory logData) = _lsvWithdraw(inputData);
-        logger.logActionDirectEvent("LSVSupply", logData);
+        logger.logActionDirectEvent("LSVWithdraw", logData);
     }
 
     /// @inheritdoc ActionBase
