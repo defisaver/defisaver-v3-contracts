@@ -5,6 +5,7 @@ pragma solidity =0.8.10;
 import "../../auth/AdminAuth.sol";
 import "../../auth/ProxyPermission.sol";
 import "../../core/strategy/SubStorage.sol";
+import "../../interfaces/ISubscriptions.sol";
 
 /// @title Contract that subscribes users to Compound V2 automation bundles
 contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
@@ -24,6 +25,9 @@ contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     error WrongSubParams(uint256 minRatio, uint256 maxRatio);
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
 
+    address public constant COMP_SUB_ADDRESS = 0x52015EFFD577E08f498a0CCc11905925D58D6207;
+    address public constant LEGACY_PROXY_AUTH_ADDR = 0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a;
+
     struct CompSubData {
         uint128 minRatio;
         uint128 maxRatio;
@@ -39,6 +43,13 @@ contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     function subToCompAutomation(
         CompSubData calldata _subData
     ) public {
+        // unsub from old automation if the user is already subbed
+        if (ISubscriptions(COMP_SUB_ADDRESS).isSubscribed(address(this))) {
+            ISubscriptions(COMP_SUB_ADDRESS).unsubscribe();
+
+            removePermission(LEGACY_PROXY_AUTH_ADDR);
+        }
+
         givePermission(PROXY_AUTH_ADDR);
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 

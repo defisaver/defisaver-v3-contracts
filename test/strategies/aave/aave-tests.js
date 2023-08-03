@@ -28,13 +28,9 @@ const {
     fetchAmountinUSDPrice,
     approve,
     setBalance,
-    BN2Float,
-    takeSnapshot,
-    revertToSnapshot,
     redeploy,
     resetForkToBlock,
     REGISTRY_ADDR,
-    WETH_ADDRESS,
     AAVE_V2_MARKET_ADDR,
 } = require('../../utils');
 const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
@@ -74,14 +70,14 @@ const testPairs = [
         collSymbol: 'WETH',
         debtSymbol: 'DAI',
     },
-    // {
-    //     collSymbol: 'cWBTC',
-    //     debtSymbol: 'cUSDC',
-    // },
-    // {
-    //     collSymbol: 'cDAI',
-    //     debtSymbol: 'cETH',
-    // },
+    {
+        collSymbol: 'WBTC',
+        debtSymbol: 'USDC',
+    },
+    {
+        collSymbol: 'DAI',
+        debtSymbol: 'WETH',
+    },
 ];
 
 const aaveV2BoostTest = () => describe('Aave-Boost-Strategy', function () {

@@ -28,9 +28,6 @@ const {
     fetchAmountinUSDPrice,
     approve,
     setBalance,
-    BN2Float,
-    takeSnapshot,
-    revertToSnapshot,
     redeploy,
     resetForkToBlock,
     REGISTRY_ADDR,
@@ -145,6 +142,10 @@ const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
                 collAsset.address = WETH_ADDRESS;
             }
 
+            if (debtAsset.symbol === 'ETH') {
+                debtAsset.address = WETH_ADDRESS;
+            }
+
             await setBalance(collAsset.address, senderAcc.address, collAmount);
             await approve(collAsset.address, proxy.address);
 
@@ -177,8 +178,6 @@ const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
             const boostAmount = debtAmount.div(20);
 
             const loanDataBefore = await view.getLoanData(proxy.address);
-
-            console.log(loanDataBefore.ratio / 1e16);
 
             await callCompV2BoostStrategy(
                 botAcc,
@@ -290,6 +289,10 @@ const compV2RepayTest = () => describe('Comp-Repay-Strategy', function () {
         it('... should make a new Comp position and sub', async () => {
             if (collAsset.symbol === 'ETH') {
                 collAsset.address = WETH_ADDRESS;
+            }
+
+            if (debtAsset.symbol === 'ETH') {
+                debtAsset.address = WETH_ADDRESS;
             }
 
             await setBalance(collAsset.address, senderAcc.address, collAmount);

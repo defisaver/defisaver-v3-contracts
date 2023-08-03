@@ -5,6 +5,7 @@ pragma solidity =0.8.10;
 import "../../auth/AdminAuth.sol";
 import "../../auth/ProxyPermission.sol";
 import "../../core/strategy/SubStorage.sol";
+import "../../interfaces/ISubscriptions.sol";
 
 /// @title Contract that subscribes users to Aave V2 automation bundles
 contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
@@ -25,6 +26,8 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
 
     address public constant AAVE_MARKET = 0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5;
+    address public constant AAVE_SUB_ADDRESS = 0x6B25043BF08182d8e86056C6548847aF607cd7CD;
+    address public constant LEGACY_PROXY_AUTH_ADDR = 0x380982902872836ceC629171DaeAF42EcC02226e;
 
     struct AaveSubData {
         uint128 minRatio;
@@ -41,6 +44,13 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     function subToAaveAutomation(
         AaveSubData calldata _subData
     ) public {
+        // unsub from old automation if the user is already subbed
+        if (ISubscriptions(AAVE_SUB_ADDRESS).isSubscribed(address(this))) {
+            ISubscriptions(AAVE_SUB_ADDRESS).unsubscribe();
+
+            removePermission(LEGACY_PROXY_AUTH_ADDR);
+        }
+
         givePermission(PROXY_AUTH_ADDR);
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 
