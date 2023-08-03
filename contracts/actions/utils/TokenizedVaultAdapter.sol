@@ -7,6 +7,7 @@ import "../ActionBase.sol";
 
 
 /// @notice Action that handles ERC4626 vault operations
+/// @dev MAXUINT amount is possible for DEPOSIT and REDEEM operations
 contract TokenizedVaultAdapter is ActionBase {
     using TokenUtils for address;
 
