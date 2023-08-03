@@ -33,6 +33,8 @@ interface IAggregatorV3 {
             uint80 answeredInRound
         );
 
+    function latestAnswer() external view returns (uint256);
+
     function getTimestamp(uint256 _roundId) external view returns (uint256);
 
     function phaseId() external view returns (uint16);
