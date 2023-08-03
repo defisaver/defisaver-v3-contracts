@@ -16,7 +16,7 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper {
     /// @param amount -
     /// @param isPositionClosing -
     struct Params {
-        string protocol;
+        uint8 protocol;
         address token;
         uint256 amount;
         bool isPositionClosing;

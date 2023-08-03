@@ -4,21 +4,21 @@ pragma solidity =0.8.10;
 
 contract LSVProfitTracker{
 
-    mapping(string => mapping(address => int256)) public unrealisedProfit;
+    mapping(uint8 => mapping(address => int256)) public unrealisedProfit;
 
-    function supply(string memory _protocol, uint256 _amount) public {
+    function supply(uint8 _protocol, uint256 _amount) public {
         unrealisedProfit[_protocol][msg.sender] -= downCastUintToInt(_amount); 
     }
 
-    function borrow(string memory _protocol, uint256 _amount) public {
+    function borrow(uint8 _protocol, uint256 _amount) public {
         unrealisedProfit[_protocol][msg.sender] += downCastUintToInt(_amount); 
     }
     
-    function payback(string memory _protocol, uint256 _amount) public {
+    function payback(uint8 _protocol, uint256 _amount) public {
         unrealisedProfit[_protocol][msg.sender] -= downCastUintToInt(_amount); 
     }
 
-    function withdraw(string memory _protocol, uint256 _amount,  bool _isClosingVault) public returns (uint256 feeAmount){
+    function withdraw(uint8 _protocol, uint256 _amount,  bool _isClosingVault) public returns (uint256 feeAmount){
         unrealisedProfit[_protocol][msg.sender] += downCastUintToInt(_amount);
         
         if (unrealisedProfit[_protocol][msg.sender] > 0){

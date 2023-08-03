@@ -11,7 +11,7 @@ contract LSVPayback is ActionBase, LSVUtilHelper {
     /// @param protocol - 
     /// @param amount - 
     struct Params {
-        string protocol;
+        uint8 protocol;
         uint256 amount;
     }
 
