@@ -37,4 +37,7 @@ abstract contract IComptroller {
     function getAccountLiquidity(address account) external virtual view returns (uint256, uint256, uint256);
 
     function oracle() public virtual view returns (address);
+    
+    function mintGuardianPaused(address cToken) external virtual view returns (bool);
+    function borrowGuardianPaused(address cToken) external virtual view returns (bool);
 }
