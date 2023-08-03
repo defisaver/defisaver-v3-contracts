@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import "../interfaces/IERC4626.sol";
-import "../actions/ActionBase.sol";
-import "./TokenUtils.sol";
+import "../../interfaces/IERC4626.sol";
+import "../../utils/TokenUtils.sol";
+import "../ActionBase.sol";
 
 
-/// @notice Action that handles IERC4626 vault operations
+/// @notice Action that handles ERC4626 vault operations
 contract TokenizedVaultAdapter is ActionBase {
     using TokenUtils for address;
 
@@ -22,6 +22,7 @@ contract TokenizedVaultAdapter is ActionBase {
 
     /// @param amount - For DEPOSIT and REDEEM represents exact input token amount, otherwise represents exact output
     /// @param minOutOrMaxIn - For DEPOSIT and REDEEM represents min output token amount, otherwise represents max input
+    /// @param vaultAddress - Address of the ERC4626 vault
     /// @param from - Address from which to pull the input token
     /// @param to - Asset that will receive the output token
     /// @param operationId - Enum id that represents the selected operation (DEPOSIT, MINT, WITHDRAW, REDEEM)
