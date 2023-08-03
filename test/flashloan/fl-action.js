@@ -5,6 +5,7 @@ const {
 
 const {
     aaveFlTest, balancerFLTest, makerFLTest, aaveV3FlTest,
+    ghoFLTest, sparkFlTest, uniswapV3FlashloanTest,
 } = require('./fl-tests');
 
 describe('Generalised flashloan test', function () {
@@ -19,9 +20,10 @@ describe('Generalised flashloan test', function () {
         if (network === 'mainnet') {
             await aaveFlTest(true);
             await makerFLTest(true);
+            await ghoFLTest(true);
+            await sparkFlTest(true);
+            await uniswapV3FlashloanTest(true);
         }
-        // euler hacked do we remove?
-        // await eulerFLTest(true);
 
         await balancerFLTest(true);
         await aaveV3FlTest(true);

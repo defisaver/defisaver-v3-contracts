@@ -115,7 +115,7 @@ contract ActionsUtils {
     }
 
     function gasFeeEncode(uint256 _gasUsed, address _feeToken) public pure returns (bytes memory) {
-        GasFeeTaker.Params memory params = GasFeeTaker.Params({
+        GasFeeTaker.GasFeeTakerParams memory params = GasFeeTaker.GasFeeTakerParams({
             gasUsed: _gasUsed,
             feeToken: _feeToken,
             availableAmount: 0,

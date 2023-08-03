@@ -44,6 +44,7 @@ const addrs = {
         COMP_ADDR: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
         CHICKEN_BONDS_VIEW: '0x809a93fd4a0d7d7906Ef6176f0b5518b418Da08f',
         AAVE_MARKET: '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e',
+        SPARK_MARKET: '0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE',
         AAVE_V3_VIEW: '0xf4B715BB788cC4071061bd67dC8B56681460A2fF',
         ZRX_ALLOWLIST_ADDR: '0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F',
         ZRX_ALLOWLIST_OWNER: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
@@ -184,6 +185,12 @@ const dydxTokens = ['WETH', 'USDC', 'DAI'];
 
 let network = hre.network.config.name;
 
+const setNetwork = (networkName) => {
+    network = networkName;
+};
+
+const getNetwork = () => network;
+
 const chainIds = {
     mainnet: 1,
     optimism: 10,
@@ -194,6 +201,14 @@ const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
 const AAVE_V3_FL_FEE = 0.05;
 const MIN_VAULT_DAI_AMOUNT = '45010'; // TODO: can we fetch this dynamically
 const MIN_VAULT_RAI_AMOUNT = '3000'; // TODO: can we fetch this dynamically
+
+const getSparkFLFee = async () => {
+    console.log(getNetwork(), addrs[getNetwork()].SPARK_MARKET);
+    return hre.ethers.getContractAt('IPoolAddressesProvider', addrs[getNetwork()].SPARK_MARKET)
+        .then((addressProvider) => addressProvider.getPool())
+        .then((poolAddr) => hre.ethers.getContractAt('IPoolV3', poolAddr))
+        .then((pool) => pool.FLASHLOAN_PREMIUM_TOTAL());
+};
 
 const AVG_GAS_PRICE = 100; // gwei
 
@@ -229,6 +244,8 @@ const standardAmounts = {
 };
 
 const coinGeckoHelper = {
+    GNO: 'gnosis',
+    rETH: 'rocket-pool-eth',
     STETH: 'staked-ether',
     CRV: 'curve-dao-token',
     ETH: 'ethereum',
@@ -277,12 +294,6 @@ const coinGeckoHelper = {
 const BN2Float = hre.ethers.utils.formatUnits;
 
 const Float2BN = hre.ethers.utils.parseUnits;
-
-const setNetwork = (networkName) => {
-    network = networkName;
-};
-
-const getNetwork = () => network;
 
 const getOwnerAddr = () => addrs[network].OWNER_ACC;
 
@@ -1327,6 +1338,7 @@ module.exports = {
     USDC_ADDR,
     AAVE_FL_FEE,
     AAVE_V3_FL_FEE,
+    getSparkFLFee,
     MIN_VAULT_DAI_AMOUNT,
     MIN_VAULT_RAI_AMOUNT,
     RAI_ADDR,
