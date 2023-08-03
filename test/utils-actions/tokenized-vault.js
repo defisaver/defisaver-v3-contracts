@@ -4,7 +4,7 @@
 /* eslint-disable no-shadow */
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
-const { utils: { basicUtils: { OperationId } } } = require('@defisaver/sdk');
+const { utils: { basicUtils: { TokenizedVaultOperationId: OperationId } } } = require('@defisaver/sdk');
 
 const {
     getContractFromRegistry, fetchAmountinUSDPrice, setBalance,
@@ -82,7 +82,7 @@ const tokenizedVaultAdapterTest = () => describe('Tokenized-Vault-Adapter', () =
             await setBalance(assetAddress, senderAddress, assetAmount);
             await setBalance(shareTokenAddress, senderAddress, Float2BN('0'));
             await approve(assetAddress, proxyAddress);
-            await tokenizedVaultAdapter({
+            const { assetsToApprove } = await tokenizedVaultAdapter({
                 proxy,
                 amount: assetAmount,
                 minOutOrMaxIn,
@@ -90,7 +90,10 @@ const tokenizedVaultAdapterTest = () => describe('Tokenized-Vault-Adapter', () =
                 from: senderAddress,
                 to: senderAddress,
                 operationId: OperationId.DEPOSIT,
+                underlyingAssetAddress: assetAddress,
             });
+            expect(assetsToApprove[0].asset).to.be.eq(assetAddress);
+            expect(assetsToApprove[0].owner).to.be.eq(senderAddress);
 
             expect(await balanceOf(shareTokenAddress, senderAddress)).to.be.gte(minOutOrMaxIn);
             expect(await balanceOf(shareTokenAddress, proxyAddress)).to.be.eq(0);
@@ -124,7 +127,7 @@ const tokenizedVaultAdapterTest = () => describe('Tokenized-Vault-Adapter', () =
             await setBalance(assetAddress, senderAddress, minOutOrMaxIn);
             await setBalance(shareTokenAddress, senderAddress, Float2BN('0'));
             await approve(assetAddress, proxyAddress);
-            await tokenizedVaultAdapter({
+            const { assetsToApprove } = await tokenizedVaultAdapter({
                 proxy,
                 amount: shareAmount,
                 minOutOrMaxIn,
@@ -132,7 +135,10 @@ const tokenizedVaultAdapterTest = () => describe('Tokenized-Vault-Adapter', () =
                 from: senderAddress,
                 to: senderAddress,
                 operationId: OperationId.MINT,
+                underlyingAssetAddress: assetAddress,
             });
+            expect(assetsToApprove[0].asset).to.be.eq(assetAddress);
+            expect(assetsToApprove[0].owner).to.be.eq(senderAddress);
 
             expect(await balanceOf(shareTokenAddress, senderAddress)).to.be.eq(shareAmount);
             expect(await balanceOf(shareTokenAddress, proxyAddress)).to.be.eq(0);
@@ -166,7 +172,7 @@ const tokenizedVaultAdapterTest = () => describe('Tokenized-Vault-Adapter', () =
             await setBalance(shareTokenAddress, senderAddress, minOutOrMaxIn);
             await setBalance(assetAddress, senderAddress, Float2BN('0'));
             await approve(shareTokenAddress, proxyAddress);
-            await tokenizedVaultAdapter({
+            const { assetsToApprove } = await tokenizedVaultAdapter({
                 proxy,
                 amount: assetAmount,
                 minOutOrMaxIn,
@@ -175,6 +181,8 @@ const tokenizedVaultAdapterTest = () => describe('Tokenized-Vault-Adapter', () =
                 to: senderAddress,
                 operationId: OperationId.WITHDRAW,
             });
+            expect(assetsToApprove[0].asset).to.be.eq(shareTokenAddress);
+            expect(assetsToApprove[0].owner).to.be.eq(senderAddress);
 
             expect(await balanceOf(assetAddress, senderAddress)).to.be.eq(assetAmount);
             expect(await balanceOf(shareTokenAddress, proxyAddress)).to.be.eq(0);
@@ -208,7 +216,7 @@ const tokenizedVaultAdapterTest = () => describe('Tokenized-Vault-Adapter', () =
             await setBalance(shareTokenAddress, senderAddress, shareAmount);
             await setBalance(assetAddress, senderAddress, Float2BN('0'));
             await approve(shareTokenAddress, proxyAddress);
-            await tokenizedVaultAdapter({
+            const { assetsToApprove } = await tokenizedVaultAdapter({
                 proxy,
                 amount: shareAmount,
                 minOutOrMaxIn,
@@ -217,6 +225,8 @@ const tokenizedVaultAdapterTest = () => describe('Tokenized-Vault-Adapter', () =
                 to: senderAddress,
                 operationId: OperationId.REDEEM,
             });
+            expect(assetsToApprove[0].asset).to.be.eq(shareTokenAddress);
+            expect(assetsToApprove[0].owner).to.be.eq(senderAddress);
 
             expect(await balanceOf(assetAddress, senderAddress)).to.be.gte(minOutOrMaxIn);
             expect(await balanceOf(shareTokenAddress, proxyAddress)).to.be.eq(0);

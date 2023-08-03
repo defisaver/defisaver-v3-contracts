@@ -3233,6 +3233,7 @@ const tokenizedVaultAdapter = async ({
     from,
     to,
     operationId,
+    underlyingAssetAddress,
 }) => {
     const actionAddress = await getAddrFromRegistry('TokenizedVaultAdapter');
 
@@ -3243,6 +3244,7 @@ const tokenizedVaultAdapter = async ({
         from,
         to,
         operationId,
+        underlyingAssetAddress,
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
@@ -3250,7 +3252,7 @@ const tokenizedVaultAdapter = async ({
 
     const gasUsed = await getGasUsed(receipt);
     console.log(`GasUsed tokenizedVaultAdapter: ${gasUsed}`);
-    return receipt;
+    return { receipt, assetsToApprove: await action.getAssetsToApprove() };
 };
 
 module.exports = {
