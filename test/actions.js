@@ -22,7 +22,6 @@ const {
     getGasUsed,
     formatExchangeObjCurve,
     addrs,
-    USDC_ADDR,
     LUSD_ADDR,
     BLUSD_ADDR,
     getNetwork,
@@ -3226,6 +3225,34 @@ const curveUsdSelfLiquidate = async (
     return receipt;
 };
 
+const tokenizedVaultAdapter = async ({
+    proxy,
+    amount,
+    minOutOrMaxIn,
+    vaultAddress,
+    from,
+    to,
+    operationId,
+}) => {
+    const actionAddress = await getAddrFromRegistry('TokenizedVaultAdapter');
+
+    const action = new dfs.actions.basic.TokenizedVaultAdapterAction(
+        amount,
+        minOutOrMaxIn,
+        vaultAddress,
+        from,
+        to,
+        operationId,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed tokenizedVaultAdapter: ${gasUsed}`);
+    return receipt;
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -3421,4 +3448,6 @@ module.exports = {
     curveUsdSelfLiquidate,
     curveUsdLevCreate,
     curveUsdSelfLiquidateWithColl,
+
+    tokenizedVaultAdapter,
 };
