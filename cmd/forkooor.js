@@ -2243,10 +2243,10 @@ const updateSubDataCompV2 = async (
     maxRatio,
     optimalRatioBoost,
     optimalRatioRepay,
-    boostEnabled,
     sender,
 ) => {
     const { proxy } = await forkSetup(sender);
+    console.log("real sender and proxy", {sender, proxy});
 
     const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
     const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
