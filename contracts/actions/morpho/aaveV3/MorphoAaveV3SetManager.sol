@@ -45,7 +45,7 @@ contract MorphoAaveV3SetManager is ActionBase, MorphoAaveV3Helper {
 
     function _setManager(Params memory _params) internal {
         address morphoAddress = getMorphoAddressByEmode(_params.emodeId);
-        IMorphoAaveV3(morphoAddress).allow(_params.manager, _params.isAllowed);
+        IMorphoAaveV3(morphoAddress).approveManager(_params.manager, _params.isAllowed);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
