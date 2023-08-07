@@ -58,21 +58,17 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
     function getProxyPoolCount() public view returns (uint256) {
         return proxyPool.length;
     }
-    
-    /// @dev function to be called by proxy that will be changing owner
-    function changeProxyOwner(address _oldOwner, address _newOwner, uint256 _noInProxiesArr) public {
-        require (_oldOwner == address(this) || msg.sender == proxies[_oldOwner][_noInProxiesArr]);
-        if (_oldOwner != address(this)) proxies[_oldOwner][_noInProxiesArr] = address(0);
-        proxies[_newOwner].push(msg.sender);
-        emit ChangedOwner(_oldOwner, _newOwner, msg.sender);
+
+    function removeProxy(uint256 _noInProxiesArr) public {
+        uint256 arrLength = proxies[msg.sender].length;
+        if (arrLength > 1 &&_noInProxiesArr < (arrLength - 1))  {
+            proxies[msg.sender][_noInProxiesArr] = proxies[msg.sender][arrLength - 1];
+        }
+        proxies[msg.sender].pop();
     }
-    
-    /// @dev let someone use this if they already changed proxy.owner on their own
-    function changeProxiesInRegistry(address _newOwner, uint256 _noInProxiesArr) public {
-        address proxyAddr = proxies[msg.sender][_noInProxiesArr];
-        proxies[msg.sender][_noInProxiesArr] = address(0);
-        proxies[_newOwner].push(proxyAddr);
-        emit ChangedOwner(msg.sender, _newOwner, proxyAddr);
+
+    function addProxy(address proxyAddr) public {
+        proxies[msg.sender].push(proxyAddr);
     }
 
     /// @notice Adds proxies to pool for users to later claim and save on gas
