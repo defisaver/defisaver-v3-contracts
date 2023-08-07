@@ -467,6 +467,17 @@
       "history": ["0x5fA356C700F0C8A6f445B8a36Eb6e108590919D4"]
     },
     {
+      "name": "TokenizedVaultAdapter",
+      "address": "0xdf31669FEd440f5BfF658ca0bBF0D22B8abdeb73",
+      "id": "0x3e46d5ba",
+      "path": "contracts/actions/utils/TokenizedVaultAdapter.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "BotAuth",
       "address": "0x694897cb974e60640F6c731b52F6f3214C6eF45e",
       "id": "0xa267eb4d",
