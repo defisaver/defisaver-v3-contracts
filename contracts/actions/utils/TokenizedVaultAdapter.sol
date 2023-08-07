@@ -11,7 +11,7 @@ import "../ActionBase.sol";
 contract TokenizedVaultAdapter is ActionBase {
     using TokenUtils for address;
 
-    error TokenizedVaultSlippageHit();
+    error TokenizedVaultSlippageHit(Params, uint256 returnAmount);
     error TokenizedVaultUndefinedAction();
 
     enum OperationId {
@@ -78,14 +78,14 @@ contract TokenizedVaultAdapter is ActionBase {
                 _params.amount = vault.balanceOf(_params.from);
             }
             uint256 assetsWithdrawn = vault.redeem(_params.amount, _params.to, _params.from);
-            if (assetsWithdrawn < _params.minOutOrMaxIn) revert TokenizedVaultSlippageHit();
+            if (assetsWithdrawn < _params.minOutOrMaxIn) revert TokenizedVaultSlippageHit(_params, assetsWithdrawn);
             logData = abi.encode(_params, assetsWithdrawn);
             return (logData, assetsWithdrawn);
         }
 
         if (_params.operationId == OperationId.WITHDRAW) {
             uint256 sharesBurned = vault.withdraw(_params.amount, _params.to, _params.from);
-            if (sharesBurned > _params.minOutOrMaxIn) revert TokenizedVaultSlippageHit();
+            if (sharesBurned > _params.minOutOrMaxIn) revert TokenizedVaultSlippageHit(_params, sharesBurned);
             logData = abi.encode(_params, sharesBurned);
             return (logData, sharesBurned);
         }
@@ -97,21 +97,21 @@ contract TokenizedVaultAdapter is ActionBase {
             assetAddress.approveToken(address(vault), _params.amount);
 
             uint256 sharesMinted = vault.deposit(_params.amount, _params.to);
-            if (sharesMinted < _params.minOutOrMaxIn) revert TokenizedVaultSlippageHit();
+            if (sharesMinted < _params.minOutOrMaxIn) revert TokenizedVaultSlippageHit(_params, sharesMinted);
             logData = abi.encode(_params, sharesMinted);
             return (logData, sharesMinted);
         }
 
         if (_params.operationId == OperationId.MINT) {
             uint256 assetsToDeposit = vault.previewMint(_params.amount);
-            if (assetsToDeposit > _params.minOutOrMaxIn) revert TokenizedVaultSlippageHit();
+            if (assetsToDeposit > _params.minOutOrMaxIn) revert TokenizedVaultSlippageHit(_params, assetsToDeposit);
 
-            _params.minOutOrMaxIn = assetAddress.pullTokensIfNeeded(_params.from, assetsToDeposit);
-            assetAddress.approveToken(address(vault), _params.minOutOrMaxIn);
+            uint256 pulledAssetAmount = assetAddress.pullTokensIfNeeded(_params.from, assetsToDeposit);
+            assetAddress.approveToken(address(vault), pulledAssetAmount);
 
             uint256 assetsDeposited = vault.mint(_params.amount, _params.to);
-            if (assetsToDeposit > assetsDeposited) {
-                assetAddress.withdrawTokens(_params.from, assetsToDeposit - assetsDeposited);
+            if (pulledAssetAmount > assetsDeposited) {
+                assetAddress.withdrawTokens(_params.to, pulledAssetAmount - assetsDeposited);
             }
             logData = abi.encode(_params, assetsDeposited);
             return (logData, assetsDeposited);
