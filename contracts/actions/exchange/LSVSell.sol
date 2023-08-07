@@ -50,7 +50,7 @@ contract LSVSell is ActionBase, DFSExchangeCore {
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
         (uint256 exchangedAmount, bytes memory logData) = _lsvSell(params.exchangeData, params.from, params.to);
-        emit ActionEvent("DFSSell", logData);
+        emit ActionEvent("LSVSell", logData);
         return bytes32(exchangedAmount);
     }
 
@@ -58,7 +58,7 @@ contract LSVSell is ActionBase, DFSExchangeCore {
     function executeActionDirect(bytes memory _callData) public virtual override payable   {
         Params memory params = parseInputs(_callData);
         (, bytes memory logData) = _lsvSell(params.exchangeData, params.from, params.to);
-        logger.logActionDirectEvent("DFSSell", logData);
+        logger.logActionDirectEvent("LSVSell", logData);
     }
 
     /// @inheritdoc ActionBase
