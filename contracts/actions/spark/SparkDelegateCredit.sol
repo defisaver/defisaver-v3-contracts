@@ -31,8 +31,6 @@ contract SparkDelegateCredit is ActionBase, SparkHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.delegatee = _parseParamAddr(params.delegatee, _paramMapping[1], _subData, _returnValues);
         params.assetId = uint16(_parseParamUint(uint16(params.assetId), _paramMapping[2], _subData, _returnValues));

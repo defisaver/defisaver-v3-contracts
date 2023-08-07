@@ -31,8 +31,6 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.delegatee = _parseParamAddr(params.delegatee, _paramMapping[1], _subData, _returnValues);
         params.assetId = uint16(_parseParamUint(uint16(params.assetId), _paramMapping[2], _subData, _returnValues));
@@ -55,7 +53,7 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
         (bytes memory logData) = _delegate(params);
-        logger.logActionDirectEvent("SparkDelegateCredit", logData);
+        logger.logActionDirectEvent("AaveV3DelegateCredit", logData);
     }
 
     /// @inheritdoc ActionBase
