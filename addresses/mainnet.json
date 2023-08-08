@@ -1520,25 +1520,25 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xf4B715BB788cC4071061bd67dC8B56681460A2fF",
+        "address": "0x8095fFFC3cDdE58C4F537D39f9795A40a103e633",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.0",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xf4B715BB788cC4071061bd67dC8B56681460A2fF"]
     },
     {
         "name": "SparkView",
-        "address": "0x29d01EF37514912ab874D51fEc76c8f5d4d6712e",
+        "address": "0xB3B13838F6F57CE76b94f0744Ab0B045B780836e",
         "id": "0xd6f690a9",
         "path": "contracts/views/SparkView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x29d01EF37514912ab874D51fEc76c8f5d4d6712e"]
     },
     {
         "name": "CompBorrow",
