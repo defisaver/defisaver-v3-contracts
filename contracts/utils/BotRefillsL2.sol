@@ -6,20 +6,18 @@ import "../auth/AdminAuth.sol";
 import "../interfaces/uniswap/v3/ISwapRouter.sol";
 import "../interfaces/uniswap/v3/IQuoter.sol";
 import "../interfaces/IBotRegistry.sol";
-import "../interfaces/chainlink/IAggregatorV3.sol";
+import "../utils/TokenPriceHelper.sol";
 import "./TokenUtils.sol";
 import "./helpers/UtilHelper.sol";
 import "./FeeRecipient.sol";
 
 
-contract BotRefillsL2 is AdminAuth, UtilHelper {
+contract BotRefillsL2 is AdminAuth, TokenPriceHelper {
     using TokenUtils for address;
     error WrongRefillCallerError();
     error NotAuthBotError();
 
     uint256 public constant ALLOWED_SLIPPAGE = 2e16;
-    IAggregatorV3 internal constant daiFeed = IAggregatorV3(CHAINLINK_DAI_FEED);
-    IAggregatorV3 internal constant ethFeed = IAggregatorV3(CHAINLINK_ETH_FEED);
 
     FeeRecipient public constant feeRecipient = FeeRecipient(FEE_RECIPIENT);
 
@@ -63,8 +61,8 @@ contract BotRefillsL2 is AdminAuth, UtilHelper {
             payable(_botAddress).transfer(_ethAmount);
         } else {        
             // get how much dai we need to convert
-            uint256 daiPrice = daiFeed.latestAnswer();
-            uint256 ethPrice = ethFeed.latestAnswer();
+            uint256 daiPrice = uint256(getChainlinkPriceInUSD(DAI_ADDR, false));
+            uint256 ethPrice = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
             uint256 daiAmount = _ethAmount * ethPrice * (1e18 + ALLOWED_SLIPPAGE) / daiPrice / 1e18;
 
             IERC20(DAI_ADDR).transferFrom(feeReceiverAddr, address(this), daiAmount);

@@ -5,19 +5,18 @@ pragma solidity =0.8.10;
 import "../auth/AdminAuth.sol";
 import "../interfaces/exchange/IUniswapRouter.sol";
 import "../interfaces/IBotRegistry.sol";
-import "../interfaces/chainlink/IAggregatorV3.sol";
+import "../utils/TokenPriceHelper.sol";
 import "./TokenUtils.sol";
 import "./helpers/UtilHelper.sol";
 
 
 /// @title Contract used to refill tx sending bots when they are low on eth
-contract BotRefills is AdminAuth, UtilHelper {
+contract BotRefills is AdminAuth, TokenPriceHelper {
     using TokenUtils for address;
     error WrongRefillCallerError();
     error NotAuthBotError();
 
     uint256 public constant ALLOWED_SLIPPAGE = 2e16;
-    IAggregatorV3 internal constant daiEthFeed = IAggregatorV3(0x773616E4d11A78F511299002da57A0a94577F1f4);
 
     IUniswapRouter internal router = IUniswapRouter(UNI_V2_ROUTER);
 
@@ -53,7 +52,7 @@ contract BotRefills is AdminAuth, UtilHelper {
             payable(_botAddress).transfer(_ethAmount);
         } else {
             // get how much dai we need to convert
-            uint256 daiPriceInEth = daiEthFeed.latestAnswer();
+            uint256 daiPriceInEth = uint256(getChainlinkPriceInETH(DAI_ADDR));
             uint256 daiAmount = _ethAmount * (1e18 + ALLOWED_SLIPPAGE) / daiPriceInEth;
 
             IERC20(DAI_ADDR).transferFrom(feeAddr, address(this), daiAmount);
