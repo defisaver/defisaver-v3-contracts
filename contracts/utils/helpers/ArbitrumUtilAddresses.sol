@@ -33,4 +33,7 @@ contract ArbitrumUtilAddresses {
 
     address internal constant CHAINLINK_FEED_REGISTRY = 0x158E27De8B5E5bC3FA1C6D5b365a291c54f6b0Fd;
 
+    address internal constant CHAINLINK_DAI_FEED = 0xc5C8E77B397E531B8EC06BFb0048328B30E9eCfB;
+    address internal constant CHAINLINK_ETH_FEED = 0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612;
+
 }

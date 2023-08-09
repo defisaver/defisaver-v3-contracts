@@ -31,4 +31,7 @@ contract OptimismUtilAddresses {
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
 
     address internal constant CHAINLINK_FEED_REGISTRY = 0x7E3D9e4E620842d61aB111a6DbF1be5a8cc91774;
+
+    address internal constant CHAINLINK_DAI_FEED = 0x8dBa75e83DA73cc766A7e5a0ee71F656BAb470d6;
+    address internal constant CHAINLINK_ETH_FEED = 0x13e3Ee699D1909E989722E753853AE30b17e08c5;
 }

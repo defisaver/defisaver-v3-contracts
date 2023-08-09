@@ -38,6 +38,7 @@ const botRefillL2Test = async () => {
         let owner;
         // TEST FOR OPTIMISM NETWORK
         const network = hre.network.config.name;
+        console.log({ network });
         before(async () => {
             const botRefillsAddr = await getAddrFromRegistry('BotRefillsL2');
             botRefills = await hre.ethers.getContractAt('BotRefillsL2', botRefillsAddr);
@@ -45,7 +46,7 @@ const botRefillL2Test = async () => {
             refillAddr = '0x5aa40C7C8158D8E29CA480d7E05E5a32dD819332';
             feeAddr = '0x76720ac2574631530ec8163e4085d6f98513fb27';
             refillCaller = '0xaFdFC3814921d49AA412d6a22e3F44Cc555dDcC8';
-            owner = '0x322d58b9E75a6918f7e7849AEe0fF09369977e08';
+            owner = '0xc9a956923bfb5f141f1cd4467126b3ae91e5cc33';
 
             await sendEther((await hre.ethers.getSigners())[1], refillCaller, '5');
 

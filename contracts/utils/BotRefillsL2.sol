@@ -6,14 +6,20 @@ import "../auth/AdminAuth.sol";
 import "../interfaces/uniswap/v3/ISwapRouter.sol";
 import "../interfaces/uniswap/v3/IQuoter.sol";
 import "../interfaces/IBotRegistry.sol";
+import "../interfaces/chainlink/IAggregatorV3.sol";
 import "./TokenUtils.sol";
 import "./helpers/UtilHelper.sol";
 import "./FeeRecipient.sol";
 
-contract BotRefillsL2 is AdminAuth, UtilHelper{
+
+contract BotRefillsL2 is AdminAuth, UtilHelper {
     using TokenUtils for address;
     error WrongRefillCallerError();
     error NotAuthBotError();
+
+    uint256 public constant ALLOWED_SLIPPAGE = 2e16;
+    IAggregatorV3 internal constant daiFeed = IAggregatorV3(CHAINLINK_DAI_FEED);
+    IAggregatorV3 internal constant ethFeed = IAggregatorV3(CHAINLINK_ETH_FEED);
 
     FeeRecipient public constant feeRecipient = FeeRecipient(FEE_RECIPIENT);
 
@@ -57,7 +63,9 @@ contract BotRefillsL2 is AdminAuth, UtilHelper{
             payable(_botAddress).transfer(_ethAmount);
         } else {        
             // get how much dai we need to convert
-            uint256 daiAmount = getEth2Dai(_ethAmount);
+            uint256 daiPrice = daiFeed.latestAnswer();
+            uint256 ethPrice = ethFeed.latestAnswer();
+            uint256 daiAmount = _ethAmount * ethPrice * (1e18 + ALLOWED_SLIPPAGE) / daiPrice / 1e18;
 
             IERC20(DAI_ADDR).transferFrom(feeReceiverAddr, address(this), daiAmount);
             DAI_ADDR.approveToken(address(router), daiAmount);
@@ -70,7 +78,7 @@ contract BotRefillsL2 is AdminAuth, UtilHelper{
                             recipient: address(this),
                             deadline: block.timestamp,
                             amountIn: daiAmount,
-                            amountOutMinimum: 0,
+                            amountOutMinimum: _ethAmount,
                             sqrtPriceLimitX96: 0
                         });
             router.exactInputSingle(params);
@@ -83,13 +91,6 @@ contract BotRefillsL2 is AdminAuth, UtilHelper{
         for(uint i = 0; i < _botAddresses.length; ++i) {
             refill(_ethAmounts[i], _botAddresses[i]);
         }
-    }
-
-    /// @dev Returns Dai amount, given eth amount based on uniV3 pool price
-    function getEth2Dai(uint256 _ethAmount) internal returns (uint256 daiAmount) {
-        bytes memory path = abi.encodePacked(TokenUtils.WETH_ADDR, uint24(3000), DAI_ADDR);
-
-        daiAmount = quoter.quoteExactOutput(path, _ethAmount);
     }
 
     function setRefillCaller(address _newBot) public onlyOwner {
