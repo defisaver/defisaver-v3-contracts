@@ -520,6 +520,17 @@
         "history": []
     },
     {
+        "name": "TokenizedVaultAdapter",
+        "address": "0x3944364Ce3a273D269707484F3a676fCa17E08b8",
+        "id": "0x3e46d5ba",
+        "path": "contracts/actions/utils/TokenizedVaultAdapter.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "ERC20View",
         "address": "0xfaf0860B711b0b54912034c8A628f0847585e4ae",
         "id": "0xde8e6da5",
