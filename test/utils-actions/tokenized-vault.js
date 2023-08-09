@@ -4,13 +4,17 @@
 /* eslint-disable no-shadow */
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
-const { utils: { basicUtils: { TokenizedVaultOperationId: OperationId } } } = require('@defisaver/sdk');
 
 const {
     getContractFromRegistry, fetchAmountinUSDPrice, setBalance,
     balanceOf, getProxy, Float2BN, approve, BN2Float,
 } = require('../utils');
-const { tokenizedVaultAdapter } = require('../actions');
+const {
+    tokenizedVaultAdapterDeposit,
+    tokenizedVaultAdapterMint,
+    tokenizedVaultAdapterRedeem,
+    tokenizedVaultAdapterWithdraw,
+} = require('../actions');
 
 const vaults = [
     '0x36F8d0D0573ae92326827C4a82Fe4CE4C244cAb6', // Morpho-Aave Dai Stablecoin Supply Vault
@@ -82,14 +86,13 @@ const tokenizedVaultAdapterTest = () => describe('Tokenized-Vault-Adapter', () =
             await setBalance(assetAddress, senderAddress, assetAmount);
             await setBalance(shareTokenAddress, senderAddress, Float2BN('0'));
             await approve(assetAddress, proxyAddress);
-            const { assetsToApprove } = await tokenizedVaultAdapter({
+            const { assetsToApprove } = await tokenizedVaultAdapterDeposit({
                 proxy,
                 amount: assetAmount,
                 minOutOrMaxIn,
                 vaultAddress,
                 from: senderAddress,
                 to: senderAddress,
-                operationId: OperationId.DEPOSIT,
                 underlyingAssetAddress: assetAddress,
             });
             expect(assetsToApprove[0].asset).to.be.eq(assetAddress);
@@ -127,14 +130,13 @@ const tokenizedVaultAdapterTest = () => describe('Tokenized-Vault-Adapter', () =
             await setBalance(assetAddress, senderAddress, minOutOrMaxIn);
             await setBalance(shareTokenAddress, senderAddress, Float2BN('0'));
             await approve(assetAddress, proxyAddress);
-            const { assetsToApprove } = await tokenizedVaultAdapter({
+            const { assetsToApprove } = await tokenizedVaultAdapterMint({
                 proxy,
                 amount: shareAmount,
                 minOutOrMaxIn,
                 vaultAddress,
                 from: senderAddress,
                 to: senderAddress,
-                operationId: OperationId.MINT,
                 underlyingAssetAddress: assetAddress,
             });
             expect(assetsToApprove[0].asset).to.be.eq(assetAddress);
@@ -172,14 +174,13 @@ const tokenizedVaultAdapterTest = () => describe('Tokenized-Vault-Adapter', () =
             await setBalance(shareTokenAddress, senderAddress, minOutOrMaxIn);
             await setBalance(assetAddress, senderAddress, Float2BN('0'));
             await approve(shareTokenAddress, proxyAddress);
-            const { assetsToApprove } = await tokenizedVaultAdapter({
+            const { assetsToApprove } = await tokenizedVaultAdapterWithdraw({
                 proxy,
                 amount: assetAmount,
                 minOutOrMaxIn,
                 vaultAddress,
                 from: senderAddress,
                 to: senderAddress,
-                operationId: OperationId.WITHDRAW,
             });
             expect(assetsToApprove[0].asset).to.be.eq(shareTokenAddress);
             expect(assetsToApprove[0].owner).to.be.eq(senderAddress);
@@ -216,14 +217,13 @@ const tokenizedVaultAdapterTest = () => describe('Tokenized-Vault-Adapter', () =
             await setBalance(shareTokenAddress, senderAddress, shareAmount);
             await setBalance(assetAddress, senderAddress, Float2BN('0'));
             await approve(shareTokenAddress, proxyAddress);
-            const { assetsToApprove } = await tokenizedVaultAdapter({
+            const { assetsToApprove } = await tokenizedVaultAdapterRedeem({
                 proxy,
                 amount: shareAmount,
                 minOutOrMaxIn,
                 vaultAddress,
                 from: senderAddress,
                 to: senderAddress,
-                operationId: OperationId.REDEEM,
             });
             expect(assetsToApprove[0].asset).to.be.eq(shareTokenAddress);
             expect(assetsToApprove[0].owner).to.be.eq(senderAddress);
