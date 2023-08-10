@@ -24,11 +24,12 @@ async function main() {
 
     // STEP 3 : Update LSV_PROXY_REGISTRY_ADDRESS in MainnetActionsUtilAddresses
     // STEP 4 : Update LSV_PROFIT_TRACKER_ADDRESS in LSVUtilMainnetAddresses
+    // STEP 5 : npx hardhat compile
 
-    // STEP 5 : Uncomment bottom part, comment out above part
+    // STEP 6 : Uncomment bottom part, comment out above part
 
-    // STEP 6 : Deploy all other actions (node scripts/deploy-lsv --network fork)
     /*
+    // STEP 7 : Deploy all other actions (node scripts/deploy-lsv --network fork)
     const test1 = await redeploy('LSVSupply', addrs[network].REGISTRY_ADDR, true, true);
     const test2 = await redeploy('LSVBorrow', addrs[network].REGISTRY_ADDR, true, true);
     const test3 = await redeploy('LSVPayback', addrs[network].REGISTRY_ADDR, true, true);
@@ -44,6 +45,7 @@ async function main() {
     console.log('LSVWithdraw deployed to:', test4.address);
     console.log('LSVSell deployed to:', test5.address);
     console.log('ApproveToken deployed to:', test6.address);
+    console.log('MorphoAaveV3SetManager deployed to:', test7.address);
     console.log('LSVView deployed to:', test8.address);
     */
     process.exit(0);
