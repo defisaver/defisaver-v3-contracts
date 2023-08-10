@@ -221,14 +221,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x05f8Ba4Db7F7C65a61881297D86Aea3c83C26304",
+        "address": "0xB6aF2C91E3eBB250615aaa33Bb955f7a7f21AD17",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0x05f8Ba4Db7F7C65a61881297D86Aea3c83C26304",
           "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
           "0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc"
         ]
@@ -465,6 +466,17 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": ["0x5fA356C700F0C8A6f445B8a36Eb6e108590919D4"]
+    },
+    {
+      "name": "TokenizedVaultAdapter",
+      "address": "0xdf31669FEd440f5BfF658ca0bBF0D22B8abdeb73",
+      "id": "0x3e46d5ba",
+      "path": "contracts/actions/utils/TokenizedVaultAdapter.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
     },
     {
       "name": "BotAuth",

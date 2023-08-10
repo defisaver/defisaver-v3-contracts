@@ -221,14 +221,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x401E66549DF354a21B3CC95e3F548Df6854d6DEE",
+        "address": "0x2596e41933136E87C04b56f632CEcA2cdCCC2Cc6",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0x401E66549DF354a21B3CC95e3F548Df6854d6DEE",
           "0x8EF42fF40e9a9dD3E1ae81e7947D4E89e6d9f968",
           "0xA74a85407D5A940542915458616aC3cf3f404E3b"
       ]
@@ -263,6 +264,17 @@
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TokenizedVaultAdapter",
+        "address": "0xD05C512bDFf6D3eAc5328807B3bC075F35271167",
+        "id": "0x3e46d5ba",
+        "path": "contracts/actions/utils/TokenizedVaultAdapter.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
