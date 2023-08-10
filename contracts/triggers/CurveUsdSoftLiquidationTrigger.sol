@@ -36,11 +36,11 @@ contract CurveUsdSoftLiquidationTrigger is ITrigger, AdminAuth {
         if (activeBand >= bandRange[0]) return 0;
 
         uint256 highBandPrice = amm.p_oracle_up(bandRange[0]);
-        uint256 ammPrice = amm.get_p();
+        uint256 oraclePrice = amm.price_oracle();
 
-        if (ammPrice < highBandPrice) return 0;
+        if (oraclePrice < highBandPrice) return 0;
 
-        return percentage = ammPrice * 1e18 / highBandPrice - 1e18;
+        return percentage = oraclePrice * 1e18 / highBandPrice - 1e18;
     }
 
     function parseInputs(bytes memory _subData) internal pure returns (SubParams memory params) {
