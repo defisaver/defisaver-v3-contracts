@@ -268,6 +268,17 @@
         "history": []
     },
     {
+        "name": "TokenizedVaultAdapter",
+        "address": "0xD05C512bDFf6D3eAc5328807B3bC075F35271167",
+        "id": "0x3e46d5ba",
+        "path": "contracts/actions/utils/TokenizedVaultAdapter.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "TransientStorage",
         "address": "0x48cdE7c1f67fF11A62F6b4272166AB60EFB48C1F",
         "id": "0x69885459",
