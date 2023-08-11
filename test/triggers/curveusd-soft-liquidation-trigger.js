@@ -2,7 +2,7 @@ const { ethers } = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
 const {
-    redeploy, getProxy, fetchAmountinUSDPrice, Float2BN, setBalance, approve,
+    redeploy, getProxy, fetchAmountinUSDPrice, Float2BN, setBalance, approve, BN2Float,
 } = require('../utils');
 const { curveUsdCreate } = require('../actions');
 
@@ -45,6 +45,7 @@ const softLiquidationTriggerTest = () => describe('CurveUsd-Soft-Liquidation-Tri
     it('... should trigger correctly', async () => {
         const coder = ethers.utils.defaultAbiCoder;
         const percentage = await trigger.calcPercentage(WSTETH_MARKET, proxyAddr);
+        console.log({ percentage: BN2Float(percentage, 16) });
 
         expect(await trigger.isTriggered(
             '0x',
