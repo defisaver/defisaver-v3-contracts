@@ -4,7 +4,7 @@ All the contracts related to the Defi Saver ecosystem.
 Detailed overview about that code can be found https://docs.defisaver.com
 
 ## To install
-Run `npm install` or `yarn` in the repo folder.
+Run `yarn` in the repo folder.
 You will also need to create a .env file as in the .env.example and fill it in with appropriate api keys.
 
 ## How to run tests
