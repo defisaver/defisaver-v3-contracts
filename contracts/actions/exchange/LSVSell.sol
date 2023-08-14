@@ -3,6 +3,7 @@
 pragma solidity =0.8.10;
 
 import "../../interfaces/IDSProxy.sol";
+import "../../interfaces/lido/IWStEth.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../ActionBase.sol";
 
@@ -111,9 +112,28 @@ contract LSVSell is ActionBase, DFSExchangeCore {
             isEthDest = true;
         } 
 
-        _exchangeData.dfsFeeDivider = 0;        
+        _exchangeData.dfsFeeDivider = 0;
+        bool shouldSellOnchain = true;
 
-        (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
+        address wrapper;
+        uint256 exchangedAmount;
+
+        if (_exchangeData.destAddr == TokenUtils.WSTETH_ADDR){
+            if (_exchangeData.srcAddr == TokenUtils.WETH_ADDR || _exchangeData.srcAddr == TokenUtils.STETH_ADDR){
+                shouldSellOnchain = _exchangeData.minPrice > IWStEth(TokenUtils.WSTETH_ADDR).tokensPerStEth();
+            }
+            if (!shouldSellOnchain){
+                if (_exchangeData.srcAddr == TokenUtils.WETH_ADDR){
+                    exchangedAmount = _lidoStakeAndWrapWETH(_exchangeData.srcAmount);
+                } else if (_exchangeData.srcAddr == TokenUtils.STETH_ADDR){
+                    exchangedAmount = _lidoWrapStEth(_exchangeData.srcAmount);
+                }
+            }
+        }
+
+        if (shouldSellOnchain){
+            (wrapper, exchangedAmount) = _sell(_exchangeData);
+        }
 
         if (isEthDest) {
             TokenUtils.withdrawWeth(exchangedAmount);
@@ -133,6 +153,23 @@ contract LSVSell is ActionBase, DFSExchangeCore {
             _exchangeData.dfsFeeDivider
         );
         return (exchangedAmount, logData);
+    }
+
+    function _lidoStakeAndWrapWETH(uint256 wethAmount) internal returns (uint256 wStEthReceivedAmount){
+        TokenUtils.withdrawWeth(wethAmount);
+
+        uint256 wStEthBalanceBefore = TokenUtils.WSTETH_ADDR.getBalance(address(this));
+        (bool sent, ) = payable(TokenUtils.WSTETH_ADDR).call{value: wethAmount}("");
+        require(sent, "Failed to send Ether");
+        uint256 wStEthBalanceAfter = TokenUtils.WSTETH_ADDR.getBalance(address(this));
+
+        wStEthReceivedAmount = wStEthBalanceAfter - wStEthBalanceBefore;
+    }
+
+    function _lidoWrapStEth(uint256 stethAmount) internal returns (uint256 wStEthReceivedAmount){
+        TokenUtils.STETH_ADDR.approveToken(TokenUtils.WSTETH_ADDR, stethAmount);
+
+        wStEthReceivedAmount = IWStEth(TokenUtils.WSTETH_ADDR).wrap(stethAmount);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
