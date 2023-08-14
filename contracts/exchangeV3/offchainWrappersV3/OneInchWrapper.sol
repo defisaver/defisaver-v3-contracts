@@ -13,12 +13,13 @@ import "../../interfaces/exchange/IOffchainWrapper.sol";
 contract OneInchWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath {
 
     using TokenUtils for address;
-
-    string public constant ERR_SRC_AMOUNT = "Not enough funds";
-    string public constant ERR_PROTOCOL_FEE = "Not enough eth for protocol fee";
-    string public constant ERR_TOKENS_SWAPPED_ZERO = "Order success but amount 0";
-
     using SafeERC20 for IERC20;
+    
+    //Not enough funds
+    error InsufficientFunds(uint256 available, uint256 required);
+
+    //Order success but amount 0
+    error ZeroTokensSwapped();
 
     /// @notice offchainData.callData should be this struct encoded
     struct OneInchCalldata{
@@ -33,34 +34,39 @@ contract OneInchWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMat
         ExchangeData memory _exData,
         ExchangeActionType _type
     ) override public payable returns (bool success, uint256) {
+
         // check that contract have enough balance for exchange
-        require(_exData.srcAddr.getBalance(address(this)) >= _exData.srcAmount, ERR_SRC_AMOUNT);
-
-        IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
-
-        OneInchCalldata memory paraswapCalldata = abi.decode(_exData.offchainData.callData, (OneInchCalldata));
+        uint256 tokenBalance = _exData.srcAddr.getBalance(address(this));
+        if (tokenBalance < _exData.srcAmount){
+            revert InsufficientFunds(tokenBalance, _exData.srcAmount);
+        }
+        OneInchCalldata memory oneInchCalldata = abi.decode(_exData.offchainData.callData, (OneInchCalldata));
         // write in the exact amount we are selling/buying in an order
         if (_type == ExchangeActionType.SELL) {
-            for (uint256 i; i < paraswapCalldata.offsets.length; i++){
-                writeUint256(paraswapCalldata.realCalldata, paraswapCalldata.offsets[i], _exData.srcAmount);
+            for (uint256 i; i < oneInchCalldata.offsets.length; i++){
+                writeUint256(oneInchCalldata.realCalldata, oneInchCalldata.offsets[i], _exData.srcAmount);
             }
         } else {
             uint srcAmount = wdiv(_exData.destAmount, _exData.offchainData.price) + 1; // + 1 so we round up
-            for (uint256 i; i < paraswapCalldata.offsets.length; i++){
-                writeUint256(paraswapCalldata.realCalldata, paraswapCalldata.offsets[i], srcAmount);
+            for (uint256 i; i < oneInchCalldata.offsets.length; i++){
+                writeUint256(oneInchCalldata.realCalldata, oneInchCalldata.offsets[i], srcAmount);
             }
         }
 
+        IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
+
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
-        (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(paraswapCalldata.realCalldata);
+        (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(oneInchCalldata.realCalldata);
         uint256 tokensSwapped = 0;
 
         if (success) {
             // get the current balance of the swapped tokens
-            tokensSwapped = sub(_exData.destAddr.getBalance(address(this)), tokensBefore);
-            require(tokensSwapped > 0, ERR_TOKENS_SWAPPED_ZERO);
+            tokensSwapped = _exData.destAddr.getBalance(address(this)) - tokensBefore;
+            if (tokensSwapped == 0){
+                revert ZeroTokensSwapped();
+            }
         }
-        // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
+        // returns all funds from src addr, dest addr
         sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
 
         return (success, tokensSwapped);

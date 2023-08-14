@@ -30,6 +30,7 @@ const {
     takeSnapshot,
     revertToSnapshot,
     depositToWeth,
+    getNetwork,
 } = require('../utils');
 
 const {
@@ -613,8 +614,7 @@ const paraswapTest = async () => {
 };
 
 const oneInchTest = async () => {
-    // @dev Works only on mainnet forks
-    describe('Dfs-Sell-via-Paraswap-Aggregator', function () {
+    describe('Dfs-Sell-via-1inch-Aggregator', function () {
         this.timeout(400000);
 
         let senderAcc;
@@ -627,6 +627,8 @@ const oneInchTest = async () => {
         let buyAssetInfo;
 
         before(async () => {
+            const chainId = chainIds[getNetwork()];
+            console.log(chainId);
             await redeploy('DFSSell');
             oneInchWrapper = await redeploy('OneInchWrapper');
 
@@ -634,24 +636,20 @@ const oneInchTest = async () => {
             proxy = await getProxy(senderAcc.address);
             await setNewExchangeWrapper(senderAcc, oneInchWrapper.address);
 
-            const sellAssetInfo = getAssetInfo('WETH');
-            buyAssetInfo = getAssetInfo('USDC');
+            const sellAssetInfo = getAssetInfo('WETH', chainId);
+            buyAssetInfo = getAssetInfo('USDC', chainId);
 
             buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
-            amount = hre.ethers.utils.parseUnits('10', 18);
+            amount = hre.ethers.utils.parseUnits('1', 18);
             await setBalance(sellAssetInfo.address, senderAcc.address, amount);
             await approve(sellAssetInfo.address, proxy.address);
-
-            const protocols = 'UNISWAP_V1,UNISWAP_V3,UNISWAP_V2,SUSHI,MOONISWAP,BALANCER,COMPOUND,CURVE,CURVE_V2_SPELL_2_ASSET,CURVE_V2_SGT_2_ASSET,CURVE_V2_THRESHOLDNETWORK_2_ASSET,CHAI,OASIS,KYBER,AAVE,IEARN,BANCOR,PMM1,SWERVE,BLACKHOLESWAP,DODO,DODO_V2,VALUELIQUID,SHELL,DEFISWAP,SAKESWAP,LUASWAP,MINISWAP,MSTABLE,PMM2,SYNTHETIX,AAVE_V2,ST_ETH,ONE_INCH_LP,ONE_INCH_LP_1_1,LINKSWAP,S_FINANCE,PSM,POWERINDEX,PMM3,XSIGMA,SMOOTHY_FINANCE,SADDLE,PMM4,KYBER_DMM,BALANCER_V2,SETH_WRAPPER,CURVE_V2,CURVE_V2_EURS_2_ASSET,CURVE_V2_ETH_CRV,CURVE_V2_ETH_CVX,CONVERGENCE_X,ONE_INCH_LIMIT_ORDER,ONE_INCH_LIMIT_ORDER_V2,ONE_INCH_LIMIT_ORDER_V3,DFX_FINANCE,FIXED_FEE_SWAP,DXSWAP,SHIBASWAP,UNIFI,PMMX,PMM5,PSM_PAX,PMM2MM1,WSTETH,DEFI_PLAZA,FIXED_FEE_SWAP_V3,SYNTHETIX_WRAPPER,SYNAPSE,CURVE_V2_YFI_2_ASSET,CURVE_V2_ETH_PAL,POOLTOGETHER,ETH_BANCOR_V3,PMM6,ELASTICSWAP,BALANCER_V2_WRAPPER,FRAXSWAP,RADIOSHACK,KYBERSWAP_ELASTIC,CURVE_V2_TWO_CRYPTO,PMM9,STABLE_PLAZA,PMM8,ZEROX_LIMIT_ORDER,CURVE_3CRV,KYBER_DMM_STATIC,ANGLE,ROCKET_POOL,ETHEREUM_ELK,ETHEREUM_PANCAKESWAP_V2,SYNTHETIX_ATOMIC_SIP288,PSM_GUSD,INTEGRAL,MAINNET_SOLIDLY,NOMISWAP_STABLE,CURVE_V2_TWOCRYPTO_META,MAVERICK_V1,VERSE,DFX_FINANCE_V2,ZK_BOB,PANCAKESWAP_V3,NOMISWAPEPCS,XFAI,PMM11,CURVE_V2_LLAMMA,CURVE_V2_TRICRYPTO_NG,PMM8_2,SUSHISWAP_V3,SFRX_ETH';
-
             const options = {
                 method: 'GET',
                 baseURL: 'https://api.1inch.dev/swap',
-                url: `/v5.2/1/swap?src=${sellAssetInfo.address}&dst=${buyAssetInfo.address}&amount=${amount}&from=${oneInchWrapper.address}`
-                + '&slippage=0.3'
+                url: `/v5.2/${chainId}/swap?src=${sellAssetInfo.address}&dst=${buyAssetInfo.address}&amount=${amount}&from=${oneInchWrapper.address}`
+                + '&slippage=1'
                 + '&usePatching=true'
                 + '&disableEstimate=true'
-                + `&protocols=${protocols}`
                 + '&allowPartialFill=false'
                 + '&includeProtocols=true',
                 headers: {
