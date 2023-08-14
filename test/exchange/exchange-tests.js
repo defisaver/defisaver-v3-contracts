@@ -612,6 +612,132 @@ const paraswapTest = async () => {
     });
 };
 
+const oneInchTest = async () => {
+    // @dev Works only on mainnet forks
+    describe('Dfs-Sell-via-Paraswap-Aggregator', function () {
+        this.timeout(400000);
+
+        let senderAcc;
+        let oneInchWrapper;
+        let proxy;
+        let snapshot;
+        let exchangeObject;
+        let amount;
+        let buyBalanceBefore;
+        let buyAssetInfo;
+
+        before(async () => {
+            await redeploy('DFSSell');
+            oneInchWrapper = await redeploy('OneInchWrapper');
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+            await setNewExchangeWrapper(senderAcc, oneInchWrapper.address);
+
+            const sellAssetInfo = getAssetInfo('WETH');
+            buyAssetInfo = getAssetInfo('USDC');
+
+            buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
+            amount = hre.ethers.utils.parseUnits('1', 18);
+            await depositToWeth(amount);
+            await approve(sellAssetInfo.address, proxy.address);
+
+            const options = {
+                method: 'GET',
+                baseURL: 'https://api.1inch.dev/swap',
+                url: `/v5.2/1/swap?src=${sellAssetInfo.address}&dst=${buyAssetInfo.address}&amount=${amount}&from=${oneInchWrapper.address}`
+                + '&slippage=10'
+                + '&usePatching=true'
+                + '&disableEstimate=true',
+                headers: {
+                    Authorization: 'Bearer 4trHOrTtM6UWnztd8m68QSXBtuARRZoF',
+                },
+            };
+            console.log(options.baseURL + options.url);
+            const priceObject = await axios(options).then((response) => response.data);
+            console.log(priceObject);
+            // THIS IS CHANGEABLE WITH API INFORMATION
+            const allowanceTarget = priceObject.tx.to;
+            const price = 1; // just for testing, anything bigger than 0 triggers offchain if
+            const protocolFee = 0;
+            const callData = priceObject.tx.data;
+            // console.log(callData);
+            let amountInHex = hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [amount]);
+            amountInHex = amountInHex.slice(2);
+            console.log(amountInHex);
+            // console.log(amountInHex.toString());
+            const sourceStr = callData;
+            const searchStr = amountInHex.toString();
+            const indexes = [...sourceStr.matchAll(new RegExp(searchStr, 'gi'))].map((a) => a.index);
+            console.log(indexes); // [2, 25, 27, 33]
+
+            const offsets = [];
+            // console.log(offset);
+            for (let i = 0; i < indexes.length; i++) {
+                offsets[i] = indexes[i] / 2 - 1;
+            }
+            console.log(offsets);
+            // console.log(offset);
+            const specialCalldata = hre.ethers.utils.defaultAbiCoder.encode(['(bytes,uint256[])'], [[callData, offsets]]);
+
+            exchangeObject = formatExchangeObjForOffchain(
+                sellAssetInfo.address,
+                buyAssetInfo.address,
+                hre.ethers.utils.parseUnits('1', 18),
+                oneInchWrapper.address,
+                allowanceTarget,
+                allowanceTarget,
+                price,
+                protocolFee,
+                specialCalldata,
+            );
+
+            await addToZRXAllowlist(senderAcc, allowanceTarget);
+        });
+
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        it('... should try to sell WETH for DAI with offchain calldata (1inch)', async () => {
+            const sellAction = new dfs.actions.basic.SellAction(
+                exchangeObject, senderAcc.address, senderAcc.address,
+            );
+            const functionData = sellAction.encodeForDsProxyCall()[1];
+
+            await executeAction('DFSSell', functionData, proxy);
+
+            const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
+            console.log(buyBalanceAfter.toString());
+            console.log(buyBalanceBefore.toString());
+            expect(buyBalanceBefore).is.lt(buyBalanceAfter);
+        });
+        it('... should try to sell WETH for DAI with offchain calldata (1inch) in a recipe', async () => {
+            // test recipe
+            const sellRecipe = new dfs.Recipe('SellRecipe', [
+                new dfs.actions.basic.WrapEthAction(amount.toString()),
+                new dfs.actions.basic.SellAction(
+                    exchangeObject, proxy.address, senderAcc.address,
+                ),
+            ]);
+            const functionData = sellRecipe.encodeForDsProxyCall()[1];
+            const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
+            await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData, {
+                value: amount,
+                gasLimit: 5000000,
+            });
+            const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
+            console.log(buyBalanceAfter.toString());
+            console.log(buyBalanceBefore.toString());
+            expect(buyBalanceBefore).is.lt(buyBalanceAfter);
+        });
+    });
+};
+
 const dfsExchangeFullTest = async () => {
     await dfsSellTest();
     await paraswapTest();
@@ -624,4 +750,5 @@ module.exports = {
     dfsSellTest,
     kyberAggregatorDFSSellTest,
     paraswapTest,
+    oneInchTest,
 };
