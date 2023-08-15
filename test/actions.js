@@ -22,7 +22,6 @@ const {
     getGasUsed,
     formatExchangeObjCurve,
     addrs,
-    USDC_ADDR,
     LUSD_ADDR,
     BLUSD_ADDR,
     getNetwork,
@@ -3211,6 +3210,114 @@ const curveUsdSelfLiquidate = async (
     return receipt;
 };
 
+const tokenizedVaultAdapterDeposit = async ({
+    proxy,
+    amount,
+    minOutOrMaxIn,
+    vaultAddress,
+    from,
+    to,
+    underlyingAssetAddress,
+}) => {
+    const actionAddress = await getAddrFromRegistry('TokenizedVaultAdapter');
+
+    const action = new dfs.actions.basic.TokenizedVaultAdapterDepositAction(
+        amount,
+        minOutOrMaxIn,
+        vaultAddress,
+        from,
+        to,
+        underlyingAssetAddress,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed tokenizedVaultAdapter-Deposit: ${gasUsed}`);
+    return { receipt, assetsToApprove: await action.getAssetsToApprove() };
+};
+
+const tokenizedVaultAdapterMint = async ({
+    proxy,
+    amount,
+    minOutOrMaxIn,
+    vaultAddress,
+    from,
+    to,
+    underlyingAssetAddress,
+}) => {
+    const actionAddress = await getAddrFromRegistry('TokenizedVaultAdapter');
+
+    const action = new dfs.actions.basic.TokenizedVaultAdapterMintAction(
+        amount,
+        minOutOrMaxIn,
+        vaultAddress,
+        from,
+        to,
+        underlyingAssetAddress,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed tokenizedVaultAdapter-Mint: ${gasUsed}`);
+    return { receipt, assetsToApprove: await action.getAssetsToApprove() };
+};
+
+const tokenizedVaultAdapterRedeem = async ({
+    proxy,
+    amount,
+    minOutOrMaxIn,
+    vaultAddress,
+    from,
+    to,
+}) => {
+    const actionAddress = await getAddrFromRegistry('TokenizedVaultAdapter');
+
+    const action = new dfs.actions.basic.TokenizedVaultAdapterRedeemAction(
+        amount,
+        minOutOrMaxIn,
+        vaultAddress,
+        from,
+        to,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed tokenizedVaultAdapter-Redeem: ${gasUsed}`);
+    return { receipt, assetsToApprove: await action.getAssetsToApprove() };
+};
+
+const tokenizedVaultAdapterWithdraw = async ({
+    proxy,
+    amount,
+    minOutOrMaxIn,
+    vaultAddress,
+    from,
+    to,
+}) => {
+    const actionAddress = await getAddrFromRegistry('TokenizedVaultAdapter');
+
+    const action = new dfs.actions.basic.TokenizedVaultAdapterWithdrawAction(
+        amount,
+        minOutOrMaxIn,
+        vaultAddress,
+        from,
+        to,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed tokenizedVaultAdapter-Withdraw: ${gasUsed}`);
+    return { receipt, assetsToApprove: await action.getAssetsToApprove() };
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -3406,4 +3513,9 @@ module.exports = {
     curveUsdSelfLiquidate,
     curveUsdLevCreate,
     curveUsdSelfLiquidateWithColl,
+
+    tokenizedVaultAdapterDeposit,
+    tokenizedVaultAdapterMint,
+    tokenizedVaultAdapterRedeem,
+    tokenizedVaultAdapterWithdraw,
 };

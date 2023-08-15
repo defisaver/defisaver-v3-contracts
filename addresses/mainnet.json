@@ -55,6 +55,17 @@
         "history": []
     },
     {
+        "name": "SparkSubProxy",
+        "address": "0x3730bb1f58087D02Ccf7E0B6696755f588E17A03",
+        "id": "0x03931575",
+        "path": "contracts/actions/spark/SparkSubProxy.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "McdSubProxy",
         "address": "0xded2752728227c502e08e51023b1ce0a37f907a2",
         "id": "0x72fb2f08",
@@ -509,6 +520,17 @@
         "history": []
     },
     {
+        "name": "TokenizedVaultAdapter",
+        "address": "0x3944364Ce3a273D269707484F3a676fCa17E08b8",
+        "id": "0x3e46d5ba",
+        "path": "contracts/actions/utils/TokenizedVaultAdapter.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "ERC20View",
         "address": "0xfaf0860B711b0b54912034c8A628f0847585e4ae",
         "id": "0xde8e6da5",
@@ -700,6 +722,28 @@
             "0x05b104aB6BaE42d4a665bB1A407142f2ec5A6512",
             "0x096288961eaaB6D3b7B23bd144Fe34D98b3579b3"
         ]
+    },
+    {
+        "name": "SDaiWrap",
+        "address": "0xac7Ac294F29d818D26Bd9DF86d36904B1Ed346Ae",
+        "id": "0xf7fc13f2",
+        "path": "contracts/actions/utils/SDaiWrap.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SDaiUnwrap",
+        "address": "0xe8Cb536BB96075241c4bd8f1831A8577562F2B32",
+        "id": "0xeafe8383",
+        "path": "contracts/actions/utils/SDaiUnwrap.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     },
     {
         "name": "WrapEth",
@@ -1211,10 +1255,32 @@
         "history": []
     },
     {
+        "name": "SparkSupply",
+        "address": "0x9e1d7AAA55D83D36d55BF11cAe4d922aF52B6eF0",
+        "id": "0x92e0c47c",
+        "path": "contracts/actions/spark/SparkSupply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AaveV3ATokenPayback",
         "address": "0xDe5c012cd1878D86E91309593764895a3adb380E",
         "id": "0x62c722e3",
         "path": "contracts/actions/aaveV3/AaveV3ATokenPayback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SparkSpTokenPayback",
+        "address": "0x57403bB33A4829EBf5935D39eD08F19282F61d9c",
+        "id": "0xe673c4c4",
+        "path": "contracts/actions/spark/SparkSpTokenPayback.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
@@ -1233,6 +1299,17 @@
         "history": ["0x4d3F58460aE2bC71fFaeb33838BFA3b5610083Db"]
     },
     {
+        "name": "SparkBorrow",
+        "address": "0x3E2C366065bA0f6f9936C2C6A802D72F250b27AA",
+        "id": "0x9bc097ab",
+        "path": "contracts/actions/spark/SparkBorrow.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": ["0x4d3F58460aE2bC71fFaeb33838BFA3b5610083Db"]
+    },
+    {
         "name": "AaveV3ClaimRewards",
         "address": "0x998A2E9aaE03c11b7A9863C1F59c42A21fcf47D0",
         "id": "0x3c4556e9",
@@ -1242,12 +1319,34 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
-      },
+    },
+    {
+        "name": "SparkClaimRewards",
+        "address": "0x9C3E31f42a46676785C72401cD4F2287b355b003",
+        "id": "0x948d2ba7",
+        "path": "contracts/actions/spark/SparkClaimRewards.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
     {
         "name": "AaveV3CollateralSwitch",
         "address": "0x54A4d6cB567B2C6CDe4687c361b24fd912695DAb",
         "id": "0xbffa4e35",
         "path": "contracts/actions/aaveV3/AaveV3CollateralSwitch.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SparkCollateralSwitch",
+        "address": "0xA859Dff8BCEE9C6daaEF5d0eCCb25219Da4B62b4",
+        "id": "0x85f16e59",
+        "path": "contracts/actions/spark/SparkCollateralSwitch.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
@@ -1266,10 +1365,32 @@
         "history": []
     },
     {
+        "name": "SparkPayback",
+        "address": "0x3a0F7Ca5cCf15aF19147F71de5fc84DC195f149f",
+        "id": "0x5b717c1d",
+        "path": "contracts/actions/spark/SparkPayback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AaveV3SetEMode",
         "address": "0xBe7F735d7955e0461579E34266f41F928AE06D78",
         "id": "0x3d35d254",
         "path": "contracts/actions/aaveV3/AaveV3SetEMode.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SparkSetEMode",
+        "address": "0x2252a83Da69A237686eD9AC07a38DDA74ec7cE5f",
+        "id": "0x2fa361c3",
+        "path": "contracts/actions/spark/SparkSetEMode.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
@@ -1288,6 +1409,17 @@
         "history": []
     },
     {
+        "name": "SparkSwapBorrowRateMode",
+        "address": "0x71B0687C7ec0286dc3cfb715fe97249604aC898f",
+        "id": "0xf7e49593",
+        "path": "contracts/actions/spark/SparkSwapBorrowRateMode.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AaveV3Withdraw",
         "address": "0x9D4e4b26A5E2e6Dad30C5d95F5cE78A8310F04C2",
         "id": "0x72a6498a",
@@ -1299,10 +1431,32 @@
         "history": []
     },
     {
+        "name": "SparkWithdraw",
+        "address": "0x1e3187D89e79B5c411D710E0fdF2709517852600",
+        "id": "0xe9d31142",
+        "path": "contracts/actions/spark/SparkWithdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AaveV3QuotePriceTrigger",
         "address": "0xc8c5c66c9f147d3F6a47733D468912967616c3F7",
         "id": "0xda3df4c8",
         "path": "contracts/triggers/AaveV3QuotePriceTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SparkQuotePriceTrigger",
+        "address": "0x4AcAe06d6De0f8aD8c47D9E1A9E44B12f3a53fE0",
+        "id": "0x13335502",
+        "path": "contracts/triggers/SparkQuotePriceTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
@@ -1343,6 +1497,17 @@
         "history": []
     },
     {
+        "name": "SparkRatioTrigger",
+        "address": "0x1F61250B3eFB747C7C0A9dF4851935C95CE387cC",
+        "id": "0xbfb2ea35",
+        "path": "contracts/triggers/SparkRatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AaveV3RatioCheck",
         "address": "0x8a975A9fB0d77b8d9e7E1694CC868e704D0Ef0fD",
         "id": "0x71ef3d4e",
@@ -1354,15 +1519,37 @@
         "history": []
     },
     {
+        "name": "SparkRatioCheck",
+        "address": "0x38D9fdc88f304d9E271679447FF07126F54CDff9",
+        "id": "0xaf91e475",
+        "path": "contracts/actions/checkers/SparkRatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AaveV3View",
-        "address": "0xf4B715BB788cC4071061bd67dC8B56681460A2fF",
+        "address": "0x8095fFFC3cDdE58C4F537D39f9795A40a103e633",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.0",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xf4B715BB788cC4071061bd67dC8B56681460A2fF"]
+    },
+    {
+        "name": "SparkView",
+        "address": "0xB3B13838F6F57CE76b94f0744Ab0B045B780836e",
+        "id": "0xd6f690a9",
+        "path": "contracts/views/SparkView.sol",
+        "version": "1.0.1",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": ["0x29d01EF37514912ab874D51fEc76c8f5d4d6712e"]
     },
     {
         "name": "CompBorrow",
@@ -1525,15 +1712,29 @@
         "history": ["0xaf591afeCbAa4026Be377AA3cF02dA366f18DE07"]
     },
     {
+        "name": "FLSpark",
+        "address": "0xe9Fe5a0f5e4B370Ae60d837da58744666D5C06F7",
+        "id": "0xf02ebd0f",
+        "path": "contracts/actions/flashloan/FLSpark.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [""]
+    },
+    {
         "name": "FLAction",
-        "address": "0x72915D41982DfCAf30b871290618E59C45Edba7F",
+        "address": "0x2bE65F12dCc55c8485030E306A1B01F47C437a8A",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x9eC9E483Edb2dACA782222fF32b261AD56e43879"]
+        "history": [
+            "0x72915D41982DfCAf30b871290618E59C45Edba7F",
+            "0x9eC9E483Edb2dACA782222fF32b261AD56e43879"
+        ]
     },
     {
         "name": "UniSupply",
@@ -2225,13 +2426,13 @@
     },
     {
         "name": "CurveUsdSoftLiquidationTrigger",
-        "address": "0x5D037963b2822a2B13B542477b8706C313b47821",
+        "address": "0xb70f9CD0C17c8b3486D64F67b04661Fe40968b18",
         "id": "0x7ff68c12",
         "path": "contracts/triggers/CurveUsdSoftLiquidationTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": "0",
-        "registryIds": [],
+        "registryIds": ["0x5D037963b2822a2B13B542477b8706C313b47821"],
         "history": []
     },
     {

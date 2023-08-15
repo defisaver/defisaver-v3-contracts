@@ -289,6 +289,7 @@ const coinGeckoHelper = {
     wstETH: 'wrapped-steth',
     GMX: 'gmx',
     ARB: 'arbitrum',
+    frxETH: 'frax-ether',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;

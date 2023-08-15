@@ -20,6 +20,9 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant LIQUIDATION_THRESHOLD_MASK =     0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFF; // prettier-ignore
     uint256 internal constant DEBT_CEILING_MASK =              0xF0000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant FLASHLOAN_ENABLED_MASK =         0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF; // prettier-ignore
+    uint256 internal constant ACTIVE_MASK =                    0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFF; // prettier-ignore
+    uint256 internal constant FROZEN_MASK =                    0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDFFFFFFFFFFFFFF; // prettier-ignore
+    uint256 internal constant PAUSED_MASK =                    0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFF; // prettier-ignore
 
     
     uint256 internal constant LIQUIDATION_THRESHOLD_START_BIT_POSITION = 16;
@@ -100,6 +103,9 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint16 liquidationBonus;
         address priceSource;
         string label;
+        bool isActive;
+        bool isPaused;
+        bool isFrozen;
     }
 
     function getHealthFactor(address _market, address _user)
@@ -229,6 +235,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint256 eMode = getEModeCategory(config);
         DataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(eMode));
 
+        (bool isActive, bool isFrozen, , , bool isPaused) = getFlags(config);
+
         _tokenInfo = TokenInfoFull({
             aTokenAddress: reserveData.aTokenAddress,
             underlyingTokenAddress: _tokenAddr,
@@ -260,7 +268,10 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             liquidationThreshold: categoryData.liquidationThreshold,
             liquidationBonus: categoryData.liquidationBonus,
             priceSource: categoryData.priceSource,
-            label: categoryData.label
+            label: categoryData.label,
+            isActive: isActive,
+            isPaused: isPaused,
+            isFrozen: isFrozen
         });
     }
 
@@ -469,6 +480,29 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
 
     function getFlashLoanEnabled(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
         return (self.data & ~FLASHLOAN_ENABLED_MASK) != 0;
+    }
+
+    /**
+     * @notice Gets the configuration flags of the reserve
+     * @param self The reserve configuration
+     * @return The state flag representing active
+     * @return The state flag representing frozen
+     * @return The state flag representing borrowing enabled
+     * @return The state flag representing stableRateBorrowing enabled
+     * @return The state flag representing paused
+     */
+    function getFlags(
+        DataTypes.ReserveConfigurationMap memory self
+    ) internal pure returns (bool, bool, bool, bool, bool) {
+        uint256 dataLocal = self.data;
+
+        return (
+        (dataLocal & ~ACTIVE_MASK) != 0,
+        (dataLocal & ~FROZEN_MASK) != 0,
+        (dataLocal & ~BORROWING_MASK) != 0,
+        (dataLocal & ~STABLE_BORROWING_MASK) != 0,
+        (dataLocal & ~PAUSED_MASK) != 0
+        );
     }
 
     function isBorrowAllowed(address _market) public view returns (bool) {
