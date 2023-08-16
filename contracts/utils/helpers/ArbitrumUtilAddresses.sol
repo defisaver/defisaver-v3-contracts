@@ -4,7 +4,7 @@ pragma solidity =0.8.10;
 
 contract ArbitrumUtilAddresses {
     address internal refillCaller = 0xcbA094ae1B2B363886CC7f428206dB1b116834A2;
-    address internal feeAddr = 0x76720aC2574631530eC8163e4085d6F98513fb27;
+
     address internal constant DEFAULT_BOT = 0x3b20F1394f4cf46c6f460Fd8D2799F88c23c37EA;
     address internal constant BOT_REGISTRY_ADDRESS = 0x75E2F915B37D49716365346b1E3E273Cb3E0cC33;
     address internal constant FEE_RECIPIENT = 0xe000e3c9428D539566259cCd89ed5fb85e655A01;

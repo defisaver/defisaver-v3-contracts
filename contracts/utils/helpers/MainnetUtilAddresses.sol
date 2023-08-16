@@ -3,8 +3,7 @@
 pragma solidity =0.8.10;
 
 contract MainnetUtilAddresses {
-    address internal refillCaller = 0x33fDb79aFB4456B604f376A45A546e7ae700e880;
-    address internal feeAddr = 0x76720aC2574631530eC8163e4085d6F98513fb27;
+    address internal refillCaller = 0x8973f5e6142ed2e2F50EEE8Bb34a47C2DAa6624a;
 
     address internal constant BOT_REGISTRY_ADDRESS = 0x637726f8b08a7ABE3aE3aCaB01A80E2d8ddeF77B;
     address internal constant UNI_V2_ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;

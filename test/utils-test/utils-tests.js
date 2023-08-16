@@ -1,9 +1,9 @@
 /* eslint-disable no-await-in-loop */
+const path = require('path');
+const fs = require('fs');
 const { expect } = require('chai');
 const hre = require('hardhat');
 const { getAssetInfo, assets } = require('@defisaver/tokens');
-const path = require('path');
-const fs = require('fs');
 
 const {
     redeploy,
@@ -27,6 +27,8 @@ const {
     setBalance,
     addrs,
     chainIds,
+    getContractFromRegistry,
+    Float2BN,
 } = require('../utils');
 
 const botRefillL2Test = async () => {
@@ -36,6 +38,8 @@ const botRefillL2Test = async () => {
         let botRefills;
         let refillCaller; let refillAddr; let feeAddr;
         let owner;
+        let priceHelper;
+
         // TEST FOR OPTIMISM NETWORK
         const network = hre.network.config.name;
         console.log({ network });
@@ -44,7 +48,8 @@ const botRefillL2Test = async () => {
             botRefills = await hre.ethers.getContractAt('BotRefillsL2', botRefillsAddr);
 
             refillAddr = '0x5aa40C7C8158D8E29CA480d7E05E5a32dD819332';
-            feeAddr = '0x76720ac2574631530ec8163e4085d6f98513fb27';
+            feeAddr = await hre.ethers.getContractAt('FeeRecipient', '0x5b12C2B979CB3aB89DD4813837873bC4Dd1930D0')
+                .then((r) => r.getFeeAddr());
             refillCaller = '0xaFdFC3814921d49AA412d6a22e3F44Cc555dDcC8';
             owner = '0xc9a956923bfb5f141f1cd4467126b3ae91e5cc33';
 
@@ -75,12 +80,14 @@ const botRefillL2Test = async () => {
             await wethContract.transfer(nullAddress, wethFeeAddrBalance);
 
             await stopImpersonatingAccount(feeAddr);
+            priceHelper = await getContractFromRegistry('TokenPriceHelperL2');
         });
 
         it('... should call refill with WETH', async () => {
             await impersonateAccount(refillCaller);
 
             const ethBotAddrBalanceBefore = await balanceOf(ETH_ADDR, refillAddr);
+            const daiFeeAddrBalanceBefore = await balanceOf(addrs[network].DAI_ADDRESS, feeAddr);
 
             const signer = await hre.ethers.provider.getSigner(refillCaller);
             botRefills = botRefills.connect(signer);
@@ -94,11 +101,13 @@ const botRefillL2Test = async () => {
                 await send(addrs[network].WETH_ADDRESS, feeAddr, ethRefillAmount);
             }
 
-            await botRefills.refill(ethRefillAmount, refillAddr);
+            await botRefills.refill(ethRefillAmount, Float2BN('0'), refillAddr);
 
             const ethBotAddrBalanceAfter = await balanceOf(ETH_ADDR, refillAddr);
+            const daiFeeAddrBalanceAfter = await balanceOf(addrs[network].DAI_ADDRESS, feeAddr);
 
             expect(ethBotAddrBalanceAfter).to.be.eq(ethBotAddrBalanceBefore.add(ethRefillAmount));
+            expect(daiFeeAddrBalanceAfter).to.be.eq(daiFeeAddrBalanceBefore);
 
             await stopImpersonatingAccount(refillCaller);
         });
@@ -114,12 +123,48 @@ const botRefillL2Test = async () => {
 
             const daiAmount = hre.ethers.utils.parseUnits('50000', 18);
             await setBalance(addrs[network].DAI_ADDRESS, feeAddr, daiAmount);
+            const daiFeeAddrBalanceBefore = await balanceOf(addrs[network].DAI_ADDRESS, feeAddr);
 
-            await botRefills.refill(ethRefillAmount, refillAddr);
+            const daiPriceInEth = await priceHelper.getPriceInETH(addrs[network].DAI_ADDRESS)
+                .then((price) => price.mul(98).div(100));
+            await botRefills.refill(ethRefillAmount, daiPriceInEth, refillAddr);
 
             const ethBotAddrBalanceAfter = await balanceOf(ETH_ADDR, refillAddr);
+            const daiFeeAddrBalanceAfter = await balanceOf(addrs[network].DAI_ADDRESS, feeAddr);
 
-            expect(ethBotAddrBalanceAfter).to.be.eq(ethBotAddrBalanceBefore.add(ethRefillAmount));
+            expect(ethBotAddrBalanceAfter).to.be.gte(ethBotAddrBalanceBefore.add(ethRefillAmount));
+            const expectedDaiDeposit = ethRefillAmount.mul(Float2BN('1', 18)).div(daiPriceInEth);
+            expect(daiFeeAddrBalanceAfter).to.be
+                .eq(daiFeeAddrBalanceBefore.sub(expectedDaiDeposit));
+            await stopImpersonatingAccount(refillCaller);
+        });
+
+        it('... should call refill with DAI using fallback chainlink price', async () => {
+            await impersonateAccount(refillCaller);
+
+            const ethBotAddrBalanceBefore = await balanceOf(ETH_ADDR, refillAddr);
+
+            const signer = await hre.ethers.provider.getSigner(refillCaller);
+            botRefills = botRefills.connect(signer);
+
+            const ethRefillAmount = hre.ethers.utils.parseUnits('4', 18);
+
+            const daiAmount = hre.ethers.utils.parseUnits('50000', 18);
+            await setBalance(addrs[network].DAI_ADDRESS, feeAddr, daiAmount);
+            const daiFeeAddrBalanceBefore = await balanceOf(addrs[network].DAI_ADDRESS, feeAddr);
+
+            const daiPriceInEth = await priceHelper.getPriceInETH(addrs[network].DAI_ADDRESS)
+                .then((price) => price.mul(98).div(100));
+
+            await botRefills.refill(ethRefillAmount, Float2BN('0'), refillAddr);
+
+            const ethBotAddrBalanceAfter = await balanceOf(ETH_ADDR, refillAddr);
+            const daiFeeAddrBalanceAfter = await balanceOf(addrs[network].DAI_ADDRESS, feeAddr);
+
+            expect(ethBotAddrBalanceAfter).to.be.gte(ethBotAddrBalanceBefore.add(ethRefillAmount));
+            const expectedDaiDeposit = ethRefillAmount.mul(Float2BN('1', 18)).div(daiPriceInEth);
+            expect(daiFeeAddrBalanceAfter).to.be
+                .eq(daiFeeAddrBalanceBefore.sub(expectedDaiDeposit));
             await stopImpersonatingAccount(refillCaller);
         });
     });
@@ -130,6 +175,7 @@ const botRefillTest = async () => {
         this.timeout(80000);
 
         let botRefills;
+        let priceHelper;
         let refillCaller; let refillAddr; let feeAddr;
 
         before(async () => {
@@ -137,8 +183,9 @@ const botRefillTest = async () => {
             botRefills = await hre.ethers.getContractAt('BotRefills', botRefillsAddr);
 
             refillAddr = '0x5aa40C7C8158D8E29CA480d7E05E5a32dD819332';
-            feeAddr = '0x76720ac2574631530ec8163e4085d6f98513fb27';
-            refillCaller = '0x33fDb79aFB4456B604f376A45A546e7ae700e880';
+            feeAddr = await hre.ethers.getContractAt('FeeRecipient', '0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A')
+                .then((r) => r.getFeeAddr());
+            refillCaller = '0x8973f5e6142ed2e2F50EEE8Bb34a47C2DAa6624a';
 
             // give approval to contract from feeAddr
             await impersonateAccount(feeAddr);
@@ -158,12 +205,15 @@ const botRefillTest = async () => {
             await wethContract.transfer(nullAddress, wethFeeAddrBalance);
 
             await stopImpersonatingAccount(feeAddr);
+
+            priceHelper = await getContractFromRegistry('TokenPriceHelper');
         });
 
         it('... should call refill with WETH', async () => {
             await impersonateAccount(refillCaller);
 
             const ethBotAddrBalanceBefore = await balanceOf(ETH_ADDR, refillAddr);
+            const daiFeeAddrBalanceBefore = await balanceOf(DAI_ADDR, feeAddr);
 
             const signer = await hre.ethers.provider.getSigner(refillCaller);
             botRefills = botRefills.connect(signer);
@@ -177,11 +227,13 @@ const botRefillTest = async () => {
                 await send(WETH_ADDRESS, feeAddr, ethRefillAmount);
             }
 
-            await botRefills.refill(ethRefillAmount, refillAddr);
+            await botRefills.refill(ethRefillAmount, Float2BN('0'), refillAddr);
 
             const ethBotAddrBalanceAfter = await balanceOf(ETH_ADDR, refillAddr);
+            const daiFeeAddrBalanceAfter = await balanceOf(DAI_ADDR, feeAddr);
 
             expect(ethBotAddrBalanceAfter).to.be.eq(ethBotAddrBalanceBefore.add(ethRefillAmount));
+            expect(daiFeeAddrBalanceBefore).to.be.eq(daiFeeAddrBalanceAfter);
 
             await stopImpersonatingAccount(refillCaller);
         });
@@ -197,13 +249,50 @@ const botRefillTest = async () => {
             const ethRefillAmount = hre.ethers.utils.parseUnits('4', 18);
             const daiAmount = hre.ethers.utils.parseUnits('50000', 18);
             await setBalance(DAI_ADDR, feeAddr, daiAmount);
-            await botRefills.refill(ethRefillAmount, refillAddr);
+            const daiFeeAddrBalanceBefore = await balanceOf(DAI_ADDR, feeAddr);
+
+            const daiPriceInEth = await priceHelper.getPriceInETH(DAI_ADDR)
+                .then((price) => price.mul(98).div(100));
+            await botRefills.refill(ethRefillAmount, daiPriceInEth, refillAddr);
 
             const ethBotAddrBalanceAfter = await balanceOf(ETH_ADDR, refillAddr);
+            const daiFeeAddrBalanceAfter = await balanceOf(DAI_ADDR, feeAddr);
 
             console.log(ethBotAddrBalanceBefore.toString(), ethBotAddrBalanceAfter.toString());
 
-            expect(ethBotAddrBalanceAfter).to.be.gt(ethBotAddrBalanceBefore);
+            expect(ethBotAddrBalanceAfter).to.be.gte(ethBotAddrBalanceBefore.add(ethRefillAmount));
+            const expectedDaiDeposit = ethRefillAmount.mul(Float2BN('1', 18)).div(daiPriceInEth);
+            expect(daiFeeAddrBalanceAfter).to.be
+                .eq(daiFeeAddrBalanceBefore.sub(expectedDaiDeposit));
+            await stopImpersonatingAccount(refillCaller);
+        });
+
+        it('... should call refill with DAI using fallback chainlink price', async () => {
+            await impersonateAccount(refillCaller);
+
+            const ethBotAddrBalanceBefore = await balanceOf(ETH_ADDR, refillAddr);
+
+            const signer = await hre.ethers.provider.getSigner(refillCaller);
+            botRefills = botRefills.connect(signer);
+
+            const ethRefillAmount = hre.ethers.utils.parseUnits('4', 18);
+            const daiAmount = hre.ethers.utils.parseUnits('50000', 18);
+            await setBalance(DAI_ADDR, feeAddr, daiAmount);
+            const daiFeeAddrBalanceBefore = await balanceOf(DAI_ADDR, feeAddr);
+            const daiPriceInEth = await priceHelper.getPriceInETH(DAI_ADDR)
+                .then((price) => price.mul(98).div(100));
+
+            await botRefills.refill(ethRefillAmount, Float2BN('0'), refillAddr);
+
+            const ethBotAddrBalanceAfter = await balanceOf(ETH_ADDR, refillAddr);
+            const daiFeeAddrBalanceAfter = await balanceOf(DAI_ADDR, feeAddr);
+
+            console.log(ethBotAddrBalanceBefore.toString(), ethBotAddrBalanceAfter.toString());
+
+            expect(ethBotAddrBalanceAfter).to.be.gte(ethBotAddrBalanceBefore);
+            const expectedDaiDeposit = ethRefillAmount.mul(Float2BN('1', 18)).div(daiPriceInEth);
+            expect(daiFeeAddrBalanceAfter).to.be
+                .eq(daiFeeAddrBalanceBefore.sub(expectedDaiDeposit));
             await stopImpersonatingAccount(refillCaller);
         });
     });

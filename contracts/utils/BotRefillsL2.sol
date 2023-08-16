@@ -4,15 +4,15 @@ pragma solidity =0.8.10;
 
 import "../auth/AdminAuth.sol";
 import "../interfaces/uniswap/v3/ISwapRouter.sol";
-import "../interfaces/uniswap/v3/IQuoter.sol";
 import "../interfaces/IBotRegistry.sol";
-import "../utils/TokenPriceHelper.sol";
+import "../utils/TokenPriceHelperL2.sol";
 import "./TokenUtils.sol";
 import "./helpers/UtilHelper.sol";
 import "./FeeRecipient.sol";
 
 
-contract BotRefillsL2 is AdminAuth, TokenPriceHelper {
+/// @title Contract used to refill tx sending bots when they are low on eth
+contract BotRefillsL2 is AdminAuth, TokenPriceHelperL2 {
     using TokenUtils for address;
     error WrongRefillCallerError();
     error NotAuthBotError();
@@ -22,7 +22,6 @@ contract BotRefillsL2 is AdminAuth, TokenPriceHelper {
     FeeRecipient public constant feeRecipient = FeeRecipient(FEE_RECIPIENT);
 
     ISwapRouter internal router = ISwapRouter(UNI_V3_ROUTER);
-    IQuoter internal quoter = IQuoter(UNI_V3_QUOTER);
 
     mapping(address => bool) public additionalBots;
 
@@ -45,7 +44,7 @@ contract BotRefillsL2 is AdminAuth, TokenPriceHelper {
         additionalBots[DEFAULT_BOT] = true;
     }
 
-    function refill(uint256 _ethAmount, address _botAddress)
+    function refill(uint256 _ethAmount, uint256 _daiPriceInEth, address _botAddress)
         public
         isRefillCaller
         isApprovedBot(_botAddress)
@@ -61,9 +60,10 @@ contract BotRefillsL2 is AdminAuth, TokenPriceHelper {
             payable(_botAddress).transfer(_ethAmount);
         } else {        
             // get how much dai we need to convert
-            uint256 daiPrice = uint256(getChainlinkPriceInUSD(DAI_ADDR, false));
-            uint256 ethPrice = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
-            uint256 daiAmount = _ethAmount * ethPrice * (1e18 + ALLOWED_SLIPPAGE) / daiPrice / 1e18;
+            if (_daiPriceInEth == 0) {
+                _daiPriceInEth = _daiPriceInEth = getPriceInETH(DAI_ADDR) * (1e18 - ALLOWED_SLIPPAGE) / 1e18;
+            }
+            uint256 daiAmount = _ethAmount * 1e18 / _daiPriceInEth;
 
             IERC20(DAI_ADDR).transferFrom(feeReceiverAddr, address(this), daiAmount);
             DAI_ADDR.approveToken(address(router), daiAmount);
@@ -85,9 +85,9 @@ contract BotRefillsL2 is AdminAuth, TokenPriceHelper {
         }
     }
 
-    function refillMany(uint256[] memory _ethAmounts, address[] memory _botAddresses) public {
+    function refillMany(uint256[] memory _ethAmounts, uint256 _daiPriceInEth, address[] memory _botAddresses) public {
         for(uint i = 0; i < _botAddresses.length; ++i) {
-            refill(_ethAmounts[i], _botAddresses[i]);
+            refill(_ethAmounts[i], _daiPriceInEth, _botAddresses[i]);
         }
     }
 
