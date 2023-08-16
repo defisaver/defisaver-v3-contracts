@@ -1080,14 +1080,14 @@
     },
     {
         "name": "AaveSupply",
-        "address": "0xEbB200a529058B561B42Eab510DA157a63243CEc",
+        "address": "0x3DbdC87d2299768AD82DDCAc13021A29681b8520",
         "id": "0xc380343c",
         "path": "contracts/actions/aave/AaveSupply.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xEbB200a529058B561B42Eab510DA157a63243CEc"]
     },
     {
         "name": "AaveWithdraw",
