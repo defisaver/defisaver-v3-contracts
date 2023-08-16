@@ -1123,6 +1123,17 @@
         "history": []
     },
     {
+        "name": "AaveV2RatioCheck",
+        "address": "0x2C35d28f969cC76B4CcA490cEF31289432B22640",
+        "id": "0xe2833393",
+        "path": "contracts/actions/checkers/AaveV2RatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "MorphoMarketStorage",
         "address": "0x56EE33811a6C8c1Fd443E53685ed1605E43b3971",
         "id": "0x9600f04b",
@@ -2239,9 +2250,20 @@
     },
     {
         "name": "CompoundRatioTrigger",
-        "address": "0x8EfbD976709c2bD46bdaf0c3Db83E875F1451BAE",
+        "address": "0x5e9d504d6C4028A905069EE9e2c237d2dcF8380B",
         "id": "0xfd030057",
         "path": "contracts/triggers/CompoundRatioTrigger.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": ["0x8EfbD976709c2bD46bdaf0c3Db83E875F1451BAE"]
+    },
+    {
+        "name": "CompV2RatioCheck",
+        "address": "0x46ad845534bEDfBF682C4AD516A92DF503AD86da",
+        "id": "0x950d2607",
+        "path": "contracts/checkers/CompV2RatioCheck.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
@@ -2272,14 +2294,14 @@
     },
     {
         "name": "AaveV2RatioTrigger",
-        "address": "0xd891f499260aF046B4d4324cBEB84d02a6D61195",
+        "address": "0xafdB4566876590527cAA31633A2208Ea77d5BC15",
         "id": "0x7e8b6344",
         "path": "contracts/triggers/AaveV2RatioTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xd891f499260aF046B4d4324cBEB84d02a6D61195"]
     },
     {
         "name": "LiquityDebtInFrontTrigger",
