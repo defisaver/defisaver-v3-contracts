@@ -8,9 +8,6 @@ import "../../../DS/DSMath.sol";
 
 contract AaveRatioHelper is DSMath {
 
-    address internal constant TRANSIENT_STORAGE = 0x2F7Ef2ea5E8c97B8687CA703A0e50Aa5a49B7eb2;
-    address internal constant DEFAULT_AAVE_V2_MARKET = 0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5;
-
     function getSafetyRatio(address _market, address _user) public view returns(uint256) {
         ILendingPoolV2 lendingPool = ILendingPoolV2(ILendingPoolAddressesProviderV2(_market).getLendingPool());
         
