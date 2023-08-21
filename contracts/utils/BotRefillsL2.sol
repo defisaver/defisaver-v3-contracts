@@ -7,7 +7,6 @@ import "../interfaces/uniswap/v3/ISwapRouter.sol";
 import "../interfaces/IBotRegistry.sol";
 import "../utils/TokenPriceHelperL2.sol";
 import "./TokenUtils.sol";
-import "./helpers/UtilHelper.sol";
 import "./FeeRecipient.sol";
 
 
@@ -41,10 +40,10 @@ contract BotRefillsL2 is AdminAuth, TokenPriceHelperL2 {
     }
 
     constructor() {
-        additionalBots[DEFAULT_BOT] = true;
     }
 
-    function refill(uint256 _ethAmount, uint256 _daiPriceInEth, address _botAddress)
+    /// @dev _minPrice is DAI/ETH price - allowed slippage %
+    function refill(uint256 _ethAmount, uint256 _minPrice, address _botAddress)
         public
         isRefillCaller
         isApprovedBot(_botAddress)
@@ -60,10 +59,10 @@ contract BotRefillsL2 is AdminAuth, TokenPriceHelperL2 {
             payable(_botAddress).transfer(_ethAmount);
         } else {        
             // get how much dai we need to convert
-            if (_daiPriceInEth == 0) {
-                _daiPriceInEth = _daiPriceInEth = getPriceInETH(DAI_ADDR) * (1e18 - ALLOWED_SLIPPAGE) / 1e18;
+            if (_minPrice == 0) {
+                _minPrice = _minPrice = getPriceInETH(DAI_ADDR) * (1e18 - ALLOWED_SLIPPAGE) / 1e18;
             }
-            uint256 daiAmount = _ethAmount * 1e18 / _daiPriceInEth;
+            uint256 daiAmount = _ethAmount * 1e18 / _minPrice;
 
             IERC20(DAI_ADDR).transferFrom(feeReceiverAddr, address(this), daiAmount);
             DAI_ADDR.approveToken(address(router), daiAmount);
@@ -85,9 +84,9 @@ contract BotRefillsL2 is AdminAuth, TokenPriceHelperL2 {
         }
     }
 
-    function refillMany(uint256[] memory _ethAmounts, uint256 _daiPriceInEth, address[] memory _botAddresses) public {
+    function refillMany(uint256[] memory _ethAmounts, uint256 _minPrice, address[] memory _botAddresses) public {
         for(uint i = 0; i < _botAddresses.length; ++i) {
-            refill(_ethAmounts[i], _daiPriceInEth, _botAddresses[i]);
+            refill(_ethAmounts[i], _minPrice, _botAddresses[i]);
         }
     }
 
@@ -97,6 +96,12 @@ contract BotRefillsL2 is AdminAuth, TokenPriceHelperL2 {
 
     function setAdditionalBot(address _botAddr, bool _approved) public onlyOwner {
         additionalBots[_botAddr] = _approved;
+    }
+
+    function setAdditionalBots(address[] calldata _botAddresses, bool[] calldata _approved) public {
+        for (uint256 i = 0; i < _botAddresses.length; ++i){
+            setAdditionalBot(_botAddresses[i], _approved[i]);
+        }
     }
 
     receive() external payable {}
