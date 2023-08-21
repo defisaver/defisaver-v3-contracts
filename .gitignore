@@ -122,3 +122,5 @@ contracts/flattened/
 
 forked-addr.json
 deployments/
+
+/.idea/
