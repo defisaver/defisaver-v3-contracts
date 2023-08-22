@@ -2,6 +2,7 @@
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const hre = require('hardhat');
+require('dotenv-safe').config();
 // const axios = require('axios');
 
 const dfs = require('@defisaver/sdk');
@@ -652,8 +653,9 @@ const oneInchTest = async () => {
                 + '&disableEstimate=true'
                 + '&allowPartialFill=false'
                 + '&includeProtocols=true',
+
                 headers: {
-                    Authorization: 'Bearer 4trHOrTtM6UWnztd8m68QSXBtuARRZoF',
+                    Authorization: `Bearer ${process.env.ONE_INCH_KEY}`,
                 },
             };
             // set slippage to user slippage + fee%

@@ -55,7 +55,10 @@ contract OneInchWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMat
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
 
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
-        (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(oneInchCalldata.realCalldata);
+
+        /// @dev the amount of tokens received is checked in DFSExchangeCore
+        /// @dev Exchange wrapper contracts should not be used on their own
+        (success, ) = _exData.offchainData.exchangeAddr.call(oneInchCalldata.realCalldata);
         uint256 tokensSwapped = 0;
 
         if (success) {
