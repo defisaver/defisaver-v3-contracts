@@ -1134,6 +1134,17 @@
         "history": []
     },
     {
+        "name": "AaveClaimAAVE",
+        "address": "0xd52855bD011F3D87565f9040DdE2A59fB1b27b15",
+        "id": "0x22ed53c6",
+        "path": "contracts/actions/aave/AaveClaimAAVE.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "MorphoMarketStorage",
         "address": "0x56EE33811a6C8c1Fd443E53685ed1605E43b3971",
         "id": "0x9600f04b",
