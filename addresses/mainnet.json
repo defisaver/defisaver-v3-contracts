@@ -198,6 +198,17 @@
         "history": []
     },
     {
+        "name": "OneInchWrapper",
+        "address": "0x02DCC3438Bb7e46F6BF671C72e98D503c0bCE520",
+        "id": "0x82854967",
+        "path": "contracts/exchangeV3/offchainWrappersV3/OneInchWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveWrapperV3",
         "address": "0x3788B4Db5e99fF555e22a08241EB3cFc3a0ac149",
         "id": "0xb856c9af",

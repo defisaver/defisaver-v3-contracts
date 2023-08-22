@@ -143,6 +143,17 @@
       "history": []
     },
     {
+      "name": "OneInchWrapper",
+      "address": "0x0EC0b0F3BaDD1d66235Eec303D698D4A7652E658",
+      "id": "0x82854967",
+      "path": "contracts/exchangeV3/offchainWrappersV3/OneInchWrapper.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "ParaswapWrapper",
       "address": "0x38E7c23f6BbAA26EF076bbcFc2a509bcaA45797c",
       "id": "0x115fa27e",
