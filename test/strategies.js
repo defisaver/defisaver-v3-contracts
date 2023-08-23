@@ -2612,10 +2612,45 @@ const createAaveV3FLCloseToDebtStrategy = () => {
     return aaveCloseStrategy.encodeForDsProxyCall();
 };
 
+const createAaveV3FLCloseToDebtWithGasPriceStrategy = () => {
+    const strategyName = 'AaveV3FLCloseToDebtWithGasPrice';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addTrigger(new dfs.triggers.GasPriceTrigger('0'));
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.flAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionFL());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendRepayFL());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
 const createAaveV3CloseToCollStrategy = () => {
     const strategyName = 'AaveV3CloseToColl';
 
     const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionColl());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendColl());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV3CloseToCollWithGasPriceStrategy = () => {
+    const strategyName = 'AaveV3CloseToCollWithGasPrice';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addTrigger(new dfs.triggers.GasPriceTrigger('0'));
 
     aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
     aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionColl());
@@ -3134,6 +3169,25 @@ const createAaveFLV2BoostStrategy = () => {
     return aaveV2BoostStrategy.encodeForDsProxyCall();
 };
 
+const createAaveV3FLCloseToCollWithGasPriceStrategy = () => {
+    const strategyName = 'AaveV3FLCloseToCollWithGasPrice';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addTrigger(new dfs.triggers.GasPriceTrigger('0'));
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.flAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionFLColl());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendRepayFL());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendColl());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
 const createSparkBoostStrategy = () => {
     const sparkBoostStrategy = new dfs.Strategy('SparkBoost');
 
@@ -3634,8 +3688,11 @@ module.exports = {
     createAaveV3RepayStrategy,
     createAaveFLV3RepayStrategy,
     createAaveV3CloseToDebtStrategy,
+    createAaveV3CloseToDebtWithGasPriceStrategy,
     createAaveV3FLCloseToDebtStrategy,
+    createAaveV3FLCloseToDebtWithGasPriceStrategy,
     createAaveV3CloseToCollStrategy,
+    createAaveV3CloseToCollWithGasPriceStrategy,
     createAaveV3FLCloseToCollStrategy,
     createAaveV2RepayStrategy,
     createAaveFLV2RepayStrategy,
@@ -3645,6 +3702,7 @@ module.exports = {
     createCompFLV2RepayStrategy,
     createCompV2BoostStrategy,
     createCompFLV2BoostStrategy,
+    createAaveV3FLCloseToCollWithGasPriceStrategy,
     createSparkBoostStrategy,
     createSparkFLBoostStrategy,
     createSparkRepayStrategy,
