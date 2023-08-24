@@ -5,8 +5,9 @@ pragma solidity =0.8.10;
 import "../../ActionBase.sol";
 import "./helpers/MorphoAaveV3Helper.sol";
 
-/// @title Allow or disallow an address to manage your CompV3 position
+/// @title Allow or disallow an address to manage your Morpho-AaveV3 DSProxy position
 contract MorphoAaveV3SetManager is ActionBase, MorphoAaveV3Helper {
+    
     struct Params {
         uint256 emodeId;
         address manager;
