@@ -22,7 +22,7 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
     /// @param amount - amount of tokens being withdrawn
     /// @param isPositionClosing - bool representing if the user is fully closing his position
     struct Params {
-        uint8 protocol;
+        uint256 protocol;
         address token;
         uint256 amount;
         bool isPositionClosing;

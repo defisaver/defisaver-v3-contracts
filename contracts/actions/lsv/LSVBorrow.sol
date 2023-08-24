@@ -11,7 +11,7 @@ contract LSVBorrow is ActionBase, LSVUtilHelper {
     /// @param protocol - an ID representing the protocol in LSVProfitTracker
     /// @param amount - amount of token being borrowed
     struct Params {
-        uint8 protocol;
+        uint256 protocol;
         uint256 amount;
     }
 

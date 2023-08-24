@@ -2,23 +2,25 @@
 
 pragma solidity =0.8.10;
 
+/// @dev We are aware that anyone can change their unrealisedProfit, the worst thing someone can do is remove LSV fee
+/// @dev It's tradeoff for much higher gas usage that would happen if we'd have much more strict requirements and checks
 contract LSVProfitTracker{
 
-    mapping(uint8 => mapping(address => int256)) public unrealisedProfit;
+    mapping(uint256 => mapping(address => int256)) public unrealisedProfit;
 
-    function supply(uint8 _protocol, uint256 _amount) public {
+    function supply(uint256 _protocol, uint256 _amount) public {
         unrealisedProfit[_protocol][msg.sender] -= downCastUintToInt(_amount); 
     }
 
-    function borrow(uint8 _protocol, uint256 _amount) public {
+    function borrow(uint256 _protocol, uint256 _amount) public {
         unrealisedProfit[_protocol][msg.sender] += downCastUintToInt(_amount); 
     }
     
-    function payback(uint8 _protocol, uint256 _amount) public {
+    function payback(uint256 _protocol, uint256 _amount) public {
         unrealisedProfit[_protocol][msg.sender] -= downCastUintToInt(_amount); 
     }
 
-    function withdraw(uint8 _protocol, uint256 _amount,  bool _isClosingVault) public returns (uint256 realisedProfit){
+    function withdraw(uint256 _protocol, uint256 _amount,  bool _isClosingVault) public returns (uint256 realisedProfit){
         unrealisedProfit[_protocol][msg.sender] += downCastUintToInt(_amount);
         
         if (unrealisedProfit[_protocol][msg.sender] > 0){

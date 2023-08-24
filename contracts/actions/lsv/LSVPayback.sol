@@ -11,7 +11,7 @@ contract LSVPayback is ActionBase, LSVUtilHelper {
     /// @param protocol - an ID representing the protocol in LSVProfitTracker
     /// @param amount - amount of token being paid back
     struct Params {
-        uint8 protocol;
+        uint256 protocol;
         uint256 amount;
     }
 

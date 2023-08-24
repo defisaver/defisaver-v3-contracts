@@ -12,7 +12,7 @@ contract LSVSupply is ActionBase, LSVUtilHelper {
     /// @param token - token which is being supplied to the protocol
     /// @param amount - amount of token being supplied
     struct Params {
-        uint8 protocol;
+        uint256 protocol;
         address token;
         uint256 amount;
     }
