@@ -114,16 +114,16 @@ contract LSVSell is ActionBase, DFSExchangeCore {
         } 
 
         _exchangeData.dfsFeeDivider = 0;
-        bool shouldSellOnchain = true;
+        bool shouldSell = true;
 
         address wrapper;
         uint256 exchangedAmount;
 
         if (_exchangeData.destAddr == TokenUtils.WSTETH_ADDR){
             if (_exchangeData.srcAddr == TokenUtils.WETH_ADDR || _exchangeData.srcAddr == TokenUtils.STETH_ADDR){
-                shouldSellOnchain = _exchangeData.minPrice > IWStEth(TokenUtils.WSTETH_ADDR).tokensPerStEth();
+                shouldSell = _exchangeData.minPrice > IWStEth(TokenUtils.WSTETH_ADDR).tokensPerStEth();
             }
-            if (!shouldSellOnchain){
+            if (!shouldSell){
                 if (_exchangeData.srcAddr == TokenUtils.WETH_ADDR){
                     exchangedAmount = _lidoStakeAndWrapWETH(_exchangeData.srcAmount);
                 } else if (_exchangeData.srcAddr == TokenUtils.STETH_ADDR){
@@ -132,7 +132,9 @@ contract LSVSell is ActionBase, DFSExchangeCore {
             }
         }
 
-        if (shouldSellOnchain){
+        _exchangeData.user = getUserAddress();
+
+        if (shouldSell){
             (wrapper, exchangedAmount) = _sell(_exchangeData);
         }
 
