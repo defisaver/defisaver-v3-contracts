@@ -67,8 +67,13 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper {
         uint256 amountWithdrawnInETH = getAmountInETHFromLST(_inputData.token, _inputData.amount);
         uint256 feeAmountInETH = LSVProfitTracker(LSV_PROFIT_TRACKER_ADDRESS).withdraw(_inputData.protocol, amountWithdrawnInETH, _inputData.isPositionClosing);
         
+        /// @dev fee can maximally be 10% of the amount being withdrawn
+        if (feeAmountInETH > amountWithdrawnInETH / 10) {
+            feeAmountInETH = amountWithdrawnInETH / 10;
+        }
+    
         uint256 feeAmount = getAmountInLSTFromETH(_inputData.token, feeAmountInETH);
-        
+
         address feeAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();
         
         _inputData.token.withdrawTokens(feeAddr, feeAmount);
