@@ -44,6 +44,7 @@ const {
 } = require('./utils');
 
 const { MCD_MANAGER_ADDR } = require('./utils-mcd');
+const { defaultAbiCoder } = require('ethers/src.ts/utils');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -644,7 +645,7 @@ const subSparkCloseBundle = async (
     return { subId, strategySub };
 };
 
-const subAaveV3CloseWithGasPriceBundle = async (
+const subAaveV3CloseWithMaximumGasPriceBundle = async (
     proxy,
     bundleId,
     triggerBaseAsset,
@@ -702,5 +703,5 @@ module.exports = {
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,
     subSparkCloseBundle,
-    subAaveV3CloseWithGasPriceBundle,
+    subAaveV3CloseWithMaximumGasPriceBundle,
 };
