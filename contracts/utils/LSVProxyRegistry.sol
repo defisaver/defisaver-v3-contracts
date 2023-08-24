@@ -29,17 +29,17 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
         return newProxy;
     }
 
-    function updateRegistry(address _proxyAddr, address _oldOwner, uint256 _noInOldOwnerProxiesArr) public {
+    function updateRegistry(address _proxyAddr, address _oldOwner, uint256 _indexNumInOldOwnerProxiesArr) public {
         // check if msg.sender is the owner of proxy in question
         require(DSProxy(payable(_proxyAddr)).owner() == msg.sender);
 
         // check if oldOwner really was the owner of proxy in question
-        require(proxies[_oldOwner][_noInOldOwnerProxiesArr] == _proxyAddr);
+        require(proxies[_oldOwner][_indexNumInOldOwnerProxiesArr] == _proxyAddr);
 
         // remove proxy from oldOwners proxies
         uint256 oldOwnersProxyCount = proxies[_oldOwner].length;
-        if (oldOwnersProxyCount > 1 && _noInOldOwnerProxiesArr < (oldOwnersProxyCount - 1))  {
-            proxies[_oldOwner][_noInOldOwnerProxiesArr] = proxies[_oldOwner][oldOwnersProxyCount - 1];
+        if (oldOwnersProxyCount > 1 && _indexNumInOldOwnerProxiesArr < (oldOwnersProxyCount - 1))  {
+            proxies[_oldOwner][_indexNumInOldOwnerProxiesArr] = proxies[_oldOwner][oldOwnersProxyCount - 1];
         }
         proxies[_oldOwner].pop();
 
