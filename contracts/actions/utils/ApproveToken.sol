@@ -30,6 +30,7 @@ contract ApproveToken is ActionBase {
 
         _approveToken(inputData.tokenAddr, inputData.spender, inputData.amount);
 
+        emit ActionEvent("ApproveToken", abi.encode(inputData));
         return bytes32(inputData.amount);
     }
 
@@ -38,6 +39,7 @@ contract ApproveToken is ActionBase {
         Params memory inputData = parseInputs(_callData);
 
         _approveToken(inputData.tokenAddr, inputData.spender, inputData.amount);
+        logger.logActionDirectEvent("ApproveToken", abi.encode(inputData));
     }
 
     /// @inheritdoc ActionBase
