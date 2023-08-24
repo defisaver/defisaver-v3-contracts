@@ -199,7 +199,7 @@ async function verifyContract(contractAddress, contractName) {
     params.append('compilerversion', solVersion);
     params.append('optimizationUsed', hardhatSettings.solidity.settings.optimizer.enabled ? 1 : 0);
     params.append('runs', hardhatSettings.solidity.settings.optimizer.runs);
-    params.append('EVMVersion', 'default (compiler defaults)');
+    params.append('EVMVersion', '');
     /// @notice : MIT license
     params.append('licenseType', 3);
 

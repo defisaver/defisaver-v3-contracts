@@ -7,4 +7,5 @@ abstract contract IStkAave {
   function redeem(address to, uint256 amount) external virtual;
   function REWARD_TOKEN() external virtual view returns (address);
   function stake(address onBehalfOf, uint256 amount) external virtual;
+  function claimRewards(address to, uint256 amount) external virtual;
 } 

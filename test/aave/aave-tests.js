@@ -26,6 +26,8 @@ const {
     redeploy,
     setBalance,
     approve,
+    resetForkToBlock,
+    impersonateAccount,
 } = require('../utils');
 
 const {
@@ -36,6 +38,7 @@ const {
     claimStkAave,
     startUnstakeAave,
     finalizeUnstakeAave,
+    claimAaveFromStkAave,
 } = require('../actions');
 
 const aaveSupplyTest = async (testLength) => {
@@ -500,6 +503,47 @@ const aaveClaimStkAaveTest = async () => {
     });
 };
 
+const aaveClaimAAVETest = async () => {
+    describe('Aave-claim staked aave test', function () {
+        this.timeout(150000);
+
+        let senderAcc; let proxy;
+        const AAVE_ADDR = '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9';
+        const OWNER_ACC = '0xa6584b95EA4E9018b1F377dad99448EC478a150f';
+
+        before(async () => {
+            await resetForkToBlock(17970305);
+            // at this block user can claim 1.357486729318663975 AAVE on his proxy
+            await redeploy('AaveClaimAAVE');
+            senderAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
+
+            proxy = await getProxy(OWNER_ACC);
+            proxy = proxy.connect(senderAcc);
+            await impersonateAccount(OWNER_ACC);
+        });
+
+        it('... should claim 1 AAVE (out of 1.35) for DSProxy from Staking Aave', async () => {
+            const amountToClaim = hre.ethers.utils.parseUnits('1', 18);
+            const aaveBalanceBefore = await balanceOf(AAVE_ADDR, OWNER_ACC);
+            await claimAaveFromStkAave(proxy, amountToClaim, OWNER_ACC);
+            const aaveBalanceAfter = await balanceOf(AAVE_ADDR, OWNER_ACC);
+            console.log(aaveBalanceBefore.toString());
+            console.log(aaveBalanceAfter.toString());
+            expect(aaveBalanceAfter.sub(aaveBalanceBefore)).to.be.eq(amountToClaim);
+        });
+
+        it('... should claim all accrued rewards when amount > unclaimed rewards', async () => {
+            const amountToClaim = hre.ethers.constants.MaxUint256;
+            const aaveBalanceBefore = await balanceOf(AAVE_ADDR, OWNER_ACC);
+            await claimAaveFromStkAave(proxy, amountToClaim, OWNER_ACC);
+            const aaveBalanceAfter = await balanceOf(AAVE_ADDR, OWNER_ACC);
+            console.log(aaveBalanceBefore.toString());
+            console.log(aaveBalanceAfter.toString());
+            expect(aaveBalanceAfter.sub(aaveBalanceBefore)).to.be.gt('0');
+        });
+    });
+};
+
 const aaveUnstakeTest = async () => {
     describe('Aave-stake on behalf of proxy and unstake test', function () {
         this.timeout(150000);
@@ -581,4 +625,5 @@ module.exports = {
     aaveUnstakeTest,
     aaveFullTest,
     aaveDeployContracts,
+    aaveClaimAAVETest,
 };

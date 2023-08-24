@@ -88,6 +88,17 @@
       "history": []
     },
     {
+      "name": "OneInchWrapper",
+      "address": "0x6aB5ee6758235a3aBf6F32578EC2Cb655f2A94a8",
+      "id": "0x82854967",
+      "path": "contracts/exchangeV3/offchainWrappersV3/OneInchWrapper.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "KyberAggregatorWrapper",
       "address": "0x59aD138C43b63Be18363630eF8Ab8b78Ada2c3e0",
       "id": "0x1abf4ed0",
