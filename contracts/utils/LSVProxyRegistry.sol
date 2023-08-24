@@ -29,19 +29,22 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
         return newProxy;
     }
 
-    /// @notice user wants to manualy remove a proxy so it doesn't get shown to him
-    function removeProxy(uint256 _noInProxiesArr) public {
-        uint256 arrLength = proxies[msg.sender].length;
-        if (arrLength > 1 &&_noInProxiesArr < (arrLength - 1))  {
-            proxies[msg.sender][_noInProxiesArr] = proxies[msg.sender][arrLength - 1];
-        }
-        proxies[msg.sender].pop();
-    }
+    function updateRegistry(address _proxyAddr, address _oldOwner, uint256 _noInOldOwnerProxiesArr) public {
+        // check if msg.sender is the owner of proxy in question
+        require(DSProxy(payable(_proxyAddr)).owner() == msg.sender);
 
-    /// @notice user wants to manualy add a proxy so it gets shown to him
-    function addProxy(address proxyAddr) public {
-        require(DSProxy(payable(proxyAddr)).owner() == msg.sender);
-        proxies[msg.sender].push(proxyAddr);
+        // check if oldOwner really was the owner of proxy in question
+        require(proxies[_oldOwner][_noInOldOwnerProxiesArr] == _proxyAddr);
+
+        // remove proxy from oldOwners proxies
+        uint256 oldOwnersProxyCount = proxies[_oldOwner].length;
+        if (oldOwnersProxyCount > 1 && _noInOldOwnerProxiesArr < (oldOwnersProxyCount - 1))  {
+            proxies[_oldOwner][_noInOldOwnerProxiesArr] = proxies[_oldOwner][oldOwnersProxyCount - 1];
+        }
+        proxies[_oldOwner].pop();
+
+        // add proxy to msg.sender proxies
+        proxies[msg.sender].push(_proxyAddr);
     }
 
     /// @notice Adds proxies to pool for users to later claim and save on gas
@@ -70,10 +73,8 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
         if (proxyPool.length > 0) {
             address newProxy = proxyPool[proxyPool.length - 1];
             proxyPool.pop();
-            if (_user != (address(this))){
-                DSAuth(newProxy).setOwner(_user);
-            }
-
+            
+            DSAuth(newProxy).setOwner(_user);
             return newProxy;
         } else {
             DSProxy newProxy = DSProxyFactoryInterface(PROXY_FACTORY_ADDR).build(_user);
