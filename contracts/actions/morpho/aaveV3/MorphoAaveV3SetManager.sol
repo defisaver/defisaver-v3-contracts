@@ -25,7 +25,9 @@ contract MorphoAaveV3SetManager is ActionBase, MorphoAaveV3Helper {
 
         params.emodeId = _parseParamUint(params.emodeId, _paramMapping[0], _subData, _returnValues);
         params.manager = _parseParamAddr(params.manager, _paramMapping[1], _subData, _returnValues);
+        
         _setManager(params);
+
         emit ActionEvent("MorphoAaveV3SetManager", abi.encode(params));
         return bytes32(bytes20(params.manager));
     }
@@ -33,7 +35,9 @@ contract MorphoAaveV3SetManager is ActionBase, MorphoAaveV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
+
         _setManager(params);
+        
         logger.logActionDirectEvent("MorphoAaveV3SetManager", abi.encode(params));
     }
 

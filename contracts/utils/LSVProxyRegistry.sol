@@ -55,7 +55,7 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
         }
     }
 
-    /// @dev helper function to get all users proxies
+    /// @notice helper function to get all users proxies
     function getProxies(address _user) public view returns (address[] memory){
         address[] memory resultProxies = new address[](proxies[_user].length);
         for (uint256 i = 0; i < proxies[_user].length; i++){
@@ -63,6 +63,7 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
         }
         return resultProxies;
     }
+    
     /// @notice helper function to check how many proxies are there in the proxy pool for cheaper user onboarding
     function getProxyPoolCount() public view returns (uint256) {
         return proxyPool.length;

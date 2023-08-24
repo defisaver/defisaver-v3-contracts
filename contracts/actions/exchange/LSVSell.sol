@@ -7,8 +7,8 @@ import "../../interfaces/lido/IWStEth.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../ActionBase.sol";
 
-/// @title A exchange sell action through the dfs exchange with no fee
-/// @dev weth and steth can be transformed into wsteth directly if the rate is better than minPrice
+/// @title A exchange sell action through the LSV exchange with no fee (used only for ETH Saver)
+/// @dev weth and steth will be transformed into wsteth directly if the rate is better than minPrice
 /// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
 contract LSVSell is ActionBase, DFSExchangeCore {
 
@@ -153,7 +153,8 @@ contract LSVSell is ActionBase, DFSExchangeCore {
             _exchangeData.destAddr,
             _exchangeData.srcAmount,
             exchangedAmount,
-            _exchangeData.dfsFeeDivider
+            _exchangeData.dfsFeeDivider,
+            shouldSell
         );
         return (exchangedAmount, logData);
     }
@@ -175,14 +176,15 @@ contract LSVSell is ActionBase, DFSExchangeCore {
         wStEthReceivedAmount = IWStEth(TokenUtils.WSTETH_ADDR).wrap(stethAmount);
     }
 
-    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
-        params = abi.decode(_callData, (Params));
-    }
-
     /// @notice Returns the owner of the DSProxy that called the contract
     function getUserAddress() internal view returns (address) {
         IDSProxy proxy = IDSProxy(payable(address(this)));
 
         return proxy.owner();
     }
+
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
+        params = abi.decode(_callData, (Params));
+    }
+
 }
