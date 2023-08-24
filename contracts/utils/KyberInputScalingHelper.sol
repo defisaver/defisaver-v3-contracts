@@ -203,6 +203,12 @@ contract KyberInputScalingHelper {
                 swap.data = newPlatypus(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeMaverick.selector) {
                 swap.data = newMaverick(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeSyncSwap.selector) {
+                swap.data = newSyncSwap(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeAlgebraV1.selector) {
+                swap.data = newAlgebraV1(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeBalancerBatch.selector) {
+                swap.data = newBalancerBatch(swap.data, oldAmount, newAmount);
             } else revert("AggregationExecutor: Dex type not supported");
             unchecked {
                 ++i;
@@ -389,6 +395,39 @@ contract KyberInputScalingHelper {
         IExecutorHelper.Maverick memory maverick = abi.decode(data, (IExecutorHelper.Maverick));
         maverick.swapAmount = (maverick.swapAmount * newAmount) / oldAmount;
         return abi.encode(maverick);
+    }
+
+    function newSyncSwap(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.SyncSwap memory syncSwap = abi.decode(data, (IExecutorHelper.SyncSwap));
+        syncSwap.collectAmount = (syncSwap.collectAmount * newAmount) / oldAmount;
+        return abi.encode(syncSwap);
+    }
+
+    function newAlgebraV1(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.AlgebraV1 memory algebraV1Swap = abi.decode(data, (IExecutorHelper.AlgebraV1));
+        algebraV1Swap.swapAmount = (algebraV1Swap.swapAmount * newAmount) / oldAmount;
+        return abi.encode(algebraV1Swap);
+    }
+
+    function newBalancerBatch(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.BalancerBatch memory balancerBatch = abi.decode(
+        data,
+        (IExecutorHelper.BalancerBatch)
+        );
+        balancerBatch.amountIn = (balancerBatch.amountIn * newAmount) / oldAmount;
+        return abi.encode(balancerBatch);
     }
 
     function _scaledPositiveSlippageFeeData(
