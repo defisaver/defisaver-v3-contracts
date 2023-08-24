@@ -3933,7 +3933,7 @@ const aaveV3CloseActionsEncoded = {
     )).encodeForRecipe()[0],
 };
 
-const callAaveCloseToCollWithGasPriceStrategy = async (
+const callAaveCloseToCollWithMaximumGasPriceStrategy = async (
     strategyExecutorByBot,
     subId,
     swapAmount,
@@ -3977,7 +3977,7 @@ const callAaveCloseToCollWithGasPriceStrategy = async (
     const gasUsed = await getGasUsed(receipt);
 
     console.log(
-        `GasUsed callAaveCloseToCollL2Strategy: ${gasUsed}`,
+        `GasUsed callAaveCloseToCollWithMaximumGasPriceStrategy: ${gasUsed}`,
     );
 
     return receipt;
@@ -4040,5 +4040,5 @@ module.exports = {
     callSparkCloseToCollStrategy,
     callSparkFLCloseToCollStrategy,
     sparkCloseActionsEncoded,
-    callAaveCloseToCollWithGasPriceStrategy,
+    callAaveCloseToCollWithMaximumGasPriceStrategy,
 };
