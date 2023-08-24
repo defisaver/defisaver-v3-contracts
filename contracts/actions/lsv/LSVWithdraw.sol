@@ -7,14 +7,14 @@ import "./helpers/LSVUtilHelper.sol";
 import "../../utils/TokenUtils.sol";
 import "../../utils/FeeRecipient.sol";
 
-/// @title 
+/// @title action for tracking users withdrawals within the LSV ecosystem
 contract LSVWithdraw is ActionBase, LSVUtilHelper {
     using TokenUtils for address;
 
-    /// @param protocol - 
-    /// @param token - 
-    /// @param amount -
-    /// @param isPositionClosing -
+    /// @param protocol - an ID representing the protocol in LSVProfitTracker
+    /// @param token - token which is being withdrawn
+    /// @param amount - amount of tokens being withdrawn
+    /// @param isPositionClosing - bool representing if the user is fully closing his position
     struct Params {
         uint8 protocol;
         address token;
@@ -31,9 +31,15 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
+        inputData.token = _parseParamAddr(
+            inputData.token,
+            _paramMapping[0],
+            _subData,
+            _returnValues
+        );
         inputData.amount = _parseParamUint(
             inputData.amount,
-            _paramMapping[0],
+            _paramMapping[1],
             _subData,
             _returnValues
         );
@@ -56,15 +62,15 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper {
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
-
+    /// @dev LSV Withdraw expects users to have withdrawn tokens to the proxy, from which we'll pull the performance fee
     function _lsvWithdraw(Params memory _inputData) internal returns (uint256 remainingAmount, bytes memory logData) {
         uint256 amountWithdrawnInETH = getAmountInETHFromLST(_inputData.token, _inputData.amount);
         uint256 feeAmountInETH = LSVProfitTracker(LSV_PROFIT_TRACKER_ADDRESS).withdraw(_inputData.protocol, amountWithdrawnInETH, _inputData.isPositionClosing);
-
+        
         uint256 feeAmount = getAmountInLSTFromETH(_inputData.token, feeAmountInETH);
         
         address feeAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();
-
+        
         _inputData.token.withdrawTokens(feeAddr, feeAmount);
 
         remainingAmount = _inputData.amount - feeAmount;

@@ -5,12 +5,12 @@ pragma solidity =0.8.10;
 import "../ActionBase.sol";
 import "./helpers/LSVUtilHelper.sol";
 
-/// @title 
+/// @title action for tracking users supply within the LSV ecosystem
 contract LSVSupply is ActionBase, LSVUtilHelper {
 
-    /// @param protocol - 
-    /// @param token -
-    /// @param amount - 
+    /// @param protocol - an ID representing the protocol in LSVProfitTracker
+    /// @param token - token which is being supplied to the protocol
+    /// @param amount - amount of token being supplied
     struct Params {
         uint8 protocol;
         address token;
@@ -26,9 +26,15 @@ contract LSVSupply is ActionBase, LSVUtilHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
+        inputData.token = _parseParamAddr(
+            inputData.token,
+            _paramMapping[0],
+            _subData,
+            _returnValues
+        );
         inputData.amount = _parseParamUint(
             inputData.amount,
-            _paramMapping[0],
+            _paramMapping[1],
             _subData,
             _returnValues
         );

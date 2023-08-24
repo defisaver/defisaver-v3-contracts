@@ -5,11 +5,11 @@ pragma solidity =0.8.10;
 import "../ActionBase.sol";
 import "./helpers/LSVUtilHelper.sol";
 
-/// @title 
+/// @title action for tracking users paybacks within the LSV ecosystem
 contract LSVPayback is ActionBase, LSVUtilHelper {
 
-    /// @param protocol - 
-    /// @param amount - 
+    /// @param protocol - an ID representing the protocol in LSVProfitTracker
+    /// @param amount - amount of token being paid back
     struct Params {
         uint8 protocol;
         uint256 amount;

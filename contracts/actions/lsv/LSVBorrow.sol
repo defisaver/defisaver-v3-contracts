@@ -5,11 +5,11 @@ pragma solidity =0.8.10;
 import "../ActionBase.sol";
 import "./helpers/LSVUtilHelper.sol";
 
-/// @title 
+/// @title action for tracking users borrowings within the LSV ecosystem
 contract LSVBorrow is ActionBase, LSVUtilHelper {
 
-    /// @param protocol - 
-    /// @param amount - 
+    /// @param protocol - an ID representing the protocol in LSVProfitTracker
+    /// @param amount - amount of token being borrowed
     struct Params {
         uint8 protocol;
         uint256 amount;
