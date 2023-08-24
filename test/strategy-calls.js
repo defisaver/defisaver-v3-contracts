@@ -2,7 +2,9 @@
 const dfs = require('@defisaver/sdk');
 const hre = require('hardhat');
 
-const { getAssetInfo } = require('@defisaver/tokens');
+const { getAssetInfo,
+    MAXUINT
+} = require('@defisaver/tokens');
 
 const {
     mUSD,
