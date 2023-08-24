@@ -2848,6 +2848,17 @@
         "history": []
     },
     {
+        "name": "LSVView",
+        "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+        "id": "0x373e1531",
+        "path": "contracts/views/LSVView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompoundMonitorProxy",
         "address": "0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a",
         "path": "old_contracts"

@@ -78,9 +78,9 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
         
         uint256 feeAmountInETH = calculateFee(realisedProfitInETH);
         
-        /// @dev fee can maximally be 10% of the amount being withdrawn
-        if (feeAmountInETH > amountWithdrawnInETH / 10) {
-            feeAmountInETH = amountWithdrawnInETH / 10;
+        /// @dev fee can maximally be amount withdrawn divided by the fee divider
+        if (feeAmountInETH > amountWithdrawnInETH / FEE_DIVIDER) {
+            feeAmountInETH = amountWithdrawnInETH / FEE_DIVIDER;
         }
     
         uint256 feeAmount = getAmountInLSTFromETH(_inputData.token, feeAmountInETH);
