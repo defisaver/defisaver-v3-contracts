@@ -12,7 +12,8 @@ import "../../../utils/LSVProfitTracker.sol";
 contract LSVUtilHelper is DSMath, LSVUtilMainnetAddresses{
     
     function getAmountInETHFromLST(address lstAddress, uint256 lstAmount) public view returns (uint256 ethAmount){
-        
+        if (lstAmount == 0) return 0;
+
         if (lstAddress == RETH_ADDRESS){
             return IRETH(RETH_ADDRESS).getEthValue(lstAmount);
         }
@@ -28,6 +29,7 @@ contract LSVUtilHelper is DSMath, LSVUtilMainnetAddresses{
     }
 
     function getAmountInLSTFromETH(address lstAddress, uint256 ethAmount) public view returns (uint256 lstAmount) {
+        if (ethAmount == 0) return 0;
 
         if (lstAddress == RETH_ADDRESS){
             return IRETH(RETH_ADDRESS).getRethValue(ethAmount);

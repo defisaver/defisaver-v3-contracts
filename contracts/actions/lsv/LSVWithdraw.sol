@@ -6,10 +6,16 @@ import "../ActionBase.sol";
 import "./helpers/LSVUtilHelper.sol";
 import "../../utils/TokenUtils.sol";
 import "../../utils/FeeRecipient.sol";
+import "../../utils/Discount.sol";
+import "../../exchangeV3/helpers/ExchangeHelper.sol";
+import "../../interfaces/IDSProxy.sol";
 
 /// @title action for tracking users withdrawals within the LSV ecosystem
-contract LSVWithdraw is ActionBase, LSVUtilHelper {
+contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
     using TokenUtils for address;
+
+    /// @dev 10% fee on profit as we divide profit by this number
+    uint256 public constant FEE_DIVIDER = 10;
 
     /// @param protocol - an ID representing the protocol in LSVProfitTracker
     /// @param token - token which is being withdrawn
@@ -62,10 +68,15 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper {
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
+
     /// @dev LSV Withdraw expects users to have withdrawn tokens to the proxy, from which we'll pull the performance fee
+    /// @dev ProfitTracker will return realisedProfit amount, from which we will calculate fee
     function _lsvWithdraw(Params memory _inputData) internal returns (uint256 remainingAmount, bytes memory logData) {
         uint256 amountWithdrawnInETH = getAmountInETHFromLST(_inputData.token, _inputData.amount);
-        uint256 feeAmountInETH = LSVProfitTracker(LSV_PROFIT_TRACKER_ADDRESS).withdraw(_inputData.protocol, amountWithdrawnInETH, _inputData.isPositionClosing);
+
+        uint256 realisedProfitInETH = LSVProfitTracker(LSV_PROFIT_TRACKER_ADDRESS).withdraw(_inputData.protocol, amountWithdrawnInETH, _inputData.isPositionClosing);
+        
+        uint256 feeAmountInETH = calculateFee(realisedProfitInETH);
         
         /// @dev fee can maximally be 10% of the amount being withdrawn
         if (feeAmountInETH > amountWithdrawnInETH / 10) {
@@ -81,8 +92,29 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper {
         remainingAmount = _inputData.amount - feeAmount;
         logData = abi.encode(_inputData, feeAmount, remainingAmount);
     }
+    
+    /// @dev if someone has a set Discount his fee will be 0%
+    function calculateFee(
+        uint256 _amount
+    ) internal view returns (uint256 feeAmount) {
+        address user = getUserAddress();
 
-    function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
+        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(user)) {
+            feeAmount = 0;
+        } else {
+            feeAmount = _amount / FEE_DIVIDER;
+        }
+    }
+
+    /// @notice Returns the owner of the DSProxy that called the contract
+    function getUserAddress() internal view returns (address) {
+        IDSProxy proxy = IDSProxy(payable(address(this)));
+
+        return proxy.owner();
+    }
+
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
+    
 }

@@ -18,17 +18,17 @@ contract LSVProfitTracker{
         unrealisedProfit[_protocol][msg.sender] -= downCastUintToInt(_amount); 
     }
 
-    function withdraw(uint8 _protocol, uint256 _amount,  bool _isClosingVault) public returns (uint256 feeAmount){
+    function withdraw(uint8 _protocol, uint256 _amount,  bool _isClosingVault) public returns (uint256 realisedProfit){
         unrealisedProfit[_protocol][msg.sender] += downCastUintToInt(_amount);
         
         if (unrealisedProfit[_protocol][msg.sender] > 0){
-            feeAmount = uint256(unrealisedProfit[_protocol][msg.sender]) / 10;
+            realisedProfit = uint256(unrealisedProfit[_protocol][msg.sender]);
             unrealisedProfit[_protocol][msg.sender] = 0;
         } else if (_isClosingVault) {
             unrealisedProfit[_protocol][msg.sender] = 0;
         }
 
-        return feeAmount;
+        return realisedProfit;
     }
 
     function downCastUintToInt(uint256 uintAmount) internal pure returns(int256 amount){
