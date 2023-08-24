@@ -40,6 +40,7 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
 
     /// @notice user wants to manualy add a proxy so it gets shown to him
     function addProxy(address proxyAddr) public {
+        require(DSProxy(payable(proxyAddr)).owner() == msg.sender);
         proxies[msg.sender].push(proxyAddr);
     }
 
