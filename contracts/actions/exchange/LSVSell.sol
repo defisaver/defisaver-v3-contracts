@@ -7,7 +7,8 @@ import "../../interfaces/lido/IWStEth.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../ActionBase.sol";
 
-/// @title A exchange sell action through the dfs exchange
+/// @title A exchange sell action through the dfs exchange with no fee
+/// @dev weth and steth can be transformed into wsteth directly if the rate is better than minPrice
 /// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
 contract LSVSell is ActionBase, DFSExchangeCore {
 

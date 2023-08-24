@@ -50,7 +50,7 @@ contract ApproveToken is ActionBase {
     
 
     /// @notice Approves an amount of tokens for spender to pull from DSProxy
-    /// @param _tokenAddr Address of token, use 0xEeee... for eth
+    /// @param _tokenAddr Address of token
     /// @param _spender Address of the spender
     /// @param _amount Amount of tokens, can be type(uint).max
     function _approveToken(address _tokenAddr, address _spender, uint _amount) internal {

@@ -18,7 +18,7 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
 
     event NewProxy(address, address);
     event ChangedOwner(address oldOwner, address newOwner, address proxy);
-    
+
     /// @notice User calls from EOA to build a new LSV registered proxy
     function addNewProxy() public returns (address) {
         address newProxy = getFromPoolOrBuild(msg.sender);
@@ -29,36 +29,7 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
         return newProxy;
     }
 
-    function getProxies(address _user) public view returns (address[] memory){
-        address[] memory resultProxies = new address[](proxies[_user].length);
-        for (uint256 i = 0; i < proxies[_user].length; i++){
-            resultProxies[i] = proxies[_user][i];
-        }
-        return resultProxies;
-    }
-
-    /// @notice User calls from EOA if he wants to execute something with DSProxy bundled with build tx
-    function addNewProxyAndExecute(address _target, bytes memory _data) public payable returns (address) {
-        address newProxy = getFromPoolOrBuild(address(this));
-
-        DSProxy(payable(newProxy)).execute{value: msg.value}(_target, _data);
-
-        // if we didn't execute changeLSVProxyOwner in recipe
-        if (DSAuth(newProxy).owner() == address(this)){
-            DSAuth(newProxy).setOwner(msg.sender);
-        }
-        proxies[msg.sender].push(newProxy);
-
-        emit NewProxy(msg.sender, newProxy);
-
-        return newProxy;
-
-    }
-
-    function getProxyPoolCount() public view returns (uint256) {
-        return proxyPool.length;
-    }
-
+    /// @notice user wants to manualy remove a proxy so it doesn't get shown to him
     function removeProxy(uint256 _noInProxiesArr) public {
         uint256 arrLength = proxies[msg.sender].length;
         if (arrLength > 1 &&_noInProxiesArr < (arrLength - 1))  {
@@ -67,6 +38,7 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
         proxies[msg.sender].pop();
     }
 
+    /// @notice user wants to manualy add a proxy so it gets shown to him
     function addProxy(address proxyAddr) public {
         proxies[msg.sender].push(proxyAddr);
     }
@@ -79,7 +51,20 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
         }
     }
 
-    /// @notice Created a new DSProxy or grabs a prebuilt one
+    /// @dev helper function to get all users proxies
+    function getProxies(address _user) public view returns (address[] memory){
+        address[] memory resultProxies = new address[](proxies[_user].length);
+        for (uint256 i = 0; i < proxies[_user].length; i++){
+            resultProxies[i] = proxies[_user][i];
+        }
+        return resultProxies;
+    }
+    /// @notice helper function to check how many proxies are there in the proxy pool for cheaper user onboarding
+    function getProxyPoolCount() public view returns (uint256) {
+        return proxyPool.length;
+    }
+
+    /// @notice Create a new DSProxy or grabs a prebuilt one
     function getFromPoolOrBuild(address _user) internal returns (address) {
         if (proxyPool.length > 0) {
             address newProxy = proxyPool[proxyPool.length - 1];
