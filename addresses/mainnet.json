@@ -2838,7 +2838,7 @@
     },
     {
         "name": "LSVProxyRegistry",
-        "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+        "address": "0xa8a3c86c4A2DcCf350E84D2b3c46BDeBc711C16e",
         "id": "0xc2948a6c",
         "path": "contracts/utils/LSVProxyRegistry.sol",
         "version": "1.0.0",
@@ -2849,7 +2849,7 @@
     },
     {
         "name": "LSVView",
-        "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+        "address": "0x328d7a29f1cf211c58a910e498e326e7f419f8d6",
         "id": "0x373e1531",
         "path": "contracts/views/LSVView.sol",
         "version": "1.0.0",
