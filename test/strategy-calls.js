@@ -3936,6 +3936,7 @@ const aaveV3CloseActionsEncoded = {
 const callAaveCloseToCollWithMaximumGasPriceStrategy = async (
     strategyExecutorByBot,
     subId,
+    sub,
     swapAmount,
     srcTokenInfo,
     destTokenInfo,
@@ -3969,6 +3970,7 @@ const callAaveCloseToCollWithMaximumGasPriceStrategy = async (
         0,
         triggerCallData,
         actionsCallData,
+        sub,
         {
             gasLimit: 8000000,
         },

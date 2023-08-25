@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 const hre = require('hardhat');
 
+const { defaultAbiCoder } = require('ethers/lib/utils');
 const {
     subToStrategy,
     subToCompV3Proxy,
@@ -44,7 +45,6 @@ const {
 } = require('./utils');
 
 const { MCD_MANAGER_ADDR } = require('./utils-mcd');
-const { defaultAbiCoder } = require('ethers/src.ts/utils');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -672,7 +672,8 @@ const subAaveV3CloseWithMaximumGasPriceBundle = async (
         defaultAbiCoder.encode(['address'], [nullAddress]), // needed so we dont have to trust injection
     ]];
 
-    return subToStrategy(proxy, strategySub);
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
 };
 
 module.exports = {
