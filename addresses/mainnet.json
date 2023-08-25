@@ -1247,6 +1247,17 @@
         "history": []
     },
     {
+        "name": "MorphoAaveV2RatioTrigger",
+        "address": "0xa9ebacAAA232f5679144fc128a8212ceD6FB331e",
+        "id": "0x429242d7",
+        "path": "contracts/triggers/MorphoAaveV2RatioTrigger",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "MorphoClaim",
         "address": "0xa269C841E26EA8Ee1F0350a2E5905F71446998dC",
         "id": "0x50967400",
@@ -2444,7 +2455,7 @@
         "id": "0x2198133a",
         "path": "contracts/triggers/CurveUsdBorrowRateTrigger.sol",
         "version": "1.0.0",
-        "inRegistry": false,
+        "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
         "history": []
@@ -2455,7 +2466,7 @@
         "id": "0x7ff68c12",
         "path": "contracts/triggers/CurveUsdSoftLiquidationTrigger.sol",
         "version": "1.0.1",
-        "inRegistry": false,
+        "inRegistry": true,
         "changeTime": "0",
         "registryIds": ["0x5D037963b2822a2B13B542477b8706C313b47821"],
         "history": []
