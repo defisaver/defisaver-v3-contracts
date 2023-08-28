@@ -783,14 +783,14 @@
     },
     {
         "name": "PullToken",
-        "address": "0x254cA89a00d53ab61de2Ba5641DBDC01aE48aed4",
+        "address": "0x29Bb266A72E585C661e292F7D8CA7C4581a0AF72",
         "id": "0xcc063de4",
         "path": "contracts/actions/utils/PullToken.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x254cA89a00d53ab61de2Ba5641DBDC01aE48aed4"]
     },
     {
         "name": "SendToken",
