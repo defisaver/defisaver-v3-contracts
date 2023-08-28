@@ -623,7 +623,7 @@
     },
     {
         "name": "ProxyAuth",
-        "address": "0xD489FfAEEB46b2d7E377850d45E1F8cA3350fc82",
+        "address": "0x149667b6FAe2c63D1B4317C716b0D0e4d3E2bD70",
         "id": "0x5079c3ea",
         "path": "contracts/core/strategy/ProxyAuth.sol",
         "version": "1.0.0",
