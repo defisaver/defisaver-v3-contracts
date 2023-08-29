@@ -239,7 +239,7 @@ library LogarithmicBuckets {
 }
 
 
-library DataTypes {
+library DataTypesAaveV3 {
   struct ReserveData {
     //stores the reserve configuration
     ReserveConfigurationMap configuration;
@@ -955,7 +955,7 @@ library Types {
     struct LiquidityVars {
         address user;
         IAaveOracle oracle;
-        DataTypes.EModeCategory eModeCategory;
+        DataTypesAaveV3.EModeCategory eModeCategory;
     }
 
     struct PromoteVars {

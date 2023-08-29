@@ -10,6 +10,8 @@ import "../actions/aaveV3/helpers/AaveV3Helper.sol";
 import "../actions/morpho/aaveV3/helpers/MorphoAaveV3Helper.sol";
 import "../actions/compoundV3/helpers/CompV3Helper.sol";
 import "../utils/helpers/UtilHelper.sol";
+import "../actions/lsv/helpers/LSVUtilHelper.sol";
+import "../utils/LSVProfitTracker.sol";
 
 struct Position {
     uint8 protocol;
@@ -20,7 +22,7 @@ struct Position {
     uint256 debt;
 }
 
-contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Helper, CompV3Helper {
+contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Helper, CompV3Helper, LSVUtilHelper {
     enum Protocol {
         AAVE_V3,
         MORPHO_AAVE_V3,
@@ -306,6 +308,71 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
         positions = new Position[](positionCounter);
         for (uint i = 0; i < positionCounter; i++) {
             positions[i] = tempPositions[i];
+        }
+    }
+
+
+
+    function getInfoForLSVPosition(uint8 _protocol, address _lsvProxy, address[] memory _collTokens) public view returns (uint256 netWorth, int256 unrealisedProfit) {
+        unrealisedProfit = LSVProfitTracker(LSV_PROFIT_TRACKER_ADDRESS).unrealisedProfit(_protocol, _lsvProxy);
+        (uint256 collBalance, uint256 ethDebtBalance, address collToken) = findCollAndDebtBalance(_protocol, _lsvProxy, _collTokens);
+        uint256 collBalanceInETH = getAmountInETHFromLST(collToken, collBalance);
+        netWorth = collBalanceInETH  - ethDebtBalance;
+    }
+    
+    function findCollAndDebtBalance(uint8 protocol, address _user, address[] memory _collTokens) public view returns (uint256, uint256, address){
+        if (protocol == uint8(Protocol.AAVE_V3)) return findCollAndDebtForAaveV3Position(_user, _collTokens);
+        if (protocol == uint8(Protocol.MORPHO_AAVE_V3)) return findCollAndDebtForMorphoAaveV3Position(_user, _collTokens);
+        if (protocol == uint8(Protocol.COMPOUND_V3)) return findCollAndDebtForCompV3Position(_user, _collTokens);
+    }
+
+    /// @dev we assume it only has one LST token as collateral, and only ETH as debt
+    function findCollAndDebtForAaveV3Position(address _user, address[] memory _collTokens) public view returns (uint256, uint256, address) {
+        IPoolV3 lendingPool = getLendingPool(DEFAULT_AAVE_MARKET);
+        DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
+            TokenUtils.WETH_ADDR
+        );
+        uint256 ethDebtAmount = wethReserveData.variableDebtTokenAddress.getBalance(_user);
+        for (uint j = 0; j < _collTokens.length; j++) {
+            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
+                _collTokens[j]
+            );
+            if (reserveData.aTokenAddress != address(0)) {
+                uint256 lstCollAmount = reserveData.aTokenAddress.getBalance(_user);
+                return (lstCollAmount, ethDebtAmount, _collTokens[j]);
+            }
+        }
+    }
+
+    /// @dev we assume it only has one LST token as collateral, and only ETH as debt
+    function findCollAndDebtForMorphoAaveV3Position(address _user, address[] memory _collTokens) public view returns (uint256, uint256, address) {
+        address morphoAddr = getMorphoAddressByEmode(1);
+        uint256 debtBalance = IMorphoAaveV3(morphoAddr).borrowBalance(
+            TokenUtils.WETH_ADDR,
+            _user
+        );
+
+        for (uint j = 0; j < _collTokens.length; j++) {
+            uint256 collBalance = IMorphoAaveV3(morphoAddr).collateralBalance(
+                _collTokens[j],
+                _user
+            );
+            if (collBalance > 0) {
+                return (collBalance, debtBalance, _collTokens[j]);
+            }
+        }
+    }
+
+    /// @dev we assume it only has one LST token as collateral, and only ETH as debt
+    function findCollAndDebtForCompV3Position(address _user, address[] memory _collTokens) public view returns (uint256, uint256, address) {
+        IComet comet = IComet(COMP_ETH_COMET);
+
+        uint256 debtBalance = comet.borrowBalanceOf(_user);
+        for (uint j = 0; j < _collTokens.length; j++) {
+            uint256 collBalance = comet.collateralBalanceOf(_user, _collTokens[j]);
+            if (collBalance > 0) {
+                return (collBalance, debtBalance, _collTokens[j]);
+            }
         }
     }
 }

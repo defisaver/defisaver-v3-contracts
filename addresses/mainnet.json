@@ -2849,14 +2849,14 @@
     },
     {
         "name": "LSVView",
-        "address": "0x328d7a29f1cf211c58a910e498e326e7f419f8d6",
+        "address": "0x290a23A9BFC80B7d9b575ACd88c9d885D3f0Faf9",
         "id": "0x373e1531",
         "path": "contracts/views/LSVView.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x328d7a29f1cf211c58a910e498e326e7f419f8d6"]
     },
     {
         "name": "CompoundMonitorProxy",
