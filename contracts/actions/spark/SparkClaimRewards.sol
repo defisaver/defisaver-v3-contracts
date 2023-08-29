@@ -65,7 +65,7 @@ contract SparkClaimRewards is ActionBase, SparkHelper {
     {
         require(params.assetsLength == params.assets.length);
 
-        IRewardsController rewardsController = IRewardsController(REWARDS_CONTROLLER_ADDRESS);
+        IRewardsController rewardsController = IRewardsController(SPARK_REWARDS_CONTROLLER_ADDRESS);
 
         amountReceived = rewardsController.claimRewards(params.assets, params.amount, params.to, params.reward);
 

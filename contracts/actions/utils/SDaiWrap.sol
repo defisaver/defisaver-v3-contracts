@@ -5,10 +5,10 @@ import "../ActionBase.sol";
 import "../spark/helpers/SparkHelper.sol";
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/spark/IsDAI.sol";
-
+import "../../utils/helpers/UtilHelper.sol";
 
 /// @title Action that deposits dai into sDai
-contract SDaiWrap is ActionBase, SparkHelper {
+contract SDaiWrap is ActionBase, SparkHelper, UtilHelper {
     using TokenUtils for address;
 
     /// @param amount - Amount of dai to deposit
