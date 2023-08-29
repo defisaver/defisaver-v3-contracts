@@ -2849,7 +2849,7 @@
     },
     {
         "name": "LSVView",
-        "address": "0x290a23A9BFC80B7d9b575ACd88c9d885D3f0Faf9",
+        "address": "0x7fb85Bab66C4a14eb4c048a34CEf0AB16747778d",
         "id": "0x373e1531",
         "path": "contracts/views/LSVView.sol",
         "version": "1.0.0",
