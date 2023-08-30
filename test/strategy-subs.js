@@ -26,6 +26,7 @@ const {
     createMorphoTrigger,
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
+    IN_REPAY,
 } = require('./triggers');
 
 const {
@@ -605,6 +606,20 @@ const subSparkCloseBundle = async (
     return { subId, strategySub };
 };
 
+const subLiqutityDsrStrategy = async ({
+    proxy, strategyId, triggerRatio, targetRatio,
+}) => {
+    const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_REPAY]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+
+    const triggerData = await createLiquityTrigger(proxy.address, triggerRatio, RATIO_STATE_UNDER);
+    const strategySub = [strategyId, false, [triggerData], [ratioStateEncoded, targetRatioEncoded]];
+
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdRepayStrategy,
@@ -633,4 +648,5 @@ module.exports = {
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,
     subSparkCloseBundle,
+    subLiqutityDsrStrategy,
 };

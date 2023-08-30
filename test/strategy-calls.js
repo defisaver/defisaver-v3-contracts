@@ -3166,6 +3166,153 @@ const callSparkFLCloseToCollStrategy = async (
     return receipt;
 };
 
+const callLiquityDsrPaybackStrategy = async ({
+    strategyExecutorByBot,
+    subId,
+    sub,
+    proxy,
+    daiWithdrawAmount,
+}) => {
+    const daiInfo = getAssetInfo('DAI');
+    const lusdInfo = getAssetInfo('LUSD');
+    const strategyGasCost = 1_500_000;
+
+    const { collAmount, debtAmount } = await getTroveInfo(proxy.address);
+    const newDebtAmount = debtAmount.sub(daiWithdrawAmount);
+    const { upperHint, lowerHint } = await findInsertPosition(collAmount, newDebtAmount);
+
+    const actionsCallData = [];
+
+    const dsrWithdrawAction = new dfs.actions.maker.MakerDsrWithdrawAction(
+        daiWithdrawAmount,
+        placeHolderAddr,
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        await formatMockExchangeObj(
+            daiInfo,
+            lusdInfo,
+            '0',
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        strategyGasCost, lusdInfo.address, '0',
+    );
+
+    const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
+        '0',
+        placeHolderAddr,
+        upperHint,
+        lowerHint,
+    );
+
+    const liquityRatioCheckAction = new dfs.actions.checkers.LiquityRatioCheckAction(
+        '0', '0',
+    );
+
+    actionsCallData.push(dsrWithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityPaybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityRatioCheckAction.encodeForRecipe()[0]);
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        0,
+        ['0x'],
+        actionsCallData,
+        sub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callLiquityDsrPaybackStrategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
+const callLiquityDsrSupplyStrategy = async ({
+    strategyExecutorByBot,
+    subId,
+    sub,
+    proxy,
+    daiWithdrawAmount,
+}) => {
+    const daiInfo = getAssetInfo('DAI');
+    const wethInfo = getAssetInfo('WETH');
+    const strategyGasCost = 1_500_000;
+
+    const daiWithdrawAmountInEth = daiWithdrawAmount.div(Float2BN(getLocalTokenPrice('ETH').toString()));
+    const { collAmount, debtAmount } = await getTroveInfo(proxy.address);
+    const newCollAmount = collAmount.add(daiWithdrawAmountInEth);
+    const { upperHint, lowerHint } = await findInsertPosition(newCollAmount, debtAmount);
+
+    const actionsCallData = [];
+
+    const dsrWithdrawAction = new dfs.actions.maker.MakerDsrWithdrawAction(
+        daiWithdrawAmount,
+        placeHolderAddr,
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        await formatMockExchangeObj(
+            daiInfo,
+            wethInfo,
+            '0',
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        strategyGasCost, wethInfo.address, '0',
+    );
+
+    const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
+        '0',
+        placeHolderAddr,
+        upperHint,
+        lowerHint,
+    );
+
+    const liquityRatioCheckAction = new dfs.actions.checkers.LiquityRatioCheckAction(
+        '0', '0',
+    );
+
+    actionsCallData.push(dsrWithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquitySupplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityRatioCheckAction.encodeForRecipe()[0]);
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        0,
+        ['0x'],
+        actionsCallData,
+        sub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callLiquityDsrSupplyStrategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
 module.exports = {
     callDcaStrategy,
     callMcdRepayStrategy,
@@ -3214,5 +3361,8 @@ module.exports = {
     callSparkFLCloseToDebtStrategy,
     callSparkCloseToCollStrategy,
     callSparkFLCloseToCollStrategy,
+    callLiquityDsrPaybackStrategy,
+    callLiquityDsrSupplyStrategy,
+
     sparkCloseActionsEncoded,
 };
