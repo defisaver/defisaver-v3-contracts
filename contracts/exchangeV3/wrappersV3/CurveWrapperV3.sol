@@ -33,6 +33,8 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
             address[9] memory _route, uint256[3][4] memory _swap_params
         ) = abi.decode(_additionalData, (address[9], uint256[3][4]));
 
+        /// @dev the amount of tokens received is checked in DFSExchangeCore
+        /// @dev Exchange wrapper contracts should not be used on their own
         uint256 amountOut = exchangeContract.exchange_multiple(
             _route,
             _swap_params,

@@ -88,15 +88,29 @@
       "history": []
     },
     {
+      "name": "OneInchWrapper",
+      "address": "0x6aB5ee6758235a3aBf6F32578EC2Cb655f2A94a8",
+      "id": "0x82854967",
+      "path": "contracts/exchangeV3/offchainWrappersV3/OneInchWrapper.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "KyberAggregatorWrapper",
-      "address": "0x59aD138C43b63Be18363630eF8Ab8b78Ada2c3e0",
+      "address": "0xBf708dfed6C357Dd2c2baD06e81015F2170d168f",
       "id": "0x1abf4ed0",
       "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
       "version": "1.0.0",
       "inRegistry": false,
       "changeTime": 0,
       "registryIds": [],
-      "history": ["0xB7EAa93C69b6450D6dF0CDb00307A5136392eCF8"]
+      "history": [
+        "0x59aD138C43b63Be18363630eF8Ab8b78Ada2c3e0",
+        "0xB7EAa93C69b6450D6dF0CDb00307A5136392eCF8"
+      ]
     },
     {
         "name": "Discount",

@@ -205,6 +205,14 @@ const claimStkAave = async (proxy, assets, amount, to) => {
     return tx;
 };
 
+const claimAaveFromStkAave = async (proxy, amount, to) => {
+    const aaveClaimStkAaveAction = new dfs.actions.aave.AaveClaimAAVEAction(amount, to);
+    const functionData = aaveClaimStkAaveAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('AaveClaimAAVE', functionData, proxy);
+    return tx;
+};
+
 const startUnstakeAave = async (proxy) => {
     const startUnstakeAction = new dfs.actions.aave.AaveStartUnstakeAction();
     const functionData = startUnstakeAction.encodeForDsProxyCall()[1];
@@ -3340,6 +3348,7 @@ module.exports = {
     claimStkAave,
     startUnstakeAave,
     finalizeUnstakeAave,
+    claimAaveFromStkAave,
 
     supplyComp,
     withdrawComp,

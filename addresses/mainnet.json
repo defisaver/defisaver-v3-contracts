@@ -198,6 +198,17 @@
         "history": []
     },
     {
+        "name": "OneInchWrapper",
+        "address": "0x02DCC3438Bb7e46F6BF671C72e98D503c0bCE520",
+        "id": "0x82854967",
+        "path": "contracts/exchangeV3/offchainWrappersV3/OneInchWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveWrapperV3",
         "address": "0x3788B4Db5e99fF555e22a08241EB3cFc3a0ac149",
         "id": "0xb856c9af",
@@ -232,14 +243,17 @@
     },
     {
         "name": "KyberAggregatorWrapper",
-        "address": "0xBfb05d97FE87DCbc7Ff6F2e4f83FcA0861318A4E",
+        "address": "0x2197b1f0c3C61A8f74E78431A0d17837642B23cf",
         "id": "0x1abf4ed0",
         "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x25A1c8C54018F198D8BdfB3a410D812b4ad312e4"]
+        "history": [
+            "0xBfb05d97FE87DCbc7Ff6F2e4f83FcA0861318A4E",
+            "0x25A1c8C54018F198D8BdfB3a410D812b4ad312e4"
+        ]
     },
     {
         "name": "ScpWrapper",
@@ -769,14 +783,14 @@
     },
     {
         "name": "PullToken",
-        "address": "0x254cA89a00d53ab61de2Ba5641DBDC01aE48aed4",
+        "address": "0x29Bb266A72E585C661e292F7D8CA7C4581a0AF72",
         "id": "0xcc063de4",
         "path": "contracts/actions/utils/PullToken.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x254cA89a00d53ab61de2Ba5641DBDC01aE48aed4"]
     },
     {
         "name": "SendToken",
@@ -1134,6 +1148,17 @@
         "history": []
     },
     {
+        "name": "AaveClaimAAVE",
+        "address": "0xd52855bD011F3D87565f9040DdE2A59fB1b27b15",
+        "id": "0x22ed53c6",
+        "path": "contracts/actions/aave/AaveClaimAAVE.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "MorphoMarketStorage",
         "address": "0x56EE33811a6C8c1Fd443E53685ed1605E43b3971",
         "id": "0x9600f04b",
@@ -1226,6 +1251,17 @@
         "address": "0x29a8b5A8889F465c85b778eDCcf984E44Ad70F12",
         "id": "0x914eb1c7",
         "path": "contracts/actions/morpho/aaveV2/MorphoAaveV2Withdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoAaveV2RatioTrigger",
+        "address": "0xa9ebacAAA232f5679144fc128a8212ceD6FB331e",
+        "id": "0x429242d7",
+        "path": "contracts/triggers/MorphoAaveV2RatioTrigger",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
@@ -2441,7 +2477,7 @@
         "id": "0x2198133a",
         "path": "contracts/triggers/CurveUsdBorrowRateTrigger.sol",
         "version": "1.0.0",
-        "inRegistry": false,
+        "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
         "history": []
@@ -2452,7 +2488,7 @@
         "id": "0x7ff68c12",
         "path": "contracts/triggers/CurveUsdSoftLiquidationTrigger.sol",
         "version": "1.0.1",
-        "inRegistry": false,
+        "inRegistry": true,
         "changeTime": "0",
         "registryIds": ["0x5D037963b2822a2B13B542477b8706C313b47821"],
         "history": []

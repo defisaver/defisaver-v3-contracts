@@ -44,6 +44,9 @@ contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAut
         bytes memory scaledCalldata = getScaledInputData(_exData.offchainData.callData, _exData.srcAmount);
         
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
+
+        /// @dev the amount of tokens received is checked in DFSExchangeCore
+        /// @dev Exchange wrapper contracts should not be used on their own
         (success, ) = _exData.offchainData.exchangeAddr.call(scaledCalldata);
 
         uint256 tokensSwapped = 0;

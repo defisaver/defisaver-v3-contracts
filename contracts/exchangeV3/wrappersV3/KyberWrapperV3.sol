@@ -28,6 +28,8 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
 
         srcToken.safeApprove(address(kyberNetworkProxy), _srcAmount);
 
+        /// @dev the amount of tokens received is checked in DFSExchangeCore
+        /// @dev Exchange wrapper contracts should not be used on their own
         uint destAmount = kyberNetworkProxy.trade(
             srcToken,
             _srcAmount,

@@ -129,6 +129,32 @@ interface IExecutorHelper {
     uint256 sqrtPriceLimitD18;
   }
 
+  struct SyncSwap {
+    bytes _data;
+    address vault;
+    address tokenIn;
+    address pool;
+    uint256 collectAmount;
+  }
+
+  struct AlgebraV1 {
+    address recipient;
+    address pool;
+    address tokenIn;
+    address tokenOut;
+    uint256 swapAmount;
+    uint160 sqrtPriceLimitX96;
+    uint256 senderFeeOnTransfer; // [ FoT_FLAG(1 bit) ... SENDER_ADDRESS(160 bits) ]
+  }
+
+  struct BalancerBatch {
+    address vault;
+    bytes32[] poolIds;
+    address[] path; // swap path from assetIn to assetOut
+    bytes[] userDatas;
+    uint256 amountIn; // assetIn amount
+  }
+
   function executeUniswap(
     bytes memory data,
     uint256 flagsAndPrevAmountOut
@@ -225,6 +251,21 @@ interface IExecutorHelper {
   ) external payable returns (uint256);
 
   function executeMaverick(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeSyncSwap(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeAlgebraV1(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeBalancerBatch(
     bytes memory data,
     uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
