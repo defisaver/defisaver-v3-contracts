@@ -5,10 +5,13 @@ pragma solidity =0.8.10;
 import "../auth/AdminAuth.sol";
 import "../actions/aave/helpers/AaveRatioHelper.sol";
 import "../interfaces/ITrigger.sol";
+import "../utils/TransientStorage.sol";
 
 contract AaveV2RatioTrigger is ITrigger, AdminAuth, AaveRatioHelper {
 
     enum RatioState { OVER, UNDER }
+
+    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
     
     /// @param user address of the user whose position we check
     /// @param market aaveV2 market address
@@ -23,7 +26,6 @@ contract AaveV2RatioTrigger is ITrigger, AdminAuth, AaveRatioHelper {
     
     function isTriggered(bytes memory, bytes memory _subData)
         public
-        view
         override
         returns (bool)
     {   
@@ -32,6 +34,8 @@ contract AaveV2RatioTrigger is ITrigger, AdminAuth, AaveRatioHelper {
         uint256 currRatio = getSafetyRatio(triggerSubData.market, triggerSubData.user);
 
         if (currRatio == 0) return false;
+
+        tempStorage.setBytes32("AAVE_V2_RATIO", bytes32(currRatio));
 
         if (RatioState(triggerSubData.state) == RatioState.OVER) {
             if (currRatio > triggerSubData.ratio) return true;

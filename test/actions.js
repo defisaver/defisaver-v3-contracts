@@ -358,21 +358,6 @@ const balancerWithdraw = async (
  \______| \______/  |__|  |__| | _|       \______/   \______/  |__| \__| |_______/
 */
 const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
-    await setBalance(tokenAddr, from, amount);
-    await approve(tokenAddr, proxy.address);
-    if (tokenAddr.toLowerCase() === '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9'.toLowerCase()) {
-        // eslint-disable-next-line no-use-before-define
-        await sell(
-            proxy,
-            WETH_ADDRESS,
-            tokenAddr,
-            hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
-            UNISWAP_WRAPPER,
-            from,
-            from,
-        );
-    }
-
     const compSupplyAction = new dfs.actions.compound.CompoundSupplyAction(
         cTokenAddr,
         amount,

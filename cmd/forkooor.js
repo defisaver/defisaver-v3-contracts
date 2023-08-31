@@ -52,7 +52,6 @@ const {
     getContractFromRegistry,
     filterEthersObject,
     setBalance,
-    crvusdAddress,
 } = require('../test/utils');
 
 const {
@@ -108,6 +107,8 @@ const {
     subToMcdProxy,
     updateSubDataMorphoAaveV2Proxy,
     updateLiquityProxy,
+    updateToAaveV2Proxy,
+    updateToCompV2Proxy,
 } = require('../test/utils-strategies');
 
 const {
@@ -131,6 +132,14 @@ const {
     createLiquityBoostStrategy,
     createLiquityFLBoostStrategy,
     createLiquityFLBoostWithCollStrategy,
+    createAaveV2RepayStrategy,
+    createAaveFLV2RepayStrategy,
+    createAaveV2BoostStrategy,
+    createAaveFLV2BoostStrategy,
+    createCompV2RepayStrategy,
+    createCompFLV2RepayStrategy,
+    createCompV2BoostStrategy,
+    createCompFLV2BoostStrategy,
 } = require('../test/strategies');
 
 const {
@@ -148,6 +157,8 @@ const {
     subDcaStrategy,
     subMorphoAaveV2AutomationStrategy,
     subLiquityAutomationStrategy,
+    subCompV2AutomationStrategy,
+    subAaveV2AutomationStrategy,
     subSparkCloseBundle,
     subSparkAutomationStrategy,
 } = require('../test/strategy-subs');
@@ -770,6 +781,137 @@ const mcdBoostRepaySub = async ({
         repaySubId,
         boostSubId,
     });
+};
+
+const aaveAutomationSub = async ({
+    minRatio,
+    maxRatio,
+    targetRatioBoost,
+    targetRatioRepay,
+    senderAddr,
+}) => {
+    setNetwork('mainnet');
+    let [senderAcc] = await hre.ethers.getSigners();
+
+    if (senderAddr) {
+        senderAcc = hre.ethers.provider.getSigner(senderAddr.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = senderAddr ? proxy.connect(senderAcc) : proxy;
+
+    { // deploy if not live
+        const registry = await hre.ethers.getContractAt('DFSRegistry', addrs[getNetwork()].REGISTRY_ADDR);
+        if (await registry.isRegistered(hre.ethers.utils.id('AaveSubProxy').slice(0, 10)).then((e) => !e)) {
+            const repayAaveStrategyEncoded = createAaveV2RepayStrategy();
+            const repayFLAaveStrategyEncoded = createAaveFLV2RepayStrategy();
+
+            const boostAaveStrategyEncoded = createAaveV2BoostStrategy();
+            const boostFLAaveStrategyEncoded = createAaveFLV2BoostStrategy();
+
+            await openStrategyAndBundleStorage(true);
+
+            const repayId1 = await createStrategy(proxy, ...repayAaveStrategyEncoded, true);
+            const repayId2 = await createStrategy(proxy, ...repayFLAaveStrategyEncoded, true);
+
+            const boostId1 = await createStrategy(proxy, ...boostAaveStrategyEncoded, true);
+            const boostId2 = await createStrategy(proxy, ...boostFLAaveStrategyEncoded, true);
+
+            const repayBundleId = await createBundle(
+                proxy,
+                [repayId1, repayId2],
+            );
+
+            const boostBundleId = await createBundle(
+                proxy,
+                [boostId1, boostId2],
+            );
+            await redeploy('AaveSubProxy', REGISTRY_ADDR, false, true, repayBundleId, boostBundleId);
+            console.log({ repayBundleId, boostBundleId });
+
+            await redeploy('AaveV2RatioCheck', REGISTRY_ADDR, false, true);
+        }
+    }
+
+    const subData = await subAaveV2AutomationStrategy(
+        proxy,
+        Float2BN(minRatio, 16).toString(),
+        Float2BN(maxRatio, 16).toString(),
+        Float2BN(targetRatioBoost, 16).toString(),
+        Float2BN(targetRatioRepay, 16).toString(),
+        maxRatio > 0,
+    );
+    console.log('Subscribed to Aave automation');
+    console.log(`Repay sub id: ${subData.repaySubId}`);
+    console.log(`Boost sub id: ${subData.boostSubId}`);
+};
+
+const compAutomationSub = async ({
+    minRatio,
+    maxRatio,
+    targetRatioBoost,
+    targetRatioRepay,
+    senderAddr,
+}) => {
+    setNetwork('mainnet');
+    let [senderAcc] = await hre.ethers.getSigners();
+
+    if (senderAddr) {
+        senderAcc = hre.ethers.provider.getSigner(senderAddr.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+
+    let proxy = await getProxy(senderAcc.address);
+    proxy = senderAddr ? proxy.connect(senderAcc) : proxy;
+
+    { // deploy if not live
+        const registry = await hre.ethers.getContractAt('DFSRegistry', addrs[getNetwork()].REGISTRY_ADDR);
+        if (await registry.isRegistered(hre.ethers.utils.id('CompSubProxy').slice(0, 10)).then((e) => !e)) {
+            const repayCompStrategyEncoded = createCompV2RepayStrategy();
+            const repayFLCompStrategyEncoded = createCompFLV2RepayStrategy();
+
+            const boostCompStrategyEncoded = createCompV2BoostStrategy();
+            const boostFLCompStrategyEncoded = createCompFLV2BoostStrategy();
+
+            await openStrategyAndBundleStorage(true);
+
+            const repayId1 = await createStrategy(proxy, ...repayCompStrategyEncoded, true);
+            const repayId2 = await createStrategy(proxy, ...repayFLCompStrategyEncoded, true);
+
+            const boostId1 = await createStrategy(proxy, ...boostCompStrategyEncoded, true);
+            const boostId2 = await createStrategy(proxy, ...boostFLCompStrategyEncoded, true);
+
+            const repayBundleId = await createBundle(
+                proxy,
+                [repayId1, repayId2],
+            );
+
+            const boostBundleId = await createBundle(
+                proxy,
+                [boostId1, boostId2],
+            );
+            await redeploy('CompSubProxy', REGISTRY_ADDR, false, true, repayBundleId, boostBundleId);
+            console.log({ repayBundleId, boostBundleId });
+
+            await redeploy('CompV2RatioCheck', REGISTRY_ADDR, false, true);
+            await redeploy('CompoundRatioTrigger', REGISTRY_ADDR, false, true);
+        }
+    }
+
+    const subData = await subCompV2AutomationStrategy(
+        proxy,
+        Float2BN(minRatio, 16).toString(),
+        Float2BN(maxRatio, 16).toString(),
+        Float2BN(targetRatioBoost, 16).toString(),
+        Float2BN(targetRatioRepay, 16).toString(),
+        maxRatio > 0,
+    );
+    console.log('Subscribed to Comp automation');
+    console.log(`Repay sub id: ${subData.repaySubId}`);
+    console.log(`Boost sub id: ${subData.boostSubId}`);
 };
 
 const liquityTrailingCloseToCollStrategySub = async (percentage, sender) => {
@@ -1556,7 +1698,6 @@ const subAaveAutomation = async (
     maxRatio,
     optimalRatioBoost,
     optimalRatioRepay,
-    boostEnabled,
     sender,
 ) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
@@ -1600,7 +1741,7 @@ const subAaveAutomation = async (
         maxRatioFormatted.toHexString().slice(2),
         optimalRatioBoostFormatted.toHexString().slice(2),
         optimalRatioRepayFormatted.toHexString().slice(2),
-        boostEnabled,
+        maxRatio > 0,
         addrs[network].REGISTRY_ADDR,
     );
 
@@ -2210,6 +2351,73 @@ const updateSubDataMorphoAaveV2 = async (
     );
 
     console.log('MorphoAaveV2 position sub updated');
+};
+
+const updateSubDataAaveV2 = async (
+    subIdRepay,
+    subIdBoost,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    sender,
+) => {
+    const { proxy } = await forkSetup(sender);
+
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
+
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
+
+    await updateToAaveV2Proxy(
+        proxy,
+        subIdRepay.toString(),
+        subIdBoost.toString(),
+        [
+            minRatioFormatted.toString(),
+            maxRatioFormatted.toString(),
+            optimalRatioBoostFormatted.toString(),
+            optimalRatioRepayFormatted.toString(),
+            maxRatio > 0,
+        ],
+    );
+
+    console.log('AaveV2 position sub updated');
+};
+
+const updateSubDataCompV2 = async (
+    subIdRepay,
+    subIdBoost,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    sender,
+) => {
+    const { proxy } = await forkSetup(sender);
+    console.log("real sender and proxy", {sender, proxy});
+
+    const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
+    const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
+
+    const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
+    const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
+
+    await updateToCompV2Proxy(
+        proxy,
+        subIdRepay.toString(),
+        subIdBoost.toString(),
+        [
+            minRatioFormatted.toString(),
+            maxRatioFormatted.toString(),
+            optimalRatioBoostFormatted.toString(),
+            optimalRatioRepayFormatted.toString(),
+            maxRatio > 0,
+        ],
+    );
+
+    console.log('CompV2 position sub updated');
 };
 
 const deployLiquityContracts = async () => {
@@ -2893,6 +3101,46 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         });
 
     program
+        .command('sub-aaveV2-automation <minRatio> <maxRatio> <targetRatioBoost> <targetRatioRepay> [senderAddr]')
+        .description('Subscribes to AaveV2 repay and (optionaly) boost bundles')
+        .action(async (
+            minRatio,
+            maxRatio,
+            targetRatioBoost,
+            targetRatioRepay,
+            senderAddr,
+        ) => {
+            await aaveAutomationSub({
+                minRatio,
+                maxRatio,
+                targetRatioBoost,
+                targetRatioRepay,
+                senderAddr,
+            });
+            process.exit(0);
+        });
+
+    program
+        .command('sub-compV2-automation <minRatio> <maxRatio> <targetRatioBoost> <targetRatioRepay> [senderAddr]')
+        .description('Subscribes to CompoundV2 repay and (optionaly) boost bundles')
+        .action(async (
+            minRatio,
+            maxRatio,
+            targetRatioBoost,
+            targetRatioRepay,
+            senderAddr,
+        ) => {
+            await compAutomationSub({
+                minRatio,
+                maxRatio,
+                targetRatioBoost,
+                targetRatioRepay,
+                senderAddr,
+            });
+            process.exit(0);
+        });
+
+    program
         .command('sub-ss <protocol> <vaultId> <minRatio> <targetRatio> [senderAddr]')
         .description('Subscribes to a Smart Savings strategy')
         .action(async (protocol, vaultId, minRatio, targetRatio, senderAddr) => {
@@ -2953,7 +3201,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
 
     program
         .command(
-            'sub-aave-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+            'sub-aave-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> [senderAddr]',
         )
         .description('Subscribes to aave automation can be both b/r')
         .action(
@@ -2962,7 +3210,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 maxRatio,
                 optimalRatioBoost,
                 optimalRatioRepay,
-                boostEnabled,
                 senderAcc,
             ) => {
                 // eslint-disable-next-line max-len
@@ -2971,7 +3218,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                     maxRatio,
                     optimalRatioBoost,
                     optimalRatioRepay,
-                    boostEnabled,
                     senderAcc,
                 );
                 process.exit(0);
@@ -3277,7 +3523,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
 
     program
         .command(
-            'update-aave-automation <subIdRepay> <subIdBoost> <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> [senderAddr]',
+            'update-aave-automation <subIdRepay> <subIdBoost> <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> [senderAddr]',
         )
         .description('Updates aaveV3 automation bundles')
         .action(
@@ -3288,7 +3534,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 maxRatio,
                 optimalRatioBoost,
                 optimalRatioRepay,
-                boostEnabled,
                 senderAcc,
             ) => {
                 // eslint-disable-next-line max-len
@@ -3299,7 +3544,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                     maxRatio,
                     optimalRatioBoost,
                     optimalRatioRepay,
-                    boostEnabled,
                     senderAcc,
                 );
                 process.exit(0);
@@ -3332,6 +3576,64 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                     optimalRatioBoost,
                     optimalRatioRepay,
                     boostEnabled,
+                    senderAcc,
+                );
+                process.exit(0);
+            },
+        );
+
+    program
+        .command(
+            'update-aaveV2-automation <subIdRepay> <subIdBoost> <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> [senderAddr]',
+        )
+        .description('Updates AaveV2 automation bundles')
+        .action(
+            async (
+                subIdRepay,
+                subIdBoost,
+                minRatio,
+                maxRatio,
+                optimalRatioBoost,
+                optimalRatioRepay,
+                senderAcc,
+            ) => {
+                // eslint-disable-next-line no-param-reassign
+                await updateSubDataAaveV2(
+                    subIdRepay,
+                    subIdBoost,
+                    minRatio,
+                    maxRatio,
+                    optimalRatioBoost,
+                    optimalRatioRepay,
+                    senderAcc,
+                );
+                process.exit(0);
+            },
+        );
+
+    program
+        .command(
+            'update-compV2-automation <subIdRepay> <subIdBoost> <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> [senderAddr]',
+        )
+        .description('Updates CompV2 automation bundles')
+        .action(
+            async (
+                subIdRepay,
+                subIdBoost,
+                minRatio,
+                maxRatio,
+                optimalRatioBoost,
+                optimalRatioRepay,
+                senderAcc,
+            ) => {
+                // eslint-disable-next-line no-param-reassign
+                await updateSubDataCompV2(
+                    subIdRepay,
+                    subIdBoost,
+                    minRatio,
+                    maxRatio,
+                    optimalRatioBoost,
+                    optimalRatioRepay,
                     senderAcc,
                 );
                 process.exit(0);

@@ -637,7 +637,7 @@
     },
     {
         "name": "ProxyAuth",
-        "address": "0xD489FfAEEB46b2d7E377850d45E1F8cA3350fc82",
+        "address": "0x149667b6FAe2c63D1B4317C716b0D0e4d3E2bD70",
         "id": "0x5079c3ea",
         "path": "contracts/core/strategy/ProxyAuth.sol",
         "version": "1.0.0",
@@ -783,14 +783,14 @@
     },
     {
         "name": "PullToken",
-        "address": "0x254cA89a00d53ab61de2Ba5641DBDC01aE48aed4",
+        "address": "0x29Bb266A72E585C661e292F7D8CA7C4581a0AF72",
         "id": "0xcc063de4",
         "path": "contracts/actions/utils/PullToken.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x254cA89a00d53ab61de2Ba5641DBDC01aE48aed4"]
     },
     {
         "name": "SendToken",
@@ -1094,14 +1094,14 @@
     },
     {
         "name": "AaveSupply",
-        "address": "0xEbB200a529058B561B42Eab510DA157a63243CEc",
+        "address": "0x3DbdC87d2299768AD82DDCAc13021A29681b8520",
         "id": "0xc380343c",
         "path": "contracts/actions/aave/AaveSupply.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xEbB200a529058B561B42Eab510DA157a63243CEc"]
     },
     {
         "name": "AaveWithdraw",
@@ -1130,6 +1130,17 @@
         "address": "0x2FE4024e350cD2c64D2fd0Db5d16F5cE54Ca0E09",
         "id": "0x887729ae",
         "path": "contracts/actions/aave/AaveUnstake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV2RatioCheck",
+        "address": "0x2C35d28f969cC76B4CcA490cEF31289432B22640",
+        "id": "0xe2833393",
+        "path": "contracts/actions/checkers/AaveV2RatioCheck.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
@@ -2275,9 +2286,20 @@
     },
     {
         "name": "CompoundRatioTrigger",
-        "address": "0x8EfbD976709c2bD46bdaf0c3Db83E875F1451BAE",
+        "address": "0x5e9d504d6C4028A905069EE9e2c237d2dcF8380B",
         "id": "0xfd030057",
         "path": "contracts/triggers/CompoundRatioTrigger.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": ["0x8EfbD976709c2bD46bdaf0c3Db83E875F1451BAE"]
+    },
+    {
+        "name": "CompV2RatioCheck",
+        "address": "0x46ad845534bEDfBF682C4AD516A92DF503AD86da",
+        "id": "0x950d2607",
+        "path": "contracts/checkers/CompV2RatioCheck.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
@@ -2308,14 +2330,14 @@
     },
     {
         "name": "AaveV2RatioTrigger",
-        "address": "0xd891f499260aF046B4d4324cBEB84d02a6D61195",
+        "address": "0xafdB4566876590527cAA31633A2208Ea77d5BC15",
         "id": "0x7e8b6344",
         "path": "contracts/triggers/AaveV2RatioTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xd891f499260aF046B4d4324cBEB84d02a6D61195"]
     },
     {
         "name": "LiquityDebtInFrontTrigger",

@@ -7,7 +7,7 @@ import "../../auth/ProxyPermission.sol";
 import "../strategy/SubStorage.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
-contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+contract AaveV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID; 
 
