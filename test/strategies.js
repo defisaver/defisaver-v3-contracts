@@ -3176,6 +3176,8 @@ const createLiquityDsrPaybackStrategy = () => {
     const liquityDsrPaybackStrategy = new dfs.Strategy('LiquityDsrPayback');
     liquityDsrPaybackStrategy.addSubSlot('&ratioState', 'uint8');
     liquityDsrPaybackStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityDsrPaybackStrategy.addSubSlot('&daiAddress', 'address');
+    liquityDsrPaybackStrategy.addSubSlot('&lusdAddress', 'uint256');
 
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityDsrPaybackStrategy.addTrigger(liquityRatioTrigger);
@@ -3187,8 +3189,8 @@ const createLiquityDsrPaybackStrategy = () => {
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%daiAddress',
-            '%lusdAddress',
+            '&daiAddress',
+            '&lusdAddress',
             '$1',
             '%wrapper',
         ),
@@ -3197,7 +3199,7 @@ const createLiquityDsrPaybackStrategy = () => {
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '%strategyGasCost', '%lusdAddress', '$2',
+        '%strategyGasCost', '&lusdAddress', '$2',
     );
 
     const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
@@ -3224,6 +3226,8 @@ const createLiquityDsrSupplyStrategy = () => {
     const liquityDsrSupplyStrategy = new dfs.Strategy('LiquityDsrSupply');
     liquityDsrSupplyStrategy.addSubSlot('&ratioState', 'uint8');
     liquityDsrSupplyStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityDsrSupplyStrategy.addSubSlot('&daiAddress', 'address');
+    liquityDsrSupplyStrategy.addSubSlot('&wethAddress', 'uint256');
 
     const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
     liquityDsrSupplyStrategy.addTrigger(liquityRatioTrigger);
@@ -3235,8 +3239,8 @@ const createLiquityDsrSupplyStrategy = () => {
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%daiAddress',
-            '%wethAddress',
+            '&daiAddress',
+            '&wethAddress',
             '$1',
             '%wrapper',
         ),
@@ -3245,7 +3249,7 @@ const createLiquityDsrSupplyStrategy = () => {
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '%strategyGasCost', '%wethAddress', '$2',
+        '%strategyGasCost', '&wethAddress', '$2',
     );
 
     const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(

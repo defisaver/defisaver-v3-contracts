@@ -3190,8 +3190,8 @@ const callLiquityDsrPaybackStrategy = async ({
 
     const sellAction = new dfs.actions.basic.SellAction(
         await formatMockExchangeObj(
-            daiInfo,
-            lusdInfo,
+            daiInfo, // these two are piped from subdata
+            lusdInfo, // but are needed here for mock wrapper setup
             '0',
         ),
         placeHolderAddr,
@@ -3199,7 +3199,7 @@ const callLiquityDsrPaybackStrategy = async ({
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        strategyGasCost, lusdInfo.address, '0',
+        strategyGasCost, placeHolderAddr, '0',
     );
 
     const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
@@ -3264,8 +3264,8 @@ const callLiquityDsrSupplyStrategy = async ({
 
     const sellAction = new dfs.actions.basic.SellAction(
         await formatMockExchangeObj(
-            daiInfo,
-            wethInfo,
+            daiInfo, // these two are piped from subdata
+            wethInfo, // but are needed here for mock wrapper setup
             '0',
         ),
         placeHolderAddr,
@@ -3273,7 +3273,7 @@ const callLiquityDsrSupplyStrategy = async ({
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        strategyGasCost, wethInfo.address, '0',
+        strategyGasCost, placeHolderAddr, '0',
     );
 
     const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(

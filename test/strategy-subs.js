@@ -606,14 +606,32 @@ const subSparkCloseBundle = async (
     return { subId, strategySub };
 };
 
-const subLiqutityDsrStrategy = async ({
+const subLiqutityDsrPaybackStrategy = async ({
     proxy, strategyId, triggerRatio, targetRatio,
 }) => {
     const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_REPAY]);
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const daiAddressEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const lusdAddressEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
 
     const triggerData = await createLiquityTrigger(proxy.address, triggerRatio, RATIO_STATE_UNDER);
-    const strategySub = [strategyId, false, [triggerData], [ratioStateEncoded, targetRatioEncoded]];
+    const strategySub = [strategyId, false, [triggerData], [ratioStateEncoded, targetRatioEncoded, daiAddressEncoded, lusdAddressEncoded]];
+
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+
+const subLiqutityDsrSupplyStrategy = async ({
+    proxy, strategyId, triggerRatio, targetRatio,
+}) => {
+    const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_REPAY]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const daiAddressEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const wethAddressEncoded = abiCoder.encode(['address'], [WETH_ADDRESS]);
+
+    const triggerData = await createLiquityTrigger(proxy.address, triggerRatio, RATIO_STATE_UNDER);
+    const strategySub = [strategyId, false, [triggerData], [ratioStateEncoded, targetRatioEncoded, daiAddressEncoded, wethAddressEncoded]];
 
     const subId = await subToStrategy(proxy, strategySub);
 
@@ -648,5 +666,6 @@ module.exports = {
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,
     subSparkCloseBundle,
-    subLiqutityDsrStrategy,
+    subLiqutityDsrPaybackStrategy,
+    subLiqutityDsrSupplyStrategy,
 };

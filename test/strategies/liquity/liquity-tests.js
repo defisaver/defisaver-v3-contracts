@@ -57,7 +57,8 @@ const {
     subCbRebondStrategy,
     subLiquityCBPaybackStrategy,
     subLiquityAutomationStrategy,
-    subLiqutityDsrStrategy,
+    subLiqutityDsrPaybackStrategy,
+    subLiqutityDsrSupplyStrategy,
 } = require('../../strategy-subs');
 
 const {
@@ -894,7 +895,7 @@ const liquityDsrPaybackStrategyTest = () => describe('Liquity-Dsr-Payback', () =
             senderAcc.address,
         );
 
-        ({ subId, strategySub } = await subLiqutityDsrStrategy({
+        ({ subId, strategySub } = await subLiqutityDsrPaybackStrategy({
             proxy,
             strategyId,
             triggerRatio: Float2BN(MIN_RATIO),
@@ -982,7 +983,7 @@ const liquityDsrSupplyStrategyTest = () => describe('Liquity-Dsr-Supply', () => 
             senderAcc.address,
         );
 
-        ({ subId, strategySub } = await subLiqutityDsrStrategy({
+        ({ subId, strategySub } = await subLiqutityDsrSupplyStrategy({
             proxy,
             strategyId,
             triggerRatio: Float2BN(MIN_RATIO),
