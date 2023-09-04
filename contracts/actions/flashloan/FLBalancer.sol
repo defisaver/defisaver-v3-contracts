@@ -9,6 +9,7 @@ import "../../interfaces/balancer/IFlashLoanRecipient.sol";
 import "../../interfaces/balancer/IFlashLoans.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/IFLParamGetter.sol";
+import "../../interfaces/safe/ISafe.sol";
 import "../../interfaces/flashloan/IFlashLoanBase.sol";
 import "../../core/strategy/StrategyModel.sol";
 import "../../utils/TokenUtils.sol";
@@ -82,11 +83,20 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, Balance
         }
         address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
 
-        // call Action execution
-        IDSProxy(proxy).execute{value: address(this).balance}(
-            recipeExecutorAddr,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, _amounts[0].add(_feeAmounts[0]))
-        );
+        if (isDSProxy()) {
+            // call Action execution
+            IDSProxy(proxy).execute{value: address(this).balance}(
+                recipeExecutorAddr,
+                abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, _amounts[0].add(_feeAmounts[0]))
+            );
+        } else {
+            ISafe(proxy).execTransactionFromModule(
+                recipeExecutorAddr,
+                address(this).balance,
+                abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, _amounts[0].add(_feeAmounts[0])),
+                ISafe.Operation.DelegateCall
+            );
+        }
 
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 paybackAmount = _amounts[i].add(_feeAmounts[i]);
@@ -103,5 +113,14 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, Balance
         returns (FlashLoanParams memory params)
     {
         params = abi.decode(_callData, (FlashLoanParams));
+    }
+
+     // TODO: should be a better check
+    function isDSProxy() internal returns (bool) {
+        (bool success, bytes memory response) = address(this).call(abi.encodeWithSignature("nonce()"));
+
+        if (response.length == 0) return true;
+
+        return false;
     }
 }

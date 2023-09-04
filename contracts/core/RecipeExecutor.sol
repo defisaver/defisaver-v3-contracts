@@ -12,9 +12,12 @@ import "./strategy/BundleStorage.sol";
 import "./strategy/SubStorage.sol";
 import "../interfaces/flashloan/IFlashLoanBase.sol";
 import "../interfaces/ITrigger.sol";
+import "../auth/ModulePermission.sol";
+
+import "hardhat/console.sol";
 
 /// @title Entry point into executing recipes/checking triggers directly and as part of a strategy
-contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper {
+contract RecipeExecutor is StrategyModel, ProxyPermission, ModulePermission, AdminAuth, CoreHelper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     error TriggerNotActiveError(uint256);
@@ -121,6 +124,8 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
         bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
         returnValues[0] = _flAmount; // set the flash loan action as first return value
 
+        console.log("Vratio mi FL");
+
         // skips the first actions as it was the fl action
         for (uint256 i = 1; i < _currRecipe.actionIds.length; ++i) {
             returnValues[i] = _executeAction(_currRecipe, i, returnValues);
@@ -135,8 +140,17 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
 
         bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
 
+        console.log("Here");
+
         if (isFL(firstActionAddr)) {
-            _parseFLAndExecute(_currRecipe, firstActionAddr, returnValues);
+                    console.log("IN fl logic");
+                    console.log(isDSProxy());
+
+            if (isDSProxy()) {
+                _parseFLAndExecute(_currRecipe, firstActionAddr, returnValues);
+            } else {
+                _parseFLAndExecuteWithFLCallback(_currRecipe, firstActionAddr, returnValues);
+            }
         } else {
             for (uint256 i = 0; i < _currRecipe.actionIds.length; ++i) {
                 returnValues[i] = _executeAction(_currRecipe, i, returnValues);
@@ -159,8 +173,8 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
 
         address actionAddr = registry.getAddr(_currRecipe.actionIds[_index]);
 
-        response = IDSProxy(address(this)).execute(
-            actionAddr,
+        response = delegateCallAndReturnBytes32(
+            actionAddr, 
             abi.encodeWithSignature(
                 "executeAction(bytes,bytes32[],uint8[],bytes32[])",
                 _currRecipe.callData[_index],
@@ -203,9 +217,63 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
         removePermission(_flActionAddr);
     }
 
+    function _parseFLAndExecuteWithFLCallback(
+        Recipe memory _currRecipe,
+        address _flActionAddr,
+        bytes32[] memory _returnValues
+    ) internal {
+
+        enableModule(_flActionAddr);
+
+        console.log("setovao module");
+
+        // encode data for FL
+        bytes memory recipeData = abi.encode(_currRecipe, address(this));
+        IFlashLoanBase.FlashLoanParams memory params = abi.decode(
+            _currRecipe.callData[0],
+            (IFlashLoanBase.FlashLoanParams)
+        );
+        params.recipeData = recipeData;
+        _currRecipe.callData[0] = abi.encode(params);
+
+         /// @dev FL action is called directly so that we can check who the msg.sender of FL is
+        ActionBase(_flActionAddr).executeAction(
+            _currRecipe.callData[0],
+            _currRecipe.subData,
+            _currRecipe.paramMapping[0],
+            _returnValues
+        );
+
+        disableModule(_flActionAddr);
+    }
+
     /// @notice Checks if the specified address is of FL type action
     /// @param _actionAddr Address of the action
     function isFL(address _actionAddr) internal pure returns (bool) {
         return ActionBase(_actionAddr).actionType() == uint8(ActionBase.ActionType.FL_ACTION);
+    }
+
+    // TODO: should be a better check
+    function isDSProxy() internal returns (bool) {
+        (bool success, bytes memory response) = address(this).call(abi.encodeWithSignature("nonce()"));
+
+        if (response.length == 0) return true;
+
+        return false;
+    }
+
+    function delegateCallAndReturnBytes32(address _target, bytes memory _data) internal returns (bytes32 response) {
+        require(_target != address(0));
+
+        // call contract in current context
+        assembly {
+            let succeeded := delegatecall(sub(gas(), 5000), _target, add(_data, 0x20), mload(_data), 0, 32)
+            response := mload(0)      // load delegatecall output
+            switch iszero(succeeded)
+            case 1 {
+                // throw if delegatecall failed
+                revert(0, 0)
+            }
+        }
     }
 }

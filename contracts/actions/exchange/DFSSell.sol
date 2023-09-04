@@ -7,6 +7,8 @@ import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../exchangeV3/TokenGroupRegistry.sol";
 import "../ActionBase.sol";
 
+
+import "hardhat/console.sol";
 /// @title A exchange sell action through the dfs exchange
 /// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
 contract DFSSell is ActionBase, DFSExchangeCore {
@@ -88,6 +90,8 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
 
+        console.log("DFS SELL");
+
         // if source and destination address are same we want to skip exchanging and take no fees
         if (_exchangeData.srcAddr == _exchangeData.destAddr){
             bytes memory sameAssetLogData = abi.encode(
@@ -101,6 +105,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             return (_exchangeData.srcAmount, sameAssetLogData);
         }
 
+        console.log(_from, address(this));
         // Wrap eth if sent directly
         if (_exchangeData.srcAddr == TokenUtils.ETH_ADDR) {
             TokenUtils.depositWeth(_exchangeData.srcAmount);
@@ -116,7 +121,12 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             isEthDest = true;
         } 
 
+                console.log("JOOJ");
+
+
         _exchangeData.user = getUserAddress();
+
+        console.log(_exchangeData.user);
 
         /// @dev only check for custom fee if a non standard fee is sent
         if (!_isDirect) {
@@ -157,10 +167,16 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         params = abi.decode(_callData, (Params));
     }
 
-    /// @notice Returns the owner of the DSProxy that called the contract
-    function getUserAddress() internal view returns (address) {
+    /// @notice Returns the owner of the DSProxy or the address of current proxy if not DSProxy
+    function getUserAddress() internal returns (address) {
         IDSProxy proxy = IDSProxy(payable(address(this)));
 
-        return proxy.owner();
+        (bool success, bytes memory response) = address(this).call(abi.encodeWithSignature("nonce()"));
+
+        if (response.length == 0) {
+            return proxy.owner(); // TODO: parse response don't call again
+        } else {
+            return address(this);
+        }
     }
 }
