@@ -1,5 +1,8 @@
 const hre = require('hardhat');
+const chai = require('chai');
+
 const { expect } = require('chai');
+chai.use(require('chai-as-promised'));
 
 const { configure } = require('@defisaver/sdk');
 const {
@@ -351,6 +354,95 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                             debtAssetInfo.decimals,
                         ),
                     );
+            });
+
+            it('... should subscribe to AaveV3 Close With Maximum Gas Price strategy with small gasprice', async () => {
+                await revertToSnapshot(snapshotId);
+                snapshotId = await takeSnapshot();
+
+                const amount = Float2BN(
+                    fetchAmountinUSDPrice(testPairs[i].collAsset, USD_COLL_OPEN),
+                    collAssetInfo.decimals,
+                );
+                await setBalance(collAddr, senderAcc.address, amount);
+
+                const reserveData = await pool.getReserveData(collAddr);
+                collAssetId = reserveData.id;
+
+                await aaveV3Supply(
+                    proxy,
+                    addrs[network].AAVE_MARKET,
+                    amount,
+                    collAddr,
+                    collAssetId,
+                    senderAcc.address,
+                );
+
+                const reserveDataDebt = await pool.getReserveData(debtAddr);
+
+                const amountDebt = Float2BN(
+                    fetchAmountinUSDPrice(testPairs[i].debtAsset, USD_DEBT_OPEN),
+                    debtAssetInfo.decimals,
+                );
+                debtAssetId = reserveDataDebt.id;
+
+                await aaveV3Borrow(
+                    proxy,
+                    addrs[network].AAVE_MARKET,
+                    amountDebt,
+                    senderAcc.address,
+                    RATE_MODE,
+                    debtAssetId,
+                );
+
+                await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
+
+                const triggerPrice = Float2BN(
+                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
+                    8,
+                );
+
+                ({
+                    subId,
+                    strategySub: sub,
+                } = await subAaveV3CloseWithMaximumGasPriceBundle(
+                    proxy,
+                    bundleId,
+                    collAddr,
+                    nullAddress,
+                    triggerPrice,
+                    RATIO_STATE_OVER,
+                    100,
+                    collAddr,
+                    collAssetId,
+                    debtAddr,
+                    debtAssetId,
+                ));
+
+                await activateSub(proxy, subId);
+            });
+
+            it('... should call AaveV3 Close With Maximum Gas Price strategy and fail', async () => {
+                snapshotId4partial = await takeSnapshot();
+                // eslint-disable-next-line max-len
+                const usdRepayAmount = USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST);
+                const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
+                const swapAmount = Float2BN(
+                    fetchAmountinUSDPrice(
+                        collAssetInfo.symbol,
+                        usdSwapAmount,
+                    ),
+                    collAssetInfo.decimals,
+                );
+
+                await expect(callAaveCloseToCollWithMaximumGasPriceStrategy(
+                    strategyExecutorByBot,
+                    subId,
+                    sub,
+                    swapAmount,
+                    collAssetInfo,
+                    debtAssetInfo,
+                )).to.be.rejectedWith('Error: Transaction reverted without a reason string');
             });
         }
     });
