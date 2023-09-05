@@ -2695,6 +2695,25 @@ const createAaveV3FLCloseToCollStrategy = () => {
     return aaveCloseStrategy.encodeForDsProxyCall();
 };
 
+const createAaveV3FLCloseToCollWithMaximumGasPriceStrategy = () => {
+    const strategyName = 'AaveV3FLCloseToCollWithMaximumGasPrice';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addTrigger(new dfs.triggers.GasPriceTrigger('0'));
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.flAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionFLColl());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendRepayFL());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendColl());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
 const createCompV2RepayStrategy = () => {
     const compV2RepayStrategy = new dfs.Strategy('CompV2Repay');
 
@@ -3183,25 +3202,6 @@ const createAaveFLV2BoostStrategy = () => {
     aaveV2BoostStrategy.addAction(checkerAction);
 
     return aaveV2BoostStrategy.encodeForDsProxyCall();
-};
-
-const createAaveV3FLCloseToCollWithMaximumGasPriceStrategy = () => {
-    const strategyName = 'AaveV3FLCloseToCollWithMaximumGasPrice';
-
-    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
-
-    aaveCloseStrategy.addTrigger(new dfs.triggers.GasPriceTrigger('0'));
-
-    aaveCloseStrategy.addAction(aaveV3CloseActions.flAction());
-    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
-    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
-    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionFLColl());
-    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
-    aaveCloseStrategy.addAction(aaveV3CloseActions.sendRepayFL());
-    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
-    aaveCloseStrategy.addAction(aaveV3CloseActions.sendColl());
-
-    return aaveCloseStrategy.encodeForDsProxyCall();
 };
 
 const createSparkBoostStrategy = () => {
@@ -3710,6 +3710,7 @@ module.exports = {
     createAaveV3CloseToCollStrategy,
     createAaveV3CloseToCollWithMaximumGasPriceStrategy,
     createAaveV3FLCloseToCollStrategy,
+    createAaveV3FLCloseToCollWithMaximumGasPriceStrategy,
     createAaveV2RepayStrategy,
     createAaveFLV2RepayStrategy,
     createAaveV2BoostStrategy,
@@ -3718,8 +3719,6 @@ module.exports = {
     createCompFLV2RepayStrategy,
     createCompV2BoostStrategy,
     createCompFLV2BoostStrategy,
-    createAaveV3FLCloseToCollWithGasPriceStrategy,
-    createAaveV3FLCloseToCollWithMaximumGasPriceStrategy,
     createSparkBoostStrategy,
     createSparkFLBoostStrategy,
     createSparkRepayStrategy,
