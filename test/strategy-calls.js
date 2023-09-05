@@ -3875,7 +3875,7 @@ const callSparkFLCloseToCollStrategy = async (
 
 const aaveV3CloseActionsEncoded = {
     // eslint-disable-next-line max-len
-    flAction: ({ repayAmount, flAsset }) => (new dfs.actions.flashloan.AaveV3FlashLoanAction(
+    flAction: ({ repayAmount, flAsset }) => new dfs.actions.flashloan.FLAction(new dfs.actions.flashloan.AaveV3FlashLoanAction(
         [flAsset],
         [repayAmount],
         [AAVE_NO_DEBT_MODE],
