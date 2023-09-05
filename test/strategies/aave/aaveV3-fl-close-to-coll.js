@@ -1,13 +1,13 @@
 const config = require('../../../hardhat.config');
-const { aaveV3CloseToCollWithMaximumGasPriceStrategyTest } = require('./tests');
+const { aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest } = require('./tests');
 
-describe('AaveV3 close to collateral with maximum gas price strategy test', function () {
+describe('AaveV3 FL close to collateral with maximum gas price strategy test', function () {
     this.timeout(80000);
 
-    it('... test AaveV3 close to collateral with maximum gas price ', async () => {
+    it('... test AaveV3 FL close to collateral with maximum gas price ', async () => {
         let numTestPairs = 3;
 
         if (config.lightTesting) numTestPairs = 1;
-        await aaveV3CloseToCollWithMaximumGasPriceStrategyTest(numTestPairs);
+        await aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest(numTestPairs);
     }).timeout(50000);
 });
