@@ -2,22 +2,22 @@
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
-const { supplyComp, borrowComp } = require('../../actions');
+const { supplyAave, borrowAave } = require('../../actions');
 const {
-    createCompV2BoostStrategy,
-    createCompV2RepayStrategy,
-    createCompFLV2BoostStrategy,
-    createCompFLV2RepayStrategy,
+    createAaveV2BoostStrategy,
+    createAaveV2RepayStrategy,
+    createAaveFLV2BoostStrategy,
+    createAaveFLV2RepayStrategy,
 } = require('../../strategies');
 
 const {
-    callCompV2BoostStrategy,
-    callCompV2RepayStrategy,
-    callCompFLV2BoostStrategy,
-    callCompFLV2RepayStrategy,
+    callAaveV2BoostStrategy,
+    callAaveV2RepayStrategy,
+    callAaveFLV2BoostStrategy,
+    callAaveFLV2RepayStrategy,
 } = require('../../strategy-calls');
 
-const { subCompV2AutomationStrategy } = require('../../strategy-subs');
+const { subAaveV2AutomationStrategy } = require('../../strategy-subs');
 const {
     getContractFromRegistry,
     setNetwork,
@@ -31,24 +31,26 @@ const {
     redeploy,
     resetForkToBlock,
     REGISTRY_ADDR,
-    WETH_ADDRESS,
+    AAVE_V2_MARKET_ADDR,
 } = require('../../utils');
 const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
 
-const createBundleAndStrategy = async (proxy) => {
-    const repayCompStrategyEncoded = createCompV2RepayStrategy();
-    const repayFLCompStrategyEncoded = createCompFLV2RepayStrategy();
+const VARIABLE_RATE_MODE = 2;
 
-    const boostCompStrategyEncoded = createCompV2BoostStrategy();
-    const boostFLCompStrategyEncoded = createCompFLV2BoostStrategy();
+const createBundleAndStrategy = async (proxy) => {
+    const repayAaveStrategyEncoded = createAaveV2RepayStrategy();
+    const repayFLAaveStrategyEncoded = createAaveFLV2RepayStrategy();
+
+    const boostAaveStrategyEncoded = createAaveV2BoostStrategy();
+    const boostFLAaveStrategyEncoded = createAaveFLV2BoostStrategy();
 
     await openStrategyAndBundleStorage(false);
 
-    const repayId1 = await createStrategy(proxy, ...repayCompStrategyEncoded, true);
-    const repayId2 = await createStrategy(proxy, ...repayFLCompStrategyEncoded, true);
+    const repayId1 = await createStrategy(proxy, ...repayAaveStrategyEncoded, true);
+    const repayId2 = await createStrategy(proxy, ...repayFLAaveStrategyEncoded, true);
 
-    const boostId1 = await createStrategy(proxy, ...boostCompStrategyEncoded, true);
-    const boostId2 = await createStrategy(proxy, ...boostFLCompStrategyEncoded, true);
+    const boostId1 = await createStrategy(proxy, ...boostAaveStrategyEncoded, true);
+    const boostId2 = await createStrategy(proxy, ...boostFLAaveStrategyEncoded, true);
 
     const repayBundleId = await createBundle(
         proxy,
@@ -59,26 +61,26 @@ const createBundleAndStrategy = async (proxy) => {
         proxy,
         [boostId1, boostId2],
     );
-    await redeploy('CompSubProxy', REGISTRY_ADDR, false, false, repayBundleId, boostBundleId);
+    await redeploy('AaveSubProxy', REGISTRY_ADDR, false, false, repayBundleId, boostBundleId);
     return { repayBundleId, boostBundleId };
 };
 
 const testPairs = [
     {
-        collSymbol: 'cETH',
-        debtSymbol: 'cDAI',
+        collSymbol: 'WETH',
+        debtSymbol: 'DAI',
     },
-    // {
-    //     collSymbol: 'cWBTC',
-    //     debtSymbol: 'cUSDC',
-    // },
-    // {
-    //     collSymbol: 'cDAI',
-    //     debtSymbol: 'cETH',
-    // },
+    {
+        collSymbol: 'WBTC',
+        debtSymbol: 'USDC',
+    },
+    {
+        collSymbol: 'DAI',
+        debtSymbol: 'WETH',
+    },
 ];
 
-const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
+const aaveV2BoostTest = () => describe('Aave-Boost-Strategy', function () {
     this.timeout(1000000);
 
     let senderAcc;
@@ -102,13 +104,13 @@ const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
         botAcc = (await ethers.getSigners())[1];
         strategyExecutor = await getContractFromRegistry('StrategyExecutor');
 
-        await redeploy('CompBorrow');
-        await redeploy('CompSupply');
-        await redeploy('CompoundRatioTrigger');
-        await redeploy('CompV2RatioCheck');
+        await redeploy('AaveBorrow');
+        await redeploy('AaveSupply');
+        await redeploy('AaveV2RatioTrigger');
+        await redeploy('AaveV2RatioCheck');
 
         flAddr = await getContractFromRegistry('FLAction');
-        view = await getContractFromRegistry('CompView');
+        view = await getContractFromRegistry('AaveView');
 
         ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));
         await setNewExchangeWrapper(senderAcc, exchangeWrapper);
@@ -120,11 +122,8 @@ const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
     for (let i = 0; i < testPairs.length; i++) {
         const { collSymbol, debtSymbol } = testPairs[i];
 
-        const cCollAsset = getAssetInfo(collSymbol);
-        const cDebtAsset = getAssetInfo(debtSymbol);
-
-        const collAsset = getAssetInfo(cCollAsset.underlyingAsset);
-        const debtAsset = getAssetInfo(cDebtAsset.underlyingAsset);
+        const collAsset = getAssetInfo(collSymbol);
+        const debtAsset = getAssetInfo(debtSymbol);
 
         const collAmount = ethers.utils.parseUnits(
             fetchAmountinUSDPrice(collAsset.symbol, '20000'),
@@ -137,34 +136,28 @@ const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
 
         console.log(collAmount.toString(), debtAmount.toString());
 
-        it('... should make a new Comp position and sub', async () => {
-            if (collAsset.symbol === 'ETH') {
-                collAsset.address = WETH_ADDRESS;
-            }
-
-            if (debtAsset.symbol === 'ETH') {
-                debtAsset.address = WETH_ADDRESS;
-            }
-
+        it('... should make a new Aave position and sub', async () => {
             await setBalance(collAsset.address, senderAcc.address, collAmount);
             await approve(collAsset.address, proxy.address);
 
-            await supplyComp(
+            await supplyAave(
                 proxy,
-                cCollAsset.address,
-                collAsset.address,
+                AAVE_V2_MARKET_ADDR,
                 collAmount,
+                collAsset.address,
                 senderAcc.address,
             );
 
-            await borrowComp(
+            await borrowAave(
                 proxy,
-                cDebtAsset.address,
+                AAVE_V2_MARKET_ADDR,
+                debtAsset.address,
                 debtAmount,
+                VARIABLE_RATE_MODE,
                 senderAcc.address,
             );
 
-            subData = await subCompV2AutomationStrategy(
+            subData = await subAaveV2AutomationStrategy(
                 proxy,
                 Float2BN('120', 16).toString(),
                 Float2BN('200', 16).toString(),
@@ -174,45 +167,43 @@ const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
             );
         });
 
-        it('... should trigger a Comp Boost strategy', async () => {
+        it('... should trigger a Aave Boost strategy', async () => {
             const boostAmount = debtAmount.div(20);
 
-            const loanDataBefore = await view.getLoanData(proxy.address);
+            const loanDataBefore = await view.getLoanData(AAVE_V2_MARKET_ADDR, proxy.address);
 
-            await callCompV2BoostStrategy(
+            console.log(loanDataBefore.ratio / 1e16);
+
+            await callAaveV2BoostStrategy(
                 botAcc,
                 strategyExecutor,
                 0, // strategyIndex
                 subData.boostSubId,
                 subData.boostSub,
-                cCollAsset.address,
-                cDebtAsset.address,
                 collAsset.address,
                 debtAsset.address,
                 boostAmount,
                 exchangeWrapper,
             );
 
-            const loanDataAfter = await view.getLoanData(proxy.address);
+            const loanDataAfter = await view.getLoanData(AAVE_V2_MARKET_ADDR, proxy.address);
 
             expect(loanDataAfter.ratio).to.be.lt(loanDataBefore.ratio);
         });
 
-        it('... should trigger a Comp FL Boost strategy', async () => {
+        it('... should trigger a Aave FL Boost strategy', async () => {
             const boostAmount = debtAmount.div(10);
 
-            const loanDataBefore = await view.getLoanData(proxy.address);
+            const loanDataBefore = await view.getLoanData(AAVE_V2_MARKET_ADDR, proxy.address);
 
             console.log(loanDataBefore.ratio / 1e16);
 
-            await callCompFLV2BoostStrategy(
+            await callAaveFLV2BoostStrategy(
                 botAcc,
                 strategyExecutor,
                 1, // strategyIndex
                 subData.boostSubId,
                 subData.boostSub,
-                cCollAsset.address,
-                cDebtAsset.address,
                 collAsset.address,
                 debtAsset.address,
                 boostAmount,
@@ -220,14 +211,14 @@ const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
                 flAddr.address,
             );
 
-            const loanDataAfter = await view.getLoanData(proxy.address);
+            const loanDataAfter = await view.getLoanData(AAVE_V2_MARKET_ADDR, proxy.address);
 
             expect(loanDataAfter.ratio).to.be.lt(loanDataBefore.ratio);
         });
     }
 });
 
-const compV2RepayTest = () => describe('Comp-Repay-Strategy', function () {
+const aaveV2RepayTest = () => describe('Aave-Repay-Strategy', function () {
     this.timeout(1000000);
 
     let senderAcc;
@@ -252,14 +243,14 @@ const compV2RepayTest = () => describe('Comp-Repay-Strategy', function () {
         strategyExecutor = await getContractFromRegistry('StrategyExecutor');
 
         await redeploy('DFSSell');
-        await redeploy('CompWithdraw');
-        await redeploy('CompPayback');
-        await redeploy('CompoundRatioTrigger');
-        await redeploy('CompV2RatioCheck');
+        await redeploy('AaveWithdraw');
+        await redeploy('AavePayback');
+        await redeploy('AaveV2RatioTrigger');
+        await redeploy('AaveV2RatioCheck');
         await redeploy('FLAction');
 
         flAddr = await getContractFromRegistry('FLAction');
-        view = await getContractFromRegistry('CompView');
+        view = await getContractFromRegistry('AaveView');
 
         ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));
         await setNewExchangeWrapper(senderAcc, exchangeWrapper);
@@ -271,11 +262,8 @@ const compV2RepayTest = () => describe('Comp-Repay-Strategy', function () {
     for (let i = 0; i < testPairs.length; i++) {
         const { collSymbol, debtSymbol } = testPairs[i];
 
-        const cCollAsset = getAssetInfo(collSymbol);
-        const cDebtAsset = getAssetInfo(debtSymbol);
-
-        const collAsset = getAssetInfo(cCollAsset.underlyingAsset);
-        const debtAsset = getAssetInfo(cDebtAsset.underlyingAsset);
+        const collAsset = getAssetInfo(collSymbol);
+        const debtAsset = getAssetInfo(debtSymbol);
 
         const collAmount = ethers.utils.parseUnits(
             fetchAmountinUSDPrice(collAsset.symbol, '20000'),
@@ -286,34 +274,28 @@ const compV2RepayTest = () => describe('Comp-Repay-Strategy', function () {
             debtAsset.decimals,
         );
 
-        it('... should make a new Comp position and sub', async () => {
-            if (collAsset.symbol === 'ETH') {
-                collAsset.address = WETH_ADDRESS;
-            }
-
-            if (debtAsset.symbol === 'ETH') {
-                debtAsset.address = WETH_ADDRESS;
-            }
-
+        it('... should make a new Aave position and sub', async () => {
             await setBalance(collAsset.address, senderAcc.address, collAmount);
             await approve(collAsset.address, proxy.address);
 
-            await supplyComp(
+            await supplyAave(
                 proxy,
-                cCollAsset.address,
-                collAsset.address,
+                AAVE_V2_MARKET_ADDR,
                 collAmount,
+                collAsset.address,
                 senderAcc.address,
             );
 
-            await borrowComp(
+            await borrowAave(
                 proxy,
-                cDebtAsset.address,
+                AAVE_V2_MARKET_ADDR,
+                debtAsset.address,
                 debtAmount,
+                VARIABLE_RATE_MODE,
                 senderAcc.address,
             );
 
-            subData = await subCompV2AutomationStrategy(
+            subData = await subAaveV2AutomationStrategy(
                 proxy,
                 Float2BN('200', 16).toString(),
                 Float2BN('300', 16).toString(),
@@ -323,46 +305,42 @@ const compV2RepayTest = () => describe('Comp-Repay-Strategy', function () {
             );
         });
 
-        it('... should trigger a Comp Repay strategy', async () => {
+        it('... should trigger a Aave Repay strategy', async () => {
             const repayAmount = collAmount.div(20);
 
-            const loanDataBefore = await view.getLoanData(proxy.address);
+            const loanDataBefore = await view.getLoanData(AAVE_V2_MARKET_ADDR, proxy.address);
 
             console.log(loanDataBefore.ratio / 1e16);
 
-            await callCompV2RepayStrategy(
+            await callAaveV2RepayStrategy(
                 botAcc,
                 strategyExecutor,
                 0, // strategyIndex
                 subData.repaySubId,
                 subData.repaySub,
-                cCollAsset.address,
-                cDebtAsset.address,
                 collAsset.address,
                 debtAsset.address,
                 repayAmount,
                 exchangeWrapper,
             );
 
-            const loanDataAfter = await view.getLoanData(proxy.address);
+            const loanDataAfter = await view.getLoanData(AAVE_V2_MARKET_ADDR, proxy.address);
 
             expect(loanDataAfter.ratio).to.be.gt(loanDataBefore.ratio);
         });
 
-        it('... should trigger a Comp FL Repay strategy', async () => {
+        it('... should trigger a Aave FL Repay strategy', async () => {
             const repayAmount = collAmount.div(20);
 
-            const loanDataBefore = await view.getLoanData(proxy.address);
+            const loanDataBefore = await view.getLoanData(AAVE_V2_MARKET_ADDR, proxy.address);
             console.log(loanDataBefore.ratio / 1e16);
 
-            await callCompFLV2RepayStrategy(
+            await callAaveFLV2RepayStrategy(
                 botAcc,
                 strategyExecutor,
                 1, // strategyIndex
                 subData.repaySubId,
                 subData.repaySub,
-                cCollAsset.address,
-                cDebtAsset.address,
                 collAsset.address,
                 debtAsset.address,
                 repayAmount,
@@ -370,20 +348,20 @@ const compV2RepayTest = () => describe('Comp-Repay-Strategy', function () {
                 flAddr.address,
             );
 
-            const loanDataAfter = await view.getLoanData(proxy.address);
+            const loanDataAfter = await view.getLoanData(AAVE_V2_MARKET_ADDR, proxy.address);
 
             expect(loanDataAfter.ratio).to.be.gt(loanDataBefore.ratio);
         });
     }
 });
 
-const compV2StrategiesTest = () => {
-    compV2BoostTest();
-    compV2RepayTest();
+const aaveV2StrategiesTest = () => {
+    aaveV2BoostTest();
+    aaveV2RepayTest();
 };
 
 module.exports = {
-    compV2StrategiesTest,
-    compV2BoostTest,
-    compV2RepayTest,
+    aaveV2StrategiesTest,
+    aaveV2BoostTest,
+    aaveV2RepayTest,
 };
