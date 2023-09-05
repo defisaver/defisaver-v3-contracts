@@ -5,7 +5,7 @@ const { configure } = require('@defisaver/sdk');
 const {
     assets,
     getAssetInfo,
-    utils: { compare }
+    utils: { compare },
 } = require('@defisaver/tokens');
 
 const {
@@ -131,7 +131,7 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
 
             console.log({
                 eoa: senderAcc.address,
-                proxy: proxyAddr
+                proxy: proxyAddr,
             });
 
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
@@ -234,7 +234,7 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
 
                 ({
                     subId,
-                    strategySub: sub
+                    strategySub: sub,
                 } = await subAaveV3CloseWithMaximumGasPriceBundle(
                     proxy,
                     bundleId,
@@ -286,7 +286,7 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
 
                 const {
                     collAssetBalance,
-                    collAssetBalanceFloat
+                    collAssetBalanceFloat,
                 } = await balanceOf(
                     compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
@@ -300,7 +300,7 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
 
                 const {
                     debtAssetBalance,
-                    debtAssetBalanceFloat
+                    debtAssetBalanceFloat,
                 } = await balanceOf(
                     compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address, chainIds[network]) ? ETH_ADDR : debtAddr,
                     senderAcc.address,

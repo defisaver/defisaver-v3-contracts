@@ -2,8 +2,9 @@
 const dfs = require('@defisaver/sdk');
 const hre = require('hardhat');
 
-const { getAssetInfo,
-    MAXUINT
+const {
+    getAssetInfo,
+    MAXUINT,
 } = require('@defisaver/tokens');
 
 const {
@@ -4004,7 +4005,7 @@ const callAaveFLCloseToDebtWithMaximumGasPriceStrategy = async (
 
     actionsCallData.push(aaveV3CloseActionsEncoded.flAction({
         flAsset,
-        repayAmount
+        repayAmount,
     }));
     actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
         repayAmount: withdrawAmount ? repayAmount : MAXUINT,
@@ -4120,7 +4121,7 @@ const callAaveFLCloseToCollWithMaximumGasPriceStrategy = async (
 
     actionsCallData.push(aaveV3CloseActionsEncoded.flAction({
         repayAmount,
-        flAsset
+        flAsset,
     }));
     actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
         repayAmount: withdrawAmount ? repayAmount : MAXUINT,
