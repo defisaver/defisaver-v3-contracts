@@ -5,10 +5,11 @@ import "../ActionBase.sol";
 import "../spark/helpers/SparkHelper.sol";
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/spark/IsDAI.sol";
+import "../../utils/helpers/UtilHelper.sol";
 
 
 /// @title Action that redeems sDai for dai
-contract SDaiUnwrap is ActionBase, SparkHelper {
+contract SDaiUnwrap is ActionBase, SparkHelper, UtilHelper {
     using TokenUtils for address;
 
     /// @param amount - Amount of sDai to redeem

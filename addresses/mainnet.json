@@ -793,6 +793,17 @@
         "history": ["0x254cA89a00d53ab61de2Ba5641DBDC01aE48aed4"]
     },
     {
+        "name": "ApproveToken",
+        "address": "0xA4161cED7A29F0a3424e464a4a2dBf75888c5BF9",
+        "id": "0xbb8027f4",
+        "path": "contracts/actions/utils/ApproveToken.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "SendToken",
         "address": "0x36C26aA8bDc7CFE14e88721dc7fe53EdfED8C880",
         "id": "0x02abc227",
@@ -1196,6 +1207,17 @@
         "address": "0x51fA8FBc6F0aDEfe2FBA06104FCA39f5beD69291",
         "id": "0x695a7da7",
         "path": "contracts/actions/morpho/aaveV3/MorphoAaveV3Supply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoAaveV3SetManager",
+        "address": "0x1082AE0565504E3617BD5b6E80f91B59b81a82D9",
+        "id": "0x1ee82dad",
+        "path": "contracts/actions/morpho/aaveV3/MorphoAaveV3SetManager.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
@@ -2783,6 +2805,94 @@
         "changeTime": 0,
         "registryIds": [],
         "history": ["0x37434dcb2DC049c0068d4b8F95497311F44c5d9e"]
+    },
+    {
+        "name": "LSVSell",
+        "address": "0x0c1bb9A39d4A0EF4215Ade19Ce4F954E8419Dfd7",
+        "id": "0x9fde5493",
+        "path": "contracts/actions/lsv/LSVSupply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVSupply",
+        "address": "0x984c00DC098c98bed1CDfe2Ed786Fe1443da6671",
+        "id": "0x2b24ec36",
+        "path": "contracts/actions/lsv/LSVSupply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVBorrow",
+        "address": "0x7dFB434527Fdb39854156cDBa9bF4799E36E7e82",
+        "id": "0xc173a756",
+        "path": "contracts/actions/lsv/LSVBorrow.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVWithdraw",
+        "address": "0x0A4Ef5ADf759064b546441a50109eCbC2528A455",
+        "id": "0xbc21da53",
+        "path": "contracts/actions/lsv/LSVWithdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVPayback",
+        "address": "0x10749CE97583dBcEb54a083386CC8438C4e0FE65",
+        "id": "0x3179400b",
+        "path": "contracts/actions/lsv/LSVPayback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVProfitTracker",
+        "address": "0xa5941F267995553dA9369F04Dc02f9411EEb2F12",
+        "id": "0x58baaf3c",
+        "path": "contracts/utils/LSVProfitTracker.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVProxyRegistry",
+        "address": "0xa8a3c86c4A2DcCf350E84D2b3c46BDeBc711C16e",
+        "id": "0xc2948a6c",
+        "path": "contracts/utils/LSVProxyRegistry.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVView",
+        "address": "0xFAb98E139EBeC1Ed76d226b6bd6E4C5f66B2fE1b",
+        "id": "0x373e1531",
+        "path": "contracts/views/LSVView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": ["0x328d7a29f1cf211c58a910e498e326e7f419f8d6"]
     },
     {
         "name": "CompoundMonitorProxy",
