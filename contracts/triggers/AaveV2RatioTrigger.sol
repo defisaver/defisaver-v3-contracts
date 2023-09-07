@@ -6,8 +6,9 @@ import "../auth/AdminAuth.sol";
 import "../actions/aave/helpers/AaveRatioHelper.sol";
 import "../interfaces/ITrigger.sol";
 import "../utils/TransientStorage.sol";
+import "./helpers/TriggerHelper.sol";
 
-contract AaveV2RatioTrigger is ITrigger, AdminAuth, AaveRatioHelper {
+contract AaveV2RatioTrigger is ITrigger, AdminAuth, AaveRatioHelper, TriggerHelper {
 
     enum RatioState { OVER, UNDER }
 

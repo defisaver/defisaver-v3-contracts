@@ -6,9 +6,10 @@ import "../auth/AdminAuth.sol";
 import "../actions/compound/helpers/CompRatioHelper.sol";
 import "../interfaces/ITrigger.sol";
 import "../utils/TransientStorage.sol";
+import "./helpers/TriggerHelper.sol";
 
 /// @title Trigger contract that verifies if the Compound position went over/under the subbed ratio
-contract CompoundRatioTrigger is ITrigger, AdminAuth, CompRatioHelper {
+contract CompoundRatioTrigger is ITrigger, AdminAuth, CompRatioHelper, TriggerHelper {
 
     enum RatioState { OVER, UNDER }
 

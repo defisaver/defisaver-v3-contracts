@@ -4,7 +4,7 @@ pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
 import "../../auth/ProxyPermission.sol";
-import "../strategy/SubStorage.sol";
+import "../../core/strategy/SubStorage.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
 contract AaveV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {

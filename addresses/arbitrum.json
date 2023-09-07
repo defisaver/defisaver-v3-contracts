@@ -55,10 +55,10 @@
       "history": ["0x43Af8734096941271eC637549661DCeA64052575"]
     },
     {
-        "name": "AaveSubProxy",
+        "name": "AaveV3SubProxy",
         "address": "0x29a172f04CF9C6a79EdF4dD2744F2d260b8b8FE4",
-        "id": "0xd11b2581",
-        "path": "contracts/core/l2/AaveSubProxy.sol",
+        "id": "0x9275abae",
+        "path": "contracts/actions/aaveV3/AaveV3SubProxy.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
