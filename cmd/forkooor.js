@@ -2,10 +2,11 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-use-before-define */
 /* eslint-disable import/no-extraneous-dependencies */
-const hre = require('hardhat');
-require('dotenv-safe').config();
+const path = require('path');
 const fs = require('fs');
 const { spawnSync } = require('child_process');
+const hre = require('hardhat');
+require('dotenv-safe').config();
 const {
     getAssetInfo, ilks, assets, set, utils: { compare },
 } = require('@defisaver/tokens');
@@ -19,7 +20,6 @@ const {
     stringify,
 } = require('envfile');
 
-const path = require('path');
 const {
     createFork, topUp, chainIds,
 } = require('../scripts/utils/fork');
@@ -140,6 +140,8 @@ const {
     createCompFLV2RepayStrategy,
     createCompV2BoostStrategy,
     createCompFLV2BoostStrategy,
+    createLiquityDsrPaybackStrategy,
+    createLiquityDsrSupplyStrategy,
 } = require('../test/strategies');
 
 const {
@@ -2396,7 +2398,7 @@ const updateSubDataCompV2 = async (
     sender,
 ) => {
     const { proxy } = await forkSetup(sender);
-    console.log("real sender and proxy", {sender, proxy});
+    console.log('real sender and proxy', { sender, proxy });
 
     const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
     const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
@@ -3891,6 +3893,36 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
             const deployments = await sparkContracts.reduce(async (acc, name) => ({ ...(await acc), [name]: await redeploy(name, addrs[network].REGISTRY_ADDR, false, true).then((c) => c.address) }), {});
             console.log(deployments);
 
+            process.exit(0);
+        });
+    program
+        .command('deploy-liquity-dsr-strategies')
+        .description('Deploys Liquity Dsr strategies as well as updated McdView')
+        .action(async () => {
+            let network = 'mainnet';
+
+            if (process.env.TEST_CHAIN_ID) {
+                network = process.env.TEST_CHAIN_ID;
+            }
+
+            if (latestStrategyId >= 70) return;
+
+            const contractsToDeploy = [
+                'McdView',
+            ];
+
+            const deployments = await contractsToDeploy.reduce(async (acc, name) => ({ ...(await acc), [name]: await redeploy(name, addrs[network].REGISTRY_ADDR, false, true).then((c) => c.address) }), {});
+            console.log(deployments);
+
+            const latestStrategyId = await getLatestStrategyId();
+
+            await openStrategyAndBundleStorage(true);
+            const paybackStrategy = createLiquityDsrPaybackStrategy();
+            const supplyStrategy = createLiquityDsrSupplyStrategy();
+
+            const paybackStrategyId = await createStrategy(undefined, ...paybackStrategy, true);
+            const supplyStrategyId = await createStrategy(undefined, ...supplyStrategy, true);
+            console.log({ paybackStrategyId, supplyStrategyId });
             process.exit(0);
         });
     program.parse(process.argv);
