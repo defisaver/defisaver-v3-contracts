@@ -65,7 +65,7 @@ contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {
     {
         require(params.assetsLength == params.assets.length);
 
-        IRewardsController rewardsController = IRewardsController(REWARDS_CONTROLLER_ADDRESS);
+        IRewardsController rewardsController = IRewardsController(AAVE_REWARDS_CONTROLLER_ADDRESS);
 
         amountReceived = rewardsController.claimRewards(params.assets, params.amount, params.to, params.reward);
 

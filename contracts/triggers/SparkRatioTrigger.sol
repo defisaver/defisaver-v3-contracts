@@ -6,8 +6,10 @@ import "../auth/AdminAuth.sol";
 import "../actions/spark/helpers/SparkRatioHelper.sol";
 import "../interfaces/ITrigger.sol";
 import "../utils/TransientStorage.sol";
+import "./helpers/TriggerHelper.sol";
 
-contract SparkRatioTrigger is ITrigger, AdminAuth, SparkRatioHelper {
+
+contract SparkRatioTrigger is ITrigger, AdminAuth, SparkRatioHelper, TriggerHelper {
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
