@@ -265,7 +265,7 @@
     },
     {
         "name": "KyberAggregatorWrapper",
-        "address": "0x7a77e9C66867da4eEf0feb9eA1759Ff9e51e7D4f",
+        "address": "0xcafb38fb65056cc753dbf5433cde70b6b28a8458",
         "id": "0x1abf4ed0",
         "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
         "version": "1.0.0",
