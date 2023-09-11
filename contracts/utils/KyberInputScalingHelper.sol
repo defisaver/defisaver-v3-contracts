@@ -463,11 +463,17 @@ contract KyberInputScalingHelper {
     ) internal pure returns (bytes memory newData) {
         if (data.length > 32) {
             PositiveSlippageFeeData memory psData = abi.decode(data, (PositiveSlippageFeeData));
-            psData.expectedReturnAmount = (psData.expectedReturnAmount * newAmount) / oldAmount;
+            uint256 left = uint256(psData.expectedReturnAmount >> 128);
+            uint256 right = uint256(uint128(psData.expectedReturnAmount)) * newAmount / oldAmount;
+            require(right <= type(uint128).max, "Exceeded type range");
+            psData.expectedReturnAmount = right | left << 128;
             data = abi.encode(psData);
         } else if (data.length == 32) {
             uint256 expectedReturnAmount = abi.decode(data, (uint256));
-            expectedReturnAmount = (expectedReturnAmount * newAmount) / oldAmount;
+            uint256 left = uint256(expectedReturnAmount >> 128);
+            uint256 right = uint256(uint128(expectedReturnAmount)) * newAmount / oldAmount;
+            require(right <= type(uint128).max, "Exceeded type range");
+            expectedReturnAmount = right | left << 128;
             data = abi.encode(expectedReturnAmount);
         }
         return data;
