@@ -4042,7 +4042,7 @@ const callAaveFLCloseToDebtWithMaximumGasPriceStrategy = async (
     const gasUsed = await getGasUsed(receipt);
 
     console.log(
-        `GasUsed callAaveCloseToDebtWithMaximumGasPriceStrategy: ${gasUsed}`,
+        `GasUsed callAaveFLCloseToDebtWithMaximumGasPriceStrategy: ${gasUsed}`,
     );
 
     return receipt;
@@ -4158,7 +4158,7 @@ const callAaveFLCloseToCollWithMaximumGasPriceStrategy = async (
     const gasUsed = await getGasUsed(receipt);
 
     console.log(
-        `GasUsed callAaveCloseToCollWithMaximumGasPriceStrategy: ${gasUsed}`,
+        `GasUsed callAaveFLCloseToCollWithMaximumGasPriceStrategy: ${gasUsed}`,
     );
 
     return receipt;
