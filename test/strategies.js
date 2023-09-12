@@ -2601,6 +2601,8 @@ const createAaveV3CloseToDebtWithMaximumGasPriceStrategy = () => {
 
     const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
 
+    // This is a second trigger.
+    // Default close trigger for ratio set in createAaveCloseStrategyBase()
     aaveCloseStrategy.addTrigger(new dfs.triggers.GasPriceTrigger('0'));
 
     aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
