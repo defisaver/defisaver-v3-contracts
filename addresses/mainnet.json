@@ -1622,14 +1622,17 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x8095fFFC3cDdE58C4F537D39f9795A40a103e633",
+        "address": "0x485416D87B6B6B98259c32E789D4f7Ce4CD2959c",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
         "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xf4B715BB788cC4071061bd67dC8B56681460A2fF"]
+        "history": [
+            "0x8095fFFC3cDdE58C4F537D39f9795A40a103e633",
+            "0xf4B715BB788cC4071061bd67dC8B56681460A2fF"
+        ]
     },
     {
         "name": "SparkView",
