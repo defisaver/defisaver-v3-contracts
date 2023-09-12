@@ -209,6 +209,12 @@ contract KyberInputScalingHelper {
                 swap.data = newAlgebraV1(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeBalancerBatch.selector) {
                 swap.data = newBalancerBatch(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeWombat.selector) {
+                swap.data = newMantis(swap.data, oldAmount, newAmount); // @dev struct Mantis is used for both Wombat and Mantis because of same fields
+            } else if (functionSelector == IExecutorHelper.executeMantis.selector) {
+                swap.data = newMantis(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeIziSwap.selector) {
+                swap.data = newIziSwap(swap.data, oldAmount, newAmount);
             } else revert("AggregationExecutor: Dex type not supported");
             unchecked {
                 ++i;
@@ -430,6 +436,26 @@ contract KyberInputScalingHelper {
         return abi.encode(balancerBatch);
     }
 
+        function newMantis(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.Mantis memory mantis = abi.decode(data, (IExecutorHelper.Mantis));
+        mantis.amount = (mantis.amount * newAmount) / oldAmount;
+        return abi.encode(mantis);
+    }
+
+    function newIziSwap(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.IziSwap memory iZi = abi.decode(data, (IExecutorHelper.IziSwap));
+        iZi.swapAmount = (iZi.swapAmount * newAmount) / oldAmount;
+        return abi.encode(iZi);
+    }
+
     function _scaledPositiveSlippageFeeData(
         bytes memory data,
         uint256 oldAmount,
@@ -437,11 +463,17 @@ contract KyberInputScalingHelper {
     ) internal pure returns (bytes memory newData) {
         if (data.length > 32) {
             PositiveSlippageFeeData memory psData = abi.decode(data, (PositiveSlippageFeeData));
-            psData.expectedReturnAmount = (psData.expectedReturnAmount * newAmount) / oldAmount;
+            uint256 left = uint256(psData.expectedReturnAmount >> 128);
+            uint256 right = uint256(uint128(psData.expectedReturnAmount)) * newAmount / oldAmount;
+            require(right <= type(uint128).max, "Exceeded type range");
+            psData.expectedReturnAmount = right | left << 128;
             data = abi.encode(psData);
         } else if (data.length == 32) {
             uint256 expectedReturnAmount = abi.decode(data, (uint256));
-            expectedReturnAmount = (expectedReturnAmount * newAmount) / oldAmount;
+            uint256 left = uint256(expectedReturnAmount >> 128);
+            uint256 right = uint256(uint128(expectedReturnAmount)) * newAmount / oldAmount;
+            require(right <= type(uint128).max, "Exceeded type range");
+            expectedReturnAmount = right | left << 128;
             data = abi.encode(expectedReturnAmount);
         }
         return data;
