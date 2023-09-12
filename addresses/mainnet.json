@@ -389,14 +389,14 @@
     },
     {
         "name": "McdView",
-        "address": "0x922C795aE0be55Aaeb3FF51813B76AFc78e97C7c",
+        "address": "0x0Fa061b5a59D85eDaA8aa914b9C9933C3b62C63e",
         "id": "0xb131d25c",
         "path": "contracts/views/McdView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x922C795aE0be55Aaeb3FF51813B76AFc78e97C7c"]
     },
     {
         "name": "LiquityView",
