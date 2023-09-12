@@ -61,8 +61,6 @@ const {
     callAaveCloseToDebtWithMaximumGasPriceStrategy,
     callAaveFLCloseToDebtWithMaximumGasPriceStrategy,
 } = require('../../strategy-calls');
-const { subAaveV3CloseBundle } = require('../../l2-strategy-subs');
-const { callAaveFLCloseToDebtL2Strategy } = require('../../l2-strategy-calls');
 
 const testPairs = [
     {
@@ -79,7 +77,7 @@ const testPairs = [
     },
 ];
 
-const deployCloseToCollWithMaximumGasPriceBundle = async (proxy, isFork = undefined) => {
+const deployCloseToCollWithMaximumGasPriceBundle = async (proxy, isFork = false) => {
     await openStrategyAndBundleStorage(isFork);
 
     const closeStrategy = createAaveV3CloseToCollWithMaximumGasPriceStrategy();
@@ -104,7 +102,7 @@ const deployCloseToCollWithMaximumGasPriceBundle = async (proxy, isFork = undefi
     return aaveV3CloseToCollBundleId;
 };
 
-const deployCloseToDebtWithMaximumGasPriceBundle = async (proxy, isFork = undefined) => {
+const deployCloseToDebtWithMaximumGasPriceBundle = async (proxy, isFork = false) => {
     await openStrategyAndBundleStorage(isFork);
 
     const closeStrategy = createAaveV3CloseToDebtWithMaximumGasPriceStrategy();
