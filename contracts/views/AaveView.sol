@@ -17,6 +17,7 @@ contract AaveView is AaveHelper, DSMath{
         address user;
         uint128 ratio;
         address[] collAddr;
+        bool[] enabledAsColl;
         address[] borrowAddr;
         uint256[] collAmounts;
         uint256[] borrowStableAmounts;
@@ -242,6 +243,7 @@ contract AaveView is AaveHelper, DSMath{
             user: _user,
             ratio: 0,
             collAddr: new address[](reserves.length),
+            enabledAsColl: new bool[](reserves.length),
             borrowAddr: new address[](reserves.length),
             collAmounts: new uint[](reserves.length),
             borrowStableAmounts: new uint[](reserves.length),
@@ -254,13 +256,14 @@ contract AaveView is AaveHelper, DSMath{
         for (uint64 i = 0; i < reserves.length; i++) {
             address reserve = reserves[i].tokenAddress;
 
-            (uint256 aTokenBalance, uint256 borrowsStable, uint256 borrowsVariable,,,,,,) = dataProvider.getUserReserveData(reserve, _user);
+            (uint256 aTokenBalance, uint256 borrowsStable, uint256 borrowsVariable,,,,,,bool usageAsCollateralEnabled) = dataProvider.getUserReserveData(reserve, _user);
             uint256 price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(reserve);
 
             if (aTokenBalance > 0) {
                 uint256 userTokenBalanceEth = wmul(aTokenBalance, price) * (10 ** (18 - reserve.getTokenDecimals()));
                 data.collAddr[collPos] = reserve;
                 data.collAmounts[collPos] = userTokenBalanceEth;
+                data.enabledAsColl[collPos] = usageAsCollateralEnabled;
                 collPos++;
             }
 
