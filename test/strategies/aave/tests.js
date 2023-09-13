@@ -1434,6 +1434,8 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
 };
 
 module.exports = {
+    deployCloseToCollWithMaximumGasPriceBundle,
+    deployCloseToDebtWithMaximumGasPriceBundle,
     aaveV3CloseToCollWithMaximumGasPriceStrategyTest,
     aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest,
     aaveV3CloseToDebtWithMaximumGasPriceStrategyTest,
