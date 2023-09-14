@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.10;
 
-import "./MainnetUtilAddresses.sol";
+import "./BaseUtilAddresses.sol";
 
-contract UtilHelper is MainnetUtilAddresses{
+contract UtilHelper is BaseUtilAddresses{
 }
