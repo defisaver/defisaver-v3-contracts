@@ -115,6 +115,15 @@ module.exports = {
             blockExplorer: 'etherscan',
             contractVerification: true,
         },
+        base: {
+            url: process.env.BASE_NODE,
+            chainId: 8453,
+            accounts: [process.env.PRIV_KEY_KOVAN],
+            name: 'base',
+            txType: 0,
+            blockExplorer: 'etherscan',
+            contractVerification: true,
+        },
         rinkebyArbitrum: {
             url: process.env.RINKEBY_ARBITRUM_NODE,
             chainID: 421611,
