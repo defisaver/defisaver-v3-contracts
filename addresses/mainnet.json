@@ -639,14 +639,14 @@
     },
     {
         "name": "AaveView",
-        "address": "0xEDf1087544a01596b70Da746F861B878F245B08f",
+        "address": "0xf585d53f568d226449a94d48c4ea122cdeffe52d",
         "id": "0x0a55b48c",
         "path": "contracts/views/AaveView.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xEDf1087544a01596b70Da746F861B878F245B08f"]
     },
     {
         "name": "MockChainlinkFeedRegistry",
@@ -1638,14 +1638,17 @@
     },
     {
         "name": "SparkView",
-        "address": "0xB3B13838F6F57CE76b94f0744Ab0B045B780836e",
+        "address": "0xd34306ae3FAE4e347290E4691059e240Aee22eb3",
         "id": "0xd6f690a9",
         "path": "contracts/views/SparkView.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x29d01EF37514912ab874D51fEc76c8f5d4d6712e"]
+        "history": [
+            "0xB3B13838F6F57CE76b94f0744Ab0B045B780836e",
+            "0x29d01EF37514912ab874D51fEc76c8f5d4d6712e"
+        ]
     },
     {
         "name": "CompBorrow",
