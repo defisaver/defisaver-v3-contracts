@@ -4,9 +4,9 @@ pragma solidity =0.8.10;
 
 import "../../../DS/DSMath.sol";
 import "../../../interfaces/compoundV3/IComet.sol";
-import "./MainnetCompV3Addresses.sol";
+import "./BaseCompV3Addresses.sol";
 
-contract CompV3RatioHelper is DSMath, MainnetCompV3Addresses {
+contract CompV3RatioHelper is DSMath, BaseCompV3Addresses {
 
     function getAssets(address _market) public view returns(IComet.AssetInfo[] memory assets){
         uint8 numAssets = IComet(_market).numAssets();

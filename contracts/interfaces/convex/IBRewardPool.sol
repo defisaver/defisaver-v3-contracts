@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity =0.8.10;
 
-interface IBaseRewardPool {
+interface IBRewardPool {
     function extraRewardsLength() external view returns (uint256);
     function extraRewards(uint256) external view returns (address);
 
