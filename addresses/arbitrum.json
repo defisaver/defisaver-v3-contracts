@@ -525,14 +525,14 @@
     },
     {
       "name": "PullToken",
-      "address": "0xD8B3769f74bd9F196C3416a42a91E786948898e6",
+      "address": "0x62581168af33821163E682073d599a8B5e39Cc4c",
       "id": "0xcc063de4",
       "path": "contracts/actions/utils/PullToken.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0xD8B3769f74bd9F196C3416a42a91E786948898e6"]
     },
     {
       "name": "FLAction",
@@ -563,7 +563,7 @@
       "path": "contracts/core/strategy/StrategyStorage.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -574,7 +574,7 @@
       "path": "contracts/core/strategy/BotAuth.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -585,7 +585,7 @@
       "path": "contracts/core/strategy/BundleStorage.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -596,7 +596,7 @@
       "path": "contracts/core/l2/SubStorageL2.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -607,7 +607,7 @@
       "path": "contracts/core/strategy/ProxyAuth.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -617,7 +617,7 @@
       "id": "0x0c1dc439",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -628,7 +628,7 @@
       "path": "contracts/triggers/AaveV3RatioTrigger.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -639,7 +639,7 @@
       "path": "contracts/actions/fee/GasFeeTakerL2.sol",
       "version": "1.0.3",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": [
         "0xD684Efb6a7c1ADE7298Dde28A2057E8EaF5D61fc",
@@ -654,7 +654,7 @@
       "path": "contracts/actions/checkers/AaveV3RatioCheck.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -664,7 +664,7 @@
       "id": "0x9f01e6ae",
       "version": "1.0.1",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": [
         "0xBF1CaC12DB60819Bfa71A328282ecbc1D40443aA"

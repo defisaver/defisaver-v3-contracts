@@ -3,8 +3,8 @@
 pragma solidity =0.8.10;
 
 import "../../../interfaces/compoundV3/IComet.sol";
-import "./MainnetCompV3Addresses.sol";
+import "./BaseCompV3Addresses.sol";
 
-contract CompV3Helper is MainnetCompV3Addresses{
+contract CompV3Helper is BaseCompV3Addresses {
     
 }

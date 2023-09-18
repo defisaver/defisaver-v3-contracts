@@ -510,7 +510,7 @@
       "path": "contracts/core/strategy/StrategyStorage.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -521,7 +521,7 @@
       "path": "contracts/core/strategy/BundleStorage.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -532,7 +532,7 @@
       "path": "contracts/core/l2/SubStorageL2.sol",
       "version": "1.0.1",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": [
         "0x7dba2b04c6efaE74D5076248666B86a9C551da5e"
@@ -545,7 +545,7 @@
       "path": "contracts/core/strategy/ProxyAuth.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -597,14 +597,14 @@
     },
     {
       "name": "PullToken",
-      "address": "0x392579E020a688068422A925c85f28bFD12a7EBB",
+      "address": "0x98c753531420605c3120be777183E6B1096c1B80",
       "id": "0xcc063de4",
       "path": "contracts/actions/utils/PullToken.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0x392579E020a688068422A925c85f28bFD12a7EBB"]
     },
     {
       "name": "SendTokenAndUnwrap",

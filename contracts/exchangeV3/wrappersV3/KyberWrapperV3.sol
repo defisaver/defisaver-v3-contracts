@@ -8,7 +8,7 @@ import "../../interfaces/exchange/IExchangeV3.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 import "./helpers/WrapperHelper.sol";
-
+import "../../utils/TokenUtils.sol";
 
 contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
 
@@ -116,7 +116,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     function sendLeftOver(address _srcAddr) internal {
         payable(msg.sender).transfer(address(this).balance);
 
-        if (_srcAddr != ETH_ADDRESS) {
+        if (_srcAddr != TokenUtils.ETH_ADDR) {
             IERC20(_srcAddr).safeTransfer(msg.sender, IERC20(_srcAddr).balanceOf(address(this)));
         }
     }
@@ -125,7 +125,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     receive() payable external {}
 
     function getDecimals(address _token) internal view returns (uint256) {
-        if (_token == ETH_ADDRESS) return 18;
+        if (_token == TokenUtils.ETH_ADDR) return 18;
 
         return IERC20(_token).decimals();
     }
