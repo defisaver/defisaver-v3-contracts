@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.10;
 
-import "./BaseCoreAddresses.sol";
+import "./MainnetCoreAddresses.sol";
 
-contract CoreHelper is BaseCoreAddresses {
+contract CoreHelper is MainnetCoreAddresses {
 }

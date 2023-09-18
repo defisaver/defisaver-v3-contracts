@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.10;
 
-import "./BaseExchangeAddresses.sol";
+import "./MainnetExchangeAddresses.sol";
 
-contract ExchangeHelper is BaseExchangeAddresses {
+contract ExchangeHelper is MainnetExchangeAddresses {
 }
