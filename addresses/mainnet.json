@@ -2536,13 +2536,13 @@
     },
     {
         "name": "CurveUsdSoftLiquidationTrigger",
-        "address": "0xb70f9CD0C17c8b3486D64F67b04661Fe40968b18",
+        "address": "0x3558c764258E8084020C357A113FC52D27eDCEEf",
         "id": "0x7ff68c12",
         "path": "contracts/triggers/CurveUsdSoftLiquidationTrigger.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "0",
-        "registryIds": ["0x5D037963b2822a2B13B542477b8706C313b47821"],
+        "registryIds": ["0x5D037963b2822a2B13B542477b8706C313b47821", "0xb70f9CD0C17c8b3486D64F67b04661Fe40968b18"],
         "history": []
     },
     {

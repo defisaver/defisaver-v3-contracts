@@ -29,6 +29,9 @@ contract CurveUsdSoftLiquidationTrigger is ITrigger, AdminAuth {
         ICrvUsdController ctrl = ICrvUsdController(_market);
         ILLAMMA amm = ILLAMMA(ctrl.amm());
 
+        // check if user has the position
+        if (!ctrl.loan_exists(_user)) return type(uint256).max;
+
         int256[2] memory bandRange = amm.read_user_tick_numbers(_user);
         int256 activeBand = amm.active_band();
 
