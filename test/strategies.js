@@ -3583,6 +3583,106 @@ const createSparkFLCloseToCollStrategy = () => {
     return sparkCloseStrategy.encodeForDsProxyCall();
 };
 
+const createLiquityDsrPaybackStrategy = () => {
+    const liquityDsrPaybackStrategy = new dfs.Strategy('LiquityDsrPayback');
+    liquityDsrPaybackStrategy.addSubSlot('&ratioState', 'uint8');
+    liquityDsrPaybackStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityDsrPaybackStrategy.addSubSlot('&daiAddress', 'address');
+    liquityDsrPaybackStrategy.addSubSlot('&lusdAddress', 'uint256');
+
+    const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
+    liquityDsrPaybackStrategy.addTrigger(liquityRatioTrigger);
+
+    const dsrWithdrawAction = new dfs.actions.maker.MakerDsrWithdrawAction(
+        '%daiWithdrawAmount',
+        '&proxy',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&daiAddress',
+            '&lusdAddress',
+            '$1',
+            '%wrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%strategyGasCost', '&lusdAddress', '$2',
+    );
+
+    const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
+        '$3',
+        '&proxy',
+        '%upperHint',
+        '%lowerHint',
+    );
+
+    const liquityRatioCheckAction = new dfs.actions.checkers.LiquityRatioCheckAction(
+        '&ratioState', '&targetRatio',
+    );
+
+    liquityDsrPaybackStrategy.addAction(dsrWithdrawAction);
+    liquityDsrPaybackStrategy.addAction(sellAction);
+    liquityDsrPaybackStrategy.addAction(feeTakingAction);
+    liquityDsrPaybackStrategy.addAction(liquityPaybackAction);
+    liquityDsrPaybackStrategy.addAction(liquityRatioCheckAction);
+
+    return liquityDsrPaybackStrategy.encodeForDsProxyCall();
+};
+
+const createLiquityDsrSupplyStrategy = () => {
+    const liquityDsrSupplyStrategy = new dfs.Strategy('LiquityDsrSupply');
+    liquityDsrSupplyStrategy.addSubSlot('&ratioState', 'uint8');
+    liquityDsrSupplyStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityDsrSupplyStrategy.addSubSlot('&daiAddress', 'address');
+    liquityDsrSupplyStrategy.addSubSlot('&wethAddress', 'uint256');
+
+    const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
+    liquityDsrSupplyStrategy.addTrigger(liquityRatioTrigger);
+
+    const dsrWithdrawAction = new dfs.actions.maker.MakerDsrWithdrawAction(
+        '%daiWithdrawAmount',
+        '&proxy',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&daiAddress',
+            '&wethAddress',
+            '$1',
+            '%wrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%strategyGasCost', '&wethAddress', '$2',
+    );
+
+    const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
+        '$3',
+        '&proxy',
+        '%upperHint',
+        '%lowerHint',
+    );
+
+    const liquityRatioCheckAction = new dfs.actions.checkers.LiquityRatioCheckAction(
+        '&ratioState', '&targetRatio',
+    );
+
+    liquityDsrSupplyStrategy.addAction(dsrWithdrawAction);
+    liquityDsrSupplyStrategy.addAction(sellAction);
+    liquityDsrSupplyStrategy.addAction(feeTakingAction);
+    liquityDsrSupplyStrategy.addAction(liquitySupplyAction);
+    liquityDsrSupplyStrategy.addAction(liquityRatioCheckAction);
+
+    return liquityDsrSupplyStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
@@ -3653,4 +3753,6 @@ module.exports = {
     createSparkFLCloseToDebtStrategy,
     createSparkCloseToCollStrategy,
     createSparkFLCloseToCollStrategy,
+    createLiquityDsrPaybackStrategy,
+    createLiquityDsrSupplyStrategy,
 };

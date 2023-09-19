@@ -413,25 +413,25 @@
     },
     {
         "name": "McdView",
-        "address": "0x922C795aE0be55Aaeb3FF51813B76AFc78e97C7c",
+        "address": "0x0Fa061b5a59D85eDaA8aa914b9C9933C3b62C63e",
         "id": "0xb131d25c",
         "path": "contracts/views/McdView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x922C795aE0be55Aaeb3FF51813B76AFc78e97C7c"]
     },
     {
         "name": "LiquityView",
-        "address": "0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C",
+        "address": "0xb760e60Dff6263E8Ab31B04ee5Cc010beA47e2Df",
         "id": "0xe23de5c6",
         "path": "contracts/views/LiquityView.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xd1913b977737c9505b8ecfedb8121546096d3393"]
+        "history": ["0xd1913b977737c9505b8ecfedb8121546096d3393, 0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C"]
     },
     {
         "name": "ChickenBondsView",
