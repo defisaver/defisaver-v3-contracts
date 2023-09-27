@@ -165,8 +165,19 @@
       "history": []
     },
     {
+      "name": "KyberInputScalingHelper",
+      "address": "0xf446fb6bdd3133f451d6cdce17812662161e9420",
+      "id": "0x559d99f5",
+      "path": "contracts/utils/KyberInputScalingHelper",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "KyberAggregatorWrapper",
-      "address": "0x7a77e9C66867da4eEf0feb9eA1759Ff9e51e7D4f",
+      "address": "0xe8ec0f8c046817c3a7255aec40b48b7e54dd98fc",
       "id": "0x1abf4ed0",
       "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
       "version": "1.0.0",
@@ -174,6 +185,7 @@
       "changeTime": 0,
       "registryIds": [],
       "history": [
+        "0x7a77e9C66867da4eEf0feb9eA1759Ff9e51e7D4f",
         "0x0df2d6691aee2486a3d1cc42e844c7f780f3ff1f",
         "0x51ef3d99c01bb8d7190fb51fa732e599acef59f6",
         "0x02d67d99AA5EF4bb0dc86b1c4D61878a80472552",

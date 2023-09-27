@@ -172,6 +172,14 @@ interface IExecutorHelper {
     int24 limitPoint;
   }
 
+  struct TraderJoeV2 {
+    address recipient;
+    address pool;
+    address tokenIn;
+    address tokenOut;
+    uint256 collectAmount; // most significant 1 bit is to determine whether pool is v2.1, else v2.0
+  }
+
   function executeUniswap(
     bytes memory data,
     uint256 flagsAndPrevAmountOut
@@ -298,6 +306,21 @@ interface IExecutorHelper {
   ) external payable returns (uint256);
 
   function executeIziSwap(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeWooFiV2(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeTraderJoeV2(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executePancakeStableSwap(
     bytes memory data,
     uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);

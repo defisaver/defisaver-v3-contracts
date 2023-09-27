@@ -229,6 +229,7 @@ const kyberAggregatorDFSSellTest = async () => {
         let snapshot;
 
         before(async () => {
+            await redeploy('KyberInputScalingHelper');
             await redeploy('DFSSell');
             kyberAggregatorWrapper = await redeploy('KyberAggregatorWrapper');
 
