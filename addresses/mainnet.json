@@ -44,11 +44,33 @@
         "history": []
     },
     {
-        "name": "AaveSubProxy",
+        "name": "AaveV3SubProxy",
         "address": "0xb9F73625AA64D46A9b2f0331712e9bEE19e4C3f7",
-        "id": "0xd11b2581",
-        "path": "contracts/core/l2/AaveSubProxy.sol",
+        "id": "0x9275abae",
+        "path": "contracts/actions/aaveV3/AaveV3SubProxy.sol",
         "version": "1.0.1",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveSubProxy",
+        "address": "0xf5b40E26cEE37650f5B93946Bd4AC3e39CbcE76b",
+        "id": "0xd11b2581",
+        "path": "contracts/actions/aave/AaveSubProxy.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompSubProxy",
+        "address": "0xEC8553D9063a0A0Bfb4953fca6d7A7F75E8B8d31",
+        "id": "0xd87b2479",
+        "path": "contracts/actions/comp/CompSubProxy.sol",
+        "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
@@ -242,8 +264,19 @@
         "history": []
     },
     {
+        "name": "KyberInputScalingHelper",
+        "address": "0x05977cA080Ef44a824D935191d0A3d56659295a0",
+        "id": "0x559d99f5",
+        "path": "contracts/utils/KyberInputScalingHelper",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "KyberAggregatorWrapper",
-        "address": "0x2197b1f0c3C61A8f74E78431A0d17837642B23cf",
+        "address": "0x1e474f3E48e0b2378f4B9f58A076C3F3E316E5FC",
         "id": "0x1abf4ed0",
         "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
         "version": "1.0.0",
@@ -251,6 +284,9 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xcafb38fb65056cc753dbf5433cde70b6b28a8458",
+            "0xf36cC3f17e336450a8646F57c419835c81Db7F95",
+            "0x2197b1f0c3C61A8f74E78431A0d17837642B23cf",
             "0xBfb05d97FE87DCbc7Ff6F2e4f83FcA0861318A4E",
             "0x25A1c8C54018F198D8BdfB3a410D812b4ad312e4"
         ]
@@ -389,25 +425,25 @@
     },
     {
         "name": "McdView",
-        "address": "0x922C795aE0be55Aaeb3FF51813B76AFc78e97C7c",
+        "address": "0x0Fa061b5a59D85eDaA8aa914b9C9933C3b62C63e",
         "id": "0xb131d25c",
         "path": "contracts/views/McdView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x922C795aE0be55Aaeb3FF51813B76AFc78e97C7c"]
     },
     {
         "name": "LiquityView",
-        "address": "0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C",
+        "address": "0xb760e60Dff6263E8Ab31B04ee5Cc010beA47e2Df",
         "id": "0xe23de5c6",
         "path": "contracts/views/LiquityView.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xd1913b977737c9505b8ecfedb8121546096d3393"]
+        "history": ["0xd1913b977737c9505b8ecfedb8121546096d3393, 0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C"]
     },
     {
         "name": "ChickenBondsView",
@@ -515,7 +551,7 @@
         "name": "CBRebondSubProxy",
         "address": "0x2b37E3A0ef2Bc449633F85b654a9C8D17A575F81",
         "id": "0xa69c4bb7",
-        "path": "contracts/subProxies/CBRebondSubProxy.sol",
+        "path": "contracts/actions/liquity/bonds/CBRebondSubProxy.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": "0",
@@ -615,14 +651,14 @@
     },
     {
         "name": "AaveView",
-        "address": "0xEDf1087544a01596b70Da746F861B878F245B08f",
+        "address": "0xf585d53f568d226449a94d48c4ea122cdeffe52d",
         "id": "0x0a55b48c",
         "path": "contracts/views/AaveView.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xEDf1087544a01596b70Da746F861B878F245B08f"]
     },
     {
         "name": "MockChainlinkFeedRegistry",
@@ -791,6 +827,17 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": ["0x254cA89a00d53ab61de2Ba5641DBDC01aE48aed4"]
+    },
+    {
+        "name": "ApproveToken",
+        "address": "0xA4161cED7A29F0a3424e464a4a2dBf75888c5BF9",
+        "id": "0xbb8027f4",
+        "path": "contracts/actions/utils/ApproveToken.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     },
     {
         "name": "SendToken",
@@ -1203,6 +1250,17 @@
         "history": []
     },
     {
+        "name": "MorphoAaveV3SetManager",
+        "address": "0x1082AE0565504E3617BD5b6E80f91B59b81a82D9",
+        "id": "0x1ee82dad",
+        "path": "contracts/actions/morpho/aaveV3/MorphoAaveV3SetManager.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "MorphoAaveV3Withdraw",
         "address": "0xdc3e74C4cD577275296ceFE36A3D082223AfF206",
         "id": "0x1f2dba0b",
@@ -1578,25 +1636,31 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x8095fFFC3cDdE58C4F537D39f9795A40a103e633",
+        "address": "0x485416D87B6B6B98259c32E789D4f7Ce4CD2959c",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
         "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xf4B715BB788cC4071061bd67dC8B56681460A2fF"]
+        "history": [
+            "0x8095fFFC3cDdE58C4F537D39f9795A40a103e633",
+            "0xf4B715BB788cC4071061bd67dC8B56681460A2fF"
+        ]
     },
     {
         "name": "SparkView",
-        "address": "0xB3B13838F6F57CE76b94f0744Ab0B045B780836e",
+        "address": "0xd34306ae3FAE4e347290E4691059e240Aee22eb3",
         "id": "0xd6f690a9",
         "path": "contracts/views/SparkView.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x29d01EF37514912ab874D51fEc76c8f5d4d6712e"]
+        "history": [
+            "0xB3B13838F6F57CE76b94f0744Ab0B045B780836e",
+            "0x29d01EF37514912ab874D51fEc76c8f5d4d6712e"
+        ]
     },
     {
         "name": "CompBorrow",
@@ -2484,13 +2548,13 @@
     },
     {
         "name": "CurveUsdSoftLiquidationTrigger",
-        "address": "0xb70f9CD0C17c8b3486D64F67b04661Fe40968b18",
+        "address": "0x3558c764258E8084020C357A113FC52D27eDCEEf",
         "id": "0x7ff68c12",
         "path": "contracts/triggers/CurveUsdSoftLiquidationTrigger.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "0",
-        "registryIds": ["0x5D037963b2822a2B13B542477b8706C313b47821"],
+        "registryIds": ["0x5D037963b2822a2B13B542477b8706C313b47821", "0xb70f9CD0C17c8b3486D64F67b04661Fe40968b18"],
         "history": []
     },
     {
@@ -2783,6 +2847,94 @@
         "changeTime": 0,
         "registryIds": [],
         "history": ["0x37434dcb2DC049c0068d4b8F95497311F44c5d9e"]
+    },
+    {
+        "name": "LSVSell",
+        "address": "0x0c1bb9A39d4A0EF4215Ade19Ce4F954E8419Dfd7",
+        "id": "0x9fde5493",
+        "path": "contracts/actions/lsv/LSVSupply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVSupply",
+        "address": "0x984c00DC098c98bed1CDfe2Ed786Fe1443da6671",
+        "id": "0x2b24ec36",
+        "path": "contracts/actions/lsv/LSVSupply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVBorrow",
+        "address": "0x7dFB434527Fdb39854156cDBa9bF4799E36E7e82",
+        "id": "0xc173a756",
+        "path": "contracts/actions/lsv/LSVBorrow.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVWithdraw",
+        "address": "0x0A4Ef5ADf759064b546441a50109eCbC2528A455",
+        "id": "0xbc21da53",
+        "path": "contracts/actions/lsv/LSVWithdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVPayback",
+        "address": "0x10749CE97583dBcEb54a083386CC8438C4e0FE65",
+        "id": "0x3179400b",
+        "path": "contracts/actions/lsv/LSVPayback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVProfitTracker",
+        "address": "0xa5941F267995553dA9369F04Dc02f9411EEb2F12",
+        "id": "0x58baaf3c",
+        "path": "contracts/utils/LSVProfitTracker.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVProxyRegistry",
+        "address": "0xa8a3c86c4A2DcCf350E84D2b3c46BDeBc711C16e",
+        "id": "0xc2948a6c",
+        "path": "contracts/utils/LSVProxyRegistry.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVView",
+        "address": "0xFAb98E139EBeC1Ed76d226b6bd6E4C5f66B2fE1b",
+        "id": "0x373e1531",
+        "path": "contracts/views/LSVView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": ["0x328d7a29f1cf211c58a910e498e326e7f419f8d6"]
     },
     {
         "name": "CompoundMonitorProxy",

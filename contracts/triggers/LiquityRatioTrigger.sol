@@ -6,9 +6,10 @@ import "../auth/AdminAuth.sol";
 import "../actions/liquity/helpers/LiquityRatioHelper.sol";
 import "../interfaces/ITrigger.sol";
 import "../utils/TransientStorage.sol";
+import "./helpers/TriggerHelper.sol";
 
 /// @title Trigger contract that verifies if current Liquity position ratio went over/under the subbed ratio
-contract LiquityRatioTrigger is ITrigger, AdminAuth, LiquityRatioHelper {
+contract LiquityRatioTrigger is ITrigger, AdminAuth, LiquityRatioHelper, TriggerHelper {
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 

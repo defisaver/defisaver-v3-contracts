@@ -44,10 +44,10 @@
         "history": ["0xfE87DE5e11F580fBD3637f34089BaeeA2C393826"]
     },
     {
-        "name": "AaveSubProxy",
+        "name": "AaveV3SubProxy",
         "address": "0x9E8aE909Af8A391b58f45819f0d36e4256991D19",
-        "id": "0xd11b2581",
-        "path": "contracts/core/l2/AaveSubProxy.sol",
+        "id": "0x9275abae",
+        "path": "contracts/actions/aaveV3/AaveV3SubProxy.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
@@ -99,8 +99,19 @@
       "history": []
     },
     {
+      "name": "KyberInputScalingHelper",
+      "address": "0x7ce957981a02ced5baeec6102d04b4e0328b4b06",
+      "id": "0x559d99f5",
+      "path": "contracts/utils/KyberInputScalingHelper",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "KyberAggregatorWrapper",
-      "address": "0xBf708dfed6C357Dd2c2baD06e81015F2170d168f",
+      "address": "0xF83127C2967D50e47323fDb1cc3920E856ee4Fbc",
       "id": "0x1abf4ed0",
       "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
       "version": "1.0.0",
@@ -108,6 +119,9 @@
       "changeTime": 0,
       "registryIds": [],
       "history": [
+        "0x9512e7da2014562FFD28401De2566d7ed256C8e3",
+        "0x2d8a9b579c32e916d5a6ec69c307ec14037b8371",
+        "0xBf708dfed6C357Dd2c2baD06e81015F2170d168f",
         "0x59aD138C43b63Be18363630eF8Ab8b78Ada2c3e0",
         "0xB7EAa93C69b6450D6dF0CDb00307A5136392eCF8"
       ]
@@ -235,7 +249,7 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xB6aF2C91E3eBB250615aaa33Bb955f7a7f21AD17",
+        "address": "0x1BD33a66791ef6278f6d88503F1e65bEbAED59da",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
         "version": "1.0.3",
@@ -243,6 +257,7 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0xB6aF2C91E3eBB250615aaa33Bb955f7a7f21AD17",
           "0x05f8Ba4Db7F7C65a61881297D86Aea3c83C26304",
           "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
           "0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc"
