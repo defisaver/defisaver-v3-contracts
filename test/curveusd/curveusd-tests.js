@@ -32,6 +32,7 @@ const {
     curveUsdSelfLiquidate,
     curveUsdSelfLiquidateWithColl,
     curveUsdLevCreate,
+    curveUsdAdjust,
 } = require('../actions');
 
 const crvusdAddress = getAssetInfo('crvUSD').address;
@@ -1029,6 +1030,85 @@ const curveUsdSelfLiquidateTest = () => describe('CurveUsd-Self-Liquidate', () =
         });
 });
 
+const curveUsdAdjustTest = () => describe('CurveUsd-Adjust', () => {
+    Object.entries(curveusdMarkets)
+        .map(([assetSymbol, { controllerAddress, debtAvailableBlock }]) => {
+            let snapshot;
+            let senderAcc;
+            let proxy;
+            let collateralBefore;
+
+            const collateralAmount = ethers.utils.parseUnits('10');
+            const debtAmount = ethers.utils.parseUnits('2000');
+            const nBands = 5;
+            const collateralAsset = getAssetInfo(assetSymbol).address;
+
+            it(`... should test supply for ${assetSymbol} market`, async () => {
+                await resetForkToBlock(debtAvailableBlock);
+                await debtCeilCheck(controllerAddress);
+                await getContractFromRegistry('CurveUsdCreate');
+                await getContractFromRegistry('CurveUsdSupply');
+
+                [senderAcc] = await ethers.getSigners();
+                proxy = await getProxy(senderAcc.address);
+
+                await setBalance(collateralAsset, senderAcc.address, collateralAmount);
+                ({ collateral: collateralBefore } = await testCreate({
+                    proxy,
+                    collateralAsset: getAssetInfo(assetSymbol).address,
+                    controllerAddress,
+                    from: senderAcc.address,
+                    to: senderAcc.address,
+                    collateralAmount,
+                    debtAmount,
+                    nBands,
+                }));
+
+                snapshot = await takeSnapshot();
+
+                const from = senderAcc.address;
+                const onBehalfOf = nullAddress;
+
+                await setBalance(collateralAsset, senderAcc.address, collateralAmount);
+                await approve(collateralAsset, proxy.address);
+
+                const { approveObj: { owner, asset } } = await curveUsdAdjust(
+                    proxy,
+                    controllerAddress,
+                    from,
+                    onBehalfOf,
+                    collateralAmount,
+                );
+                expect(owner).to.be.eq(from);
+                expect(asset).to.be.eq(collateralAsset);
+
+                const { collateral } = await getUserInfo(controllerAddress, proxy.address);
+                expect(collateralBefore.add(collateralAmount)).to.be.eq(collateral);
+            });
+
+            it(`... should test supply maxUint for ${assetSymbol} market`, async () => {
+                await revertToSnapshot(snapshot);
+
+                const from = senderAcc.address;
+                const onBehalfOf = nullAddress;
+
+                await setBalance(collateralAsset, senderAcc.address, collateralAmount);
+                await approve(collateralAsset, proxy.address);
+
+                await curveUsdSupply(
+                    proxy,
+                    controllerAddress,
+                    from,
+                    onBehalfOf,
+                    ethers.constants.MaxUint256,
+                );
+
+                const { collateral } = await getUserInfo(controllerAddress, proxy.address);
+                expect(collateralBefore.add(collateralAmount)).to.be.eq(collateral);
+            });
+        });
+});
+
 const curveUsdFullTest = () => {
     curveUsdCreateTest();
     curveUsdSupplyTest();
@@ -1048,4 +1128,5 @@ module.exports = {
     curveUsdRepayTest,
     curveUsdFullTest,
     curveUsdSelfLiquidateTest,
+    curveUsdAdjustTest,
 };
