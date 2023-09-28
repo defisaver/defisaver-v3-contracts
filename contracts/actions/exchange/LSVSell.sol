@@ -6,11 +6,12 @@ import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/lido/IWStEth.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../ActionBase.sol";
+import "../../utils/helpers/UtilHelper.sol";
 
 /// @title A exchange sell action through the LSV exchange with no fee (used only for ETH Saver)
 /// @dev weth and steth will be transformed into wsteth directly if the rate is better than minPrice
 /// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
-contract LSVSell is ActionBase, DFSExchangeCore {
+contract LSVSell is ActionBase, DFSExchangeCore, UtilHelper {
 
     using TokenUtils for address;
 
@@ -119,14 +120,14 @@ contract LSVSell is ActionBase, DFSExchangeCore {
         address wrapper;
         uint256 exchangedAmount;
 
-        if (_exchangeData.destAddr == TokenUtils.WSTETH_ADDR){
-            if (_exchangeData.srcAddr == TokenUtils.WETH_ADDR || _exchangeData.srcAddr == TokenUtils.STETH_ADDR){
-                shouldSell = _exchangeData.minPrice > IWStEth(TokenUtils.WSTETH_ADDR).tokensPerStEth();
+        if (_exchangeData.destAddr == WSTETH_ADDR){
+            if (_exchangeData.srcAddr == TokenUtils.WETH_ADDR || _exchangeData.srcAddr == STETH_ADDR){
+                shouldSell = _exchangeData.minPrice > IWStEth(WSTETH_ADDR).tokensPerStEth();
             }
             if (!shouldSell){
                 if (_exchangeData.srcAddr == TokenUtils.WETH_ADDR){
                     exchangedAmount = _lidoStakeAndWrapWETH(_exchangeData.srcAmount);
-                } else if (_exchangeData.srcAddr == TokenUtils.STETH_ADDR){
+                } else if (_exchangeData.srcAddr == STETH_ADDR){
                     exchangedAmount = _lidoWrapStEth(_exchangeData.srcAmount);
                 }
             }
@@ -162,18 +163,18 @@ contract LSVSell is ActionBase, DFSExchangeCore {
     function _lidoStakeAndWrapWETH(uint256 wethAmount) internal returns (uint256 wStEthReceivedAmount){
         TokenUtils.withdrawWeth(wethAmount);
 
-        uint256 wStEthBalanceBefore = TokenUtils.WSTETH_ADDR.getBalance(address(this));
-        (bool sent, ) = payable(TokenUtils.WSTETH_ADDR).call{value: wethAmount}("");
+        uint256 wStEthBalanceBefore = WSTETH_ADDR.getBalance(address(this));
+        (bool sent, ) = payable(WSTETH_ADDR).call{value: wethAmount}("");
         require(sent, "Failed to send Ether");
-        uint256 wStEthBalanceAfter = TokenUtils.WSTETH_ADDR.getBalance(address(this));
+        uint256 wStEthBalanceAfter = WSTETH_ADDR.getBalance(address(this));
 
         wStEthReceivedAmount = wStEthBalanceAfter - wStEthBalanceBefore;
     }
 
     function _lidoWrapStEth(uint256 stethAmount) internal returns (uint256 wStEthReceivedAmount){
-        TokenUtils.STETH_ADDR.approveToken(TokenUtils.WSTETH_ADDR, stethAmount);
+        STETH_ADDR.approveToken(WSTETH_ADDR, stethAmount);
 
-        wStEthReceivedAmount = IWStEth(TokenUtils.WSTETH_ADDR).wrap(stethAmount);
+        wStEthReceivedAmount = IWStEth(WSTETH_ADDR).wrap(stethAmount);
     }
 
     /// @notice Returns the owner of the DSProxy that called the contract
