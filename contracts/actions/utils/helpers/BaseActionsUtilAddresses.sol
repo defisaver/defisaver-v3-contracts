@@ -10,4 +10,6 @@ contract BaseActionsUtilAddresses {
     address internal constant DFS_LOGGER_ADDR = 0xc9D6EfA6e08B66a5Cdc516Bcd5807c2fa69E0f2A;
     address internal constant PROXY_AUTH_ADDR = 0xD34BBE7398F7F08952b033bbaF2D2C84231dCEdc;
 
+    // not yet implemented
+    address internal constant LSV_PROXY_REGISTRY_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 }
