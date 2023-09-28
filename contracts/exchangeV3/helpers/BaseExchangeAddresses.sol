@@ -9,5 +9,4 @@ contract BaseExchangeAddresses {
     address internal constant SAVER_EXCHANGE_REGISTRY = 0x2A588cBCBd5e6c6ba7ED0E260B8107F599017DDE;
     address internal constant ZRX_ALLOWLIST_ADDR = 0x169D6E128238ebabF86032Ae9da65938eaD7F69e;
     address internal constant GROUP_REGISTRY = 0xa898078f369A78CE6b8023715e8f6d2Ad7d2719f;
-    address internal constant TRANSIENT_STORAGE = 0x9D95de57631DD8Ac071892843DA67FEe52EA3962;
 }
