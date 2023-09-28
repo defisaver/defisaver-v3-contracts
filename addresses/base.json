@@ -484,6 +484,17 @@
         "history": []
       },
       {
+        "name": "ParaswapWrapper",
+        "address": "0x2D00bb171B91a86ebb9A7860875484bB90Cb7766",
+        "id": "0x115fa27e",
+        "path": "contracts/exchangeV3/offchainWrappersV3/ParaswapWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
         "name": "SaverExchangeRegistry",
         "address": "0x2A588cBCBd5e6c6ba7ED0E260B8107F599017DDE",
         "id": "0x848bdf22",
