@@ -4,11 +4,10 @@ pragma solidity =0.8.10;
 
 import "../utils/TokenUtils.sol";
 import "../actions/liquity/helpers/LiquityHelper.sol";
-import "../actions/liquity/helpers/LiquityRatioHelper.sol";
-
+import "../DS/DSMath.sol";
 import "../utils/SafeMath.sol";
 
-contract LiquityView is LiquityHelper, LiquityRatioHelper {
+contract LiquityView is LiquityHelper, DSMath {
     using TokenUtils for address;
     using SafeMath for uint256;
 
@@ -205,6 +204,7 @@ contract LiquityView is LiquityHelper, LiquityRatioHelper {
     /// @return next Trove owner address to be used in the subsequent call, address(0) if debtInFront is calculated fully for inputted ratio
     /// @return debt Accumulated debt to be used in the subsequent call
     function getDebtInFrontByRatio(address _of, uint256 _acc, uint256 _iterations, uint256 _targetRatio) external returns (address next, uint256 debt) {
+        uint256 collPrice = PriceFeed.fetchPrice();
         if (_of == address(0)) {
             next = SortedTroves.getLast();
         } else {
@@ -212,10 +212,13 @@ contract LiquityView is LiquityHelper, LiquityRatioHelper {
         }
         debt = _acc;
         for (uint256 i = 0; i < _iterations && next != address(0); i++) {
-            (uint256 ratio, bool isActive) = getRatio(next);
-            if (ratio > _targetRatio && isActive) return (address(0), debt);
+            uint256 collAmount = TroveManager.getTroveColl(next);
+            uint256 debtAmount = TroveManager.getTroveDebt(next);
+            uint256 ratio = wdiv(wmul(collAmount, collPrice), debtAmount);
 
-            debt = debt.add(TroveManager.getTroveDebt(next));
+            if (ratio > _targetRatio) return (address(0), debt);
+
+            debt = debt + debtAmount;
             next = SortedTroves.getPrev(next);
         }
     }
