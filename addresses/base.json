@@ -187,6 +187,17 @@
       "history": []
     },
     {
+      "name": "FLAaveV3WithFee",
+      "address": "0x79Eb9cEe432Cd3e7b09A9eFdB21A733A6d7b4c3A",
+      "id": "0xe10b7b9d",
+      "path": "contracts/actions/flashloan/FLAaveV3.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "FLBalancer",
       "address": "0x862E533198C9656B75bB6A5dDF0953F7ED5E8507",
       "id": "0xf97d044f",
@@ -474,9 +485,20 @@
       },
       {
         "name": "KyberAggregatorWrapper",
-        "address": "0xae56474aBe3C271579b513b6668864e39f65Ae15",
+        "address": "0x52A327855a1F523C6aEf42684cc97139970182c7",
         "id": "0x1abf4ed0",
         "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
+        "version": "1.0.1",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": ["0xae56474aBe3C271579b513b6668864e39f65Ae15"]
+      },
+      {
+        "name": "KyberInputScalingHelper",
+        "address": "0xB134b0c38E0DB42f22634e09C8aFAFB5F6307761",
+        "id": "0x559d99f5",
+        "path": "contracts/utils/KyberInputScalingHelper",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
