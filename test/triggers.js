@@ -3,6 +3,9 @@ const hre = require('hardhat');
 const RATIO_STATE_OVER = 0;
 const RATIO_STATE_UNDER = 1;
 
+const IN_BOOST = 0;
+const IN_REPAY = 1;
+
 const BUY_ORDER = 0;
 const SELL_ORDER = 1;
 
@@ -91,6 +94,8 @@ module.exports = {
     createMorphoTrigger,
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
+    IN_BOOST,
+    IN_REPAY,
     BUY_ORDER,
     SELL_ORDER,
 };

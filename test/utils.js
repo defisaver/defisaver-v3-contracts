@@ -2,9 +2,8 @@
 /* eslint-disable no-await-in-loop */
 // const { default: curve } = require('@curvefi/api');
 const curve = import('@curvefi/api');
-
-const hre = require('hardhat');
 const fs = require('fs');
+const hre = require('hardhat');
 const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const storageSlots = require('./storageSlots.json');
@@ -746,7 +745,7 @@ const formatMockExchangeObj = async (
 ) => {
     if (!wrapper) {
         // eslint-disable-next-line no-param-reassign
-        wrapper = await getAddrFromRegistry('MockExchangeWrapper');
+        wrapper = await getContractFromRegistry('MockExchangeWrapper');
     }
 
     const rateDecimals = 18 + destTokenInfo.decimals - srcTokenInfo.decimals;
@@ -760,7 +759,7 @@ const formatMockExchangeObj = async (
 
     await setBalance(
         destTokenInfo.addresses[chainIds[network]],
-        wrapper,
+        wrapper.address,
         expectedOutput,
     );
 
@@ -772,7 +771,7 @@ const formatMockExchangeObj = async (
         0,
         0,
         nullAddress,
-        wrapper,
+        wrapper.address,
         hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [rate]),
         [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
     ];

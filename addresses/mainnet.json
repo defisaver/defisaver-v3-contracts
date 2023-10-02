@@ -264,8 +264,19 @@
         "history": []
     },
     {
+        "name": "KyberInputScalingHelper",
+        "address": "0x05977cA080Ef44a824D935191d0A3d56659295a0",
+        "id": "0x559d99f5",
+        "path": "contracts/utils/KyberInputScalingHelper",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "KyberAggregatorWrapper",
-        "address": "0xcafb38fb65056cc753dbf5433cde70b6b28a8458",
+        "address": "0x1e474f3E48e0b2378f4B9f58A076C3F3E316E5FC",
         "id": "0x1abf4ed0",
         "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
         "version": "1.0.0",
@@ -273,6 +284,7 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xcafb38fb65056cc753dbf5433cde70b6b28a8458",
             "0xf36cC3f17e336450a8646F57c419835c81Db7F95",
             "0x2197b1f0c3C61A8f74E78431A0d17837642B23cf",
             "0xBfb05d97FE87DCbc7Ff6F2e4f83FcA0861318A4E",
@@ -413,25 +425,25 @@
     },
     {
         "name": "McdView",
-        "address": "0x922C795aE0be55Aaeb3FF51813B76AFc78e97C7c",
+        "address": "0x0Fa061b5a59D85eDaA8aa914b9C9933C3b62C63e",
         "id": "0xb131d25c",
         "path": "contracts/views/McdView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x922C795aE0be55Aaeb3FF51813B76AFc78e97C7c"]
     },
     {
         "name": "LiquityView",
-        "address": "0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C",
+        "address": "0xb760e60Dff6263E8Ab31B04ee5Cc010beA47e2Df",
         "id": "0xe23de5c6",
         "path": "contracts/views/LiquityView.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xd1913b977737c9505b8ecfedb8121546096d3393"]
+        "history": ["0xd1913b977737c9505b8ecfedb8121546096d3393, 0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C"]
     },
     {
         "name": "ChickenBondsView",
@@ -639,14 +651,14 @@
     },
     {
         "name": "AaveView",
-        "address": "0xEDf1087544a01596b70Da746F861B878F245B08f",
+        "address": "0xf585d53f568d226449a94d48c4ea122cdeffe52d",
         "id": "0x0a55b48c",
         "path": "contracts/views/AaveView.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xEDf1087544a01596b70Da746F861B878F245B08f"]
     },
     {
         "name": "MockChainlinkFeedRegistry",
@@ -1649,14 +1661,17 @@
     },
     {
         "name": "SparkView",
-        "address": "0xB3B13838F6F57CE76b94f0744Ab0B045B780836e",
+        "address": "0xd34306ae3FAE4e347290E4691059e240Aee22eb3",
         "id": "0xd6f690a9",
         "path": "contracts/views/SparkView.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x29d01EF37514912ab874D51fEc76c8f5d4d6712e"]
+        "history": [
+            "0xB3B13838F6F57CE76b94f0744Ab0B045B780836e",
+            "0x29d01EF37514912ab874D51fEc76c8f5d4d6712e"
+        ]
     },
     {
         "name": "CompBorrow",
@@ -2544,13 +2559,13 @@
     },
     {
         "name": "CurveUsdSoftLiquidationTrigger",
-        "address": "0xb70f9CD0C17c8b3486D64F67b04661Fe40968b18",
+        "address": "0x3558c764258E8084020C357A113FC52D27eDCEEf",
         "id": "0x7ff68c12",
         "path": "contracts/triggers/CurveUsdSoftLiquidationTrigger.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "0",
-        "registryIds": ["0x5D037963b2822a2B13B542477b8706C313b47821"],
+        "registryIds": ["0x5D037963b2822a2B13B542477b8706C313b47821", "0xb70f9CD0C17c8b3486D64F67b04661Fe40968b18"],
         "history": []
     },
     {
