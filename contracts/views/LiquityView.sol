@@ -4,9 +4,11 @@ pragma solidity =0.8.10;
 
 import "../utils/TokenUtils.sol";
 import "../actions/liquity/helpers/LiquityHelper.sol";
+import "../actions/liquity/helpers/LiquityRatioHelper.sol";
+
 import "../utils/SafeMath.sol";
 
-contract LiquityView is LiquityHelper {
+contract LiquityView is LiquityHelper, LiquityRatioHelper {
     using TokenUtils for address;
     using SafeMath for uint256;
 
@@ -192,6 +194,29 @@ contract LiquityView is LiquityHelper {
         for (uint256 i = 0; i < _iterations && next != address(0); i++) {
             next = SortedTroves.getNext(next);
             debt = debt.add(TroveManager.getTroveDebt(next));
+        }
+    }
+
+    /// @notice Returns the debt in front of the potential trove with a targetRatio
+    /// @param _of Address of the trove from which we are starting (either address(0) or what this function return in next)
+    /// @param _acc Accumulated sum used in subsequent calls, 0 for first call
+    /// @param _iterations Maximum number of troves to traverse
+    /// @param _targetRatio Ratio * 1e16
+    /// @return next Trove owner address to be used in the subsequent call, address(0) if debtInFront is calculated fully for inputted ratio
+    /// @return debt Accumulated debt to be used in the subsequent call
+    function getDebtInFrontByRatio(address _of, uint256 _acc, uint256 _iterations, uint256 _targetRatio) external returns (address next, uint256 debt) {
+        if (_of == address(0)) {
+            next = SortedTroves.getLast();
+        } else {
+            next = _of;
+        }
+        debt = _acc;
+        for (uint256 i = 0; i < _iterations && next != address(0); i++) {
+            (uint256 ratio, bool isActive) = getRatio(next);
+            if (ratio > _targetRatio && isActive) return (address(0), debt);
+
+            debt = debt.add(TroveManager.getTroveDebt(next));
+            next = SortedTroves.getPrev(next);
         }
     }
 }
