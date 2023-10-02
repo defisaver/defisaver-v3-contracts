@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 const hre = require('hardhat');
 
+const { defaultAbiCoder } = require('ethers/lib/utils');
 const {
     subToStrategy,
     subToCompV3Proxy,
@@ -677,6 +678,37 @@ const subLiqutityDsrSupplyStrategy = async ({
     return { subId, strategySub };
 };
 
+const subAaveV3CloseWithMaximumGasPriceBundle = async (
+    proxy,
+    bundleId,
+    triggerBaseAsset,
+    triggerQuoteAsset,
+    targetPrice,
+    priceState,
+    gasPrice,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+) => {
+    const priceTriggerData = defaultAbiCoder.encode(
+        ['address', 'address', 'uint256', 'uint8'],
+        [triggerBaseAsset, triggerQuoteAsset, targetPrice, priceState],
+    );
+    const gasPriceTriggerData = await createGasPriceTrigger(gasPrice);
+
+    const strategySub = [bundleId, true, [priceTriggerData, gasPriceTriggerData], [
+        defaultAbiCoder.encode(['address'], [collAsset]),
+        defaultAbiCoder.encode(['uint16'], [collAssetId.toString()]),
+        defaultAbiCoder.encode(['address'], [debtAsset]),
+        defaultAbiCoder.encode(['uint16'], [debtAssetId.toString()]),
+        defaultAbiCoder.encode(['address'], [nullAddress]), // needed so we dont have to trust injection
+    ]];
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdRepayStrategy,
@@ -707,4 +739,5 @@ module.exports = {
     subSparkCloseBundle,
     subLiqutityDsrPaybackStrategy,
     subLiqutityDsrSupplyStrategy,
+    subAaveV3CloseWithMaximumGasPriceBundle,
 };
