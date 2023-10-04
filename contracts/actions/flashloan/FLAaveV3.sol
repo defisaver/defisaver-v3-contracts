@@ -2,7 +2,6 @@
 pragma solidity =0.8.10;
 
 import "../ActionBase.sol";
-import "../../DS/DSMath.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/IFLParamGetter.sol";
 import "../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
@@ -17,7 +16,7 @@ import "../../core/strategy/StrategyModel.sol";
 
 
 /// @title Action that gets and receives a FL from Aave V3
-contract FLAaveV3 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlashLoanBase, DSMath {
+contract FLAaveV3 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlashLoanBase {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
     //Caller not aave pool
@@ -123,7 +122,7 @@ contract FLAaveV3 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlas
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
-            uint256 paybackAmount = add(_amounts[i],_fees[i]);
+            uint256 paybackAmount = _amounts[i] + _fees[i];
 
             bool correctAmount = _assets[i].getBalance(address(this)) == paybackAmount + balancesBefore[i];
 
