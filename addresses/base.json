@@ -66,6 +66,17 @@
       "history": []
     },
     {
+      "name": "DFSSell",
+      "address": "0xCc0f04e8c34B670a1D06f4978C843952F690d3f4",
+      "id": "0x7f2a0f35",
+      "path": "contracts/actions/exchange/DFSSell.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "ProxyAuth",
       "address": "0xD34BBE7398F7F08952b033bbaF2D2C84231dCEdc",
       "id": "0x5079c3ea",
