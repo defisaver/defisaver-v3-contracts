@@ -15,8 +15,8 @@ contract CurveUsdAdjust is ActionBase, CurveUsdHelper {
     /// @param controllerAddress Address of the curveusd market controller
     /// @param from Address from which to pull collateral asset, will default to proxy
     /// @param to Address which will receive borrowed crvUSD
-    /// @param supplyAmount Amount of collateral asset to supply
-    /// @param borrowAmount Amount of debt asset to borrow
+    /// @param supplyAmount Amount of collateral asset to supply (uint.max supported)
+    /// @param borrowAmount Amount of debt asset to borrow (uint.max not supported)
     struct Params {
         address controllerAddress;
         address from;
@@ -65,17 +65,16 @@ contract CurveUsdAdjust is ActionBase, CurveUsdHelper {
         if (_params.borrowAmount == 0) revert ZeroAmountBorrowed();
         /// @dev see ICrvUsdController natspec
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
-
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
         _params.supplyAmount = collateralAsset.pullTokensIfNeeded(_params.from, _params.supplyAmount);
-        collateralAsset.approveToken(_params.controllerAddress, _params.supplyAmount);
 
+        collateralAsset.approveToken(_params.controllerAddress, _params.supplyAmount);
         ICrvUsdController(_params.controllerAddress).borrow_more(_params.supplyAmount, _params.borrowAmount);
 
         CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, _params.borrowAmount);
 
         return (
-            _params.supplyAmount,
+            _params.borrowAmount,
             abi.encode(_params)
         );
     }

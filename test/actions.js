@@ -3101,8 +3101,6 @@ const curveUsdAdjust = async (
     const action = new dfs.actions.curveusd.CurveUsdAdjustAction(
         controllerAddresss,
         from,
-        controllerAddresss,
-        from,
         to,
         supplyAmount,
         borrowAmount,

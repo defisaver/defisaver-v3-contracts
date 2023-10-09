@@ -1036,23 +1036,23 @@ const curveUsdAdjustTest = () => describe('CurveUsd-Adjust', () => {
             let snapshot;
             let senderAcc;
             let proxy;
-            let collateralBefore;
 
             const collateralAmount = ethers.utils.parseUnits('10');
             const debtAmount = ethers.utils.parseUnits('2000');
             const nBands = 5;
             const collateralAsset = getAssetInfo(assetSymbol).address;
 
-            it(`... should test supply for ${assetSymbol} market`, async () => {
+            it(`... should test create and adjust for ${assetSymbol} market`, async () => {
                 await resetForkToBlock(debtAvailableBlock);
                 await debtCeilCheck(controllerAddress);
-                await getContractFromRegistry('CurveUsdCreate');
-                await getContractFromRegistry('CurveUsdSupply');
+                await redeploy('CurveUsdCreate');
+                await redeploy('CurveUsdAdjust');
 
                 [senderAcc] = await ethers.getSigners();
                 proxy = await getProxy(senderAcc.address);
 
                 await setBalance(collateralAsset, senderAcc.address, collateralAmount);
+                let collateralBefore = 0;
                 ({ collateral: collateralBefore } = await testCreate({
                     proxy,
                     collateralAsset: getAssetInfo(assetSymbol).address,
@@ -1067,44 +1067,81 @@ const curveUsdAdjustTest = () => describe('CurveUsd-Adjust', () => {
                 snapshot = await takeSnapshot();
 
                 const from = senderAcc.address;
-                const onBehalfOf = nullAddress;
+                const to = senderAcc.address;
 
                 await setBalance(collateralAsset, senderAcc.address, collateralAmount);
                 await approve(collateralAsset, proxy.address);
 
+                console.log(await getUserInfo(controllerAddress, proxy.address));
+                const { approveObj: { owner, asset } } = await curveUsdAdjust(
+                    proxy,
+                    controllerAddress,
+                    from,
+                    to,
+                    collateralAmount,
+                    debtAmount,
+                );
+                expect(owner).to.be.eq(from);
+                expect(asset).to.be.eq(collateralAsset);
+
+                const { collateral: collateralAfter } = await getUserInfo(controllerAddress, proxy.address);
+                console.log(await getUserInfo(controllerAddress, proxy.address));
+                expect(collateralBefore.add(collateralAmount)).to.be.eq(collateralAfter);
+            });
+
+            it(`... should test only generating debt with adjust action for ${assetSymbol} market`, async () => {
+                await revertToSnapshot(snapshot);
+
+                await setBalance(collateralAsset, senderAcc.address, ethers.utils.parseUnits('0', 1));
+                await approve(collateralAsset, proxy.address);
+
+                const { collateral: collateralBefore, debt: debtBefore } = await getUserInfo(controllerAddress, proxy.address);
+
+                const from = senderAcc.address;
+                const onBehalfOf = senderAcc.address;
                 const { approveObj: { owner, asset } } = await curveUsdAdjust(
                     proxy,
                     controllerAddress,
                     from,
                     onBehalfOf,
-                    collateralAmount,
+                    '0',
+                    debtAmount,
                 );
                 expect(owner).to.be.eq(from);
                 expect(asset).to.be.eq(collateralAsset);
 
-                const { collateral } = await getUserInfo(controllerAddress, proxy.address);
-                expect(collateralBefore.add(collateralAmount)).to.be.eq(collateral);
+                const { collateral: collateralAfter, debt: debtAfter } = await getUserInfo(controllerAddress, proxy.address);
+
+                expect(collateralBefore).to.be.eq(collateralAfter);
+                console.log(await getUserInfo(controllerAddress, proxy.address));
+
+                expect(debtBefore.add(debtAmount)).to.be.lte(debtAfter);
             });
-
-            it(`... should test supply maxUint for ${assetSymbol} market`, async () => {
+            it(`... should test supplying max amount and generating debt with adjust action for ${assetSymbol} market`, async () => {
                 await revertToSnapshot(snapshot);
-
-                const from = senderAcc.address;
-                const onBehalfOf = nullAddress;
 
                 await setBalance(collateralAsset, senderAcc.address, collateralAmount);
                 await approve(collateralAsset, proxy.address);
 
-                await curveUsdSupply(
+                const { collateral: collateralBefore, debt: debtBefore } = await getUserInfo(controllerAddress, proxy.address);
+
+                const from = senderAcc.address;
+                const onBehalfOf = senderAcc.address;
+                const { approveObj: { owner, asset } } = await curveUsdAdjust(
                     proxy,
                     controllerAddress,
                     from,
                     onBehalfOf,
                     ethers.constants.MaxUint256,
+                    debtAmount,
                 );
+                expect(owner).to.be.eq(from);
+                expect(asset).to.be.eq(collateralAsset);
 
-                const { collateral } = await getUserInfo(controllerAddress, proxy.address);
-                expect(collateralBefore.add(collateralAmount)).to.be.eq(collateral);
+                const { collateral: collateralAfter, debt: debtAfter } = await getUserInfo(controllerAddress, proxy.address);
+                console.log(await getUserInfo(controllerAddress, proxy.address));
+                expect(collateralBefore.add(collateralAmount)).to.be.eq(collateralAfter);
+                expect(debtBefore.add(debtAmount)).to.be.lte(debtAfter);
             });
         });
 });
