@@ -58,6 +58,12 @@ module.exports = {
             gasPrice: 1700000000,
             name: 'arbitrum',
         },
+        localBase: {
+            url: 'http://127.0.0.1:8545',
+            timeout: 1000000,
+            gasPrice: 1700000000,
+            name: 'base',
+        },
         fork: {
             url: `https://rpc.tenderly.co/fork/${process.env.FORK_ID}`,
             timeout: 1000000,
@@ -105,6 +111,15 @@ module.exports = {
             chainId: 10,
             accounts: [process.env.PRIV_KEY_KOVAN],
             name: 'optimistic',
+            txType: 0,
+            blockExplorer: 'etherscan',
+            contractVerification: true,
+        },
+        base: {
+            url: process.env.BASE_NODE,
+            chainId: 8453,
+            accounts: [process.env.PRIV_KEY_KOVAN],
+            name: 'base',
             txType: 0,
             blockExplorer: 'etherscan',
             contractVerification: true,
@@ -158,6 +173,7 @@ module.exports = {
         Mainnet: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         Arbitrum: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
         Optimism: '0x4200000000000000000000000000000000000006',
+        Base: '0x4200000000000000000000000000000000000006',
     },
 };
 

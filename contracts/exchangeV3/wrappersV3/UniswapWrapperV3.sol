@@ -82,7 +82,7 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     function sendLeftOver(address _srcAddr) internal {
         payable(msg.sender).transfer(address(this).balance);
 
-        if (_srcAddr != ETH_ADDRESS) {
+        if (_srcAddr != TokenUtils.ETH_ADDR) {
             IERC20(_srcAddr).safeTransfer(msg.sender, IERC20(_srcAddr).balanceOf(address(this)));
         }
     }

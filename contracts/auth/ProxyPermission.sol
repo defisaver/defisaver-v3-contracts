@@ -19,7 +19,7 @@ contract ProxyPermission is AuthHelper {
         DSGuard guard = DSGuard(currAuthority);
 
         if (currAuthority == address(0)) {
-            guard = DSGuardFactory(FACTORY_ADDRESS).newGuard();
+            guard = DSGuardFactory(DSGUARD_FACTORY_ADDRESS).newGuard();
             DSAuth(address(this)).setAuthority(DSAuthority(address(guard)));
         }
 
