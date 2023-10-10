@@ -3088,6 +3088,34 @@ const curveUsdSupply = async (
     return { receipt, approveObj };
 };
 
+const curveUsdAdjust = async (
+    proxy,
+    controllerAddresss,
+    from,
+    to,
+    supplyAmount,
+    borrowAmount,
+) => {
+    const actionAddress = await getAddrFromRegistry('CurveUsdAdjust');
+
+    const action = new dfs.actions.curveusd.CurveUsdAdjustAction(
+        controllerAddresss,
+        from,
+        to,
+        supplyAmount,
+        borrowAmount,
+    );
+
+    const [approveObj] = await action.getAssetsToApprove();
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed curveUsdAdjust: ${gasUsed}`);
+    return { receipt, approveObj };
+};
+
 const curveUsdWithdraw = async (
     proxy,
     controllerAddresss,
@@ -3522,6 +3550,7 @@ module.exports = {
     curveUsdSelfLiquidate,
     curveUsdLevCreate,
     curveUsdSelfLiquidateWithColl,
+    curveUsdAdjust,
 
     tokenizedVaultAdapterDeposit,
     tokenizedVaultAdapterMint,

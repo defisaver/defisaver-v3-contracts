@@ -2452,6 +2452,17 @@
         "history": []
     },
     {
+        "name": "CurveUsdAdjust",
+        "address": "0x6f69A7d0B1BE7602381d9cCE6B29F05B9D0b85e6",
+        "id": "0xb7bc5093",
+        "path": "contracts/actions/curveusd/CurveUsdAdjust.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveUsdCreate",
         "address": "0x715B40970dac1cfAf0bB85C4Fe64921b44b3f73e",
         "id": "0x269ac704",
