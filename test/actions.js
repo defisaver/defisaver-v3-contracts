@@ -2106,6 +2106,22 @@ const morphoAaveV3Borrow = async (
     return receipt;
 };
 
+const aaveV3DelegateCredit = async (
+    proxy, assetId, amount, rateMode, delegatee,
+) => {
+    const aaveDelegateAddr = await getAddrFromRegistry('AaveV3DelegateCredit');
+    const aaveDelegateAction = new dfs.actions.aaveV3.AaveV3DelegateCredit(
+        true, '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', amount, rateMode, assetId, delegatee,
+    );
+    const functionData = aaveDelegateAction.encodeForDsProxyCall()[1];
+
+    const receipt = await proxy['execute(address,bytes)'](aaveDelegateAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed aaveV3DelegateCredit: ${gasUsed}`);
+    return receipt;
+};
+
 const aaveV3Supply = async (
     proxy, market, amount, tokenAddr, assetId, from, signer,
 ) => {
@@ -2783,6 +2799,22 @@ const sparkSwitchCollateralCallDataOptimised = async (
 
     const gasUsed = await getGasUsed(receipt);
     console.log(`GasUsed sparkSwitchCollateralCallDataOptimised: ${gasUsed}`);
+    return receipt;
+};
+
+const sparkDelegateCredit = async (
+    proxy, assetId, amount, rateMode, delegatee,
+) => {
+    const sparkDelegateAddr = await getAddrFromRegistry('SparkDelegateCredit');
+    const sparkDelegateAction = new dfs.actions.spark.SparkDelegateCredit(
+        true, '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', amount, rateMode, assetId, delegatee,
+    );
+    const functionData = sparkDelegateAction.encodeForDsProxyCall()[1];
+
+    const receipt = await proxy['execute(address,bytes)'](sparkDelegateAddr, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed sparkDelegateCredit: ${gasUsed}`);
     return receipt;
 };
 
@@ -3487,6 +3519,7 @@ module.exports = {
     aaveV3SwapBorrowRate,
     aaveV3SwapBorrowRateCalldataOptimised,
     aaveV3ClaimRewards,
+    aaveV3DelegateCredit,
 
     sparkSupply,
     sparkSupplyCalldataOptimised,
@@ -3507,6 +3540,7 @@ module.exports = {
     sparkClaimRewards,
     sDaiWrap,
     sDaiUnwrap,
+    sparkDelegateCredit,
 
     updateSubData,
 
