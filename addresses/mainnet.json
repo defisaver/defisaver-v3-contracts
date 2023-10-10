@@ -2442,25 +2442,25 @@
     },
     {
         "name": "CurveUsdBorrow",
-        "address": "0x2512A976227a82Ef0F6bDdb463cBcD5B732596BF",
+        "address": "0x9D82989715114D35903caf4077BC3e5b5DD70eA7",
         "id": "0x2f22c507",
         "path": "contracts/actions/curveusd/CurveUsdBorrow.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0x2512A976227a82Ef0F6bDdb463cBcD5B732596BF"]
     },
     {
         "name": "CurveUsdCreate",
-        "address": "0x715B40970dac1cfAf0bB85C4Fe64921b44b3f73e",
+        "address": "0xd44f3984249772fd5a667889e7a478d6beb912c9",
         "id": "0x269ac704",
         "path": "contracts/actions/curveusd/CurveUsdCreate.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0x715B40970dac1cfAf0bB85C4Fe64921b44b3f73e"]
     },
     {
         "name": "CurveUsdPayback",
