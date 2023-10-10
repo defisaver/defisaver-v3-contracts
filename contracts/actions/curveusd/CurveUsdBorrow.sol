@@ -62,10 +62,6 @@ contract CurveUsdBorrow is ActionBase, CurveUsdHelper {
         
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
-        /// @dev figure out if we need this calculated on-chain
-        if (_params.debtAmount == type(uint256).max) {
-            _params.debtAmount = userMaxBorrow(_params.controllerAddress, address(this));
-        }
         ICrvUsdController(_params.controllerAddress).borrow_more(0, _params.debtAmount);
 
         CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, _params.debtAmount);
