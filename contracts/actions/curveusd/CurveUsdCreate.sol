@@ -15,7 +15,7 @@ contract CurveUsdCreate is ActionBase, CurveUsdHelper {
     /// @param from Address from which to pull collateral asset, will default to proxy
     /// @param to Address that will receive the borrowed crvUSD, will default to proxy
     /// @param collateralAmount Amount of collateral asset to supply
-    /// @param debtAmount Amount of crvUSD to borrow
+    /// @param debtAmount Amount of crvUSD to borrow (does not support uint.max)
     /// @param nBands Number of bands in which the collateral will be supplied
     struct Params {
         address controllerAddress;
