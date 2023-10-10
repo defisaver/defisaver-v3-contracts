@@ -15,7 +15,7 @@ contract CurveUsdCreate is ActionBase, CurveUsdHelper {
     /// @param from Address from which to pull collateral asset, will default to proxy
     /// @param to Address that will receive the borrowed crvUSD, will default to proxy
     /// @param collateralAmount Amount of collateral asset to supply
-    /// @param debtAmount Amount of crvUSD to borrow
+    /// @param debtAmount Amount of crvUSD to borrow (does not support uint.max)
     /// @param nBands Number of bands in which the collateral will be supplied
     struct Params {
         address controllerAddress;
@@ -68,10 +68,6 @@ contract CurveUsdCreate is ActionBase, CurveUsdHelper {
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
         _params.collateralAmount = collateralAsset.pullTokensIfNeeded(_params.from, _params.collateralAmount);
         collateralAsset.approveToken(_params.controllerAddress, _params.collateralAmount);
-
-        if (_params.debtAmount == type(uint256).max) {
-            _params.debtAmount = ICrvUsdController(_params.controllerAddress).max_borrowable(_params.collateralAmount, _params.nBands);
-        }
 
         ICrvUsdController(_params.controllerAddress).create_loan(_params.collateralAmount, _params.debtAmount, _params.nBands);
 

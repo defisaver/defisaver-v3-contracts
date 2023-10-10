@@ -151,12 +151,13 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
                 });
             });
 
-            it(`... should test create collateral=maxUint debt=maxUint for ${assetSymbol} market`, async () => {
+            it(`... should test create collateral=maxUint for ${assetSymbol} market`, async () => {
                 await revertToSnapshot(snapshot);
                 snapshot = await takeSnapshot();
 
                 const collateralAmount = ethers.utils.parseUnits('10');
                 const nBands = 5;
+                const debtAmount = ethers.utils.parseUnits('2000');
 
                 await setBalance(collateralAsset, senderAcc.address, collateralAmount);
                 await testCreate({
@@ -166,7 +167,7 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
                     from: senderAcc.address,
                     to: senderAcc.address,
                     collateralAmount: ethers.constants.MaxUint256,
-                    debtAmount: ethers.constants.MaxUint256,
+                    debtAmount,
                     nBands,
                 });
             });
@@ -422,7 +423,6 @@ const curveUsdWithdrawTest = () => describe('CurveUsd-Withdraw', () => {
 const curveUsdBorrowTest = () => describe('CurveUsd-Borrow', () => {
     Object.entries(curveusdMarkets)
         .map(([assetSymbol, { controllerAddress, debtAvailableBlock }]) => {
-            let snapshot;
             let senderAcc;
             let proxy;
             let stablecoinBalanceBefore;
@@ -432,8 +432,8 @@ const curveUsdBorrowTest = () => describe('CurveUsd-Borrow', () => {
             it(`... should test borrow for ${assetSymbol} market`, async () => {
                 await resetForkToBlock(debtAvailableBlock);
                 await debtCeilCheck(controllerAddress);
-                await getContractFromRegistry('CurveUsdCreate');
-                await getContractFromRegistry('CurveUsdBorrow');
+                await redeploy('CurveUsdCreate');
+                await redeploy('CurveUsdBorrow');
 
                 [senderAcc] = await ethers.getSigners();
                 proxy = await getProxy(senderAcc.address);
@@ -467,7 +467,6 @@ const curveUsdBorrowTest = () => describe('CurveUsd-Borrow', () => {
                     expect(debt).to.be.eq(debtAmount);
 
                     stablecoinBalanceBefore = await balanceOf(crvusdAddress, senderAcc.address);
-                    snapshot = await takeSnapshot();
                 }
 
                 {
@@ -483,38 +482,6 @@ const curveUsdBorrowTest = () => describe('CurveUsd-Borrow', () => {
 
                     expect(stablecoinBalanceBefore.add(debtAmount))
                         .to.be.eq(await balanceOf(crvusdAddress, senderAcc.address));
-                }
-            });
-
-            it(`... should test borrow maxUint for ${assetSymbol} market`, async () => {
-                await revertToSnapshot(snapshot);
-
-                let expectedDebt;
-                {
-                    const to = senderAcc.address;
-
-                    {
-                        const controller = await ethers.getContractAt('ICrvUsdController', controllerAddress);
-                        const llamma = await ethers.getContractAt('ILLAMMA', controller.amm());
-
-                        const [, collateral] = await llamma.get_sum_xy(proxy.address);
-                        const debt = await controller.debt(proxy.address);
-                        const ticks = await llamma.read_user_tick_numbers(proxy.address);
-                        const nBands = ticks[1] - ticks[0] + 1;
-
-                        expectedDebt = await controller.max_borrowable(collateral, nBands).then((maxDebt) => maxDebt.sub(debt));
-                    }
-
-                    await curveUsdBorrow(
-                        proxy,
-                        controllerAddress,
-                        to,
-                        ethers.constants.MaxUint256,
-                    );
-
-                    const crvUsdAfter = await balanceOf(crvusdAddress, senderAcc.address);
-                    expect(stablecoinBalanceBefore.add(expectedDebt))
-                        .to.be.closeTo(crvUsdAfter, crvUsdAfter.div(1e6));
                 }
             });
         });
