@@ -42,6 +42,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint128 ratio;
         uint256 eMode;
         address[] collAddr;
+        bool[] enabledAsColl;
         address[] borrowAddr;
         uint256[] collAmounts;
         uint256[] borrowStableAmounts;
@@ -303,6 +304,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             user: _user,
             ratio: 0,
             collAddr: new address[](reserveList.length),
+            enabledAsColl: new bool[](reserveList.length),
             borrowAddr: new address[](reserveList.length),
             collAmounts: new uint[](reserveList.length),
             borrowStableAmounts: new uint[](reserveList.length),
@@ -321,18 +323,19 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             address reserve = reserveList[i];
             uint256 price = getAssetPrice(_market, reserve);
             DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(reserve);
-            uint256 aTokenBalance = reserveData.aTokenAddress.getBalance(_user);
-            uint256 borrowsStable = reserveData.stableDebtTokenAddress.getBalance(_user);
-            uint256 borrowsVariable = reserveData.variableDebtTokenAddress.getBalance(_user);
-        
-            if (aTokenBalance > 0) {
-                uint256 userTokenBalanceEth = (aTokenBalance * price) / (10 ** (reserve.getTokenDecimals()));
-                data.collAddr[collPos] = reserve;
-                data.collAmounts[collPos] = userTokenBalanceEth;
-                collPos++;
+            {
+                uint256 aTokenBalance = reserveData.aTokenAddress.getBalance(_user);
+                if (aTokenBalance > 0) {
+                    data.collAddr[collPos] = reserve;
+                    data.enabledAsColl[collPos] = isUsingAsCollateral(lendingPool.getUserConfiguration(_user), reserveData.id);
+                    uint256 userTokenBalanceEth = (aTokenBalance * price) / (10 ** (reserve.getTokenDecimals()));
+                    data.collAmounts[collPos] = userTokenBalanceEth;
+                    collPos++;
+                }
             }
-
+            
             // Sum up debt in Usd
+            uint256 borrowsStable = reserveData.stableDebtTokenAddress.getBalance(_user);
             if (borrowsStable > 0) {
                 uint256 userBorrowBalanceEth = (borrowsStable * price) / (10 ** (reserve.getTokenDecimals()));
                 data.borrowAddr[borrowPos] = reserve;
@@ -340,12 +343,12 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             }
 
             // Sum up debt in Usd
+            uint256 borrowsVariable = reserveData.variableDebtTokenAddress.getBalance(_user);
             if (borrowsVariable > 0) {
                 uint256 userBorrowBalanceEth = (borrowsVariable * price) / (10 ** (reserve.getTokenDecimals()));
                 data.borrowAddr[borrowPos] = reserve;
                 data.borrowVariableAmounts[borrowPos] = userBorrowBalanceEth;
             }
-
             if (borrowsStable > 0 || borrowsVariable > 0) {
                 borrowPos++;
             }

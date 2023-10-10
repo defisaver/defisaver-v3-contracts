@@ -2,9 +2,8 @@
 /* eslint-disable no-await-in-loop */
 // const { default: curve } = require('@curvefi/api');
 const curve = import('@curvefi/api');
-
-const hre = require('hardhat');
 const fs = require('fs');
+const hre = require('hardhat');
 const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const storageSlots = require('./storageSlots.json');
@@ -110,6 +109,31 @@ const addrs = {
         DFS_REG_CONTROLLER: '0x7702fa16b0cED7e44fF7Baeed04bF165f58eE51D',
         AVG_GAS_PRICE: 0.5,
     },
+    base: {
+        PROXY_REGISTRY: '0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d',
+        REGISTRY_ADDR: '0x347FB634271F666353F23A3362f3935D96F97476',
+        OWNER_ACC: '0xC4D4b4F2Df76f9952E6e0Dc79861582A5b7269c3',
+        WETH_ADDRESS: '0x4200000000000000000000000000000000000006',
+        DAI_ADDRESS: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
+        USDC_ADDR: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
+        EXCHANGE_OWNER_ADDR: '0xC4D4b4F2Df76f9952E6e0Dc79861582A5b7269c3',
+        SAVER_EXCHANGE_ADDR: '0x2A588cBCBd5e6c6ba7ED0E260B8107F599017DDE',
+        PROXY_AUTH_ADDR: '0xD34BBE7398F7F08952b033bbaF2D2C84231dCEdc',
+        AAVE_MARKET: '0xe20fCBdBfFC4Dd138cE8b2E6FBb6CB49777ad64D',
+        StrategyProxy: '',
+        SubProxy: '',
+        UNISWAP_V3_WRAPPER: '0xBd2d2d4718C24B8D35168480553b1F5a11f9884b',
+        AAVE_V3_VIEW: '0x125b8b832BD7F2EBD77Eef148A6319AdE751C44b',
+        AAVE_SUB_PROXY: '',
+        AVG_GAS_PRICE: 0.001,
+        TOKEN_GROUP_REGISTRY: '0xa898078f369A78CE6b8023715e8f6d2Ad7d2719f',
+        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        ZRX_ALLOWLIST_ADDR: '0x169D6E128238ebabF86032Ae9da65938eaD7F69e',
+        ZRX_ALLOWLIST_OWNER: '',
+        ADMIN_VAULT: '0xD8E67968d8a0df4beCf2D50daE1e34d4d80C701C',
+        ADMIN_ACC: '0xF8EC1967A719027A95883a89579e7A77699899e4',
+        DFS_REG_CONTROLLER: '0x50bCFC115283dF48Ab6382551B9B93b08E197747',
+    },
     kovan: {
         PROXY_REGISTRY: '0xF9722E05B68E5ad5D6E1674C4d6BfE11791a1E33',
     },
@@ -146,6 +170,8 @@ const FEED_REGISTRY_ADDRESS = '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf';
 const USD_DENOMINATION = '0x0000000000000000000000000000000000000348';
 const BLUSD_ADDR = '0xB9D7DdDca9a4AC480991865EfEf82E01273F79C3';
 const BOND_NFT_ADDR = '0xa8384862219188a8f03c144953Cf21fc124029Ee';
+
+const AAVE_V2_MARKET_ADDR = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
 
 // optimism aave V3
 const AAVE_MARKET_OPTIMISM = '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb';
@@ -744,7 +770,7 @@ const formatMockExchangeObj = async (
 ) => {
     if (!wrapper) {
         // eslint-disable-next-line no-param-reassign
-        wrapper = await getAddrFromRegistry('MockExchangeWrapper');
+        wrapper = await getContractFromRegistry('MockExchangeWrapper');
     }
 
     const rateDecimals = 18 + destTokenInfo.decimals - srcTokenInfo.decimals;
@@ -758,7 +784,7 @@ const formatMockExchangeObj = async (
 
     await setBalance(
         destTokenInfo.addresses[chainIds[network]],
-        wrapper,
+        wrapper.address,
         expectedOutput,
     );
 
@@ -770,7 +796,7 @@ const formatMockExchangeObj = async (
         0,
         0,
         nullAddress,
-        wrapper,
+        wrapper.address,
         hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [rate]),
         [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
     ];
@@ -1373,6 +1399,7 @@ module.exports = {
     chainIds,
     BLUSD_ADDR,
     BOND_NFT_ADDR,
+    AAVE_V2_MARKET_ADDR,
     setNetwork,
     getNetwork,
     setBalance,

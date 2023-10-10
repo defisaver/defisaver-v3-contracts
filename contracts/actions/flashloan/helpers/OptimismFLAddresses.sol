@@ -14,7 +14,6 @@ contract OptimismFLAddresses {
 
     address internal constant WETH_ADDR = 0x4200000000000000000000000000000000000006;
     address internal constant DAI_ADDR = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;
-    address internal constant ETH_ADDR = 0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000;
 
     // AAVE_LENDING_POOL == AAVE_V3_LENDING_POOL so current automation doesn't break
     address internal constant AAVE_LENDING_POOL = 0x794a61358D6845594F94dc1DB02A252b5b4814aD;

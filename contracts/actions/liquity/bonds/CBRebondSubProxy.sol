@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.10;
 
-import "../auth/AdminAuth.sol";
-import "../auth/ProxyPermission.sol";
-import "../core/strategy/SubStorage.sol";
-import "../actions/liquity/helpers/CBHelper.sol";
+import "../../../auth/AdminAuth.sol";
+import "../../../auth/ProxyPermission.sol";
+import "../../../core/strategy/SubStorage.sol";
+import "../helpers/CBHelper.sol";
 
 /// @title SubProxy to inject subId during subscription for the cb rebond strategy
 contract CBRebondSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper, CBHelper {

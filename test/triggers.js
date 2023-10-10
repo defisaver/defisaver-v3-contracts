@@ -3,6 +3,9 @@ const hre = require('hardhat');
 const RATIO_STATE_OVER = 0;
 const RATIO_STATE_UNDER = 1;
 
+const IN_BOOST = 0;
+const IN_REPAY = 1;
+
 const BUY_ORDER = 0;
 const SELL_ORDER = 1;
 
@@ -37,8 +40,8 @@ const createChainLinkPriceTrigger = async (tokenAddr, price, state) => {
     return param;
 };
 
-const createOffchainPriceTrigger = async (targetPrice, goodUntil) => {
-    const param = abiCoder.encode(['uint256', 'uint256'], [targetPrice, goodUntil]);
+const createOffchainPriceTrigger = async (targetPrice, goodUntil, orderType) => {
+    const param = abiCoder.encode(['uint256', 'uint256', 'uint8'], [targetPrice, goodUntil, orderType]);
     return param;
 };
 
@@ -91,6 +94,8 @@ module.exports = {
     createMorphoTrigger,
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
+    IN_BOOST,
+    IN_REPAY,
     BUY_ORDER,
     SELL_ORDER,
 };

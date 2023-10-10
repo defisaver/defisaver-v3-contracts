@@ -4,6 +4,7 @@ pragma solidity =0.8.10;
 
 import "../utils/SafeERC20.sol";
 import "./helpers/ExchangeHelper.sol";
+import "../utils/TokenUtils.sol";
 
 contract DFSPrices is ExchangeHelper {
 
@@ -99,7 +100,7 @@ contract DFSPrices is ExchangeHelper {
     }
 
     function getDecimals(address _token) internal view returns (uint256) {
-        if (_token == ETH_ADDRESS) return 18;
+        if (_token == TokenUtils.ETH_ADDR) return 18;
 
         return IERC20(_token).decimals();
     }

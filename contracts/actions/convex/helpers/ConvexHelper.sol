@@ -3,7 +3,7 @@ pragma solidity =0.8.10;
 
 import "../../../interfaces/convex/IConvexToken.sol";
 import "../../../interfaces/convex/IConvexToken.sol";
-import "../../../interfaces/convex/IBaseRewardPool.sol";
+import "../../../interfaces/convex/IBRewardPool.sol";
 import "../../../interfaces/convex/IRewardPool.sol";
 import "../../../utils/SafeMath.sol";
 import "../../../utils/TokenUtils.sol";
@@ -70,15 +70,15 @@ contract ConvexHelper is MainnetConvexAddresses {
     function _earnedRewards(address _account, address _rewardContract) internal view returns (
         Reward[] memory rewards
     ) {
-        uint256 crvEarned = IBaseRewardPool(_rewardContract).earned(_account);
+        uint256 crvEarned = IBRewardPool(_rewardContract).earned(_account);
         uint256 cvxEarned = _cvxMintAmount(crvEarned);
     
-        uint256 extraRewardsLength = IBaseRewardPool(_rewardContract).extraRewardsLength();
+        uint256 extraRewardsLength = IBRewardPool(_rewardContract).extraRewardsLength();
         rewards = new Reward[](extraRewardsLength + 2);
 
         uint256 c = 2;
         for (uint256 i = 0; i < extraRewardsLength; i++) {
-            address rewardPool = IBaseRewardPool(_rewardContract).extraRewards(i);
+            address rewardPool = IBRewardPool(_rewardContract).extraRewards(i);
             address token = IRewardPool(rewardPool).rewardToken();
             uint256 earned = IRewardPool(rewardPool).earned(_account);
             if (token == CRV_ADDR) {

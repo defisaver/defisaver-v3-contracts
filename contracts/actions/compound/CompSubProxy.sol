@@ -1,0 +1,169 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity =0.8.10;
+
+import "../../auth/AdminAuth.sol";
+import "../../auth/ProxyPermission.sol";
+import "../../core/strategy/SubStorage.sol";
+import "../../interfaces/ISubscriptions.sol";
+
+/// @title Contract that subscribes users to Compound V2 automation bundles
+contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+    uint64 public immutable REPAY_BUNDLE_ID; 
+    uint64 public immutable BOOST_BUNDLE_ID;
+
+    enum RatioState { OVER, UNDER }
+
+    constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
+        REPAY_BUNDLE_ID = _repayBundleId;
+        BOOST_BUNDLE_ID = _boostBundleId;
+    }
+
+    /// @dev 5% offset acceptable
+    uint256 internal constant RATIO_OFFSET = 50000000000000000;
+
+    error WrongSubParams(uint256 minRatio, uint256 maxRatio);
+    error RangeTooClose(uint256 ratio, uint256 targetRatio);
+
+    address public constant COMP_SUB_ADDRESS = 0x52015EFFD577E08f498a0CCc11905925D58D6207;
+    address public constant LEGACY_PROXY_AUTH_ADDR = 0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a;
+
+    struct CompSubData {
+        uint128 minRatio;
+        uint128 maxRatio;
+        uint128 targetRatioBoost;
+        uint128 targetRatioRepay;
+        bool boostEnabled;
+    }
+
+    /// @notice Parses input data and subscribes user to repay and boost bundles
+    /// @dev Gives DSProxy permission if needed and registers a new sub
+    /// @dev If boostEnabled = false it will only create a repay bundle
+    /// @dev User can't just sub a boost bundle without repay
+    function subToCompAutomation(
+        CompSubData calldata _subData
+    ) public {
+        // unsub from old automation if the user is already subbed
+        if (ISubscriptions(COMP_SUB_ADDRESS).isSubscribed(address(this))) {
+            ISubscriptions(COMP_SUB_ADDRESS).unsubscribe();
+
+            removePermission(LEGACY_PROXY_AUTH_ADDR);
+        }
+
+        givePermission(PROXY_AUTH_ADDR);
+        StrategySub memory repaySub = formatRepaySub(_subData, address(this));
+
+        SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
+        if (_subData.boostEnabled) {
+            _validateSubData(_subData);
+
+            StrategySub memory boostSub = formatBoostSub(_subData, address(this));
+            SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
+        }
+    }
+
+    /// @notice Calls SubStorage to update the users subscription data
+    /// @dev Updating sub data will activate it as well
+    /// @dev If we don't have a boost subId send as 0
+    function updateSubData(
+        uint32 _subId1,
+        uint32 _subId2,
+        CompSubData calldata _subData
+    ) public {
+
+        // update repay as we must have a subId, it's ok if it's the same data
+        StrategySub memory repaySub = formatRepaySub(_subData, address(this));
+        SubStorage(SUB_STORAGE_ADDR).updateSubData(_subId1, repaySub);
+        SubStorage(SUB_STORAGE_ADDR).activateSub(_subId1);
+
+        if (_subData.boostEnabled) {
+            _validateSubData(_subData);
+
+            StrategySub memory boostSub = formatBoostSub(_subData, address(this));
+
+            // if we don't have a boost bundleId, create one
+            if (_subId2 == 0) {
+                SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
+            } else {
+                SubStorage(SUB_STORAGE_ADDR).updateSubData(_subId2, boostSub);
+                SubStorage(SUB_STORAGE_ADDR).activateSub(_subId2);
+            }
+        } else {
+            if (_subId2 != 0) {
+                SubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId2);
+            }
+        }
+    }
+
+    /// @notice Activates Repay sub and if exists a Boost sub
+    function activateSub(
+        uint32 _subId1,
+        uint32 _subId2
+    ) public {
+        SubStorage(SUB_STORAGE_ADDR).activateSub(_subId1);
+
+        if (_subId2 != 0) {
+            SubStorage(SUB_STORAGE_ADDR).activateSub(_subId2);
+        }
+    }
+
+    /// @notice Deactivates Repay sub and if exists a Boost sub
+    function deactivateSub(
+        uint32 _subId1,
+        uint32 _subId2
+    ) public {
+        SubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId1);
+
+        if (_subId2 != 0) {
+            SubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId2);
+        }
+    }
+
+
+    ///////////////////////////////// HELPER FUNCTIONS /////////////////////////////////
+
+    function _validateSubData(CompSubData memory _subData) internal pure {
+        if (_subData.minRatio > _subData.maxRatio) {
+            revert WrongSubParams(_subData.minRatio, _subData.maxRatio);
+        }
+
+        if ((_subData.maxRatio - RATIO_OFFSET) < _subData.targetRatioRepay) {
+            revert RangeTooClose(_subData.maxRatio, _subData.targetRatioRepay);
+        }
+
+        if ((_subData.minRatio + RATIO_OFFSET) > _subData.targetRatioBoost) {
+            revert RangeTooClose(_subData.minRatio, _subData.targetRatioBoost);
+        }
+    }
+
+    /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized comp sub
+    function formatRepaySub(CompSubData memory _subData, address _proxy) public view returns (StrategySub memory repaySub) {
+        repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
+        repaySub.isBundle = true;
+
+        // format data for ratio trigger if currRatio < minRatio = true
+        bytes memory triggerData = abi.encode(_proxy, uint256(_subData.minRatio), uint8(RatioState.UNDER));
+        repaySub.triggerData =  new bytes[](1);
+        repaySub.triggerData[0] = triggerData;
+
+        repaySub.subData = new bytes32[](2);
+        repaySub.subData[0] = bytes32(uint256(_subData.targetRatioRepay)); // targetRatio
+        repaySub.subData[1] = bytes32(uint256(1)); // ratioState = repay
+    }
+
+    /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized comp sub
+    function formatBoostSub(CompSubData memory _subData, address _proxy) public view returns (StrategySub memory boostSub) {
+        boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
+        boostSub.isBundle = true;
+
+        // format data for ratio trigger if currRatio > maxRatio = true
+        bytes memory triggerData = abi.encode(_proxy, uint256(_subData.maxRatio), uint8(RatioState.OVER));
+        boostSub.triggerData =  new bytes[](1);
+        boostSub.triggerData[0] = triggerData;
+
+        boostSub.subData =  new bytes32[](3);
+        boostSub.subData[0] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
+        boostSub.subData[1] = bytes32(uint256(0)); // ratioState = boost
+        boostSub.subData[2] = bytes32(uint256(1)); // enableAsColl = true
+    }
+}

@@ -1282,85 +1282,6 @@ const createContinuousUniV3CollectStrategy = () => {
     return continuousUniV3Strat.encodeForDsProxyCall();
 };
 
-const createCompRepayStrategy = () => {
-    const compBoostStrategy = new dfs.Strategy('CompBoostStrategy');
-    compBoostStrategy.addSubSlot('&targetRatio', 'uint256');
-
-    const compRatioTrigger = new dfs.triggers.CompoundRatioTrigger('0', '0', '0');
-    compBoostStrategy.addTrigger(compRatioTrigger);
-    const compWithdrawAction = new dfs.actions.compound.CompoundWithdrawAction(
-        '%cETH',
-        '%amount',
-        '&proxy',
-    );
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '%wethAddr', '$1',
-    );
-    const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            '%wethAddr',
-            '%daiAddr',
-            '$2',
-            '%exchangeWrapper',
-        ),
-        '&proxy',
-        '&proxy',
-    );
-    const paybackAction = new dfs.actions.compound.CompoundPaybackAction(
-        '%cDai',
-        '$3',
-        '&proxy',
-    );
-    compBoostStrategy.addAction(compWithdrawAction);
-    compBoostStrategy.addAction(feeTakingAction);
-    compBoostStrategy.addAction(sellAction);
-    compBoostStrategy.addAction(paybackAction);
-
-    return compBoostStrategy.encodeForDsProxyCall();
-};
-
-const createBoostStrategy = () => {
-    const compBoostStrategy = new dfs.Strategy('CompBoostStrategy');
-    compBoostStrategy.addSubSlot('&targetRatio', 'uint256');
-
-    const compRatioTrigger = new dfs.triggers.CompoundRatioTrigger('0', '0', '0');
-    compBoostStrategy.addTrigger(compRatioTrigger);
-
-    const compBorrowAction = new dfs.actions.compound.CompoundBorrowAction(
-        '%assetToBorrow',
-        '%amountToBorrow',
-        '&proxy',
-    );
-
-    const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            '%assetBorrowed',
-            '%assetWanted',
-            '$1',
-            '%wrapper',
-        ),
-        '&proxy',
-        '&proxy',
-    );
-
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '%wethAddr', '$2',
-    );
-
-    const compSupplyAction = new dfs.actions.compound.CompoundSupplyAction(
-        'cAssetToSupply',
-        '$3',
-        '&proxy',
-        true,
-    );
-    compBoostStrategy.addAction(compBorrowAction);
-    compBoostStrategy.addAction(sellAction);
-    compBoostStrategy.addAction(feeTakingAction);
-    compBoostStrategy.addAction(compSupplyAction);
-
-    return compBoostStrategy.encodeForDsProxyCall();
-};
-
 const createMcdBoostStrategy = () => {
     const mcdBoostStrategy = new dfs.Strategy('MakerBoostStrategy');
     mcdBoostStrategy.addSubSlot('&vaultId', 'uint256');
@@ -2675,10 +2596,46 @@ const createAaveV3CloseToDebtStrategy = () => {
     return aaveCloseStrategy.encodeForDsProxyCall();
 };
 
+const createAaveV3CloseToDebtWithMaximumGasPriceStrategy = () => {
+    const strategyName = 'AaveV3CloseToDebtWithMaximumGasPrice';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    // This is a second trigger.
+    // Default close trigger for ratio set in createAaveCloseStrategyBase()
+    aaveCloseStrategy.addTrigger(new dfs.triggers.GasPriceTrigger('0'));
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
 const createAaveV3FLCloseToDebtStrategy = () => {
     const strategyName = 'AaveV3FLCloseToDebt';
 
     const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.flAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionFL());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendRepayFL());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV3FLCloseToDebtWithMaximumGasPriceStrategy = () => {
+    const strategyName = 'AaveV3FLCloseToDebtWithMaximumGasPrice';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addTrigger(new dfs.triggers.GasPriceTrigger('0'));
 
     aaveCloseStrategy.addAction(aaveV3CloseActions.flAction());
     aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
@@ -2706,6 +2663,23 @@ const createAaveV3CloseToCollStrategy = () => {
     return aaveCloseStrategy.encodeForDsProxyCall();
 };
 
+const createAaveV3CloseToCollWithMaximumGasPriceStrategy = () => {
+    const strategyName = 'AaveV3CloseToCollWithMaximumGasPrice';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addTrigger(new dfs.triggers.GasPriceTrigger('0'));
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionColl());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendColl());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
 const createAaveV3FLCloseToCollStrategy = () => {
     const strategyName = 'AaveV3FLCloseToColl';
 
@@ -2721,6 +2695,515 @@ const createAaveV3FLCloseToCollStrategy = () => {
     aaveCloseStrategy.addAction(aaveV3CloseActions.sendColl());
 
     return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV3FLCloseToCollWithMaximumGasPriceStrategy = () => {
+    const strategyName = 'AaveV3FLCloseToCollWithMaximumGasPrice';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addTrigger(new dfs.triggers.GasPriceTrigger('0'));
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.flAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionFLColl());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendRepayFL());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendColl());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
+const createCompV2RepayStrategy = () => {
+    const compV2RepayStrategy = new dfs.Strategy('CompV2Repay');
+
+    compV2RepayStrategy.addSubSlot('&targetRatio', 'uint256');
+    compV2RepayStrategy.addSubSlot('&checkRepayState', 'uint256');
+
+    const compV2Trigger = new dfs.triggers.CompoundRatioTrigger('0', '0', '0');
+    compV2RepayStrategy.addTrigger(compV2Trigger);
+
+    const withdrawAction = new dfs.actions.compound.CompoundWithdrawAction(
+        '%cCollAddr', // variable (backend picks which asset to swap)
+        '%amount', // must stay variable
+        '&proxy', // hardcoded to address
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAddr', // must stay variable
+            '%debtAddr', // must stay variable
+            '$1', //  hardcoded from withdraw
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%debtAddr', // must stay variable as debt can differ
+        '$2', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+    );
+
+    const paybackAction = new dfs.actions.compound.CompoundPaybackAction(
+        '%cCollAddr', // variable cToken coll address
+        '$3', // amount hardcoded
+        '&proxy', // hardcoded from address
+        '&proxy', // hardcoded onBehalf address
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV2RatioCheckAction(
+        '&checkRepayState', // hardcoded repay state
+        '&targetRatio', // hardcoded target ratio
+    );
+
+    compV2RepayStrategy.addAction(withdrawAction);
+    compV2RepayStrategy.addAction(sellAction);
+    compV2RepayStrategy.addAction(feeTakingAction);
+    compV2RepayStrategy.addAction(paybackAction);
+    compV2RepayStrategy.addAction(checkerAction);
+
+    return compV2RepayStrategy.encodeForDsProxyCall();
+};
+
+const createCompFLV2RepayStrategy = () => {
+    const compV2RepayStrategy = new dfs.Strategy('CompFLV2Repay');
+
+    compV2RepayStrategy.addSubSlot('&targetRatio', 'uint256');
+    compV2RepayStrategy.addSubSlot('&checkRepayState', 'uint256');
+
+    const compV2Trigger = new dfs.triggers.CompoundRatioTrigger('0', '0', '0');
+    compV2RepayStrategy.addTrigger(compV2Trigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%collAddr'],
+        ['%loanAmount'],
+        nullAddress,
+        [],
+    );
+    compV2RepayStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAddr', // must stay variable
+            '%debtAddr', // must stay variable
+            '%flAmount', //  must stay variable if FL has fees
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%debtAddr', // must stay variable as debt can differ
+        '$2', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+    );
+
+    const paybackAction = new dfs.actions.compound.CompoundPaybackAction(
+        '%cDebtAddr', // variable cToken debt address
+        '$3', // amount hardcoded
+        '&proxy', // hardcoded from address
+        '&proxy', // hardcoded onBehalf address
+    );
+
+    const withdrawAction = new dfs.actions.compound.CompoundWithdrawAction(
+        '%cCollAddr', // variable cToken (backend picks which asset to swap)
+        '$1', // fl amount hardcoded from action
+        '%flAddress', // repay the FL
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV2RatioCheckAction(
+        '&checkRepayState', // hardcoded repay state
+        '&targetRatio', // hardcoded target ratio
+    );
+
+    compV2RepayStrategy.addAction(sellAction);
+    compV2RepayStrategy.addAction(feeTakingAction);
+    compV2RepayStrategy.addAction(paybackAction);
+    compV2RepayStrategy.addAction(withdrawAction);
+    compV2RepayStrategy.addAction(checkerAction);
+
+    return compV2RepayStrategy.encodeForDsProxyCall();
+};
+
+const createCompV2BoostStrategy = () => {
+    const compV2BoostStrategy = new dfs.Strategy('CompV2Boost');
+
+    compV2BoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    compV2BoostStrategy.addSubSlot('&checkBoostState', 'uint256');
+    compV2BoostStrategy.addSubSlot('&enableAsColl', 'uint256');
+
+    const compV2Trigger = new dfs.triggers.CompoundRatioTrigger('0', '0', '0');
+    compV2BoostStrategy.addTrigger(compV2Trigger);
+
+    const borrowAction = new dfs.actions.compound.CompoundBorrowAction(
+        '%cDebtAddr', // cToken variable debt address
+        '%amount', // amount to borrow (variable)
+        '&proxy', // hardcoded to address
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%debtAddr', // must stay variable
+            '%collAddr', // must stay variable
+            '$1', //  hardcoded piped from borrow
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%collAddr', // must stay variable as coll can differ
+        '$2', // hardcoded output from withdraw action
+        '%dfsFeeDivider', // defaults at 0.05%
+    );
+
+    const supplyAction = new dfs.actions.compound.CompoundSupplyAction(
+        '%cCollAddr', // cToken variable coll address
+        '$3', // amount hardcoded from feeTakeAction
+        '&proxy', // proxy hardcoded from address
+        '&enableAsColl', // hardcoded always enable as coll
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV2RatioCheckAction(
+        '&checkBoostState', // hardcoded boost state
+        '&targetRatio', // hardcoded target ratio
+    );
+
+    compV2BoostStrategy.addAction(borrowAction);
+    compV2BoostStrategy.addAction(sellAction);
+    compV2BoostStrategy.addAction(feeTakingAction);
+    compV2BoostStrategy.addAction(supplyAction);
+    compV2BoostStrategy.addAction(checkerAction);
+
+    return compV2BoostStrategy.encodeForDsProxyCall();
+};
+
+const createCompFLV2BoostStrategy = () => {
+    const compV2BoostStrategy = new dfs.Strategy('CompFLV2Boost');
+
+    compV2BoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    compV2BoostStrategy.addSubSlot('&checkBoostState', 'uint256');
+    compV2BoostStrategy.addSubSlot('&enableAsColl', 'uint256');
+
+    const compV2Trigger = new dfs.triggers.CompoundRatioTrigger('0', '0', '0');
+    compV2BoostStrategy.addTrigger(compV2Trigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%debtAddr'],
+        ['%loanAmount'],
+        nullAddress,
+        [],
+    );
+
+    compV2BoostStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%debtAddr', // must stay variable
+            '%collAddr', // must stay variable
+            '%flAmount', // variable as flAmount returns with fee
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%collAddr', // must stay variable as coll can differ
+        '$2', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+    );
+
+    const supplyAction = new dfs.actions.compound.CompoundSupplyAction(
+        '%cCollAddr', // cToken variable coll address
+        '$3', // amount hardcoded from feeTakeAction
+        '&proxy', // proxy hardcoded from address
+        '&enableAsColl', // hardcoded always enable as coll
+    );
+
+    const borrowAction = new dfs.actions.compound.CompoundBorrowAction(
+        '%cDebtAddr', // cToken variable debt address
+        '$1', // amount to borrow (variable)
+        '%flAddress', // flAddress for fl repay
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV2RatioCheckAction(
+        '&checkBoostState', // hardcoded boost state
+        '&targetRatio', // hardcoded target ratio
+    );
+
+    compV2BoostStrategy.addAction(sellAction);
+    compV2BoostStrategy.addAction(feeTakingAction);
+    compV2BoostStrategy.addAction(supplyAction);
+    compV2BoostStrategy.addAction(borrowAction);
+    compV2BoostStrategy.addAction(checkerAction);
+
+    return compV2BoostStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV2RepayStrategy = () => {
+    const aaveV2RepayStrategy = new dfs.Strategy('AaveV2Repay');
+
+    aaveV2RepayStrategy.addSubSlot('&market', 'address');
+    aaveV2RepayStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV2RepayStrategy.addSubSlot('&checkRepayState', 'uint256');
+
+    const aaveV2Trigger = new dfs.triggers.AaveV2RatioTrigger('0', '0', '0');
+    aaveV2RepayStrategy.addTrigger(aaveV2Trigger);
+
+    const withdrawAction = new dfs.actions.aave.AaveWithdrawAction(
+        '&market', // hardcoded market only main one is used
+        '%collAddr', // variable (backend picks which asset to swap)
+        '%amount', // must stay variable
+        '&proxy', // hardcoded
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAddr', // must stay variable
+            '%debtAddr', // must stay variable
+            '$1', //  hardcoded from withdraw
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%debtAddr', // must stay variable as debt can differ
+        '$2', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+    );
+
+    const paybackAction = new dfs.actions.aave.AavePaybackAction(
+        '&market', // hardcoded market only main one is used
+        '%collAddr', // variable coll address
+        '$3', // amount hardcoded
+        '%rateMode', // variable type of debt
+        '&proxy', // hardcoded from address
+        '&proxy', // hardcoded onBehalf address
+    );
+
+    const checkerAction = new dfs.actions.checkers.AaveV2RatioCheckAction(
+        '&checkRepayState', // hardcoded repay state
+        '&targetRatio', // hardcoded target ratio
+    );
+
+    aaveV2RepayStrategy.addAction(withdrawAction);
+    aaveV2RepayStrategy.addAction(sellAction);
+    aaveV2RepayStrategy.addAction(feeTakingAction);
+    aaveV2RepayStrategy.addAction(paybackAction);
+    aaveV2RepayStrategy.addAction(checkerAction);
+
+    return aaveV2RepayStrategy.encodeForDsProxyCall();
+};
+
+const createAaveFLV2RepayStrategy = () => {
+    const aaveV2RepayStrategy = new dfs.Strategy('AaveFLV2Repay');
+
+    aaveV2RepayStrategy.addSubSlot('&market', 'address');
+    aaveV2RepayStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV2RepayStrategy.addSubSlot('&checkRepayState', 'uint256');
+
+    const aaveV2Trigger = new dfs.triggers.AaveV2RatioTrigger('0', '0', '0');
+    aaveV2RepayStrategy.addTrigger(aaveV2Trigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%collAddr'],
+        ['%loanAmount'],
+        nullAddress,
+        [],
+    );
+    aaveV2RepayStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAddr', // must stay variable
+            '%debtAddr', // must stay variable
+            '%flAmount', //  must stay variable if FL has fees
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%debtAddr', // must stay variable as debt can differ
+        '$2', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+    );
+
+    const paybackAction = new dfs.actions.aave.AavePaybackAction(
+        '&market', // hardcoded market only main one is used
+        '%collAddr', // variable coll address
+        '$3', // amount hardcoded
+        '%rateMode', // variable type of debt
+        '&proxy', // hardcoded from address
+        '&proxy', // hardcoded onBehalf address
+    );
+
+    const withdrawAction = new dfs.actions.aave.AaveWithdrawAction(
+        '&market', // hardcoded market only main one is used
+        '%collAddr', // variable (backend picks which asset to swap)
+        '$1', // fl amount hardcoded from action
+        '%flAddress', // repay the FL
+    );
+
+    const checkerAction = new dfs.actions.checkers.AaveV2RatioCheckAction(
+        '&checkRepayState', // hardcoded repay state
+        '&targetRatio', // hardcoded target ratio
+    );
+
+    aaveV2RepayStrategy.addAction(sellAction);
+    aaveV2RepayStrategy.addAction(feeTakingAction);
+    aaveV2RepayStrategy.addAction(paybackAction);
+    aaveV2RepayStrategy.addAction(withdrawAction);
+    aaveV2RepayStrategy.addAction(checkerAction);
+
+    return aaveV2RepayStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV2BoostStrategy = () => {
+    const aaveV2BoostStrategy = new dfs.Strategy('AaveV2Boost');
+
+    aaveV2BoostStrategy.addSubSlot('&market', 'address');
+    aaveV2BoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV2BoostStrategy.addSubSlot('&checkBoostState', 'uint256');
+    aaveV2BoostStrategy.addSubSlot('&enableAsColl', 'uint256');
+
+    const aaveV2Trigger = new dfs.triggers.AaveV2RatioTrigger('0', '0', '0');
+    aaveV2BoostStrategy.addTrigger(aaveV2Trigger);
+
+    const borrowAction = new dfs.actions.aave.AaveBorrowAction(
+        '&market', // hardcoded market only main one is used
+        '%debtAddr', // variable debt address
+        '%amount', // amount to borrow (variable)
+        '%rateMode', // depends on type of debt we want
+        '&proxy', // hardcoded to address
+        '&proxy', // hardcoded onBehalf address
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%debtAddr', // must stay variable
+            '%collAddr', // must stay variable
+            '$1', //  hardcoded piped from borrow
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%collAddr', // must stay variable as coll can differ
+        '$2', // hardcoded output from withdraw action
+        '%dfsFeeDivider', // defaults at 0.05%
+    );
+
+    const supplyAction = new dfs.actions.aave.AaveSupplyAction(
+        '&market', // hardcoded market only main one is used
+        '%collAddr', // variable coll address
+        '$3', // amount hardcoded from feeTakeAction
+        '&proxy', // proxy hardcoded from address
+        '&proxy', // proxy hardcoded onBehalf address
+        '&enableAsColl', // hardcoded always enable as coll
+    );
+
+    const checkerAction = new dfs.actions.checkers.AaveV2RatioCheckAction(
+        '&checkBoostState', // hardcoded boost state
+        '&targetRatio', // hardcoded target ratio
+    );
+
+    aaveV2BoostStrategy.addAction(borrowAction);
+    aaveV2BoostStrategy.addAction(sellAction);
+    aaveV2BoostStrategy.addAction(feeTakingAction);
+    aaveV2BoostStrategy.addAction(supplyAction);
+    aaveV2BoostStrategy.addAction(checkerAction);
+
+    return aaveV2BoostStrategy.encodeForDsProxyCall();
+};
+
+const createAaveFLV2BoostStrategy = () => {
+    const aaveV2BoostStrategy = new dfs.Strategy('AaveFLV2Boost');
+
+    aaveV2BoostStrategy.addSubSlot('&market', 'address');
+    aaveV2BoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV2BoostStrategy.addSubSlot('&checkBoostState', 'uint256');
+    aaveV2BoostStrategy.addSubSlot('&enableAsColl', 'uint256');
+
+    const aaveV2Trigger = new dfs.triggers.AaveV2RatioTrigger('0', '0', '0');
+    aaveV2BoostStrategy.addTrigger(aaveV2Trigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%debtAddr'],
+        ['%loanAmount'],
+        nullAddress,
+        [],
+    );
+
+    aaveV2BoostStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%debtAddr', // must stay variable
+            '%collAddr', // must stay variable
+            '%flAmount', // variable as flAmount returns with fee
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%collAddr', // must stay variable as coll can differ
+        '$2', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+    );
+
+    const supplyAction = new dfs.actions.aave.AaveSupplyAction(
+        '&market', // hardcoded market only main one is used
+        '%collAddr', // variable coll address
+        '$3', // amount hardcoded from feeTakeAction
+        '&proxy', // proxy hardcoded from address
+        '&proxy', // proxy hardcoded onBehalf address
+        '&enableAsColl', // hardcoded always enable as coll
+    );
+
+    const borrowAction = new dfs.actions.aave.AaveBorrowAction(
+        '&market', // hardcoded market only main one is used
+        '%debtAddr', // variable debt address
+        '$1', // amount to borrow (variable)
+        '%rateMode', // depends on type of debt we want
+        '%flAddress', // flAddress for fl repay
+        '&proxy', // hardcoded onBehalf address
+    );
+
+    const checkerAction = new dfs.actions.checkers.AaveV2RatioCheckAction(
+        '&checkBoostState', // hardcoded boost state
+        '&targetRatio', // hardcoded target ratio
+    );
+
+    aaveV2BoostStrategy.addAction(sellAction);
+    aaveV2BoostStrategy.addAction(feeTakingAction);
+    aaveV2BoostStrategy.addAction(supplyAction);
+    aaveV2BoostStrategy.addAction(borrowAction);
+    aaveV2BoostStrategy.addAction(checkerAction);
+
+    return aaveV2BoostStrategy.encodeForDsProxyCall();
 };
 
 const createSparkBoostStrategy = () => {
@@ -3172,6 +3655,106 @@ const createSparkFLCloseToCollStrategy = () => {
     return sparkCloseStrategy.encodeForDsProxyCall();
 };
 
+const createLiquityDsrPaybackStrategy = () => {
+    const liquityDsrPaybackStrategy = new dfs.Strategy('LiquityDsrPayback');
+    liquityDsrPaybackStrategy.addSubSlot('&ratioState', 'uint8');
+    liquityDsrPaybackStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityDsrPaybackStrategy.addSubSlot('&daiAddress', 'address');
+    liquityDsrPaybackStrategy.addSubSlot('&lusdAddress', 'uint256');
+
+    const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
+    liquityDsrPaybackStrategy.addTrigger(liquityRatioTrigger);
+
+    const dsrWithdrawAction = new dfs.actions.maker.MakerDsrWithdrawAction(
+        '%daiWithdrawAmount',
+        '&proxy',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&daiAddress',
+            '&lusdAddress',
+            '$1',
+            '%wrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%strategyGasCost', '&lusdAddress', '$2',
+    );
+
+    const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
+        '$3',
+        '&proxy',
+        '%upperHint',
+        '%lowerHint',
+    );
+
+    const liquityRatioCheckAction = new dfs.actions.checkers.LiquityRatioCheckAction(
+        '&ratioState', '&targetRatio',
+    );
+
+    liquityDsrPaybackStrategy.addAction(dsrWithdrawAction);
+    liquityDsrPaybackStrategy.addAction(sellAction);
+    liquityDsrPaybackStrategy.addAction(feeTakingAction);
+    liquityDsrPaybackStrategy.addAction(liquityPaybackAction);
+    liquityDsrPaybackStrategy.addAction(liquityRatioCheckAction);
+
+    return liquityDsrPaybackStrategy.encodeForDsProxyCall();
+};
+
+const createLiquityDsrSupplyStrategy = () => {
+    const liquityDsrSupplyStrategy = new dfs.Strategy('LiquityDsrSupply');
+    liquityDsrSupplyStrategy.addSubSlot('&ratioState', 'uint8');
+    liquityDsrSupplyStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityDsrSupplyStrategy.addSubSlot('&daiAddress', 'address');
+    liquityDsrSupplyStrategy.addSubSlot('&wethAddress', 'uint256');
+
+    const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
+    liquityDsrSupplyStrategy.addTrigger(liquityRatioTrigger);
+
+    const dsrWithdrawAction = new dfs.actions.maker.MakerDsrWithdrawAction(
+        '%daiWithdrawAmount',
+        '&proxy',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&daiAddress',
+            '&wethAddress',
+            '$1',
+            '%wrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%strategyGasCost', '&wethAddress', '$2',
+    );
+
+    const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
+        '$3',
+        '&proxy',
+        '%upperHint',
+        '%lowerHint',
+    );
+
+    const liquityRatioCheckAction = new dfs.actions.checkers.LiquityRatioCheckAction(
+        '&ratioState', '&targetRatio',
+    );
+
+    liquityDsrSupplyStrategy.addAction(dsrWithdrawAction);
+    liquityDsrSupplyStrategy.addAction(sellAction);
+    liquityDsrSupplyStrategy.addAction(feeTakingAction);
+    liquityDsrSupplyStrategy.addAction(liquitySupplyAction);
+    liquityDsrSupplyStrategy.addAction(liquityRatioCheckAction);
+
+    return liquityDsrSupplyStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
@@ -3196,8 +3779,6 @@ module.exports = {
     createLimitOrderStrategy,
     createDCAStrategy,
     createContinuousUniV3CollectStrategy,
-    createCompRepayStrategy,
-    createBoostStrategy,
     createMcdBoostStrategy,
     createFlMcdBoostStrategy,
     createMcdCloseToCollStrategy,
@@ -3225,9 +3806,21 @@ module.exports = {
     createAaveV3RepayStrategy,
     createAaveFLV3RepayStrategy,
     createAaveV3CloseToDebtStrategy,
+    createAaveV3CloseToDebtWithMaximumGasPriceStrategy,
     createAaveV3FLCloseToDebtStrategy,
+    createAaveV3FLCloseToDebtWithMaximumGasPriceStrategy,
     createAaveV3CloseToCollStrategy,
+    createAaveV3CloseToCollWithMaximumGasPriceStrategy,
     createAaveV3FLCloseToCollStrategy,
+    createAaveV3FLCloseToCollWithMaximumGasPriceStrategy,
+    createAaveV2RepayStrategy,
+    createAaveFLV2RepayStrategy,
+    createAaveV2BoostStrategy,
+    createAaveFLV2BoostStrategy,
+    createCompV2RepayStrategy,
+    createCompFLV2RepayStrategy,
+    createCompV2BoostStrategy,
+    createCompFLV2BoostStrategy,
     createSparkBoostStrategy,
     createSparkFLBoostStrategy,
     createSparkRepayStrategy,
@@ -3236,4 +3829,6 @@ module.exports = {
     createSparkFLCloseToDebtStrategy,
     createSparkCloseToCollStrategy,
     createSparkFLCloseToCollStrategy,
+    createLiquityDsrPaybackStrategy,
+    createLiquityDsrSupplyStrategy,
 };

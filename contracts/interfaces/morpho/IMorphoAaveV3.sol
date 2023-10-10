@@ -128,6 +128,8 @@ interface IMorphoAaveV3 is IMorphoGetters, IMorphoSetters {
         Types.Signature calldata signature
     ) external;
 
+    function isManagedBy(address delegator, address manager) external view returns(bool);
+
     function liquidate(address underlyingBorrowed, address underlyingCollateral, address user, uint256 amount)
         external
         returns (uint256 repaid, uint256 seized);

@@ -48,6 +48,9 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath{
         }
 
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
+
+        /// @dev the amount of tokens received is checked in DFSExchangeCore
+        /// @dev Exchange wrapper contracts should not be used on their own
         (success, ) = _exData.offchainData.exchangeAddr.call{value: _exData.offchainData.protocolFee}(_exData.offchainData.callData);
         uint256 tokensSwapped = 0;
 
