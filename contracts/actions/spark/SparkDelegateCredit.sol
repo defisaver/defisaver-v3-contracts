@@ -11,8 +11,8 @@ import "../../interfaces/aaveV3/IDebtToken.sol";
 contract SparkDelegateCredit is ActionBase, SparkHelper {
     using TokenUtils for address;
 
-    uint256 STABLE_ID = 1;
-    uint256 VARIABLE_ID = 2;
+    uint256 internal constant STABLE_ID = 1;
+    uint256 internal constant VARIABLE_ID = 2;
     
     error NonExistantRateMode();
 

@@ -7,7 +7,7 @@ describe('Aave-Delegate-Credit', function () {
     before(async () => {
         await redeploy('AaveV3DelegateCredit');
     });
-    it('... should run full aave set EMode test', async () => {
+    it('... should run full aave delegate credit test', async () => {
         await aaveV3DelegateCreditTest();
     });
 });
