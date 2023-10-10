@@ -2,7 +2,10 @@
 const dfs = require('@defisaver/sdk');
 const hre = require('hardhat');
 
-const { getAssetInfo } = require('@defisaver/tokens');
+const {
+    getAssetInfo,
+    MAXUINT,
+} = require('@defisaver/tokens');
 
 const {
     mUSD,
@@ -2473,6 +2476,710 @@ const callMorphoAaveV2RepayStrategy = async ({
     console.log(`GasUsed callMorphoAaveV2RepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
+// eslint-disable-next-line max-len
+const callAaveV2BoostStrategy = async (
+    botAcc,
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    collAddr,
+    debtAddr,
+    boostAmount,
+    exchangeWrapper,
+) => {
+    const actionsCallData = [];
+
+    const borrowAction = new dfs.actions.aave.AaveBorrowAction(
+        placeHolderAddr, // market hardcoded
+        debtAddr, // token variable debt address
+        boostAmount, // amount to borrow (variable)
+        2, // rate mode variable
+        placeHolderAddr, // hardcoded proxy address
+        placeHolderAddr, // hardcoded proxy address
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            debtAddr, // must stay variable
+            collAddr, // must stay variable
+            '0', //  hardcoded piped from borrow
+            exchangeWrapper, // can pick exchange wrapper
+        ),
+        placeHolderAddr, // hardcoded proxy address
+        placeHolderAddr, // hardcoded proxy address
+    );
+
+    const gasCost = 1_000_000;
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        gasCost, // must stay variable backend sets gasCost
+        collAddr, // must stay variable as coll can differ
+        '0', // hardcoded output from withdraw action
+    );
+
+    const supplyAction = new dfs.actions.aave.AaveSupplyAction(
+        placeHolderAddr, // market hardcoded
+        collAddr, // cToken variable coll address
+        '0', // amount hardcoded from feeTakeAction
+        placeHolderAddr, // proxy hardcoded from address
+        placeHolderAddr, // proxy hardcoded onBehalf address
+        true, // hardcoded always enable as coll
+    );
+
+    const checkerAction = new dfs.actions.checkers.AaveV2RatioCheckAction(
+        '0', // hardcoded boost state
+        '0', // hardcoded target ratio
+    );
+
+    actionsCallData.push(borrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(supplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
+
+    const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(
+        `GasUsed callAaveV2BoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
+// eslint-disable-next-line max-len
+const callAaveFLV2BoostStrategy = async (
+    botAcc,
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    collAddr,
+    debtAddr,
+    boostAmount,
+    exchangeWrapper,
+    flAddr,
+) => {
+    const actionsCallData = [];
+
+    let flashLoanAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        [debtAddr],
+        [boostAmount],
+        [],
+    );
+
+    flashLoanAction = new dfs.actions.flashloan.FLAction(flashLoanAction);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            debtAddr, // must stay variable
+            collAddr, // must stay variable
+            boostAmount, //  boostAmount
+            exchangeWrapper, // can pick exchange wrapper
+        ),
+        placeHolderAddr, // hardcoded proxy address
+        placeHolderAddr, // hardcoded proxy address
+    );
+
+    const gasCost = 1_400_000;
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        gasCost, // must stay variable backend sets gasCost
+        collAddr, // must stay variable as coll can differ
+        '0', // hardcoded output from sell action
+    );
+
+    const supplyAction = new dfs.actions.aave.AaveSupplyAction(
+        placeHolderAddr, // market hardcoded
+        collAddr, // cToken variable coll address
+        '0', // amount hardcoded from feeTakeAction
+        placeHolderAddr, // proxy hardcoded from address
+        placeHolderAddr, // proxy hardcoded onBehalf address
+        true, // hardcoded always enable as coll
+    );
+
+    const borrowAction = new dfs.actions.aave.AaveBorrowAction(
+        placeHolderAddr, // market hardcoded
+        debtAddr, // token variable debt address
+        '0', // fl amount hardcoded
+        2, // rate mode variable
+        flAddr, // hardcoded proxy address
+        placeHolderAddr, // hardcoded onBehalf address
+    );
+
+    const checkerAction = new dfs.actions.checkers.AaveV2RatioCheckAction(
+        '0', // hardcoded boost state
+        '0', // hardcoded target ratio
+    );
+
+    actionsCallData.push(flashLoanAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(supplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(borrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
+
+    const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(
+        `GasUsed callAaveFLV2BoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
+// eslint-disable-next-line max-len
+const callAaveV2RepayStrategy = async (
+    botAcc,
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    collAddr,
+    debtAddr,
+    repayAmount,
+    exchangeWrapper,
+) => {
+    const actionsCallData = [];
+
+    const withdrawAction = new dfs.actions.aave.AaveWithdrawAction(
+        placeHolderAddr, // market hardcoded
+        collAddr, // variable (backend picks which asset to swap)
+        repayAmount, // must stay variable
+        placeHolderAddr, // proxy hardcoded to address
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            collAddr, // must stay variable
+            debtAddr, // must stay variable
+            '0', //  hardcoded piped from borrow
+            exchangeWrapper, // can pick exchange wrapper
+        ),
+        placeHolderAddr, // hardcoded proxy address
+        placeHolderAddr, // hardcoded proxy address
+    );
+
+    const gasCost = 1_000_000;
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        gasCost, // must stay variable backend sets gasCost
+        debtAddr, // must stay variable as coll can differ
+        '0', // hardcoded output from withdraw action
+    );
+
+    const paybackAction = new dfs.actions.aave.AavePaybackAction(
+        placeHolderAddr, // market hardcoded
+        debtAddr, // variable cToken coll address
+        '0', // amount hardcoded
+        '2', // rate mode variable
+        placeHolderAddr, // hardcoded proxy address
+        placeHolderAddr, // hardcoded onBehalf address
+    );
+
+    const checkerAction = new dfs.actions.checkers.AaveV2RatioCheckAction(
+        '0', // hardcoded boost state
+        '0', // hardcoded target ratio
+    );
+
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
+
+    const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(
+        `GasUsed callAaveV2RepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
+// eslint-disable-next-line max-len
+const callAaveFLV2RepayStrategy = async (
+    botAcc,
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    collAddr,
+    debtAddr,
+    repayAmount,
+    exchangeWrapper,
+    flAddr,
+) => {
+    const actionsCallData = [];
+
+    let flashLoanAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        [collAddr],
+        [repayAmount],
+        [],
+    );
+
+    flashLoanAction = new dfs.actions.flashloan.FLAction(flashLoanAction);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            collAddr, // must stay variable
+            debtAddr, // must stay variable
+            repayAmount, //   fl amount
+            exchangeWrapper, // can pick exchange wrapper
+        ),
+        placeHolderAddr, // hardcoded proxy address
+        placeHolderAddr, // hardcoded proxy address
+    );
+
+    const gasCost = 1_000_000;
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        gasCost, // must stay variable backend sets gasCost
+        debtAddr, // must stay variable as debt can differ
+        '0', // hardcoded output from withdraw action
+    );
+
+    const paybackAction = new dfs.actions.aave.AavePaybackAction(
+        placeHolderAddr, // market hardcoded
+        debtAddr, // variable cToken coll address
+        '0', // amount hardcoded
+        '2', // rate mode variable
+        placeHolderAddr, // hardcoded proxy address
+        placeHolderAddr, // hardcoded onBehalf address
+    );
+
+    const withdrawAction = new dfs.actions.aave.AaveWithdrawAction(
+        placeHolderAddr, // market hardcoded
+        collAddr, // variable (backend picks which asset to swap)
+        '0', // hardcoded from FL
+        flAddr, // proxy hardcoded to address
+    );
+
+    const checkerAction = new dfs.actions.checkers.AaveV2RatioCheckAction(
+        '0', // hardcoded boost state
+        '0', // hardcoded target ratio
+    );
+
+    actionsCallData.push(flashLoanAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
+
+    const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(
+        `GasUsed callAaveV2RepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
+// eslint-disable-next-line max-len
+const callCompV2BoostStrategy = async (
+    botAcc,
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    cCollAddr,
+    cDebtAddr,
+    collAddr,
+    debtAddr,
+    boostAmount,
+    exchangeWrapper,
+) => {
+    const actionsCallData = [];
+
+    const borrowAction = new dfs.actions.compound.CompoundBorrowAction(
+        cDebtAddr, // cToken variable debt address
+        boostAmount, // amount to borrow (variable)
+        placeHolderAddr, // hardcoded proxy address
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            debtAddr, // must stay variable
+            collAddr, // must stay variable
+            '0', //  hardcoded piped from borrow
+            exchangeWrapper, // can pick exchange wrapper
+        ),
+        placeHolderAddr, // hardcoded proxy address
+        placeHolderAddr, // hardcoded proxy address
+    );
+
+    const gasCost = 1_000_000;
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        gasCost, // must stay variable backend sets gasCost
+        collAddr, // must stay variable as coll can differ
+        '0', // hardcoded output from withdraw action
+    );
+
+    const supplyAction = new dfs.actions.compound.CompoundSupplyAction(
+        cCollAddr, // cToken variable coll address
+        '0', // amount hardcoded from feeTakeAction
+        placeHolderAddr, // proxy hardcoded from address
+        true, // hardcoded always enable as coll
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV2RatioCheckAction(
+        '0', // hardcoded boost state
+        '0', // hardcoded target ratio
+    );
+
+    actionsCallData.push(borrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(supplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
+
+    const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(
+        `GasUsed callCompV2BoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
+// eslint-disable-next-line max-len
+const callCompFLV2BoostStrategy = async (
+    botAcc,
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    cCollAddr,
+    cDebtAddr,
+    collAddr,
+    debtAddr,
+    boostAmount,
+    exchangeWrapper,
+    flAddr,
+) => {
+    const actionsCallData = [];
+
+    let flashLoanAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        [debtAddr],
+        [boostAmount],
+        [],
+    );
+
+    flashLoanAction = new dfs.actions.flashloan.FLAction(flashLoanAction);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            debtAddr, // must stay variable
+            collAddr, // must stay variable
+            boostAmount, //  boostAmount
+            exchangeWrapper, // can pick exchange wrapper
+        ),
+        placeHolderAddr, // hardcoded proxy address
+        placeHolderAddr, // hardcoded proxy address
+    );
+
+    const gasCost = 1_400_000;
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        gasCost, // must stay variable backend sets gasCost
+        collAddr, // must stay variable as coll can differ
+        '0', // hardcoded output from sell action
+    );
+
+    const supplyAction = new dfs.actions.compound.CompoundSupplyAction(
+        cCollAddr, // cToken variable coll address
+        '0', // amount hardcoded from feeTakeAction
+        placeHolderAddr, // proxy hardcoded from address
+        true, // hardcoded always enable as coll
+    );
+
+    const borrowAction = new dfs.actions.compound.CompoundBorrowAction(
+        cDebtAddr, // cToken variable debt address
+        '0', // hardcoded amount from FL
+        flAddr, // repay fl loan
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV2RatioCheckAction(
+        '0', // hardcoded boost state
+        '0', // hardcoded target ratio
+    );
+
+    actionsCallData.push(flashLoanAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(supplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(borrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
+
+    const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(
+        `GasUsed callCompFLV2BoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
+// eslint-disable-next-line max-len
+const callCompV2RepayStrategy = async (
+    botAcc,
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    cCollAddr,
+    cDebtAddr,
+    collAddr,
+    debtAddr,
+    repayAmount,
+    exchangeWrapper,
+) => {
+    const actionsCallData = [];
+
+    const withdrawAction = new dfs.actions.compound.CompoundWithdrawAction(
+        cCollAddr, // variable (backend picks which asset to swap)
+        repayAmount, // must stay variable
+        placeHolderAddr, // proxy hardcoded to address
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            collAddr, // must stay variable
+            debtAddr, // must stay variable
+            '0', //  hardcoded piped from borrow
+            exchangeWrapper, // can pick exchange wrapper
+        ),
+        placeHolderAddr, // hardcoded proxy address
+        placeHolderAddr, // hardcoded proxy address
+    );
+
+    const gasCost = 1_000_000;
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        gasCost, // must stay variable backend sets gasCost
+        debtAddr, // must stay variable as coll can differ
+        '0', // hardcoded output from withdraw action
+    );
+
+    const paybackAction = new dfs.actions.compound.CompoundPaybackAction(
+        cDebtAddr, // variable cToken coll address
+        '0', // amount hardcoded
+        placeHolderAddr, // hardcoded proxy address
+        placeHolderAddr, // hardcoded proxy address
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV2RatioCheckAction(
+        '0', // hardcoded boost state
+        '0', // hardcoded target ratio
+    );
+
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
+
+    const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(
+        `GasUsed callCompV2RepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
+// eslint-disable-next-line max-len
+const callCompFLV2RepayStrategy = async (
+    botAcc,
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    cCollAddr,
+    cDebtAddr,
+    collAddr,
+    debtAddr,
+    repayAmount,
+    exchangeWrapper,
+    flAddr,
+) => {
+    const actionsCallData = [];
+
+    let flashLoanAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        [collAddr],
+        [repayAmount],
+        [],
+    );
+
+    flashLoanAction = new dfs.actions.flashloan.FLAction(flashLoanAction);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            collAddr, // must stay variable
+            debtAddr, // must stay variable
+            repayAmount, //   fl amount
+            exchangeWrapper, // can pick exchange wrapper
+        ),
+        placeHolderAddr, // hardcoded proxy address
+        placeHolderAddr, // hardcoded proxy address
+    );
+
+    const gasCost = 1_000_000;
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        gasCost, // must stay variable backend sets gasCost
+        debtAddr, // must stay variable as debt can differ
+        '0', // hardcoded output from withdraw action
+    );
+
+    const paybackAction = new dfs.actions.compound.CompoundPaybackAction(
+        cDebtAddr, // variable cToken debt address
+        '0', // amount hardcoded
+        placeHolderAddr, // hardcoded proxy address
+        placeHolderAddr, // hardcoded proxy address
+    );
+
+    const withdrawAction = new dfs.actions.compound.CompoundWithdrawAction(
+        cCollAddr, // variable (backend picks which asset to swap)
+        '0', // hardcoded from FL
+        flAddr, // proxy hardcoded to address
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV2RatioCheckAction(
+        '0', // hardcoded boost state
+        '0', // hardcoded target ratio
+    );
+
+    actionsCallData.push(flashLoanAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
+
+    const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(
+        `GasUsed callCompV2RepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
 const AAVE_NO_DEBT_MODE = 0;
 
 const callSparkRepayStrategy = async (
@@ -3166,6 +3873,444 @@ const callSparkFLCloseToCollStrategy = async (
     return receipt;
 };
 
+const callLiquityDsrPaybackStrategy = async ({
+    strategyExecutorByBot,
+    subId,
+    sub,
+    proxy,
+    daiWithdrawAmount,
+}) => {
+    const daiInfo = getAssetInfo('DAI');
+    const lusdInfo = getAssetInfo('LUSD');
+    const strategyGasCost = 1_500_000;
+
+    const { collAmount, debtAmount } = await getTroveInfo(proxy.address);
+    const newDebtAmount = debtAmount.sub(daiWithdrawAmount);
+    const { upperHint, lowerHint } = await findInsertPosition(collAmount, newDebtAmount);
+
+    const actionsCallData = [];
+
+    const dsrWithdrawAction = new dfs.actions.maker.MakerDsrWithdrawAction(
+        daiWithdrawAmount,
+        placeHolderAddr,
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        await formatMockExchangeObj(
+            daiInfo, // these two are piped from subdata
+            lusdInfo, // but are needed here for mock wrapper setup
+            '0',
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        strategyGasCost, placeHolderAddr, '0',
+    );
+
+    const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
+        '0',
+        placeHolderAddr,
+        upperHint,
+        lowerHint,
+    );
+
+    const liquityRatioCheckAction = new dfs.actions.checkers.LiquityRatioCheckAction(
+        '0', '0',
+    );
+
+    actionsCallData.push(dsrWithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityPaybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityRatioCheckAction.encodeForRecipe()[0]);
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        0,
+        ['0x'],
+        actionsCallData,
+        sub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callLiquityDsrPaybackStrategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
+const callLiquityDsrSupplyStrategy = async ({
+    strategyExecutorByBot,
+    subId,
+    sub,
+    proxy,
+    daiWithdrawAmount,
+}) => {
+    const daiInfo = getAssetInfo('DAI');
+    const wethInfo = getAssetInfo('WETH');
+    const strategyGasCost = 1_500_000;
+
+    const daiWithdrawAmountInEth = daiWithdrawAmount.div(Float2BN(getLocalTokenPrice('ETH').toString()));
+    const { collAmount, debtAmount } = await getTroveInfo(proxy.address);
+    const newCollAmount = collAmount.add(daiWithdrawAmountInEth);
+    const { upperHint, lowerHint } = await findInsertPosition(newCollAmount, debtAmount);
+
+    const actionsCallData = [];
+
+    const dsrWithdrawAction = new dfs.actions.maker.MakerDsrWithdrawAction(
+        daiWithdrawAmount,
+        placeHolderAddr,
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        await formatMockExchangeObj(
+            daiInfo, // these two are piped from subdata
+            wethInfo, // but are needed here for mock wrapper setup
+            '0',
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        strategyGasCost, placeHolderAddr, '0',
+    );
+
+    const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
+        '0',
+        placeHolderAddr,
+        upperHint,
+        lowerHint,
+    );
+
+    const liquityRatioCheckAction = new dfs.actions.checkers.LiquityRatioCheckAction(
+        '0', '0',
+    );
+
+    actionsCallData.push(dsrWithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquitySupplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityRatioCheckAction.encodeForRecipe()[0]);
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        0,
+        ['0x'],
+        actionsCallData,
+        sub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callLiquityDsrSupplyStrategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
+const aaveV3CloseActionsEncoded = {
+    // eslint-disable-next-line max-len
+    flAction: ({ repayAmount, flAsset }) => new dfs.actions.flashloan.FLAction(new dfs.actions.flashloan.AaveV3FlashLoanAction(
+        [flAsset],
+        [repayAmount],
+        [AAVE_NO_DEBT_MODE],
+        nullAddress,
+    )).encodeForRecipe()[0],
+
+    paybackAction: ({ repayAmount, rateMode = 2 }) => (new dfs.actions.aaveV3.AaveV3PaybackAction(
+        true,
+        nullAddress,
+        repayAmount,
+        placeHolderAddr,
+        rateMode,
+        placeHolderAddr,
+        '0',
+        false,
+        nullAddress,
+    )).encodeForRecipe()[0],
+
+    withdrawAction: ({ withdrawAmount }) => (new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        true,
+        nullAddress,
+        withdrawAmount,
+        placeHolderAddr,
+        '0',
+    )).encodeForRecipe()[0],
+
+    // eslint-disable-next-line max-len
+    sellAction: async ({ srcTokenInfo, destTokenInfo, swapAmount }) => (new dfs.actions.basic.SellAction(
+        await formatMockExchangeObj(
+            srcTokenInfo,
+            destTokenInfo,
+            swapAmount,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    )).encodeForRecipe()[0],
+
+    feeTakingAction: ({ closeGasCost }) => (new dfs.actions.basic.GasFeeActionL2(
+        closeGasCost,
+        placeHolderAddr,
+        '0',
+        '0',
+        closeGasCost,
+    )).encodeForRecipe()[0],
+
+    sendAction: () => (new dfs.actions.basic.SendTokenAndUnwrapAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        MAXUINT,
+    )).encodeForRecipe()[0],
+
+    sendRepayFL: ({ flAddr }) => (new dfs.actions.basic.SendTokenAction(
+        placeHolderAddr,
+        flAddr,
+        0,
+    )).encodeForRecipe()[0],
+};
+
+const callAaveCloseToDebtWithMaximumGasPriceStrategy = async (
+    strategyExecutorByBot,
+    subId,
+    sub,
+    srcTokenInfo,
+    destTokenInfo,
+    partialAmounts = undefined,
+) => {
+    const actionsCallData = [];
+    const triggerCallData = [];
+
+    const closeGasCost = '1000000';
+
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
+    }));
+    // eslint-disable-next-line max-len
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo,
+        destTokenInfo,
+        swapAmount: MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: partialAmounts?.repayAmount || MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+
+    // price
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+    // gas price
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        0,
+        triggerCallData,
+        actionsCallData,
+        sub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callAaveCloseToDebtWithMaximumGasPriceStrategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
+const callAaveFLCloseToDebtWithMaximumGasPriceStrategy = async (
+    strategyExecutorByBot,
+    subId,
+    sub,
+    repayAmount,
+    flAsset,
+    flAddr,
+    srcTokenInfo,
+    destTokenInfo,
+    withdrawAmount = undefined,
+) => {
+    const actionsCallData = [];
+    const triggerCallData = [];
+
+    const closeGasCost = '1000000';
+
+    actionsCallData.push(aaveV3CloseActionsEncoded.flAction({
+        flAsset,
+        repayAmount,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: withdrawAmount ? repayAmount : MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: withdrawAmount || MAXUINT,
+    }));
+    // eslint-disable-next-line max-len
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo,
+        destTokenInfo,
+        swapAmount: MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendRepayFL({ flAddr }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+
+    // price
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+    // gas price
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        1,
+        triggerCallData,
+        actionsCallData,
+        sub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callAaveFLCloseToDebtWithMaximumGasPriceStrategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
+const callAaveCloseToCollWithMaximumGasPriceStrategy = async (
+    strategyExecutorByBot,
+    subId,
+    sub,
+    swapAmount,
+    srcTokenInfo,
+    destTokenInfo,
+    partialAmounts = undefined,
+) => {
+    const actionsCallData = [];
+    const triggerCallData = [];
+
+    const closeGasCost = '1000000';
+
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo,
+        destTokenInfo,
+        swapAmount: partialAmounts ? MAXUINT : swapAmount,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: partialAmounts?.repayAmount || MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+
+    // price
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+    // gas price
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        0,
+        triggerCallData,
+        actionsCallData,
+        sub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callAaveCloseToCollWithMaximumGasPriceStrategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
+const callAaveFLCloseToCollWithMaximumGasPriceStrategy = async (
+    strategyExecutorByBot,
+    subId,
+    sub,
+    repayAmount,
+    flAsset,
+    flAddr,
+    swapAmount,
+    srcTokenInfo,
+    destTokenInfo,
+    withdrawAmount = undefined,
+) => {
+    const actionsCallData = [];
+    const triggerCallData = [];
+
+    const closeGasCost = '1000000';
+
+    actionsCallData.push(aaveV3CloseActionsEncoded.flAction({
+        repayAmount,
+        flAsset,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: withdrawAmount ? repayAmount : MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: withdrawAmount || MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo,
+        destTokenInfo,
+        swapAmount: withdrawAmount ? MAXUINT : swapAmount,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendRepayFL({ flAddr }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+
+    // price
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+    // gas price
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        1,
+        triggerCallData,
+        actionsCallData,
+        sub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callAaveFLCloseToCollWithMaximumGasPriceStrategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
 module.exports = {
     callDcaStrategy,
     callMcdRepayStrategy,
@@ -3206,6 +4351,14 @@ module.exports = {
     callMorphoAaveV2BoostStrategy,
     callMorphoAaveV2FLRepayStrategy,
     callMorphoAaveV2RepayStrategy,
+    callCompV2BoostStrategy,
+    callCompFLV2BoostStrategy,
+    callCompV2RepayStrategy,
+    callCompFLV2RepayStrategy,
+    callAaveV2BoostStrategy,
+    callAaveFLV2BoostStrategy,
+    callAaveV2RepayStrategy,
+    callAaveFLV2RepayStrategy,
     callSparkRepayStrategy,
     callSparkFLRepayStrategy,
     callSparkBoostStrategy,
@@ -3214,5 +4367,11 @@ module.exports = {
     callSparkFLCloseToDebtStrategy,
     callSparkCloseToCollStrategy,
     callSparkFLCloseToCollStrategy,
+    callLiquityDsrPaybackStrategy,
+    callLiquityDsrSupplyStrategy,
     sparkCloseActionsEncoded,
+    callAaveCloseToDebtWithMaximumGasPriceStrategy,
+    callAaveFLCloseToDebtWithMaximumGasPriceStrategy,
+    callAaveCloseToCollWithMaximumGasPriceStrategy,
+    callAaveFLCloseToCollWithMaximumGasPriceStrategy,
 };

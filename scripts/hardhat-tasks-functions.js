@@ -7,7 +7,7 @@ const axios = require('axios');
 const path = require('path');
 const readline = require('readline');
 const readlineSync = require('readline-sync');
-const hardhatSettings = require('../hardhat.config.js');
+const hardhatSettings = require('../hardhat.config');
 const { encrypt, decrypt } = require('./utils/crypto');
 
 async function changeWethAddress(oldNetworkName, newNetworkName) {
@@ -147,10 +147,19 @@ async function deployContract(contractName, args) {
 
     const networkPrefix = (network === 'mainnet' || network === 'arbitrum') ? '' : `${network}.`;
 
-    console.log(`Transaction : https://${networkPrefix}${blockExplorer}.io/tx/${contract.deployTransaction.hash}`);
+    if (network !== 'base') {
+        console.log(`Transaction : https://${networkPrefix}${blockExplorer}.io/tx/${contract.deployTransaction.hash}`);
+    } else {
+        console.log(`Transaction : https://basescan.org/tx/${contract.deployTransaction.hash}`);
+    }
 
     await contract.deployed();
-    console.log(`Contract deployed to: https://${networkPrefix}${blockExplorer}.io/address/${contract.address}`);
+
+    if (network !== 'base') {
+        console.log(`Contract deployed to: https://${networkPrefix}${blockExplorer}.io/address/${contract.address}`);
+    } else {
+        console.log(`Contract deployed to: https://basescan.org/address/${contract.address}`);
+    }
 
     return contract.address;
 }
@@ -178,6 +187,8 @@ async function verifyContract(contractAddress, contractName) {
         apiKey = process.env.ARBISCAN_API_KEY;
     } else if (network === 'optimistic') {
         apiKey = process.env.OPTIMISTIC_ETHERSCAN_API_KEY;
+    } else if (network === 'base') {
+        apiKey = process.env.BASE_ETHERSCAN_API_KEY;
     }
 
     params.append('apikey', apiKey);
@@ -199,7 +210,7 @@ async function verifyContract(contractAddress, contractName) {
     params.append('compilerversion', solVersion);
     params.append('optimizationUsed', hardhatSettings.solidity.settings.optimizer.enabled ? 1 : 0);
     params.append('runs', hardhatSettings.solidity.settings.optimizer.runs);
-    params.append('EVMVersion', 'default (compiler defaults)');
+    params.append('EVMVersion', '');
     /// @notice : MIT license
     params.append('licenseType', 3);
 
@@ -210,6 +221,12 @@ async function verifyContract(contractAddress, contractName) {
         url = `https://api-${network}.${blockExplorer}.io/api`;
         demo = `https://${network}.${blockExplorer}.io/sourcecode-demo.html`;
     }
+
+    if (network === 'base') {
+        url = 'https://api.basescan.org/api';
+        demo = 'https://basescan.org/sourcecode-demo.html';
+    }
+
     const tx = await axios.post(url, params, config);
     console.log(`Check how verification is going at ${demo} with API key ${apiKey} and receipt GUID ${tx.data.result}`);
 }

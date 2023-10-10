@@ -2,6 +2,7 @@ const { expect } = require('chai');
 const hre = require('hardhat');
 
 const dfs = require('@defisaver/sdk');
+const { getAssetInfo } = require('@defisaver/tokens');
 
 const ISubscriptionsABI = require('../../artifacts/contracts/interfaces/ISubscriptions.sol/ISubscriptions.json').abi;
 const {
@@ -310,6 +311,39 @@ const sendTokenTest = async () => {
 
             await executeAction('SendToken', sendTokenData, proxy);
             expect(await balanceOf(WETH_ADDRESS, senderAcc.address)).to.be.eq(hre.ethers.utils.parseUnits('4', 18));
+        });
+    });
+};
+
+const approveTokenTest = async () => {
+    describe('Approve-Token', function () {
+        this.timeout(80000);
+
+        let senderAcc; let proxy;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+        it('... should approve DSProxy tokens for someone else to spend', async () => {
+            const weth = getAssetInfo('WETH');
+            const wethAddress = weth.address;
+            const amount = hre.ethers.utils.parseUnits('10', 18);
+            const approveAction = new dfs.actions.basic.ApproveTokenAction(
+                wethAddress, senderAcc.address, amount,
+            );
+            const functionData = approveAction.encodeForDsProxyCall()[1];
+
+            // Set WETH Balances
+            await setBalance(wethAddress, proxy.address, amount);
+            await setBalance(wethAddress, senderAcc.address, hre.ethers.utils.parseUnits('0', 18));
+            await executeAction('ApproveToken', functionData, proxy);
+
+            let tokenContract = await hre.ethers.getContractAt('IERC20', wethAddress);
+            tokenContract = tokenContract.connect(senderAcc);
+            tokenContract.transferFrom(proxy.address, senderAcc.address, amount);
+            expect(await balanceOf(wethAddress, senderAcc.address)).to.be.eq(amount);
+            expect(await balanceOf(wethAddress, proxy.address)).to.be.eq('0');
         });
     });
 };
@@ -945,4 +979,5 @@ module.exports = {
     toggleSubDataTest,
     transferNFTTest,
     sendTokensTest,
+    approveTokenTest,
 };

@@ -1,3 +1,6 @@
+# Conflicting package managers
+package-lock.json
+
 # Logs
 logs
 *.log
@@ -119,3 +122,5 @@ contracts/flattened/
 
 forked-addr.json
 deployments/
+
+/.idea/

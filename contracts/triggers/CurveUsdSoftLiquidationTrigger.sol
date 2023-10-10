@@ -25,9 +25,12 @@ contract CurveUsdSoftLiquidationTrigger is ITrigger, AdminAuth {
         return percentage <= triggerSubData.percentage;
     }
 
-    function calcPercentage(address _market, address _user) public view returns (uint256) {
+    function calcPercentage(address _market, address _user) public view returns (uint256 percentage) {
         ICrvUsdController ctrl = ICrvUsdController(_market);
         ILLAMMA amm = ILLAMMA(ctrl.amm());
+
+        // check if user has the position
+        if (!ctrl.loan_exists(_user)) return type(uint256).max;
 
         int256[2] memory bandRange = amm.read_user_tick_numbers(_user);
         int256 activeBand = amm.active_band();
@@ -36,10 +39,11 @@ contract CurveUsdSoftLiquidationTrigger is ITrigger, AdminAuth {
         if (activeBand >= bandRange[0]) return 0;
 
         uint256 highBandPrice = amm.p_oracle_up(bandRange[0]);
-        uint256 ammPrice = amm.get_p();
+        uint256 oraclePrice = amm.price_oracle();
 
-        uint256 percentage = ammPrice * 1e18 / highBandPrice - 1e18;
-        return percentage;
+        if (oraclePrice < highBandPrice) return 0;
+
+        return percentage = oraclePrice * 1e18 / highBandPrice - 1e18;
     }
 
     function parseInputs(bytes memory _subData) internal pure returns (SubParams memory params) {

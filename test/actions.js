@@ -205,6 +205,14 @@ const claimStkAave = async (proxy, assets, amount, to) => {
     return tx;
 };
 
+const claimAaveFromStkAave = async (proxy, amount, to) => {
+    const aaveClaimStkAaveAction = new dfs.actions.aave.AaveClaimAAVEAction(amount, to);
+    const functionData = aaveClaimStkAaveAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('AaveClaimAAVE', functionData, proxy);
+    return tx;
+};
+
 const startUnstakeAave = async (proxy) => {
     const startUnstakeAction = new dfs.actions.aave.AaveStartUnstakeAction();
     const functionData = startUnstakeAction.encodeForDsProxyCall()[1];
@@ -350,21 +358,6 @@ const balancerWithdraw = async (
  \______| \______/  |__|  |__| | _|       \______/   \______/  |__| \__| |_______/
 */
 const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
-    await setBalance(tokenAddr, from, amount);
-    await approve(tokenAddr, proxy.address);
-    if (tokenAddr.toLowerCase() === '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9'.toLowerCase()) {
-        // eslint-disable-next-line no-use-before-define
-        await sell(
-            proxy,
-            WETH_ADDRESS,
-            tokenAddr,
-            hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '15000'), 18),
-            UNISWAP_WRAPPER,
-            from,
-            from,
-        );
-    }
-
     const compSupplyAction = new dfs.actions.compound.CompoundSupplyAction(
         cTokenAddr,
         amount,
@@ -3127,6 +3120,34 @@ const curveUsdSupply = async (
     return { receipt, approveObj };
 };
 
+const curveUsdAdjust = async (
+    proxy,
+    controllerAddresss,
+    from,
+    to,
+    supplyAmount,
+    borrowAmount,
+) => {
+    const actionAddress = await getAddrFromRegistry('CurveUsdAdjust');
+
+    const action = new dfs.actions.curveusd.CurveUsdAdjustAction(
+        controllerAddresss,
+        from,
+        to,
+        supplyAmount,
+        borrowAmount,
+    );
+
+    const [approveObj] = await action.getAssetsToApprove();
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed curveUsdAdjust: ${gasUsed}`);
+    return { receipt, approveObj };
+};
+
 const curveUsdWithdraw = async (
     proxy,
     controllerAddresss,
@@ -3257,6 +3278,114 @@ const curveUsdSelfLiquidate = async (
     return receipt;
 };
 
+const tokenizedVaultAdapterDeposit = async ({
+    proxy,
+    amount,
+    minOutOrMaxIn,
+    vaultAddress,
+    from,
+    to,
+    underlyingAssetAddress,
+}) => {
+    const actionAddress = await getAddrFromRegistry('TokenizedVaultAdapter');
+
+    const action = new dfs.actions.basic.TokenizedVaultAdapterDepositAction(
+        amount,
+        minOutOrMaxIn,
+        vaultAddress,
+        from,
+        to,
+        underlyingAssetAddress,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed tokenizedVaultAdapter-Deposit: ${gasUsed}`);
+    return { receipt, assetsToApprove: await action.getAssetsToApprove() };
+};
+
+const tokenizedVaultAdapterMint = async ({
+    proxy,
+    amount,
+    minOutOrMaxIn,
+    vaultAddress,
+    from,
+    to,
+    underlyingAssetAddress,
+}) => {
+    const actionAddress = await getAddrFromRegistry('TokenizedVaultAdapter');
+
+    const action = new dfs.actions.basic.TokenizedVaultAdapterMintAction(
+        amount,
+        minOutOrMaxIn,
+        vaultAddress,
+        from,
+        to,
+        underlyingAssetAddress,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed tokenizedVaultAdapter-Mint: ${gasUsed}`);
+    return { receipt, assetsToApprove: await action.getAssetsToApprove() };
+};
+
+const tokenizedVaultAdapterRedeem = async ({
+    proxy,
+    amount,
+    minOutOrMaxIn,
+    vaultAddress,
+    from,
+    to,
+}) => {
+    const actionAddress = await getAddrFromRegistry('TokenizedVaultAdapter');
+
+    const action = new dfs.actions.basic.TokenizedVaultAdapterRedeemAction(
+        amount,
+        minOutOrMaxIn,
+        vaultAddress,
+        from,
+        to,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed tokenizedVaultAdapter-Redeem: ${gasUsed}`);
+    return { receipt, assetsToApprove: await action.getAssetsToApprove() };
+};
+
+const tokenizedVaultAdapterWithdraw = async ({
+    proxy,
+    amount,
+    minOutOrMaxIn,
+    vaultAddress,
+    from,
+    to,
+}) => {
+    const actionAddress = await getAddrFromRegistry('TokenizedVaultAdapter');
+
+    const action = new dfs.actions.basic.TokenizedVaultAdapterWithdrawAction(
+        amount,
+        minOutOrMaxIn,
+        vaultAddress,
+        from,
+        to,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed tokenizedVaultAdapter-Withdraw: ${gasUsed}`);
+    return { receipt, assetsToApprove: await action.getAssetsToApprove() };
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -3279,6 +3408,7 @@ module.exports = {
     claimStkAave,
     startUnstakeAave,
     finalizeUnstakeAave,
+    claimAaveFromStkAave,
 
     supplyComp,
     withdrawComp,
@@ -3454,4 +3584,10 @@ module.exports = {
     curveUsdSelfLiquidate,
     curveUsdLevCreate,
     curveUsdSelfLiquidateWithColl,
+    curveUsdAdjust,
+
+    tokenizedVaultAdapterDeposit,
+    tokenizedVaultAdapterMint,
+    tokenizedVaultAdapterRedeem,
+    tokenizedVaultAdapterWithdraw,
 };

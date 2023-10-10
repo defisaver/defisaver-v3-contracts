@@ -1,4 +1,5 @@
 const { getAssetInfo } = require('@defisaver/tokens');
+const dfs = require('@defisaver/sdk');
 const { expect } = require('chai');
 const hre = require('hardhat');
 
@@ -17,6 +18,7 @@ const {
     morphoAaveV3Withdraw,
     morphoAaveV3Borrow,
     morphoAaveV3Payback,
+    executeAction,
 } = require('../../actions');
 
 const EMODE = {
@@ -103,6 +105,41 @@ const morphoAaveV3SupplyTest = async () => {
     });
 };
 
+const morphoAaveV3SetManagerTest = async () => {
+    describe('Morpho-AaveV3-SetManager', function () {
+        this.timeout(80000);
+
+        let senderAcc;
+        let proxy;
+        let snapshot;
+
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+        it('should approve address to manage MorphoAaveV3 proxy position', async () => {
+            const setManagerAction = new dfs.actions.morpho.MorphoAaveV3SetManagerAction(
+                EMODE.ETH, senderAcc.address, true,
+            );
+            const functionData = setManagerAction.encodeForDsProxyCall()[1];
+
+            await executeAction('MorphoAaveV3SetManager', functionData, proxy);
+            const morphoAaveV3 = await hre.ethers.getContractAt('IMorphoAaveV3', '0x33333aea097c193e66081E930c33020272b33333');
+            const permission = await morphoAaveV3.isManagedBy(proxy.address, senderAcc.address);
+            console.log(permission);
+            // eslint-disable-next-line no-unused-expressions
+            expect(permission).to.be.true;
+        });
+    });
+};
 const morphoAaveV3WithdrawTest = async () => {
     describe('Morpho-AaveV3-Withdraw', function () {
         this.timeout(80000);
@@ -350,4 +387,5 @@ module.exports = {
     morphoAaveV3WithdrawTest,
     morphoAaveV3BorrowTest,
     morphoAaveV3PaybackTest,
+    morphoAaveV3SetManagerTest,
 };

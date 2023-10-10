@@ -1,13 +1,16 @@
 /* eslint-disable max-len */
 const hre = require('hardhat');
 
+const { defaultAbiCoder } = require('ethers/lib/utils');
 const {
     subToStrategy,
     subToCompV3Proxy,
+    subToCompV2Proxy,
     subToCBRebondProxy,
     subToLimitOrderProxy,
     subToMorphoAaveV2Proxy,
     subToLiquityProxy,
+    subToAaveV2Proxy,
     subToSparkProxy,
     updateSparkProxy,
 } = require('./utils-strategies');
@@ -18,7 +21,6 @@ const {
     createChainLinkPriceTrigger,
     createTimestampTrigger,
     createGasPriceTrigger,
-    createCompTrigger,
     createReflexerTrigger,
     createLiquityTrigger,
     createTrailingStopTrigger,
@@ -26,6 +28,7 @@ const {
     createMorphoTrigger,
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
+    IN_REPAY,
 } = require('./triggers');
 
 const {
@@ -131,32 +134,6 @@ const subRepayFromSavingsStrategy = async (proxy, bundleId, vaultId, rationUnder
     const strategySub = [bundleId, isBundle, [triggerData], [vaultIdEncoded, targetRatioEncoded, daiAddrEncoded, mcdManagerAddrEncoded]];
 
     const subId = await subToStrategy(proxy, strategySub, regAddr);
-
-    return { subId, strategySub };
-};
-
-const subCompBoostStrategy = async (proxy, ratioOver, targetRatio, strategyId) => {
-    const isBundle = false;
-
-    const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
-    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
-    const triggerData = await createCompTrigger(proxy.address, ratioOver, RATIO_STATE_OVER);
-
-    const strategySub = [strategyId, isBundle, [triggerData], [proxyAddrEncoded, targetRatioEncoded]];
-    const subId = await subToStrategy(proxy, strategySub);
-
-    return { subId, strategySub };
-};
-
-const subCompRepayStrategy = async (proxy, ratioUnder, targetRatio, strategyId) => {
-    const isBundle = false;
-
-    const proxyAddrEncoded = abiCoder.encode(['address'], [proxy.address]);
-    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
-    const triggerData = await createCompTrigger(proxy.address, ratioUnder, RATIO_STATE_UNDER);
-
-    const strategySub = [strategyId, isBundle, [triggerData], [proxyAddrEncoded, targetRatioEncoded]];
-    const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };
 };
@@ -347,6 +324,70 @@ const subCompV3AutomationStrategy = async (
     }
 
     return { firstSub: subId1, secondSub: subId2 };
+};
+
+const subAaveV2AutomationStrategy = async (
+    proxy,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    regAddr = REGISTRY_ADDR,
+) => {
+    const subInput = [[minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled]];
+
+    const subData = await subToAaveV2Proxy(proxy, subInput, regAddr);
+
+    let subId1 = '0';
+    let subId2 = '0';
+
+    if (boostEnabled) {
+        subId1 = (parseInt(subData.subId, 10) - 1).toString();
+        subId2 = subData.subId;
+    } else {
+        subId1 = subData.subId;
+        subId2 = '0';
+    }
+
+    return {
+        repaySubId: subId1,
+        boostSubId: subId2,
+        repaySub: subData.repaySub,
+        boostSub: subData.boostSub,
+    };
+};
+
+const subCompV2AutomationStrategy = async (
+    proxy,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    regAddr = REGISTRY_ADDR,
+) => {
+    const subInput = [[minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled]];
+
+    const subData = await subToCompV2Proxy(proxy, subInput, regAddr);
+
+    let subId1 = '0';
+    let subId2 = '0';
+
+    if (boostEnabled) {
+        subId1 = (parseInt(subData.subId, 10) - 1).toString();
+        subId2 = subData.subId;
+    } else {
+        subId1 = subData.subId;
+        subId2 = '0';
+    }
+
+    return {
+        repaySubId: subId1,
+        boostSubId: subId2,
+        repaySub: subData.repaySub,
+        boostSub: subData.boostSub,
+    };
 };
 
 const subCbRebondStrategy = async (proxy, bondID, strategyId, regAddr = REGISTRY_ADDR) => {
@@ -605,6 +646,69 @@ const subSparkCloseBundle = async (
     return { subId, strategySub };
 };
 
+const subLiqutityDsrPaybackStrategy = async ({
+    proxy, strategyId, triggerRatio, targetRatio,
+}) => {
+    const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_REPAY]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const daiAddressEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const lusdAddressEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
+
+    const triggerData = await createLiquityTrigger(proxy.address, triggerRatio, RATIO_STATE_UNDER);
+    const strategySub = [strategyId, false, [triggerData], [ratioStateEncoded, targetRatioEncoded, daiAddressEncoded, lusdAddressEncoded]];
+
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+
+const subLiqutityDsrSupplyStrategy = async ({
+    proxy, strategyId, triggerRatio, targetRatio,
+}) => {
+    const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_REPAY]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const daiAddressEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const wethAddressEncoded = abiCoder.encode(['address'], [WETH_ADDRESS]);
+
+    const triggerData = await createLiquityTrigger(proxy.address, triggerRatio, RATIO_STATE_UNDER);
+    const strategySub = [strategyId, false, [triggerData], [ratioStateEncoded, targetRatioEncoded, daiAddressEncoded, wethAddressEncoded]];
+
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+
+const subAaveV3CloseWithMaximumGasPriceBundle = async (
+    proxy,
+    bundleId,
+    triggerBaseAsset,
+    triggerQuoteAsset,
+    targetPrice,
+    priceState,
+    gasPrice,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+) => {
+    const priceTriggerData = defaultAbiCoder.encode(
+        ['address', 'address', 'uint256', 'uint8'],
+        [triggerBaseAsset, triggerQuoteAsset, targetPrice, priceState],
+    );
+    const gasPriceTriggerData = await createGasPriceTrigger(gasPrice);
+
+    const strategySub = [bundleId, true, [priceTriggerData, gasPriceTriggerData], [
+        defaultAbiCoder.encode(['address'], [collAsset]),
+        defaultAbiCoder.encode(['uint16'], [collAssetId.toString()]),
+        defaultAbiCoder.encode(['address'], [debtAsset]),
+        defaultAbiCoder.encode(['uint16'], [debtAssetId.toString()]),
+        defaultAbiCoder.encode(['address'], [nullAddress]), // needed so we dont have to trust injection
+    ]];
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdRepayStrategy,
@@ -616,8 +720,6 @@ module.exports = {
     subMcdCloseToDaiStrategy,
     subMcdTrailingCloseToDaiStrategy,
     subUniContinuousCollectStrategy,
-    subCompBoostStrategy,
-    subCompRepayStrategy,
     subReflexerBoostStrategy,
     subReflexerRepayStrategy,
     subLiquityCloseToCollStrategy,
@@ -630,7 +732,12 @@ module.exports = {
     subMorphoAaveV2RepayStrategy,
     subMorphoAaveV2AutomationStrategy,
     subLiquityAutomationStrategy,
+    subAaveV2AutomationStrategy,
+    subCompV2AutomationStrategy,
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,
     subSparkCloseBundle,
+    subLiqutityDsrPaybackStrategy,
+    subLiqutityDsrSupplyStrategy,
+    subAaveV3CloseWithMaximumGasPriceBundle,
 };

@@ -7,10 +7,15 @@ import "../../auth/AdminAuth.sol";
 import "../DFSExchangeHelper.sol";
 import "../../interfaces/exchange/IOffchainWrapper.sol";
 import "../../utils/KyberInputScalingHelper.sol";
+import "../../core/DFSRegistry.sol";
+import "../../core/helpers/CoreHelper.sol";
 
-contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath, KyberInputScalingHelper{
+contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath, CoreHelper{
 
     using TokenUtils for address;
+
+    bytes4 constant SCALING_HELPER_ID = bytes4(keccak256("KyberInputScalingHelper"));
+    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     //Not enough funds
     error InsufficientFunds(uint256 available, uint256 required);
@@ -41,9 +46,13 @@ contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAut
             IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, srcAmount);
         }
 
-        bytes memory scaledCalldata = getScaledInputData(_exData.offchainData.callData, _exData.srcAmount);
+        address scalingHelperAddr = registry.getAddr(SCALING_HELPER_ID);
+        bytes memory scaledCalldata = KyberInputScalingHelper(scalingHelperAddr).getScaledInputData(_exData.offchainData.callData, _exData.srcAmount);
         
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
+
+        /// @dev the amount of tokens received is checked in DFSExchangeCore
+        /// @dev Exchange wrapper contracts should not be used on their own
         (success, ) = _exData.offchainData.exchangeAddr.call(scaledCalldata);
 
         uint256 tokensSwapped = 0;
