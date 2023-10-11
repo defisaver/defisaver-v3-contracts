@@ -2329,7 +2329,7 @@
         "address": "0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b",
         "id": "0x4571b8b3",
         "path": "contracts/actions/fee/GasFeeTaker.sol",
-        "version": "1.0.4",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
@@ -2351,15 +2351,14 @@
     },
     {
         "name": "ChainLinkPriceTrigger",
-        "address": "0x43E6262325580B21BE33410783d9EB8ef9D284CD",
+        "address": "0x484c78cf4a3C5bAb2174931E0A451e0E1B5b08F7",
         "id": "0xac6bb72a",
         "path": "contracts/triggers/ChainLinkPriceTrigger.sol",
-        "version": "1.0.3",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
-            "0x484c78cf4a3C5bAb2174931E0A451e0E1B5b08F7",
             "0xb14226c3FD41e9B1FF85b4f7144CB4096a5D1Ec9",
             "0xAbf52Fc6e5C0e6E44Daac7C6ca79498302D9B0CA"
         ]

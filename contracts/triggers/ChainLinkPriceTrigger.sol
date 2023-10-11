@@ -33,9 +33,6 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath, To
 
         uint256 currPrice = getPriceInUSD(triggerSubData.tokenAddr);
 
-        /// @dev if currPrice is 0, we failed fetching the price
-        if (currPrice == 0) return false;
-
         if (PriceState(triggerSubData.state) == PriceState.OVER) {
             if (currPrice > triggerSubData.price) return true;
         }
