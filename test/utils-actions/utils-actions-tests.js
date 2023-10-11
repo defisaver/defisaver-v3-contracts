@@ -325,7 +325,7 @@ const approveTokenTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
-        it('... should approve DSProxy tokens for someone else to spend', async () => {
+        it('... should approve DSProxy WETH for someone else to spend', async () => {
             const weth = getAssetInfo('WETH');
             const wethAddress = weth.address;
             const amount = hre.ethers.utils.parseUnits('10', 18);
@@ -341,9 +341,29 @@ const approveTokenTest = async () => {
 
             let tokenContract = await hre.ethers.getContractAt('IERC20', wethAddress);
             tokenContract = tokenContract.connect(senderAcc);
-            tokenContract.transferFrom(proxy.address, senderAcc.address, amount);
+            await tokenContract.transferFrom(proxy.address, senderAcc.address, amount);
             expect(await balanceOf(wethAddress, senderAcc.address)).to.be.eq(amount);
             expect(await balanceOf(wethAddress, proxy.address)).to.be.eq('0');
+        });
+        it('... should approve DSProxy USDT for someone else to spend', async () => {
+            const usdt = getAssetInfo('USDT');
+            const usdtAddress = usdt.address;
+            const amount = hre.ethers.utils.parseUnits('10', 6);
+            const approveAction = new dfs.actions.basic.ApproveTokenAction(
+                usdtAddress, senderAcc.address, amount,
+            );
+            const functionData = approveAction.encodeForDsProxyCall()[1];
+
+            // Set USDT Balances
+            await setBalance(usdtAddress, proxy.address, amount);
+            await setBalance(usdtAddress, senderAcc.address, hre.ethers.utils.parseUnits('0', 18));
+            await executeAction('ApproveToken', functionData, proxy);
+
+            let tokenContract = await hre.ethers.getContractAt('IERC20', usdtAddress);
+            tokenContract = tokenContract.connect(senderAcc);
+            await tokenContract.transferFrom(proxy.address, senderAcc.address, amount);
+            expect(await balanceOf(usdtAddress, senderAcc.address)).to.be.eq(amount);
+            expect(await balanceOf(usdtAddress, proxy.address)).to.be.eq('0');
         });
     });
 };
