@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.9.0) (token/ERC20/utils/SafeERC20.sol)
+// changes made - renamed forceApprove to safeApprove and removed safePermit function
 
 pragma solidity =0.8.10;
 
