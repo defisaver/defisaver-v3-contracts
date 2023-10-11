@@ -10,6 +10,7 @@ import "./helpers/TriggerHelper.sol";
 import "../utils/TokenPriceHelper.sol";
 
 /// @title Trigger contract that verifies if current token price is over/under the price specified during subscription
+/// @notice If there's no chainlink oracle available for the token, price will be fetched from AaveV2, Spark and AaveV3 (in that order)
 contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath, TokenPriceHelper {
     using TokenUtils for address;
 
