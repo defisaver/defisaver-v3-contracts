@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.9.0) (token/ERC20/utils/SafeERC20.sol)
-// changes made - renamed forceApprove to safeApprove and removed safePermit function
+// changes made - renamed forceApprove to safeApprove
+// changes made - removed safePermit, safeIncreaseAllowance, safeDecreaseAllowance functions
 
 pragma solidity =0.8.10;
 
@@ -46,27 +47,6 @@ library SafeERC20 {
         if (!_callOptionalReturnBool(token, approvalCall)) {
             _callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, 0));
             _callOptionalReturn(token, approvalCall);
-        }
-    }
-
-    /**
-     * @dev Increase the calling contract's allowance toward `spender` by `value`. If `token` returns no value,
-     * non-reverting calls are assumed to be successful.
-     */
-    function safeIncreaseAllowance(IERC20 token, address spender, uint256 value) internal {
-        uint256 oldAllowance = token.allowance(address(this), spender);
-        safeApprove(token, spender, oldAllowance + value);
-    }
-
-    /**
-     * @dev Decrease the calling contract's allowance toward `spender` by `value`. If `token` returns no value,
-     * non-reverting calls are assumed to be successful.
-     */
-    function safeDecreaseAllowance(IERC20 token, address spender, uint256 value) internal {
-        unchecked {
-            uint256 oldAllowance = token.allowance(address(this), spender);
-            require(oldAllowance >= value, "SafeERC20: decreased allowance below zero");
-            safeApprove(token, spender, oldAllowance - value);
         }
     }
 
