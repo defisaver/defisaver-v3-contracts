@@ -2326,14 +2326,15 @@
     },
     {
         "name": "GasFeeTaker",
-        "address": "0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b",
+        "address": "0x558A8B92EE6a2B724afDEd319b61Ac55B7259826",
         "id": "0x4571b8b3",
         "path": "contracts/actions/fee/GasFeeTaker.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b",
             "0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d",
             "0xcCFFC73347B05cBDCCe7c3de2a0AdEcDAa8AEf51",
             "0x80536cb79341972a5Ef679dF5B70bB4A40a53d96"
@@ -2351,14 +2352,15 @@
     },
     {
         "name": "ChainLinkPriceTrigger",
-        "address": "0x484c78cf4a3C5bAb2174931E0A451e0E1B5b08F7",
+        "address": "0xDB9086334AA77179d273dB20314169828E33094f",
         "id": "0xac6bb72a",
         "path": "contracts/triggers/ChainLinkPriceTrigger.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x484c78cf4a3C5bAb2174931E0A451e0E1B5b08F7",
             "0xb14226c3FD41e9B1FF85b4f7144CB4096a5D1Ec9",
             "0xAbf52Fc6e5C0e6E44Daac7C6ca79498302D9B0CA"
         ]
