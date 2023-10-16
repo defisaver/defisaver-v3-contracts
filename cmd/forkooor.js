@@ -167,7 +167,7 @@ const {
     subLiquityDebtInFrontRepayStrategy,
 } = require('../test/strategy-subs');
 
-const { getTroveInfo } = require('../test/utils-liquity');
+const { getTroveInfo, getDebtInFront } = require('../test/utils-liquity');
 
 const {
     createMcdTrigger,
@@ -1188,6 +1188,13 @@ const createLiquityTrove = async (coll, debt, sender) => {
         await tx.wait();
 
         console.log(`Trove created at proxy address: ${proxy.address}`);
+        const debtInFront = await getDebtInFront(proxy.address);
+
+        const troveInfo = await getTroveInfo(proxy.address);
+
+        console.log('Trove ratio: ', troveInfo.TCRatio / 1e16);
+
+        console.log('DebtInFront ', debtInFront.debt / 1e18);
     } catch (err) {
         console.log(`Error opening trove at proxy address: ${proxy.address}`);
 
@@ -2446,16 +2453,23 @@ const liqDebtInFrontRepaySub = async (
     const ratioIncreaseFormatted = hre.ethers.utils.parseUnits(ratioIncrease, '16');
     const maxDebtInFrontFormatted = hre.ethers.utils.parseUnits(maxDebtInFront, '18');
 
-    await openStrategyAndBundleStorage(true);
+    const latestStrategyId = (await getLatestStrategyId());
 
-    const strategyData = createLiquityDebtInFrontRepayStrategy();
+    // check if our strategy is deployed, and if not deploy it
+    if (+latestStrategyId < 75) {
+        await openStrategyAndBundleStorage(true);
 
-    const strategyId = await createStrategy(proxy, ...strategyData, true);
+        const strategyData = createLiquityDebtInFrontRepayStrategy();
 
-    await redeploy('LiquityDebtInFrontWithLimitTrigger', REGISTRY_ADDR, false, true);
-    await redeploy('LiquityRatioIncreaseCheck', REGISTRY_ADDR, false, true);
+        await createStrategy(proxy, ...strategyData, true);
 
-    console.log(`Strategy deployed id: ${strategyId}`);
+        await redeploy('LiquityDebtInFrontWithLimitTrigger', REGISTRY_ADDR, false, true);
+        await redeploy('LiquityRatioIncreaseCheck', REGISTRY_ADDR, false, true);
+
+        console.log(`Strategy deployed id: ${strategyId}`);
+    }
+
+    const strategyId = 75;
 
     const { subId, strategySub } = await subLiquityDebtInFrontRepayStrategy(
         proxy,
