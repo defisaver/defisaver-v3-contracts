@@ -6,7 +6,8 @@ const { getAssetInfo } = require('@defisaver/tokens');
 const {
     getProxy,
     balanceOf, setBalance, redeploy,
-    takeSnapshot, revertToSnapshot, addrs, approve, impersonateAccount, getNetwork, Float2BN,
+    takeSnapshot, revertToSnapshot, addrs, approve, impersonateAccount,
+    getNetwork, Float2BN, getAddrFromRegistry,
 } = require('../utils');
 
 const sparkMarket = addrs[getNetwork()].SPARK_MARKET;
@@ -17,7 +18,7 @@ const {
     sparkSwapBorrowRateCalldataOptimised, sparkSwapBorrowRate, sparkSetEModeCalldataOptimised,
     sparkSetEMode, sparkSwitchCollateral, sparkSwitchCollateralCallDataOptimised,
     sparkSpTokenPaybackCalldataOptimised, sparkSpTokenPayback,
-    sparkBorrowCalldataOptimised, sparkClaimRewards, sDaiWrap, sDaiUnwrap,
+    sparkBorrowCalldataOptimised, sparkClaimRewards, sDaiWrap, sDaiUnwrap, sparkDelegateCredit,
 } = require('../actions');
 
 const sparkSupplyTest = async () => {
@@ -1121,6 +1122,33 @@ const sDaiUnwrapTest = async () => describe('sDai-Unwrap', () => {
         expect(await balanceOf(daiAddr, senderAcc.address)).to.be.gt(expectedSDaiAmount);
     });
 });
+const sparkDelegateCreditTest = async () => {
+    describe('Spark-DelegateCreditTest', function () {
+        this.timeout(150000);
+        let senderAcc; let
+            proxy;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+
+        it('... delegate credit on Spark', async () => {
+            const delegatee = '0x000000000000000000000000000000000000dEaD';
+            const assetId = 0;
+            const rateMode = 2;
+            const amount = hre.ethers.utils.parseUnits('100', 18);
+            await sparkDelegateCredit(proxy, assetId, amount, rateMode, delegatee);
+            const sparkDelegateAddr = await getAddrFromRegistry('SparkDelegateCredit');
+            const sparkDelegateContract = await hre.ethers.getContractAt('SparkDelegateCredit', sparkDelegateAddr);
+            const delegatedAmount = await sparkDelegateContract.getCreditDelegation(
+                sparkMarket, assetId, rateMode, proxy.address, delegatee,
+            );
+            console.log(delegatedAmount.toString());
+            expect(delegatedAmount).to.be.eq(amount);
+        }).timeout(50000);
+    });
+};
 
 const sparkDeployContracts = async () => {
     await redeploy('SparkSupply');
@@ -1131,6 +1159,7 @@ const sparkDeployContracts = async () => {
     await redeploy('SparkSetEMode');
     await redeploy('SparkSwapBorrowRateMode');
     await redeploy('SparkWithdraw');
+    await redeploy('SparkDelegateCredit');
 
     await redeploy('SDaiWrap');
     await redeploy('SDaiUnwrap');
@@ -1150,6 +1179,7 @@ const sparkFullTest = async () => {
     await sparkPaybackTest();
     await sparkCollSwitchTest();
     await sparkSpTokenPaybackTest();
+    await sparkDelegateCreditTest();
 };
 module.exports = {
     sparkFullTest,
@@ -1164,4 +1194,5 @@ module.exports = {
     sparkClaimRewardsTest,
     sDaiWrapTest,
     sDaiUnwrapTest,
+    sparkDelegateCreditTest,
 };

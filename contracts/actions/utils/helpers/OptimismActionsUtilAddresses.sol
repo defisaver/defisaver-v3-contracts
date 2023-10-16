@@ -12,4 +12,7 @@ contract OptimismActionsUtilAddresses {
     address internal constant DFS_LOGGER_ADDR = 0xFc2f1355296ab7dd98a1260E3Ff5E906999d4Acb;
     address internal constant PROXY_AUTH_ADDR = 0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043;
 
+    // not yet implemented
+    address internal constant LSV_PROXY_REGISTRY_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
 }

@@ -6,14 +6,17 @@ const { configure } = require('@defisaver/sdk');
 const {
     getProxy,
     balanceOf, setBalance, redeploy,
-    takeSnapshot, revertToSnapshot, AAVE_MARKET_OPTIMISM, addrs, approve, impersonateAccount, resetForkToBlock,
+    takeSnapshot, revertToSnapshot, AAVE_MARKET_OPTIMISM, addrs, approve,
+    impersonateAccount, getAddrFromRegistry,
 } = require('../utils');
 const {
     aaveV3Supply, aaveV3SupplyCalldataOptimised, aaveV3Borrow, aaveV3Withdraw,
     aaveV3WithdrawCalldataOptimised, aaveV3Payback, aaveV3PaybackCalldataOptimised,
     aaveV3SwapBorrowRateCalldataOptimised, aaveV3SwapBorrowRate, aaveV3SetEModeCalldataOptimised,
     aaveV3SetEMode, aaveV3SwitchCollateral, aaveV3SwitchCollateralCallDataOptimised,
-    aaveV3ATokenPaybackCalldataOptimised, aaveV3ATokenPayback, aaveV3BorrowCalldataOptimised, aaveV3ClaimRewards,
+    aaveV3ATokenPaybackCalldataOptimised, aaveV3ATokenPayback, aaveV3BorrowCalldataOptimised,
+    aaveV3ClaimRewards,
+    aaveV3DelegateCredit,
 } = require('../actions');
 
 const aaveV3SupplyTest = async () => {
@@ -1037,6 +1040,34 @@ const aaveV3ClaimRewardsTest = async () => {
         });
     });
 };
+const aaveV3DelegateCreditTest = async () => {
+    describe('AaveV3-DelegateCreditTest', function () {
+        this.timeout(150000);
+        let senderAcc; let
+            proxy;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+
+        it('... delegate credit on AaveV3', async () => {
+            const delegatee = '0x000000000000000000000000000000000000dEaD';
+            const assetId = 0;
+            const rateMode = 2;
+            const amount = hre.ethers.utils.parseUnits('100', 18);
+            await aaveV3DelegateCredit(proxy, assetId, amount, rateMode, delegatee);
+            const aaveV3DelegateAddr = await getAddrFromRegistry('AaveV3DelegateCredit');
+            const aaveV3DelegateContract = await hre.ethers.getContractAt('AaveV3DelegateCredit', aaveV3DelegateAddr);
+            const network = hre.network.config.name;
+            const delegatedAmount = await aaveV3DelegateContract.getCreditDelegation(
+                addrs[network].AAVE_MARKET, assetId, rateMode, proxy.address, delegatee,
+            );
+            console.log(delegatedAmount.toString());
+            expect(delegatedAmount).to.be.eq(amount);
+        }).timeout(50000);
+    });
+};
 
 const aaveV3DeployContracts = async () => {
     await redeploy('AaveV3Supply');
@@ -1047,6 +1078,7 @@ const aaveV3DeployContracts = async () => {
     await redeploy('AaveV3SetEMode');
     await redeploy('AaveV3SwapBorrowRateMode');
     await redeploy('AaveV3Withdraw');
+    await redeploy('AaveV3DelegateCredit');
 };
 
 const aaveV3FullTest = async () => {
@@ -1060,6 +1092,7 @@ const aaveV3FullTest = async () => {
     await aaveV3PaybackTest();
     await aaveV3CollSwitchTest();
     await aaveV3ATokenPaybackTest();
+    await aaveV3DelegateCreditTest();
 };
 module.exports = {
     aaveV3FullTest,
@@ -1072,4 +1105,5 @@ module.exports = {
     aaveV3CollSwitchTest,
     aaveV3ATokenPaybackTest,
     aaveV3ClaimRewardsTest,
+    aaveV3DelegateCreditTest,
 };

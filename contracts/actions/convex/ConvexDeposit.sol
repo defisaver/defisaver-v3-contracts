@@ -2,7 +2,7 @@
 pragma solidity =0.8.10;
 
 import "../../interfaces/convex/IBooster.sol";
-import "../../interfaces/convex/IBaseRewardPool.sol";
+import "../../interfaces/convex/IBRewardPool.sol";
 import "../../utils/TokenUtils.sol";
 import "./helpers/ConvexHelper.sol";
 import "../ActionBase.sol";
@@ -68,7 +68,7 @@ contract ConvexDeposit is ConvexHelper, ActionBase {
         if (_params.option == DepositOption.STAKE) {
             _params.amount = poolInfo.token.pullTokensIfNeeded(_params.from, _params.amount);
             poolInfo.token.approveToken(poolInfo.crvRewards, _params.amount);
-            IBaseRewardPool(poolInfo.crvRewards).stakeFor(_params.to, _params.amount);
+            IBRewardPool(poolInfo.crvRewards).stakeFor(_params.to, _params.amount);
         } else
         if (_params.option == DepositOption.WRAP_AND_STAKE) {
             bool stakeForProxy = _params.to == address(this);
@@ -79,7 +79,7 @@ contract ConvexDeposit is ConvexHelper, ActionBase {
 
             if (!stakeForProxy) {
                 poolInfo.token.approveToken(poolInfo.crvRewards, _params.amount);
-                IBaseRewardPool(poolInfo.crvRewards).stakeFor(_params.to, _params.amount);
+                IBRewardPool(poolInfo.crvRewards).stakeFor(_params.to, _params.amount);
             }
         }
 

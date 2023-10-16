@@ -2,7 +2,7 @@
 pragma solidity =0.8.10;
 
 import "../../interfaces/convex/IBooster.sol";
-import "../../interfaces/convex/IBaseRewardPool.sol";
+import "../../interfaces/convex/IBRewardPool.sol";
 import "../../utils/TokenUtils.sol";
 import "./helpers/ConvexHelper.sol";
 import "../ActionBase.sol";
@@ -67,13 +67,13 @@ contract ConvexWithdraw is ConvexHelper, ActionBase {
             _params.from = address(this);
             // crvRewards implements balanceOf, but is not transferable, this is fine because from == address(this)
             _params.amount = poolInfo.crvRewards.pullTokensIfNeeded(_params.from, _params.amount);
-            IBaseRewardPool(poolInfo.crvRewards).withdraw(_params.amount, false);
+            IBRewardPool(poolInfo.crvRewards).withdraw(_params.amount, false);
             poolInfo.token.withdrawTokens(_params.to, _params.amount);
         } else
         if (_params.option == WithdrawOption.UNSTAKE_AND_UNWRAP) {
             _params.from = address(this);
             _params.amount = poolInfo.crvRewards.pullTokensIfNeeded(_params.from, _params.amount);
-            IBaseRewardPool(poolInfo.crvRewards).withdrawAndUnwrap(_params.amount, false);
+            IBRewardPool(poolInfo.crvRewards).withdrawAndUnwrap(_params.amount, false);
             poolInfo.lpToken.withdrawTokens(_params.to, _params.amount);
         }
 

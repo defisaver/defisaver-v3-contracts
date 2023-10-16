@@ -436,14 +436,18 @@
     },
     {
         "name": "LiquityView",
-        "address": "0xb760e60Dff6263E8Ab31B04ee5Cc010beA47e2Df",
+        "address": "0xFdA4344cbC85e684754C8971A975239350F99967",
         "id": "0xe23de5c6",
         "path": "contracts/views/LiquityView.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xd1913b977737c9505b8ecfedb8121546096d3393, 0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C"]
+        "history": [
+            "0xb760e60Dff6263E8Ab31B04ee5Cc010beA47e2Df",
+            "0xd1913b977737c9505b8ecfedb8121546096d3393",
+            "0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C"
+        ]
     },
     {
         "name": "ChickenBondsView",
@@ -1569,6 +1573,17 @@
         "history": []
     },
     {
+        "name": "GasPriceTrigger",
+        "address": "0xBe940a40Dcad3065C627f342f405f3D7afC61035",
+        "id": "0x020a2a1f",
+        "path": "contracts/triggers/GasPriceTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "FLAaveV3",
         "address": "0xd9D8e68717Ce24CCbf162868aaad7E38d81b05d1",
         "id": "0x8d7fb192",
@@ -2311,14 +2326,15 @@
     },
     {
         "name": "GasFeeTaker",
-        "address": "0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b",
+        "address": "0x558A8B92EE6a2B724afDEd319b61Ac55B7259826",
         "id": "0x4571b8b3",
         "path": "contracts/actions/fee/GasFeeTaker.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b",
             "0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d",
             "0xcCFFC73347B05cBDCCe7c3de2a0AdEcDAa8AEf51",
             "0x80536cb79341972a5Ef679dF5B70bB4A40a53d96"
@@ -2336,14 +2352,15 @@
     },
     {
         "name": "ChainLinkPriceTrigger",
-        "address": "0x484c78cf4a3C5bAb2174931E0A451e0E1B5b08F7",
+        "address": "0xDB9086334AA77179d273dB20314169828E33094f",
         "id": "0xac6bb72a",
         "path": "contracts/triggers/ChainLinkPriceTrigger.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x484c78cf4a3C5bAb2174931E0A451e0E1B5b08F7",
             "0xb14226c3FD41e9B1FF85b4f7144CB4096a5D1Ec9",
             "0xAbf52Fc6e5C0e6E44Daac7C6ca79498302D9B0CA"
         ]
@@ -2427,9 +2444,20 @@
     },
     {
         "name": "CurveUsdBorrow",
-        "address": "0x2512A976227a82Ef0F6bDdb463cBcD5B732596BF",
+        "address": "0x9D82989715114D35903caf4077BC3e5b5DD70eA7",
         "id": "0x2f22c507",
         "path": "contracts/actions/curveusd/CurveUsdBorrow.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": ["0x2512A976227a82Ef0F6bDdb463cBcD5B732596BF"]
+    },
+    {
+        "name": "CurveUsdAdjust",
+        "address": "0x6f69A7d0B1BE7602381d9cCE6B29F05B9D0b85e6",
+        "id": "0xb7bc5093",
+        "path": "contracts/actions/curveusd/CurveUsdAdjust.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
@@ -2438,14 +2466,14 @@
     },
     {
         "name": "CurveUsdCreate",
-        "address": "0x715B40970dac1cfAf0bB85C4Fe64921b44b3f73e",
+        "address": "0xd44f3984249772fd5a667889e7a478d6beb912c9",
         "id": "0x269ac704",
         "path": "contracts/actions/curveusd/CurveUsdCreate.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0x715B40970dac1cfAf0bB85C4Fe64921b44b3f73e"]
     },
     {
         "name": "CurveUsdPayback",

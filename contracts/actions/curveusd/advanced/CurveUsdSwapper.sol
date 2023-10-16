@@ -172,7 +172,7 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         // check custom fee if front sends a non standard fee param
         if (dfsFeeDivider != STANDARD_DFS_FEE) {
             dfsFeeDivider = uint32(
-                TokenGroupRegistry(GROUP_REGISTRY).getFeeForTokens(srcToken, destToken)
+                TokenGroupRegistry(TOKEN_GROUP_REGISTRY).getFeeForTokens(srcToken, destToken)
             );
         }
 

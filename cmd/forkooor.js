@@ -165,6 +165,7 @@ const {
     subSparkCloseBundle,
     subSparkAutomationStrategy,
     subLiquityDebtInFrontRepayStrategy,
+    subAaveV3CloseWithMaximumGasPriceBundle,
 } = require('../test/strategy-subs');
 
 const { getTroveInfo, getDebtInFront } = require('../test/utils-liquity');
@@ -176,6 +177,7 @@ const {
     RATIO_STATE_UNDER,
 } = require('../test/triggers');
 // const { deployCloseToDebtBundle, deployCloseToCollBundle } = require('../test/strategies/l2/l2-tests');
+const { deployCloseToCollWithMaximumGasPriceBundle, deployCloseToDebtWithMaximumGasPriceBundle } = require('../test/strategies/aave/tests');
 const { createRepayBundle, createBoostBundle } = require('../test/strategies/mcd/mcd-tests');
 
 const {
@@ -1920,6 +1922,92 @@ const subAaveClose = async (
     ).then((subId) => console.log(`subId: ${subId}`));
 };
 
+const subAaveCloseWithMaximumGasPrice = async (
+    collSymbol,
+    debtSymbol,
+    triggerBaseSymbol,
+    triggerQuoteSymbol,
+    targetQuotePrice,
+    priceState,
+    maximumGasPrice,
+    sender,
+    closeToColl = false,
+) => {
+    let network = 'mainnet';
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy;
+    let senderAcc = (await hre.ethers.getSigners())[0];
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+    proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await topUp(getOwnerAddr());
+    await topUp(senderAcc.address);
+
+    const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
+    const poolAddress = await aaveMarketContract.getPool();
+    const pool = await hre.ethers.getContractAt('IPoolV3', poolAddress);
+
+    const baseAssetInfo = getAssetInfo(triggerBaseSymbol);
+    const quoteAssetInfo = getAssetInfo(triggerQuoteSymbol);
+    const collAssetInfo = getAssetInfo(collSymbol);
+    const debtAssetInfo = getAssetInfo(debtSymbol);
+    const collReserveData = await pool.getReserveData(collAssetInfo.address);
+    const debtReserveData = await pool.getReserveData(debtAssetInfo.address);
+    const collAssetId = collReserveData.id;
+    const debtAssetId = debtReserveData.id;
+
+    // const priceTriggerAddr = await redeploy(
+    //     'AaveV3QuotePriceTrigger', undefined, false, true,
+    // ).then((c) => c.address);
+    // const gasPriceTriggerAddr = await redeploy(
+    //     'GasPriceTrigger', undefined, false, true,
+    // ).then((c) => c.address);
+    // const viewAddr = await redeploy(
+    //     'AaveV3OracleView', undefined, false, true,
+    // ).then((c) => c.address);
+
+    // console.log('AaveQuotePriceTrigger address:', priceTriggerAddr);
+    // console.log('MaximumGasPriceTrigger address:', gasPriceTriggerAddr);
+    // console.log('AaveV3OracleView address:', viewAddr);
+
+    const closeToDebtId = await deployCloseToDebtWithMaximumGasPriceBundle(proxy, true);
+    const closeToCollId = await deployCloseToCollWithMaximumGasPriceBundle(proxy, true);
+    const bundleId = closeToColl ? closeToCollId : closeToDebtId;
+
+    // const bundleId = closeToColl ? '13' : '12'; //TODO hardcode IDs
+
+    const formattedPrice = (targetQuotePrice * 1e8).toString();
+
+    await subAaveV3CloseWithMaximumGasPriceBundle(
+        proxy,
+        bundleId,
+        baseAssetInfo.address,
+        quoteAssetInfo.address,
+        formattedPrice,
+        priceState,
+        maximumGasPrice,
+        collAssetInfo.address,
+        collAssetId,
+        debtAssetInfo.address,
+        debtAssetId,
+    ).then((sub) => console.log(`sub: ${JSON.stringify(sub, null, 2)}`));
+};
+
 const subSparkAutomation = async (
     minRatio,
     maxRatio,
@@ -3335,6 +3423,32 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         });
 
     program
+        .command('sub-aave-close-to-debt-with-max-gasprice <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> <maximumGasPrice> [senderAddr]')
+        .description('Subscribes to AaveV3 close to debt with maximum gas price bundle')
+        .action(async (
+            collSymbol,
+            debtSymbol,
+            triggerBaseSymbol,
+            triggerQuoteSymbol,
+            triggerTargetPrice,
+            triggerState,
+            maximumGasPrice,
+            senderAddr,
+        ) => {
+            await subAaveCloseWithMaximumGasPrice(
+                collSymbol,
+                debtSymbol,
+                triggerBaseSymbol,
+                triggerQuoteSymbol,
+                triggerTargetPrice,
+                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                maximumGasPrice,
+                senderAddr,
+            );
+            process.exit(0);
+        });
+
+    program
         .command('sub-aave-close-to-coll <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
         .description('Subscribes to AaveV3 close to collateral bundle')
         .action(async (
@@ -3353,6 +3467,33 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 triggerQuoteSymbol,
                 triggerTargetPrice,
                 triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                senderAddr,
+                true,
+            );
+            process.exit(0);
+        });
+
+    program
+        .command('sub-aave-close-to-coll-with-max-gasprice <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> <maximumGasPrice> [senderAddr]')
+        .description('Subscribes to AaveV3 close to collateral with maximum gasprice bundle')
+        .action(async (
+            collSymbol,
+            debtSymbol,
+            triggerBaseSymbol,
+            triggerQuoteSymbol,
+            triggerTargetPrice,
+            triggerState,
+            maximumGasPrice,
+            senderAddr,
+        ) => {
+            await subAaveCloseWithMaximumGasPrice(
+                collSymbol,
+                debtSymbol,
+                triggerBaseSymbol,
+                triggerQuoteSymbol,
+                triggerTargetPrice,
+                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                maximumGasPrice,
                 senderAddr,
                 true,
             );

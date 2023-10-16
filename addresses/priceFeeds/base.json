@@ -1,0 +1,38 @@
+[
+    {
+        "name": "rETH / ETH",
+        "base": "0xB6fe221Fe9EeF5aBa221c348bA20A1Bf5e73624c",
+        "quote": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+        "feedAddress": "0xf397bF97280B488cA19ee3093E81C0a77F02e9a5"
+    },
+    {
+        "name": "cbETH / USD",
+        "base": "0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xd7818272b9e248357d13057aab0b417af31e817d"
+    },
+    {
+        "name": "COMP / USD",
+        "base": "0x9e1028F5F1D5eDE59748FFceE5532509976840E0",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x9dda783de64a9d1a60c49ca761ebe528c35ba428"
+    },
+    {
+        "name": "DAI / USD",
+        "base": "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x591e79239a7d679378ec8c847e5038150364c78f"
+    },
+    {
+        "name": "ETH / USD",
+        "base": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x71041dddad3595f9ced3dccfbe3d1f4b0a16bb70"
+    },
+    {
+        "name": "USDC / USD",
+        "base": "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x7e860098f58bbfc8648a4311b374b1d669a2bc6b"
+    }
+]

@@ -9,6 +9,6 @@ contract ArbitrumExchangeAddresses {
     address internal constant SAVER_EXCHANGE_REGISTRY = 0xaB1E4b72BC2f3890F052df111EE626c1c7229F26;
     address internal constant ZRX_ALLOWLIST_ADDR = 0x5eD8e74b1caE57B0c68B3278B88589991FBa0750;
     address internal constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address internal constant GROUP_REGISTRY = 0xb03fe103f54841821C080C124312059c9A3a7B5c;
+    address internal constant TOKEN_GROUP_REGISTRY = 0xb03fe103f54841821C080C124312059c9A3a7B5c;
 
 }
