@@ -222,4 +222,30 @@ contract LiquityView is LiquityHelper, DSMath {
             next = SortedTroves.getPrev(next);
         }
     }
+
+    /// @notice Returns the number of troves based on the targetDebtInFront
+    /// @param _acc Accumulated sum used in subsequent calls, 0 for first call
+    /// @param _iterations Maximum number of troves to traverse
+    /// @param _targetDebtInFront Lusd debt in wei
+    /// @return next Trove owner address to be used in the subsequent call
+    /// @return numTroves Number of troves below the targetDebtInFront
+    function getNumTrovesForDebtInFront(uint256 _acc, uint256 _iterations, uint256 _targetDebtInFront) external view returns (address next, uint256 numTroves) {
+        next = SortedTroves.getLast();
+
+        uint256 currDebt = _acc;
+        for (uint256 i = 0; i < _iterations; i++) {
+            if (next == address(0)) {
+                return (next, numTroves);
+            }
+
+            uint256 debtAmount = TroveManager.getTroveDebt(next);
+
+            currDebt += debtAmount;
+
+            if (currDebt >= _targetDebtInFront) return (next, numTroves);
+
+            next = SortedTroves.getPrev(next);
+            numTroves++;
+        }
+    }
 }

@@ -13,6 +13,7 @@ import "../utils/TransientStorage.sol";
 /// @title Checks if total amount of debt in front of a specified trove is over a limit
 contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatioHelper, TriggerHelper, LiquityHelper {
 
+    /// @dev Max number of troves to check
     uint256 constant internal MAX_ITERATIONS = 200;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
@@ -34,11 +35,12 @@ contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatio
         
         if (isActive == false || currRatio == 0) return false;
 
+        /// @dev Needed for LiquityRatioIncreaseCheck later
         tempStorage.setBytes32("LIQUITY_RATIO", bytes32(currRatio));
 
         uint256 i;
 
-        while(next != address(0)) {
+        for (; i < MAX_ITERATIONS && next != address(0); ++i) {
             next = SortedTroves.getNext(next);
             debtInFront += TroveManager.getTroveDebt(next);
 
@@ -47,15 +49,9 @@ contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatio
                 return false;
             }
 
-            i++;
-
-            // don't allow repay if to many troves in front
-            if (i >=  MAX_ITERATIONS) {
-                return false;
-            }
         }
 
-
+        // return true if currently debtInFront is less than debtInFrontMin
         if (debtInFront < triggerSubData.debtInFrontMin) {
             return true;
         }

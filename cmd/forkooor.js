@@ -1194,7 +1194,7 @@ const createLiquityTrove = async (coll, debt, sender) => {
 
         const troveInfo = await getTroveInfo(proxy.address);
 
-        console.log('Trove ratio: ', troveInfo.TCRatio / 1e16);
+        console.log('Trove ratio: ', troveInfo.collAmount.mul(troveInfo.collPrice).div(troveInfo.debtAmount) / 1e16);
 
         console.log('DebtInFront ', debtInFront.debt / 1e18);
     } catch (err) {
@@ -2543,6 +2543,8 @@ const liqDebtInFrontRepaySub = async (
 
     const latestStrategyId = (await getLatestStrategyId());
 
+    const strategyId = 75;
+
     // check if our strategy is deployed, and if not deploy it
     if (+latestStrategyId < 75) {
         await openStrategyAndBundleStorage(true);
@@ -2553,11 +2555,10 @@ const liqDebtInFrontRepaySub = async (
 
         await redeploy('LiquityDebtInFrontWithLimitTrigger', REGISTRY_ADDR, false, true);
         await redeploy('LiquityRatioIncreaseCheck', REGISTRY_ADDR, false, true);
+        await redeploy('LiquityView', REGISTRY_ADDR, false, true);
 
         console.log(`Strategy deployed id: ${strategyId}`);
     }
-
-    const strategyId = 75;
 
     const { subId, strategySub } = await subLiquityDebtInFrontRepayStrategy(
         proxy,
