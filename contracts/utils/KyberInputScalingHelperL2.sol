@@ -966,7 +966,7 @@ library ScalingDataL2Lib {
     }
 }
 
-contract InputScalingHelperL2 {
+contract KyberInputScalingHelperL2 {
     using ExecutorReader for bytes;
     using ScalingDataL2Lib for bytes;
 
