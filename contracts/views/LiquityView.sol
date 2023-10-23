@@ -245,7 +245,7 @@ contract LiquityView is LiquityHelper, DSMath {
 
             currDebt += debtAmount;
 
-            if (currDebt >= _targetDebtInFront) return (next, numTroves);
+            if (currDebt >= _targetDebtInFront) return (address(0), numTroves);
 
             next = SortedTroves.getPrev(next);
             numTroves++;
