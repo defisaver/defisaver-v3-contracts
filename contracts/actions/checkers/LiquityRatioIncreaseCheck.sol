@@ -43,7 +43,7 @@ contract LiquityRatioIncreaseCheck is ActionBase, LiquityRatioHelper {
             revert BadAfterRatio(startRatio, currRatio);
         }
 
-        // can't repay too much over targetRatio so we don't trigger boost after
+        // can't repay too much over targetRatio
         if (currRatio > (targetRatio + RATIO_OFFSET)) {
             revert BadAfterRatio(startRatio, currRatio);
         }
