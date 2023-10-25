@@ -86,7 +86,7 @@ contract CurveUsdView {
 
       return UserData({
         loanExists: ctrl.loan_exists(user),
-        collateralPrice: ctrl.amm_price(),
+        collateralPrice: amm.price_oracle(),
         marketCollateralAmount: amounts[0],
         curveUsdCollateralAmount: amounts[1],
         debtAmount: amounts[2],
