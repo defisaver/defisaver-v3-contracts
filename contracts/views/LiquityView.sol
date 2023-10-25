@@ -275,11 +275,12 @@ contract LiquityView is LiquityHelper, DSMath {
         next = _user;
 
         for (uint256 i = 0; i < _iterations; i++) {
+            next = SortedTroves.getNext(next);
+
             if (next == address(0)) {
                 return (next, numTroves);
             }
 
-            next = SortedTroves.getNext(next);
             numTroves++;
         }
     }
