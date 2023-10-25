@@ -3,7 +3,7 @@ pragma solidity =0.8.10;
 
 import "../../utils/TokenUtils.sol";
 import "../../interfaces/exchange/IExchangeV3.sol";
-import "../../interfaces/exchange/ISwapRouter.sol";
+import "../../interfaces/exchange/ISwapRouter02.sol";
 import "../../interfaces/exchange/IQuoter.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
@@ -15,7 +15,7 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 
-    ISwapRouter public constant router = ISwapRouter(UNI_V3_ROUTER);
+    ISwapRouter02 public constant router = ISwapRouter02(UNI_V3_ROUTER);
     IQuoter public constant quoter = IQuoter(UNI_V3_QUOTER);
     /// @notice Sells _srcAmount of tokens at UniswapV3
     /// @param _srcAddr From token
@@ -25,11 +25,10 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     function sell(address _srcAddr, address, uint _srcAmount, bytes calldata _additionalData) external override returns (uint) {
         IERC20(_srcAddr).safeApprove(address(router), _srcAmount);
 
-        ISwapRouter.ExactInputParams memory params = 
-            ISwapRouter.ExactInputParams({
+        ISwapRouter02.ExactInputParams memory params =
+            ISwapRouter02.ExactInputParams({
                 path: _additionalData,
                 recipient: msg.sender,
-                deadline: block.timestamp + 1,
                 amountIn: _srcAmount,
                 amountOutMinimum: 1 /// @dev DFSExchangeCore contains slippage check
             });
@@ -44,11 +43,10 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     function buy(address _srcAddr, address, uint _destAmount, bytes calldata _additionalData) external override returns(uint) {
         uint srcAmount = _srcAddr.getBalance(address(this));
         IERC20(_srcAddr).safeApprove(address(router), srcAmount);
-        ISwapRouter.ExactOutputParams memory params = 
-            ISwapRouter.ExactOutputParams({
+        ISwapRouter02.ExactOutputParams memory params =
+            ISwapRouter02.ExactOutputParams({
                 path: _additionalData,
                 recipient: msg.sender,
-                deadline: block.timestamp + 1,
                 amountOut: _destAmount,
                 amountInMaximum: type(uint).max
             });
