@@ -14,7 +14,7 @@ import "../utils/TransientStorage.sol";
 contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatioHelper, TriggerHelper, LiquityHelper {
 
     /// @dev Max number of troves to check
-    uint256 constant internal MAX_ITERATIONS = 200;
+    uint256 constant internal MAX_ITERATIONS = 250;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
@@ -40,8 +40,19 @@ contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatio
 
         uint256 i;
 
-        for (; i < MAX_ITERATIONS && next != address(0); ++i) {
+        for (; i < MAX_ITERATIONS; ++i) {
             next = SortedTroves.getNext(next);
+
+            // if we're at the end of the list
+            if (next == address(0)) {
+                // if current debtInFront is less than minimum return true
+                if (debtInFront <= triggerSubData.debtInFrontMin) {
+                    return true;
+                }
+
+                return false;
+            }
+
             debtInFront += TroveManager.getTroveDebt(next);
 
             // jump out of the loop early to save on gas
@@ -49,11 +60,6 @@ contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatio
                 return false;
             }
 
-        }
-
-        // return true if currently debtInFront is less than debtInFrontMin
-        if (debtInFront < triggerSubData.debtInFrontMin) {
-            return true;
         }
 
         return false;

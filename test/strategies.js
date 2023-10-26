@@ -946,6 +946,8 @@ const createLiquityDebtInFrontRepayStrategy = () => {
     return liquityFLRepayStrategy.encodeForDsProxyCall();
 };
 
+console.log(createLiquityDebtInFrontRepayStrategy());
+
 const createLiquityFLRepayStrategy = () => {
     const liquityFLRepayStrategy = new dfs.Strategy('LiquityFLRepayStrategy');
     liquityFLRepayStrategy.addSubSlot('&ratioState', 'uint8');
