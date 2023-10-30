@@ -27,7 +27,6 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
     /// @param gasUsed Gas amount to charge in strategies
     /// @param flAddr Flashloan address 0x0 if we're not using flashloan
     /// @param flAmount Amount that the flashloan actions returns if used (must have it because of fee)
-    /// @param nextPrice Maker OSM next price if 0 we're using current price (used for ratio check)
     /// @param targetRatio Target ratio to repay if 0 we are not checking the ratio
     /// @param exchangeData Data needed for swap
     struct BoostParams {
@@ -36,7 +35,6 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         uint256 gasUsed;
         address flAddr;
         uint256 flAmount;
-        uint256 nextPrice;
         uint256 targetRatio;
         ExchangeData exchangeData;
     }
@@ -122,7 +120,7 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
 
         uint256 ratioBefore;
         if (_boostParams.gasUsed != 0) {
-             ratioBefore = getRatio(_boostParams.vaultId, _boostParams.nextPrice);
+             ratioBefore = getRatio(_boostParams.vaultId);
         }
 
         address collateralAsset = _boostParams.exchangeData.destAddr;
@@ -173,7 +171,7 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
 
         // check if collateral is higher, only if part of strategy
         if (_boostParams.gasUsed != 0) {
-            uint256 ratioAfter = getRatio(_boostParams.vaultId, _boostParams.nextPrice);
+            uint256 ratioAfter = getRatio(_boostParams.vaultId);
 
             // ratio worst off than before
             if (ratioAfter >= ratioBefore) {

@@ -221,8 +221,7 @@ const callMcdRepayFromYearnWithExchangeStrategy = async (botAcc, strategyExecuto
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
 
-    const nextPrice = 0;
-    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
@@ -262,8 +261,7 @@ const callMcdRepayFromYearnStrategy = async (botAcc, strategyExecutor, strategyI
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
 
-    const nextPrice = 0;
-    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
@@ -309,8 +307,7 @@ const callMcdRepayFromMstableStrategy = async (botAcc, strategyExecutor, strateg
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
 
-    const nextPrice = 0;
-    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
 
@@ -370,8 +367,7 @@ const callMcdRepayFromMstableWithExchangeStrategy = async (botAcc, strategyExecu
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
 
-    const nextPrice = 0;
-    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
 
@@ -428,8 +424,7 @@ const callMcdRepayFromRariStrategyWithExchange = async (botAcc, strategyExecutor
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
 
-    const nextPrice = 0;
-    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
@@ -473,8 +468,7 @@ const callMcdRepayFromRariStrategy = async (botAcc, strategyExecutor, strategyIn
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
 
-    const nextPrice = 0;
-    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
@@ -542,8 +536,7 @@ const callMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, sub
     actionsCallData.push(mcdPaybackAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
 
-    const nextPrice = 0;
-    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len
@@ -614,10 +607,7 @@ const callFLMcdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, s
     actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(mcdRatioCheckAction.encodeForRecipe()[0]);
 
-    // const nextPrice = await getNextEthPrice();
-    const nextPrice = 0;
-
-    triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     // eslint-disable-next-line max-len

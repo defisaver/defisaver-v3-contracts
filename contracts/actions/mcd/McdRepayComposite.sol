@@ -26,7 +26,6 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
     /// @param gasUsed Gas amount to charge in strategies
     /// @param flAddress Flashloan address 0x0 if we're not using flashloan
     /// @param flAmount Amount that the flashloan actions returns if used (must have it because of fee)
-    /// @param nextPrice Maker OSM next price if 0 we're using current price (used for ratio check)
     /// @param targetRatio Target ratio to repay if 0 we are not checking the ratio
     /// @param exchangeData Data needed for swap
     struct RepayParams {
@@ -35,7 +34,6 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         uint256 gasUsed;
         address flAddr;
         uint256 flAmount;
-        uint256 nextPrice;
         uint256 targetRatio;
         ExchangeData exchangeData;
     }
@@ -117,7 +115,7 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         uint256 ratioBefore;
         // is part of strategy so check before ratio
         if (_repayParams.gasUsed != 0) {
-            ratioBefore = getRatio(_repayParams.vaultId, _repayParams.nextPrice);
+            ratioBefore = getRatio(_repayParams.vaultId);
         }
 
         uint256 repayAmount = _repayParams.exchangeData.srcAmount;
@@ -175,7 +173,7 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
 
         // is part of strategy so check after ratio
         if (_repayParams.gasUsed != 0) {    
-            uint256 ratioAfter = getRatio(_repayParams.vaultId, _repayParams.nextPrice);
+            uint256 ratioAfter = getRatio(_repayParams.vaultId);
 
             // ratio worst off than before
             if (ratioAfter < ratioBefore) {

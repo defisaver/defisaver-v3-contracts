@@ -19,10 +19,9 @@ contract McdRatioHelper is DSMath {
 
     /// @notice Gets CDP ratio
     /// @param _vaultId Id of the CDP
-    /// @param _nextPrice Next price for user
-    function getRatio(uint256 _vaultId, uint256 _nextPrice) public view returns (uint256) {
+    function getRatio(uint256 _vaultId) public view returns (uint256) {
         bytes32 ilk = manager.ilks(_vaultId);
-        uint256 price = (_nextPrice == 0) ? getPrice(ilk) : _nextPrice;
+        uint256 price = getPrice(ilk);
 
         (uint256 collateral, uint256 debt) = getCdpInfo(_vaultId, ilk);
 
