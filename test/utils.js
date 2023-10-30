@@ -600,6 +600,10 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
         // eslint-disable-next-line no-param-reassign
         name = 'StrategyExecutorID';
     }
+    if (name === 'KyberInputScalingHelper' && getNetwork() !== 'mainnet') {
+        // eslint-disable-next-line no-param-reassign
+        name = 'KyberInputScalingHelperL2';
+    }
 
     // if (name === 'FLAaveV3') {
     //     // eslint-disable-next-line no-param-reassign
