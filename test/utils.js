@@ -1244,6 +1244,7 @@ const resetForkToBlock = async (block) => {
         rpcUrl = process.env[`${network.toUpperCase()}_NODE`];
     }
 
+    /// `ProviderError: TypeError [ERR_INVALID_URL]: Invalid URL` on localBase network
     if (block) {
         await hre.network.provider.request({
             method: 'hardhat_reset',
@@ -1416,7 +1417,8 @@ module.exports = {
     setContractAt,
     getContractFromRegistry,
     filterEthersObject,
-    curveApiInit: async () => curve.init('Alchemy', {
-        url: hre.network.url,
-    }),
+    curveApiInit: async () => {
+        const curveObj = ((await curve).default);
+        return curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
+    },
 };
