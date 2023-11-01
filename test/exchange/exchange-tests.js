@@ -229,8 +229,9 @@ const kyberAggregatorDFSSellTest = async () => {
         let snapshot;
 
         before(async () => {
-            await redeploy('KyberInputScalingHelper');
-            await redeploy('DFSSell');
+            // await redeploy('KyberInputScalingHelper');
+            // await redeploy('KyberInputScalingHelperL2');
+            // await redeploy('DFSSell');
             kyberAggregatorWrapper = await redeploy('KyberAggregatorWrapper');
 
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -354,10 +355,15 @@ const kyberAggregatorDFSSellTest = async () => {
                 if (chainId === 42161) {
                     baseUrl = 'https://aggregator-api.kyberswap.com/arbitrum/api/v1/';
                 }
+                const clientId = 'partner-staging';
+                const headers = {
+                    'x-client-id': clientId,
+                };
                 const options = {
                     method: 'GET',
                     baseURL: baseUrl,
-                    url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${buyAssetInfo.address}&amountIn=${amount.toString()}&saveGas=false&gasInclude=true`,
+                    url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${buyAssetInfo.address}&amountIn=${amount.toString()}&saveGas=false&gasInclude=true&x-client-id=${clientId}`,
+                    headers,
                 };
                 // console.log(options.baseURL + options.url);
                 const priceObject = await axios(options).then((response) => response.data.data);
@@ -366,12 +372,14 @@ const kyberAggregatorDFSSellTest = async () => {
                     method: 'POST',
                     baseURL: baseUrl,
                     url: 'route/build',
+                    headers,
                     data: {
                         routeSummary: priceObject.routeSummary,
                         sender: kyberAggregatorWrapper.address,
                         recipient: kyberAggregatorWrapper.address,
                         slippageTolerance: 1000,
                         deadline: 1776079017,
+                        source: clientId,
                     },
                 };
                 // console.log(secondOptions.data);
