@@ -436,17 +436,18 @@
     },
     {
         "name": "LiquityView",
-        "address": "0xFdA4344cbC85e684754C8971A975239350F99967",
+        "address": "0xD077e3875811dB44D8eb4722af59E1B137F462e3",
         "id": "0xe23de5c6",
         "path": "contracts/views/LiquityView.sol",
-        "version": "1.0.1",
+        "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
             "0xb760e60Dff6263E8Ab31B04ee5Cc010beA47e2Df",
             "0xd1913b977737c9505b8ecfedb8121546096d3393",
-            "0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C"
+            "0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C",
+            "0xFdA4344cbC85e684754C8971A975239350F99967"
         ]
     },
     {
@@ -2425,6 +2426,28 @@
         "address": "0xC4608Cb08ecBC109B9FaE4312274f60535a10820",
         "id": "0xff4a5c51",
         "path": "contracts/triggers/LiquityDebtInFrontTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityRatioIncreaseCheck",
+        "address": "0x4E3ab326c188D936c0d1166eE3B3b0dD615B17Ae",
+        "id": "0x3b29b437",
+        "path": "contracts/actions/checkers/LiquityRatioIncreaseCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityDebtInFrontWithLimitTrigger",
+        "address": "0xb677E68385C201847A5f3BdE2e0Ed1A900194e3B",
+        "id": "0x72a21f97",
+        "path": "contracts/triggers/LiquityDebtInFrontWithLimitTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",

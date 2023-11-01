@@ -156,6 +156,12 @@ const getTroveInfo = async (troveOwner) => {
     return liquityView['getTroveInfo(address)'](troveOwner);
 };
 
+const getDebtInFront = async (troveOwner) => {
+    const liquityView = await hre.ethers.getContractAt('LiquityView', getAddrFromRegistry('LiquityView'));
+
+    return liquityView['getDebtInFront(address,uint256,uint256)'](troveOwner, 0, 1000);
+};
+
 const getRatio = async (liquityView, troveOwner) => {
     const {
         troveStatus,
@@ -171,10 +177,11 @@ const getRatio = async (liquityView, troveOwner) => {
 module.exports = {
     getHints,
     getRedemptionHints,
-    LiquityActionIds,
     getTroveInfo,
     findInsertPosition,
+    getDebtInFront,
     getRatio,
+    LiquityActionIds,
     collChangeId,
     debtChangeId,
 };
