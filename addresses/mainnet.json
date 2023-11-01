@@ -2610,14 +2610,17 @@
     },
     {
         "name": "CurveUsdView",
-        "address": "0x512460CF2Bb80823C135F5DC04D2a1fF258FAA1e",
+        "address": "0x4df1281f9d2303be453e0085881702a4b1358692",
         "id": "0xe19de022",
         "path": "contracts/views/CurveUsdView.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0xa81430a4eC71466264b9ee50403F8d63E8c72B95"]
+        "history": [
+            "0x512460CF2Bb80823C135F5DC04D2a1fF258FAA1e",
+            "0xa81430a4eC71466264b9ee50403F8d63E8c72B95"
+        ]
     },
     {
         "name": "CurveStethPoolDeposit",
