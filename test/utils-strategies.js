@@ -619,21 +619,6 @@ const addBotCaller = async (
     }
 };
 
-const setMCDPriceVerifier = async (triggerAddr) => {
-    const oldOwner = '0x0528A32fda5beDf89Ba9ad67296db83c9452F28C';
-    await impersonateAccount(oldOwner);
-
-    const signer = await hre.ethers.provider.getSigner(oldOwner);
-
-    let mcdPriceVerifier = await hre.ethers.getContractAt('IMCDPriceVerifier', '0xeAa474cbFFA87Ae0F1a6f68a3aBA6C77C656F72c');
-
-    mcdPriceVerifier = mcdPriceVerifier.connect(signer);
-
-    await mcdPriceVerifier.setAuthorized(triggerAddr, true);
-
-    await stopImpersonatingAccount(oldOwner);
-};
-
 const getSubHash = (subData) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -671,7 +656,6 @@ module.exports = {
     getLatestBundleId,
     getLatestSubId,
     addBotCaller,
-    setMCDPriceVerifier,
     getSubHash,
     subToCBRebondProxy,
     getUpdatedStrategySub,

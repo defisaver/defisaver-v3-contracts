@@ -42,7 +42,7 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
         inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[2], _subData, _returnValues);
         inputData.startRatioIndex = _parseParamUint(inputData.startRatioIndex, _paramMapping[3], _subData, _returnValues);
 
-        uint256 currRatio = getRatio(inputData.vaultId, 0);
+        uint256 currRatio = getRatio(inputData.vaultId);
         uint256 beforeRatio = uint256(_returnValues[inputData.startRatioIndex]);
 
         // ratio should be lower

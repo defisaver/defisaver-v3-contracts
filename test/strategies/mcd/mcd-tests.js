@@ -37,7 +37,6 @@ const {
     createBundle,
     createStrategy,
     addBotCaller,
-    setMCDPriceVerifier,
     subToMcdProxy,
 } = require('../../utils-strategies');
 
@@ -292,7 +291,6 @@ const mcdRepayStrategyTest = async (numTests) => {
             await redeploy('McdRepayComposite');
 
             await addBotCaller(botAcc.address);
-            await setMCDPriceVerifier(mcdRatioTriggerAddr);
 
             proxy = await getProxy(senderAcc.address);
         });
@@ -436,8 +434,6 @@ const mcdRepayFromRariStrategyTest = async () => {
             strategyExecutor = await redeployCore();
             await addBotCaller(botAcc.address);
 
-            await setMCDPriceVerifier(mcdRatioTriggerAddr);
-
             proxy = await getProxy(senderAcc.address);
         });
 
@@ -567,7 +563,6 @@ const mcdRepayFromYearnStrategyTest = async () => {
 
             await addBotCaller(botAcc.address);
 
-            await setMCDPriceVerifier(mcdRatioTriggerAddr);
             yearnRegistry = await hre.ethers.getContractAt('IYearnRegistry', YEARN_REGISTRY_ADDRESS);
 
             proxy = await getProxy(senderAcc.address);
@@ -704,8 +699,6 @@ const mcdRepayFromMStableStrategyTest = async () => {
 
             strategyExecutor = await redeployCore();
             await addBotCaller(botAcc.address);
-
-            await setMCDPriceVerifier(mcdRatioTriggerAddr);
 
             proxy = await getProxy(senderAcc.address);
         });

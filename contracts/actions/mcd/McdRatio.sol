@@ -23,7 +23,7 @@ contract McdRatio is ActionBase, McdRatioHelper {
 
         inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
 
-        uint256 ratio = getRatio(inputData.vaultId, 0);
+        uint256 ratio = getRatio(inputData.vaultId);
 
         return bytes32(ratio);
     }
