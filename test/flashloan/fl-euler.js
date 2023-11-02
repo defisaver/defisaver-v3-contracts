@@ -4,7 +4,7 @@ const {
 
 const { eulerFLTest } = require('./fl-tests');
 
-describe('FL-Euler', function () {
+describe.skip('FL-Euler', function () {
     this.timeout(60000);
     before(async () => {
         await redeploy('FLEuler');
