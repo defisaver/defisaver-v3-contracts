@@ -12,12 +12,14 @@ import "./strategy/BundleStorage.sol";
 import "./strategy/SubStorage.sol";
 import "../interfaces/flashloan/IFlashLoanBase.sol";
 import "../interfaces/ITrigger.sol";
+import "../actions/ActionBase.sol";
 
 /// @title Entry point into executing recipes/checking triggers directly and as part of a strategy
 contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     error TriggerNotActiveError(uint256);
+    error ActionUnknownRevert();
 
     /// @notice Called directly through DsProxy to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
@@ -158,17 +160,30 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
     ) internal returns (bytes32 response) {
 
         address actionAddr = registry.getAddr(_currRecipe.actionIds[_index]);
+        require(actionAddr != address(0));
 
-        response = IDSProxy(address(this)).execute(
-            actionAddr,
-            abi.encodeWithSignature(
-                "executeAction(bytes,bytes32[],uint8[],bytes32[])",
-                _currRecipe.callData[_index],
-                _currRecipe.subData,
-                _currRecipe.paramMapping[_index],
-                _returnValues
-            )
+        bytes memory data = abi.encodeWithSelector(
+            ActionBase.executeAction.selector,
+            _currRecipe.callData[_index],
+            _currRecipe.subData,
+            _currRecipe.paramMapping[_index],
+            _returnValues
         );
+
+        (bool success, bytes memory returndata) = actionAddr.delegatecall(data);
+
+        if (success == false) {
+            if (returndata.length > 0) {
+                assembly {
+                    let returndata_size := mload(returndata)
+                    revert(add(32, returndata), returndata_size)
+                }
+            } else {
+                revert ActionUnknownRevert();
+            }
+        }
+
+        response = abi.decode(returndata, (bytes32));
     }
 
     /// @notice Prepares and executes a flash loan action
