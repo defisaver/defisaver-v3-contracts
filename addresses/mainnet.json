@@ -2205,39 +2205,6 @@
         "history": []
     },
     {
-        "name": "BalancerV2Supply",
-        "address": "0xE48123018Db5e9075841C61EA702cEca51621191",
-        "id": "0x443f994c",
-        "path": "contracts/actions/balancer/BalancerV2Supply.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "BalancerV2Withdraw",
-        "address": "0xbED38692438b90AF738F8A7A3142C217DE8fB069",
-        "id": "0x54f465c5",
-        "path": "contracts/actions/balancer/BalancerV2Withdraw.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "BalancerV2Claim",
-        "address": "0xEac7c5bEFaA6E17f1A2e86947eEd6419c74A7C03",
-        "id": "0xde8dbbc2",
-        "path": "contracts/actions/balancer/BalancerV2Claim.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
         "name": "GUniWithdraw",
         "address": "0x6F7cD7C0Dd3634E14bAB91FDF3bCE0a4315b3C59",
         "id": "0x6b185983",
