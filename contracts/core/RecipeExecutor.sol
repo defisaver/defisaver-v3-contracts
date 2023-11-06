@@ -14,8 +14,6 @@ import "../interfaces/flashloan/IFlashLoanBase.sol";
 import "../interfaces/ITrigger.sol";
 import "../auth/ModulePermission.sol";
 
-import "hardhat/console.sol";
-
 /// @title Entry point into executing recipes/checking triggers directly and as part of a strategy
 contract RecipeExecutor is StrategyModel, ProxyPermission, ModulePermission, AdminAuth, CoreHelper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
@@ -124,8 +122,6 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, ModulePermission, Adm
         bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
         returnValues[0] = _flAmount; // set the flash loan action as first return value
 
-        console.log("Vratio mi FL");
-
         // skips the first actions as it was the fl action
         for (uint256 i = 1; i < _currRecipe.actionIds.length; ++i) {
             returnValues[i] = _executeAction(_currRecipe, i, returnValues);
@@ -140,12 +136,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, ModulePermission, Adm
 
         bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
 
-        console.log("Here");
-
         if (isFL(firstActionAddr)) {
-                    console.log("IN fl logic");
-                    console.log(isDSProxy());
-
             if (isDSProxy()) {
                 _parseFLAndExecute(_currRecipe, firstActionAddr, returnValues);
             } else {
@@ -224,8 +215,6 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, ModulePermission, Adm
     ) internal {
 
         enableModule(_flActionAddr);
-
-        console.log("setovao module");
 
         // encode data for FL
         bytes memory recipeData = abi.encode(_currRecipe, address(this));
