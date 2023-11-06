@@ -167,7 +167,11 @@ contract TokenPriceHelper is DSMath, UtilHelper {
     function getAaveTokenPriceInETH(address _tokenAddr) public view returns (uint256 price) {
         address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_MARKET).getPriceOracle();
 
-        price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr);
+        try IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr) returns (uint256 tokenPrice){
+            price = tokenPrice;
+        } catch {
+            price = 0;
+        }
     }
 
     /// @dev if price isn't found this returns 0

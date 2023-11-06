@@ -937,14 +937,17 @@
     },
     {
         "name": "LimitSell",
-        "address": "0x02b0eE3b52e8E0749444a7255B9D86c50d18D19A",
+        "address": "0xDa0df9dBD89FE40881EC2C4B000D44C76eA2Dd4A",
         "id": "0x8c712c04",
         "path": "contracts/actions/exchange/LimitSell.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x555C5B5d3e49ae015d5dA5C0476f984386e906BD"]
+        "history": [
+            "0x02b0eE3b52e8E0749444a7255B9D86c50d18D19A",
+            "0x555C5B5d3e49ae015d5dA5C0476f984386e906BD"
+        ]
     },
     {
         "name": "McdGenerate",
@@ -2205,39 +2208,6 @@
         "history": []
     },
     {
-        "name": "BalancerV2Supply",
-        "address": "0xE48123018Db5e9075841C61EA702cEca51621191",
-        "id": "0x443f994c",
-        "path": "contracts/actions/balancer/BalancerV2Supply.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "BalancerV2Withdraw",
-        "address": "0xbED38692438b90AF738F8A7A3142C217DE8fB069",
-        "id": "0x54f465c5",
-        "path": "contracts/actions/balancer/BalancerV2Withdraw.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "BalancerV2Claim",
-        "address": "0xEac7c5bEFaA6E17f1A2e86947eEd6419c74A7C03",
-        "id": "0xde8dbbc2",
-        "path": "contracts/actions/balancer/BalancerV2Claim.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
         "name": "GUniWithdraw",
         "address": "0x6F7cD7C0Dd3634E14bAB91FDF3bCE0a4315b3C59",
         "id": "0x6b185983",
@@ -2327,14 +2297,15 @@
     },
     {
         "name": "GasFeeTaker",
-        "address": "0x558A8B92EE6a2B724afDEd319b61Ac55B7259826",
+        "address": "0xfaE5e10014Dc90A85ABdE21E0fa85CcB78521aB5",
         "id": "0x4571b8b3",
         "path": "contracts/actions/fee/GasFeeTaker.sol",
-        "version": "1.0.4",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x558A8B92EE6a2B724afDEd319b61Ac55B7259826",
             "0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b",
             "0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d",
             "0xcCFFC73347B05cBDCCe7c3de2a0AdEcDAa8AEf51",
@@ -2353,14 +2324,15 @@
     },
     {
         "name": "ChainLinkPriceTrigger",
-        "address": "0xDB9086334AA77179d273dB20314169828E33094f",
+        "address": "0xFe333F4Be1423600C9fF129A7D85D3eAE97C9c42",
         "id": "0xac6bb72a",
         "path": "contracts/triggers/ChainLinkPriceTrigger.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xDB9086334AA77179d273dB20314169828E33094f",
             "0x484c78cf4a3C5bAb2174931E0A451e0E1B5b08F7",
             "0xb14226c3FD41e9B1FF85b4f7144CB4096a5D1Ec9",
             "0xAbf52Fc6e5C0e6E44Daac7C6ca79498302D9B0CA"
@@ -2566,14 +2538,17 @@
     },
     {
         "name": "CurveUsdSwapper",
-        "address": "0xFa2dfE6AF842e3184D305a85d09cfcf220ed4CBd",
+        "address": "0x934489c930C327D5a8B8b1D017cB08223bcF833f",
         "id": "0x83a67cc0",
         "path": "contracts/actions/curveusd/advanced/CurveUsdSwapper.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0xef8Aa00f824360236b6F586CeF8e4071Bd4448b6"]
+        "history": [
+            "0xFa2dfE6AF842e3184D305a85d09cfcf220ed4CBd",
+            "0xef8Aa00f824360236b6F586CeF8e4071Bd4448b6"
+        ]
     },
     {
         "name": "CurveUsdSelfLiquidateWithColl",

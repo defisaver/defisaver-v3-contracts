@@ -2,7 +2,6 @@
 pragma solidity =0.8.10;
 pragma experimental ABIEncoderV2;
 
-import "../balancer/helpers/BalancerV2Helper.sol";
 import "../ActionBase.sol";
 
 import "../../interfaces/balancer/IFlashLoanRecipient.sol";
@@ -15,7 +14,9 @@ import "../../utils/TokenUtils.sol";
 import "../../utils/SafeMath.sol";
 import "../../utils/ReentrancyGuard.sol";
 
-contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, BalancerV2Helper, IFlashLoanBase, StrategyModel {
+import "./helpers/FLHelper.sol";
+
+contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashLoanBase, StrategyModel, FLHelper {
     using TokenUtils for address;
     using SafeMath for uint256;
 

@@ -292,64 +292,6 @@ const reflexerGenerate = async (proxy, safeId, amount, to) => {
     return tx;
 };
 /*
-.______        ___       __          ___      .__   __.   ______  _______ .______
-|   _  \      /   \     |  |        /   \     |  \ |  |  /      ||   ____||   _  \
-|  |_)  |    /  ^  \    |  |       /  ^  \    |   \|  | |  ,----'|  |__   |  |_)  |
-|   _  <    /  /_\  \   |  |      /  /_\  \   |  . `  | |  |     |   __|  |      /
-|  |_)  |  /  _____  \  |  `----./  _____  \  |  |\   | |  `----.|  |____ |  |\  \----.
-|______/  /__/     \__\ |_______/__/     \__\ |__| \__|  \______||_______|| _| `._____|
-*/
-
-const balancerSupply = async (proxy, poolId, from, to, tokens, maxAmountsIn, userData) => {
-    const balancerSupplyAction = new dfs.actions.balancer.BalancerV2SupplyAction(
-        poolId,
-        from,
-        to,
-        tokens,
-        maxAmountsIn,
-        userData,
-    );
-    const functionData = balancerSupplyAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('BalancerV2Supply', functionData, proxy);
-    return tx;
-};
-const balancerClaim = async (proxy, liquidityProvider, to, weeks, balances, merkleProofs) => {
-    const balancerClaimAction = new dfs.actions.balancer.BalancerV2ClaimAction(
-        liquidityProvider,
-        to,
-        weeks,
-        balances,
-        merkleProofs,
-    );
-    const functionData = balancerClaimAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('BalancerV2Claim', functionData, proxy);
-    return tx;
-};
-const balancerWithdraw = async (
-    proxy,
-    poolId,
-    from,
-    to,
-    lpTokenAmount,
-    tokens,
-    minAmountsOut,
-    userData,
-) => {
-    const balancerWithdrawAction = new dfs.actions.balancer.BalancerV2WithdrawAction(
-        poolId,
-        from,
-        to,
-        lpTokenAmount,
-        tokens,
-        minAmountsOut,
-        userData,
-    );
-    const functionData = balancerWithdrawAction.encodeForDsProxyCall()[1];
-
-    const tx = await executeAction('BalancerV2Withdraw', functionData, proxy);
-    return tx;
-};
-/*
   ______   ______   .___  ___. .______     ______    __    __  .__   __.  _______
  /      | /  __  \  |   \/   | |   _  \   /  __  \  |  |  |  | |  \ |  | |       \
 |  ,----'|  |  |  | |  \  /  | |  |_)  | |  |  |  | |  |  |  | |   \|  | |  .--.  |
@@ -1836,103 +1778,6 @@ const rariWithdraw = async (
 
     const functionData = rariWithdrawAction.encodeForDsProxyCall()[1];
     const tx = await executeAction('RariWithdraw', functionData, proxy);
-    return tx;
-};
-const qiDaoOpen = async (
-    proxy,
-    vaultId,
-) => {
-    dfs.configure({
-        chainId: 10,
-    });
-    const qidaoOpenAction = new dfs.actions.qidao.QiDaoOpenVaultAction(
-        vaultId,
-    );
-    const functionData = qidaoOpenAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('QiDaoOpen', functionData, proxy);
-    return tx;
-};
-const qiDaoSupply = async (
-    proxy,
-    vaultId,
-    userVaultId,
-    tokenAddress,
-    amount,
-    from,
-) => {
-    dfs.configure({
-        chainId: 10,
-    });
-    const qiDaoSupplyAction = new dfs.actions.qidao.QiDaoSupplyAction(
-        vaultId,
-        userVaultId,
-        amount,
-        from,
-        tokenAddress,
-    );
-    const functionData = qiDaoSupplyAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('QiDaoSupply', functionData, proxy);
-    return tx;
-};
-const qiDaoWithdraw = async (
-    proxy,
-    vaultId,
-    userVaultid,
-    amount,
-    to,
-) => {
-    dfs.configure({
-        chainId: 10,
-    });
-    const qiDaoWithdrawAction = new dfs.actions.qidao.QiDaoWithdrawAction(
-        vaultId,
-        userVaultid,
-        amount,
-        to,
-    );
-    const functionData = qiDaoWithdrawAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('QiDaoWithdraw', functionData, proxy);
-    return tx;
-};
-
-const qiDaoGenerate = async (
-    proxy,
-    vaultId,
-    userVaultId,
-    amount,
-    to,
-) => {
-    dfs.configure({
-        chainId: 10,
-    });
-    const qiDaoGenerateAction = new dfs.actions.qidao.QiDaoGenerateAction(
-        vaultId,
-        userVaultId,
-        amount,
-        to,
-    );
-    const functionData = qiDaoGenerateAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('QiDaoGenerate', functionData, proxy);
-    return tx;
-};
-const qiDaoPayback = async (
-    proxy,
-    vaultId,
-    userVaultId,
-    amount,
-    from,
-) => {
-    dfs.configure({
-        chainId: 10,
-    });
-    const qiDaoGenerateAction = new dfs.actions.qidao.QiDaoPaybackAction(
-        vaultId,
-        userVaultId,
-        amount,
-        from,
-    );
-    const functionData = qiDaoGenerateAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('QiDaoPayback', functionData, proxy);
     return tx;
 };
 
@@ -3479,10 +3324,6 @@ module.exports = {
     buyTokenIfNeeded,
     pullTokensInstDSA,
 
-    balancerSupply,
-    balancerWithdraw,
-    balancerClaim,
-
     changeProxyOwner,
     automationV2Unsub,
 
@@ -3495,12 +3336,6 @@ module.exports = {
 
     rariDeposit,
     rariWithdraw,
-
-    qiDaoOpen,
-    qiDaoSupply,
-    qiDaoGenerate,
-    qiDaoPayback,
-    qiDaoWithdraw,
 
     aaveV3Supply,
     aaveV3SupplyCalldataOptimised,
