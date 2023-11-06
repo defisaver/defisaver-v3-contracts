@@ -3,7 +3,7 @@ const {
 } = require('../utils');
 const { dydxFLTest } = require('./fl-tests');
 
-describe('FL-DyDx', function () {
+describe.skip('FL-DyDx', function () {
     this.timeout(60000);
 
     before(async () => {

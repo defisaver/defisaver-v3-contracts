@@ -11,6 +11,7 @@ contract BaseWrapperAddresses {
 
     // currently not set on base
     address internal constant CURVE_ADDRESS_PROVIDER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant CURVE_ROUTER_NG = 0xd6681e74eEA20d196c15038C580f721EF2aB6320;
 
     // not used on L2
     address internal constant KYBER_INTERFACE = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
