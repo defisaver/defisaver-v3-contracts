@@ -5,6 +5,7 @@ const { getAssetInfo } = require('@defisaver/tokens');
 
 const {
     getAaveDataProvider,
+    getAaveLendingPoolV2,
     getAaveTokenInfo,
     getAaveReserveInfo,
     getAaveReserveData,
@@ -47,7 +48,14 @@ const aaveSupplyTest = async (testLength) => {
 
         let senderAcc; let proxy; let dataProvider;
 
-        before(async () => {
+        before(async function () {
+            const lendingPool = await getAaveLendingPoolV2();
+            const isPaused = await lendingPool.paused();
+            if (isPaused) {
+                console.log('Aave V2 Lending Pool is paused. Skipping supply tests...');
+                this.skip();
+            }
+
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             dataProvider = await getAaveDataProvider();
@@ -86,7 +94,14 @@ const aaveSupplyTest = async (testLength) => {
 const aaveBorrowTest = async (testLength) => {
     describe('Aave-Borrow', () => {
         let senderAcc; let proxy; let dataProvider;
-        before(async () => {
+        before(async function () {
+            const lendingPool = await getAaveLendingPoolV2();
+            const isPaused = await lendingPool.paused();
+            if (isPaused) {
+                console.log('Aave V2 Lending Pool is paused. Skipping borrow tests...');
+                this.skip();
+            }
+
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             dataProvider = await getAaveDataProvider();
@@ -224,7 +239,14 @@ const aaveWithdrawTest = async (testLength) => {
 
         let senderAcc; let proxy; let dataProvider;
 
-        before(async () => {
+        before(async function () {
+            const lendingPool = await getAaveLendingPoolV2();
+            const isPaused = await lendingPool.paused();
+            if (isPaused) {
+                console.log('Aave V2 Lending Pool is paused. Skipping withdraw tests...');
+                this.skip();
+            }
+
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             dataProvider = await getAaveDataProvider();
@@ -277,7 +299,14 @@ const aavePaybackTest = async (testLength) => {
 
         let senderAcc; let proxy; let dataProvider;
 
-        before(async () => {
+        before(async function () {
+            const lendingPool = await getAaveLendingPoolV2();
+            const isPaused = await lendingPool.paused();
+            if (isPaused) {
+                console.log('Aave V2 Lending Pool is paused. Skipping payback tests...');
+                this.skip();
+            }
+
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             dataProvider = await getAaveDataProvider();
@@ -447,7 +476,14 @@ const aaveClaimStkAaveTest = async () => {
         let accruedRewards;
         let snapshot;
 
-        before(async () => {
+        before(async function () {
+            const lendingPool = await getAaveLendingPoolV2();
+            const isPaused = await lendingPool.paused();
+            if (isPaused) {
+                console.log('Aave V2 Lending Pool is paused. Skipping claimStkAave tests...');
+                this.skip();
+            }
+
             const aaveViewAddr = await getAddrFromRegistry('AaveView');
             AaveView = await hre.ethers.getContractAt('AaveView', aaveViewAddr);
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -614,6 +650,10 @@ const aaveFullTest = async (testLength) => {
     await aavePaybackTest(testLength);
 
     await aaveClaimStkAaveTest();
+
+    await aaveClaimAAVETest();
+
+    await aaveUnstakeTest();
 };
 
 module.exports = {
