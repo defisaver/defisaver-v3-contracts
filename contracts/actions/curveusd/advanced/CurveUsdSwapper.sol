@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import "../../../interfaces/curve/ISwaps.sol";
+import "../../../interfaces/curve/ISwapRouterNG.sol";
 import "../../../interfaces/IERC20.sol";
 
 import "../../../auth/AdminAuth.sol";
@@ -18,6 +18,7 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
+    ISwapRouterNG internal constant exchangeContract = ISwapRouterNG(CURVE_ROUTER_NG);
     uint256 internal constant STANDARD_DFS_FEE = 400;
 
     event LogCurveUsdSwapper(
@@ -35,12 +36,14 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
     }
 
     struct SwapRoutes {
-        address[9] route;
-        uint256[3][4] swap_params;
+        address[11] route;
+        uint256[5][5] swap_params;
+        address[5] pools;
     }
 
-    /// @dev Transient store of curve swap routes as we can"t fit whole data in callback params
-    address[6] internal additionalRoutes;
+    /// @dev Transient store of curve swap routes and zap pools as we can"t fit whole data in callback params
+    address[8] internal additionalRoutes;
+    address[5] internal swapZapPools;
 
     ///@dev Called by curve controller from repay_extended method, sends collateral tokens to this contract
     function callback_repay(
@@ -123,10 +126,12 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         IERC20(collToken).safeApprove(controllerAddr, cb.collateral);
     }
 
-    /// @dev Called by our actions to transiently store curve swap routes
-    /// @param _additionalRoutes Array of 6 addresses to store in transient storage
-    function setAdditionalRoutes(address[6] memory _additionalRoutes) external {
+    /// @dev Called by our actions to transiently store curve swap routes and zap pools
+    /// @param _additionalRoutes Array of 8 addresses to store in transient storage
+    /// @param _swapZapPools Array of 5 addresses to store in transient storage
+    function setAdditionalRoutes(address[8] memory _additionalRoutes, address[5] memory _swapZapPools) external {
         additionalRoutes = _additionalRoutes;
+        swapZapPools = _swapZapPools;
     }
 
     /// @dev No funds should be stored on this contract, but if anything is left send back to the user
@@ -145,8 +150,6 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         address _collToken,
         bool _collToUsd
     ) internal returns (uint256 amountOut) {
-        ISwaps exchangeContract = ISwaps(addressProvider.get_address(2));
-
         // get swap params
         uint256 swapAmount = _swapData[0];
         uint256 minAmountOut = _swapData[1];
@@ -157,21 +160,12 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         (
             SwapRoutes memory swapRoutes,
             uint32 gasUsed,
-            uint32 dfsFeeDivider,
-            bool useSteth
+            uint24 dfsFeeDivider
         ) = getSwapPath(_swapData, _collToken, _collToUsd);
-
-        // if we are doing coll -> usd trade and the unwrap is true convert wsteth -> steth
-        if (useSteth && _collToUsd) {
-            swapAmount = IWStEth(WSTETH_ADDR).unwrap(swapAmount);
-
-            srcToken = STETH_ADDR;
-            swapRoutes.route[0] = STETH_ADDR;
-        }
 
         // check custom fee if front sends a non standard fee param
         if (dfsFeeDivider != STANDARD_DFS_FEE) {
-            dfsFeeDivider = uint32(
+            dfsFeeDivider = uint24(
                 TokenGroupRegistry(TOKEN_GROUP_REGISTRY).getFeeForTokens(srcToken, destToken)
             );
         }
@@ -181,23 +175,18 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
 
         IERC20(srcToken).safeApprove(address(exchangeContract), swapAmount);
 
-        amountOut = exchangeContract.exchange_multiple(
+        amountOut = exchangeContract.exchange(
             swapRoutes.route,
             swapRoutes.swap_params,
             swapAmount,
-            minAmountOut
+            minAmountOut,
+            swapRoutes.pools,
+            address(this)
         );
-
-        if (useSteth && !_collToUsd) {
-            // wrap any leftover steth
-            uint256 stethBalance = IERC20(STETH_ADDR).balanceOf(address(this));
-            IERC20(STETH_ADDR).safeApprove(WSTETH_ADDR, stethBalance);
-
-            amountOut = IWStEth(WSTETH_ADDR).wrap(stethBalance);
-        }
 
         // free the storage only needed inside tx as transient storage
         delete additionalRoutes;
+        delete swapZapPools;
 
         emit LogCurveUsdSwapper(_user, srcToken, destToken, swapAmount, amountOut, minAmountOut);
     }
@@ -210,9 +199,9 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
     )
         public
         view
-        returns (SwapRoutes memory swapRoutes, uint32 gasUsed, uint32 dfsFeeDivider, bool useSteth)
+        returns (SwapRoutes memory swapRoutes, uint32 gasUsed, uint24 dfsFeeDivider)
     {
-        (swapRoutes.swap_params, gasUsed, dfsFeeDivider, useSteth) = decodeSwapParams(swapData[2]);
+        (swapRoutes.swap_params, gasUsed, dfsFeeDivider) = decodeSwapParams(swapData[2]);
 
         address firstAddr = _collToUsd ? _collToken : CRVUSD_TOKEN_ADDR;
 
@@ -226,6 +215,14 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         swapRoutes.route[6] = additionalRoutes[3];
         swapRoutes.route[7] = additionalRoutes[4];
         swapRoutes.route[8] = additionalRoutes[5];
+        swapRoutes.route[9] = additionalRoutes[6];
+        swapRoutes.route[10] = additionalRoutes[7];
+
+        swapRoutes.pools[0] = swapZapPools[0];
+        swapRoutes.pools[1] = swapZapPools[1];
+        swapRoutes.pools[2] = swapZapPools[2];
+        swapRoutes.pools[3] = swapZapPools[3];
+        swapRoutes.pools[4] = swapZapPools[4];
     }
 
     function takeSwapAndGasCostFee(
@@ -260,26 +257,21 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
 
     /// @dev Encode swapParams in 1 uint256 as the values are small
     function encodeSwapParams(
-        uint256[3][4] memory swapParams,
+        uint256[5][5] memory swapParams,
         uint32 gasUsed,
-        uint32 dfsFeeDivider,
-        uint8 useSteth
+        uint24 dfsFeeDivider
     ) public pure returns (uint256 encoded) {
-        encoded |= swapParams[0][0];
-        encoded |= (swapParams[0][1] << 16);
-        encoded |= (swapParams[0][2] << 32);
-        encoded |= (swapParams[1][0] << 48);
-        encoded |= (swapParams[1][1] << 64);
-        encoded |= (swapParams[1][2] << 80);
-        encoded |= (swapParams[2][0] << 96);
-        encoded |= (swapParams[2][1] << 112);
-        encoded |= (swapParams[2][2] << 128);
-        encoded |= (swapParams[3][0] << 144);
-        encoded |= (swapParams[3][1] << 160);
-        encoded |= (swapParams[3][2] << 176);
-        encoded |= uint256(gasUsed) << 192;
-        encoded |= uint256(dfsFeeDivider) << 224;
-        encoded |= uint256(useSteth) << 248;
+        uint256 maskOffset;
+
+        for (uint256 i; i < 5; i++) {
+            for (uint256 j; j < 5; j++) {
+                encoded |= (swapParams[i][j] << maskOffset);
+                maskOffset += 8;
+            }
+        }
+        encoded |= uint256(gasUsed) << maskOffset;
+        maskOffset += 32;
+        encoded |= uint256(dfsFeeDivider) << maskOffset;
     }
 
     /// @dev Decode swapParams from 1 uint256
@@ -289,34 +281,20 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         public
         pure
         returns (
-            uint256[3][4] memory swapParams,
+            uint256[5][5] memory swapParams,
             uint32 gasUsed,
-            uint32 dfsFeeDivider,
-            bool useSteth
+            uint24 dfsFeeDivider
         )
     {
-        swapParams[0] = [
-            uint256(uint16(swapParamEncoded)),
-            uint256(uint16(swapParamEncoded >> 16)),
-            uint256(uint16(swapParamEncoded >> 32))
-        ];
-        swapParams[1] = [
-            uint256(uint16(swapParamEncoded >> 48)),
-            uint256(uint16(swapParamEncoded >> 64)),
-            uint256(uint16(swapParamEncoded >> 80))
-        ];
-        swapParams[2] = [
-            uint256(uint16(swapParamEncoded >> 96)),
-            uint256(uint16(swapParamEncoded >> 112)),
-            uint256(uint16(swapParamEncoded >> 128))
-        ];
-        swapParams[3] = [
-            uint256(uint16(swapParamEncoded >> 144)),
-            uint256(uint16(swapParamEncoded >> 160)),
-            uint256(uint16(swapParamEncoded >> 176))
-        ];
-        gasUsed = uint32(swapParamEncoded >> 192);
-        dfsFeeDivider = uint24(swapParamEncoded >> 224);
-        useSteth = uint8(swapParamEncoded >> 248) == 1;
+        uint256 maskOffset;
+        for (uint256 i; i < 5; i++) {
+            for (uint256 j; j < 5; j++) {
+                swapParams[i][j] = uint256(uint8(swapParamEncoded >> maskOffset));
+                maskOffset += 8;
+            }
+        }
+        gasUsed = uint32(swapParamEncoded >> maskOffset);
+        maskOffset += 32;
+        dfsFeeDivider = uint24(swapParamEncoded >> maskOffset);
     }
 }
