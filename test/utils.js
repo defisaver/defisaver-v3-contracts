@@ -850,7 +850,13 @@ let _curveObj;
 const curveApiInit = async () => {
     if (!_curveObj) {
         _curveObj = ((await curve).default);
-        _curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
+        await _curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
+        // Fetch factory pools
+        await _curveObj.factory.fetchPools(true);
+        await _curveObj.crvUSDFactory.fetchPools(true);
+        await _curveObj.EYWAFactory.fetchPools(true);
+        await _curveObj.cryptoFactory.fetchPools(true);
+        await _curveObj.tricryptoFactory.fetchPools(true);
     }
     return _curveObj;
 };
