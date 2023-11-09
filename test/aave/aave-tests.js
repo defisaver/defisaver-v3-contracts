@@ -72,6 +72,14 @@ const aaveSupplyTest = async (testLength) => {
                     assetInfo.address = WETH_ADDRESS;
                 }
 
+                const reserveInfo = await getAaveReserveInfo(dataProvider, assetInfo.address);
+
+                if (!reserveInfo.isActive || reserveInfo.isFrozen) {
+                // eslint-disable-next-line no-unused-expressions
+                    expect(true).to.be.true;
+                    return;
+                }
+
                 const aaveTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
                 const aToken = aaveTokenInfo.aTokenAddress;
                 const amount = hre.ethers.utils.parseUnits(
@@ -122,7 +130,7 @@ const aaveBorrowTest = async (testLength) => {
                 const aTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
                 const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
-                if (!reserveInfo.borrowingEnabled) {
+                if (!reserveInfo.borrowingEnabled || !reserveInfo.isActive) {
                 // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
@@ -185,7 +193,7 @@ const aaveBorrowTest = async (testLength) => {
                 const aTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
                 const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
-                if (!reserveInfo.stableBorrowRateEnabled) {
+                if (!reserveInfo.stableBorrowRateEnabled || !reserveInfo.isActive) {
                 // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
@@ -275,6 +283,13 @@ const aaveWithdrawTest = async (testLength) => {
                 const aBalanceBefore = await balanceOf(aToken, proxy.address);
 
                 if (aBalanceBefore.lte(amount)) {
+                    const reserveInfo = await getAaveReserveInfo(dataProvider, assetInfo.address);
+                    if (reserveInfo.isFrozen || !reserveInfo.isActive) {
+                    // eslint-disable-next-line no-unused-expressions
+                        expect(true).to.be.true;
+                        return;
+                    }
+
                     // eslint-disable-next-line max-len
                     await supplyAave(proxy, AAVE_MARKET, amount, assetInfo.address, senderAcc.address);
                 }
@@ -594,8 +609,6 @@ const aaveUnstakeTest = async () => {
             proxy = await getProxy(senderAcc.address);
             snapshot = await takeSnapshot();
         });
-        it('... should accrue rewards over time', async () => {
-        });
 
         it('... should stake 100 AAVE on behalf of DSProxy', async () => {
             const amount = hre.ethers.utils.parseUnits('100', 18);
@@ -603,6 +616,7 @@ const aaveUnstakeTest = async () => {
             await approve(aaveToken, stkAaveAddr, senderAcc);
             await stkAaveContract.stake(proxy.address, amount);
         });
+
         it('... should accrue rewards over time', async () => {
             const secondsInMonth = 2592000;
             await timeTravel(secondsInMonth);
