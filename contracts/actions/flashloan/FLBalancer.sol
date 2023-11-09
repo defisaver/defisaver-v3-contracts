@@ -83,7 +83,7 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, Balance
         }
         address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
 
-        if (isDSProxy()) {
+        if (isDSProxy(proxy)) {
             // call Action execution
             IDSProxy(proxy).execute{value: address(this).balance}(
                 recipeExecutorAddr,
@@ -116,8 +116,8 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, Balance
     }
 
      // TODO: should be a better check
-    function isDSProxy() internal returns (bool) {
-        (bool success, bytes memory response) = address(this).call(abi.encodeWithSignature("nonce()"));
+    function isDSProxy(address _proxy) internal returns (bool) {
+        (bool success, bytes memory response) = _proxy.call(abi.encodeWithSignature("nonce()"));
 
         if (response.length == 0) return true;
 
