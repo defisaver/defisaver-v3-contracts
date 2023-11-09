@@ -29,6 +29,7 @@ const {
     approve,
     resetForkToBlock,
     impersonateAccount,
+    sendEther,
 } = require('../utils');
 
 const {
@@ -481,54 +482,39 @@ const aaveClaimStkAaveTest = async () => {
         this.timeout(150000);
 
         const stkAaveAddr = '0x4da27a545c0c5B758a6BA100e3a049001de870f5';
-
+        const OWNER_ACC = '0xe97f5363b77424332aae94e358a41ccbeb9e454b';
         const tokenSymbol = 'WETH';
         const assetInfo = getAssetInfo(tokenSymbol);
-        const supplyAmount = fetchAmountinUSDPrice(tokenSymbol, '10000');
 
         let senderAcc; let proxy; let proxyAddr; let dataProvider;
         let aTokenInfo; let AaveView;
         let accruedRewards;
         let snapshot;
 
-        before(async function () {
-            const lendingPool = await getAaveLendingPoolV2();
-            const isPaused = await lendingPool.paused();
-            if (isPaused) {
-                console.log('Aave V2 Lending Pool is paused. Skipping claimStkAave tests...');
-                this.skip();
-            }
+        before(async () => {
+            resetForkToBlock(18435394);
+            await redeploy('AaveClaimStkAave');
+            await redeploy('AaveView');
+
+            senderAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
+            proxy = await getProxy(OWNER_ACC);
+            proxy = proxy.connect(senderAcc);
+            proxyAddr = proxy.address;
+            await impersonateAccount(OWNER_ACC);
+
+            // send some eth to senderAcc
+            const zeroAddress = hre.ethers.constants.AddressZero;
+            const zeroAcc = await hre.ethers.provider.getSigner(zeroAddress);
+            await impersonateAccount(zeroAddress);
+            await sendEther(zeroAcc, OWNER_ACC, '5');
+
+            dataProvider = await getAaveDataProvider();
+            aTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
 
             const aaveViewAddr = await getAddrFromRegistry('AaveView');
             AaveView = await hre.ethers.getContractAt('AaveView', aaveViewAddr);
-            senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
-            proxyAddr = proxy.address;
-            dataProvider = await getAaveDataProvider();
-            aTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
-            snapshot = await takeSnapshot();
-        });
-
-        it(`... should supply ${supplyAmount} ${tokenSymbol} to Aave`, async () => {
-            const aTokenBalanceBefore = await balanceOf(aTokenInfo.aTokenAddress, proxyAddr);
-            // eslint-disable-next-line max-len
-            await supplyAave(proxy, AAVE_MARKET, hre.ethers.utils.parseUnits(supplyAmount, 18), WETH_ADDRESS, senderAcc.address);
-            const aTokenBalanceAfter = await balanceOf(aTokenInfo.aTokenAddress, proxyAddr);
-
-            // eslint-disable-next-line max-len
-            expect(aTokenBalanceAfter.sub(aTokenBalanceBefore)).to.eq(hre.ethers.utils.parseUnits(supplyAmount, 18));
-        });
-
-        it('... should accrue rewards over time', async () => {
-            const secondsInMonth = 2592000;
-            await timeTravel(secondsInMonth);
-
-            // eslint-disable-next-line max-len
-            await supplyAave(proxy, AAVE_MARKET, hre.ethers.constants.One, WETH_ADDRESS, senderAcc.address);
-            // this is done so the getter function below returns accurate balance
-
             accruedRewards = await AaveView['getUserUnclaimedRewards(address)'](proxyAddr);
-            expect(accruedRewards).to.be.gt(hre.ethers.constants.Zero);
+            snapshot = await takeSnapshot();
         });
 
         it('... should not revert when claiming 0 rewards', async () => {
@@ -546,7 +532,7 @@ const aaveClaimStkAaveTest = async () => {
 
         it('... should claim all accrued rewards when amount > unclaimed rewards', async () => {
         // eslint-disable-next-line max-len
-            await claimStkAave(proxy, [aTokenInfo.aTokenAddress], accruedRewards.add('1'), proxyAddr);
+            await claimStkAave(proxy, [aTokenInfo.aTokenAddress], accruedRewards.div('2').add('1'), proxyAddr);
             const stkAaveBalanceAfter = await balanceOf(stkAaveAddr, proxyAddr);
             expect(stkAaveBalanceAfter / 1e18).to.be.closeTo(accruedRewards / 1e18, 0.00001);
             await revertToSnapshot(snapshot);
