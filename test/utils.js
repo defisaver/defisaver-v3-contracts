@@ -985,10 +985,12 @@ const getProxyAuth = async (proxyAddr, addrWithAuth) => {
     return hasPermission;
 };
 
-const setNewExchangeWrapper = async (acc, newAddr) => {
+const setNewExchangeWrapper = async (acc, newAddr, isFork = false) => {
     const exchangeOwnerAddr = addrs[network].EXCHANGE_OWNER_ADDR;
     await sendEther(acc, exchangeOwnerAddr, '1');
-    await impersonateAccount(exchangeOwnerAddr);
+    if (!isFork) {
+        await impersonateAccount(exchangeOwnerAddr);
+    }
 
     const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
 
@@ -997,7 +999,9 @@ const setNewExchangeWrapper = async (acc, newAddr) => {
     const registryByOwner = registry.connect(signer);
 
     await registryByOwner.addWrapper(newAddr, { gasLimit: 300000 });
-    await stopImpersonatingAccount(exchangeOwnerAddr);
+    if (!isFork) {
+        await stopImpersonatingAccount(exchangeOwnerAddr);
+    }
 };
 
 const depositToWeth = async (amount, signer) => {
