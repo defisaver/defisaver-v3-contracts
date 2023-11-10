@@ -17,7 +17,10 @@ interface IAaveProtocolDataProvider {
      * @return usageAsCollateralEnabled True if the user is using the asset as collateral, false
      *         otherwise
      **/
-    function getUserReserveData(address asset, address user)
+    function getUserReserveData(
+        address asset,
+        address user
+    )
         external
         view
         returns (
@@ -31,5 +34,46 @@ interface IAaveProtocolDataProvider {
             uint40 stableRateLastUpdated,
             bool usageAsCollateralEnabled
         );
-    function getSiloedBorrowing(address asset) external view returns (bool);	
+
+    function getSiloedBorrowing(address asset) external view returns (bool);
+
+    /**
+     * @notice Returns if the pool is paused
+     * @param asset The address of the underlying asset of the reserve
+     * @return isPaused True if the pool is paused, false otherwise
+     **/
+    function getPaused(address asset) external view returns (bool isPaused);
+
+    /**
+     * @notice Returns the configuration data of the reserve
+     * @dev Not returning borrow and supply caps for compatibility, nor pause flag
+     * @param asset The address of the underlying asset of the reserve
+     * @return decimals The number of decimals of the reserve
+     * @return ltv The ltv of the reserve
+     * @return liquidationThreshold The liquidationThreshold of the reserve
+     * @return liquidationBonus The liquidationBonus of the reserve
+     * @return reserveFactor The reserveFactor of the reserve
+     * @return usageAsCollateralEnabled True if the usage as collateral is enabled, false otherwise
+     * @return borrowingEnabled True if borrowing is enabled, false otherwise
+     * @return stableBorrowRateEnabled True if stable rate borrowing is enabled, false otherwise
+     * @return isActive True if it is active, false otherwise
+     * @return isFrozen True if it is frozen, false otherwise
+     */
+    function getReserveConfigurationData(
+        address asset
+    )
+        external
+        view
+        returns (
+            uint256 decimals,
+            uint256 ltv,
+            uint256 liquidationThreshold,
+            uint256 liquidationBonus,
+            uint256 reserveFactor,
+            bool usageAsCollateralEnabled,
+            bool borrowingEnabled,
+            bool stableBorrowRateEnabled,
+            bool isActive,
+            bool isFrozen
+        );
 }

@@ -38,12 +38,29 @@ const getAaveReserveData = async (dataProvider, tokenAddr) => {
     return tokens;
 };
 
+const isAssetBorrowableV3 = async (dataProviderAddr, tokenAddr, checkStableBorrow = false) => {
+    const protocolDataProvider = await hre.ethers.getContractAt('IAaveProtocolDataProvider', dataProviderAddr);
+
+    const isPausedAsset = await protocolDataProvider.getPaused(tokenAddr);
+    const { isActive, isFrozen, stableBorrowRateEnabled } = await protocolDataProvider
+        .getReserveConfigurationData(tokenAddr);
+
+    const canBorrow = !isPausedAsset && isActive && !isFrozen;
+
+    if (checkStableBorrow) {
+        return canBorrow && stableBorrowRateEnabled;
+    }
+
+    return canBorrow;
+};
+
 module.exports = {
     getAaveDataProvider,
     getAaveLendingPoolV2,
     getAaveTokenInfo,
     getAaveReserveInfo,
     getAaveReserveData,
+    isAssetBorrowableV3,
     aaveV2assetsDefaultMarket,
     STABLE_RATE,
     VARIABLE_RATE,
