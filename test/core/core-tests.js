@@ -642,7 +642,7 @@ const recipeExecutorTest = async () => {
         let strategyExecutorByBot;
         let maxGasPrice;
         let recipeExecutor;
-        let dydxFl;
+        let flAddr;
         let strategyId;
         let subId;
 
@@ -655,10 +655,7 @@ const recipeExecutorTest = async () => {
             const subProxyAddr = await getAddrFromRegistry('SubProxy');
             subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
 
-            dydxFl = await redeploy('FLDyDx');
-            await redeploy('SendToken');
-            await redeploy('WrapEth');
-            await redeploy('GasPriceTrigger');
+            flAddr = await getAddrFromRegistry('FLAaveV3');
 
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
@@ -757,11 +754,11 @@ const recipeExecutorTest = async () => {
 
         it('...should execute basic recipe with FL', async () => {
             const beforeBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
-
+            const AAVE_NO_DEBT_MODE = 0;
             const dummyRecipeWithFL = new dfs.Recipe('DummyRecipeWithFl', [
                 // eslint-disable-next-line max-len
-                new dfs.actions.flashloan.DyDxFlashLoanAction(pullAmount, WETH_ADDRESS, nullAddress, []),
-                new dfs.actions.basic.SendTokenAction(WETH_ADDRESS, dydxFl.address, pullAmount),
+                new dfs.actions.flashloan.AaveV3FlashLoanNoFeeAction([WETH_ADDRESS], [pullAmount], [AAVE_NO_DEBT_MODE], nullAddress),
+                new dfs.actions.basic.SendTokenAction(WETH_ADDRESS, flAddr, pullAmount),
             ]);
 
             const functionData = dummyRecipeWithFL.encodeForDsProxyCall();

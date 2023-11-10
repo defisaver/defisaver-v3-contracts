@@ -845,44 +845,36 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, u
     ];
 };
 
+// eslint-disable-next-line no-underscore-dangle
+let _curveObj;
+const curveApiInit = async () => {
+    if (!_curveObj) {
+        _curveObj = ((await curve).default);
+        _curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
+    }
+    return _curveObj;
+};
+
 const formatExchangeObjCurve = async (
     srcAddr,
     destAddr,
     amount,
     wrapper,
 ) => {
-    const curveObj = ((await curve).default);
-    await curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
-
-    await curveObj.factory.fetchPools();
-    await curveObj.crvUSDFactory.fetchPools();
-    await curveObj.EYWAFactory.fetchPools();
-    await curveObj.cryptoFactory.fetchPools();
-    await curveObj.tricryptoFactory.fetchPools();
+    const curveObj = await curveApiInit();
 
     const { route: sdkRoute } = await curveObj.router.getBestRouteAndOutput(
         srcAddr,
         destAddr,
         amount,
     );
-    const swapParams = sdkRoute.map((e) => [e.i, e.j, e.swapType]).concat(
-        [...Array(4 - sdkRoute.length).keys()].map(
-            () => [0, 0, 0],
-        ),
-    );
-    const route = [srcAddr].concat(
-        ...sdkRoute.map((e) => [e.poolAddress, e.outputCoinAddress]),
-        ...[...Array(8 - (sdkRoute.length) * 2).keys()].map(
-            () => [nullAddress],
-        ),
-    );
+    const args = curveObj.router.getArgs(sdkRoute);
 
     const exchangeData = hre.ethers.utils.defaultAbiCoder.encode(
-        ['address[9]', 'uint256[3][4]'],
-        [route, swapParams],
+        ['address[11]', 'uint256[5][5]', 'address[5]'],
+        // eslint-disable-next-line no-underscore-dangle
+        [args._route, args._swapParams, args._pools],
     );
-
-    console.log(route, swapParams);
 
     return [
         srcAddr,
@@ -897,47 +889,6 @@ const formatExchangeObjCurve = async (
         [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
     ];
 };
-
-// const getRouteForCurveSwapper = async (
-//     srcAddr,
-//     destAddr,
-//     amount,
-//     wrapper,
-// ) => {
-//     const curveObj = ((await curve).default);
-//     await curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
-
-//     await curveObj.factory.fetchPools();
-//     await curveObj.crvUSDFactory.fetchPools();
-//     await curveObj.EYWAFactory.fetchPools();
-//     await curveObj.cryptoFactory.fetchPools();
-//     await curveObj.tricryptoFactory.fetchPools();
-
-//     const { route: sdkRoute } = await curveObj.router.getBestRouteAndOutput(
-//         srcAddr,
-//         destAddr,
-//         '1000',
-//     );
-//     const swapParams = sdkRoute.map((e) => [e.i, e.j, e.swapType]).concat(
-//         [...Array(4 - sdkRoute.length).keys()].map(
-//             () => [0, 0, 0],
-//         ),
-//     );
-//     const route = [srcAddr].concat(
-//         ...sdkRoute.map((e) => [e.poolAddress, e.outputCoinAddress]),
-//         ...[...Array(8 - (sdkRoute.length) * 2).keys()].map(
-//             () => [nullAddress],
-//         ),
-//     );
-
-//     return {
-//         swapParamsCompact,
-//         secondAddr:
-//         thirdAddr:
-
-//     }
-
-// };
 
 const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
     console.log({ srcAddr, destAddr });
@@ -1244,6 +1195,7 @@ const resetForkToBlock = async (block) => {
         rpcUrl = process.env[`${network.toUpperCase()}_NODE`];
     }
 
+    /// `ProviderError: TypeError [ERR_INVALID_URL]: Invalid URL` on localBase network
     if (block) {
         await hre.network.provider.request({
             method: 'hardhat_reset',
@@ -1416,7 +1368,5 @@ module.exports = {
     setContractAt,
     getContractFromRegistry,
     filterEthersObject,
-    curveApiInit: async () => curve.init('Alchemy', {
-        url: hre.network.url,
-    }),
+    curveApiInit,
 };

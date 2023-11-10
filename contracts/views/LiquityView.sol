@@ -5,11 +5,9 @@ pragma solidity =0.8.10;
 import "../utils/TokenUtils.sol";
 import "../actions/liquity/helpers/LiquityHelper.sol";
 import "../DS/DSMath.sol";
-import "../utils/SafeMath.sol";
 
 contract LiquityView is LiquityHelper, DSMath {
     using TokenUtils for address;
-    using SafeMath for uint256;
 
     enum CollChange { SUPPLY, WITHDRAW }
     enum DebtChange { PAYBACK, BORROW }
@@ -21,7 +19,7 @@ contract LiquityView is LiquityHelper, DSMath {
 
     function computeNICR(uint256 _coll, uint256 _debt) public pure returns (uint256) {
         if (_debt > 0) {
-            return _coll.mul(1e20).div(_debt);
+            return _coll * 1e20 / _debt;
         }
         // Return the maximal value for uint256 if the Trove has a debt of 0. Represents "infinite" CR.
         else {
@@ -50,20 +48,20 @@ contract LiquityView is LiquityHelper, DSMath {
             if (_collAmount == type(uint256).max)
                 _collAmount = TokenUtils.WETH_ADDR.getBalance(_from);
 
-            newColl = coll.add(_collAmount);
+            newColl = coll + _collAmount;
         }
 
         //  LiquityWithdraw
         if (collChangeAction == CollChange.WITHDRAW) {
-            newColl = coll.sub(_collAmount);
+            newColl = coll - _collAmount;
         }
               
         //  LiquityBorrow
         if (debtChangeAction == DebtChange.BORROW) {
             if (!isRecoveryMode())
-                _lusdAmount = _lusdAmount.add(TroveManager.getBorrowingFeeWithDecay(_lusdAmount));
+                _lusdAmount = _lusdAmount + (TroveManager.getBorrowingFeeWithDecay(_lusdAmount));
 
-            newDebt = debt.add(_lusdAmount);
+            newDebt = debt + _lusdAmount;
         }
 
         //  LiquityPayback
@@ -77,7 +75,7 @@ contract LiquityView is LiquityHelper, DSMath {
                 _lusdAmount = wholeDebt - MIN_DEBT;
             }
 
-            newDebt = debt.sub(_lusdAmount);
+            newDebt = debt - _lusdAmount;
         }
         return computeNICR(newColl, newDebt);
     }
@@ -134,7 +132,7 @@ contract LiquityView is LiquityHelper, DSMath {
         uint256 _numTrials,
         uint256 _inputRandomSeed
     ) external view returns (address upperHint, address lowerHint) {
-        uint256 NICR = _collAmount.mul(1e20).div(_debtAmount);
+        uint256 NICR = _collAmount * 1e20 / _debtAmount;
         (address hintAddress, , ) = HintHelpers.getApproxHint(NICR, _numTrials, _inputRandomSeed);
         (upperHint, lowerHint) = SortedTroves.findInsertPosition(NICR, hintAddress, hintAddress);
     }
@@ -146,7 +144,7 @@ contract LiquityView is LiquityHelper, DSMath {
         uint256 _inputRandomSeed,
         address _troveOwner
     ) external view returns (address upperHint, address lowerHint) {
-        uint256 NICR = _collAmount.mul(1e20).div(_debtAmount);
+        uint256 NICR = _collAmount * 1e20 / _debtAmount;
         (address hintAddress, , ) = HintHelpers.getApproxHint(NICR, _numTrials, _inputRandomSeed);
         (upperHint, lowerHint) = SortedTroves.findInsertPosition(NICR, hintAddress, hintAddress);
 
@@ -192,7 +190,7 @@ contract LiquityView is LiquityHelper, DSMath {
         debt = _acc;
         for (uint256 i = 0; i < _iterations && next != address(0); i++) {
             next = SortedTroves.getNext(next);
-            debt = debt.add(TroveManager.getTroveDebt(next));
+            debt = debt + TroveManager.getTroveDebt(next);
         }
     }
 
@@ -220,6 +218,70 @@ contract LiquityView is LiquityHelper, DSMath {
 
             debt = debt + debtAmount;
             next = SortedTroves.getPrev(next);
+        }
+    }
+
+    /// @notice Returns the number of troves based on the targetDebtInFront
+    /// @param _of Address of the trove from which we are starting (either address(0) or what this function return in next)
+    /// @param _acc Accumulated sum used in subsequent calls, 0 for first call
+    /// @param _iterations Maximum number of troves to traverse
+    /// @param _targetDebtInFront Lusd debt in wei
+    /// @return next Trove owner address to be used in the subsequent call
+    /// @return numTroves Number of troves below the targetDebtInFront
+    function getNumTrovesForDebtInFront(address _of, uint256 _acc, uint256 _iterations, uint256 _targetDebtInFront) external view returns (address next, uint256 numTroves) {
+        if (_of == address(0)) {
+            next = SortedTroves.getLast();
+        } else {
+            next = _of;
+        }
+
+        uint256 currDebt = _acc;
+        for (uint256 i = 0; i < _iterations; i++) {
+            if (next == address(0)) {
+                return (next, numTroves);
+            }
+
+            uint256 debtAmount = TroveManager.getTroveDebt(next);
+
+            currDebt += debtAmount;
+
+            if (currDebt >= _targetDebtInFront) return (address(0), numTroves);
+
+            next = SortedTroves.getPrev(next);
+            numTroves++;
+        }
+    }
+
+    /// @notice Returns the debt in front from the start of the list to _numTroves specified
+    /// @param _numTroves Number of troves to traverse
+    /// @return debt Total debt for the number of troves
+    function getDebtInFrontByTroveNum(uint256 _numTroves) external view returns (uint256 debt) {
+        address next = SortedTroves.getLast();
+
+        for (uint256 i = 0; i < _numTroves; i++) {
+            uint256 debtAmount = TroveManager.getTroveDebt(next);
+
+            debt = debt + debtAmount;
+            next = SortedTroves.getPrev(next);
+        }
+    }
+
+    /// @notice Returns the number of troves in front of a specific user
+    /// @param _user Address of the trove from which we are starting
+    /// @param _iterations Maximum number of troves to traverse
+    /// @return next Trove owner address to be used in the subsequent call
+    /// @return numTroves Number of troves in front of the user
+    function getNumTrovesInFrontOfUser(address _user, uint256 _iterations) external view returns (address next, uint256 numTroves) {        
+        next = _user;
+
+        for (uint256 i = 0; i < _iterations; i++) {
+            next = SortedTroves.getNext(next);
+
+            if (next == address(0)) {
+                return (next, numTroves);
+            }
+
+            numTroves++;
         }
     }
 }

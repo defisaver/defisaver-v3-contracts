@@ -79,6 +79,12 @@ const createMorphoTrigger = async (user, ratio, ratioState) => {
     return param;
 };
 
+const createDebtInFrontWithLimitTrigger = async (user, debtInFrontMin) => {
+    const param = abiCoder.encode(['address', 'uint256'], [user, debtInFrontMin]);
+
+    return param;
+};
+
 module.exports = {
     createUniV3RangeOrderTrigger,
     createMcdTrigger,
@@ -92,6 +98,7 @@ module.exports = {
     createCbRebondTrigger,
     createOffchainPriceTrigger,
     createMorphoTrigger,
+    createDebtInFrontWithLimitTrigger,
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
     IN_BOOST,

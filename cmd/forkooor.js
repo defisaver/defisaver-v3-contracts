@@ -142,6 +142,7 @@ const {
     createCompFLV2BoostStrategy,
     createLiquityDsrPaybackStrategy,
     createLiquityDsrSupplyStrategy,
+    createLiquityDebtInFrontRepayStrategy,
 } = require('../test/strategies');
 
 const {
@@ -163,10 +164,11 @@ const {
     subAaveV2AutomationStrategy,
     subSparkCloseBundle,
     subSparkAutomationStrategy,
+    subLiquityDebtInFrontRepayStrategy,
     subAaveV3CloseWithMaximumGasPriceBundle,
 } = require('../test/strategy-subs');
 
-const { getTroveInfo } = require('../test/utils-liquity');
+const { getTroveInfo, getDebtInFront } = require('../test/utils-liquity');
 
 const {
     createMcdTrigger,
@@ -1162,6 +1164,8 @@ const createLiquityTrove = async (coll, debt, sender) => {
 
     setNetwork(network);
 
+    await redeploy('LiquityView', REGISTRY_ADDR, false, true);
+
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
@@ -1186,6 +1190,13 @@ const createLiquityTrove = async (coll, debt, sender) => {
         await tx.wait();
 
         console.log(`Trove created at proxy address: ${proxy.address}`);
+        const debtInFront = await getDebtInFront(proxy.address);
+
+        const troveInfo = await getTroveInfo(proxy.address);
+
+        console.log('Trove ratio: ', troveInfo.collAmount.mul(troveInfo.collPrice).div(troveInfo.debtAmount) / 1e16);
+
+        console.log('DebtInFront ', debtInFront.debt / 1e18);
     } catch (err) {
         console.log(`Error opening trove at proxy address: ${proxy.address}`);
 
@@ -2520,6 +2531,45 @@ const deployLiquityContracts = async () => {
     await getContractFromRegistry('LiquityRatioCheck', undefined, undefined, true);
 };
 
+const liqDebtInFrontRepaySub = async (
+    maxDebtInFront,
+    ratioIncrease,
+    sender,
+) => {
+    const { proxy } = await forkSetup(sender);
+
+    const ratioIncreaseFormatted = hre.ethers.utils.parseUnits(ratioIncrease, '16');
+    const maxDebtInFrontFormatted = hre.ethers.utils.parseUnits(maxDebtInFront, '18');
+
+    const latestStrategyId = (await getLatestStrategyId());
+
+    const strategyId = 75;
+
+    // check if our strategy is deployed, and if not deploy it
+    if (+latestStrategyId < 75) {
+        await openStrategyAndBundleStorage(true);
+
+        const strategyData = createLiquityDebtInFrontRepayStrategy();
+
+        await createStrategy(proxy, ...strategyData, true);
+
+        await redeploy('LiquityDebtInFrontWithLimitTrigger', REGISTRY_ADDR, false, true);
+        await redeploy('LiquityRatioIncreaseCheck', REGISTRY_ADDR, false, true);
+        await redeploy('LiquityView', REGISTRY_ADDR, false, true);
+
+        console.log(`Strategy deployed id: ${strategyId}`);
+    }
+
+    const { subId, strategySub } = await subLiquityDebtInFrontRepayStrategy(
+        proxy,
+        strategyId,
+        maxDebtInFrontFormatted,
+        ratioIncreaseFormatted,
+    );
+
+    console.log('Liquity debtInFront repay position subed', subId);
+};
+
 const subLiquityAutomation = async (
     minRatio,
     maxRatio,
@@ -3268,6 +3318,14 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
             // When executing strategy from bundle, ChickenIn strategy index is 0, ChickenOut is 1
             // eslint-disable-next-line max-len
             await liqCBPaybackSub(sourceId, sourceType, triggerRatio, triggerState, senderAddr);
+            process.exit(0);
+        });
+
+    program
+        .command('sub-liquity-debt-in-front-repay <minDebtInFront> <ratioIncrease> [senderAddr]')
+        .description('Subscribes a bond to the rebonding strategy')
+        .action(async (minDebtInFront, ratioIncrease, senderAddr) => {
+            await liqDebtInFrontRepaySub(minDebtInFront, ratioIncrease, senderAddr);
             process.exit(0);
         });
 
