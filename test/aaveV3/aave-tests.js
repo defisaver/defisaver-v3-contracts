@@ -106,10 +106,10 @@ const aaveV3BorrowTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
-            const poolAddres = await aaveMarketContract.getPool();
+            const poolAddress = await aaveMarketContract.getPool();
 
             const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
-            pool = await hre.ethers.getContractAt(poolContractName, poolAddres);
+            pool = await hre.ethers.getContractAt(poolContractName, poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             BORROW_ASSET_ADDR = addrs[network].DAI_ADDRESS;
 
@@ -213,10 +213,10 @@ const aaveV3WithdrawTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
-            const poolAddres = await aaveMarketContract.getPool();
+            const poolAddress = await aaveMarketContract.getPool();
 
             const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
-            pool = await hre.ethers.getContractAt(poolContractName, poolAddres);
+            pool = await hre.ethers.getContractAt(poolContractName, poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
 
             aWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
@@ -314,10 +314,10 @@ const aaveV3PaybackTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
-            const poolAddres = await aaveMarketContract.getPool();
+            const poolAddress = await aaveMarketContract.getPool();
 
             const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
-            pool = await hre.ethers.getContractAt(poolContractName, poolAddres);
+            pool = await hre.ethers.getContractAt(poolContractName, poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             BORROW_ASSET_ADDR = addrs[network].DAI_ADDRESS;
 
@@ -512,10 +512,10 @@ const aaveV3SwapBorrowRateTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
-            const poolAddres = await aaveMarketContract.getPool();
+            const poolAddress = await aaveMarketContract.getPool();
 
             const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
-            pool = await hre.ethers.getContractAt(poolContractName, poolAddres);
+            pool = await hre.ethers.getContractAt(poolContractName, poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             BORROW_ASSET_ADDR = addrs[network].DAI_ADDRESS;
 
@@ -652,10 +652,10 @@ const aaveV3SetEModeTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
-            const poolAddres = await aaveMarketContract.getPool();
+            const poolAddress = await aaveMarketContract.getPool();
 
             const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
-            pool = await hre.ethers.getContractAt(poolContractName, poolAddres);
+            pool = await hre.ethers.getContractAt(poolContractName, poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
 
             aWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
@@ -743,10 +743,10 @@ const aaveV3CollSwitchTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
-            const poolAddres = await aaveMarketContract.getPool();
+            const poolAddress = await aaveMarketContract.getPool();
 
             const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
-            pool = await hre.ethers.getContractAt(poolContractName, poolAddres);
+            pool = await hre.ethers.getContractAt(poolContractName, poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             DAI_ADDRESS = addrs[network].DAI_ADDRESS;
 
@@ -869,10 +869,10 @@ const aaveV3ATokenPaybackTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
-            const poolAddres = await aaveMarketContract.getPool();
+            const poolAddress = await aaveMarketContract.getPool();
 
             const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
-            pool = await hre.ethers.getContractAt(poolContractName, poolAddres);
+            pool = await hre.ethers.getContractAt(poolContractName, poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             BORROW_ASSET_ADDR = addrs[network].DAI_ADDRESS;
 
