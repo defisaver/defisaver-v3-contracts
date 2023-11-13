@@ -1219,8 +1219,8 @@
         "id": "0xd93d7e7f",
         "path": "contracts/actions/aave/AaveClaimStkAave.sol",
         "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
+        "inRegistry": false,
+        "changeTime": "0",
         "registryIds": [],
         "history": []
     },
