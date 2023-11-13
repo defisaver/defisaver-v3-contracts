@@ -482,7 +482,7 @@ const aaveClaimStkAaveTest = async () => {
         this.timeout(150000);
 
         const stkAaveAddr = '0x4da27a545c0c5B758a6BA100e3a049001de870f5';
-        const OWNER_ACC = '0xe97f5363b77424332aae94e358a41ccbeb9e454b';
+        const USER_ACC = '0xe97f5363b77424332aae94e358a41ccbeb9e454b';
         const tokenSymbol = 'WETH';
         const assetInfo = getAssetInfo(tokenSymbol);
 
@@ -496,17 +496,17 @@ const aaveClaimStkAaveTest = async () => {
             await redeploy('AaveClaimStkAave');
             await redeploy('AaveView');
 
-            senderAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
-            proxy = await getProxy(OWNER_ACC);
+            senderAcc = await hre.ethers.provider.getSigner(USER_ACC);
+            proxy = await getProxy(USER_ACC);
             proxy = proxy.connect(senderAcc);
             proxyAddr = proxy.address;
-            await impersonateAccount(OWNER_ACC);
+            await impersonateAccount(USER_ACC);
 
             // send some eth to senderAcc
             const zeroAddress = hre.ethers.constants.AddressZero;
             const zeroAcc = await hre.ethers.provider.getSigner(zeroAddress);
             await impersonateAccount(zeroAddress);
-            await sendEther(zeroAcc, OWNER_ACC, '5');
+            await sendEther(zeroAcc, USER_ACC, '5');
 
             dataProvider = await getAaveDataProvider();
             aTokenInfo = await getAaveTokenInfo(dataProvider, assetInfo.address);
@@ -546,24 +546,24 @@ const aaveClaimAAVETest = async () => {
 
         let senderAcc; let proxy;
         const AAVE_ADDR = '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9';
-        const OWNER_ACC = '0xa6584b95EA4E9018b1F377dad99448EC478a150f';
+        const USER_ACC = '0xa6584b95EA4E9018b1F377dad99448EC478a150f';
 
         before(async () => {
             await resetForkToBlock(17970305);
             // at this block user can claim 1.357486729318663975 AAVE on his proxy
             await redeploy('AaveClaimAAVE');
-            senderAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
+            senderAcc = await hre.ethers.provider.getSigner(USER_ACC);
 
-            proxy = await getProxy(OWNER_ACC);
+            proxy = await getProxy(USER_ACC);
             proxy = proxy.connect(senderAcc);
-            await impersonateAccount(OWNER_ACC);
+            await impersonateAccount(USER_ACC);
         });
 
         it('... should claim 1 AAVE (out of 1.35) for DSProxy from Staking Aave', async () => {
             const amountToClaim = hre.ethers.utils.parseUnits('1', 18);
-            const aaveBalanceBefore = await balanceOf(AAVE_ADDR, OWNER_ACC);
-            await claimAaveFromStkAave(proxy, amountToClaim, OWNER_ACC);
-            const aaveBalanceAfter = await balanceOf(AAVE_ADDR, OWNER_ACC);
+            const aaveBalanceBefore = await balanceOf(AAVE_ADDR, USER_ACC);
+            await claimAaveFromStkAave(proxy, amountToClaim, USER_ACC);
+            const aaveBalanceAfter = await balanceOf(AAVE_ADDR, USER_ACC);
             console.log(aaveBalanceBefore.toString());
             console.log(aaveBalanceAfter.toString());
             expect(aaveBalanceAfter.sub(aaveBalanceBefore)).to.be.eq(amountToClaim);
@@ -571,9 +571,9 @@ const aaveClaimAAVETest = async () => {
 
         it('... should claim all accrued rewards when amount > unclaimed rewards', async () => {
             const amountToClaim = hre.ethers.constants.MaxUint256;
-            const aaveBalanceBefore = await balanceOf(AAVE_ADDR, OWNER_ACC);
-            await claimAaveFromStkAave(proxy, amountToClaim, OWNER_ACC);
-            const aaveBalanceAfter = await balanceOf(AAVE_ADDR, OWNER_ACC);
+            const aaveBalanceBefore = await balanceOf(AAVE_ADDR, USER_ACC);
+            await claimAaveFromStkAave(proxy, amountToClaim, USER_ACC);
+            const aaveBalanceAfter = await balanceOf(AAVE_ADDR, USER_ACC);
             console.log(aaveBalanceBefore.toString());
             console.log(aaveBalanceAfter.toString());
             expect(aaveBalanceAfter.sub(aaveBalanceBefore)).to.be.gt('0');

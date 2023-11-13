@@ -32,9 +32,9 @@ const aaveV3SupplyTest = async () => {
             proxy = await getProxy(senderAcc.address);
 
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
-            const poolAddres = await aaveMarketContract.getPool();
+            const poolAddress = await aaveMarketContract.getPool();
             const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
-            pool = await hre.ethers.getContractAt(poolContractName, poolAddres);
+            pool = await hre.ethers.getContractAt(poolContractName, poolAddress);
 
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             aWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
