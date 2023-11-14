@@ -2635,14 +2635,14 @@
     },
     {
         "name": "CurveStethPoolWithdraw",
-        "address": "0x4089731d843Ce52699Fe64F68556aBbD95D70D00",
+        "address": "0x41313695a4829a80c8019Ec8bCC529Fec08F9099",
         "id": "0x212a9416",
         "path": "contracts/actions/curve/stethPool/CurveStethPoolWithdraw.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x4089731d843Ce52699Fe64F68556aBbD95D70D00"]
     },
     {
         "name": "McdClaim",
@@ -2735,17 +2735,18 @@
     },
     {
         "name": "CurveWithdraw",
-        "address": "0x97616a969daaa8e1f27c4902745c88357e54ad6c",
+        "address": "0x7127A1Cd69eC2A1F91661bc0ED40aD5B73898A54",
         "id": "0x7633d6dc",
         "path": "contracts/actions/curve/lp/CurveWithdraw.sol",
-        "version": "1.0.2",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
             "0x7Fb9234E349F85678F6a02A291684A7008Ad78e2",
             "0xA2A6D75417807ebAf8364613018D697f88021771",
-            "0xb6Be5c486dD65c2cb18A388671b348E62307F0B3"
+            "0xb6Be5c486dD65c2cb18A388671b348E62307F0B3",
+            "0x97616a969daaa8e1f27c4902745c88357e54ad6c"
         ]
     },
     {
