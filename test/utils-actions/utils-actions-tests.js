@@ -51,6 +51,7 @@ const { addBotCaller, createStrategy, subToStrategy } = require('../utils-strate
 const { createMcdCloseStrategy } = require('../strategies');
 const { subMcdCloseStrategy } = require('../strategy-subs');
 const { RATIO_STATE_OVER, createChainLinkPriceTrigger } = require('../triggers');
+const { chainIds } = require('../../scripts/utils/fork');
 
 const wrapEthTest = async () => {
     describe('Wrap-Eth', function () {
@@ -348,6 +349,93 @@ const approveTokenTest = async () => {
     });
 };
 
+const permitTokenTest = async () => {
+    /// @dev for running this test you need to add chainId : 1 to local and hardhat networks in cfg
+    describe('Permit-Token', function () {
+        this.timeout(80000);
+
+        let senderAcc; let proxy;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+        it('... should permit tokens for DSProxy to pull from eoa', async () => {
+            const snapshot = await takeSnapshot();
+            const network = hre.network.config.name;
+            const chainId = chainIds[network];
+            const wsteth = getAssetInfo('wsteth', chainId);
+            const wstethAddress = wsteth.address;
+
+            const daiPermitContract = await hre.ethers.getContractAt('IERC20Permit', wstethAddress);
+            const nonce = await daiPermitContract.nonces(senderAcc.address);
+            const daiContract = await hre.ethers.getContractAt('IERC20', wstethAddress);
+            const name = await daiContract.name();
+            const version = '1';
+
+            const value = hre.ethers.utils.parseUnits('10000', 18);
+            const deadline = '2015495230';
+
+            const signature = hre.ethers.utils.splitSignature(
+                // eslint-disable-next-line no-underscore-dangle
+                await senderAcc._signTypedData(
+                    {
+                        name,
+                        version,
+                        chainId,
+                        verifyingContract: wstethAddress,
+                    },
+                    {
+                        Permit: [
+                            {
+                                name: 'owner',
+                                type: 'address',
+                            },
+                            {
+                                name: 'spender',
+                                type: 'address',
+                            },
+                            {
+                                name: 'value',
+                                type: 'uint256',
+                            },
+                            {
+                                name: 'nonce',
+                                type: 'uint256',
+                            },
+                            {
+                                name: 'deadline',
+                                type: 'uint256',
+                            },
+                        ],
+                    },
+                    {
+                        owner: senderAcc.address,
+                        spender: proxy.address,
+                        value,
+                        nonce,
+                        deadline,
+                    },
+                ),
+            );
+
+            const permitAction = new dfs.actions.basic.PermitTokenAction(
+                wstethAddress,
+                senderAcc.address,
+                proxy.address,
+                value, deadline, signature.v, signature.r, signature.s,
+            );
+            const functionData = permitAction.encodeForDsProxyCall()[1];
+
+            const allowanceBefore = await daiContract.allowance(senderAcc.address, proxy.address);
+            await executeAction('PermitToken', functionData, proxy);
+            const allowanceAfter = await daiContract.allowance(senderAcc.address, proxy.address);
+
+            expect(allowanceAfter.sub(allowanceBefore)).to.eq(value);
+            await revertToSnapshot(snapshot);
+        });
+    });
+};
 const sendTokensTest = async () => {
     describe('Send-Tokens', function () {
         this.timeout(80000);
@@ -980,4 +1068,5 @@ module.exports = {
     transferNFTTest,
     sendTokensTest,
     approveTokenTest,
+    permitTokenTest,
 };

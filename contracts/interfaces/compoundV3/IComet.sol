@@ -101,4 +101,8 @@ abstract contract IComet {
     function baseTrackingBorrowSpeed() virtual external pure returns (uint256);
     function baseTrackingSupplySpeed() virtual external pure returns (uint256);
 
+    function userNonce(address owner) virtual external view returns (uint256);
+    function version() virtual external view returns (string memory);
+    function name() virtual external view returns (string memory);
+    function hasPermission(address owner, address manager) virtual external view returns (bool);
 }

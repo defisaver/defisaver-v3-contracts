@@ -20,6 +20,7 @@ const {
     morphoAaveV3Payback,
     executeAction,
 } = require('../../actions');
+const { chainIds } = require('../../../scripts/utils/fork');
 
 const EMODE = {
     GENERAL: 0,
@@ -140,6 +141,99 @@ const morphoAaveV3SetManagerTest = async () => {
         });
     });
 };
+
+const morphoAaveV3SetManagerBySigTest = async () => {
+    /// @dev for running this test you need to add chainId : 1 to local and hardhat networks in cfg
+    describe('Morpho-AaveV3-SetManagerBySig', function () {
+        this.timeout(80000);
+
+        let senderAcc;
+        let proxy;
+        let snapshot;
+
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+        it('should approve proxy to manage MorphoAaveV3 eoa position', async () => {
+            const morphoAaveV3 = await hre.ethers.getContractAt('IMorphoAaveV3', '0x33333aea097c193e66081E930c33020272b33333');
+
+            const nonce = await morphoAaveV3.userNonce(senderAcc.address);
+            const name = 'Morpho-AaveV3';
+            const version = '0';
+            const network = hre.network.config.name;
+            const chainId = chainIds[network];
+            const deadline = '2015495230';
+            const signature = hre.ethers.utils.splitSignature(
+                // eslint-disable-next-line no-underscore-dangle
+                await senderAcc._signTypedData(
+                    {
+                        name,
+                        version,
+                        chainId,
+                        verifyingContract: morphoAaveV3.address,
+                    },
+                    {
+                        Authorization: [
+                            {
+                                name: 'delegator',
+                                type: 'address',
+                            },
+                            {
+                                name: 'manager',
+                                type: 'address',
+                            },
+                            {
+                                name: 'isAllowed',
+                                type: 'bool',
+                            },
+                            {
+                                name: 'nonce',
+                                type: 'uint256',
+                            },
+                            {
+                                name: 'deadline',
+                                type: 'uint256',
+                            },
+                        ],
+                    },
+                    {
+                        delegator: senderAcc.address,
+                        manager: proxy.address,
+                        isAllowed: true,
+                        nonce,
+                        deadline,
+                    },
+                ),
+            );
+
+            const setManagerAction = new dfs.actions.morpho.MorphoAaveV3SetManagerBySigAction(
+                EMODE.ETH,
+                senderAcc.address,
+                proxy.address,
+                true, nonce, deadline, signature.v, signature.r, signature.s,
+            );
+            const functionData = setManagerAction.encodeForDsProxyCall()[1];
+
+            let permission = await morphoAaveV3.isManagedBy(senderAcc.address, proxy.address);
+            expect(permission).to.be.eq(false);
+
+            await executeAction('MorphoAaveV3SetManagerBySig', functionData, proxy);
+
+            permission = await morphoAaveV3.isManagedBy(senderAcc.address, proxy.address);
+            expect(permission).to.be.eq(true);
+        });
+    });
+};
+
 const morphoAaveV3WithdrawTest = async () => {
     describe('Morpho-AaveV3-Withdraw', function () {
         this.timeout(80000);
@@ -388,4 +482,5 @@ module.exports = {
     morphoAaveV3BorrowTest,
     morphoAaveV3PaybackTest,
     morphoAaveV3SetManagerTest,
+    morphoAaveV3SetManagerBySigTest,
 };

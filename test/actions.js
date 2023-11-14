@@ -404,6 +404,16 @@ const allowCompV3 = async (market, proxy, manager, isAllowed) => {
     return tx;
 };
 
+const allowBySigCompV3 = async (proxy, market, owner, manager, isAllowed, nonce, expiry, v, r, s) => {
+    const allowBySigAction = new dfs.actions.compoundV3.CompoundV3AllowBySigAction(
+        market, owner, manager, isAllowed, nonce, expiry, v, r, s,
+    );
+    const functionData = allowBySigAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('CompV3AllowBySig', functionData, proxy);
+    return tx;
+};
+
 const withdrawCompV3 = async (market, proxy, tokenAddr, amount, onBehalf, to) => {
     const compV3WithdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
         market,
@@ -3264,6 +3274,7 @@ module.exports = {
     supplyCompV3,
     borrowCompV3,
     allowCompV3,
+    allowBySigCompV3,
     withdrawCompV3,
     claimCompV3,
     paybackCompV3,

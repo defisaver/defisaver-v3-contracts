@@ -12,6 +12,7 @@ const {
     withdrawCompV3,
     claimCompV3,
     paybackCompV3,
+    allowBySigCompV3,
 } = require('../actions');
 
 const {
@@ -345,6 +346,87 @@ const compV3AllowTest = async () => {
             await allowCompV3(addrs[network].COMET_USDC_ADDR, proxy, ownerAcc.address, false);
             const allowanceAfter = await cometContract.allowance(proxy.address, ownerAcc.address);
             expect(allowanceAfter.toString()).to.equal('0');
+        });
+    });
+};
+
+const compV3AllowBySigTest = async () => {
+    /// @dev for running this test you need to add chainId : 1 to local and hardhat networks in cfg
+    describe('CompV3-AllowBySig', function () {
+        this.timeout(80000);
+
+        let senderAcc;
+        let proxy;
+        let snapshotId;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
+        });
+
+        it('... should test CompoundV3 allow by sig', async () => {
+            const cometContract = await hre.ethers.getContractAt('IComet', addrs[network].COMET_USDC_ADDR);
+            const nonce = await cometContract.userNonce(senderAcc.address);
+            const name = await cometContract.name();
+            const version = await cometContract.version();
+            const expiry = '2015495230';
+            const signature = hre.ethers.utils.splitSignature(
+                // eslint-disable-next-line no-underscore-dangle
+                await senderAcc._signTypedData(
+                    {
+                        name,
+                        version,
+                        chainId,
+                        verifyingContract: cometContract.address,
+                    },
+                    {
+                        Authorization: [
+                            {
+                                name: 'owner',
+                                type: 'address',
+                            },
+                            {
+                                name: 'manager',
+                                type: 'address',
+                            },
+                            {
+                                name: 'isAllowed',
+                                type: 'bool',
+                            },
+                            {
+                                name: 'nonce',
+                                type: 'uint256',
+                            },
+                            {
+                                name: 'expiry',
+                                type: 'uint256',
+                            },
+                        ],
+                    },
+                    {
+                        owner: senderAcc.address,
+                        manager: proxy.address,
+                        isAllowed: true,
+                        nonce,
+                        expiry,
+                    },
+                ),
+            );
+
+            const allowanceBefore = await cometContract.hasPermission(senderAcc.address, proxy.address);
+            expect(allowanceBefore).to.be.eq(false);
+
+            await allowBySigCompV3(proxy, cometContract.address, senderAcc.address, proxy.address, true, nonce, expiry, signature.v, signature.r, signature.s);
+
+            const allowanceAfter = await cometContract.hasPermission(senderAcc.address, proxy.address);
+            expect(allowanceAfter).to.be.eq(true);
         });
     });
 };
@@ -802,6 +884,7 @@ module.exports = {
     compV3SupplyTest,
     compV3TransferTest,
     compV3AllowTest,
+    compV3AllowBySigTest,
     compoundDeployContracts,
     compoundV3FullTest,
 };
