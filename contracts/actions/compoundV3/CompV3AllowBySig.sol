@@ -23,14 +23,11 @@ contract CompV3AllowBySig is ActionBase, CompV3Helper {
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
-        bytes32[] memory _subData,
-        uint8[] memory _paramMapping,
-        bytes32[] memory _returnValues
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
-
-        params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-
         (bytes memory logData) = _allow(params);
         emit ActionEvent("CompV3AllowBySig", logData);
         return bytes32(uint256(params.isAllowed ? 1 : 0));

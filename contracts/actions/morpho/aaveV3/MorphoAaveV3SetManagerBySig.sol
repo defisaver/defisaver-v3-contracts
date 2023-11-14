@@ -23,17 +23,15 @@ contract MorphoAaveV3SetManagerBySig is ActionBase, MorphoAaveV3Helper {
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
-        bytes32[] memory _subData,
-        uint8[] memory _paramMapping,
-        bytes32[] memory _returnValues
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
+        ///@dev nothing will be piped and potentially replaced as we need to have the exact values as signed
+        bytes memory logData = _setManager(params);
 
-        params.emodeId = _parseParamUint(params.emodeId, _paramMapping[0], _subData, _returnValues);
-        
-        _setManager(params);
-
-        emit ActionEvent("MorphoAaveV3SetManagerBySig", abi.encode(params));
+        emit ActionEvent("MorphoAaveV3SetManagerBySig", abi.encode(logData));
         return bytes32(bytes20(params.manager));
     }
 
@@ -41,9 +39,9 @@ contract MorphoAaveV3SetManagerBySig is ActionBase, MorphoAaveV3Helper {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
 
-        _setManager(params);
+        bytes memory logData = _setManager(params);
         
-        logger.logActionDirectEvent("MorphoAaveV3SetManagerBySig", abi.encode(params));
+        logger.logActionDirectEvent("MorphoAaveV3SetManagerBySig", abi.encode(logData));
     }
 
     /// @inheritdoc ActionBase
@@ -53,11 +51,17 @@ contract MorphoAaveV3SetManagerBySig is ActionBase, MorphoAaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _setManager(Params memory _params) internal {
+    function _setManager(Params memory _params) internal returns (bytes memory){
         address morphoAddress = getMorphoAddressByEmode(_params.emodeId);
         uint256 startingNonce = IMorphoAaveV3(morphoAddress).userNonce(_params.delegator);
+
         IMorphoAaveV3(morphoAddress).approveManagerWithSig(_params.delegator, _params.manager, _params.isAllowed, _params.nonce, _params.deadline, Types.Signature(_params.v, _params.r, _params.s));
+        
+        ///@dev Every successful call to permit increases owners nonce by one. 
         require(IMorphoAaveV3(morphoAddress).userNonce(_params.delegator) == startingNonce + 1);
+
+        bytes memory logData = abi.encode(_params.delegator, _params.manager, _params.isAllowed, _params.nonce);
+        return (logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
