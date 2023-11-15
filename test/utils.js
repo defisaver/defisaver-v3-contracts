@@ -854,7 +854,13 @@ let _curveObj;
 const curveApiInit = async () => {
     if (!_curveObj) {
         _curveObj = ((await curve).default);
-        _curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
+        await _curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
+        // Fetch factory pools
+        await _curveObj.factory.fetchPools(true);
+        await _curveObj.crvUSDFactory.fetchPools(true);
+        await _curveObj.EYWAFactory.fetchPools(true);
+        await _curveObj.cryptoFactory.fetchPools(true);
+        await _curveObj.tricryptoFactory.fetchPools(true);
     }
     return _curveObj;
 };
@@ -983,10 +989,12 @@ const getProxyAuth = async (proxyAddr, addrWithAuth) => {
     return hasPermission;
 };
 
-const setNewExchangeWrapper = async (acc, newAddr) => {
+const setNewExchangeWrapper = async (acc, newAddr, isFork = false) => {
     const exchangeOwnerAddr = addrs[network].EXCHANGE_OWNER_ADDR;
     await sendEther(acc, exchangeOwnerAddr, '1');
-    await impersonateAccount(exchangeOwnerAddr);
+    if (!isFork) {
+        await impersonateAccount(exchangeOwnerAddr);
+    }
 
     const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
 
@@ -995,7 +1003,9 @@ const setNewExchangeWrapper = async (acc, newAddr) => {
     const registryByOwner = registry.connect(signer);
 
     await registryByOwner.addWrapper(newAddr, { gasLimit: 300000 });
-    await stopImpersonatingAccount(exchangeOwnerAddr);
+    if (!isFork) {
+        await stopImpersonatingAccount(exchangeOwnerAddr);
+    }
 };
 
 const depositToWeth = async (amount, signer) => {

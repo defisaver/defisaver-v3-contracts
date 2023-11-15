@@ -16,8 +16,6 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
-    IAddressProvider addressProvider = IAddressProvider(CURVE_ADDRESS_PROVIDER);
-
     /// @notice Sells _srcAmount of tokens on Curve
     /// @param _srcAddr From token
     /// @param _srcAmount From amount
