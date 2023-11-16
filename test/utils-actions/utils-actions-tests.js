@@ -367,8 +367,8 @@ const permitTokenTest = async () => {
             const wsteth = getAssetInfo('wsteth', chainId);
             const wstethAddress = wsteth.address;
 
-            const daiPermitContract = await hre.ethers.getContractAt('IERC20Permit', wstethAddress);
-            const nonce = await daiPermitContract.nonces(senderAcc.address);
+            const wstethPermitContract = await hre.ethers.getContractAt('IERC20Permit', wstethAddress);
+            const nonce = await wstethPermitContract.nonces(senderAcc.address);
             const daiContract = await hre.ethers.getContractAt('IERC20', wstethAddress);
             const name = await daiContract.name();
             const version = '1';

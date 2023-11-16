@@ -7,7 +7,7 @@ describe('Morpho-Aave-V3-SetManagerBySig', function () {
         await redeploy('MorphoAaveV3SetManagerBySig');
     });
 
-    it('... should test Morpho AaveV3 supply', async () => {
+    it('... should test Morpho AaveV3 set manager by signature', async () => {
         await morphoAaveV3SetManagerBySigTest();
     });
 });
