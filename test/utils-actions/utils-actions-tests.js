@@ -369,8 +369,8 @@ const permitTokenTest = async () => {
 
             const wstethPermitContract = await hre.ethers.getContractAt('IERC20Permit', wstethAddress);
             const nonce = await wstethPermitContract.nonces(senderAcc.address);
-            const daiContract = await hre.ethers.getContractAt('IERC20', wstethAddress);
-            const name = await daiContract.name();
+            const wstethContract = await hre.ethers.getContractAt('IERC20', wstethAddress);
+            const name = await wstethContract.name();
             const version = '1';
 
             const value = hre.ethers.utils.parseUnits('10000', 18);
@@ -427,9 +427,11 @@ const permitTokenTest = async () => {
             );
             const functionData = permitAction.encodeForDsProxyCall()[1];
 
-            const allowanceBefore = await daiContract.allowance(senderAcc.address, proxy.address);
+            const allowanceBefore = await wstethContract.allowance(
+                senderAcc.address, proxy.address,
+            );
             await executeAction('PermitToken', functionData, proxy);
-            const allowanceAfter = await daiContract.allowance(senderAcc.address, proxy.address);
+            const allowanceAfter = await wstethContract.allowance(senderAcc.address, proxy.address);
 
             expect(allowanceAfter.sub(allowanceBefore)).to.eq(value);
             await revertToSnapshot(snapshot);
