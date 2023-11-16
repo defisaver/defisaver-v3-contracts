@@ -53,6 +53,7 @@ const addrs = {
         ADMIN_ACC: '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9',
         DFS_REG_CONTROLLER: '0x6F6DaE1bCB60F67B2Cb939dBE565e8fD03F6F002',
         AVG_GAS_PRICE: 100,
+        AAVE_V3_POOL_DATA_PROVIDER: '0x7B4EB56E7CD4b454BA8ff71E4518426369a138a3',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -78,6 +79,7 @@ const addrs = {
         ADMIN_VAULT: '0x136b1bEAfff362530F98f10E3D8C38f3a3F3d38C',
         ADMIN_ACC: '0x98118fD1Da4b3369AEe87778168e97044980632F',
         DFS_REG_CONTROLLER: '0x493C0dE902E6916128A223F66F37d3b6ee8fA408',
+        AAVE_V3_POOL_DATA_PROVIDER: '0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654',
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -107,12 +109,13 @@ const addrs = {
         ADMIN_VAULT: '0xd47D8D97cAd12A866900eEc6Cde1962529F25351',
         ADMIN_ACC: '0x6AFEA85cFAB61e3a55Ad2e4537252Ec05796BEfa',
         DFS_REG_CONTROLLER: '0x7702fa16b0cED7e44fF7Baeed04bF165f58eE51D',
+        AAVE_V3_POOL_DATA_PROVIDER: '0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654',
         AVG_GAS_PRICE: 0.5,
     },
     base: {
         PROXY_REGISTRY: '0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d',
         REGISTRY_ADDR: '0x347FB634271F666353F23A3362f3935D96F97476',
-        OWNER_ACC: '0xC4D4b4F2Df76f9952E6e0Dc79861582A5b7269c3',
+        OWNER_ACC: '0xBaBe2409dBD359453E5292d684fF324A638801bF',
         WETH_ADDRESS: '0x4200000000000000000000000000000000000006',
         DAI_ADDRESS: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
         USDC_ADDR: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
@@ -133,6 +136,7 @@ const addrs = {
         ADMIN_VAULT: '0xD8E67968d8a0df4beCf2D50daE1e34d4d80C701C',
         ADMIN_ACC: '0xF8EC1967A719027A95883a89579e7A77699899e4',
         DFS_REG_CONTROLLER: '0x50bCFC115283dF48Ab6382551B9B93b08E197747',
+        AAVE_V3_POOL_DATA_PROVIDER: '0x2d8A3C5677189723C4cB8873CfC9C8976FDF38Ac',
     },
     kovan: {
         PROXY_REGISTRY: '0xF9722E05B68E5ad5D6E1674C4d6BfE11791a1E33',
@@ -850,7 +854,13 @@ let _curveObj;
 const curveApiInit = async () => {
     if (!_curveObj) {
         _curveObj = ((await curve).default);
-        _curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
+        await _curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
+        // Fetch factory pools
+        await _curveObj.factory.fetchPools(true);
+        await _curveObj.crvUSDFactory.fetchPools(true);
+        await _curveObj.EYWAFactory.fetchPools(true);
+        await _curveObj.cryptoFactory.fetchPools(true);
+        await _curveObj.tricryptoFactory.fetchPools(true);
     }
     return _curveObj;
 };
@@ -979,10 +989,12 @@ const getProxyAuth = async (proxyAddr, addrWithAuth) => {
     return hasPermission;
 };
 
-const setNewExchangeWrapper = async (acc, newAddr) => {
+const setNewExchangeWrapper = async (acc, newAddr, isFork = false) => {
     const exchangeOwnerAddr = addrs[network].EXCHANGE_OWNER_ADDR;
     await sendEther(acc, exchangeOwnerAddr, '1');
-    await impersonateAccount(exchangeOwnerAddr);
+    if (!isFork) {
+        await impersonateAccount(exchangeOwnerAddr);
+    }
 
     const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
 
@@ -991,7 +1003,9 @@ const setNewExchangeWrapper = async (acc, newAddr) => {
     const registryByOwner = registry.connect(signer);
 
     await registryByOwner.addWrapper(newAddr, { gasLimit: 300000 });
-    await stopImpersonatingAccount(exchangeOwnerAddr);
+    if (!isFork) {
+        await stopImpersonatingAccount(exchangeOwnerAddr);
+    }
 };
 
 const depositToWeth = async (amount, signer) => {

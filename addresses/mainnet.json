@@ -232,14 +232,14 @@
     },
     {
         "name": "CurveWrapperV3",
-        "address": "0x3788B4Db5e99fF555e22a08241EB3cFc3a0ac149",
+        "address": "0xdE73496DD6349829C6649aCaDe31FB1371528AC5",
         "id": "0xb856c9af",
         "path": "contracts/exchangeV3/wrappersV3/CurveWrapperV3.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x3788B4Db5e99fF555e22a08241EB3cFc3a0ac149"]
     },
     {
         "name": "ZeroxWrapper",
@@ -1210,6 +1210,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveClaimStkAave",
+        "address": "0x5Dcd9Dc0185a6Ab07a31e5284D16Ce9f0A79Ce99",
+        "id": "0xd93d7e7f",
+        "path": "contracts/actions/aave/AaveClaimStkAave.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
         "registryIds": [],
         "history": []
     },
@@ -2516,50 +2527,51 @@
     },
     {
         "name": "CurveUsdLevCreate",
-        "address": "0x8B5ACd4ce0a43327aaDfc5c42be029898e242393",
+        "address": "0xcbd9aFc2b7532b9eeB3A7EC4ea8Bb4320795d9Ad",
         "id": "0x2465d76e",
         "path": "contracts/actions/curveusd/advanced/CurveUsdLevCreate.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0x8B5ACd4ce0a43327aaDfc5c42be029898e242393"]
     },
     {
         "name": "CurveUsdRepay",
-        "address": "0xDaDFC60207C17be005ECf2B03f3B31885D22F908",
+        "address": "0xd12785e4834C1421fC7B64ca57d64E886e39b80F",
         "id": "0x42cd8e33",
         "path": "contracts/actions/curveusd/advanced/CurveUsdRepay.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xDaDFC60207C17be005ECf2B03f3B31885D22F908"]
     },
     {
         "name": "CurveUsdSwapper",
-        "address": "0x934489c930C327D5a8B8b1D017cB08223bcF833f",
+        "address": "0xFA8c594b903651F97b27aCADEa83b720cfD7F80b",
         "id": "0x83a67cc0",
         "path": "contracts/actions/curveusd/advanced/CurveUsdSwapper.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
         "history": [
             "0xFa2dfE6AF842e3184D305a85d09cfcf220ed4CBd",
-            "0xef8Aa00f824360236b6F586CeF8e4071Bd4448b6"
+            "0xef8Aa00f824360236b6F586CeF8e4071Bd4448b6",
+            "0x934489c930C327D5a8B8b1D017cB08223bcF833f"
         ]
     },
     {
         "name": "CurveUsdSelfLiquidateWithColl",
-        "address": "0x6d02300C1A68c63C60AFD713b744bA750aB33aB0",
+        "address": "0x7cE305FC2A18c6820a533AD418dC0A549aFeDcAF",
         "id": "0xe17ef895",
         "path": "contracts/actions/curveusd/advanced/CurveUsdSelfLiquidateWithColl.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0x6d02300C1A68c63C60AFD713b744bA750aB33aB0"]
     },
     {
         "name": "CurveUsdBorrowRateTrigger",
@@ -2610,14 +2622,14 @@
     },
     {
         "name": "CurveStethPoolWithdraw",
-        "address": "0x4089731d843Ce52699Fe64F68556aBbD95D70D00",
+        "address": "0x41313695a4829a80c8019Ec8bCC529Fec08F9099",
         "id": "0x212a9416",
         "path": "contracts/actions/curve/stethPool/CurveStethPoolWithdraw.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x4089731d843Ce52699Fe64F68556aBbD95D70D00"]
     },
     {
         "name": "McdClaim",
@@ -2710,17 +2722,18 @@
     },
     {
         "name": "CurveWithdraw",
-        "address": "0x97616a969daaa8e1f27c4902745c88357e54ad6c",
+        "address": "0x7127A1Cd69eC2A1F91661bc0ED40aD5B73898A54",
         "id": "0x7633d6dc",
         "path": "contracts/actions/curve/lp/CurveWithdraw.sol",
-        "version": "1.0.2",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
             "0x7Fb9234E349F85678F6a02A291684A7008Ad78e2",
             "0xA2A6D75417807ebAf8364613018D697f88021771",
-            "0xb6Be5c486dD65c2cb18A388671b348E62307F0B3"
+            "0xb6Be5c486dD65c2cb18A388671b348E62307F0B3",
+            "0x97616a969daaa8e1f27c4902745c88357e54ad6c"
         ]
     },
     {

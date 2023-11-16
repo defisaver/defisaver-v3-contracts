@@ -1,4 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
+require('hardhat-tracer');
 require('dotenv-safe').config();
 require('@nomiclabs/hardhat-waffle');
 require('@nomiclabs/hardhat-etherscan');
