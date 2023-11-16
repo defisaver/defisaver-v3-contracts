@@ -48,11 +48,10 @@ contract CompV3AllowBySig is ActionBase, CompV3Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _allow(Params memory _params) internal returns (bytes memory) {
-        uint256 startingNonce = IComet(_params.market).userNonce(_params.owner);
         IComet(_params.market).allowBySig(_params.owner,_params.manager, _params.isAllowed, _params.nonce, _params.expiry, _params.v, _params.r, _params.s);
         
         ///@dev Every successful call to permit increases owners nonce by one. 
-        require (IComet(_params.market).userNonce(_params.owner) == startingNonce + 1);
+        require (IComet(_params.market).userNonce(_params.owner) == _params.nonce + 1);
         
         bytes memory logData = abi.encode(_params.owner, _params.manager, _params.isAllowed, _params.nonce);
         return (logData);

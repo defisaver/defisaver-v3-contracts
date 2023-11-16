@@ -53,12 +53,11 @@ contract MorphoAaveV3SetManagerBySig is ActionBase, MorphoAaveV3Helper {
 
     function _setManager(Params memory _params) internal returns (bytes memory){
         address morphoAddress = getMorphoAddressByEmode(_params.emodeId);
-        uint256 startingNonce = IMorphoAaveV3(morphoAddress).userNonce(_params.delegator);
 
         IMorphoAaveV3(morphoAddress).approveManagerWithSig(_params.delegator, _params.manager, _params.isAllowed, _params.nonce, _params.deadline, Types.Signature(_params.v, _params.r, _params.s));
         
         ///@dev Every successful call to permit increases owners nonce by one. 
-        require(IMorphoAaveV3(morphoAddress).userNonce(_params.delegator) == startingNonce + 1);
+        require(IMorphoAaveV3(morphoAddress).userNonce(_params.delegator) == _params.nonce + 1);
 
         bytes memory logData = abi.encode(_params.delegator, _params.manager, _params.isAllowed, _params.nonce);
         return (logData);
