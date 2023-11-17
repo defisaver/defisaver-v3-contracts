@@ -230,7 +230,7 @@ const kyberAggregatorDFSSellTest = async () => {
 
         before(async () => {
             // await redeploy('KyberInputScalingHelper');
-            // await redeploy('KyberInputScalingHelperL2');
+            await redeploy('KyberInputScalingHelperL2');
             // await redeploy('DFSSell');
             kyberAggregatorWrapper = await redeploy('KyberAggregatorWrapper');
 
@@ -302,8 +302,6 @@ const kyberAggregatorDFSSellTest = async () => {
                 };
                 // console.log(secondOptions.data);
                 const resultObject = await axios(secondOptions).then((response) => response.data);
-
-                console.log(resultObject);
                 // THIS IS CHANGEABLE WITH API INFORMATION
                 const allowanceTarget = priceObject.routerAddress;
                 const price = 1; // just for testing, anything bigger than 0 triggers offchain if
