@@ -3,8 +3,6 @@ pragma solidity =0.8.10;
 
 import "../interfaces/IERC20.sol";
 import "../interfaces/kyber/IAggregationExecutorOptimistic.sol";
-import {IAggregationExecutorOptimistic as IExecutorHelperL2} from
-  "../interfaces/kyber/IAggregationExecutorOptimistic.sol";
 import "../interfaces/kyber/IMetaAggregationRouterV2.sol";
 
 library Common {
@@ -963,7 +961,7 @@ contract CalldataWriter {
   /*
    ************************ AggregationExecutor ************************
    */
-  function writeSwapExecutorDescription(IExecutorHelperL2.SwapExecutorDescription memory desc)
+  function writeSwapExecutorDescription(IAggregationExecutorOptimistic.SwapExecutorDescription memory desc)
     internal
     pure
     returns (bytes memory shortData)
@@ -1002,7 +1000,7 @@ contract CalldataWriter {
     bytes memory data,
     address tokenIn
   ) internal pure returns (bytes memory shortData) {
-    IExecutorHelperL2.Swap[] memory swaps = abi.decode(data, (IExecutorHelperL2.Swap[]));
+    IAggregationExecutorOptimistic.Swap[] memory swaps = abi.decode(data, (IAggregationExecutorOptimistic.Swap[]));
 
     uint8 len = uint8(swaps.length);
     shortData = bytes.concat(shortData, bytes1(len));
@@ -1065,7 +1063,7 @@ contract CalldataWriter {
     return data;
   }
 
-  function _writeSwap(IExecutorHelperL2.Swap memory swap)
+  function _writeSwap(IAggregationExecutorOptimistic.Swap memory swap)
     internal
     pure
     returns (bytes memory shortData)
@@ -1224,7 +1222,7 @@ contract KyberInputScalingHelperL2 is CalldataWriter{
       simpleSwapData.firstSwapAmounts[i] =
         (simpleSwapData.firstSwapAmounts[i] * newAmount) / oldAmount;
 
-      IExecutorHelperL2.Swap[] memory dexData;
+      IAggregationExecutorOptimistic.Swap[] memory dexData;
 
       (dexData, tokenIn) = simpleSwapData.swapDatas[i].readSwapSingleSequence();
 
@@ -1253,14 +1251,15 @@ contract KyberInputScalingHelperL2 is CalldataWriter{
     uint256 oldAmount,
     uint256 newAmount
   ) internal pure returns (bytes memory) {
-    IExecutorHelperL2.SwapExecutorDescription memory executorDesc =
-      abi.decode(data.readSwapExecutorDescription(), (IExecutorHelperL2.SwapExecutorDescription));
+    IAggregationExecutorOptimistic.SwapExecutorDescription memory executorDesc =
+      abi.decode(data.readSwapExecutorDescription(), (IAggregationExecutorOptimistic.SwapExecutorDescription));
     executorDesc.positiveSlippageData =
       _scaledPositiveSlippageFeeData(executorDesc.positiveSlippageData, oldAmount, newAmount);
     uint256 nSequences = executorDesc.swapSequences.length;
     for (uint256 i = 0; i < nSequences;) {
       // only need to scale the first dex in each sequence
-      IExecutorHelperL2.Swap memory swap = executorDesc.swapSequences[i][0];
+      IAggregationExecutorOptimistic.Swap memory swap = executorDesc.swapSequences[i][0];
+      
       executorDesc.swapSequences[i][0] = _scaleDexData(swap, oldAmount, newAmount);
       unchecked {
         ++i;
@@ -1294,10 +1293,10 @@ contract KyberInputScalingHelperL2 is CalldataWriter{
 
     // 10 working
   function _scaleDexData(
-    IExecutorHelperL2.Swap memory swap,
+    IAggregationExecutorOptimistic.Swap memory swap,
     uint256 oldAmount,
     uint256 newAmount
-  ) internal pure returns (IExecutorHelperL2.Swap memory) {
+  ) internal pure returns (IAggregationExecutorOptimistic.Swap memory) {
     uint8 functionSelectorIndex = uint8(uint32(swap.functionSelector));
     if (DexIndex(functionSelectorIndex) == DexIndex.UNI) {
       swap.data = swap.data.newUniSwap(oldAmount, newAmount);
