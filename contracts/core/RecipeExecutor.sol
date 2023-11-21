@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../interfaces/IDSProxy.sol";
 import "../auth/ProxyPermission.sol";
 import "../actions/ActionBase.sol";
 import "../core/DFSRegistry.sol";
@@ -12,7 +11,6 @@ import "./strategy/BundleStorage.sol";
 import "./strategy/SubStorage.sol";
 import "../interfaces/flashloan/IFlashLoanBase.sol";
 import "../interfaces/ITrigger.sol";
-import "../actions/ActionBase.sol";
 
 /// @title Entry point into executing recipes/checking triggers directly and as part of a strategy
 contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper {
@@ -24,7 +22,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
     /// @notice Called directly through DsProxy to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
     /// @param _currRecipe Recipe to be executed
-    function executeRecipe(Recipe calldata _currRecipe) public payable {
+    function executeRecipe(Recipe calldata _currRecipe) external payable {
         _executeActions(_currRecipe);
     }
 
@@ -41,7 +39,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
         bytes[] calldata _triggerCallData,
         uint256 _strategyIndex,
         StrategySub memory _sub
-    ) public payable {
+    ) external payable {
         Strategy memory strategy;
 
         { // to handle stack too deep
@@ -119,7 +117,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
     /// @dev FL function must be the first action and repayment is done last
     /// @param _currRecipe Recipe to be executed
     /// @param _flAmount Result value from FL action
-    function _executeActionsFromFL(Recipe calldata _currRecipe, bytes32 _flAmount) public payable {
+    function executeActionsFromFL(Recipe calldata _currRecipe, bytes32 _flAmount) external payable {
         bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
         returnValues[0] = _flAmount; // set the flash loan action as first return value
 
@@ -130,14 +128,14 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
     }
 
     /// @notice Runs all actions from the recipe
-    /// @dev FL action must be first and is parsed separately, execution will go to _executeActionsFromFL
+    /// @dev FL action must be first and is parsed separately, execution will go to executeActionsFromFL
     /// @param _currRecipe Recipe to be executed
     function _executeActions(Recipe memory _currRecipe) internal {
         address firstActionAddr = registry.getAddr(_currRecipe.actionIds[0]);
 
         bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
 
-        if (isFL(firstActionAddr)) {
+        if (_isFL(firstActionAddr)) {
             _parseFLAndExecute(_currRecipe, firstActionAddr, returnValues);
         } else {
             for (uint256 i = 0; i < _currRecipe.actionIds.length; ++i) {
@@ -220,7 +218,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
 
     /// @notice Checks if the specified address is of FL type action
     /// @param _actionAddr Address of the action
-    function isFL(address _actionAddr) internal pure returns (bool) {
+    function _isFL(address _actionAddr) internal pure returns (bool) {
         return ActionBase(_actionAddr).actionType() == uint8(ActionBase.ActionType.FL_ACTION);
     }
 }

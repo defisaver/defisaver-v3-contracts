@@ -8,7 +8,7 @@ import "../DS/DSAuth.sol";
 import "./helpers/AuthHelper.sol";
 
 /// @title ProxyPermission Proxy contract which works with DSProxy to give execute permission
-contract ProxyPermission is AuthHelper {
+abstract contract ProxyPermission is AuthHelper {
 
     bytes4 public constant EXECUTE_SELECTOR = bytes4(keccak256("execute(address,bytes)"));
 

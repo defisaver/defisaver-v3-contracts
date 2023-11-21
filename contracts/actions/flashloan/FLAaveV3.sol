@@ -117,7 +117,7 @@ contract FLAaveV3 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlas
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             recipeExecutor,
-            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, bytes32(_amounts[0] + _fees[0]))
+            abi.encodeWithSignature("executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, bytes32(_amounts[0] + _fees[0]))
         );
 
         // return FL

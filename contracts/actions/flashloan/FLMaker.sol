@@ -23,8 +23,8 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
     using SafeMath for uint256;
 
 
-    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
-    bytes4 public constant CALLBACK_SELECTOR = bytes4(keccak256("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"));
+    /// @dev Function sig of RecipeExecutor.executeActionsFromFL()
+    bytes4 public constant CALLBACK_SELECTOR = bytes4(keccak256("executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"));
     bytes32 constant RECIPE_EXECUTOR_ID = keccak256("RecipeExecutor");
 
     bytes32 public constant CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");

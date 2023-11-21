@@ -21,8 +21,8 @@ import "./helpers/FLHelper.sol";
 contract FLUniV3 is ActionBase, ReentrancyGuard, IFlashLoanBase, IUniswapV3FlashCallback, StrategyModel, FLHelper {
     using TokenUtils for address;
 
-    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
-    bytes4 public constant CALLBACK_SELECTOR = bytes4(keccak256("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"));
+    /// @dev Function sig of RecipeExecutor.executeActionsFromFL()
+    bytes4 public constant CALLBACK_SELECTOR = bytes4(keccak256("executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"));
     bytes4 public constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
     
     error UntrustedLender();

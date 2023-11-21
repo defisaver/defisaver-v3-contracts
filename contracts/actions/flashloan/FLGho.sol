@@ -24,11 +24,11 @@ contract FLGho is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlashLo
     // Wrong FL payback amount sent
     error WrongPaybackAmountError();
 
-    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
+    /// @dev Function sig of RecipeExecutor.executeActionsFromFL()
     bytes4 internal constant CALLBACK_SELECTOR =
         bytes4(
             keccak256(
-                "_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"
+                "executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"
             )
         );
     bytes4 internal constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));

@@ -119,7 +119,7 @@ contract FLSpark is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlash
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             recipeExecutor,
-            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, bytes32(_amounts[0] + _fees[0]))
+            abi.encodeWithSignature("executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, bytes32(_amounts[0] + _fees[0]))
         );
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {

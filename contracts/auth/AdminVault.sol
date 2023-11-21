@@ -17,7 +17,7 @@ contract AdminVault is AuthHelper {
 
     /// @notice Admin is able to change owner
     /// @param _owner Address of new owner
-    function changeOwner(address _owner) public {
+    function changeOwner(address _owner) external {
         if (admin != msg.sender){
             revert SenderNotAdmin();
         }
@@ -26,7 +26,7 @@ contract AdminVault is AuthHelper {
 
     /// @notice Admin is able to set new admin
     /// @param _admin Address of multisig that becomes new admin
-    function changeAdmin(address _admin) public {
+    function changeAdmin(address _admin) external {
         if (admin != msg.sender){
             revert SenderNotAdmin();
         }

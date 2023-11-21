@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.10;
 
-contract MainnetCoreAddresses {
+abstract contract MainnetCoreAddresses {
     address internal constant REGISTRY_ADDR = 0x287778F121F134C66212FB16c9b53eC991D32f5b;
     address internal constant PROXY_AUTH_ADDR = 0x149667b6FAe2c63D1B4317C716b0D0e4d3E2bD70;
     address internal constant DEFISAVER_LOGGER = 0xcE7a977Cac4a481bc84AC06b2Da0df614e621cf3;

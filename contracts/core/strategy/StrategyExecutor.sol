@@ -33,9 +33,9 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
         bytes[] calldata _triggerCallData,
         bytes[] calldata _actionsCallData,
         StrategySub memory _sub
-    ) public {
+    ) external {
         // check bot auth
-        if (!checkCallerAuth(_subId)) {
+        if (!_checkCallerAuth(_subId)) {
             revert BotNotApproved(msg.sender, _subId);
         }
 
@@ -54,12 +54,12 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
         }
 
         // execute actions
-        callActions(_subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub, address(storedSubData.userProxy));
+        _callActions(_subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub, address(storedSubData.userProxy));
     }
 
     /// @notice Checks if msg.sender has auth, reverts if not
     /// @param _subId Id of the strategy
-    function checkCallerAuth(uint256 _subId) internal view returns (bool) {
+    function _checkCallerAuth(uint256 _subId) internal view returns (bool) {
         return BotAuth(registry.getAddr(BOT_AUTH_ID)).isApproved(_subId, msg.sender);
     }
 
@@ -71,7 +71,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
     /// @param _strategyIndex Which strategy in a bundle, need to specify because when sub is part of a bundle
     /// @param _sub StrategySub struct needed because on-chain we store only the hash
     /// @param _userProxy StrategySub struct needed because on-chain we store only the hash
-    function callActions(
+    function _callActions(
         uint256 _subId,
         bytes[] calldata _actionsCallData,
         bytes[] calldata _triggerCallData,

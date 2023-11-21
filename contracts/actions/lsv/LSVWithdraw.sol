@@ -8,7 +8,6 @@ import "../../utils/TokenUtils.sol";
 import "../../utils/FeeRecipient.sol";
 import "../../utils/Discount.sol";
 import "../../exchangeV3/helpers/ExchangeHelper.sol";
-import "../../interfaces/IDSProxy.sol";
 
 /// @title action for tracking users withdrawals within the LSV ecosystem
 contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
@@ -97,20 +96,13 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
     function calculateFee(
         uint256 _amount
     ) internal view returns (uint256 feeAmount) {
-        address user = getUserAddress();
+        address user = address(this);
 
         if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(user)) {
             feeAmount = 0;
         } else {
             feeAmount = _amount / FEE_DIVIDER;
         }
-    }
-
-    /// @notice Returns the owner of the DSProxy that called the contract
-    function getUserAddress() internal view returns (address) {
-        IDSProxy proxy = IDSProxy(payable(address(this)));
-
-        return proxy.owner();
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {

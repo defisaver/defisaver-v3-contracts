@@ -4,10 +4,11 @@ pragma solidity =0.8.10;
 import "../../interfaces/IDFSRegistry.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../auth/AdminAuth.sol";
+import "../../auth/Pausable.sol";
 import "./../helpers/CoreHelper.sol";
 
 /// @title ProxyAuth Gets DSProxy auth from users and is callable by the Executor
-contract ProxyAuth is AdminAuth, CoreHelper {
+contract ProxyAuth is AdminAuth, CoreHelper, Pausable {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// @dev The id is on purpose not the same as contract name for easier deployment
@@ -34,7 +35,7 @@ contract ProxyAuth is AdminAuth, CoreHelper {
         address _proxyAddr,
         address _contractAddr,
         bytes memory _callData
-    ) public payable onlyExecutor {
+    ) external payable onlyExecutor notPaused {
         IDSProxy(_proxyAddr).execute{value: msg.value}(_contractAddr, _callData);
     }
 }

@@ -55,7 +55,7 @@ contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
     /// @param _strategyIds Array of strategyIds that go into a bundle
     function createBundle(
         uint64[] memory _strategyIds
-    ) public onlyAuthCreators sameTriggers(_strategyIds) returns (uint256) {
+    ) external onlyAuthCreators sameTriggers(_strategyIds) returns (uint256) {
 
         bundles.push(StrategyBundle({
             creator: msg.sender,
@@ -70,7 +70,7 @@ contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
     /// @notice Switch to determine if bundles can be created by anyone
     /// @dev Callable only by the owner
     /// @param _openToPublic Flag if true anyone can create bundles
-    function changeEditPermission(bool _openToPublic) public onlyOwner {
+    function changeEditPermission(bool _openToPublic) external onlyOwner {
         openToPublic = _openToPublic;
     }
 
@@ -83,11 +83,12 @@ contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
     function getBundle(uint _bundleId) public view returns (StrategyBundle memory) {
         return bundles[_bundleId];
     }
+
     function getBundleCount() public view returns (uint256) {
         return bundles.length;
     }
 
-    function getPaginatedBundles(uint _page, uint _perPage) public view returns (StrategyBundle[] memory) {
+    function getPaginatedBundles(uint _page, uint _perPage) external view returns (StrategyBundle[] memory) {
         StrategyBundle[] memory bundlesPerPage = new StrategyBundle[](_perPage);
         uint start = _page * _perPage;
         uint end = start + _perPage;

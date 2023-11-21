@@ -8,6 +8,7 @@ import "./SubStorage.sol";
 import "../DFSRegistry.sol";
 
 /// @title Called through DSProxy, handles auth and calls subscription contract
+/// @dev Should merge with subStorage and deprecate
 contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
@@ -16,7 +17,7 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
     function subscribeToStrategy(
         StrategySub calldata _sub
-    ) public {
+    ) external {
         givePermission(PROXY_AUTH_ADDR);
 
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(_sub);
@@ -28,7 +29,7 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     function updateSubData(
         uint256 _subId,
         StrategySub calldata _sub
-    ) public {
+    ) external {
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_subId, _sub);
     }
 
@@ -37,7 +38,7 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     /// @param _subId Id of subscription to enable
     function activateSub(
         uint _subId
-    ) public {
+    ) external {
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId);
     }
 
@@ -48,7 +49,7 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     function updateAndActivateSub(
         uint _subId,
         StrategySub calldata _sub
-    ) public {
+    ) external {
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_subId, _sub);
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId);
     }
@@ -58,7 +59,7 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     /// @param _subId Id of subscription to disable
     function deactivateSub(
         uint _subId
-    ) public {
+    ) external {
         SubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
     }
 }

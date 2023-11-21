@@ -4,5 +4,5 @@ pragma solidity =0.8.10;
 
 import "./MainnetAuthAddresses.sol";
 
-contract AuthHelper is MainnetAuthAddresses {
+abstract contract AuthHelper is MainnetAuthAddresses {
 }

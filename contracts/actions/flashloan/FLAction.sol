@@ -43,11 +43,11 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         SPARK
     }
 
-    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
+    /// @dev Function sig of RecipeExecutor.executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR =
         bytes4(
             keccak256(
-                "_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"
+                "executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"
             )
         );
     bytes4 public constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));

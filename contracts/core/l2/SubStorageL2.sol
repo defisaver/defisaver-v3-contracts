@@ -69,7 +69,7 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
     /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
     function subscribeToStrategy(
         StrategySub memory _sub
-    ) public isValidId(_sub.strategyOrBundleId, _sub.isBundle) returns (uint256) {
+    ) external isValidId(_sub.strategyOrBundleId, _sub.isBundle) returns (uint256) {
 
         bytes32 subStorageHash = keccak256(abi.encode(_sub));
 
@@ -95,7 +95,7 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
     function updateSubData(
         uint256 _subId,
         StrategySub calldata _sub
-    ) public onlySubOwner(_subId) isValidId(_sub.strategyOrBundleId, _sub.isBundle)  {
+    ) external onlySubOwner(_subId) isValidId(_sub.strategyOrBundleId, _sub.isBundle)  {
         StoredSubData storage storedSubData = strategiesSubs[_subId];
 
         bytes32 subStorageHash = keccak256(abi.encode(_sub));
@@ -112,7 +112,7 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
     /// @param _subId Id of subscription to enable
     function activateSub(
         uint _subId
-    ) public onlySubOwner(_subId) {
+    ) external onlySubOwner(_subId) {
         StoredSubData storage sub = strategiesSubs[_subId];
 
         sub.isEnabled = true;
@@ -125,7 +125,7 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
     /// @param _subId Id of subscription to disable
     function deactivateSub(
         uint _subId
-    ) public onlySubOwner(_subId) {
+    ) external onlySubOwner(_subId) {
         StoredSubData storage sub = strategiesSubs[_subId];
 
         sub.isEnabled = false;

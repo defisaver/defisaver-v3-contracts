@@ -35,7 +35,7 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         bytes4[] memory _actionIds,
         uint8[][] memory _paramMapping,
         bool _continuous
-    ) public onlyAuthCreators returns (uint256) {
+    ) external onlyAuthCreators returns (uint256) {
         strategies.push(Strategy({
                 name: _name,
                 creator: msg.sender,
@@ -53,7 +53,7 @@ contract StrategyStorage is StrategyModel, AdminAuth {
     /// @notice Switch to determine if bundles can be created by anyone
     /// @dev Callable only by the owner
     /// @param _openToPublic Flag if true anyone can create bundles
-    function changeEditPermission(bool _openToPublic) public onlyOwner {
+    function changeEditPermission(bool _openToPublic) external onlyOwner {
         openToPublic = _openToPublic;
     }
 
@@ -66,7 +66,7 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         return strategies.length;
     }
 
-    function getPaginatedStrategies(uint _page, uint _perPage) public view returns (Strategy[] memory) {
+    function getPaginatedStrategies(uint _page, uint _perPage) external view returns (Strategy[] memory) {
         Strategy[] memory strategiesPerPage = new Strategy[](_perPage);
 
         uint start = _page * _perPage;
@@ -82,5 +82,4 @@ contract StrategyStorage is StrategyModel, AdminAuth {
 
         return strategiesPerPage;
     }
-
 }

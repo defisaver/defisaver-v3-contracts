@@ -4,7 +4,7 @@ pragma solidity =0.8.10;
 
 
 /// @title StrategyModel - contract that implements the structs used in the core system
-contract StrategyModel {
+abstract contract StrategyModel {
         
     /// @dev Group of strategies bundled together so user can sub to multiple strategies at once
     /// @param creator Address of the user who created the bundle

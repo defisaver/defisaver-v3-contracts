@@ -41,13 +41,13 @@ contract DFSRegistry is AdminAuth {
     /// @notice Given an contract id returns the registered address
     /// @dev Id is keccak256 of the contract name
     /// @param _id Id of contract
-    function getAddr(bytes4 _id) public view returns (address) {
+    function getAddr(bytes4 _id) external view returns (address) {
         return entries[_id].contractAddr;
     }
 
     /// @notice Helper function to easily query if id is registered
     /// @param _id Id of contract
-    function isRegistered(bytes4 _id) public view returns (bool) {
+    function isRegistered(bytes4 _id) external view returns (bool) {
         return entries[_id].exists;
     }
 
@@ -61,7 +61,7 @@ contract DFSRegistry is AdminAuth {
         bytes4 _id,
         address _contractAddr,
         uint256 _waitPeriod
-    ) public onlyOwner {
+    ) external onlyOwner {
         if (entries[_id].exists){
             revert EntryAlreadyExistsError(_id);
         }
@@ -81,7 +81,7 @@ contract DFSRegistry is AdminAuth {
     /// @notice Reverts to the previous address immediately
     /// @dev In case the new version has a fault, a quick way to fallback to the old contract
     /// @param _id Id of contract
-    function revertToPreviousAddress(bytes4 _id) public onlyOwner {
+    function revertToPreviousAddress(bytes4 _id) external onlyOwner {
         if (!(entries[_id].exists)){
             revert EntryNonExistentError(_id);
         }
@@ -99,7 +99,7 @@ contract DFSRegistry is AdminAuth {
     /// @dev Can override a change that is currently in progress
     /// @param _id Id of contract
     /// @param _newContractAddr Address of the new contract
-    function startContractChange(bytes4 _id, address _newContractAddr) public onlyOwner {
+    function startContractChange(bytes4 _id, address _newContractAddr) external onlyOwner {
         if (!entries[_id].exists){
             revert EntryNonExistentError(_id);
         }
@@ -117,7 +117,7 @@ contract DFSRegistry is AdminAuth {
 
     /// @notice Changes new contract address, correct time must have passed
     /// @param _id Id of contract
-    function approveContractChange(bytes4 _id) public onlyOwner {
+    function approveContractChange(bytes4 _id) external onlyOwner {
         if (!entries[_id].exists){
             revert EntryNonExistentError(_id);
         }
@@ -141,7 +141,7 @@ contract DFSRegistry is AdminAuth {
 
     /// @notice Cancel pending change
     /// @param _id Id of contract
-    function cancelContractChange(bytes4 _id) public onlyOwner {
+    function cancelContractChange(bytes4 _id) external onlyOwner {
         if (!entries[_id].exists){
             revert EntryNonExistentError(_id);
         }
@@ -161,7 +161,7 @@ contract DFSRegistry is AdminAuth {
     /// @notice Starts the change for waitPeriod
     /// @param _id Id of contract
     /// @param _newWaitPeriod New wait time
-    function startWaitPeriodChange(bytes4 _id, uint256 _newWaitPeriod) public onlyOwner {
+    function startWaitPeriodChange(bytes4 _id, uint256 _newWaitPeriod) external onlyOwner {
         if (!entries[_id].exists){
             revert EntryNonExistentError(_id);
         }
@@ -179,7 +179,7 @@ contract DFSRegistry is AdminAuth {
 
     /// @notice Changes new wait period, correct time must have passed
     /// @param _id Id of contract
-    function approveWaitPeriodChange(bytes4 _id) public onlyOwner {
+    function approveWaitPeriodChange(bytes4 _id) external onlyOwner {
         if (!entries[_id].exists){
             revert EntryNonExistentError(_id);
         }
@@ -203,7 +203,7 @@ contract DFSRegistry is AdminAuth {
 
     /// @notice Cancel wait period change
     /// @param _id Id of contract
-    function cancelWaitPeriodChange(bytes4 _id) public onlyOwner {
+    function cancelWaitPeriodChange(bytes4 _id) external onlyOwner {
         if (!entries[_id].exists){
             revert EntryNonExistentError(_id);
         }

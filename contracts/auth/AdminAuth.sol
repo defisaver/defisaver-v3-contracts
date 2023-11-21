@@ -7,7 +7,7 @@ import "./AdminVault.sol";
 import "./helpers/AuthHelper.sol";
 
 /// @title AdminAuth Handles owner/admin privileges over smart contracts
-contract AdminAuth is AuthHelper {
+abstract contract AdminAuth is AuthHelper {
     using SafeERC20 for IERC20;
 
     AdminVault public constant adminVault = AdminVault(ADMIN_VAULT_ADDR);
@@ -30,16 +30,11 @@ contract AdminAuth is AuthHelper {
     }
 
     /// @notice withdraw stuck funds
-    function withdrawStuckFunds(address _token, address _receiver, uint256 _amount) public onlyOwner {
+    function withdrawStuckFunds(address _token, address _receiver, uint256 _amount) external onlyOwner {
         if (_token == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
             payable(_receiver).transfer(_amount);
         } else {
             IERC20(_token).safeTransfer(_receiver, _amount);
         }
-    }
-
-    /// @notice Destroy the contract
-    function kill() public onlyAdmin {
-        selfdestruct(payable(msg.sender));
     }
 }

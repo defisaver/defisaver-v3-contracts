@@ -17,13 +17,13 @@ contract BotAuth is AdminAuth {
 
     /// @notice Adds a new bot address which will be able to call executeStrategy()
     /// @param _caller Bot address
-    function addCaller(address _caller) public onlyOwner {
+    function addCaller(address _caller) external onlyOwner {
         approvedCallers[_caller] = true;
     }
 
     /// @notice Removes a bot address so it can't call executeStrategy()
     /// @param _caller Bot address
-    function removeCaller(address _caller) public onlyOwner {
+    function removeCaller(address _caller) external onlyOwner {
         approvedCallers[_caller] = false;
     }
 }
