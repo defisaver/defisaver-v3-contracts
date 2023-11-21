@@ -90,44 +90,24 @@ const dfsRegistryTest = async () => {
         });
 
         describe('Testing auth of the functions', async () => {
-            it('...should fail to registry if not owner', async () => {
+            it('...should fail to register if not owner', async () => {
                 const registry2 = registry.connect(senderAcc2);
-
-                try {
-                    await registry2.addNewContract(id1, contractAddr1, 0);
-                } catch (err) {
-                    expect(err.toString()).to.have.string('SenderNotOwner');
-                }
+                await expect(registry2.addNewContract(id1, contractAddr1, 0)).to.be.revertedWith('SenderNotOwner');
             });
 
             it('...should fail to start contact change if not owner', async () => {
                 const registry2 = registry.connect(senderAcc2);
-
-                try {
-                    await registry2.startContractChange(id1, contractAddr1);
-                } catch (err) {
-                    expect(err.toString()).to.have.string('SenderNotOwner');
-                }
+                await expect(registry2.startContractChange(id1, contractAddr1)).to.be.revertedWith('SenderNotOwner');
             });
 
             it('...should fail to approve contact change if not owner', async () => {
                 const registry2 = registry.connect(senderAcc2);
-
-                try {
-                    await registry2.approveContractChange(id1);
-                } catch (err) {
-                    expect(err.toString()).to.have.string('SenderNotOwner');
-                }
+                await expect(registry2.approveContractChange(id1)).to.be.revertedWith('SenderNotOwner');
             });
 
             it('...should fail to cancel contact change if not owner', async () => {
                 const registry2 = registry.connect(senderAcc2);
-
-                try {
-                    await registry2.cancelContractChange(id1);
-                } catch (err) {
-                    expect(err.toString()).to.have.string('SenderNotOwner');
-                }
+                await expect(registry2.cancelContractChange(id1)).to.be.revertedWith('SenderNotOwner');
             });
         });
 
@@ -155,15 +135,9 @@ const dfsRegistryTest = async () => {
             });
 
             it('...should fail to register same id twice', async () => {
-                try {
-                    // eslint-disable-next-line no-shadow
-                    const registryByOwner = registry.connect(owner);
-                    await registryByOwner.addNewContract(id1, contractAddr2, 0);
-                    // eslint-disable-next-line no-unused-expressions
-                    expect(true).to.be.false;
-                } catch (err) {
-                    expect(err.toString()).to.have.string('EntryAlreadyExistsError');
-                }
+                // eslint-disable-next-line no-shadow
+                const registryByOwner = registry.connect(owner);
+                await expect(registryByOwner.addNewContract(id1, contractAddr2, 0)).to.be.revertedWith('EntryAlreadyExistsError');
 
                 await stopImpersonatingAccount(OWNER_ACC);
             });
@@ -180,11 +154,7 @@ const dfsRegistryTest = async () => {
             });
 
             it('...should fail to approve it, because not in change process', async () => {
-                try {
-                    await registryByOwner.approveContractChange(id2);
-                } catch (err) {
-                    expect(err.toString()).to.have.string('EntryNotInChangeError');
-                }
+                await expect(registryByOwner.approveContractChange(id2)).to.be.revertedWith('EntryNotInChangeError');
             });
 
             it('...should initiate a change and approve after 3 hours', async () => {
@@ -218,13 +188,7 @@ const dfsRegistryTest = async () => {
                     id: new Date().getTime(),
                 });
 
-                try {
-                    await registryByOwner.approveContractChange(id3);
-                    // eslint-disable-next-line no-unused-expressions
-                    expect(true).to.be.false;
-                } catch (err) {
-                    expect(err.toString()).to.have.string('ChangeNotReadyError');
-                }
+                await expect(registryByOwner.approveContractChange(id3)).to.be.revertedWith('ChangeNotReadyError');
             });
 
             it('...should cancel the contract change', async () => {
@@ -254,31 +218,18 @@ const dfsRegistryTest = async () => {
             });
 
             it('...should fail to start a change in contract address, while wait period change', async () => {
-                try {
-                    const newWaitPeriod = TWO_DAYS + TWO_DAYS;
-                    await registryByOwner.startWaitPeriodChange(id3, newWaitPeriod);
+                const newWaitPeriod = TWO_DAYS + TWO_DAYS;
+                await registryByOwner.startWaitPeriodChange(id3, newWaitPeriod);
 
-                    await registryByOwner.startContractChange(id3, contractAddr3);
-                    // eslint-disable-next-line no-unused-expressions
-                    expect(true).to.be.false;
-                } catch (err) {
-                    expect(err.toString()).to.have.string('AlreadyInWaitPeriodChangeError');
-                    await registryByOwner.cancelWaitPeriodChange(id3);
-                }
+                await expect(registryByOwner.startContractChange(id3, contractAddr3)).to.be.revertedWith('AlreadyInWaitPeriodChangeError');
+                await registryByOwner.cancelWaitPeriodChange(id3);
             });
 
             it('...should fail to start a wait period change, while in contract change', async () => {
-                try {
-                    const newWaitPeriod = TWO_DAYS + TWO_DAYS;
-                    await registryByOwner.startContractChange(id3, contractAddr3);
-
-                    await registryByOwner.startWaitPeriodChange(id3, newWaitPeriod);
-                    // eslint-disable-next-line no-unused-expressions
-                    expect(true).to.be.false;
-                } catch (err) {
-                    expect(err.toString()).to.have.string('AlreadyInContractChangeError');
-                    await registryByOwner.cancelContractChange(id3);
-                }
+                const newWaitPeriod = TWO_DAYS + TWO_DAYS;
+                await registryByOwner.startContractChange(id3, contractAddr3);
+                await expect(registryByOwner.startWaitPeriodChange(id3, newWaitPeriod)).to.be.revertedWith('AlreadyInContractChangeError');
+                await registryByOwner.cancelContractChange(id3);
             });
 
             it('...should fail to approve voting period change, because not enought time has passed', async () => {
@@ -290,14 +241,7 @@ const dfsRegistryTest = async () => {
                     params: [TWO_DAYS],
                     id: new Date().getTime(),
                 });
-
-                try {
-                    await registryByOwner.approveWaitPeriodChange(id3);
-                    // eslint-disable-next-line no-unused-expressions
-                    expect(true).to.be.false;
-                } catch (err) {
-                    expect(err.toString()).to.have.string('ChangeNotReadyError');
-                }
+                await expect(registryByOwner.approveWaitPeriodChange(id3)).to.be.revertedWith('ChangeNotReadyError');
             });
 
             it('...should start a new period change and cancel it', async () => {
@@ -357,22 +301,12 @@ const botAuthTest = async () => {
         });
 
         it('...should fail to add new acc. because sender not owner', async () => {
-            try {
-                botAuth = botAuth.connect(senderAcc);
-                await botAuth.addCaller(botAcc1.address);
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotOwner()');
-            }
+            botAuth = botAuth.connect(senderAcc);
+            await expect(botAuth.addCaller(botAcc1.address)).to.be.revertedWith('SenderNotOwner()');
         });
 
         it('...should fail to remove new acc. because sender not owner', async () => {
-            try {
-                await botAuth.removeCaller(botAcc1.address);
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotOwner()');
-            }
+            await expect(botAuth.removeCaller(botAcc1.address)).to.be.revertedWith('SenderNotOwner()');
         });
     });
 };
@@ -406,10 +340,10 @@ const bundleStorageTest = async () => {
 
             strategyCount = parseInt((await getLatestStrategyId()), 10);
 
-            owner = await hre.ethers.provider.getSigner(OWNER_ACC);
+            owner = hre.ethers.provider.getSigner(OWNER_ACC);
         });
 
-        it('...should registry a new bundle ', async () => {
+        it('...should register a new bundle ', async () => {
             await bundleStorage.createBundle([
                 strategyCount - 4,
                 strategyCount - 3,
@@ -432,46 +366,30 @@ const bundleStorageTest = async () => {
         });
 
         it('...should fail to change edit permission from non owner acc', async () => {
-            try {
-                await bundleStorage.changeEditPermission(false);
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotOwner()');
-            }
+            await expect(bundleStorage.changeEditPermission(false)).to.be.revertedWith('SenderNotOwner()');
         });
 
         it('...should fail to reg. a new bundle from non owner acc', async () => {
-            try {
-                await bundleStorage.createBundle([
-                    strategyCount - 4,
-                    strategyCount - 3,
-                    strategyCount - 2,
-                ]);
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('NoAuthToCreateBundle');
-            }
+            await expect(bundleStorage.createBundle([
+                strategyCount - 4,
+                strategyCount - 3,
+                strategyCount - 2,
+            ])).to.be.revertedWith('NoAuthToCreateBundle');
         });
 
-        it('...should fail to registry a bundle because triggerIds are not the same', async () => {
-            try {
-                // set permission to open to test trigger validation
-                await openStrategyAndBundleStorage();
+        it('...should fail to register a bundle because triggerIds are not the same', async () => {
+            // set permission to open to test trigger validation
+            await openStrategyAndBundleStorage();
 
-                await bundleStorage.createBundle([strategyCount - 2, strategyCount - 1]);
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('DiffTriggersInBundle');
-            }
+            await expect(
+                bundleStorage.createBundle([strategyCount - 2, strategyCount - 1]),
+            ).to.be.revertedWith('DiffTriggersInBundle');
         });
 
-        it('...should fail to registry a bundle because triggerIds are diff. length', async () => {
-            try {
-                await bundleStorage.createBundle([strategyCount - 2, strategyCount - 1]);
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('DiffTriggersInBundle');
-            }
+        it('...should fail to register a bundle because triggerIds are diff. length', async () => {
+            await expect(
+                bundleStorage.createBundle([strategyCount - 2, strategyCount - 1]),
+            ).to.be.revertedWith('DiffTriggersInBundle');
 
             // set permission to only owner after trigger validation tested
             await impersonateAccount(OWNER_ACC);
@@ -552,7 +470,7 @@ const proxyAuthTest = async () => {
             proxy2 = await getProxy(senderAcc2.address);
 
             // give auth to ProxyAuth
-            proxyPermission = await redeploy('ProxyPermission');
+            proxyPermission = await redeploy('RecipeExecutor');
 
             // set StrategyExecutor to EOA for testing purposes so we can callExecute()
 
@@ -581,8 +499,7 @@ const proxyAuthTest = async () => {
 
         it('...should callExecute when auth is given to proxyAuth and StrategyExecutor set', async () => {
             // give proxy permission to ProxyAuth
-            const ProxyPermission = await hre.ethers.getContractFactory('ProxyPermission');
-            const functionData = ProxyPermission.interface.encodeFunctionData(
+            const functionData = proxyPermission.interface.encodeFunctionData(
                 'givePermission',
                 [proxyAuth.address],
             );
@@ -591,40 +508,23 @@ const proxyAuthTest = async () => {
 
             // test action
             const encodedCall = new dfs.actions.basic.SumInputsAction(1, 2).encodeForDsProxyCall();
-
-            try {
-                await proxyAuth.callExecute(proxy.address, sumInputs.address, encodedCall[1]);
-                expect(true).to.be.equal(true);
-            } catch (err) {
-                expect(true).to.be.equal(false);
-            }
+            await proxyAuth.callExecute(proxy.address, sumInputs.address, encodedCall[1]);
         });
 
         it('...should fail when ProxyAuth has no DSProxy.authority()', async () => {
-            try {
-                // eslint-disable-next-line max-len
-                const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2)).encodeForDsProxyCall();
-
-                await proxyAuth.callExecute(proxy2.address, sumInputs.address, encodedCall[1]);
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                // can't map error as the DSProxy throws
-                expect(true).to.be.equal(true);
-            }
+            // eslint-disable-next-line max-len
+            const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2)).encodeForDsProxyCall();
+            await expect(
+                proxyAuth.callExecute(proxy2.address, sumInputs.address, encodedCall[1]),
+            ).to.be.reverted;
         });
 
         it('...should fail when StrategyExecutor is not the caller', async () => {
-            try {
-                await redeploy('StrategyExecutor'); // set diff. address to be StrategyExecutor
+            await redeploy('StrategyExecutor'); // set diff. address to be StrategyExecutor
 
-                // eslint-disable-next-line max-len
-                const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2)).encodeForDsProxyCall();
-
-                await proxyAuth.callExecute(proxy.address, sumInputs.address, encodedCall[1]);
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotExecutorError');
-            }
+            // eslint-disable-next-line max-len
+            const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2)).encodeForDsProxyCall();
+            await expect(proxyAuth.callExecute(proxy.address, sumInputs.address, encodedCall[1])).to.be.revertedWith('SenderNotExecutorError');
         });
     });
 };
@@ -655,7 +555,7 @@ const recipeExecutorTest = async () => {
             const subProxyAddr = await getAddrFromRegistry('SubProxy');
             subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
 
-            flAddr = await getAddrFromRegistry('FLAaveV3');
+            ({ address: flAddr } = await redeploy('FLSpark'));
 
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
@@ -681,21 +581,16 @@ const recipeExecutorTest = async () => {
         });
 
         it('...should fail to execute recipe by strategy because the triggers check is not passing', async () => {
-            try {
-                await strategyExecutorByBot.executeStrategy(
+            await expect(
+                strategyExecutorByBot.executeStrategy(
                     subId,
                     0,
                     [triggerData],
                     [actionData],
                     strategySub,
                     { gasLimit: 5000000 },
-                );
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                // trigger error not caught by hardhat but it is throwing it
-                // expect(err.toString()).to.have.string('TriggerNotActiveError');
-                expect(err.toString()).to.have.string('reverted without a reason string');
-            }
+                ),
+            ).to.be.revertedWith('reverted without a reason string');
         });
 
         it('...should execute recipe by strategy', async () => {
@@ -757,7 +652,7 @@ const recipeExecutorTest = async () => {
             const AAVE_NO_DEBT_MODE = 0;
             const dummyRecipeWithFL = new dfs.Recipe('DummyRecipeWithFl', [
                 // eslint-disable-next-line max-len
-                new dfs.actions.flashloan.AaveV3FlashLoanNoFeeAction([WETH_ADDRESS], [pullAmount], [AAVE_NO_DEBT_MODE], nullAddress),
+                new dfs.actions.flashloan.SparkFlashLoanAction([WETH_ADDRESS], [pullAmount], [AAVE_NO_DEBT_MODE], nullAddress),
                 new dfs.actions.basic.SendTokenAction(WETH_ADDRESS, flAddr, pullAmount),
             ]);
 
@@ -820,59 +715,51 @@ const strategyExecutorTest = async () => {
         });
 
         it('...should fail because caller is not auth bot', async () => {
-            try {
-                await strategyExecutor.executeStrategy(
+            await expect(
+                strategyExecutor.executeStrategy(
                     subId,
                     0,
                     [triggerData],
                     [actionData],
                     strategySub,
-                );
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('BotNotApproved');
-            }
+                ),
+            ).to.be.revertedWith('BotNotApproved');
         });
 
         it('...should fail because of wrong SubData hash', async () => {
-            try {
-                await addBotCaller(botAcc.address);
+            await addBotCaller(botAcc.address);
 
-                const amountEncoded = abiCoder.encode(['uint256'], [pullAmount]);
-                // isBundle changed to true
-                const strategySubUpdated = [strategyId, true, [triggerData], [amountEncoded]];
-
-                await strategyExecutorByBot.executeStrategy(
+            const amountEncoded = abiCoder.encode(['uint256'], [pullAmount]);
+            // isBundle changed to true
+            const strategySubUpdated = [strategyId, true, [triggerData], [amountEncoded]];
+            await expect(
+                strategyExecutorByBot.executeStrategy(
                     subId,
                     0,
                     [triggerData],
                     [actionData],
                     strategySubUpdated,
-                );
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('SubDatHashMismatch');
-            }
+                ),
+            ).to.be.revertedWith('SubDatHashMismatch');
         });
 
         it('...should fail because subscription is not enabled', async () => {
-            try {
+            {
                 // disable sub
                 const functionData = subProxy.interface.encodeFunctionData('deactivateSub', [subId]);
                 await proxy['execute(address,bytes)'](subProxy.address, functionData, {
                     gasLimit: 5000000,
                 });
 
-                await strategyExecutorByBot.executeStrategy(
-                    subId,
-                    0,
-                    [triggerData],
-                    [actionData],
-                    strategySub,
-                );
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('SubNotEnabled(');
+                await expect(
+                    strategyExecutorByBot.executeStrategy(
+                        subId,
+                        0,
+                        [triggerData],
+                        [actionData],
+                        strategySub,
+                    ),
+                ).to.be.revertedWith(`SubNotEnabled(${subId})`);
             }
 
             // enable sub
@@ -905,101 +792,23 @@ const strategyExecutorTest = async () => {
     });
 };
 
-const strategyProxyTest = async () => {
-    describe('StrategyProxy', () => {
-        let strategyStorage;
-        let bundleStorage;
-        let senderAcc;
-        let strategyProxy;
-        let proxy;
+const strategyStorageTest = async () => {
+    describe('StrategyStorage', () => {
+        let strategyStorage; let owner; let strategyStorageFromOwner; let numStrategiesBeforeTest;
 
         before(async () => {
             await redeployCore();
-
-            const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
-            strategyStorage = await hre.ethers.getContractAt('StrategyStorage', strategyStorageAddr);
-
-            const bundleStorageAddr = await getAddrFromRegistry('BundleStorage');
-            bundleStorage = await hre.ethers.getContractAt('BundleStorage', bundleStorageAddr);
-
-            const strategyProxyAddr = await getAddrFromRegistry('StrategyProxy');
-            strategyProxy = await hre.ethers.getContractAt('StrategyProxy', strategyProxyAddr);
-
-            senderAcc = (await hre.ethers.getSigners())[0];
-
-            await openStrategyAndBundleStorage();
-
-            proxy = await getProxy(senderAcc.address);
-        });
-
-        it('...should create a new strategy ', async () => {
-            const numStrategiesBefore = await strategyStorage.getStrategyCount();
-
-            const functionData = strategyProxy.interface.encodeFunctionData('createStrategy', [
-                'TestStrategy', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true,
-            ]);
-
-            await proxy['execute(address,bytes)'](strategyProxy.address, functionData, {
-                gasLimit: 5000000,
-            });
-
-            const numStrategies = await strategyStorage.getStrategyCount();
-
-            expect(numStrategies).to.be.eq(+numStrategiesBefore + 1);
-        });
-
-        it('...should create a another new strategy ', async () => {
-            const numStrategiesBefore = await strategyStorage.getStrategyCount();
-
-            const functionData = strategyProxy.interface.encodeFunctionData('createStrategy', [
-                'TestStrategy2', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true,
-            ]);
-
-            await proxy['execute(address,bytes)'](strategyProxy.address, functionData, {
-                gasLimit: 5000000,
-            });
-
-            const numStrategies = await strategyStorage.getStrategyCount();
-
-            expect(numStrategies).to.be.eq(+numStrategiesBefore + 1);
-        });
-
-        it('...should registry a new bundle ', async () => {
-            const numBundlesBefore = await bundleStorage.getBundleCount();
-
-            const numStrategies = +(await strategyStorage.getStrategyCount()) - 1;
-
-            console.log(numStrategies);
-            const functionData = strategyProxy.interface.encodeFunctionData('createBundle', [
-                [numStrategies, numStrategies - 1],
-            ]);
-
-            await proxy['execute(address,bytes)'](strategyProxy.address, functionData, {
-                gasLimit: 5000000,
-            });
-
-            const numBundles = await bundleStorage.getBundleCount();
-
-            expect(numBundles).to.be.eq(+numBundlesBefore + 1);
-        });
-    });
-};
-
-const strategyStorageTest = async () => {
-    describe('StrategyStorage', () => {
-        let strategyStorage; let owner; let strategyStorageFromOwner;
-
-        before(async () => {
             const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
             strategyStorage = await hre.ethers.getContractAt('StrategyStorage', strategyStorageAddr);
 
             await openStrategyAndBundleStorage();
 
-            owner = await hre.ethers.provider.getSigner(OWNER_ACC);
+            owner = hre.ethers.provider.getSigner(OWNER_ACC);
         });
 
-        it('...should registry a new strategy ', async () => {
+        it('...should register a new strategy ', async () => {
             const numStrategiesBefore = await strategyStorage.getStrategyCount();
+            numStrategiesBeforeTest = numStrategiesBefore;
 
             await strategyStorage.createStrategy('TestStrategy', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
 
@@ -1019,21 +828,15 @@ const strategyStorageTest = async () => {
         });
 
         it('...should fail to change edit permission from non owner acc', async () => {
-            try {
-                await strategyStorage.changeEditPermission(false);
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotOwner()');
-            }
+            await expect(
+                strategyStorage.changeEditPermission(false),
+            ).to.be.reverted; // revertedWith('SenderNotOwner()');
         });
 
         it('...should fail to reg. a new strategy from non owner acc', async () => {
-            try {
-                await strategyStorage.createStrategy('TestStrategy', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('NoAuthToCreateStrategy');
-            }
+            await expect(
+                strategyStorage.createStrategy('TestStrategy', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true),
+            ).to.be.reverted; // revertedWith('NoAuthToCreateStrategy');
         });
 
         it('...should reg. strategies from owner acc', async () => {
@@ -1064,21 +867,15 @@ const strategyStorageTest = async () => {
         });
 
         it('...should fetch getPaginatedStrategies', async () => {
-            const strategies1 = await strategyStorageFromOwner.getPaginatedStrategies(
-                0,
-                2,
+            const strategies = await strategyStorageFromOwner.getPaginatedStrategies(
+                1,
+                numStrategiesBeforeTest,
             );
 
-            expect(strategies1[0].name).to.be.eq('McdYearnRepayStrategy');
-            expect(strategies1[1].name).to.be.eq('McdYearnRepayWithExchangeStrategy');
-
-            const strategies2 = await strategyStorageFromOwner.getPaginatedStrategies(
-                2,
-                2,
-            );
-
-            expect(strategies2[0].name).to.be.eq('McdRariRepayStrategy');
-            expect(strategies2[1].name).to.be.eq('McdRariRepayWithExchangeStrategy');
+            expect(strategies[0].name).to.be.eq('TestStrategy');
+            expect(strategies[1].name).to.be.eq('TestStrategy2');
+            expect(strategies[2].name).to.be.eq('TestStrategy3');
+            expect(strategies[3].name).to.be.eq('TestStrategy4');
         });
     });
 };
@@ -1093,6 +890,7 @@ const subProxyTest = async () => {
         let proxy;
 
         before(async () => {
+            await redeployCore();
             const subStorageAddr = await getAddrFromRegistry('SubStorage');
             subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
 
@@ -1183,6 +981,7 @@ const subStorageTest = async () => {
         let subStorage; let senderAcc2; let strategyStorage;
 
         before(async () => {
+            await redeployCore();
             const subStorageAddr = await getAddrFromRegistry('SubStorage');
             subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
 
@@ -1215,23 +1014,13 @@ const subStorageTest = async () => {
         });
 
         it('...should fail to add a new subscription with an invalid subId', async () => {
-            try {
-                const subData = [42069, false, [], []];
-
-                await subStorage.subscribeToStrategy(subData);
-            } catch (err) {
-                expect(err.toString()).to.have.string('SubIdOutOfRange');
-            }
+            const subData = [42069, false, [], []];
+            await expect(subStorage.subscribeToStrategy(subData)).to.be.revertedWith('SubIdOutOfRange');
         });
 
         it('...should fail to add a new subscription with an invalid bundleId', async () => {
-            try {
-                const subData = [42069, true, [], []];
-
-                await subStorage.subscribeToStrategy(subData);
-            } catch (err) {
-                expect(err.toString()).to.have.string('SubIdOutOfRange');
-            }
+            const subData = [42069, true, [], []];
+            await expect(subStorage.subscribeToStrategy(subData)).to.be.revertedWith('SubIdOutOfRange');
         });
 
         it('...should update the new subscription', async () => {
@@ -1249,36 +1038,21 @@ const subStorageTest = async () => {
         });
 
         it('...should fail to update with and invalid subId', async () => {
-            try {
-                const updatedSubData = [42069, false, [], []];
-                const latestSub = +(await subStorage.getSubsCount()) - 1;
-
-                await subStorage.updateSubData(latestSub, updatedSubData);
-            } catch (err) {
-                expect(err.toString()).to.have.string('SubIdOutOfRange');
-            }
+            const updatedSubData = [42069, false, [], []];
+            const latestSub = +(await subStorage.getSubsCount()) - 1;
+            await expect(subStorage.updateSubData(latestSub, updatedSubData)).to.be.revertedWith('SubIdOutOfRange');
         });
 
         it('...should fail to update with and invalid bundleId', async () => {
-            try {
-                const updatedSubData = [42069, true, [], []];
-                const latestSub = +(await subStorage.getSubsCount()) - 1;
-
-                await subStorage.updateSubData(latestSub, updatedSubData);
-            } catch (err) {
-                expect(err.toString()).to.have.string('SubIdOutOfRange');
-            }
+            const updatedSubData = [42069, true, [], []];
+            const latestSub = +(await subStorage.getSubsCount()) - 1;
+            await expect(subStorage.updateSubData(latestSub, updatedSubData)).to.be.revertedWith('SubIdOutOfRange');
         });
 
         it('...should fail to update the subscription from non-owner account', async () => {
-            try {
-                const updatedSubData = [1, false, [], []];
-                const subStorageSender2 = subStorage.connect(senderAcc2);
-
-                await subStorageSender2.updateSubData(0, updatedSubData);
-            } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotSubOwnerError');
-            }
+            const updatedSubData = [1, false, [], []];
+            const subStorageSender2 = subStorage.connect(senderAcc2);
+            await expect(subStorageSender2.updateSubData(0, updatedSubData)).to.be.revertedWith('SenderNotSubOwnerError');
         });
 
         it('...should deactivate users sub', async () => {
@@ -1291,13 +1065,8 @@ const subStorageTest = async () => {
         });
 
         it('...should fail to deactivate users sub from non-owner account', async () => {
-            try {
-                const subStorageSender2 = subStorage.connect(senderAcc2);
-
-                await subStorageSender2.deactivateSub(0);
-            } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotSubOwnerError');
-            }
+            const subStorageSender2 = subStorage.connect(senderAcc2);
+            await expect(subStorageSender2.deactivateSub(0)).to.be.revertedWith('SenderNotSubOwnerError');
         });
 
         it('...should activate users sub', async () => {
@@ -1310,21 +1079,14 @@ const subStorageTest = async () => {
         });
 
         it('...should fail to activate users sub from non-owner account', async () => {
-            try {
-                const latestSub = +(await subStorage.getSubsCount()) - 1;
-
-                const subStorageSender2 = subStorage.connect(senderAcc2);
-
-                await subStorageSender2.activateSub(latestSub);
-            } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotSubOwnerError');
-            }
+            const latestSub = +(await subStorage.getSubsCount()) - 1;
+            const subStorageSender2 = subStorage.connect(senderAcc2);
+            await expect(subStorageSender2.activateSub(latestSub)).to.be.revertedWith('SenderNotSubOwnerError');
         });
     });
 };
 
 const coreFullTest = async () => {
-    await strategyProxyTest();
     await dfsRegistryTest();
     await botAuthTest();
     await bundleStorageTest();
@@ -1344,7 +1106,6 @@ module.exports = {
     proxyAuthTest,
     recipeExecutorTest,
     strategyExecutorTest,
-    strategyProxyTest,
     strategyStorageTest,
     subProxyTest,
     subStorageTest,

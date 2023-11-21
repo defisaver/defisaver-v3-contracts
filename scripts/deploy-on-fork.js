@@ -98,9 +98,8 @@ async function main() {
     );
     await run('compile');
 
-    const recipeExecutor = await redeploy('RecipeExecutor', reg.address);
+    await redeploy('RecipeExecutor', reg.address);
     await redeploy('SubProxy', reg.address);
-    await redeploy('StrategyProxy', reg.address);
 
     await changeConstantInFiles(
         './contracts',
