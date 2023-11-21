@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../../interfaces/IDSProxy.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../exchangeV3/TokenGroupRegistry.sol";
 import "../ActionBase.sol";
@@ -116,7 +115,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             isEthDest = true;
         } 
 
-        _exchangeData.user = getUserAddress();
+        _exchangeData.user = address(this);
 
         /// @dev only check for custom fee if a non standard fee is sent
         if (!_isDirect) {
@@ -155,12 +154,5 @@ contract DFSSell is ActionBase, DFSExchangeCore {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
-    }
-
-    /// @notice Returns the owner of the DSProxy that called the contract
-    function getUserAddress() internal view returns (address) {
-        IDSProxy proxy = IDSProxy(payable(address(this)));
-
-        return proxy.owner();
     }
 }

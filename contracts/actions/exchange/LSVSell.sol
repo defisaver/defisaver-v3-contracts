@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/lido/IWStEth.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../ActionBase.sol";
@@ -133,7 +132,7 @@ contract LSVSell is ActionBase, DFSExchangeCore, UtilHelper {
             }
         }
 
-        _exchangeData.user = getUserAddress();
+        _exchangeData.user = address(this);
 
         if (shouldSell){
             (wrapper, exchangedAmount) = _sell(_exchangeData);
@@ -175,13 +174,6 @@ contract LSVSell is ActionBase, DFSExchangeCore, UtilHelper {
         STETH_ADDR.approveToken(WSTETH_ADDR, stethAmount);
 
         wStEthReceivedAmount = IWStEth(WSTETH_ADDR).wrap(stethAmount);
-    }
-
-    /// @notice Returns the owner of the DSProxy that called the contract
-    function getUserAddress() internal view returns (address) {
-        IDSProxy proxy = IDSProxy(payable(address(this)));
-
-        return proxy.owner();
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

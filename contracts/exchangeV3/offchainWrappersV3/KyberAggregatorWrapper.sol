@@ -27,11 +27,9 @@ contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAut
 
     /// @notice Takes order from Paraswap and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    /// @param _type Action type (buy or sell)
     function takeOrder(
-        ExchangeData calldata _exData,
-        ExchangeActionType _type
-    ) override public payable returns (bool success, uint256) {
+        ExchangeData memory _exData
+    ) external override payable returns (bool success, uint256) {
         // check that contract have enough balance for exchange and protocol fee
         uint256 tokenBalance = _exData.srcAddr.getBalance(address(this));
         if (tokenBalance < _exData.srcAmount){
@@ -39,12 +37,7 @@ contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAut
         }
 
         /// @dev safeApprove is modified to always first set approval to 0, then to exact amount
-        if (_type == ExchangeActionType.SELL) {
-            IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
-        } else {
-            uint srcAmount = wdiv(_exData.destAmount, _exData.offchainData.price) + 1; // + 1 so we round up
-            IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, srcAmount);
-        }
+        IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
 
         address scalingHelperAddr = registry.getAddr(SCALING_HELPER_ID);
         bytes memory scaledCalldata = KyberInputScalingHelper(scalingHelperAddr).getScaledInputData(_exData.offchainData.callData, _exData.srcAmount);
@@ -66,11 +59,11 @@ contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAut
         }
 
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
-        sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
+        _sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
 
         return (success, tokensSwapped);
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external virtual payable {}
+    receive() external payable {}
 }

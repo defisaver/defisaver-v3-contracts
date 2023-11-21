@@ -28,11 +28,9 @@ contract ParaswapWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMa
 
     /// @notice Takes order from Paraswap and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    /// @param _type Action type (buy or sell)
     function takeOrder(
-        ExchangeData memory _exData,
-        ExchangeActionType _type
-    ) override public payable returns (bool success, uint256) {
+        ExchangeData memory _exData
+    ) external override payable returns (bool success, uint256) {
         // check that contract have enough balance for exchange
         require(_exData.srcAddr.getBalance(address(this)) >= _exData.srcAmount, ERR_SRC_AMOUNT);
 
@@ -40,12 +38,7 @@ contract ParaswapWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMa
 
         ParaswapCalldata memory paraswapCalldata = abi.decode(_exData.offchainData.callData, (ParaswapCalldata));
         // write in the exact amount we are selling/buying in an order
-        if (_type == ExchangeActionType.SELL) {
-            writeUint256(paraswapCalldata.realCalldata, paraswapCalldata.offset, _exData.srcAmount);
-        } else {
-            uint srcAmount = wdiv(_exData.destAmount, _exData.offchainData.price) + 1; // + 1 so we round up
-            writeUint256(paraswapCalldata.realCalldata, paraswapCalldata.offset, srcAmount);
-        }
+        _writeUint256(paraswapCalldata.realCalldata, paraswapCalldata.offset, _exData.srcAmount);
 
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
 
@@ -60,11 +53,11 @@ contract ParaswapWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMa
             require(tokensSwapped > 0, ERR_TOKENS_SWAPPED_ZERO);
         }
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
-        sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
+        _sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
 
         return (success, tokensSwapped);
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external virtual payable {}
+    receive() external payable {}
 }

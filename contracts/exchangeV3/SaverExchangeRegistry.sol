@@ -7,15 +7,15 @@ contract SaverExchangeRegistry is AdminAuth {
 
 	mapping(address => bool) private wrappers;
 
-	function addWrapper(address _wrapper) public onlyOwner {
+	function addWrapper(address _wrapper) external onlyOwner {
 		wrappers[_wrapper] = true;
 	}
 
-	function removeWrapper(address _wrapper) public onlyOwner {
+	function removeWrapper(address _wrapper) external onlyOwner {
 		wrappers[_wrapper] = false;
 	}
 
-	function isWrapper(address _wrapper) public view returns(bool) {
+	function isWrapper(address _wrapper) external view returns(bool) {
 		return wrappers[_wrapper];
 	}
 }

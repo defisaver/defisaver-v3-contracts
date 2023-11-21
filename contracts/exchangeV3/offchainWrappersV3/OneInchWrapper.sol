@@ -28,11 +28,9 @@ contract OneInchWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMat
 
     /// @notice Takes order from 1inch and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    /// @param _type Action type (buy or sell)
     function takeOrder(
-        ExchangeData memory _exData,
-        ExchangeActionType _type
-    ) override public payable returns (bool success, uint256) {
+        ExchangeData memory _exData
+    ) external override payable returns (bool success, uint256) {
 
         // check that contract have enough balance for exchange
         uint256 tokenBalance = _exData.srcAddr.getBalance(address(this));
@@ -41,15 +39,8 @@ contract OneInchWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMat
         }
         OneInchCalldata memory oneInchCalldata = abi.decode(_exData.offchainData.callData, (OneInchCalldata));
         // write in the exact amount we are selling/buying in an order
-        if (_type == ExchangeActionType.SELL) {
-            for (uint256 i; i < oneInchCalldata.offsets.length; i++){
-                writeUint256(oneInchCalldata.realCalldata, oneInchCalldata.offsets[i], _exData.srcAmount);
-            }
-        } else {
-            uint srcAmount = wdiv(_exData.destAmount, _exData.offchainData.price) + 1; // + 1 so we round up
-            for (uint256 i; i < oneInchCalldata.offsets.length; i++){
-                writeUint256(oneInchCalldata.realCalldata, oneInchCalldata.offsets[i], srcAmount);
-            }
+        for (uint256 i; i < oneInchCalldata.offsets.length; i++){
+            _writeUint256(oneInchCalldata.realCalldata, oneInchCalldata.offsets[i], _exData.srcAmount);
         }
 
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
@@ -69,11 +60,11 @@ contract OneInchWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMat
             }
         }
         // returns all funds from src addr, dest addr
-        sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
+        _sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
 
         return (success, tokensSwapped);
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external virtual payable {}
+    receive() external payable {}
 }

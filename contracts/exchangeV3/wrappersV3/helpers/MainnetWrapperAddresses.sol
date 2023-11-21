@@ -2,8 +2,7 @@
 
 pragma solidity =0.8.10;
 
-contract MainnetWrapperAddresses {
-
+abstract contract MainnetWrapperAddresses {
     address internal constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant KYBER_INTERFACE = 0x9AAb3f75489902f3a48495025729a0AF77d4b11e;
     address payable internal constant WALLET_ID = payable(0x322d58b9E75a6918f7e7849AEe0fF09369977e08);

@@ -23,11 +23,9 @@ contract ScpWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath{
 
     /// @notice Takes order from Scp and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    /// @param _type Action type (buy or sell)
     function takeOrder(
-        ExchangeData memory _exData,
-        ExchangeActionType _type
-    ) override public payable returns (bool success, uint256) {
+        ExchangeData memory _exData
+    ) external override payable returns (bool success, uint256) {
         // check that contract have enough balance for exchange and protocol fee
         uint256 tokenBalance = _exData.srcAddr.getBalance(address(this));
         if (tokenBalance < _exData.srcAmount){
@@ -41,12 +39,7 @@ contract ScpWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath{
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
 
         // write in the exact amount we are selling/buying in an order
-        if (_type == ExchangeActionType.SELL) {
-            writeUint256(_exData.offchainData.callData, 36, _exData.srcAmount);
-        } else {
-            uint srcAmount = wdiv(_exData.destAmount, _exData.offchainData.price) + 1; // + 1 so we round up
-            writeUint256(_exData.offchainData.callData, 36, srcAmount);
-        }
+        _writeUint256(_exData.offchainData.callData, 36, _exData.srcAmount);
 
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
 
@@ -64,11 +57,11 @@ contract ScpWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath{
         }
 
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
-        sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
+        _sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
 
         return (success, tokensSwapped);
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external virtual payable {}
+    receive() external payable {}
 }

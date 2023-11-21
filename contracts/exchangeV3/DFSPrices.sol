@@ -26,14 +26,14 @@ contract DFSPrices is ExchangeHelper {
         ActionType _type,
         address[] memory _wrappers,
         bytes[] memory _additionalData
-    ) public returns (address, uint256) {
+    ) external returns (address, uint256) {
 
         uint256[] memory rates = new uint256[](_wrappers.length);
         for (uint i=0; i<_wrappers.length; i++) {
             rates[i] = getExpectedRate(_wrappers[i], _srcToken, _destToken, _amount, _type, _additionalData[i]);
         }
 
-        return getBiggestRate(_wrappers, rates);
+        return _getBiggestRate(_wrappers, rates);
     }
 
     /// @notice Return the expected rate from the exchange wrapper
@@ -74,7 +74,7 @@ contract DFSPrices is ExchangeHelper {
         }
 
         if (success) {
-            return sliceUint(result, 0);
+            return _sliceUint(result, 0);
         }
 
         return 0;
@@ -83,7 +83,7 @@ contract DFSPrices is ExchangeHelper {
     /// @notice Finds the biggest rate between exchanges, needed for sell rate
     /// @param _wrappers Array of wrappers to compare
     /// @param _rates Array of rates to compare
-    function getBiggestRate(
+    function _getBiggestRate(
         address[] memory _wrappers,
         uint256[] memory _rates
     ) internal pure returns (address, uint) {
@@ -99,13 +99,7 @@ contract DFSPrices is ExchangeHelper {
         return (_wrappers[maxIndex], _rates[maxIndex]);
     }
 
-    function getDecimals(address _token) internal view returns (uint256) {
-        if (_token == TokenUtils.ETH_ADDR) return 18;
-
-        return IERC20(_token).decimals();
-    }
-
-    function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {
+    function _sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {
         if (bs.length < start + 32){
             revert OutOfRangeSlicingError();
         }

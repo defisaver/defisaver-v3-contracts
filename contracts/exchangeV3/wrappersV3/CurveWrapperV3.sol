@@ -45,16 +45,11 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         return amountOut;
     }
 
-    /// @dev deprecated function
-    function buy(address, address, uint, bytes calldata) external override returns(uint) {
-        return 0;
-    }
-
     /// @notice Return a rate for which we can sell an amount of tokens
     /// @param _srcAmount From amount
     /// @param _additionalData Route and swap params
     /// @return uint256 Rate (price)
-    function getSellRate(address, address, uint256 _srcAmount, bytes memory _additionalData) public view override returns (uint) {
+    function getSellRate(address, address, uint256 _srcAmount, bytes memory _additionalData) external view override returns (uint) {
         ISwapRouterNG exchangeContract = ISwapRouterNG(CURVE_ROUTER_NG);
         (
             address[11] memory _route, uint256[5][5] memory _swap_params, address[5] memory _pools
@@ -67,11 +62,6 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
             _pools
         );
         return wdiv(amountOut, _srcAmount);
-    }
-
-    /// @dev deprecated function
-    function getBuyRate(address, address, uint, bytes memory) public override returns (uint) {
-        return 0;
     }
 
     // solhint-disable-next-line no-empty-blocks

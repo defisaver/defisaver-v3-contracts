@@ -6,8 +6,7 @@ import "../utils/TokenUtils.sol";
 import "../utils/SafeERC20.sol";
 import "../utils/Discount.sol";
 
-contract DFSExchangeHelper {
-    
+abstract contract DFSExchangeHelper {
     using TokenUtils for address;
     
     error InvalidOffchainData();
@@ -15,7 +14,7 @@ contract DFSExchangeHelper {
 
     using SafeERC20 for IERC20;
 
-    function sendLeftover(
+    function _sendLeftover(
         address _srcAddr,
         address _destAddr,
         address payable _to
@@ -27,21 +26,7 @@ contract DFSExchangeHelper {
         _destAddr.withdrawTokens(_to, type(uint256).max);
     }
 
-    function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {
-        if (bs.length < start + 32){
-            revert OutOfRangeSlicingError();
-        }
-
-
-        uint256 x;
-        assembly {
-            x := mload(add(bs, add(0x20, start)))
-        }
-
-        return x;
-    }
-
-    function writeUint256(
+    function _writeUint256(
         bytes memory _b,
         uint256 _index,
         uint256 _input

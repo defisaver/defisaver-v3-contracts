@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../../interfaces/IDSProxy.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../utils/TransientStorage.sol";
 import "../fee/helpers/GasFeeHelper.sol";
@@ -101,8 +100,7 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
      
         _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
 
-        // set owner of the proxy as the user that is selling for offchain orders
-        _exchangeData.user = getUserAddress();
+        _exchangeData.user = address(this);
         
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
 
@@ -131,13 +129,6 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
-    }
-
-    /// @notice Returns the owner of the DSProxy that called the contract
-    function getUserAddress() internal view returns (address) {
-        IDSProxy proxy = IDSProxy(payable(address(this)));
-
-        return proxy.owner();
     }
 
     function _takeGasFee(uint256 _gasUsed, uint256 _soldAmount, address _feeToken) internal returns (uint256 amountAfterFee) {

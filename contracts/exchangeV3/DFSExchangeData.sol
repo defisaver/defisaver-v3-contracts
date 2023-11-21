@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-contract DFSExchangeData {
+abstract contract DFSExchangeData {
 
     // first is empty to keep the legacy order in place
     // EMPTY was _, but in >0.8.x using underscore as name is forbidden
     enum ExchangeType { EMPTY, OASIS, KYBER, UNISWAP, ZEROX }
-
-    enum ExchangeActionType { SELL, BUY }
 
     struct OffchainData {
         address wrapper;
@@ -31,11 +29,11 @@ contract DFSExchangeData {
         OffchainData offchainData;
     }
 
-    function packExchangeData(ExchangeData memory _exData) public pure returns(bytes memory) {
+    function packExchangeData(ExchangeData memory _exData) external pure returns(bytes memory) {
         return abi.encode(_exData);
     }
 
-    function unpackExchangeData(bytes memory _data) public pure returns(ExchangeData memory _exData) {
+    function unpackExchangeData(bytes memory _data) external pure returns(ExchangeData memory _exData) {
         _exData = abi.decode(_data, (ExchangeData));
     }
 }

@@ -31,7 +31,7 @@ contract TokenGroupRegistry is AdminAuth {
     }
 
     /// @notice Checks if 2 tokens are in the same group and returns the correct exchange fee for the pair
-    function getFeeForTokens(address _sellToken, address _buyToken) public view returns (uint256) {
+    function getFeeForTokens(address _sellToken, address _buyToken) external view returns (uint256) {
         uint256 firstId = groupIds[_sellToken];
         uint256 secondId = groupIds[_buyToken];
 
@@ -52,7 +52,7 @@ contract TokenGroupRegistry is AdminAuth {
     /// @notice Adds token to an existing group
     /// @dev This will overwrite if token is part of a different group
     /// @dev Groups needs to exist to add to it
-    function addTokenInGroup(address _tokenAddr, uint256 _groupId) public onlyOwner {
+    function addTokenInGroup(address _tokenAddr, uint256 _groupId) external onlyOwner {
         if (_groupId > feesPerGroup.length) revert GroupNonExistent(_groupId);
 
         groupIds[_tokenAddr] = _groupId;
@@ -69,7 +69,7 @@ contract TokenGroupRegistry is AdminAuth {
 
     /// @notice Create new group and add tokens
     /// @dev Divider has to gte 50, which means max fee is 2%
-    function addNewGroup(address[] memory _tokensAddr, uint256 _feeDivider) public onlyOwner {
+    function addNewGroup(address[] memory _tokensAddr, uint256 _feeDivider) external onlyOwner {
         if(_feeDivider < MAX_FEE_DIVIDER) revert FeeTooHigh(_feeDivider);
 
         feesPerGroup.push(_feeDivider);
@@ -79,11 +79,10 @@ contract TokenGroupRegistry is AdminAuth {
 
     /// @notice Change existing group fee
     /// @dev Divider has to be gte 50, which means max fee is 2%
-    function changeGroupFee(uint256 _groupId, uint256 _newFeeDivider) public onlyOwner {
+    function changeGroupFee(uint256 _groupId, uint256 _newFeeDivider) external onlyOwner {
         if(_newFeeDivider < MAX_FEE_DIVIDER) revert FeeTooHigh(_newFeeDivider);
 
         feesPerGroup[_groupId] = _newFeeDivider;
     }
-
 }
 

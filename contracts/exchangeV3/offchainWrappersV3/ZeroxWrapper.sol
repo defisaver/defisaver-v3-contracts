@@ -23,11 +23,9 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath{
 
     /// @notice Takes order from 0x and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    /// @param _type Action type (buy or sell)
     function takeOrder(
-        ExchangeData memory _exData,
-        ExchangeActionType _type
-    ) override public payable returns (bool success, uint256) {
+        ExchangeData memory _exData
+    ) external override payable returns (bool success, uint256) {
         // check that contract have enough balance for exchange and protocol fee
         uint256 tokenBalance = _exData.srcAddr.getBalance(address(this));
         if (tokenBalance < _exData.srcAmount){
@@ -40,12 +38,7 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath{
 
         /// @dev 0x always uses max approve in v1, so we approve the exact amount we want to sell
         /// @dev safeApprove is modified to always first set approval to 0, then to exact amount
-        if (_type == ExchangeActionType.SELL) {
-            IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
-        } else {
-            uint srcAmount = wdiv(_exData.destAmount, _exData.offchainData.price) + 1; // + 1 so we round up
-            IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, srcAmount);
-        }
+        IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
 
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
 
@@ -63,11 +56,11 @@ contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath{
         }
 
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
-        sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
+        _sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
 
         return (success, tokensSwapped);
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external virtual payable {}
+    receive() external payable {}
 }

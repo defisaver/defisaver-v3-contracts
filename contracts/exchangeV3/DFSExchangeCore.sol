@@ -13,7 +13,7 @@ import "./SaverExchangeRegistry.sol";
 import "../interfaces/exchange/IOffchainWrapper.sol";
 import "./helpers/ExchangeHelper.sol";
 
-contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, ExchangeHelper {
+abstract contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, ExchangeHelper {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
@@ -36,7 +36,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
 
         // Takes DFS exchange fee
         if (exData.dfsFeeDivider != 0) {
-            exData.srcAmount = sub(exData.srcAmount, getFee(
+            exData.srcAmount = sub(exData.srcAmount, _getFee(
                 exData.srcAmount,
                 exData.user,
                 exData.srcAddr,
@@ -46,12 +46,12 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
 
         // Try 0x first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
-            (offChainSwapSuccess, ) = offChainSwap(exData, ExchangeActionType.SELL);
+            (offChainSwapSuccess, ) = _offChainSwap(exData);
         }
 
         // fallback to desired wrapper if 0x failed
         if (!offChainSwapSuccess) {
-            onChainSwap(exData, ExchangeActionType.SELL);
+            _onChainSwap(exData);
             wrapper = exData.wrapper;
         }
 
@@ -69,60 +69,10 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
         return (wrapper, amountBought);
     }
 
-    /// @notice Internal method that preforms a buy on 0x/on-chain
-    /// @dev Useful for other DFS contract to integrate for exchanging
-    /// @param exData Exchange data struct
-    /// @return (address, uint) Address of the wrapper used and srcAmount
-    function _buy(ExchangeData memory exData) internal returns (address, uint256) {
-        if (exData.destAmount == 0){
-            revert DestAmountMissingError();
-        }
-
-        uint256 amountWithoutFee = exData.srcAmount;
-        address wrapper = exData.offchainData.wrapper;
-        bool offChainSwapSuccess;
-
-        uint256 destBalanceBefore = exData.destAddr.getBalance(address(this));
-
-        // Takes DFS exchange fee
-        if (exData.dfsFeeDivider != 0) {
-            exData.srcAmount = sub(exData.srcAmount, getFee(
-                exData.srcAmount,
-                exData.user,
-                exData.srcAddr,
-                exData.dfsFeeDivider
-            ));
-        }
-
-        // Try 0x first and then fallback on specific wrapper
-        if (exData.offchainData.price > 0) {
-            (offChainSwapSuccess, ) = offChainSwap(exData, ExchangeActionType.BUY);
-        }
-
-        // fallback to desired wrapper if 0x failed
-        if (!offChainSwapSuccess) {
-            onChainSwap(exData, ExchangeActionType.BUY);
-            wrapper = exData.wrapper;
-        }
-
-        uint256 destBalanceAfter = exData.destAddr.getBalance(address(this));
-        uint256 amountBought = destBalanceAfter - destBalanceBefore;
-
-        // check slippage
-        if (amountBought < exData.destAmount){
-            revert SlippageHitError(amountBought, exData.destAmount);
-        }
-
-        // revert back exData changes to keep it consistent
-        exData.srcAmount = amountWithoutFee;
-
-        return (wrapper, amountBought);
-    }
-
     /// @notice Takes order from 0x and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    function offChainSwap(ExchangeData memory _exData, ExchangeActionType _type)
-        private
+    function _offChainSwap(ExchangeData memory _exData)
+        internal
         returns (bool success, uint256)
     {
         if (!ZrxAllowlist(ZRX_ALLOWLIST_ADDR).isZrxAddr(_exData.offchainData.exchangeAddr)) {
@@ -141,14 +91,13 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
         return
             IOffchainWrapper(_exData.offchainData.wrapper).takeOrder{
                 value: _exData.offchainData.protocolFee
-            }(_exData, _type);
+            }(_exData);
     }
 
     /// @notice Calls wrapper contract for exchange to preform an on-chain swap
     /// @param _exData Exchange data struct
-    /// @param _type Type of action SELL|BUY
     /// @return swappedTokens For Sell that the destAmount, for Buy thats the srcAmount
-    function onChainSwap(ExchangeData memory _exData, ExchangeActionType _type)
+    function _onChainSwap(ExchangeData memory _exData)
         internal
         returns (uint256 swappedTokens)
     {
@@ -158,21 +107,12 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
 
         IERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
 
-        if (_type == ExchangeActionType.SELL) {
-            swappedTokens = IExchangeV3(_exData.wrapper).sell(
-                _exData.srcAddr,
-                _exData.destAddr,
-                _exData.srcAmount,
-                _exData.wrapperData
-            );
-        } else {
-            swappedTokens = IExchangeV3(_exData.wrapper).buy(
-                _exData.srcAddr,
-                _exData.destAddr,
-                _exData.destAmount,
-                _exData.wrapperData
-            );
-        }
+        swappedTokens = IExchangeV3(_exData.wrapper).sell(
+            _exData.srcAddr,
+            _exData.destAddr,
+            _exData.srcAmount,
+            _exData.wrapperData
+        );
     }
 
     /// @notice Takes a feePercentage and sends it to wallet
@@ -181,7 +121,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
     /// @param _token Address of the token
     /// @param _dfsFeeDivider Dfs fee divider
     /// @return feeAmount Amount in Dai owner earned on the fee
-    function getFee(
+    function _getFee(
         uint256 _amount,
         address _user,
         address _token,
@@ -206,5 +146,4 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
             _token.withdrawTokens(walletAddr, feeAmount);
         }
     }
-
 }

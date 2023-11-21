@@ -2,8 +2,7 @@
 
 pragma solidity =0.8.10;
 
-contract BaseWrapperAddresses {
-
+abstract contract BaseWrapperAddresses {
    // address internal constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address payable internal constant WALLET_ID = payable(0x76720aC2574631530eC8163e4085d6F98513fb27);
     address internal constant UNI_V3_ROUTER = 0x2626664c2603336E57B271c5C0b26F421741e481;
