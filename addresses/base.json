@@ -507,14 +507,17 @@
       },
       {
         "name": "KyberInputScalingHelper",
-        "address": "0xec54f692a17311c47ef7a0857ad587952e09a6ff",
+        "address": "0x24Bfd5AD4c5842C31515dc4A985341710Ee14B09",
         "id": "0x559d99f5",
         "path": "contracts/utils/KyberInputScalingHelperL2",
-        "version": "1.0.0",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xB134b0c38E0DB42f22634e09C8aFAFB5F6307761"]
+        "history": [
+          "0xec54f692a17311c47ef7a0857ad587952e09a6ff",
+          "0xB134b0c38E0DB42f22634e09C8aFAFB5F6307761"
+        ]
       },
       {
         "name": "ParaswapWrapper",
