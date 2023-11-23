@@ -17,7 +17,6 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
     /// @param additionalData Additional data where curve swap path is encoded
     /// @param gasUsed Only used as part of a strategy, estimated gas used for this tx
     /// @param dfsFeeDivider Fee divider, if a non standard fee is set it will check for custom fee
-    /// @param useSteth If the collateral is wsteth, can set this flag to true for it to use steth instead
     struct Params {
         address controllerAddress;
         uint256 collAmount;
@@ -25,8 +24,7 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
         uint256 minAmount;
         bytes additionalData;
         uint32 gasUsed;
-        uint32 dfsFeeDivider;
-        bool useSteth;
+        uint24 dfsFeeDivider;
     }
 
     /// @inheritdoc ActionBase
@@ -73,9 +71,8 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
                 _params.additionalData,
                 _params.collAmount,
                 _params.minAmount,
-                _params.gasUsed, 
-                _params.dfsFeeDivider, 
-                _params.useSteth ? 1 : 0
+                _params.gasUsed,
+                _params.dfsFeeDivider
         );
         
         

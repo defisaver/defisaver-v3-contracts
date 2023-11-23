@@ -122,14 +122,14 @@
     },
     {
         "name": "CurveWrapperV3",
-        "address": "0xB82b43c4c0ABF41Dfc342571C330964fF576a9b3",
+        "address": "0x6bfa86D54B75DcFEb58C6A80FadE947E180C3616",
         "id": "0xb856c9af",
         "path": "contracts/exchangeV3/wrappersV3/CurveWrapperV3.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xB82b43c4c0ABF41Dfc342571C330964fF576a9b3"]
     },
     {
       "name": "ZeroxWrapper",

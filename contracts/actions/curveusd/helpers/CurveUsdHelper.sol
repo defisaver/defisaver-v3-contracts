@@ -12,8 +12,6 @@ contract CurveUsdHelper is MainnetCurveUsdAddresses {
 
     error CurveUsdInvalidController();
 
-    IAddressProvider addressProvider = IAddressProvider(CURVE_ADDRESS_PROVIDER);
-
     bytes4 constant CURVE_SWAPPER_ID = bytes4(keccak256("CurveUsdSwapper"));
 
     function isControllerValid(address _controllerAddr) public view returns (bool) {
@@ -57,30 +55,31 @@ contract CurveUsdHelper is MainnetCurveUsdAddresses {
         uint256 _swapAmount,
         uint256 _minSwapAmount,
         uint32 _gasUsed,
-        uint32 _dfsFeeDivider,
-        uint8 _useSteth
+        uint24 _dfsFeeDivider
     ) internal returns (uint256[] memory swapData) {
-        (address[9] memory _route, uint256[3][4] memory _swap_params) = abi.decode(
+        (address[11] memory _route, uint256[5][5] memory _swap_params, address[5] memory _pools) = abi.decode(
             _additionalData,
-            (address[9], uint256[3][4])
+            (address[11], uint256[5][5], address[5])
         );
 
         swapData = new uint256[](5);
         swapData[0] = _swapAmount;
         swapData[1] = _minSwapAmount;
-        swapData[2] = ICurveUsdSwapper(_curveUsdSwapper).encodeSwapParams(_swap_params, _gasUsed, _dfsFeeDivider, _useSteth);
+        swapData[2] = ICurveUsdSwapper(_curveUsdSwapper).encodeSwapParams(_swap_params, _gasUsed, _dfsFeeDivider);
         swapData[3] = uint256(uint160(_route[1]));
         swapData[4] = uint256(uint160(_route[2]));
 
-        address[6] memory _path = [
+        address[8] memory _path = [
             _route[3],
             _route[4],
             _route[5],
             _route[6],
             _route[7],
-            _route[8]
+            _route[8],
+            _route[9],
+            _route[10]
         ];
 
-        ICurveUsdSwapper(_curveUsdSwapper).setAdditionalRoutes(_path);
+        ICurveUsdSwapper(_curveUsdSwapper).setAdditionalRoutes(_path, _pools);
     }
 }

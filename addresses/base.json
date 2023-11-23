@@ -407,6 +407,17 @@
       "history": []
     },
     {
+      "name": "TokenBalance",
+      "address": "0xc44bce580b1b3339fe9272d3bc3d6566083ea59c",
+      "id": "0x019d9978",
+      "path": "contracts/actions/utils/TokenBalance.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
         "name": "DFSProxyRegistry",
         "address": "0x2D8BFD9FF88E3106ce7214621b0770c1578749A1",
         "id": "0xc83e4f5e",
@@ -524,6 +535,17 @@
         "address": "0x2D00bb171B91a86ebb9A7860875484bB90Cb7766",
         "id": "0x115fa27e",
         "path": "contracts/exchangeV3/offchainWrappersV3/ParaswapWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "CurveWrapperV3",
+        "address": "0x4a2ca50c1723c1Dd033A2E519df74BC9500eA561",
+        "id": "0xb856c9af",
+        "path": "contracts/exchangeV3/wrappersV3/CurveWrapperV3.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,

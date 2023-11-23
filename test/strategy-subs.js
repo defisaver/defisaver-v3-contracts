@@ -26,6 +26,7 @@ const {
     createTrailingStopTrigger,
     createCbRebondTrigger,
     createMorphoTrigger,
+    createDebtInFrontWithLimitTrigger,
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
     IN_REPAY,
@@ -662,6 +663,24 @@ const subLiqutityDsrPaybackStrategy = async ({
     return { subId, strategySub };
 };
 
+const subLiquityDebtInFrontRepayStrategy = async (
+    proxy, strategyId, debtInFront, targetRatioIncrease,
+) => {
+    const wethAddrEncoded = abiCoder.encode(['address'], [WETH_ADDRESS]);
+    const lusdAddrEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
+    const targetRatioIncreaseEncoded = abiCoder.encode(['uint256'], [targetRatioIncrease.toString()]);
+    const withdrawIdEncoded = abiCoder.encode(['uint8'], [1]); // withdraw - 1
+    const paybackIdEncoded = abiCoder.encode(['uint8'], [0]); // payback - 0
+
+    const triggerData = await createDebtInFrontWithLimitTrigger(proxy.address, debtInFront.toString());
+    const strategySub = [strategyId, false, [triggerData], [
+        wethAddrEncoded, lusdAddrEncoded, targetRatioIncreaseEncoded, withdrawIdEncoded, paybackIdEncoded]];
+
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+
 const subLiqutityDsrSupplyStrategy = async ({
     proxy, strategyId, triggerRatio, targetRatio,
 }) => {
@@ -739,5 +758,6 @@ module.exports = {
     subSparkCloseBundle,
     subLiqutityDsrPaybackStrategy,
     subLiqutityDsrSupplyStrategy,
+    subLiquityDebtInFrontRepayStrategy,
     subAaveV3CloseWithMaximumGasPriceBundle,
 };

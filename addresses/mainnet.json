@@ -232,14 +232,14 @@
     },
     {
         "name": "CurveWrapperV3",
-        "address": "0x3788B4Db5e99fF555e22a08241EB3cFc3a0ac149",
+        "address": "0xdE73496DD6349829C6649aCaDe31FB1371528AC5",
         "id": "0xb856c9af",
         "path": "contracts/exchangeV3/wrappersV3/CurveWrapperV3.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x3788B4Db5e99fF555e22a08241EB3cFc3a0ac149"]
     },
     {
         "name": "ZeroxWrapper",
@@ -436,17 +436,18 @@
     },
     {
         "name": "LiquityView",
-        "address": "0xFdA4344cbC85e684754C8971A975239350F99967",
+        "address": "0xD077e3875811dB44D8eb4722af59E1B137F462e3",
         "id": "0xe23de5c6",
         "path": "contracts/views/LiquityView.sol",
-        "version": "1.0.1",
+        "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
             "0xb760e60Dff6263E8Ab31B04ee5Cc010beA47e2Df",
             "0xd1913b977737c9505b8ecfedb8121546096d3393",
-            "0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C"
+            "0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C",
+            "0xFdA4344cbC85e684754C8971A975239350F99967"
         ]
     },
     {
@@ -936,14 +937,17 @@
     },
     {
         "name": "LimitSell",
-        "address": "0x02b0eE3b52e8E0749444a7255B9D86c50d18D19A",
+        "address": "0xDa0df9dBD89FE40881EC2C4B000D44C76eA2Dd4A",
         "id": "0x8c712c04",
         "path": "contracts/actions/exchange/LimitSell.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x555C5B5d3e49ae015d5dA5C0476f984386e906BD"]
+        "history": [
+            "0x02b0eE3b52e8E0749444a7255B9D86c50d18D19A",
+            "0x555C5B5d3e49ae015d5dA5C0476f984386e906BD"
+        ]
     },
     {
         "name": "McdGenerate",
@@ -1206,6 +1210,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveClaimStkAave",
+        "address": "0x5Dcd9Dc0185a6Ab07a31e5284D16Ce9f0A79Ce99",
+        "id": "0xd93d7e7f",
+        "path": "contracts/actions/aave/AaveClaimStkAave.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
         "registryIds": [],
         "history": []
     },
@@ -2204,39 +2219,6 @@
         "history": []
     },
     {
-        "name": "BalancerV2Supply",
-        "address": "0xE48123018Db5e9075841C61EA702cEca51621191",
-        "id": "0x443f994c",
-        "path": "contracts/actions/balancer/BalancerV2Supply.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "BalancerV2Withdraw",
-        "address": "0xbED38692438b90AF738F8A7A3142C217DE8fB069",
-        "id": "0x54f465c5",
-        "path": "contracts/actions/balancer/BalancerV2Withdraw.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "BalancerV2Claim",
-        "address": "0xEac7c5bEFaA6E17f1A2e86947eEd6419c74A7C03",
-        "id": "0xde8dbbc2",
-        "path": "contracts/actions/balancer/BalancerV2Claim.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
         "name": "GUniWithdraw",
         "address": "0x6F7cD7C0Dd3634E14bAB91FDF3bCE0a4315b3C59",
         "id": "0x6b185983",
@@ -2326,14 +2308,15 @@
     },
     {
         "name": "GasFeeTaker",
-        "address": "0x558A8B92EE6a2B724afDEd319b61Ac55B7259826",
+        "address": "0xfaE5e10014Dc90A85ABdE21E0fa85CcB78521aB5",
         "id": "0x4571b8b3",
         "path": "contracts/actions/fee/GasFeeTaker.sol",
-        "version": "1.0.4",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x558A8B92EE6a2B724afDEd319b61Ac55B7259826",
             "0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b",
             "0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d",
             "0xcCFFC73347B05cBDCCe7c3de2a0AdEcDAa8AEf51",
@@ -2352,14 +2335,15 @@
     },
     {
         "name": "ChainLinkPriceTrigger",
-        "address": "0xDB9086334AA77179d273dB20314169828E33094f",
+        "address": "0xFe333F4Be1423600C9fF129A7D85D3eAE97C9c42",
         "id": "0xac6bb72a",
         "path": "contracts/triggers/ChainLinkPriceTrigger.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xDB9086334AA77179d273dB20314169828E33094f",
             "0x484c78cf4a3C5bAb2174931E0A451e0E1B5b08F7",
             "0xb14226c3FD41e9B1FF85b4f7144CB4096a5D1Ec9",
             "0xAbf52Fc6e5C0e6E44Daac7C6ca79498302D9B0CA"
@@ -2425,6 +2409,28 @@
         "address": "0xC4608Cb08ecBC109B9FaE4312274f60535a10820",
         "id": "0xff4a5c51",
         "path": "contracts/triggers/LiquityDebtInFrontTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityRatioIncreaseCheck",
+        "address": "0x4E3ab326c188D936c0d1166eE3B3b0dD615B17Ae",
+        "id": "0x3b29b437",
+        "path": "contracts/actions/checkers/LiquityRatioIncreaseCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityDebtInFrontWithLimitTrigger",
+        "address": "0xb677E68385C201847A5f3BdE2e0Ed1A900194e3B",
+        "id": "0x72a21f97",
+        "path": "contracts/triggers/LiquityDebtInFrontWithLimitTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
@@ -2521,47 +2527,51 @@
     },
     {
         "name": "CurveUsdLevCreate",
-        "address": "0x8B5ACd4ce0a43327aaDfc5c42be029898e242393",
+        "address": "0xcbd9aFc2b7532b9eeB3A7EC4ea8Bb4320795d9Ad",
         "id": "0x2465d76e",
         "path": "contracts/actions/curveusd/advanced/CurveUsdLevCreate.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "0",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "CurveUsdRepay",
-        "address": "0xDaDFC60207C17be005ECf2B03f3B31885D22F908",
-        "id": "0x42cd8e33",
-        "path": "contracts/actions/curveusd/advanced/CurveUsdRepay.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "0",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "CurveUsdSwapper",
-        "address": "0xFa2dfE6AF842e3184D305a85d09cfcf220ed4CBd",
-        "id": "0x83a67cc0",
-        "path": "contracts/actions/curveusd/advanced/CurveUsdSwapper.sol",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0xef8Aa00f824360236b6F586CeF8e4071Bd4448b6"]
+        "history": ["0x8B5ACd4ce0a43327aaDfc5c42be029898e242393"]
     },
     {
-        "name": "CurveUsdSelfLiquidateWithColl",
-        "address": "0x6d02300C1A68c63C60AFD713b744bA750aB33aB0",
-        "id": "0xe17ef895",
-        "path": "contracts/actions/curveusd/advanced/CurveUsdSelfLiquidateWithColl.sol",
-        "version": "1.0.0",
+        "name": "CurveUsdRepay",
+        "address": "0xd12785e4834C1421fC7B64ca57d64E886e39b80F",
+        "id": "0x42cd8e33",
+        "path": "contracts/actions/curveusd/advanced/CurveUsdRepay.sol",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xDaDFC60207C17be005ECf2B03f3B31885D22F908"]
+    },
+    {
+        "name": "CurveUsdSwapper",
+        "address": "0xFA8c594b903651F97b27aCADEa83b720cfD7F80b",
+        "id": "0x83a67cc0",
+        "path": "contracts/actions/curveusd/advanced/CurveUsdSwapper.sol",
+        "version": "1.0.3",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": [
+            "0xFa2dfE6AF842e3184D305a85d09cfcf220ed4CBd",
+            "0xef8Aa00f824360236b6F586CeF8e4071Bd4448b6",
+            "0x934489c930C327D5a8B8b1D017cB08223bcF833f"
+        ]
+    },
+    {
+        "name": "CurveUsdSelfLiquidateWithColl",
+        "address": "0x7cE305FC2A18c6820a533AD418dC0A549aFeDcAF",
+        "id": "0xe17ef895",
+        "path": "contracts/actions/curveusd/advanced/CurveUsdSelfLiquidateWithColl.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": ["0x6d02300C1A68c63C60AFD713b744bA750aB33aB0"]
     },
     {
         "name": "CurveUsdBorrowRateTrigger",
@@ -2612,14 +2622,14 @@
     },
     {
         "name": "CurveStethPoolWithdraw",
-        "address": "0x4089731d843Ce52699Fe64F68556aBbD95D70D00",
+        "address": "0x41313695a4829a80c8019Ec8bCC529Fec08F9099",
         "id": "0x212a9416",
         "path": "contracts/actions/curve/stethPool/CurveStethPoolWithdraw.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x4089731d843Ce52699Fe64F68556aBbD95D70D00"]
     },
     {
         "name": "McdClaim",
@@ -2712,17 +2722,18 @@
     },
     {
         "name": "CurveWithdraw",
-        "address": "0x97616a969daaa8e1f27c4902745c88357e54ad6c",
+        "address": "0x7127A1Cd69eC2A1F91661bc0ED40aD5B73898A54",
         "id": "0x7633d6dc",
         "path": "contracts/actions/curve/lp/CurveWithdraw.sol",
-        "version": "1.0.2",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
             "0x7Fb9234E349F85678F6a02A291684A7008Ad78e2",
             "0xA2A6D75417807ebAf8364613018D697f88021771",
-            "0xb6Be5c486dD65c2cb18A388671b348E62307F0B3"
+            "0xb6Be5c486dD65c2cb18A388671b348E62307F0B3",
+            "0x97616a969daaa8e1f27c4902745c88357e54ad6c"
         ]
     },
     {

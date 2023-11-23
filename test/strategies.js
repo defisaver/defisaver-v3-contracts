@@ -887,6 +887,65 @@ const createLiquityRepayStrategy = () => {
     return liquityRepayStrategy.encodeForDsProxyCall();
 };
 
+const createLiquityDebtInFrontRepayStrategy = () => {
+    const liquityFLRepayStrategy = new dfs.Strategy('LiquityDebtInFrontRepayStrategy');
+    liquityFLRepayStrategy.addSubSlot('&wethAddr', 'address');
+    liquityFLRepayStrategy.addSubSlot('&lusdAddr', 'address');
+    liquityFLRepayStrategy.addSubSlot('&ratioIncrease', 'uin256');
+    liquityFLRepayStrategy.addSubSlot('&collChangeId.WITHDRAW', 'uint8');
+    liquityFLRepayStrategy.addSubSlot('&debtChangeId.PAYBACK', 'uint8');
+
+    const liquityRatioTrigger = new dfs.triggers.LiquityDebtInFrontWithLimitTrigger('0');
+    liquityFLRepayStrategy.addTrigger(liquityRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%wethAddr'],
+            ['%flAmount'],
+        ),
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&wethAddr',
+            '&lusdAddr',
+            '%exchangeAmount',
+            '%wrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%repayGasCost', '&lusdAddr', '$2',
+    );
+
+    const liquityAdjustAction = new dfs.actions.liquity.LiquityAdjustAction(
+        '%0', // no liquity fee charged in recipe
+        '$1',
+        '$3',
+        '&collChangeId.WITHDRAW',
+        '&debtChangeId.PAYBACK',
+        '&proxy',
+        '%FLAddr',
+        '%upperHint',
+        '%lowerHint',
+    );
+
+    const liquityRatioIncreaseCheckAction =
+        new dfs.actions.checkers.LiquityRatioIncreaseCheckAction(
+            '&ratioIncrease',
+        );
+
+    liquityFLRepayStrategy.addAction(flAction);
+    liquityFLRepayStrategy.addAction(sellAction);
+    liquityFLRepayStrategy.addAction(feeTakingAction);
+    liquityFLRepayStrategy.addAction(liquityAdjustAction);
+    liquityFLRepayStrategy.addAction(liquityRatioIncreaseCheckAction);
+
+    return liquityFLRepayStrategy.encodeForDsProxyCall();
+};
+
 const createLiquityFLRepayStrategy = () => {
     const liquityFLRepayStrategy = new dfs.Strategy('LiquityFLRepayStrategy');
     liquityFLRepayStrategy.addSubSlot('&ratioState', 'uint8');
@@ -3831,4 +3890,5 @@ module.exports = {
     createSparkFLCloseToCollStrategy,
     createLiquityDsrPaybackStrategy,
     createLiquityDsrSupplyStrategy,
+    createLiquityDebtInFrontRepayStrategy,
 };

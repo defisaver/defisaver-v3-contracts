@@ -2,7 +2,7 @@
 pragma solidity =0.8.10;
 
 import "../../interfaces/exchange/IExchangeV3.sol";
-import "../../interfaces/curve/ISwaps.sol";
+import "../../interfaces/curve/ISwapRouterNG.sol";
 import "../../interfaces/curve/IAddressProvider.sol";
 import "../../interfaces/IERC20.sol";
 import "../../DS/DSMath.sol";
@@ -16,32 +16,29 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
-    IAddressProvider addressProvider = IAddressProvider(CURVE_ADDRESS_PROVIDER);
-
     /// @notice Sells _srcAmount of tokens on Curve
     /// @param _srcAddr From token
     /// @param _srcAmount From amount
     /// @param _additionalData Route and swap params
     /// @return uint256 amount of tokens received from selling
-    function sell(address _srcAddr, address _destAddr, uint256 _srcAmount, bytes calldata _additionalData) external override returns (uint) {    
-        ISwaps exchangeContract = ISwaps(
-                addressProvider.get_address(2)
-        );
+    function sell(address _srcAddr, address, uint256 _srcAmount, bytes calldata _additionalData) external override returns (uint) {
+        ISwapRouterNG exchangeContract = ISwapRouterNG(CURVE_ROUTER_NG);
         IERC20(_srcAddr).safeApprove(address(exchangeContract), _srcAmount);
 
         (
-            address[9] memory _route, uint256[3][4] memory _swap_params
-        ) = abi.decode(_additionalData, (address[9], uint256[3][4]));
+            address[11] memory _route, uint256[5][5] memory _swap_params, address[5] memory _pools
+        ) = abi.decode(_additionalData, (address[11], uint256[5][5], address[5]));
 
         /// @dev the amount of tokens received is checked in DFSExchangeCore
         /// @dev Exchange wrapper contracts should not be used on their own
-        uint256 amountOut = exchangeContract.exchange_multiple(
+        uint256 amountOut = exchangeContract.exchange(
             _route,
             _swap_params,
             _srcAmount,
-            1   /// @dev DFSExchangeCore contains slippage check instead of writing it here
+            1,   /// @dev DFSExchangeCore contains slippage check instead of writing it here
+            _pools,
+            msg.sender
         );
-        _destAddr.withdrawTokens(msg.sender, amountOut);
 
         return amountOut;
     }
@@ -55,18 +52,17 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     /// @param _srcAmount From amount
     /// @param _additionalData Route and swap params
     /// @return uint256 Rate (price)
-    function getSellRate(address, address, uint256 _srcAmount, bytes memory _additionalData) public override returns (uint) {
-        ISwaps exchangeContract = ISwaps(
-                addressProvider.get_address(2)
-        );
+    function getSellRate(address, address, uint256 _srcAmount, bytes memory _additionalData) public view override returns (uint) {
+        ISwapRouterNG exchangeContract = ISwapRouterNG(CURVE_ROUTER_NG);
         (
-            address[9] memory _route, uint256[3][4] memory _swap_params
-        ) = abi.decode(_additionalData, (address[9], uint256[3][4]));
+            address[11] memory _route, uint256[5][5] memory _swap_params, address[5] memory _pools
+        ) = abi.decode(_additionalData, (address[11], uint256[5][5], address[5]));
 
-        uint256 amountOut = exchangeContract.get_exchange_multiple_amount(
+        uint256 amountOut = exchangeContract.get_dy(
             _route,
             _swap_params,
-            _srcAmount
+            _srcAmount,
+            _pools
         );
         return wdiv(amountOut, _srcAmount);
     }

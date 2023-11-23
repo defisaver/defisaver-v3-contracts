@@ -1,4 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
+require('hardhat-tracer');
 require('dotenv-safe').config();
 require('@nomiclabs/hardhat-waffle');
 require('@nomiclabs/hardhat-etherscan');
@@ -88,28 +89,10 @@ module.exports = {
             blockExplorer: 'etherscan',
             contractVerification: true,
         },
-        kovan: {
-            url: process.env.KOVAN_ETHEREUM_NODE,
-            chainId: 42,
-            accounts: [process.env.PRIV_KEY_KOVAN],
-            name: 'kovan',
-            txType: 2,
-            blockExplorer: 'etherscan',
-            contractVerification: true,
-        },
-        kovanOptimism: {
-            url: process.env.KOVAN_OPTIMISM_NODE,
-            chainId: 69,
-            accounts: [process.env.PRIV_KEY_KOVAN],
-            name: 'kovan-optimistic',
-            txType: 0,
-            blockExplorer: 'etherscan',
-            contractVerification: false,
-        },
         optimism: {
             url: process.env.OPTIMISM_NODE,
+            accounts: [process.env.PRIV_KEY_OPTIMISM],
             chainId: 10,
-            accounts: [process.env.PRIV_KEY_KOVAN],
             name: 'optimistic',
             txType: 0,
             blockExplorer: 'etherscan',
@@ -117,26 +100,17 @@ module.exports = {
         },
         base: {
             url: process.env.BASE_NODE,
+            accounts: [process.env.PRIV_KEY_BASE],
             chainId: 8453,
-            accounts: [process.env.PRIV_KEY_KOVAN],
             name: 'base',
             txType: 0,
             blockExplorer: 'etherscan',
             contractVerification: true,
         },
-        rinkebyArbitrum: {
-            url: process.env.RINKEBY_ARBITRUM_NODE,
-            chainID: 421611,
-            accounts: [process.env.PRIV_KEY_KOVAN],
-            name: 'testnet',
-            txType: 0,
-            blockExplorer: 'arbiscan',
-            contractVerification: true,
-        },
         arbitrum: {
             url: process.env.ARBITRUM_NODE,
+            accounts: [process.env.PRIV_KEY_ARBITRUM],
             chainId: 42161,
-            accounts: [process.env.PRIV_KEY_KOVAN],
             name: 'arbitrum',
             txType: 0,
             blockExplorer: 'arbiscan',

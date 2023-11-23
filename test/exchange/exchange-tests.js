@@ -112,7 +112,8 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
         0, // exchangeType = SELL
         exchangeData,
     );
-    const expectedOutput = +BN2Float(rate) * trade.amount;
+
+    const expectedOutput = amount.mul(rate).div(Float2BN('1'));
 
     const feeReceiverAmountBefore = await balanceOf(sellAssetInfo.address,
         addrs[hre.network.config.name].FEE_RECEIVER);
@@ -148,11 +149,11 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
 
     expect(buyBalanceAfter).is.gt('0');
     if (Math.abs(
-        +BN2Float(buyBalanceAfter, buyAssetInfo.decimals) - expectedOutput,
+        buyBalanceAfter - expectedOutput,
     ) > expectedOutput * 0.01) {
         console.log(`
         Bad liquidity or rate getter:
-        Expected: ${expectedOutput}
+        Expected: ${+BN2Float(expectedOutput, buyAssetInfo.decimals)}
         Output: ${+BN2Float(buyBalanceAfter, buyAssetInfo.decimals)}
         `);
     }
@@ -455,20 +456,23 @@ const dfsSellTest = async () => {
         for (let i = 0; i < 1; ++i) {
             const trade = trades[i];
 
-            it(`... should sell ${trade.sellToken} for ${trade.buyToken}`, async () => {
+            it(`... should sell on Kyber ${trade.sellToken} for ${trade.buyToken}`, async () => {
                 const kyberRate = await executeSell(senderAcc, proxy, dfsPrices, trade, kyberWrapper);
                 console.log(`Kyber sell rate -> ${kyberRate}`);
-
+            });
+            it(`... should sell on Uniswap ${trade.sellToken} for ${trade.buyToken}`, async () => {
                 const uniRate = await executeSell(
                     senderAcc, proxy, dfsPrices,
                     { ...trade, fee: 0 },
                     uniWrapper,
                 );
                 console.log(`Uniswap sell rate -> ${uniRate}`);
-
+            });
+            it(`... should sell on UniswapV3 ${trade.sellToken} for ${trade.buyToken}`, async () => {
                 const uniV3Rate = await executeSell(senderAcc, proxy, dfsPrices, trade, uniV3Wrapper);
                 console.log(`UniswapV3 sell rate -> ${uniV3Rate}`);
-
+            });
+            it(`... should sell on Curve ${trade.sellToken} for ${trade.buyToken}`, async () => {
                 const curveRate = await executeSell(
                     senderAcc,
                     proxy,
@@ -514,9 +518,7 @@ const paraswapTest = async () => {
         let buyAssetInfo;
 
         before(async () => {
-            await redeploy('DFSSell');
-            paraswapWrapper = await redeploy('ParaswapWrapper');
-
+            paraswapWrapper = await hre.ethers.getContractAt('ParaswapWrapper', '0x005c78a48b482C1733c7Cf958E65d90d3D40554b');
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             await setNewExchangeWrapper(senderAcc, paraswapWrapper.address);
@@ -646,7 +648,7 @@ const oneInchTest = async () => {
 
         before(async () => {
             const chainId = chainIds[getNetwork()];
-            console.log(chainId);
+
             await redeploy('DFSSell');
             oneInchWrapper = await redeploy('OneInchWrapper');
 
@@ -677,32 +679,28 @@ const oneInchTest = async () => {
             };
             // set slippage to user slippage + fee%
             // add all protocols and remove one by one
-            console.log(options.baseURL + options.url);
+
             const priceObject = await axios(options).then((response) => response.data);
-            console.log(priceObject);
-            console.log(priceObject.protocols[0]);
+
             // THIS IS CHANGEABLE WITH API INFORMATION
             const allowanceTarget = priceObject.tx.to;
             const price = 1; // just for testing, anything bigger than 0 triggers offchain if
             const protocolFee = 0;
             const callData = priceObject.tx.data;
-            // console.log(callData);
+
             let amountInHex = hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [amount]);
             amountInHex = amountInHex.slice(2);
-            console.log(amountInHex);
-            // console.log(amountInHex.toString());
+
             const sourceStr = callData;
             const searchStr = amountInHex.toString();
             const indexes = [...sourceStr.matchAll(new RegExp(searchStr, 'gi'))].map((a) => a.index);
-            console.log(indexes); // [2, 25, 27, 33]
 
             const offsets = [];
-            // console.log(offset);
+
             for (let i = 0; i < indexes.length; i++) {
                 offsets[i] = indexes[i] / 2 - 1;
             }
-            console.log(offsets);
-            // console.log(offset);
+
             const specialCalldata = hre.ethers.utils.defaultAbiCoder.encode(['(bytes,uint256[])'], [[callData, offsets]]);
 
             exchangeObject = formatExchangeObjForOffchain(
@@ -737,8 +735,7 @@ const oneInchTest = async () => {
             await executeAction('DFSSell', functionData, proxy);
 
             const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
-            console.log(buyBalanceAfter.toString());
-            console.log(buyBalanceBefore.toString());
+
             expect(buyBalanceBefore).is.lt(buyBalanceAfter);
         });
         it('... should try to sell WETH for DAI with offchain calldata (1inch) in a recipe', async () => {
@@ -756,17 +753,18 @@ const oneInchTest = async () => {
                 gasLimit: 5000000,
             });
             const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
-            console.log(buyBalanceAfter.toString());
-            console.log(buyBalanceBefore.toString());
+
             expect(buyBalanceBefore).is.lt(buyBalanceAfter);
         });
     });
 };
 
 const dfsExchangeFullTest = async () => {
-    await dfsSellTest();
     await paraswapTest();
+    await oneInchTest();
     await kyberAggregatorDFSSellTest();
+    await dfsSellTest();
+    await dfsSellSameAssetTest();
 };
 
 module.exports = {
