@@ -12,7 +12,7 @@ const req = CoinGeckoClient.simple.price({
         + 'gemini-dollar,yearn-finance,liquity-usd,liquity,tornado-cash,musd,imusd,rai,'
         + 'loopring,chainlink,tether,true-usd,balancer,musd,imusd,pax-dollar,arbitrum,gmx,'
         + 'gemini-dollar,yearn-finance,liquity-usd,liquity,tornado-cash,sushi,matic-network,boosted-lusd,wrapped-steth,'
-        + 'gnosis,rocket-pool-eth,frax-ether',
+        + 'gnosis,rocket-pool-eth,frax-ether,staked-frax-ether,tbtc',
     vs_currencies: 'usd',
 });
 

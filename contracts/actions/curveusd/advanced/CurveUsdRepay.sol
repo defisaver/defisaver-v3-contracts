@@ -37,8 +37,8 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
         Params memory params = parseInputs(_callData);
 
         params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
-        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
-        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[2], _subData, _returnValues);
+        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[1], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
         (uint256 generatedAmount, bytes memory logData) = _repay(params);
         emit ActionEvent("CurveUsdRepay", logData);

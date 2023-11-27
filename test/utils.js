@@ -312,6 +312,8 @@ const coinGeckoHelper = {
     GMX: 'gmx',
     ARB: 'arbitrum',
     frxETH: 'frax-ether',
+    sfrxETH: 'staked-frax-ether',
+    tBTC: 'tbtc',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;

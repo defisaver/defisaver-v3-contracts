@@ -3814,6 +3814,37 @@ const createLiquityDsrSupplyStrategy = () => {
     return liquityDsrSupplyStrategy.encodeForDsProxyCall();
 };
 
+const createCurveUsdRepayStrategy = () => {
+    const repayStrategy = new dfs.Strategy('CurveUsdRepayStrategy');
+
+    repayStrategy.addSubSlot('&controllerAddress', 'address');
+    repayStrategy.addSubSlot('&ratioState', 'uint8');
+    repayStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(nullAddress, nullAddress, '0', '0');
+    repayStrategy.addTrigger(curveUsdCollRatioTrigger);
+
+    const curveUsdRepayAction = new dfs.actions.curveusd.CurveUsdRepayAction(
+        '&controllerAddress', // taken from subdata
+        '%collAmount', // calculated by backend
+        '&eoa', // most likely wont be used as this will only be partial repay
+        '%minAmount', // calculated by backend
+        '%additionalData', // packed data for exchange
+        '%gasUsed',
+        '%dfsFeeDivider', // 400 (25bps)
+    );
+
+    const curveUsdCollRatioCheckAction = new dfs.actions.checkers.CurveUsdCollRatioCheck(
+        '&ratioState', // sent from backend, but should be taken directly from trigger
+        '&targetRatio', // taken from subdata
+        '&controllerAddress', // taken from subdata
+    );
+
+    repayStrategy.addAction(curveUsdRepayAction);
+    repayStrategy.addAction(curveUsdCollRatioCheckAction);
+    return repayStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
@@ -3891,4 +3922,5 @@ module.exports = {
     createLiquityDsrPaybackStrategy,
     createLiquityDsrSupplyStrategy,
     createLiquityDebtInFrontRepayStrategy,
+    createCurveUsdRepayStrategy,
 };
