@@ -1420,7 +1420,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x4d3F58460aE2bC71fFaeb33838BFA3b5610083Db"]
+        "history": []
     },
     {
         "name": "SparkBorrow",
@@ -1431,7 +1431,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x4d3F58460aE2bC71fFaeb33838BFA3b5610083Db"]
+        "history": []
     },
     {
         "name": "AaveV3ClaimRewards",
@@ -1861,7 +1861,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [""]
+        "history": []
     },
     {
         "name": "FLAction",
