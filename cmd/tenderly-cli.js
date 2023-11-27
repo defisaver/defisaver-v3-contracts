@@ -38,32 +38,48 @@ const getContractsFromTenderly = async (networkId) => {
         const response = await axios.get(url, { headers: headersParams });
         return response.data
             .filter((c) => c.contract.network_id === networkId)
-            .map((c) => ({ address: c.contract.address }));
+            .map((c) => ({
+                address: c.contract.address,
+                display_name: c.display_name,
+            }));
     } catch (error) {
         console.error('Error getting contracts from tenderly', error);
         return null;
     }
 };
 
-const sendContractsToTenderly = async (contracts, networkId) => {
+const sendContractsToTenderly = async (formattedContractsToSend) => {
     const url = 'https://api.tenderly.co/api/v2/accounts/defisaver-v2/projects/Strategies/contracts';
     const headersParams = {
         'Content-Type': 'application/json',
         'X-Access-Key': process.env.TENDERLY_ACCESS_KEY,
     };
-    const body = {
-        contracts: contracts.map((contract) => ({
-            network_id: networkId,
-            address: contract.address,
-            display_name: contract.name,
-        })),
-    };
+    const body = { contracts: formattedContractsToSend };
     try {
         await axios.post(url, body, { headers: headersParams });
         console.log('Contract(s) successfully sent to Tenderly');
     } catch (error) {
         console.error('Error sending contracts to Tenderly', error.response.data);
     }
+};
+
+const getFormattedContractsWithHistoryIncluded = (contract, networkId) => {
+    const formattedContracts = [];
+
+    formattedContracts.push({
+        network_id: networkId,
+        address: contract.address,
+        display_name: contract.name,
+    });
+    // oldest contract will have the lowest index in display name, starting with _1
+    for (let i = contract.history?.length - 1; i >= 0; i -= 1) {
+        formattedContracts.push({
+            network_id: networkId,
+            address: contract.history[i],
+            display_name: `${contract.name}_${contract.history.length - i}`,
+        });
+    }
+    return formattedContracts;
 };
 
 const sync = async (idOrNameOrAddress, options) => {
@@ -79,7 +95,8 @@ const sync = async (idOrNameOrAddress, options) => {
     const found = contracts.find(
         (c) => c.name === idOrNameOrAddress
         || c.address === idOrNameOrAddress
-        || c.id === idOrNameOrAddress,
+        || c.id === idOrNameOrAddress
+        || c.history.includes(idOrNameOrAddress),
     );
 
     if (!found) {
@@ -87,24 +104,28 @@ const sync = async (idOrNameOrAddress, options) => {
         return;
     }
 
-    await sendContractsToTenderly([found], getNetworkId(network));
+    const networkId = getNetworkId(network);
+    const formattedContractsToSend = getFormattedContractsWithHistoryIncluded(found, networkId);
+    console.log('Sending contract(s) to Tenderly...');
+    await sendContractsToTenderly(formattedContractsToSend);
 };
 
 const findContractsToSync = (contractsFromJson, contractsFromTenderly, networkId) => {
     const contractsFromTenderlyMap = {};
     contractsFromTenderly.forEach((contract) => {
-        contractsFromTenderlyMap[contract.address.toLowerCase()] = contract;
+        const key = `${contract.address.toLowerCase()}${contract.display_name}`;
+        contractsFromTenderlyMap[key] = contract;
     });
 
     const contractsToSync = [];
     contractsFromJson.forEach((contract) => {
-        if (!contractsFromTenderlyMap[contract.address.toLowerCase()]) {
-            contractsToSync.push({
-                network_id: networkId,
-                address: contract.address,
-                display_name: contract.name,
-            });
-        }
+        const contractsWithHistory = getFormattedContractsWithHistoryIncluded(contract, networkId);
+        contractsWithHistory.forEach((c) => {
+            const key = `${c.address.toLowerCase()}${c.display_name}`;
+            if (!contractsFromTenderlyMap[key]) {
+                contractsToSync.push(c);
+            }
+        });
     });
 
     return contractsToSync;
@@ -144,7 +165,7 @@ const syncAll = async (options) => {
 
     console.log(`Syncing ${contractsToSync.length} contracts to Tenderly...`);
 
-    await sendContractsToTenderly(contractsToSync, networkId);
+    await sendContractsToTenderly(contractsToSync);
 };
 
 (async () => {
