@@ -94,28 +94,11 @@ const deployAndReturnGasUsed = async (contractName, signer, action, gasPrice, no
 };
 
 // eslint-disable-next-line max-len
-const deployWithResend = (contractName, signer, action, exGasPrice, nonce, ...args) => new Promise((resolve) => {
+const deployWithNewGasPrice = (contractName, signer, action, exGasPrice, nonce, ...args) => new Promise((resolve) => {
     getGasPrice(exGasPrice).then((gasPrice) => {
-        const deployPromise = deploy(contractName, signer, action, gasPrice, nonce, ...args);
-
-        const redeployTime = process.env.REDEPLOY_TIME_IN_MINUTES;
-
-        if (!redeployTime) {
-            console.log('Warning: no redeploy time set');
-        } else {
-            const timeoutId = setTimeout(
-                () => resolve(
-                    deployWithResend(contractName, 'Resending', gasPrice, nonce, ...args),
-                ),
-                parseFloat(redeployTime) * 60 * 1000,
-            );
-
-            deployPromise.then((contract) => {
-                clearTimeout(timeoutId);
-
-                if (contract !== null) resolve(contract);
-            });
-        }
+        deploy(contractName, signer, action, gasPrice, nonce, ...args).then((contract) => {
+            if (contract !== null) resolve(contract);
+        });
     });
 });
 
@@ -124,7 +107,7 @@ const deployContract = async (contractName, ...args) => {
     const address = await signers[0].getAddress();
     const nonce = await hre.ethers.provider.getTransactionCount(address);
 
-    return deployWithResend(
+    return deployWithNewGasPrice(
         contractName,
         signers[0],
         'Deploying',
@@ -149,7 +132,7 @@ const deployContractAndReturnGasUsed = async (contractName, ...args) => {
     );
 };
 
-const deployAsOwner = async (contractName, signer, ...args) => deployWithResend(
+const deployAsOwner = async (contractName, signer, ...args) => deployWithNewGasPrice(
     contractName,
     signer,
     'Deploying',
@@ -160,7 +143,6 @@ const deployAsOwner = async (contractName, signer, ...args) => deployWithResend(
 
 module.exports = {
     deploy,
-    deployWithResend,
     deployContract,
     deployAsOwner,
     deployContractAndReturnGasUsed,
