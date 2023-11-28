@@ -4416,7 +4416,7 @@ const callCurveUsdAdvancedRepayStrategy = async (botAcc, strategyExecutor, strat
 
     console.log(`GasUsed callCurveUsdAdvancedRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
-const callCurveUsdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, repayAmount, crvusdAddr, maxActiveBand, exchangeObject) => {
+const callCurveUsdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, repayAmount, maxActiveBand, exchangeObject) => {
     const triggerCallData = [];
     const actionsCallData = [];
     const repayGasCost = 1000000; // .8 mil gas
@@ -4431,7 +4431,7 @@ const callCurveUsdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex
         '0x000000000000000000000000000000000000dead',
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        repayGasCost, crvusdAddr, '0',
+        repayGasCost, nullAddress, '0',
     );
     const curveUsdPaybackAction = new dfs.actions.curveusd.CurveUsdPaybackAction(
         nullAddress,
@@ -4460,7 +4460,7 @@ const callCurveUsdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex
 
     console.log(`GasUsed callCurveUsdRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
-const callCurveUsdFLRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, repayAmount, collAddr, crvusdAddr, maxActiveBand, exchangeObject, flAddr) => {
+const callCurveUsdFLRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, repayAmount, collAddr, maxActiveBand, exchangeObject, flAddr) => {
     const triggerCallData = [];
     const actionsCallData = [];
     const repayGasCost = 1000000; // .8 mil gas
@@ -4472,7 +4472,7 @@ const callCurveUsdFLRepayStrategy = async (botAcc, strategyExecutor, strategyInd
         '0x000000000000000000000000000000000000dead',
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        repayGasCost, crvusdAddr, '0',
+        repayGasCost, nullAddress, '0',
     );
     const curveUsdPaybackAction = new dfs.actions.curveusd.CurveUsdPaybackAction(
         nullAddress,

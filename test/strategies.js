@@ -3820,6 +3820,8 @@ const createCurveUsdAdvancedRepayStrategy = () => {
     repayStrategy.addSubSlot('&controllerAddress', 'address');
     repayStrategy.addSubSlot('&ratioState', 'uint8');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&collToken', 'address');
+    repayStrategy.addSubSlot('&crvUsd', 'address');
 
     const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(nullAddress, nullAddress, '0', '0');
     repayStrategy.addTrigger(curveUsdCollRatioTrigger);
@@ -3850,6 +3852,8 @@ const createCurveUsdRepayStrategy = () => {
     repayStrategy.addSubSlot('&controllerAddress', 'address');
     repayStrategy.addSubSlot('&ratioState', 'uint8');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&collToken', 'address');
+    repayStrategy.addSubSlot('&crvUsd', 'address');
 
     const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(nullAddress, nullAddress, '0', '0');
     repayStrategy.addTrigger(curveUsdCollRatioTrigger);
@@ -3861,8 +3865,8 @@ const createCurveUsdRepayStrategy = () => {
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%collToken',
-            '%crvusd',
+            '&collToken',
+            '&crvUsd',
             '$1',
             '%exchangeWrapper',
         ),
@@ -3870,7 +3874,7 @@ const createCurveUsdRepayStrategy = () => {
         '&proxy',
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '%crvusd', '$2',
+        '0', '&crvUsd', '$2',
     );
     const curveUsdPaybackAction = new dfs.actions.curveusd.CurveUsdPaybackAction(
         '&controllerAddress',
@@ -3900,20 +3904,22 @@ const createCurveUsdFLRepayStrategy = () => {
     repayStrategy.addSubSlot('&controllerAddress', 'address');
     repayStrategy.addSubSlot('&ratioState', 'uint8');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&collToken', 'address');
+    repayStrategy.addSubSlot('&crvUsd', 'address');
 
     const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(nullAddress, nullAddress, '0', '0');
     repayStrategy.addTrigger(curveUsdCollRatioTrigger);
 
     const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        ['%collAddr'],
+        ['%collToken'],
         ['%loanAmount'],
         '%nullAddress',
         [],
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%collToken',
-            '%crvusd',
+            '&collToken',
+            '&crvUsd',
             '%boostAmount',
             '%exchangeWrapper',
         ),
@@ -3921,7 +3927,7 @@ const createCurveUsdFLRepayStrategy = () => {
         '&proxy',
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '%crvusd', '$2',
+        '0', '&crvUsd', '$2',
     );
     const curveUsdPaybackAction = new dfs.actions.curveusd.CurveUsdPaybackAction(
         '&controllerAddress',

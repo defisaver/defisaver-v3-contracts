@@ -105,7 +105,8 @@ const curveUsdRepayStrategyTest = async () => {
                     const ratioUnder = Float2BN('2.5');
                     const targetRatio = Float2BN('3');
                     ({ subId, strategySub } = await subCurveUsdRepayBundle(
-                        proxy, repayBundleId, controllerAddress, ratioUnder, targetRatio,
+                        proxy, repayBundleId, controllerAddress,
+                        ratioUnder, targetRatio, collateralAsset.address, crvusdAddress,
                     ));
                 });
                 it(`Executes advanced repay strategy for ${assetSymbol} market`, async () => {
@@ -166,7 +167,6 @@ const curveUsdRepayStrategyTest = async () => {
                         subId,
                         strategySub,
                         repayAmount,
-                        crvusdAddress,
                         maxActiveBand,
                         exchangeObj,
                     );
@@ -205,7 +205,6 @@ const curveUsdRepayStrategyTest = async () => {
                         strategySub,
                         repayAmount,
                         collateralAsset.address,
-                        crvusdAddress,
                         maxActiveBand,
                         exchangeObj,
                         flActionAddr,

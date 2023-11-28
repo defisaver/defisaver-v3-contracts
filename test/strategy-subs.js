@@ -729,13 +729,17 @@ const subAaveV3CloseWithMaximumGasPriceBundle = async (
     return { subId, strategySub };
 };
 const subCurveUsdRepayBundle = async (
-    proxy, bundleId, controllerAddr, minRatio, targetRatio,
+    proxy, bundleId, controllerAddr, minRatio, targetRatio, collTokenAddress, crvusdAddress,
 ) => {
     const triggerData = await createCurveUsdCollRatioTrigger(proxy.address, controllerAddr, minRatio, RATIO_STATE_UNDER);
     const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_REPAY]);
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
     const controllerAddressEncoded = abiCoder.encode(['address'], [controllerAddr]);
-    const strategySub = [bundleId, true, [triggerData], [controllerAddressEncoded, ratioStateEncoded, targetRatioEncoded]];
+    const collTokenAddressEncoded = abiCoder.encode(['address'], [collTokenAddress]);
+    const crvUsdAddressEncoded = abiCoder.encode(['address'], [crvusdAddress]);
+    const strategySub = [bundleId, true, [triggerData],
+        [controllerAddressEncoded, ratioStateEncoded, targetRatioEncoded, collTokenAddressEncoded, crvUsdAddressEncoded],
+    ];
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };

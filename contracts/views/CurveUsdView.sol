@@ -6,6 +6,8 @@ pragma experimental ABIEncoderV2;
 import "../interfaces/curveusd/ICurveUsd.sol";
 import "../actions/curveusd/helpers/CurveUsdHelper.sol";
 import "../interfaces/IERC20.sol";
+// forkor create position, sub repay strat, get position info
+// deploy and setup one fork
 
 contract CurveUsdView is CurveUsdHelper {
   struct Band {
