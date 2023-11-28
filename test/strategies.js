@@ -3814,8 +3814,8 @@ const createLiquityDsrSupplyStrategy = () => {
     return liquityDsrSupplyStrategy.encodeForDsProxyCall();
 };
 
-const createCurveUsdRepayStrategy = () => {
-    const repayStrategy = new dfs.Strategy('CurveUsdRepayStrategy');
+const createCurveUsdAdvancedRepayStrategy = () => {
+    const repayStrategy = new dfs.Strategy('CurveUsdAdvancedRepayStrategy');
 
     repayStrategy.addSubSlot('&controllerAddress', 'address');
     repayStrategy.addSubSlot('&ratioState', 'uint8');
@@ -3841,6 +3841,112 @@ const createCurveUsdRepayStrategy = () => {
     );
 
     repayStrategy.addAction(curveUsdRepayAction);
+    repayStrategy.addAction(curveUsdCollRatioCheckAction);
+    return repayStrategy.encodeForDsProxyCall();
+};
+const createCurveUsdRepayStrategy = () => {
+    const repayStrategy = new dfs.Strategy('CurveUsdRepayStrategy');
+
+    repayStrategy.addSubSlot('&controllerAddress', 'address');
+    repayStrategy.addSubSlot('&ratioState', 'uint8');
+    repayStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(nullAddress, nullAddress, '0', '0');
+    repayStrategy.addTrigger(curveUsdCollRatioTrigger);
+
+    const curveUsdWithdrawAction = new dfs.actions.curveusd.CurveUsdWithdrawAction(
+        '&controllerAddress',
+        '&proxy',
+        '%repayAmount',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collToken',
+            '%crvusd',
+            '$1',
+            '%exchangeWrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', '%crvusd', '$2',
+    );
+    const curveUsdPaybackAction = new dfs.actions.curveusd.CurveUsdPaybackAction(
+        '&controllerAddress',
+        '&proxy',
+        '&proxy',
+        '&eoa',
+        '$3',
+        '%maxActiveBand', // sent by backend
+    );
+    const curveUsdCollRatioCheckAction = new dfs.actions.checkers.CurveUsdCollRatioCheck(
+        '&ratioState', // sent from backend, but should be taken directly from trigger
+        '&targetRatio', // taken from subdata
+        '&controllerAddress', // taken from subdata
+    );
+
+    repayStrategy.addAction(curveUsdWithdrawAction);
+    repayStrategy.addAction(sellAction);
+    repayStrategy.addAction(feeTakingAction);
+    repayStrategy.addAction(curveUsdPaybackAction);
+    repayStrategy.addAction(curveUsdCollRatioCheckAction);
+    return repayStrategy.encodeForDsProxyCall();
+};
+
+const createCurveUsdFLRepayStrategy = () => {
+    const repayStrategy = new dfs.Strategy('CurveUsdFLRepayStrategy');
+
+    repayStrategy.addSubSlot('&controllerAddress', 'address');
+    repayStrategy.addSubSlot('&ratioState', 'uint8');
+    repayStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(nullAddress, nullAddress, '0', '0');
+    repayStrategy.addTrigger(curveUsdCollRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%collAddr'],
+        ['%loanAmount'],
+        '%nullAddress',
+        [],
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collToken',
+            '%crvusd',
+            '%boostAmount',
+            '%exchangeWrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', '%crvusd', '$2',
+    );
+    const curveUsdPaybackAction = new dfs.actions.curveusd.CurveUsdPaybackAction(
+        '&controllerAddress',
+        '&proxy',
+        '&proxy',
+        '&eoa',
+        '$3',
+        '%maxActiveBand', // sent by backend
+    );
+    const curveUsdWithdrawAction = new dfs.actions.curveusd.CurveUsdWithdrawAction(
+        '&controllerAddress',
+        '%flAddr',
+        '$1',
+    );
+    const curveUsdCollRatioCheckAction = new dfs.actions.checkers.CurveUsdCollRatioCheck(
+        '&ratioState', // sent from backend, but should be taken directly from trigger
+        '&targetRatio', // taken from subdata
+        '&controllerAddress', // taken from subdata
+    );
+
+    repayStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+    repayStrategy.addAction(sellAction);
+    repayStrategy.addAction(feeTakingAction);
+    repayStrategy.addAction(curveUsdPaybackAction);
+    repayStrategy.addAction(curveUsdWithdrawAction);
     repayStrategy.addAction(curveUsdCollRatioCheckAction);
     return repayStrategy.encodeForDsProxyCall();
 };
@@ -3922,5 +4028,7 @@ module.exports = {
     createLiquityDsrPaybackStrategy,
     createLiquityDsrSupplyStrategy,
     createLiquityDebtInFrontRepayStrategy,
+    createCurveUsdAdvancedRepayStrategy,
     createCurveUsdRepayStrategy,
+    createCurveUsdFLRepayStrategy,
 };

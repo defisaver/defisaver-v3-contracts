@@ -192,7 +192,6 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         if (gasUsed > 0){
             amountOut -= takeAutomationFee(amountOut, destToken, gasUsed, feeDividerForAutomation);
         }
-
         // free the storage only needed inside tx as transient storage
         delete additionalRoutes;
         delete swapZapPools;
@@ -267,9 +266,10 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         // gas fee can't go over 20% of the whole amount
         if (feeAmount > (_destTokenAmount / 5)) {
             feeAmount = _destTokenAmount / 5;
-            if (_dfsFeeDivider != 0) {
-                feeAmount += _destTokenAmount / AUTOMATION_DFS_FEE;
-            }
+        }
+    
+        if (_dfsFeeDivider != 0) {
+            feeAmount += _destTokenAmount / AUTOMATION_DFS_FEE;
         }
 
         address walletAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();

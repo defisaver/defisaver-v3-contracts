@@ -54,6 +54,7 @@ const addrs = {
         DFS_REG_CONTROLLER: '0x6F6DaE1bCB60F67B2Cb939dBE565e8fD03F6F002',
         AVG_GAS_PRICE: 100,
         AAVE_V3_POOL_DATA_PROVIDER: '0x7B4EB56E7CD4b454BA8ff71E4518426369a138a3',
+        CURVE_WRAPPER_V3: '0xdE73496DD6349829C6649aCaDe31FB1371528AC5',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -881,6 +882,7 @@ const formatExchangeObjCurve = async (
         // eslint-disable-next-line no-underscore-dangle
         [args._route, args._swapParams, args._pools],
     );
+    console.log(exchangeData);
 
     return [
         srcAddr,

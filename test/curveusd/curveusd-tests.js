@@ -1032,4 +1032,5 @@ module.exports = {
     curveUsdFullTest,
     curveUsdSelfLiquidateTest,
     curveUsdAdjustTest,
+    getActiveBand,
 };

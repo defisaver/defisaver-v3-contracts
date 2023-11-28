@@ -1,29 +1,34 @@
 const hre = require('hardhat');
-const { utils: { curveusdUtils: { curveusdMarkets, controllerFactoryAddress } } } = require('@defisaver/sdk');
+const { utils: { curveusdUtils: { curveusdMarkets } } } = require('@defisaver/sdk');
 
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
-const { createCurveUsdRepayStrategy } = require('../../strategies');
+const { createCurveUsdRepayStrategy, createCurveUsdAdvancedRepayStrategy, createCurveUsdFLRepayStrategy } = require('../../strategies');
 const {
     openStrategyAndBundleStorage,
     redeployCore, redeploy, getProxy,
     takeSnapshot, fetchAmountinUSDPrice,
     setBalance, approve, revertToSnapshot,
-    Float2BN, formatExchangeObjCurve, addrs,
+    Float2BN, formatExchangeObjCurve, addrs, getAddrFromRegistry,
 } = require('../../utils');
 const { createStrategy, createBundle, addBotCaller } = require('../../utils-strategies');
 const { curveUsdCreate } = require('../../actions');
 const { subCurveUsdRepayBundle } = require('../../strategy-subs');
-const { callCurveUsdRepayStrategy } = require('../../strategy-calls');
+const { callCurveUsdRepayStrategy, callCurveUsdAdvancedRepayStrategy, callCurveUsdFLRepayStrategy } = require('../../strategy-calls');
+const { getActiveBand } = require('../../curveusd/curveusd-tests');
 
 const crvusdAddress = getAssetInfo('crvUSD').address;
 const createRepayBundle = async (proxy, isFork) => {
-    const repayCurveUsdStrategyEncoded = createCurveUsdRepayStrategy();
+    const curveUsdAdvancedRepayStrategy = createCurveUsdAdvancedRepayStrategy();
+    const curveUsdRepayStrategy = createCurveUsdRepayStrategy();
+    const curveUsdFLRepayStrategy = createCurveUsdFLRepayStrategy();
     await openStrategyAndBundleStorage(isFork);
-    const strategyId = await createStrategy(proxy, ...repayCurveUsdStrategyEncoded, true);
+    const strategyIdFirst = await createStrategy(proxy, ...curveUsdAdvancedRepayStrategy, true);
+    const strategyIdSecond = await createStrategy(proxy, ...curveUsdRepayStrategy, true);
+    const strategyIdThird = await createStrategy(proxy, ...curveUsdFLRepayStrategy, true);
     return createBundle(
         proxy,
-        [strategyId],
+        [strategyIdFirst, strategyIdSecond, strategyIdThird],
     );
 };
 
@@ -49,12 +54,17 @@ const curveUsdRepayStrategyTest = async () => {
             botAcc = (await hre.ethers.getSigners())[1];
 
             strategyExecutor = await redeployCore();
-
             crvusdView = await redeploy('CurveUsdView');
             await redeploy('CurveUsdCreate');
             await redeploy('CurveUsdRepay');
             await redeploy('CurveUsdCollRatioTrigger');
             await redeploy('CurveUsdCollRatioCheck');
+            await redeploy('CurveUsdWithdraw');
+            await redeploy('CurveUsdPayback');
+            await redeploy('FLAction');
+            await redeploy('DFSSell');
+            await redeploy('GasFeeTaker');
+            await redeploy('CurveUsdSwapper');
 
             await addBotCaller(botAcc.address);
 
@@ -64,16 +74,15 @@ const curveUsdRepayStrategyTest = async () => {
         it('... should create a repay bundle', async () => {
             repayBundleId = await createRepayBundle(proxy, false);
         });
+
         Object.entries(curveusdMarkets)
             // eslint-disable-next-line array-callback-return
             .map(([assetSymbol, { controllerAddress }]) => {
                 const collateralAsset = getAssetInfo(assetSymbol);
-                // let snapshot;
+                let snapshot;
                 let collateralAmount;
 
                 it(`Create new curve position to be repaid in ${assetSymbol} market`, async () => {
-                    // snapshot = await takeSnapshot();
-
                     collateralAmount = hre.ethers.utils.parseUnits(
                         fetchAmountinUSDPrice(assetSymbol, SUPPLY_AMOUNT_USD),
                         collateralAsset.decimals,
@@ -99,7 +108,8 @@ const curveUsdRepayStrategyTest = async () => {
                         proxy, repayBundleId, controllerAddress, ratioUnder, targetRatio,
                     ));
                 });
-                it(`Executes a repay strategy for ${assetSymbol} market`, async () => {
+                it(`Executes advanced repay strategy for ${assetSymbol} market`, async () => {
+                    snapshot = await takeSnapshot();
                     const userDataBefore = await crvusdView.userData(
                         controllerAddress, proxy.address,
                     );
@@ -114,7 +124,7 @@ const curveUsdRepayStrategyTest = async () => {
                         repayAmount,
                         addrs.mainnet.CURVE_USD_WRAPPER,
                     );
-                    await callCurveUsdRepayStrategy(
+                    await callCurveUsdAdvancedRepayStrategy(
                         botAcc,
                         strategyExecutor,
                         0,
@@ -129,7 +139,84 @@ const curveUsdRepayStrategyTest = async () => {
                     const collRatioAfter = userDataAfter.collRatio;
                     console.log(`Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`);
                     expect(collRatioAfter).to.be.gt(collRatioBefore);
-                    // await revertToSnapshot(snapshot);
+                    await revertToSnapshot(snapshot);
+                });
+                it(`Executes a regular repay strategy for ${assetSymbol} market`, async () => {
+                    snapshot = await takeSnapshot();
+                    const userDataBefore = await crvusdView.userData(
+                        controllerAddress, proxy.address,
+                    );
+                    const collRatioBefore = userDataBefore.collRatio;
+                    const repayAmount = hre.ethers.utils.parseUnits(
+                        fetchAmountinUSDPrice(assetSymbol, REPAY_AMOUNT_USD),
+                        collateralAsset.decimals,
+                    );
+
+                    const maxActiveBand = await getActiveBand(controllerAddress);
+                    const exchangeObj = await formatExchangeObjCurve(
+                        collateralAsset.address,
+                        crvusdAddress,
+                        repayAmount,
+                        addrs.mainnet.CURVE_WRAPPER_V3,
+                    );
+                    await callCurveUsdRepayStrategy(
+                        botAcc,
+                        strategyExecutor,
+                        1,
+                        subId,
+                        strategySub,
+                        repayAmount,
+                        crvusdAddress,
+                        maxActiveBand,
+                        exchangeObj,
+                    );
+                    const userDataAfter = await crvusdView.userData(
+                        controllerAddress, proxy.address,
+                    );
+                    const collRatioAfter = userDataAfter.collRatio;
+                    console.log(`Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`);
+                    expect(collRatioAfter).to.be.gt(collRatioBefore);
+                    await revertToSnapshot(snapshot);
+                });
+                it(`Executes a flashloan repay strategy for ${assetSymbol} market`, async () => {
+                    if (assetSymbol.toLowerCase() === 'tbtc' || assetSymbol.toLowerCase() === 'sfrxeth') return;
+                    snapshot = await takeSnapshot();
+                    const userDataBefore = await crvusdView.userData(
+                        controllerAddress, proxy.address,
+                    );
+                    const collRatioBefore = userDataBefore.collRatio;
+                    const repayAmount = hre.ethers.utils.parseUnits(
+                        fetchAmountinUSDPrice(assetSymbol, REPAY_AMOUNT_USD),
+                        collateralAsset.decimals,
+                    );
+                    const maxActiveBand = await getActiveBand(controllerAddress);
+                    const exchangeObj = await formatExchangeObjCurve(
+                        collateralAsset.address,
+                        crvusdAddress,
+                        repayAmount,
+                        addrs.mainnet.CURVE_WRAPPER_V3,
+                    );
+                    const flActionAddr = await getAddrFromRegistry('FLAction');
+                    await callCurveUsdFLRepayStrategy(
+                        botAcc,
+                        strategyExecutor,
+                        2,
+                        subId,
+                        strategySub,
+                        repayAmount,
+                        collateralAsset.address,
+                        crvusdAddress,
+                        maxActiveBand,
+                        exchangeObj,
+                        flActionAddr,
+                    );
+                    const userDataAfter = await crvusdView.userData(
+                        controllerAddress, proxy.address,
+                    );
+                    const collRatioAfter = userDataAfter.collRatio;
+                    console.log(`Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`);
+                    expect(collRatioAfter).to.be.gt(collRatioBefore);
+                    await revertToSnapshot(snapshot);
                 });
             });
     });
