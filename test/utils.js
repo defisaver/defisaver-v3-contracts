@@ -882,8 +882,15 @@ const formatExchangeObjCurve = async (
         // eslint-disable-next-line no-underscore-dangle
         [args._route, args._swapParams, args._pools],
     );
-    console.log(exchangeData);
-
+    if (exchangeData.toString().includes('5e74c9036fb86bd7ecdcb084a0673efc32ea31cb')) {
+        console.log('sETH used in curve route, may fail');
+    }
+    if (exchangeData.toString().includes('fe18be6b3bd88a2d2a7f928d00292e7a9963cfc6')) {
+        console.log('sBTC used in curve route, may fail');
+    }
+    if (exchangeData.toString().includes('57Ab1ec28D129707052df4dF418D58a2D46d5f51')) {
+        console.log('sUSD used in curve route, may fail');
+    }
     return [
         srcAddr,
         destAddr,

@@ -55,16 +55,16 @@ const curveUsdRepayStrategyTest = async () => {
 
             strategyExecutor = await redeployCore();
             crvusdView = await redeploy('CurveUsdView');
-            await redeploy('CurveUsdCreate');
             await redeploy('CurveUsdRepay');
             await redeploy('CurveUsdCollRatioTrigger');
             await redeploy('CurveUsdCollRatioCheck');
-            await redeploy('CurveUsdWithdraw');
-            await redeploy('CurveUsdPayback');
-            await redeploy('FLAction');
-            await redeploy('DFSSell');
-            await redeploy('GasFeeTaker');
             await redeploy('CurveUsdSwapper');
+            // await redeploy('CurveUsdCreate');
+            // await redeploy('CurveUsdWithdraw');
+            // await redeploy('CurveUsdPayback');
+            // await redeploy('FLAction');
+            // await redeploy('DFSSell');
+            // await redeploy('GasFeeTaker');
 
             await addBotCaller(botAcc.address);
 
