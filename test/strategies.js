@@ -3820,8 +3820,8 @@ const createCurveUsdAdvancedRepayStrategy = () => {
     repayStrategy.addSubSlot('&controllerAddress', 'address');
     repayStrategy.addSubSlot('&ratioState', 'uint8');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
-    repayStrategy.addSubSlot('&collToken', 'address');
-    repayStrategy.addSubSlot('&crvUsd', 'address');
+    repayStrategy.addSubSlot('&collAddr', 'address');
+    repayStrategy.addSubSlot('&crvUsdAddress', 'address');
 
     const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(nullAddress, nullAddress, '0', '0');
     repayStrategy.addTrigger(curveUsdCollRatioTrigger);
@@ -3832,12 +3832,12 @@ const createCurveUsdAdvancedRepayStrategy = () => {
         '&eoa', // most likely wont be used as this will only be partial repay
         '%minAmount', // calculated by backend
         '%additionalData', // packed data for exchange
-        '%gasUsed',
+        '%gasUsed', // sent by backend
         '%dfsFeeDivider', // 400 (25bps)
     );
 
     const curveUsdCollRatioCheckAction = new dfs.actions.checkers.CurveUsdCollRatioCheck(
-        '&ratioState', // sent from backend, but should be taken directly from trigger
+        '&ratioState', // taken from subdata
         '&targetRatio', // taken from subdata
         '&controllerAddress', // taken from subdata
     );
@@ -3852,40 +3852,42 @@ const createCurveUsdRepayStrategy = () => {
     repayStrategy.addSubSlot('&controllerAddress', 'address');
     repayStrategy.addSubSlot('&ratioState', 'uint8');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
-    repayStrategy.addSubSlot('&collToken', 'address');
-    repayStrategy.addSubSlot('&crvUsd', 'address');
+    repayStrategy.addSubSlot('&collAddr', 'address');
+    repayStrategy.addSubSlot('&crvUsdAddress', 'address');
 
     const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(nullAddress, nullAddress, '0', '0');
     repayStrategy.addTrigger(curveUsdCollRatioTrigger);
 
     const curveUsdWithdrawAction = new dfs.actions.curveusd.CurveUsdWithdrawAction(
-        '&controllerAddress',
-        '&proxy',
-        '%repayAmount',
+        '&controllerAddress', // taken from subdata
+        '&proxy', // piped
+        '%repayAmount', // calculated by backend
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '&collToken',
-            '&crvUsd',
-            '$1',
-            '%exchangeWrapper',
+            '&collAddr', // taken from subdata
+            '&crvUsdAddress', // taken from subdata
+            '$1', // output of withdraw action
+            '%exchangeWrapper', // sent by backend
         ),
-        '&proxy',
-        '&proxy',
+        '&proxy', // taken from subdata
+        '&proxy', // taken from subdata
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '&crvUsd', '$2',
+        '0', // sent by backend
+        '&crvUsdAddress', // taken from subdata
+        '$2', // output of sell action
     );
     const curveUsdPaybackAction = new dfs.actions.curveusd.CurveUsdPaybackAction(
-        '&controllerAddress',
-        '&proxy',
-        '&proxy',
-        '&eoa',
-        '$3',
+        '&controllerAddress', // taken from subdata
+        '&proxy', // piped
+        '&proxy', // piped
+        '&eoa', // piped
+        '$3', // output of gas fee taker action
         '%maxActiveBand', // sent by backend
     );
     const curveUsdCollRatioCheckAction = new dfs.actions.checkers.CurveUsdCollRatioCheck(
-        '&ratioState', // sent from backend, but should be taken directly from trigger
+        '&ratioState', // taken from subdata
         '&targetRatio', // taken from subdata
         '&controllerAddress', // taken from subdata
     );
@@ -3904,46 +3906,48 @@ const createCurveUsdFLRepayStrategy = () => {
     repayStrategy.addSubSlot('&controllerAddress', 'address');
     repayStrategy.addSubSlot('&ratioState', 'uint8');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
-    repayStrategy.addSubSlot('&collToken', 'address');
-    repayStrategy.addSubSlot('&crvUsd', 'address');
+    repayStrategy.addSubSlot('&collAddr', 'address');
+    repayStrategy.addSubSlot('&crvUsdAddress', 'address');
 
     const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(nullAddress, nullAddress, '0', '0');
     repayStrategy.addTrigger(curveUsdCollRatioTrigger);
 
     const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        ['%collToken'],
-        ['%loanAmount'],
+        ['%collAddr'], // sent by backend (no piping available in fl actions)
+        ['%loanAmount'], // sent by backend
         '%nullAddress',
         [],
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '&collToken',
-            '&crvUsd',
-            '%boostAmount',
-            '%exchangeWrapper',
+            '&collAddr', // taken from subdata
+            '&crvUsdAddress', // taken from subdata
+            '%boostAmount', // sent by backend, should be th same as amount flashloaned
+            '%exchangeWrapper', // sent by backend
         ),
-        '&proxy',
-        '&proxy',
+        '&proxy', // piped
+        '&proxy', // piped
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '&crvUsd', '$2',
+        '0', // sent by backend
+        '&crvUsdAddress', // taken from subdata
+        '$2', // output of sell action
     );
     const curveUsdPaybackAction = new dfs.actions.curveusd.CurveUsdPaybackAction(
-        '&controllerAddress',
-        '&proxy',
-        '&proxy',
-        '&eoa',
-        '$3',
+        '&controllerAddress', // taken from subdata
+        '&proxy', // piped
+        '&proxy', // piped
+        '&eoa', // piped
+        '$3', // output of gas fee taker action
         '%maxActiveBand', // sent by backend
     );
     const curveUsdWithdrawAction = new dfs.actions.curveusd.CurveUsdWithdrawAction(
-        '&controllerAddress',
-        '%flAddr',
-        '$1',
+        '&controllerAddress', // taken from subdata
+        '%flAddr', // FLAction address
+        '$1', // output of flaction address (flAmount+fee)
     );
     const curveUsdCollRatioCheckAction = new dfs.actions.checkers.CurveUsdCollRatioCheck(
-        '&ratioState', // sent from backend, but should be taken directly from trigger
+        '&ratioState', // taken from subdata
         '&targetRatio', // taken from subdata
         '&controllerAddress', // taken from subdata
     );
