@@ -4400,7 +4400,7 @@ const callCurveUsdAdvancedRepayStrategy = async (botAcc, strategyExecutor, strat
         nullAddress, repayAmount, nullAddress, 0, additionalData, repayGasCost, 400,
     );
     const curveUsdCollRatioCheck = new dfs.actions.checkers.CurveUsdCollRatioCheck(
-        nullAddress, nullAddress, nullAddress,
+        '0', '0', nullAddress,
     );
     actionsCallData.push(curveUsdRepayAction.encodeForRecipe()[0]);
     actionsCallData.push(curveUsdCollRatioCheck.encodeForRecipe()[0]);
@@ -4442,7 +4442,7 @@ const callCurveUsdRepayStrategy = async (botAcc, strategyExecutor, strategyIndex
         maxActiveBand, // sent by backend
     );
     const curveUsdCollRatioCheck = new dfs.actions.checkers.CurveUsdCollRatioCheck(
-        nullAddress, nullAddress, nullAddress,
+        '0', '0', nullAddress,
     );
     actionsCallData.push(curveUsdWithdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
@@ -4488,7 +4488,7 @@ const callCurveUsdFLRepayStrategy = async (botAcc, strategyExecutor, strategyInd
         '0',
     );
     const curveUsdCollRatioCheck = new dfs.actions.checkers.CurveUsdCollRatioCheck(
-        nullAddress, nullAddress, nullAddress,
+        '0', '0', nullAddress,
     );
     actionsCallData.push(flAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
