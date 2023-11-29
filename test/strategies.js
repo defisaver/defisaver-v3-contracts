@@ -3820,7 +3820,7 @@ const createCurveUsdAdvancedRepayStrategy = () => {
     repayStrategy.addSubSlot('&controllerAddress', 'address');
     repayStrategy.addSubSlot('&ratioState', 'uint8');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
-    repayStrategy.addSubSlot('&collAddr', 'address');
+    repayStrategy.addSubSlot('&collAddress', 'address');
     repayStrategy.addSubSlot('&crvUsdAddress', 'address');
 
     const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(nullAddress, nullAddress, '0', '0');
@@ -3852,7 +3852,7 @@ const createCurveUsdRepayStrategy = () => {
     repayStrategy.addSubSlot('&controllerAddress', 'address');
     repayStrategy.addSubSlot('&ratioState', 'uint8');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
-    repayStrategy.addSubSlot('&collAddr', 'address');
+    repayStrategy.addSubSlot('&collAddress', 'address');
     repayStrategy.addSubSlot('&crvUsdAddress', 'address');
 
     const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(nullAddress, nullAddress, '0', '0');
@@ -3865,7 +3865,7 @@ const createCurveUsdRepayStrategy = () => {
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '&collAddr', // taken from subdata
+            '&collAddress', // taken from subdata
             '&crvUsdAddress', // taken from subdata
             '$1', // output of withdraw action
             '%exchangeWrapper', // sent by backend
@@ -3906,21 +3906,21 @@ const createCurveUsdFLRepayStrategy = () => {
     repayStrategy.addSubSlot('&controllerAddress', 'address');
     repayStrategy.addSubSlot('&ratioState', 'uint8');
     repayStrategy.addSubSlot('&targetRatio', 'uint256');
-    repayStrategy.addSubSlot('&collAddr', 'address');
+    repayStrategy.addSubSlot('&collAddress', 'address');
     repayStrategy.addSubSlot('&crvUsdAddress', 'address');
 
     const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(nullAddress, nullAddress, '0', '0');
     repayStrategy.addTrigger(curveUsdCollRatioTrigger);
 
     const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        ['%collAddr'], // sent by backend (no piping available in fl actions)
+        ['%collAddress'], // sent by backend (no piping available in fl actions)
         ['%loanAmount'], // sent by backend
         '%nullAddress',
         [],
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '&collAddr', // taken from subdata
+            '&collAddress', // taken from subdata
             '&crvUsdAddress', // taken from subdata
             '%boostAmount', // sent by backend, should be th same as amount flashloaned
             '%exchangeWrapper', // sent by backend
@@ -3959,6 +3959,175 @@ const createCurveUsdFLRepayStrategy = () => {
     repayStrategy.addAction(curveUsdWithdrawAction);
     repayStrategy.addAction(curveUsdCollRatioCheckAction);
     return repayStrategy.encodeForDsProxyCall();
+};
+
+const createCurveUsdBoostStrategy = () => {
+    const boostStrategy = new dfs.Strategy('CurveUsdBoostStrategy');
+
+    boostStrategy.addSubSlot('&controllerAddress', 'address');
+    boostStrategy.addSubSlot('&ratioState', 'uint8');
+    boostStrategy.addSubSlot('&targetRatio', 'uint256');
+    boostStrategy.addSubSlot('&collAddress', 'address');
+    boostStrategy.addSubSlot('&crvUsdAddress', 'address');
+
+    const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(nullAddress, nullAddress, '0', '0');
+    boostStrategy.addTrigger(curveUsdCollRatioTrigger);
+
+    const curveUsdBorrowAction = new dfs.actions.curveusd.CurveUsdBorrowAction(
+        '&controllerAddress', // taken from subdata
+        '&proxy', // taken from subdata
+        '%boostAmount', // calculated by backend
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&crvUsdAddress', // taken from subdata
+            '&collAddress', // taken from subdata
+            '$1', // output of borrow action
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy', // piped
+        '&proxy', // piped
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // sent by backend
+        '&collAddress', // taken from subdata
+        '$2', // output of sell action
+    );
+    const supplyAction = new dfs.actions.curveusd.CurveUsdSupplyAction(
+        '&controllerAddress', // taken from subdata
+        '&proxy', // piped
+        '&proxy', // piped
+        '$3', // output of gas fee taker action
+    );
+    const curveUsdCollRatioCheckAction = new dfs.actions.checkers.CurveUsdCollRatioCheck(
+        '&ratioState', // taken from subdata
+        '&targetRatio', // taken from subdata
+        '&controllerAddress', // taken from subdata
+    );
+
+    boostStrategy.addAction(curveUsdBorrowAction);
+    boostStrategy.addAction(sellAction);
+    boostStrategy.addAction(feeTakingAction);
+    boostStrategy.addAction(supplyAction);
+    boostStrategy.addAction(curveUsdCollRatioCheckAction);
+    return boostStrategy.encodeForDsProxyCall();
+};
+
+const createCurveUsdFLCollBoostStrategy = () => {
+    const boostStrategy = new dfs.Strategy('CurveUsdFLCollBoostStrategy');
+
+    boostStrategy.addSubSlot('&controllerAddress', 'address');
+    boostStrategy.addSubSlot('&ratioState', 'uint8');
+    boostStrategy.addSubSlot('&targetRatio', 'uint256');
+    boostStrategy.addSubSlot('&collAddress', 'address');
+    boostStrategy.addSubSlot('&crvUsdAddress', 'address');
+
+    const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(nullAddress, nullAddress, '0', '0');
+    boostStrategy.addTrigger(curveUsdCollRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%collAddress'], // sent by backend (no piping available in fl actions)
+        ['%flAmount'], // sent by backend
+        '%nullAddress',
+        [],
+    );
+
+    const curveUsdAdjustAction = new dfs.actions.curveusd.CurveUsdAdjustAction(
+        '&controllerAddress', // taken from subdata
+        '&proxy', // piped
+        '&proxy', // piped
+        '%flAmount', // sent by backend, cant pipe fl output due to fee
+        '%crvusdBoostAmount', // sent by backend
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&crvUsdAddress', // taken from subdata
+            '&collAddress', // taken from subdata
+            '$2', // output of adjust action (amount of borrowed crvusd)
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy', // piped
+        '&proxy', // piped
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // sent by backend
+        '&collAddress', // taken from subdata
+        '$3', // output of sell action
+    );
+    const sendTokensAction = new dfs.actions.basic.SendTokensAction(
+        ['&collAddress', '&collAddress'], // taken from subdata
+        ['%flAddress', '&eoa'], // first one sent by backend, second piped
+        ['$1', '%maxUint'], // first one piped to return fl, second one sent by backend
+    );
+    const curveUsdCollRatioCheckAction = new dfs.actions.checkers.CurveUsdCollRatioCheck(
+        '&ratioState', // taken from subdata
+        '&targetRatio', // taken from subdata
+        '&controllerAddress', // taken from subdata
+    );
+    boostStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+    boostStrategy.addAction(curveUsdAdjustAction);
+    boostStrategy.addAction(sellAction);
+    boostStrategy.addAction(feeTakingAction);
+    boostStrategy.addAction(sendTokensAction);
+    boostStrategy.addAction(curveUsdCollRatioCheckAction);
+    return boostStrategy.encodeForDsProxyCall();
+};
+
+const createCurveUsdFLCrvUsdBoostStrategy = () => {
+    const boostStrategy = new dfs.Strategy('CurveUsdFLCrvUsdBoostStrategy');
+
+    boostStrategy.addSubSlot('&controllerAddress', 'address');
+    boostStrategy.addSubSlot('&ratioState', 'uint8');
+    boostStrategy.addSubSlot('&targetRatio', 'uint256');
+    boostStrategy.addSubSlot('&collAddress', 'address');
+    boostStrategy.addSubSlot('&crvUsdAddress', 'address');
+
+    const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(nullAddress, nullAddress, '0', '0');
+    boostStrategy.addTrigger(curveUsdCollRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%crvUsdAddress'], // sent by backend (no piping available in fl actions)
+        ['%flAmount'], // sent by backend
+        '%nullAddress',
+        [],
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&crvUsdAddress', // taken from subdata
+            '&collAddress', // taken from subdata
+            '%flAmount', // same number as fl amount, cant pipe fl output due to fee
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy', // piped
+        '&proxy', // piped
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // sent by backend
+        '&collAddress', // taken from subdata
+        '$2', // output of sell action
+    );
+
+    const curveUsdAdjustAction = new dfs.actions.curveusd.CurveUsdAdjustAction(
+        '&controllerAddress', // taken from subdata
+        '&proxy', // piped
+        '%flAddress', // sent by backend
+        '$3', // we supply whatever left after gas fee taker
+        '$1', // we borrow enough to payback flashloan
+    );
+    const curveUsdCollRatioCheckAction = new dfs.actions.checkers.CurveUsdCollRatioCheck(
+        '&ratioState', // taken from subdata
+        '&targetRatio', // taken from subdata
+        '&controllerAddress', // taken from subdata
+    );
+    boostStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+    boostStrategy.addAction(sellAction);
+    boostStrategy.addAction(feeTakingAction);
+    boostStrategy.addAction(curveUsdAdjustAction);
+    boostStrategy.addAction(curveUsdCollRatioCheckAction);
+    return boostStrategy.encodeForDsProxyCall();
 };
 
 module.exports = {
@@ -4041,4 +4210,7 @@ module.exports = {
     createCurveUsdAdvancedRepayStrategy,
     createCurveUsdRepayStrategy,
     createCurveUsdFLRepayStrategy,
+    createCurveUsdBoostStrategy,
+    createCurveUsdFLCollBoostStrategy,
+    createCurveUsdFLCrvUsdBoostStrategy,
 };

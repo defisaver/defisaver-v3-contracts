@@ -26,7 +26,7 @@ contract CurveUsdCollRatioTrigger is ITrigger, AdminAuth, CurveUsdHelper, Trigge
         uint8 state;
     }
     
-    /// @dev checks current safety ratio of a CompoundV3 position and triggers if it's in a correct state
+    /// @dev checks current safety ratio of a CurveUsd position and triggers if it's in a correct state
     function isTriggered(bytes memory, bytes memory _subData)
         public
         override

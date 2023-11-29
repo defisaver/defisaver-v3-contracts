@@ -31,6 +31,7 @@ const {
     RATIO_STATE_OVER,
     IN_REPAY,
     createCurveUsdCollRatioTrigger,
+    IN_BOOST,
 } = require('./triggers');
 
 const {
@@ -744,6 +745,22 @@ const subCurveUsdRepayBundle = async (
 
     return { subId, strategySub };
 };
+const subCurveUsdBoostBundle = async (
+    proxy, bundleId, controllerAddr, maxRatio, targetRatio, collTokenAddress, crvusdAddress,
+) => {
+    const triggerData = await createCurveUsdCollRatioTrigger(proxy.address, controllerAddr, maxRatio, RATIO_STATE_OVER);
+    const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_BOOST]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const controllerAddressEncoded = abiCoder.encode(['address'], [controllerAddr]);
+    const collTokenAddressEncoded = abiCoder.encode(['address'], [collTokenAddress]);
+    const crvUsdAddressEncoded = abiCoder.encode(['address'], [crvusdAddress]);
+    const strategySub = [bundleId, true, [triggerData],
+        [controllerAddressEncoded, ratioStateEncoded, targetRatioEncoded, collTokenAddressEncoded, crvUsdAddressEncoded],
+    ];
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
 
 module.exports = {
     subDcaStrategy,
@@ -778,4 +795,5 @@ module.exports = {
     subLiquityDebtInFrontRepayStrategy,
     subAaveV3CloseWithMaximumGasPriceBundle,
     subCurveUsdRepayBundle,
+    subCurveUsdBoostBundle,
 };

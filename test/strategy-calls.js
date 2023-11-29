@@ -4508,6 +4508,152 @@ const callCurveUsdFLRepayStrategy = async (botAcc, strategyExecutor, strategyInd
     console.log(`GasUsed callCurveUsdFLRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
+const callCurveUsdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, boostAmount, exchangeObject) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const boostGasCost = 1000000; // .8 mil gas
+
+    const curveUsdBorrowAction = new dfs.actions.curveusd.CurveUsdBorrowAction(
+        nullAddress,
+        nullAddress,
+        boostAmount,
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        nullAddress, // piped
+        '0x000000000000000000000000000000000000dead', // piped
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        boostGasCost, // sent by backend
+        nullAddress, // taken from subdata
+        '0', // output of sell action
+    );
+    const supplyAction = new dfs.actions.curveusd.CurveUsdSupplyAction(
+        nullAddress,
+        nullAddress,
+        nullAddress,
+        '0',
+    );
+    const curveUsdCollRatioCheckAction = new dfs.actions.checkers.CurveUsdCollRatioCheck(
+        '0', // taken from subdata
+        '0', // taken from subdata
+        nullAddress, // taken from subdata
+    );
+    actionsCallData.push(curveUsdBorrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(supplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(curveUsdCollRatioCheckAction.encodeForRecipe()[0]);
+    triggerCallData.push(abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [nullAddress, nullAddress, '0', '0']));
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
+        gasLimit: 8000000,
+    });
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callCurveUsdBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+const callCurveUsdFLCrvUsdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, boostAmount, exchangeObject, crvusdAddress, flActionAddr) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const boostGasCost = 1000000; // .8 mil gas
+
+    const flAction = new dfs.actions.flashloan.FLAction(new dfs.actions.flashloan.BalancerFlashLoanAction([crvusdAddress], [boostAmount]));
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        nullAddress, // piped
+        '0x000000000000000000000000000000000000dead', // piped
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        boostGasCost, // sent by backend
+        nullAddress, // taken from subdata
+        '0', // output of sell action
+    );
+    const curveUsdAdjustAction = new dfs.actions.curveusd.CurveUsdAdjustAction(
+        nullAddress,
+        nullAddress,
+        flActionAddr,
+        '0',
+        '0',
+    );
+    const curveUsdCollRatioCheckAction = new dfs.actions.checkers.CurveUsdCollRatioCheck(
+        '0', // taken from subdata
+        '0', // taken from subdata
+        nullAddress, // taken from subdata
+    );
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(curveUsdAdjustAction.encodeForRecipe()[0]);
+    actionsCallData.push(curveUsdCollRatioCheckAction.encodeForRecipe()[0]);
+    triggerCallData.push(abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [nullAddress, nullAddress, '0', '0']));
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
+        gasLimit: 8000000,
+    });
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callCurveUsdFLCrvUsdBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+const callCurveUsdFLCollBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, boostAmount, exchangeObject, collAddress, flActionAddr, flAmount) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const boostGasCost = 1000000; // .8 mil gas
+
+    const flAction = new dfs.actions.flashloan.FLAction(new dfs.actions.flashloan.BalancerFlashLoanAction([collAddress], [flAmount]));
+    const curveUsdAdjustAction = new dfs.actions.curveusd.CurveUsdAdjustAction(
+        nullAddress,
+        nullAddress,
+        nullAddress,
+        flAmount,
+        boostAmount,
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        nullAddress, // piped
+        '0x000000000000000000000000000000000000dead', // piped
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        boostGasCost, // sent by backend
+        nullAddress, // taken from subdata
+        '0', // output of sell action
+    );
+    const sendTokensAction = new dfs.actions.basic.SendTokensAction(
+        [nullAddress, nullAddress],
+        [flActionAddr, nullAddress],
+        ['0', hre.ethers.constants.MaxUint256],
+    );
+    const curveUsdCollRatioCheckAction = new dfs.actions.checkers.CurveUsdCollRatioCheck(
+        '0', // taken from subdata
+        '0', // taken from subdata
+        nullAddress, // taken from subdata
+    );
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(curveUsdAdjustAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(sendTokensAction.encodeForRecipe()[0]);
+    actionsCallData.push(curveUsdCollRatioCheckAction.encodeForRecipe()[0]);
+    triggerCallData.push(abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [nullAddress, nullAddress, '0', '0']));
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
+        gasLimit: 8000000,
+    });
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callCurveUsdFLCrvUsdBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
 module.exports = {
     callDcaStrategy,
     callMcdRepayStrategy,
@@ -4575,4 +4721,7 @@ module.exports = {
     callCurveUsdAdvancedRepayStrategy,
     callCurveUsdRepayStrategy,
     callCurveUsdFLRepayStrategy,
+    callCurveUsdBoostStrategy,
+    callCurveUsdFLCrvUsdBoostStrategy,
+    callCurveUsdFLCollBoostStrategy,
 };
