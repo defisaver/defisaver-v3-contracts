@@ -9,7 +9,9 @@ const {
 } = require('../test/utils');
 
 const { topUp } = require('./utils/fork');
-const { createCurveUsdAdvancedRepayStrategy, createCurveUsdRepayStrategy, createCurveUsdFLRepayStrategy } = require('../test/strategies');
+const {
+    createCurveUsdAdvancedRepayStrategy, createCurveUsdRepayStrategy, createCurveUsdFLRepayStrategy, createCurveUsdBoostStrategy, createCurveUsdFLCollBoostStrategy, createCurveUsdFLCrvUsdBoostStrategy,
+} = require('../test/strategies');
 const { createStrategy, createBundle } = require('../test/utils-strategies');
 
 async function main() {
@@ -20,14 +22,28 @@ async function main() {
     const curvetrigger = await redeploy('CurveUsdCollRatioTrigger', addrs[network].REGISTRY_ADDR, true, true);
     const curvechecker = await redeploy('CurveUsdCollRatioCheck', addrs[network].REGISTRY_ADDR, true, true);
     const curveswapper = await redeploy('CurveUsdSwapper', addrs[network].REGISTRY_ADDR, true, true);
+
+    await openStrategyAndBundleStorage(true);
+
     const curveUsdAdvancedRepayStrategy = createCurveUsdAdvancedRepayStrategy();
     const curveUsdRepayStrategy = createCurveUsdRepayStrategy();
     const curveUsdFLRepayStrategy = createCurveUsdFLRepayStrategy();
-    await openStrategyAndBundleStorage(true);
-    const strategyIdFirst = await createStrategy(undefined, ...curveUsdAdvancedRepayStrategy, true);
-    const strategyIdSecond = await createStrategy(undefined, ...curveUsdRepayStrategy, true);
-    const strategyIdThird = await createStrategy(undefined, ...curveUsdFLRepayStrategy, true);
-    const bundleId = await createBundle(
+    const strategyRepayIdFirst = await createStrategy(undefined, ...curveUsdAdvancedRepayStrategy, true);
+    const strategyRepayIdSecond = await createStrategy(undefined, ...curveUsdRepayStrategy, true);
+    const strategyRepayIdThird = await createStrategy(undefined, ...curveUsdFLRepayStrategy, true);
+
+    const repayBundleId = await createBundle(
+        undefined,
+        [strategyRepayIdFirst, strategyRepayIdSecond, strategyRepayIdThird],
+    );
+
+    const curveUsdBoostStrategy = createCurveUsdBoostStrategy();
+    const curveUsdFLCollBoostStrategy = createCurveUsdFLCollBoostStrategy();
+    const curveUsdFLCrvUSDBoostStrategy = createCurveUsdFLCrvUsdBoostStrategy();
+    const strategyIdFirst = await createStrategy(undefined, ...curveUsdBoostStrategy, true);
+    const strategyIdSecond = await createStrategy(undefined, ...curveUsdFLCollBoostStrategy, true);
+    const strategyIdThird = await createStrategy(undefined, ...curveUsdFLCrvUSDBoostStrategy, true);
+    const boostBundleId = await createBundle(
         undefined,
         [strategyIdFirst, strategyIdSecond, strategyIdThird],
     );
@@ -37,7 +53,8 @@ async function main() {
     console.log('CurveUsdCollRatioCheck deployed to:', curvechecker.address);
     console.log('CurveUsdSwapper deployed to:', curveswapper.address);
 
-    console.log(bundleId);
+    console.log(`Repay bundle id: ${repayBundleId}`);
+    console.log(`Boost bundle id: ${boostBundleId}`);
 
     process.exit(0);
 }
