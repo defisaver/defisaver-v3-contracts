@@ -13,6 +13,17 @@ import "../../contracts/actions/checkers/CompV3RatioCheck.sol";
 
 contract ActionsUtils {
 
+    enum FLSource {
+        EMPTY,
+        AAVEV2,
+        BALANCER,
+        GHO,
+        MAKER,
+        AAVEV3,
+        UNIV3,
+        SPARK
+    }
+
     function compV3SupplyEncode(
         address _market,
         address _tokenAddr,
@@ -157,6 +168,33 @@ contract ActionsUtils {
             targetRatio: _targetRatio,
             market: _market,
             user: address(0)
+        });
+
+        return abi.encode(params);
+    }
+
+    function flActionEncode(
+        address _tokenAddr,
+        uint256 _amount,
+        FLSource _flSource
+    ) public pure returns (bytes memory) {
+        address[] memory tokens = new address[](1);
+        tokens[0] = _tokenAddr;
+
+        uint[] memory amounts = new uint[](1);
+        amounts[0] = _amount;
+
+        uint[] memory modes = new uint[](1);
+        modes[0] = 0;
+
+        IFlashLoanBase.FlashLoanParams memory params = IFlashLoanBase.FlashLoanParams({
+            tokens: tokens,
+            amounts: amounts,
+            modes: modes,
+            onBehalfOf: address(0),
+            flParamGetterAddr: address(0),
+            flParamGetterData: abi.encodePacked(uint8(_flSource)),
+            recipeData: ""
         });
 
         return abi.encode(params);

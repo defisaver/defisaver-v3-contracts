@@ -101,7 +101,7 @@ contract Strategies {
         repayStrategy.addTrigger("CompV3RatioTrigger");
 
         string[] memory flParams = new string[](1);
-        repayStrategy.addAction("FLBalancer", flParams);
+        repayStrategy.addAction("FLAction", flParams);
 
         string[] memory sellParams = new string[](5);
         sellParams[1] = "&baseToken";
@@ -147,7 +147,7 @@ contract Strategies {
         repayStrategy.addTrigger("CompV3RatioTrigger");
 
         string[] memory flParams = new string[](1);
-        repayStrategy.addAction("FLBalancer", flParams);
+        repayStrategy.addAction("FLAction", flParams);
 
         string[] memory sellParams = new string[](5);
         sellParams[1] = "&baseToken";
@@ -273,7 +273,7 @@ contract Strategies {
         boostStrategy.addTrigger("CompV3RatioTrigger");
 
         string[] memory flParams = new string[](1);
-        boostStrategy.addAction("FLBalancer", flParams);
+        boostStrategy.addAction("FLAction", flParams);
 
         string[] memory sellParams = new string[](5);
         sellParams[0] = "&baseToken";
@@ -315,7 +315,7 @@ contract Strategies {
         boostStrategy.addTrigger("CompV3RatioTrigger");
 
         string[] memory flParams = new string[](1);
-        boostStrategy.addAction("FLBalancer", flParams);
+        boostStrategy.addAction("FLAction", flParams);
 
         string[] memory sellParams = new string[](5);
         sellParams[0] = "&baseToken";

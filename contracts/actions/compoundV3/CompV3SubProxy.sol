@@ -7,11 +7,17 @@ import "../../auth/ProxyPermission.sol";
 import "../../core/strategy/SubStorage.sol";
 
 contract CompV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
-    uint64 public constant REPAY_BUNDLE_ID = 3; 
-    uint64 public constant BOOST_BUNDLE_ID = 4;
+    // uint64 public constant REPAY_BUNDLE_ID = 3; 
+    // uint64 public constant BOOST_BUNDLE_ID = 4;
 
-    uint64 public constant REPAY_BUNDLE_EOA_ID = 5; 
-    uint64 public constant BOOST_BUNDLE_EOA_ID = 6;
+    // uint64 public constant REPAY_BUNDLE_EOA_ID = 5; 
+    // uint64 public constant BOOST_BUNDLE_EOA_ID = 6;
+ 
+    uint64 public immutable REPAY_BUNDLE_ID; 
+    uint64 public immutable BOOST_BUNDLE_ID;
+
+    uint64 public immutable REPAY_BUNDLE_EOA_ID; 
+    uint64 public immutable BOOST_BUNDLE_EOA_ID;
 
     enum RatioState { OVER, UNDER }
 
@@ -30,6 +36,18 @@ contract CompV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
         uint128 targetRatioRepay;
         bool boostEnabled;
         bool isEOA;
+    }
+
+    constructor(
+        uint64 _repayBundleId,
+        uint64 _boostBundleId,
+        uint64 _repayBundleEoaId,
+        uint64 _boostBundleEoaId
+    ) {
+        REPAY_BUNDLE_ID = _repayBundleId;
+        BOOST_BUNDLE_ID = _boostBundleId;
+        REPAY_BUNDLE_EOA_ID = _repayBundleEoaId;
+        BOOST_BUNDLE_EOA_ID = _boostBundleEoaId;
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
@@ -126,7 +144,7 @@ contract CompV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
     }
 
     /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized compV3 sub
-    function formatRepaySub(CompV3SubData memory _subData, address _proxy, address _eoa) public pure returns (StrategySub memory repaySub) {
+    function formatRepaySub(CompV3SubData memory _subData, address _proxy, address _eoa) public view returns (StrategySub memory repaySub) {
         repaySub.strategyOrBundleId = _subData.isEOA ? REPAY_BUNDLE_EOA_ID : REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
@@ -145,7 +163,7 @@ contract CompV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized compV3 sub
-    function formatBoostSub(CompV3SubData memory _subData, address _proxy, address _eoa) public pure returns (StrategySub memory boostSub) {
+    function formatBoostSub(CompV3SubData memory _subData, address _proxy, address _eoa) public view returns (StrategySub memory boostSub) {
         boostSub.strategyOrBundleId = _subData.isEOA ? BOOST_BUNDLE_EOA_ID : BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
