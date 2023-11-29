@@ -34,9 +34,11 @@ contract CurveUsdCollRatioTrigger is ITrigger, AdminAuth, CurveUsdHelper, Trigge
     {   
         SubParams memory triggerSubData = parseInputs(_subData);
 
-        uint256 currRatio = getCollateralRatio(triggerSubData.user, triggerSubData.market);
+        (uint256 currRatio, bool isInSoftLiquidation) = getCollateralRatio(triggerSubData.user, triggerSubData.market);
 
         if (currRatio == 0) return false;
+        /// @dev this trigger will be used for leverage management strategies which can't be managed while underwater
+        if (isInSoftLiquidation) return false;
 
         tempStorage.setBytes32("CURVEUSD_RATIO", bytes32(currRatio));
 

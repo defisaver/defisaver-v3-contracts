@@ -41,7 +41,7 @@ contract CurveUsdCollRatioCheck is ActionBase, CurveUsdHelper {
 
         address positionOwner = address(this);
 
-        (uint256 currRatio) = getCollateralRatio(positionOwner, controllerAddress);
+        (uint256 currRatio,) = getCollateralRatio(positionOwner, controllerAddress);
 
         uint256 startRatio = uint256(tempStorage.getBytes32("CURVEUSD_RATIO"));
         

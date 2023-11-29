@@ -56,6 +56,7 @@ contract CurveUsdView is CurveUsdHelper {
     int256[2] bandRange;
     uint256[][2] usersBands;
     uint256 collRatio;
+    bool isInSoftLiquidation;
   }
 
   address public constant WBTC_MARKET = 0x4e59541306910aD6dC1daC0AC9dFB29bD9F15c67;
@@ -82,12 +83,14 @@ contract CurveUsdView is CurveUsdHelper {
           health: 0,
           bandRange: bandRange,
           usersBands: usersBands,
-          collRatio: 0
+          collRatio: 0,
+          isInSoftLiquidation: false
         });
       }
 
       uint256[4] memory amounts = ctrl.user_state(user);
       uint256[2] memory prices = ctrl.user_prices(user);
+      (uint256 collRatio, bool isInSoftLiquidation) = getCollateralRatio(user, market);
 
       return UserData({
         loanExists: ctrl.loan_exists(user),
@@ -102,7 +105,8 @@ contract CurveUsdView is CurveUsdHelper {
         health: ctrl.health(user, true),
         bandRange: amm.read_user_tick_numbers(user),
         usersBands: amm.get_xy(user),
-        collRatio: getCollateralRatio(user, market)
+        collRatio: collRatio,
+        isInSoftLiquidation: isInSoftLiquidation
       });
   }
 
