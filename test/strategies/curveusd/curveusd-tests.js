@@ -84,6 +84,8 @@ const curveUsdBoostStrategyTest = async () => {
             await redeploy('CurveUsdCollRatioTrigger');
             await redeploy('CurveUsdCollRatioCheck');
 
+            await addBotCaller(botAcc.address);
+
             proxy = await getProxy(senderAcc.address);
         });
 
