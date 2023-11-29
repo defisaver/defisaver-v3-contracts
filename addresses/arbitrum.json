@@ -681,9 +681,7 @@
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": [
-        "0xBF1CaC12DB60819Bfa71A328282ecbc1D40443aA"
-      ]
+      "history": []
     },
     {
       "name": "TimestampTrigger",
