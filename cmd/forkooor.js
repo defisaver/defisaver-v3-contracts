@@ -2187,58 +2187,54 @@ const subCompV3Automation = async (
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    await redeploy('CompV3SubProxy', addrs[network].REGISTRY_ADDR, false, true);
-
     const bundleId = await getLatestBundleId();
 
-    console.log(parseInt(bundleId, 10));
+    console.log(`Latest bundle id: ${parseInt(bundleId, 10)}`);
 
     let repayBundleId;
     let boostBundleId;
+    let repayBundleEOAId;
+    let boostBundleEOAId;
 
-    if (parseInt(bundleId, 10) < 4) {
+    // at the time of writing this script, latestBundleId is 25
+    const newBundlesAlreadyDeployed = parseInt(bundleId, 10) > 25;
+
+    if (!newBundlesAlreadyDeployed) {
         await openStrategyAndBundleStorage(true);
-        const compV3RepayStrategyEncoded = createCompV3RepayStrategy();
+
+        // existing strategies
+        const existingCompV3RepayStrategyId = 15;
+        const existingCompV3BoostStrategyId = 19;
+        const existingCompV3EOARepayStrategyId = 23;
+        const existingCompV3EOABoostStrategyId = 27;
+
+        // encode new strategies with FLBalancer replaced with FLAction
         const compV3RepayFLStrategyEncoded = createFlCompV3RepayStrategy();
-
-        const strategyId1 = await createStrategy(proxy, ...compV3RepayStrategyEncoded, true);
-        const strategyId2 = await createStrategy(proxy, ...compV3RepayFLStrategyEncoded, true);
-
-        repayBundleId = await createBundle(proxy, [strategyId1, strategyId2]);
-
-        const compV3BoostStrategyEncoded = createCompV3BoostStrategy();
         const compV3BoostFLStrategyEncoded = createCompV3FlBoostStrategy();
+        const compV3EOARepayFLStrategyEncoded = createFlCompV3EOARepayStrategy();
+        const compV3EOABoostFLStrategyEncoded = createCompV3EOAFlBoostStrategy();
 
-        const strategyId11 = await createStrategy(proxy, ...compV3BoostStrategyEncoded, true);
-        const strategyId22 = await createStrategy(proxy, ...compV3BoostFLStrategyEncoded, true);
+        // create new strategies
+        const newRepayFLStrategyId = await createStrategy(proxy, ...compV3RepayFLStrategyEncoded, true);
+        const newBoostFLStrategyId = await createStrategy(proxy, ...compV3BoostFLStrategyEncoded, true);
+        const newRepayEOAFLStrategyId = await createStrategy(proxy, ...compV3EOARepayFLStrategyEncoded, true);
+        const newBoostEOAFLStrategyId = await createStrategy(proxy, ...compV3EOABoostFLStrategyEncoded, true);
 
-        boostBundleId = await createBundle(proxy, [strategyId11, strategyId22]);
+        // create new bundles
+        repayBundleId = await createBundle(proxy, [existingCompV3RepayStrategyId, newRepayFLStrategyId]);
+        boostBundleId = await createBundle(proxy, [existingCompV3BoostStrategyId, newBoostFLStrategyId]);
+        repayBundleEOAId = await createBundle(proxy, [existingCompV3EOARepayStrategyId, newRepayEOAFLStrategyId]);
+        boostBundleEOAId = await createBundle(proxy, [existingCompV3EOABoostStrategyId, newBoostEOAFLStrategyId]);
 
-        console.log(repayBundleId, boostBundleId);
-    }
+        console.log(`Repay bundle id: ${repayBundleId}`);
+        console.log(`Boost bundle id: ${boostBundleId}`);
+        console.log(`Repay EOA bundle id: ${repayBundleEOAId}`);
+        console.log(`Boost EOA bundle id: ${boostBundleEOAId}`);
 
-    if (isEOA === 'true') {
-        if (parseInt(bundleId, 10) < 6) {
-            await openStrategyAndBundleStorage(true);
-            const compV3RepayStrategyEncoded = createCompV3EOARepayStrategy();
-            const compV3RepayFLStrategyEncoded = createFlCompV3EOARepayStrategy();
-
-            const strategyId1 = await createStrategy(proxy, ...compV3RepayStrategyEncoded, true);
-            const strategyId2 = await createStrategy(proxy, ...compV3RepayFLStrategyEncoded, true);
-
-            repayBundleId = await createBundle(proxy, [strategyId1, strategyId2]);
-
-            const compV3BoostStrategyEncoded = createCompV3EOABoostStrategy();
-            const compV3BoostFLStrategyEncoded = createCompV3EOAFlBoostStrategy();
-
-            const strategyId11 = await createStrategy(proxy, ...compV3BoostStrategyEncoded, true);
-            const strategyId22 = await createStrategy(proxy, ...compV3BoostFLStrategyEncoded, true);
-
-            boostBundleId = await createBundle(proxy, [strategyId11, strategyId22]);
-
-            console.log(repayBundleId, boostBundleId);
-        }
-        // create strategies
+        // redeploy CompV3SubProxy with new bundles
+        await redeploy(
+            'CompV3SubProxy', addrs[network].REGISTRY_ADDR, false, true, repayBundleId, boostBundleId, repayBundleEOAId, boostBundleEOAId,
+        );
     }
 
     const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
