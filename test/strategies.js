@@ -1654,7 +1654,8 @@ const createFlCompV3RepayStrategy = () => {
     const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
     compV3RepayStrategy.addTrigger(compV3Trigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%collAddr'], ['%repayAmount']);
+    const flBalancer = new dfs.actions.flashloan.BalancerFlashLoanAction(['%collAddr'], ['%repayAmount']);
+    const flAction = new dfs.actions.flashloan.FLAction(flBalancer);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -1711,7 +1712,8 @@ const createFlCompV3EOARepayStrategy = () => {
     const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
     compV3RepayStrategy.addTrigger(compV3Trigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%collAddr'], ['%repayAmount']);
+    const flBalancer = new dfs.actions.flashloan.BalancerFlashLoanAction(['%collAddr'], ['%repayAmount']);
+    const flAction = new dfs.actions.flashloan.FLAction(flBalancer);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -1875,7 +1877,8 @@ const createCompV3FlBoostStrategy = () => {
     const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
     compV3BoostStrategy.addTrigger(compV3Trigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%baseToken'], ['%boostAmount']);
+    const flBalancer = new dfs.actions.flashloan.BalancerFlashLoanAction(['%baseToken'], ['%boostAmount']);
+    const flAction = new dfs.actions.flashloan.FLAction(flBalancer);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -1979,7 +1982,8 @@ const createCompV3EOAFlBoostStrategy = () => {
     const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
     compV3BoostStrategy.addTrigger(compV3Trigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%baseToken'], ['%boostAmount']);
+    const flBalancer = new dfs.actions.flashloan.BalancerFlashLoanAction(['%baseToken'], ['%boostAmount']);
+    const flAction = new dfs.actions.flashloan.FLAction(flBalancer);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
