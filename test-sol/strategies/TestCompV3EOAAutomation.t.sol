@@ -83,32 +83,24 @@ contract TestCompV3EOAAutomation is
     function _initRepayBundle() internal {
         uint256 repayId = createCompV3EOARepay();
         uint256 repayFLId = createCompV3FLEOARepay();
-        uint256 repayCompositeId = createCompV3CompositeRepay();
-        uint256 repayFLCompositeId = createCompV3FLCompositeRepay();
 
         BundleBuilder bundleBuilder = new BundleBuilder();
 
-        uint64[] memory repayIds = new uint64[](4);
+        uint64[] memory repayIds = new uint64[](2);
         repayIds[0] = uint64(repayId);
         repayIds[1] = uint64(repayFLId);
-        repayIds[2] = uint64(repayCompositeId);
-        repayIds[3] = uint64(repayFLCompositeId);
         repayBundleEoaId = uint64(bundleBuilder.init(repayIds));
     }
 
     function _initBoostBundle() internal {
         uint256 boostId = createCompV3EOABoost();
         uint256 boostFLId = createCompV3FLEOABoost();
-        uint256 boostCompositeId = createCompV3CompositeBoost();
-        uint256 boostFLCompositeId = createCompV3FLCompositeBoost();
 
         BundleBuilder bundleBuilder = new BundleBuilder();
 
-        uint64[] memory boostIds = new uint64[](4);
+        uint64[] memory boostIds = new uint64[](2);
         boostIds[0] = uint64(boostId);
         boostIds[1] = uint64(boostFLId);
-        boostIds[2] = uint64(boostCompositeId);
-        boostIds[3] = uint64(boostFLCompositeId);
         boostBundleEoaId = uint64(bundleBuilder.init(boostIds));
     }
 
