@@ -113,14 +113,6 @@ const {
 
 const {
     createLiquityCloseToCollStrategy,
-    createCompV3FlBoostStrategy,
-    createCompV3RepayStrategy,
-    createCompV3BoostStrategy,
-    createFlCompV3RepayStrategy,
-    createCompV3EOABoostStrategy,
-    createCompV3EOAFlBoostStrategy,
-    createCompV3EOARepayStrategy,
-    createFlCompV3EOARepayStrategy,
     createLiquityPaybackChickenInStrategy,
     createLiquityPaybackChickenOutStrategy,
     createMorphoAaveV2BoostStrategy,
@@ -169,6 +161,8 @@ const {
 } = require('../test/strategy-subs');
 
 const { getTroveInfo, getDebtInFront } = require('../test/utils-liquity');
+
+const { createNewCompV3AutomationBundles } = require('../test/utils-compV3');
 
 const {
     createMcdTrigger,
@@ -2191,45 +2185,18 @@ const subCompV3Automation = async (
 
     console.log(`Latest bundle id: ${parseInt(bundleId, 10)}`);
 
-    let repayBundleId;
-    let boostBundleId;
-    let repayBundleEOAId;
-    let boostBundleEOAId;
-
     // at the time of writing this script, latestBundleId is 25
     const newBundlesAlreadyDeployed = parseInt(bundleId, 10) > 25;
 
     if (!newBundlesAlreadyDeployed) {
         await openStrategyAndBundleStorage(true);
 
-        // existing strategies
-        const existingCompV3RepayStrategyId = 15;
-        const existingCompV3BoostStrategyId = 19;
-        const existingCompV3EOARepayStrategyId = 23;
-        const existingCompV3EOABoostStrategyId = 27;
-
-        // encode new strategies with FLBalancer replaced with FLAction
-        const compV3RepayFLStrategyEncoded = createFlCompV3RepayStrategy();
-        const compV3BoostFLStrategyEncoded = createCompV3FlBoostStrategy();
-        const compV3EOARepayFLStrategyEncoded = createFlCompV3EOARepayStrategy();
-        const compV3EOABoostFLStrategyEncoded = createCompV3EOAFlBoostStrategy();
-
-        // create new strategies
-        const newRepayFLStrategyId = await createStrategy(proxy, ...compV3RepayFLStrategyEncoded, true);
-        const newBoostFLStrategyId = await createStrategy(proxy, ...compV3BoostFLStrategyEncoded, true);
-        const newRepayEOAFLStrategyId = await createStrategy(proxy, ...compV3EOARepayFLStrategyEncoded, true);
-        const newBoostEOAFLStrategyId = await createStrategy(proxy, ...compV3EOABoostFLStrategyEncoded, true);
-
-        // create new bundles
-        repayBundleId = await createBundle(proxy, [existingCompV3RepayStrategyId, newRepayFLStrategyId]);
-        boostBundleId = await createBundle(proxy, [existingCompV3BoostStrategyId, newBoostFLStrategyId]);
-        repayBundleEOAId = await createBundle(proxy, [existingCompV3EOARepayStrategyId, newRepayEOAFLStrategyId]);
-        boostBundleEOAId = await createBundle(proxy, [existingCompV3EOABoostStrategyId, newBoostEOAFLStrategyId]);
-
-        console.log(`Repay bundle id: ${repayBundleId}`);
-        console.log(`Boost bundle id: ${boostBundleId}`);
-        console.log(`Repay EOA bundle id: ${repayBundleEOAId}`);
-        console.log(`Boost EOA bundle id: ${boostBundleEOAId}`);
+        const {
+            repayBundleId,
+            boostBundleId,
+            repayBundleEOAId,
+            boostBundleEOAId,
+        } = await createNewCompV3AutomationBundles();
 
         // redeploy CompV3SubProxy with new bundles
         await redeploy(
