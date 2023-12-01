@@ -4212,5 +4212,5 @@ module.exports = {
     createCurveUsdFLRepayStrategy,
     createCurveUsdBoostStrategy,
     createCurveUsdFLCollBoostStrategy,
-    createCurveUsdFLCrvUsdBoostStrategy,
+    createCurveUsdFLDebtBoostStrategy,
 };
