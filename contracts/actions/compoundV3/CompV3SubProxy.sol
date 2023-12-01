@@ -7,12 +7,6 @@ import "../../auth/ProxyPermission.sol";
 import "../../core/strategy/SubStorage.sol";
 
 contract CompV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
-    // uint64 public constant REPAY_BUNDLE_ID = 3; 
-    // uint64 public constant BOOST_BUNDLE_ID = 4;
-
-    // uint64 public constant REPAY_BUNDLE_EOA_ID = 5; 
-    // uint64 public constant BOOST_BUNDLE_EOA_ID = 6;
- 
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID;
 
