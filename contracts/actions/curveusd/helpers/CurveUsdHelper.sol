@@ -17,15 +17,22 @@ contract CurveUsdHelper is MainnetCurveUsdAddresses, DSMath {
     bytes4 constant CURVE_SWAPPER_ID = bytes4(keccak256("CurveUsdSwapper"));
 
     function getCollateralRatio(address _user, address _controllerAddr) public view returns (uint256 collRatio, bool isInSoftLiquidation) {
+        // fetch users debt
         uint256 debt = ICrvUsdController(_controllerAddr).debt(_user);
+        // no position can exist without debt
         if (debt == 0) return (0, false);
         (uint256 crvUsdCollAmount, uint256 collAmount) = getCollAmountsFromAMM(_controllerAddr, _user);
+        // if user has crvusd as coll he is currently underwater
         if (crvUsdCollAmount > 0) isInSoftLiquidation = true;
+
+        // fetch collToken oracle price
         address amm = ICrvUsdController(_controllerAddr).amm();
-        address collToken = ICrvUsdController(_controllerAddr).collateral_token();
         uint256 oraclePrice = ILLAMMA(amm).price_oracle();
+        // calculate collAmount as WAD (18 decimals)
+        address collToken = ICrvUsdController(_controllerAddr).collateral_token();
         uint256 assetDec = IERC20(collToken).decimals();
         uint256 collAmountWAD = assetDec > 18 ? (collAmount / 10 ** (assetDec - 18)) : (collAmount * 10 ** (18 - assetDec));
+        
         collRatio = wdiv(wmul(collAmountWAD, oraclePrice) + crvUsdCollAmount, debt);
     }
 
