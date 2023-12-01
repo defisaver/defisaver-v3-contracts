@@ -9,7 +9,7 @@ const {
     createCurveUsdFLRepayStrategy,
     createCurveUsdBoostStrategy,
     createCurveUsdFLCollBoostStrategy,
-    createCurveUsdFLCrvUsdBoostStrategy,
+    createCurveUsdFLDebtBoostStrategy,
 } = require('../../strategies');
 const {
     openStrategyAndBundleStorage,
@@ -26,7 +26,7 @@ const {
     callCurveUsdAdvancedRepayStrategy,
     callCurveUsdFLRepayStrategy,
     callCurveUsdBoostStrategy,
-    callCurveUsdFLCrvUsdBoostStrategy,
+    callCurveUsdFLDebtBoostStrategy,
     callCurveUsdFLCollBoostStrategy,
 } = require('../../strategy-calls');
 const { getActiveBand } = require('../../curveusd/curveusd-tests');
@@ -48,11 +48,11 @@ const createRepayBundle = async (proxy, isFork) => {
 const createBoostBundle = async (proxy, isFork) => {
     const curveUsdBoostStrategy = createCurveUsdBoostStrategy();
     const curveUsdFLCollBoostStrategy = createCurveUsdFLCollBoostStrategy();
-    const curveUsdFLCrvUSDBoostStrategy = createCurveUsdFLCrvUsdBoostStrategy();
+    const curveUsdFLDebtBoostStrategy = createCurveUsdFLDebtBoostStrategy();
     await openStrategyAndBundleStorage(isFork);
     const strategyIdFirst = await createStrategy(proxy, ...curveUsdBoostStrategy, true);
     const strategyIdSecond = await createStrategy(proxy, ...curveUsdFLCollBoostStrategy, true);
-    const strategyIdThird = await createStrategy(proxy, ...curveUsdFLCrvUSDBoostStrategy, true);
+    const strategyIdThird = await createStrategy(proxy, ...curveUsdFLDebtBoostStrategy, true);
     return createBundle(
         proxy,
         [strategyIdFirst, strategyIdSecond, strategyIdThird],
@@ -225,7 +225,7 @@ const curveUsdBoostStrategyTest = async () => {
                         addrs.mainnet.CURVE_WRAPPER_V3,
                     );
                     const flActionAddr = await getAddrFromRegistry('FLAction');
-                    await callCurveUsdFLCrvUsdBoostStrategy(
+                    await callCurveUsdFLDebtBoostStrategy(
                         botAcc,
                         strategyExecutor,
                         2,

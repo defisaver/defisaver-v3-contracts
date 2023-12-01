@@ -4556,7 +4556,7 @@ const callCurveUsdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex
 
     console.log(`GasUsed callCurveUsdBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
-const callCurveUsdFLCrvUsdBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, boostAmount, exchangeObject, crvusdAddress, flActionAddr) => {
+const callCurveUsdFLDebtBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, boostAmount, exchangeObject, crvusdAddress, flActionAddr) => {
     const triggerCallData = [];
     const actionsCallData = [];
     const boostGasCost = 1000000; // .8 mil gas
@@ -4600,7 +4600,7 @@ const callCurveUsdFLCrvUsdBoostStrategy = async (botAcc, strategyExecutor, strat
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
-    console.log(`GasUsed callCurveUsdFLCrvUsdBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+    console.log(`GasUsed callCurveUsdFLDebtBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 const callCurveUsdFLCollBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, boostAmount, exchangeObject, collAddress, flActionAddr, flAmount) => {
     const triggerCallData = [];
@@ -4651,7 +4651,7 @@ const callCurveUsdFLCollBoostStrategy = async (botAcc, strategyExecutor, strateg
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
 
-    console.log(`GasUsed callCurveUsdFLCrvUsdBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+    console.log(`GasUsed callCurveUsdFLCollBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 module.exports = {
@@ -4722,6 +4722,6 @@ module.exports = {
     callCurveUsdRepayStrategy,
     callCurveUsdFLRepayStrategy,
     callCurveUsdBoostStrategy,
-    callCurveUsdFLCrvUsdBoostStrategy,
+    callCurveUsdFLDebtBoostStrategy,
     callCurveUsdFLCollBoostStrategy,
 };

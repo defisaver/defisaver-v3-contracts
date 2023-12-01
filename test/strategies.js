@@ -4075,8 +4075,8 @@ const createCurveUsdFLCollBoostStrategy = () => {
     return boostStrategy.encodeForDsProxyCall();
 };
 
-const createCurveUsdFLCrvUsdBoostStrategy = () => {
-    const boostStrategy = new dfs.Strategy('CurveUsdFLCrvUsdBoostStrategy');
+const createCurveUsdFLDebtBoostStrategy = () => {
+    const boostStrategy = new dfs.Strategy('CurveUsdFLDebtBoostStrategy');
 
     boostStrategy.addSubSlot('&controllerAddress', 'address');
     boostStrategy.addSubSlot('&ratioState', 'uint8');
