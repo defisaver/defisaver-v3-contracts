@@ -1,12 +1,15 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 const hre = require('hardhat');
-const { start } = require('./utils/starter');
 
+const { topUp } = require('./utils/fork');
 const { redeploy, addrs, network } = require('../test/utils');
 const { createNewCompV3AutomationBundles } = require('../test/utils-compV3');
 
 async function main() {
+    const senderAcc = (await hre.ethers.getSigners())[0];
+    await topUp(senderAcc.address);
+
     const {
         repayBundleId,
         boostBundleId,
@@ -16,13 +19,11 @@ async function main() {
 
     console.log(repayBundleId, boostBundleId, repayBundleEOAId, boostBundleEOAId);
 
-    // TODO: check for deployment process
-
-    // await redeploy(
-    //     'CompV3SubProxy', addrs[network].REGISTRY_ADDR, false, false, repayBundleId, boostBundleId, repayBundleEOAId, boostBundleEOAId,
-    // );
+    await redeploy(
+        'CompV3SubProxy', addrs[network].REGISTRY_ADDR, true, true, repayBundleId, boostBundleId, repayBundleEOAId, boostBundleEOAId,
+    );
 
     process.exit(0);
 }
 
-start(main);
+main();
