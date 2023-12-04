@@ -5,10 +5,13 @@ const hre = require('hardhat');
 const { topUp } = require('./utils/fork');
 const { redeploy, addrs, network } = require('../test/utils');
 const { createNewCompV3AutomationBundles } = require('../test/utils-compV3');
+const { openStrategyAndBundleStorage } = require('../test/utils');
 
 async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];
     await topUp(senderAcc.address);
+
+    await openStrategyAndBundleStorage(true);
 
     const {
         repayBundleId,
