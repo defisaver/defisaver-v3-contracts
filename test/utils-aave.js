@@ -1,4 +1,5 @@
 const hre = require('hardhat');
+const { addrs, getNetwork } = require('./utils');
 
 const aaveV2assetsDefaultMarket = [
     'ETH', 'DAI', 'SUSD', 'USDC', 'USDT', 'WBTC',
@@ -38,6 +39,14 @@ const getAaveReserveData = async (dataProvider, tokenAddr) => {
     return tokens;
 };
 
+const getEstimatedTotalLiquidityForToken = async (tokenAddr) => {
+    const dataProvider = await hre.ethers.getContractAt('IAaveProtocolDataProvider', addrs[getNetwork()].AAVE_V3_POOL_DATA_PROVIDER);
+    const reserveData = await getAaveReserveData(dataProvider, tokenAddr);
+    const totalAToken = reserveData.totalAToken;
+    const totalDebt = reserveData.totalVariableDebt;
+    return totalAToken.sub(totalDebt);
+};
+
 const isAssetBorrowableV3 = async (dataProviderAddr, tokenAddr, checkStableBorrow = false) => {
     const protocolDataProvider = await hre.ethers.getContractAt('IAaveProtocolDataProvider', dataProviderAddr);
 
@@ -61,6 +70,7 @@ module.exports = {
     getAaveReserveInfo,
     getAaveReserveData,
     isAssetBorrowableV3,
+    getEstimatedTotalLiquidityForToken,
     aaveV2assetsDefaultMarket,
     STABLE_RATE,
     VARIABLE_RATE,
