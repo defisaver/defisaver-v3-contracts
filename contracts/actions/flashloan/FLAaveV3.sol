@@ -104,29 +104,24 @@ contract FLAaveV3 is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlas
             revert SameCallerError();
         }
 
-        (Recipe memory currRecipe, address proxy, uint256[] memory modes) = abi.decode(_params, (Recipe, address, uint256[]));
+        (Recipe memory currRecipe, address proxy) = abi.decode(_params, (Recipe, address));
         uint256[] memory balancesBefore = new uint256[](_assets.length);
-        
         // Send FL amounts to user proxy
         for (uint256 i = 0; i < _assets.length; ++i) {
             _assets[i].withdrawTokens(proxy, _amounts[i]);
             balancesBefore[i] = _assets[i].getBalance(address(this));
         }
-        
-        {
-            address payable recipeExecutor = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
 
-            // call Action execution
-            IDSProxy(proxy).execute{value: address(this).balance}(
-                recipeExecutor,
-                abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, bytes32(_amounts[0] + _fees[0]))
-            );
-        }
+        address payable recipeExecutor = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
+
+        // call Action execution
+        IDSProxy(proxy).execute{value: address(this).balance}(
+            recipeExecutor,
+            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, bytes32(_amounts[0] + _fees[0]))
+        );
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
-            if (modes[i] != 0) continue; // skip payback and create borrow position
-
             uint256 paybackAmount = _amounts[i] + _fees[i];
 
             bool correctAmount = _assets[i].getBalance(address(this)) == paybackAmount + balancesBefore[i];

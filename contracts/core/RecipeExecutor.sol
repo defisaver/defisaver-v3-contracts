@@ -183,15 +183,12 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
     ) internal {
         givePermission(_flActionAddr);
 
+        // encode data for FL
+        bytes memory recipeData = abi.encode(_currRecipe, address(this));
         IFlashLoanBase.FlashLoanParams memory params = abi.decode(
             _currRecipe.callData[0],
             (IFlashLoanBase.FlashLoanParams)
         );
-        uint256[] memory modes = params.modes;
-
-        // encode data for FL
-        bytes memory recipeData = abi.encode(_currRecipe, address(this), modes);
-
         params.recipeData = recipeData;
         _currRecipe.callData[0] = abi.encode(params);
 
