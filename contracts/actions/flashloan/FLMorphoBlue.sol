@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "../../interfaces/morpho-blue/IMorphoBlue.sol";
@@ -19,7 +18,7 @@ contract FLMorphoBlue is ActionBase, ReentrancyGuard, StrategyModel, IFlashLoanB
     using SafeMath for uint256;
 
 
-    //Caller not GHO Flash Minter
+    //Caller not Morpho Blue
     error UntrustedLender();
     // Wrong FL payback amount sent
     error WrongPaybackAmountError();
