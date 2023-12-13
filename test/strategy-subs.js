@@ -13,6 +13,7 @@ const {
     subToAaveV2Proxy,
     subToSparkProxy,
     updateSparkProxy,
+    subToAaveV3Proxy,
 } = require('./utils-strategies');
 
 const {
@@ -339,6 +340,49 @@ const subAaveV2AutomationStrategy = async (
     const subInput = [[minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled]];
 
     const subData = await subToAaveV2Proxy(proxy, subInput, regAddr);
+
+    let subId1 = '0';
+    let subId2 = '0';
+
+    if (boostEnabled) {
+        subId1 = (parseInt(subData.subId, 10) - 1).toString();
+        subId2 = subData.subId;
+    } else {
+        subId1 = subData.subId;
+        subId2 = '0';
+    }
+
+    return {
+        repaySubId: subId1,
+        boostSubId: subId2,
+        repaySub: subData.repaySub,
+        boostSub: subData.boostSub,
+    };
+};
+
+const subAaveV3AutomationStrategy = async (
+    proxy,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    regAddr = REGISTRY_ADDR,
+) => {
+    const minRatioBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(minRatio), 16);
+    const maxRatioBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(maxRatio), 16);
+    const optimalRatioBoostBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(optimalRatioBoost), 16);
+    const optimalRatioRepayBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(optimalRatioRepay), 16);
+    const boostEnabledBytes = boostEnabled ? '0x01' : '0x00';
+    const subInput = hre.ethers.utils.concat([
+        minRatioBytes,
+        maxRatioBytes,
+        optimalRatioBoostBytes,
+        optimalRatioRepayBytes,
+        boostEnabledBytes,
+    ]);
+
+    const subData = await subToAaveV3Proxy(proxy, subInput, regAddr);
 
     let subId1 = '0';
     let subId2 = '0';
@@ -752,6 +796,7 @@ module.exports = {
     subMorphoAaveV2AutomationStrategy,
     subLiquityAutomationStrategy,
     subAaveV2AutomationStrategy,
+    subAaveV3AutomationStrategy,
     subCompV2AutomationStrategy,
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,

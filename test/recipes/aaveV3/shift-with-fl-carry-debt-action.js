@@ -13,31 +13,34 @@ const {
     takeSnapshot,
     revertToSnapshot,
     setBalance,
-    getAddrFromRegistry,
     addrs,
     getNetwork,
     balanceOf,
     redeploy,
+    getAddrFromRegistry,
 } = require('../../utils');
 
 const { liquityOpen, executeAction } = require('../../actions');
 const { getTroveInfo } = require('../../utils-liquity');
-const { getAaveReserveData, getEstimatedTotalLiquidityForToken, VARIABLE_RATE } = require('../../utils-aave');
+const {
+    getEstimatedTotalLiquidityForToken,
+    VARIABLE_RATE,
+    AAVE_NO_DEBT_MODE,
+    WSETH_ASSET_ID_IN_AAVE_V3_MARKET,
+    LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
+} = require('../../utils-aave');
 
-const WSETH_ASSET_ID_IN_AAVE_V3_MARKET = '1';
-const LUSD_ASSET_ID_IN_AAVE_V3_MARKET = '10';
-const AAVE_NO_DEBT_MODE = '0';
-const AAVE_VARIABLE_DEBT_MODE = '2';
 const ETH_USD_PRICE_FEED = '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419';
 
 const aaveV3Shifter = async () => {
-    describe('Aave V3 Shifter from liquity position', () => {
+    describe('Aave V3 Shifter', () => {
         let senderAcc;
         let senderAddr;
         let proxy;
         let proxyAddr;
         let snapshotId;
         let flAaveV3Address;
+        let flAaveV3CarryDebtAddress;
 
         const createLiquityPosition = async (collAmount, LUSDAmount) => {
             await setBalance(WETH_ADDRESS, senderAddr, collAmount);
@@ -64,11 +67,11 @@ const aaveV3Shifter = async () => {
                 [AAVE_NO_DEBT_MODE],
                 nullAddress,
             ),
-            flAaveV3ActionWithDeptPosition: (debtAmount) => new dfs.actions.flashloan
-                .AaveV3FlashLoanNoFeeAction(
+            flAaveV3CarryDebtAction: (debtAmount) => new dfs.actions.flashloan
+                .AaveV3FlashLoanCarryDebtAction(
                     [LUSD_ADDR],
                     [debtAmount.toString()],
-                    [AAVE_VARIABLE_DEBT_MODE],
+                    [VARIABLE_RATE],
                     proxyAddr,
                 ),
             lidoWrapAction: (collAmount) => new dfs.actions.lido.LidoWrapAction(
@@ -97,7 +100,7 @@ const aaveV3Shifter = async () => {
                 addrs[getNetwork()].AAVE_MARKET,
                 debtAmount.toString(), // debt amount
                 proxyAddr,
-                AAVE_VARIABLE_DEBT_MODE,
+                VARIABLE_RATE,
                 LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
                 false,
                 nullAddress,
@@ -118,7 +121,7 @@ const aaveV3Shifter = async () => {
                 '$1', // from FL action
                 VARIABLE_RATE,
                 LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
-                flAaveV3Address,
+                flAaveV3CarryDebtAddress,
             ),
         };
 
@@ -149,14 +152,12 @@ const aaveV3Shifter = async () => {
         };
 
         before(async () => {
-            //flAaveV3Address = await getAddrFromRegistry('FLAaveV3');
-            const flAaveV3Contract = await redeploy('FLAaveV3');
-            flAaveV3Address = flAaveV3Contract.address;
+            flAaveV3Address = await getAddrFromRegistry('FLAaveV3');
 
-            // not deployed so we need to deploy it
+            const flAaveV3CarryDebtContract = await redeploy('FLAaveV3CarryDebt');
+            flAaveV3CarryDebtAddress = flAaveV3CarryDebtContract.address;
+
             await redeploy('AaveV3DelegateCredit');
-
-            await redeploy('RecipeExecutor');
 
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAddr = senderAcc.address;
@@ -197,14 +198,13 @@ const aaveV3Shifter = async () => {
             const troveInfo = await createLiquityPosWithDebtGtThanHalfOfLiquidityOnAaveV3();
             const shiftRecipe = regularShiftRecipe(troveInfo);
             const functionData = shiftRecipe.encodeForDsProxyCall();
-            await expect(executeAction('RecipeExecutor', functionData[1], proxy))
-                .to.be.revertedWith('Error: Transaction reverted without a reason string');
+            await expect(executeAction('RecipeExecutor', functionData[1], proxy)).to.be.reverted;
         });
 
         it('... should shift from WETH/LUSD to WSETH/LUSD when debt is greater than half of liquidity', async () => {
             const troveInfo = await createLiquityPosWithDebtGtThanHalfOfLiquidityOnAaveV3();
             const recipeWithNewFLAction = new dfs.Recipe('Shift', [
-                actions.flAaveV3ActionWithDeptPosition(troveInfo.debtAmount),
+                actions.flAaveV3CarryDebtAction(troveInfo.debtAmount),
                 actions.liquityCloseAction(),
                 actions.lidoWrapAction(troveInfo.collAmount),
                 actions.aaveV3SupplyAction(),

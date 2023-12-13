@@ -151,7 +151,7 @@ const subToAaveV3Proxy = async (proxy, inputData, regAddr = addrs[getNetwork()].
 
     const latestSubId = await getLatestSubId(regAddr);
 
-    const { repaySub, boostSub } = await hre.ethers.getContractAt('AaveSubProxy', aaveSubProxyAddr)
+    const { repaySub, boostSub } = await hre.ethers.getContractAt('AaveV3SubProxy', aaveSubProxyAddr)
         .then((c) => [c, c.parseSubData(inputData)])
         .then(async ([c, subData]) => {
             // eslint-disable-next-line no-param-reassign
