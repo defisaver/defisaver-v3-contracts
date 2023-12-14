@@ -4,7 +4,6 @@ pragma solidity =0.8.10;
 import "../ActionBase.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/IFLParamGetter.sol";
-import "../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import "../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../core/strategy/StrategyModel.sol";
 import "../../utils/TokenUtils.sol";
@@ -26,11 +25,6 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
     string constant ERR_ONLY_AAVE_CALLER = "Caller not aave pool";
     string constant ERR_SAME_CALLER = "FL taker must be this contract";
     string constant ERR_WRONG_PAYBACK_AMOUNT = "Wrong FL payback amount sent";
-
-    ILendingPoolAddressesProviderV2
-        public constant addressesProvider = ILendingPoolAddressesProviderV2(
-            AAVE_V3_LENDING_POOL_ADDRESS_PROVIDER
-    );
 
     bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
