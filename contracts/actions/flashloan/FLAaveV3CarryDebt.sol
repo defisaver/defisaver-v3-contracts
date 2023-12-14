@@ -4,12 +4,13 @@ pragma solidity =0.8.10;
 import "../ActionBase.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/IFLParamGetter.sol";
-import "../../interfaces/aaveV2/ILendingPoolV2.sol";
+import "../../interfaces/aaveV3/IPoolV3.sol";
 import "../../core/strategy/StrategyModel.sol";
 import "../../utils/TokenUtils.sol";
 import "../../utils/ReentrancyGuard.sol";
 import "./helpers/FLHelper.sol";
 import "../../interfaces/flashloan/IFlashLoanBase.sol";
+import "../../interfaces/aaveV3/IDebtToken.sol";
 
 /// @title Action that gets and receives a FL from Aave V3 and does not return funds but opens debt position on Aave V3
 contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlashLoanBase {
@@ -21,10 +22,8 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
     error SameCallerError();
     //Interest rate can't be 0 for opening depth position on Aave V3
     error NoInterestRateSetError();
-
-    string constant ERR_ONLY_AAVE_CALLER = "Caller not aave pool";
-    string constant ERR_SAME_CALLER = "FL taker must be this contract";
-    string constant ERR_WRONG_PAYBACK_AMOUNT = "Wrong FL payback amount sent";
+    //Credit delegation allowance must be 0 after FL
+    error CreditDelegationAllowanceLeftError();
 
     bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
@@ -53,6 +52,24 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
         bytes memory recipeData = flData.recipeData;
         uint flAmount = _flAaveV3(flData, recipeData);
 
+        // revert if some credit delegation allowance is left
+        for (uint256 i = 0; i < flData.tokens.length; ++i) {
+            DataTypes.ReserveData memory reserveData = IPoolV3(AAVE_V3_LENDING_POOL).getReserveData(flData.tokens[i]);
+            
+            address debtToken = DataTypes.InterestRateMode(flData.modes[i]) == DataTypes.InterestRateMode.VARIABLE 
+                ? reserveData.variableDebtTokenAddress 
+                : reserveData.stableDebtTokenAddress;
+            
+            uint256 creditDelegationAllowance = IDebtToken(debtToken).borrowAllowance(
+                flData.onBehalfOf,
+                address(this)
+            );
+            
+            if (creditDelegationAllowance > 0) {
+                revert CreditDelegationAllowanceLeftError();
+            }
+        }
+
         return bytes32(flAmount);
     }
 
@@ -71,7 +88,7 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
     /// @param _params Rest of the data we have in the recipe
     function _flAaveV3(FlashLoanParams memory _flData, bytes memory _params) internal returns (uint) {
 
-        ILendingPoolV2(AAVE_V3_LENDING_POOL).flashLoan(
+        IPoolV3(AAVE_V3_LENDING_POOL).flashLoan(
             address(this),
             _flData.tokens,
             _flData.amounts,
