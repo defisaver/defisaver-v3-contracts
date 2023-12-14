@@ -109,10 +109,10 @@ const aaveV3BoostWithNewFL = async () => {
                 false,
                 nullAddress,
             ),
-            delegateCreditOnAaveV3Action: () => new dfs.actions.aaveV3.AaveV3DelegateCredit(
+            delegateCreditOnAaveV3Action: (amount) => new dfs.actions.aaveV3.AaveV3DelegateCredit(
                 true,
                 addrs[getNetwork()].AAVE_MARKET,
-                '$1', // from FL action
+                amount,
                 VARIABLE_RATE,
                 LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
                 flAaveV3CarryDebtAddress,
@@ -191,7 +191,7 @@ const aaveV3BoostWithNewFL = async () => {
                 actions.sellAction(boostAmount),
                 actions.feeTakingAction(1_400_000),
                 actions.aaveV3SupplyAction(),
-                actions.delegateCreditOnAaveV3Action(),
+                actions.delegateCreditOnAaveV3Action('$1'), // amount from FL action
             ]);
 
             const functionData = regularBoostRecipe.encodeForDsProxyCall();
@@ -203,6 +203,46 @@ const aaveV3BoostWithNewFL = async () => {
             console.log(`Ratio before: ${loanDataBeforeBoost.ratio / 1e16}`);
             console.log(`Ratio After: ${loanDataAfterBoost.ratio / 1e16}`);
             expect(loanDataAfterBoost.ratio).to.be.lt(loanDataBeforeBoost.ratio);
+        }).timeout(300000);
+
+        it('... should revert on new boost with maximum credit delegation allowance', async () => {
+            const collAmount = hre.ethers.utils.parseUnits('100', 18);
+            const debtAmount = hre.ethers.utils.parseUnits('100000', 18);
+
+            await createAaveV3Position(collAmount, debtAmount);
+
+            const boostAmount = debtAmount.div(20);
+
+            const regularBoostRecipe = new dfs.Recipe('AaveV3BoostRecipeWithNewFL', [
+                actions.flAaveV3CarryDebtAction(boostAmount),
+                actions.sellAction(boostAmount),
+                actions.feeTakingAction(1_400_000),
+                actions.aaveV3SupplyAction(),
+                actions.delegateCreditOnAaveV3Action(hre.ethers.constants.MaxUint256),
+            ]);
+
+            const functionData = regularBoostRecipe.encodeForDsProxyCall();
+            await expect(executeAction('RecipeExecutor', functionData[1], proxy)).to.be.reverted;
+        }).timeout(300000);
+
+        it('... should revert on new boost with slightly bigger credit delegation allowance', async () => {
+            const collAmount = hre.ethers.utils.parseUnits('100', 18);
+            const debtAmount = hre.ethers.utils.parseUnits('100000', 18);
+
+            await createAaveV3Position(collAmount, debtAmount);
+
+            const boostAmount = debtAmount.div(20);
+
+            const regularBoostRecipe = new dfs.Recipe('AaveV3BoostRecipeWithNewFL', [
+                actions.flAaveV3CarryDebtAction(boostAmount),
+                actions.sellAction(boostAmount),
+                actions.feeTakingAction(1_400_000),
+                actions.aaveV3SupplyAction(),
+                actions.delegateCreditOnAaveV3Action(debtAmount.div(20).add(1)),
+            ]);
+
+            const functionData = regularBoostRecipe.encodeForDsProxyCall();
+            await expect(executeAction('RecipeExecutor', functionData[1], proxy)).to.be.reverted;
         }).timeout(300000);
     });
 };

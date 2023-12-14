@@ -115,10 +115,10 @@ const aaveV3Shifter = async () => {
                 senderAddr,
                 hre.ethers.constants.MaxUint256.toString(), // send all DSProxy LUSD leftover
             ),
-            delegateCreditOnAaveV3Action: () => new dfs.actions.aaveV3.AaveV3DelegateCredit(
+            delegateCreditOnAaveV3Action: (amount) => new dfs.actions.aaveV3.AaveV3DelegateCredit(
                 true,
                 addrs[getNetwork()].AAVE_MARKET,
-                '$1', // from FL action
+                amount, // from FL action
                 VARIABLE_RATE,
                 LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
                 flAaveV3CarryDebtAddress,
@@ -208,7 +208,7 @@ const aaveV3Shifter = async () => {
                 actions.liquityCloseAction(),
                 actions.lidoWrapAction(troveInfo.collAmount),
                 actions.aaveV3SupplyAction(),
-                actions.delegateCreditOnAaveV3Action(),
+                actions.delegateCreditOnAaveV3Action('$1'), // fl amount
                 actions.sendTokenActionCleanUpProxy(),
             ]);
 
@@ -222,6 +222,34 @@ const aaveV3Shifter = async () => {
 
             const proxyBalance = await balanceOf(A_WSETH_TOKEN_ADDR, proxyAddr);
             expect(proxyBalance).to.be.gt(0);
+        });
+
+        it('... should revert on shift from WETH/LUSD to WSETH/LUSD because of maximum credit delegation allowance', async () => {
+            const troveInfo = await createLiquityPosWithDebtGtThanHalfOfLiquidityOnAaveV3();
+            const recipeWithNewFLAction = new dfs.Recipe('Shift', [
+                actions.flAaveV3CarryDebtAction(troveInfo.debtAmount),
+                actions.liquityCloseAction(),
+                actions.lidoWrapAction(troveInfo.collAmount),
+                actions.aaveV3SupplyAction(),
+                actions.delegateCreditOnAaveV3Action(hre.ethers.constants.MaxUint256),
+                actions.sendTokenActionCleanUpProxy(),
+            ]);
+            const functionData = recipeWithNewFLAction.encodeForDsProxyCall();
+            await expect(executeAction('RecipeExecutor', functionData[1], proxy)).to.be.reverted;
+        });
+
+        it('... should revert on shift from WETH/LUSD to WSETH/LUSD because of slightly bigger credit delegation allowance', async () => {
+            const troveInfo = await createLiquityPosWithDebtGtThanHalfOfLiquidityOnAaveV3();
+            const recipeWithNewFLAction = new dfs.Recipe('Shift', [
+                actions.flAaveV3CarryDebtAction(troveInfo.debtAmount),
+                actions.liquityCloseAction(),
+                actions.lidoWrapAction(troveInfo.collAmount),
+                actions.aaveV3SupplyAction(),
+                actions.delegateCreditOnAaveV3Action(troveInfo.debtAmount.add(1)),
+                actions.sendTokenActionCleanUpProxy(),
+            ]);
+            const functionData = recipeWithNewFLAction.encodeForDsProxyCall();
+            await expect(executeAction('RecipeExecutor', functionData[1], proxy)).to.be.reverted;
         });
     });
 };
