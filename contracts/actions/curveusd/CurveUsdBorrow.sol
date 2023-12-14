@@ -8,7 +8,6 @@ import "./helpers/CurveUsdHelper.sol";
 
 /// @title Action that borrows crvUSD from proxy curveusd position
 /// @dev debtAmount must be non-zero
-/// @dev if debtAmount == uintMax will borrow as much as the collateral will support
 contract CurveUsdBorrow is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 
@@ -16,7 +15,7 @@ contract CurveUsdBorrow is ActionBase, CurveUsdHelper {
 
     /// @param controllerAddress Address of the curveusd market controller
     /// @param to Address that will receive the borrowed crvUSD, will default to proxy
-    /// @param debtAmount Amount of crvUSD to borrow
+    /// @param debtAmount Amount of crvUSD to borrow (does not support uint.max)
     struct Params {
         address controllerAddress;
         address to;
@@ -62,10 +61,6 @@ contract CurveUsdBorrow is ActionBase, CurveUsdHelper {
         
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
-        /// @dev figure out if we need this calculated on-chain
-        if (_params.debtAmount == type(uint256).max) {
-            _params.debtAmount = userMaxBorrow(_params.controllerAddress, address(this));
-        }
         ICrvUsdController(_params.controllerAddress).borrow_more(0, _params.debtAmount);
 
         CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, _params.debtAmount);

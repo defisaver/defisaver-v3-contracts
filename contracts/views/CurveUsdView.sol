@@ -86,7 +86,7 @@ contract CurveUsdView {
 
       return UserData({
         loanExists: ctrl.loan_exists(user),
-        collateralPrice: ctrl.amm_price(),
+        collateralPrice: amm.price_oracle(),
         marketCollateralAmount: amounts[0],
         curveUsdCollateralAmount: amounts[1],
         debtAmount: amounts[2],
@@ -172,7 +172,7 @@ contract CurveUsdView {
     return ctrl.min_collateral(debt, N);
   }
 
-  function getBandsData(address market, uint256 collateral, uint256 debt, uint256 N) external view returns (Band[] memory bands) {
+  function getBandsDataForPosition(address market, uint256 collateral, uint256 debt, uint256 N) external view returns (Band[] memory bands) {
     ICrvUsdController ctrl = ICrvUsdController(market);
 
     int256 n1 = ctrl.calculate_debt_n1(collateral, debt, N);
@@ -187,7 +187,7 @@ contract CurveUsdView {
     // handle special health_calc if WBTC is collateral
     if (market == WBTC_MARKET) {
       ICrvUsdController healthZap = ICrvUsdController(WBTC_HEALTH_ZAP);
-      health = healthZap.health_calculator(address(0x00), int256(collChange), int256(debtChange), isFull, numBands);
+      health = healthZap.health_calculator(user, int256(collChange), int256(debtChange), isFull, numBands);
     } else {
       health =  ctrl.health_calculator(user, collChange, debtChange, isFull, numBands);
     }

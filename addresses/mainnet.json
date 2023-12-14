@@ -44,11 +44,33 @@
         "history": []
     },
     {
-        "name": "AaveSubProxy",
+        "name": "AaveV3SubProxy",
         "address": "0xb9F73625AA64D46A9b2f0331712e9bEE19e4C3f7",
-        "id": "0xd11b2581",
-        "path": "contracts/core/l2/AaveSubProxy.sol",
+        "id": "0x9275abae",
+        "path": "contracts/actions/aaveV3/AaveV3SubProxy.sol",
         "version": "1.0.1",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveSubProxy",
+        "address": "0xf5b40E26cEE37650f5B93946Bd4AC3e39CbcE76b",
+        "id": "0xd11b2581",
+        "path": "contracts/actions/aave/AaveSubProxy.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompSubProxy",
+        "address": "0xEC8553D9063a0A0Bfb4953fca6d7A7F75E8B8d31",
+        "id": "0xd87b2479",
+        "path": "contracts/actions/comp/CompSubProxy.sol",
+        "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
@@ -210,14 +232,14 @@
     },
     {
         "name": "CurveWrapperV3",
-        "address": "0x3788B4Db5e99fF555e22a08241EB3cFc3a0ac149",
+        "address": "0xdE73496DD6349829C6649aCaDe31FB1371528AC5",
         "id": "0xb856c9af",
         "path": "contracts/exchangeV3/wrappersV3/CurveWrapperV3.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x3788B4Db5e99fF555e22a08241EB3cFc3a0ac149"]
     },
     {
         "name": "ZeroxWrapper",
@@ -242,8 +264,19 @@
         "history": []
     },
     {
+        "name": "KyberInputScalingHelper",
+        "address": "0x05977cA080Ef44a824D935191d0A3d56659295a0",
+        "id": "0x559d99f5",
+        "path": "contracts/utils/KyberInputScalingHelper",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "KyberAggregatorWrapper",
-        "address": "0x2197b1f0c3C61A8f74E78431A0d17837642B23cf",
+        "address": "0x1e474f3E48e0b2378f4B9f58A076C3F3E316E5FC",
         "id": "0x1abf4ed0",
         "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
         "version": "1.0.0",
@@ -251,6 +284,9 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xcafb38fb65056cc753dbf5433cde70b6b28a8458",
+            "0xf36cC3f17e336450a8646F57c419835c81Db7F95",
+            "0x2197b1f0c3C61A8f74E78431A0d17837642B23cf",
             "0xBfb05d97FE87DCbc7Ff6F2e4f83FcA0861318A4E",
             "0x25A1c8C54018F198D8BdfB3a410D812b4ad312e4"
         ]
@@ -389,25 +425,30 @@
     },
     {
         "name": "McdView",
-        "address": "0x922C795aE0be55Aaeb3FF51813B76AFc78e97C7c",
+        "address": "0x0Fa061b5a59D85eDaA8aa914b9C9933C3b62C63e",
         "id": "0xb131d25c",
         "path": "contracts/views/McdView.sol",
-        "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "LiquityView",
-        "address": "0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C",
-        "id": "0xe23de5c6",
-        "path": "contracts/views/LiquityView.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xd1913b977737c9505b8ecfedb8121546096d3393"]
+        "history": ["0x922C795aE0be55Aaeb3FF51813B76AFc78e97C7c"]
+    },
+    {
+        "name": "LiquityView",
+        "address": "0xD077e3875811dB44D8eb4722af59E1B137F462e3",
+        "id": "0xe23de5c6",
+        "path": "contracts/views/LiquityView.sol",
+        "version": "1.0.4",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": [
+            "0xb760e60Dff6263E8Ab31B04ee5Cc010beA47e2Df",
+            "0xd1913b977737c9505b8ecfedb8121546096d3393",
+            "0x9579e3f68A92E2c888Eb3e69bCe00f440DF0872C",
+            "0xFdA4344cbC85e684754C8971A975239350F99967"
+        ]
     },
     {
         "name": "ChickenBondsView",
@@ -515,7 +556,7 @@
         "name": "CBRebondSubProxy",
         "address": "0x2b37E3A0ef2Bc449633F85b654a9C8D17A575F81",
         "id": "0xa69c4bb7",
-        "path": "contracts/subProxies/CBRebondSubProxy.sol",
+        "path": "contracts/actions/liquity/bonds/CBRebondSubProxy.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": "0",
@@ -568,14 +609,17 @@
     },
     {
         "name": "CurveView",
-        "address": "0x18893df1341d42F54e0242f7785C0b6968dDE04a",
+        "address": "0x79fdec1d39f6282a92e5e087d10ba0b0cef89a84",
         "id": "0x7da42156",
         "path": "contracts/views/CurveView.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xe088a5005Bb995A9554bD3FE7F47e80f8F182389"]
+        "history": [
+            "0xe088a5005Bb995A9554bD3FE7F47e80f8F182389",
+            "0x18893df1341d42F54e0242f7785C0b6968dDE04a"
+        ]
     },
     {
         "name": "CompView",
@@ -615,14 +659,14 @@
     },
     {
         "name": "AaveView",
-        "address": "0xEDf1087544a01596b70Da746F861B878F245B08f",
+        "address": "0xf585d53f568d226449a94d48c4ea122cdeffe52d",
         "id": "0x0a55b48c",
         "path": "contracts/views/AaveView.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xEDf1087544a01596b70Da746F861B878F245B08f"]
     },
     {
         "name": "MockChainlinkFeedRegistry",
@@ -793,6 +837,17 @@
         "history": ["0x254cA89a00d53ab61de2Ba5641DBDC01aE48aed4"]
     },
     {
+        "name": "ApproveToken",
+        "address": "0xA4161cED7A29F0a3424e464a4a2dBf75888c5BF9",
+        "id": "0xbb8027f4",
+        "path": "contracts/actions/utils/ApproveToken.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "SendToken",
         "address": "0x36C26aA8bDc7CFE14e88721dc7fe53EdfED8C880",
         "id": "0x02abc227",
@@ -885,14 +940,17 @@
     },
     {
         "name": "LimitSell",
-        "address": "0x02b0eE3b52e8E0749444a7255B9D86c50d18D19A",
+        "address": "0xDa0df9dBD89FE40881EC2C4B000D44C76eA2Dd4A",
         "id": "0x8c712c04",
         "path": "contracts/actions/exchange/LimitSell.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x555C5B5d3e49ae015d5dA5C0476f984386e906BD"]
+        "history": [
+            "0x02b0eE3b52e8E0749444a7255B9D86c50d18D19A",
+            "0x555C5B5d3e49ae015d5dA5C0476f984386e906BD"
+        ]
     },
     {
         "name": "McdGenerate",
@@ -1159,6 +1217,17 @@
         "history": []
     },
     {
+        "name": "AaveClaimStkAave",
+        "address": "0x5Dcd9Dc0185a6Ab07a31e5284D16Ce9f0A79Ce99",
+        "id": "0xd93d7e7f",
+        "path": "contracts/actions/aave/AaveClaimStkAave.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "MorphoMarketStorage",
         "address": "0x56EE33811a6C8c1Fd443E53685ed1605E43b3971",
         "id": "0x9600f04b",
@@ -1196,6 +1265,17 @@
         "address": "0x51fA8FBc6F0aDEfe2FBA06104FCA39f5beD69291",
         "id": "0x695a7da7",
         "path": "contracts/actions/morpho/aaveV3/MorphoAaveV3Supply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoAaveV3SetManager",
+        "address": "0x1082AE0565504E3617BD5b6E80f91B59b81a82D9",
+        "id": "0x1ee82dad",
+        "path": "contracts/actions/morpho/aaveV3/MorphoAaveV3SetManager.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
@@ -1343,7 +1423,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x4d3F58460aE2bC71fFaeb33838BFA3b5610083Db"]
+        "history": []
     },
     {
         "name": "SparkBorrow",
@@ -1354,7 +1434,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x4d3F58460aE2bC71fFaeb33838BFA3b5610083Db"]
+        "history": []
     },
     {
         "name": "AaveV3ClaimRewards",
@@ -1511,6 +1591,17 @@
         "history": []
     },
     {
+        "name": "GasPriceTrigger",
+        "address": "0xBe940a40Dcad3065C627f342f405f3D7afC61035",
+        "id": "0x020a2a1f",
+        "path": "contracts/triggers/GasPriceTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "FLAaveV3",
         "address": "0xd9D8e68717Ce24CCbf162868aaad7E38d81b05d1",
         "id": "0x8d7fb192",
@@ -1578,25 +1669,31 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x8095fFFC3cDdE58C4F537D39f9795A40a103e633",
+        "address": "0x485416D87B6B6B98259c32E789D4f7Ce4CD2959c",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
         "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xf4B715BB788cC4071061bd67dC8B56681460A2fF"]
+        "history": [
+            "0x8095fFFC3cDdE58C4F537D39f9795A40a103e633",
+            "0xf4B715BB788cC4071061bd67dC8B56681460A2fF"
+        ]
     },
     {
         "name": "SparkView",
-        "address": "0xB3B13838F6F57CE76b94f0744Ab0B045B780836e",
+        "address": "0xd34306ae3FAE4e347290E4691059e240Aee22eb3",
         "id": "0xd6f690a9",
         "path": "contracts/views/SparkView.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x29d01EF37514912ab874D51fEc76c8f5d4d6712e"]
+        "history": [
+            "0xB3B13838F6F57CE76b94f0744Ab0B045B780836e",
+            "0x29d01EF37514912ab874D51fEc76c8f5d4d6712e"
+        ]
     },
     {
         "name": "CompBorrow",
@@ -1767,7 +1864,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [""]
+        "history": []
     },
     {
         "name": "FLAction",
@@ -2125,39 +2222,6 @@
         "history": []
     },
     {
-        "name": "BalancerV2Supply",
-        "address": "0xE48123018Db5e9075841C61EA702cEca51621191",
-        "id": "0x443f994c",
-        "path": "contracts/actions/balancer/BalancerV2Supply.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "BalancerV2Withdraw",
-        "address": "0xbED38692438b90AF738F8A7A3142C217DE8fB069",
-        "id": "0x54f465c5",
-        "path": "contracts/actions/balancer/BalancerV2Withdraw.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "BalancerV2Claim",
-        "address": "0xEac7c5bEFaA6E17f1A2e86947eEd6419c74A7C03",
-        "id": "0xde8dbbc2",
-        "path": "contracts/actions/balancer/BalancerV2Claim.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
         "name": "GUniWithdraw",
         "address": "0x6F7cD7C0Dd3634E14bAB91FDF3bCE0a4315b3C59",
         "id": "0x6b185983",
@@ -2247,14 +2311,16 @@
     },
     {
         "name": "GasFeeTaker",
-        "address": "0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b",
+        "address": "0xfaE5e10014Dc90A85ABdE21E0fa85CcB78521aB5",
         "id": "0x4571b8b3",
         "path": "contracts/actions/fee/GasFeeTaker.sol",
-        "version": "1.0.3",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x558A8B92EE6a2B724afDEd319b61Ac55B7259826",
+            "0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b",
             "0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d",
             "0xcCFFC73347B05cBDCCe7c3de2a0AdEcDAa8AEf51",
             "0x80536cb79341972a5Ef679dF5B70bB4A40a53d96"
@@ -2272,14 +2338,16 @@
     },
     {
         "name": "ChainLinkPriceTrigger",
-        "address": "0x484c78cf4a3C5bAb2174931E0A451e0E1B5b08F7",
+        "address": "0xFe333F4Be1423600C9fF129A7D85D3eAE97C9c42",
         "id": "0xac6bb72a",
         "path": "contracts/triggers/ChainLinkPriceTrigger.sol",
-        "version": "1.0.2",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xDB9086334AA77179d273dB20314169828E33094f",
+            "0x484c78cf4a3C5bAb2174931E0A451e0E1B5b08F7",
             "0xb14226c3FD41e9B1FF85b4f7144CB4096a5D1Ec9",
             "0xAbf52Fc6e5C0e6E44Daac7C6ca79498302D9B0CA"
         ]
@@ -2351,6 +2419,28 @@
         "history": []
     },
     {
+        "name": "LiquityRatioIncreaseCheck",
+        "address": "0x4E3ab326c188D936c0d1166eE3B3b0dD615B17Ae",
+        "id": "0x3b29b437",
+        "path": "contracts/actions/checkers/LiquityRatioIncreaseCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityDebtInFrontWithLimitTrigger",
+        "address": "0xb677E68385C201847A5f3BdE2e0Ed1A900194e3B",
+        "id": "0x72a21f97",
+        "path": "contracts/triggers/LiquityDebtInFrontWithLimitTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "SendTokenAndUnwrap",
         "address": "0xeecd376026335261c89faD40D89625391b1eFF6a",
         "id": "0x17782156",
@@ -2363,9 +2453,20 @@
     },
     {
         "name": "CurveUsdBorrow",
-        "address": "0x2512A976227a82Ef0F6bDdb463cBcD5B732596BF",
+        "address": "0x9D82989715114D35903caf4077BC3e5b5DD70eA7",
         "id": "0x2f22c507",
         "path": "contracts/actions/curveusd/CurveUsdBorrow.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": ["0x2512A976227a82Ef0F6bDdb463cBcD5B732596BF"]
+    },
+    {
+        "name": "CurveUsdAdjust",
+        "address": "0x6f69A7d0B1BE7602381d9cCE6B29F05B9D0b85e6",
+        "id": "0xb7bc5093",
+        "path": "contracts/actions/curveusd/CurveUsdAdjust.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
@@ -2374,14 +2475,14 @@
     },
     {
         "name": "CurveUsdCreate",
-        "address": "0x715B40970dac1cfAf0bB85C4Fe64921b44b3f73e",
+        "address": "0xd44f3984249772fd5a667889e7a478d6beb912c9",
         "id": "0x269ac704",
         "path": "contracts/actions/curveusd/CurveUsdCreate.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0x715B40970dac1cfAf0bB85C4Fe64921b44b3f73e"]
     },
     {
         "name": "CurveUsdPayback",
@@ -2429,47 +2530,51 @@
     },
     {
         "name": "CurveUsdLevCreate",
-        "address": "0x8B5ACd4ce0a43327aaDfc5c42be029898e242393",
+        "address": "0xcbd9aFc2b7532b9eeB3A7EC4ea8Bb4320795d9Ad",
         "id": "0x2465d76e",
         "path": "contracts/actions/curveusd/advanced/CurveUsdLevCreate.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "0",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "CurveUsdRepay",
-        "address": "0xDaDFC60207C17be005ECf2B03f3B31885D22F908",
-        "id": "0x42cd8e33",
-        "path": "contracts/actions/curveusd/advanced/CurveUsdRepay.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "0",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "CurveUsdSwapper",
-        "address": "0xFa2dfE6AF842e3184D305a85d09cfcf220ed4CBd",
-        "id": "0x83a67cc0",
-        "path": "contracts/actions/curveusd/advanced/CurveUsdSwapper.sol",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0xef8Aa00f824360236b6F586CeF8e4071Bd4448b6"]
+        "history": ["0x8B5ACd4ce0a43327aaDfc5c42be029898e242393"]
     },
     {
-        "name": "CurveUsdSelfLiquidateWithColl",
-        "address": "0x6d02300C1A68c63C60AFD713b744bA750aB33aB0",
-        "id": "0xe17ef895",
-        "path": "contracts/actions/curveusd/advanced/CurveUsdSelfLiquidateWithColl.sol",
-        "version": "1.0.0",
+        "name": "CurveUsdRepay",
+        "address": "0xd12785e4834C1421fC7B64ca57d64E886e39b80F",
+        "id": "0x42cd8e33",
+        "path": "contracts/actions/curveusd/advanced/CurveUsdRepay.sol",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xDaDFC60207C17be005ECf2B03f3B31885D22F908"]
+    },
+    {
+        "name": "CurveUsdSwapper",
+        "address": "0xFA8c594b903651F97b27aCADEa83b720cfD7F80b",
+        "id": "0x83a67cc0",
+        "path": "contracts/actions/curveusd/advanced/CurveUsdSwapper.sol",
+        "version": "1.0.3",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": [
+            "0xFa2dfE6AF842e3184D305a85d09cfcf220ed4CBd",
+            "0xef8Aa00f824360236b6F586CeF8e4071Bd4448b6",
+            "0x934489c930C327D5a8B8b1D017cB08223bcF833f"
+        ]
+    },
+    {
+        "name": "CurveUsdSelfLiquidateWithColl",
+        "address": "0x7cE305FC2A18c6820a533AD418dC0A549aFeDcAF",
+        "id": "0xe17ef895",
+        "path": "contracts/actions/curveusd/advanced/CurveUsdSelfLiquidateWithColl.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": ["0x6d02300C1A68c63C60AFD713b744bA750aB33aB0"]
     },
     {
         "name": "CurveUsdBorrowRateTrigger",
@@ -2484,25 +2589,28 @@
     },
     {
         "name": "CurveUsdSoftLiquidationTrigger",
-        "address": "0xb70f9CD0C17c8b3486D64F67b04661Fe40968b18",
+        "address": "0x3558c764258E8084020C357A113FC52D27eDCEEf",
         "id": "0x7ff68c12",
         "path": "contracts/triggers/CurveUsdSoftLiquidationTrigger.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "0",
-        "registryIds": ["0x5D037963b2822a2B13B542477b8706C313b47821"],
+        "registryIds": ["0x5D037963b2822a2B13B542477b8706C313b47821", "0xb70f9CD0C17c8b3486D64F67b04661Fe40968b18"],
         "history": []
     },
     {
         "name": "CurveUsdView",
-        "address": "0x512460CF2Bb80823C135F5DC04D2a1fF258FAA1e",
+        "address": "0x4df1281f9d2303be453e0085881702a4b1358692",
         "id": "0xe19de022",
         "path": "contracts/views/CurveUsdView.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0xa81430a4eC71466264b9ee50403F8d63E8c72B95"]
+        "history": [
+            "0x512460CF2Bb80823C135F5DC04D2a1fF258FAA1e",
+            "0xa81430a4eC71466264b9ee50403F8d63E8c72B95"
+        ]
     },
     {
         "name": "CurveStethPoolDeposit",
@@ -2517,14 +2625,14 @@
     },
     {
         "name": "CurveStethPoolWithdraw",
-        "address": "0x4089731d843Ce52699Fe64F68556aBbD95D70D00",
+        "address": "0x41313695a4829a80c8019Ec8bCC529Fec08F9099",
         "id": "0x212a9416",
         "path": "contracts/actions/curve/stethPool/CurveStethPoolWithdraw.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x4089731d843Ce52699Fe64F68556aBbD95D70D00"]
     },
     {
         "name": "McdClaim",
@@ -2617,17 +2725,18 @@
     },
     {
         "name": "CurveWithdraw",
-        "address": "0x97616a969daaa8e1f27c4902745c88357e54ad6c",
+        "address": "0x7127A1Cd69eC2A1F91661bc0ED40aD5B73898A54",
         "id": "0x7633d6dc",
         "path": "contracts/actions/curve/lp/CurveWithdraw.sol",
-        "version": "1.0.2",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
             "0x7Fb9234E349F85678F6a02A291684A7008Ad78e2",
             "0xA2A6D75417807ebAf8364613018D697f88021771",
-            "0xb6Be5c486dD65c2cb18A388671b348E62307F0B3"
+            "0xb6Be5c486dD65c2cb18A388671b348E62307F0B3",
+            "0x97616a969daaa8e1f27c4902745c88357e54ad6c"
         ]
     },
     {
@@ -2783,6 +2892,94 @@
         "changeTime": 0,
         "registryIds": [],
         "history": ["0x37434dcb2DC049c0068d4b8F95497311F44c5d9e"]
+    },
+    {
+        "name": "LSVSell",
+        "address": "0x0c1bb9A39d4A0EF4215Ade19Ce4F954E8419Dfd7",
+        "id": "0x9fde5493",
+        "path": "contracts/actions/lsv/LSVSupply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVSupply",
+        "address": "0x984c00DC098c98bed1CDfe2Ed786Fe1443da6671",
+        "id": "0x2b24ec36",
+        "path": "contracts/actions/lsv/LSVSupply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVBorrow",
+        "address": "0x7dFB434527Fdb39854156cDBa9bF4799E36E7e82",
+        "id": "0xc173a756",
+        "path": "contracts/actions/lsv/LSVBorrow.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVWithdraw",
+        "address": "0x0A4Ef5ADf759064b546441a50109eCbC2528A455",
+        "id": "0xbc21da53",
+        "path": "contracts/actions/lsv/LSVWithdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVPayback",
+        "address": "0x10749CE97583dBcEb54a083386CC8438C4e0FE65",
+        "id": "0x3179400b",
+        "path": "contracts/actions/lsv/LSVPayback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVProfitTracker",
+        "address": "0xa5941F267995553dA9369F04Dc02f9411EEb2F12",
+        "id": "0x58baaf3c",
+        "path": "contracts/utils/LSVProfitTracker.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVProxyRegistry",
+        "address": "0xa8a3c86c4A2DcCf350E84D2b3c46BDeBc711C16e",
+        "id": "0xc2948a6c",
+        "path": "contracts/utils/LSVProxyRegistry.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LSVView",
+        "address": "0xFAb98E139EBeC1Ed76d226b6bd6E4C5f66B2fE1b",
+        "id": "0x373e1531",
+        "path": "contracts/views/LSVView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": ["0x328d7a29f1cf211c58a910e498e326e7f419f8d6"]
     },
     {
         "name": "CompoundMonitorProxy",

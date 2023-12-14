@@ -442,49 +442,53 @@ const tokenPriceHelperTest = async () => {
         before(async () => {
             tokenPriceHelperAddr = await getAddrFromRegistry('TokenPriceHelper');
             tokenPriceHelper = await hre.ethers.getContractAt('TokenPriceHelper', tokenPriceHelperAddr);
-
-            tokenHelperOld = await hre.ethers.getContractAt('TokenPriceHelper', '0x80536cb79341972a5Ef679dF5B70bB4A40a53d96');
+            tokenHelperOld = await hre.ethers.getContractAt('TokenPriceHelper', '0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b');
         });
 
         for (let i = 0; i < assets.length; i++) {
             it(`... should get USD and ETH price for ${assets[i].symbol} `, async () => {
                 if (assets[i].symbol === 'OP') return;
                 if (assets[i].symbol === 'SUSHI') return;
+                if (assets[i].symbol === 'USDC.e') return;
+                if (assets[i].symbol === 'ARB') return;
+                if (assets[i].symbol === 'GMX') return;
                 const assetInfo = getAssetInfo(assets[i].symbol);
-                const priceInUSD = await tokenPriceHelper.getPriceInUSD(assetInfo.address);
-                const aaveInUSD = await tokenPriceHelper.getAaveTokenPriceInUSD(assetInfo.address);
-                const priceInETH = await tokenPriceHelper.getPriceInETH(assetInfo.address);
-                const aaveInETH = await tokenPriceHelper.getAaveTokenPriceInETH(assetInfo.address);
+                const tokenAddr = assetInfo.address;
+                const priceInUSD = await tokenPriceHelper.getPriceInUSD(tokenAddr);
 
-                const priceInUSDOld = await tokenHelperOld.getPriceInUSD(assetInfo.address);
-                const aaveInUSDOld = await tokenHelperOld.getAaveTokenPriceInUSD(assetInfo.address);
-                const priceInETHOld = await tokenHelperOld.getPriceInETH(assetInfo.address);
-                const aaveInETHOld = await tokenHelperOld.getAaveTokenPriceInETH(assetInfo.address);
+                const oldPriceUSD = await tokenHelperOld.getPriceInUSD(assetInfo.address);
+                /*
+                const priceInETH = await tokenPriceHelper.getPriceInETH(tokenAddr);
+
+                const clInUSD = await tokenPriceHelper.getChainlinkPriceInUSD(tokenAddr, false);
+                const clPriceInETH = await tokenPriceHelper.getChainlinkPriceInETH(tokenAddr);
+
+                const aaveInUSD = await tokenPriceHelper.getAaveTokenPriceInUSD(tokenAddr);
+                const aaveInETH = await tokenPriceHelper.getAaveTokenPriceInETH(tokenAddr);
+
+                const aaveV3InUSD = await tokenPriceHelper.getAaveV3TokenPriceInUSD(tokenAddr);
+                const aaveV3InETH = await tokenPriceHelper.getAaveV3TokenPriceInETH(tokenAddr);
+
+                const sparkInUSD = await tokenPriceHelper.getSparkTokenPriceInUSD(tokenAddr);
+                const sparkInETH = await tokenPriceHelper.getSparkTokenPriceInETH(tokenAddr);
+
                 console.log(`-----------------${assets[i].symbol}`);
+                console.log(priceInUSD);
+                console.log(clInUSD);
+                console.log(aaveInUSD);
+                console.log(aaveV3InUSD);
+                console.log(sparkInUSD);
+                console.log('');
+                console.log(priceInETH);
+                console.log(clPriceInETH);
+                console.log(aaveInETH);
+                console.log(aaveV3InETH);
+                console.log(sparkInETH);
+                console.log('------------------------');
+                */
 
-                if (priceInUSD.toString() !== priceInUSDOld.toString()) {
-                    console.log('-----------------1');
-                    console.log(priceInUSD);
-                    console.log(priceInUSDOld);
-                }
-                if (aaveInUSD.toString() !== aaveInUSDOld.toString()) {
-                    console.log('-----------------2');
-
-                    console.log(aaveInUSD);
-                    console.log(aaveInUSDOld);
-                }
-                if (priceInETH.toString() !== priceInETHOld.toString()) {
-                    console.log('-----------------3');
-
-                    console.log(priceInETH);
-                    console.log(priceInETHOld);
-                }
-                if (aaveInETH.toString() !== aaveInETHOld.toString()) {
-                    console.log('-----------------4');
-
-                    console.log(aaveInETH);
-                    console.log(aaveInETHOld);
-                }
+                if (oldPriceUSD.toString() !== priceInUSD.toString()) console.log(assets[i].symbol);
+                // await new Promise((r) => setTimeout(r, 3000));
             });
         }
     });

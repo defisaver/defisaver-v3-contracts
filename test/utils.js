@@ -2,9 +2,8 @@
 /* eslint-disable no-await-in-loop */
 // const { default: curve } = require('@curvefi/api');
 const curve = import('@curvefi/api');
-
-const hre = require('hardhat');
 const fs = require('fs');
+const hre = require('hardhat');
 const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const storageSlots = require('./storageSlots.json');
@@ -54,6 +53,7 @@ const addrs = {
         ADMIN_ACC: '0x25eFA336886C74eA8E282ac466BdCd0199f85BB9',
         DFS_REG_CONTROLLER: '0x6F6DaE1bCB60F67B2Cb939dBE565e8fD03F6F002',
         AVG_GAS_PRICE: 100,
+        AAVE_V3_POOL_DATA_PROVIDER: '0x7B4EB56E7CD4b454BA8ff71E4518426369a138a3',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -79,6 +79,7 @@ const addrs = {
         ADMIN_VAULT: '0x136b1bEAfff362530F98f10E3D8C38f3a3F3d38C',
         ADMIN_ACC: '0x98118fD1Da4b3369AEe87778168e97044980632F',
         DFS_REG_CONTROLLER: '0x493C0dE902E6916128A223F66F37d3b6ee8fA408',
+        AAVE_V3_POOL_DATA_PROVIDER: '0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654',
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -108,13 +109,34 @@ const addrs = {
         ADMIN_VAULT: '0xd47D8D97cAd12A866900eEc6Cde1962529F25351',
         ADMIN_ACC: '0x6AFEA85cFAB61e3a55Ad2e4537252Ec05796BEfa',
         DFS_REG_CONTROLLER: '0x7702fa16b0cED7e44fF7Baeed04bF165f58eE51D',
+        AAVE_V3_POOL_DATA_PROVIDER: '0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654',
         AVG_GAS_PRICE: 0.5,
     },
-    kovan: {
-        PROXY_REGISTRY: '0xF9722E05B68E5ad5D6E1674C4d6BfE11791a1E33',
-    },
-    kovanOptimism: {
-        PROXY_REGISTRY: '0x1fA11C699629E43005fd64f4DA36d9Eb30333ef9',
+    base: {
+        PROXY_REGISTRY: '0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d',
+        REGISTRY_ADDR: '0x347FB634271F666353F23A3362f3935D96F97476',
+        OWNER_ACC: '0xBaBe2409dBD359453E5292d684fF324A638801bF',
+        WETH_ADDRESS: '0x4200000000000000000000000000000000000006',
+        DAI_ADDRESS: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
+        USDC_ADDR: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
+        EXCHANGE_OWNER_ADDR: '0xC4D4b4F2Df76f9952E6e0Dc79861582A5b7269c3',
+        SAVER_EXCHANGE_ADDR: '0x2A588cBCBd5e6c6ba7ED0E260B8107F599017DDE',
+        PROXY_AUTH_ADDR: '0xD34BBE7398F7F08952b033bbaF2D2C84231dCEdc',
+        AAVE_MARKET: '0xe20fCBdBfFC4Dd138cE8b2E6FBb6CB49777ad64D',
+        StrategyProxy: '',
+        SubProxy: '',
+        UNISWAP_V3_WRAPPER: '0xBd2d2d4718C24B8D35168480553b1F5a11f9884b',
+        AAVE_V3_VIEW: '0x125b8b832BD7F2EBD77Eef148A6319AdE751C44b',
+        AAVE_SUB_PROXY: '',
+        AVG_GAS_PRICE: 0.001,
+        TOKEN_GROUP_REGISTRY: '0xa898078f369A78CE6b8023715e8f6d2Ad7d2719f',
+        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        ZRX_ALLOWLIST_ADDR: '0x169D6E128238ebabF86032Ae9da65938eaD7F69e',
+        ZRX_ALLOWLIST_OWNER: '',
+        ADMIN_VAULT: '0xD8E67968d8a0df4beCf2D50daE1e34d4d80C701C',
+        ADMIN_ACC: '0xF8EC1967A719027A95883a89579e7A77699899e4',
+        DFS_REG_CONTROLLER: '0x50bCFC115283dF48Ab6382551B9B93b08E197747',
+        AAVE_V3_POOL_DATA_PROVIDER: '0x2d8A3C5677189723C4cB8873CfC9C8976FDF38Ac',
     },
 };
 
@@ -746,7 +768,7 @@ const formatMockExchangeObj = async (
 ) => {
     if (!wrapper) {
         // eslint-disable-next-line no-param-reassign
-        wrapper = await getAddrFromRegistry('MockExchangeWrapper');
+        wrapper = await getContractFromRegistry('MockExchangeWrapper');
     }
 
     const rateDecimals = 18 + destTokenInfo.decimals - srcTokenInfo.decimals;
@@ -760,7 +782,7 @@ const formatMockExchangeObj = async (
 
     await setBalance(
         destTokenInfo.addresses[chainIds[network]],
-        wrapper,
+        wrapper.address,
         expectedOutput,
     );
 
@@ -772,7 +794,7 @@ const formatMockExchangeObj = async (
         0,
         0,
         nullAddress,
-        wrapper,
+        wrapper.address,
         hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [rate]),
         [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
     ];
@@ -821,44 +843,42 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, u
     ];
 };
 
+// eslint-disable-next-line no-underscore-dangle
+let _curveObj;
+const curveApiInit = async () => {
+    if (!_curveObj) {
+        _curveObj = ((await curve).default);
+        await _curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
+        // Fetch factory pools
+        await _curveObj.factory.fetchPools(true);
+        await _curveObj.crvUSDFactory.fetchPools(true);
+        await _curveObj.EYWAFactory.fetchPools(true);
+        await _curveObj.cryptoFactory.fetchPools(true);
+        await _curveObj.tricryptoFactory.fetchPools(true);
+    }
+    return _curveObj;
+};
+
 const formatExchangeObjCurve = async (
     srcAddr,
     destAddr,
     amount,
     wrapper,
 ) => {
-    const curveObj = ((await curve).default);
-    await curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
-
-    await curveObj.factory.fetchPools();
-    await curveObj.crvUSDFactory.fetchPools();
-    await curveObj.EYWAFactory.fetchPools();
-    await curveObj.cryptoFactory.fetchPools();
-    await curveObj.tricryptoFactory.fetchPools();
+    const curveObj = await curveApiInit();
 
     const { route: sdkRoute } = await curveObj.router.getBestRouteAndOutput(
         srcAddr,
         destAddr,
         amount,
     );
-    const swapParams = sdkRoute.map((e) => [e.i, e.j, e.swapType]).concat(
-        [...Array(4 - sdkRoute.length).keys()].map(
-            () => [0, 0, 0],
-        ),
-    );
-    const route = [srcAddr].concat(
-        ...sdkRoute.map((e) => [e.poolAddress, e.outputCoinAddress]),
-        ...[...Array(8 - (sdkRoute.length) * 2).keys()].map(
-            () => [nullAddress],
-        ),
-    );
+    const args = curveObj.router.getArgs(sdkRoute);
 
     const exchangeData = hre.ethers.utils.defaultAbiCoder.encode(
-        ['address[9]', 'uint256[3][4]'],
-        [route, swapParams],
+        ['address[11]', 'uint256[5][5]', 'address[5]'],
+        // eslint-disable-next-line no-underscore-dangle
+        [args._route, args._swapParams, args._pools],
     );
-
-    console.log(route, swapParams);
 
     return [
         srcAddr,
@@ -873,47 +893,6 @@ const formatExchangeObjCurve = async (
         [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
     ];
 };
-
-// const getRouteForCurveSwapper = async (
-//     srcAddr,
-//     destAddr,
-//     amount,
-//     wrapper,
-// ) => {
-//     const curveObj = ((await curve).default);
-//     await curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
-
-//     await curveObj.factory.fetchPools();
-//     await curveObj.crvUSDFactory.fetchPools();
-//     await curveObj.EYWAFactory.fetchPools();
-//     await curveObj.cryptoFactory.fetchPools();
-//     await curveObj.tricryptoFactory.fetchPools();
-
-//     const { route: sdkRoute } = await curveObj.router.getBestRouteAndOutput(
-//         srcAddr,
-//         destAddr,
-//         '1000',
-//     );
-//     const swapParams = sdkRoute.map((e) => [e.i, e.j, e.swapType]).concat(
-//         [...Array(4 - sdkRoute.length).keys()].map(
-//             () => [0, 0, 0],
-//         ),
-//     );
-//     const route = [srcAddr].concat(
-//         ...sdkRoute.map((e) => [e.poolAddress, e.outputCoinAddress]),
-//         ...[...Array(8 - (sdkRoute.length) * 2).keys()].map(
-//             () => [nullAddress],
-//         ),
-//     );
-
-//     return {
-//         swapParamsCompact,
-//         secondAddr:
-//         thirdAddr:
-
-//     }
-
-// };
 
 const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
     console.log({ srcAddr, destAddr });
@@ -1004,10 +983,12 @@ const getProxyAuth = async (proxyAddr, addrWithAuth) => {
     return hasPermission;
 };
 
-const setNewExchangeWrapper = async (acc, newAddr) => {
+const setNewExchangeWrapper = async (acc, newAddr, isFork = false) => {
     const exchangeOwnerAddr = addrs[network].EXCHANGE_OWNER_ADDR;
     await sendEther(acc, exchangeOwnerAddr, '1');
-    await impersonateAccount(exchangeOwnerAddr);
+    if (!isFork) {
+        await impersonateAccount(exchangeOwnerAddr);
+    }
 
     const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
 
@@ -1016,7 +997,9 @@ const setNewExchangeWrapper = async (acc, newAddr) => {
     const registryByOwner = registry.connect(signer);
 
     await registryByOwner.addWrapper(newAddr, { gasLimit: 300000 });
-    await stopImpersonatingAccount(exchangeOwnerAddr);
+    if (!isFork) {
+        await stopImpersonatingAccount(exchangeOwnerAddr);
+    }
 };
 
 const depositToWeth = async (amount, signer) => {
@@ -1220,6 +1203,7 @@ const resetForkToBlock = async (block) => {
         rpcUrl = process.env[`${network.toUpperCase()}_NODE`];
     }
 
+    /// `ProviderError: TypeError [ERR_INVALID_URL]: Invalid URL` on localBase network
     if (block) {
         await hre.network.provider.request({
             method: 'hardhat_reset',
@@ -1392,7 +1376,5 @@ module.exports = {
     setContractAt,
     getContractFromRegistry,
     filterEthersObject,
-    curveApiInit: async () => curve.init('Alchemy', {
-        url: hre.network.url,
-    }),
+    curveApiInit,
 };

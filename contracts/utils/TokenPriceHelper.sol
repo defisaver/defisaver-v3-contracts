@@ -65,6 +65,12 @@ contract TokenPriceHelper is DSMath, UtilHelper {
             price = int256(getAaveTokenPriceInUSD(_inputTokenAddr));
         }
         if (price == 0){
+            price = int256(getAaveV3TokenPriceInUSD(_inputTokenAddr));
+        }
+        if (price == 0){
+            price = int256(getSparkTokenPriceInUSD(_inputTokenAddr));
+        }
+        if (price == 0){
             return 0;
         }
 
@@ -94,9 +100,14 @@ contract TokenPriceHelper is DSMath, UtilHelper {
         uint256 chainlinkPriceInETH = uint256(getChainlinkPriceInETH(chainlinkTokenAddr));
         if (chainlinkPriceInETH != 0) return chainlinkPriceInETH;
 
-
         uint256 aavePriceInETH = getAaveTokenPriceInETH(_inputTokenAddr);
         if (aavePriceInETH != 0) return aavePriceInETH;
+
+        uint256 aaveV3PriceInETH = getAaveV3TokenPriceInETH(_inputTokenAddr);
+        if (aaveV3PriceInETH != 0) return aaveV3PriceInETH;
+
+        uint256 sparkPriceInETH = getSparkTokenPriceInETH(_inputTokenAddr);
+        if (sparkPriceInETH != 0) return sparkPriceInETH;
         
         return 0;
     }
@@ -156,7 +167,11 @@ contract TokenPriceHelper is DSMath, UtilHelper {
     function getAaveTokenPriceInETH(address _tokenAddr) public view returns (uint256 price) {
         address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_MARKET).getPriceOracle();
 
-        price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr);
+        try IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr) returns (uint256 tokenPrice){
+            price = tokenPrice;
+        } catch {
+            price = 0;
+        }
     }
 
     /// @dev if price isn't found this returns 0
@@ -165,5 +180,41 @@ contract TokenPriceHelper is DSMath, UtilHelper {
         uint256 ethPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
 
         return wmul(tokenAavePriceInETH, ethPriceInUSD);
+    }
+
+    function getAaveV3TokenPriceInUSD(address _tokenAddr) public view returns (uint256 price) {
+        address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_V3_MARKET).getPriceOracle();
+
+        try IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr) returns (uint256 tokenPrice) {
+            price = tokenPrice;
+        } catch {
+            price = 0;
+        }
+    }
+
+    /// @dev if price isn't found this returns 0
+    function getAaveV3TokenPriceInETH(address _tokenAddr) public view returns (uint256) {
+        uint256 tokenAavePriceInUSD = getAaveV3TokenPriceInUSD(_tokenAddr);
+        uint256 ethPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
+
+        return wdiv(tokenAavePriceInUSD, ethPriceInUSD);
+    }
+
+    function getSparkTokenPriceInUSD(address _tokenAddr) public view returns (uint256 price) {
+        address priceOracleAddress = ILendingPoolAddressesProviderV2(SPARK_MARKET).getPriceOracle();
+
+        try IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr) returns (uint256 tokenPrice) {
+            price = tokenPrice;
+        } catch {
+            price = 0;
+        }
+    }
+
+    /// @dev if price isn't found this returns 0
+    function getSparkTokenPriceInETH(address _tokenAddr) public view returns (uint256) {
+        uint256 tokenSparkPriceInUSD = getSparkTokenPriceInUSD(_tokenAddr);
+        uint256 ethPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
+
+        return wdiv(tokenSparkPriceInUSD, ethPriceInUSD);
     }
 }

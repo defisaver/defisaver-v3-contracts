@@ -1,7 +1,8 @@
 const { getAssetInfo } = require('@defisaver/tokens');
 const hre = require('hardhat');
-const { getAddrFromRegistry, balanceOf, getContractFromRegistry, BN2Float } = require('./utils');
-
+const {
+    getAddrFromRegistry, balanceOf, getContractFromRegistry, BN2Float,
+} = require('./utils');
 
 const collChangeId = { SUPPLY: 0, WITHDRAW: 1 };
 const debtChangeId = { PAYBACK: 0, BORROW: 1 };
@@ -59,7 +60,9 @@ const prefetchedHints = {
     },
 };
 
-const getHints = async (troveOwner, actionId, from, collAmount, LUSDamount, actionId2) => {
+const getHints = async (
+    troveOwner, actionId, from, collAmount, LUSDamount, actionId2, isFork = false,
+) => {
     const blockNum = hre.ethers.provider.blockNumber;
     const paramsSerialized = JSON.stringify(
         {
@@ -75,7 +78,7 @@ const getHints = async (troveOwner, actionId, from, collAmount, LUSDamount, acti
 
     if (hints !== undefined) return hints;
 
-    const liquityView = await getContractFromRegistry('LiquityView', undefined, undefined, true);
+    const liquityView = await getContractFromRegistry('LiquityView', undefined, undefined, isFork);
 
     const NICR = await liquityView['predictNICRForAdjust(address,uint8,uint8,address,uint256,uint256)'](troveOwner, actionId, actionId2, from, collAmount, LUSDamount);
 
@@ -153,6 +156,12 @@ const getTroveInfo = async (troveOwner) => {
     return liquityView['getTroveInfo(address)'](troveOwner);
 };
 
+const getDebtInFront = async (troveOwner) => {
+    const liquityView = await hre.ethers.getContractAt('LiquityView', getAddrFromRegistry('LiquityView'));
+
+    return liquityView['getDebtInFront(address,uint256,uint256)'](troveOwner, 0, 1000);
+};
+
 const getRatio = async (liquityView, troveOwner) => {
     const {
         troveStatus,
@@ -168,10 +177,11 @@ const getRatio = async (liquityView, troveOwner) => {
 module.exports = {
     getHints,
     getRedemptionHints,
-    LiquityActionIds,
     getTroveInfo,
     findInsertPosition,
+    getDebtInFront,
     getRatio,
+    LiquityActionIds,
     collChangeId,
     debtChangeId,
 };

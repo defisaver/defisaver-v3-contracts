@@ -66,7 +66,6 @@ contract CurveStethPoolWithdraw is ActionBase, CurveHelper {
         require(_params.to != address(0), "to cant be 0x0");
 
         STE_CRV_ADDR.pullTokensIfNeeded(_params.from, _params.maxBurnAmount);
-        STE_CRV_ADDR.approveToken(CURVE_STETH_POOL_ADDR, _params.maxBurnAmount);
 
         burnedLp = ICurveStethPool(CURVE_STETH_POOL_ADDR).remove_liquidity_imbalance(
             _params.amounts,

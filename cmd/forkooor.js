@@ -2,10 +2,11 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-use-before-define */
 /* eslint-disable import/no-extraneous-dependencies */
-const hre = require('hardhat');
-require('dotenv-safe').config();
+const path = require('path');
 const fs = require('fs');
 const { spawnSync } = require('child_process');
+const hre = require('hardhat');
+require('dotenv-safe').config();
 const {
     getAssetInfo, ilks, assets, set, utils: { compare },
 } = require('@defisaver/tokens');
@@ -19,7 +20,6 @@ const {
     stringify,
 } = require('envfile');
 
-const path = require('path');
 const {
     createFork, topUp, chainIds,
 } = require('../scripts/utils/fork');
@@ -140,6 +140,9 @@ const {
     createCompFLV2RepayStrategy,
     createCompV2BoostStrategy,
     createCompFLV2BoostStrategy,
+    createLiquityDsrPaybackStrategy,
+    createLiquityDsrSupplyStrategy,
+    createLiquityDebtInFrontRepayStrategy,
 } = require('../test/strategies');
 
 const {
@@ -161,9 +164,11 @@ const {
     subAaveV2AutomationStrategy,
     subSparkCloseBundle,
     subSparkAutomationStrategy,
+    subLiquityDebtInFrontRepayStrategy,
+    subAaveV3CloseWithMaximumGasPriceBundle,
 } = require('../test/strategy-subs');
 
-const { getTroveInfo } = require('../test/utils-liquity');
+const { getTroveInfo, getDebtInFront } = require('../test/utils-liquity');
 
 const {
     createMcdTrigger,
@@ -172,6 +177,7 @@ const {
     RATIO_STATE_UNDER,
 } = require('../test/triggers');
 // const { deployCloseToDebtBundle, deployCloseToCollBundle } = require('../test/strategies/l2/l2-tests');
+const { deployCloseToCollWithMaximumGasPriceBundle, deployCloseToDebtWithMaximumGasPriceBundle } = require('../test/strategies/aave/tests');
 const { createRepayBundle, createBoostBundle } = require('../test/strategies/mcd/mcd-tests');
 
 const {
@@ -1158,6 +1164,8 @@ const createLiquityTrove = async (coll, debt, sender) => {
 
     setNetwork(network);
 
+    await redeploy('LiquityView', REGISTRY_ADDR, false, true);
+
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
@@ -1182,6 +1190,13 @@ const createLiquityTrove = async (coll, debt, sender) => {
         await tx.wait();
 
         console.log(`Trove created at proxy address: ${proxy.address}`);
+        const debtInFront = await getDebtInFront(proxy.address);
+
+        const troveInfo = await getTroveInfo(proxy.address);
+
+        console.log('Trove ratio: ', troveInfo.collAmount.mul(troveInfo.collPrice).div(troveInfo.debtAmount) / 1e16);
+
+        console.log('DebtInFront ', debtInFront.debt / 1e18);
     } catch (err) {
         console.log(`Error opening trove at proxy address: ${proxy.address}`);
 
@@ -1907,6 +1922,92 @@ const subAaveClose = async (
     ).then((subId) => console.log(`subId: ${subId}`));
 };
 
+const subAaveCloseWithMaximumGasPrice = async (
+    collSymbol,
+    debtSymbol,
+    triggerBaseSymbol,
+    triggerQuoteSymbol,
+    targetQuotePrice,
+    priceState,
+    maximumGasPrice,
+    sender,
+    closeToColl = false,
+) => {
+    let network = 'mainnet';
+    if (process.env.TEST_CHAIN_ID) {
+        network = process.env.TEST_CHAIN_ID;
+    }
+
+    configure({
+        chainId: chainIds[network],
+        testMode: true,
+    });
+
+    setNetwork(network);
+
+    let proxy;
+    let senderAcc = (await hre.ethers.getSigners())[0];
+    if (sender) {
+        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
+        // eslint-disable-next-line no-underscore-dangle
+        senderAcc.address = senderAcc._address;
+    }
+    proxy = await getProxy(senderAcc.address);
+    proxy = sender ? proxy.connect(senderAcc) : proxy;
+
+    await topUp(getOwnerAddr());
+    await topUp(senderAcc.address);
+
+    const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
+    const poolAddress = await aaveMarketContract.getPool();
+    const pool = await hre.ethers.getContractAt('IPoolV3', poolAddress);
+
+    const baseAssetInfo = getAssetInfo(triggerBaseSymbol);
+    const quoteAssetInfo = getAssetInfo(triggerQuoteSymbol);
+    const collAssetInfo = getAssetInfo(collSymbol);
+    const debtAssetInfo = getAssetInfo(debtSymbol);
+    const collReserveData = await pool.getReserveData(collAssetInfo.address);
+    const debtReserveData = await pool.getReserveData(debtAssetInfo.address);
+    const collAssetId = collReserveData.id;
+    const debtAssetId = debtReserveData.id;
+
+    // const priceTriggerAddr = await redeploy(
+    //     'AaveV3QuotePriceTrigger', undefined, false, true,
+    // ).then((c) => c.address);
+    // const gasPriceTriggerAddr = await redeploy(
+    //     'GasPriceTrigger', undefined, false, true,
+    // ).then((c) => c.address);
+    // const viewAddr = await redeploy(
+    //     'AaveV3OracleView', undefined, false, true,
+    // ).then((c) => c.address);
+
+    // console.log('AaveQuotePriceTrigger address:', priceTriggerAddr);
+    // console.log('MaximumGasPriceTrigger address:', gasPriceTriggerAddr);
+    // console.log('AaveV3OracleView address:', viewAddr);
+
+    const closeToDebtId = await deployCloseToDebtWithMaximumGasPriceBundle(proxy, true);
+    const closeToCollId = await deployCloseToCollWithMaximumGasPriceBundle(proxy, true);
+    const bundleId = closeToColl ? closeToCollId : closeToDebtId;
+
+    // const bundleId = closeToColl ? '13' : '12'; //TODO hardcode IDs
+
+    const formattedPrice = (targetQuotePrice * 1e8).toString();
+
+    await subAaveV3CloseWithMaximumGasPriceBundle(
+        proxy,
+        bundleId,
+        baseAssetInfo.address,
+        quoteAssetInfo.address,
+        formattedPrice,
+        priceState,
+        maximumGasPrice,
+        collAssetInfo.address,
+        collAssetId,
+        debtAssetInfo.address,
+        debtAssetId,
+    ).then((sub) => console.log(`sub: ${JSON.stringify(sub, null, 2)}`));
+};
+
 const subSparkAutomation = async (
     minRatio,
     maxRatio,
@@ -2396,7 +2497,7 @@ const updateSubDataCompV2 = async (
     sender,
 ) => {
     const { proxy } = await forkSetup(sender);
-    console.log("real sender and proxy", {sender, proxy});
+    console.log('real sender and proxy', { sender, proxy });
 
     const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
     const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');
@@ -2428,6 +2529,45 @@ const deployLiquityContracts = async () => {
         return address;
     });
     await getContractFromRegistry('LiquityRatioCheck', undefined, undefined, true);
+};
+
+const liqDebtInFrontRepaySub = async (
+    maxDebtInFront,
+    ratioIncrease,
+    sender,
+) => {
+    const { proxy } = await forkSetup(sender);
+
+    const ratioIncreaseFormatted = hre.ethers.utils.parseUnits(ratioIncrease, '16');
+    const maxDebtInFrontFormatted = hre.ethers.utils.parseUnits(maxDebtInFront, '18');
+
+    const latestStrategyId = (await getLatestStrategyId());
+
+    const strategyId = 75;
+
+    // check if our strategy is deployed, and if not deploy it
+    if (+latestStrategyId < 75) {
+        await openStrategyAndBundleStorage(true);
+
+        const strategyData = createLiquityDebtInFrontRepayStrategy();
+
+        await createStrategy(proxy, ...strategyData, true);
+
+        await redeploy('LiquityDebtInFrontWithLimitTrigger', REGISTRY_ADDR, false, true);
+        await redeploy('LiquityRatioIncreaseCheck', REGISTRY_ADDR, false, true);
+        await redeploy('LiquityView', REGISTRY_ADDR, false, true);
+
+        console.log(`Strategy deployed id: ${strategyId}`);
+    }
+
+    const { subId, strategySub } = await subLiquityDebtInFrontRepayStrategy(
+        proxy,
+        strategyId,
+        maxDebtInFrontFormatted,
+        ratioIncreaseFormatted,
+    );
+
+    console.log('Liquity debtInFront repay position subed', subId);
 };
 
 const subLiquityAutomation = async (
@@ -3182,6 +3322,14 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         });
 
     program
+        .command('sub-liquity-debt-in-front-repay <minDebtInFront> <ratioIncrease> [senderAddr]')
+        .description('Subscribes a bond to the rebonding strategy')
+        .action(async (minDebtInFront, ratioIncrease, senderAddr) => {
+            await liqDebtInFrontRepaySub(minDebtInFront, ratioIncrease, senderAddr);
+            process.exit(0);
+        });
+
+    program
         .command('sub-mcd-trailing-close-to-coll <vaultId> <type> <percentage> [senderAddr]')
         .description('Subscribes to a Trailing Mcd close to coll strategy')
         .action(async (vaultId, type, percentage, senderAddr) => {
@@ -3276,6 +3424,32 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         });
 
     program
+        .command('sub-aave-close-to-debt-with-max-gasprice <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> <maximumGasPrice> [senderAddr]')
+        .description('Subscribes to AaveV3 close to debt with maximum gas price bundle')
+        .action(async (
+            collSymbol,
+            debtSymbol,
+            triggerBaseSymbol,
+            triggerQuoteSymbol,
+            triggerTargetPrice,
+            triggerState,
+            maximumGasPrice,
+            senderAddr,
+        ) => {
+            await subAaveCloseWithMaximumGasPrice(
+                collSymbol,
+                debtSymbol,
+                triggerBaseSymbol,
+                triggerQuoteSymbol,
+                triggerTargetPrice,
+                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                maximumGasPrice,
+                senderAddr,
+            );
+            process.exit(0);
+        });
+
+    program
         .command('sub-aave-close-to-coll <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
         .description('Subscribes to AaveV3 close to collateral bundle')
         .action(async (
@@ -3294,6 +3468,33 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 triggerQuoteSymbol,
                 triggerTargetPrice,
                 triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                senderAddr,
+                true,
+            );
+            process.exit(0);
+        });
+
+    program
+        .command('sub-aave-close-to-coll-with-max-gasprice <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> <maximumGasPrice> [senderAddr]')
+        .description('Subscribes to AaveV3 close to collateral with maximum gasprice bundle')
+        .action(async (
+            collSymbol,
+            debtSymbol,
+            triggerBaseSymbol,
+            triggerQuoteSymbol,
+            triggerTargetPrice,
+            triggerState,
+            maximumGasPrice,
+            senderAddr,
+        ) => {
+            await subAaveCloseWithMaximumGasPrice(
+                collSymbol,
+                debtSymbol,
+                triggerBaseSymbol,
+                triggerQuoteSymbol,
+                triggerTargetPrice,
+                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                maximumGasPrice,
                 senderAddr,
                 true,
             );
@@ -3891,6 +4092,36 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
             const deployments = await sparkContracts.reduce(async (acc, name) => ({ ...(await acc), [name]: await redeploy(name, addrs[network].REGISTRY_ADDR, false, true).then((c) => c.address) }), {});
             console.log(deployments);
 
+            process.exit(0);
+        });
+    program
+        .command('deploy-liquity-dsr-strategies')
+        .description('Deploys Liquity Dsr strategies as well as updated McdView')
+        .action(async () => {
+            let network = 'mainnet';
+
+            if (process.env.TEST_CHAIN_ID) {
+                network = process.env.TEST_CHAIN_ID;
+            }
+
+            if (latestStrategyId >= 70) return;
+
+            const contractsToDeploy = [
+                'McdView',
+            ];
+
+            const deployments = await contractsToDeploy.reduce(async (acc, name) => ({ ...(await acc), [name]: await redeploy(name, addrs[network].REGISTRY_ADDR, false, true).then((c) => c.address) }), {});
+            console.log(deployments);
+
+            const latestStrategyId = await getLatestStrategyId();
+
+            await openStrategyAndBundleStorage(true);
+            const paybackStrategy = createLiquityDsrPaybackStrategy();
+            const supplyStrategy = createLiquityDsrSupplyStrategy();
+
+            const paybackStrategyId = await createStrategy(undefined, ...paybackStrategy, true);
+            const supplyStrategyId = await createStrategy(undefined, ...supplyStrategy, true);
+            console.log({ paybackStrategyId, supplyStrategyId });
             process.exit(0);
         });
     program.parse(process.argv);

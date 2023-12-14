@@ -101,7 +101,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
                 _exchangeData.srcAmount,
                 _exchangeData.srcAmount,
                 0
-        );
+            );
             return (_exchangeData.srcAmount, sameAssetLogData);
         }
 
@@ -131,7 +131,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         /// @dev only check for custom fee if a non standard fee is sent
         if (!_isDirect) {
             if (_exchangeData.dfsFeeDivider != RECIPE_FEE) {
-                _exchangeData.dfsFeeDivider = TokenGroupRegistry(GROUP_REGISTRY).getFeeForTokens(
+                _exchangeData.dfsFeeDivider = TokenGroupRegistry(TOKEN_GROUP_REGISTRY).getFeeForTokens(
                     _exchangeData.srcAddr,
                     _exchangeData.destAddr
                 );

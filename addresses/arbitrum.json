@@ -55,10 +55,10 @@
       "history": ["0x43Af8734096941271eC637549661DCeA64052575"]
     },
     {
-        "name": "AaveSubProxy",
+        "name": "AaveV3SubProxy",
         "address": "0x29a172f04CF9C6a79EdF4dD2744F2d260b8b8FE4",
-        "id": "0xd11b2581",
-        "path": "contracts/core/l2/AaveSubProxy.sol",
+        "id": "0x9275abae",
+        "path": "contracts/actions/aaveV3/AaveV3SubProxy.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
@@ -122,14 +122,14 @@
     },
     {
         "name": "CurveWrapperV3",
-        "address": "0xB82b43c4c0ABF41Dfc342571C330964fF576a9b3",
+        "address": "0x6bfa86D54B75DcFEb58C6A80FadE947E180C3616",
         "id": "0xb856c9af",
         "path": "contracts/exchangeV3/wrappersV3/CurveWrapperV3.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xB82b43c4c0ABF41Dfc342571C330964fF576a9b3"]
     },
     {
       "name": "ZeroxWrapper",
@@ -165,8 +165,19 @@
       "history": []
     },
     {
+      "name": "KyberInputScalingHelper",
+      "address": "0xf446fb6bdd3133f451d6cdce17812662161e9420",
+      "id": "0x559d99f5",
+      "path": "contracts/utils/KyberInputScalingHelper",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "KyberAggregatorWrapper",
-      "address": "0x51ef3d99c01bb8d7190fb51fa732e599acef59f6",
+      "address": "0xe8ec0f8c046817c3a7255aec40b48b7e54dd98fc",
       "id": "0x1abf4ed0",
       "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
       "version": "1.0.0",
@@ -174,6 +185,9 @@
       "changeTime": 0,
       "registryIds": [],
       "history": [
+        "0x7a77e9C66867da4eEf0feb9eA1759Ff9e51e7D4f",
+        "0x0df2d6691aee2486a3d1cc42e844c7f780f3ff1f",
+        "0x51ef3d99c01bb8d7190fb51fa732e599acef59f6",
         "0x02d67d99AA5EF4bb0dc86b1c4D61878a80472552",
         "0x3B431e1E50BDCd7A41F061A1752Dc766371bE4DD"]
     },
@@ -234,7 +248,7 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x2596e41933136E87C04b56f632CEcA2cdCCC2Cc6",
+        "address": "0x35a329dda803ecced333647d7e6c14bafb14fe8a",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
         "version": "1.0.3",
@@ -242,6 +256,7 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0x2596e41933136E87C04b56f632CEcA2cdCCC2Cc6",
           "0x401E66549DF354a21B3CC95e3F548Df6854d6DEE",
           "0x8EF42fF40e9a9dD3E1ae81e7947D4E89e6d9f968",
           "0xA74a85407D5A940542915458616aC3cf3f404E3b"
@@ -525,14 +540,14 @@
     },
     {
       "name": "PullToken",
-      "address": "0xD8B3769f74bd9F196C3416a42a91E786948898e6",
+      "address": "0x62581168af33821163E682073d599a8B5e39Cc4c",
       "id": "0xcc063de4",
       "path": "contracts/actions/utils/PullToken.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0xD8B3769f74bd9F196C3416a42a91E786948898e6"]
     },
     {
       "name": "FLAction",
@@ -563,7 +578,7 @@
       "path": "contracts/core/strategy/StrategyStorage.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -574,7 +589,7 @@
       "path": "contracts/core/strategy/BotAuth.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -585,7 +600,7 @@
       "path": "contracts/core/strategy/BundleStorage.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -596,7 +611,7 @@
       "path": "contracts/core/l2/SubStorageL2.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -607,7 +622,7 @@
       "path": "contracts/core/strategy/ProxyAuth.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -617,7 +632,7 @@
       "id": "0x0c1dc439",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -628,7 +643,7 @@
       "path": "contracts/triggers/AaveV3RatioTrigger.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -639,7 +654,7 @@
       "path": "contracts/actions/fee/GasFeeTakerL2.sol",
       "version": "1.0.3",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": [
         "0xD684Efb6a7c1ADE7298Dde28A2057E8EaF5D61fc",
@@ -654,7 +669,7 @@
       "path": "contracts/actions/checkers/AaveV3RatioCheck.sol",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
     },
@@ -664,11 +679,9 @@
       "id": "0x9f01e6ae",
       "version": "1.0.1",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
-      "history": [
-        "0xBF1CaC12DB60819Bfa71A328282ecbc1D40443aA"
-      ]
+      "history": []
     },
     {
       "name": "TimestampTrigger",
@@ -757,6 +770,94 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": []
+    },
+    {
+      "name": "CompV3Allow",
+      "address": "0x0380E8e13CdE0499c720999930CaA07A5744887c",
+      "id": "0xf2bccef8",
+      "path": "contracts/actions/compoundV3/CompV3Allow.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Borrow",
+      "address": "0x1C0eCc794fDA7c29aBd19E0b2F7dA166C237d616",
+      "id": "0xbb9f4021",
+      "path": "contracts/actions/compoundV3/CompV3Borrow.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Claim",
+      "address": "0xDa135F74a24FE2B23ECc35De227f5d3b000c5AdA",
+      "id": "0xf8470345",
+      "path": "contracts/actions/compoundV3/CompV3Claim.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Payback",
+      "address": "0xeA8b80944a70e6C290eb00Ae0298d2953aD3aA0C",
+      "id": "0xdaa9b106",
+      "path": "contracts/actions/compoundV3/CompV3Payback.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Supply",
+      "address": "0x82bf73d2083e69344747fff0d51816059db0113c",
+      "id": "0x71643f58",
+      "path": "contracts/actions/compoundV3/CompV3Supply.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Transfer",
+      "address": "0x9EB98fA05E89a598288B0386e66052Ba0d0B9911",
+      "id": "0xc7443570",
+      "path": "contracts/actions/compoundV3/CompV3Transfer.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Withdraw",
+      "address": "0xb6c2dC95201630cAF7568cBdF434d787CD84dB79",
+      "id": "0xc0072381",
+      "path": "contracts/actions/compoundV3/CompV3Withdraw.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+    "name": "CompV3View",
+    "address": "0x3A07Bb9eb0d71bf03295a84655d82b00A1450CD6",
+    "id": "0x16be4292",
+    "path": "contracts/views/CompV3View.sol",
+    "version": "1.0.0",
+    "inRegistry": false,
+    "changeTime": 0,
+    "registryIds": [],
+    "history": []
     },
     {
       "name": "BotRefillsL2",

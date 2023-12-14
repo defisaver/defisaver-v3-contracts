@@ -6,9 +6,10 @@ import "../auth/AdminAuth.sol";
 import "../utils/TransientStorage.sol";
 import "../actions/compoundV3/helpers/CompV3RatioHelper.sol";
 import "../interfaces/ITrigger.sol";
+import "./helpers/TriggerHelper.sol";
 
 /// @title Trigger contract that verifies if the CompoundV3 position went over/under the subbed ratio
-contract CompV3RatioTrigger is ITrigger, AdminAuth, CompV3RatioHelper {
+contract CompV3RatioTrigger is ITrigger, AdminAuth, CompV3RatioHelper, TriggerHelper {
 
     enum RatioState { OVER, UNDER }
 

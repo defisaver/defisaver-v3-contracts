@@ -887,6 +887,65 @@ const createLiquityRepayStrategy = () => {
     return liquityRepayStrategy.encodeForDsProxyCall();
 };
 
+const createLiquityDebtInFrontRepayStrategy = () => {
+    const liquityFLRepayStrategy = new dfs.Strategy('LiquityDebtInFrontRepayStrategy');
+    liquityFLRepayStrategy.addSubSlot('&wethAddr', 'address');
+    liquityFLRepayStrategy.addSubSlot('&lusdAddr', 'address');
+    liquityFLRepayStrategy.addSubSlot('&ratioIncrease', 'uin256');
+    liquityFLRepayStrategy.addSubSlot('&collChangeId.WITHDRAW', 'uint8');
+    liquityFLRepayStrategy.addSubSlot('&debtChangeId.PAYBACK', 'uint8');
+
+    const liquityRatioTrigger = new dfs.triggers.LiquityDebtInFrontWithLimitTrigger('0');
+    liquityFLRepayStrategy.addTrigger(liquityRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%wethAddr'],
+            ['%flAmount'],
+        ),
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&wethAddr',
+            '&lusdAddr',
+            '%exchangeAmount',
+            '%wrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%repayGasCost', '&lusdAddr', '$2',
+    );
+
+    const liquityAdjustAction = new dfs.actions.liquity.LiquityAdjustAction(
+        '%0', // no liquity fee charged in recipe
+        '$1',
+        '$3',
+        '&collChangeId.WITHDRAW',
+        '&debtChangeId.PAYBACK',
+        '&proxy',
+        '%FLAddr',
+        '%upperHint',
+        '%lowerHint',
+    );
+
+    const liquityRatioIncreaseCheckAction =
+        new dfs.actions.checkers.LiquityRatioIncreaseCheckAction(
+            '&ratioIncrease',
+        );
+
+    liquityFLRepayStrategy.addAction(flAction);
+    liquityFLRepayStrategy.addAction(sellAction);
+    liquityFLRepayStrategy.addAction(feeTakingAction);
+    liquityFLRepayStrategy.addAction(liquityAdjustAction);
+    liquityFLRepayStrategy.addAction(liquityRatioIncreaseCheckAction);
+
+    return liquityFLRepayStrategy.encodeForDsProxyCall();
+};
+
 const createLiquityFLRepayStrategy = () => {
     const liquityFLRepayStrategy = new dfs.Strategy('LiquityFLRepayStrategy');
     liquityFLRepayStrategy.addSubSlot('&ratioState', 'uint8');
@@ -2596,10 +2655,46 @@ const createAaveV3CloseToDebtStrategy = () => {
     return aaveCloseStrategy.encodeForDsProxyCall();
 };
 
+const createAaveV3CloseToDebtWithMaximumGasPriceStrategy = () => {
+    const strategyName = 'AaveV3CloseToDebtWithMaximumGasPrice';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    // This is a second trigger.
+    // Default close trigger for ratio set in createAaveCloseStrategyBase()
+    aaveCloseStrategy.addTrigger(new dfs.triggers.GasPriceTrigger('0'));
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
 const createAaveV3FLCloseToDebtStrategy = () => {
     const strategyName = 'AaveV3FLCloseToDebt';
 
     const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.flAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionFL());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendRepayFL());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV3FLCloseToDebtWithMaximumGasPriceStrategy = () => {
+    const strategyName = 'AaveV3FLCloseToDebtWithMaximumGasPrice';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addTrigger(new dfs.triggers.GasPriceTrigger('0'));
 
     aaveCloseStrategy.addAction(aaveV3CloseActions.flAction());
     aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
@@ -2627,10 +2722,46 @@ const createAaveV3CloseToCollStrategy = () => {
     return aaveCloseStrategy.encodeForDsProxyCall();
 };
 
+const createAaveV3CloseToCollWithMaximumGasPriceStrategy = () => {
+    const strategyName = 'AaveV3CloseToCollWithMaximumGasPrice';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addTrigger(new dfs.triggers.GasPriceTrigger('0'));
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionColl());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendColl());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
 const createAaveV3FLCloseToCollStrategy = () => {
     const strategyName = 'AaveV3FLCloseToColl';
 
     const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addAction(aaveV3CloseActions.flAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.withdrawAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.feeTakingActionFLColl());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sellAction());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendRepayFL());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendDebt());
+    aaveCloseStrategy.addAction(aaveV3CloseActions.sendColl());
+
+    return aaveCloseStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV3FLCloseToCollWithMaximumGasPriceStrategy = () => {
+    const strategyName = 'AaveV3FLCloseToCollWithMaximumGasPrice';
+
+    const aaveCloseStrategy = createAaveCloseStrategyBase(strategyName);
+
+    aaveCloseStrategy.addTrigger(new dfs.triggers.GasPriceTrigger('0'));
 
     aaveCloseStrategy.addAction(aaveV3CloseActions.flAction());
     aaveCloseStrategy.addAction(aaveV3CloseActions.paybackAction());
@@ -3583,6 +3714,106 @@ const createSparkFLCloseToCollStrategy = () => {
     return sparkCloseStrategy.encodeForDsProxyCall();
 };
 
+const createLiquityDsrPaybackStrategy = () => {
+    const liquityDsrPaybackStrategy = new dfs.Strategy('LiquityDsrPayback');
+    liquityDsrPaybackStrategy.addSubSlot('&ratioState', 'uint8');
+    liquityDsrPaybackStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityDsrPaybackStrategy.addSubSlot('&daiAddress', 'address');
+    liquityDsrPaybackStrategy.addSubSlot('&lusdAddress', 'uint256');
+
+    const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
+    liquityDsrPaybackStrategy.addTrigger(liquityRatioTrigger);
+
+    const dsrWithdrawAction = new dfs.actions.maker.MakerDsrWithdrawAction(
+        '%daiWithdrawAmount',
+        '&proxy',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&daiAddress',
+            '&lusdAddress',
+            '$1',
+            '%wrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%strategyGasCost', '&lusdAddress', '$2',
+    );
+
+    const liquityPaybackAction = new dfs.actions.liquity.LiquityPaybackAction(
+        '$3',
+        '&proxy',
+        '%upperHint',
+        '%lowerHint',
+    );
+
+    const liquityRatioCheckAction = new dfs.actions.checkers.LiquityRatioCheckAction(
+        '&ratioState', '&targetRatio',
+    );
+
+    liquityDsrPaybackStrategy.addAction(dsrWithdrawAction);
+    liquityDsrPaybackStrategy.addAction(sellAction);
+    liquityDsrPaybackStrategy.addAction(feeTakingAction);
+    liquityDsrPaybackStrategy.addAction(liquityPaybackAction);
+    liquityDsrPaybackStrategy.addAction(liquityRatioCheckAction);
+
+    return liquityDsrPaybackStrategy.encodeForDsProxyCall();
+};
+
+const createLiquityDsrSupplyStrategy = () => {
+    const liquityDsrSupplyStrategy = new dfs.Strategy('LiquityDsrSupply');
+    liquityDsrSupplyStrategy.addSubSlot('&ratioState', 'uint8');
+    liquityDsrSupplyStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityDsrSupplyStrategy.addSubSlot('&daiAddress', 'address');
+    liquityDsrSupplyStrategy.addSubSlot('&wethAddress', 'uint256');
+
+    const liquityRatioTrigger = new dfs.triggers.LiquityRatioTrigger('0', '0', '0');
+    liquityDsrSupplyStrategy.addTrigger(liquityRatioTrigger);
+
+    const dsrWithdrawAction = new dfs.actions.maker.MakerDsrWithdrawAction(
+        '%daiWithdrawAmount',
+        '&proxy',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&daiAddress',
+            '&wethAddress',
+            '$1',
+            '%wrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%strategyGasCost', '&wethAddress', '$2',
+    );
+
+    const liquitySupplyAction = new dfs.actions.liquity.LiquitySupplyAction(
+        '$3',
+        '&proxy',
+        '%upperHint',
+        '%lowerHint',
+    );
+
+    const liquityRatioCheckAction = new dfs.actions.checkers.LiquityRatioCheckAction(
+        '&ratioState', '&targetRatio',
+    );
+
+    liquityDsrSupplyStrategy.addAction(dsrWithdrawAction);
+    liquityDsrSupplyStrategy.addAction(sellAction);
+    liquityDsrSupplyStrategy.addAction(feeTakingAction);
+    liquityDsrSupplyStrategy.addAction(liquitySupplyAction);
+    liquityDsrSupplyStrategy.addAction(liquityRatioCheckAction);
+
+    return liquityDsrSupplyStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
@@ -3634,9 +3865,13 @@ module.exports = {
     createAaveV3RepayStrategy,
     createAaveFLV3RepayStrategy,
     createAaveV3CloseToDebtStrategy,
+    createAaveV3CloseToDebtWithMaximumGasPriceStrategy,
     createAaveV3FLCloseToDebtStrategy,
+    createAaveV3FLCloseToDebtWithMaximumGasPriceStrategy,
     createAaveV3CloseToCollStrategy,
+    createAaveV3CloseToCollWithMaximumGasPriceStrategy,
     createAaveV3FLCloseToCollStrategy,
+    createAaveV3FLCloseToCollWithMaximumGasPriceStrategy,
     createAaveV2RepayStrategy,
     createAaveFLV2RepayStrategy,
     createAaveV2BoostStrategy,
@@ -3653,4 +3888,7 @@ module.exports = {
     createSparkFLCloseToDebtStrategy,
     createSparkCloseToCollStrategy,
     createSparkFLCloseToCollStrategy,
+    createLiquityDsrPaybackStrategy,
+    createLiquityDsrSupplyStrategy,
+    createLiquityDebtInFrontRepayStrategy,
 };

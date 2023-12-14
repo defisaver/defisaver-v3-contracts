@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 const hre = require('hardhat');
 
+const { defaultAbiCoder } = require('ethers/lib/utils');
 const {
     subToStrategy,
     subToCompV3Proxy,
@@ -25,8 +26,10 @@ const {
     createTrailingStopTrigger,
     createCbRebondTrigger,
     createMorphoTrigger,
+    createDebtInFrontWithLimitTrigger,
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
+    IN_REPAY,
 } = require('./triggers');
 
 const {
@@ -644,6 +647,87 @@ const subSparkCloseBundle = async (
     return { subId, strategySub };
 };
 
+const subLiqutityDsrPaybackStrategy = async ({
+    proxy, strategyId, triggerRatio, targetRatio,
+}) => {
+    const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_REPAY]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const daiAddressEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const lusdAddressEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
+
+    const triggerData = await createLiquityTrigger(proxy.address, triggerRatio, RATIO_STATE_UNDER);
+    const strategySub = [strategyId, false, [triggerData], [ratioStateEncoded, targetRatioEncoded, daiAddressEncoded, lusdAddressEncoded]];
+
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+
+const subLiquityDebtInFrontRepayStrategy = async (
+    proxy, strategyId, debtInFront, targetRatioIncrease,
+) => {
+    const wethAddrEncoded = abiCoder.encode(['address'], [WETH_ADDRESS]);
+    const lusdAddrEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
+    const targetRatioIncreaseEncoded = abiCoder.encode(['uint256'], [targetRatioIncrease.toString()]);
+    const withdrawIdEncoded = abiCoder.encode(['uint8'], [1]); // withdraw - 1
+    const paybackIdEncoded = abiCoder.encode(['uint8'], [0]); // payback - 0
+
+    const triggerData = await createDebtInFrontWithLimitTrigger(proxy.address, debtInFront.toString());
+    const strategySub = [strategyId, false, [triggerData], [
+        wethAddrEncoded, lusdAddrEncoded, targetRatioIncreaseEncoded, withdrawIdEncoded, paybackIdEncoded]];
+
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+
+const subLiqutityDsrSupplyStrategy = async ({
+    proxy, strategyId, triggerRatio, targetRatio,
+}) => {
+    const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_REPAY]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const daiAddressEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
+    const wethAddressEncoded = abiCoder.encode(['address'], [WETH_ADDRESS]);
+
+    const triggerData = await createLiquityTrigger(proxy.address, triggerRatio, RATIO_STATE_UNDER);
+    const strategySub = [strategyId, false, [triggerData], [ratioStateEncoded, targetRatioEncoded, daiAddressEncoded, wethAddressEncoded]];
+
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+
+const subAaveV3CloseWithMaximumGasPriceBundle = async (
+    proxy,
+    bundleId,
+    triggerBaseAsset,
+    triggerQuoteAsset,
+    targetPrice,
+    priceState,
+    gasPrice,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+) => {
+    const priceTriggerData = defaultAbiCoder.encode(
+        ['address', 'address', 'uint256', 'uint8'],
+        [triggerBaseAsset, triggerQuoteAsset, targetPrice, priceState],
+    );
+    const gasPriceTriggerData = await createGasPriceTrigger(gasPrice);
+
+    const strategySub = [bundleId, true, [priceTriggerData, gasPriceTriggerData], [
+        defaultAbiCoder.encode(['address'], [collAsset]),
+        defaultAbiCoder.encode(['uint16'], [collAssetId.toString()]),
+        defaultAbiCoder.encode(['address'], [debtAsset]),
+        defaultAbiCoder.encode(['uint16'], [debtAssetId.toString()]),
+        defaultAbiCoder.encode(['address'], [nullAddress]), // needed so we dont have to trust injection
+    ]];
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdRepayStrategy,
@@ -672,4 +756,8 @@ module.exports = {
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,
     subSparkCloseBundle,
+    subLiqutityDsrPaybackStrategy,
+    subLiqutityDsrSupplyStrategy,
+    subLiquityDebtInFrontRepayStrategy,
+    subAaveV3CloseWithMaximumGasPriceBundle,
 };

@@ -3,6 +3,9 @@ const hre = require('hardhat');
 const RATIO_STATE_OVER = 0;
 const RATIO_STATE_UNDER = 1;
 
+const IN_BOOST = 0;
+const IN_REPAY = 1;
+
 const BUY_ORDER = 0;
 const SELL_ORDER = 1;
 
@@ -76,6 +79,12 @@ const createMorphoTrigger = async (user, ratio, ratioState) => {
     return param;
 };
 
+const createDebtInFrontWithLimitTrigger = async (user, debtInFrontMin) => {
+    const param = abiCoder.encode(['address', 'uint256'], [user, debtInFrontMin]);
+
+    return param;
+};
+
 module.exports = {
     createUniV3RangeOrderTrigger,
     createMcdTrigger,
@@ -89,8 +98,11 @@ module.exports = {
     createCbRebondTrigger,
     createOffchainPriceTrigger,
     createMorphoTrigger,
+    createDebtInFrontWithLimitTrigger,
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
+    IN_BOOST,
+    IN_REPAY,
     BUY_ORDER,
     SELL_ORDER,
 };
