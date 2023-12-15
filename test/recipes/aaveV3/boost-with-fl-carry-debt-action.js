@@ -27,7 +27,7 @@ const {
 } = require('../../utils-aave');
 
 const aaveV3BoostWithNewFL = async () => {
-    describe('Aave V3 AaveV3 Boost Tests With New FL', () => {
+    describe('Aave V3 AaveV3 Boost Tests With Carry Debt FL', () => {
         let senderAcc;
         let senderAddr;
         let proxy;
@@ -174,7 +174,7 @@ const aaveV3BoostWithNewFL = async () => {
             expect(loanDataAfterBoost.ratio).to.be.lt(loanDataBeforeBoost.ratio);
         }).timeout(300000);
 
-        it('... should perform aaveV3 boost with new FL', async () => {
+        it('... should perform aaveV3 boost with carry debt fl', async () => {
             const collAmount = hre.ethers.utils.parseUnits('100', 18);
             const debtAmount = hre.ethers.utils.parseUnits('100000', 18);
 
@@ -205,7 +205,7 @@ const aaveV3BoostWithNewFL = async () => {
             expect(loanDataAfterBoost.ratio).to.be.lt(loanDataBeforeBoost.ratio);
         }).timeout(300000);
 
-        it('... should revert on new boost with maximum credit delegation allowance', async () => {
+        it('... should revert on carry debt fl when using maximum credit delegation allowance', async () => {
             const collAmount = hre.ethers.utils.parseUnits('100', 18);
             const debtAmount = hre.ethers.utils.parseUnits('100000', 18);
 
@@ -225,7 +225,7 @@ const aaveV3BoostWithNewFL = async () => {
             await expect(executeAction('RecipeExecutor', functionData[1], proxy)).to.be.reverted;
         }).timeout(300000);
 
-        it('... should revert on new boost with slightly bigger credit delegation allowance', async () => {
+        it('... should revert on carry debt fl when using slightly bigger credit delegation allowance', async () => {
             const collAmount = hre.ethers.utils.parseUnits('100', 18);
             const debtAmount = hre.ethers.utils.parseUnits('100000', 18);
 
@@ -247,7 +247,7 @@ const aaveV3BoostWithNewFL = async () => {
     });
 };
 
-describe('AaveV3 Boost Tests With New FL', function () {
+describe('AaveV3 Boost Tests With Carry Debt FL', function () {
     this.timeout(300000);
 
     it('... test AaveV3 Boost', async () => {
