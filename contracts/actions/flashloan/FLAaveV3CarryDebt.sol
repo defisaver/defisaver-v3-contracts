@@ -13,9 +13,11 @@ import "../../interfaces/flashloan/IFlashLoanBase.sol";
 import "../../interfaces/aaveV3/IDebtToken.sol";
 
 /// @title Action that gets and receives a FL from Aave V3 and does not return funds but opens debt position on Aave V3
+/// @dev In order to open debt position, FL action must have credit delegation allowance from onBehalfOf address
+/// @dev No credit delegation allowance should be left after FL to prevent someone to borrow funds and generate debt onBehalfOf address 
 contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlashLoanBase {
-    using SafeERC20 for IERC20;
     using TokenUtils for address;
+
     //Caller not aave pool
     error OnlyAaveCallerError();
     //FL Taker must be this contract
@@ -23,7 +25,7 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
     //Interest rate can't be 0 for opening depth position on Aave V3
     error NoInterestRateSetError();
     //Credit delegation allowance must be 0 after FL
-    error CreditDelegationAllowanceLeftError();
+    error CreditDelegationAllowanceLeftError(uint256 amountLeft);
 
     bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
@@ -37,7 +39,7 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
         FlashLoanParams memory flData = parseInputs(_callData);
 
         // check to make sure modes are not 0
-        for (uint256 i = 0; i < flData.modes.length; i++) {
+        for (uint256 i = 0; i < flData.modes.length; ++i) {
             if (flData.modes[i] == 0) {
                 revert NoInterestRateSetError();
             }
@@ -66,7 +68,7 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
             );
             
             if (creditDelegationAllowance > 0) {
-                revert CreditDelegationAllowanceLeftError();
+                revert CreditDelegationAllowanceLeftError(creditDelegationAllowance);
             }
         }
 
@@ -99,7 +101,7 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
         );
 
         emit ActionEvent(
-            "FLAaveV3",
+            "FLAaveV3CarryDebt",
             abi.encode(_flData.tokens, _flData.amounts, _flData.modes, _flData.onBehalfOf)
         );
 
