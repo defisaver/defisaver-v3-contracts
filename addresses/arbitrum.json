@@ -684,9 +684,7 @@
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": [
-        "0xBF1CaC12DB60819Bfa71A328282ecbc1D40443aA"
-      ]
+      "history": []
     },
     {
       "name": "TimestampTrigger",
@@ -775,6 +773,94 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": []
+    },
+    {
+      "name": "CompV3Allow",
+      "address": "0x0380E8e13CdE0499c720999930CaA07A5744887c",
+      "id": "0xf2bccef8",
+      "path": "contracts/actions/compoundV3/CompV3Allow.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Borrow",
+      "address": "0x1C0eCc794fDA7c29aBd19E0b2F7dA166C237d616",
+      "id": "0xbb9f4021",
+      "path": "contracts/actions/compoundV3/CompV3Borrow.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Claim",
+      "address": "0xDa135F74a24FE2B23ECc35De227f5d3b000c5AdA",
+      "id": "0xf8470345",
+      "path": "contracts/actions/compoundV3/CompV3Claim.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Payback",
+      "address": "0xeA8b80944a70e6C290eb00Ae0298d2953aD3aA0C",
+      "id": "0xdaa9b106",
+      "path": "contracts/actions/compoundV3/CompV3Payback.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Supply",
+      "address": "0x82bf73d2083e69344747fff0d51816059db0113c",
+      "id": "0x71643f58",
+      "path": "contracts/actions/compoundV3/CompV3Supply.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Transfer",
+      "address": "0x9EB98fA05E89a598288B0386e66052Ba0d0B9911",
+      "id": "0xc7443570",
+      "path": "contracts/actions/compoundV3/CompV3Transfer.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Withdraw",
+      "address": "0xb6c2dC95201630cAF7568cBdF434d787CD84dB79",
+      "id": "0xc0072381",
+      "path": "contracts/actions/compoundV3/CompV3Withdraw.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+    "name": "CompV3View",
+    "address": "0x3A07Bb9eb0d71bf03295a84655d82b00A1450CD6",
+    "id": "0x16be4292",
+    "path": "contracts/views/CompV3View.sol",
+    "version": "1.0.0",
+    "inRegistry": false,
+    "changeTime": 0,
+    "registryIds": [],
+    "history": []
     },
     {
       "name": "BotRefillsL2",
