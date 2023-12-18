@@ -682,6 +682,288 @@ const callAaveFLCloseToCollL2Strategy = async (
     return receipt;
 };
 
+const TRIGGER_CALLDATA = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
+
+// PLACEHOLDER VALUES //
+const MARKET = placeHolderAddr; // from sub
+const DEBT_ADDR = placeHolderAddr; // from sub
+const RATIO_STATE = 0; // from sub
+const TARGET_RATIO = 0; // from sub
+const PROXY_ADDR = placeHolderAddr; // hardcoded
+
+const callCompV3RepayL2Strategy = async (
+    botAcc,
+    strategyExecutor,
+    subId,
+    strategySub,
+    strategyIndex,
+    collAddr,
+    repayAmount,
+    exchangeWrapper,
+) => {
+    const actionsCallData = [];
+
+    const withdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        MARKET,
+        PROXY_ADDR,
+        collAddr,
+        repayAmount,
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            collAddr,
+            DEBT_ADDR,
+            '0', //  piped from withdraw action
+            exchangeWrapper,
+        ),
+        PROXY_ADDR,
+        PROXY_ADDR,
+    );
+    const repayGasCost = 1_000_000; // 1 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        repayGasCost,
+        DEBT_ADDR,
+        '0', // piped from sell action
+        '0', // dfs fee divider
+        '10000000',
+    );
+    const paybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
+        MARKET,
+        '0', // piped from fee action
+        PROXY_ADDR,
+        PROXY_ADDR,
+        DEBT_ADDR,
+    );
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        RATIO_STATE,
+        TARGET_RATIO,
+        MARKET,
+    );
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        TRIGGER_CALLDATA,
+        actionsCallData,
+        strategySub,
+        { gasLimit: 8000000 },
+    );
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed callCompV3RepayStrategy: ${gasUsed}`);
+};
+
+const callCompV3FLRepayL2Strategy = async (
+    botAcc,
+    strategyExecutor,
+    subId,
+    strategySub,
+    strategyIndex,
+    collAddr,
+    repayAmount,
+    exchangeWrapper,
+    flAddr,
+) => {
+    const actionsCallData = [];
+
+    const flBalancer = new dfs.actions.flashloan.BalancerFlashLoanAction([collAddr], [repayAmount]);
+    const flAction = new dfs.actions.flashloan.FLAction(flBalancer);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            collAddr,
+            DEBT_ADDR,
+            repayAmount, // fl amount
+            exchangeWrapper,
+        ),
+        PROXY_ADDR,
+        PROXY_ADDR,
+    );
+    const repayGasCost = 1_000_000; // 1 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        repayGasCost,
+        DEBT_ADDR,
+        '0', // piped from sell action
+        '0', // dfs fee divider
+        '10000000',
+    );
+    const paybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
+        MARKET,
+        '0', // piped from fee action
+        PROXY_ADDR,
+        PROXY_ADDR,
+        DEBT_ADDR,
+    );
+    const withdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        MARKET,
+        flAddr,
+        collAddr,
+        '0', // amount from fl action
+    );
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        RATIO_STATE,
+        TARGET_RATIO,
+        MARKET,
+    );
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        TRIGGER_CALLDATA,
+        actionsCallData,
+        strategySub,
+        { gasLimit: 8000000 },
+    );
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed callCompV3FlRepayStrategy: ${gasUsed}`);
+};
+const callCompV3BoostL2Strategy = async (
+    botAcc,
+    strategyExecutor,
+    subId,
+    strategySub,
+    strategyIndex,
+    collAddr,
+    boostAmount,
+    exchangeWrapper,
+) => {
+    const actionsCallData = [];
+
+    const borrowAction = new dfs.actions.compoundV3.CompoundV3BorrowAction(
+        MARKET,
+        boostAmount,
+        PROXY_ADDR,
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            DEBT_ADDR,
+            collAddr,
+            '0', //  hardcoded piped from borrow
+            exchangeWrapper,
+        ),
+        PROXY_ADDR,
+        PROXY_ADDR,
+    );
+    const boostGasCost = 1_000_000; // 1 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        boostGasCost,
+        collAddr,
+        '0', // piped from sell action
+        '0', // dfs fee divider
+        '10000000',
+    );
+    const supplyAction = new dfs.actions.compoundV3.CompoundV3SupplyAction(
+        MARKET,
+        collAddr,
+        '0', // piped amount
+        PROXY_ADDR,
+    );
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        RATIO_STATE,
+        TARGET_RATIO,
+        MARKET,
+    );
+    actionsCallData.push(borrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(supplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        TRIGGER_CALLDATA,
+        actionsCallData,
+        strategySub,
+        { gasLimit: 8000000 },
+    );
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed callCompV3BoostStrategy: ${gasUsed}`);
+};
+const callCompV3FLBoostL2Strategy = async (
+    botAcc,
+    strategyExecutor,
+    subId,
+    strategySub,
+    strategyIndex,
+    collAddr,
+    debtAddr,
+    boostAmount,
+    exchangeWrapper,
+    flAddr,
+) => {
+    const actionsCallData = [];
+
+    const flBalancer = new dfs.actions.flashloan.BalancerFlashLoanAction([debtAddr], [boostAmount]);
+    const flAction = new dfs.actions.flashloan.FLAction(flBalancer);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            debtAddr,
+            collAddr,
+            boostAmount,
+            exchangeWrapper,
+        ),
+        PROXY_ADDR,
+        PROXY_ADDR,
+    );
+    const boostGasCost = 1_000_000; // 1 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        boostGasCost,
+        collAddr,
+        '0', // piped from sell action
+        '0', // dfs fee divider
+        '10000000',
+    );
+    const supplyAction = new dfs.actions.compoundV3.CompoundV3SupplyAction(
+        MARKET,
+        collAddr,
+        '0', // piped amount
+        PROXY_ADDR,
+    );
+    const borrowAction = new dfs.actions.compoundV3.CompoundV3BorrowAction(
+        MARKET,
+        '0', // piped amount
+        flAddr,
+    );
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        RATIO_STATE,
+        TARGET_RATIO,
+        MARKET,
+    );
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(supplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(borrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
+
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        strategyIndex,
+        TRIGGER_CALLDATA,
+        actionsCallData,
+        strategySub,
+        { gasLimit: 8000000 },
+    );
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed callCompV3FlBoostStrategy: ${gasUsed}`);
+};
+
 module.exports = {
     callAaveV3RepayL2Strategy,
     callAaveFLV3RepayL2Strategy,
@@ -692,4 +974,8 @@ module.exports = {
     callAaveCloseToCollL2Strategy,
     callAaveFLCloseToCollL2Strategy,
     aaveV3CloseActionsEncoded,
+    callCompV3RepayL2Strategy,
+    callCompV3FLRepayL2Strategy,
+    callCompV3BoostL2Strategy,
+    callCompV3FLBoostL2Strategy,
 };
