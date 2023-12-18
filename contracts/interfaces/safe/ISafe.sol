@@ -70,6 +70,10 @@ interface ISafe {
 
     function setFallbackHandler(address handler) external;
 
+    function getOwners() external view returns (address[] memory);
+    function isOwner(address owner) external view returns (bool);
+    function getThreshold() external view returns (uint256);
+
     function enableModule(address module) external;
     function disableModule(address prevModule, address module) external;
     function getModulesPaginated(address start, uint256 pageSize) external view returns (address[] memory array, address next);

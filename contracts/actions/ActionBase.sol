@@ -6,6 +6,7 @@ import "../core/DFSRegistry.sol";
 import "../DS/DSProxy.sol";
 import "../utils/DefisaverLogger.sol";
 import "./utils/helpers/ActionsUtilHelper.sol";
+import "../interfaces/safe/ISafe.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
 abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
@@ -102,8 +103,8 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
                 _param = address(bytes20((_returnValues[getReturnIndex(_mapType)])));
             } else {
                 /// @dev The last two values are specially reserved for proxy addr and owner addr
-                if (_mapType == 254) return address(this); //DSProxy address
-                if (_mapType == 255) return DSProxy(payable(address(this))).owner(); // owner of DSProxy
+                if (_mapType == 254) return address(this); // DSProxy address
+                if (_mapType == 255) return fetchOwnersOrWallet(); // owner if 1/1 wallet or the wallet itself
 
                 _param = address(uint160(uint256(_subData[getSubIndex(_mapType)])));
             }
@@ -163,5 +164,22 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
             revert ReturnIndexValueError();
         }
         return (_type - SUB_MIN_INDEX_VALUE);
+    }
+
+    function fetchOwnersOrWallet() internal view returns (address) {
+        (bool success, bytes memory response) = address(this).staticcall(abi.encodeWithSignature("getOwners()"));
+
+        if (!success) revert();
+
+        // empty response if the wallet is dsproxy()
+        if (response.length == 0) return DSProxy(payable(address(this))).owner();
+
+        address[] memory owners = ISafe(address(this)).getOwners();
+
+        if (owners.length == 1) {
+            return owners[0];
+        } else {
+            return address(this);
+        }
     }
 }
