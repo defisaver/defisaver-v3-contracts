@@ -1,8 +1,10 @@
+const hre = require('hardhat');
 const { defaultAbiCoder } = require('ethers/lib/utils');
 const {
     subToAaveProxy,
     updateAaveProxy,
     subToStrategy,
+    subToCompV3ProxyL2,
 } = require('./utils-strategies');
 
 const {
@@ -106,8 +108,58 @@ const subAaveV3CloseBundle = async (
     return subToStrategy(proxy, strategySub);
 };
 
+const subToCompV3L2AutomationStrategy = async (
+    proxy,
+    market,
+    baseToken,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    regAddr = addrs[network].REGISTRY_ADDR,
+) => {
+    const minRatioBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(minRatio), 16);
+    const maxRatioBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(maxRatio), 16);
+    const optimalRatioBoostBytes = hre.ethers.utils.zeroPad(
+        hre.ethers.BigNumber.from(optimalRatioBoost), 16,
+    );
+    const optimalRatioRepayBytes = hre.ethers.utils.zeroPad(
+        hre.ethers.BigNumber.from(optimalRatioRepay), 16,
+    );
+    const boostEnabledBytes = boostEnabled ? '0x01' : '0x00';
+
+    const subInput = hre.ethers.utils.concat([
+        market,
+        baseToken,
+        minRatioBytes,
+        maxRatioBytes,
+        optimalRatioBoostBytes,
+        optimalRatioRepayBytes,
+        boostEnabledBytes,
+    ]);
+
+    const subId = await subToCompV3ProxyL2(proxy, subInput, regAddr);
+
+    let subId1 = '0';
+    let subId2 = '0';
+
+    if (boostEnabled) {
+        subId1 = (parseInt(subId, 10) - 1).toString();
+        subId2 = subId;
+    } else {
+        subId1 = subId;
+        subId2 = '0';
+    }
+
+    console.log('Subs: ', subId, subId2);
+
+    return { firstSub: subId1, secondSub: subId2 };
+};
+
 module.exports = {
     subAaveV3L2AutomationStrategy,
     updateAaveV3L2AutomationStrategy,
     subAaveV3CloseBundle,
+    subToCompV3L2AutomationStrategy,
 };
