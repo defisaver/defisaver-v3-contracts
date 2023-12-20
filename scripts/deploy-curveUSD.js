@@ -10,10 +10,9 @@ const {
 
 const { topUp } = require('./utils/fork');
 const {
-    createCurveUsdAdvancedRepayStrategy, createCurveUsdRepayStrategy, createCurveUsdFLRepayStrategy, createCurveUsdBoostStrategy, createCurveUsdFLCollBoostStrategy,
+    createCurveUsdAdvancedRepayStrategy, createCurveUsdRepayStrategy, createCurveUsdFLRepayStrategy, createCurveUsdBoostStrategy, createCurveUsdFLCollBoostStrategy, createCurveUsdFLDebtBoostStrategy,
 } = require('../test/strategies');
 const { createStrategy, createBundle } = require('../test/utils-strategies');
-const { callCurveUsdFLDebtBoostStrategy } = require('../test/strategy-calls');
 
 async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];
@@ -40,7 +39,7 @@ async function main() {
 
     const curveUsdBoostStrategy = createCurveUsdBoostStrategy();
     const curveUsdFLCollBoostStrategy = createCurveUsdFLCollBoostStrategy();
-    const curveUsdFLDebtBoostStrategy = callCurveUsdFLDebtBoostStrategy();
+    const curveUsdFLDebtBoostStrategy = createCurveUsdFLDebtBoostStrategy();
     const strategyIdFirst = await createStrategy(undefined, ...curveUsdBoostStrategy, true);
     const strategyIdSecond = await createStrategy(undefined, ...curveUsdFLCollBoostStrategy, true);
     const strategyIdThird = await createStrategy(undefined, ...curveUsdFLDebtBoostStrategy, true);
