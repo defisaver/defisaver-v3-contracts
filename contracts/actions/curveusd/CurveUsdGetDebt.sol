@@ -1,16 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "../../interfaces/curveusd/ICurveUsd.sol";
 
 
 /// @title Action that returns users crvusd debt on a given market
 contract CurveUsdGetDebt is ActionBase {
-    using TokenUtils for address;
-
-    error ZeroAmountSupplied();
 
     /// @param controllerAddress Address of the curveusd market controller
     /// @param debtor Address which owns the curveusd position
