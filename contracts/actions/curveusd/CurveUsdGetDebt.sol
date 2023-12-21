@@ -7,7 +7,6 @@ import "../../interfaces/curveusd/ICurveUsd.sol";
 
 
 /// @title Action that returns users crvusd debt on a given market
-/// @dev collateralAmount must be non-zero, can be maxUint
 contract CurveUsdGetDebt is ActionBase {
     using TokenUtils for address;
 
