@@ -39,8 +39,6 @@ contract CurveUsdGetDebt is ActionBase {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    //////////////////////////// ACTION LOGIC ////////////////////////////
-
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
