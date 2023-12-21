@@ -30,6 +30,7 @@ contract CurveUsdGetDebt is ActionBase {
         Params memory params = parseInputs(_callData);
 
         params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.debtor = _parseParamAddr(params.debtor, _paramMapping[1], _subData, _returnValues);
 
         uint256 debt = ICrvUsdController(params.controllerAddress).debt(params.debtor);
         return bytes32(debt);
