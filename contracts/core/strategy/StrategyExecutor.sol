@@ -3,6 +3,7 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
+import "../../utils/CheckWalletType.sol";
 import "./StrategyModel.sol";
 import "./BotAuth.sol";
 import "../DFSRegistry.sol";
@@ -10,7 +11,7 @@ import "./ProxyAuth.sol";
 import "../strategy/SubStorage.sol";
 
 /// @title Main entry point for executing automated strategies
-contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
+contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, CheckWalletType {
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
@@ -64,7 +65,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
     }
 
 
-    /// @notice Calls ProxyAuth which has the auth from the DSProxy which will call RecipeExecutor
+    /// @notice Calls ProxyAuth which has the auth from the wallet which will call RecipeExecutor
     /// @param _subId Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
     /// @param _triggerCallData All input data needed to check triggers
@@ -79,7 +80,9 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper {
         StrategySub memory _sub,
         address _userProxy
     ) internal {
-        ProxyAuth(PROXY_AUTH_ADDR).callExecute{value: msg.value}(
+        address authAddr = isDSProxy() ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
+
+        ProxyAuth(authAddr).callExecute{value: msg.value}(
             _userProxy,
             RECIPE_EXECUTOR_ADDR,
             abi.encodeWithSignature(

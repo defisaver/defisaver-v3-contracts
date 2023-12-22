@@ -6,6 +6,7 @@ import "../interfaces/IDSProxy.sol";
 import "../auth/ProxyPermission.sol";
 import "../actions/ActionBase.sol";
 import "../core/DFSRegistry.sol";
+import "../utils/CheckWalletType.sol";
 import "./strategy/StrategyModel.sol";
 import "./strategy/StrategyStorage.sol";
 import "./strategy/BundleStorage.sol";
@@ -15,7 +16,7 @@ import "../interfaces/ITrigger.sol";
 import "../auth/ModulePermission.sol";
 
 /// @title Entry point into executing recipes/checking triggers directly and as part of a strategy
-contract RecipeExecutor is StrategyModel, ProxyPermission, ModulePermission, AdminAuth, CoreHelper {
+contract RecipeExecutor is StrategyModel, ProxyPermission, ModulePermission, AdminAuth, CoreHelper, CheckWalletType {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     error TriggerNotActiveError(uint256);
@@ -137,11 +138,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, ModulePermission, Adm
         bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
 
         if (isFL(firstActionAddr)) {
-            if (isDSProxy()) {
-                _parseFLAndExecute(_currRecipe, firstActionAddr, returnValues);
-            } else {
-                _parseFLAndExecuteWithFLCallback(_currRecipe, firstActionAddr, returnValues);
-            }
+             _parseFLAndExecute(_currRecipe, firstActionAddr, returnValues);
         } else {
             for (uint256 i = 0; i < _currRecipe.actionIds.length; ++i) {
                 returnValues[i] = _executeAction(_currRecipe, i, returnValues);
@@ -186,7 +183,10 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, ModulePermission, Adm
         address _flActionAddr,
         bytes32[] memory _returnValues
     ) internal {
-        givePermission(_flActionAddr);
+
+        bool isDSProxy = isDSProxy();
+
+        isDSProxy ? givePermission(_flActionAddr) : enableModule(_flActionAddr);
 
         // encode data for FL
         bytes memory recipeData = abi.encode(_currRecipe, address(this));
@@ -205,50 +205,13 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, ModulePermission, Adm
             _returnValues
         );
 
-        removePermission(_flActionAddr);
-    }
-
-    function _parseFLAndExecuteWithFLCallback(
-        Recipe memory _currRecipe,
-        address _flActionAddr,
-        bytes32[] memory _returnValues
-    ) internal {
-
-        enableModule(_flActionAddr);
-
-        // encode data for FL
-        bytes memory recipeData = abi.encode(_currRecipe, address(this));
-        IFlashLoanBase.FlashLoanParams memory params = abi.decode(
-            _currRecipe.callData[0],
-            (IFlashLoanBase.FlashLoanParams)
-        );
-        params.recipeData = recipeData;
-        _currRecipe.callData[0] = abi.encode(params);
-
-         /// @dev FL action is called directly so that we can check who the msg.sender of FL is
-        ActionBase(_flActionAddr).executeAction(
-            _currRecipe.callData[0],
-            _currRecipe.subData,
-            _currRecipe.paramMapping[0],
-            _returnValues
-        );
-
-        disableModule(_flActionAddr);
+        isDSProxy ? removePermission(_flActionAddr) : disableModule(_flActionAddr);
     }
 
     /// @notice Checks if the specified address is of FL type action
     /// @param _actionAddr Address of the action
     function isFL(address _actionAddr) internal pure returns (bool) {
         return ActionBase(_actionAddr).actionType() == uint8(ActionBase.ActionType.FL_ACTION);
-    }
-
-    // TODO: should be a better check
-    function isDSProxy() internal returns (bool) {
-        (bool success, bytes memory response) = address(this).call(abi.encodeWithSignature("nonce()"));
-
-        if (response.length == 0) return true;
-
-        return false;
     }
 
     function delegateCallAndReturnBytes32(address _target, bytes memory _data) internal returns (bytes32 response) {
