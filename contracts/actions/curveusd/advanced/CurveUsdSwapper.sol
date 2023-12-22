@@ -19,7 +19,11 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
     using TokenUtils for address;
 
     ISwapRouterNG internal constant exchangeContract = ISwapRouterNG(CURVE_ROUTER_NG);
+    /// @dev Divider for swap fee, 25 bps
     uint256 internal constant STANDARD_DFS_FEE = 400;
+
+    /// @dev Divider for automatisation fee, 5 bps
+    uint256 internal constant AUTOMATION_DFS_FEE = 2000;
 
     event LogCurveUsdSwapper(
         address indexed user,
@@ -171,7 +175,8 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         }
 
         // get dfs fee and update swap amount
-        swapAmount -= takeSwapAndGasCostFee(swapAmount, _user, srcToken, dfsFeeDivider, gasUsed);
+        (uint256 swapFee, uint256 feeDividerForAutomation) = takeSwapFee(swapAmount, _user, srcToken, dfsFeeDivider);
+        swapAmount -= swapFee;
 
         IERC20(srcToken).safeApprove(address(exchangeContract), swapAmount);
 
@@ -183,7 +188,10 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
             swapRoutes.pools,
             address(this)
         );
-
+        
+        if (gasUsed > 0){
+            amountOut -= takeAutomationFee(amountOut, destToken, gasUsed, feeDividerForAutomation);
+        }
         // free the storage only needed inside tx as transient storage
         delete additionalRoutes;
         delete swapZapPools;
@@ -225,30 +233,43 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         swapRoutes.pools[4] = swapZapPools[4];
     }
 
-    function takeSwapAndGasCostFee(
-        uint256 _amount,
+    function takeSwapFee(
+        uint256 _sellAmount,
         address _user,
         address _token,
-        uint256 _dfsFeeDivider,
-        uint32 _gasUsed
-    ) internal returns (uint256 feeAmount) {
-        if (_dfsFeeDivider != 0 && Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_user)) {
-            _dfsFeeDivider = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_user);
-        }
-
-        // we need to take the fee for tx cost as well, as it"s in a strategy
-        if (_gasUsed != 0) {
-            feeAmount += calcGasCost(_gasUsed, _token, 0);
+        uint24 _dfsFeeDivider
+    ) internal returns (uint256 feeAmount, uint256 dfsFeeDivider) {
+        dfsFeeDivider = _dfsFeeDivider;
+        if (dfsFeeDivider != 0 && Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_user)) {
+            dfsFeeDivider = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_user);
         }
 
         // take dfs fee if set, and add to feeAmount
-        if (_dfsFeeDivider != 0) {
-            feeAmount += _amount / _dfsFeeDivider;
+        if (dfsFeeDivider != 0) {
+            feeAmount += _sellAmount / _dfsFeeDivider;
         }
 
-        // fee can"t go over 10% of the whole amount
-        if (feeAmount > (_amount / 10)) {
-            feeAmount = _amount / 10;
+        address walletAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();
+        _token.withdrawTokens(walletAddr, feeAmount);
+    }
+
+    function takeAutomationFee(
+        uint256 _destTokenAmount,
+        address _token,
+        uint256 _gasUsed,
+        uint256 _dfsFeeDivider
+    ) internal returns (uint256 feeAmount) {
+        // we need to take the fee for tx cost as well, as it"s in a strategy
+        
+        feeAmount += calcGasCost(_gasUsed, _token, 0);
+        
+        // gas fee can't go over 20% of the whole amount
+        if (feeAmount > (_destTokenAmount / 5)) {
+            feeAmount = _destTokenAmount / 5;
+        }
+    
+        if (_dfsFeeDivider != 0) {
+            feeAmount += _destTokenAmount / AUTOMATION_DFS_FEE;
         }
 
         address walletAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();

@@ -4,37 +4,57 @@
 const hre = require('hardhat');
 const { start } = require('./utils/starter');
 
-const { redeploy, addrs, network } = require('../test/utils');
+const {
+    redeploy, addrs, network, openStrategyAndBundleStorage,
+} = require('../test/utils');
 
 const { topUp } = require('./utils/fork');
+const {
+    createCurveUsdAdvancedRepayStrategy, createCurveUsdRepayStrategy, createCurveUsdFLRepayStrategy, createCurveUsdBoostStrategy, createCurveUsdFLCollBoostStrategy, createCurveUsdFLDebtBoostStrategy,
+} = require('../test/strategies');
+const { createStrategy, createBundle } = require('../test/utils-strategies');
 
 async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];
     await topUp(senderAcc.address);
 
-    // const curveUsdBorrow = await redeploy('CurveUsdBorrow', addrs[network].REGISTRY_ADDR, true, true);
-    // const curveUsdCreate = await redeploy('CurveUsdCreate', addrs[network].REGISTRY_ADDR, true, true);
-    // const curveUsdPayback = await redeploy('CurveUsdPayback', addrs[network].REGISTRY_ADDR, true, true);
-    // const curveUsdSupply = await redeploy('CurveUsdSupply', addrs[network].REGISTRY_ADDR, true, true);
-    // const curveUsdWithdraw = await redeploy('CurveUsdWithdraw', addrs[network].REGISTRY_ADDR, true, true);
-    // const curveUsdSelfLiquidate = await redeploy('CurveUsdSelfLiquidate', addrs[network].REGISTRY_ADDR, true, true);
-    // const curveView = await redeploy('CurveUsdView', addrs[network].REGISTRY_ADDR, true, true);
-    // const curveUsedLevCreate = await redeploy('CurveUsdLevCreate', addrs[network].REGISTRY_ADDR, true, true);
-    // const curveUsdRepay = await redeploy('CurveUsdRepay', addrs[network].REGISTRY_ADDR, true, true);
+    const curveUsdRepay = await redeploy('CurveUsdRepay', addrs[network].REGISTRY_ADDR, true, true);
+    const curveUsdCollRatioTrigger = await redeploy('CurveUsdCollRatioTrigger', addrs[network].REGISTRY_ADDR, true, true);
+    const curveUsdCollRatioCheck = await redeploy('CurveUsdCollRatioCheck', addrs[network].REGISTRY_ADDR, true, true);
     const curveUsdSwapper = await redeploy('CurveUsdSwapper', addrs[network].REGISTRY_ADDR, true, true);
-    // const curveUsdSelfLiquidateWithColl = await redeploy('CurveUsdSelfLiquidateWithColl', addrs[network].REGISTRY_ADDR, true, true);
 
-    // console.log('CurveUsdBorrow deployed to:', curveUsdBorrow.address);
-    // console.log('CurveUsdCreate deployed to:', curveUsdCreate.address);
-    // console.log('CurveUsdPayback deployed to:', curveUsdPayback.address);
-    // console.log('CurveUsdSupply deployed to:', curveUsdSupply.address);
-    // console.log('CurveUsdWithdraw deployed to:', curveUsdWithdraw.address);
-    // console.log('CurveUsdSelfLiquidate deployed to:', curveUsdSelfLiquidate.address);
-    // console.log('CurveUsdView deployed to:', curveView.address);
-    // console.log('CurveUsdLevCreate deployed to:', curveUsedLevCreate.address);
-    // console.log('CurveUsdRepay deployed to:', curveUsdRepay.address);
+    await openStrategyAndBundleStorage(true);
+
+    const curveUsdAdvancedRepayStrategy = createCurveUsdAdvancedRepayStrategy();
+    const curveUsdRepayStrategy = createCurveUsdRepayStrategy();
+    const curveUsdFLRepayStrategy = createCurveUsdFLRepayStrategy();
+    const strategyRepayIdFirst = await createStrategy(undefined, ...curveUsdAdvancedRepayStrategy, true);
+    const strategyRepayIdSecond = await createStrategy(undefined, ...curveUsdRepayStrategy, true);
+    const strategyRepayIdThird = await createStrategy(undefined, ...curveUsdFLRepayStrategy, true);
+
+    const repayBundleId = await createBundle(
+        undefined,
+        [strategyRepayIdFirst, strategyRepayIdSecond, strategyRepayIdThird],
+    );
+
+    const curveUsdBoostStrategy = createCurveUsdBoostStrategy();
+    const curveUsdFLCollBoostStrategy = createCurveUsdFLCollBoostStrategy();
+    const curveUsdFLDebtBoostStrategy = createCurveUsdFLDebtBoostStrategy();
+    const strategyIdFirst = await createStrategy(undefined, ...curveUsdBoostStrategy, true);
+    const strategyIdSecond = await createStrategy(undefined, ...curveUsdFLCollBoostStrategy, true);
+    const strategyIdThird = await createStrategy(undefined, ...curveUsdFLDebtBoostStrategy, true);
+    const boostBundleId = await createBundle(
+        undefined,
+        [strategyIdFirst, strategyIdSecond, strategyIdThird],
+    );
+
+    console.log('CurveUsdRepay deployed to:', curveUsdRepay.address);
+    console.log('CurveUsdCollRatioTrigger deployed to:', curveUsdCollRatioTrigger.address);
+    console.log('CurveUsdCollRatioCheck deployed to:', curveUsdCollRatioCheck.address);
     console.log('CurveUsdSwapper deployed to:', curveUsdSwapper.address);
-    // console.log('CurveUsdSelfLiquidateWithColl deployed to:', curveUsdSelfLiquidateWithColl.address);
+
+    console.log(`Repay bundle id: ${repayBundleId}`);
+    console.log(`Boost bundle id: ${boostBundleId}`);
 
     process.exit(0);
 }
