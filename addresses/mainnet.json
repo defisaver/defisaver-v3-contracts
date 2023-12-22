@@ -2463,6 +2463,17 @@
         "history": ["0x2512A976227a82Ef0F6bDdb463cBcD5B732596BF"]
     },
     {
+        "name": "CurveUsdGetDebt",
+        "address": "0x3Bb41d3f300dA758780fe7696bb4fB93cD7172fB",
+        "id": "0xc914b767",
+        "path": "contracts/actions/curveusd/CurveUsdGetDebt.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveUsdAdjust",
         "address": "0x6f69A7d0B1BE7602381d9cCE6B29F05B9D0b85e6",
         "id": "0xb7bc5093",
