@@ -101,7 +101,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
                 _exchangeData.srcAmount,
                 _exchangeData.srcAmount,
                 0
-            );
+        );
             return (_exchangeData.srcAmount, sameAssetLogData);
         }
 

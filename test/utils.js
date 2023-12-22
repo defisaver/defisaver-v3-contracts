@@ -598,6 +598,10 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
         // eslint-disable-next-line no-param-reassign
         name = 'StrategyExecutorID';
     }
+    if (name === 'KyberInputScalingHelperL2' && getNetwork() !== 'mainnet') {
+        // eslint-disable-next-line no-param-reassign
+        name = 'KyberInputScalingHelper';
+    }
 
     // if (name === 'FLAaveV3') {
     //     // eslint-disable-next-line no-param-reassign
@@ -1203,7 +1207,6 @@ const resetForkToBlock = async (block) => {
         rpcUrl = process.env[`${network.toUpperCase()}_NODE`];
     }
 
-    /// `ProviderError: TypeError [ERR_INVALID_URL]: Invalid URL` on localBase network
     if (block) {
         await hre.network.provider.request({
             method: 'hardhat_reset',

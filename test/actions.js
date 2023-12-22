@@ -55,10 +55,12 @@ const executeAction = async (actionName, functionData, proxy, regAddr = addrs[ne
         return receipt;
     } catch (error) {
         console.log(error);
+        /*
         const blockNum = await hre.ethers.provider.getBlockNumber();
         const block = await hre.ethers.provider.getBlockWithTransactions(blockNum);
         const txHash = block.transactions[0].hash;
         await execShellCommand(`tenderly export ${txHash}`);
+        */
         throw error;
     }
 };
