@@ -80,7 +80,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, CheckWalletTy
         StrategySub memory _sub,
         address _userProxy
     ) internal {
-        address authAddr = isDSProxy() ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
+        address authAddr = isDSProxy(_userProxy) ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
 
         ProxyAuth(authAddr).callExecute{value: msg.value}(
             _userProxy,

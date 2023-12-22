@@ -184,7 +184,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, ModulePermission, Adm
         bytes32[] memory _returnValues
     ) internal {
 
-        bool isDSProxy = isDSProxy();
+        bool isDSProxy = isDSProxy(address(this));
 
         isDSProxy ? givePermission(_flActionAddr) : enableModule(_flActionAddr);
 

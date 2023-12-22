@@ -104,7 +104,7 @@ describe('Safe-wallet-tests', function () {
     let safeInstance;
     let pullTokenInstance;
     let recipeExecutor;
-    let flBalancer;
+    let flAction;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -116,7 +116,7 @@ describe('Safe-wallet-tests', function () {
         pullTokenInstance = await redeploy('PullToken');
         recipeExecutor = await redeploy('RecipeExecutor');
         await redeploy('DFSSell');
-        flBalancer = await redeploy('FLBalancer');
+        flAction = await redeploy('FLAction');
 
         console.log('Safe addr: ', safeAddr);
     });
@@ -154,8 +154,10 @@ describe('Safe-wallet-tests', function () {
 
         const flAmountInWei = hre.ethers.utils.parseUnits('3', 18);
 
-        const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-            [WETH_ADDRESS], [flAmountInWei],
+        const flActionBalancer = new dfs.actions.flashloan.FLAction(
+            new dfs.actions.flashloan.BalancerFlashLoanAction(
+                [WETH_ADDRESS], [flAmountInWei],
+            ),
         );
 
         const sellAction = new dfs.actions.basic.SellAction(
@@ -174,11 +176,11 @@ describe('Safe-wallet-tests', function () {
         );
 
         const repayFlAction = new dfs.actions.basic.SendTokenAction(
-            WETH_ADDRESS, flBalancer.address, flAmountInWei,
+            WETH_ADDRESS, flAction.address, flAmountInWei,
         );
 
         const recipe = new dfs.Recipe('FLSwapPullForRepay', [
-            flAction,
+            flActionBalancer,
             sellAction,
             pullTokenAction,
             repayFlAction,
