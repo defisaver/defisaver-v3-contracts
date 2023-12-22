@@ -79,10 +79,10 @@ const curveUsdBoostStrategyTest = async () => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
-            strategyExecutor = await redeployCore();
+
+            const strategyExecutorAddr = await getAddrFromRegistry('StrategyExecutor');
+            strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', strategyExecutorAddr);
             crvusdView = await redeploy('CurveUsdView');
-            await redeploy('CurveUsdCollRatioTrigger');
-            await redeploy('CurveUsdCollRatioCheck');
 
             await addBotCaller(botAcc.address);
 
@@ -269,13 +269,9 @@ const curveUsdRepayStrategyTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
 
-            strategyExecutor = await redeployCore();
+            const strategyExecutorAddr = await getAddrFromRegistry('StrategyExecutor');
+            strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', strategyExecutorAddr);
             crvusdView = await redeploy('CurveUsdView');
-            await redeploy('CurveUsdRepay');
-            await redeploy('CurveUsdCollRatioTrigger');
-            await redeploy('CurveUsdCollRatioCheck');
-            await redeploy('CurveUsdSwapper');
-
             await addBotCaller(botAcc.address);
 
             proxy = await getProxy(senderAcc.address);
