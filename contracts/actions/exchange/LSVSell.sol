@@ -177,11 +177,8 @@ contract LSVSell is ActionBase, DFSExchangeCore, UtilHelper {
         wStEthReceivedAmount = IWStEth(WSTETH_ADDR).wrap(stethAmount);
     }
 
-    /// @notice Returns the owner of the DSProxy that called the contract
     function getUserAddress() internal view returns (address) {
-        IDSProxy proxy = IDSProxy(payable(address(this)));
-
-        return proxy.owner();
+        return address(this);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

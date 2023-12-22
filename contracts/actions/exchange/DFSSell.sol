@@ -167,16 +167,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         params = abi.decode(_callData, (Params));
     }
 
-    /// @notice Returns the owner of the DSProxy or the address of current proxy if not DSProxy
-    function getUserAddress() internal returns (address) {
-        IDSProxy proxy = IDSProxy(payable(address(this)));
-
-        (bool success, bytes memory response) = address(this).call(abi.encodeWithSignature("nonce()"));
-
-        if (response.length == 0) {
-            return proxy.owner(); // TODO: parse response don't call again
-        } else {
-            return address(this);
-        }
+    function getUserAddress() internal view returns (address) {
+        return address(this);
     }
 }

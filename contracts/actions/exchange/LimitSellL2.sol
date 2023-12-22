@@ -147,11 +147,8 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
         params = abi.decode(_callData, (Params));
     }
 
-    /// @notice Returns the owner of the DSProxy that called the contract
     function getUserAddress() internal view returns (address) {
-        IDSProxy proxy = IDSProxy(payable(address(this)));
-
-        return proxy.owner();
+        return address(this);
     }
 
     function _takeGasFee(

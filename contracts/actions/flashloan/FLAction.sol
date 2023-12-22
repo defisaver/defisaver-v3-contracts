@@ -20,8 +20,6 @@ import "../../core/strategy/StrategyModel.sol";
 
 import "./helpers/FLHelper.sol";
 
-import "hardhat/console.sol";
-
 /// @title Action that gets and receives FL from different variety of sources
 contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel, FLHelper, CheckWalletType {
     using TokenUtils for address;
@@ -152,7 +150,6 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
 
     /// @notice Gets a FL from Balancer and returns back the execution to the action address
     function _flBalancer(FlashLoanParams memory _flParams) internal {
-        console.log("_flBalancer");
         IFlashLoans(VAULT_ADDR).flashLoan(
             address(this),
             _flParams.tokens,
@@ -277,14 +274,10 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         uint256[] memory _feeAmounts,
         bytes memory _userData
     ) external nonReentrant {
-                    console.log("receiveFlashLoan");
-
         if (msg.sender != VAULT_ADDR) {
             revert UntrustedLender();
         }
         (Recipe memory currRecipe, address proxy) = abi.decode(_userData, (Recipe, address));
-
-        console.log(proxy);
 
         uint256[] memory balancesBefore = new uint256[](_tokens.length);
         for (uint256 i = 0; i < _tokens.length; i++) {
@@ -391,7 +384,6 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
                 abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount)
             );
         } else {
-            console.log("execTransactionFromModule");
             ISafe(_wallet).execTransactionFromModule(
                 _recipeExecutorAddr,
                 address(this).balance,

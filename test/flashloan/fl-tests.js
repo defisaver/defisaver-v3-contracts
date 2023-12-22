@@ -412,62 +412,7 @@ const balancerFLTest = async (generalisedFLFlag) => {
         });
     });
 };
-const dydxFLTest = async () => {
-    describe.skip('FL-DyDx', function () {
-        this.timeout(60000);
 
-        let senderAcc; let proxy; let
-            dydxFl;
-
-        const FLASHLOAN_TOKENS = ['WETH', 'DAI', 'USDC'];
-
-        before(async () => {
-            const flDydxAddr = await getAddrFromRegistry('FLDyDx');
-            dydxFl = await hre.ethers.getContractAt('FLDyDx', flDydxAddr);
-            senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
-        });
-
-        for (let i = 0; i < FLASHLOAN_TOKENS.length; ++i) {
-            const tokenSymbol = FLASHLOAN_TOKENS[i];
-
-            it(`... should get an ${tokenSymbol} DyDx flash loan`, async () => {
-                const assetInfo = getAssetInfo(tokenSymbol);
-
-                if (assetInfo.symbol === 'ETH') {
-                    assetInfo.address = WETH_ADDRESS;
-                }
-
-                // test if balance will brick fl action
-                await setBalance(assetInfo.address, dydxFl.address, Float2BN('1', 0));
-
-                const amount = fetchAmountinUSDPrice(tokenSymbol, '1000');
-                const loanAmount = hre.ethers.utils.parseUnits(
-                    amount,
-                    assetInfo.decimals,
-                );
-
-                const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
-                    new dfs.actions.flashloan.DyDxFlashLoanAction(
-                        loanAmount,
-                        assetInfo.address,
-                        nullAddress,
-                        [],
-                    ),
-                    new dfs.actions.basic.SendTokenAction(
-                        assetInfo.address,
-                        dydxFl.address,
-                        hre.ethers.constants.MaxUint256,
-                    ),
-                ]);
-
-                const functionData = basicFLRecipe.encodeForDsProxyCall();
-
-                await executeAction('RecipeExecutor', functionData[1], proxy);
-            });
-        }
-    });
-};
 const makerFLTest = async (generalisedFLFlag) => {
     describe('FL-Maker', function () {
         this.timeout(60000);
@@ -826,7 +771,6 @@ const deployFLContracts = async () => {
     await redeploy('FLMaker');
     await redeploy('SendToken');
     await redeploy('RecipeExecutor');
-    await redeploy('FLDyDx');
     await redeploy('FLBalancer');
     await redeploy('FLAaveV2');
     await redeploy('FLEuler');
@@ -857,7 +801,6 @@ module.exports = {
     fullFLTest,
     aaveFlTest,
     balancerFLTest,
-    dydxFLTest,
     makerFLTest,
     eulerFLTest,
     aaveV3FlTest,

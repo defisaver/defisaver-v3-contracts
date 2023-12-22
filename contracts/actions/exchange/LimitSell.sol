@@ -135,9 +135,7 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
 
     /// @notice Returns the owner of the DSProxy that called the contract
     function getUserAddress() internal view returns (address) {
-        IDSProxy proxy = IDSProxy(payable(address(this)));
-
-        return proxy.owner();
+        return address(this);
     }
 
     function _takeGasFee(uint256 _gasUsed, uint256 _soldAmount, address _feeToken) internal returns (uint256 amountAfterFee) {
