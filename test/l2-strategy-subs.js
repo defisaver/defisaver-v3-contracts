@@ -152,7 +152,7 @@ const subToCompV3L2AutomationStrategy = async (
         subId2 = '0';
     }
 
-    console.log('Subs: ', subId, subId2);
+    console.log('Subs: ', subId1, subId2);
 
     return { firstSub: subId1, secondSub: subId2 };
 };
