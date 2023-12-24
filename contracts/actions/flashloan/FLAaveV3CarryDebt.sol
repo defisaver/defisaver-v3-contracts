@@ -113,7 +113,7 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
     function executeOperation(
         address[] memory _assets,
         uint256[] memory _amounts,
-        uint256[] memory _fees,
+        uint256[] memory,
         address _initiator,
         bytes memory _params
     ) public nonReentrant returns (bool) {
@@ -136,7 +136,7 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
         // call Action execution
         IDSProxy(proxy).execute{value: address(this).balance}(
             recipeExecutor,
-            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, bytes32(_amounts[0] + _fees[0]))
+            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, bytes32(_amounts[0]))
         );
 
         return true;
