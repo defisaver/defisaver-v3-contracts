@@ -9,6 +9,11 @@ import "./helpers/MorphoBlueHelper.sol";
 contract MorphoBlueBorrow is ActionBase, MorphoBlueHelper {
     using TokenUtils for address;
 
+
+    /// @param marketParams Market params of specified Morpho Blue market
+    /// @param borrowAmount The amount of assets to borrow
+    /// @param onBehalf The address that owns the position whose debt will increase
+    /// @param to The Address which will receive tokens borrowed
     struct Params {
         MarketParams marketParams;
         uint256 borrowAmount;

@@ -9,6 +9,10 @@ import "./helpers/MorphoBlueHelper.sol";
 contract MorphoBlueWithdraw is ActionBase, MorphoBlueHelper {
     using TokenUtils for address;
 
+    /// @param marketParams Market params of specified Morpho Blue market
+    /// @param withdrawAmount The amount of assets to withdraw (uint.max for full balance withdrawal)
+    /// @param onBehalf The address that owns the position from which the tokens will be withdrawn
+    /// @param to The Address which will receive tokens withdrawn
     struct Params {
         MarketParams marketParams;
         uint256 withdrawAmount;
@@ -56,7 +60,7 @@ contract MorphoBlueWithdraw is ActionBase, MorphoBlueHelper {
         uint256 assetsWithdrawn;
 
         if (_params.withdrawAmount == type(uint256).max){
-            uint256 supplyShares = getSupplySharesAfterAccrual(_params.marketParams, _params.onBehalf);
+            uint256 supplyShares = getSupplyShares(_params.marketParams, _params.onBehalf);
             (assetsWithdrawn, ) = morphoBlue.withdraw(_params.marketParams, 0, supplyShares, _params.onBehalf, _params.to);
         } else {
             (assetsWithdrawn, ) = morphoBlue.withdraw(_params.marketParams, _params.withdrawAmount, 0, _params.onBehalf, _params.to);

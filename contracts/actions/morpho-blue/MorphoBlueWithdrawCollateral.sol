@@ -9,6 +9,10 @@ import "./helpers/MorphoBlueHelper.sol";
 contract MorphoBlueWithdrawCollateral is ActionBase, MorphoBlueHelper {
     using TokenUtils for address;
 
+    /// @param marketParams Market params of specified Morpho Blue market
+    /// @param withdrawAmount The amount of assets to supply.
+    /// @param onBehalf The address that owns the collateral position.
+    /// @param to The address that will receive the collateral assets.
     struct Params {
         MarketParams marketParams;
         uint256 withdrawAmount;

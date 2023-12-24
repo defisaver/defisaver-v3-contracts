@@ -73,6 +73,8 @@ contract FLMorphoBlue is ActionBase, ReentrancyGuard, StrategyModel, IFlashLoanB
         (bytes memory taskData, address token) = abi.decode(data, (bytes, address));
         (Recipe memory currRecipe, address proxy) = abi.decode(taskData, (Recipe, address));
 
+        token.withdrawTokens(proxy, assets);
+
         uint256 balanceBefore = token.getBalance(address(this));
         address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
 

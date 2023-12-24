@@ -3,6 +3,7 @@ pragma solidity =0.8.10;
 
 import "./MainnetMorphoBlueAddresses.sol";
 import "../../../interfaces/morpho-blue/IMorphoBlue.sol";
+import "./MorphoBlueLib.sol";
 
 contract MorphoBlueHelper is MainnetMorphoBlueAddresses {
     IMorphoBlue public constant morphoBlue = IMorphoBlue(MORPHO_BLUE_ADDRESS);
@@ -12,41 +13,22 @@ contract MorphoBlueHelper is MainnetMorphoBlueAddresses {
     uint256 internal constant VIRTUAL_SHARES = 1e6;
     uint256 internal constant VIRTUAL_ASSETS = 1;
 
-    function id(MarketParams memory marketParams) internal pure returns (Id marketParamsId) {
-        assembly {
-            marketParamsId := keccak256(marketParams, MARKET_PARAMS_BYTES_LENGTH)
-        }
-    }
-
-    function getSupplySharesAfterAccrual(MarketParams memory marketParams, address owner) public returns (uint256 supplyShares){
+    /// @dev this changes state and uses up more gas
+    /// @dev if you call other morpho blue state changing function in same transaction then its _accrueInterest will return early and save gas
+    /// Function fetches debt in assets so that we know exactly how many tokens we need to repay the whole debt
+    function getCurrentDebt(MarketParams memory marketParams, address owner) internal returns (uint256 currentDebtInAssets, uint256 borrowShares){
         morphoBlue.accrueInterest(marketParams);
-        Position memory position = morphoBlue.position(id(marketParams), owner);
-        supplyShares = position.supplyShares;
+        Id marketId = MarketParamsLib.id(marketParams);
+        borrowShares = MorphoLib.borrowShares(morphoBlue, marketId, owner);
+        currentDebtInAssets = SharesMathLib.toAssetsUp(
+            borrowShares, 
+            MorphoLib.totalBorrowAssets(morphoBlue, marketId),
+            MorphoLib.totalBorrowShares(morphoBlue, marketId)
+        );
     }
-    
-    function getBorrowSharesAfterAccrual(MarketParams memory marketParams, address owner) public returns (uint256 borrowShares){
-        morphoBlue.accrueInterest(marketParams);
-        Position memory position = morphoBlue.position(id(marketParams), owner);
-        borrowShares = position.borrowShares;
-    }
-
-    function getAccruedMarketInfo(MarketParams memory marketParams) public returns (Market memory marketInfo){
-        morphoBlue.accrueInterest(marketParams);
-        marketInfo = morphoBlue.market(id(marketParams));
-    }
-
-    function sharesToAssetsUp(uint256 shares, uint256 totalAssets,  uint256 totalShares) internal pure returns (uint256){
-        return mulDivUp(shares, totalAssets + VIRTUAL_ASSETS, totalShares + VIRTUAL_SHARES);
-    }
-
-    /// @dev Returns (`x` * `y`) / `d` rounded up.
-    function mulDivUp(uint256 x, uint256 y, uint256 d) internal pure returns (uint256) {
-        return (x * y + (d - 1)) / d;
-    }
-
-    function getCurrentDebt(MarketParams memory marketParams, address owner) public returns (uint256 currentDebtInAssets, uint256 borrowShares){
-        Market memory marketInfo = getAccruedMarketInfo(marketParams);
-        borrowShares = getBorrowSharesAfterAccrual(marketParams, owner);
-        currentDebtInAssets = sharesToAssetsUp(borrowShares, marketInfo.totalBorrowAssets, marketInfo.totalBorrowShares);
+    /// Function reads supply shares for a given user from MorphoBlue state
+    function getSupplyShares(MarketParams memory marketParams, address owner) internal view returns (uint256 supplyShares){
+        Id marketId = MarketParamsLib.id(marketParams);
+        supplyShares = MorphoLib.supplyShares(morphoBlue, marketId, owner);
     }
 }

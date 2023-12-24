@@ -9,6 +9,10 @@ import "./helpers/MorphoBlueHelper.sol";
 contract MorphoBluePayback is ActionBase, MorphoBlueHelper {
     using TokenUtils for address;
 
+    /// @param marketParams Market params of specified Morpho Blue market
+    /// @param paybackAmount The amount of tokens to payback (uint.max for full debt repayment)
+    /// @param from The Address from which to pull tokens to be repaid
+    /// @param onBehalf The address that will have its debt reduced
     struct Params {
         MarketParams marketParams;
         uint256 paybackAmount;
@@ -56,7 +60,7 @@ contract MorphoBluePayback is ActionBase, MorphoBlueHelper {
         
         (uint256 currentDebt, uint256 borrowShares) = getCurrentDebt(_params.marketParams, _params.onBehalf);
         bool maxPayback;
-        if (_params.paybackAmount >= currentDebt){
+        if (_params.paybackAmount > currentDebt){
             _params.paybackAmount = currentDebt;
             maxPayback = true;
         }

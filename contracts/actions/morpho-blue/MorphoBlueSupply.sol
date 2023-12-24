@@ -5,10 +5,14 @@ import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 import "./helpers/MorphoBlueHelper.sol";
 
-/// @title Supply a token to Morpho Blue market
+/// @title Supply a token to Morpho Blue market for interest
 contract MorphoBlueSupply is ActionBase, MorphoBlueHelper {
     using TokenUtils for address;
 
+    /// @param marketParams Market params of specified Morpho Blue market
+    /// @param supplyAmount The amount of assets to supply.
+    /// @param from The Address from which to pull tokens to be supplied for interest
+    /// @param onBehalf The address that will own the shares
     struct Params {
         MarketParams marketParams;
         uint256 supplyAmount;
@@ -58,7 +62,6 @@ contract MorphoBlueSupply is ActionBase, MorphoBlueHelper {
         _params.marketParams.loanToken.approveToken(address(morphoBlue), _params.supplyAmount);
 
         morphoBlue.supply(_params.marketParams, _params.supplyAmount, 0, _params.onBehalf, "");
-
 
         bytes memory logData = abi.encode(_params);
 

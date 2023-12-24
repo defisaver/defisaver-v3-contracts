@@ -16,9 +16,9 @@ contract MorphoBlueSetAuthWithSig is ActionBase, MorphoBlueHelper {
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
-        bytes32[] memory _subData,
-        uint8[] memory _paramMapping,
-        bytes32[] memory _returnValues
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
         _setAuth(params);
