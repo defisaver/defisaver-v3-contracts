@@ -35,6 +35,12 @@ const createLiquityTrigger = async (user, ratio, ratioState) => {
     return param;
 };
 
+const createCurveUsdCollRatioTrigger = async (user, controllerAddr, ratio, ratioState) => {
+    const param = abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [user, controllerAddr, ratio, ratioState]);
+
+    return param;
+};
+
 const createChainLinkPriceTrigger = async (tokenAddr, price, state) => {
     const param = abiCoder.encode(['address', 'uint256', 'uint8'], [tokenAddr, price, state]);
     return param;
@@ -99,6 +105,7 @@ module.exports = {
     createOffchainPriceTrigger,
     createMorphoTrigger,
     createDebtInFrontWithLimitTrigger,
+    createCurveUsdCollRatioTrigger,
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
     IN_BOOST,

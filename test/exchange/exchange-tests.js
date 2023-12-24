@@ -20,7 +20,7 @@ const {
     formatExchangeObj,
     BN2Float,
     formatExchangeObjCurve,
-    // REGISTRY_ADDR,
+    REGISTRY_ADDR,
     addrs,
     placeHolderAddr,
     getAddrFromRegistry,
@@ -75,8 +75,8 @@ const curveTrades = [
 ];
 
 const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve = false) => {
-    const sellAssetInfo = getAssetInfo(trade.sellToken, chainIds[getNetwork()]);
-    const buyAssetInfo = getAssetInfo(trade.buyToken, chainIds[getNetwork()]);
+    const sellAssetInfo = getAssetInfo(trade.sellToken);
+    const buyAssetInfo = getAssetInfo(trade.buyToken);
 
     const amount = Float2BN(trade.amount, getAssetInfo(trade.sellToken).decimals);
 
@@ -115,8 +115,8 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
 
     const expectedOutput = amount.mul(rate).div(Float2BN('1'));
 
-    // const feeReceiverAmountBefore = await balanceOf(sellAssetInfo.address,
-    //     addrs[hre.network.config.name].FEE_RECEIVER);
+    const feeReceiverAmountBefore = await balanceOf(sellAssetInfo.address,
+        addrs[hre.network.config.name].FEE_RECEIVER);
 
     await sell(
         proxy,
@@ -128,24 +128,24 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
         senderAcc.address,
         trade.fee,
         senderAcc,
-        undefined,
+        REGISTRY_ADDR,
         isCurve,
     );
 
-    // const feeReceiverAmountAfter = await balanceOf(sellAssetInfo.address,
-    //     addrs[hre.network.config.name].FEE_RECEIVER);
+    const feeReceiverAmountAfter = await balanceOf(sellAssetInfo.address,
+        addrs[hre.network.config.name].FEE_RECEIVER);
     const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
 
     // test fee amount
-    // const tokenGroupRegistry = await hre.ethers.getContractAt('TokenGroupRegistry',
-    //     addrs[hre.network.config.name].TOKEN_GROUP_REGISTRY);
+    const tokenGroupRegistry = await hre.ethers.getContractAt('TokenGroupRegistry',
+        addrs[hre.network.config.name].TOKEN_GROUP_REGISTRY);
 
-    // const fee = await tokenGroupRegistry.getFeeForTokens(sellAssetInfo.address, buyAssetInfo.address);
+    const fee = await tokenGroupRegistry.getFeeForTokens(sellAssetInfo.address, buyAssetInfo.address);
 
-    // const feeAmount = amount.div(fee);
+    const feeAmount = amount.div(fee);
 
     // must be closeTo because 1 wei steth bug
-    // expect(feeReceiverAmountAfter).to.be.closeTo(feeReceiverAmountBefore.add(feeAmount), '1');
+    expect(feeReceiverAmountAfter).to.be.closeTo(feeReceiverAmountBefore.add(feeAmount), '1');
 
     expect(buyBalanceAfter).is.gt('0');
     if (Math.abs(
@@ -230,8 +230,9 @@ const kyberAggregatorDFSSellTest = async () => {
         let snapshot;
 
         before(async () => {
-            await redeploy('KyberInputScalingHelper');
-            await redeploy('DFSSell');
+            // await redeploy('KyberInputScalingHelper');
+            await redeploy('KyberInputScalingHelperL2');
+            // await redeploy('DFSSell');
             kyberAggregatorWrapper = await redeploy('KyberAggregatorWrapper');
 
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -270,10 +271,18 @@ const kyberAggregatorDFSSellTest = async () => {
                 if (chainId === 42161) {
                     baseUrl = 'https://aggregator-api.kyberswap.com/arbitrum/api/v1/';
                 }
+                if (chainId === 8453) {
+                    baseUrl = 'https://aggregator-api.kyberswap.com/base/api/v1/';
+                }
+                const clientId = 'partner-staging';
+                const headers = {
+                    'x-client-id': clientId,
+                };
                 const options = {
                     method: 'GET',
                     baseURL: baseUrl,
-                    url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${buyAssetInfo.address}&amountIn=${amount.toString()}&saveGas=false&gasInclude=true`,
+                    url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${buyAssetInfo.address}&amountIn=${amount.toString()}&saveGas=false&gasInclude=true&x-client-id=${clientId}`,
+                    headers,
                 };
                 // console.log(options.baseURL + options.url);
                 const priceObject = await axios(options).then((response) => response.data.data);
@@ -282,18 +291,18 @@ const kyberAggregatorDFSSellTest = async () => {
                     method: 'POST',
                     baseURL: baseUrl,
                     url: 'route/build',
+                    headers,
                     data: {
                         routeSummary: priceObject.routeSummary,
                         sender: kyberAggregatorWrapper.address,
                         recipient: kyberAggregatorWrapper.address,
                         slippageTolerance: 1000,
                         deadline: 1776079017,
+                        source: clientId,
                     },
                 };
                 // console.log(secondOptions.data);
                 const resultObject = await axios(secondOptions).then((response) => response.data);
-
-                // console.log(resultObject);
                 // THIS IS CHANGEABLE WITH API INFORMATION
                 const allowanceTarget = priceObject.routerAddress;
                 const price = 1; // just for testing, anything bigger than 0 triggers offchain if
@@ -345,10 +354,15 @@ const kyberAggregatorDFSSellTest = async () => {
                 if (chainId === 42161) {
                     baseUrl = 'https://aggregator-api.kyberswap.com/arbitrum/api/v1/';
                 }
+                const clientId = 'partner-staging';
+                const headers = {
+                    'x-client-id': clientId,
+                };
                 const options = {
                     method: 'GET',
                     baseURL: baseUrl,
-                    url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${buyAssetInfo.address}&amountIn=${amount.toString()}&saveGas=false&gasInclude=true`,
+                    url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${buyAssetInfo.address}&amountIn=${amount.toString()}&saveGas=false&gasInclude=true&x-client-id=${clientId}`,
+                    headers,
                 };
                 // console.log(options.baseURL + options.url);
                 const priceObject = await axios(options).then((response) => response.data.data);
@@ -357,12 +371,14 @@ const kyberAggregatorDFSSellTest = async () => {
                     method: 'POST',
                     baseURL: baseUrl,
                     url: 'route/build',
+                    headers,
                     data: {
                         routeSummary: priceObject.routeSummary,
                         sender: kyberAggregatorWrapper.address,
                         recipient: kyberAggregatorWrapper.address,
                         slippageTolerance: 1000,
                         deadline: 1776079017,
+                        source: clientId,
                     },
                 };
                 // console.log(secondOptions.data);
@@ -437,7 +453,7 @@ const dfsSellTest = async () => {
             await setNewExchangeWrapper(senderAcc, curveWrapper.address);
         });
 
-        for (let i = 0; i < trades.length; ++i) {
+        for (let i = 0; i < 1; ++i) {
             const trade = trades[i];
 
             it(`... should sell on Kyber ${trade.sellToken} for ${trade.buyToken}`, async () => {

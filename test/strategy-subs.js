@@ -30,6 +30,8 @@ const {
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
     IN_REPAY,
+    createCurveUsdCollRatioTrigger,
+    IN_BOOST,
 } = require('./triggers');
 
 const {
@@ -727,6 +729,38 @@ const subAaveV3CloseWithMaximumGasPriceBundle = async (
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
+const subCurveUsdRepayBundle = async (
+    proxy, bundleId, controllerAddr, minRatio, targetRatio, collTokenAddress, crvusdAddress,
+) => {
+    const triggerData = await createCurveUsdCollRatioTrigger(proxy.address, controllerAddr, minRatio, RATIO_STATE_UNDER);
+    const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_REPAY]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const controllerAddressEncoded = abiCoder.encode(['address'], [controllerAddr]);
+    const collTokenAddressEncoded = abiCoder.encode(['address'], [collTokenAddress]);
+    const crvUsdAddressEncoded = abiCoder.encode(['address'], [crvusdAddress]);
+    const strategySub = [bundleId, true, [triggerData],
+        [controllerAddressEncoded, ratioStateEncoded, targetRatioEncoded, collTokenAddressEncoded, crvUsdAddressEncoded],
+    ];
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+const subCurveUsdBoostBundle = async (
+    proxy, bundleId, controllerAddr, maxRatio, targetRatio, collTokenAddress, crvusdAddress,
+) => {
+    const triggerData = await createCurveUsdCollRatioTrigger(proxy.address, controllerAddr, maxRatio, RATIO_STATE_OVER);
+    const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_BOOST]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const controllerAddressEncoded = abiCoder.encode(['address'], [controllerAddr]);
+    const collTokenAddressEncoded = abiCoder.encode(['address'], [collTokenAddress]);
+    const crvUsdAddressEncoded = abiCoder.encode(['address'], [crvusdAddress]);
+    const strategySub = [bundleId, true, [triggerData],
+        [controllerAddressEncoded, ratioStateEncoded, targetRatioEncoded, collTokenAddressEncoded, crvUsdAddressEncoded],
+    ];
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
 
 module.exports = {
     subDcaStrategy,
@@ -760,4 +794,6 @@ module.exports = {
     subLiqutityDsrSupplyStrategy,
     subLiquityDebtInFrontRepayStrategy,
     subAaveV3CloseWithMaximumGasPriceBundle,
+    subCurveUsdRepayBundle,
+    subCurveUsdBoostBundle,
 };

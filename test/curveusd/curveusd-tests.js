@@ -3,6 +3,7 @@
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
+const dfs = require('@defisaver/sdk');
 
 const { utils: { curveusdUtils: { curveusdMarkets, controllerFactoryAddress } } } = require('@defisaver/sdk');
 const {
@@ -20,6 +21,7 @@ const {
     fetchAmountinUSDPrice,
     STETH_ADDRESS,
     resetForkToBlock,
+    getAddrFromRegistry,
 } = require('../utils');
 
 const {
@@ -33,6 +35,7 @@ const {
     curveUsdSelfLiquidateWithColl,
     curveUsdLevCreate,
     curveUsdAdjust,
+    proxyApproveToken,
 } = require('../actions');
 
 const crvusdAddress = getAssetInfo('crvUSD').address;
@@ -88,7 +91,6 @@ const testCreate = async ({
     const expectedDebt = debtAmount === ethers.constants.MaxUint256
         ? await ethers.getContractAt('ICrvUsdController', controllerAddress).then((c) => c.max_borrowable(expectedCollateral, nBands))
         : debtAmount;
-
     await approve(collateralAsset, proxy.address);
     const { approveObj: { owner, asset } } = await curveUsdCreate(
         proxy,
@@ -113,6 +115,87 @@ const testCreate = async ({
 
     return { collateral, debt };
 };
+
+const curveUsdImportTest = () => describe('CurveUsd-Import', () => {
+    let senderAcc;
+    let proxy;
+    let originalPositionOwnerAcc;
+    let originalPositionOwnerProxy;
+    let crvUsdView;
+    let snapshotId;
+
+    before(async () => {
+        crvUsdView = await redeploy('CurveUsdView');
+        await redeploy('CurveUsdGetDebt');
+        senderAcc = (await ethers.getSigners())[1];
+        proxy = await getProxy(senderAcc.address);
+        console.log(senderAcc.address);
+        originalPositionOwnerAcc = (await ethers.getSigners())[0];
+        originalPositionOwnerProxy = await getProxy(originalPositionOwnerAcc.address);
+    });
+
+    beforeEach(async () => {
+        snapshotId = await takeSnapshot();
+    });
+
+    afterEach(async () => {
+        await revertToSnapshot(snapshotId);
+    });
+
+    Object.entries(curveusdMarkets)
+        .reduce((acc, e) => [e, ...acc], []).map(([assetSymbol, { controllerAddress }]) => {
+            const collateralAsset = getAssetInfo(assetSymbol).address;
+            it(`... should test import for ${assetSymbol} market`, async () => {
+                await debtCeilCheck(controllerAddress);
+
+                const collateralAmount = ethers.utils.parseUnits('10', getAssetInfo(assetSymbol).decimals);
+                const debtAmount = ethers.utils.parseUnits('5000');
+                const nBands = 10;
+                await setBalance(collateralAsset, originalPositionOwnerAcc.address, collateralAmount);
+                await testCreate({
+                    proxy: originalPositionOwnerProxy,
+                    collateralAsset,
+                    controllerAddress,
+                    from: originalPositionOwnerAcc.address,
+                    to: originalPositionOwnerAcc.address,
+                    collateralAmount,
+                    debtAmount,
+                    nBands,
+                });
+                await proxyApproveToken(originalPositionOwnerProxy, collateralAsset, proxy.address, collateralAmount);
+                const userDataBefore = await crvUsdView.userData(
+                    controllerAddress, originalPositionOwnerProxy.address,
+                );
+                const maxActiveBand = await getActiveBand(controllerAddress);
+                const flActionAddr = await getAddrFromRegistry('FLBalancer');
+                const importRecipe = new dfs.Recipe('BasicFLRecipe', [
+                    new dfs.actions.flashloan.BalancerFlashLoanAction([collateralAsset], [collateralAmount]),
+                    new dfs.actions.curveusd.CurveUsdGetDebtAction(controllerAddress, originalPositionOwnerProxy.address),
+                    new dfs.actions.curveusd.CurveUsdCreateAction(controllerAddress, proxy.address, proxy.address, collateralAmount, '$2', nBands),
+                    new dfs.actions.curveusd.CurveUsdPaybackAction(controllerAddress, proxy.address, originalPositionOwnerProxy.address, originalPositionOwnerAcc.address, '$2', maxActiveBand),
+                    new dfs.actions.basic.PullTokenAction(collateralAsset, originalPositionOwnerProxy.address, collateralAmount),
+                    new dfs.actions.basic.SendTokenAction(collateralAsset, flActionAddr, collateralAmount),
+                ]);
+                const functionData = importRecipe.encodeForDsProxyCall();
+                const recipeExecutor = await getAddrFromRegistry('RecipeExecutor');
+
+                await proxy.connect(senderAcc)['execute(address,bytes)'](recipeExecutor, functionData[1], {
+                    gasLimit: 3000000,
+                });
+                const userDataAfter = await crvUsdView.userData(
+                    controllerAddress, proxy.address,
+                );
+
+                console.log(userDataBefore.marketCollateralAmount);
+                console.log(userDataAfter.marketCollateralAmount);
+                expect(userDataAfter.marketCollateralAmount).to.be.eq(userDataBefore.marketCollateralAmount);
+                console.log(userDataBefore.debtAmount);
+                console.log(userDataAfter.debtAmount);
+                expect((userDataAfter.debtAmount / 1e18).toFixed(2)).to.be.eq((userDataBefore.debtAmount / 1e18).toFixed(2));
+                // this isn't as precise since rate will make debt a bit higher so we can't compare
+            });
+        });
+});
 
 const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
     let blocknumber;
@@ -1032,4 +1115,6 @@ module.exports = {
     curveUsdFullTest,
     curveUsdSelfLiquidateTest,
     curveUsdAdjustTest,
+    getActiveBand,
+    curveUsdImportTest,
 };

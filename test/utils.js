@@ -54,6 +54,7 @@ const addrs = {
         DFS_REG_CONTROLLER: '0x6F6DaE1bCB60F67B2Cb939dBE565e8fD03F6F002',
         AVG_GAS_PRICE: 100,
         AAVE_V3_POOL_DATA_PROVIDER: '0x7B4EB56E7CD4b454BA8ff71E4518426369a138a3',
+        CURVE_WRAPPER_V3: '0xdE73496DD6349829C6649aCaDe31FB1371528AC5',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -137,12 +138,6 @@ const addrs = {
         ADMIN_ACC: '0xF8EC1967A719027A95883a89579e7A77699899e4',
         DFS_REG_CONTROLLER: '0x50bCFC115283dF48Ab6382551B9B93b08E197747',
         AAVE_V3_POOL_DATA_PROVIDER: '0x2d8A3C5677189723C4cB8873CfC9C8976FDF38Ac',
-    },
-    kovan: {
-        PROXY_REGISTRY: '0xF9722E05B68E5ad5D6E1674C4d6BfE11791a1E33',
-    },
-    kovanOptimism: {
-        PROXY_REGISTRY: '0x1fA11C699629E43005fd64f4DA36d9Eb30333ef9',
     },
 };
 
@@ -318,6 +313,8 @@ const coinGeckoHelper = {
     GMX: 'gmx',
     ARB: 'arbitrum',
     frxETH: 'frax-ether',
+    sfrxETH: 'staked-frax-ether',
+    tBTC: 'tbtc',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;
@@ -604,6 +601,10 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
         // eslint-disable-next-line no-param-reassign
         name = 'StrategyExecutorID';
     }
+    if (name === 'KyberInputScalingHelperL2' && getNetwork() !== 'mainnet') {
+        // eslint-disable-next-line no-param-reassign
+        name = 'KyberInputScalingHelper';
+    }
 
     // if (name === 'FLAaveV3') {
     //     // eslint-disable-next-line no-param-reassign
@@ -885,7 +886,15 @@ const formatExchangeObjCurve = async (
         // eslint-disable-next-line no-underscore-dangle
         [args._route, args._swapParams, args._pools],
     );
-
+    if (exchangeData.toString().includes('5e74c9036fb86bd7ecdcb084a0673efc32ea31cb')) {
+        console.log('sETH used in curve route, may fail');
+    }
+    if (exchangeData.toString().includes('fe18be6b3bd88a2d2a7f928d00292e7a9963cfc6')) {
+        console.log('sBTC used in curve route, may fail');
+    }
+    if (exchangeData.toString().includes('57Ab1ec28D129707052df4dF418D58a2D46d5f51')) {
+        console.log('sUSD used in curve route, may fail');
+    }
     return [
         srcAddr,
         destAddr,
@@ -1209,7 +1218,6 @@ const resetForkToBlock = async (block) => {
         rpcUrl = process.env[`${network.toUpperCase()}_NODE`];
     }
 
-    /// `ProviderError: TypeError [ERR_INVALID_URL]: Invalid URL` on localBase network
     if (block) {
         await hre.network.provider.request({
             method: 'hardhat_reset',
