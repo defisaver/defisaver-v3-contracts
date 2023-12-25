@@ -4,13 +4,15 @@ pragma solidity =0.8.10;
 
 import "../DS/DSMath.sol";
 import "../utils/Exponential.sol";
+import "../utils/TokenPriceHelper.sol";
 import "../interfaces/compoundV3/IComet.sol";
 import "../interfaces/compoundV3/ICometExt.sol";
 import "../interfaces/compoundV3/ICometRewards.sol";
 
 import "../actions/compoundV3/helpers/CompV3Helper.sol";
+import "hardhat/console.sol";
 
-contract CompV3View is Exponential, DSMath, CompV3Helper {
+contract CompV3View is Exponential, DSMath, CompV3Helper, TokenPriceHelper {
 
     struct LoanData {
         address user;
@@ -103,26 +105,45 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
             collValue: 0
         });
 
-        for (uint i = 0; i < assets.length; i++) {
-            address asset = assets[i].asset;
-            address priceFeed = assets[i].priceFeed; 
+        bool isEthMarket = keccak256(abi.encode(comet.symbol())) == keccak256(abi.encode(WETH_TOKEN_SYMBOL));
 
-            uint tokenBalance = comet.collateralBalanceOf(_user,asset);
-            data.collAddr[i] = asset;
-            data.collAmounts[i] = tokenBalance;
-            if (tokenBalance != 0) {
-                data.collAddr[i] = asset;
-                uint value = tokenBalance * comet.getPrice(priceFeed) / assets[i].scale;
-                data.collAmounts[i] = tokenBalance;
-                data.collValue += value;
+        for (uint i = 0; i < assets.length; i++) {
+            address assetAddr = assets[i].asset;
+
+            data.collAddr[i] = assetAddr;
+
+            uint collBalance = comet.collateralBalanceOf(_user, assetAddr);
+            data.collAmounts[i] = collBalance;
+        
+            if (collBalance != 0) {
+
+                if (isEthMarket) {
+                    uint256 collValueInEth = comet.getPrice(assets[i].priceFeed);
+                    uint256 ethInUsd = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
+                    uint256 collValueInUsd = collValueInEth * ethInUsd / 1e8;
+                    uint256 value = collBalance * collValueInUsd / assets[i].scale;
+                    data.collValue += value;
+                } 
+                else {
+                    uint value = collBalance * comet.getPrice(assets[i].priceFeed) / assets[i].scale;
+                    data.collValue += value;
+                }
             }
         }
 
-        address usdcPriceFeed = comet.baseTokenPriceFeed();
         data.borrowAmount = comet.borrowBalanceOf(_user);
-        data.borrowValue = comet.borrowBalanceOf(_user) * comet.getPrice(usdcPriceFeed) / comet.priceScale();
         data.depositAmount = comet.balanceOf(_user);
-        data.depositValue = comet.balanceOf(_user) * comet.getPrice(usdcPriceFeed) / comet.priceScale();
+
+        if (isEthMarket) {
+            uint256 ethInUsd = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
+            data.borrowValue = data.borrowAmount * ethInUsd / comet.baseScale();
+            data.depositValue = data.depositAmount * ethInUsd / comet.baseScale();
+        } else {
+            address usdcPriceFeed = comet.baseTokenPriceFeed();
+            uint256 usdcInUsd = comet.getPrice(usdcPriceFeed);
+            data.borrowValue = data.borrowAmount * usdcInUsd / comet.baseScale();
+            data.depositValue = data.depositAmount * usdcInUsd / comet.baseScale();
+        }
 
         return data;
     }
