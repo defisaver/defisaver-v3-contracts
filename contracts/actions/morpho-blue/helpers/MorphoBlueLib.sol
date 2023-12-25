@@ -150,14 +150,14 @@ library MorphoLib {
         return uint256(morpho.extSloads(slot)[0] >> 128);
     }
 
-    function lastUpdate(IMorphoBlue morpho, Id id) internal view returns (uint256) {
+    function lastUpdate(IMorphoBlue morpho, Id id) internal view returns (uint128) {
         bytes32[] memory slot = _array(MorphoStorageLib.marketLastUpdateAndFeeSlot(id));
         return uint128(uint256(morpho.extSloads(slot)[0]));
     }
 
-    function fee(IMorphoBlue morpho, Id id) internal view returns (uint256) {
+    function fee(IMorphoBlue morpho, Id id) internal view returns (uint128) {
         bytes32[] memory slot = _array(MorphoStorageLib.marketLastUpdateAndFeeSlot(id));
-        return uint256(morpho.extSloads(slot)[0] >> 128);
+        return uint128(uint256(morpho.extSloads(slot)[0] >> 128));
     }
 
     function _array(bytes32 x) private pure returns (bytes32[] memory) {
