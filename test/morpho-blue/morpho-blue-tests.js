@@ -1,9 +1,10 @@
 const hre = require('hardhat');
+const { expect } = require('chai');
 const {
     takeSnapshot, revertToSnapshot, getProxy, impersonateAccount,
-    stopImpersonatingAccount, sendEther, setBalance, approve, nullAddress,
+    stopImpersonatingAccount, sendEther, setBalance, approve, nullAddress, redeploy, balanceOf,
 } = require('../utils');
-const { morphoBlueSupply } = require('../actions');
+const { morphoBlueSupply, morphoBlueWithdraw } = require('../actions');
 
 const deployMorphoBlueMarket = async () => {
     const [wallet] = await hre.ethers.getSigners();
@@ -34,8 +35,9 @@ const deployMorphoBlueMarket = async () => {
     await stopImpersonatingAccount(morphoOwnerAddr);
     await setBalance('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', wallet.address, hre.ethers.utils.parseUnits('1000'));
     await approve('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', morphoBlue.address, wallet);
-    await morphoBlue.supply(marketParams, hre.ethers.utils.parseUnits('1000'), '0', wallet.address, [], { gasLimit: 3000000 });
 
+    await morphoBlue.supply(marketParams, hre.ethers.utils.parseUnits('1000'), '0', wallet.address, [], { gasLimit: 3000000 });
+    if (morphoBlue.address !== '0x4bF9BF8A2EdB9A43a51DD07566855EFe658d27FC') console.log('ERROR');
     return marketParams;
 };
 
@@ -54,22 +56,95 @@ const morphoBlueSupplyTest = async () => {
             proxy = await getProxy(senderAcc.address);
             snapshot = await takeSnapshot();
             const morphoInfo = await deployMorphoBlueMarket();
+            await redeploy('MorphoBlueSupply');
+            view = await redeploy('MorphoBlueView');
             marketParams = morphoInfo;
         });
         after(async () => {
             await revertToSnapshot(snapshot);
         });
         it('should supply to morpho blue ', async () => {
-            const supplyAmount = hre.ethers.utils.parseUnits('100');
+            const supplyAmount = hre.ethers.utils.parseUnits('15');
             await setBalance(marketParams[0], senderAcc.address, supplyAmount);
             await approve(marketParams[0], proxy.address, senderAcc);
             await morphoBlueSupply(
                 proxy, marketParams, supplyAmount, senderAcc.address, nullAddress,
             );
+            const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
+            expect(supplyAmount).to.be.closeTo(positionInfo.suppliedInAssets, 1);
+        });
+    });
+};
+
+const morphoBlueWithdrawTest = async () => {
+    describe('Morpho-Blue-Supply', function () {
+        this.timeout(80000);
+
+        let senderAcc;
+        let proxy;
+        let snapshot;
+        let view;
+        let marketParams;
+        let supplyAmount;
+        let withdrawAmount;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+            snapshot = await takeSnapshot();
+            const morphoInfo = await deployMorphoBlueMarket();
+            await redeploy('MorphoBlueSupply');
+            await redeploy('MorphoBlueWithdraw');
+            view = await redeploy('MorphoBlueView');
+            marketParams = morphoInfo;
+            supplyAmount = hre.ethers.utils.parseUnits('15');
+            withdrawAmount = hre.ethers.utils.parseUnits('10');
+        });
+        after(async () => {
+            await revertToSnapshot(snapshot);
+        });
+        it('should supply to morpho blue ', async () => {
+            await setBalance(marketParams[0], senderAcc.address, supplyAmount);
+            await approve(marketParams[0], proxy.address, senderAcc);
+            await morphoBlueSupply(
+                proxy, marketParams, supplyAmount, senderAcc.address, nullAddress,
+            );
+            const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
+            console.log(positionInfo);
+            expect(supplyAmount).to.be.closeTo(positionInfo.suppliedInAssets, 1);
+        });
+        it('should withdraw a part of the supplied assets from morphoBlue ', async () => {
+            await setBalance(marketParams[0], senderAcc.address, hre.ethers.utils.parseUnits('0'));
+            await morphoBlueWithdraw(
+                proxy, marketParams, withdrawAmount, nullAddress, senderAcc.address,
+            );
+            const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
+            console.log(positionInfo);
+            const userBalance = await balanceOf(marketParams[0], senderAcc.address);
+            expect(userBalance).to.be.eq(withdrawAmount);
+            expect(supplyAmount.sub(withdrawAmount)).to.be.closeTo(
+                positionInfo.suppliedInAssets, 1,
+            );
+        });
+        it('should withdraw all of the supplied assets from morphoBlue ', async () => {
+            await setBalance(marketParams[0], senderAcc.address, hre.ethers.utils.parseUnits('0'));
+            await morphoBlueWithdraw(
+                proxy,
+                marketParams,
+                hre.ethers.constants.MaxUint256,
+                nullAddress,
+                senderAcc.address,
+            );
+            const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
+            console.log(positionInfo);
+            const userBalance = await balanceOf(marketParams[0], senderAcc.address);
+            expect(userBalance).to.be.closeTo(supplyAmount.sub(withdrawAmount), 1);
+            expect(positionInfo.suppliedInAssets).to.be.eq(0);
         });
     });
 };
 
 module.exports = {
     morphoBlueSupplyTest,
+    morphoBlueWithdrawTest,
 };

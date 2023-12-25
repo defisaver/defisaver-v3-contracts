@@ -3269,7 +3269,30 @@ const morphoBlueSupply = async (
     );
     const functionData = morphoSupplyAction.encodeForDsProxyCall()[1];
     const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
-        
+
+    return receipt;
+};
+const morphoBlueWithdraw = async (
+    proxy,
+    marketParams,
+    amount,
+    onBehalf,
+    to,
+) => {
+    const actionAddress = await getAddrFromRegistry('MorphoBlueWithdraw');
+    const morphoWithdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawAction(
+        marketParams[0],
+        marketParams[1],
+        marketParams[2],
+        marketParams[3],
+        marketParams[4],
+        amount,
+        onBehalf,
+        to,
+    );
+    const functionData = morphoWithdrawAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+
     return receipt;
 };
 
@@ -3471,4 +3494,5 @@ module.exports = {
     proxyApproveToken,
 
     morphoBlueSupply,
+    morphoBlueWithdraw,
 };
