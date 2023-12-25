@@ -3249,6 +3249,30 @@ const proxyApproveToken = async (
     return receipt;
 };
 
+const morphoBlueSupply = async (
+    proxy,
+    marketParams,
+    amount,
+    from,
+    onBehalf,
+) => {
+    const actionAddress = await getAddrFromRegistry('MorphoBlueSupply');
+    const morphoSupplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyAction(
+        marketParams[0],
+        marketParams[1],
+        marketParams[2],
+        marketParams[3],
+        marketParams[4],
+        amount,
+        from,
+        onBehalf,
+    );
+    const functionData = morphoSupplyAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+        
+    return receipt;
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -3445,4 +3469,6 @@ module.exports = {
     tokenizedVaultAdapterWithdraw,
 
     proxyApproveToken,
+
+    morphoBlueSupply,
 };
