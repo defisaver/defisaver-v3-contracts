@@ -5,7 +5,7 @@ import "../../../interfaces/convex/IConvexToken.sol";
 import "../../../interfaces/convex/IConvexToken.sol";
 import "../../../interfaces/convex/IBRewardPool.sol";
 import "../../../interfaces/convex/IRewardPool.sol";
-import "../../../utils/SafeMath.sol";
+import "../../../utils/math/SafeMath.sol";
 import "../../../utils/TokenUtils.sol";
 
 import "./MainnetConvexAddresses.sol";

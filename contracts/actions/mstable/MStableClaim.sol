@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "../../interfaces/mstable/IBoostedVaultWithLockup.sol";
 import "./helpers/MStableHelper.sol";
 import "../../utils/TokenUtils.sol";
-import "../../utils/SafeMath.sol";
+import "../../utils/math/SafeMath.sol";
 import "../ActionBase.sol";
 
 contract MStableClaim is ActionBase, MStableHelper {

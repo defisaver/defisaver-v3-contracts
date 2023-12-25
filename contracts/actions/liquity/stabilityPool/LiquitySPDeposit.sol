@@ -4,7 +4,7 @@ pragma solidity =0.8.10;
 
 import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
-import "../../../utils/SafeMath.sol";
+import "../../../utils/math/SafeMath.sol";
 import "../../ActionBase.sol";
 
 contract LiquitySPDeposit is ActionBase, LiquityHelper {

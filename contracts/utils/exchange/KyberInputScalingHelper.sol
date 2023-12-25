@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import {IExecutorHelper} from "../interfaces/kyber/IExecutorHelper.sol";
-import {IMetaAggregationRouterV2} from "../interfaces/kyber/IMetaAggregationRouterV2.sol";
+import {IExecutorHelper} from "../../interfaces/kyber/IExecutorHelper.sol";
+import {IMetaAggregationRouterV2} from "../../interfaces/kyber/IMetaAggregationRouterV2.sol";
 
 contract KyberInputScalingHelper {
     uint256 private constant _PARTIAL_FILL = 0x01;

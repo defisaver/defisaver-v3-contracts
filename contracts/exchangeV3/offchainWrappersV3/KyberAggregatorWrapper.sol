@@ -6,7 +6,7 @@ import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 import "../DFSExchangeHelper.sol";
 import "../../interfaces/exchange/IOffchainWrapper.sol";
-import "../../utils/KyberInputScalingHelper.sol";
+import "../../utils/exchange/KyberInputScalingHelper.sol";
 import "../../core/DFSRegistry.sol";
 import "../../core/helpers/CoreHelper.sol";
 

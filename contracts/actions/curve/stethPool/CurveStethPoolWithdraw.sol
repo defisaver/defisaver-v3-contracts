@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "../../../interfaces/curve/stethPool/ICurveStethPool.sol";
 import "../helpers/CurveHelper.sol";
 import "../../../utils/TokenUtils.sol";
-import "../../../utils/SafeMath.sol";
+import "../../../utils/math/SafeMath.sol";
 import "../../ActionBase.sol";
 
 contract CurveStethPoolWithdraw is ActionBase, CurveHelper {
