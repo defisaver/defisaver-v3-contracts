@@ -733,7 +733,7 @@ const compV3ClaimTest = async () => {
             const parsedTx = await tx.wait();
 
             // set new Comet implementation contract
-            await hre.ethers.provider.send('hardhat_setStorageAt', [
+            await hre.ethers.provider.send('tenderly_setStorageAt', [
                 addrs[network].COMET_USDC_ADDR,
                 '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc', // proxy impl. storage slot
                 parsedTx.events[0].topics[2], // new Comet impl. contract addr

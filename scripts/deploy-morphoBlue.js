@@ -1,13 +1,21 @@
-const hre = require('hardhat');
-const { expect } = require('chai');
-const {
-    takeSnapshot, revertToSnapshot, getProxy, impersonateAccount,
-    stopImpersonatingAccount, sendEther, setBalance, approve, nullAddress, redeploy, balanceOf,
-} = require('../utils');
-const { morphoBlueSupply, morphoBlueWithdraw, morphoBlueSupplyCollateral, morphoBlueWithdrawCollateral } = require('../actions');
+/* eslint-disable max-len */
+/* eslint-disable import/no-extraneous-dependencies */
 
-const deployMorphoBlueMarket = async () => {
-    const [wallet] = await hre.ethers.getSigners();
+const hre = require('hardhat');
+const { start } = require('./utils/starter');
+
+const {
+    sendEther, approve, setBalance, redeploy, addrs, network,
+} = require('../test/utils');
+
+const { topUp } = require('./utils/fork');
+
+async function main() {
+    // replace tenderly_setStorage to tenderly_setStorage accross the repo
+    // RUN SCRIPT WITH: node scripts/deploy-morphoBlue --network fork
+    /*
+    const wallet = (await hre.ethers.getSigners())[0];
+    await topUp(wallet.address);
     const firstContractCreationData = '0x604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3';
     const firstContractCreateTx = await wallet.sendTransaction({ data: firstContractCreationData });
     const firstContract = await firstContractCreateTx.wait();
@@ -17,218 +25,74 @@ const deployMorphoBlueMarket = async () => {
     );
     const cometInfo = await morphoDeployTx.wait();
     const morphoBlue = await hre.ethers.getContractAt('IMorphoBlue', cometInfo.logs[0].address);
-    console.log(morphoBlue.address);
     const irmDeployTxData = `0x610120346200027257601f62000bb738819003918201601f19168301916001600160401b03831184841017620002775780849260a094604052833981010312620002725780516001600160a01b038116919082810362000272576020908183015190620001fd604085015193620000a56080606088015197015197620000846200028d565b90600c82526b7a65726f206164647265737360a01b848301521515620002ad565b620000af6200028d565b600f91828252620001db6e1a5b9c1d5d081d1bdbc81cdb585b1b608a1b8083850152620000e9670de0b6b3a764000094858a1215620002ad565b6200018d620000f76200028d565b948686526200012b6e696e70757420746f6f206c6172676560881b96878782015268056bc75e2d631000008c1315620002ad565b6200014c620001396200028d565b888152848782015260008d1215620002ad565b620001726200015a6200028d565b8881528787820152651cd702e318948d1315620002ad565b6200017c6200028d565b9087825286868301528c12620002ad565b620001bb6200019b6200028d565b600a8152691e995c9bc81a5b9c1d5d60b21b8582015260008c13620002ad565b620001c56200028d565b90858252838201526301e3da5f8b1215620002ad565b620001e56200028d565b9283528201526704668ee0c6f02c29871315620002ad565b60805260a05260c05260e05261010090815260405161089f918262000318833960805182818161017501526102d8015260a0518281816090015281816105f00152610679015260c0518281816102a101526106d8015260e051828181610108015261052101525181818160ce01526105c10152f35b600080fd5b634e487b7160e01b600052604160045260246000fd5b60408051919082016001600160401b038111838210176200027757604052565b15620002b65750565b6040519062461bcd60e51b82528160208060048301528251908160248401526000935b828510620002fd575050604492506000838284010152601f80199101168101030190fd5b8481018201518686016044015293810193859350620002d956fe60806040818152600436101561001457600080fd5b600091823560e01c90816301977b5714610307575080633acb5624146102c45780635a92fa851461028a5780638c00bf6b146102635780639451fed41461012b5780639a1a14d9146100f1578063d91042b5146100b75763fc4c2d541461007a57600080fd5b346100b357816003193601126100b357602090517f00000000000000000000000000000000000000000000000000000000000000008152f35b5080fd5b50346100b357816003193601126100b357602090517f00000000000000000000000000000000000000000000000000000000000000008152f35b50346100b357816003193601126100b357602090517f00000000000000000000000000000000000000000000000000000000000000008152f35b5090346102605761013b36610330565b8351939184830167ffffffffffffffff81118682101761024c578352600a8552696e6f74204d6f7270686f60b01b602080870191909152947f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031633036101f2575082806101d560a07f7120161a7b3d31251e01294ab351ef15a41b91659a36032e4641bb89b121e321942094856104dc565b91878684939952808a52205581519086825287820152a251908152f35b859085855192839162461bcd60e51b8352816004840152835191826024850152815b83811061023557505060448094508284010152601f80199101168101030190fd5b808601820151878201604401528694508101610214565b634e487b7160e01b85526041600452602485fd5b80fd5b50346100b35760209061028260a061027a36610330565b9190206104dc565b509051908152f35b50346100b357816003193601126100b357602090517f00000000000000000000000000000000000000000000000000000000000000008152f35b50346100b357816003193601126100b357517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b9190503461032c57602036600319011261032c57602092600435815280845220548152f35b8280fd5b90600319820161016081126104495760a013610449576040805167ffffffffffffffff919060a081018381118282101761044e5782526001600160a01b0390600435828116810361044957815260243582811681036104495760208201526044358281168103610449578382015260643591821682036104495760c091606082015260843560808201529460a31901126104495780519160c083019081118382101761044e5781526001600160801b039060a435828116810361044957835260c435828116810361044957602084015260e435908282168203610449578301526101043581811681036104495760608301526101243581811681036104495760808301526101443590811681036104495760a082015290565b600080fd5b634e487b7160e01b600052604160045260246000fd5b90670de0b6b3a76400006000838203931281841281169184139015161761048757565b634e487b7160e01b600052601160045260246000fd5b818102929160008212600160ff1b82141661048757818405149015171561048757565b9190916000838201938412911290801582169115161761048757565b81519092916001600160801b03918216801560008161078757508360408401511690670de0b6b3a764000091828102928184041490151715610487576106615704915b7f000000000000000000000000000000000000000000000000000000000000000092838113156107805761055284610464565b905b84810390600086128183128116908284139015161761048757670de0b6b3a76400009586830292830587149114171561048757811561066157600160ff1b811460001983141661048757059460005260006020526040600020549160009183156000146106cf57505050507f000000000000000000000000000000000000000000000000000000000000000080935b60008082121561067757507f00000000000000000000000000000000000000000000000000000000000000008015610661578391610634610639926ec097ce7bc90715b34b9f100000000005610464565b61049d565b059082820191600084841291129080158216911516176104875761065c9161049d565b059190565b634e487b7160e01b600052601260045260246000fd5b7f000000000000000000000000000000000000000000000000000000000000000090670de0b6b3a763ffff1982019182136001166106bb575083916106399161049d565b634e487b7160e01b81526011600452602490fd5b6080856106fc897f000000000000000000000000000000000000000000000000000000000000000061049d565b059201511642039042821161076c57906107159161049d565b8061072357505080936105e3565b9061074982610743610739869560029a97610790565b9889920585610790565b936104c0565b908260011b9260028405036106bb5750600491610765916104c0565b05906105e3565b634e487b7160e01b83526011600452602483fd5b8390610554565b9150509161051f565b6107ac906107a6670de0b6b3a7640000936107ce565b9061049d565b056704668ee0c6f02c2981811290821802186301e3da5f818113908218021890565b68023f2fa8f6da5b9d27198112610863576805168fd0946fc0415f811215610853576000811215610844576704cf46d8192b672d19905b67099e8db03256ce5d80928201059182029003670de0b6b3a7640000906002828280020505010190600081121560001461083d571b90565b6000031d90565b6704cf46d8192b672e90610805565b50671263b02ca18fb11760871b90565b5060009056fea2646970667358221220507eb82fbb1e34d90b9f43dd485191afa54c9f841e2b35b4e4ad59859134453f64736f6c63430008130033000000000000000000000000${morphoBlue.address.slice(2)}0000000000000000000000000000000000000000000000003782dace9d90000000000000000000000000000000000000000000000000000000000171268b5ad40000000000000000000000000000000000000000000000000c7d713b49da00000000000000000000000000000000000000000000000000000000000012e687bf`;
     const irmDeployTx = await wallet.sendTransaction({ data: irmDeployTxData });
     const irmInfo = await irmDeployTx.wait();
     const lltv = hre.ethers.utils.parseUnits('0.9', 18);
     const irmContractAddress = irmInfo.contractAddress;
-    const morphoOwnerAddr = '0x50d0dE2207989017398e33919A3ed6558eBc6644';
-    await sendEther(wallet, morphoOwnerAddr, '10');
-    await morphoBlue.enableIrm(irmContractAddress);
-    await morphoBlue.enableLltv(lltv);
-    const marketParams = ['0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', '0x4F67e4d9BD67eFa28236013288737D39AeF48e79', irmContractAddress, lltv];
+    const oracle = await redeploy('MorphoBlueOracleTest', addrs.mainnet.REGISTRY_ADDR, true, true);
+    const owner = await morphoBlue.owner();
+    console.log(wallet.address);
+    console.log(owner);
+    console.log('---------------');
+    console.log(`enabling irm ${irmContractAddress}`);
+    await morphoBlue.connect(wallet).enableIrm(irmContractAddress);
+    console.log(`enabling lltv ${lltv}`);
+    await morphoBlue.connect(wallet).enableLltv(lltv);
+    const marketParams = ['0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', oracle.address, irmContractAddress, lltv];
     await morphoBlue.createMarket(marketParams);
     await setBalance('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', wallet.address, hre.ethers.utils.parseUnits('1000'));
     await approve('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', morphoBlue.address, wallet);
 
-    await morphoBlue.supply(marketParams, hre.ethers.utils.parseUnits('1000'), '0', wallet.address, [], { gasLimit: 3000000 });
-    if (morphoBlue.address !== '0x4bF9BF8A2EdB9A43a51DD07566855EFe658d27FC') console.log('ERROR');
-    return marketParams;
-};
+    await morphoBlue.connect(wallet).supply(marketParams, hre.ethers.utils.parseUnits('1000'), '0', wallet.address, [], { gasLimit: 3000000 });
+    console.log('MorphoBlue address');
+    console.log(morphoBlue.address);
+    console.log('Market Params');
+    console.log(marketParams);
+    */
+    // in console there will be morphoBlue contract address -> replace MORPHO_BLUE_ADDRESS var with that address
+    // replace params in lower script (morphoBlue address and marketParams)
+    // RUN SCRIPT BELOW WITH : node scripts/deploy-morphoBlue --network fork
 
-const morphoBlueSupplyTest = async () => {
-    describe('Morpho-Blue-Supply', function () {
-        this.timeout(80000);
+    /*
+    const wallet = (await hre.ethers.getSigners())[1];
+    await topUp(wallet.address);
+    const morphoBlue = await hre.ethers.getContractAt('IMorphoBlue', '0x575E16382C0e5C98caF67e4724C56edA3318a00b');
+    const marketParams = ['0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', '0x369AaeD0E710B75fA16c947bE3407f610EeE6d93', '0xBda60AaC8a47B03805751D15755F52B2ce3E1ecB', '900000000000000000'];
 
-        let senderAcc;
-        let proxy;
-        let snapshot;
-        let view;
-        let marketParams;
+    await setBalance('0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', wallet.address, hre.ethers.utils.parseUnits('100'));
+    console.log(wallet.address);
+    await approve('0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', morphoBlue.address, wallet);
+    const morphoBlueWithSecondSigner = await morphoBlue.connect(wallet);
+    await morphoBlueWithSecondSigner.supplyCollateral(marketParams, hre.ethers.utils.parseUnits('100'), wallet.address, [], { gasLimit: 3000000 });
+    await morphoBlueWithSecondSigner.borrow(marketParams, hre.ethers.utils.parseUnits('100'), '0', wallet.address, wallet.address, { gasLimit: 3000000 });
+    */
 
-        before(async () => {
-            senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
-            snapshot = await takeSnapshot();
-            const morphoInfo = await deployMorphoBlueMarket();
-            await redeploy('MorphoBlueSupply');
-            view = await redeploy('MorphoBlueView');
-            marketParams = morphoInfo;
-        });
-        after(async () => {
-            await revertToSnapshot(snapshot);
-        });
-        it('should supply to morpho blue ', async () => {
-            marketParams = ['0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0', '0x4f67e4d9bd67efa28236013288737d39aef48e79', '0xf40a88cb05940b3fd9071c104dae0c895f5eac23', '900000000000000000'];
-            console.log(await view.getMarketId(marketParams));
-            /*
-            const supplyAmount = hre.ethers.utils.parseUnits('15');
-            await setBalance(marketParams[0], senderAcc.address, supplyAmount);
-            await approve(marketParams[0], proxy.address, senderAcc);
-            await morphoBlueSupply(
-                proxy, marketParams, supplyAmount, senderAcc.address, nullAddress,
-            );
-            const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
-            expect(supplyAmount).to.be.closeTo(positionInfo.suppliedInAssets, 1);
-            */
-        });
-    });
-};
+    // do npx hardhat compile
+    // RUN SCRIPT BELOW WITH : node scripts/deploy-morphoBlue --network fork
+    /*
 
-const morphoBlueWithdrawTest = async () => {
-    describe('Morpho-Blue-Supply', function () {
-        this.timeout(80000);
+    const wallet = (await hre.ethers.getSigners())[0];
+    await topUp(wallet.address);
+    const morphoBlueSupply = await redeploy('MorphoBlueSupply', addrs[network].REGISTRY_ADDR, true, true);
+    const morphoBlueSupplyCollateral = await redeploy('MorphoBlueSupplyCollateral', addrs[network].REGISTRY_ADDR, true, true);
+    const morphoBlueWithdraw = await redeploy('MorphoBlueWithdraw', addrs[network].REGISTRY_ADDR, true, true);
+    const morphoBlueWithdrawCollateral = await redeploy('MorphoBlueWithdrawCollateral', addrs[network].REGISTRY_ADDR, true, true);
+    const morphoBlueBorrow = await redeploy('MorphoBlueBorrow', addrs[network].REGISTRY_ADDR, true, true);
+    const morphoBluePayback = await redeploy('MorphoBluePayback', addrs[network].REGISTRY_ADDR, true, true);
+    const morphoBlueSetAuth = await redeploy('MorphoBlueSetAuth', addrs[network].REGISTRY_ADDR, true, true);
+    const morphoBlueSetAuthBySig = await redeploy('MorphoBlueSetAuthWithSig', addrs[network].REGISTRY_ADDR, true, true);
 
-        let senderAcc;
-        let proxy;
-        let snapshot;
-        let view;
-        let marketParams;
-        let supplyAmount;
-        let withdrawAmount;
+    console.log('MorphoBlueSupply deployed to:', morphoBlueSupply.address);
+    console.log('MorphoBlueSupplyCollateral deployed to:', morphoBlueSupplyCollateral.address);
+    console.log('MorphoBlueWithdraw deployed to:', morphoBlueWithdraw.address);
+    console.log('MorphoBlueWithdrawCollateral deployed to:', morphoBlueWithdrawCollateral.address);
+    console.log('MorphoBlueBorrow deployed to:', morphoBlueBorrow.address);
+    console.log('MorphoBluePayback deployed to:', morphoBluePayback.address);
+    console.log('MorphoBlueSetAuth deployed to:', morphoBlueSetAuth.address);
+    console.log('MorphoBlueSetAuthWithSig deployed to:', morphoBlueSetAuthBySig.address);
+    */
+    process.exit(0);
+}
 
-        before(async () => {
-            senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
-            snapshot = await takeSnapshot();
-            const morphoInfo = await deployMorphoBlueMarket();
-            await redeploy('MorphoBlueSupply');
-            await redeploy('MorphoBlueWithdraw');
-            view = await redeploy('MorphoBlueView');
-            marketParams = morphoInfo;
-            supplyAmount = hre.ethers.utils.parseUnits('15');
-            withdrawAmount = hre.ethers.utils.parseUnits('10');
-        });
-        after(async () => {
-            await revertToSnapshot(snapshot);
-        });
-        it('should supply to morpho blue ', async () => {
-            await setBalance(marketParams[0], senderAcc.address, supplyAmount);
-            await approve(marketParams[0], proxy.address, senderAcc);
-            await morphoBlueSupply(
-                proxy, marketParams, supplyAmount, senderAcc.address, nullAddress,
-            );
-            const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
-            console.log(positionInfo);
-            expect(supplyAmount).to.be.closeTo(positionInfo.suppliedInAssets, 1);
-        });
-        it('should withdraw a part of the supplied assets from morphoBlue ', async () => {
-            await setBalance(marketParams[0], senderAcc.address, hre.ethers.utils.parseUnits('0'));
-            await morphoBlueWithdraw(
-                proxy, marketParams, withdrawAmount, nullAddress, senderAcc.address,
-            );
-            const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
-            console.log(positionInfo);
-            const userBalance = await balanceOf(marketParams[0], senderAcc.address);
-            expect(userBalance).to.be.eq(withdrawAmount);
-            expect(supplyAmount.sub(withdrawAmount)).to.be.closeTo(
-                positionInfo.suppliedInAssets, 1,
-            );
-        });
-        it('should withdraw all of the supplied assets from morphoBlue ', async () => {
-            await setBalance(marketParams[0], senderAcc.address, hre.ethers.utils.parseUnits('0'));
-            await morphoBlueWithdraw(
-                proxy,
-                marketParams,
-                hre.ethers.constants.MaxUint256,
-                nullAddress,
-                senderAcc.address,
-            );
-            const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
-            console.log(positionInfo);
-            const userBalance = await balanceOf(marketParams[0], senderAcc.address);
-            expect(userBalance).to.be.closeTo(supplyAmount.sub(withdrawAmount), 1);
-            expect(positionInfo.suppliedInAssets).to.be.eq(0);
-        });
-    });
-};
-
-const morphoBlueSupplyCollateralTest = async () => {
-    describe('Morpho-Blue-Supply-Collateral', function () {
-        this.timeout(80000);
-
-        let senderAcc;
-        let proxy;
-        let snapshot;
-        let view;
-        let marketParams;
-
-        before(async () => {
-            senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
-            snapshot = await takeSnapshot();
-            const morphoInfo = await deployMorphoBlueMarket();
-            await redeploy('MorphoBlueSupplyCollateral');
-            view = await redeploy('MorphoBlueView');
-            marketParams = morphoInfo;
-        });
-        after(async () => {
-            await revertToSnapshot(snapshot);
-        });
-        it('should supply collateral to morpho blue ', async () => {
-            const supplyAmount = hre.ethers.utils.parseUnits('15');
-            await setBalance(marketParams[1], senderAcc.address, supplyAmount);
-            await approve(marketParams[1], proxy.address, senderAcc);
-            await morphoBlueSupplyCollateral(
-                proxy, marketParams, supplyAmount, senderAcc.address, nullAddress,
-            );
-            const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
-            expect(supplyAmount).to.be.eq(positionInfo.collateral);
-        });
-    });
-};
-
-const morphoBlueWithdrawCollateralTest = async () => {
-    describe('Morpho-Blue-Supply-Collateral', function () {
-        this.timeout(80000);
-
-        let senderAcc;
-        let proxy;
-        let snapshot;
-        let view;
-        let marketParams;
-        let supplyAmount;
-
-        before(async () => {
-            senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
-            snapshot = await takeSnapshot();
-            const morphoInfo = await deployMorphoBlueMarket();
-            await redeploy('MorphoBlueSupplyCollateral');
-            await redeploy('MorphoBlueWithdrawCollateral');
-            view = await redeploy('MorphoBlueView');
-            marketParams = morphoInfo;
-            supplyAmount = hre.ethers.utils.parseUnits('15');
-        });
-        after(async () => {
-            await revertToSnapshot(snapshot);
-        });
-        it('should supply collateral to morpho blue ', async () => {
-            await setBalance(marketParams[1], senderAcc.address, supplyAmount);
-            await approve(marketParams[1], proxy.address, senderAcc);
-            await morphoBlueSupplyCollateral(
-                proxy, marketParams, supplyAmount, senderAcc.address, nullAddress,
-            );
-            const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
-            expect(supplyAmount).to.be.eq(positionInfo.collateral);
-        });
-        it('should withdraw collateral from morpho blue ', async () => {
-            await setBalance(marketParams[1], senderAcc.address, hre.ethers.parseUnits('0'));
-            await morphoBlueWithdrawCollateral(
-                proxy, marketParams, supplyAmount, nullAddress, senderAcc.address,
-            );
-            const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
-            const eoaBalance = await balanceOf(marketParams[1], senderAcc.address);
-            expect(supplyAmount).to.be.eq(eoaBalance);
-            expect(positionInfo.collateral).to.be.eq(0);
-        });
-    });
-};
-
-module.exports = {
-    morphoBlueSupplyTest,
-    morphoBlueWithdrawTest,
-    morphoBlueSupplyCollateralTest,
-    morphoBlueWithdrawCollateralTest,
-};
+start(main);

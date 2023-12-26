@@ -46,6 +46,36 @@ contract MorphoBlueView is MorphoBlueHelper {
         });
     }
 
+    function getMarketInfoNotTuple(address loanToken, address collToken, address oracle, address irm, uint256 lltv) public returns (MarketInfo memory) {    
+        MarketParams memory marketParams = MarketParams({
+            loanToken: loanToken,
+            collateralToken: collToken,
+            oracle: oracle,
+            irm: irm,
+            lltv: lltv
+        });
+        Id marketId = MarketParamsLib.id(marketParams);
+        uint128 lastUpdate = MorphoLib.lastUpdate(morphoBlue, marketId);
+        uint128 fee = MorphoLib.fee(morphoBlue, marketId);
+        morphoBlue.accrueInterest(marketParams);
+        Market memory market = morphoBlue.market(marketId);
+        return MarketInfo({
+            id: marketId,
+            totalSupplyAssets: market.totalSupplyAssets,
+            totalSupplyShares: market.totalSupplyShares,
+            totalBorrowAssets: market.totalBorrowAssets,
+            totalBorrowShares: market.totalBorrowShares,
+            lastUpdate: lastUpdate,
+            fee: fee,
+            borrowRate: IIrm(marketParams.irm).borrowRateView(marketParams, market),
+            oracle: IOracle(marketParams.oracle).price()
+        });
+    }
+
+    function getMarketId(MarketParams memory marketParams) public pure returns (Id id){
+        id = MarketParamsLib.id(marketParams);
+    }
+
     function getUserInfo(MarketParams memory marketParams, address owner) public returns (PositionInfo memory) {
         Id marketId = MarketParamsLib.id(marketParams);
         morphoBlue.accrueInterest(marketParams);
