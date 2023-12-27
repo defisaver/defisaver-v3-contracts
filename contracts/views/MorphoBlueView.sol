@@ -79,7 +79,7 @@ contract MorphoBlueView is MorphoBlueHelper {
     function getUserInfo(MarketParams memory marketParams, address owner) public returns (PositionInfo memory) {
         Id marketId = MarketParamsLib.id(marketParams);
         morphoBlue.accrueInterest(marketParams);
-        Position memory position = morphoBlue.position(marketId, owner);
+        MorphoBluePosition memory position = morphoBlue.position(marketId, owner);
         Market memory market = morphoBlue.market(marketId);
         return PositionInfo({
             supplyShares: position.supplyShares,

@@ -13,7 +13,7 @@ struct MarketParams {
 
 /// @dev Warning: For `feeRecipient`, `supplyShares` does not contain the accrued shares since the last interest
 /// accrual.
-struct Position {
+struct MorphoBluePosition {
     uint256 supplyShares;
     uint128 borrowShares;
     uint128 collateral;
@@ -334,7 +334,7 @@ interface IMorphoBlue is IMorphoBase {
     /// @notice The state of the position of `user` on the market corresponding to `id`.
     /// @dev Warning: For `feeRecipient`, `p.supplyShares` does not contain the accrued shares since the last interest
     /// accrual.
-    function position(Id id, address user) external view returns (Position memory p);
+    function position(Id id, address user) external view returns (MorphoBluePosition memory p);
 
     /// @notice The state of the market corresponding to `id`.
     /// @dev Warning: `m.totalSupplyAssets` does not contain the accrued interest since the last interest accrual.
