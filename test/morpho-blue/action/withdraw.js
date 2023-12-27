@@ -2,9 +2,9 @@ const hre = require('hardhat');
 const { expect } = require('chai');
 const {
     takeSnapshot, revertToSnapshot, getProxy, redeploy, setBalance, approve, nullAddress, balanceOf,
-} = require('../utils');
-const { deployMorphoBlueMarket } = require('./morpho-blue-tests');
-const { morphoBlueSupply, morphoBlueWithdraw } = require('../actions');
+} = require('../../utils');
+const { getMarketParams } = require('../utils');
+const { morphoBlueSupply, morphoBlueWithdraw } = require('../../actions');
 
 describe('Morpho-Blue-Supply', function () {
     this.timeout(80000);
@@ -21,11 +21,10 @@ describe('Morpho-Blue-Supply', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
         snapshot = await takeSnapshot();
-        const morphoInfo = await deployMorphoBlueMarket();
+        marketParams = await getMarketParams();
         await redeploy('MorphoBlueSupply');
         await redeploy('MorphoBlueWithdraw');
         view = await redeploy('MorphoBlueView');
-        marketParams = morphoInfo;
         supplyAmount = hre.ethers.utils.parseUnits('15');
         withdrawAmount = hre.ethers.utils.parseUnits('10');
     });

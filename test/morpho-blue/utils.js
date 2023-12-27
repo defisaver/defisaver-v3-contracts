@@ -3,7 +3,7 @@ const {
     sendEther, setBalance, approve,
 } = require('../utils');
 
-const deployMorphoBlueMarket = async () => {
+const deployMarket = async () => {
     const [wallet] = await hre.ethers.getSigners();
     const firstContractCreationData = '0x604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3';
     const firstContractCreateTx = await wallet.sendTransaction({ data: firstContractCreationData });
@@ -29,11 +29,21 @@ const deployMorphoBlueMarket = async () => {
     await approve('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', morphoBlue.address, wallet);
 
     await morphoBlue.supply(marketParams, hre.ethers.utils.parseUnits('1000'), '0', wallet.address, [], { gasLimit: 3000000 });
-    console.log(morphoBlue.address);
     if (morphoBlue.address !== '0xa3B2aaf6D491c85052728f14c156C4000fb66B48') console.log('ERROR WRONG MARKET ADDRESS IN MAINNETMORPHOBLUEADDRESSES');
-    return marketParams;
+    return [morphoBlue.address, marketParams];
 };
 
+const getMarkets = () => [
+    [
+        '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
+        '0x4F67e4d9BD67eFa28236013288737D39AeF48e79',
+        '0xcb0A9835CDf63c84FE80Fcc59d91d7505871c98B',
+        '900000000000000000',
+    ],
+];
+
 module.exports = {
-    deployMorphoBlueMarket,
+    deployMarket,
+    getMarkets,
 };

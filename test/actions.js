@@ -38,7 +38,6 @@ const { getSecondTokenAmount } = require('./utils-uni');
 const {
     LiquityActionIds, getHints, getRedemptionHints, collChangeId, debtChangeId,
 } = require('./utils-liquity');
-const { execShellCommand } = require('../scripts/hardhat-tasks-functions');
 
 const network = hre.network.config.name;
 
@@ -3256,7 +3255,6 @@ const morphoBlueSupply = async (
     from,
     onBehalf,
 ) => {
-    const actionAddress = await getAddrFromRegistry('MorphoBlueSupply');
     const morphoSupplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyAction(
         marketParams[0],
         marketParams[1],
@@ -3268,7 +3266,7 @@ const morphoBlueSupply = async (
         onBehalf,
     );
     const functionData = morphoSupplyAction.encodeForDsProxyCall()[1];
-    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+    const receipt = await executeAction('MorphoBlueSupply', functionData, proxy);
 
     return receipt;
 };
@@ -3279,7 +3277,6 @@ const morphoBlueWithdraw = async (
     onBehalf,
     to,
 ) => {
-    const actionAddress = await getAddrFromRegistry('MorphoBlueWithdraw');
     const morphoWithdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawAction(
         marketParams[0],
         marketParams[1],
@@ -3291,7 +3288,7 @@ const morphoBlueWithdraw = async (
         to,
     );
     const functionData = morphoWithdrawAction.encodeForDsProxyCall()[1];
-    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+    const receipt = await executeAction('MorphoBlueWithdraw', functionData, proxy);
 
     return receipt;
 };
@@ -3302,7 +3299,6 @@ const morphoBlueSupplyCollateral = async (
     from,
     onBehalf,
 ) => {
-    const actionAddress = await getAddrFromRegistry('MorphoBlueSupplyCollateral');
     const morphoSupplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyCollateralAction(
         marketParams[0],
         marketParams[1],
@@ -3314,7 +3310,7 @@ const morphoBlueSupplyCollateral = async (
         onBehalf,
     );
     const functionData = morphoSupplyAction.encodeForDsProxyCall()[1];
-    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+    const receipt = await executeAction('MorphoBlueSupplyCollateral', functionData, proxy);
 
     return receipt;
 };
@@ -3325,7 +3321,6 @@ const morphoBlueWithdrawCollateral = async (
     onBehalf,
     to,
 ) => {
-    const actionAddress = await getAddrFromRegistry('MorphoBlueWithdrawCollateral');
     const morphoWithdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
         marketParams[0],
         marketParams[1],
@@ -3337,7 +3332,7 @@ const morphoBlueWithdrawCollateral = async (
         to,
     );
     const functionData = morphoWithdrawAction.encodeForDsProxyCall()[1];
-    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+    const receipt = await executeAction('MorphoBlueWithdrawCollateral', functionData, proxy);
 
     return receipt;
 };
