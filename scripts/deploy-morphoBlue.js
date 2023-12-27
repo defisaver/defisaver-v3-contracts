@@ -11,7 +11,7 @@ const {
 const { topUp } = require('./utils/fork');
 
 async function main() {
-    // replace tenderly_setStorage to tenderly_setStorage accross the repo
+    // replace hardhat_setStorage to hardhat_setStorage accross the repo
     // RUN SCRIPT WITH: node scripts/deploy-morphoBlue --network fork
     /*
     const wallet = (await hre.ethers.getSigners())[0];

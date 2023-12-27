@@ -351,7 +351,7 @@ async function findBalancesSlot(tokenAddress) {
             // make sure the probe will change the slot value
             const probe = prev === probeA ? probeB : probeA;
 
-            await hre.ethers.provider.send('tenderly_setStorageAt', [
+            await hre.ethers.provider.send('hardhat_setStorageAt', [
                 tokenAddress,
                 probedSlot,
                 probe,
@@ -359,7 +359,7 @@ async function findBalancesSlot(tokenAddress) {
 
             const balance = await token.balanceOf(account);
             // reset to previous value
-            await hre.ethers.provider.send('tenderly_setStorageAt', [
+            await hre.ethers.provider.send('hardhat_setStorageAt', [
                 tokenAddress,
                 probedSlot,
                 prev,
@@ -385,7 +385,7 @@ async function findBalancesSlot(tokenAddress) {
             // make sure the probe will change the slot value
             const probe = prev === probeA ? probeB : probeA;
 
-            await hre.ethers.provider.send('tenderly_setStorageAt', [
+            await hre.ethers.provider.send('hardhat_setStorageAt', [
                 tokenAddress,
                 probedSlot,
                 probe,
@@ -393,7 +393,7 @@ async function findBalancesSlot(tokenAddress) {
 
             const balance = await token.balanceOf(account);
             // reset to previous value
-            await hre.ethers.provider.send('tenderly_setStorageAt', [
+            await hre.ethers.provider.send('hardhat_setStorageAt', [
                 tokenAddress,
                 probedSlot,
                 prev,
