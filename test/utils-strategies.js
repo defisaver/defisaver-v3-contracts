@@ -229,6 +229,24 @@ const subToCompV3Proxy = async (proxy, inputData, regAddr = addrs[network].REGIS
     return latestSubId;
 };
 
+const subToCompV3ProxyL2 = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const compV3SubProxyAddr = await getAddrFromRegistry('CompV3SubProxyL2', regAddr);
+
+    const CompV3SubProxyL2 = await hre.ethers.getContractFactory('CompV3SubProxyL2');
+    const functionData = CompV3SubProxyL2.interface.encodeFunctionData(
+        'subToCompV3Automation',
+        [inputData],
+    );
+    const receipt = await proxy['execute(address,bytes)'](compV3SubProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed subToCompV3ProxyL2; ${gasUsed}`);
+    const latestSubId = await getLatestSubId(regAddr);
+    return latestSubId;
+};
+
 const subToCompV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
     const compV2SubProxyAddr = await getAddrFromRegistry('CompSubProxy', regAddr);
 
@@ -687,4 +705,5 @@ module.exports = {
     updateToCompV2Proxy,
     subToSparkProxy,
     updateSparkProxy,
+    subToCompV3ProxyL2,
 };

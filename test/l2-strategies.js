@@ -3,6 +3,7 @@ const dfs = require('@defisaver/sdk');
 const {
     formatExchangeObj,
     nullAddress,
+    placeHolderAddr,
 } = require('./utils');
 
 const createAaveV3RepayL2Strategy = () => {
@@ -517,6 +518,123 @@ const createLimitOrderL2Strategy = () => {
     return limitOrderStrategy.encodeForDsProxyCall();
 };
 
+const addSubSlotsToCompV3Strategy = (strategy) => {
+    strategy.addSubSlot('&market', 'address');
+    strategy.addSubSlot('&baseToken', 'address');
+    strategy.addSubSlot('&ratioState', 'uint256');
+    strategy.addSubSlot('&targetRatio', 'uint256');
+};
+
+const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
+
+const compV3Actions = {
+    withdraw: (to, amount) => new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        '&market', // comet proxy addr of used market
+        to,
+        '%assetAddr', // variable token to withdraw
+        amount,
+    ),
+    sellAction: (src, dest, amount) => new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            src,
+            dest,
+            amount,
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    ),
+    feeTakingAction: (baseToken, amount) => new dfs.actions.basic.GasFeeActionL2(
+        '0', // must stay variable backend sets gasCost
+        baseToken, // must stay variable as debt can differ
+        amount, // available amount to pay gas
+        '%dfsFeeDivider', // defaults at 0.05%
+        '%l1GasCostInEth', // additional gas cost for L1
+    ),
+    paybackAction: (amount) => new dfs.actions.compoundV3.CompoundV3PaybackAction(
+        '&market', // hardcoded
+        amount,
+        '&proxy', // proxy hardcoded (from)
+        '&proxy', // proxy hardcoded (onBehalf)
+        placeHolderAddr, // additional only needed for sdk for front
+    ),
+    checkerAction: () => new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState', '&targetRatio', '&market',
+    ),
+    flAction: (token, amount) => new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction([token], [amount]),
+    ),
+    borrowAction: (amount, to) => new dfs.actions.compoundV3.CompoundV3BorrowAction(
+        '&market', // comet proxy addr of used market
+        amount, // variable amount to borrow
+        to, // hardcoded
+    ),
+    supplyAction: (amount) => new dfs.actions.compoundV3.CompoundV3SupplyAction(
+        '&market', // hardcoded
+        '%collAsset', // variable coll token
+        amount,
+        '&proxy', // proxy hardcoded (from)
+    ),
+};
+
+const createCompV3RepayL2Strategy = () => {
+    const compV3RepayStrategy = new dfs.Strategy('CompV3RepayL2');
+    addSubSlotsToCompV3Strategy(compV3RepayStrategy);
+
+    compV3RepayStrategy.addTrigger(compV3Trigger);
+    compV3RepayStrategy.addAction(compV3Actions.withdraw('&proxy', '%amount')); // variable amount to withdraw
+    compV3RepayStrategy.addAction(compV3Actions.sellAction('%collAddr', '&baseToken', '$1')); // pipe amount from withdraw
+    compV3RepayStrategy.addAction(compV3Actions.feeTakingAction('&baseToken', '$2')); // pipe amount from sell
+    compV3RepayStrategy.addAction(compV3Actions.paybackAction('$3')); // pipe amount from fee taking
+    compV3RepayStrategy.addAction(compV3Actions.checkerAction());
+
+    return compV3RepayStrategy.encodeForDsProxyCall();
+};
+
+const createCompV3FLRepayL2Strategy = () => {
+    const compV3FlRepayStrategy = new dfs.Strategy('CompV3FlRepayL2');
+    addSubSlotsToCompV3Strategy(compV3FlRepayStrategy);
+
+    compV3FlRepayStrategy.addTrigger(compV3Trigger);
+    compV3FlRepayStrategy.addAction(compV3Actions.flAction('%collAddr', '%repayAmount'));
+    compV3FlRepayStrategy.addAction(compV3Actions.sellAction('%collAddr', '&baseToken', '%amount')); // variable amount to sell
+    compV3FlRepayStrategy.addAction(compV3Actions.feeTakingAction('&baseToken', '$2')); // pipe amount from sell
+    compV3FlRepayStrategy.addAction(compV3Actions.paybackAction('$3')); // pipe amount from fee taking
+    compV3FlRepayStrategy.addAction(compV3Actions.withdraw('%flAddr', '$1')); // send back FL amount
+    compV3FlRepayStrategy.addAction(compV3Actions.checkerAction());
+
+    return compV3FlRepayStrategy.encodeForDsProxyCall();
+};
+
+const createCompV3BoostL2Strategy = () => {
+    const compV3BoostStrategy = new dfs.Strategy('CompV3BoostL2');
+    addSubSlotsToCompV3Strategy(compV3BoostStrategy);
+
+    compV3BoostStrategy.addTrigger(compV3Trigger);
+    compV3BoostStrategy.addAction(compV3Actions.borrowAction('%amount', '&proxy')); // to proxy
+    compV3BoostStrategy.addAction(compV3Actions.sellAction('&baseToken', '%collToken', '$1'));
+    compV3BoostStrategy.addAction(compV3Actions.feeTakingAction('%collToken', '$2')); // pipe amount from sell
+    compV3BoostStrategy.addAction(compV3Actions.supplyAction('$3')); // pipe amount from fee taking
+    compV3BoostStrategy.addAction(compV3Actions.checkerAction());
+
+    return compV3BoostStrategy.encodeForDsProxyCall();
+};
+
+const createCompV3FLBoostL2Strategy = () => {
+    const compV3FlBoostStrategy = new dfs.Strategy('CompV3FlBoostL2');
+    addSubSlotsToCompV3Strategy(compV3FlBoostStrategy);
+
+    compV3FlBoostStrategy.addTrigger(compV3Trigger);
+    compV3FlBoostStrategy.addAction(compV3Actions.flAction('%baseToken', '%boostAmount'));
+    compV3FlBoostStrategy.addAction(compV3Actions.sellAction('&baseToken', '%collToken', '%amount')); // variable amount from FL
+    compV3FlBoostStrategy.addAction(compV3Actions.feeTakingAction('%collToken', '$2')); // pipe amount from sell
+    compV3FlBoostStrategy.addAction(compV3Actions.supplyAction('$3')); // pipe amount from fee taking
+    compV3FlBoostStrategy.addAction(compV3Actions.borrowAction('$1', '%flAddr')); // send back FL amount
+    compV3FlBoostStrategy.addAction(compV3Actions.checkerAction());
+
+    return compV3FlBoostStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createAaveV3RepayL2Strategy,
     createAaveFLV3RepayL2Strategy,
@@ -529,4 +647,8 @@ module.exports = {
     aaveV3CloseActions,
     createDCAL2Strategy,
     createLimitOrderL2Strategy,
+    createCompV3RepayL2Strategy,
+    createCompV3FLRepayL2Strategy,
+    createCompV3BoostL2Strategy,
+    createCompV3FLBoostL2Strategy,
 };
