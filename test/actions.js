@@ -3381,6 +3381,45 @@ const morphoBluePayback = async (
 
     return receipt;
 };
+const morphoBlueSetAuth = async (
+    proxy,
+    manager,
+    newIsAuthorized,
+) => {
+    const morphoBlueSetAuthAction = new dfs.actions.morphoblue.MorphoBlueSetAuthAction(
+        manager, newIsAuthorized,
+    );
+    const functionData = morphoBlueSetAuthAction.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('MorphoBlueSetAuth', functionData, proxy);
+
+    return receipt;
+};
+const morphoBlueSetAuthWithSig = async (
+    proxy,
+    authorizer,
+    authorized,
+    isAuthorized,
+    nonce,
+    deadline,
+    v,
+    r,
+    s,
+) => {
+    const morphoBlueSetAuthAction = new dfs.actions.morphoblue.MorphoBlueSetAuthWithSigAction(
+        authorizer,
+        authorized,
+        isAuthorized,
+        nonce,
+        deadline,
+        v,
+        r,
+        s,
+    );
+    const functionData = morphoBlueSetAuthAction.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('MorphoBlueSetAuthWithSig', functionData, proxy);
+
+    return receipt;
+};
 
 module.exports = {
     executeAction,
@@ -3585,4 +3624,6 @@ module.exports = {
     morphoBlueWithdrawCollateral,
     morphoBlueBorrow,
     morphoBluePayback,
+    morphoBlueSetAuth,
+    morphoBlueSetAuthWithSig,
 };

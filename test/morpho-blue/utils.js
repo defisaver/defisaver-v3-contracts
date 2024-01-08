@@ -2,6 +2,7 @@ const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const hre = require('hardhat');
 const { setBalance, fetchAmountinUSDPrice, approve } = require('../utils');
 
+const MORPHO_BLUE_ADDRESS = '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb';
 const loanTokenSupplyAmountInUsd = '50000';
 const collateralSupplyAmountInUsd = '50000';
 const borrowAmountInUsd = '30000';
@@ -24,8 +25,7 @@ const getMarkets = () => [
 ];
 const supplyToMarket = async (marketParams) => {
     const [wallet] = await hre.ethers.getSigners();
-    const morphoBlueAddress = '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb';
-    const morphoBlue = await hre.ethers.getContractAt('IMorphoBlue', morphoBlueAddress);
+    const morphoBlue = await hre.ethers.getContractAt('IMorphoBlue', MORPHO_BLUE_ADDRESS);
     const loanToken = getAssetInfoByAddress(marketParams[0]);
     const supplyAmount = fetchAmountinUSDPrice(loanToken.symbol, loanTokenSupplyAmountInUsd);
     const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, loanToken.decimals);
@@ -34,7 +34,7 @@ const supplyToMarket = async (marketParams) => {
         wallet.address,
         supplyAmountInWei,
     );
-    await approve(loanToken.address, morphoBlueAddress, wallet);
+    await approve(loanToken.address, MORPHO_BLUE_ADDRESS, wallet);
     await morphoBlue.supply(marketParams, supplyAmountInWei, '0', wallet.address, [], { gasLimit: 3000000 });
 };
 
@@ -44,4 +44,5 @@ module.exports = {
     loanTokenSupplyAmountInUsd,
     collateralSupplyAmountInUsd,
     borrowAmountInUsd,
+    MORPHO_BLUE_ADDRESS,
 };
