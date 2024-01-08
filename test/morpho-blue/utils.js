@@ -34,8 +34,7 @@ const supplyToMarket = async (marketParams) => {
         wallet.address,
         supplyAmountInWei,
     );
-    await approve(loanToken.addresss, morphoBlueAddress, wallet);
-
+    await approve(loanToken.address, morphoBlueAddress, wallet);
     await morphoBlue.supply(marketParams, supplyAmountInWei, '0', wallet.address, [], { gasLimit: 3000000 });
 };
 

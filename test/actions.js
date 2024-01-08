@@ -3336,6 +3336,52 @@ const morphoBlueWithdrawCollateral = async (
 
     return receipt;
 };
+
+const morphoBlueBorrow = async (
+    proxy,
+    marketParams,
+    amount,
+    onBehalfOf,
+    to,
+) => {
+    const morphoBlueBorrowAction = new dfs.actions.morphoblue.MorphoBlueBorrowAction(
+        marketParams[0],
+        marketParams[1],
+        marketParams[2],
+        marketParams[3],
+        marketParams[4],
+        amount,
+        onBehalfOf,
+        to,
+    );
+    const functionData = morphoBlueBorrowAction.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('MorphoBlueBorrow', functionData, proxy);
+
+    return receipt;
+};
+const morphoBluePayback = async (
+    proxy,
+    marketParams,
+    amount,
+    from,
+    onBehalf,
+) => {
+    const morphoBlueBorrowAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
+        marketParams[0],
+        marketParams[1],
+        marketParams[2],
+        marketParams[3],
+        marketParams[4],
+        amount,
+        from,
+        onBehalf,
+    );
+    const functionData = morphoBlueBorrowAction.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('MorphoBluePayback', functionData, proxy);
+
+    return receipt;
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -3537,4 +3583,6 @@ module.exports = {
     morphoBlueWithdraw,
     morphoBlueSupplyCollateral,
     morphoBlueWithdrawCollateral,
+    morphoBlueBorrow,
+    morphoBluePayback,
 };
