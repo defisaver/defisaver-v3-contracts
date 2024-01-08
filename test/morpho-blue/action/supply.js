@@ -5,14 +5,14 @@ const {
     takeSnapshot, revertToSnapshot, getProxy, redeploy,
     setBalance, approve, nullAddress, fetchAmountinUSDPrice,
 } = require('../../utils');
-const { getMarkets, deployMarket } = require('../utils');
+const { getMarkets, loanTokenSupplyAmountInUsd } = require('../utils');
 const { morphoBlueSupply } = require('../../actions');
 
 describe('Morpho-Blue-Supply', function () {
     this.timeout(80000);
 
     const markets = getMarkets();
-    const supplyAmountInUsd = '10000';
+    const supplyAmountInUsd = loanTokenSupplyAmountInUsd;
 
     let senderAcc; let proxy; let snapshot; let view;
 
@@ -20,21 +20,15 @@ describe('Morpho-Blue-Supply', function () {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
         snapshot = await takeSnapshot();
-        await deployMarket(); // TODO: Delete this
         await redeploy('MorphoBlueSupply');
         view = await (await hre.ethers.getContractFactory('MorphoBlueView')).deploy();
     });
-    after(async () => {
-        await revertToSnapshot(snapshot);
-    });
-    /*
     beforeEach(async () => {
         snapshot = await takeSnapshot();
     });
-    after(async () => {
+    afterEach(async () => {
         await revertToSnapshot(snapshot);
     });
-    */
     for (let i = 0; i < markets.length; i++) {
         const marketParams = markets[i];
         const loanToken = getAssetInfoByAddress(marketParams[0]);

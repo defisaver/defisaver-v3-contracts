@@ -1,52 +1,64 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
+const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const {
-    takeSnapshot, revertToSnapshot, getProxy,
-    setBalance, approve, nullAddress, redeploy, balanceOf,
+    takeSnapshot, revertToSnapshot, getProxy, redeploy,
+    setBalance, approve, nullAddress, fetchAmountinUSDPrice, balanceOf,
 } = require('../../utils');
+const { getMarkets, collateralSupplyAmountInUsd } = require('../utils');
 const { morphoBlueSupplyCollateral, morphoBlueWithdrawCollateral } = require('../../actions');
-const { getMarketParams } = require('../utils');
 
-describe('Morpho-Blue-Supply-Collateral', function () {
+describe('Morpho-Blue-Withdraw-Collateral', function () {
     this.timeout(80000);
 
-    let senderAcc;
-    let proxy;
-    let snapshot;
-    let view;
-    let marketParams;
-    let supplyAmount;
+    const markets = getMarkets();
+    const supplyAmountInUsd = collateralSupplyAmountInUsd;
+
+    let senderAcc; let proxy; let snapshot; let view;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
         snapshot = await takeSnapshot();
-        marketParams = await getMarketParams();
         await redeploy('MorphoBlueSupplyCollateral');
         await redeploy('MorphoBlueWithdrawCollateral');
-        view = await redeploy('MorphoBlueView');
-        supplyAmount = hre.ethers.utils.parseUnits('15');
+
+        view = await (await hre.ethers.getContractFactory('MorphoBlueView')).deploy();
     });
-    after(async () => {
+    beforeEach(async () => {
+        snapshot = await takeSnapshot();
+    });
+    afterEach(async () => {
         await revertToSnapshot(snapshot);
     });
-    it('should supply collateral to morpho blue ', async () => {
-        await setBalance(marketParams[1], senderAcc.address, supplyAmount);
-        await approve(marketParams[1], proxy.address, senderAcc);
-        await morphoBlueSupplyCollateral(
-            proxy, marketParams, supplyAmount, senderAcc.address, nullAddress,
-        );
-        const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
-        expect(supplyAmount).to.be.eq(positionInfo.collateral);
-    });
-    it('should withdraw collateral from morpho blue ', async () => {
-        await setBalance(marketParams[1], senderAcc.address, hre.ethers.utils.parseUnits('0'));
-        await morphoBlueWithdrawCollateral(
-            proxy, marketParams, supplyAmount, nullAddress, senderAcc.address,
-        );
-        const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
-        const eoaBalance = await balanceOf(marketParams[1], senderAcc.address);
-        expect(supplyAmount).to.be.eq(eoaBalance);
-        expect(positionInfo.collateral).to.be.eq(0);
-    });
+    for (let i = 0; i < markets.length; i++) {
+        const marketParams = markets[i];
+        const loanToken = getAssetInfoByAddress(marketParams[0]);
+        const collToken = getAssetInfoByAddress(marketParams[1]);
+        it(`should supply and withdraw ${supplyAmountInUsd}$ of ${collToken.symbol} as collateral to MorphoBlue ${collToken.symbol}/${loanToken.symbol} market`, async () => {
+            const supplyAmount = fetchAmountinUSDPrice(collToken.symbol, supplyAmountInUsd);
+            const supplyAmountInWei = hre.ethers.utils.parseUnits(
+                supplyAmount, collToken.decimals,
+            );
+
+            await setBalance(collToken.address, senderAcc.address, supplyAmountInWei);
+            await approve(collToken.address, proxy.address, senderAcc);
+            await morphoBlueSupplyCollateral(
+                proxy, marketParams, supplyAmountInWei, senderAcc.address, nullAddress,
+            );
+            const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
+            expect(supplyAmountInWei).to.be.eq(positionInfo.collateral);
+
+            await setBalance(marketParams[1], senderAcc.address, hre.ethers.utils.parseUnits('0'));
+            await morphoBlueWithdrawCollateral(
+                proxy, marketParams, supplyAmountInWei, nullAddress, senderAcc.address,
+            );
+            const positionInfoAfterWithdraw = await view.callStatic.getUserInfo(
+                marketParams, proxy.address,
+            );
+            const eoaBalance = await balanceOf(marketParams[1], senderAcc.address);
+            expect(supplyAmountInWei).to.be.eq(eoaBalance);
+            expect(positionInfoAfterWithdraw.collateral).to.be.eq(0);
+        });
+    }
 });

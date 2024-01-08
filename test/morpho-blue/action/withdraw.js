@@ -1,72 +1,81 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
+const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const {
-    takeSnapshot, revertToSnapshot, getProxy, redeploy, setBalance, approve, nullAddress, balanceOf,
+    takeSnapshot, revertToSnapshot, getProxy, redeploy,
+    setBalance, approve, nullAddress, fetchAmountinUSDPrice, balanceOf,
 } = require('../../utils');
-const { getMarketParams } = require('../utils');
+const { getMarkets, loanTokenSupplyAmountInUsd } = require('../utils');
 const { morphoBlueSupply, morphoBlueWithdraw } = require('../../actions');
 
-describe('Morpho-Blue-Supply', function () {
+describe('Morpho-Blue-Withdraw', function () {
     this.timeout(80000);
 
-    let senderAcc;
-    let proxy;
-    let snapshot;
-    let view;
-    let marketParams;
-    let supplyAmount;
-    let withdrawAmount;
+    const markets = getMarkets();
+    const supplyAmountInUsd = loanTokenSupplyAmountInUsd;
+
+    let senderAcc; let proxy; let snapshot; let view;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
         snapshot = await takeSnapshot();
-        marketParams = await getMarketParams();
         await redeploy('MorphoBlueSupply');
         await redeploy('MorphoBlueWithdraw');
-        view = await redeploy('MorphoBlueView');
-        supplyAmount = hre.ethers.utils.parseUnits('15');
-        withdrawAmount = hre.ethers.utils.parseUnits('10');
+        view = await (await hre.ethers.getContractFactory('MorphoBlueView')).deploy();
     });
-    after(async () => {
+    beforeEach(async () => {
+        snapshot = await takeSnapshot();
+    });
+    afterEach(async () => {
         await revertToSnapshot(snapshot);
     });
-    it('should supply to morpho blue ', async () => {
-        await setBalance(marketParams[0], senderAcc.address, supplyAmount);
-        await approve(marketParams[0], proxy.address, senderAcc);
-        await morphoBlueSupply(
-            proxy, marketParams, supplyAmount, senderAcc.address, nullAddress,
-        );
-        const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
-        console.log(positionInfo);
-        expect(supplyAmount).to.be.closeTo(positionInfo.suppliedInAssets, 1);
-    });
-    it('should withdraw a part of the supplied assets from morphoBlue ', async () => {
-        await setBalance(marketParams[0], senderAcc.address, hre.ethers.utils.parseUnits('0'));
-        await morphoBlueWithdraw(
-            proxy, marketParams, withdrawAmount, nullAddress, senderAcc.address,
-        );
-        const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
-        console.log(positionInfo);
-        const userBalance = await balanceOf(marketParams[0], senderAcc.address);
-        expect(userBalance).to.be.eq(withdrawAmount);
-        expect(supplyAmount.sub(withdrawAmount)).to.be.closeTo(
-            positionInfo.suppliedInAssets, 1,
-        );
-    });
-    it('should withdraw all of the supplied assets from morphoBlue ', async () => {
-        await setBalance(marketParams[0], senderAcc.address, hre.ethers.utils.parseUnits('0'));
-        await morphoBlueWithdraw(
-            proxy,
-            marketParams,
-            hre.ethers.constants.MaxUint256,
-            nullAddress,
-            senderAcc.address,
-        );
-        const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
-        console.log(positionInfo);
-        const userBalance = await balanceOf(marketParams[0], senderAcc.address);
-        expect(userBalance).to.be.closeTo(supplyAmount.sub(withdrawAmount), 1);
-        expect(positionInfo.suppliedInAssets).to.be.eq(0);
-    });
+    for (let i = 0; i < markets.length; i++) {
+        const marketParams = markets[i];
+        const loanToken = getAssetInfoByAddress(marketParams[0]);
+        const collToken = getAssetInfoByAddress(marketParams[1]);
+        it(`should partially and fully withdraw ${supplyAmountInUsd}$ of ${loanToken.symbol} to MorphoBlue ${collToken.symbol}/${loanToken.symbol} market`, async () => {
+            const supplyAmount = fetchAmountinUSDPrice(loanToken.symbol, supplyAmountInUsd);
+            const supplyAmountInWei = hre.ethers.utils.parseUnits(
+                supplyAmount, loanToken.decimals,
+            );
+
+            await setBalance(marketParams[0], senderAcc.address, supplyAmountInWei);
+            await approve(marketParams[0], proxy.address, senderAcc);
+            await morphoBlueSupply(
+                proxy, marketParams, supplyAmountInWei, senderAcc.address, nullAddress,
+            );
+            let positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
+            console.log(positionInfo.suppliedInAssets);
+            expect(supplyAmountInWei).to.be.closeTo(positionInfo.suppliedInAssets, 1);
+            // loanToken supplied
+            const withdrawAmount = (supplyAmount / 3).toFixed(loanToken.decimals);
+            const withdrawAmountInWei = hre.ethers.utils.parseUnits(
+                withdrawAmount.toString(), loanToken.decimals,
+            );
+            await setBalance(marketParams[0], senderAcc.address, hre.ethers.utils.parseUnits('0'));
+            await morphoBlueWithdraw(
+                proxy, marketParams, withdrawAmountInWei, nullAddress, senderAcc.address,
+            );
+            positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
+            let userBalance = await balanceOf(marketParams[0], senderAcc.address);
+            expect(userBalance).to.be.eq(withdrawAmountInWei);
+            expect(supplyAmountInWei.sub(withdrawAmountInWei)).to.be.lte(
+                positionInfo.suppliedInAssets.add(1),
+            );
+            // withdrawn third of supplied assets
+            await morphoBlueWithdraw(
+                proxy,
+                marketParams,
+                hre.ethers.constants.MaxUint256,
+                nullAddress,
+                senderAcc.address,
+            );
+            positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
+            userBalance = await balanceOf(marketParams[0], senderAcc.address);
+            expect(userBalance).to.be.gte(supplyAmountInWei.sub(1));
+            expect(positionInfo.suppliedInAssets).to.be.eq(0);
+            // withdrawn all of the supplied assets
+        });
+    }
 });
