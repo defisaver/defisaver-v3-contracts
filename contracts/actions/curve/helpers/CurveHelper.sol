@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
 
 import "../../../interfaces/curve/ICurveFactory.sol";
 import "../../../interfaces/curve/IDepositZap.sol";

@@ -852,6 +852,39 @@
       "history": []
     },
     {
+      "name": "CompV3RatioTrigger",
+      "address": "0x3ee4A07722C8Df4A3259Eba90644F30f4A0caeed",
+      "id": "0x506812d0",
+      "path": "contracts/triggers/CompV3RatioTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3RatioCheck",
+      "address": "0x9A481a33d27dE100de7Eb12d7c35028c1aCedDEa",
+      "id": "0x2ce67bb9",
+      "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3SubProxyL2",
+      "address": "0x2F368325C53656BBEE6BDE1C04a39eEd717F1E43",
+      "id": "0x49b12183",
+      "path": "contracts/actions/compoundV3/CompV3SubProxyL2.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
     "name": "CompV3View",
     "address": "0x3A07Bb9eb0d71bf03295a84655d82b00A1450CD6",
     "id": "0x16be4292",

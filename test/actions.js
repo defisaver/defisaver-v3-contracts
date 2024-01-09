@@ -1075,7 +1075,7 @@ const yearnWithdraw = async (token, amount, from, to, proxy) => {
 *
 *
 */
-const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from, to) => {
+const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from, to, isFork = false) => {
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
         collChangeId.SUPPLY,
@@ -1083,6 +1083,7 @@ const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from
         collAmount,
         LUSDAmount,
         debtChangeId.BORROW,
+        isFork,
     );
 
     const liquityOpenAction = new dfs.actions.liquity.LiquityOpenAction(
