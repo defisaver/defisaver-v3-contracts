@@ -14,6 +14,7 @@ import "../../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../../interfaces/balancer/IFlashLoans.sol";
 import "../../interfaces/uniswap/v3/IUniswapV3Pool.sol";
 import "../../interfaces/uniswap/v3/IUniswapV3Factory.sol";
+import "../../interfaces/morpho-blue/IMorphoBlue.sol";
 
 import "../../core/strategy/StrategyModel.sol";
 
@@ -40,7 +41,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         MAKER,
         AAVEV3,
         UNIV3,
-        SPARK
+        SPARK,
+        MORPHO_BLUE
     }
 
     /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
@@ -92,6 +94,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
             _flUniV3(_flParams);
         } else if (_source == FLSource.SPARK) {
             _flSpark(_flParams);
+        } else if (_source == FLSource.MORPHO_BLUE) {
+            _flMorphoBlue(_flParams);
         } else {
             revert NonexistentFLSource();
         }
@@ -215,6 +219,18 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         );
 
         emit ActionEvent("FLAction", abi.encode("SPARK", _flParams.amounts[0]));
+    }
+
+    /// @notice Gets a FL from Morpho blue and returns back the execution to the action address
+    function _flMorphoBlue(FlashLoanParams memory _params) internal returns (uint256) {
+        IMorphoBlue(MORPHO_BLUE_ADDR).flashLoan(
+            _params.tokens[0],
+            _params.amounts[0],
+            abi.encode(_params.recipeData, _params.tokens[0])
+        );
+
+        emit ActionEvent("FLAction", abi.encode("MORPHOBLUE", _params.amounts[0]));
+        return _params.amounts[0];
     }
 
     /// @notice Aave callback function that formats and calls back RecipeExecutor
@@ -386,5 +402,30 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
 
         params.tokens[0].withdrawTokens(msg.sender, params.amounts[0] + _fee0);
         params.tokens[1].withdrawTokens(msg.sender, params.amounts[1] + _fee1);
+    }
+
+    function onMorphoFlashLoan(uint256 assets, bytes calldata data) external nonReentrant{
+        if (msg.sender != MORPHO_BLUE_ADDR) {
+            revert UntrustedLender();
+        }
+        (bytes memory taskData, address token) = abi.decode(data, (bytes, address));
+        (Recipe memory currRecipe, address proxy) = abi.decode(taskData, (Recipe, address));
+
+        token.withdrawTokens(proxy, assets);
+
+        uint256 balanceBefore = token.getBalance(address(this));
+        address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
+
+        // call Action execution
+        IDSProxy(proxy).execute{value: address(this).balance}(
+            recipeExecutorAddr,
+            abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, assets)
+        );
+
+        if (token.getBalance(address(this)) != assets + balanceBefore) {
+            revert WrongPaybackAmountError();
+        }
+
+        token.approveToken(MORPHO_BLUE_ADDR, assets);
     }
 }

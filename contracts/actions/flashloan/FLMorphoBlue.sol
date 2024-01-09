@@ -40,9 +40,7 @@ contract FLMorphoBlue is ActionBase, ReentrancyGuard, StrategyModel, IFlashLoanB
                 IFLParamGetter(params.flParamGetterAddr).getFlashLoanParams(params.flParamGetterData);
         }
 
-        bytes memory recipeData = params.recipeData;
-
-        uint256 amount = _flMorphoBlue(params, recipeData);
+        uint256 amount = _flMorphoBlue(params);
         return bytes32(amount);
     }
 
@@ -55,11 +53,11 @@ contract FLMorphoBlue is ActionBase, ReentrancyGuard, StrategyModel, IFlashLoanB
     }
 
     /// @notice Gets a FL from Morpho blue and returns back the execution to the action address
-    function _flMorphoBlue(FlashLoanParams memory _params, bytes memory _taskData) internal returns (uint256) {
+    function _flMorphoBlue(FlashLoanParams memory _params) internal returns (uint256) {
         IMorphoBlue(MORPHO_BLUE_ADDR).flashLoan(
             _params.tokens[0],
             _params.amounts[0],
-            abi.encode(_taskData, _params.tokens[0])
+            abi.encode(_params.recipeData, _params.tokens[0])
         );
 
         emit ActionEvent("FLMorphoBlue", abi.encode(_params));
