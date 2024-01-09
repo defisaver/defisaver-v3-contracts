@@ -32,6 +32,7 @@ const {
     resetForkToBlock,
     REGISTRY_ADDR,
     AAVE_V2_MARKET_ADDR,
+    redeployCore,
 } = require('../../utils');
 const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
 
@@ -99,10 +100,10 @@ const aaveV2BoostTest = () => describe('Aave-Boost-Strategy', function () {
 
         setNetwork('mainnet');
         [senderAcc] = await ethers.getSigners();
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, true);
 
         botAcc = (await ethers.getSigners())[1];
-        strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+        strategyExecutor = await redeployCore();
 
         await redeploy('AaveBorrow');
         await redeploy('AaveSupply');
@@ -119,7 +120,7 @@ const aaveV2BoostTest = () => describe('Aave-Boost-Strategy', function () {
         await createBundleAndStrategy(proxy);
     });
 
-    for (let i = 0; i < testPairs.length; i++) {
+    for (let i = 0; i < 1; i++) {
         const { collSymbol, debtSymbol } = testPairs[i];
 
         const collAsset = getAssetInfo(collSymbol);

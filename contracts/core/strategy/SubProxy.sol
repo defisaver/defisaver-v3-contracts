@@ -3,12 +3,12 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
+import "../../auth/Permission.sol";
 import "./SubStorage.sol";
 import "../DFSRegistry.sol";
 
 /// @title Called through DSProxy, handles auth and calls subscription contract
-contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
@@ -17,7 +17,8 @@ contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     function subscribeToStrategy(
         StrategySub calldata _sub
     ) public {
-        givePermission(PROXY_AUTH_ADDR);
+         /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission();
 
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(_sub);
     }

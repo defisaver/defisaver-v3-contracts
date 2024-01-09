@@ -5,11 +5,9 @@ pragma experimental ABIEncoderV2;
 import "../../ActionBase.sol";
 import "../helpers/CurveHelper.sol";
 import "../../../utils/TokenUtils.sol";
-import "../../../utils/math/SafeMath.sol";
 
 contract CurveMintCrv is ActionBase, CurveHelper {
     using TokenUtils for address;
-    using SafeMath for uint256;
     
     struct Params {
         address[8] gaugeAddrs;  // array of gauges determining Crv issuance
@@ -48,7 +46,7 @@ contract CurveMintCrv is ActionBase, CurveHelper {
 
         uint256 balanceBefore = CRV_TOKEN_ADDR.getBalance(address(this));
         Minter.mint_many(_params.gaugeAddrs);
-        minted = CRV_TOKEN_ADDR.getBalance(address(this)).sub(balanceBefore);
+        minted = CRV_TOKEN_ADDR.getBalance(address(this)) - (balanceBefore);
 
         CRV_TOKEN_ADDR.withdrawTokens(_params.receiver, minted);
         logData = abi.encode(_params, minted);

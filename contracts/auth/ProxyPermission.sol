@@ -14,7 +14,7 @@ contract ProxyPermission is AuthHelper {
 
     /// @notice Called in the context of DSProxy to authorize an address
     /// @param _contractAddr Address which will be authorized
-    function givePermission(address _contractAddr) public {
+    function giveProxyPermission(address _contractAddr) public {
         address currAuthority = address(DSAuth(address(this)).authority());
         DSGuard guard = DSGuard(currAuthority);
 
@@ -30,7 +30,7 @@ contract ProxyPermission is AuthHelper {
 
     /// @notice Called in the context of DSProxy to remove authority of an address
     /// @param _contractAddr Auth address which will be removed from authority list
-    function removePermission(address _contractAddr) public {
+    function removeProxyPermission(address _contractAddr) public {
         address currAuthority = address(DSAuth(address(this)).authority());
 
         // if there is no authority, that means that contract doesn't have permission

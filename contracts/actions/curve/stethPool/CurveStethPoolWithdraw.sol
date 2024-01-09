@@ -6,12 +6,10 @@ pragma experimental ABIEncoderV2;
 import "../../../interfaces/curve/stethPool/ICurveStethPool.sol";
 import "../helpers/CurveHelper.sol";
 import "../../../utils/TokenUtils.sol";
-import "../../../utils/math/SafeMath.sol";
 import "../../ActionBase.sol";
 
 contract CurveStethPoolWithdraw is ActionBase, CurveHelper {
     using TokenUtils for address;
-    using SafeMath for uint256;
 
     enum ReturnValue {
         WETH,
@@ -79,7 +77,7 @@ contract CurveStethPoolWithdraw is ActionBase, CurveHelper {
         
         STETH_ADDR.withdrawTokens(_params.to, _params.amounts[1]);
         // return unburned lp tokens to from
-        STE_CRV_ADDR.withdrawTokens(_params.from, _params.maxBurnAmount.sub(burnedLp));
+        STE_CRV_ADDR.withdrawTokens(_params.from, _params.maxBurnAmount - (burnedLp));
 
         logData = abi.encode(_params.amounts[0], _params.amounts[1], burnedLp);
 

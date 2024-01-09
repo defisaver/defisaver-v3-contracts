@@ -1,3 +1,4 @@
+/* eslint-disable no-else-return */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable no-await-in-loop */
 // const { default: curve } = require('@curvefi/api');
@@ -9,6 +10,8 @@ const { expect } = require('chai');
 const storageSlots = require('./storageSlots.json');
 
 const { deployAsOwner, deployContract } = require('../scripts/utils/deployer');
+
+const { createSafe, executeSafeTx } = require('./utils-safe');
 
 const strategyStorageBytecode = require('../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
 const subStorageBytecode = require('../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
@@ -545,19 +548,27 @@ const getProxyWithSigner = async (signer, addr) => {
     return dsProxy;
 };
 
-const getProxy = async (acc) => {
-    const proxyRegistry = await
-    hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
-    let proxyAddr = await proxyRegistry.proxies(acc);
+const getProxy = async (acc, isSafe = false) => {
+    if (isSafe === false) {
+        const proxyRegistry = await
+        hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
+        let proxyAddr = await proxyRegistry.proxies(acc);
 
-    if (proxyAddr === nullAddress) {
-        await proxyRegistry.build(acc);
-        proxyAddr = await proxyRegistry.proxies(acc);
+        if (proxyAddr === nullAddress) {
+            await proxyRegistry.build(acc);
+            proxyAddr = await proxyRegistry.proxies(acc);
+        }
+
+        const dsProxy = await hre.ethers.getContractAt('IDSProxy', proxyAddr);
+
+        return dsProxy;
+    } else {
+        // create safe
+        const safeAddr = await createSafe(acc);
+        const safe = await hre.ethers.getContractAt('ISafe', safeAddr);
+
+        return safe;
     }
-
-    const dsProxy = await hre.ethers.getContractAt('IDSProxy', proxyAddr);
-
-    return dsProxy;
 };
 
 const sendEther = async (signer, toAddress, amount) => {
@@ -1269,6 +1280,27 @@ const filterEthersObject = (obj) => {
     return keys.map((key) => filterEthersObject(obj[key]));
 };
 
+const isProxySafe = (proxy) => proxy.functions.nonce !== undefined;
+
+// executes tx through safe or dsproxy depending the type
+const executeTxFromProxy = async (proxy, targetAddr, callData) => {
+    let receipt;
+    if (isProxySafe(proxy)) {
+        receipt = await executeSafeTx(
+            proxy.signer.address,
+            proxy,
+            targetAddr,
+            callData,
+        );
+    } else {
+        receipt = await proxy['execute(address,bytes)'](targetAddr, callData, {
+            gasLimit: 10000000,
+        });
+    }
+
+    return receipt;
+};
+
 module.exports = {
     addToZRXAllowlist,
     getAddrFromRegistry,
@@ -1308,6 +1340,26 @@ module.exports = {
     mockChainlinkPriceFeed,
     setMockPrice,
     getNftOwner,
+    isProxySafe,
+    getSparkFLFee,
+    setNetwork,
+    getNetwork,
+    setBalance,
+    takeSnapshot,
+    revertToSnapshot,
+    mineBlock,
+    setForkForTesting,
+    resetForkToBlock,
+    balanceOfOnTokenInBlock,
+    formatExchangeObjCurve,
+    formatMockExchangeObj,
+    cacheChainlinkPrice,
+    expectCloseEq,
+    setContractAt,
+    getContractFromRegistry,
+    filterEthersObject,
+    curveApiInit,
+    executeTxFromProxy,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,
@@ -1326,7 +1378,6 @@ module.exports = {
     USDC_ADDR,
     AAVE_FL_FEE,
     AAVE_V3_FL_FEE,
-    getSparkFLFee,
     MIN_VAULT_DAI_AMOUNT,
     MIN_VAULT_RAI_AMOUNT,
     RAI_ADDR,
@@ -1363,21 +1414,4 @@ module.exports = {
     BLUSD_ADDR,
     BOND_NFT_ADDR,
     AAVE_V2_MARKET_ADDR,
-    setNetwork,
-    getNetwork,
-    setBalance,
-    takeSnapshot,
-    revertToSnapshot,
-    mineBlock,
-    setForkForTesting,
-    resetForkToBlock,
-    balanceOfOnTokenInBlock,
-    formatExchangeObjCurve,
-    formatMockExchangeObj,
-    cacheChainlinkPrice,
-    expectCloseEq,
-    setContractAt,
-    getContractFromRegistry,
-    filterEthersObject,
-    curveApiInit,
 };

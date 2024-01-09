@@ -3,9 +3,12 @@ const dfs = require('@defisaver/sdk');
 const hre = require('hardhat');
 
 const { getAssetInfo, ilks } = require('@defisaver/tokens');
+
+
 const {
     approve,
     getAddrFromRegistry,
+    executeTxFromProxy,
     nullAddress,
     WETH_ADDRESS,
     UNISWAP_WRAPPER,
@@ -26,6 +29,7 @@ const {
     BLUSD_ADDR,
     getNetwork,
     formatExchangeObjSdk,
+    isProxySafe,
 } = require('./utils');
 
 const {
@@ -47,9 +51,9 @@ const executeAction = async (actionName, functionData, proxy, regAddr = addrs[ne
     let receipt;
     try {
         mineBlock();
-        receipt = await proxy['execute(address,bytes)'](actionAddr, functionData, {
-            gasLimit: 10000000,
-        });
+
+        receipt = await executeTxFromProxy(proxy, actionAddr, functionData);
+
         const gasUsed = await getGasUsed(receipt);
         console.log(`Gas used by ${actionName} action; ${gasUsed}`);
         return receipt;

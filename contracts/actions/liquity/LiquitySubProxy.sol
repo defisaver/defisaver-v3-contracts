@@ -3,11 +3,11 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
+import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 import "./trove/LiquityAdjust.sol";
 
-contract LiquitySubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+contract LiquitySubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     uint64 public immutable REPAY_BUNDLE_ID;
     uint64 public immutable BOOST_BUNDLE_ID;
 
@@ -39,7 +39,9 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelpe
     function subToLiquityAutomation(
         LiquitySubData calldata _subData
     ) public {
-        givePermission(PROXY_AUTH_ADDR);
+         /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission();
+
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);

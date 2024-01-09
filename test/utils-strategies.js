@@ -10,6 +10,7 @@ const {
     network,
     getNetwork,
     getContractFromRegistry,
+    executeTxFromProxy,
 } = require('./utils');
 
 const getLatestBundleId = async () => {
@@ -99,9 +100,7 @@ const subToStrategy = async (proxy, strategySub, regAddr = addrs[getNetwork()].R
         [strategySub],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](SubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, SubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -121,9 +120,7 @@ const activateSub = async (proxy, subId, regAddr = addrs[network].REGISTRY_ADDR)
         [subId.toString()],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](SubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, SubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -141,9 +138,7 @@ const subToAaveV3Proxy = async (proxy, inputData, regAddr = addrs[getNetwork()].
         [inputData],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](aaveSubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, aaveSubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -174,9 +169,7 @@ const subToSparkProxy = async (proxy, inputData, regAddr = addrs[getNetwork()].R
         [inputData],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](sparkSubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, sparkSubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -216,9 +209,7 @@ const subToCompV3Proxy = async (proxy, inputData, regAddr = addrs[network].REGIS
         inputData,
     );
 
-    const receipt = await proxy['execute(address,bytes)'](compV3SubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, compV3SubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -238,9 +229,7 @@ const subToCompV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGIS
         inputData,
     );
 
-    const receipt = await proxy['execute(address,bytes)'](compV2SubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, compV2SubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -271,9 +260,7 @@ const updateToCompV2Proxy = async (
         inputData,
     ]);
 
-    const receipt = await proxy['execute(address,bytes)'](compV2SubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, compV2SubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -299,9 +286,7 @@ const subToAaveV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGIS
         inputData,
     );
 
-    const receipt = await proxy['execute(address,bytes)'](aaveV2SubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, aaveV2SubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -332,9 +317,7 @@ const updateToAaveV2Proxy = async (
         inputData,
     ]);
 
-    const receipt = await proxy['execute(address,bytes)'](aaveV2SubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, aaveV2SubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -360,9 +343,7 @@ const subToCBRebondProxy = async (proxy, inputData, regAddr = addrs[network].REG
         inputData,
     );
 
-    const receipt = await proxy['execute(address,bytes)'](cbRebondSubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, cbRebondSubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -382,9 +363,7 @@ const subToMorphoAaveV2Proxy = async (proxy, inputData, regAddr = addrs[network]
         inputData,
     );
 
-    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, subProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -415,9 +394,7 @@ const updateSubDataMorphoAaveV2Proxy = async (
         ],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, subProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -440,9 +417,7 @@ const subToLiquityProxy = async (proxy, inputData, regAddr = addrs[network].REGI
         inputData,
     );
 
-    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, subProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -473,9 +448,7 @@ const updateLiquityProxy = async (
         ],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, subProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -497,9 +470,7 @@ const updateAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGIST
         [inputData],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](aaveSubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, aaveSubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -520,9 +491,7 @@ const updateSparkProxy = async (proxy, inputData, regAddr = addrs[network].REGIS
         [inputData],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](sparkSubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, sparkSubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -542,9 +511,7 @@ const subToMcdProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY
         [inputData, false],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, subProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -575,9 +542,7 @@ const subToLimitOrderProxy = async (proxy, inputData, regAddr = addrs[network].R
         inputData,
     );
 
-    const receipt = await proxy['execute(address,bytes)'](limitOrderSubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, limitOrderSubProxyAddr, functionData);
 
     const parsed = await receipt.wait();
     const lastEvent = parsed.events.at(-1);

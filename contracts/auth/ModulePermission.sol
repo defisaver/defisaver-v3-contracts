@@ -13,7 +13,7 @@ contract ModulePermission {
         ISafe(address(this)).enableModule(_moduleAddr);
     }
 
-    function disableModule(address _moduleAddr) public {
+    function disableLastModule(address _moduleAddr) public {
         (address[] memory moduleArr, address next) = ISafe(address(this)).getModulesPaginated(SENTINEL_MODULES, 10);
 
         require(next == SENTINEL_MODULES, "Too many modules to handle");

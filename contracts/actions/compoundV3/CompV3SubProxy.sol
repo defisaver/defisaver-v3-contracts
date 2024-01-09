@@ -3,10 +3,10 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
+import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 
-contract CompV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+contract CompV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     uint64 public constant REPAY_BUNDLE_ID = 3; 
     uint64 public constant BOOST_BUNDLE_ID = 4;
 
@@ -39,7 +39,9 @@ contract CompV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
     function subToCompV3Automation(
         CompV3SubData calldata _subData
     ) public {
-        givePermission(PROXY_AUTH_ADDR);
+         /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission();
+
         StrategySub memory repaySub = formatRepaySub(_subData, address(this), msg.sender);
 
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);

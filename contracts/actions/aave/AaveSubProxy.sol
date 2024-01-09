@@ -3,12 +3,12 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
+import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 import "../../interfaces/ISubscriptions.sol";
 
 /// @title Contract that subscribes users to Aave V2 automation bundles
-contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID;
 
@@ -48,10 +48,12 @@ contract AaveSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
         if (ISubscriptions(AAVE_SUB_ADDRESS).isSubscribed(address(this))) {
             ISubscriptions(AAVE_SUB_ADDRESS).unsubscribe();
 
-            removePermission(LEGACY_PROXY_AUTH_ADDR);
+            removeProxyPermission(LEGACY_PROXY_AUTH_ADDR);
         }
 
-        givePermission(PROXY_AUTH_ADDR);
+        /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission();
+        
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);

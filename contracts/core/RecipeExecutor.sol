@@ -186,7 +186,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, ModulePermission, Adm
 
         bool isDSProxy = isDSProxy(address(this));
 
-        isDSProxy ? givePermission(_flActionAddr) : enableModule(_flActionAddr);
+        isDSProxy ? giveProxyPermission(_flActionAddr) : enableModule(_flActionAddr);
 
         // encode data for FL
         bytes memory recipeData = abi.encode(_currRecipe, address(this));
@@ -205,7 +205,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, ModulePermission, Adm
             _returnValues
         );
 
-        isDSProxy ? removePermission(_flActionAddr) : disableModule(_flActionAddr);
+        isDSProxy ? removeProxyPermission(_flActionAddr) : disableLastModule(_flActionAddr);
     }
 
     /// @notice Checks if the specified address is of FL type action

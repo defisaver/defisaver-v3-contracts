@@ -4,10 +4,8 @@ pragma solidity =0.8.10;
 
 import "../interfaces/IERC20.sol";
 import "./Address.sol";
-import "./math/SafeMath.sol";
 
 library SafeERC20 {
-    using SafeMath for uint256;
     using Address for address;
 
     function safeTransfer(
@@ -45,7 +43,7 @@ library SafeERC20 {
         address spender,
         uint256 value
     ) internal {
-        uint256 newAllowance = token.allowance(address(this), spender).add(value);
+        uint256 newAllowance = token.allowance(address(this), spender) + value;
         _callOptionalReturn(
             token,
             abi.encodeWithSelector(token.approve.selector, spender, newAllowance)
@@ -57,10 +55,8 @@ library SafeERC20 {
         address spender,
         uint256 value
     ) internal {
-        uint256 newAllowance = token.allowance(address(this), spender).sub(
-            value,
-            "SafeERC20: decreased allowance below zero"
-        );
+        uint256 newAllowance = token.allowance(address(this), spender) - value;
+          
         _callOptionalReturn(
             token,
             abi.encodeWithSelector(token.approve.selector, spender, newAllowance)

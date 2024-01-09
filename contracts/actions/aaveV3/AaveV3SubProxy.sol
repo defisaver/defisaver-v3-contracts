@@ -3,11 +3,11 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
+import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
-contract AaveV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID; 
 
@@ -42,7 +42,8 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
     function subToAaveAutomation(
         bytes calldata encodedInput
     ) public {
-        givePermission(PROXY_AUTH_ADDR);
+         /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission();
 
         AaveSubData memory subData = parseSubData(encodedInput);
 

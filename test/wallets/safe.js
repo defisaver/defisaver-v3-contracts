@@ -77,8 +77,15 @@ const signAndExecuteSafeTx = async (
     );
 
     console.log(txHash);
+    console.log("senderAcc.address: ", senderAcc.address);
 
-    const sig = (await senderAcc.signMessage(hre.ethers.utils.arrayify(txHash))).replace(/1b$/, '1f').replace(/1c$/, '20');
+    let sig = abiCoder.encode(['address', 'bytes32'], [senderAcc.address, '0x0000000000000000000000000000000000000000000000000000000000000000']);
+
+    sig = sig + '01';
+    console.log(sig);
+
+    // const sig = (await senderAcc.signMessage(hre.ethers.utils.arrayify(txHash))).replace(/1b$/, '1f').replace(/1c$/, '20');
+    // console.log(sig);
 
     // call safe function
     await safeInstance.execTransaction(

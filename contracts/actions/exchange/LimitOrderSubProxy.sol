@@ -3,11 +3,11 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
+import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 import "../../utils/helpers/UtilHelper.sol";
 
-contract LimitOrderSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper, UtilHelper {
+contract LimitOrderSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHelper {
 
     error InvalidTokenAddresses(address tokenSellAddr, address tokenBuyAddr);
     error InvalidAmount();
@@ -30,7 +30,8 @@ contract LimitOrderSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHe
     }
 
     function subToLimitOrder(LimitOrderSub memory _subData) external {
-        givePermission(PROXY_AUTH_ADDR);
+         /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission();
 
         _validateData(_subData);
 
