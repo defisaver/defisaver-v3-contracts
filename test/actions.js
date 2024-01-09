@@ -1080,7 +1080,7 @@ const yearnWithdraw = async (token, amount, from, to, proxy) => {
 *
 *
 */
-const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from, to) => {
+const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from, to, isFork = false) => {
     const { upperHint, lowerHint } = await getHints(
         proxy.address,
         collChangeId.SUPPLY,
@@ -1088,6 +1088,7 @@ const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from
         collAmount,
         LUSDAmount,
         debtChangeId.BORROW,
+        isFork,
     );
 
     const liquityOpenAction = new dfs.actions.liquity.LiquityOpenAction(
@@ -3237,6 +3238,22 @@ const tokenizedVaultAdapterWithdraw = async ({
     return { receipt, assetsToApprove: await action.getAssetsToApprove() };
 };
 
+const proxyApproveToken = async (
+    proxy,
+    tokenAddr,
+    spender,
+    amount,
+) => {
+    const actionAddress = await getAddrFromRegistry('ApproveToken');
+    const approveAction = new dfs.actions.basic.ApproveTokenAction(
+        tokenAddr, spender, amount,
+    );
+    const functionData = approveAction.encodeForDsProxyCall()[1];
+    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+
+    return receipt;
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -3431,4 +3448,6 @@ module.exports = {
     tokenizedVaultAdapterMint,
     tokenizedVaultAdapterRedeem,
     tokenizedVaultAdapterWithdraw,
+
+    proxyApproveToken,
 };

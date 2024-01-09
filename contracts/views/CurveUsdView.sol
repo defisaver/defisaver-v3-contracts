@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
 
 import "../interfaces/curveusd/ICurveUsd.sol";
+import "../actions/curveusd/helpers/CurveUsdHelper.sol";
 import "../interfaces/IERC20.sol";
 
-contract CurveUsdView {
+contract CurveUsdView is CurveUsdHelper {
   struct Band {
     int256 id;
     uint256 lowPrice;
@@ -52,6 +52,8 @@ contract CurveUsdView {
     int256 health;
     int256[2] bandRange;
     uint256[][2] usersBands;
+    uint256 collRatio;
+    bool isInSoftLiquidation;
   }
 
   address public constant WBTC_MARKET = 0x4e59541306910aD6dC1daC0AC9dFB29bD9F15c67;
@@ -77,12 +79,15 @@ contract CurveUsdView {
           liquidationDiscount: 0,
           health: 0,
           bandRange: bandRange,
-          usersBands: usersBands
+          usersBands: usersBands,
+          collRatio: 0,
+          isInSoftLiquidation: false
         });
       }
 
       uint256[4] memory amounts = ctrl.user_state(user);
       uint256[2] memory prices = ctrl.user_prices(user);
+      (uint256 collRatio, bool isInSoftLiquidation) = getCollateralRatio(user, market);
 
       return UserData({
         loanExists: ctrl.loan_exists(user),
@@ -96,7 +101,9 @@ contract CurveUsdView {
         liquidationDiscount: ctrl.liquidation_discount(),
         health: ctrl.health(user, true),
         bandRange: amm.read_user_tick_numbers(user),
-        usersBands: amm.get_xy(user)
+        usersBands: amm.get_xy(user),
+        collRatio: collRatio,
+        isInSoftLiquidation: isInSoftLiquidation
       });
   }
 

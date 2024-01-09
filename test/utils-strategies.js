@@ -146,7 +146,7 @@ const subToAaveV3Proxy = async (proxy, inputData, regAddr = addrs[getNetwork()].
 
     const latestSubId = await getLatestSubId(regAddr);
 
-    const { repaySub, boostSub } = await hre.ethers.getContractAt('AaveSubProxy', aaveSubProxyAddr)
+    const { repaySub, boostSub } = await hre.ethers.getContractAt('AaveV3SubProxy', aaveSubProxyAddr)
         .then((c) => [c, c.parseSubData(inputData)])
         .then(async ([c, subData]) => {
             // eslint-disable-next-line no-param-reassign
@@ -217,6 +217,24 @@ const subToCompV3Proxy = async (proxy, inputData, regAddr = addrs[network].REGIS
 
     const latestSubId = await getLatestSubId(regAddr);
 
+    return latestSubId;
+};
+
+const subToCompV3ProxyL2 = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
+    const compV3SubProxyAddr = await getAddrFromRegistry('CompV3SubProxyL2', regAddr);
+
+    const CompV3SubProxyL2 = await hre.ethers.getContractFactory('CompV3SubProxyL2');
+    const functionData = CompV3SubProxyL2.interface.encodeFunctionData(
+        'subToCompV3Automation',
+        [inputData],
+    );
+    const receipt = await proxy['execute(address,bytes)'](compV3SubProxyAddr, functionData, {
+        gasLimit: 5000000,
+    });
+
+    const gasUsed = await getGasUsed(receipt);
+    console.log(`GasUsed subToCompV3ProxyL2; ${gasUsed}`);
+    const latestSubId = await getLatestSubId(regAddr);
     return latestSubId;
 };
 
@@ -652,4 +670,5 @@ module.exports = {
     updateToCompV2Proxy,
     subToSparkProxy,
     updateSparkProxy,
+    subToCompV3ProxyL2,
 };

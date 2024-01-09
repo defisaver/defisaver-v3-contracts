@@ -13,6 +13,7 @@ const {
     subToAaveV2Proxy,
     subToSparkProxy,
     updateSparkProxy,
+    subToAaveV3Proxy,
 } = require('./utils-strategies');
 
 const {
@@ -30,6 +31,8 @@ const {
     RATIO_STATE_UNDER,
     RATIO_STATE_OVER,
     IN_REPAY,
+    createCurveUsdCollRatioTrigger,
+    IN_BOOST,
 } = require('./triggers');
 
 const {
@@ -339,6 +342,49 @@ const subAaveV2AutomationStrategy = async (
     const subInput = [[minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled]];
 
     const subData = await subToAaveV2Proxy(proxy, subInput, regAddr);
+
+    let subId1 = '0';
+    let subId2 = '0';
+
+    if (boostEnabled) {
+        subId1 = (parseInt(subData.subId, 10) - 1).toString();
+        subId2 = subData.subId;
+    } else {
+        subId1 = subData.subId;
+        subId2 = '0';
+    }
+
+    return {
+        repaySubId: subId1,
+        boostSubId: subId2,
+        repaySub: subData.repaySub,
+        boostSub: subData.boostSub,
+    };
+};
+
+const subAaveV3AutomationStrategy = async (
+    proxy,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    regAddr = REGISTRY_ADDR,
+) => {
+    const minRatioBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(minRatio), 16);
+    const maxRatioBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(maxRatio), 16);
+    const optimalRatioBoostBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(optimalRatioBoost), 16);
+    const optimalRatioRepayBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(optimalRatioRepay), 16);
+    const boostEnabledBytes = boostEnabled ? '0x01' : '0x00';
+    const subInput = hre.ethers.utils.concat([
+        minRatioBytes,
+        maxRatioBytes,
+        optimalRatioBoostBytes,
+        optimalRatioRepayBytes,
+        boostEnabledBytes,
+    ]);
+
+    const subData = await subToAaveV3Proxy(proxy, subInput, regAddr);
 
     let subId1 = '0';
     let subId2 = '0';
@@ -727,6 +773,38 @@ const subAaveV3CloseWithMaximumGasPriceBundle = async (
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
+const subCurveUsdRepayBundle = async (
+    proxy, bundleId, controllerAddr, minRatio, targetRatio, collTokenAddress, crvusdAddress,
+) => {
+    const triggerData = await createCurveUsdCollRatioTrigger(proxy.address, controllerAddr, minRatio, RATIO_STATE_UNDER);
+    const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_REPAY]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const controllerAddressEncoded = abiCoder.encode(['address'], [controllerAddr]);
+    const collTokenAddressEncoded = abiCoder.encode(['address'], [collTokenAddress]);
+    const crvUsdAddressEncoded = abiCoder.encode(['address'], [crvusdAddress]);
+    const strategySub = [bundleId, true, [triggerData],
+        [controllerAddressEncoded, ratioStateEncoded, targetRatioEncoded, collTokenAddressEncoded, crvUsdAddressEncoded],
+    ];
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+const subCurveUsdBoostBundle = async (
+    proxy, bundleId, controllerAddr, maxRatio, targetRatio, collTokenAddress, crvusdAddress,
+) => {
+    const triggerData = await createCurveUsdCollRatioTrigger(proxy.address, controllerAddr, maxRatio, RATIO_STATE_OVER);
+    const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_BOOST]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const controllerAddressEncoded = abiCoder.encode(['address'], [controllerAddr]);
+    const collTokenAddressEncoded = abiCoder.encode(['address'], [collTokenAddress]);
+    const crvUsdAddressEncoded = abiCoder.encode(['address'], [crvusdAddress]);
+    const strategySub = [bundleId, true, [triggerData],
+        [controllerAddressEncoded, ratioStateEncoded, targetRatioEncoded, collTokenAddressEncoded, crvUsdAddressEncoded],
+    ];
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
 
 module.exports = {
     subDcaStrategy,
@@ -752,6 +830,7 @@ module.exports = {
     subMorphoAaveV2AutomationStrategy,
     subLiquityAutomationStrategy,
     subAaveV2AutomationStrategy,
+    subAaveV3AutomationStrategy,
     subCompV2AutomationStrategy,
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,
@@ -760,4 +839,6 @@ module.exports = {
     subLiqutityDsrSupplyStrategy,
     subLiquityDebtInFrontRepayStrategy,
     subAaveV3CloseWithMaximumGasPriceBundle,
+    subCurveUsdRepayBundle,
+    subCurveUsdBoostBundle,
 };

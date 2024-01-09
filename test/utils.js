@@ -57,6 +57,7 @@ const addrs = {
         DFS_REG_CONTROLLER: '0x6F6DaE1bCB60F67B2Cb939dBE565e8fD03F6F002',
         AVG_GAS_PRICE: 100,
         AAVE_V3_POOL_DATA_PROVIDER: '0x7B4EB56E7CD4b454BA8ff71E4518426369a138a3',
+        CURVE_WRAPPER_V3: '0xdE73496DD6349829C6649aCaDe31FB1371528AC5',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -91,6 +92,7 @@ const addrs = {
         WETH_ADDRESS: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
         DAI_ADDRESS: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
         USDC_ADDR: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
+        USDC_NATIVE_ADDR: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
         EXCHANGE_OWNER_ADDR: '0x926516e60521556f4ab5e7bf16a4d41a8539c7d1',
         SAVER_EXCHANGE_ADDR: '0xaB1E4b72BC2f3890F052df111EE626c1c7229F26',
         FEE_RECEIVER: '0xe000e3c9428D539566259cCd89ed5fb85e655A01',
@@ -107,6 +109,7 @@ const addrs = {
         ZRX_ALLOWLIST_ADDR: '0x5eD8e74b1caE57B0c68B3278B88589991FBa0750',
         ZRX_ALLOWLIST_OWNER: '0x926516e60521556f4ab5e7bf16a4d41a8539c7d1',
         COMET_USDC_ADDR: '0xA5EDBDD9646f8dFF606d7448e414884C7d905dCA',
+        COMET_USDC_NATIVE_ADDR: '0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf',
         COMET_USDC_REWARDS_ADDR: '0x88730d254A2f7e6AC8388c3198aFd694bA9f7fae',
         COMP_ADDR: '0x354A6dA3fcde098F8389cad84b0182725c6C91dE',
         ADMIN_VAULT: '0xd47D8D97cAd12A866900eEc6Cde1962529F25351',
@@ -166,6 +169,7 @@ const AAVE_MARKET = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
 const YEARN_REGISTRY_ADDRESS = '0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804';
 const STETH_ADDRESS = '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84';
 const WSTETH_ADDRESS = '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0';
+const A_WSETH_TOKEN_ADDR = '0x0B925eD163218f6662a35e0f0371Ac234f9E9371';
 const UNIV2_ROUTER_ADDRESS = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
 const FEED_REGISTRY_ADDRESS = '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf';
 const USD_DENOMINATION = '0x0000000000000000000000000000000000000348';
@@ -315,6 +319,8 @@ const coinGeckoHelper = {
     GMX: 'gmx',
     ARB: 'arbitrum',
     frxETH: 'frax-ether',
+    sfrxETH: 'staked-frax-ether',
+    tBTC: 'tbtc',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;
@@ -894,7 +900,15 @@ const formatExchangeObjCurve = async (
         // eslint-disable-next-line no-underscore-dangle
         [args._route, args._swapParams, args._pools],
     );
-
+    if (exchangeData.toString().includes('5e74c9036fb86bd7ecdcb084a0673efc32ea31cb')) {
+        console.log('sETH used in curve route, may fail');
+    }
+    if (exchangeData.toString().includes('fe18be6b3bd88a2d2a7f928d00292e7a9963cfc6')) {
+        console.log('sBTC used in curve route, may fail');
+    }
+    if (exchangeData.toString().includes('57Ab1ec28D129707052df4dF418D58a2D46d5f51')) {
+        console.log('sUSD used in curve route, may fail');
+    }
     return [
         srcAddr,
         destAddr,
@@ -1403,6 +1417,7 @@ module.exports = {
     AWBTC_ADDR,
     WBTC_ADDR,
     WSTETH_ADDRESS,
+    A_WSETH_TOKEN_ADDR,
     LUSD_ADDR,
     rariDaiFundManager,
     rdptAddress,

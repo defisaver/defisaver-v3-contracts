@@ -1624,6 +1624,17 @@
         "history": []
     },
     {
+        "name": "FLAaveV3CarryDebt",
+        "address": "0x7BdD8ACE8a48B7032Df68B7f53E0D6D9Ea9411A7",
+        "id": "0x66258f8a",
+        "path": "contracts/actions/flashloan/FLAaveV3CarryDebt.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AaveV3RatioTrigger",
         "address": "0xC1b97aB9eF18EeE338a381c6f74470AA5C567283",
         "id": "0x21a42a26",
@@ -2463,6 +2474,17 @@
         "history": ["0x2512A976227a82Ef0F6bDdb463cBcD5B732596BF"]
     },
     {
+        "name": "CurveUsdGetDebt",
+        "address": "0x3Bb41d3f300dA758780fe7696bb4fB93cD7172fB",
+        "id": "0xc914b767",
+        "path": "contracts/actions/curveusd/CurveUsdGetDebt.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveUsdAdjust",
         "address": "0x6f69A7d0B1BE7602381d9cCE6B29F05B9D0b85e6",
         "id": "0xb7bc5093",
@@ -2541,25 +2563,51 @@
     },
     {
         "name": "CurveUsdRepay",
-        "address": "0xd12785e4834C1421fC7B64ca57d64E886e39b80F",
+        "address": "0x40B6C02D9E7e4019fF8FC8558C4aE38315A4dA4d",
         "id": "0x42cd8e33",
         "path": "contracts/actions/curveusd/advanced/CurveUsdRepay.sol",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0xDaDFC60207C17be005ECf2B03f3B31885D22F908"]
+        "history": [
+            "0xd12785e4834C1421fC7B64ca57d64E886e39b80F",
+            "0xDaDFC60207C17be005ECf2B03f3B31885D22F908"
+        ]
+    },
+    {
+        "name": "CurveUsdCollRatioTrigger",
+        "address": "0xFCc610809b735BB13E583c5E46595457083D2b0c",
+        "id": "0x3e09367b",
+        "path": "contracts/triggers/CurveUsdCollRatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdCollRatioCheck",
+        "address": "0x8c65f37ca216de1625886431249be13ead051388",
+        "id": "0xe677476f",
+        "path": "contracts/actions/checker/CurveUsdCollRatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
     },
     {
         "name": "CurveUsdSwapper",
-        "address": "0xFA8c594b903651F97b27aCADEa83b720cfD7F80b",
+        "address": "0xE6a422Ec7a312730A9692CD9B8B63A836A6151A1",
         "id": "0x83a67cc0",
         "path": "contracts/actions/curveusd/advanced/CurveUsdSwapper.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
         "history": [
+            "0xFA8c594b903651F97b27aCADEa83b720cfD7F80b",
             "0xFa2dfE6AF842e3184D305a85d09cfcf220ed4CBd",
             "0xef8Aa00f824360236b6F586CeF8e4071Bd4448b6",
             "0x934489c930C327D5a8B8b1D017cB08223bcF833f"
@@ -2600,14 +2648,15 @@
     },
     {
         "name": "CurveUsdView",
-        "address": "0x4df1281f9d2303be453e0085881702a4b1358692",
+        "address": "0x4bbcf0e587853aaedfc3e60f74c10e07d8dea701",
         "id": "0xe19de022",
         "path": "contracts/views/CurveUsdView.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
         "history": [
+            "0x4df1281f9d2303be453e0085881702a4b1358692",
             "0x512460CF2Bb80823C135F5DC04D2a1fF258FAA1e",
             "0xa81430a4eC71466264b9ee50403F8d63E8c72B95"
         ]
