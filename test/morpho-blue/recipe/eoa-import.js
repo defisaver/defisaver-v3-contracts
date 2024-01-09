@@ -13,7 +13,7 @@ const {
 } = require('../utils');
 const { executeAction } = require('../../actions');
 
-describe('Morpho-Blue-Repay', function () {
+describe('Morpho-Blue-Import', function () {
     this.timeout(80000);
 
     const markets = getMarkets();
