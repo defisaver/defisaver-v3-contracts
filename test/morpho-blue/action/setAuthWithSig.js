@@ -9,7 +9,7 @@ const {
 const { morphoBlueSetAuthWithSig } = require('../../actions');
 const { chainIds } = require('../../../scripts/utils/fork');
 
-describe('Morpho-Blue-Borrow', function () {
+describe('Morpho-Blue-SetAuthWithSig', function () {
     this.timeout(80000);
 
     let senderAcc; let proxy; let snapshot;
@@ -26,7 +26,7 @@ describe('Morpho-Blue-Borrow', function () {
     afterEach(async () => {
         await revertToSnapshot(snapshot);
     });
-    it('should give auth for proxy position to someone', async () => {
+    it('should change auth setup with signature', async () => {
         const morphoBlue = await hre.ethers.getContractAt('IMorphoBlue', MORPHO_BLUE_ADDRESS);
         const nonce = await morphoBlue.nonce(senderAcc.address);
         const network = hre.network.config.name;
