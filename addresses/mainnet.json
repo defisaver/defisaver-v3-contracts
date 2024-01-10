@@ -403,7 +403,7 @@
     },
     {
         "name": "ReflexerView",
-        "address": "0x7bC3f159080E8010eD5970C654c33a135e07241C",
+        "address": "0x21564700150B7C7860613aAfacdA1cEE345f41c2",
         "id": "0xf8dd2ed4",
         "path": "contracts/views/ReflexerView.sol",
         "version": "1.0.1",
