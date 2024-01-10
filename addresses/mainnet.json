@@ -403,14 +403,14 @@
     },
     {
         "name": "ReflexerView",
-        "address": "0x793cAE99DC75d4497B2c6eA6bDCC7f2218034d74",
+        "address": "0x7bC3f159080E8010eD5970C654c33a135e07241C",
         "id": "0xf8dd2ed4",
         "path": "contracts/views/ReflexerView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x793cAE99DC75d4497B2c6eA6bDCC7f2218034d74"]
     },
     {
         "name": "RariView",
