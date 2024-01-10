@@ -222,7 +222,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     }
 
     /// @notice Gets a FL from Morpho blue and returns back the execution to the action address
-    function _flMorphoBlue(FlashLoanParams memory _params) internal returns (uint256) {
+    function _flMorphoBlue(FlashLoanParams memory _params) internal {
         IMorphoBlue(MORPHO_BLUE_ADDR).flashLoan(
             _params.tokens[0],
             _params.amounts[0],
@@ -230,7 +230,6 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         );
 
         emit ActionEvent("FLAction", abi.encode("MORPHOBLUE", _params.amounts[0]));
-        return _params.amounts[0];
     }
 
     /// @notice Aave callback function that formats and calls back RecipeExecutor

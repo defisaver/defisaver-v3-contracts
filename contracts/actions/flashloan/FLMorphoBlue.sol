@@ -40,8 +40,8 @@ contract FLMorphoBlue is ActionBase, ReentrancyGuard, StrategyModel, IFlashLoanB
                 IFLParamGetter(params.flParamGetterAddr).getFlashLoanParams(params.flParamGetterData);
         }
 
-        uint256 amount = _flMorphoBlue(params);
-        return bytes32(amount);
+        _flMorphoBlue(params);
+        return bytes32(params.amounts[0]);
     }
 
     // solhint-disable-next-line no-empty-blocks
@@ -53,7 +53,7 @@ contract FLMorphoBlue is ActionBase, ReentrancyGuard, StrategyModel, IFlashLoanB
     }
 
     /// @notice Gets a FL from Morpho blue and returns back the execution to the action address
-    function _flMorphoBlue(FlashLoanParams memory _params) internal returns (uint256) {
+    function _flMorphoBlue(FlashLoanParams memory _params) internal{
         IMorphoBlue(MORPHO_BLUE_ADDR).flashLoan(
             _params.tokens[0],
             _params.amounts[0],
@@ -61,7 +61,6 @@ contract FLMorphoBlue is ActionBase, ReentrancyGuard, StrategyModel, IFlashLoanB
         );
 
         emit ActionEvent("FLMorphoBlue", abi.encode(_params));
-        return _params.amounts[0];
     }
 
     function onMorphoFlashLoan(uint256 assets, bytes calldata data) external nonReentrant{
