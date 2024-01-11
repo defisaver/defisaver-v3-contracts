@@ -3131,7 +3131,7 @@
     },
     {
         "name": "LSVView",
-        "address": "0xfAff55F2Ce2b74534a08049Cfd88055F323a9543",
+        "address": "0xECE15C12d8dCDb88c70fAfF38E8dAE4aC4ee69Ce",
         "id": "0x373e1531",
         "path": "contracts/views/LSVView.sol",
         "version": "1.0.0",

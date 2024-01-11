@@ -158,14 +158,14 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
                     lltv: 945000000000000000
                 });
                 Id marketId = MarketParamsLib.id(marketParams);
-                if (MorphoLib.collateral(morphoBlue, marketId, _user) > 0){
+                if (MorphoLib.collateral(morphoBlue, marketId, proxies[i]) > 0){
                     tempPositions[positionCounter++] = Position(
                         uint8(Protocol.MORPHO_BLUE_WSTETH),
-                        _user,
+                        proxies[i],
                         marketParams.collateralToken,
                         TokenUtils.WETH_ADDR,
-                        MorphoLib.collateral(morphoBlue, marketId, _user),
-                        MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, _user)
+                        MorphoLib.collateral(morphoBlue, marketId, proxies[i]),
+                        MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, proxies[i])
                     );
                 }
             }
@@ -316,14 +316,14 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
                     lltv: 945000000000000000
                 });
                 Id marketId = MarketParamsLib.id(marketParams);
-                if (MorphoLib.collateral(morphoBlue, marketId, _user) > 0){
+                if (MorphoLib.collateral(morphoBlue, marketId, proxies[i]) > 0){
                     tempPositions[positionCounter++] = Position(
                         uint8(Protocol.MORPHO_BLUE_WSTETH),
-                        _user,
+                        proxies[i],
                         marketParams.collateralToken,
                         TokenUtils.WETH_ADDR,
-                        MorphoLib.collateral(morphoBlue, marketId, _user),
-                        MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, _user)
+                        MorphoLib.collateral(morphoBlue, marketId, proxies[i]),
+                        MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, proxies[i])
                     );
                 }
             }
@@ -454,16 +454,16 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
                 lltv: 945000000000000000
             });
             Id marketId = MarketParamsLib.id(marketParams);
-                if (MorphoLib.collateral(morphoBlue, marketId, _user) > 0){
-                    tempPositions[positionCounter++] = Position(
-                        uint8(Protocol.MORPHO_BLUE_WSTETH),
-                        _user,
-                        marketParams.collateralToken,
-                        TokenUtils.WETH_ADDR,
-                        MorphoLib.collateral(morphoBlue, marketId, _user),
-                        MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, _user)
-                    );
-                }
+            if (MorphoLib.collateral(morphoBlue, marketId, _user) > 0){
+                tempPositions[positionCounter++] = Position(
+                    uint8(Protocol.MORPHO_BLUE_WSTETH),
+                    _user,
+                    marketParams.collateralToken,
+                    TokenUtils.WETH_ADDR,
+                    MorphoLib.collateral(morphoBlue, marketId, _user),
+                    MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, _user)
+                );
+            }
             
         }
         positions = new Position[](positionCounter);
