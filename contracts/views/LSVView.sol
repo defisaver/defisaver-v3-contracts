@@ -9,6 +9,7 @@ import "../actions/utils/helpers/ActionsUtilHelper.sol";
 import "../actions/aaveV3/helpers/AaveV3Helper.sol";
 import "../actions/morpho/aaveV3/helpers/MorphoAaveV3Helper.sol";
 import "../actions/compoundV3/helpers/CompV3Helper.sol";
+import "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
 import "../utils/helpers/UtilHelper.sol";
 import "../actions/lsv/helpers/LSVUtilHelper.sol";
 import "../utils/LSVProfitTracker.sol";
@@ -23,15 +24,16 @@ struct Position {
     uint256 debt;
 }
 
-contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Helper, CompV3Helper, SparkHelper, LSVUtilHelper {
+contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Helper, CompV3Helper, SparkHelper, MorphoBlueHelper, LSVUtilHelper {
     enum Protocol {
         AAVE_V3,
         MORPHO_AAVE_V3,
         COMPOUND_V3,
-        SPARK
+        SPARK,
+        MORPHO_BLUE_WSTETH
     }
 
-    uint256 public constant NUMBER_OF_SUPPORTED_PROTOCOLS = 4;
+    uint256 public constant NUMBER_OF_SUPPORTED_PROTOCOLS = 5;
     
     using TokenUtils for address;
 
@@ -117,6 +119,7 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
                     }
                 }
             }
+            // Spark Position
             {
                 IPoolV3 lendingPool = getLendingPool(DEFAULT_SPARK_MARKET);
                 DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
@@ -145,7 +148,29 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
                     }
                 }
             }
+            // MorphoBlue wsteth/eth market
+            {       
+                MarketParams memory marketParams = MarketParams({
+                    loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
+                    collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
+                    oracle: 0x2a01EB9496094dA03c4E364Def50f5aD1280AD72,
+                    irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
+                    lltv: 945000000000000000
+                });
+                Id marketId = MarketParamsLib.id(marketParams);
+                if (MorphoLib.collateral(morphoBlue, marketId, proxies[i]) > 0){
+                    tempPositions[positionCounter++] = Position(
+                        uint8(Protocol.MORPHO_BLUE_WSTETH),
+                        proxies[i],
+                        marketParams.collateralToken,
+                        TokenUtils.WETH_ADDR,
+                        MorphoLib.collateral(morphoBlue, marketId, proxies[i]),
+                        MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, proxies[i])
+                    );
+                }
+            }
         }
+        
         positions = new Position[](positionCounter);
         for (uint i = 0; i < positionCounter; i++) {
             positions[i] = tempPositions[i];
@@ -280,6 +305,28 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
                     }
                 }
             }
+
+            // MorphoBlue wsteth/eth market
+            {       
+                MarketParams memory marketParams = MarketParams({
+                    loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
+                    collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
+                    oracle: 0x2a01EB9496094dA03c4E364Def50f5aD1280AD72,
+                    irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
+                    lltv: 945000000000000000
+                });
+                Id marketId = MarketParamsLib.id(marketParams);
+                if (MorphoLib.collateral(morphoBlue, marketId, proxies[i]) > 0){
+                    tempPositions[positionCounter++] = Position(
+                        uint8(Protocol.MORPHO_BLUE_WSTETH),
+                        proxies[i],
+                        marketParams.collateralToken,
+                        TokenUtils.WETH_ADDR,
+                        MorphoLib.collateral(morphoBlue, marketId, proxies[i]),
+                        MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, proxies[i])
+                    );
+                }
+            }
         }
         positions = new Position[](positionCounter);
         for (uint i = 0; i < positionCounter; i++) {
@@ -397,6 +444,28 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
                 }
             }
         }
+        // MorphoBlue wsteth/eth market
+        {       
+            MarketParams memory marketParams = MarketParams({
+                loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
+                collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
+                oracle: 0x2a01EB9496094dA03c4E364Def50f5aD1280AD72,
+                irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
+                lltv: 945000000000000000
+            });
+            Id marketId = MarketParamsLib.id(marketParams);
+            if (MorphoLib.collateral(morphoBlue, marketId, _user) > 0){
+                tempPositions[positionCounter++] = Position(
+                    uint8(Protocol.MORPHO_BLUE_WSTETH),
+                    _user,
+                    marketParams.collateralToken,
+                    TokenUtils.WETH_ADDR,
+                    MorphoLib.collateral(morphoBlue, marketId, _user),
+                    MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, _user)
+                );
+            }
+            
+        }
         positions = new Position[](positionCounter);
         for (uint i = 0; i < positionCounter; i++) {
             positions[i] = tempPositions[i];
@@ -421,6 +490,7 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
         if (protocol == uint8(Protocol.MORPHO_AAVE_V3)) return findCollAndDebtForMorphoAaveV3Position(_user, _collTokens);
         if (protocol == uint8(Protocol.COMPOUND_V3)) return findCollAndDebtForCompV3Position(_user, _collTokens);
         if (protocol == uint8(Protocol.SPARK)) return findCollAndDebtForSparkPosition(_user, _collTokens);
+        if (protocol == uint8(Protocol.MORPHO_BLUE_WSTETH)) return findCollAndDebtForMorphoBlueWstethPosition(_user);
     }
 
     /// @dev we assume it only has one LST token as collateral, and only ETH as debt
@@ -493,6 +563,20 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
                 return (collBalance, debtBalance, _collTokens[j]);
             }
         }
+    }
+    /// @dev we assume it only has one LST token as collateral, and only ETH as debt
+    function findCollAndDebtForMorphoBlueWstethPosition(address _user) public view returns (uint256, uint256, address) {
+        MarketParams memory marketParams = MarketParams({
+            loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
+            collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
+            oracle: 0x2a01EB9496094dA03c4E364Def50f5aD1280AD72,
+            irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
+            lltv: 945000000000000000
+        });
+        Id marketId = MarketParamsLib.id(marketParams);
+        uint256 collBalance = MorphoLib.collateral(morphoBlue, marketId, _user);
+        uint256 debtBalance = MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, _user);
+        return (collBalance, debtBalance, marketParams.collateralToken);
     }
 
     /// @notice Returns the lending pool contract of the specified market
