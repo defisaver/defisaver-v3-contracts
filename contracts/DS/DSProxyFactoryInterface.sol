@@ -7,4 +7,5 @@ import "./DSProxy.sol";
 abstract contract DSProxyFactoryInterface {
     function build(address owner) public virtual returns (DSProxy proxy);
     function build() public virtual returns (DSProxy proxy);
+    function isProxy(address) public virtual view returns (bool);
 }
