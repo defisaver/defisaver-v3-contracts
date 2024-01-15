@@ -33,6 +33,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
 
     error NonexistentFLSource();
 
+    error SafeExecutionError();
+
     enum FLSource {
         EMPTY,
         AAVEV2,
@@ -286,10 +288,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         }
         address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
 
-
-
         _executeRecipe(proxy, recipeExecutorAddr, currRecipe, _amounts[0] + _feeAmounts[0]);
-
+        
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 paybackAmount = _amounts[i] + (_feeAmounts[i]);
 
@@ -384,12 +384,16 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
                 abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount)
             );
         } else {
-            ISafe(_wallet).execTransactionFromModule(
+            bool success = ISafe(_wallet).execTransactionFromModule(
                 _recipeExecutorAddr,
                 address(this).balance,
                 abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount),
                 ISafe.Operation.DelegateCall
             );
+
+            if (!success) {
+                revert SafeExecutionError();
+             }
         }
     }
 }

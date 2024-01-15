@@ -1,5 +1,5 @@
 const config = require('../../../hardhat.config');
-const { aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest } = require('./tests');
+const { aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest } = require('./aaveV3-tests');
 
 describe('AaveV3 FL close to collateral with maximum gas price strategy test', function () {
     this.timeout(80000);

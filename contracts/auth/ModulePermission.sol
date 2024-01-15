@@ -10,7 +10,10 @@ contract ModulePermission {
 
     // we assume we are in a context of a gnosis safe
     function enableModule(address _moduleAddr) public {
-        ISafe(address(this)).enableModule(_moduleAddr);
+        /// @dev Can't enable the same module twice
+        if(!ISafe(address(this)).isModuleEnabled(_moduleAddr)) {
+            ISafe(address(this)).enableModule(_moduleAddr);
+        }
     }
 
     function disableLastModule(address _moduleAddr) public {
@@ -19,12 +22,6 @@ contract ModulePermission {
         require(next == SENTINEL_MODULES, "Too many modules to handle");
 
         address prevAddr = SENTINEL_MODULES;
-    
-        /// @dev We added the module to the end of the array and remove in the same tx
-        // if we have only one module, 
-        if (moduleArr.length > 1) {
-            prevAddr = moduleArr[moduleArr.length - 2];
-        }
 
         ISafe(address(this)).disableModule(prevAddr, _moduleAddr);
     }

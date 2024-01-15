@@ -298,6 +298,8 @@ const updateToCompV2Proxy = async (
 const subToAaveV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
     const aaveV2SubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
 
+    console.log('aaveV2SubProxyAddr: ', aaveV2SubProxyAddr);
+
     const AaveV2SubProxy = await hre.ethers.getContractFactory('AaveSubProxy');
     const functionData = AaveV2SubProxy.interface.encodeFunctionData(
         'subToAaveAutomation',

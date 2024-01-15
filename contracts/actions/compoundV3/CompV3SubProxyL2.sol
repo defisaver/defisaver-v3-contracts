@@ -3,11 +3,11 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
+import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
-contract CompV3SubProxyL2 is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission {
 
     /// @dev 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
@@ -42,7 +42,8 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, ProxyPermission, CoreHelp
     function subToCompV3Automation(
         bytes calldata encodedInput
     ) public {
-        givePermission(PROXY_AUTH_ADDR);
+         /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission();
 
         CompV3SubData memory subData = parseSubData(encodedInput);
         StrategySub memory repaySub = formatRepaySub(subData);

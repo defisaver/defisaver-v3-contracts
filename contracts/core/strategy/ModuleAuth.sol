@@ -2,17 +2,18 @@
 pragma solidity =0.8.10;
 
 import "../../interfaces/IDFSRegistry.sol";
-import "../../auth/AdminAuth.sol";
+import "../../auth/Pausable.sol";
 import "./../helpers/CoreHelper.sol";
 import "../../interfaces/safe/ISafe.sol";
 
-contract ModuleAuth is AdminAuth, CoreHelper {
-     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
+contract ModuleAuth is Pausable, CoreHelper {
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// @dev The id is on purpose not the same as contract name for easier deployment
     bytes4 constant STRATEGY_EXECUTOR_ID = bytes4(keccak256("StrategyExecutorID"));
 
     error SenderNotExecutorError(address, address);
+    error SafeExecutionError();
 
     modifier onlyExecutor {
         address executorAddr = registry.getAddr(STRATEGY_EXECUTOR_ID);
@@ -33,7 +34,12 @@ contract ModuleAuth is AdminAuth, CoreHelper {
         address _safeAddr,
         address _recipeExecutorAddr,
         bytes memory _callData
-    ) public payable onlyExecutor {
-       ISafe(_safeAddr).execTransactionFromModule(_recipeExecutorAddr, msg.value, _callData, ISafe.Operation.DelegateCall);
+    ) external payable onlyExecutor notPaused {
+       // execute from module does not revert on failure 
+       bool success = ISafe(_safeAddr).execTransactionFromModule(_recipeExecutorAddr, msg.value, _callData, ISafe.Operation.DelegateCall);
+
+       if (!success) {
+            revert SafeExecutionError();
+       }
     }
 }

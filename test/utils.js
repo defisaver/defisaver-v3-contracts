@@ -573,6 +573,8 @@ const getProxy = async (acc, isSafe = false) => {
         const safeAddr = await createSafe(acc);
         const safe = await hre.ethers.getContractAt('ISafe', safeAddr);
 
+        console.log(`Safe created ${safeAddr}`);
+
         return safe;
     }
 };

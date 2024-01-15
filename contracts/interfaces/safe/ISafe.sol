@@ -75,6 +75,7 @@ interface ISafe {
     function getThreshold() external view returns (uint256);
 
     function enableModule(address module) external;
+    function isModuleEnabled(address module) external view returns (bool);
     function disableModule(address prevModule, address module) external;
     function getModulesPaginated(address start, uint256 pageSize) external view returns (address[] memory array, address next);
     
