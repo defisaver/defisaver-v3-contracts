@@ -4,25 +4,23 @@ pragma solidity =0.8.10;
 
 import "../interfaces/safe/ISafe.sol";
 
+/// @title ModulePermission contract which works with Safe modules to give execute permission
 contract ModulePermission {
 
     address public constant SENTINEL_MODULES = address(0x1);
 
-    // we assume we are in a context of a gnosis safe
+    /// @notice Called in the context of Safe to authorize module
+    /// @param _moduleAddr Address of module which will be authorized
+    /// @dev Can't enable the same module twice
     function enableModule(address _moduleAddr) public {
-        /// @dev Can't enable the same module twice
         if(!ISafe(address(this)).isModuleEnabled(_moduleAddr)) {
             ISafe(address(this)).enableModule(_moduleAddr);
         }
     }
 
+    /// @notice Called in the context of Safe to remove authority of module
+    /// @param _moduleAddr Address of module which will be removed from authority list
     function disableLastModule(address _moduleAddr) public {
-        (address[] memory moduleArr, address next) = ISafe(address(this)).getModulesPaginated(SENTINEL_MODULES, 10);
-
-        require(next == SENTINEL_MODULES, "Too many modules to handle");
-
-        address prevAddr = SENTINEL_MODULES;
-
-        ISafe(address(this)).disableModule(prevAddr, _moduleAddr);
+        ISafe(address(this)).disableModule(SENTINEL_MODULES, _moduleAddr);
     }
 }

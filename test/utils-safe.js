@@ -3,6 +3,10 @@ const hre = require('hardhat');
 const SAFE_PROXY_FACTORY_ADDR = '0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67';
 const SAFE_SINGLETON_ADDR = '0x41675C099F32341bf84BFc5382aF534df5C7461a';
 
+const SAFE_CONSTANTS = {
+    SENTINEL_MODULE: '0x0000000000000000000000000000000000000001',
+};
+
 const createSafe = async (senderAddress) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -93,4 +97,5 @@ const executeSafeTx = async (
 module.exports = {
     createSafe,
     executeSafeTx,
+    SAFE_CONSTANTS,
 };
