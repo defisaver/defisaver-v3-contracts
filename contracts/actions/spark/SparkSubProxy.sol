@@ -6,7 +6,6 @@ import "../../auth/AdminAuth.sol";
 import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 
-
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
 contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     uint64 public immutable REPAY_BUNDLE_ID; 
@@ -18,8 +17,6 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     }
 
     enum RatioState { OVER, UNDER }
-
-    address public constant SPARK_MARKET = 0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE;
 
     /// @dev 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;

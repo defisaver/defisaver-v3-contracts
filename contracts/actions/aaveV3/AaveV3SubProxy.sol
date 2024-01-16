@@ -18,8 +18,6 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
 
     enum RatioState { OVER, UNDER }
 
-    address public constant AAVE_MARKET = 0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e;
-
     /// @dev 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
 
@@ -141,7 +139,7 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData = abi.encode(address(this), AAVE_MARKET, uint256(_user.minRatio), uint8(RatioState.UNDER));
+        bytes memory triggerData = abi.encode(address(this), AAVE_V3_MARKET, uint256(_user.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData =  new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
@@ -158,7 +156,7 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(address(this), AAVE_MARKET, uint256(_user.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData = abi.encode(address(this), AAVE_V3_MARKET, uint256(_user.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
