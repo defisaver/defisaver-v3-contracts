@@ -28,4 +28,6 @@ contract MainnetFLAddresses {
     address internal constant GHO_ADDR = 0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f;
     address internal constant GHO_FLASH_MINTER_ADDR = 0xb639D208Bcf0589D54FaC24E655C79EC529762B8;
     address internal constant UNI_V3_FACTORY = 0x1F98431c8aD98523631AE4a59f267346ea31F984;
+
+    address internal constant MORPHO_BLUE_ADDR = 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb;
 }

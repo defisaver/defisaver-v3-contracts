@@ -403,14 +403,14 @@
     },
     {
         "name": "ReflexerView",
-        "address": "0x793cAE99DC75d4497B2c6eA6bDCC7f2218034d74",
+        "address": "0x21564700150B7C7860613aAfacdA1cEE345f41c2",
         "id": "0xf8dd2ed4",
         "path": "contracts/views/ReflexerView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x793cAE99DC75d4497B2c6eA6bDCC7f2218034d74"]
     },
     {
         "name": "RariView",
@@ -1283,6 +1283,105 @@
         "history": []
     },
     {
+        "name": "MorphoBlueWithdraw",
+        "address": "0xE97c7D2838D068C967B7c40080e09A08B9b11fca",
+        "id": "0x5e8a8984",
+        "path": "contracts/actions/morpho-blue/MorphoBlueWithdraw",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueWithdrawCollateral",
+        "address": "0xF339F5272E48f9b2c074dcCF7e169259465A4872",
+        "id": "0x053bcb63",
+        "path": "contracts/actions/morpho-blue/MorphoBlueWithdrawCollateral",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueBorrow",
+        "address": "0xcc05A3e06DA9Bd2827C7e86a96C63EAda3935AA0",
+        "id": "0xf82d8814",
+        "path": "contracts/actions/morpho-blue/MorphoBlueBorrow",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBluePayback",
+        "address": "0x9f437E5F705E02d77adC2e72C34926978776b085",
+        "id": "0xca8b1df9",
+        "path": "contracts/actions/morpho-blue/MorphoBluePayback",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueSupply",
+        "address": "0x1D0F6027Eeb118dEc06055735eE840E3Fe3E6f9a",
+        "id": "0x9200fb32",
+        "path": "contracts/actions/morpho-blue/MorphoBlueSupply",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueSupplyCollateral",
+        "address": "0x1cdAC5D4b207e8DBd308504BbedD5D1BD19D26ac",
+        "id": "0xc69d5942",
+        "path": "contracts/actions/morpho-blue/MorphoBlueSupplyCollateral",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueSetAuth",
+        "address": "0xf30935e20c6357c7bcecd5e58ad6de26d54b9f64",
+        "id": "0x3f1352f1",
+        "path": "contracts/actions/morpho-blue/MorphoBlueSetAuth",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueSetAuthWithSig",
+        "address": "0xE2d5fCDBf73BAd24A0FCAf6B2733933A98021808",
+        "id": "0x382f0f62",
+        "path": "contracts/actions/morpho-blue/MorphoBlueSetAuthWithSig",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FLMorphoBlue",
+        "address": "0x6206C96EAc5EAC546861438A9f953B6BEa50EBAB",
+        "id": "0x025e64d8",
+        "path": "contracts/actions/flashloan/FLMorphoBlue",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "MorphoAaveV3Withdraw",
         "address": "0xdc3e74C4cD577275296ceFE36A3D082223AfF206",
         "id": "0x1f2dba0b",
@@ -1356,6 +1455,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueView",
+        "address": "0xE29175a86B60138403a9534A391acaDb19f1E9a6",
+        "id": "0x942aef0a",
+        "path": "contracts/views/MorphoBlueView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
         "registryIds": [],
         "history": []
     },
@@ -3021,14 +3131,17 @@
     },
     {
         "name": "LSVView",
-        "address": "0xFAb98E139EBeC1Ed76d226b6bd6E4C5f66B2fE1b",
+        "address": "0xECE15C12d8dCDb88c70fAfF38E8dAE4aC4ee69Ce",
         "id": "0x373e1531",
         "path": "contracts/views/LSVView.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x328d7a29f1cf211c58a910e498e326e7f419f8d6"]
+        "history": [
+            "0xFAb98E139EBeC1Ed76d226b6bd6E4C5f66B2fE1b",
+            "0x328d7a29f1cf211c58a910e498e326e7f419f8d6"
+        ]
     },
     {
         "name": "CompoundMonitorProxy",

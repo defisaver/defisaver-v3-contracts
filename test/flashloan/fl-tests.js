@@ -767,6 +767,63 @@ const ghoFLTest = async (generalisedFLFlag) => {
     });
 };
 
+const flMorphoBlueTest = async (generalisedFLFlag) => {
+    describe('FL-MorphoBlue', function () {
+        this.timeout(60000);
+
+        let senderAcc; let proxy;
+        let flMorphoBlue;
+
+        before(async () => {
+            const flMorphoBlueAddr = await getAddrFromRegistry('FLMorphoBlue');
+            flMorphoBlue = await hre.ethers.getContractAt('FLMorphoBlue', flMorphoBlueAddr);
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+        const network = hre.network.config.name;
+        const amountWeth = hre.ethers.utils.parseUnits(
+            '1',
+            18,
+        );
+        const wethAddr = addrs[network].WETH_ADDRESS;
+
+        it('... should get a WETH MorphoBlue flash loan', async () => {
+            if (generalisedFLFlag) {
+                const flActionAddr = await getAddrFromRegistry('FLAction');
+                flMorphoBlue = await hre.ethers.getContractAt('FLAction', flActionAddr);
+            }
+            // test if balance will brick fl action
+            await setBalance(wethAddr, flMorphoBlue.address, Float2BN('1', 0));
+
+            let flAction = new dfs.actions.flashloan.MorphoBlueFlashLoanAction(
+                wethAddr,
+                amountWeth,
+            );
+
+            if (generalisedFLFlag) {
+                flAction = new dfs.actions.flashloan.FLAction(
+                    flAction,
+                );
+            }
+            console.log(flMorphoBlue.address);
+
+            const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
+                flAction,
+                new dfs.actions.basic.SendTokenAction(
+                    wethAddr,
+                    flMorphoBlue.address,
+                    amountWeth,
+                ),
+            ]);
+
+            const functionData = basicFLRecipe.encodeForDsProxyCall();
+
+            await executeAction('RecipeExecutor', functionData[1], proxy);
+        });
+    });
+};
+
 const deployFLContracts = async () => {
     await redeploy('FLMaker');
     await redeploy('SendToken');
@@ -777,9 +834,12 @@ const deployFLContracts = async () => {
     await redeploy('FLSpark');
     await redeploy('FLUniV3');
     await redeploy('FLGho');
+    await redeploy('FLAction');
+    await redeploy('FLMorphoBlue');
 };
 
 const fullFLTest = async () => {
+    await deployFLContracts();
     await aaveFlTest();
     await aaveV3FlTest();
     await balancerFLTest();
@@ -795,6 +855,8 @@ const fullFLTest = async () => {
     await sparkFlTest(true);
     await uniswapV3FlashloanTest(true);
     await ghoFLTest(true);
+    await flMorphoBlueTest();
+    await flMorphoBlueTest(true);
 };
 
 module.exports = {
@@ -808,4 +870,5 @@ module.exports = {
     ghoFLTest,
     sparkFlTest,
     deployFLContracts,
+    flMorphoBlueTest,
 };
