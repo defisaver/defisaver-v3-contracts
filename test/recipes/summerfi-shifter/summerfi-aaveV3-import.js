@@ -5,6 +5,8 @@ const { ethers } = require('hardhat');
 const { expect } = require('chai');
 const sdk = require('@defisaver/sdk');
 
+const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
+
 const {
     impersonateAccount,
     resetForkToBlock,
@@ -17,6 +19,7 @@ const {
     getProxy,
     getContractFromRegistry,
     redeploy,
+    getGasUsed,
 } = require('../../utils');
 const { VARIABLE_RATE, getAaveReserveData } = require('../../utils-aave');
 
@@ -25,7 +28,7 @@ const sfProxyLiquidBlock = 18976412;
 
 const sfServiceRegistryAddress = '0x5e81a7515f956ab642eb698821a449fe8fe7498e';
 const sfAAVEV3PaybackWithdrawName = 'AAVEV3PaybackWithdraw';
-const sfSetApproveTargetHash = ethers.utils.id('SetApproval_3');
+const sfSetApprovalTargetHash = ethers.utils.id('SetApproval_3');
 const sfSetApprovalTypes = ['(address asset, address delegate, uint256 amount, bool sumAmounts)'];
 
 const coder = ethers.utils.defaultAbiCoder;
@@ -41,7 +44,7 @@ const encodeSfApproveOperation = async (asset, delegate, amount) => {
     ).then((c) => c.getOperation(sfAAVEV3PaybackWithdrawName));
 
     const setApprovalIndex = actions.reduce(
-        (acc, e, i) => (e === sfSetApproveTargetHash ? i : acc),
+        (acc, e, i) => (e === sfSetApprovalTargetHash ? i : acc),
         -1,
     );
 
@@ -55,7 +58,7 @@ const encodeSfApproveOperation = async (asset, delegate, amount) => {
 
     const executableInterface = await ethers.getContractAt('IExecutable', placeHolderAddr).then((e) => e.interface);
     calls[setApprovalIndex] = [
-        sfSetApproveTargetHash,
+        sfSetApprovalTargetHash,
         executableInterface.encodeFunctionData('execute', [
             coder.encode(sfSetApprovalTypes, [[asset, delegate, amount, false]]),
             [0, 0, 0],
@@ -70,7 +73,7 @@ const encodeSfApproveOperation = async (asset, delegate, amount) => {
     ];
 };
 
-const createAaveV3ImportRecipe = ({
+const createAaveV3ImportRecipeNoPermit = ({
     proxyAddress,
     oasisProxyAddress,
     flAddress,
@@ -103,6 +106,77 @@ const createAaveV3ImportRecipe = ({
             true,
             oasisProxyAddress,
         )),
+
+        // pull actions
+        ...collATokenAddresses.map((collATokenAddress) => new sdk.actions.basic.PullTokenAction(
+            collATokenAddress, oasisProxyAddress, MAX_UINT,
+        )),
+
+        new sdk.actions.aaveV3.AaveV3CollateralSwitchAction(
+            true,
+            nullAddress,
+            collAssetIds.length,
+            collAssetIds,
+            useAsCollateralFlags,
+        ),
+
+        new sdk.actions.aaveV3.AaveV3SetEModeAction(true, nullAddress, emodeCategoryId),
+
+        // borrow actions go her
+        ...debtAssetIds.map((debtAssetId, i) => new sdk.actions.aaveV3.AaveV3BorrowAction(
+            true,
+            nullAddress,
+            debtAmounts[i],
+            flAddress,
+            VARIABLE_RATE,
+            debtAssetId,
+            false,
+        )),
+    ];
+    return new sdk.Recipe('SummerfiAaveV3ImportNoPermit', actions);
+};
+
+const createAaveV3ImportRecipe = ({
+    proxyAddress,
+    oasisProxyAddress,
+    flAddress,
+
+    collAssetIds,
+    collATokenAddresses,
+    useAsCollateralFlags,
+    collAmounts,
+
+    emodeCategoryId,
+    debtTokenAddresses,
+    debtAssetIds,
+    debtAmounts,
+}) => {
+    debtAmounts = debtAmounts.map((e) => e.mul(1_00_01).div(1_00_00));
+    const actions = [
+        new sdk.actions.flashloan.FLAction(new sdk.actions.flashloan.BalancerFlashLoanAction(
+            debtTokenAddresses,
+            debtAmounts,
+        )),
+
+        // payback actions
+        ...debtAssetIds.map((debtAssetId, i) => new sdk.actions.aaveV3.AaveV3PaybackAction(
+            true,
+            nullAddress,
+            MAX_UINT,
+            proxyAddress,
+            VARIABLE_RATE,
+            debtTokenAddresses[i],
+            debtAssetId,
+            true,
+            oasisProxyAddress,
+        )),
+
+        new sdk.actions.summerfi.SFApproveTokensAction(
+            oasisProxyAddress,
+            proxyAddress,
+            collATokenAddresses,
+            collAmounts.map((e) => e.mul(100_01).div(100_00)),
+        ),
 
         // pull actions
         ...collATokenAddresses.map((collATokenAddress) => new sdk.actions.basic.PullTokenAction(
@@ -196,34 +270,103 @@ const getPositionInfo = async (user) => {
         debtAmounts,
     };
 };
+
+const validatePositionShift = (oldPosition, newPosition) => {
+    expect(oldPosition.emodeCategoryId).to.be.eq(newPosition.emodeCategoryId);
+    oldPosition.collAssetIds.map((e, i) => expect(e).to.be.eq(newPosition.collAssetIds[i]));
+    oldPosition.collATokenAddresses.map((e, i) => expect(e).to.be.eq(newPosition.collATokenAddresses[i]));
+    oldPosition.useAsCollateralFlags.map((e, i) => expect(e).to.be.eq(newPosition.useAsCollateralFlags[i]));
+    oldPosition.debtTokenAddresses.map((e, i) => expect(e).to.be.eq(newPosition.debtTokenAddresses[i]));
+    oldPosition.debtAssetIds.map((e, i) => expect(e).to.be.eq(newPosition.debtAssetIds[i]));
+
+    oldPosition.collAmounts.map((e, i) => {
+        expect(newPosition.collAmounts[i]).to.be.gte(e);
+        expect(newPosition.collAmounts[i].sub(e)).to.be.lte(e.div(100_00));
+    });
+    oldPosition.debtAmounts.map((e, i) => {
+        expect(newPosition.debtAmounts[i]).to.be.gte(e);
+        expect(newPosition.debtAmounts[i].sub(e)).to.be.lte(e.div(100_00));
+    });
+};
+
 describe('Summerfi-AaveV3-Import', function () {
     this.timeout(1_000_000);
     let flAddress;
 
-    before(async () => {
+    const fixture = async () => {
         await resetForkToBlock(sfProxyLiquidBlock);
 
-        await redeploy('AaveV3View');
+        await redeploy('SFApproveTokens');
+        await getContractFromRegistry('AaveV3View');
         flAddress = await getContractFromRegistry('FLAction').then(({ address }) => address);
-    });
 
-    it('... should import aaveV3 position from summerfi to DSProxy', async () => {
         const sfProxy = await ethers.getContractAt('IDSProxy', sfProxyAddress);
         const userAddress = await ethers.getContractAt('IDSProxy', sfProxyAddress).then((e) => e.owner());
         const user = await ethers.getSigner(userAddress);
-
         const dsProxy = await getProxy(userAddress);
         const dsProxyAddress = dsProxy.address;
+        const positionInfo = await getPositionInfo(sfProxyAddress);
 
         await impersonateAccount(userAddress);
 
-        const positionInfo = await getPositionInfo(sfProxyAddress);
+        return {
+            sfProxy,
+            userAddress,
+            user,
+            dsProxy,
+            dsProxyAddress,
+            positionInfo,
+        };
+    };
+
+    it('...should send approve Txs then execute import recipe', async () => {
+        const {
+            sfProxy,
+            user,
+            dsProxy,
+            dsProxyAddress,
+            positionInfo,
+        } = await loadFixture(fixture);
+
         await Promise.all(positionInfo.collATokenAddresses.map(async (asset, i) => {
             const assetBalance = positionInfo.collAmounts[i].mul(1_00_01).div(1_00_00);
             const encodedSfApproveOperation = await encodeSfApproveOperation(asset, dsProxyAddress, assetBalance);
-            await sfProxy.connect(user).execute(...encodedSfApproveOperation);
+            const tx = await sfProxy.connect(user).execute(...encodedSfApproveOperation);
+            await getGasUsed(tx).then((e) => console.log('Gas used summefi approve:', e));
             expect(await getAllowance(asset, sfProxyAddress, dsProxyAddress)).to.be.eq(assetBalance);
         }));
+
+        const recipe = createAaveV3ImportRecipeNoPermit({
+            proxyAddress: dsProxyAddress,
+            oasisProxyAddress: sfProxyAddress,
+            flAddress,
+
+            ...positionInfo,
+        });
+
+        const recipeData = recipe.encodeForDsProxyCall();
+        const tx = await dsProxy.connect(user).execute(recipeData[0], recipeData[1]);
+        await getGasUsed(tx).then((e) => console.log('Gas used SummerfiAaveV3ImportNoPermit recipe:', e));
+
+        const newPosition = await getPositionInfo(dsProxyAddress);
+        validatePositionShift(positionInfo, newPosition);
+        console.log({ newPosition });
+    });
+
+    it('... should send permit Tx then execute import recipe with SFApproveTokens action', async () => {
+        const {
+            sfProxy,
+            user,
+            dsProxy,
+            dsProxyAddress,
+            positionInfo,
+        } = await loadFixture(fixture);
+
+        const guard = await ethers.getContractAt('IAccountGuard', await sfProxy.guard());
+        {
+            const tx = await guard.connect(user).permit(dsProxyAddress, sfProxyAddress, true);
+            await getGasUsed(tx).then((e) => console.log('Gas used summerfi permit:', e));
+        }
 
         const recipe = createAaveV3ImportRecipe({
             proxyAddress: dsProxyAddress,
@@ -234,26 +377,23 @@ describe('Summerfi-AaveV3-Import', function () {
         });
 
         const recipeData = recipe.encodeForDsProxyCall();
-        await dsProxy.connect(user).execute(recipeData[0], recipeData[1]);
+        {
+            const tx = await dsProxy.connect(user).execute(recipeData[0], recipeData[1]);
+            await getGasUsed(tx).then((e) => console.log('Gas used SummerfiAaveV3Import recipe:', e));
+        }
 
         const newPosition = await getPositionInfo(dsProxyAddress);
-
-        expect(positionInfo.emodeCategoryId).to.be.eq(newPosition.emodeCategoryId);
-        positionInfo.collAssetIds.map((e, i) => expect(e).to.be.eq(newPosition.collAssetIds[i]));
-        positionInfo.collATokenAddresses.map((e, i) => expect(e).to.be.eq(newPosition.collATokenAddresses[i]));
-        positionInfo.useAsCollateralFlags.map((e, i) => expect(e).to.be.eq(newPosition.useAsCollateralFlags[i]));
-        positionInfo.debtTokenAddresses.map((e, i) => expect(e).to.be.eq(newPosition.debtTokenAddresses[i]));
-        positionInfo.debtAssetIds.map((e, i) => expect(e).to.be.eq(newPosition.debtAssetIds[i]));
-
-        positionInfo.collAmounts.map((e, i) => {
-            expect(newPosition.collAmounts[i]).to.be.gte(e);
-            expect(newPosition.collAmounts[i].sub(e)).to.be.lte(e.div(100_00));
-        });
-        positionInfo.debtAmounts.map((e, i) => {
-            expect(newPosition.debtAmounts[i]).to.be.gte(e);
-            expect(newPosition.debtAmounts[i].sub(e)).to.be.lte(e.div(100_00));
-        });
-
+        validatePositionShift(positionInfo, newPosition);
         console.log({ newPosition });
+
+        {
+            const tx = await guard.connect(user).permit(dsProxyAddress, sfProxyAddress, false);
+            await getGasUsed(tx).then((e) => console.log('Gas used summerfi permit:', e));
+        }
     });
 });
+
+module.exports = {
+    createAaveV3ImportRecipeNoPermit,
+    createAaveV3ImportRecipe,
+};
