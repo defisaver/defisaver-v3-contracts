@@ -8,6 +8,8 @@ import {IExecutable} from '../../interfaces/summerfi/IExecutable.sol';
 import {IOperationsRegistry} from '../../interfaces/summerfi/IOperationsRegistry.sol';
 import {IOperationExecutor, Call} from '../../interfaces/summerfi/IOperationExecutor.sol';
 
+
+/// @title Approve tokens through Summerfi proxy
 contract SFApproveTokens is ActionBase {
     address constant SF_OPERATION_EXECUTOR = 0xcA71C36D26f515AD0cce1D806B231CBC1185CdfC;
     address constant SF_OPERATIONS_REGISTRY = 0x563d2689fE89c78259dD7F694146BB93f6388A55;
@@ -20,6 +22,10 @@ contract SFApproveTokens is ActionBase {
     error SFApproveFailed(address proxy, address sfProxy);
     error InvalidArrayLength();
 
+    /// @param sfProxy  Summerfi proxy address
+    /// @param spender  DSProxy address
+    /// @param tokens  List of assets to approve
+    /// @param allowances  Approve amounts
     struct Params {
         address sfProxy;
         address spender;
