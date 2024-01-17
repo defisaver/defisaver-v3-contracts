@@ -69,6 +69,7 @@
   },
   "dependencies": {
     "@curvefi/api": "^2.52.1",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.10",
     "@uniswap/sdk-core": "^3.1.1",
     "@uniswap/smart-order-router": "^3.5.0",
     "coingecko-api": "^1.0.10",
