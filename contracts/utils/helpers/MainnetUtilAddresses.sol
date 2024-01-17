@@ -31,6 +31,10 @@ contract MainnetUtilAddresses {
 
     address internal constant FEE_RECIPIENT = 0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A;
 
+    address internal constant PROXY_AUTH_ADDRESS = 0x149667b6FAe2c63D1B4317C716b0D0e4d3E2bD70;
+    address internal constant MODULE_AUTH_ADDRESS = 0x840748F7Fd3EA956E5f4c88001da5CC1ABCBc038; // NOT LIVE ADDR
+
+
     // not needed on mainnet
     address internal constant DEFAULT_BOT = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
