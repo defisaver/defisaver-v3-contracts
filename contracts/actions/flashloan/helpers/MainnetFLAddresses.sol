@@ -20,8 +20,6 @@ contract MainnetFLAddresses {
 
     address internal constant DSS_FLASH_ADDR = 0x60744434d6339a6B27d73d9Eda62b6F66a0a04FA;
     address internal constant ST_ETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
-    address internal constant EULER_MARKET_ADDR = 0x3520d5a913427E6F0D6A83E07ccD4A4da316e4d3;
-    address internal constant EULER_ADDR = 0x27182842E098f60e3D576794A5bFFb0777E025d3;
     address internal constant VAULT_ADDR = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
 
     address internal constant GHO_ADDR = 0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f;
