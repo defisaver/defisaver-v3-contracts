@@ -81,13 +81,13 @@ async function main() {
 
     const subStorage = await redeploy('SubStorage', reg.address);
 
-    const proxyAuth = await redeploy('ProxyAuth', reg.address);
+    const dsProxyAuth = await redeploy('DSProxyAuth', reg.address);
 
     await changeConstantInFiles(
         './contracts',
         ['MainnetCoreAddresses'],
         'PROXY_AUTH_ADDR',
-        proxyAuth.address,
+        dsProxyAuth.address,
 
     );
     await changeConstantInFiles(

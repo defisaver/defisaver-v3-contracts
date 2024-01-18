@@ -6,8 +6,8 @@ import "../../interfaces/IDSProxy.sol";
 import "../../auth/AdminAuth.sol";
 import "./../helpers/CoreHelper.sol";
 
-/// @title ProxyAuth Gets DSProxy auth from users and is callable by the Executor
-contract ProxyAuth is AdminAuth, CoreHelper {
+/// @title DSProxyAuth Gets DSProxy auth from users and is callable by the Executor
+contract DSProxyAuth is AdminAuth, CoreHelper {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// @dev The id is on purpose not the same as contract name for easier deployment

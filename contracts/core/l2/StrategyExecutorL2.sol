@@ -7,7 +7,7 @@ import "../../utils/CheckWalletType.sol";
 import "../strategy/StrategyModel.sol";
 import "../strategy/BotAuth.sol";
 import "../DFSRegistry.sol";
-import "../strategy/ProxyAuth.sol";
+import "../strategy/DSProxyAuth.sol";
 import "./SubStorageL2.sol";
 
 /// @title Main entry point for executing automated strategies
@@ -56,7 +56,7 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWallet
     }
 
 
-    /// @notice Calls ProxyAuth which has the auth from the wallet which will call RecipeExecutor
+    /// @notice Calls DSProxyAuth which has the auth from the wallet which will call RecipeExecutor
     /// @param _subId Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
     /// @param _triggerCallData All input data needed to check triggers
@@ -73,7 +73,7 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWallet
     ) internal {
         address authAddr = isDSProxy(_userProxy) ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
 
-        ProxyAuth(authAddr).callExecute{value: msg.value}(
+        DSProxyAuth(authAddr).callExecute{value: msg.value}(
             _userProxy,
             RECIPE_EXECUTOR_ADDR,
             abi.encodeWithSignature(

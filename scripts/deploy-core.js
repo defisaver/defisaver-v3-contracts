@@ -6,14 +6,14 @@ const { changeConstantInFiles } = require('./utils/utils');
 const { redeploy } = require('../test/utils');
 
 async function main() {
-    const proxyAuth = await deployContract('ProxyAuth');
+    const dsProxyAuth = await deployContract('DSProxyAuth');
     const reg = await deployAsOwner('DFSRegistry');
 
     // await changeConstantInFiles(
     //     './contracts',
     //     ['StrategyExecutor'],
     //     'PROXY_AUTH_ADDR',
-    //     proxyAuth.address,
+    //     dsProxyAuth.address,
     // );
 
     // await run('compile');

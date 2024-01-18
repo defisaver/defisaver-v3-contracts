@@ -29,7 +29,7 @@ contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermissio
     }
 
 
-    /// @notice Called by users DSProxy through the ProxyAuth to execute a recipe & check triggers
+    /// @notice Called by users DSProxy through the DSProxyAuth to execute a recipe & check triggers
     /// @param _subId Id of the subscription we want to execute
     /// @param _actionCallData All input data needed to execute actions
     /// @param _triggerCallData All input data needed to check triggers
