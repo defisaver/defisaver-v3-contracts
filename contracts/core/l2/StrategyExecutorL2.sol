@@ -2,6 +2,7 @@
 
 pragma solidity =0.8.10;
 
+import "../../interfaces/IAuth.sol";
 import "../../auth/AdminAuth.sol";
 import "../../utils/CheckWalletType.sol";
 import "../strategy/StrategyModel.sol";
@@ -56,25 +57,25 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWallet
     }
 
 
-    /// @notice Calls DSProxyAuth which has the auth from the wallet which will call RecipeExecutor
+    /// @notice Calls auth contract which has the auth from the user wallet which will call RecipeExecutor
     /// @param _subId Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
     /// @param _triggerCallData All input data needed to check triggers
     /// @param _strategyIndex Which strategy in a bundle, need to specify because when sub is part of a bundle
     /// @param _sub StrategySub struct needed because on-chain we store only the hash
-    /// @param _userProxy StrategySub struct needed because on-chain we store only the hash
+    /// @param _userWallet Address of the user's wallet
     function callActions(
         uint256 _subId,
         bytes[] calldata _actionsCallData,
         bytes[] calldata _triggerCallData,
         uint256 _strategyIndex,
         StrategySub memory _sub,
-        address _userProxy
+        address _userWallet
     ) internal {
-        address authAddr = isDSProxy(_userProxy) ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
+        address authAddr = isDSProxy(_userWallet) ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
 
-        DSProxyAuth(authAddr).callExecute{value: msg.value}(
-            _userProxy,
+        IAuth(authAddr).callExecute{value: msg.value}(
+            _userWallet,
             RECIPE_EXECUTOR_ADDR,
             abi.encodeWithSignature(
                 "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bytes[],bytes32[]))",
