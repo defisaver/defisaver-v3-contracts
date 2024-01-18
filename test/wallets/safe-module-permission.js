@@ -8,7 +8,7 @@ const {
 } = require('../utils');
 const { createSafe, executeSafeTx, SAFE_CONSTANTS } = require('../utils-safe');
 
-describe('ModulePermission', () => {
+describe('SafeModulePermission', () => {
     let modulePermissionContract;
     let senderAddr;
     let safeAddr;
@@ -17,7 +17,7 @@ describe('ModulePermission', () => {
     let snapshotId;
 
     before(async () => {
-        modulePermissionContract = await redeploy('ModulePermission');
+        modulePermissionContract = await redeploy('SafeModulePermission');
 
         flAddr = await getAddrFromRegistry('FLAction');
 

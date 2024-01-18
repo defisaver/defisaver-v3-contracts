@@ -110,7 +110,7 @@ const aaveV2BoostTest = () => describe('Aave-Boost-Strategy', function () {
         await redeploy('AaveSupply');
         await redeploy('AaveV2RatioTrigger');
         await redeploy('AaveV2RatioCheck');
-        await redeploy('ModuleAuth');
+        await redeploy('SafeModuleAuth');
         await redeploy('DFSSell');
 
         flAddr = await redeploy('FLAction');
@@ -250,7 +250,7 @@ const aaveV2RepayTest = () => describe('Aave-Repay-Strategy', function () {
         await redeploy('AavePayback');
         await redeploy('AaveV2RatioTrigger');
         await redeploy('AaveV2RatioCheck');
-        await redeploy('ModuleAuth');
+        await redeploy('SafeModuleAuth');
         await redeploy('DFSSell');
 
         flAddr = await redeploy('FLAction');

@@ -6,7 +6,7 @@ import "../../auth/Pausable.sol";
 import "./../helpers/CoreHelper.sol";
 import "../../interfaces/safe/ISafe.sol";
 
-contract ModuleAuth is Pausable, CoreHelper {
+contract SafeModuleAuth is Pausable, CoreHelper {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// @dev The id is on purpose not the same as contract name for easier deployment

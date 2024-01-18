@@ -153,13 +153,13 @@ const adminVaultTest = async () => {
         });
     });
 };
-const proxyPermissionTest = async () => {
-    describe('Proxy-Permission', () => {
+const dsProxyPermissionTest = async () => {
+    describe('DSProxy-Permission', () => {
         let ownerAcc1; let ownerAcc2; let
-            proxy; let proxyPermission;
+            proxy; let dsProxyPermission;
 
         before(async () => {
-            proxyPermission = await deployContract('ProxyPermission');
+            dsProxyPermission = await deployContract('DSProxyPermission');
 
             ownerAcc1 = (await hre.ethers.getSigners())[0];
             ownerAcc2 = (await hre.ethers.getSigners())[1];
@@ -168,26 +168,26 @@ const proxyPermissionTest = async () => {
         });
 
         it('... should through DSProxy give contract permission', async () => {
-            const ProxyPermission = await hre.ethers.getContractFactory('ProxyPermission');
-            const functionData = ProxyPermission.interface.encodeFunctionData(
+            const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
+            const functionData = DSProxyPermission.interface.encodeFunctionData(
                 'givePermission',
                 [ownerAcc2.address],
             );
 
-            await proxy['execute(address,bytes)'](proxyPermission.address, functionData, { gasLimit: 1500000 });
+            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, { gasLimit: 1500000 });
 
             const hasPermission = await getProxyAuth(proxy.address, ownerAcc2.address);
             expect(hasPermission).to.be.equal(true);
         });
 
         it('... should through DSProxy remove contract permission', async () => {
-            const ProxyPermission = await hre.ethers.getContractFactory('ProxyPermission');
-            const functionData = ProxyPermission.interface.encodeFunctionData(
+            const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
+            const functionData = DSProxyPermission.interface.encodeFunctionData(
                 'removePermission',
                 [ownerAcc2.address],
             );
 
-            await proxy['execute(address,bytes)'](proxyPermission.address, functionData, { gasLimit: 1500000 });
+            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, { gasLimit: 1500000 });
 
             const hasPermission = await getProxyAuth(proxy.address, ownerAcc2.address);
             expect(hasPermission).to.be.equal(false);
@@ -198,19 +198,19 @@ const proxyPermissionTest = async () => {
 const authDeployContracts = async () => {
     await redeploy('AdminAuth');
     await redeploy('AdminVault');
-    await redeploy('ProxyPermission');
+    await redeploy('DSProxyPermission');
 };
 const authFullTest = async () => {
     await authDeployContracts();
     await adminAuthTest();
     await adminVaultTest();
-    await proxyPermissionTest();
+    await dsProxyPermissionTest();
 };
 
 module.exports = {
     adminAuthTest,
     adminVaultTest,
-    proxyPermissionTest,
+    dsProxyPermissionTest,
     authFullTest,
     authDeployContracts,
 };

@@ -4,8 +4,8 @@ pragma solidity =0.8.10;
 
 import "../interfaces/safe/ISafe.sol";
 
-/// @title ModulePermission contract which works with Safe modules to give execute permission
-contract ModulePermission {
+/// @title SafeModulePermission contract which works with Safe modules to give execute permission
+contract SafeModulePermission {
 
     address public constant SENTINEL_MODULES = address(0x1);
 

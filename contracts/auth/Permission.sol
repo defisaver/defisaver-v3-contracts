@@ -3,11 +3,11 @@
 pragma solidity =0.8.10;
 
 import "../interfaces/safe/ISafe.sol";
-import "./ModulePermission.sol";
-import "./ProxyPermission.sol";
+import "./SafeModulePermission.sol";
+import "./DSProxyPermission.sol";
 import "../utils/CheckWalletType.sol";
 
-contract Permission is CheckWalletType, ProxyPermission, ModulePermission {   
+contract Permission is CheckWalletType, DSProxyPermission, SafeModulePermission {   
     /// @dev Called from the context of the wallet we are using
     function giveWalletPermission() public {
         bool isDSProxy = isDSProxy(address(this));

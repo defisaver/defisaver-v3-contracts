@@ -539,7 +539,7 @@ const bundleStorageTest = async () => {
 
 const proxyAuthTest = async () => {
     describe('ProxyAuth', () => {
-        let proxyAuth; let proxy; let proxy2; let senderAcc; let proxyPermission; let sumInputs;
+        let proxyAuth; let proxy; let proxy2; let senderAcc; let dsProxyPermission; let sumInputs;
 
         before(async () => {
             proxyAuth = await redeploy('ProxyAuth');
@@ -552,7 +552,7 @@ const proxyAuthTest = async () => {
             proxy2 = await getProxy(senderAcc2.address);
 
             // give auth to ProxyAuth
-            proxyPermission = await redeploy('ProxyPermission');
+            dsProxyPermission = await redeploy('DSProxyPermission');
 
             // set StrategyExecutor to EOA for testing purposes so we can callExecute()
 
@@ -581,13 +581,13 @@ const proxyAuthTest = async () => {
 
         it('...should callExecute when auth is given to proxyAuth and StrategyExecutor set', async () => {
             // give proxy permission to ProxyAuth
-            const ProxyPermission = await hre.ethers.getContractFactory('ProxyPermission');
-            const functionData = ProxyPermission.interface.encodeFunctionData(
+            const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
+            const functionData = DSProxyPermission.interface.encodeFunctionData(
                 'givePermission',
                 [proxyAuth.address],
             );
 
-            await proxy['execute(address,bytes)'](proxyPermission.address, functionData, { gasLimit: 1500000 });
+            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, { gasLimit: 1500000 });
 
             // test action
             const encodedCall = new dfs.actions.basic.SumInputsAction(1, 2).encodeForDsProxyCall();

@@ -3,13 +3,13 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
+import "../../auth/DSProxyPermission.sol";
 import "./StrategyStorage.sol";
 import "./BundleStorage.sol";
 import "../DFSRegistry.sol";
 
 /// @title Called through DSProxy calls strategy storage contract
-contract StrategyProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+contract StrategyProxy is StrategyModel, AdminAuth, DSProxyPermission, CoreHelper {
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
