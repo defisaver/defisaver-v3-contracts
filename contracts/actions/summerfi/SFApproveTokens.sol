@@ -1,21 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import {ActionBase} from '../ActionBase.sol';
-import {IERC20} from '../../interfaces/IERC20.sol';
-import {IDSProxy} from '../../interfaces/IDSProxy.sol';
-import {IExecutable} from '../../interfaces/summerfi/IExecutable.sol';
-import {IOperationsRegistry} from '../../interfaces/summerfi/IOperationsRegistry.sol';
-import {IOperationExecutor, Call} from '../../interfaces/summerfi/IOperationExecutor.sol';
+import {ActionBase} from "../ActionBase.sol";
+import {IERC20} from "../../interfaces/IERC20.sol";
+import {IDSProxy} from "../../interfaces/IDSProxy.sol";
+import {IExecutable} from "../../interfaces/summerfi/IExecutable.sol";
+import {IOperationsRegistry} from "../../interfaces/summerfi/IOperationsRegistry.sol";
+import {IOperationExecutor, Call} from "../../interfaces/summerfi/IOperationExecutor.sol";
 
 
 /// @title Approve tokens through Summerfi proxy
+/// @dev DSProxy that calls this action needs to be permited by Summerfi proxy through AccountGuard
 contract SFApproveTokens is ActionBase {
     address constant SF_OPERATION_EXECUTOR = 0xcA71C36D26f515AD0cce1D806B231CBC1185CdfC;
     address constant SF_OPERATIONS_REGISTRY = 0x563d2689fE89c78259dD7F694146BB93f6388A55;
-    string constant SF_OPERATION_NAME = 'AAVEV3PaybackWithdraw';
+    string constant SF_OPERATION_NAME = "AAVEV3PaybackWithdraw";
     bytes32 constant SF_OPERATION_HASH = keccak256(bytes(SF_OPERATION_NAME));
-    bytes32 constant SF_SET_APPROVAL_HASH = keccak256('SetApproval_3');
+    bytes32 constant SF_SET_APPROVAL_HASH = keccak256("SetApproval_3");
     uint256 constant SF_OPERATION_ACTIONS = 9;
     uint256 constant OPERATION_SET_APPROVAL_INDEX = 1;
 
@@ -48,14 +49,14 @@ contract SFApproveTokens is ActionBase {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
         bytes memory logData = _sfApprove(params);
-        emit ActionEvent('SFApproveTokens', logData);
+        emit ActionEvent("SFApproveTokens", logData);
         return bytes32(0);
     }
 
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
         bytes memory logData = _sfApprove(params);
-        logger.logActionDirectEvent('SFApproveTokens', logData);
+        logger.logActionDirectEvent("SFApproveTokens", logData);
     }
 
     function actionType() public pure virtual override returns (uint8) {
