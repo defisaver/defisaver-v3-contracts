@@ -22,7 +22,7 @@ import "../../core/strategy/StrategyModel.sol";
 import "./helpers/FLHelper.sol";
 
 /// @title Action that gets and receives FL from different variety of sources
-contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel, FLHelper, CheckWalletType {
+contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel, FLHelper {
     using TokenUtils for address;
 
     /// @dev FL Initiator must be this contract

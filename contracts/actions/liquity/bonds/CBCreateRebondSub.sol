@@ -9,7 +9,7 @@ import "../../../auth/Permission.sol";
 import "../../../actions/liquity/helpers/CBHelper.sol";
 
 /// @title Special action to subscribe to CB Rebond strategy
-contract CBCreateRebondSub is ActionBase, CBHelper, Permission {
+contract CBCreateRebondSub is ActionBase, CBHelper {
     
     /// @param bondId Id of the chicken bond NFT we want to sub
     struct Params {

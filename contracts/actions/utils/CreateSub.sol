@@ -8,7 +8,7 @@ import "../../core/strategy/SubStorage.sol";
 import "../../core/strategy/StrategyModel.sol";
 
 /// @title Action to create a new subscription
-contract CreateSub is ActionBase, Permission {
+contract CreateSub is ActionBase {
 
     /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
     struct Params {

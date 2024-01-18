@@ -6,9 +6,10 @@ import "../../auth/AdminAuth.sol";
 import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 import "../../interfaces/ISubscriptions.sol";
+import "../../utils/helpers/UtilHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies for Maker
-contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
+contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHelper {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID; 
 

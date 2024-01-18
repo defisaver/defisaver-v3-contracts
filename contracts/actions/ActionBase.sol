@@ -7,9 +7,10 @@ import "../DS/DSProxy.sol";
 import "../utils/DefisaverLogger.sol";
 import "./utils/helpers/ActionsUtilHelper.sol";
 import "../interfaces/safe/ISafe.sol";
+import "../auth/Permission.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
-abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
+abstract contract ActionBase is AdminAuth, ActionsUtilHelper, Permission {
     event ActionEvent(
         string indexed logName,
         bytes data
@@ -167,19 +168,11 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
     }
 
     function fetchOwnersOrWallet() internal view returns (address) {
-        (bool success, bytes memory response) = address(this).staticcall(abi.encodeWithSignature("getOwners()"));
+        if (isDSProxy(address(this))) 
+            return DSProxy(payable(address(this))).owner();
 
-        if (!success) revert();
-
-        // empty response if the wallet is dsproxy()
-        if (response.length == 0) return DSProxy(payable(address(this))).owner();
-
+        // if not DSProxy, we assume we are in contex of Safe
         address[] memory owners = ISafe(address(this)).getOwners();
-
-        if (owners.length == 1) {
-            return owners[0];
-        } else {
-            return address(this);
-        }
+        return owners.length == 1 ? owners[0] : address(this);
     }
 }

@@ -5,8 +5,9 @@ pragma solidity =0.8.10;
 import "../../auth/AdminAuth.sol";
 import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
+import "../../utils/helpers/UtilHelper.sol";
 
-contract LimitOrderSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
+contract LimitOrderSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHelper {
 
     error InvalidTokenAddresses(address tokenSellAddr, address tokenBuyAddr);
     error InvalidAmount();
