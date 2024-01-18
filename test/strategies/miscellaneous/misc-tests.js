@@ -79,7 +79,7 @@ const limitOrderStrategyTest = async () => {
         const goodUntilDuration = 24 * 60 * 60;
 
         before(async () => {
-            await resetForkToBlock(16728856);
+            // await resetForkToBlock(19000000);
 
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
@@ -100,7 +100,7 @@ const limitOrderStrategyTest = async () => {
             uniV3Wrapper = await hre.ethers.getContractAt('UniswapWrapperV3', addrs[network].UNISWAP_V3_WRAPPER);
 
             await addBotCaller(botAcc.address);
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
             const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
             await openStrategyAndBundleStorage();
@@ -318,13 +318,15 @@ const dcaStrategyTest = async () => {
             await redeploy('GasFeeTaker');
             await redeploy('DFSSell');
             await redeploy('TimestampTrigger');
+            await redeploy('SendTokenAndUnwrap');
+            // await redeploy('ModuleAuth');
 
             subStorageAddr = getAddrFromRegistry('SubStorage');
             subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
 
             await addBotCaller(botAcc.address);
 
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
             const strategyData = network === 'mainnet' ? createDCAStrategy() : createDCAL2Strategy();
             await openStrategyAndBundleStorage();

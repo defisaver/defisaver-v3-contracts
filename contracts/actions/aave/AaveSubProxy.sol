@@ -25,9 +25,6 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     error WrongSubParams(uint256 minRatio, uint256 maxRatio);
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
 
-    address public constant AAVE_SUB_ADDRESS = 0x6B25043BF08182d8e86056C6548847aF607cd7CD;
-    address public constant LEGACY_PROXY_AUTH_ADDR = 0x380982902872836ceC629171DaeAF42EcC02226e;
-
     struct AaveSubData {
         uint128 minRatio;
         uint128 maxRatio;
@@ -43,13 +40,6 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     function subToAaveAutomation(
         AaveSubData calldata _subData
     ) public {
-        // unsub from old automation if the user is already subbed
-        if (ISubscriptions(AAVE_SUB_ADDRESS).isSubscribed(address(this))) {
-            ISubscriptions(AAVE_SUB_ADDRESS).unsubscribe();
-
-            removeProxyPermission(LEGACY_PROXY_AUTH_ADDR);
-        }
-
         /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
         giveWalletPermission();
         
