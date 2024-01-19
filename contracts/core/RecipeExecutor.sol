@@ -21,7 +21,7 @@ contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermissio
 
     error TriggerNotActiveError(uint256);
 
-    /// @notice Called directly through DsProxy to execute a recipe
+    /// @notice Called directly through user wallet to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
     /// @param _currRecipe Recipe to be executed
     function executeRecipe(Recipe calldata _currRecipe) public payable {
@@ -29,7 +29,7 @@ contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermissio
     }
 
 
-    /// @notice Called by users DSProxy through the DSProxyAuth to execute a recipe & check triggers
+    /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers
     /// @param _subId Id of the subscription we want to execute
     /// @param _actionCallData All input data needed to execute actions
     /// @param _triggerCallData All input data needed to check triggers
