@@ -52,8 +52,9 @@ contract MorphoBlueHelper is MainnetMorphoBlueAddresses {
         MorphoBluePosition memory position = morphoBlue.position(marketId, owner);
         
         uint256 collateral = position.collateral;
+        if (collateral == 0) return 0;
         uint256 debt = SharesMathLib.toAssetsUp(position.borrowShares, market.totalBorrowAssets, market.totalBorrowShares);
-
+        if (debt == 0) return 0;
         ratio = collateral * oraclePrice / debt / 1e18;
     }
 }
