@@ -24,8 +24,6 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     error WrongSubParams(uint256 minRatio, uint256 maxRatio);
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
 
-    address public constant AAVE_MARKET = 0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5;
-
     struct AaveSubData {
         uint128 minRatio;
         uint128 maxRatio;

@@ -6,10 +6,9 @@ import "../auth/AdminAuth.sol";
 import "../utils/helpers/UtilHelper.sol";
 import "../actions/utils/helpers/ActionsUtilHelper.sol";
 import "../DS/DSProxyFactoryInterface.sol";
-import "../utils/ds-proxy-factory/DSProxyFactoryHelper.sol";
 
 /// @title Registry of proxies related to LSV
-contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper, DSProxyFactoryHelper {
+contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
 
     /// @dev List of proxies a user owns
     mapping(address => address[]) public proxies;

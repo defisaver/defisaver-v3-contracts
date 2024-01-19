@@ -10,4 +10,6 @@ contract MainnetActionsUtilAddresses {
     address internal constant PROXY_AUTH_ADDR = 0x149667b6FAe2c63D1B4317C716b0D0e4d3E2bD70;
     address internal constant LSV_PROXY_REGISTRY_ADDRESS = 0xa8a3c86c4A2DcCf350E84D2b3c46BDeBc711C16e;
     address internal constant TRANSIENT_STORAGE = 0x2F7Ef2ea5E8c97B8687CA703A0e50Aa5a49B7eb2;
+    address internal constant MAKER_PROXY_FACTORY_ADDR = 0xA26e15C895EFc0616177B7c1e7270A4C7D51C997;
+
 }

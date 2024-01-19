@@ -22,6 +22,7 @@ contract ArbitrumUtilAddresses {
 
     address internal constant MKR_PROXY_REGISTRY = 0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895;
     address internal constant DFS_PROXY_REGISTRY_ADDR = 0xeCF15D0aE171F757175c6aBDD2C70e9a8806984C;
+    address internal constant PROXY_FACTORY_ADDR = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
 
     // TODO: not needed now
     address internal constant FEE_RECEIVER_ADMIN_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

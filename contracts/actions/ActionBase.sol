@@ -7,10 +7,10 @@ import "../DS/DSProxy.sol";
 import "../utils/DefisaverLogger.sol";
 import "./utils/helpers/ActionsUtilHelper.sol";
 import "../interfaces/safe/ISafe.sol";
-import "../utils/CheckWalletType.sol";
+import "../interfaces/IDSProxyFactory.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
-abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
+abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
     event ActionEvent(
         string indexed logName,
         bytes data
@@ -168,10 +168,12 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     }
 
     function fetchOwnersOrWallet() internal view returns (address) {
-        if (isDSProxy(address(this))) 
-            return DSProxy(payable(address(this))).owner();
 
-        // if not DSProxy, we assume we are in contex of Safe
+        if (IDSProxyFactory(MAKER_PROXY_FACTORY_ADDR).isProxy(address(this))) {
+            return DSProxy(payable(address(this))).owner();
+        }
+     
+        // if not DSProxy, we assume we are in context of Safe
         address[] memory owners = ISafe(address(this)).getOwners();
         return owners.length == 1 ? owners[0] : address(this);
     }

@@ -30,6 +30,8 @@ contract MainnetUtilAddresses {
 
     address internal constant FEE_RECIPIENT = 0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A;
 
+    address internal constant PROXY_FACTORY_ADDR = 0xA26e15C895EFc0616177B7c1e7270A4C7D51C997;
+
     // not needed on mainnet
     address internal constant DEFAULT_BOT = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 

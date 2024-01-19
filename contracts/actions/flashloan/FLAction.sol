@@ -16,13 +16,13 @@ import "../../interfaces/balancer/IFlashLoans.sol";
 import "../../interfaces/uniswap/v3/IUniswapV3Pool.sol";
 import "../../interfaces/uniswap/v3/IUniswapV3Factory.sol";
 import "../../interfaces/morpho-blue/IMorphoBlue.sol";
-
+import "../../utils/CheckWalletType.sol";
 import "../../core/strategy/StrategyModel.sol";
 
 import "./helpers/FLHelper.sol";
 
 /// @title Action that gets and receives FL from different variety of sources
-contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel, FLHelper {
+contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel, FLHelper, CheckWalletType {
     using TokenUtils for address;
 
     /// @dev FL Initiator must be this contract

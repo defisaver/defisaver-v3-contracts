@@ -18,7 +18,6 @@ contract MainnetFLAddresses {
     address internal constant SPARK_LENDING_POOL = 0xC13e21B648A5Ee794902342038FF3aDAB66BE987;
 
     address internal constant DSS_FLASH_ADDR = 0x60744434d6339a6B27d73d9Eda62b6F66a0a04FA;
-    address internal constant DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address internal constant ST_ETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
     address internal constant VAULT_ADDR = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
 

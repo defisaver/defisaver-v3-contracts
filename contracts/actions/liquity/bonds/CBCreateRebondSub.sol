@@ -5,11 +5,11 @@ pragma solidity =0.8.10;
 import "../../ActionBase.sol";
 import "../../../core/strategy/SubStorage.sol";
 import "../../../core/strategy/StrategyModel.sol";
-import "../../../auth/Permission_1.sol";
+import "../../../auth/Permission.sol";
 import "../../../actions/liquity/helpers/CBHelper.sol";
 
 /// @title Special action to subscribe to CB Rebond strategy
-contract CBCreateRebondSub is ActionBase, CBHelper, Permission_1 {
+contract CBCreateRebondSub is ActionBase, CBHelper, Permission {
     
     /// @param bondId Id of the chicken bond NFT we want to sub
     struct Params {
