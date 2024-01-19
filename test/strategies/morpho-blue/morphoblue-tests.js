@@ -29,6 +29,8 @@ const {
     callCurveUsdAdvancedRepayStrategy,
     callCurveUsdFLRepayStrategy,
     callMorphoBlueBoostStrategy,
+    callMorphoBlueFLCollBoostStrategy,
+    callMorphoBlueFLDebtBoostStrategy,
 } = require('../../strategy-calls');
 const { getActiveBand } = require('../../curveusd/curveusd-tests');
 const { getMarkets, supplyToMarket } = require('../../morpho-blue/utils');
@@ -137,7 +139,6 @@ const morphoBlueBoostStrategyTest = async () => {
                 const targetRatio = Float2BN('1.5');
                 const ratioOver = Float2BN('1.8');
                 marketId = await morphoBlueView.getMarketId(marketParams);
-                console.log(marketId);
                 ({ subId, strategySub } = await subMorphoBlueBoostBundle(
                     proxy,
                     boostBundleId,
@@ -153,7 +154,6 @@ const morphoBlueBoostStrategyTest = async () => {
                 const ratioBefore = await morphoBlueView.callStatic.getRatioUsingId(
                     marketId, proxy.address,
                 );
-                console.log(ratioBefore.toString());
                 const boostAmount = hre.ethers.utils.parseUnits(
                     fetchAmountinUSDPrice(loanToken.symbol, BOOST_AMOUNT_USD),
                     loanToken.decimals,
@@ -176,96 +176,89 @@ const morphoBlueBoostStrategyTest = async () => {
                     marketId, proxy.address,
                 );
                 console.log(`Collateral ratio went from ${ratioBefore / 1e16}% to ${ratioAfter / 1e16}%`);
-                // expect(collRatioBefore).to.be.gt(collRatioAfter);
+                expect(ratioBefore).to.be.gt(ratioAfter);
                 await revertToSnapshot(snapshot);
             });
-            /*
-            it(`Executes a boost strategy with coll fl for ${assetSymbol} market`, async () => {
+            it(`Executes a boost strategy with coll fl for ${collToken.symbol}/${loanToken.symbol} market`, async () => {
                 snapshot = await takeSnapshot();
-                const userDataBefore = await crvusdView.userData(
-                    controllerAddress, proxy.address,
+                const ratioBefore = await morphoBlueView.callStatic.getRatioUsingId(
+                    marketId, proxy.address,
                 );
-                const collRatioBefore = userDataBefore.collRatio;
-                const flAmount = hre.ethers.utils.parseUnits(
-                    fetchAmountinUSDPrice(assetSymbol, BOOST_AMOUNT_USD),
-                    collateralAsset.decimals,
-                ); // this is amount of collateral we're flashloaning
                 const boostAmount = hre.ethers.utils.parseUnits(
-                    (BOOST_AMOUNT_USD * 1.1).toString(),
+                    fetchAmountinUSDPrice(loanToken.symbol, BOOST_AMOUNT_USD),
+                    loanToken.decimals,
                 );
-                    // this amount is what we're borrowing,
-                    // this * price - slippage should equal flAmount
-                await setBalance(collateralAsset.address, '0xBA12222222228d8Ba445958a75a0704d566BF2C8', boostAmount);
+                await setBalance(loanToken.address, '0xBA12222222228d8Ba445958a75a0704d566BF2C8', boostAmount);
 
-                const exchangeObj = await formatExchangeObjCurve(
-                    crvusdAddress,
-                    collateralAsset.address,
+                const exchangeObj = await formatMockExchangeObj(
+                    loanToken,
+                    collToken,
                     boostAmount,
-                    addrs.mainnet.CURVE_WRAPPER_V3,
                 );
                 const flActionAddr = await getAddrFromRegistry('FLAction');
-                const collBefore = await balanceOf(collateralAsset.address, senderAcc.address);
-                await callCurveUsdFLCollBoostStrategy(
+                await callMorphoBlueFLDebtBoostStrategy(
                     botAcc,
                     strategyExecutor,
                     1,
                     subId,
                     strategySub,
+                    loanToken.address,
                     boostAmount,
-                    exchangeObj,
-                    collateralAsset.address,
                     flActionAddr,
-                    flAmount.toString(),
+                    exchangeObj,
                 );
-                const collAfter = await balanceOf(collateralAsset.address, senderAcc.address);
 
-                const userDataAfter = await crvusdView.userData(
-                    controllerAddress, proxy.address,
+                const ratioAfter = await morphoBlueView.callStatic.getRatioUsingId(
+                    marketId, proxy.address,
                 );
-                const collRatioAfter = userDataAfter.collRatio;
-                console.log(`User received ${collAfter.sub(collBefore)} of coll on his EOA`);
-                console.log(`Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`);
-                expect(collRatioBefore).to.be.gt(collRatioAfter);
+                console.log(`Collateral ratio went from ${ratioBefore / 1e16}% to ${ratioAfter / 1e16}%`);
+                expect(ratioBefore).to.be.gt(ratioAfter);
                 await revertToSnapshot(snapshot);
             });
-
-            it(`Executes a boost strategy with crvusd flashloan for ${assetSymbol} market`, async () => {
+            it(`Executes a boost strategy with coll fl for ${collToken.symbol}/${loanToken.symbol} market`, async () => {
                 snapshot = await takeSnapshot();
-                await setBalance(crvusdAddress, '0xBA12222222228d8Ba445958a75a0704d566BF2C8', Float2BN('10000'));
-                const userDataBefore = await crvusdView.userData(
-                    controllerAddress, proxy.address,
+                const ratioBefore = await morphoBlueView.callStatic.getRatioUsingId(
+                    marketId, proxy.address,
                 );
-                const collRatioBefore = userDataBefore.collRatio;
+                const flAmount = hre.ethers.utils.parseUnits(
+                    fetchAmountinUSDPrice(collToken.symbol, BOOST_AMOUNT_USD),
+                    collToken.decimals,
+                ); // this is amount of collateral we're flashloaning
                 const boostAmount = hre.ethers.utils.parseUnits(
-                    BOOST_AMOUNT_USD,
+                    fetchAmountinUSDPrice(loanToken.symbol, BOOST_AMOUNT_USD * 1.2),
+                    loanToken.decimals,
                 );
-                const exchangeObj = await formatExchangeObjCurve(
-                    crvusdAddress,
-                    collateralAsset.address,
+                await setBalance(collToken.address, '0xBA12222222228d8Ba445958a75a0704d566BF2C8', flAmount);
+                console.log(flAmount, boostAmount);
+                const exchangeObj = await formatMockExchangeObj(
+                    loanToken,
+                    collToken,
                     boostAmount,
-                    addrs.mainnet.CURVE_WRAPPER_V3,
                 );
                 const flActionAddr = await getAddrFromRegistry('FLAction');
-                await callCurveUsdFLDebtBoostStrategy(
+                const collBefore = await balanceOf(collToken.address, senderAcc.address);
+                await callMorphoBlueFLCollBoostStrategy(
                     botAcc,
                     strategyExecutor,
                     2,
                     subId,
                     strategySub,
+                    collToken.address,
+                    flAmount,
+                    flActionAddr,
                     boostAmount,
                     exchangeObj,
-                    crvusdAddress,
-                    flActionAddr,
                 );
-                const userDataAfter = await crvusdView.userData(
-                    controllerAddress, proxy.address,
+                const collAfter = await balanceOf(collToken.address, senderAcc.address);
+
+                const ratioAfter = await morphoBlueView.callStatic.getRatioUsingId(
+                    marketId, proxy.address,
                 );
-                const collRatioAfter = userDataAfter.collRatio;
-                console.log(`Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`);
-                expect(collRatioBefore).to.be.gt(collRatioAfter);
+                console.log(`User received ${collAfter.sub(collBefore)} of coll on his EOA`);
+                console.log(`Collateral ratio went from ${ratioBefore / 1e16}% to ${ratioAfter / 1e16}%`);
+                expect(ratioBefore).to.be.gt(ratioAfter);
                 await revertToSnapshot(snapshot);
             });
-            */
         }
     });
 };
