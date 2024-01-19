@@ -5,9 +5,10 @@ pragma solidity =0.8.10;
 import "../../auth/AdminAuth.sol";
 import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
+import "../../utils/CheckWalletType.sol";
 
 /// @title Contract that subscribes users to Aave V2 automation bundles
-contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
+contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID;
 
@@ -42,7 +43,7 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
         AaveSubData calldata _subData
     ) public {
         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission();
+        giveWalletPermission(isDSProxy(address(this)));
         
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 

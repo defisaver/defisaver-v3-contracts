@@ -171,7 +171,7 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
         if (isDSProxy(address(this))) 
             return DSProxy(payable(address(this))).owner();
 
-        // if not DSProxy, we assume we are in contex of Safe
+        // if not DSProxy, we assume we are in context of Safe
         address[] memory owners = ISafe(address(this)).getOwners();
         return owners.length == 1 ? owners[0] : address(this);
     }

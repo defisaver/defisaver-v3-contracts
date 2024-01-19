@@ -6,9 +6,10 @@ import "../../../auth/AdminAuth.sol";
 import "../../../auth/Permission.sol";
 import "../../../core/strategy/SubStorage.sol";
 import "../helpers/CBHelper.sol";
+import "../../../utils/CheckWalletType.sol";
 
 /// @title SubProxy to inject subId during subscription for the cb rebond strategy
-contract CBRebondSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CBHelper {
+contract CBRebondSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CBHelper, CheckWalletType {
 
     /// @notice Subscribes to an deployed cb rebond strategy
     /// @param _bondID Nft id of the chicken bond
@@ -16,7 +17,7 @@ contract CBRebondSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, C
         uint256 _bondID
     ) public {
          /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission();
+        giveWalletPermission(isDSProxy(address(this)));
 
         // returns .length which is the next id we are subscribing
         uint256 newSubId = SubStorage(SUB_STORAGE_ADDR).getSubsCount();

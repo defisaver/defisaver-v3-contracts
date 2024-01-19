@@ -5,8 +5,9 @@ pragma solidity =0.8.10;
 import "../../auth/AdminAuth.sol";
 import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
+import "../../utils/CheckWalletType.sol";
 
-contract CompV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
+contract CompV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
     uint64 public constant REPAY_BUNDLE_ID = 3; 
     uint64 public constant BOOST_BUNDLE_ID = 4;
 
@@ -40,7 +41,7 @@ contract CompV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
         CompV3SubData calldata _subData
     ) public {
          /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission();
+        giveWalletPermission(isDSProxy(address(this)));
 
         StrategySub memory repaySub = formatRepaySub(_subData, address(this), msg.sender);
 

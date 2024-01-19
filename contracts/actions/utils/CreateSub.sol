@@ -3,12 +3,12 @@
 pragma solidity =0.8.10;
 
 import "../ActionBase.sol";
-import "../../auth/Permission_1.sol";
+import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 import "../../core/strategy/StrategyModel.sol";
 
 /// @title Action to create a new subscription
-contract CreateSub is ActionBase, Permission_1 {
+contract CreateSub is ActionBase, Permission {
 
     /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
     struct Params {
@@ -49,7 +49,7 @@ contract CreateSub is ActionBase, Permission_1 {
     /// @notice Gives DSProxy permission if needed and registers a new sub
     function createSub(Params memory _inputData) internal returns (uint256 subId) {
          /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission();
+        giveWalletPermission(isDSProxy(address(this)));
 
         subId = SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(_inputData.sub);
     }
