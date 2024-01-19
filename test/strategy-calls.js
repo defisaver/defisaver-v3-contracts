@@ -4654,6 +4654,67 @@ const callCurveUsdFLCollBoostStrategy = async (botAcc, strategyExecutor, strateg
     console.log(`GasUsed callCurveUsdFLCollBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
+const callMorphoBlueBoostStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, boostAmount, exchangeObject) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const boostGasCost = 1000000;
+    const borrowAction = new dfs.actions.morphoblue.MorphoBlueBorrowAction(
+        nullAddress,
+        nullAddress,
+        nullAddress,
+        nullAddress,
+        0,
+        boostAmount,
+        nullAddress,
+        nullAddress,
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        nullAddress,
+        '0x000000000000000000000000000000000000dead',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        boostGasCost,
+        nullAddress,
+        '0',
+    );
+    const supplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyCollateralAction(
+        nullAddress,
+        nullAddress,
+        nullAddress,
+        nullAddress,
+        0,
+        0,
+        nullAddress,
+        nullAddress,
+    );
+    const ratioCheck = new dfs.actions.checkers.MorphoBlueRatioCheckAction(
+        nullAddress,
+        nullAddress,
+        nullAddress,
+        nullAddress,
+        nullAddress,
+        nullAddress,
+        0,
+        0,
+    );
+    actionsCallData.push(borrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(supplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(ratioCheck.encodeForRecipe()[0]);
+    triggerCallData.push(abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [nullAddress, nullAddress, '0', '0']));
+    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
+    // eslint-disable-next-line max-len
+    const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
+        gasLimit: 8000000,
+    });
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+
+    console.log(`GasUsed callMorphoBlueBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
 module.exports = {
     callDcaStrategy,
     callMcdRepayStrategy,
@@ -4724,4 +4785,5 @@ module.exports = {
     callCurveUsdBoostStrategy,
     callCurveUsdFLDebtBoostStrategy,
     callCurveUsdFLCollBoostStrategy,
+    callMorphoBlueBoostStrategy,
 };

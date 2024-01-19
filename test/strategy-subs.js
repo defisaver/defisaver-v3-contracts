@@ -33,6 +33,7 @@ const {
     IN_REPAY,
     createCurveUsdCollRatioTrigger,
     IN_BOOST,
+    createMorphoBlueRatioTrigger,
 } = require('./triggers');
 
 const {
@@ -805,6 +806,62 @@ const subCurveUsdBoostBundle = async (
 
     return { subId, strategySub };
 };
+const subMorphoBlueRepayBundle = async (
+    proxy, bundleId, marketParams, marketId, minRatio, targetRatio, user,
+) => {
+    const triggerData = await createMorphoBlueRatioTrigger(marketId, user, minRatio, RATIO_STATE_UNDER);
+    const loanTokenEncoded = abiCoder.encode(['address'], [marketParams[0]]);
+    const collateralTokenEncoded = abiCoder.encode(['address'], [marketParams[1]]);
+    const oracleEncoded = abiCoder.encode(['address'], [marketParams[2]]);
+    const irmEncoded = abiCoder.encode(['address'], [marketParams[3]]);
+    const lltvEncoded = abiCoder.encode(['uint256'], [marketParams[4]]);
+    const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_REPAY]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const userEncoded = abiCoder.encode(['address'], [user]);
+    const strategySub = [bundleId, true, [triggerData],
+        [
+            loanTokenEncoded,
+            collateralTokenEncoded,
+            oracleEncoded,
+            irmEncoded,
+            lltvEncoded,
+            ratioStateEncoded,
+            targetRatioEncoded,
+            userEncoded,
+        ],
+    ];
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+const subMorphoBlueBoostBundle = async (
+    proxy, bundleId, marketParams, marketId, maxRatio, targetRatio, user,
+) => {
+    const triggerData = await createMorphoBlueRatioTrigger(marketId, user, maxRatio, RATIO_STATE_OVER);
+    const loanTokenEncoded = abiCoder.encode(['address'], [marketParams[0]]);
+    const collateralTokenEncoded = abiCoder.encode(['address'], [marketParams[1]]);
+    const oracleEncoded = abiCoder.encode(['address'], [marketParams[2]]);
+    const irmEncoded = abiCoder.encode(['address'], [marketParams[3]]);
+    const lltvEncoded = abiCoder.encode(['uint256'], [marketParams[4]]);
+    const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_BOOST]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const userEncoded = abiCoder.encode(['address'], [user]);
+    const strategySub = [bundleId, true, [triggerData],
+        [
+            loanTokenEncoded,
+            collateralTokenEncoded,
+            oracleEncoded,
+            irmEncoded,
+            lltvEncoded,
+            ratioStateEncoded,
+            targetRatioEncoded,
+            userEncoded,
+        ],
+    ];
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
 
 module.exports = {
     subDcaStrategy,
@@ -841,4 +898,6 @@ module.exports = {
     subAaveV3CloseWithMaximumGasPriceBundle,
     subCurveUsdRepayBundle,
     subCurveUsdBoostBundle,
+    subMorphoBlueBoostBundle,
+    subMorphoBlueRepayBundle,
 };
