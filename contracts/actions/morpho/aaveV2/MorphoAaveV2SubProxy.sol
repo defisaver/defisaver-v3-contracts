@@ -32,13 +32,13 @@ contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, CoreHelper, Permissio
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
-    /// @dev Gives DSProxy permission if needed and registers a new sub
+    /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToMorphoAaveV2Automation(
         MorphoAaveV2SubData calldata _subData
     ) public {
-         /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
+         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
         giveWalletPermission();
 
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
@@ -127,12 +127,12 @@ contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, CoreHelper, Permissio
     }
 
     /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized morphoAaveV2 sub
-    function formatRepaySub(MorphoAaveV2SubData memory _subData, address _proxy) public view returns (StrategySub memory repaySub) {
+    function formatRepaySub(MorphoAaveV2SubData memory _subData, address _wallet) public view returns (StrategySub memory repaySub) {
         repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData = abi.encode(_proxy, uint256(_subData.minRatio), uint8(RatioState.UNDER));
+        bytes memory triggerData = abi.encode(_wallet, uint256(_subData.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData =  new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
@@ -142,12 +142,12 @@ contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, CoreHelper, Permissio
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized morphoAaveV2 sub
-    function formatBoostSub(MorphoAaveV2SubData memory _subData, address _proxy) public view returns (StrategySub memory boostSub) {
+    function formatBoostSub(MorphoAaveV2SubData memory _subData, address _wallet) public view returns (StrategySub memory boostSub) {
         boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(_proxy, uint256(_subData.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData = abi.encode(_wallet, uint256(_subData.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData =  new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 

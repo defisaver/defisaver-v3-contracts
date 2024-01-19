@@ -15,7 +15,7 @@ contract CBRebondSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, C
     function subToRebondStrategy(
         uint256 _bondID
     ) public {
-         /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
+         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
         giveWalletPermission();
 
         // returns .length which is the next id we are subscribing

@@ -36,13 +36,13 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission {
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
-    /// @dev Gives DSProxy permission if needed and registers a new sub
+    /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToCompV3Automation(
         bytes calldata encodedInput
     ) public {
-         /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
+         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
         giveWalletPermission();
 
         CompV3SubData memory subData = parseSubData(encodedInput);
