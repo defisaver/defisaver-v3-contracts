@@ -7,10 +7,10 @@ import "../DS/DSProxy.sol";
 import "../utils/DefisaverLogger.sol";
 import "./utils/helpers/ActionsUtilHelper.sol";
 import "../interfaces/safe/ISafe.sol";
-import "../auth/Permission.sol";
+import "../utils/CheckWalletType.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
-abstract contract ActionBase is AdminAuth, ActionsUtilHelper, Permission {
+abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     event ActionEvent(
         string indexed logName,
         bytes data

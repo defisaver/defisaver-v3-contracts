@@ -3,12 +3,12 @@
 pragma solidity =0.8.10;
 
 import "../ActionBase.sol";
-import "../../auth/Permission.sol";
+import "../../auth/Permission_1.sol";
 import "../../core/strategy/SubStorage.sol";
 import "../../core/strategy/StrategyModel.sol";
 
 /// @title Action to create a new subscription
-contract CreateSub is ActionBase {
+contract CreateSub is ActionBase, Permission_1 {
 
     /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
     struct Params {

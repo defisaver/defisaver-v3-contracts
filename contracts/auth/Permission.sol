@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../interfaces/safe/ISafe.sol";
 import "./SafeModulePermission.sol";
 import "./DSProxyPermission.sol";
 import "../utils/CheckWalletType.sol";
