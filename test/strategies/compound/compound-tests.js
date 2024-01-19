@@ -1,4 +1,6 @@
 /* eslint-disable camelcase */
+const hre = require('hardhat');
+
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
@@ -32,6 +34,7 @@ const {
     resetForkToBlock,
     REGISTRY_ADDR,
     WETH_ADDRESS,
+    redeployCore,
 } = require('../../utils');
 const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
 
@@ -68,14 +71,14 @@ const testPairs = [
         collSymbol: 'cETH',
         debtSymbol: 'cDAI',
     },
-    // {
-    //     collSymbol: 'cWBTC',
-    //     debtSymbol: 'cUSDC',
-    // },
-    // {
-    //     collSymbol: 'cDAI',
-    //     debtSymbol: 'cETH',
-    // },
+    {
+        collSymbol: 'cWBTC',
+        debtSymbol: 'cUSDC',
+    },
+    {
+        collSymbol: 'cDAI',
+        debtSymbol: 'cETH',
+    },
 ];
 
 const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
@@ -93,21 +96,20 @@ const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
     let flAddr;
 
     before(async () => {
-        await resetForkToBlock(17828193);
-
         setNetwork('mainnet');
         [senderAcc] = await ethers.getSigners();
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
         botAcc = (await ethers.getSigners())[1];
-        strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+        strategyExecutor = await redeployCore();
 
         await redeploy('CompBorrow');
         await redeploy('CompSupply');
         await redeploy('CompoundRatioTrigger');
         await redeploy('CompV2RatioCheck');
+        await redeploy('DFSSell');
 
-        flAddr = await getContractFromRegistry('FLAction');
+        flAddr = await redeploy('FLAction');
         view = await getContractFromRegistry('CompView');
 
         ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));
@@ -242,23 +244,20 @@ const compV2RepayTest = () => describe('Comp-Repay-Strategy', function () {
     let flAddr;
 
     before(async () => {
-        await resetForkToBlock(17828193);
-
         setNetwork('mainnet');
         [senderAcc] = await ethers.getSigners();
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
         botAcc = (await ethers.getSigners())[1];
-        strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+        strategyExecutor = await redeployCore();
 
         await redeploy('DFSSell');
         await redeploy('CompWithdraw');
         await redeploy('CompPayback');
         await redeploy('CompoundRatioTrigger');
         await redeploy('CompV2RatioCheck');
-        await redeploy('FLAction');
+        flAddr = await redeploy('FLAction');
 
-        flAddr = await getContractFromRegistry('FLAction');
         view = await getContractFromRegistry('CompView');
 
         ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));

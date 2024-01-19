@@ -11,6 +11,7 @@ const {
     getNetwork,
     getContractFromRegistry,
     executeTxFromProxy,
+    isProxySafe,
 } = require('./utils');
 
 const getLatestBundleId = async () => {
@@ -92,7 +93,7 @@ const createBundle = async (proxy, strategyIds) => {
 };
 
 const subToStrategy = async (proxy, strategySub, regAddr = addrs[getNetwork()].REGISTRY_ADDR) => {
-    const SubProxyAddr = addrs[getNetwork()].SubProxy;
+    const SubProxyAddr = await getAddrFromRegistry('SubProxy', regAddr);
 
     const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
     const functionData = SubProxyProxy.interface.encodeFunctionData(
@@ -565,7 +566,9 @@ const subToLimitOrderProxy = async (proxy, inputData, regAddr = addrs[network].R
     const receipt = await executeTxFromProxy(proxy, limitOrderSubProxyAddr, functionData);
 
     const parsed = await receipt.wait();
-    const lastEvent = parsed.events.at(-1);
+
+    // safe wallets fires an extra event at the end of tx
+    const lastEvent = isProxySafe(proxy) ? parsed.events.at(-2) : parsed.events.at(-1);
 
     const abiCoder = hre.ethers.utils.defaultAbiCoder;
     const strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], lastEvent.data)[0];

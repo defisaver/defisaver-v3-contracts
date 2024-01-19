@@ -42,7 +42,7 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHe
     /// @dev User can't just sub a boost bundle without repay
     function subToMcdAutomation(
         McdSubData calldata _subData,
-        bool _shouldLegacyUnsub
+        bool // _shouldLegacyUnsub no longer needed, kept to keep the function sig the same
     ) public {
          /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
         giveWalletPermission();
