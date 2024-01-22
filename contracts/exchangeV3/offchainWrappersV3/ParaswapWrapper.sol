@@ -11,11 +11,6 @@ import "../../interfaces/exchange/IOffchainWrapper.sol";
 contract ParaswapWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {
 
     using TokenUtils for address;
-
-    string public constant ERR_SRC_AMOUNT = "Not enough funds";
-    string public constant ERR_PROTOCOL_FEE = "Not enough eth for protocol fee";
-    string public constant ERR_TOKENS_SWAPPED_ZERO = "Order success but amount 0";
-
     using SafeERC20 for IERC20;
 
     /// @notice offchainData.callData should be this struct encoded
@@ -47,8 +42,11 @@ contract ParaswapWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {
         if (success) {
             // get the current balance of the swapped tokens
             tokensSwapped = _exData.destAddr.getBalance(address(this)) - tokensBefore;
-            require(tokensSwapped > 0, ERR_TOKENS_SWAPPED_ZERO);
+            if (tokensSwapped == 0){
+                revert ZeroTokensSwapped();
+            }
         }
+
         // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
         sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
 

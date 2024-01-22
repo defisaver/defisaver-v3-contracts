@@ -10,10 +10,6 @@ import "../../interfaces/exchange/IOffchainWrapper.sol";
 contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {
 
     using TokenUtils for address;
-
-    //Order success but amount 0
-    error ZeroTokensSwapped();
-
     using SafeERC20 for IERC20;
 
     /// @notice Takes order from 0x and returns bool indicating if it is successful

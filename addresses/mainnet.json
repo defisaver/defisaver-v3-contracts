@@ -328,7 +328,7 @@
         "name": "TokenGroupRegistry",
         "address": "0xcA49e64FE1FE8be40ED30F682edA1b27a6c8611c",
         "id": "0x4f594ea4",
-        "path": "contracts/exchangeV3/TokenGroupRegistry.sol",
+        "path": "contracts/exchangeV3/registries/TokenGroupRegistry.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,

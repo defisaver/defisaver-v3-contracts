@@ -23,7 +23,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
     ExchangeAggregatorRegistry internal constant exchangeAggRegistry = ExchangeAggregatorRegistry(EXCHANGE_AGGREGATOR_REGISTRY_ADDR);
     WrapperExchangeRegistry internal constant wrapperRegistry = WrapperExchangeRegistry(WRAPPER_EXCHANGE_REGISTRY);
 
-    /// @notice Internal method that preforms a sell on offchain aggregator/on-chain
+    /// @notice Internal method that performs a sell on offchain aggregator/on-chain
     /// @dev Useful for other DFS contract to integrate for exchanging
     /// @param exData Exchange data struct
     /// @return (address, uint) Address of the wrapper used and destAmount
@@ -44,7 +44,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
             ));
         }
 
-        // Try 0x first and then fallback on specific wrapper
+        // Try offchain aggregator first and then fallback on specific wrapper
         if (exData.offchainData.price > 0) {
             (offChainSwapSuccess, ) = offChainSwap(exData);
         }

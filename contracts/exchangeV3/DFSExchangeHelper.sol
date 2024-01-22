@@ -12,6 +12,8 @@ contract DFSExchangeHelper {
     
     error InvalidOffchainData();
     error OutOfRangeSlicingError();
+    //Order success but amount 0
+    error ZeroTokensSwapped();
 
     using SafeERC20 for IERC20;
 

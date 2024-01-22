@@ -12,14 +12,10 @@ import "../../core/helpers/CoreHelper.sol";
 contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, CoreHelper{
 
     using TokenUtils for address;
+    using SafeERC20 for IERC20;
 
     bytes4 constant SCALING_HELPER_ID = bytes4(keccak256("KyberInputScalingHelper"));
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
-
-    //Order success but amount 0
-    error ZeroTokensSwapped();
-
-    using SafeERC20 for IERC20;
 
     /// @notice Takes order from Kyberswap and returns bool indicating if it is successful
     /// @param _exData Exchange data

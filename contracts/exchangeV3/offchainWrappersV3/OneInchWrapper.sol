@@ -12,9 +12,6 @@ contract OneInchWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {
 
     using TokenUtils for address;
     using SafeERC20 for IERC20;
-    
-    //Order success but amount 0
-    error ZeroTokensSwapped();
 
     /// @notice offchainData.callData should be this struct encoded
     struct OneInchCalldata{
@@ -33,7 +30,7 @@ contract OneInchWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {
         for (uint256 i; i < oneInchCalldata.offsets.length; i++){
             writeUint256(oneInchCalldata.realCalldata, oneInchCalldata.offsets[i], _exData.srcAmount);
         }
- 
+
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
 
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
