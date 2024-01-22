@@ -4377,7 +4377,7 @@ const createMorphoBlueRepayStrategy = () => {
     );
     repayStrategy.addTrigger(morphoBlueRatioTrigger);
 
-    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawAction(
+    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
         '&loanToken',
         '&collateralToken',
         '&oracle',
@@ -4479,7 +4479,7 @@ const createMorphoBlueFLCollRepayStrategy = () => {
         '&proxy',
         '&user',
     );
-    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawAction(
+    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
         '&loanToken',
         '&collateralToken',
         '&oracle',
@@ -4502,7 +4502,6 @@ const createMorphoBlueFLCollRepayStrategy = () => {
 
     repayStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
     repayStrategy.addAction(sellAction);
-    repayStrategy.addAction(feeTakingAction);
     repayStrategy.addAction(feeTakingAction);
     repayStrategy.addAction(paybackAction);
     repayStrategy.addAction(withdrawAction);
@@ -4542,7 +4541,7 @@ const createMorphoBlueFLDebtRepayStrategy = () => {
         '&proxy',
         '&user',
     );
-    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawAction(
+    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
         '&loanToken',
         '&collateralToken',
         '&oracle',
