@@ -1023,7 +1023,7 @@ const setNewExchangeWrapper = async (acc, newAddr, isFork = false) => {
 
     const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
 
-    const registryInstance = await hre.ethers.getContractFactory('SaverExchangeRegistry');
+    const registryInstance = await hre.ethers.getContractFactory('WrapperExchangeRegistry');
     const registry = await registryInstance.attach(addrs[network].SAVER_EXCHANGE_ADDR);
     const registryByOwner = registry.connect(signer);
 

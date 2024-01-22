@@ -36,26 +36,9 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         uint amountOut = router.exactInput(params);
         return amountOut;
     }
-    /// @notice Buys _destAmount of tokens at UniswapV3
-    /// @param _srcAddr From token
-    /// @param _destAmount To amount
-    /// @param _additionalData Path for swapping
-    /// @return uint amount of _srcAddr tokens sent for transaction
-    function buy(address _srcAddr, address, uint _destAmount, bytes calldata _additionalData) external override returns(uint) {
-        uint srcAmount = _srcAddr.getBalance(address(this));
-        IERC20(_srcAddr).safeApprove(address(router), srcAmount);
-        ISwapRouter.ExactOutputParams memory params = 
-            ISwapRouter.ExactOutputParams({
-                path: _additionalData,
-                recipient: msg.sender,
-                deadline: block.timestamp + 1,
-                amountOut: _destAmount,
-                amountInMaximum: type(uint).max
-            });
-        uint amountIn = router.exactOutput(params);
-        sendLeftOver(_srcAddr);
-        return amountIn;
-    }
+
+    /// @dev deprecated function
+    function buy(address _srcAddr, address, uint _destAmount, bytes calldata _additionalData) external override returns(uint) {}
 
     /// @notice Return a rate for which we can sell an amount of tokens
     /// @param _srcAmount From amount
@@ -66,24 +49,8 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         return wdiv(amountOut, _srcAmount);
     }
 
-    /// @notice Return a rate for which we can buy an amount of tokens
-    /// @param _destAmount To amount
-    /// @param _additionalData path object (encoded path_fee_path_fee_path etc.)
-    /// @return uint Rate (price)
-    function getBuyRate(address, address, uint _destAmount, bytes memory _additionalData) public override returns (uint) {
-        uint amountIn = quoter.quoteExactOutput(_additionalData, _destAmount);
-        return wdiv(_destAmount, amountIn);
-    }
-
-    /// @notice Send any leftover tokens, we use to clear out srcTokens after buy
-    /// @param _srcAddr Source token address
-    function sendLeftOver(address _srcAddr) internal {
-        payable(msg.sender).transfer(address(this).balance);
-
-        if (_srcAddr != TokenUtils.ETH_ADDR) {
-            IERC20(_srcAddr).safeTransfer(msg.sender, IERC20(_srcAddr).balanceOf(address(this)));
-        }
-    }
+    /// @dev deprecated function
+    function getBuyRate(address, address, uint _destAmount, bytes memory _additionalData) public override returns (uint) {}
 
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}

@@ -3,10 +3,10 @@
 pragma solidity =0.8.10;
 
 import "../utils/SafeERC20.sol";
-import "./helpers/ExchangeHelper.sol";
+import "../exchangeV3/helpers/ExchangeHelper.sol";
 import "../utils/TokenUtils.sol";
 
-contract DFSPrices is ExchangeHelper {
+contract DFSPricesView is ExchangeHelper {
 
     enum ActionType { SELL, BUY }
     

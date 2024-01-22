@@ -26,66 +26,29 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         address[] memory path = abi.decode(_additionalData, (address[]));
 
         IERC20(_srcAddr).safeApprove(address(router), _srcAmount);
+
         /// @dev DFSExchangeCore contains slippage check instead of writing it here (minOutput = 1)
+        /// @dev On-chain wrapper only used for simulations and strategies, in both cases we are ok with setting a dynamic timestamp
         amounts = router.swapExactTokensForTokens(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
 
         return amounts[amounts.length - 1];
     }
 
-    /// @notice Buys a _destAmount of tokens at UniswapV2
-    /// @param _srcAddr From token
-    /// @param _destAmount To amount
-    /// @return uint srcAmount
-    function buy(address _srcAddr, address, uint _destAmount, bytes memory _additionalData) external override returns(uint) {
-        uint[] memory amounts;
-        address[] memory path = abi.decode(_additionalData, (address[]));
-
-        uint srcAmount = _srcAddr.getBalance(address(this));
-
-        IERC20(_srcAddr).safeApprove(address(router), srcAmount);
-
-        amounts = router.swapTokensForExactTokens(_destAmount, type(uint).max, path, msg.sender, block.timestamp + 1);
-
-        // Send the leftover from the source token back
-        sendLeftOver(_srcAddr);
-
-        return amounts[0];
-    }
+    /// @dev deprecated function
+    function buy(address _srcAddr, address, uint _destAmount, bytes memory _additionalData) external override returns(uint) {}
 
     /// @notice Return a rate for which we can sell an amount of tokens
-    /// @param _srcAddr From token
-    /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @return uint Rate
-    function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory _additionalData) public override view returns (uint) {
+    function getSellRate(address, address, uint _srcAmount, bytes memory _additionalData) public override view returns (uint) {
         address[] memory path = abi.decode(_additionalData, (address[]));
 
         uint[] memory amounts = router.getAmountsOut(_srcAmount, path);
         return wdiv(amounts[amounts.length - 1], _srcAmount);
     }
 
-    /// @notice Return a rate for which we can buy an amount of tokens
-    /// @param _srcAddr From token
-    /// @param _destAddr To token
-    /// @param _destAmount To amount
-    /// @return uint Rate
-    function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount, bytes memory _additionalData) public override view returns (uint) {
-
-        address[] memory path = abi.decode(_additionalData, (address[]));
-
-        uint[] memory amounts = router.getAmountsIn(_destAmount, path);
-        return wdiv(_destAmount, amounts[0]);
-    }
-
-    /// @notice Send any leftover tokens, we use to clear out srcTokens after buy
-    /// @param _srcAddr Source token address
-    function sendLeftOver(address _srcAddr) internal {
-        payable(msg.sender).transfer(address(this).balance);
-
-        if (_srcAddr != TokenUtils.ETH_ADDR) {
-            IERC20(_srcAddr).safeTransfer(msg.sender, IERC20(_srcAddr).balanceOf(address(this)));
-        }
-    }
+    /// @dev deprecated function
+    function getBuyRate(address, address, uint _destAmount, bytes memory _additionalData) public override view returns (uint) {}
 
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}

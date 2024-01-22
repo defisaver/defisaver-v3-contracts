@@ -4,7 +4,6 @@ pragma solidity =0.8.10;
 import "../../interfaces/exchange/IExchangeV3.sol";
 import "../../interfaces/curve/ISwapRouterNG.sol";
 import "../../interfaces/curve/IAddressProvider.sol";
-import "../../interfaces/IERC20.sol";
 import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 import "../../utils/SafeERC20.sol";
@@ -44,7 +43,7 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     }
 
     /// @dev deprecated function
-    function buy(address, address, uint, bytes calldata) external override returns(uint) {
+    function buy(address, address, uint, bytes calldata) external pure override returns(uint) {
         return 0;
     }
 
@@ -68,7 +67,7 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     }
 
     /// @dev deprecated function
-    function getBuyRate(address, address, uint, bytes memory) public override returns (uint) {
+    function getBuyRate(address, address, uint, bytes memory) external pure override returns (uint) {
         return 0;
     }
 

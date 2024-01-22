@@ -32,7 +32,6 @@ contract DFSExchangeHelper {
             revert OutOfRangeSlicingError();
         }
 
-
         uint256 x;
         assembly {
             x := mload(add(bs, add(0x20, start)))
