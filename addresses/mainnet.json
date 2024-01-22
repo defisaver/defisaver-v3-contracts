@@ -2579,7 +2579,7 @@
         "path": "contracts/actions/curveusd/CurveUsdBorrow.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": ["0x2512A976227a82Ef0F6bDdb463cBcD5B732596BF"]
     },
@@ -2590,7 +2590,7 @@
         "path": "contracts/actions/curveusd/CurveUsdGetDebt.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -2601,7 +2601,7 @@
         "path": "contracts/actions/curveusd/CurveUsdAdjust.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -2612,7 +2612,7 @@
         "path": "contracts/actions/curveusd/CurveUsdCreate.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": ["0x715B40970dac1cfAf0bB85C4Fe64921b44b3f73e"]
     },
@@ -2623,7 +2623,7 @@
         "path": "contracts/actions/curveusd/CurveUsdPayback.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -2634,7 +2634,7 @@
         "path": "contracts/actions/curveusd/CurveUsdSupply.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -2645,7 +2645,7 @@
         "path": "contracts/actions/curveusd/CurveUsdWithdraw.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -2656,7 +2656,7 @@
         "path": "contracts/actions/curveusd/CurveUsdSelfLiquidate.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -2667,7 +2667,7 @@
         "path": "contracts/actions/curveusd/advanced/CurveUsdLevCreate.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": ["0x8B5ACd4ce0a43327aaDfc5c42be029898e242393"]
     },
@@ -2678,7 +2678,7 @@
         "path": "contracts/actions/curveusd/advanced/CurveUsdRepay.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": [
             "0xd12785e4834C1421fC7B64ca57d64E886e39b80F",
@@ -2692,7 +2692,7 @@
         "path": "contracts/triggers/CurveUsdCollRatioTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -2703,7 +2703,7 @@
         "path": "contracts/actions/checker/CurveUsdCollRatioCheck.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -2714,7 +2714,7 @@
         "path": "contracts/actions/curveusd/advanced/CurveUsdSwapper.sol",
         "version": "1.0.4",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": [
             "0xFA8c594b903651F97b27aCADEa83b720cfD7F80b",
@@ -2730,7 +2730,7 @@
         "path": "contracts/actions/curveusd/advanced/CurveUsdSelfLiquidateWithColl.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": ["0x6d02300C1A68c63C60AFD713b744bA750aB33aB0"]
     },
