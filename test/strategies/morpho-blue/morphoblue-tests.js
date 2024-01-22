@@ -1,6 +1,6 @@
 const hre = require('hardhat');
 
-const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
+const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const {
     createMorphoBlueRepayStrategy,
@@ -29,6 +29,7 @@ const {
     callMorphoBlueFLDebtBoostStrategy,
     callMorphoBlueFLCollRepayStrategy,
     callMorphoBlueFLDebtRepayStrategy,
+    callMorphoBlueRepayStrategy,
 } = require('../../strategy-calls');
 const { getMarkets, supplyToMarket, MORPHO_BLUE_ADDRESS } = require('../../morpho-blue/utils');
 
@@ -187,7 +188,7 @@ const morphoBlueBoostStrategyTest = async (eoaBoost) => {
                 expect(ratioBefore).to.be.gt(ratioAfter);
                 await revertToSnapshot(snapshot);
             });
-            it(`Executes a boost strategy with coll fl for ${collToken.symbol}/${loanToken.symbol} market for ${eoaBoost ? 'eoa' : 'proxy'}`, async () => {
+            it(`Executes a boost strategy with debt fl for ${collToken.symbol}/${loanToken.symbol} market for ${eoaBoost ? 'eoa' : 'proxy'}`, async () => {
                 snapshot = await takeSnapshot();
                 const ratioBefore = await morphoBlueView.callStatic.getRatioUsingId(
                     marketId, user,
@@ -297,7 +298,6 @@ const morphoBlueRepayStrategyTest = async (eoaRepay) => {
             user = eoaRepay ? senderAcc.address : proxy.address;
             await redeploy('MorphoBlueRatioTrigger');
             await redeploy('MorphoBlueRatioCheck');
-            await redeploy('GasFeeTaker');
 
             mockWrapper = await redeploy('MockExchangeWrapper');
             await setNewExchangeWrapper(senderAcc, mockWrapper.address);
@@ -355,7 +355,7 @@ const morphoBlueRepayStrategyTest = async (eoaRepay) => {
                     );
                 }
             });
-            it('Subscribes to boost strategy', async () => {
+            it('Subscribes to repay strategy', async () => {
                 const ratioUnder = Float2BN('2.5');
                 const targetRatio = Float2BN('3');
                 marketId = await morphoBlueView.getMarketId(marketParams);
@@ -374,22 +374,22 @@ const morphoBlueRepayStrategyTest = async (eoaRepay) => {
                 const ratioBefore = await morphoBlueView.callStatic.getRatioUsingId(
                     marketId, user,
                 );
-                const boostAmount = hre.ethers.utils.parseUnits(
+                const repayAmount = hre.ethers.utils.parseUnits(
                     fetchAmountinUSDPrice(collToken.symbol, REPAY_AMOUNT_USD),
                     collToken.decimals,
                 );
                 const exchangeObj = await formatMockExchangeObj(
                     collToken,
                     loanToken,
-                    boostAmount,
+                    repayAmount,
                 );
-                await callMorphoBlueBoostStrategy(
+                await callMorphoBlueRepayStrategy(
                     botAcc,
                     strategyExecutor,
                     0,
                     subId,
                     strategySub,
-                    boostAmount,
+                    repayAmount,
                     exchangeObj,
                 );
                 const ratioAfter = await morphoBlueView.callStatic.getRatioUsingId(

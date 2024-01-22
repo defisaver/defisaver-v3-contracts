@@ -4848,7 +4848,7 @@ const callMorphoBlueFLDebtBoostStrategy = async (botAcc, strategyExecutor, strat
 
     console.log(`GasUsed callMorphoBlueFLDebtBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
-const callMorphoBlueRepayStrategys = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, repayAmount, exchangeObject) => {
+const callMorphoBlueRepayStrategy = async (botAcc, strategyExecutor, strategyIndex, subId, strategySub, repayAmount, exchangeObject) => {
     const triggerCallData = [];
     const actionsCallData = [];
     const repayGasCost = 1000000;
@@ -5116,6 +5116,7 @@ module.exports = {
     callMorphoBlueBoostStrategy,
     callMorphoBlueFLCollBoostStrategy,
     callMorphoBlueFLDebtBoostStrategy,
+    callMorphoBlueRepayStrategy,
     callMorphoBlueFLCollRepayStrategy,
     callMorphoBlueFLDebtRepayStrategy,
 };
