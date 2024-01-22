@@ -5,7 +5,6 @@ import "./MainnetMorphoBlueAddresses.sol";
 import "../../../interfaces/morpho-blue/IMorphoBlue.sol";
 import "./MorphoBlueLib.sol";
 import "../../../interfaces/morpho-blue/IOracle.sol";
-import "../../../interfaces/IERC20.sol";
 
 contract MorphoBlueHelper is MainnetMorphoBlueAddresses {
     IMorphoBlue public constant morphoBlue = IMorphoBlue(MORPHO_BLUE_ADDRESS);
