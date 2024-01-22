@@ -5,9 +5,10 @@ pragma solidity =0.8.10;
 import "../../auth/AdminAuth.sol";
 import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
+import "../../utils/CheckWalletType.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
-contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission {
+contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
 
     /// @dev 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
@@ -36,14 +37,14 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission {
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
-    /// @dev Gives DSProxy permission if needed and registers a new sub
+    /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToCompV3Automation(
         bytes calldata encodedInput
     ) public {
-         /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission();
+         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
 
         CompV3SubData memory subData = parseSubData(encodedInput);
         StrategySub memory repaySub = formatRepaySub(subData);

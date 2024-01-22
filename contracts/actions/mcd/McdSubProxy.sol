@@ -6,9 +6,11 @@ import "../../auth/AdminAuth.sol";
 import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 import "../../interfaces/ISubscriptions.sol";
+import "../../utils/helpers/UtilHelper.sol";
+import "../../utils/CheckWalletType.sol";
 
 /// @title Subscribes users to boost/repay strategies for Maker
-contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
+contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHelper, CheckWalletType {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID; 
 
@@ -36,15 +38,15 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
-    /// @dev Gives DSProxy permission if needed and registers a new sub
+    /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToMcdAutomation(
         McdSubData calldata _subData,
         bool // _shouldLegacyUnsub no longer needed, kept to keep the function sig the same
     ) public {
-         /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission();
+         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
 
         StrategySub memory repaySub = formatRepaySub(_subData);
 

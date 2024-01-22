@@ -19,7 +19,6 @@ contract BaseUtilAddresses {
     address internal constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address internal constant MKR_PROXY_REGISTRY = 0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d;
-    address internal constant PROXY_FACTORY_ADDR = 0x291EAc3cA14b7FcA8a93af4f6198E76FcFc6B0cD;
     address internal constant DFS_PROXY_REGISTRY_ADDR = 0x2D8BFD9FF88E3106ce7214621b0770c1578749A1;
 
     // TODO: not needed now

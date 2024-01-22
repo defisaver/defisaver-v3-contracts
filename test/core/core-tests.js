@@ -537,12 +537,12 @@ const bundleStorageTest = async () => {
     });
 };
 
-const proxyAuthTest = async () => {
-    describe('ProxyAuth', () => {
-        let proxyAuth; let proxy; let proxy2; let senderAcc; let proxyPermission; let sumInputs;
+const dsProxyAuthTest = async () => {
+    describe('DSProxyAuth', () => {
+        let dsProxyAuth; let proxy; let proxy2; let senderAcc; let dsProxyPermission; let sumInputs;
 
         before(async () => {
-            proxyAuth = await redeploy('ProxyAuth');
+            dsProxyAuth = await redeploy('DSProxyAuth');
             sumInputs = await redeploy('SumInputs');
 
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -551,8 +551,8 @@ const proxyAuthTest = async () => {
             proxy = await getProxy(senderAcc.address);
             proxy2 = await getProxy(senderAcc2.address);
 
-            // give auth to ProxyAuth
-            proxyPermission = await redeploy('ProxyPermission');
+            // give auth to DSProxyAuth
+            dsProxyPermission = await redeploy('DSProxyPermission');
 
             // set StrategyExecutor to EOA for testing purposes so we can callExecute()
 
@@ -579,33 +579,33 @@ const proxyAuthTest = async () => {
             await stopImpersonatingAccount(getOwnerAddr());
         });
 
-        it('...should callExecute when auth is given to proxyAuth and StrategyExecutor set', async () => {
-            // give proxy permission to ProxyAuth
-            const ProxyPermission = await hre.ethers.getContractFactory('ProxyPermission');
-            const functionData = ProxyPermission.interface.encodeFunctionData(
+        it('...should callExecute when auth is given to dsProxyAuth and StrategyExecutor set', async () => {
+            // give proxy permission to DSProxyAuth
+            const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
+            const functionData = DSProxyPermission.interface.encodeFunctionData(
                 'givePermission',
-                [proxyAuth.address],
+                [dsProxyAuth.address],
             );
 
-            await proxy['execute(address,bytes)'](proxyPermission.address, functionData, { gasLimit: 1500000 });
+            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, { gasLimit: 1500000 });
 
             // test action
             const encodedCall = new dfs.actions.basic.SumInputsAction(1, 2).encodeForDsProxyCall();
 
             try {
-                await proxyAuth.callExecute(proxy.address, sumInputs.address, encodedCall[1]);
+                await dsProxyAuth.callExecute(proxy.address, sumInputs.address, encodedCall[1]);
                 expect(true).to.be.equal(true);
             } catch (err) {
                 expect(true).to.be.equal(false);
             }
         });
 
-        it('...should fail when ProxyAuth has no DSProxy.authority()', async () => {
+        it('...should fail when DSProxyAuth has no DSProxy.authority()', async () => {
             try {
                 // eslint-disable-next-line max-len
                 const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2)).encodeForDsProxyCall();
 
-                await proxyAuth.callExecute(proxy2.address, sumInputs.address, encodedCall[1]);
+                await dsProxyAuth.callExecute(proxy2.address, sumInputs.address, encodedCall[1]);
                 expect(true).to.be.equal(false);
             } catch (err) {
                 // can't map error as the DSProxy throws
@@ -620,7 +620,7 @@ const proxyAuthTest = async () => {
                 // eslint-disable-next-line max-len
                 const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2)).encodeForDsProxyCall();
 
-                await proxyAuth.callExecute(proxy.address, sumInputs.address, encodedCall[1]);
+                await dsProxyAuth.callExecute(proxy.address, sumInputs.address, encodedCall[1]);
                 expect(true).to.be.equal(false);
             } catch (err) {
                 expect(err.toString()).to.have.string('SenderNotExecutorError');
@@ -1328,7 +1328,7 @@ const coreFullTest = async () => {
     await dfsRegistryTest();
     await botAuthTest();
     await bundleStorageTest();
-    await proxyAuthTest();
+    await dsProxyAuthTest();
     await recipeExecutorTest();
     await strategyExecutorTest();
     await strategyStorageTest();
@@ -1341,7 +1341,7 @@ module.exports = {
     dfsRegistryTest,
     bundleStorageTest,
     botAuthTest,
-    proxyAuthTest,
+    dsProxyAuthTest,
     recipeExecutorTest,
     strategyExecutorTest,
     strategyProxyTest,

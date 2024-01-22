@@ -622,7 +622,7 @@
       "name": "ProxyAuth",
       "address": "0xF3A8479538319756e100C386b3E60BF783680d8f",
       "id": "0x5079c3ea",
-      "path": "contracts/core/strategy/ProxyAuth.sol",
+      "path": "contracts/core/strategy/DSProxyAuth.sol",
       "version": "1.0.0",
       "inRegistry": true,
       "changeTime": "86400",

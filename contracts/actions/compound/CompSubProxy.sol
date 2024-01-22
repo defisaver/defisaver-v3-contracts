@@ -6,9 +6,10 @@ import "../../auth/AdminAuth.sol";
 import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 import "../../interfaces/ISubscriptions.sol";
+import "../../utils/CheckWalletType.sol";
 
 /// @title Contract that subscribes users to Compound V2 automation bundles
-contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
+contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID;
 
@@ -34,14 +35,14 @@ contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
-    /// @dev Gives DSProxy permission if needed and registers a new sub
+    /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToCompAutomation(
         CompSubData calldata _subData
     ) public {
-         /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission();
+         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
 
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 
@@ -129,12 +130,12 @@ contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     }
 
     /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized comp sub
-    function formatRepaySub(CompSubData memory _subData, address _proxy) public view returns (StrategySub memory repaySub) {
+    function formatRepaySub(CompSubData memory _subData, address _wallet) public view returns (StrategySub memory repaySub) {
         repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData = abi.encode(_proxy, uint256(_subData.minRatio), uint8(RatioState.UNDER));
+        bytes memory triggerData = abi.encode(_wallet, uint256(_subData.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData =  new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
@@ -144,12 +145,12 @@ contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized comp sub
-    function formatBoostSub(CompSubData memory _subData, address _proxy) public view returns (StrategySub memory boostSub) {
+    function formatBoostSub(CompSubData memory _subData, address _wallet) public view returns (StrategySub memory boostSub) {
         boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(_proxy, uint256(_subData.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData = abi.encode(_wallet, uint256(_subData.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData =  new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 

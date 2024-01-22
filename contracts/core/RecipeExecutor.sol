@@ -3,7 +3,7 @@
 pragma solidity =0.8.10;
 
 import "../interfaces/IDSProxy.sol";
-import "../auth/ProxyPermission.sol";
+import "../auth/DSProxyPermission.sol";
 import "../actions/ActionBase.sol";
 import "../core/DFSRegistry.sol";
 import "../utils/CheckWalletType.sol";
@@ -13,15 +13,15 @@ import "./strategy/BundleStorage.sol";
 import "./strategy/SubStorage.sol";
 import "../interfaces/flashloan/IFlashLoanBase.sol";
 import "../interfaces/ITrigger.sol";
-import "../auth/ModulePermission.sol";
+import "../auth/SafeModulePermission.sol";
 
 /// @title Entry point into executing recipes/checking triggers directly and as part of a strategy
-contract RecipeExecutor is StrategyModel, ProxyPermission, ModulePermission, AdminAuth, CoreHelper, CheckWalletType {
+contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermission, AdminAuth, CoreHelper, CheckWalletType {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     error TriggerNotActiveError(uint256);
 
-    /// @notice Called directly through DsProxy to execute a recipe
+    /// @notice Called directly through user wallet to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
     /// @param _currRecipe Recipe to be executed
     function executeRecipe(Recipe calldata _currRecipe) public payable {
@@ -29,7 +29,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, ModulePermission, Adm
     }
 
 
-    /// @notice Called by users DSProxy through the ProxyAuth to execute a recipe & check triggers
+    /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers
     /// @param _subId Id of the subscription we want to execute
     /// @param _actionCallData All input data needed to execute actions
     /// @param _triggerCallData All input data needed to check triggers

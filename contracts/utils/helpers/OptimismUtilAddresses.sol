@@ -20,7 +20,6 @@ contract OptimismUtilAddresses {
     address internal constant WBTC_ADDR = 0x68f180fcCe6836688e9084f035309E29Bf0A2095;
 
     address internal constant MKR_PROXY_REGISTRY = 0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895;
-    address internal constant PROXY_FACTORY_ADDR = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
     address internal constant DFS_PROXY_REGISTRY_ADDR = 0x7cB647205ec73A026fe3566777e5c73Cd5A11b38;
 
     // TODO: not needed now

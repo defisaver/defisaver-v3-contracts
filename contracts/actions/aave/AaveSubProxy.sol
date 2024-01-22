@@ -5,10 +5,10 @@ pragma solidity =0.8.10;
 import "../../auth/AdminAuth.sol";
 import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
-import "../../interfaces/ISubscriptions.sol";
+import "../../utils/CheckWalletType.sol";
 
 /// @title Contract that subscribes users to Aave V2 automation bundles
-contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
+contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID;
 
@@ -25,6 +25,8 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     error WrongSubParams(uint256 minRatio, uint256 maxRatio);
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
 
+    address public constant AAVE_MARKET = 0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5;
+
     struct AaveSubData {
         uint128 minRatio;
         uint128 maxRatio;
@@ -34,14 +36,14 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
-    /// @dev Gives DSProxy permission if needed and registers a new sub
+    /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToAaveAutomation(
         AaveSubData calldata _subData
     ) public {
-        /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission();
+        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
         
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 
@@ -129,12 +131,12 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     }
 
     /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized aave sub
-    function formatRepaySub(AaveSubData memory _subData, address _proxy) public view returns (StrategySub memory repaySub) {
+    function formatRepaySub(AaveSubData memory _subData, address _wallet) public view returns (StrategySub memory repaySub) {
         repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData = abi.encode(_proxy, AAVE_MARKET, uint256(_subData.minRatio), uint8(RatioState.UNDER));
+        bytes memory triggerData = abi.encode(_wallet, AAVE_MARKET, uint256(_subData.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData =  new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
@@ -145,12 +147,12 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized aave sub
-    function formatBoostSub(AaveSubData memory _subData, address _proxy) public view returns (StrategySub memory boostSub) {
+    function formatBoostSub(AaveSubData memory _subData, address _wallet) public view returns (StrategySub memory boostSub) {
         boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(_proxy, AAVE_MARKET, uint256(_subData.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData = abi.encode(_wallet, AAVE_MARKET, uint256(_subData.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData =  new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
