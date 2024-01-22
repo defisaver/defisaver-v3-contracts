@@ -99,49 +99,20 @@ describe('Safe-AaveV3-Shift-Position', function () {
         ]);
     };
 
-    before(async () => {
-        aaveV3View = await redeploy('AaveV3View');
-        flAction = await redeploy('FLAction');
-        recipeExecutor = await redeploy('RecipeExecutor');
-        await redeploy('PullToken');
-        await redeploy('AaveV3Borrow');
-        await redeploy('AaveV3Payback');
-        await redeploy('ApproveToken');
-
-        senderAcc = (await ethers.getSigners())[0];
-        proxy = await getProxy(senderAcc.address, false);
-        safe = await getProxy(senderAcc.address, true);
-    });
-
-    it('... should shift aave V3 position from dsProxy to safe', async () => {
-        const positionObj = {
-            collAddr: WETH_ADDRESS,
-            collAmount: ethers.utils.parseUnits('10', 18),
-            collAssetId: WETH_ASSET_ID_IN_AAVE_V3_MARKET,
-            collATokenAddr: A_WETH_ADDRESS_V3,
-            debtAddr: LUSD_ADDR,
-            debtAmount: ethers.utils.parseUnits('10000', 18),
-            debtAssetId: LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
-        };
-        await createAaveV3Position(positionObj);
-
+    const approveSafeToPullTokensOnBehalfOfProxy = async (positionData) => {
         // accrue interest
-        const aCollTokensAmount = positionObj.collAmount.mul(1_00_01).div(1_00_00);
+        const aCollTokensAmount = positionData.collAmount.mul(1_00_01).div(1_00_00);
 
-        // dsProxy approve safe to pull aCollTokens
         await proxyApproveToken(
             proxy,
-            positionObj.collATokenAddr,
+            positionData.collATokenAddr,
             safe.address,
             aCollTokensAmount,
         );
-        console.log('Getting loan data for dsProxy before shift...');
-        const proxyLoanBefore = await aaveV3View.getLoanData(
-            addrs[getNetwork()].AAVE_MARKET,
-            proxy.address,
-        );
+    };
 
-        const shiftPositionRecipe = await createShiftRecipe(positionObj);
+    const migratePositionToSafeTx = async (positionData) => {
+        const shiftPositionRecipe = await createShiftRecipe(positionData);
         const recipeData = shiftPositionRecipe.encodeForDsProxyCall()[1];
 
         await executeSafeTx(
@@ -150,7 +121,9 @@ describe('Safe-AaveV3-Shift-Position', function () {
             recipeExecutor.address,
             recipeData,
         );
+    };
 
+    const validateMigration = async (positionData, proxyLoanBefore) => {
         const proxyLoanAfter = await aaveV3View.getLoanData(
             addrs[getNetwork()].AAVE_MARKET,
             proxy.address,
@@ -168,11 +141,11 @@ describe('Safe-AaveV3-Shift-Position', function () {
 
         const collAddrSafeAfter = safeLoanAfter.collAddr.filter((a) => a !== nullAddress);
         expect(collAddrSafeAfter.length).to.be.equal(1);
-        expect(collAddrSafeAfter[0]).to.be.equal(positionObj.collAddr);
+        expect(collAddrSafeAfter[0]).to.be.equal(positionData.collAddr);
 
         const borrowAddrSafeAfter = safeLoanAfter.borrowAddr.filter((a) => a !== nullAddress);
         expect(borrowAddrSafeAfter.length).to.be.equal(1);
-        expect(borrowAddrSafeAfter[0]).to.be.equal(positionObj.debtAddr);
+        expect(borrowAddrSafeAfter[0]).to.be.equal(positionData.debtAddr);
 
         const collAmountProxyBefore = proxyLoanBefore.collAmounts[0];
         const collAmountSafeAfter = safeLoanAfter.collAmounts[0];
@@ -184,5 +157,44 @@ describe('Safe-AaveV3-Shift-Position', function () {
 
         const ratioDiff = proxyLoanBefore.ratio.sub(safeLoanAfter.ratio).abs();
         expect(ratioDiff).to.be.lte(ethers.BigNumber.from('10000000000000000')); // 10e16
+    };
+
+    before(async () => {
+        aaveV3View = await redeploy('AaveV3View');
+        flAction = await redeploy('FLAction');
+        recipeExecutor = await redeploy('RecipeExecutor');
+        await redeploy('PullToken');
+        await redeploy('AaveV3Borrow');
+        await redeploy('AaveV3Payback');
+        await redeploy('ApproveToken');
+
+        senderAcc = (await ethers.getSigners())[0];
+        proxy = await getProxy(senderAcc.address, false);
+        safe = await getProxy(senderAcc.address, true);
+    });
+
+    it('... should shift aave V3 position from dsProxy to safe', async () => {
+        const positionData = {
+            collAddr: WETH_ADDRESS,
+            collAmount: ethers.utils.parseUnits('10', 18),
+            collAssetId: WETH_ASSET_ID_IN_AAVE_V3_MARKET,
+            collATokenAddr: A_WETH_ADDRESS_V3,
+            debtAddr: LUSD_ADDR,
+            debtAmount: ethers.utils.parseUnits('10000', 18),
+            debtAssetId: LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
+        };
+        await createAaveV3Position(positionData);
+
+        console.log('Getting loan data for dsProxy before shift...');
+        const proxyLoanBefore = await aaveV3View.getLoanData(
+            addrs[getNetwork()].AAVE_MARKET,
+            proxy.address,
+        );
+
+        await approveSafeToPullTokensOnBehalfOfProxy(positionData);
+
+        await migratePositionToSafeTx(positionData);
+
+        await validateMigration(positionData, proxyLoanBefore);
     });
 });
