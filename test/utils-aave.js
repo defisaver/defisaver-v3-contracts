@@ -15,6 +15,7 @@ const VARIABLE_RATE = 2;
 const WETH_ASSET_ID_IN_AAVE_V3_MARKET = 0;
 const WSETH_ASSET_ID_IN_AAVE_V3_MARKET = 1;
 const LUSD_ASSET_ID_IN_AAVE_V3_MARKET = 10;
+const A_WETH_ADDRESS_V3 = '0x4d5F47FA6A74757f35C14fD3a6Ef8E3C9BC514E8';
 
 const getAaveDataProvider = async () => {
     const dataProvider = await hre.ethers.getContractAt('IAaveProtocolDataProviderV2', AAVE_MARKET_DATA_ADDR);
@@ -82,4 +83,5 @@ module.exports = {
     WETH_ASSET_ID_IN_AAVE_V3_MARKET,
     LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
     WSETH_ASSET_ID_IN_AAVE_V3_MARKET,
+    A_WETH_ADDRESS_V3,
 };
