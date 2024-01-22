@@ -6,9 +6,10 @@ import "../../auth/AdminAuth.sol";
 import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 import "../../interfaces/ISubscriptions.sol";
+import "../../utils/CheckWalletType.sol";
 
 /// @title Contract that subscribes users to Compound V2 automation bundles
-contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
+contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID;
 
@@ -41,7 +42,7 @@ contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission {
         CompSubData calldata _subData
     ) public {
          /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission();
+        giveWalletPermission(isDSProxy(address(this)));
 
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 
