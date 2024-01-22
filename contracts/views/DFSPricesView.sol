@@ -2,13 +2,10 @@
 
 pragma solidity =0.8.10;
 
-import "../utils/SafeERC20.sol";
 import "../exchangeV3/helpers/ExchangeHelper.sol";
 import "../utils/TokenUtils.sol";
 
 contract DFSPricesView is ExchangeHelper {
-
-    enum ActionType { SELL, BUY }
     
     error OutOfRangeSlicingError();
 
@@ -16,21 +13,19 @@ contract DFSPricesView is ExchangeHelper {
     /// @param _amount Amount of source tokens you want to exchange
     /// @param _srcToken Address of the source token
     /// @param _destToken Address of the destination token
-    /// @param _type Type of action SELL|BUY
     /// @param _wrappers Array of wrapper addresses to compare
     /// @return (address, uint) The address of the best exchange and the exchange price
     function getBestPrice(
         uint256 _amount,
         address _srcToken,
         address _destToken,
-        ActionType _type,
         address[] memory _wrappers,
         bytes[] memory _additionalData
     ) public returns (address, uint256) {
 
         uint256[] memory rates = new uint256[](_wrappers.length);
         for (uint i=0; i<_wrappers.length; i++) {
-            rates[i] = getExpectedRate(_wrappers[i], _srcToken, _destToken, _amount, _type, _additionalData[i]);
+            rates[i] = getExpectedRate(_wrappers[i], _srcToken, _destToken, _amount, _additionalData[i]);
         }
 
         return getBiggestRate(_wrappers, rates);
@@ -42,36 +37,24 @@ contract DFSPricesView is ExchangeHelper {
     /// @param _srcToken From token
     /// @param _destToken To token
     /// @param _amount Amount to be exchanged
-    /// @param _type Type of action SELL|BUY
     function getExpectedRate(
         address _wrapper,
         address _srcToken,
         address _destToken,
         uint256 _amount,
-        ActionType _type,
         bytes memory _additionalData
     ) public returns (uint256) {
         bool success;
         bytes memory result;
 
-        if (_type == ActionType.SELL) {
-            (success, result) = _wrapper.call(abi.encodeWithSignature(
-                "getSellRate(address,address,uint256,bytes)",
-                _srcToken,
-                _destToken,
-                _amount,
-                _additionalData
-            ));
+        (success, result) = _wrapper.call(abi.encodeWithSignature(
+            "getSellRate(address,address,uint256,bytes)",
+            _srcToken,
+            _destToken,
+            _amount,
+            _additionalData
+        ));
 
-        } else {
-            (success, result) = _wrapper.call(abi.encodeWithSignature(
-                "getBuyRate(address,address,uint256,bytes)",
-                _srcToken,
-                _destToken,
-                _amount,
-                _additionalData
-            ));
-        }
 
         if (success) {
             return sliceUint(result, 0);

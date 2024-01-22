@@ -34,9 +34,6 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         return amounts[amounts.length - 1];
     }
 
-    /// @dev deprecated function
-    function buy(address _srcAddr, address, uint _destAmount, bytes memory _additionalData) external override returns(uint) {}
-
     /// @notice Return a rate for which we can sell an amount of tokens
     /// @param _srcAmount From amount
     /// @return uint Rate
@@ -46,9 +43,6 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         uint[] memory amounts = router.getAmountsOut(_srcAmount, path);
         return wdiv(amounts[amounts.length - 1], _srcAmount);
     }
-
-    /// @dev deprecated function
-    function getBuyRate(address, address, uint _destAmount, bytes memory _additionalData) public override view returns (uint) {}
 
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}

@@ -42,11 +42,6 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         return amountOut;
     }
 
-    /// @dev deprecated function
-    function buy(address, address, uint, bytes calldata) external pure override returns(uint) {
-        return 0;
-    }
-
     /// @notice Return a rate for which we can sell an amount of tokens
     /// @param _srcAmount From amount
     /// @param _additionalData Route and swap params
@@ -64,11 +59,6 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
             _pools
         );
         return wdiv(amountOut, _srcAmount);
-    }
-
-    /// @dev deprecated function
-    function getBuyRate(address, address, uint, bytes memory) external pure override returns (uint) {
-        return 0;
     }
 
     // solhint-disable-next-line no-empty-blocks

@@ -43,9 +43,6 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         return destAmount;
     }
 
-    /// @dev deprecated function
-    function buy(address _srcAddr, address _destAddr, uint _destAmount, bytes memory) external override returns(uint) {}
-
     /// @notice Return a rate for which we can sell an amount of tokens
     /// @dev Will fail if token is over 18 decimals
     /// @param _srcAddr From token
@@ -61,9 +58,6 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         // divide with decimal difference in dest token
         rate = rate / (10 ** (18 - getDecimals(_srcAddr)));
     }
-
-    /// @dev deprecated function
-    function getBuyRate(address _srcAddr, address _destAddr, uint _destAmount, bytes memory _additionalData) public override view returns (uint rate) {}
 
     // solhint-disable-next-line no-empty-blocks
     receive() payable external {}

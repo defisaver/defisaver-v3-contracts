@@ -37,9 +37,6 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         return amountOut;
     }
 
-    /// @dev deprecated function
-    function buy(address _srcAddr, address, uint _destAmount, bytes calldata _additionalData) external override returns(uint) {}
-
     /// @notice Return a rate for which we can sell an amount of tokens
     /// @param _srcAmount From amount
     /// @param _additionalData path object (encoded path_fee_path_fee_path etc.)
@@ -48,9 +45,6 @@ contract UniV3WrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         uint amountOut = quoter.quoteExactInput(_additionalData, _srcAmount);
         return wdiv(amountOut, _srcAmount);
     }
-
-    /// @dev deprecated function
-    function getBuyRate(address, address, uint _destAmount, bytes memory _additionalData) public override returns (uint) {}
 
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
