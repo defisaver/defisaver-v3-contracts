@@ -35,7 +35,6 @@ const addrs = {
         USDC_ADDR: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         EXCHANGE_OWNER_ADDR: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
         SAVER_EXCHANGE_ADDR: '0x25dd3F51e0C3c3Ff164DDC02A8E4D65Bb9cBB12D',
-        StrategyProxy: '0x0822902D30CC9c77404e6eB140dC1E98aF5b559A',
         SubProxy: '0xd18d4756bbf848674cc35f1a0B86afEF20787382',
         UNISWAP_WRAPPER: '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54',
         UNISWAP_V3_WRAPPER: '0xA250D449e8246B0be1ecF66E21bB98678448DEF5',
@@ -70,7 +69,6 @@ const addrs = {
         SAVER_EXCHANGE_ADDR: '0xFfE2F824f0a1Ca917885CB4f848f3aEf4a32AaB9',
         PROXY_AUTH_ADDR: '0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043',
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
-        StrategyProxy: '0xEe0C404FD30E289c305E760b3AE1d1Ae6503350f',
         SubProxy: '0x163c08d3F6d916AD6Af55b37728D547e968103F8',
         UNISWAP_V3_WRAPPER: '0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357',
         AAVE_V3_VIEW: '0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc',
@@ -100,7 +98,6 @@ const addrs = {
         PROXY_AUTH_ADDR: '0xF3A8479538319756e100C386b3E60BF783680d8f',
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
         SubProxy: '0x275A8f98dBA07Ad6380D3ea3F36B665DD6E02F25',
-        StrategyProxy: '0x8F62B8Cd1189dB92ba4CBd4dBE64D03C54fD079B',
         AAVE_V3_VIEW: '0xA74a85407D5A940542915458616aC3cf3f404E3b',
         UNISWAP_V3_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
         ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
@@ -129,7 +126,6 @@ const addrs = {
         SAVER_EXCHANGE_ADDR: '0x2A588cBCBd5e6c6ba7ED0E260B8107F599017DDE',
         PROXY_AUTH_ADDR: '0xD34BBE7398F7F08952b033bbaF2D2C84231dCEdc',
         AAVE_MARKET: '0xe20fCBdBfFC4Dd138cE8b2E6FBb6CB49777ad64D',
-        StrategyProxy: '',
         SubProxy: '',
         UNISWAP_V3_WRAPPER: '0xBd2d2d4718C24B8D35168480553b1F5a11f9884b',
         AAVE_V3_VIEW: '0x125b8b832BD7F2EBD77Eef148A6319AdE751C44b',
@@ -527,9 +523,7 @@ const getAddrFromRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR)
     const registry = registryInstance.attach(regAddr);
 
     // TODO: Write in registry later
-    // if (name === 'StrategyProxy') {
-    //     return addrs[network].StrategyProxy;
-    // } if (name === 'SubProxy') {
+   // if (name === 'SubProxy') {
     //     return addrs[network].SubProxy;
     // }
     const addr = await registry.getAddr(
@@ -714,7 +708,6 @@ const redeployCore = async (isL2 = false) => {
     await setCode(addrs[network].PROXY_AUTH_ADDR, dsProxyAuthBytecode);
 
     await redeploy('SubProxy', addrs[network].REGISTRY_ADDR);
-    await redeploy('StrategyProxy', addrs[network].REGISTRY_ADDR);
 
     let strategyExecutorName = 'StrategyExecutor';
     if (isL2) strategyExecutorName = 'StrategyExecutorL2';
@@ -1071,19 +1064,19 @@ const formatExchangeObjForOffchain = (
     [wrapper, exchangeAddr, allowanceTarget, price, protocolFee, callData],
 ];
 
-const addToZRXAllowlist = async (acc, newAddr) => {
+const addToExchangeAggregatorRegistry = async (acc, newAddr) => {
     const exchangeOwnerAddr = addrs[network].ZRX_ALLOWLIST_OWNER;
     await sendEther(acc, exchangeOwnerAddr, '1');
     await impersonateAccount(exchangeOwnerAddr);
 
     const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
 
-    const registryInstance = await hre.ethers.getContractFactory('ZrxAllowlist');
-    const zrxAllowlistAddr = addrs[network].ZRX_ALLOWLIST_ADDR;
+    const registryInstance = await hre.ethers.getContractFactory('ExchangeAggregatorRegistry');
+    const zrxAllowlistAddr = addrs[network].ZRX_ALLOWLIST_ADDR; // TODO: change to new addr once deployed
     const registry = await registryInstance.attach(zrxAllowlistAddr);
     const registryByOwner = await registry.connect(signer);
 
-    await registryByOwner.setAllowlistAddr(newAddr, true);
+    await registryByOwner.setExchangeTargetAddr(newAddr, true);
     await stopImpersonatingAccount(exchangeOwnerAddr);
 };
 
@@ -1318,7 +1311,7 @@ const executeTxFromProxy = async (proxy, targetAddr, callData) => {
 };
 
 module.exports = {
-    addToZRXAllowlist,
+    addToExchangeAggregatorRegistry,
     getAddrFromRegistry,
     getProxy,
     getProxyWithSigner,
