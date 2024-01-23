@@ -22,6 +22,9 @@ const {
     OWNER_ACC,
     REGISTRY_ADDR,
     WETH_ADDRESS,
+    revertToSnapshot,
+    takeSnapshot,
+    getAdminAddr,
 } = require('../utils');
 
 const { deployContract } = require('../../scripts/utils/deployer');
@@ -32,12 +35,40 @@ const {
     createStrategy,
     getSubHash,
 } = require('../utils-strategies');
+const { executeSafeTx } = require('../utils-safe');
 
 const THREE_HOURS = 3 * 60 * 60;
 const TWO_DAYS = 48 * 60 * 60;
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 const pullAmount = '1000000000000';
+
+/**
+ * Set StrategyExecutor to EOA for testing purposes so we can callExecute()
+ */
+const impersonateStrategyExecutorAsEoa = async (senderAddr) => {
+    await impersonateAccount(getOwnerAddr());
+    const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
+
+    const registryInstance = await hre.ethers.getContractFactory('DFSRegistry', signer);
+    let registry = await registryInstance.attach(REGISTRY_ADDR);
+
+    registry = registry.connect(signer);
+
+    const id = getNameId('StrategyExecutorID');
+
+    await registry.startContractChange(id, senderAddr, { gasLimit: 2000000 });
+
+    const entryData = await registry.entries(id);
+
+    if (parseInt(entryData.waitPeriod, 10) > 0) {
+        await timeTravel(parseInt(entryData.waitPeriod, 10) + 10);
+    }
+
+    await registry.approveContractChange(id, { gasLimit: 2000000 });
+
+    await stopImpersonatingAccount(getOwnerAddr());
+};
 
 const addPlaceholderStrategy = async (proxy, maxGasPrice) => {
     const dummyStrategy = new dfs.Strategy('PullTokensStrategy');
@@ -554,36 +585,14 @@ const dsProxyAuthTest = async () => {
             // give auth to DSProxyAuth
             dsProxyPermission = await redeploy('DSProxyPermission');
 
-            // set StrategyExecutor to EOA for testing purposes so we can callExecute()
-
-            await impersonateAccount(getOwnerAddr());
-            const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
-
-            const registryInstance = await hre.ethers.getContractFactory('DFSRegistry', signer);
-            let registry = await registryInstance.attach(REGISTRY_ADDR);
-
-            registry = registry.connect(signer);
-
-            const id = getNameId('StrategyExecutorID');
-
-            await registry.startContractChange(id, senderAcc.address, { gasLimit: 2000000 });
-
-            const entryData = await registry.entries(id);
-
-            if (parseInt(entryData.waitPeriod, 10) > 0) {
-                await timeTravel(parseInt(entryData.waitPeriod, 10) + 10);
-            }
-
-            await registry.approveContractChange(id, { gasLimit: 2000000 });
-
-            await stopImpersonatingAccount(getOwnerAddr());
+            await impersonateStrategyExecutorAsEoa(senderAcc.address);
         });
 
         it('...should callExecute when auth is given to dsProxyAuth and StrategyExecutor set', async () => {
             // give proxy permission to DSProxyAuth
             const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
             const functionData = DSProxyPermission.interface.encodeFunctionData(
-                'givePermission',
+                'giveProxyPermission',
                 [dsProxyAuth.address],
             );
 
@@ -625,6 +634,101 @@ const dsProxyAuthTest = async () => {
             } catch (err) {
                 expect(err.toString()).to.have.string('SenderNotExecutorError');
             }
+        });
+    });
+};
+
+const safeModuleAuthTest = async () => {
+    describe('SafeModuleAuth', () => {
+        let safeModuleAuth;
+        let safeModulePermission;
+        let senderAcc;
+        let sumInputs;
+        let safe;
+        let snapshotId;
+
+        before(async () => {
+            safeModuleAuth = await redeploy('SafeModuleAuth');
+            safeModulePermission = await redeploy('SafeModulePermission');
+            sumInputs = await redeploy('SumInputs');
+            senderAcc = (await hre.ethers.getSigners())[0];
+            safe = await getProxy(senderAcc.address, true);
+            await impersonateStrategyExecutorAsEoa(senderAcc.address);
+        });
+
+        beforeEach(async () => { snapshotId = await takeSnapshot(); });
+        afterEach(async () => { await revertToSnapshot(snapshotId); });
+
+        it('... should callExecute when auth is given to safeModuleAuth and StrategyExecutor is set', async () => {
+            // give safe module permission to SafeModuleAuth
+            const SafeModulePermission = await hre.ethers.getContractFactory('SafeModulePermission');
+            const functionData = SafeModulePermission.interface.encodeFunctionData(
+                'enableModule',
+                [safeModuleAuth.address],
+            );
+
+            await executeSafeTx(
+                senderAcc.address,
+                safe,
+                safeModulePermission.address,
+                functionData,
+            );
+
+            // test action
+            const encodedCall = new dfs.actions.basic.SumInputsAction(1, 2).encodeForDsProxyCall();
+
+            try {
+                await safeModuleAuth.callExecute(safe.address, sumInputs.address, encodedCall[1]);
+                expect(true).to.be.equal(true);
+            } catch (err) {
+                expect(true).to.be.equal(false);
+            }
+        });
+
+        it('... should fail when safeModuleAuth has no safe module permission', async () => {
+            const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2))
+                .encodeForDsProxyCall();
+
+            await expect(
+                safeModuleAuth.callExecute(safe.address, sumInputs.address, encodedCall[1]),
+            ).to.be.reverted;
+        });
+
+        it('... should fail when StrategyExecutor is not the caller', async () => {
+            await redeploy('StrategyExecutor'); // set diff. address to be StrategyExecutor
+
+            const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2))
+                .encodeForDsProxyCall();
+
+            await expect(
+                safeModuleAuth.callExecute(safe.address, sumInputs.address, encodedCall[1]),
+            ).to.be.reverted;
+        });
+
+        it('... should fail when safeModuleAuth is paused', async () => {
+            const SafeModulePermission = await hre.ethers.getContractFactory('SafeModulePermission');
+            const functionData = SafeModulePermission.interface.encodeFunctionData(
+                'enableModule',
+                [safeModuleAuth.address],
+            );
+            await executeSafeTx(
+                senderAcc.address,
+                safe,
+                safeModulePermission.address,
+                functionData,
+            );
+            const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2))
+                .encodeForDsProxyCall();
+
+            await impersonateAccount(getAdminAddr());
+            const adminAcc = await hre.ethers.provider.getSigner(getAdminAddr());
+            const safeModuleAuthByAdmin = safeModuleAuth.connect(adminAcc);
+            await safeModuleAuthByAdmin.setPaused(true);
+
+            await expect(
+                safeModuleAuth.connect(senderAcc)
+                    .callExecute(safe.address, sumInputs.address, encodedCall[1]),
+            ).to.be.reverted;
         });
     });
 };
@@ -1329,6 +1433,7 @@ const coreFullTest = async () => {
     await botAuthTest();
     await bundleStorageTest();
     await dsProxyAuthTest();
+    await safeModuleAuthTest();
     await recipeExecutorTest();
     await strategyExecutorTest();
     await strategyStorageTest();

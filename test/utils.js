@@ -329,6 +329,8 @@ const Float2BN = hre.ethers.utils.parseUnits;
 
 const getOwnerAddr = () => addrs[network].OWNER_ACC;
 
+const getAdminAddr = () => addrs[network].ADMIN_ACC;
+
 async function findBalancesSlot(tokenAddress) {
     const slotObj = storageSlots[tokenAddress];
     if (slotObj) {
@@ -1349,6 +1351,7 @@ module.exports = {
     openStrategyAndBundleStorage,
     redeployCore,
     getOwnerAddr,
+    getAdminAddr,
     getWeth,
     BN2Float,
     Float2BN,
