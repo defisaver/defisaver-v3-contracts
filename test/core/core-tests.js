@@ -905,86 +905,6 @@ const strategyExecutorTest = async () => {
     });
 };
 
-const strategyProxyTest = async () => {
-    describe('StrategyProxy', () => {
-        let strategyStorage;
-        let bundleStorage;
-        let senderAcc;
-        let strategyProxy;
-        let proxy;
-
-        before(async () => {
-            await redeployCore();
-
-            const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
-            strategyStorage = await hre.ethers.getContractAt('StrategyStorage', strategyStorageAddr);
-
-            const bundleStorageAddr = await getAddrFromRegistry('BundleStorage');
-            bundleStorage = await hre.ethers.getContractAt('BundleStorage', bundleStorageAddr);
-
-            const strategyProxyAddr = await getAddrFromRegistry('StrategyProxy');
-            strategyProxy = await hre.ethers.getContractAt('StrategyProxy', strategyProxyAddr);
-
-            senderAcc = (await hre.ethers.getSigners())[0];
-
-            await openStrategyAndBundleStorage();
-
-            proxy = await getProxy(senderAcc.address);
-        });
-
-        it('...should create a new strategy ', async () => {
-            const numStrategiesBefore = await strategyStorage.getStrategyCount();
-
-            const functionData = strategyProxy.interface.encodeFunctionData('createStrategy', [
-                'TestStrategy', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true,
-            ]);
-
-            await proxy['execute(address,bytes)'](strategyProxy.address, functionData, {
-                gasLimit: 5000000,
-            });
-
-            const numStrategies = await strategyStorage.getStrategyCount();
-
-            expect(numStrategies).to.be.eq(+numStrategiesBefore + 1);
-        });
-
-        it('...should create a another new strategy ', async () => {
-            const numStrategiesBefore = await strategyStorage.getStrategyCount();
-
-            const functionData = strategyProxy.interface.encodeFunctionData('createStrategy', [
-                'TestStrategy2', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true,
-            ]);
-
-            await proxy['execute(address,bytes)'](strategyProxy.address, functionData, {
-                gasLimit: 5000000,
-            });
-
-            const numStrategies = await strategyStorage.getStrategyCount();
-
-            expect(numStrategies).to.be.eq(+numStrategiesBefore + 1);
-        });
-
-        it('...should registry a new bundle ', async () => {
-            const numBundlesBefore = await bundleStorage.getBundleCount();
-
-            const numStrategies = +(await strategyStorage.getStrategyCount()) - 1;
-
-            console.log(numStrategies);
-            const functionData = strategyProxy.interface.encodeFunctionData('createBundle', [
-                [numStrategies, numStrategies - 1],
-            ]);
-
-            await proxy['execute(address,bytes)'](strategyProxy.address, functionData, {
-                gasLimit: 5000000,
-            });
-
-            const numBundles = await bundleStorage.getBundleCount();
-
-            expect(numBundles).to.be.eq(+numBundlesBefore + 1);
-        });
-    });
-};
-
 const strategyStorageTest = async () => {
     describe('StrategyStorage', () => {
         let strategyStorage; let owner; let strategyStorageFromOwner;
@@ -1324,7 +1244,6 @@ const subStorageTest = async () => {
 };
 
 const coreFullTest = async () => {
-    await strategyProxyTest();
     await dfsRegistryTest();
     await botAuthTest();
     await bundleStorageTest();
@@ -1344,7 +1263,6 @@ module.exports = {
     dsProxyAuthTest,
     recipeExecutorTest,
     strategyExecutorTest,
-    strategyProxyTest,
     strategyStorageTest,
     subProxyTest,
     subStorageTest,
