@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 import "../DFSExchangeHelper.sol";
 import "../../interfaces/exchange/IOffchainWrapper.sol";
@@ -10,41 +9,21 @@ import "../../utils/exchange/KyberInputScalingHelper.sol";
 import "../../core/DFSRegistry.sol";
 import "../../core/helpers/CoreHelper.sol";
 
-contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, DSMath, CoreHelper{
+contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, CoreHelper{
 
     using TokenUtils for address;
+    using SafeERC20 for IERC20;
 
     bytes4 constant SCALING_HELPER_ID = bytes4(keccak256("KyberInputScalingHelper"));
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    //Not enough funds
-    error InsufficientFunds(uint256 available, uint256 required);
-
-    //Order success but amount 0
-    error ZeroTokensSwapped();
-
-    using SafeERC20 for IERC20;
-
-    /// @notice Takes order from Paraswap and returns bool indicating if it is successful
+    /// @notice Takes order from Kyberswap and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    /// @param _type Action type (buy or sell)
     function takeOrder(
-        ExchangeData calldata _exData,
-        ExchangeActionType _type
+        ExchangeData calldata _exData
     ) override public payable returns (bool success, uint256) {
-        // check that contract have enough balance for exchange and protocol fee
-        uint256 tokenBalance = _exData.srcAddr.getBalance(address(this));
-        if (tokenBalance < _exData.srcAmount){
-            revert InsufficientFunds(tokenBalance, _exData.srcAmount);
-        }
-
         /// @dev safeApprove is modified to always first set approval to 0, then to exact amount
-        if (_type == ExchangeActionType.SELL) {
-            IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
-        } else {
-            uint srcAmount = wdiv(_exData.destAmount, _exData.offchainData.price) + 1; // + 1 so we round up
-            IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, srcAmount);
-        }
+        IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
 
         address scalingHelperAddr = registry.getAddr(SCALING_HELPER_ID);
         bytes memory scaledCalldata = KyberInputScalingHelper(scalingHelperAddr).getScaledInputData(_exData.offchainData.callData, _exData.srcAmount);

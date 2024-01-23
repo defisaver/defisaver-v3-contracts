@@ -4,7 +4,7 @@ pragma solidity =0.8.10;
 import "ds-test/test.sol";
 import "forge-std/console.sol";
 
-import "../../contracts/exchangeV3/TokenGroupRegistry.sol";
+import "../../contracts/exchangeV3/registries/TokenGroupRegistry.sol";
 import "../../contracts/auth/AdminAuth.sol";
 
 import "../CheatCodes.sol";
