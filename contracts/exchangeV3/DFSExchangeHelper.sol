@@ -3,7 +3,6 @@
 pragma solidity =0.8.10;
 
 import "../utils/TokenUtils.sol";
-import "../utils/SafeERC20.sol";
 import "../utils/Discount.sol";
 
 contract DFSExchangeHelper {

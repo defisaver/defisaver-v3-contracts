@@ -2,10 +2,8 @@
 pragma solidity =0.8.10;
 
 import "../../../interfaces/curve/ISwapRouterNG.sol";
-import "../../../interfaces/IERC20.sol";
 
 import "../../../auth/AdminAuth.sol";
-import "../../../utils/SafeERC20.sol";
 import "../helpers/CurveUsdHelper.sol";
 import "../../../utils/Discount.sol";
 import "../../../utils/FeeRecipient.sol";

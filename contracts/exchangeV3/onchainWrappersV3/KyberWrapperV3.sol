@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../../utils/SafeERC20.sol";
 import "../../interfaces//exchange/IKyberNetworkProxy.sol";
 import "../../interfaces/exchange/IExchangeV3.sol";
 import "../../DS/DSMath.sol";
