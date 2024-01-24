@@ -1371,6 +1371,28 @@
         "history": []
     },
     {
+        "name": "MorphoBlueRatioTrigger",
+        "address": "0xaD062b3A9DdCe72E7df6278f14A5A6a6190f9B14",
+        "id": "0x98c39012",
+        "path": "contracts/triggers/MorphoBlueRatioTrigger",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueRatioCheck",
+        "address": "0xE0531Cb87BF2Ae61bcBd1719E6154e823Effb2a7",
+        "id": "0xf913c3b7",
+        "path": "contracts/actions/checker/MorphoBlueRatioCheck",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "FLMorphoBlue",
         "address": "0x6206C96EAc5EAC546861438A9f953B6BEa50EBAB",
         "id": "0x025e64d8",
