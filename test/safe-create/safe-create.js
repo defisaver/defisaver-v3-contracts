@@ -3,8 +3,8 @@ const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const {
     predictSafeAddress,
-    masterCopyVersions,
-    proxyCreatedTopic0,
+    SAFE_MASTER_COPY_VERSIONS,
+    SAFE_CONSTANTS,
     deploySafe,
     getSafeCreationArgs,
 } = require('../utils-safe');
@@ -29,8 +29,8 @@ describe('Safe-Create-Test', () => {
         const saltNonce = '0';
 
         deployedSafes = await Promise.all(
-            Object.keys(masterCopyVersions).map(async (version) => {
-                const masterCopyAddress = masterCopyVersions[version];
+            Object.keys(SAFE_MASTER_COPY_VERSIONS).map(async (version) => {
+                const masterCopyAddress = SAFE_MASTER_COPY_VERSIONS[version];
 
                 const predictedAddress = await predictSafeAddress(
                     masterCopyAddress,
@@ -41,7 +41,7 @@ describe('Safe-Create-Test', () => {
                 const tx = await deploySafe(masterCopyAddress, setupArgs, saltNonce);
 
                 const deployedSafe = `0x${tx.logs.find(
-                    (log) => log.topics.includes(proxyCreatedTopic0),
+                    (log) => log.topics.includes(SAFE_CONSTANTS.PROXY_CREATED_TOPIC_0),
                 ).topics[1].slice(26)}`;
 
                 expect(deployedSafe).to.be.eq(predictedAddress);
