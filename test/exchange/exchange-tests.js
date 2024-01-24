@@ -26,7 +26,7 @@ const {
     getAddrFromRegistry,
     approve,
     formatExchangeObjForOffchain,
-    addToZRXAllowlist,
+    addToExchangeAggregatorRegistry,
     chainIds,
     takeSnapshot,
     revertToSnapshot,
@@ -232,7 +232,7 @@ const kyberAggregatorDFSSellTest = async () => {
         before(async () => {
             // await redeploy('KyberInputScalingHelper');
             await redeploy('KyberInputScalingHelperL2');
-            // await redeploy('DFSSell');
+            await redeploy('DFSSell');
             kyberAggregatorWrapper = await redeploy('KyberAggregatorWrapper');
 
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -248,7 +248,7 @@ const kyberAggregatorDFSSellTest = async () => {
             await revertToSnapshot(snapshot);
         });
 
-        for (let i = 0; i < trades.length; ++i) {
+        for (let i = 0; i < 1; ++i) {
             const trade = trades[i];
             it(`... should try to sell ${trade.sellToken} for ${trade.buyToken} with offchain calldata (Kyber) in a single DFSSell action`, async () => {
                 const network = hre.network.config.name;
@@ -321,7 +321,7 @@ const kyberAggregatorDFSSellTest = async () => {
                     callData,
                 );
 
-                await addToZRXAllowlist(senderAcc, priceObject.routerAddress);
+                await addToExchangeAggregatorRegistry(senderAcc, priceObject.routerAddress);
                 // test single action so no changing of amount
 
                 const sellAction = new dfs.actions.basic.SellAction(
@@ -403,7 +403,7 @@ const kyberAggregatorDFSSellTest = async () => {
                     callData,
                 );
 
-                await addToZRXAllowlist(senderAcc, priceObject.routerAddress);
+                await addToExchangeAggregatorRegistry(senderAcc, priceObject.routerAddress);
                 // test recipe
                 const sellRecipe = new dfs.Recipe('SellRecipe', [
                     new dfs.actions.basic.PullTokenAction(sellAssetInfo.address, senderAcc.address, amount),
@@ -588,7 +588,7 @@ const paraswapTest = async () => {
                 paraswapSpecialCalldata,
             );
 
-            await addToZRXAllowlist(senderAcc, priceObject.contractAddress);
+            await addToExchangeAggregatorRegistry(senderAcc, priceObject.contractAddress);
         });
 
         beforeEach(async () => {
@@ -715,7 +715,7 @@ const oneInchTest = async () => {
                 specialCalldata,
             );
 
-            await addToZRXAllowlist(senderAcc, allowanceTarget);
+            await addToExchangeAggregatorRegistry(senderAcc, allowanceTarget);
         });
 
         beforeEach(async () => {

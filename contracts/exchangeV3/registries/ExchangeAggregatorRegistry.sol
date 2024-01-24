@@ -9,7 +9,7 @@ contract ExchangeAggregatorRegistry is AdminAuth {
 
     error EmptyAddrError();
 
-    function setAllowlistAddr(address _exchangeAddr, bool _state) public onlyOwner {
+    function setExchangeTargetAddr(address _exchangeAddr, bool _state) public onlyOwner {
         if(_exchangeAddr == address(0)) {
 			revert EmptyAddrError();
 		}
