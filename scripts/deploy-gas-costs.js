@@ -15,7 +15,7 @@ const calcGasToUSD = (gasUsed) => {
 async function main() {
     let totalGasUsed = 0;
 
-    totalGasUsed += await deployContractAndReturnGasUsed('DSProxyAuth');
+    totalGasUsed += await deployContractAndReturnGasUsed('ProxyAuth');
 
     totalGasUsed += await deployContractAndReturnGasUsed('DFSRegistry');
 

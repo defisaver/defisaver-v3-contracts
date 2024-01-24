@@ -18,7 +18,7 @@ const subStorageBytecode = require('../artifacts/contracts/core/strategy/SubStor
 const subStorageBytecodeL2 = require('../artifacts/contracts/core/l2/SubStorageL2.sol/SubStorageL2.json').deployedBytecode;
 const bundleStorageBytecode = require('../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
 const recipeExecutorBytecode = require('../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
-const dsProxyAuthBytecode = require('../artifacts/contracts/core/strategy/DSProxyAuth.sol/DSProxyAuth.json').deployedBytecode;
+const proxyAuthBytecode = require('../artifacts/contracts/core/strategy/ProxyAuth.sol/ProxyAuth.json').deployedBytecode;
 const mockChainlinkFeedRegistryBytecode = require('../artifacts/contracts/mocks/MockChainlinkFeedRegistry.sol/MockChainlinkFeedRegistry.json').deployedBytecode;
 
 const addrs = {
@@ -707,7 +707,7 @@ const redeployCore = async (isL2 = false) => {
     const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor', addrs[network].REGISTRY_ADDR);
     await setCode(recipeExecutorAddr, recipeExecutorBytecode);
 
-    await setCode(addrs[network].PROXY_AUTH_ADDR, dsProxyAuthBytecode);
+    await setCode(addrs[network].PROXY_AUTH_ADDR, proxyAuthBytecode);
 
     await redeploy('SubProxy', addrs[network].REGISTRY_ADDR);
 

@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../interfaces/IDSProxy.sol";
 import "../auth/DSProxyPermission.sol";
 import "../actions/ActionBase.sol";
 import "../core/DFSRegistry.sol";
@@ -27,7 +26,6 @@ contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermissio
     function executeRecipe(Recipe calldata _currRecipe) public payable {
         _executeActions(_currRecipe);
     }
-
 
     /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers
     /// @param _subId Id of the subscription we want to execute
