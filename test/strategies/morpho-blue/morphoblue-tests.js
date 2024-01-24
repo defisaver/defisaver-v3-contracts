@@ -110,7 +110,7 @@ const morphoBlueBoostStrategyTest = async (eoaBoost) => {
             let collateralAmount;
             let debtAmount;
             let marketId;
-            it(`Create new morphoblue position to be boosted in ${collToken.symbol}/${loanToken.symbol} market for ${eoaBoost ? 'eoa' : 'proxy'}`, async () => {
+            it(`... should create new morphoblue position to be boosted in ${collToken.symbol}/${loanToken.symbol} market for ${eoaBoost ? 'eoa' : 'proxy'}`, async () => {
                 await supplyToMarket(marketParams);
                 collateralAmount = hre.ethers.utils.parseUnits(
                     fetchAmountinUSDPrice(collToken.symbol, SUPPLY_AMOUNT_USD),
@@ -144,7 +144,7 @@ const morphoBlueBoostStrategyTest = async (eoaBoost) => {
                     );
                 }
             });
-            it('Subscribes to boost strategy', async () => {
+            it('... should subscribe to boost strategy', async () => {
                 const targetRatio = Float2BN('1.5');
                 const ratioOver = Float2BN('1.8');
                 marketId = await morphoBlueView.getMarketId(marketParams);
@@ -158,7 +158,7 @@ const morphoBlueBoostStrategyTest = async (eoaBoost) => {
                     user,
                 ));
             });
-            it(`Executes boost without FL strategy for ${collToken.symbol}/${loanToken.symbol} market for ${eoaBoost ? 'eoa' : 'proxy'}`, async () => {
+            it(`... should execute boost without FL strategy for ${collToken.symbol}/${loanToken.symbol} market for ${eoaBoost ? 'eoa' : 'proxy'}`, async () => {
                 snapshot = await takeSnapshot();
                 const ratioBefore = await morphoBlueView.callStatic.getRatioUsingId(
                     marketId, user,
@@ -188,7 +188,7 @@ const morphoBlueBoostStrategyTest = async (eoaBoost) => {
                 expect(ratioBefore).to.be.gt(ratioAfter);
                 await revertToSnapshot(snapshot);
             });
-            it(`Executes a boost strategy with debt fl for ${collToken.symbol}/${loanToken.symbol} market for ${eoaBoost ? 'eoa' : 'proxy'}`, async () => {
+            it(`... should execute a boost strategy with debt fl for ${collToken.symbol}/${loanToken.symbol} market for ${eoaBoost ? 'eoa' : 'proxy'}`, async () => {
                 snapshot = await takeSnapshot();
                 const ratioBefore = await morphoBlueView.callStatic.getRatioUsingId(
                     marketId, user,
@@ -224,7 +224,7 @@ const morphoBlueBoostStrategyTest = async (eoaBoost) => {
                 expect(ratioBefore).to.be.gt(ratioAfter);
                 await revertToSnapshot(snapshot);
             });
-            it(`Executes a boost strategy with coll fl for ${collToken.symbol}/${loanToken.symbol} market for ${eoaBoost ? 'eoa' : 'proxy'}`, async () => {
+            it(`... should execute a boost strategy with coll fl for ${collToken.symbol}/${loanToken.symbol} market for ${eoaBoost ? 'eoa' : 'proxy'}`, async () => {
                 snapshot = await takeSnapshot();
                 const ratioBefore = await morphoBlueView.callStatic.getRatioUsingId(
                     marketId, user,
@@ -321,7 +321,7 @@ const morphoBlueRepayStrategyTest = async (eoaRepay) => {
             let collateralAmount;
             let debtAmount;
             let marketId;
-            it(`Create new morphoblue position to be repaid in ${collToken.symbol}/${loanToken.symbol} market for ${eoaRepay ? 'eoa' : 'proxy'}`, async () => {
+            it(`... should create new morphoblue position to be repaid in ${collToken.symbol}/${loanToken.symbol} market for ${eoaRepay ? 'eoa' : 'proxy'}`, async () => {
                 await supplyToMarket(marketParams);
                 collateralAmount = hre.ethers.utils.parseUnits(
                     fetchAmountinUSDPrice(collToken.symbol, SUPPLY_AMOUNT_USD),
@@ -355,7 +355,7 @@ const morphoBlueRepayStrategyTest = async (eoaRepay) => {
                     );
                 }
             });
-            it('Subscribes to repay strategy', async () => {
+            it('... should subscribe to repay strategy', async () => {
                 const ratioUnder = Float2BN('2.5');
                 const targetRatio = Float2BN('3');
                 marketId = await morphoBlueView.getMarketId(marketParams);
@@ -369,7 +369,7 @@ const morphoBlueRepayStrategyTest = async (eoaRepay) => {
                     user,
                 ));
             });
-            it(`Executes repay without FL strategy for ${collToken.symbol}/${loanToken.symbol} market for ${eoaRepay ? 'eoa' : 'proxy'}`, async () => {
+            it(`... should execute repay without FL strategy for ${collToken.symbol}/${loanToken.symbol} market for ${eoaRepay ? 'eoa' : 'proxy'}`, async () => {
                 snapshot = await takeSnapshot();
                 const ratioBefore = await morphoBlueView.callStatic.getRatioUsingId(
                     marketId, user,
@@ -399,7 +399,7 @@ const morphoBlueRepayStrategyTest = async (eoaRepay) => {
                 expect(ratioAfter).to.be.gt(ratioBefore);
                 await revertToSnapshot(snapshot);
             });
-            it(`Executes a repay strategy with coll fl for ${collToken.symbol}/${loanToken.symbol} market for ${eoaRepay ? 'eoa' : 'proxy'}`, async () => {
+            it(`... should execute a repay strategy with coll fl for ${collToken.symbol}/${loanToken.symbol} market for ${eoaRepay ? 'eoa' : 'proxy'}`, async () => {
                 snapshot = await takeSnapshot();
                 const ratioBefore = await morphoBlueView.callStatic.getRatioUsingId(
                     marketId, user,
@@ -435,7 +435,7 @@ const morphoBlueRepayStrategyTest = async (eoaRepay) => {
                 expect(ratioAfter).to.be.gt(ratioBefore);
                 await revertToSnapshot(snapshot);
             });
-            it(`Executes a repay strategy with debt fl for ${collToken.symbol}/${loanToken.symbol} market for ${eoaRepay ? 'eoa' : 'proxy'}`, async () => {
+            it(`... should execute a repay strategy with debt fl for ${collToken.symbol}/${loanToken.symbol} market for ${eoaRepay ? 'eoa' : 'proxy'}`, async () => {
                 snapshot = await takeSnapshot();
                 const ratioBefore = await morphoBlueView.callStatic.getRatioUsingId(
                     marketId, user,
