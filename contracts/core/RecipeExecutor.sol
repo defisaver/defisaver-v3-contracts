@@ -3,23 +3,25 @@
 pragma solidity =0.8.10;
 
 import "../interfaces/IDSProxy.sol";
-import "../auth/ProxyPermission.sol";
+import "../auth/DSProxyPermission.sol";
 import "../actions/ActionBase.sol";
 import "../core/DFSRegistry.sol";
+import "../utils/CheckWalletType.sol";
 import "./strategy/StrategyModel.sol";
 import "./strategy/StrategyStorage.sol";
 import "./strategy/BundleStorage.sol";
 import "./strategy/SubStorage.sol";
 import "../interfaces/flashloan/IFlashLoanBase.sol";
 import "../interfaces/ITrigger.sol";
+import "../auth/SafeModulePermission.sol";
 
 /// @title Entry point into executing recipes/checking triggers directly and as part of a strategy
-contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper {
+contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermission, AdminAuth, CoreHelper, CheckWalletType {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     error TriggerNotActiveError(uint256);
 
-    /// @notice Called directly through DsProxy to execute a recipe
+    /// @notice Called directly through user wallet to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
     /// @param _currRecipe Recipe to be executed
     function executeRecipe(Recipe calldata _currRecipe) public payable {
@@ -27,7 +29,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
     }
 
 
-    /// @notice Called by users DSProxy through the ProxyAuth to execute a recipe & check triggers
+    /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers
     /// @param _subId Id of the subscription we want to execute
     /// @param _actionCallData All input data needed to execute actions
     /// @param _triggerCallData All input data needed to check triggers
@@ -136,7 +138,7 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
         bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
 
         if (isFL(firstActionAddr)) {
-            _parseFLAndExecute(_currRecipe, firstActionAddr, returnValues);
+             _parseFLAndExecute(_currRecipe, firstActionAddr, returnValues);
         } else {
             for (uint256 i = 0; i < _currRecipe.actionIds.length; ++i) {
                 returnValues[i] = _executeAction(_currRecipe, i, returnValues);
@@ -159,8 +161,8 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
 
         address actionAddr = registry.getAddr(_currRecipe.actionIds[_index]);
 
-        response = IDSProxy(address(this)).execute(
-            actionAddr,
+        response = delegateCallAndReturnBytes32(
+            actionAddr, 
             abi.encodeWithSignature(
                 "executeAction(bytes,bytes32[],uint8[],bytes32[])",
                 _currRecipe.callData[_index],
@@ -181,7 +183,10 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
         address _flActionAddr,
         bytes32[] memory _returnValues
     ) internal {
-        givePermission(_flActionAddr);
+
+        bool isDSProxy = isDSProxy(address(this));
+
+        isDSProxy ? giveProxyPermission(_flActionAddr) : enableModule(_flActionAddr);
 
         // encode data for FL
         bytes memory recipeData = abi.encode(_currRecipe, address(this));
@@ -200,12 +205,27 @@ contract RecipeExecutor is StrategyModel, ProxyPermission, AdminAuth, CoreHelper
             _returnValues
         );
 
-        removePermission(_flActionAddr);
+        isDSProxy ? removeProxyPermission(_flActionAddr) : disableLastModule(_flActionAddr);
     }
 
     /// @notice Checks if the specified address is of FL type action
     /// @param _actionAddr Address of the action
     function isFL(address _actionAddr) internal pure returns (bool) {
         return ActionBase(_actionAddr).actionType() == uint8(ActionBase.ActionType.FL_ACTION);
+    }
+
+    function delegateCallAndReturnBytes32(address _target, bytes memory _data) internal returns (bytes32 response) {
+        require(_target != address(0));
+
+        // call contract in current context
+        assembly {
+            let succeeded := delegatecall(sub(gas(), 5000), _target, add(_data, 0x20), mload(_data), 0, 32)
+            response := mload(0)      // load delegatecall output
+            switch iszero(succeeded)
+            case 1 {
+                // throw if delegatecall failed
+                revert(0, 0)
+            }
+        }
     }
 }

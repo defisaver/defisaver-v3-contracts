@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 const { getAssetInfo } = require('@defisaver/tokens');
+const hre = require('hardhat');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const { supplyAave, borrowAave } = require('../../actions');
@@ -32,6 +33,7 @@ const {
     resetForkToBlock,
     REGISTRY_ADDR,
     AAVE_V2_MARKET_ADDR,
+    redeployCore,
 } = require('../../utils');
 const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
 
@@ -99,17 +101,19 @@ const aaveV2BoostTest = () => describe('Aave-Boost-Strategy', function () {
 
         setNetwork('mainnet');
         [senderAcc] = await ethers.getSigners();
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
         botAcc = (await ethers.getSigners())[1];
-        strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+        strategyExecutor = await redeployCore();
 
         await redeploy('AaveBorrow');
         await redeploy('AaveSupply');
         await redeploy('AaveV2RatioTrigger');
         await redeploy('AaveV2RatioCheck');
+        await redeploy('SafeModuleAuth');
+        await redeploy('DFSSell');
 
-        flAddr = await getContractFromRegistry('FLAction');
+        flAddr = await redeploy('FLAction');
         view = await getContractFromRegistry('AaveView');
 
         ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));
@@ -237,17 +241,20 @@ const aaveV2RepayTest = () => describe('Aave-Repay-Strategy', function () {
 
         setNetwork('mainnet');
         [senderAcc] = await ethers.getSigners();
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
         botAcc = (await ethers.getSigners())[1];
-        strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+        strategyExecutor = await redeployCore();
 
-        await redeploy('DFSSell');
         await redeploy('AaveWithdraw');
         await redeploy('AavePayback');
         await redeploy('AaveV2RatioTrigger');
         await redeploy('AaveV2RatioCheck');
-        await redeploy('FLAction');
+        await redeploy('SafeModuleAuth');
+        await redeploy('DFSSell');
+
+        flAddr = await redeploy('FLAction');
+        view = await getContractFromRegistry('AaveView');
 
         flAddr = await getContractFromRegistry('FLAction');
         view = await getContractFromRegistry('AaveView');

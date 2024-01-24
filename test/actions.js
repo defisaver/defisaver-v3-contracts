@@ -3,9 +3,12 @@ const dfs = require('@defisaver/sdk');
 const hre = require('hardhat');
 
 const { getAssetInfo, ilks } = require('@defisaver/tokens');
+
+
 const {
     approve,
     getAddrFromRegistry,
+    executeTxFromProxy,
     nullAddress,
     WETH_ADDRESS,
     UNISWAP_WRAPPER,
@@ -26,6 +29,7 @@ const {
     BLUSD_ADDR,
     getNetwork,
     formatExchangeObjSdk,
+    isProxySafe,
 } = require('./utils');
 
 const {
@@ -38,7 +42,6 @@ const { getSecondTokenAmount } = require('./utils-uni');
 const {
     LiquityActionIds, getHints, getRedemptionHints, collChangeId, debtChangeId,
 } = require('./utils-liquity');
-const { execShellCommand } = require('../scripts/hardhat-tasks-functions');
 
 const network = hre.network.config.name;
 
@@ -47,9 +50,9 @@ const executeAction = async (actionName, functionData, proxy, regAddr = addrs[ne
     let receipt;
     try {
         mineBlock();
-        receipt = await proxy['execute(address,bytes)'](actionAddr, functionData, {
-            gasLimit: 10000000,
-        });
+
+        receipt = await executeTxFromProxy(proxy, actionAddr, functionData);
+
         const gasUsed = await getGasUsed(receipt);
         console.log(`Gas used by ${actionName} action; ${gasUsed}`);
         return receipt;
@@ -3250,6 +3253,179 @@ const proxyApproveToken = async (
     return receipt;
 };
 
+const morphoBlueSupply = async (
+    proxy,
+    marketParams,
+    amount,
+    from,
+    onBehalf,
+) => {
+    const morphoSupplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyAction(
+        marketParams[0],
+        marketParams[1],
+        marketParams[2],
+        marketParams[3],
+        marketParams[4],
+        amount,
+        from,
+        onBehalf,
+    );
+    const functionData = morphoSupplyAction.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('MorphoBlueSupply', functionData, proxy);
+
+    return receipt;
+};
+const morphoBlueWithdraw = async (
+    proxy,
+    marketParams,
+    amount,
+    onBehalf,
+    to,
+) => {
+    const morphoWithdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawAction(
+        marketParams[0],
+        marketParams[1],
+        marketParams[2],
+        marketParams[3],
+        marketParams[4],
+        amount,
+        onBehalf,
+        to,
+    );
+    const functionData = morphoWithdrawAction.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('MorphoBlueWithdraw', functionData, proxy);
+
+    return receipt;
+};
+const morphoBlueSupplyCollateral = async (
+    proxy,
+    marketParams,
+    amount,
+    from,
+    onBehalf,
+) => {
+    const morphoSupplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyCollateralAction(
+        marketParams[0],
+        marketParams[1],
+        marketParams[2],
+        marketParams[3],
+        marketParams[4],
+        amount,
+        from,
+        onBehalf,
+    );
+    const functionData = morphoSupplyAction.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('MorphoBlueSupplyCollateral', functionData, proxy);
+
+    return receipt;
+};
+const morphoBlueWithdrawCollateral = async (
+    proxy,
+    marketParams,
+    amount,
+    onBehalf,
+    to,
+) => {
+    const morphoWithdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
+        marketParams[0],
+        marketParams[1],
+        marketParams[2],
+        marketParams[3],
+        marketParams[4],
+        amount,
+        onBehalf,
+        to,
+    );
+    const functionData = morphoWithdrawAction.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('MorphoBlueWithdrawCollateral', functionData, proxy);
+
+    return receipt;
+};
+
+const morphoBlueBorrow = async (
+    proxy,
+    marketParams,
+    amount,
+    onBehalfOf,
+    to,
+) => {
+    const morphoBlueBorrowAction = new dfs.actions.morphoblue.MorphoBlueBorrowAction(
+        marketParams[0],
+        marketParams[1],
+        marketParams[2],
+        marketParams[3],
+        marketParams[4],
+        amount,
+        onBehalfOf,
+        to,
+    );
+    const functionData = morphoBlueBorrowAction.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('MorphoBlueBorrow', functionData, proxy);
+
+    return receipt;
+};
+const morphoBluePayback = async (
+    proxy,
+    marketParams,
+    amount,
+    from,
+    onBehalf,
+) => {
+    const morphoBlueBorrowAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
+        marketParams[0],
+        marketParams[1],
+        marketParams[2],
+        marketParams[3],
+        marketParams[4],
+        amount,
+        from,
+        onBehalf,
+    );
+    const functionData = morphoBlueBorrowAction.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('MorphoBluePayback', functionData, proxy);
+
+    return receipt;
+};
+const morphoBlueSetAuth = async (
+    proxy,
+    manager,
+    newIsAuthorized,
+) => {
+    const morphoBlueSetAuthAction = new dfs.actions.morphoblue.MorphoBlueSetAuthAction(
+        manager, newIsAuthorized,
+    );
+    const functionData = morphoBlueSetAuthAction.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('MorphoBlueSetAuth', functionData, proxy);
+
+    return receipt;
+};
+const morphoBlueSetAuthWithSig = async (
+    proxy,
+    authorizer,
+    authorized,
+    isAuthorized,
+    nonce,
+    deadline,
+    v,
+    r,
+    s,
+) => {
+    const morphoBlueSetAuthAction = new dfs.actions.morphoblue.MorphoBlueSetAuthWithSigAction(
+        authorizer,
+        authorized,
+        isAuthorized,
+        nonce,
+        deadline,
+        v,
+        r,
+        s,
+    );
+    const functionData = morphoBlueSetAuthAction.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('MorphoBlueSetAuthWithSig', functionData, proxy);
+
+    return receipt;
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -3446,4 +3622,13 @@ module.exports = {
     tokenizedVaultAdapterWithdraw,
 
     proxyApproveToken,
+
+    morphoBlueSupply,
+    morphoBlueWithdraw,
+    morphoBlueSupplyCollateral,
+    morphoBlueWithdrawCollateral,
+    morphoBlueBorrow,
+    morphoBluePayback,
+    morphoBlueSetAuth,
+    morphoBlueSetAuthWithSig,
 };

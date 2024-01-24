@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
 
 // Status of the Basset - has it broken its peg?
 enum BassetStatus {

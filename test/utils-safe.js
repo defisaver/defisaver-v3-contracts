@@ -1,21 +1,17 @@
 /* eslint-disable max-len */
 /* eslint-disable consistent-return */
 /* eslint-disable no-unused-vars */
-const { ethers } = require('hardhat');
+const hre = require('hardhat');
 const { nullAddress } = require('./utils');
 
-const safeSetupTopic0 = '0x141df868a6331af528e38c83b7aa03edc19be66e37ae67f9285bf4f8e3c6a1a8';
-
-const encodeSetupArgs = async (setupArgs) => {
-    const safeInterface = await ethers.getContractAt('ISafe', nullAddress).then((safe) => safe.interface);
-    return safeInterface.encodeFunctionData('setup', setupArgs);
+const SAFE_PROXY_FACTORY_ADDR = '0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67';
+const SAFE_SINGLETON_ADDR = '0x41675C099F32341bf84BFc5382aF534df5C7461a';
+const SAFE_CONSTANTS = {
+    SENTINEL_MODULE: '0x0000000000000000000000000000000000000001',
+    PROXY_CREATED_TOPIC_0: '0x4f51faf6c4561ff95f067657e43439f0f856d97c04d9ec9070a6199ad418e235',
+    SAFE_SETUP_TOPIC_0: '0x141df868a6331af528e38c83b7aa03edc19be66e37ae67f9285bf4f8e3c6a1a8',
 };
-
-exports.proxyCreatedTopic0 = '0x4f51faf6c4561ff95f067657e43439f0f856d97c04d9ec9070a6199ad418e235';
-
-exports.proxyFactoryAddress = '0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67';
-
-exports.masterCopyVersions = {
+const SAFE_MASTER_COPY_VERSIONS = {
     // V100: '0xb6029EA3B2c51D09a50B53CA8012FeEB05bDa35A',
     // V110: '0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F',
     // V120: '0x6851D6fDFAfD08c0295C392436245E5bc78B0185', // no SafeSetup event
@@ -25,46 +21,104 @@ exports.masterCopyVersions = {
     V141L2: '0x29fcB43b46531BcA003ddC8FCB67FFE91900C762',
 };
 
-exports.deploySafe = async (
-    masterCopyAddress,
-    setupArgs,
-    saltNonce,
-) => {
-    const setupArgsEncoded = await encodeSetupArgs(setupArgs);
-    const proxyFactory = await ethers.getContractAt('ISafeProxyFactory', exports.proxyFactoryAddress);
-    return proxyFactory.createProxyWithNonce(
-        masterCopyAddress,
-        setupArgsEncoded,
-        saltNonce,
-    ).then((e) => e.wait());
+const encodeSetupArgs = async (setupArgs) => {
+    const safeInterface = await hre.ethers.getContractAt('ISafe', nullAddress).then((safe) => safe.interface);
+    return safeInterface.encodeFunctionData('setup', setupArgs);
 };
 
-exports.predictSafeAddress = async (
-    masterCopyAddress,
-    setupArgs,
-    saltNonce,
-) => {
-    const setupArgsEncoded = await encodeSetupArgs(setupArgs);
+const createSafe = async (senderAddress) => {
+    const abiCoder = new hre.ethers.utils.AbiCoder();
 
-    const safeProxyFactory = await ethers.getContractAt('ISafeProxyFactory', exports.proxyFactoryAddress);
-    const proxyCreationCode = await safeProxyFactory.proxyCreationCode(); // can cache
-    const salt = ethers.utils.keccak256(ethers.utils.solidityPack(['bytes', 'uint256'], [ethers.utils.keccak256(setupArgsEncoded), saltNonce]));
+    const safeProxyFactory = await hre.ethers.getContractAt('ISafeProxyFactory', SAFE_PROXY_FACTORY_ADDR);
 
-    return ethers.utils.getCreate2Address(
-        exports.proxyFactoryAddress,
-        salt,
-        ethers.utils.keccak256(
-            proxyCreationCode.concat(masterCopyAddress.slice(2).padStart(64, '0')),
-        ),
+    const saltNonce = Date.now();
+    const setupData = [
+        [senderAddress], // owner
+        1, // threshold
+        hre.ethers.constants.AddressZero, // to module address
+        [], // data for module
+        hre.ethers.constants.AddressZero, // fallback handler
+        hre.ethers.constants.AddressZero, // payment token
+        0, // payment
+        hre.ethers.constants.AddressZero, // payment receiver
+    ];
+
+    const safeInterface = await hre.ethers.getContractAt('ISafe', SAFE_SINGLETON_ADDR);
+    const functionData = safeInterface.interface.encodeFunctionData(
+        'setup',
+        setupData,
     );
+
+    let receipt = await safeProxyFactory.createProxyWithNonce(
+        SAFE_SINGLETON_ADDR,
+        functionData,
+        saltNonce,
+    );
+    receipt = await receipt.wait();
+
+    // fetch deployed safe addr
+    const safeAddr = abiCoder.decode(['address'], receipt.events.reverse()[0].topics[1]);
+
+    return safeAddr[0];
 };
 
-exports.getSafeCreationArgs = async (safeAddress) => {
-    const [setupEvent] = await ethers.provider.getLogs({
+// Executes 1/1 safe tx without sig
+const executeSafeTx = async (
+    senderAddress,
+    safeInstance,
+    targetAddr,
+    calldata,
+    callType = 1,
+    ethValue = 0,
+) => {
+    const abiCoder = new hre.ethers.utils.AbiCoder();
+
+    const nonce = await safeInstance.nonce();
+
+    const txHash = await safeInstance.getTransactionHash(
+        targetAddr, // to
+        ethValue, // eth value
+        calldata, // action calldata
+        callType, // 1 is delegate call
+        0, // safeTxGas
+        0, // baseGas
+        0, // gasPrice
+        hre.ethers.constants.AddressZero, // gasToken
+        hre.ethers.constants.AddressZero, // refundReceiver
+        nonce, // nonce
+    );
+    console.log(`Tx hash of safe ${txHash}`);
+
+    // encode r and s
+    let sig = abiCoder.encode(['address', 'bytes32'], [senderAddress, '0x0000000000000000000000000000000000000000000000000000000000000000']);
+
+    // add v = 1
+    sig += '01';
+
+    // call safe function
+    const receipt = await safeInstance.execTransaction(
+        targetAddr,
+        ethValue,
+        calldata,
+        callType,
+        0,
+        0,
+        0,
+        hre.ethers.constants.AddressZero,
+        hre.ethers.constants.AddressZero,
+        sig,
+        { gasLimit: 8_000_000 },
+    );
+
+    return receipt;
+};
+
+const getSafeCreationArgs = async (safeAddress) => {
+    const [setupEvent] = await hre.ethers.provider.getLogs({
         address: safeAddress,
         fromBlock: 0,
         toBlock: 'latest',
-        topics: [safeSetupTopic0],
+        topics: [SAFE_CONSTANTS.SAFE_SETUP_TOPIC_0],
     });
     if (!setupEvent) return;
     const [
@@ -72,7 +126,7 @@ exports.getSafeCreationArgs = async (safeAddress) => {
         threshold,
         _,
         fallbackHandler,
-    ] = ethers.utils.defaultAbiCoder.decode(['address[]', 'uint256', 'address', 'address'], setupEvent.data);
+    ] = hre.ethers.utils.defaultAbiCoder.decode(['address[]', 'uint256', 'address', 'address'], setupEvent.data);
 
     const setupArgs = [
         owners, // _owners - List of Safe owners.
@@ -85,7 +139,7 @@ exports.getSafeCreationArgs = async (safeAddress) => {
         nullAddress, // paymentReceiver - Address that should receive the payment (or 0 if tx.origin)
     ];
 
-    const createTx = await ethers.provider.getTransaction(setupEvent.transactionHash);
+    const createTx = await hre.ethers.provider.getTransaction(setupEvent.transactionHash);
     const masterCopyAddress = `0x${createTx.data.slice(34, 74)}`;
     const saltNonce = `0x${createTx.data.slice(138, 202)}`;
 
@@ -94,4 +148,48 @@ exports.getSafeCreationArgs = async (safeAddress) => {
         setupArgs,
         saltNonce,
     };
+};
+
+const predictSafeAddress = async (
+    masterCopyAddress,
+    setupArgs,
+    saltNonce,
+) => {
+    const setupArgsEncoded = await encodeSetupArgs(setupArgs);
+
+    const safeProxyFactory = await hre.ethers.getContractAt('ISafeProxyFactory', SAFE_PROXY_FACTORY_ADDR);
+    const proxyCreationCode = await safeProxyFactory.proxyCreationCode(); // can cache
+    const salt = hre.ethers.utils.keccak256(hre.ethers.utils.solidityPack(['bytes', 'uint256'], [hre.ethers.utils.keccak256(setupArgsEncoded), saltNonce]));
+
+    return hre.ethers.utils.getCreate2Address(
+        SAFE_PROXY_FACTORY_ADDR,
+        salt,
+        hre.ethers.utils.keccak256(
+            proxyCreationCode.concat(masterCopyAddress.slice(2).padStart(64, '0')),
+        ),
+    );
+};
+
+const deploySafe = async (
+    masterCopyAddress,
+    setupArgs,
+    saltNonce,
+) => {
+    const setupArgsEncoded = await encodeSetupArgs(setupArgs);
+    const proxyFactory = await hre.ethers.getContractAt('ISafeProxyFactory', SAFE_PROXY_FACTORY_ADDR);
+    return proxyFactory.createProxyWithNonce(
+        masterCopyAddress,
+        setupArgsEncoded,
+        saltNonce,
+    ).then((e) => e.wait());
+};
+
+module.exports = {
+    createSafe,
+    executeSafeTx,
+    SAFE_CONSTANTS,
+    getSafeCreationArgs,
+    predictSafeAddress,
+    deploySafe,
+    SAFE_MASTER_COPY_VERSIONS,
 };

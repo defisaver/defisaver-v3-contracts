@@ -39,6 +39,7 @@ module.exports = {
     saveOnTenderly: false,
     defaultNetwork: 'fork',
     lightTesting: true,
+    isWalletSafe: false,
     networks: {
         ...testNetworks,
         local: {
@@ -151,4 +152,4 @@ module.exports = {
     },
 };
 
-require('./scripts/hardhat-tasks.js');
+require('./scripts/hardhat-tasks');

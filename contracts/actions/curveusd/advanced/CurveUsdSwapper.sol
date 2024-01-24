@@ -2,16 +2,14 @@
 pragma solidity =0.8.10;
 
 import "../../../interfaces/curve/ISwapRouterNG.sol";
-import "../../../interfaces/IERC20.sol";
 
 import "../../../auth/AdminAuth.sol";
-import "../../../utils/SafeERC20.sol";
 import "../helpers/CurveUsdHelper.sol";
 import "../../../utils/Discount.sol";
 import "../../../utils/FeeRecipient.sol";
 import "../../../actions/fee/helpers/GasFeeHelper.sol";
 import "../../../exchangeV3/helpers/ExchangeHelper.sol";
-import "../../../exchangeV3/TokenGroupRegistry.sol";
+import "../../../exchangeV3/registries/TokenGroupRegistry.sol";
 
 /// @title CurveUsdSwapper Callback contract for CurveUsd extended actions, swaps directly on curve
 contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminAuth {

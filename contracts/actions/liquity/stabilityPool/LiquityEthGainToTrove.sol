@@ -4,12 +4,10 @@ pragma solidity =0.8.10;
 
 import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
-import "../../../utils/SafeMath.sol";
 import "../../ActionBase.sol";
 
 contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
     using TokenUtils for address;
-    using SafeMath for uint256;
     
     struct Params {
         address lqtyTo;     // Address that will receive LQTY token gains
@@ -53,7 +51,7 @@ contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
         
         StabilityPool.withdrawETHGainToTrove(_params.upperHint, _params.lowerHint);
 
-        uint256 lqtyGain = LQTY_TOKEN_ADDRESS.getBalance(address(this)).sub(lqtyBefore);
+        uint256 lqtyGain = LQTY_TOKEN_ADDRESS.getBalance(address(this)) - (lqtyBefore);
 
         withdrawStabilityGains(0, lqtyGain, address(0), _params.lqtyTo);
         logData = abi.encode(_params.lqtyTo, ethGain, lqtyGain);

@@ -3,21 +3,23 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
+import "../../auth/Permission.sol";
+import "../../utils/CheckWalletType.sol";
 import "./SubStorage.sol";
 import "../DFSRegistry.sol";
 
-/// @title Called through DSProxy, handles auth and calls subscription contract
-contract SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+/// @title Called through user wallet, handles auth and calls subscription contract
+contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    /// @notice Gives DSProxy permission if needed and registers a new sub
+    /// @notice Gives wallet permission if needed and registers a new sub
     /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
     function subscribeToStrategy(
         StrategySub calldata _sub
     ) public {
-        givePermission(PROXY_AUTH_ADDR);
+         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
 
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(_sub);
     }

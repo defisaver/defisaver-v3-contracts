@@ -13,7 +13,6 @@ contract MainnetUtilAddresses {
     address internal constant AAVE_V3_MARKET = 0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e;
     address internal constant SPARK_MARKET = 0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE;
 
-    address internal constant PROXY_FACTORY_ADDR = 0xA26e15C895EFc0616177B7c1e7270A4C7D51C997;
     address internal constant DFS_PROXY_REGISTRY_ADDR = 0x29474FdaC7142f9aB7773B8e38264FA15E3805ed;
 
     address internal constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;

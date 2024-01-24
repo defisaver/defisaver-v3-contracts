@@ -39,6 +39,7 @@ contract AdminAuth is AuthHelper {
     }
 
     /// @notice Destroy the contract
+    /// @dev Deprecated method, selfdestruct will soon just send eth
     function kill() public onlyAdmin {
         selfdestruct(payable(msg.sender));
     }

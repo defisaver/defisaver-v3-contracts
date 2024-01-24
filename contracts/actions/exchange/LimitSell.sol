@@ -91,8 +91,7 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         uint256 currPrice = uint256(tempStorage.getBytes32("CURR_PRICE"));
         require(currPrice > 0, "LimitSell: Price not set");
 
-        // Reset the current price for the next strategy
-        tempStorage.setBytes32("CURR_PRICE", bytes32(0));
+        // no fee for limit sell strategies
         _exchangeData.dfsFeeDivider = 0;
 
         if (_exchangeData.minPrice != currPrice) {
@@ -135,9 +134,7 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
 
     /// @notice Returns the owner of the DSProxy that called the contract
     function getUserAddress() internal view returns (address) {
-        IDSProxy proxy = IDSProxy(payable(address(this)));
-
-        return proxy.owner();
+        return address(this);
     }
 
     function _takeGasFee(uint256 _gasUsed, uint256 _soldAmount, address _feeToken) internal returns (uint256 amountAfterFee) {

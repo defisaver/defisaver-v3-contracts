@@ -1,3 +1,4 @@
+/* eslint-disable no-else-return */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable no-await-in-loop */
 // const { default: curve } = require('@curvefi/api');
@@ -10,12 +11,14 @@ const storageSlots = require('./storageSlots.json');
 
 const { deployAsOwner, deployContract } = require('../scripts/utils/deployer');
 
+const { createSafe, executeSafeTx } = require('./utils-safe');
+
 const strategyStorageBytecode = require('../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
 const subStorageBytecode = require('../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
 const subStorageBytecodeL2 = require('../artifacts/contracts/core/l2/SubStorageL2.sol/SubStorageL2.json').deployedBytecode;
 const bundleStorageBytecode = require('../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
 const recipeExecutorBytecode = require('../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
-const proxyAuthBytecode = require('../artifacts/contracts/core/strategy/ProxyAuth.sol/ProxyAuth.json').deployedBytecode;
+const dsProxyAuthBytecode = require('../artifacts/contracts/core/strategy/DSProxyAuth.sol/DSProxyAuth.json').deployedBytecode;
 const mockChainlinkFeedRegistryBytecode = require('../artifacts/contracts/mocks/MockChainlinkFeedRegistry.sol/MockChainlinkFeedRegistry.json').deployedBytecode;
 
 const addrs = {
@@ -32,7 +35,6 @@ const addrs = {
         USDC_ADDR: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         EXCHANGE_OWNER_ADDR: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
         SAVER_EXCHANGE_ADDR: '0x25dd3F51e0C3c3Ff164DDC02A8E4D65Bb9cBB12D',
-        StrategyProxy: '0x0822902D30CC9c77404e6eB140dC1E98aF5b559A',
         SubProxy: '0xd18d4756bbf848674cc35f1a0B86afEF20787382',
         UNISWAP_WRAPPER: '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54',
         UNISWAP_V3_WRAPPER: '0xA250D449e8246B0be1ecF66E21bB98678448DEF5',
@@ -67,7 +69,6 @@ const addrs = {
         SAVER_EXCHANGE_ADDR: '0xFfE2F824f0a1Ca917885CB4f848f3aEf4a32AaB9',
         PROXY_AUTH_ADDR: '0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043',
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
-        StrategyProxy: '0xEe0C404FD30E289c305E760b3AE1d1Ae6503350f',
         SubProxy: '0x163c08d3F6d916AD6Af55b37728D547e968103F8',
         UNISWAP_V3_WRAPPER: '0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357',
         AAVE_V3_VIEW: '0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc',
@@ -89,6 +90,7 @@ const addrs = {
         WETH_ADDRESS: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
         DAI_ADDRESS: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
         USDC_ADDR: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
+        USDC_NATIVE_ADDR: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
         EXCHANGE_OWNER_ADDR: '0x926516e60521556f4ab5e7bf16a4d41a8539c7d1',
         SAVER_EXCHANGE_ADDR: '0xaB1E4b72BC2f3890F052df111EE626c1c7229F26',
         FEE_RECEIVER: '0xe000e3c9428D539566259cCd89ed5fb85e655A01',
@@ -96,7 +98,6 @@ const addrs = {
         PROXY_AUTH_ADDR: '0xF3A8479538319756e100C386b3E60BF783680d8f',
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
         SubProxy: '0x275A8f98dBA07Ad6380D3ea3F36B665DD6E02F25',
-        StrategyProxy: '0x8F62B8Cd1189dB92ba4CBd4dBE64D03C54fD079B',
         AAVE_V3_VIEW: '0xA74a85407D5A940542915458616aC3cf3f404E3b',
         UNISWAP_V3_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
         ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
@@ -105,6 +106,7 @@ const addrs = {
         ZRX_ALLOWLIST_ADDR: '0x5eD8e74b1caE57B0c68B3278B88589991FBa0750',
         ZRX_ALLOWLIST_OWNER: '0x926516e60521556f4ab5e7bf16a4d41a8539c7d1',
         COMET_USDC_ADDR: '0xA5EDBDD9646f8dFF606d7448e414884C7d905dCA',
+        COMET_USDC_NATIVE_ADDR: '0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf',
         COMET_USDC_REWARDS_ADDR: '0x88730d254A2f7e6AC8388c3198aFd694bA9f7fae',
         COMP_ADDR: '0x354A6dA3fcde098F8389cad84b0182725c6C91dE',
         ADMIN_VAULT: '0xd47D8D97cAd12A866900eEc6Cde1962529F25351',
@@ -124,7 +126,6 @@ const addrs = {
         SAVER_EXCHANGE_ADDR: '0x2A588cBCBd5e6c6ba7ED0E260B8107F599017DDE',
         PROXY_AUTH_ADDR: '0xD34BBE7398F7F08952b033bbaF2D2C84231dCEdc',
         AAVE_MARKET: '0xe20fCBdBfFC4Dd138cE8b2E6FBb6CB49777ad64D',
-        StrategyProxy: '',
         SubProxy: '',
         UNISWAP_V3_WRAPPER: '0xBd2d2d4718C24B8D35168480553b1F5a11f9884b',
         AAVE_V3_VIEW: '0x125b8b832BD7F2EBD77Eef148A6319AdE751C44b',
@@ -324,6 +325,8 @@ const Float2BN = hre.ethers.utils.parseUnits;
 
 const getOwnerAddr = () => addrs[network].OWNER_ACC;
 
+const getAdminAddr = () => addrs[network].ADMIN_ACC;
+
 async function findBalancesSlot(tokenAddress) {
     const slotObj = storageSlots[tokenAddress];
     if (slotObj) {
@@ -522,9 +525,7 @@ const getAddrFromRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR)
     const registry = registryInstance.attach(regAddr);
 
     // TODO: Write in registry later
-    // if (name === 'StrategyProxy') {
-    //     return addrs[network].StrategyProxy;
-    // } if (name === 'SubProxy') {
+   // if (name === 'SubProxy') {
     //     return addrs[network].SubProxy;
     // }
     const addr = await registry.getAddr(
@@ -549,19 +550,29 @@ const getProxyWithSigner = async (signer, addr) => {
     return dsProxy;
 };
 
-const getProxy = async (acc) => {
-    const proxyRegistry = await
-    hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
-    let proxyAddr = await proxyRegistry.proxies(acc);
+const getProxy = async (acc, isSafe = false) => {
+    if (isSafe === false) {
+        const proxyRegistry = await
+        hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
+        let proxyAddr = await proxyRegistry.proxies(acc);
 
-    if (proxyAddr === nullAddress) {
-        await proxyRegistry.build(acc);
-        proxyAddr = await proxyRegistry.proxies(acc);
+        if (proxyAddr === nullAddress) {
+            await proxyRegistry.build(acc);
+            proxyAddr = await proxyRegistry.proxies(acc);
+        }
+
+        const dsProxy = await hre.ethers.getContractAt('IDSProxy', proxyAddr);
+
+        return dsProxy;
+    } else {
+        // create safe
+        const safeAddr = await createSafe(acc);
+        const safe = await hre.ethers.getContractAt('ISafe', safeAddr);
+
+        console.log(`Safe created ${safeAddr}`);
+
+        return safe;
     }
-
-    const dsProxy = await hre.ethers.getContractAt('IDSProxy', proxyAddr);
-
-    return dsProxy;
 };
 
 const sendEther = async (signer, toAddress, amount) => {
@@ -696,10 +707,9 @@ const redeployCore = async (isL2 = false) => {
     const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor', addrs[network].REGISTRY_ADDR);
     await setCode(recipeExecutorAddr, recipeExecutorBytecode);
 
-    await setCode(addrs[network].PROXY_AUTH_ADDR, proxyAuthBytecode);
+    await setCode(addrs[network].PROXY_AUTH_ADDR, dsProxyAuthBytecode);
 
     await redeploy('SubProxy', addrs[network].REGISTRY_ADDR);
-    await redeploy('StrategyProxy', addrs[network].REGISTRY_ADDR);
 
     let strategyExecutorName = 'StrategyExecutor';
     if (isL2) strategyExecutorName = 'StrategyExecutorL2';
@@ -1008,7 +1018,7 @@ const setNewExchangeWrapper = async (acc, newAddr, isFork = false) => {
 
     const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
 
-    const registryInstance = await hre.ethers.getContractFactory('SaverExchangeRegistry');
+    const registryInstance = await hre.ethers.getContractFactory('WrapperExchangeRegistry');
     const registry = await registryInstance.attach(addrs[network].SAVER_EXCHANGE_ADDR);
     const registryByOwner = registry.connect(signer);
 
@@ -1056,19 +1066,19 @@ const formatExchangeObjForOffchain = (
     [wrapper, exchangeAddr, allowanceTarget, price, protocolFee, callData],
 ];
 
-const addToZRXAllowlist = async (acc, newAddr) => {
+const addToExchangeAggregatorRegistry = async (acc, newAddr) => {
     const exchangeOwnerAddr = addrs[network].ZRX_ALLOWLIST_OWNER;
     await sendEther(acc, exchangeOwnerAddr, '1');
     await impersonateAccount(exchangeOwnerAddr);
 
     const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
 
-    const registryInstance = await hre.ethers.getContractFactory('ZrxAllowlist');
-    const zrxAllowlistAddr = addrs[network].ZRX_ALLOWLIST_ADDR;
+    const registryInstance = await hre.ethers.getContractFactory('ExchangeAggregatorRegistry');
+    const zrxAllowlistAddr = addrs[network].ZRX_ALLOWLIST_ADDR; // TODO: change to new addr once deployed
     const registry = await registryInstance.attach(zrxAllowlistAddr);
     const registryByOwner = await registry.connect(signer);
 
-    await registryByOwner.setAllowlistAddr(newAddr, true);
+    await registryByOwner.setExchangeTargetAddr(newAddr, true);
     await stopImpersonatingAccount(exchangeOwnerAddr);
 };
 
@@ -1281,8 +1291,29 @@ const filterEthersObject = (obj) => {
     return keys.map((key) => filterEthersObject(obj[key]));
 };
 
+const isProxySafe = (proxy) => proxy.functions.nonce !== undefined;
+
+// executes tx through safe or dsproxy depending the type
+const executeTxFromProxy = async (proxy, targetAddr, callData) => {
+    let receipt;
+    if (isProxySafe(proxy)) {
+        receipt = await executeSafeTx(
+            proxy.signer.address,
+            proxy,
+            targetAddr,
+            callData,
+        );
+    } else {
+        receipt = await proxy['execute(address,bytes)'](targetAddr, callData, {
+            gasLimit: 10000000,
+        });
+    }
+
+    return receipt;
+};
+
 module.exports = {
-    addToZRXAllowlist,
+    addToExchangeAggregatorRegistry,
     getAddrFromRegistry,
     getProxy,
     getProxyWithSigner,
@@ -1313,6 +1344,7 @@ module.exports = {
     openStrategyAndBundleStorage,
     redeployCore,
     getOwnerAddr,
+    getAdminAddr,
     getWeth,
     BN2Float,
     Float2BN,
@@ -1320,6 +1352,26 @@ module.exports = {
     mockChainlinkPriceFeed,
     setMockPrice,
     getNftOwner,
+    isProxySafe,
+    getSparkFLFee,
+    setNetwork,
+    getNetwork,
+    setBalance,
+    takeSnapshot,
+    revertToSnapshot,
+    mineBlock,
+    setForkForTesting,
+    resetForkToBlock,
+    balanceOfOnTokenInBlock,
+    formatExchangeObjCurve,
+    formatMockExchangeObj,
+    cacheChainlinkPrice,
+    expectCloseEq,
+    setContractAt,
+    getContractFromRegistry,
+    filterEthersObject,
+    curveApiInit,
+    executeTxFromProxy,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,
@@ -1338,7 +1390,6 @@ module.exports = {
     USDC_ADDR,
     AAVE_FL_FEE,
     AAVE_V3_FL_FEE,
-    getSparkFLFee,
     MIN_VAULT_DAI_AMOUNT,
     MIN_VAULT_RAI_AMOUNT,
     RAI_ADDR,
@@ -1376,21 +1427,4 @@ module.exports = {
     BLUSD_ADDR,
     BOND_NFT_ADDR,
     AAVE_V2_MARKET_ADDR,
-    setNetwork,
-    getNetwork,
-    setBalance,
-    takeSnapshot,
-    revertToSnapshot,
-    mineBlock,
-    setForkForTesting,
-    resetForkToBlock,
-    balanceOfOnTokenInBlock,
-    formatExchangeObjCurve,
-    formatMockExchangeObj,
-    cacheChainlinkPrice,
-    expectCloseEq,
-    setContractAt,
-    getContractFromRegistry,
-    filterEthersObject,
-    curveApiInit,
 };

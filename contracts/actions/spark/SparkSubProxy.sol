@@ -3,12 +3,12 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
+import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
-
+import "../../utils/CheckWalletType.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
-contract SparkSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID; 
 
@@ -37,13 +37,14 @@ contract SparkSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper 
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
-    /// @dev Gives DSProxy permission if needed and registers a new sub
+    /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToSparkAutomation(
         bytes calldata encodedInput
     ) public {
-        givePermission(PROXY_AUTH_ADDR);
+         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
 
         SparkSubData memory subData = parseSubData(encodedInput);
 

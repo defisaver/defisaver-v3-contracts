@@ -4,8 +4,9 @@ pragma solidity =0.8.10;
 
 import "../../interfaces/IDSProxy.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
-import "../../exchangeV3/TokenGroupRegistry.sol";
+import "../../exchangeV3/registries/TokenGroupRegistry.sol";
 import "../ActionBase.sol";
+
 
 /// @title A exchange sell action through the dfs exchange
 /// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
@@ -116,6 +117,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             isEthDest = true;
         } 
 
+
         _exchangeData.user = getUserAddress();
 
         /// @dev only check for custom fee if a non standard fee is sent
@@ -157,10 +159,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         params = abi.decode(_callData, (Params));
     }
 
-    /// @notice Returns the owner of the DSProxy that called the contract
     function getUserAddress() internal view returns (address) {
-        IDSProxy proxy = IDSProxy(payable(address(this)));
-
-        return proxy.owner();
+        return address(this);
     }
 }

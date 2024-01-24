@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
 import "../ActionBase.sol";
 
 /// @title Helper action to subtract 2 inputs/return values

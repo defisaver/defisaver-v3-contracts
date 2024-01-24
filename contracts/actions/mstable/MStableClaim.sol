@@ -1,16 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
 
 import "../../interfaces/mstable/IBoostedVaultWithLockup.sol";
 import "./helpers/MStableHelper.sol";
 import "../../utils/TokenUtils.sol";
-import "../../utils/SafeMath.sol";
 import "../ActionBase.sol";
 
 contract MStableClaim is ActionBase, MStableHelper {
     using TokenUtils for address;
-    using SafeMath for uint256;
 
     struct Params {
         address vaultAddress;   // vault contract address for the imAsset (imAssetVault address)
@@ -45,7 +42,7 @@ contract MStableClaim is ActionBase, MStableHelper {
         claimed = MTA.getBalance(address(this));
         IBoostedVaultWithLockup(_params.vaultAddress).claimRewards(_params.first, _params.last);
 
-        claimed = MTA.getBalance(address(this)).sub(claimed);
+        claimed = MTA.getBalance(address(this)) - (claimed);
         
         MTA.withdrawTokens(_params.to, claimed);
 

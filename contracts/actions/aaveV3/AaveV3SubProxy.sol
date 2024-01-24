@@ -3,11 +3,12 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
+import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
+import "../../utils/CheckWalletType.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
-contract AaveV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID; 
 
@@ -18,7 +19,7 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
 
     enum RatioState { OVER, UNDER }
 
-    address public constant AAVE_MARKET = 0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e;
+    address public constant AAVE_V3_MARKET = 0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e;
 
     /// @dev 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
@@ -36,13 +37,14 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
-    /// @dev Gives DSProxy permission if needed and registers a new sub
+    /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToAaveAutomation(
         bytes calldata encodedInput
     ) public {
-        givePermission(PROXY_AUTH_ADDR);
+         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
 
         AaveSubData memory subData = parseSubData(encodedInput);
 
@@ -140,7 +142,7 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData = abi.encode(address(this), AAVE_MARKET, uint256(_user.minRatio), uint8(RatioState.UNDER));
+        bytes memory triggerData = abi.encode(address(this), AAVE_V3_MARKET, uint256(_user.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData =  new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
@@ -157,7 +159,7 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(address(this), AAVE_MARKET, uint256(_user.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData = abi.encode(address(this), AAVE_V3_MARKET, uint256(_user.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 

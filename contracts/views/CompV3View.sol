@@ -3,7 +3,7 @@
 pragma solidity =0.8.10;
 
 import "../DS/DSMath.sol";
-import "../utils/Exponential.sol";
+import "../utils/math/Exponential.sol";
 import "../interfaces/compoundV3/IComet.sol";
 import "../interfaces/compoundV3/ICometExt.sol";
 import "../interfaces/compoundV3/ICometRewards.sol";

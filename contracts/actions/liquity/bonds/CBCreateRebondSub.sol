@@ -5,11 +5,11 @@ pragma solidity =0.8.10;
 import "../../ActionBase.sol";
 import "../../../core/strategy/SubStorage.sol";
 import "../../../core/strategy/StrategyModel.sol";
-import "../../../auth/ProxyPermission.sol";
+import "../../../auth/Permission.sol";
 import "../../../actions/liquity/helpers/CBHelper.sol";
 
 /// @title Special action to subscribe to CB Rebond strategy
-contract CBCreateRebondSub is ActionBase, ProxyPermission, CBHelper {
+contract CBCreateRebondSub is ActionBase, CBHelper, Permission {
     
     /// @param bondId Id of the chicken bond NFT we want to sub
     struct Params {
@@ -49,7 +49,8 @@ contract CBCreateRebondSub is ActionBase, ProxyPermission, CBHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function createRebondSub(Params memory _params) internal returns (uint256 newSubId) {
-        givePermission(PROXY_AUTH_ADDR);
+         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
 
         // returns .length which is the next id we are subscribing
         newSubId = SubStorage(SUB_STORAGE_ADDR).getSubsCount();

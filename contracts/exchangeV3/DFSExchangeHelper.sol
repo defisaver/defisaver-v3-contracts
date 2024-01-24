@@ -3,7 +3,6 @@
 pragma solidity =0.8.10;
 
 import "../utils/TokenUtils.sol";
-import "../utils/SafeERC20.sol";
 import "../utils/Discount.sol";
 
 contract DFSExchangeHelper {
@@ -12,6 +11,8 @@ contract DFSExchangeHelper {
     
     error InvalidOffchainData();
     error OutOfRangeSlicingError();
+    //Order success but amount 0
+    error ZeroTokensSwapped();
 
     using SafeERC20 for IERC20;
 
@@ -31,7 +32,6 @@ contract DFSExchangeHelper {
         if (bs.length < start + 32){
             revert OutOfRangeSlicingError();
         }
-
 
         uint256 x;
         assembly {
