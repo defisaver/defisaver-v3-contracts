@@ -982,10 +982,8 @@ const strategyExecutorTest = async () => {
         let subId;
 
         before(async () => {
-            strategyExecutor = await redeployCore();
-
-            const subProxyAddr = await getAddrFromRegistry('SubProxy');
-            subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
+            subProxy = await redeploy('SubProxy');
+            strategyExecutor = await redeploy('StrategyExecutor');
 
             await redeploy('SendToken');
             await redeploy('WrapEth');
@@ -1067,33 +1065,6 @@ const strategyExecutorTest = async () => {
             } catch (err) {
                 expect(err.toString()).to.have.string('SubNotEnabled(');
             }
-
-            // enable sub
-            const functionData = subProxy.interface.encodeFunctionData('activateSub', [subId]);
-            await proxy['execute(address,bytes)'](subProxy.address, functionData, {
-                gasLimit: 5000000,
-            });
-        });
-
-        it('...should execute the placeholder strategies once all conditions are met', async () => {
-            // deposit weth and give allowance to dsproxy for pull action
-            await depositToWeth(pullAmount);
-            await approve(WETH_ADDRESS, proxy.address);
-
-            const beforeBalance = await balanceOf(WETH_ADDRESS, proxy.address);
-
-            await strategyExecutorByBot.executeStrategy(
-                subId,
-                0,
-                [triggerData],
-                [actionData],
-                strategySub,
-                { gasLimit: 5000000 },
-            );
-
-            const afterBalance = await balanceOf(WETH_ADDRESS, proxy.address);
-
-            expect(beforeBalance.add(pullAmount)).to.be.eq(afterBalance);
         });
     });
 };
@@ -1203,14 +1174,37 @@ const subProxyTest = async () => {
         let senderAcc;
         let strategyStorage;
         let subStorage;
-        let proxy;
+        let dsProxy;
+        let safe;
+        let wallet;
+        let useDsProxy;
+
+        const executeTxThroughWallet = async (
+            functionData,
+            targetAddr,
+            ethValue = 0,
+            gl = 5000000,
+        ) => {
+            await (useDsProxy
+                ? wallet['execute(address,bytes)'](targetAddr, functionData, { gasLimit: gl, value: ethValue })
+                : executeSafeTx(senderAcc.address, wallet, targetAddr, functionData, 1, ethValue));
+        };
+
+        const setupWallet = async (w) => {
+            if (isWalletDsProxy(w)) {
+                useDsProxy = true;
+                wallet = dsProxy;
+            } else {
+                useDsProxy = false;
+                wallet = safe;
+            }
+        };
 
         before(async () => {
             const subStorageAddr = await getAddrFromRegistry('SubStorage');
             subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
 
-            const subProxyAddr = await getAddrFromRegistry('SubProxy');
-            subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
+            subProxy = await redeploy('SubProxy');
 
             const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
             strategyStorage = await hre.ethers.getContractAt('StrategyStorage', strategyStorageAddr);
@@ -1221,73 +1215,72 @@ const subProxyTest = async () => {
 
             senderAcc = (await hre.ethers.getSigners())[0];
 
-            proxy = await getProxy(senderAcc.address);
+            dsProxy = await getProxy(senderAcc.address);
+            safe = await getProxy(senderAcc.address, true);
         });
 
-        it('...should add a new subscription', async () => {
-            const numStrategies = +(await strategyStorage.getStrategyCount()) - 1;
+        for (let i = 0; i < WALLETS.length; i++) {
+            it('...should add a new subscription', async () => {
+                setupWallet(WALLETS[i]);
+                const numStrategies = +(await strategyStorage.getStrategyCount()) - 1;
 
-            const subData = [numStrategies, false, [], []];
-            const subDataHash = getSubHash(subData);
+                const subData = [numStrategies, false, [], []];
+                const subDataHash = getSubHash(subData);
 
-            const functionData = subProxy.interface.encodeFunctionData('subscribeToStrategy', [subData]);
+                const functionData = subProxy.interface.encodeFunctionData('subscribeToStrategy', [subData]);
 
-            const numSubsBefore = await subStorage.getSubsCount();
+                const numSubsBefore = await subStorage.getSubsCount();
 
-            await proxy['execute(address,bytes)'](subProxy.address, functionData, {
-                gasLimit: 5000000,
+                await executeTxThroughWallet(functionData, subProxy.address);
+
+                const latestSub = await subStorage.getSubsCount();
+
+                expect(latestSub).to.be.eq(+numSubsBefore + 1);
+                const storedSub = await subStorage.getSub(latestSub - 1);
+                expect(storedSub.strategySubHash).to.be.eq(subDataHash);
             });
 
-            const latestSub = await subStorage.getSubsCount();
+            it('...should update the new subscription', async () => {
+                setupWallet(WALLETS[i]);
+                const numStrategies = +(await strategyStorage.getStrategyCount()) - 1;
+                const latestSub = +(await subStorage.getSubsCount()) - 1;
 
-            expect(latestSub).to.be.eq(+numSubsBefore + 1);
-            const storedSub = await subStorage.getSub(latestSub - 1);
-            expect(storedSub.strategySubHash).to.be.eq(subDataHash);
-        });
+                const updatedSubData = [numStrategies - 1, false, [], []];
 
-        it('...should update the new subscription', async () => {
-            const numStrategies = +(await strategyStorage.getStrategyCount()) - 1;
-            const latestSub = +(await subStorage.getSubsCount()) - 1;
+                const subDataHash = getSubHash(updatedSubData);
 
-            const updatedSubData = [numStrategies - 1, false, [], []];
+                const functionData = subProxy.interface.encodeFunctionData('updateSubData', [latestSub, updatedSubData]);
 
-            const subDataHash = getSubHash(updatedSubData);
+                await executeTxThroughWallet(functionData, subProxy.address);
 
-            const functionData = subProxy.interface.encodeFunctionData('updateSubData', [latestSub, updatedSubData]);
-
-            await proxy['execute(address,bytes)'](subProxy.address, functionData, {
-                gasLimit: 5000000,
+                const storedSub = await subStorage.getSub(latestSub);
+                expect(storedSub.strategySubHash).to.be.eq(subDataHash);
             });
 
-            const storedSub = await subStorage.getSub(latestSub);
-            expect(storedSub.strategySubHash).to.be.eq(subDataHash);
-        });
+            it('...should deactivate users sub', async () => {
+                setupWallet(WALLETS[i]);
+                const latestSub = +(await subStorage.getSubsCount()) - 1;
 
-        it('...should deactivate users sub', async () => {
-            const latestSub = +(await subStorage.getSubsCount()) - 1;
+                const functionData = subProxy.interface.encodeFunctionData('deactivateSub', [latestSub]);
 
-            const functionData = subProxy.interface.encodeFunctionData('deactivateSub', [latestSub]);
+                await executeTxThroughWallet(functionData, subProxy.address);
 
-            await proxy['execute(address,bytes)'](subProxy.address, functionData, {
-                gasLimit: 5000000,
+                const storedSub = await subStorage.getSub(latestSub);
+                expect(storedSub.isEnabled).to.be.eq(false);
             });
 
-            const storedSub = await subStorage.getSub(latestSub);
-            expect(storedSub.isEnabled).to.be.eq(false);
-        });
+            it('...should activate users sub', async () => {
+                setupWallet(WALLETS[i]);
+                const latestSub = +(await subStorage.getSubsCount()) - 1;
 
-        it('...should activate users sub', async () => {
-            const latestSub = +(await subStorage.getSubsCount()) - 1;
+                const functionData = subProxy.interface.encodeFunctionData('activateSub', [latestSub]);
 
-            const functionData = subProxy.interface.encodeFunctionData('activateSub', [latestSub]);
+                await executeTxThroughWallet(functionData, subProxy.address);
 
-            await proxy['execute(address,bytes)'](subProxy.address, functionData, {
-                gasLimit: 5000000,
+                const storedSub = await subStorage.getSub(latestSub);
+                expect(storedSub.isEnabled).to.be.eq(true);
             });
-
-            const storedSub = await subStorage.getSub(latestSub);
-            expect(storedSub.isEnabled).to.be.eq(true);
-        });
+        }
     });
 };
 
@@ -1437,17 +1430,16 @@ const subStorageTest = async () => {
 };
 
 const coreFullTest = async () => {
-    // await strategyProxyTest();
-    // await dfsRegistryTest();
-    // await botAuthTest();
-    // await bundleStorageTest();
-    // await dsProxyAuthTest();
-    // await safeModuleAuthTest();
+    await dfsRegistryTest();
+    await botAuthTest();
+    await bundleStorageTest();
+    await dsProxyAuthTest();
+    await safeModuleAuthTest();
     await recipeExecutorTest();
-    // await strategyExecutorTest();
-    // await strategyStorageTest();
-    // await subProxyTest();
-    // await subStorageTest();
+    await strategyExecutorTest();
+    await strategyStorageTest();
+    await subProxyTest();
+    await subStorageTest();
 };
 
 module.exports = {
