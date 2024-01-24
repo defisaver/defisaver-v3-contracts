@@ -4,7 +4,6 @@ const hre = require('hardhat');
 
 const { getAssetInfo, ilks } = require('@defisaver/tokens');
 
-
 const {
     approve,
     getAddrFromRegistry,
@@ -29,7 +28,6 @@ const {
     BLUSD_ADDR,
     getNetwork,
     formatExchangeObjSdk,
-    isProxySafe,
 } = require('./utils');
 
 const {
