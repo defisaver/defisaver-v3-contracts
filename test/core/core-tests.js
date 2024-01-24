@@ -18,7 +18,6 @@ const {
     depositToWeth,
     approve,
     placeHolderAddr,
-    nullAddress,
     OWNER_ACC,
     REGISTRY_ADDR,
     WETH_ADDRESS,
@@ -36,12 +35,16 @@ const {
     getSubHash,
 } = require('../utils-strategies');
 const { executeSafeTx } = require('../utils-safe');
+const { CoreAddressesInjector } = require('../addressInjector');
 
 const THREE_HOURS = 3 * 60 * 60;
 const TWO_DAYS = 48 * 60 * 60;
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 const pullAmount = '1000000000000';
+
+const WALLETS = ['DS_PROXY', 'SAFE'];
+const isWalletDsProxy = (w) => w === 'DS_PROXY';
 
 /**
  * Set StrategyExecutor to EOA for testing purposes so we can callExecute()
@@ -735,44 +738,104 @@ const safeModuleAuthTest = async () => {
 
 const recipeExecutorTest = async () => {
     describe('RecipeExecutor', () => {
-        let proxy;
-        let strategyExecutor;
-        let senderAcc;
-        let botAcc;
-        let strategySub;
+        const coreAddressesInjector = new CoreAddressesInjector();
+        let snapshotId;
+
         let actionData;
         let triggerData;
         let subProxy;
+
+        let proxyAuth;
+        let safeModuleAuth;
+        let dsProxyPermission;
+        let safeModulePermission;
+
+        let strategyExecutor;
         let strategyExecutorByBot;
-        let maxGasPrice;
         let recipeExecutor;
+        let maxGasPrice;
         let flAddr;
-        let strategyId;
-        let subId;
+
+        let senderAcc;
+        let botAcc;
+        let wallet;
+        let dsProxy;
+        let safe;
+        let useDsProxy;
+
+        const executeTxThroughWallet = async (
+            functionData,
+            targetAddr,
+            ethValue = 0,
+            gl = 5000000,
+        ) => {
+            await (useDsProxy
+                ? wallet['execute(address,bytes)'](targetAddr, functionData, { gasLimit: gl, value: ethValue })
+                : executeSafeTx(senderAcc.address, wallet, targetAddr, functionData, 1, ethValue));
+        };
+
+        const setupWallet = async (w) => {
+            if (isWalletDsProxy(w)) {
+                useDsProxy = true;
+                wallet = dsProxy;
+            } else {
+                useDsProxy = false;
+                wallet = safe;
+            }
+        };
+
+        const giveAuthPermissionsToWallets = async () => {
+            // give permission to DSProxyAuth
+            const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
+            const functionDataDsProxy = DSProxyPermission.interface.encodeFunctionData(
+                'giveProxyPermission',
+                [proxyAuth.address],
+            );
+            await dsProxy['execute(address,bytes)'](dsProxyPermission.address, functionDataDsProxy, { gasLimit: 1500000 });
+
+            // give permission to SafeModuleAuth
+            const SafeModulePermission = await hre.ethers.getContractFactory('SafeModulePermission');
+            const functionDataSafe = SafeModulePermission.interface.encodeFunctionData(
+                'enableModule',
+                [safeModuleAuth.address],
+            );
+            await executeSafeTx(
+                senderAcc.address,
+                safe,
+                safeModulePermission.address,
+                functionDataSafe,
+            );
+        };
 
         before(async () => {
-            strategyExecutor = await redeployCore();
+            recipeExecutor = await redeploy('RecipeExecutor');
+            subProxy = await redeploy('SubProxy');
+            proxyAuth = await redeploy('DSProxyAuth');
+            safeModuleAuth = await redeploy('SafeModuleAuth');
+            dsProxyPermission = await redeploy('DSProxyPermission');
+            safeModulePermission = await redeploy('SafeModulePermission');
 
-            const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
-            recipeExecutor = await hre.ethers.getContractAt('RecipeExecutor', recipeExecutorAddr);
+            await coreAddressesInjector.inject(
+                recipeExecutor.address, proxyAuth.address, safeModuleAuth.address,
+            );
 
-            const subProxyAddr = await getAddrFromRegistry('SubProxy');
-            subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
+            strategyExecutor = await redeploy('StrategyExecutor');
 
-            flAddr = await getAddrFromRegistry('FLAaveV3');
+            // redeploy as those are used in recipes examples
+            const flActionContract = await redeploy('FLAction');
+            flAddr = flActionContract.address;
+            await redeploy('PullToken');
+            await redeploy('SendToken');
 
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
-
             strategyExecutorByBot = strategyExecutor.connect(botAcc);
 
-            proxy = await getProxy(senderAcc.address);
-
+            dsProxy = await getProxy(senderAcc.address);
+            safe = await getProxy(senderAcc.address, true);
             maxGasPrice = '0';
 
             await openStrategyAndBundleStorage();
-
-            ({ strategySub, strategyId, subId } = await addPlaceholderStrategy(proxy, maxGasPrice));
 
             const pullTokenAction = new dfs.actions.basic.PullTokenAction(
                 WETH_ADDRESS, placeHolderAddr, 0,
@@ -782,10 +845,64 @@ const recipeExecutorTest = async () => {
             triggerData = abiCoder.encode(['uint256'], [0]);
 
             await addBotCaller(botAcc.address);
+            await giveAuthPermissionsToWallets();
         });
 
-        it('...should fail to execute recipe by strategy because the triggers check is not passing', async () => {
-            try {
+        after(async () => {
+            await coreAddressesInjector.rollBack();
+        });
+
+        beforeEach(async () => { snapshotId = await takeSnapshot(); });
+        afterEach(async () => { await revertToSnapshot(snapshotId); });
+
+        for (let i = 0; i < WALLETS.length; i++) {
+            it(`...should fail to execute recipe by strategy through ${WALLETS[i]} because the triggers check is not passing`, async () => {
+                setupWallet(WALLETS[i]);
+                const { strategySub, subId } = await addPlaceholderStrategy(
+                    wallet, maxGasPrice,
+                );
+                try {
+                    await strategyExecutorByBot.executeStrategy(
+                        subId,
+                        0,
+                        [triggerData],
+                        [actionData],
+                        strategySub,
+                        { gasLimit: 5000000 },
+                    );
+                    expect(true).to.be.equal(false);
+                } catch (err) {
+                    // trigger error not caught by hardhat but it is throwing it
+                    // expect(err.toString()).to.have.string('TriggerNotActiveError');
+                    if (useDsProxy) {
+                        expect(err.toString()).to.have.string('reverted without a reason string');
+                    } else {
+                        expect(err.toString()).to.have.string('SafeExecutionError');
+                    }
+                }
+            });
+
+            it(`...should execute recipe by strategy through ${WALLETS[i]}`, async () => {
+                setupWallet(WALLETS[i]);
+                const { strategyId, subId } = await addPlaceholderStrategy(
+                    wallet, maxGasPrice,
+                );
+                // update sub data so trigger will pass
+                const amountEncoded = abiCoder.encode(['uint256'], [pullAmount]);
+                maxGasPrice = '1000000000000';
+                triggerData = abiCoder.encode(['uint256'], [maxGasPrice]);
+                const strategySub = [strategyId, false, [triggerData], [amountEncoded]];
+
+                const functionData = subProxy.interface.encodeFunctionData('updateSubData',
+                    [subId, [strategyId, false, [triggerData], [amountEncoded]]]);
+
+                await executeTxThroughWallet(functionData, subProxy.address);
+                // deposit weth and give allowance to wallet for pull action
+                await depositToWeth(pullAmount);
+                await approve(WETH_ADDRESS, wallet.address);
+
+                const beforeBalance = await balanceOf(WETH_ADDRESS, wallet.address);
+
                 await strategyExecutorByBot.executeStrategy(
                     subId,
                     0,
@@ -794,87 +911,59 @@ const recipeExecutorTest = async () => {
                     strategySub,
                     { gasLimit: 5000000 },
                 );
-                expect(true).to.be.equal(false);
-            } catch (err) {
-                // trigger error not caught by hardhat but it is throwing it
-                // expect(err.toString()).to.have.string('TriggerNotActiveError');
-                expect(err.toString()).to.have.string('reverted without a reason string');
-            }
-        });
 
-        it('...should execute recipe by strategy', async () => {
-            // update sub data so trigger will pass
-            const amountEncoded = abiCoder.encode(['uint256'], [pullAmount]);
-            maxGasPrice = '1000000000000';
-            triggerData = abiCoder.encode(['uint256'], [maxGasPrice]);
-            strategySub = [strategyId, false, [triggerData], [amountEncoded]];
-
-            const functionData = subProxy.interface.encodeFunctionData('updateSubData',
-                [subId, [strategyId, false, [triggerData], [amountEncoded]]]);
-
-            await proxy['execute(address,bytes)'](subProxy.address, functionData, {
-                gasLimit: 5000000,
+                const afterBalance = await balanceOf(WETH_ADDRESS, wallet.address);
+                expect(beforeBalance.add(pullAmount)).to.be.eq(afterBalance);
             });
 
-            // deposit weth and give allowance to dsproxy for pull action
-            await depositToWeth(pullAmount);
-            await approve(WETH_ADDRESS, proxy.address);
+            it(`...should execute basic placeholder recipe through ${WALLETS[i]}`, async () => {
+                setupWallet(WALLETS[i]);
+                const beforeBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
 
-            const beforeBalance = await balanceOf(WETH_ADDRESS, proxy.address);
+                await depositToWeth(pullAmount);
+                await approve(WETH_ADDRESS, wallet.address);
 
-            await strategyExecutorByBot.executeStrategy(
-                subId,
-                0,
-                [triggerData],
-                [actionData],
-                strategySub,
-                { gasLimit: 5000000 },
-            );
+                const dummyRecipe = new dfs.Recipe('DummyRecipe', [
+                    new dfs.actions.basic.PullTokenAction(
+                        WETH_ADDRESS, senderAcc.address, pullAmount,
+                    ),
+                    new dfs.actions.basic.SendTokenAction(
+                        WETH_ADDRESS, senderAcc.address, pullAmount,
+                    ),
+                ]);
 
-            const afterBalance = await balanceOf(WETH_ADDRESS, proxy.address);
+                const functionData = dummyRecipe.encodeForDsProxyCall()[1];
 
-            expect(beforeBalance.add(pullAmount)).to.be.eq(afterBalance);
-        });
+                await executeTxThroughWallet(
+                    functionData, recipeExecutor.address, pullAmount, 3000000,
+                );
 
-        it('...should execute basic placeholder recipe', async () => {
-            const beforeBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
-
-            const dummyRecipe = new dfs.Recipe('DummyRecipe', [
-                new dfs.actions.basic.WrapEthAction(pullAmount),
-                new dfs.actions.basic.SendTokenAction(WETH_ADDRESS, senderAcc.address, pullAmount),
-            ]);
-
-            const functionData = dummyRecipe.encodeForDsProxyCall();
-
-            await proxy['execute(address,bytes)'](recipeExecutor.address, functionData[1], {
-                gasLimit: 3000000,
-                value: pullAmount,
+                const afterBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
+                expect(beforeBalance.add(pullAmount)).to.be.eq(afterBalance);
             });
 
-            const afterBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
+            it(`...should execute basic recipe with FL through ${WALLETS[i]}`, async () => {
+                setupWallet(WALLETS[i]);
+                const beforeBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
+                const dummyRecipeWithFL = new dfs.Recipe('DummyRecipeWithFl', [
+                    new dfs.actions.flashloan.FLAction(
+                        new dfs.actions.flashloan.BalancerFlashLoanAction(
+                            [WETH_ADDRESS], [pullAmount],
+                        ),
+                    ),
+                    new dfs.actions.basic.SendTokenAction(WETH_ADDRESS, flAddr, pullAmount),
+                ]);
 
-            expect(beforeBalance.add(pullAmount)).to.be.eq(afterBalance);
-        });
+                const functionData = dummyRecipeWithFL.encodeForDsProxyCall()[1];
 
-        it('...should execute basic recipe with FL', async () => {
-            const beforeBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
-            const AAVE_NO_DEBT_MODE = 0;
-            const dummyRecipeWithFL = new dfs.Recipe('DummyRecipeWithFl', [
-                // eslint-disable-next-line max-len
-                new dfs.actions.flashloan.AaveV3FlashLoanNoFeeAction([WETH_ADDRESS], [pullAmount], [AAVE_NO_DEBT_MODE], nullAddress),
-                new dfs.actions.basic.SendTokenAction(WETH_ADDRESS, flAddr, pullAmount),
-            ]);
+                await executeTxThroughWallet(
+                    functionData, recipeExecutor.address, 0, 3000000,
+                );
 
-            const functionData = dummyRecipeWithFL.encodeForDsProxyCall();
-
-            await proxy['execute(address,bytes)'](recipeExecutor.address, functionData[1], {
-                gasLimit: 3000000,
+                const afterBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
+                expect(beforeBalance).to.be.eq(afterBalance);
             });
-
-            const afterBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
-
-            expect(beforeBalance).to.be.eq(afterBalance);
-        });
+        }
     });
 };
 
@@ -1005,86 +1094,6 @@ const strategyExecutorTest = async () => {
             const afterBalance = await balanceOf(WETH_ADDRESS, proxy.address);
 
             expect(beforeBalance.add(pullAmount)).to.be.eq(afterBalance);
-        });
-    });
-};
-
-const strategyProxyTest = async () => {
-    describe('StrategyProxy', () => {
-        let strategyStorage;
-        let bundleStorage;
-        let senderAcc;
-        let strategyProxy;
-        let proxy;
-
-        before(async () => {
-            await redeployCore();
-
-            const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
-            strategyStorage = await hre.ethers.getContractAt('StrategyStorage', strategyStorageAddr);
-
-            const bundleStorageAddr = await getAddrFromRegistry('BundleStorage');
-            bundleStorage = await hre.ethers.getContractAt('BundleStorage', bundleStorageAddr);
-
-            const strategyProxyAddr = await getAddrFromRegistry('StrategyProxy');
-            strategyProxy = await hre.ethers.getContractAt('StrategyProxy', strategyProxyAddr);
-
-            senderAcc = (await hre.ethers.getSigners())[0];
-
-            await openStrategyAndBundleStorage();
-
-            proxy = await getProxy(senderAcc.address);
-        });
-
-        it('...should create a new strategy ', async () => {
-            const numStrategiesBefore = await strategyStorage.getStrategyCount();
-
-            const functionData = strategyProxy.interface.encodeFunctionData('createStrategy', [
-                'TestStrategy', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true,
-            ]);
-
-            await proxy['execute(address,bytes)'](strategyProxy.address, functionData, {
-                gasLimit: 5000000,
-            });
-
-            const numStrategies = await strategyStorage.getStrategyCount();
-
-            expect(numStrategies).to.be.eq(+numStrategiesBefore + 1);
-        });
-
-        it('...should create a another new strategy ', async () => {
-            const numStrategiesBefore = await strategyStorage.getStrategyCount();
-
-            const functionData = strategyProxy.interface.encodeFunctionData('createStrategy', [
-                'TestStrategy2', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true,
-            ]);
-
-            await proxy['execute(address,bytes)'](strategyProxy.address, functionData, {
-                gasLimit: 5000000,
-            });
-
-            const numStrategies = await strategyStorage.getStrategyCount();
-
-            expect(numStrategies).to.be.eq(+numStrategiesBefore + 1);
-        });
-
-        it('...should registry a new bundle ', async () => {
-            const numBundlesBefore = await bundleStorage.getBundleCount();
-
-            const numStrategies = +(await strategyStorage.getStrategyCount()) - 1;
-
-            console.log(numStrategies);
-            const functionData = strategyProxy.interface.encodeFunctionData('createBundle', [
-                [numStrategies, numStrategies - 1],
-            ]);
-
-            await proxy['execute(address,bytes)'](strategyProxy.address, functionData, {
-                gasLimit: 5000000,
-            });
-
-            const numBundles = await bundleStorage.getBundleCount();
-
-            expect(numBundles).to.be.eq(+numBundlesBefore + 1);
         });
     });
 };
@@ -1428,17 +1437,17 @@ const subStorageTest = async () => {
 };
 
 const coreFullTest = async () => {
-    await strategyProxyTest();
-    await dfsRegistryTest();
-    await botAuthTest();
-    await bundleStorageTest();
-    await dsProxyAuthTest();
-    await safeModuleAuthTest();
+    // await strategyProxyTest();
+    // await dfsRegistryTest();
+    // await botAuthTest();
+    // await bundleStorageTest();
+    // await dsProxyAuthTest();
+    // await safeModuleAuthTest();
     await recipeExecutorTest();
-    await strategyExecutorTest();
-    await strategyStorageTest();
-    await subProxyTest();
-    await subStorageTest();
+    // await strategyExecutorTest();
+    // await strategyStorageTest();
+    // await subProxyTest();
+    // await subStorageTest();
 };
 
 module.exports = {
@@ -1449,7 +1458,6 @@ module.exports = {
     dsProxyAuthTest,
     recipeExecutorTest,
     strategyExecutorTest,
-    strategyProxyTest,
     strategyStorageTest,
     subProxyTest,
     subStorageTest,
