@@ -28,7 +28,6 @@ const {
     BLUSD_ADDR,
     getNetwork,
     formatExchangeObjSdk,
-    isProxySafe,
 } = require('./utils');
 
 const {

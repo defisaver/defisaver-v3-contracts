@@ -8,7 +8,6 @@ import "../../utils/CheckWalletType.sol";
 import "../strategy/StrategyModel.sol";
 import "../strategy/BotAuth.sol";
 import "../DFSRegistry.sol";
-import "../strategy/DSProxyAuth.sol";
 import "./SubStorageL2.sol";
 
 /// @title Main entry point for executing automated strategies
@@ -55,7 +54,6 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWallet
     function checkCallerAuth(uint256 _subId) internal view returns (bool) {
         return BotAuth(registry.getAddr(BOT_AUTH_ID)).isApproved(_subId, msg.sender);
     }
-
 
     /// @notice Calls auth contract which has the auth from the user wallet which will call RecipeExecutor
     /// @param _subId Strategy data we have in storage

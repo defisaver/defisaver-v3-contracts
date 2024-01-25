@@ -8,7 +8,6 @@ import "../../utils/CheckWalletType.sol";
 import "./StrategyModel.sol";
 import "./BotAuth.sol";
 import "../DFSRegistry.sol";
-import "./DSProxyAuth.sol";
 import "../strategy/SubStorage.sol";
 
 /// @title Main entry point for executing automated strategies

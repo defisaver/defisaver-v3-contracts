@@ -24,6 +24,8 @@ const {
     revertToSnapshot,
     takeSnapshot,
     getAdminAddr,
+    WALLETS,
+    isWalletNameDsProxy,
 } = require('../utils');
 
 const { deployContract } = require('../../scripts/utils/deployer');
@@ -42,9 +44,6 @@ const TWO_DAYS = 48 * 60 * 60;
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 const pullAmount = '1000000000000';
-
-const WALLETS = ['DS_PROXY', 'SAFE'];
-const isWalletDsProxy = (w) => w === 'DS_PROXY';
 
 /**
  * Set StrategyExecutor to EOA for testing purposes so we can callExecute()
@@ -571,12 +570,12 @@ const bundleStorageTest = async () => {
     });
 };
 
-const dsProxyAuthTest = async () => {
-    describe('DSProxyAuth', () => {
-        let dsProxyAuth; let proxy; let proxy2; let senderAcc; let dsProxyPermission; let sumInputs;
+const proxyAuthTest = async () => {
+    describe('ProxyAuth', () => {
+        let proxyAuth; let proxy; let proxy2; let senderAcc; let dsProxyPermission; let sumInputs;
 
         before(async () => {
-            dsProxyAuth = await redeploy('DSProxyAuth');
+            proxyAuth = await redeploy('ProxyAuth');
             sumInputs = await redeploy('SumInputs');
 
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -585,18 +584,18 @@ const dsProxyAuthTest = async () => {
             proxy = await getProxy(senderAcc.address);
             proxy2 = await getProxy(senderAcc2.address);
 
-            // give auth to DSProxyAuth
+            // give auth to ProxyAuth
             dsProxyPermission = await redeploy('DSProxyPermission');
 
             await impersonateStrategyExecutorAsEoa(senderAcc.address);
         });
 
-        it('...should callExecute when auth is given to dsProxyAuth and StrategyExecutor set', async () => {
-            // give proxy permission to DSProxyAuth
+        it('...should callExecute when auth is given to proxyAuth and StrategyExecutor set', async () => {
+            // give proxy permission to ProxyAuth
             const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
             const functionData = DSProxyPermission.interface.encodeFunctionData(
                 'giveProxyPermission',
-                [dsProxyAuth.address],
+                [proxyAuth.address],
             );
 
             await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, { gasLimit: 1500000 });
@@ -605,19 +604,19 @@ const dsProxyAuthTest = async () => {
             const encodedCall = new dfs.actions.basic.SumInputsAction(1, 2).encodeForDsProxyCall();
 
             try {
-                await dsProxyAuth.callExecute(proxy.address, sumInputs.address, encodedCall[1]);
+                await proxyAuth.callExecute(proxy.address, sumInputs.address, encodedCall[1]);
                 expect(true).to.be.equal(true);
             } catch (err) {
                 expect(true).to.be.equal(false);
             }
         });
 
-        it('...should fail when DSProxyAuth has no DSProxy.authority()', async () => {
+        it('...should fail when ProxyAuth has no DSProxy.authority()', async () => {
             try {
                 // eslint-disable-next-line max-len
                 const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2)).encodeForDsProxyCall();
 
-                await dsProxyAuth.callExecute(proxy2.address, sumInputs.address, encodedCall[1]);
+                await proxyAuth.callExecute(proxy2.address, sumInputs.address, encodedCall[1]);
                 expect(true).to.be.equal(false);
             } catch (err) {
                 // can't map error as the DSProxy throws
@@ -632,7 +631,7 @@ const dsProxyAuthTest = async () => {
                 // eslint-disable-next-line max-len
                 const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2)).encodeForDsProxyCall();
 
-                await dsProxyAuth.callExecute(proxy.address, sumInputs.address, encodedCall[1]);
+                await proxyAuth.callExecute(proxy.address, sumInputs.address, encodedCall[1]);
                 expect(true).to.be.equal(false);
             } catch (err) {
                 expect(err.toString()).to.have.string('SenderNotExecutorError');
@@ -775,7 +774,7 @@ const recipeExecutorTest = async () => {
         };
 
         const setupWallet = async (w) => {
-            if (isWalletDsProxy(w)) {
+            if (isWalletNameDsProxy(w)) {
                 useDsProxy = true;
                 wallet = dsProxy;
             } else {
@@ -785,7 +784,7 @@ const recipeExecutorTest = async () => {
         };
 
         const giveAuthPermissionsToWallets = async () => {
-            // give permission to DSProxyAuth
+            // give permission to ProxyAuth
             const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
             const functionDataDsProxy = DSProxyPermission.interface.encodeFunctionData(
                 'giveProxyPermission',
@@ -810,7 +809,7 @@ const recipeExecutorTest = async () => {
         before(async () => {
             recipeExecutor = await redeploy('RecipeExecutor');
             subProxy = await redeploy('SubProxy');
-            proxyAuth = await redeploy('DSProxyAuth');
+            proxyAuth = await redeploy('ProxyAuth');
             safeModuleAuth = await redeploy('SafeModuleAuth');
             dsProxyPermission = await redeploy('DSProxyPermission');
             safeModulePermission = await redeploy('SafeModulePermission');
@@ -1191,7 +1190,7 @@ const subProxyTest = async () => {
         };
 
         const setupWallet = async (w) => {
-            if (isWalletDsProxy(w)) {
+            if (isWalletNameDsProxy(w)) {
                 useDsProxy = true;
                 wallet = dsProxy;
             } else {
@@ -1433,7 +1432,8 @@ const coreFullTest = async () => {
     await dfsRegistryTest();
     await botAuthTest();
     await bundleStorageTest();
-    await dsProxyAuthTest();
+    await safeModuleAuthTest();
+    await proxyAuthTest();
     await safeModuleAuthTest();
     await recipeExecutorTest();
     await strategyExecutorTest();
@@ -1447,7 +1447,7 @@ module.exports = {
     dfsRegistryTest,
     bundleStorageTest,
     botAuthTest,
-    dsProxyAuthTest,
+    proxyAuthTest,
     recipeExecutorTest,
     strategyExecutorTest,
     strategyStorageTest,
