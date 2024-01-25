@@ -4,7 +4,6 @@ const hre = require('hardhat');
 
 const { getAssetInfo, ilks } = require('@defisaver/tokens');
 
-
 const {
     approve,
     getAddrFromRegistry,
@@ -2852,8 +2851,6 @@ const curveUsdCreate = async (
     debtAmount,
     nBands,
 ) => {
-    const actionAddress = await getAddrFromRegistry('CurveUsdCreate');
-
     const action = new dfs.actions.curveusd.CurveUsdCreateAction(
         controllerAddress,
         from,
@@ -2866,10 +2863,8 @@ const curveUsdCreate = async (
     const [approveObj] = await action.getAssetsToApprove();
 
     const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+    const receipt = await executeAction('CurveUsdCreate', functionData, proxy);
 
-    const txGasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed curveUsdCreate: ${txGasUsed}`);
     return { receipt, approveObj };
 };
 
@@ -2886,8 +2881,6 @@ const curveUsdLevCreate = async (
     dfsFeeDivider,
     useSteth,
 ) => {
-    const actionAddress = await getAddrFromRegistry('CurveUsdLevCreate');
-
     const action = new dfs.actions.curveusd.CurveUsdLevCreateAction(
         controllerAddress,
         collateralAmount,
@@ -2902,10 +2895,8 @@ const curveUsdLevCreate = async (
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+    const receipt = await executeAction('CurveUsdLevCreate', functionData, proxy);
 
-    const txGasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed CurveUsdLevCreate: ${txGasUsed}`);
     return receipt;
 };
 
@@ -2922,8 +2913,6 @@ const curveUsdSelfLiquidateWithColl = async (
     dfsFeeDivider,
     useSteth,
 ) => {
-    const actionAddress = await getAddrFromRegistry('CurveUsdSelfLiquidateWithColl');
-
     const action = new dfs.actions.curveusd.CurveUsdSelfLiquidateWithCollAction(
         controllerAddress,
         percentage,
@@ -2938,24 +2927,20 @@ const curveUsdSelfLiquidateWithColl = async (
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+    const receipt = await executeAction('CurveUsdSelfLiquidateWithColl', functionData, proxy);
 
-    const txGasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed CurveUsdSelfLiquidateWithColl: ${txGasUsed}`);
     return receipt;
 };
 
 const curveUsdSupply = async (
     proxy,
-    controllerAddresss,
+    controllerAddress,
     from,
     onBehalfOf,
     collateralAmount,
 ) => {
-    const actionAddress = await getAddrFromRegistry('CurveUsdSupply');
-
     const action = new dfs.actions.curveusd.CurveUsdSupplyAction(
-        controllerAddresss,
+        controllerAddress,
         from,
         onBehalfOf,
         collateralAmount,
@@ -2964,25 +2949,21 @@ const curveUsdSupply = async (
     const [approveObj] = await action.getAssetsToApprove();
 
     const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+    const receipt = await executeAction('CurveUsdSupply', functionData, proxy);
 
-    const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed curveUsdSupply: ${gasUsed}`);
     return { receipt, approveObj };
 };
 
 const curveUsdAdjust = async (
     proxy,
-    controllerAddresss,
+    controllerAddress,
     from,
     to,
     supplyAmount,
     borrowAmount,
 ) => {
-    const actionAddress = await getAddrFromRegistry('CurveUsdAdjust');
-
     const action = new dfs.actions.curveusd.CurveUsdAdjustAction(
-        controllerAddresss,
+        controllerAddress,
         from,
         to,
         supplyAmount,
@@ -2992,70 +2973,58 @@ const curveUsdAdjust = async (
     const [approveObj] = await action.getAssetsToApprove();
 
     const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+    const receipt = await executeAction('CurveUsdAdjust', functionData, proxy);
 
-    const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed curveUsdAdjust: ${gasUsed}`);
     return { receipt, approveObj };
 };
 
 const curveUsdWithdraw = async (
     proxy,
-    controllerAddresss,
+    controllerAddress,
     to,
     collateralAmount,
 ) => {
-    const actionAddress = await getAddrFromRegistry('CurveUsdWithdraw');
-
     const action = new dfs.actions.curveusd.CurveUsdWithdrawAction(
-        controllerAddresss,
+        controllerAddress,
         to,
         collateralAmount,
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+    const receipt = await executeAction('CurveUsdWithdraw', functionData, proxy);
 
-    const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed curveUsdWithdraw: ${gasUsed}`);
     return receipt;
 };
 
 const curveUsdBorrow = async (
     proxy,
-    controllerAddresss,
+    controllerAddress,
     to,
     debtAmount,
 ) => {
-    const actionAddress = await getAddrFromRegistry('CurveUsdBorrow');
-
     const action = new dfs.actions.curveusd.CurveUsdBorrowAction(
-        controllerAddresss,
+        controllerAddress,
         to,
         debtAmount,
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+    const receipt = await executeAction('CurveUsdBorrow', functionData, proxy);
 
-    const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed curveUsdBorrow: ${gasUsed}`);
     return receipt;
 };
 
 const curveUsdPayback = async (
     proxy,
-    controllerAddresss,
+    controllerAddress,
     from,
     onBehalfOf,
     to,
     debtAmount,
     maxActiveBand,
 ) => {
-    const actionAddress = await getAddrFromRegistry('CurveUsdPayback');
-
     const action = new dfs.actions.curveusd.CurveUsdPaybackAction(
-        controllerAddresss,
+        controllerAddress,
         from,
         onBehalfOf,
         to,
@@ -3066,16 +3035,14 @@ const curveUsdPayback = async (
     const [approveObj] = await action.getAssetsToApprove();
 
     const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 3000000 });
+    const receipt = await executeAction('CurveUsdPayback', functionData, proxy);
 
-    const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed curveUsdPayback: ${gasUsed}`);
     return { receipt, approveObj };
 };
 
 const curveUsdRepay = async (
     proxy,
-    controllerAddresss,
+    controllerAddress,
     debtAmount,
     to,
     minAmount,
@@ -3084,10 +3051,8 @@ const curveUsdRepay = async (
     dfsFeeDivider,
     useSteth,
 ) => {
-    const actionAddress = await getAddrFromRegistry('CurveUsdRepay');
-
     const action = new dfs.actions.curveusd.CurveUsdRepayAction(
-        controllerAddresss,
+        controllerAddress,
         debtAmount,
         to,
         minAmount,
@@ -3098,34 +3063,28 @@ const curveUsdRepay = async (
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+    const receipt = await executeAction('CurveUsdRepay', functionData, proxy);
 
-    const txGasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed curveUsdRepay: ${txGasUsed}`);
     return receipt;
 };
 
 const curveUsdSelfLiquidate = async (
     proxy,
-    controllerAddresss,
+    controllerAddress,
     minCrvUsdExpected,
     from,
     to,
 ) => {
-    const actionAddress = await getAddrFromRegistry('CurveUsdSelfLiquidate');
-
     const action = new dfs.actions.curveusd.CurveUsdSelfLiquidateAction(
-        controllerAddresss,
+        controllerAddress,
         minCrvUsdExpected,
         from,
         to,
     );
 
     const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await proxy['execute(address,bytes)'](actionAddress, functionData, { gasLimit: 5000000 });
+    const receipt = await executeAction('CurveUsdSelfLiquidate', functionData, proxy);
 
-    const gasUsed = await getGasUsed(receipt);
-    console.log(`GasUsed curveUsdSelfLiquidate: ${gasUsed}`);
     return receipt;
 };
 
