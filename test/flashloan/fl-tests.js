@@ -24,12 +24,11 @@ const {
     chainIds,
     getNetwork,
     getSparkFLFee,
+    WALLETS,
+    isWalletNameDsProxy,
 } = require('../utils');
 
 const { sell, executeAction } = require('../actions');
-
-const WALLETS = ['DS_PROXY', 'SAFE'];
-const isWalletDsProxy = (w) => w === 'DS_PROXY';
 
 const aaveFlTest = async () => {
     describe('FL-AaveV2', function () {
@@ -51,7 +50,7 @@ const aaveFlTest = async () => {
             safe = await getProxy(senderAcc.address, true);
         });
 
-        const determineActiveWallet = (w) => { wallet = isWalletDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
 
         for (let i = 0; i < WALLETS.length; ++i) {
             for (let j = 0; j < FLASHLOAN_TOKENS.length; ++j) {
@@ -147,7 +146,7 @@ const aaveV3FlTest = async () => {
             safe = await getProxy(senderAcc.address, true);
         });
 
-        const determineActiveWallet = (w) => { wallet = isWalletDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
 
         for (let i = 0; i < WALLETS.length; ++i) {
             for (let j = 0; j < FLASHLOAN_TOKENS.length; ++j) {
@@ -239,7 +238,7 @@ const sparkFlTest = async () => {
             sparkFlFee = await getSparkFLFee().then((f) => f.toString());
         });
 
-        const determineActiveWallet = (w) => { wallet = isWalletDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
 
         for (let i = 0; i < WALLETS.length; ++i) {
             for (let j = 0; j < FLASHLOAN_TOKENS.length; ++j) {
@@ -340,7 +339,7 @@ const balancerFLTest = async () => {
             proxy = await getProxy(senderAcc.address);
             safe = await getProxy(senderAcc.address, true);
         });
-        const determineActiveWallet = (w) => { wallet = isWalletDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
         const network = hre.network.config.name;
         const amountUSDC = hre.ethers.utils.parseUnits(
             '100',
@@ -439,7 +438,7 @@ const makerFLTest = async () => {
 
         const tokenSymbol = 'DAI';
 
-        const determineActiveWallet = (w) => { wallet = isWalletDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
 
         for (let i = 0; i < WALLETS.length; ++i) {
             it(`... should get a ${tokenSymbol} Maker flash loan using ${WALLETS[i]}`, async () => {
@@ -519,7 +518,7 @@ const uniswapV3FlashloanTest = async () => {
             fullMathLibrary = await fullMath.deploy();
         });
 
-        const determineActiveWallet = (w) => { wallet = isWalletDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
 
         const uniPoolInfo = [
             {
@@ -667,7 +666,7 @@ const ghoFLTest = async () => {
 
         const tokenSymbol = 'GHO';
 
-        const determineActiveWallet = (w) => { wallet = isWalletDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
 
         for (let i = 0; i < WALLETS.length; ++i) {
             it(`... should get a ${tokenSymbol} flash loan using ${WALLETS[i]}`, async () => {
@@ -730,7 +729,7 @@ const flMorphoBlueTest = async () => {
             18,
         );
         const wethAddr = addrs[network].WETH_ADDRESS;
-        const determineActiveWallet = (w) => { wallet = isWalletDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
 
         for (let i = 0; i < WALLETS.length; ++i) {
             it(`... should get a WETH MorphoBlue flash loan using ${WALLETS[i]}`, async () => {

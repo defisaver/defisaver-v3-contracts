@@ -24,6 +24,8 @@ const {
     revertToSnapshot,
     takeSnapshot,
     getAdminAddr,
+    WALLETS,
+    isWalletNameDsProxy,
 } = require('../utils');
 
 const { deployContract } = require('../../scripts/utils/deployer');
@@ -42,9 +44,6 @@ const TWO_DAYS = 48 * 60 * 60;
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 const pullAmount = '1000000000000';
-
-const WALLETS = ['DS_PROXY', 'SAFE'];
-const isWalletDsProxy = (w) => w === 'DS_PROXY';
 
 /**
  * Set StrategyExecutor to EOA for testing purposes so we can callExecute()
@@ -775,7 +774,7 @@ const recipeExecutorTest = async () => {
         };
 
         const setupWallet = async (w) => {
-            if (isWalletDsProxy(w)) {
+            if (isWalletNameDsProxy(w)) {
                 useDsProxy = true;
                 wallet = dsProxy;
             } else {
@@ -1191,7 +1190,7 @@ const subProxyTest = async () => {
         };
 
         const setupWallet = async (w) => {
-            if (isWalletDsProxy(w)) {
+            if (isWalletNameDsProxy(w)) {
                 useDsProxy = true;
                 wallet = dsProxy;
             } else {

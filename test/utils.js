@@ -1312,6 +1312,9 @@ const executeTxFromProxy = async (proxy, targetAddr, callData) => {
     return receipt;
 };
 
+const WALLETS = ['DS_PROXY', 'SAFE'];
+const isWalletNameDsProxy = (w) => w === 'DS_PROXY';
+
 module.exports = {
     addToExchangeAggregatorRegistry,
     getAddrFromRegistry,
@@ -1427,4 +1430,6 @@ module.exports = {
     BLUSD_ADDR,
     BOND_NFT_ADDR,
     AAVE_V2_MARKET_ADDR,
+    WALLETS,
+    isWalletNameDsProxy,
 };
