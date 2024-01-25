@@ -91,8 +91,7 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         uint256 currPrice = uint256(tempStorage.getBytes32("CURR_PRICE"));
         require(currPrice > 0, "LimitSell: Price not set");
 
-        // Reset the current price for the next strategy
-        tempStorage.setBytes32("CURR_PRICE", bytes32(0));
+        // no fee for limit sell strategies
         _exchangeData.dfsFeeDivider = 0;
 
         if (_exchangeData.minPrice != currPrice) {

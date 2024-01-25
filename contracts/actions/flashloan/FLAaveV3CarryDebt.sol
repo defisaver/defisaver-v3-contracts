@@ -26,7 +26,16 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
     error NoInterestRateSetError();
     //Credit delegation allowance must be 0 after FL
     error CreditDelegationAllowanceLeftError(uint256 amountLeft);
+    // Revert if execution fails when using safe wallet
+    error SafeExecutionError();
 
+    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
+    bytes4 public constant CALLBACK_SELECTOR =
+        bytes4(
+            keccak256(
+                "_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"
+            )
+        );
     bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     /// @inheritdoc ActionBase
@@ -124,22 +133,38 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
             revert SameCallerError();
         }
 
-        (Recipe memory currRecipe, address proxy) = abi.decode(_params, (Recipe, address));
+        (Recipe memory currRecipe, address wallet) = abi.decode(_params, (Recipe, address));
 
-        // Send FL amounts to user proxy
+        // Send FL amounts to user wallet
         for (uint256 i = 0; i < _assets.length; ++i) {
-            _assets[i].withdrawTokens(proxy, _amounts[i]);
+            _assets[i].withdrawTokens(wallet, _amounts[i]);
         }
 
         address payable recipeExecutor = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
 
-        // call Action execution
-        IDSProxy(proxy).execute{value: address(this).balance}(
-            recipeExecutor,
-            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, bytes32(_amounts[0]))
-        );
+        _executeRecipe(wallet, recipeExecutor, currRecipe, _amounts[0]);
 
         return true;
+    }
+
+    function _executeRecipe(address _wallet, address _recipeExecutorAddr, Recipe memory _currRecipe, uint256 _paybackAmount) internal {
+        if (isDSProxy(_wallet)) {
+            IDSProxy(_wallet).execute{value: address(this).balance}(
+                _recipeExecutorAddr,
+                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount)
+            );
+        } else {
+            bool success = ISafe(_wallet).execTransactionFromModule(
+                _recipeExecutorAddr,
+                address(this).balance,
+                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount),
+                ISafe.Operation.DelegateCall
+            );
+
+            if (!success) {
+                revert SafeExecutionError();
+             }
+        }
     }
 
     function parseInputs(bytes memory _callData) public pure returns (FlashLoanParams memory inputData) {

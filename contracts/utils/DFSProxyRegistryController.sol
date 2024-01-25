@@ -5,10 +5,10 @@ pragma solidity =0.8.10;
 import "./DFSProxyRegistry.sol";
 import "../DS/DSProxyFactoryInterface.sol";
 import "./helpers/UtilHelper.sol";
-
+import "./../utils/ds-proxy-factory/DSProxyFactoryHelper.sol";
 
 /// @title User facing contract to manage new proxies (is owner of DFSProxyRegistry)
-contract DFSProxyRegistryController is AdminAuth, UtilHelper {
+contract DFSProxyRegistryController is AdminAuth, UtilHelper, DSProxyFactoryHelper {
 
     /// @dev List of prebuilt proxies the users can claim to save gas
     address[] public proxyPool;

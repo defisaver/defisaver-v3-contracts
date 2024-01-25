@@ -14,10 +14,12 @@ const {
     nullAddress,
     formatExchangeObj,
     UNISWAP_WRAPPER,
-    getAddrFromRegistry,
+    approve,
+    WALLETS,
+    isWalletNameDsProxy,
 } = require('../../utils');
 
-const { aaveV3Supply, aaveV3Borrow, executeAction } = require('../../actions');
+const { executeAction } = require('../../actions');
 
 const {
     VARIABLE_RATE,
@@ -28,50 +30,67 @@ const {
 
 const aaveV3BoostWithNewFL = async () => {
     describe('Aave V3 AaveV3 Boost Tests With Carry Debt FL', () => {
+        let snapshotId;
+
         let senderAcc;
         let senderAddr;
         let proxy;
-        let proxyAddr;
-        let snapshotId;
-        let flAaveV3Address;
+        let safe;
+        let wallet;
+
+        let flActionAddress;
         let flAaveV3CarryDebtAddress;
         let aaveV3View;
+
+        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
 
         const createAaveV3Position = async (collAmount, debtAmount) => {
             const collAddress = WETH_ADDRESS;
             await setBalance(collAddress, senderAddr, collAmount);
-            await aaveV3Supply(
-                proxy,
-                addrs[getNetwork()].AAVE_MARKET,
-                collAmount,
-                collAddress,
-                WETH_ASSET_ID_IN_AAVE_V3_MARKET,
-                senderAddr,
-                senderAcc,
-            );
-            await aaveV3Borrow(
-                proxy,
-                addrs[getNetwork()].AAVE_MARKET,
-                debtAmount,
-                senderAddr,
-                VARIABLE_RATE,
-                LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
-            );
+            await approve(collAddress, wallet.address, senderAcc);
+
+            const recipe = new dfs.Recipe('CreateAaveV3Position', [
+                new dfs.actions.aaveV3.AaveV3SupplyAction(
+                    true,
+                    addrs[getNetwork()].AAVE_MARKET,
+                    collAmount.toString(),
+                    senderAddr,
+                    collAddress,
+                    WETH_ASSET_ID_IN_AAVE_V3_MARKET,
+                    true,
+                    false,
+                    nullAddress,
+                ),
+                new dfs.actions.aaveV3.AaveV3BorrowAction(
+                    true,
+                    addrs[getNetwork()].AAVE_MARKET,
+                    debtAmount.toString(),
+                    senderAddr,
+                    VARIABLE_RATE,
+                    LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
+                    true,
+                    nullAddress,
+                ),
+            ]);
+            const functionData = recipe.encodeForDsProxyCall();
+            await executeAction('RecipeExecutor', functionData[1], wallet);
         };
 
         const actions = {
-            flAaveV3Action: (boostAmount) => new dfs.actions.flashloan.AaveV3FlashLoanNoFeeAction(
-                [LUSD_ADDR],
-                [boostAmount.toString()],
-                [AAVE_NO_DEBT_MODE],
-                nullAddress,
+            flAaveV3Action: (boostAmount) => new dfs.actions.flashloan.FLAction(
+                new dfs.actions.flashloan.AaveV3FlashLoanAction(
+                    [LUSD_ADDR],
+                    [boostAmount.toString()],
+                    [AAVE_NO_DEBT_MODE],
+                    nullAddress,
+                ),
             ),
             flAaveV3CarryDebtAction: (boostAmount) => new dfs.actions.flashloan
                 .AaveV3FlashLoanCarryDebtAction(
                     [LUSD_ADDR],
                     [boostAmount.toString()],
                     [VARIABLE_RATE],
-                    proxyAddr,
+                    wallet.address,
                 ),
             sellAction: (boostAmount) => new dfs.actions.basic.SellAction(
                 formatExchangeObj(
@@ -80,8 +99,8 @@ const aaveV3BoostWithNewFL = async () => {
                     boostAmount.toString(), //  boostAmount
                     UNISWAP_WRAPPER,
                 ),
-                proxyAddr, // from
-                proxyAddr, // to
+                wallet.address, // from
+                wallet.address, // to
             ),
             feeTakingAction: (gasCost) => new dfs.actions.basic.GasFeeAction(
                 gasCost,
@@ -92,7 +111,7 @@ const aaveV3BoostWithNewFL = async () => {
                 true, // use default market
                 addrs[getNetwork()].AAVE_MARKET,
                 '$3', // pipe from fee taking action
-                proxyAddr,
+                wallet.address,
                 WETH_ADDRESS,
                 WETH_ASSET_ID_IN_AAVE_V3_MARKET,
                 true, // use as collateral
@@ -103,7 +122,7 @@ const aaveV3BoostWithNewFL = async () => {
                 true,
                 addrs[getNetwork()].AAVE_MARKET,
                 '$1', // fl amount
-                flAaveV3Address,
+                flActionAddress,
                 VARIABLE_RATE,
                 LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
                 false,
@@ -120,19 +139,24 @@ const aaveV3BoostWithNewFL = async () => {
         };
 
         before(async () => {
-            flAaveV3Address = await getAddrFromRegistry('FLAaveV3');
-
-            aaveV3View = await redeploy('AaveV3View');
+            const flActionContract = await redeploy('FLAction');
+            flActionAddress = flActionContract.address;
 
             const flAaveV3CarryDebtContract = await redeploy('FLAaveV3CarryDebt');
             flAaveV3CarryDebtAddress = flAaveV3CarryDebtContract.address;
 
+            aaveV3View = await redeploy('AaveV3View');
+            await redeploy('RecipeExecutor');
+            await redeploy('DFSSell');
+            await redeploy('GasFeeTaker');
+            await redeploy('AaveV3Supply');
+            await redeploy('AaveV3Borrow');
             await redeploy('AaveV3DelegateCredit');
 
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAddr = senderAcc.address;
             proxy = await getProxy(senderAddr);
-            proxyAddr = proxy.address;
+            safe = await getProxy(senderAddr, true);
         });
 
         beforeEach(async () => {
@@ -143,107 +167,113 @@ const aaveV3BoostWithNewFL = async () => {
             await revertToSnapshot(snapshotId);
         });
 
-        it('... should perform aaveV3 boost standard way', async () => {
-            const collAmount = hre.ethers.utils.parseUnits('100', 18);
-            const debtAmount = hre.ethers.utils.parseUnits('100000', 18);
+        for (let i = 0; i < WALLETS.length; ++i) {
+            it(`... should perform aaveV3 boost standard way using ${WALLETS[i]} as wallet`, async () => {
+                determineActiveWallet(WALLETS[i]);
+                const collAmount = hre.ethers.utils.parseUnits('100', 18);
+                const debtAmount = hre.ethers.utils.parseUnits('100000', 18);
 
-            await createAaveV3Position(collAmount, debtAmount);
+                await createAaveV3Position(collAmount, debtAmount);
 
-            const loanDataBeforeBoost = await aaveV3View.getLoanData(
-                addrs[getNetwork()].AAVE_MARKET, proxyAddr,
-            );
+                const loanDataBeforeBoost = await aaveV3View.getLoanData(
+                    addrs[getNetwork()].AAVE_MARKET, wallet.address,
+                );
 
-            const boostAmount = debtAmount.div(20);
+                const boostAmount = debtAmount.div(20);
 
-            const regularBoostRecipe = new dfs.Recipe('RegularAaveV3BoostRecipe', [
-                actions.flAaveV3Action(boostAmount),
-                actions.sellAction(boostAmount),
-                actions.feeTakingAction(1_400_000),
-                actions.aaveV3SupplyAction(),
-                actions.aaveV3BorrowAction(),
-            ]);
+                const regularBoostRecipe = new dfs.Recipe('RegularAaveV3BoostRecipe', [
+                    actions.flAaveV3Action(boostAmount),
+                    actions.sellAction(boostAmount),
+                    actions.feeTakingAction(1_400_000),
+                    actions.aaveV3SupplyAction(),
+                    actions.aaveV3BorrowAction(),
+                ]);
 
-            const functionData = regularBoostRecipe.encodeForDsProxyCall();
-            await executeAction('RecipeExecutor', functionData[1], proxy);
+                const functionData = regularBoostRecipe.encodeForDsProxyCall();
+                await executeAction('RecipeExecutor', functionData[1], wallet);
 
-            const loanDataAfterBoost = await aaveV3View.getLoanData(
-                addrs[getNetwork()].AAVE_MARKET, proxy.address,
-            );
-            console.log(`Ratio before: ${loanDataBeforeBoost.ratio / 1e16}`);
-            console.log(`Ratio After: ${loanDataAfterBoost.ratio / 1e16}`);
-            expect(loanDataAfterBoost.ratio).to.be.lt(loanDataBeforeBoost.ratio);
-        }).timeout(300000);
+                const loanDataAfterBoost = await aaveV3View.getLoanData(
+                    addrs[getNetwork()].AAVE_MARKET, wallet.address,
+                );
+                console.log(`Ratio before: ${loanDataBeforeBoost.ratio / 1e16}`);
+                console.log(`Ratio After: ${loanDataAfterBoost.ratio / 1e16}`);
+                expect(loanDataAfterBoost.ratio).to.be.lt(loanDataBeforeBoost.ratio);
+            }).timeout(300000);
 
-        it('... should perform aaveV3 boost with carry debt fl', async () => {
-            const collAmount = hre.ethers.utils.parseUnits('100', 18);
-            const debtAmount = hre.ethers.utils.parseUnits('100000', 18);
+            it(`... should perform aaveV3 boost with carry debt fl using ${WALLETS[i]} as wallet`, async () => {
+                determineActiveWallet(WALLETS[i]);
+                const collAmount = hre.ethers.utils.parseUnits('100', 18);
+                const debtAmount = hre.ethers.utils.parseUnits('100000', 18);
 
-            await createAaveV3Position(collAmount, debtAmount);
+                await createAaveV3Position(collAmount, debtAmount);
 
-            const loanDataBeforeBoost = await aaveV3View.getLoanData(
-                addrs[getNetwork()].AAVE_MARKET, proxy.address,
-            );
+                const loanDataBeforeBoost = await aaveV3View.getLoanData(
+                    addrs[getNetwork()].AAVE_MARKET, wallet.address,
+                );
 
-            const boostAmount = debtAmount.div(20);
+                const boostAmount = debtAmount.div(20);
 
-            const regularBoostRecipe = new dfs.Recipe('AaveV3BoostRecipeWithNewFL', [
-                actions.flAaveV3CarryDebtAction(boostAmount),
-                actions.sellAction(boostAmount),
-                actions.feeTakingAction(1_400_000),
-                actions.aaveV3SupplyAction(),
-                actions.delegateCreditOnAaveV3Action('$1'), // amount from FL action
-            ]);
+                const regularBoostRecipe = new dfs.Recipe('AaveV3BoostRecipeWithNewFL', [
+                    actions.flAaveV3CarryDebtAction(boostAmount),
+                    actions.sellAction(boostAmount),
+                    actions.feeTakingAction(1_400_000),
+                    actions.aaveV3SupplyAction(),
+                    actions.delegateCreditOnAaveV3Action('$1'), // amount from FL action
+                ]);
 
-            const functionData = regularBoostRecipe.encodeForDsProxyCall();
-            await executeAction('RecipeExecutor', functionData[1], proxy);
+                const functionData = regularBoostRecipe.encodeForDsProxyCall();
+                await executeAction('RecipeExecutor', functionData[1], wallet);
 
-            const loanDataAfterBoost = await aaveV3View.getLoanData(
-                addrs[getNetwork()].AAVE_MARKET, proxy.address,
-            );
-            console.log(`Ratio before: ${loanDataBeforeBoost.ratio / 1e16}`);
-            console.log(`Ratio After: ${loanDataAfterBoost.ratio / 1e16}`);
-            expect(loanDataAfterBoost.ratio).to.be.lt(loanDataBeforeBoost.ratio);
-        }).timeout(300000);
+                const loanDataAfterBoost = await aaveV3View.getLoanData(
+                    addrs[getNetwork()].AAVE_MARKET, wallet.address,
+                );
+                console.log(`Ratio before: ${loanDataBeforeBoost.ratio / 1e16}`);
+                console.log(`Ratio After: ${loanDataAfterBoost.ratio / 1e16}`);
+                expect(loanDataAfterBoost.ratio).to.be.lt(loanDataBeforeBoost.ratio);
+            }).timeout(300000);
 
-        it('... should revert on carry debt fl when using maximum credit delegation allowance', async () => {
-            const collAmount = hre.ethers.utils.parseUnits('100', 18);
-            const debtAmount = hre.ethers.utils.parseUnits('100000', 18);
+            it(`... should revert on carry debt fl when using maximum credit delegation allowance using ${WALLETS[i]} as wallet`, async () => {
+                determineActiveWallet(WALLETS[i]);
+                const collAmount = hre.ethers.utils.parseUnits('100', 18);
+                const debtAmount = hre.ethers.utils.parseUnits('100000', 18);
 
-            await createAaveV3Position(collAmount, debtAmount);
+                await createAaveV3Position(collAmount, debtAmount);
 
-            const boostAmount = debtAmount.div(20);
+                const boostAmount = debtAmount.div(20);
 
-            const regularBoostRecipe = new dfs.Recipe('AaveV3BoostRecipeWithNewFL', [
-                actions.flAaveV3CarryDebtAction(boostAmount),
-                actions.sellAction(boostAmount),
-                actions.feeTakingAction(1_400_000),
-                actions.aaveV3SupplyAction(),
-                actions.delegateCreditOnAaveV3Action(hre.ethers.constants.MaxUint256),
-            ]);
+                const regularBoostRecipe = new dfs.Recipe('AaveV3BoostRecipeWithNewFL', [
+                    actions.flAaveV3CarryDebtAction(boostAmount),
+                    actions.sellAction(boostAmount),
+                    actions.feeTakingAction(1_400_000),
+                    actions.aaveV3SupplyAction(),
+                    actions.delegateCreditOnAaveV3Action(hre.ethers.constants.MaxUint256),
+                ]);
 
-            const functionData = regularBoostRecipe.encodeForDsProxyCall();
-            await expect(executeAction('RecipeExecutor', functionData[1], proxy)).to.be.reverted;
-        }).timeout(300000);
+                const functionData = regularBoostRecipe.encodeForDsProxyCall();
+                await expect(executeAction('RecipeExecutor', functionData[1], wallet)).to.be.reverted;
+            }).timeout(300000);
 
-        it('... should revert on carry debt fl when using slightly bigger credit delegation allowance', async () => {
-            const collAmount = hre.ethers.utils.parseUnits('100', 18);
-            const debtAmount = hre.ethers.utils.parseUnits('100000', 18);
+            it(`... should revert on carry debt fl when using slightly bigger credit delegation allowance and using ${WALLETS[i]} as wallet`, async () => {
+                determineActiveWallet(WALLETS[i]);
+                const collAmount = hre.ethers.utils.parseUnits('100', 18);
+                const debtAmount = hre.ethers.utils.parseUnits('100000', 18);
 
-            await createAaveV3Position(collAmount, debtAmount);
+                await createAaveV3Position(collAmount, debtAmount);
 
-            const boostAmount = debtAmount.div(20);
+                const boostAmount = debtAmount.div(20);
 
-            const regularBoostRecipe = new dfs.Recipe('AaveV3BoostRecipeWithNewFL', [
-                actions.flAaveV3CarryDebtAction(boostAmount),
-                actions.sellAction(boostAmount),
-                actions.feeTakingAction(1_400_000),
-                actions.aaveV3SupplyAction(),
-                actions.delegateCreditOnAaveV3Action(debtAmount.div(20).add(1)),
-            ]);
+                const regularBoostRecipe = new dfs.Recipe('AaveV3BoostRecipeWithNewFL', [
+                    actions.flAaveV3CarryDebtAction(boostAmount),
+                    actions.sellAction(boostAmount),
+                    actions.feeTakingAction(1_400_000),
+                    actions.aaveV3SupplyAction(),
+                    actions.delegateCreditOnAaveV3Action(debtAmount.div(20).add(1)),
+                ]);
 
-            const functionData = regularBoostRecipe.encodeForDsProxyCall();
-            await expect(executeAction('RecipeExecutor', functionData[1], proxy)).to.be.reverted;
-        }).timeout(300000);
+                const functionData = regularBoostRecipe.encodeForDsProxyCall();
+                await expect(executeAction('RecipeExecutor', functionData[1], wallet)).to.be.reverted;
+            }).timeout(300000);
+        }
     });
 };
 
