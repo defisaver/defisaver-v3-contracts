@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../../interfaces/IDSProxy.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../utils/TransientStorage.sol";
 import "../fee/helpers/GasFeeHelper.sol";
@@ -82,7 +81,7 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         address _to,
         uint256 _gasUsed
     ) internal returns (uint256, bytes memory) {
-        // if we set srcAmount to max, take the whole proxy balance
+        // if we set srcAmount to max, take the whole user's balance
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
@@ -100,7 +99,6 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
      
         _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
 
-        // set owner of the proxy as the user that is selling for offchain orders
         _exchangeData.user = getUserAddress();
         
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
@@ -132,7 +130,6 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         params = abi.decode(_callData, (Params));
     }
 
-    /// @notice Returns the owner of the DSProxy that called the contract
     function getUserAddress() internal view returns (address) {
         return address(this);
     }

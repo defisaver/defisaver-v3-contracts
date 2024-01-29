@@ -48,9 +48,9 @@ contract TransferNFT is ActionBase {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
-    /// @dev Proxy must have approve if _from != proxy
+    /// @dev The user's wallet must have approve if _from != user's wallet
     /// @param _nftAddr Address of the ERC721 contract
-    /// @param _from Where from we are pulling the nft (defaults to proxy)
+    /// @param _from Where from we are pulling the nft (defaults to user's wallet)
     /// @param _to Address where we are transferring the nft
     /// @param _nftId TokenId we are transferring
     function _transferNFT(address _nftAddr, address _from, address _to, uint _nftId) internal {

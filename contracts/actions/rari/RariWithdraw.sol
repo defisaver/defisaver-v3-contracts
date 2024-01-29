@@ -70,7 +70,7 @@ contract RariWithdraw is ActionBase, DSMath {
 
         IFundManager fundManager = IFundManager(_inputData.fundManager);
 
-        // pull tokens if they're not on proxy
+        // pull tokens if they're not on user's wallet
         _inputData.poolTokensAmountToPull = _inputData.poolTokenAddress.pullTokensIfNeeded(
             _inputData.from,
             _inputData.poolTokensAmountToPull

@@ -15,7 +15,7 @@ contract MorphoAaveV2Payback is ActionBase, MorphoAaveV2Helper {
     /// @param tokenAddr The address of the token to be paid back
     /// @param amount Amount of tokens to be paid back
     /// @param from Where are we pulling the payback tokens amount from
-    /// @param onBehalf For what user we are paying back the debt, defaults to proxy
+    /// @param onBehalf For what user we are paying back the debt, defaults to user's wallet
     struct Params {
         address tokenAddr;
         uint256 amount;
@@ -51,7 +51,7 @@ contract MorphoAaveV2Payback is ActionBase, MorphoAaveV2Helper {
     }
 
     function _repay(Params memory _params) internal returns (uint256, bytes memory) {
-        // default to onBehalf of proxy
+        // default to onBehalf of user's wallet
         if (_params.onBehalf == address(0)) {
             _params.onBehalf = address(this);
         }

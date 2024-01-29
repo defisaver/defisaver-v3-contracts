@@ -55,7 +55,7 @@ contract MorphoBlueSupplyCollateral is ActionBase, MorphoBlueHelper {
     function _supply(Params memory _params) internal returns (uint256, bytes memory) {
         _params.supplyAmount = _params.marketParams.collateralToken.pullTokensIfNeeded(_params.from, _params.supplyAmount);
 
-        // default to onBehalf of proxy
+        // default to onBehalf of user's wallet
         if (_params.onBehalf == address(0)) {
             _params.onBehalf = address(this);
         }

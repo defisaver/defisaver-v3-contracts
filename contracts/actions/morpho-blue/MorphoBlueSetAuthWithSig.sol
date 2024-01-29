@@ -5,7 +5,7 @@ pragma solidity =0.8.10;
 import "../ActionBase.sol";
 import "./helpers/MorphoBlueHelper.sol";
 
-/// @title Allow or disallow an address to manage DSProxy MorphoBlue position
+/// @title Allow or disallow an address to manage MorphoBlue position on user's wallet
 contract MorphoBlueSetAuthWithSig is ActionBase, MorphoBlueHelper {
     
     struct Params {

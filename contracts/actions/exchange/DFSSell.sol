@@ -84,7 +84,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         address _to,
         bool _isDirect
     ) internal returns (uint256, bytes memory) {
-        // if we set srcAmount to max, take the whole proxy balance
+        // if we set srcAmount to max, take the whole user's wallet balance
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
