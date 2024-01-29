@@ -58,7 +58,7 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
         bool isAbsorbPaused;
     }
     
-    function isAllowed(address _market, address _owner, address _manager) public view returns(bool isAllowed) {
+    function isAllowed(address _market, address _owner, address _manager) public view returns(bool) {
         return ICometExt(_market).allowance(_owner, _manager) == 0 ? false : true;
     }
 
