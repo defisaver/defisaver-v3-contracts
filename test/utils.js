@@ -34,7 +34,7 @@ const addrs = {
         FEE_RECEIVER: '0x6467e807dB1E71B9Ef04E0E3aFb962E4B0900B2B',
         USDC_ADDR: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         EXCHANGE_OWNER_ADDR: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
-        SAVER_EXCHANGE_ADDR: '0x25dd3F51e0C3c3Ff164DDC02A8E4D65Bb9cBB12D',
+        WRAPPER_EXCHANGE_REGISTRY: '0x653893375dD1D942D2C429caB51641F2bf14d426',
         SubProxy: '0xd18d4756bbf848674cc35f1a0B86afEF20787382',
         UNISWAP_WRAPPER: '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54',
         UNISWAP_V3_WRAPPER: '0xA250D449e8246B0be1ecF66E21bB98678448DEF5',
@@ -66,7 +66,7 @@ const addrs = {
         DAI_ADDRESS: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
         USDC_ADDR: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
         EXCHANGE_OWNER_ADDR: '0xc9a956923bfb5f141f1cd4467126b3ae91e5cc33',
-        SAVER_EXCHANGE_ADDR: '0xFfE2F824f0a1Ca917885CB4f848f3aEf4a32AaB9',
+        WRAPPER_EXCHANGE_REGISTRY: '',
         PROXY_AUTH_ADDR: '0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043',
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
         SubProxy: '0x163c08d3F6d916AD6Af55b37728D547e968103F8',
@@ -92,7 +92,7 @@ const addrs = {
         USDC_ADDR: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
         USDC_NATIVE_ADDR: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
         EXCHANGE_OWNER_ADDR: '0x926516e60521556f4ab5e7bf16a4d41a8539c7d1',
-        SAVER_EXCHANGE_ADDR: '0xaB1E4b72BC2f3890F052df111EE626c1c7229F26',
+        WRAPPER_EXCHANGE_REGISTRY: '',
         FEE_RECEIVER: '0xe000e3c9428D539566259cCd89ed5fb85e655A01',
         TOKEN_GROUP_REGISTRY: '0xb03fe103f54841821C080C124312059c9A3a7B5c',
         PROXY_AUTH_ADDR: '0xF3A8479538319756e100C386b3E60BF783680d8f',
@@ -123,7 +123,7 @@ const addrs = {
         DAI_ADDRESS: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
         USDC_ADDR: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
         EXCHANGE_OWNER_ADDR: '0xC4D4b4F2Df76f9952E6e0Dc79861582A5b7269c3',
-        SAVER_EXCHANGE_ADDR: '0x2A588cBCBd5e6c6ba7ED0E260B8107F599017DDE',
+        WRAPPER_EXCHANGE_REGISTRY: '',
         PROXY_AUTH_ADDR: '0xD34BBE7398F7F08952b033bbaF2D2C84231dCEdc',
         AAVE_MARKET: '0xe20fCBdBfFC4Dd138cE8b2E6FBb6CB49777ad64D',
         SubProxy: '',
@@ -1010,21 +1010,21 @@ const getProxyAuth = async (proxyAddr, addrWithAuth) => {
 };
 
 const setNewExchangeWrapper = async (acc, newAddr, isFork = false) => {
-    const exchangeOwnerAddr = addrs[network].EXCHANGE_OWNER_ADDR;
-    await sendEther(acc, exchangeOwnerAddr, '1');
+    const ownerAddr = addrs[network].OWNER_ACC;
+    await sendEther(acc, ownerAddr, '1');
     if (!isFork) {
-        await impersonateAccount(exchangeOwnerAddr);
+        await impersonateAccount(ownerAddr);
     }
 
-    const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
+    const signer = await hre.ethers.provider.getSigner(ownerAddr);
 
     const registryInstance = await hre.ethers.getContractFactory('WrapperExchangeRegistry');
-    const registry = await registryInstance.attach(addrs[network].SAVER_EXCHANGE_ADDR);
+    const registry = await registryInstance.attach(addrs[network].WRAPPER_EXCHANGE_REGISTRY);
     const registryByOwner = registry.connect(signer);
 
     await registryByOwner.addWrapper(newAddr, { gasLimit: 300000 });
     if (!isFork) {
-        await stopImpersonatingAccount(exchangeOwnerAddr);
+        await stopImpersonatingAccount(ownerAddr);
     }
 };
 

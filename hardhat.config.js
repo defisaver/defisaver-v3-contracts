@@ -39,7 +39,7 @@ module.exports = {
     saveOnTenderly: false,
     defaultNetwork: 'fork',
     lightTesting: true,
-    isWalletSafe: false,
+    isWalletSafe: true,
     networks: {
         ...testNetworks,
         local: {
