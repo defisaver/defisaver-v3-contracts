@@ -184,6 +184,41 @@ const deploySafe = async (
     ).then((e) => e.wait());
 };
 
+/**
+ * Sign a safe tx with one signer using EIP 191 signature
+ */
+const signSafeTx = async (safeInstance, safeTxParams, signer) => {
+    const nonce = await safeInstance.nonce();
+    const txHashData = await safeInstance.getTransactionHash(
+        safeTxParams.to,
+        safeTxParams.value,
+        safeTxParams.data,
+        safeTxParams.operation,
+        safeTxParams.safeTxGas,
+        safeTxParams.baseGas,
+        safeTxParams.gasPrice,
+        safeTxParams.gasToken,
+        safeTxParams.refundReceiver,
+        nonce,
+    );
+
+    // ethers will append \x19Ethereum Signed Message:\n32 to the txHashData (EIP 191)
+    const sig = await signer.signMessage(hre.ethers.utils.arrayify(txHashData));
+
+    const signatureSplitted = hre.ethers.utils.splitSignature(sig);
+
+    // v is 28 so we need to adapt it so safe can recognize it as EIP 191 compliant
+    if (signatureSplitted.v < 31) {
+        const v = signatureSplitted.v + 4;
+        const r = signatureSplitted.r.slice(2);
+        const s = signatureSplitted.s.slice(2);
+        const vHex = v.toString(16).padStart(2, '0');
+        const adaptedSig = `0x${r}${s}${vHex}`;
+        return hre.ethers.utils.arrayify(adaptedSig);
+    }
+    return sig;
+};
+
 module.exports = {
     createSafe,
     executeSafeTx,
@@ -192,4 +227,5 @@ module.exports = {
     predictSafeAddress,
     deploySafe,
     SAFE_MASTER_COPY_VERSIONS,
+    signSafeTx,
 };

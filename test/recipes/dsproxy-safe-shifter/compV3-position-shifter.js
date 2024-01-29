@@ -8,8 +8,10 @@ const {
     getNetwork,
     setBalance,
 } = require('../../utils');
-const { supplyCompV3, borrowCompV3, allowCompV3 } = require('../../actions');
-const { executeSafeTx } = require('../../utils-safe');
+const {
+    supplyCompV3, borrowCompV3, executeAction,
+} = require('../../actions');
+const { signSafeTx } = require('../../utils-safe');
 
 describe('Safe-CompV3-Shift-Position', function () {
     this.timeout(200000);
@@ -44,7 +46,7 @@ describe('Safe-CompV3-Shift-Position', function () {
         );
     };
 
-    const createShiftRecipe = async (positionData) => {
+    const migrationTxCallData = async (positionData) => {
         const debtAmount = positionData.debtAmount.mul(1_00_01).div(1_00_00);
 
         const flashloanAction = new dfs.actions.flashloan.FLAction(
@@ -55,7 +57,7 @@ describe('Safe-CompV3-Shift-Position', function () {
         );
         const paybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
             market,
-            ethers.constants.MaxUint256, // repay hole debt,
+            ethers.constants.MaxUint256, // repay all debt,
             safe.address, // from
             proxy.address, // on behalf of
             positionData.debtAddr,
@@ -65,13 +67,13 @@ describe('Safe-CompV3-Shift-Position', function () {
             market,
             safe.address, // to
             positionData.collAddr,
-            ethers.constants.MaxUint256, // withdraw hole collateral
+            ethers.constants.MaxUint256, // withdraw all collateral
             proxy.address, // on behalf of
         );
         const supplyAction = new dfs.actions.compoundV3.CompoundV3SupplyAction(
             market,
             positionData.collAddr,
-            ethers.constants.MaxUint256, // supply hole balance of collAddr
+            ethers.constants.MaxUint256, // supply all balance of collAddr
             safe.address, // from
             safe.address,
         );
@@ -81,44 +83,63 @@ describe('Safe-CompV3-Shift-Position', function () {
             flAction.address,
             safe.address,
         );
-        return new dfs.Recipe('ShiftCompV3PositionToSafe', [
+        const recipe = new dfs.Recipe('ShiftCompV3PositionToSafe', [
             flashloanAction,
             paybackAction,
             withdrawAction,
             supplyAction,
             borrowAction,
         ]);
+        return recipe.encodeForDsProxyCall()[1];
     };
 
-    const approveSafeToActOnBehalfOfProxy = async () => {
-        await allowCompV3(
+    const executeMigrationInOneTx = async (positionData) => {
+        const safeTxParams = {
+            safe: safe.address,
+            to: recipeExecutor.address,
+            value: 0,
+            data: await migrationTxCallData(positionData),
+            operation: 1,
+            safeTxGas: 0,
+            baseGas: 0,
+            gasPrice: 0,
+            gasToken: ethers.constants.AddressZero,
+            refundReceiver: ethers.constants.AddressZero,
+        };
+        const signature = await signSafeTx(safe, safeTxParams, senderAcc);
+
+        const compV3GiveAllowanceAction = new dfs.actions.compoundV3.CompoundV3AllowAction(
             market,
-            proxy,
             safe.address,
             true,
         );
-    };
-
-    const removeSafeApproval = async () => {
-        await allowCompV3(
+        const executeSafeTxAction = new dfs.actions.basic.ExecuteSafeTxAction(
+            safeTxParams.safe,
+            safeTxParams.to,
+            safeTxParams.value,
+            safeTxParams.data,
+            safeTxParams.operation,
+            safeTxParams.safeTxGas,
+            safeTxParams.baseGas,
+            safeTxParams.gasPrice,
+            safeTxParams.gasToken,
+            safeTxParams.refundReceiver,
+            signature,
+        );
+        const compV3RemoveAllowanceAction = new dfs.actions.compoundV3.CompoundV3AllowAction(
             market,
-            proxy,
             safe.address,
             false,
         );
+        const recipe = new dfs.Recipe('ShiftCompV3PositionToSafe', [
+            compV3GiveAllowanceAction,
+            executeSafeTxAction,
+            compV3RemoveAllowanceAction,
+        ]);
+        const functionData = recipe.encodeForDsProxyCall()[1];
+        await executeAction('RecipeExecutor', functionData, proxy);
     };
 
-    const migratePositionToSafeTx = async (positionData) => {
-        const shiftPositionRecipe = await createShiftRecipe(positionData);
-        const recipeData = shiftPositionRecipe.encodeForDsProxyCall()[1];
-
-        await executeSafeTx(
-            senderAcc.address,
-            safe,
-            recipeExecutor.address,
-            recipeData,
-        );
-    };
     const validateMigration = async (positionData, proxyLoanBefore) => {
         const proxyLoanAfter = await compV3View.getLoanData(
             market,
@@ -151,6 +172,7 @@ describe('Safe-CompV3-Shift-Position', function () {
         await redeploy('CompV3Supply');
         await redeploy('CompV3Allow');
         await redeploy('CompV3Withdraw');
+        await redeploy('ExecuteSafeTx');
 
         senderAcc = (await ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address, false);
@@ -171,12 +193,8 @@ describe('Safe-CompV3-Shift-Position', function () {
             proxy.address,
         );
 
-        await approveSafeToActOnBehalfOfProxy();
-
-        await migratePositionToSafeTx(positionData);
+        await executeMigrationInOneTx(positionData);
 
         await validateMigration(positionData, proxyLoanBefore);
-
-        await removeSafeApproval();
     });
 });

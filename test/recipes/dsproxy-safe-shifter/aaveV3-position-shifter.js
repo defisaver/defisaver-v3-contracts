@@ -11,7 +11,7 @@ const {
     setBalance,
     nullAddress,
 } = require('../../utils');
-const { aaveV3Supply, aaveV3Borrow, proxyApproveToken } = require('../../actions');
+const { aaveV3Supply, aaveV3Borrow, executeAction } = require('../../actions');
 
 const {
     VARIABLE_RATE,
@@ -20,7 +20,7 @@ const {
     AAVE_NO_DEBT_MODE,
     A_WETH_ADDRESS_V3,
 } = require('../../utils-aave');
-const { executeSafeTx } = require('../../utils-safe');
+const { signSafeTx } = require('../../utils-safe');
 
 describe('Safe-AaveV3-Shift-Position', function () {
     this.timeout(200000);
@@ -53,7 +53,7 @@ describe('Safe-AaveV3-Shift-Position', function () {
         );
     };
 
-    const createShiftRecipe = async (positionObj) => {
+    const migrationTxCallData = async (positionObj) => {
         const debtAmount = positionObj.debtAmount.mul(1_00_01).div(1_00_00);
 
         const flashloanAction = new dfs.actions.flashloan.FLAction(
@@ -67,7 +67,7 @@ describe('Safe-AaveV3-Shift-Position', function () {
         const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
             true,
             addrs[getNetwork()].AAVE_MARKET,
-            ethers.constants.MaxUint256, // repay hole debt
+            ethers.constants.MaxUint256, // repay all debt
             safe.address,
             VARIABLE_RATE,
             positionObj.debtAddr,
@@ -91,36 +91,65 @@ describe('Safe-AaveV3-Shift-Position', function () {
             false,
             nullAddress,
         );
-        return new dfs.Recipe('ShiftAaveV3PositionToSafe', [
+        const recipe = new dfs.Recipe('ShiftAaveV3PositionToSafe', [
             flashloanAction,
             paybackAction,
             pullCollateralATokensAction,
             borrowAction,
         ]);
+        return recipe.encodeForDsProxyCall()[1];
     };
 
-    const approveSafeToPullTokensOnBehalfOfProxy = async (positionData) => {
-        // accrue interest
+    const executeMigrationInOneTx = async (positionData) => {
+        const safeTxParams = {
+            safe: safe.address,
+            to: recipeExecutor.address,
+            value: 0,
+            data: await migrationTxCallData(positionData),
+            operation: 1,
+            safeTxGas: 0,
+            baseGas: 0,
+            gasPrice: 0,
+            gasToken: ethers.constants.AddressZero,
+            refundReceiver: ethers.constants.AddressZero,
+        };
+        const signature = await signSafeTx(safe, safeTxParams, senderAcc);
+
         const aCollTokensAmount = positionData.collAmount.mul(1_00_01).div(1_00_00);
 
-        await proxyApproveToken(
-            proxy,
+        const proxyApproveTokenAction = new dfs.actions.basic.ApproveTokenAction(
             positionData.collATokenAddr,
             safe.address,
             aCollTokensAmount,
         );
-    };
 
-    const migratePositionToSafeTx = async (positionData) => {
-        const shiftPositionRecipe = await createShiftRecipe(positionData);
-        const recipeData = shiftPositionRecipe.encodeForDsProxyCall()[1];
-
-        await executeSafeTx(
-            senderAcc.address,
-            safe,
-            recipeExecutor.address,
-            recipeData,
+        const executeSafeTxAction = new dfs.actions.basic.ExecuteSafeTxAction(
+            safeTxParams.safe,
+            safeTxParams.to,
+            safeTxParams.value,
+            safeTxParams.data,
+            safeTxParams.operation,
+            safeTxParams.safeTxGas,
+            safeTxParams.baseGas,
+            safeTxParams.gasPrice,
+            safeTxParams.gasToken,
+            safeTxParams.refundReceiver,
+            signature,
         );
+
+        const removeTokenApproval = new dfs.actions.basic.RemoveTokenApprovalAction(
+            positionData.collATokenAddr,
+            safe.address,
+        );
+
+        const recipe = new dfs.Recipe('ShiftCompV3PositionToSafe', [
+            proxyApproveTokenAction,
+            executeSafeTxAction,
+            removeTokenApproval,
+        ]);
+
+        const functionData = recipe.encodeForDsProxyCall()[1];
+        await executeAction('RecipeExecutor', functionData, proxy);
     };
 
     const validateMigration = async (positionData, proxyLoanBefore) => {
@@ -157,6 +186,10 @@ describe('Safe-AaveV3-Shift-Position', function () {
 
         const ratioDiff = proxyLoanBefore.ratio.sub(safeLoanAfter.ratio).abs();
         expect(ratioDiff).to.be.lte(ethers.BigNumber.from('10000000000000000')); // 10e16
+
+        const aCollToken = await ethers.getContractAt('IERC20', positionData.collATokenAddr);
+        const safeAllowance = await aCollToken.allowance(proxy.address, safe.address);
+        expect(safeAllowance).to.be.eq(ethers.BigNumber.from(0));
     };
 
     before(async () => {
@@ -167,6 +200,8 @@ describe('Safe-AaveV3-Shift-Position', function () {
         await redeploy('AaveV3Borrow');
         await redeploy('AaveV3Payback');
         await redeploy('ApproveToken');
+        await redeploy('ExecuteSafeTx');
+        await redeploy('RemoveTokenApproval');
 
         senderAcc = (await ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address, false);
@@ -191,9 +226,7 @@ describe('Safe-AaveV3-Shift-Position', function () {
             proxy.address,
         );
 
-        await approveSafeToPullTokensOnBehalfOfProxy(positionData);
-
-        await migratePositionToSafeTx(positionData);
+        await executeMigrationInOneTx(positionData);
 
         await validateMigration(positionData, proxyLoanBefore);
     });
