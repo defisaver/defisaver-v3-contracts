@@ -64,8 +64,8 @@ contract ExecuteSafeTx is ActionBase {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _executeSafeTx(Params memory _params) internal returns (bool success) {
-        success = ISafe(_params.safe).execTransaction(
+    function _executeSafeTx(Params memory _params) internal {
+        bool success = ISafe(_params.safe).execTransaction(
             _params.to,
             _params.value,
             _params.data,
