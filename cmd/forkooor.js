@@ -34,8 +34,6 @@ const {
     WETH_ADDRESS,
     UNISWAP_WRAPPER,
     DAI_ADDR,
-    rariDaiFundManager,
-    rdptAddress,
     WBTC_ADDR,
     redeploy,
     setNetwork,
@@ -71,8 +69,6 @@ const {
 const {
     sell,
     yearnSupply,
-    rariDeposit,
-    mStableDeposit,
     supplyMcd,
     withdrawMcd,
     liquityOpen,
@@ -89,13 +85,6 @@ const {
 const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy, subAaveV3CloseBundle } = require('../test/l2-strategy-subs');
 
 const { deployContract } = require('../scripts/utils/deployer');
-
-const {
-    mUSD,
-    imUSD,
-    imUSDVault,
-    AssetPair,
-} = require('../test/utils-mstable');
 
 const {
     getSubHash,
@@ -289,31 +278,6 @@ const supplyInSS = async (protocol, daiAmount, sender) => {
                 proxy,
                 REGISTRY_ADDR,
             );
-        } else if (protocol === 'rari') {
-            await rariDeposit(
-                rariDaiFundManager,
-                DAI_ADDR,
-                rdptAddress,
-                daiAmountWei,
-                senderAcc.address,
-                proxy.address,
-                proxy,
-                REGISTRY_ADDR,
-            );
-        } else if (protocol === 'mstable') {
-            await mStableDeposit(
-                proxy,
-                DAI_ADDR,
-                mUSD,
-                imUSD,
-                imUSDVault,
-                senderAcc.address,
-                proxy.address,
-                daiAmountWei,
-                0,
-                AssetPair.BASSET_IMASSETVAULT,
-                REGISTRY_ADDR,
-            );
         }
 
         console.log(`Deposited to ${protocol} ${daiAmount} Dai`);
@@ -485,15 +449,7 @@ const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio,
     const ratioUnderWei = hre.ethers.utils.parseUnits(minRatio, '16');
     const targetRatioWei = hre.ethers.utils.parseUnits(targetRatio, '16');
 
-    let bundleId = 0;
-
-    if (protocol === 'mstable') {
-        bundleId = 1;
-    }
-
-    if (protocol === 'rari') {
-        bundleId = 2;
-    }
+    const bundleId = 0;
 
     const { subId } = await subRepayFromSavingsStrategy(
         proxy, bundleId, vaultId, ratioUnderWei, targetRatioWei, true, REGISTRY_ADDR,
@@ -1001,12 +957,7 @@ const liquityCloseToCollStrategySub = async (price, priceState, sender) => {
 const updateSmartSavingsStrategySub = async (protocol, subId, vaultId, minRatio, targetRatio, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
-    let bundleId = 0;
-    if (protocol === 'mstable') {
-        bundleId = 1;
-    } else if (protocol === 'rari') {
-        bundleId = 2;
-    }
+    const bundleId = 0;
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());

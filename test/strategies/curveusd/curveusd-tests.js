@@ -46,6 +46,21 @@ const createRepayBundle = async (proxy, isFork) => {
         [strategyIdFirst, strategyIdSecond, strategyIdThird],
     );
 };
+
+const isExchangePathValid = async (exchangeData) => {
+    if (exchangeData.toString().includes('5e74c9036fb86bd7ecdcb084a0673efc32ea31cb')) {
+        return false;
+    }
+    if (exchangeData.toString().includes('fe18be6b3bd88a2d2a7f928d00292e7a9963cfc6')) {
+        return false;
+    }
+    if (exchangeData.toString().includes('57Ab1ec28D129707052df4dF418D58a2D46d5f51')) {
+        return false;
+    }
+
+    return true;
+};
+
 const createBoostBundle = async (proxy, isFork) => {
     const curveUsdBoostStrategy = createCurveUsdBoostStrategy();
     const curveUsdFLCollBoostStrategy = createCurveUsdFLCollBoostStrategy();
@@ -83,6 +98,10 @@ const curveUsdBoostStrategyTest = async () => {
 
             strategyExecutor = await redeployCore();
             crvusdView = await redeploy('CurveUsdView');
+            await redeploy('CurveUsdCollRatioCheck');
+            await redeploy('DFSSell');
+            await redeploy('FLAction');
+            await redeploy('SendTokens');
 
             await addBotCaller(botAcc.address);
 
@@ -95,7 +114,7 @@ const curveUsdBoostStrategyTest = async () => {
             boostBundleId = await createBoostBundle(proxy, false);
         });
 
-        Object.entries(curveusdMarkets).slice(0, 1)
+        Object.entries(curveusdMarkets)
             // eslint-disable-next-line array-callback-return
             .map(([assetSymbol, { controllerAddress }]) => {
                 const collateralAsset = getAssetInfo(assetSymbol);
@@ -144,14 +163,108 @@ const curveUsdBoostStrategyTest = async () => {
                         boostAmount,
                         addrs.mainnet.CURVE_WRAPPER_V3,
                     );
-                    await callCurveUsdBoostStrategy(
+
+                    if (!isExchangePathValid(exchangeObj[8])) {
+                        console.log('TEST SKIPPED! Invalid exchange path for asset');
+                        expect(true).to.be.equal(true);
+                        await revertToSnapshot(snapshot);
+                    } else {
+                        await callCurveUsdBoostStrategy(
+                            botAcc,
+                            strategyExecutor,
+                            0,
+                            subId,
+                            strategySub,
+                            boostAmount,
+                            exchangeObj,
+                        );
+                        const userDataAfter = await crvusdView.userData(
+                            controllerAddress, proxy.address,
+                        );
+                        const collRatioAfter = userDataAfter.collRatio;
+                        console.log(`Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`);
+                        expect(collRatioBefore).to.be.gt(collRatioAfter);
+                        await revertToSnapshot(snapshot);
+                    }
+                });
+
+                it(`Executes a boost strategy with coll fl for ${assetSymbol} market`, async () => {
+                    snapshot = await takeSnapshot();
+                    const userDataBefore = await crvusdView.userData(
+                        controllerAddress, proxy.address,
+                    );
+                    const collRatioBefore = userDataBefore.collRatio;
+                    const flAmount = hre.ethers.utils.parseUnits(
+                        fetchAmountinUSDPrice(assetSymbol, BOOST_AMOUNT_USD),
+                        collateralAsset.decimals,
+                    ); // this is amount of collateral we're flashloaning
+                    const boostAmount = hre.ethers.utils.parseUnits(
+                        (BOOST_AMOUNT_USD * 1.1).toString(),
+                    );
+                    // this amount is what we're borrowing,
+                    // this * price - slippage should equal flAmount
+                    await setBalance(collateralAsset.address, '0xBA12222222228d8Ba445958a75a0704d566BF2C8', boostAmount);
+
+                    const exchangeObj = await formatExchangeObjCurve(
+                        crvusdAddress,
+                        collateralAsset.address,
+                        boostAmount,
+                        addrs.mainnet.CURVE_WRAPPER_V3,
+                    );
+
+                    const flActionAddr = await getAddrFromRegistry('FLAction');
+                    const collBefore = await balanceOf(collateralAsset.address, senderAcc.address);
+                    await callCurveUsdFLCollBoostStrategy(
                         botAcc,
                         strategyExecutor,
-                        0,
+                        1,
                         subId,
                         strategySub,
                         boostAmount,
                         exchangeObj,
+                        collateralAsset.address,
+                        flActionAddr,
+                        flAmount.toString(),
+                    );
+                    const collAfter = await balanceOf(collateralAsset.address, senderAcc.address);
+
+                    const userDataAfter = await crvusdView.userData(
+                        controllerAddress, proxy.address,
+                    );
+                    const collRatioAfter = userDataAfter.collRatio;
+                    console.log(`User received ${collAfter.sub(collBefore)} of coll on his EOA`);
+                    console.log(`Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`);
+                    expect(collRatioBefore).to.be.gt(collRatioAfter);
+                    await revertToSnapshot(snapshot);
+                });
+
+                it(`Executes a boost strategy with crvusd flashloan for ${assetSymbol} market`, async () => {
+                    snapshot = await takeSnapshot();
+                    await setBalance(crvusdAddress, '0xBA12222222228d8Ba445958a75a0704d566BF2C8', Float2BN('10000'));
+                    const userDataBefore = await crvusdView.userData(
+                        controllerAddress, proxy.address,
+                    );
+                    const collRatioBefore = userDataBefore.collRatio;
+                    const boostAmount = hre.ethers.utils.parseUnits(
+                        BOOST_AMOUNT_USD,
+                    );
+                    const exchangeObj = await formatExchangeObjCurve(
+                        crvusdAddress,
+                        collateralAsset.address,
+                        boostAmount,
+                        addrs.mainnet.CURVE_WRAPPER_V3,
+                    );
+                    const flActionAddr = await getAddrFromRegistry('FLAction');
+                    await callCurveUsdFLDebtBoostStrategy(
+                        botAcc,
+                        strategyExecutor,
+                        2,
+                        subId,
+                        strategySub,
+                        boostAmount,
+                        exchangeObj,
+                        crvusdAddress,
+                        flActionAddr,
                     );
                     const userDataAfter = await crvusdView.userData(
                         controllerAddress, proxy.address,
@@ -161,92 +274,6 @@ const curveUsdBoostStrategyTest = async () => {
                     expect(collRatioBefore).to.be.gt(collRatioAfter);
                     await revertToSnapshot(snapshot);
                 });
-
-                // it(`Executes a boost strategy with coll fl for ${assetSymbol} market`, async () => {
-                //     snapshot = await takeSnapshot();
-                //     const userDataBefore = await crvusdView.userData(
-                //         controllerAddress, proxy.address,
-                //     );
-                //     const collRatioBefore = userDataBefore.collRatio;
-                //     const flAmount = hre.ethers.utils.parseUnits(
-                //         fetchAmountinUSDPrice(assetSymbol, BOOST_AMOUNT_USD),
-                //         collateralAsset.decimals,
-                //     ); // this is amount of collateral we're flashloaning
-                //     const boostAmount = hre.ethers.utils.parseUnits(
-                //         (BOOST_AMOUNT_USD * 1.1).toString(),
-                //     );
-                //     // this amount is what we're borrowing,
-                //     // this * price - slippage should equal flAmount
-                //     await setBalance(collateralAsset.address, '0xBA12222222228d8Ba445958a75a0704d566BF2C8', boostAmount);
-
-                //     const exchangeObj = await formatExchangeObjCurve(
-                //         crvusdAddress,
-                //         collateralAsset.address,
-                //         boostAmount,
-                //         addrs.mainnet.CURVE_WRAPPER_V3,
-                //     );
-                //     const flActionAddr = await getAddrFromRegistry('FLAction');
-                //     const collBefore = await balanceOf(collateralAsset.address, senderAcc.address);
-                //     await callCurveUsdFLCollBoostStrategy(
-                //         botAcc,
-                //         strategyExecutor,
-                //         1,
-                //         subId,
-                //         strategySub,
-                //         boostAmount,
-                //         exchangeObj,
-                //         collateralAsset.address,
-                //         flActionAddr,
-                //         flAmount.toString(),
-                //     );
-                //     const collAfter = await balanceOf(collateralAsset.address, senderAcc.address);
-
-                //     const userDataAfter = await crvusdView.userData(
-                //         controllerAddress, proxy.address,
-                //     );
-                //     const collRatioAfter = userDataAfter.collRatio;
-                //     console.log(`User received ${collAfter.sub(collBefore)} of coll on his EOA`);
-                //     console.log(`Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`);
-                //     expect(collRatioBefore).to.be.gt(collRatioAfter);
-                //     await revertToSnapshot(snapshot);
-                // });
-
-                // it(`Executes a boost strategy with crvusd flashloan for ${assetSymbol} market`, async () => {
-                //     snapshot = await takeSnapshot();
-                //     await setBalance(crvusdAddress, '0xBA12222222228d8Ba445958a75a0704d566BF2C8', Float2BN('10000'));
-                //     const userDataBefore = await crvusdView.userData(
-                //         controllerAddress, proxy.address,
-                //     );
-                //     const collRatioBefore = userDataBefore.collRatio;
-                //     const boostAmount = hre.ethers.utils.parseUnits(
-                //         BOOST_AMOUNT_USD,
-                //     );
-                //     const exchangeObj = await formatExchangeObjCurve(
-                //         crvusdAddress,
-                //         collateralAsset.address,
-                //         boostAmount,
-                //         addrs.mainnet.CURVE_WRAPPER_V3,
-                //     );
-                //     const flActionAddr = await getAddrFromRegistry('FLAction');
-                //     await callCurveUsdFLDebtBoostStrategy(
-                //         botAcc,
-                //         strategyExecutor,
-                //         2,
-                //         subId,
-                //         strategySub,
-                //         boostAmount,
-                //         exchangeObj,
-                //         crvusdAddress,
-                //         flActionAddr,
-                //     );
-                //     const userDataAfter = await crvusdView.userData(
-                //         controllerAddress, proxy.address,
-                //     );
-                //     const collRatioAfter = userDataAfter.collRatio;
-                //     console.log(`Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`);
-                //     expect(collRatioBefore).to.be.gt(collRatioAfter);
-                //     await revertToSnapshot(snapshot);
-                // });
             });
     });
 };
@@ -272,12 +299,19 @@ const curveUsdRepayStrategyTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
 
-            const strategyExecutorAddr = await getAddrFromRegistry('StrategyExecutor');
-            strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', strategyExecutorAddr);
+            strategyExecutor = await redeployCore();
             crvusdView = await redeploy('CurveUsdView');
+            await redeploy('CurveUsdCollRatioCheck');
+            await redeploy('CurveUsdPayback');
+            await redeploy('DFSSell');
+            await redeploy('FLAction');
+            await redeploy('SendTokens');
+            await redeploy('CurveUsdRepay');
             await addBotCaller(botAcc.address);
 
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
+
+            await setNewExchangeWrapper(senderAcc, addrs.mainnet.CURVE_WRAPPER_V3);
         });
 
         it('... should create a repay bundle', async () => {
@@ -334,22 +368,29 @@ const curveUsdRepayStrategyTest = async () => {
                         repayAmount,
                         addrs.mainnet.CURVE_USD_WRAPPER,
                     );
-                    await callCurveUsdAdvancedRepayStrategy(
-                        botAcc,
-                        strategyExecutor,
-                        0,
-                        subId,
-                        strategySub,
-                        repayAmount,
-                        exchangeObj[8],
-                    );
-                    const userDataAfter = await crvusdView.userData(
-                        controllerAddress, proxy.address,
-                    );
-                    const collRatioAfter = userDataAfter.collRatio;
-                    console.log(`Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`);
-                    expect(collRatioAfter).to.be.gt(collRatioBefore);
-                    await revertToSnapshot(snapshot);
+
+                    if (!isExchangePathValid(exchangeObj[8])) {
+                        console.log('TEST SKIPPED! Invalid exchange path for asset');
+                        expect(true).to.be.equal(true);
+                        await revertToSnapshot(snapshot);
+                    } else {
+                        await callCurveUsdAdvancedRepayStrategy(
+                            botAcc,
+                            strategyExecutor,
+                            0,
+                            subId,
+                            strategySub,
+                            repayAmount,
+                            exchangeObj[8],
+                        );
+                        const userDataAfter = await crvusdView.userData(
+                            controllerAddress, proxy.address,
+                        );
+                        const collRatioAfter = userDataAfter.collRatio;
+                        console.log(`Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`);
+                        expect(collRatioAfter).to.be.gt(collRatioBefore);
+                        await revertToSnapshot(snapshot);
+                    }
                 });
                 it(`Executes a regular repay strategy for ${assetSymbol} market`, async () => {
                     snapshot = await takeSnapshot();

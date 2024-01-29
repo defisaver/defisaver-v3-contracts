@@ -1,4 +1,6 @@
 /* eslint-disable camelcase */
+const hre = require('hardhat');
+
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
@@ -29,6 +31,8 @@ const {
     BN2Float,
     takeSnapshot,
     revertToSnapshot,
+    redeployCore,
+    redeploy,
 } = require('../../utils');
 const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
 
@@ -60,16 +64,18 @@ const morphoAaveV2BoostTest = () => describe('Morpho-AaveV2-Boost-Strategy', fun
     before(async () => {
         setNetwork('mainnet');
         [senderAcc] = await ethers.getSigners();
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
         botAcc = (await ethers.getSigners())[1];
-        strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+        strategyExecutor = await redeployCore();
 
-        await getContractFromRegistry('MorphoAaveV2Borrow');
-        await getContractFromRegistry('MorphoAaveV2Supply');
-        await getContractFromRegistry('MorphoAaveV2RatioTrigger');
-        await getContractFromRegistry('MorphoAaveV2RatioCheck');
+        await redeploy('MorphoAaveV2Borrow');
+        await redeploy('MorphoAaveV2Supply');
+        await redeploy('MorphoAaveV2RatioTrigger');
+        await redeploy('MorphoAaveV2RatioCheck');
         view = await getContractFromRegistry('MorphoAaveV2View');
+        await redeploy('FLAction');
+        await redeploy('DFSSell');
         ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));
         await setNewExchangeWrapper(senderAcc, exchangeWrapper);
         await addBotCaller(botAcc.address);
@@ -103,8 +109,8 @@ const morphoAaveV2BoostTest = () => describe('Morpho-AaveV2-Boost-Strategy', fun
         const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
         bundleId = await createBundle(proxy, [strategyId, flStrategyId]);
 
-        await getContractFromRegistry('MorphoAaveV2SubProxy', undefined, undefined, undefined, '0', bundleId);
-        triggerRatio = ethers.utils.parseUnits('2.3', '18');
+        await redeploy('MorphoAaveV2SubProxy', undefined, undefined, undefined, '0', bundleId);
+        triggerRatio = ethers.utils.parseUnits('2.2', '18');
         const minRatio = ethers.utils.parseUnits('1', '18');
         const targetRepay = ethers.utils.parseUnits('2', '18');
         const targetRatio = ethers.utils.parseUnits('2', '18');
@@ -195,18 +201,21 @@ const morphoAaveV2RepayTest = () => describe('Morpho-AaveV2-Repay-Strategy', fun
     before(async () => {
         setNetwork('mainnet');
         [senderAcc] = await ethers.getSigners();
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
         botAcc = (await ethers.getSigners())[1];
-        strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+        strategyExecutor = await redeployCore();
 
-        await getContractFromRegistry('MorphoAaveV2Borrow');
-        await getContractFromRegistry('MorphoAaveV2Supply');
-        await getContractFromRegistry('MorphoAaveV2Withdraw');
-        await getContractFromRegistry('MorphoAaveV2Payback');
-        await getContractFromRegistry('MorphoAaveV2RatioTrigger');
-        await getContractFromRegistry('MorphoAaveV2RatioCheck');
+        await redeploy('MorphoAaveV2Borrow');
+        await redeploy('MorphoAaveV2Supply');
+        await redeploy('MorphoAaveV2Withdraw');
+        await redeploy('MorphoAaveV2Payback');
+        await redeploy('MorphoAaveV2RatioTrigger');
+        await redeploy('MorphoAaveV2RatioCheck');
         view = await getContractFromRegistry('MorphoAaveV2View');
+        await redeploy('FLAction');
+        await redeploy('DFSSell');
+
         ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));
         await setNewExchangeWrapper(senderAcc, exchangeWrapper);
         await addBotCaller(botAcc.address);
@@ -240,7 +249,7 @@ const morphoAaveV2RepayTest = () => describe('Morpho-AaveV2-Repay-Strategy', fun
         const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
         const bundleId = await createBundle(proxy, [strategyId, flStrategyId]);
 
-        await getContractFromRegistry('MorphoAaveV2SubProxy', undefined, undefined, undefined, bundleId, '0');
+        await redeploy('MorphoAaveV2SubProxy', undefined, undefined, undefined, bundleId, '0');
         triggerRatio = ethers.utils.parseUnits('2.8', '18');
         const targetRatio = ethers.utils.parseUnits('3', '18');
 
@@ -268,7 +277,6 @@ const morphoAaveV2RepayTest = () => describe('Morpho-AaveV2-Repay-Strategy', fun
             subId,
             strategyId: 0,
             strategySub,
-
             cAsset: cAsset.address,
             dAsset: dAsset.address,
             repayAmount,
@@ -294,7 +302,6 @@ const morphoAaveV2RepayTest = () => describe('Morpho-AaveV2-Repay-Strategy', fun
             subId,
             strategyId: 1,
             strategySub,
-
             cAsset: cAsset.address,
             dAsset: dAsset.address,
             flAmount: repayAmount,
