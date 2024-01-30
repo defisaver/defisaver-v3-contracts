@@ -6,14 +6,14 @@ import "../ActionBase.sol";
 import "./helpers/CurveUsdHelper.sol";
 
 
-/// @title Action that creates a curveusd position on behalf of proxy
+/// @title Action that creates a curveusd position on behalf of user's wallet
 /// @dev both collateralAmount and debtAmount must be non-zero and can be maxUint
 contract CurveUsdCreate is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 
     /// @param controllerAddress Address of the curveusd market controller
-    /// @param from Address from which to pull collateral asset, will default to proxy
-    /// @param to Address that will receive the borrowed crvUSD, will default to proxy
+    /// @param from Address from which to pull collateral asset, will default to user's wallet
+    /// @param to Address that will receive the borrowed crvUSD, will default to user's wallet
     /// @param collateralAmount Amount of collateral asset to supply
     /// @param debtAmount Amount of crvUSD to borrow (does not support uint.max)
     /// @param nBands Number of bands in which the collateral will be supplied

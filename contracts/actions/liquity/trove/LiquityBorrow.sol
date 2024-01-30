@@ -60,19 +60,19 @@ contract LiquityBorrow is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Increases the trove"s debt and withdraws minted LUSD tokens from the trove
-    function _liquityBorrow(Params memory params) internal returns (uint256, bytes memory) {
+    function _liquityBorrow(Params memory _params) internal returns (uint256, bytes memory) {
         BorrowerOperations.withdrawLUSD(
-            params.maxFeePercentage,
-            params.lusdAmount,
-            params.upperHint,
-            params.lowerHint
+            _params.maxFeePercentage,
+            _params.lusdAmount,
+            _params.upperHint,
+            _params.lowerHint
         );
 
-        LUSD_TOKEN_ADDRESS.withdrawTokens(params.to, params.lusdAmount);
+        LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, _params.lusdAmount);
 
 
-        bytes memory logData = abi.encode(params.maxFeePercentage, params.lusdAmount, params.to);
-        return (params.lusdAmount, logData);
+        bytes memory logData = abi.encode(_params.maxFeePercentage, _params.lusdAmount, _params.to);
+        return (_params.lusdAmount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

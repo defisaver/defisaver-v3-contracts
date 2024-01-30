@@ -14,7 +14,7 @@ contract CurveUsdLevCreate is ActionBase, CurveUsdHelper {
     /// @param debtAmount Amount of crvUSD to borrow (will be sold for collateral)
     /// @param minAmount Minimum amount of crvUSD to receive after sell
     /// @param nBands Number of bands in which the collateral will be supplied for soft liquidation
-    /// @param from Address from which to pull collateral asset, will default to proxy
+    /// @param from Address from which to pull collateral asset, will default to user's wallet
     /// @param additionalData Additional data where curve swap path is encoded
     /// @param gasUsed Only used as part of a strategy, estimated gas used for this tx
     /// @param dfsFeeDivider Fee divider, if a non standard fee is set it will check for custom fee

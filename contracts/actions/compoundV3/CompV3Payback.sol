@@ -54,7 +54,7 @@ contract CompV3Payback is ActionBase, CompV3Helper {
     /// @param _market Main Comet proxy contract that is different for each compound market
     /// @param _amount Amount of the base token to be repaid
     /// @param _from Address where we are pulling the underlying tokens from
-    /// @param _onBehalf Repay on behalf of which address (if 0x0 defaults to proxy)
+    /// @param _onBehalf Repay on behalf of which address (if 0x0 defaults to user's wallet)
     function _payback(
         address _market,
         uint256 _amount,
@@ -63,7 +63,7 @@ contract CompV3Payback is ActionBase, CompV3Helper {
     ) internal returns (uint256, bytes memory) {
         address tokenAddr = IComet(_market).baseToken();
 
-        // default to onBehalf of proxy 
+        // default to onBehalf of user's wallet 
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }

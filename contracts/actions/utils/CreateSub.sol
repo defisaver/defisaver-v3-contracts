@@ -46,7 +46,7 @@ contract CreateSub is ActionBase, Permission {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
    
-    /// @notice Gives DSProxy permission if needed and registers a new sub
+    /// @notice Gives user's wallet permission if needed and registers a new sub
     function createSub(Params memory _inputData) internal returns (uint256 subId) {
          /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
         giveWalletPermission(isDSProxy(address(this)));

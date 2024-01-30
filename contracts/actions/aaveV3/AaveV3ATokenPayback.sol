@@ -76,7 +76,7 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Allows user to repay with aTokens of the underlying debt asset eg. Pay DAI debt using aDAI tokens.
-    /// @dev User needs to approve the DSProxy to pull aTokens
+    /// @dev User needs to approve its wallet to pull aTokens
     /// @param _market Address provider for specific market
     /// @param _assetId The id of the underlying asset to be repaid
     /// @param _amount Amount of tokens to be paid back (uint.max for full debt)
@@ -114,28 +114,28 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
         }
     }
 
-    function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
+    function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
-        encodedInput = bytes.concat(encodedInput, bytes32(params.amount));
-        encodedInput = bytes.concat(encodedInput, bytes20(params.from));
-        encodedInput = bytes.concat(encodedInput, bytes1(params.rateMode));
-        encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
-        if (!params.useDefaultMarket) {
-            encodedInput = bytes.concat(encodedInput, bytes20(params.market));
+        encodedInput = bytes.concat(encodedInput, bytes32(_params.amount));
+        encodedInput = bytes.concat(encodedInput, bytes20(_params.from));
+        encodedInput = bytes.concat(encodedInput, bytes1(_params.rateMode));
+        encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
+        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        if (!_params.useDefaultMarket) {
+            encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
     }
 
-    function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        params.amount = uint256(bytes32(encodedInput[0:32]));
-        params.from = address(bytes20(encodedInput[32:52]));
-        params.rateMode = uint8(bytes1(encodedInput[52:53]));
-        params.assetId = uint16(bytes2(encodedInput[53:55]));
-        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[55:56]));
+    function decodeInputs(bytes calldata _encodedInput) public pure returns (Params memory params) {
+        params.amount = uint256(bytes32(_encodedInput[0:32]));
+        params.from = address(bytes20(_encodedInput[32:52]));
+        params.rateMode = uint8(bytes1(_encodedInput[52:53]));
+        params.assetId = uint16(bytes2(_encodedInput[53:55]));
+        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[55:56]));
         if (params.useDefaultMarket) {
             params.market = DEFAULT_AAVE_MARKET;
         } else {
-            params.market = address(bytes20(encodedInput[56:76]));
+            params.market = address(bytes20(_encodedInput[56:76]));
         }
     }
 }

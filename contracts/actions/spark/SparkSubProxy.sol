@@ -41,12 +41,12 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Chec
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToSparkAutomation(
-        bytes calldata encodedInput
+        bytes calldata _encodedInput
     ) public {
          /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
         giveWalletPermission(isDSProxy(address(this)));
 
-        SparkSubData memory subData = parseSubData(encodedInput);
+        SparkSubData memory subData = parseSubData(_encodedInput);
 
         StrategySub memory repaySub = formatRepaySub(subData);
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
@@ -63,11 +63,11 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Chec
     /// @dev Updating sub data will activate it as well
     /// @dev If we don't have a boost subId send as 0
     function updateSubData(
-        bytes calldata encodedInput
+        bytes calldata _encodedInput
     ) public {
-        (uint32 subId1, uint32 subId2) = parseSubIds(encodedInput[0:8]);
+        (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
-        SparkSubData memory subData = parseSubData(encodedInput[8:]);
+        SparkSubData memory subData = parseSubData(_encodedInput[8:]);
 
         // update repay as we must have a subId, it's ok if it's the same data
         StrategySub memory repaySub = formatRepaySub(subData);
@@ -95,9 +95,9 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Chec
 
     /// @notice Activates Repay sub and if exists a Boost sub
     function activateSub(
-        bytes calldata encodedInput
+        bytes calldata _encodedInput
     ) public {
-        (uint32 subId1, uint32 subId2) = parseSubIds(encodedInput[0:8]);
+        (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);
 
@@ -108,9 +108,9 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Chec
 
     /// @notice Deactivates Repay sub and if exists a Boost sub
     function deactivateSub(
-        bytes calldata encodedInput
+        bytes calldata _encodedInput
     ) public {
-        (uint32 subId1, uint32 subId2) = parseSubIds(encodedInput[0:8]);
+        (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SubStorage(SUB_STORAGE_ADDR).deactivateSub(subId1);
 
@@ -171,16 +171,16 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Chec
         boostSub.subData[4] = bytes32(uint256(1)); // enableAsColl = true
     }
 
-    function parseSubData(bytes calldata encodedInput) public pure returns (SparkSubData memory user) {
-        user.minRatio = uint128(bytes16(encodedInput[0:16]));
-        user.maxRatio = uint128(bytes16(encodedInput[16:32]));
-        user.targetRatioBoost = uint128(bytes16(encodedInput[32:48]));
-        user.targetRatioRepay = uint128(bytes16(encodedInput[48:64]));
-        user.boostEnabled = (bytes1(encodedInput[64:65])) != bytes1(0x00); // compare to get bool
+    function parseSubData(bytes calldata _encodedInput) public pure returns (SparkSubData memory user) {
+        user.minRatio = uint128(bytes16(_encodedInput[0:16]));
+        user.maxRatio = uint128(bytes16(_encodedInput[16:32]));
+        user.targetRatioBoost = uint128(bytes16(_encodedInput[32:48]));
+        user.targetRatioRepay = uint128(bytes16(_encodedInput[48:64]));
+        user.boostEnabled = (bytes1(_encodedInput[64:65])) != bytes1(0x00); // compare to get bool
     }
 
-    function parseSubIds(bytes calldata encodedInput) public pure returns (uint32 subId1, uint32 subId2) {
-        subId1 = uint32(bytes4(encodedInput[0:4]));
-        subId2 = uint32(bytes4(encodedInput[4:8]));
+    function parseSubIds(bytes calldata _encodedInput) public pure returns (uint32 subId1, uint32 subId2) {
+        subId1 = uint32(bytes4(_encodedInput[0:4]));
+        subId2 = uint32(bytes4(_encodedInput[4:8]));
     }
 }

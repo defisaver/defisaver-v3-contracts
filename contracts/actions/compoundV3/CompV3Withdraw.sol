@@ -62,8 +62,8 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
     /// @notice Withdraws a token amount from compound
     /// @dev Send type(uint).max withdraws the whole balance of _from addr
     /// @dev If to == address(0) the action will revert
-    /// @dev If onBehalf == address(0) the action will default to proxy
-    /// @dev If onBehalf is not the proxy, the onBehalf address needs to allow the proxy
+    /// @dev If onBehalf == address(0) the action will default to user's wallet
+    /// @dev If onBehalf is not the user's wallet, the onBehalf address needs to allow the user's wallet
     /// @param _params Withdraw input struct documented above
     function _withdraw(
         Params memory _params

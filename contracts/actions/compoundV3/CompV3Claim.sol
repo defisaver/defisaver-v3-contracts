@@ -61,7 +61,7 @@ contract CompV3Claim is ActionBase, CompV3Helper {
 
     /// @notice Claim rewards of token type from a comet instance to a target address
     /// @param _market Main Comet proxy contract that is different for each compound market
-    /// @param _onBehalf The owner to claim for, defaults to proxy
+    /// @param _onBehalf The owner to claim for, defaults to user's wallet
     /// @param _to The address to receive the rewards
     /// @param _shouldAccrue  If true, the protocol will account for the rewards owed to the account as of the current block before transferring
     function _claim(
@@ -72,7 +72,7 @@ contract CompV3Claim is ActionBase, CompV3Helper {
     ) internal returns (uint256 compClaimed, bytes memory logData) {
         
         require(_to != address(0), "Receiver can't be 0x0");
-        // default to onBehalf of proxy
+        // default to onBehalf of user's wallet
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }

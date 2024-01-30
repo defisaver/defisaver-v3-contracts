@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../../interfaces/IDSProxy.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../utils/TransientStorage.sol";
 import "../fee/helpers/GasFeeHelperL2.sol";
@@ -90,7 +89,7 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
         uint256 _gasUsed,
         uint256 _l1GasUsed
     ) internal returns (uint256, bytes memory) {
-        // if we set srcAmount to max, take the whole proxy balance
+        // if we set srcAmount to max, take the whole user's wallet balance
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
@@ -109,7 +108,6 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
 
         _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
 
-        // set owner of the proxy as the user that is selling for offchain orders
         _exchangeData.user = getUserAddress();
 
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);

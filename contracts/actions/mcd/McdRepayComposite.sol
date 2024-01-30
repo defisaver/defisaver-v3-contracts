@@ -2,6 +2,7 @@
 pragma solidity 0.8.10;
 
 import "../../interfaces/mcd/IDaiJoin.sol";
+import "../../interfaces/IDSProxy.sol";
 
 import "../ActionBase.sol";
 import "../exchange/DFSSell.sol";

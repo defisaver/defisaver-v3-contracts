@@ -32,10 +32,9 @@ contract MockExchangeWrapper is DSMath, IExchangeV3, AdminAuth {
     }
 
     /// @notice Return a rate for which we can sell an amount of tokens
-    /// @param _srcAmount From amount
     /// @param _additionalData Route and swap params
     /// @return uint256 Rate (price)
-    function getSellRate(address, address, uint256 _srcAmount, bytes memory _additionalData) public override returns (uint) {
+    function getSellRate(address, address, uint256, bytes memory _additionalData) public pure override returns (uint) {
         (uint256 rate) = abi.decode(_additionalData, (uint256));
         return rate;
     }

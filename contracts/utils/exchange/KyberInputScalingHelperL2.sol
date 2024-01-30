@@ -1131,7 +1131,7 @@ contract KyberInputScalingHelperL2 is CalldataWriter{
   function getScaledInputData(
     bytes calldata inputData,
     uint256 newAmount
-  ) external view returns (bytes memory) {
+  ) external pure returns (bytes memory) {
     bytes4 selector = bytes4(inputData[:4]);
     bytes calldata dataToDecode = inputData[4:];
 

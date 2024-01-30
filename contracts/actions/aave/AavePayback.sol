@@ -68,13 +68,12 @@ contract AavePayback is ActionBase, AaveHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice User paybacks tokens to the Aave protocol
-    /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
     /// @param _market Address provider for specific market
     /// @param _tokenAddr The address of the token to be paid back
     /// @param _amount Amount of tokens to be paid back
     /// @param _rateMode Type of borrow debt [Stable: 1, Variable: 2]
     /// @param _from Where are we pulling the payback tokens amount from
-    /// @param _onBehalf For what user we are paying back the debt, defaults to proxy
+    /// @param _onBehalf For what user we are paying back the debt, defaults to user's wallet
     function _payback(
         address _market,
         address _tokenAddr,
@@ -83,7 +82,7 @@ contract AavePayback is ActionBase, AaveHelper {
         address _from,
         address _onBehalf
     ) internal returns (uint256, bytes memory) {
-        // default to onBehalf of proxy
+        // default to onBehalf of user's wallet
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }

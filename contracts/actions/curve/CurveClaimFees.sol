@@ -41,7 +41,7 @@ contract CurveClaimFees is ActionBase, CurveHelper {
     }
 
     /// @notice Claims 3Crv rewards from Fee Distributor
-    /// @dev if _claimFor != _receiver the _claimFor address needs to approve the DSProxy to pull 3Crv token
+    /// @dev if _claimFor != _receiver the _claimFor address needs to approve the user's wallet to pull 3Crv token
     function _curveClaimFees(Params memory _params) internal returns (uint256 claimed, bytes memory logData) {
         claimed = FeeDistributor.claim(_params.claimFor);
 

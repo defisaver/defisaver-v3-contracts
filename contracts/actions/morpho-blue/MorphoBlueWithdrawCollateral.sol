@@ -53,7 +53,7 @@ contract MorphoBlueWithdrawCollateral is ActionBase, MorphoBlueHelper {
     }
 
     function _withdraw(Params memory _params) internal returns (uint256, bytes memory) {
-        // default to onBehalf of proxy
+        // default to onBehalf of user's wallet
         if (_params.onBehalf == address(0)) {
             _params.onBehalf = address(this);
         }

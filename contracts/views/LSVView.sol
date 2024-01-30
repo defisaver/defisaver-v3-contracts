@@ -467,8 +467,10 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
             
         }
         positions = new Position[](positionCounter);
+        proxies = new address[](positionCounter);
         for (uint i = 0; i < positionCounter; i++) {
             positions[i] = tempPositions[i];
+            proxies[i] = tempPositions[i].proxy;
         }
     }
 
@@ -491,10 +493,15 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
         if (protocol == uint8(Protocol.COMPOUND_V3)) return findCollAndDebtForCompV3Position(_user, _collTokens);
         if (protocol == uint8(Protocol.SPARK)) return findCollAndDebtForSparkPosition(_user, _collTokens);
         if (protocol == uint8(Protocol.MORPHO_BLUE_WSTETH)) return findCollAndDebtForMorphoBlueWstethPosition(_user);
+        return (0, 0, address(0));
     }
 
     /// @dev we assume it only has one LST token as collateral, and only ETH as debt
-    function findCollAndDebtForAaveV3Position(address _user, address[] memory _collTokens) public view returns (uint256, uint256, address) {
+    function findCollAndDebtForAaveV3Position(
+        address _user,
+        address[] memory _collTokens
+    ) public view returns (uint256 collAmount, uint256 debtAmount, address collToken) 
+        {
         IPoolV3 lendingPool = getLendingPool(DEFAULT_AAVE_MARKET);
         DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
             TokenUtils.WETH_ADDR
@@ -507,14 +514,19 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
             if (reserveData.aTokenAddress != address(0)) {
                 uint256 lstCollAmount = reserveData.aTokenAddress.getBalance(_user);
                 if (lstCollAmount > 0) {
-                    return (lstCollAmount, ethDebtAmount, _collTokens[j]);
+                    collAmount = lstCollAmount;
+                    debtAmount = ethDebtAmount;
+                    collToken = _collTokens[j];
                 }
             }
         }
     }
 
     /// @dev we assume it only has one LST token as collateral, and only ETH as debt
-    function findCollAndDebtForSparkPosition(address _user, address[] memory _collTokens) public view returns (uint256, uint256, address) {
+    function findCollAndDebtForSparkPosition(
+        address _user,
+        address[] memory _collTokens
+    ) public view returns (uint256 collAmount, uint256 debtAmount, address collToken) {
         IPoolV3 lendingPool = getLendingPool(DEFAULT_SPARK_MARKET);
         DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
             TokenUtils.WETH_ADDR
@@ -527,14 +539,19 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
             if (reserveData.aTokenAddress != address(0)) {
                 uint256 lstCollAmount = reserveData.aTokenAddress.getBalance(_user);
                 if (lstCollAmount > 0) {
-                    return (lstCollAmount, ethDebtAmount, _collTokens[j]);
+                    collAmount = lstCollAmount;
+                    debtAmount = ethDebtAmount;
+                    collToken = _collTokens[j];
                 }
             }
         }
     }
 
     /// @dev we assume it only has one LST token as collateral, and only ETH as debt
-    function findCollAndDebtForMorphoAaveV3Position(address _user, address[] memory _collTokens) public view returns (uint256, uint256, address) {
+    function findCollAndDebtForMorphoAaveV3Position(
+        address _user,
+        address[] memory _collTokens
+    ) public view returns (uint256 collAmount, uint256 debtAmount, address collToken) {
         address morphoAddr = getMorphoAddressByEmode(1);
         uint256 debtBalance = IMorphoAaveV3(morphoAddr).borrowBalance(
             TokenUtils.WETH_ADDR,
@@ -547,20 +564,27 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
                 _user
             );
             if (collBalance > 0) {
-                return (collBalance, debtBalance, _collTokens[j]);
+                collAmount = collBalance;
+                debtAmount = debtBalance;
+                collToken = _collTokens[j];
             }
         }
     }
 
     /// @dev we assume it only has one LST token as collateral, and only ETH as debt
-    function findCollAndDebtForCompV3Position(address _user, address[] memory _collTokens) public view returns (uint256, uint256, address) {
+    function findCollAndDebtForCompV3Position(
+        address _user,
+        address[] memory _collTokens
+    ) public view returns (uint256 collAmount, uint256 debtAmount, address collToken) {
         IComet comet = IComet(COMP_ETH_COMET);
 
         uint256 debtBalance = comet.borrowBalanceOf(_user);
         for (uint j = 0; j < _collTokens.length; j++) {
             uint256 collBalance = comet.collateralBalanceOf(_user, _collTokens[j]);
             if (collBalance > 0) {
-                return (collBalance, debtBalance, _collTokens[j]);
+                collAmount = collBalance;
+                debtAmount = debtBalance;
+                collToken = _collTokens[j];
             }
         }
     }
