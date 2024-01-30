@@ -19,6 +19,7 @@ const {
     resetForkToBlock,
     addrs,
     chainIds,
+    setNewExchangeWrapper,
 } = require('../../utils');
 
 const { callDcaStrategy } = require('../../strategy-calls');
@@ -98,6 +99,8 @@ const limitOrderStrategyTest = async () => {
             await redeploy('OffchainPriceTrigger');
 
             uniV3Wrapper = await hre.ethers.getContractAt('UniswapWrapperV3', addrs[network].UNISWAP_V3_WRAPPER);
+
+            await setNewExchangeWrapper(senderAcc, addrs[network].UNISWAP_V3_WRAPPER);
 
             await addBotCaller(botAcc.address);
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
@@ -319,7 +322,6 @@ const dcaStrategyTest = async () => {
             await redeploy('DFSSell');
             await redeploy('TimestampTrigger');
             await redeploy('SendTokenAndUnwrap');
-            // await redeploy('ModuleAuth');
 
             subStorageAddr = getAddrFromRegistry('SubStorage');
             subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
@@ -327,6 +329,8 @@ const dcaStrategyTest = async () => {
             await addBotCaller(botAcc.address);
 
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
+
+            await setNewExchangeWrapper(senderAcc, addrs[network].UNISWAP_V3_WRAPPER);
 
             const strategyData = network === 'mainnet' ? createDCAStrategy() : createDCAL2Strategy();
             await openStrategyAndBundleStorage();

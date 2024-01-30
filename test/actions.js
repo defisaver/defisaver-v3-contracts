@@ -1679,112 +1679,6 @@ const automationV2Unsub = async (proxy, protocol, cdpId = 0) => {
     return tx;
 };
 
-const mStableDeposit = async (
-    proxy,
-    bAsset,
-    mAsset,
-    saveAddress,
-    vaultAddress,
-    from,
-    to,
-    amount,
-    minOut,
-    assetPair,
-) => {
-    const mStableAction = new dfs.actions.mstable.MStableDepositAction(
-        bAsset,
-        mAsset,
-        saveAddress,
-        vaultAddress,
-        from,
-        to,
-        amount,
-        minOut,
-        assetPair,
-    );
-
-    const functionData = mStableAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('MStableDeposit', functionData, proxy);
-    return tx;
-};
-
-const mStableWithdraw = async (
-    proxy,
-    bAsset,
-    mAsset,
-    saveAddress,
-    vaultAddress,
-    from,
-    to,
-    amount,
-    minOut,
-    assetPair,
-) => {
-    const mStableAction = new dfs.actions.mstable.MStableWithdrawAction(
-        bAsset,
-        mAsset,
-        saveAddress,
-        vaultAddress,
-        from,
-        to,
-        amount,
-        minOut,
-        assetPair,
-    );
-
-    const functionData = mStableAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('MStableWithdraw', functionData, proxy);
-    return tx;
-};
-
-const mStableClaim = async (proxy, vaultAddress, to, first, last) => {
-    const mStableAction = new dfs.actions.mstable.MStableClaimAction(vaultAddress, to, first, last);
-
-    const functionData = mStableAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('MStableClaim', functionData, proxy);
-    return tx;
-};
-
-const rariDeposit = async (fundManager, token, poolToken, amount, from, to, proxy) => {
-    const rariDepositAction = new dfs.actions.rari.RariDepositAction(
-        fundManager,
-        token,
-        poolToken,
-        amount,
-        from,
-        to,
-    );
-
-    const functionData = rariDepositAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('RariDeposit', functionData, proxy);
-    return tx;
-};
-
-const rariWithdraw = async (
-    fundManager,
-    poolTokenAddress,
-    poolTokensAmountToPull,
-    from,
-    stablecoinAddress,
-    stablecoinAmountToWithdraw,
-    to,
-    proxy,
-) => {
-    const rariWithdrawAction = new dfs.actions.rari.RariWithdrawAction(
-        fundManager,
-        poolTokenAddress,
-        poolTokensAmountToPull,
-        from,
-        stablecoinAddress,
-        stablecoinAmountToWithdraw,
-        to,
-    );
-
-    const functionData = rariWithdrawAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('RariWithdraw', functionData, proxy);
-    return tx;
-};
-
 const convexDeposit = async (
     proxy,
     from,
@@ -3327,13 +3221,6 @@ module.exports = {
 
     gUniDeposit,
     gUniWithdraw,
-
-    mStableDeposit,
-    mStableWithdraw,
-    mStableClaim,
-
-    rariDeposit,
-    rariWithdraw,
 
     aaveV3Supply,
     aaveV3SupplyCalldataOptimised,
