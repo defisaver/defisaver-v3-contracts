@@ -185,38 +185,33 @@ const deploySafe = async (
 };
 
 /**
- * Sign a safe tx with one signer using EIP 191 signature
+ * Sign a safe tx with one signer
+ * @param safeInstance instance of the safe wallet
+ * @param safeTx safe tx params {to,value,data,operation,safeTxGas,baseGas,gasPrice,gasToken,refundReceiver,nonce}
+ * @param signer signer  of the safe tx
  */
-const signSafeTx = async (safeInstance, safeTxParams, signer) => {
-    const nonce = await safeInstance.nonce();
-    const txHashData = await safeInstance.getTransactionHash(
-        safeTxParams.to,
-        safeTxParams.value,
-        safeTxParams.data,
-        safeTxParams.operation,
-        safeTxParams.safeTxGas,
-        safeTxParams.baseGas,
-        safeTxParams.gasPrice,
-        safeTxParams.gasToken,
-        safeTxParams.refundReceiver,
-        nonce,
-    );
-
-    // ethers will append \x19Ethereum Signed Message:\n32 to the txHashData (EIP 191)
-    const sig = await signer.signMessage(hre.ethers.utils.arrayify(txHashData));
-
-    const signatureSplitted = hre.ethers.utils.splitSignature(sig);
-
-    // v is 28 so we need to adapt it so safe can recognize it as EIP 191 compliant
-    if (signatureSplitted.v < 31) {
-        const v = signatureSplitted.v + 4;
-        const r = signatureSplitted.r.slice(2);
-        const s = signatureSplitted.s.slice(2);
-        const vHex = v.toString(16).padStart(2, '0');
-        const adaptedSig = `0x${r}${s}${vHex}`;
-        return hre.ethers.utils.arrayify(adaptedSig);
-    }
-    return sig;
+const signSafeTx = async (safeInstance, safeTx, signer) => {
+    const EIP712_SAFE_TX_TYPE = {
+        SafeTx: [
+            { type: 'address', name: 'to' },
+            { type: 'uint256', name: 'value' },
+            { type: 'bytes', name: 'data' },
+            { type: 'uint8', name: 'operation' },
+            { type: 'uint256', name: 'safeTxGas' },
+            { type: 'uint256', name: 'baseGas' },
+            { type: 'uint256', name: 'gasPrice' },
+            { type: 'address', name: 'gasToken' },
+            { type: 'address', name: 'refundReceiver' },
+            { type: 'uint256', name: 'nonce' },
+        ],
+    };
+    const domain = {
+        chainId: await hre.ethers.provider.getNetwork().then((e) => e.chainId),
+        verifyingContract: safeInstance.address,
+    };
+    // eslint-disable-next-line no-underscore-dangle
+    const signature = await signer._signTypedData(domain, EIP712_SAFE_TX_TYPE, safeTx);
+    return signature;
 };
 
 module.exports = {

@@ -47,7 +47,7 @@ describe('Safe-CompV3-Shift-Position', function () {
     };
 
     const migrationTxCallData = async (positionData) => {
-        const debtAmount = positionData.debtAmount.mul(1_00_01).div(1_00_00);
+        const debtAmount = positionData.debtAmount.mul(10_001).div(10_000);
 
         const flashloanAction = new dfs.actions.flashloan.FLAction(
             new dfs.actions.flashloan.BalancerFlashLoanAction(
@@ -57,7 +57,7 @@ describe('Safe-CompV3-Shift-Position', function () {
         );
         const paybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
             market,
-            ethers.constants.MaxUint256, // repay all debt,
+            ethers.constants.MaxUint256, // repay whole debt,
             safe.address, // from
             proxy.address, // on behalf of
             positionData.debtAddr,
@@ -67,13 +67,13 @@ describe('Safe-CompV3-Shift-Position', function () {
             market,
             safe.address, // to
             positionData.collAddr,
-            ethers.constants.MaxUint256, // withdraw all collateral
+            ethers.constants.MaxUint256, // withdraw whole collateral
             proxy.address, // on behalf of
         );
         const supplyAction = new dfs.actions.compoundV3.CompoundV3SupplyAction(
             market,
             positionData.collAddr,
-            ethers.constants.MaxUint256, // supply all balance of collAddr
+            ethers.constants.MaxUint256, // supply whole balance of collAddr
             safe.address, // from
             safe.address,
         );
@@ -95,7 +95,6 @@ describe('Safe-CompV3-Shift-Position', function () {
 
     const executeMigrationInOneTx = async (positionData) => {
         const safeTxParams = {
-            safe: safe.address,
             to: recipeExecutor.address,
             value: 0,
             data: await migrationTxCallData(positionData),
@@ -105,6 +104,7 @@ describe('Safe-CompV3-Shift-Position', function () {
             gasPrice: 0,
             gasToken: ethers.constants.AddressZero,
             refundReceiver: ethers.constants.AddressZero,
+            nonce: await safe.nonce(),
         };
         const signature = await signSafeTx(safe, safeTxParams, senderAcc);
 
@@ -114,7 +114,7 @@ describe('Safe-CompV3-Shift-Position', function () {
             true,
         );
         const executeSafeTxAction = new dfs.actions.basic.ExecuteSafeTxAction(
-            safeTxParams.safe,
+            safe.address,
             safeTxParams.to,
             safeTxParams.value,
             safeTxParams.data,

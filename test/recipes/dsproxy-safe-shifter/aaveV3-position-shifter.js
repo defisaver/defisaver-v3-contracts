@@ -54,7 +54,7 @@ describe('Safe-AaveV3-Shift-Position', function () {
     };
 
     const migrationTxCallData = async (positionObj) => {
-        const debtAmount = positionObj.debtAmount.mul(1_00_01).div(1_00_00);
+        const debtAmount = positionObj.debtAmount.mul(10_001).div(10_000);
 
         const flashloanAction = new dfs.actions.flashloan.FLAction(
             new dfs.actions.flashloan.AaveV3FlashLoanAction(
@@ -67,7 +67,7 @@ describe('Safe-AaveV3-Shift-Position', function () {
         const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
             true,
             addrs[getNetwork()].AAVE_MARKET,
-            ethers.constants.MaxUint256, // repay all debt
+            ethers.constants.MaxUint256, // repay whole debt
             safe.address,
             VARIABLE_RATE,
             positionObj.debtAddr,
@@ -102,7 +102,6 @@ describe('Safe-AaveV3-Shift-Position', function () {
 
     const executeMigrationInOneTx = async (positionData) => {
         const safeTxParams = {
-            safe: safe.address,
             to: recipeExecutor.address,
             value: 0,
             data: await migrationTxCallData(positionData),
@@ -112,10 +111,11 @@ describe('Safe-AaveV3-Shift-Position', function () {
             gasPrice: 0,
             gasToken: ethers.constants.AddressZero,
             refundReceiver: ethers.constants.AddressZero,
+            nonce: await safe.nonce(),
         };
         const signature = await signSafeTx(safe, safeTxParams, senderAcc);
 
-        const aCollTokensAmount = positionData.collAmount.mul(1_00_01).div(1_00_00);
+        const aCollTokensAmount = positionData.collAmount.mul(10_001).div(10_000);
 
         const proxyApproveTokenAction = new dfs.actions.basic.ApproveTokenAction(
             positionData.collATokenAddr,
@@ -124,7 +124,7 @@ describe('Safe-AaveV3-Shift-Position', function () {
         );
 
         const executeSafeTxAction = new dfs.actions.basic.ExecuteSafeTxAction(
-            safeTxParams.safe,
+            safe.address,
             safeTxParams.to,
             safeTxParams.value,
             safeTxParams.data,
