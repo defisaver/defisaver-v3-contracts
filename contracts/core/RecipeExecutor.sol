@@ -14,10 +14,103 @@ import "../interfaces/flashloan/IFlashLoanBase.sol";
 import "../interfaces/ITrigger.sol";
 import "../auth/SafeModulePermission.sol";
 
-/// @title Entry point into executing recipes/checking triggers directly and as part of a strategy
+/**
+* @title Entry point into executing recipes/checking triggers directly and as part of a strategy
+* @dev RecipeExecutor can be used in two scenarios:
+* 1) Execute a recipe manually through user's wallet by calling executeRecipe()
+*                                                                                                                       ┌────────────────┐
+*                                                                                                                   ┌───┤  1st Action    │
+*                                                                                                                   │   └────────────────┘
+*                                                                                                                   │
+*   Actor                    ┌──────────────┐                    ┌────────────────┐                                 │   ┌────────────────┐
+*    ┌─┐                     │              │   Delegate call    │                │    Delegate call each action    ├───┤  2nd Action    │
+*    └┼┘                     │              │   - executeRecipe()│                │         - executeAction()       │   └────────────────┘
+*  ── │ ──  ─────────────────┤ Smart Wallet ├────────────────────┤ Recipe Executor├─────────────────────────────────┤
+*    ┌┴┐                     │              │                    │                │                                 │    . . .
+*    │ │                     │              │                    │                │                                 │
+*                            └──────────────┘                    └────────────────┘                                 │   ┌────────────────┐
+*                                                                                                                   └───┤  nth Action    │
+*                                                                                                                       └────────────────┘
+*
+* 
+* 2) Execute a recipe as part of a defi saver strategy system
+*
+*                             check:
+*                             - bot is approved                           check:                 ┌───────────────────────┐
+*                             - sub data hash                             msg.sender =           │  SafeModuleAuth       │
+*                             - sub is enabled                            strategyExecutor       │ - call tx on safe     │
+*  ┌─────┐  executeStrategy() ┌──────────────────┐       callExecute()    ┌────────────┐    IS   │   wallet from module  │
+*  │ Bot ├───────────────────►│ StrategyExecutor ├───────────────────────►│   IAuth    ├─────────┼───────────────────────┼────┐
+*  └─────┘  pass params:      └──────────────────┘                        └────────────┘         │  ProxyAuth            │    │
+*          - subId                                                      user gives permission    │ - call execute on     │    │
+*          - strategyIndex                                              to Auth contract to      │   DSProxy             │    │
+*          - triggerCallData[]                                          execute tx through       └───────────────────────┘    │
+*          - actionsCallData[]                                          smart wallet                                          │
+*          - SubscriptionData                                                                                                 │
+*                                                                                                                             │
+*                                                                                                ┌────────────────────────┐   │
+*                                                                                                │      Smart Wallet      │◄──┴─────────────────┐
+*                   ┌──────────────┐                                                             └───────────┬────────────┘                     │
+*                   │  1st Action  ├───┐                                                                     │            ▲                     │
+*                   └──────────────┘   │                                                                     │Delegate    └──────────────────┐  │
+*                                      │    Delegate call                                                    │  call                         │  │
+*                   ┌──────────────┐   │    each action                   ┌────────────┐                     ▼                               │  │
+*                   │  2nd Action  │   │    - executeAction() ┌──┐        │1st Action  │         ┌────────────────────────┐                  │  │
+*                   └──────────────┘   ├──────────────────────┤NO├────────┤is Flashloan├─────────┤     Recipe Executor    │                  │  │
+*                          ...         │                      └──┘        │  Action?   │         └────────────────────────┘                  │  │
+*                   ┌──────────────┐   │                                  └──────┬─────┘              check if triggers                      │  │
+*                   │  nth Action  ├───┘                    ┌───────┐            │                       are valid                           │  │
+*                   └──────────────┘            ┌───────────┤  YES  ├────────────┘                                                           │  │
+*                                               │           └───────┘                                                                        │  │
+*                                               ▼                                                                                            │  │
+*                                        ┌──────────────┐       giveWalletPermission             ┌────────────────────────┐                  │  │
+*                                        │              ├───────────────────────────────────────►│       Permission       │                  │  │
+*                                        │              │                                        └────────────────────────┘                  │  │
+*                                        │              │                                  -for safe -> enable FL action as module           │  │
+*                                        │              │                                  -for dsproxy -> enable FL action to call execute  │  │
+*                                        │              │                                                                                    │  │
+*                                        │              │                                                                                    │  │
+*                                        │              │                          ┌────────┐      Borrow funds    ┌────────┐                │  │
+*                                        │              │                          │        ├─────────────────────►│External│                │  │
+*                                        │              │                          │        │      Callback fn     │   FL   │                │  │
+*                                        │              │                          │        │◄─────────────────────┤ Source │                │  │
+*                                        │              │                          │        │                      └────────┘                │  │
+*                                        │              │                          │        │                                                │  │
+*                                        │              │                          │        ├────────────────────────────────────────────────┘  │
+*                                        │   parse FL   │   directly call:         │   FL   │      Send borrowed funds to smart wallet          │
+*                                        │     and      │   executeAction()        │ Action │                                                   │
+*                                        │   execute    ├─────────────────────────►│        │                                                   │
+*                                        │              │                          │        │      Call back the _executeActionsFromFL on       │
+*                                        │              │                          │        │      RecipeExecutor through Smart Wallet.         │
+*                                        │              │                          │        │      We can call wallet from FL action because    │
+*                                        │              │                          │        │      we gave it approval earlier.                 │
+*                                        │              │                          │        │      Actions are executed as regular starting     │
+*                                        │              │                          │        │      from second action.                          │
+*                                        │              │                          │        ├───────────────────────────────────────────────────┘
+*                                        │              │                          │        │
+*                                        │              │                          └────┬───┘                      ┌────────┐
+*                                        │              │                               │    Return borrowed funds │External│
+*                                        │              │                               └─────────────────────────►│   FL   │
+*                                        │              │                                                          │ Source │
+*                                        │              │                                                          └────────┘
+*                                        │              │
+*                                        │              │
+*                                        │              │       removeWalletPermission            ┌────────────────────────┐
+*                                        │              ├────────────────────────────────────────►│       Permission       │
+*                                        │              │                                         └────────────────────────┘
+*                                        └──────────────┘
+*
+*
+*
+*/
 contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermission, AdminAuth, CoreHelper, CheckWalletType {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
+    /// @dev Function sig of ActionBase.executeAction()
+    bytes4 public constant EXECUTE_ACTION_SELECTOR = 
+        bytes4(keccak256("executeAction(bytes,bytes32[],uint8[],bytes32[])"));
+
+    /// For strategy execution all triggers must be active
     error TriggerNotActiveError(uint256);
 
     /// @notice Called directly through user wallet to execute a recipe
@@ -42,7 +135,7 @@ contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermissio
     ) public payable {
         Strategy memory strategy;
 
-        { // to handle stack too deep
+        {   // to handle stack too deep
             uint256 strategyId = _sub.strategyOrBundleId;
 
             // fetch strategy if inside of bundle
@@ -92,14 +185,13 @@ contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermissio
         address triggerAddr;
         uint256 i;
 
-        for (i = 0; i < triggerIds.length; i++) {
+        for (i = 0; i < triggerIds.length; ++i) {
             triggerAddr = registry.getAddr(triggerIds[i]);
 
             isTriggered = ITrigger(triggerAddr).isTriggered(
                 _triggerCallData[i],
                 _sub.triggerData[i]
             );
-
 
             if (!isTriggered) return (false, i);
 
@@ -148,6 +240,7 @@ contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermissio
     }
 
     /// @notice Gets the action address and executes it
+    /// @dev We delegate context of user's wallet to action contract
     /// @param _currRecipe Recipe to be executed
     /// @param _index Index of the action in the recipe array
     /// @param _returnValues Return values from previous actions
@@ -161,8 +254,8 @@ contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermissio
 
         response = delegateCallAndReturnBytes32(
             actionAddr, 
-            abi.encodeWithSignature(
-                "executeAction(bytes,bytes32[],uint8[],bytes32[])",
+            abi.encodeWithSelector(
+                EXECUTE_ACTION_SELECTOR,
                 _currRecipe.callData[_index],
                 _currRecipe.subData,
                 _currRecipe.paramMapping[_index],
@@ -173,9 +266,10 @@ contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermissio
 
     /// @notice Prepares and executes a flash loan action
     /// @dev It adds to the first input value of the FL, the recipe data so it can be passed on
+    /// @dev FL action is executed directly, so we need to give it permission to call back RecipeExecutor in context of user's wallet
     /// @param _currRecipe Recipe to be executed
     /// @param _flActionAddr Address of the flash loan action
-    /// @param _returnValues An empty array of return values, because it"s the first action
+    /// @param _returnValues An empty array of return values, because it's the first action
     function _parseFLAndExecute(
         Recipe memory _currRecipe,
         address _flActionAddr,
@@ -218,10 +312,12 @@ contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermissio
         // call contract in current context
         assembly {
             let succeeded := delegatecall(sub(gas(), 5000), _target, add(_data, 0x20), mload(_data), 0, 32)
-            response := mload(0)      // load delegatecall output
-            switch iszero(succeeded)
-            case 1 {
-                // throw if delegatecall failed
+            
+            // load delegatecall output
+            response := mload(0)
+            
+            // throw if delegatecall failed
+            if eq(succeeded, 0) {
                 revert(0, 0)
             }
         }
