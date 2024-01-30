@@ -90,7 +90,7 @@ contract MockChainlinkFeedRegistry {
             return roundIds[p.index + 1];
         }
 
-    function getFeed(address, address) public returns (address) {
+    function getFeed(address, address) public pure returns (address) {
         return 0xE62B71cf983019BFf55bC83B48601ce8419650CC;
     }
 }
