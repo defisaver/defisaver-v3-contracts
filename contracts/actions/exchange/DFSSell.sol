@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../../interfaces/IDSProxy.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../exchangeV3/registries/TokenGroupRegistry.sol";
 import "../ActionBase.sol";
