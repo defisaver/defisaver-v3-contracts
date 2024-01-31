@@ -116,9 +116,6 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             isEthDest = true;
         } 
 
-
-        _exchangeData.user = getUserAddress();
-
         /// @dev only check for custom fee if a non standard fee is sent
         if (!_isDirect) {
             if (_exchangeData.dfsFeeDivider != RECIPE_FEE) {
@@ -156,9 +153,5 @@ contract DFSSell is ActionBase, DFSExchangeCore {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
-    }
-
-    function getUserAddress() internal view returns (address) {
-        return address(this);
     }
 }

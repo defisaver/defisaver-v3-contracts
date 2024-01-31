@@ -108,8 +108,6 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
 
         _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
 
-        _exchangeData.user = getUserAddress();
-
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
 
         {
@@ -143,10 +141,6 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
-    }
-
-    function getUserAddress() internal view returns (address) {
-        return address(this);
     }
 
     function _takeGasFee(

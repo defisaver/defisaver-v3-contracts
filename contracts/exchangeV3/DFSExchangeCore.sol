@@ -37,7 +37,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
         if (exData.dfsFeeDivider != 0) {
             exData.srcAmount = sub(exData.srcAmount, getFee(
                 exData.srcAmount,
-                exData.user,
+                address(this),
                 exData.srcAddr,
                 exData.dfsFeeDivider
             ));
@@ -142,5 +142,4 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
             _token.withdrawTokens(walletAddr, feeAmount);
         }
     }
-
 }

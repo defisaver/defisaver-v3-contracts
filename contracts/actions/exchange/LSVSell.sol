@@ -132,8 +132,6 @@ contract LSVSell is ActionBase, DFSExchangeCore, UtilHelper {
             }
         }
 
-        _exchangeData.user = getUserAddress();
-
         if (shouldSell){
             (wrapper, exchangedAmount) = _sell(_exchangeData);
         }
@@ -174,10 +172,6 @@ contract LSVSell is ActionBase, DFSExchangeCore, UtilHelper {
         STETH_ADDR.approveToken(WSTETH_ADDR, _stethAmount);
 
         wStEthReceivedAmount = IWStEth(WSTETH_ADDR).wrap(_stethAmount);
-    }
-
-    function getUserAddress() internal view returns (address) {
-        return address(this);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
