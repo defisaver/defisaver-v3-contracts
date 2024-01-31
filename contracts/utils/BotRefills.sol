@@ -3,7 +3,6 @@
 pragma solidity =0.8.10;
 
 import "../auth/AdminAuth.sol";
-import "../interfaces/exchange/IUniswapRouter.sol";
 import "../interfaces/IBotRegistry.sol";
 import "./TokenUtils.sol";
 import "./helpers/UtilHelper.sol";
@@ -28,8 +27,9 @@ contract BotRefills is AdminAuth, UtilHelper {
 
     modifier isRefillCaller {
         if (msg.sender != refillCaller){
-            revert WrongRefillCallerError(refillCaller);
+            revert WrongRefillCallerError(msg.sender);
         }
+
         _;
     }
 
@@ -64,5 +64,6 @@ contract BotRefills is AdminAuth, UtilHelper {
         additionalBots[_botAddr] = _approved;
     }
 
+    // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 }
