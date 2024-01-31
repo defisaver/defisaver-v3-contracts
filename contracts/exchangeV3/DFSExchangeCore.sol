@@ -113,32 +113,25 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
 
     /// @notice Takes a feePercentage and sends it to wallet
     /// @param _amount Amount of the whole trade
-    /// @param _user Address of the user
+    /// @param _wallet Address of the users wallet (safe or dsproxy)
     /// @param _token Address of the token
     /// @param _dfsFeeDivider Dfs fee divider
     /// @return feeAmount Amount owner earned on the fee
     function getFee(
         uint256 _amount,
-        address _user,
+        address _wallet,
         address _token,
         uint256 _dfsFeeDivider
     ) internal returns (uint256 feeAmount) {
-        if (_dfsFeeDivider != 0 && Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_user)) {
-            _dfsFeeDivider = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_user);
+        if (_dfsFeeDivider != 0 && Discount(DISCOUNT_ADDRESS).serviceFeesDisabled(_wallet)) {
+            _dfsFeeDivider = 0;
         }
 
         if (_dfsFeeDivider == 0) {
             feeAmount = 0;
         } else {
             feeAmount = _amount / _dfsFeeDivider;
-
-            // fee can't go over 10% of the whole amount
-            if (feeAmount > (_amount / 10)) {
-                feeAmount = _amount / 10;
-            }
-
             address walletAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();
-
             _token.withdrawTokens(walletAddr, feeAmount);
         }
     }

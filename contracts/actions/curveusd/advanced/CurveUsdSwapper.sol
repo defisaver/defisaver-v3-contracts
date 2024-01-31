@@ -233,13 +233,13 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
 
     function takeSwapFee(
         uint256 _sellAmount,
-        address _user,
+        address _wallet,
         address _token,
         uint24 _dfsFeeDivider
     ) internal returns (uint256 feeAmount, uint256 dfsFeeDivider) {
         dfsFeeDivider = _dfsFeeDivider;
-        if (dfsFeeDivider != 0 && Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_user)) {
-            dfsFeeDivider = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_user);
+        if (dfsFeeDivider != 0 && Discount(DISCOUNT_ADDRESS).serviceFeesDisabled(_wallet)) {
+            dfsFeeDivider = 0;
         }
 
         // take dfs fee if set, and add to feeAmount

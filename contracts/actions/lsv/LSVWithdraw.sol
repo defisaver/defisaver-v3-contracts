@@ -96,7 +96,7 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
     function calculateFee(
         uint256 _amount
     ) internal view returns (uint256 feeAmount) {
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(address(this))) {
+        if (Discount(DISCOUNT_ADDRESS).serviceFeesDisabled(address(this))) {
             feeAmount = 0;
         } else {
             feeAmount = _amount / FEE_DIVIDER;
