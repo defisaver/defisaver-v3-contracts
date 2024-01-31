@@ -81,7 +81,7 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         address _to,
         uint256 _gasUsed
     ) internal returns (uint256, bytes memory) {
-        // if we set srcAmount to max, take the whole user's balance
+        // if we set srcAmount to max, take the whole user's wallet balance
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
