@@ -7,7 +7,7 @@ contract Discount is AdminAuth{
     mapping(address => bool) public serviceFeesDisabled;
 
     function enableServiceFee(address _wallet) public onlyOwner{
-        serviceFeesDisabled[_wallet] = true;
+        serviceFeesDisabled[_wallet] = false;
     }
 
     function disableServiceFee(address _wallet) public onlyOwner{
