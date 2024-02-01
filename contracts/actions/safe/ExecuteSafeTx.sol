@@ -6,7 +6,18 @@ import "../../interfaces/safe/ISafe.sol";
 
 /// @title Helper action to execute a Safe transaction
 contract ExecuteSafeTx is ActionBase {
-
+     
+    /// @param safe Address of the Safe wallet
+    /// @param to Destination address of Safe transaction
+    /// @param value Ether value of Safe transaction
+    /// @param data Data payload of Safe transaction
+    /// @param operation Operation type of Safe transaction. 0 = call, 1 = delegateCall
+    /// @param safeTxGas Gas that should be used for the Safe transaction
+    /// @param baseGas Gas costs that are independent of the transaction execution(e.g. base transaction fee, signature check, payment of the refund)
+    /// @param gasPrice Gas price that should be used for the payment calculation
+    /// @param gasToken  Token address (or 0 if ETH) that is used for the payment
+    /// @param refundReceiver Address of receiver of gas payment (or 0 if tx.origin
+    /// @param signatures Packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
     struct Params {
         address safe;
         address to;
