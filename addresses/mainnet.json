@@ -3032,14 +3032,17 @@
     },
     {
         "name": "CompV3SubProxy",
-        "address": "0x5EE8853545CD8f96F1c3c30DDa8e1F6F5b7496cd",
+        "address": "0x39Fce916C420320138dBc1947784667b5Ad88df5",
         "id": "0x8c896d4c",
         "path": "contracts/triggers/CompV3RatioTrigger.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xb460c044Cb2ECA74c713b8504Fe5aF360764b38d"]
+        "history": [
+            "0xb460c044Cb2ECA74c713b8504Fe5aF360764b38d",
+            "0x5EE8853545CD8f96F1c3c30DDa8e1F6F5b7496cd"
+        ]
     },
     {
         "name": "LimitOrderSubProxy",
