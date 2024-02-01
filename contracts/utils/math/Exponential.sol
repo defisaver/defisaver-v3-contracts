@@ -4,6 +4,8 @@ pragma solidity =0.8.10;
 
 import "./CarefulMath.sol";
 
+/// @title Exponential module for storing fixed-precision decimals
+/// @author Compound
 contract Exponential is CarefulMath {
     uint constant expScale = 1e18;
     uint constant doubleScale = 1e36;
