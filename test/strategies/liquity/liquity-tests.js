@@ -31,6 +31,7 @@ const {
     getLocalTokenPrice,
     setContractAt,
     getAddrFromRegistry,
+    UNISWAP_WRAPPER,
 } = require('../../utils');
 
 const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
@@ -117,25 +118,27 @@ const liquityBoostStrategyTest = async () => {
                 .then((e) => resetForkToBlock(Math.floor(e / BLOCKS_PER_6H) * BLOCKS_PER_6H));
 
             senderAcc = (await ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             proxyAddr = proxy.address;
             botAcc = (await ethers.getSigners())[1];
 
-            flAction = await getContractFromRegistry('FLAction');
-            await getContractFromRegistry('DFSSell');
-            await getContractFromRegistry('GasFeeTaker');
+            flAction = await redeploy('FLAction');
+            await redeploy('DFSSell');
+            await redeploy('GasFeeTaker');
 
-            strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+            strategyExecutor = await redeployCore();
 
-            liquityView = await getContractFromRegistry('LiquityView');
-            await getContractFromRegistry('LiquityOpen');
-            await getContractFromRegistry('LiquitySupply');
-            await getContractFromRegistry('LiquityBorrow');
+            liquityView = await redeploy('LiquityView');
+            await redeploy('LiquityOpen');
+            await redeploy('LiquitySupply');
+            await redeploy('LiquityBorrow');
             await redeploy('LiquityRatioTrigger');
-            await getContractFromRegistry('LiquityRatioCheck');
-            await getContractFromRegistry('LiquityAdjust');
+            await redeploy('LiquityRatioCheck');
+            await redeploy('LiquityAdjust');
 
             await addBotCaller(botAcc.address);
+
+            await setNewExchangeWrapper(senderAcc, UNISWAP_WRAPPER);
 
             const collAmount = Float2BN(fetchAmountinUSDPrice('WETH', COLL_OPEN_AMOUNT_USD));
             const debtAmount = Float2BN(fetchAmountinUSDPrice('LUSD', DEBT_OPEN_AMOUNT_USD));
@@ -169,7 +172,7 @@ const liquityBoostStrategyTest = async () => {
             const ratioOver = Float2BN(MAX_RATIO);
             const targetRatio = Float2BN(TARGET_BOOST);
 
-            await getContractFromRegistry('LiquitySubProxy', undefined, undefined, undefined, '0', bundleId);
+            await redeploy('LiquitySubProxy', undefined, undefined, undefined, '0', bundleId);
             ({ boostSubId: subId, boostSub: strategySub } = await subLiquityAutomationStrategy(proxy, '0', ratioOver, targetRatio, '0', true));
 
             snapshotId = await takeSnapshot();
@@ -254,22 +257,22 @@ const liquityRepayStrategyTest = async () => {
             proxyAddr = proxy.address;
             botAcc = (await ethers.getSigners())[1];
 
-            console.log(proxyAddr);
+            await setNewExchangeWrapper(senderAcc, UNISWAP_WRAPPER);
 
-            strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+            strategyExecutor = await redeployCore();
 
-            flAction = await getContractFromRegistry('FLAction');
+            flAction = await redeploy('FLAction');
 
-            await getContractFromRegistry('DFSSell');
-            await getContractFromRegistry('GasFeeTaker');
+            await redeploy('DFSSell');
+            await redeploy('GasFeeTaker');
 
-            liquityView = await getContractFromRegistry('LiquityView');
-            await getContractFromRegistry('LiquityOpen');
-            await getContractFromRegistry('LiquityWithdraw');
-            await getContractFromRegistry('LiquityPayback');
+            liquityView = await redeploy('LiquityView');
+            await redeploy('LiquityOpen');
+            await redeploy('LiquityWithdraw');
+            await redeploy('LiquityPayback');
             await redeploy('LiquityRatioTrigger');
-            await getContractFromRegistry('LiquityRatioCheck');
-            await getContractFromRegistry('LiquityAdjust');
+            await redeploy('LiquityRatioCheck');
+            await redeploy('LiquityAdjust');
 
             await addBotCaller(botAcc.address);
 
@@ -374,9 +377,10 @@ const liquityCBPaybackTest = async () => {
         const forkedBlock = 16035000; // doing this to optimize hints fetching
 
         before(async () => {
-            await resetForkToBlock(forkedBlock);
+            await ethers.provider.getBlockNumber()
+                .then((e) => resetForkToBlock(Math.floor(e / BLOCKS_PER_6H) * BLOCKS_PER_6H));
             senderAcc = (await ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             proxyAddr = proxy.address;
             botAcc = (await ethers.getSigners())[1];
 
@@ -385,17 +389,17 @@ const liquityCBPaybackTest = async () => {
             strategyExecutor = await redeployCore();
 
             await redeploy('CBRebondSubProxy');
-            // await redeploy('LiquityRatioTrigger');
-            // await redeploy('CBCreate');
+            await redeploy('LiquityRatioTrigger');
+            await redeploy('CBCreate');
             await redeploy('FetchBondId');
-            // await redeploy('CBChickenIn');
-            // await redeploy('CBChickenOut');
+            await redeploy('CBChickenIn');
+            await redeploy('CBChickenOut');
             await redeploy('DFSSell');
             await redeploy('GasFeeTaker');
             await redeploy('LiquityPayback');
-            // await redeploy('SendToken');
+            await redeploy('SendToken');
 
-            // await redeploy('LiquityOpen');
+            await redeploy('LiquityOpen');
 
             liquityView = await redeploy('LiquityView');
 
@@ -425,6 +429,7 @@ const liquityCBPaybackTest = async () => {
                 proxy.address,
                 0,
                 Float2BN(lusdDebt),
+                0,
             ));
             upperHintFull = upperHint;
             lowerHintFull = lowerHint;
@@ -434,6 +439,7 @@ const liquityCBPaybackTest = async () => {
                 proxy.address,
                 0,
                 Float2BN(lusdDebtHalf),
+                0,
             ));
             upperHintHalf = upperHint;
             lowerHintHalf = lowerHint;
@@ -669,7 +675,7 @@ const liquityCloseToCollStrategyTest = async () => {
             await resetForkToBlock(forkedBlock);
 
             senderAcc = (await ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             proxyAddr = proxy.address;
             botAcc = (await ethers.getSigners())[1];
 
@@ -867,10 +873,10 @@ const liquityDsrPaybackStrategyTest = () => describe('Liquity-Dsr-Payback', () =
     before(async () => {
         let botAcc;
         [senderAcc, botAcc] = await ethers.getSigners();
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
         await addBotCaller(botAcc.address);
-        const strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+        const strategyExecutor = await redeployCore();
         strategyExecutorByBot = await strategyExecutor.connect(botAcc);
 
         const wrapper = await getContractFromRegistry('MockExchangeWrapper');
@@ -957,10 +963,10 @@ const liquityDsrSupplyStrategyTest = () => describe('Liquity-Dsr-Supply', () => 
     before(async () => {
         let botAcc;
         [senderAcc, botAcc] = await ethers.getSigners();
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
         await addBotCaller(botAcc.address);
-        const strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+        const strategyExecutor = await redeployCore();
         strategyExecutorByBot = await strategyExecutor.connect(botAcc);
 
         const wrapper = await getContractFromRegistry('MockExchangeWrapper');
@@ -1057,7 +1063,7 @@ const liquityDebtInFrontRepayStrategyTest = async () => {
             await resetForkToBlock(18275000);
 
             senderAcc = (await ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             proxyAddr = proxy.address;
             botAcc = (await ethers.getSigners())[1];
 

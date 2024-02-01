@@ -429,7 +429,8 @@ const updateSubDataMorphoAaveV2Proxy = async (
 };
 
 const subToLiquityProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const subProxyAddr = '0xE2f4A4629FbbC444964A16438329288C66551c30'; // hardcoded here for now
+    const subProxyAddr = await getAddrFromRegistry('LiquitySubProxy', regAddr);
+
     console.log({ subProxyAddr });
 
     const subProxyFactory = await hre.ethers.getContractFactory('LiquitySubProxy');

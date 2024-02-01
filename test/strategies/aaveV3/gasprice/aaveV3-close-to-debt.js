@@ -1,4 +1,4 @@
-const config = require('../../../hardhat.config');
+const config = require('../../../../hardhat.config');
 const { aaveV3CloseToDebtWithMaximumGasPriceStrategyTest } = require('./aaveV3-tests');
 
 describe('AaveV3 close to debt with maximum gas price strategy test', function () {

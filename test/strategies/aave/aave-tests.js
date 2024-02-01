@@ -30,7 +30,6 @@ const {
     approve,
     setBalance,
     redeploy,
-    resetForkToBlock,
     REGISTRY_ADDR,
     AAVE_V2_MARKET_ADDR,
     redeployCore,
@@ -97,8 +96,6 @@ const aaveV2BoostTest = () => describe('Aave-Boost-Strategy', function () {
     let flAddr;
 
     before(async () => {
-        await resetForkToBlock(17828193);
-
         setNetwork('mainnet');
         [senderAcc] = await ethers.getSigners();
         proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
@@ -237,8 +234,6 @@ const aaveV2RepayTest = () => describe('Aave-Repay-Strategy', function () {
     let flAddr;
 
     before(async () => {
-        await resetForkToBlock(17828193);
-
         setNetwork('mainnet');
         [senderAcc] = await ethers.getSigners();
         proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);

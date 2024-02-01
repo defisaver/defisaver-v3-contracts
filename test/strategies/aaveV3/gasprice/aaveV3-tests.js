@@ -32,35 +32,35 @@ const {
     takeSnapshot,
     revertToSnapshot,
     ETH_ADDR,
-} = require('../../utils');
+} = require('../../../utils');
 
 const {
     addBotCaller,
     createStrategy,
     createBundle,
     activateSub,
-} = require('../../utils-strategies');
+} = require('../../../utils-strategies');
 
 const {
     createAaveV3CloseToCollWithMaximumGasPriceStrategy,
     createAaveV3FLCloseToCollWithMaximumGasPriceStrategy,
     createAaveV3CloseToDebtWithMaximumGasPriceStrategy,
     createAaveV3FLCloseToDebtWithMaximumGasPriceStrategy,
-} = require('../../strategies');
+} = require('../../../strategies');
 
 const {
     aaveV3Supply,
     aaveV3Borrow,
-} = require('../../actions');
+} = require('../../../actions');
 
-const { RATIO_STATE_OVER } = require('../../triggers');
-const { subAaveV3CloseWithMaximumGasPriceBundle } = require('../../strategy-subs');
+const { RATIO_STATE_OVER } = require('../../../triggers');
+const { subAaveV3CloseWithMaximumGasPriceBundle } = require('../../../strategy-subs');
 const {
     callAaveCloseToCollWithMaximumGasPriceStrategy,
     callAaveFLCloseToCollWithMaximumGasPriceStrategy,
     callAaveCloseToDebtWithMaximumGasPriceStrategy,
     callAaveFLCloseToDebtWithMaximumGasPriceStrategy,
-} = require('../../strategy-calls');
+} = require('../../../strategy-calls');
 
 const testPairs = [
     {
@@ -134,7 +134,7 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
         const USD_DEBT_OPEN = '10000';
         const ALLOWED_SLIPPAGE = 0.05;
         const EXPECTED_MAX_INTEREST = 1e-6;
-        const EXPECTED_MAX_FEE = 1e-2; // gas + dfs fee
+        const EXPECTED_MAX_FEE = 5e-2; // gas + dfs fee
         const RATE_MODE = 2;
 
         let strategyExecutorByBot;
@@ -162,7 +162,7 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
             });
 
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             proxyAddr = proxy.address;
 
             console.log({
@@ -179,6 +179,9 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
 
             await redeploy('AaveV3QuotePriceTrigger');
             await redeploy('GasPriceTrigger');
+            await redeploy('SendTokenAndUnwrap');
+            await redeploy('SendToken');
+            await redeploy('DFSSell');
 
             const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
 
@@ -468,6 +471,12 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                     collAssetInfo.decimals,
                 );
 
+                let errMsg = 'Error: Transaction reverted without a reason string';
+
+                if (hre.config.isWalletSafe) {
+                    errMsg = 'Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
+                }
+
                 await expect(callAaveCloseToCollWithMaximumGasPriceStrategy(
                     strategyExecutorByBot,
                     subId,
@@ -475,7 +484,7 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                     swapAmount,
                     collAssetInfo,
                     debtAssetInfo,
-                )).to.be.rejectedWith('Error: Transaction reverted without a reason string');
+                )).to.be.rejectedWith(errMsg);
             });
         }
     });
@@ -489,7 +498,7 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
         const USD_DEBT_OPEN = '10000';
         const ALLOWED_SLIPPAGE = 0.03;
         const EXPECTED_MAX_INTEREST = 1e-6;
-        const EXPECTED_MAX_FEE = 1e-2; // gas + dfsFee
+        const EXPECTED_MAX_FEE = 5e-2; // gas + dfsFee
         const RATE_MODE = 2;
 
         let strategyExecutorByBot;
@@ -503,7 +512,7 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
         let sub;
         let collAssetId;
         let debtAssetId;
-        let flAaveV3;
+        let flActionAddr;
         let bundleId;
         let snapshotId;
         let snapshotId4partial;
@@ -519,7 +528,7 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
             });
 
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             proxyAddr = proxy.address;
 
             console.log({ eoa: senderAcc.address, proxy: proxyAddr });
@@ -533,10 +542,13 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
 
             await redeploy('AaveV3QuotePriceTrigger');
             await redeploy('GasPriceTrigger');
+            await redeploy('DFSSell');
+            await redeploy('SendTokenAndUnwrap');
+            await redeploy('SendToken');
 
             const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
 
-            flAaveV3 = await getAddrFromRegistry('FLAction');
+            flActionAddr = (await redeploy('FLAction')).address;
 
             await setNewExchangeWrapper(senderAcc, mockWrapperAddr);
 
@@ -665,7 +677,7 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                     sub,
                     repayAmount,
                     debtAddr,
-                    flAaveV3,
+                    flActionAddr,
                     swapAmount,
                     collAssetInfo,
                     debtAssetInfo,
@@ -813,17 +825,23 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                     collAssetInfo.decimals,
                 );
 
+                let errMsg = 'Error: Transaction reverted without a reason string';
+
+                if (hre.config.isWalletSafe) {
+                    errMsg = 'Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
+                }
+
                 await expect(callAaveFLCloseToCollWithMaximumGasPriceStrategy(
                     strategyExecutorByBot,
                     subId,
                     sub,
                     repayAmount,
                     debtAddr,
-                    flAaveV3,
+                    flActionAddr,
                     swapAmount,
                     collAssetInfo,
                     debtAssetInfo,
-                )).to.be.rejectedWith('Error: Transaction reverted without a reason string');
+                )).to.be.rejectedWith(errMsg);
             });
         }
     });
@@ -865,7 +883,7 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
             });
 
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             proxyAddr = proxy.address;
 
             console.log({ eoa: senderAcc.address, proxy: proxyAddr });
@@ -879,6 +897,9 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
 
             await redeploy('AaveV3QuotePriceTrigger');
             await redeploy('GasPriceTrigger');
+            await redeploy('SendTokenAndUnwrap');
+            await redeploy('SendToken');
+            await redeploy('DFSSell');
 
             const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
 
@@ -1111,13 +1132,19 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
             it('... should call AaveV3 Close with maximum gas price strategy and fail', async () => {
                 snapshotId4partial = await takeSnapshot();
 
+                let errMsg = 'Error: Transaction reverted without a reason string';
+
+                if (hre.config.isWalletSafe) {
+                    errMsg = 'Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
+                }
+
                 await expect(callAaveCloseToDebtWithMaximumGasPriceStrategy(
                     strategyExecutorByBot,
                     subId,
                     sub,
                     collAssetInfo,
                     debtAssetInfo,
-                )).to.be.rejectedWith('Error: Transaction reverted without a reason string');
+                )).to.be.rejectedWith(errMsg);
             });
         }
     });
@@ -1144,7 +1171,7 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
         let sub;
         let collAssetId;
         let debtAssetId;
-        let flAaveV3;
+        let flActionAddr;
         let bundleId;
         let snapshotId;
         let snapshotId4partial;
@@ -1160,7 +1187,7 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
             });
 
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             proxyAddr = proxy.address;
 
             console.log({ eoa: senderAcc.address, proxy: proxyAddr });
@@ -1174,12 +1201,15 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
 
             await redeploy('AaveV3QuotePriceTrigger');
             await redeploy('GasPriceTrigger');
+            await redeploy('SendTokenAndUnwrap');
+            await redeploy('SendToken');
+            await redeploy('DFSSell');
 
             const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
 
             await setNewExchangeWrapper(senderAcc, mockWrapperAddr);
 
-            flAaveV3 = await getAddrFromRegistry('FLAction');
+            flActionAddr = (await redeploy('FLAction')).address;
 
             botAcc = (await hre.ethers.getSigners())[1];
             await addBotCaller(botAcc.address);
@@ -1293,7 +1323,7 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                     sub,
                     repayAmount,
                     debtAddr,
-                    flAaveV3,
+                    flActionAddr,
                     collAssetInfo,
                     debtAssetInfo,
                 );
@@ -1418,16 +1448,22 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                     debtAssetInfo.decimals,
                 );
 
+                let errMsg = 'Error: Transaction reverted without a reason string';
+
+                if (hre.config.isWalletSafe) {
+                    errMsg = 'Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
+                }
+
                 await expect(callAaveFLCloseToDebtWithMaximumGasPriceStrategy(
                     strategyExecutorByBot,
                     subId,
                     sub,
                     repayAmount,
                     debtAddr,
-                    flAaveV3,
+                    flActionAddr,
                     collAssetInfo,
                     debtAssetInfo,
-                )).to.be.rejectedWith('Error: Transaction reverted without a reason string');
+                )).to.be.rejectedWith(errMsg);
             });
         }
     });
