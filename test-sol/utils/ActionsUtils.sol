@@ -7,9 +7,8 @@ import "../../contracts/actions/compoundV3/CompV3Payback.sol";
 import "../../contracts/actions/compoundV3/CompV3Borrow.sol";
 import "../../contracts/actions/exchange/DFSSell.sol";
 import "../../contracts/actions/fee/GasFeeTaker.sol";
-import "../../contracts/actions/flashloan/FLBalancer.sol";
 import "../../contracts/actions/checkers/CompV3RatioCheck.sol";
-
+import "../../contracts/interfaces/flashloan/IFlashLoanBase.sol";
 
 contract ActionsUtils {
 
