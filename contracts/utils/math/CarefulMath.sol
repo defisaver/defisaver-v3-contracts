@@ -2,6 +2,8 @@
 
 pragma solidity =0.8.10;
 
+/// @title Careful Math
+/// @author Compound
 contract CarefulMath {
 
     /**

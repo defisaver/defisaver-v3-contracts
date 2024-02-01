@@ -5,7 +5,6 @@ import "../ActionBase.sol";
 
 import "../../utils/ReentrancyGuard.sol";
 import "../../utils/TokenUtils.sol";
-import "../../utils/CheckWalletType.sol";
 
 import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/flashloan/IFlashLoanBase.sol";
@@ -29,11 +28,11 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     error UntrustedInitiator();
     /// @dev Caller in these functions must be relevant FL source address
     error UntrustedLender();
-
-    error WrongPaybackAmountError(); // Wrong FL payback amount sent
-
+    // Wrong FL payback amount sent
+    error WrongPaybackAmountError();
+    // When FL source is not found
     error NonexistentFLSource();
-
+    // Revert if execution fails when using safe wallet
     error SafeExecutionError();
 
     enum FLSource {
@@ -301,7 +300,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
             _tokens[i].withdrawTokens(wallet, _amounts[i]);
             balancesBefore[i] = _tokens[i].getBalance(address(this));
         }
-        address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
+        address payable recipeExecutorAddr = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
 
         _executeRecipe(wallet, recipeExecutorAddr, currRecipe, _amounts[0] + _feeAmounts[0]);
         
@@ -336,7 +335,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         _token.withdrawTokens(wallet, _amount);
         uint256 balanceBefore = _token.getBalance(address(this));
 
-        address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
+        address payable recipeExecutorAddr = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
 
         uint256 paybackAmount = _amount +_fee;
 
@@ -351,7 +350,11 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         return keccak256("ERC3156FlashBorrower.onFlashLoan");
     }
 
-    function uniswapV3FlashCallback(uint256 _fee0, uint256 _fee1, bytes memory _params) external nonReentrant {
+    function uniswapV3FlashCallback(
+        uint256 _fee0,
+        uint256 _fee1,
+        bytes memory _params
+    ) external nonReentrant {
         FlashLoanParams memory params = abi.decode(_params, (FlashLoanParams));
         {
             uint24 fee = IUniswapV3Pool(msg.sender).fee();

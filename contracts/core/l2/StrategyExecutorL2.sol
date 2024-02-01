@@ -15,9 +15,14 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWallet
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
+    bytes4 constant EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR = 
+        bytes4(keccak256("executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bytes[],bytes32[]))"));
+
     bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));
 
+    /// Caller must be authorized bot
     error BotNotApproved(address, uint256);
+    /// Subscription must be enabled
     error SubNotEnabled(uint256);
 
     /// @notice Checks all the triggers and executes actions
@@ -75,8 +80,8 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWallet
         IAuth(authAddr).callExecute{value: msg.value}(
             _userWallet,
             RECIPE_EXECUTOR_ADDR,
-            abi.encodeWithSignature(
-                "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bytes[],bytes32[]))",
+            abi.encodeWithSelector(
+                EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR,
                 _subId,
                 _actionsCallData,
                 _triggerCallData,

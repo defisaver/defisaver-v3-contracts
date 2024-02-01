@@ -184,6 +184,37 @@ const deploySafe = async (
     ).then((e) => e.wait());
 };
 
+/**
+ * Sign a safe tx with one signer
+ * @param safeInstance instance of the safe wallet
+ * @param safeTx safe tx params {to,value,data,operation,safeTxGas,baseGas,gasPrice,gasToken,refundReceiver,nonce}
+ * @param signer signer  of the safe tx
+ */
+const signSafeTx = async (safeInstance, safeTx, signer) => {
+    const EIP712_SAFE_TX_TYPE = {
+        SafeTx: [
+            { type: 'address', name: 'to' },
+            { type: 'uint256', name: 'value' },
+            { type: 'bytes', name: 'data' },
+            { type: 'uint8', name: 'operation' },
+            { type: 'uint256', name: 'safeTxGas' },
+            { type: 'uint256', name: 'baseGas' },
+            { type: 'uint256', name: 'gasPrice' },
+            { type: 'address', name: 'gasToken' },
+            { type: 'address', name: 'refundReceiver' },
+            { type: 'uint256', name: 'nonce' },
+        ],
+    };
+    const domain = {
+        chainId: await hre.ethers.provider.getNetwork().then((e) => e.chainId),
+        verifyingContract: safeInstance.address,
+    };
+    // @dev - _signTypedData will be renamed to signTypedData in future ethers versions
+    // eslint-disable-next-line no-underscore-dangle
+    const signature = await signer._signTypedData(domain, EIP712_SAFE_TX_TYPE, safeTx);
+    return signature;
+};
+
 module.exports = {
     createSafe,
     executeSafeTx,
@@ -192,4 +223,5 @@ module.exports = {
     predictSafeAddress,
     deploySafe,
     SAFE_MASTER_COPY_VERSIONS,
+    signSafeTx,
 };
