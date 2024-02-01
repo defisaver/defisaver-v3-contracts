@@ -4,6 +4,7 @@ pragma solidity =0.8.10;
 import "ds-test/test.sol";
 
 import "../TokenAddresses.sol";
+import "../Constants.sol";
 import "../CheatCodes.sol";
 
 import "../utils/Tokens.sol";
@@ -15,13 +16,14 @@ import "../utils/Strategies.sol";
 
 import "../../contracts/core/strategy/StrategyModel.sol";
 import "../../contracts/core/strategy/StrategyExecutor.sol";
+import "../../contracts/core/RecipeExecutor.sol";
+import "../../contracts/core/strategy/SafeModuleAuth.sol";
 import "../../contracts/triggers/CompV3RatioTrigger.sol";
 import "../../contracts/actions/fee/GasFeeTaker.sol";
 import "../../contracts/actions/exchange/DFSSell.sol";
 import "../../contracts/actions/compoundV3/CompV3SubProxy.sol";
 import "../../contracts/actions/checkers/CompV3RatioCheck.sol";
 import "../../contracts/actions/flashloan/FLAction.sol";
-import "forge-std/console.sol";
 
 contract TestCompV3Automation is
     DSTest,
@@ -30,7 +32,7 @@ contract TestCompV3Automation is
     RegistryUtils,
     ActionsUtils,
     Strategies
-{
+{   
     CompUser user1;
     address proxy;
 
@@ -60,6 +62,7 @@ contract TestCompV3Automation is
         executor = StrategyExecutor(getAddr("StrategyExecutorID"));
 
         _redeployContracts();
+        _setUpExchangeWrapper();
         vm.etch(SUB_STORAGE_ADDR, address(new SubStorage()).code);
         addBotCaller(address(this));
         _initRepayBundle();
@@ -78,6 +81,15 @@ contract TestCompV3Automation is
         redeploy("GasFeeTaker", address(new GasFeeTaker()));
         redeploy("CompV3RatioCheck", address(new CompV3RatioCheck()));
         redeploy("FLAction", address(flAction));
+        redeploy("RecipeExecutor", address(new RecipeExecutor()));
+        redeploy("SafeModuleAuth", address(new SafeModuleAuth()));
+    }
+
+    function _setUpExchangeWrapper() internal {
+        WrapperExchangeRegistry exchangeRegistry = WrapperExchangeRegistry(Constants.WRAPPER_EXCHANGE_REGISTRY);
+        vm.startPrank(Constants.OWNCER_ACC);
+        exchangeRegistry.addWrapper(TokenAddresses.UNI_V2_WRAPPER);
+        vm.stopPrank();
     }
 
     function _initRepayBundle() internal {

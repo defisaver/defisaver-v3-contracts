@@ -14,6 +14,7 @@ contract TestLiquityDebtInFront is DSTest, LiquityHelper {
     }
 
     function testDebtInFrontTriggerForLargestTrove() public  view{
+        console.log("Test debt in front trigger for largest trove. This can take a while...");
         // fetch head of list, largest TCR
         address lastTrove = SortedTroves.getFirst();
 
@@ -30,6 +31,7 @@ contract TestLiquityDebtInFront is DSTest, LiquityHelper {
     }
 
     function testDebtInFrontTriggerForLargestTroveToBeTrue() public view {
+        console.log("Test debt in front trigger for largest trove. This can take a while...");
         // fetch head of list, largest TCR
         address lastTrove = SortedTroves.getFirst();
 
