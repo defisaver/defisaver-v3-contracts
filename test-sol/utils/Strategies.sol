@@ -101,7 +101,7 @@ contract Strategies {
         repayStrategy.addTrigger("CompV3RatioTrigger");
 
         string[] memory flParams = new string[](1);
-        repayStrategy.addAction("FLBalancer", flParams);
+        repayStrategy.addAction("FLAction", flParams);
 
         string[] memory sellParams = new string[](5);
         sellParams[1] = "&baseToken";
@@ -147,7 +147,7 @@ contract Strategies {
         repayStrategy.addTrigger("CompV3RatioTrigger");
 
         string[] memory flParams = new string[](1);
-        repayStrategy.addAction("FLBalancer", flParams);
+        repayStrategy.addAction("FLAction", flParams);
 
         string[] memory sellParams = new string[](5);
         sellParams[1] = "&baseToken";
@@ -273,7 +273,7 @@ contract Strategies {
         boostStrategy.addTrigger("CompV3RatioTrigger");
 
         string[] memory flParams = new string[](1);
-        boostStrategy.addAction("FLBalancer", flParams);
+        boostStrategy.addAction("FLAction", flParams);
 
         string[] memory sellParams = new string[](5);
         sellParams[0] = "&baseToken";
@@ -315,7 +315,7 @@ contract Strategies {
         boostStrategy.addTrigger("CompV3RatioTrigger");
 
         string[] memory flParams = new string[](1);
-        boostStrategy.addAction("FLBalancer", flParams);
+        boostStrategy.addAction("FLAction", flParams);
 
         string[] memory sellParams = new string[](5);
         sellParams[0] = "&baseToken";
@@ -349,73 +349,4 @@ contract Strategies {
 
         return boostStrategy.createStrategy();
     }
-
-    function createCompV3CompositeRepay() internal returns (uint256) {
-        StrategyBuilder repayStrategy = new StrategyBuilder("CompV3CompositeRepay", true);
-        repayStrategy.addSubMapping("&market");
-        repayStrategy.addSubMapping("&baseToken");
-        repayStrategy.addSubMapping("&ratioState");
-        repayStrategy.addSubMapping("&targetRatio");
-
-        repayStrategy.addTrigger("CompV3RatioTrigger");
-
-        string[] memory compositeActionParams = new string[](2);
-        compositeActionParams[0] = "&market";
-        compositeActionParams[1] = "&targetRatio";
-        repayStrategy.addAction("CompV3CompositeRepay", compositeActionParams);
-
-        return repayStrategy.createStrategy();
-    }
-
-    function createCompV3FLCompositeRepay() internal returns (uint256) {
-        StrategyBuilder repayStrategy = new StrategyBuilder("CompV3FLCompositeRepay", true);
-        repayStrategy.addSubMapping("&market");
-        repayStrategy.addSubMapping("&baseToken");
-        repayStrategy.addSubMapping("&ratioState");
-        repayStrategy.addSubMapping("&targetRatio");
-
-        repayStrategy.addTrigger("CompV3RatioTrigger");
-
-        string[] memory compositeActionParams = new string[](2);
-        compositeActionParams[0] = "&market";
-        compositeActionParams[1] = "&targetRatio";
-        repayStrategy.addAction("CompV3FLCompositeRepay", compositeActionParams);
-
-        return repayStrategy.createStrategy();
-    }
-
-    function createCompV3CompositeBoost() internal returns (uint256) {
-        StrategyBuilder boostStrategy = new StrategyBuilder("CompV3CompositeBoost", true);
-        boostStrategy.addSubMapping("&market");
-        boostStrategy.addSubMapping("&baseToken");
-        boostStrategy.addSubMapping("&ratioState");
-        boostStrategy.addSubMapping("&targetRatio");
-
-        boostStrategy.addTrigger("CompV3RatioTrigger");
-
-        string[] memory compositeActionParams = new string[](2);
-        compositeActionParams[0] = "&market";
-        compositeActionParams[1] = "&targetRatio";
-        boostStrategy.addAction("CompV3CompositeBoost", compositeActionParams);
-
-        return boostStrategy.createStrategy();
-    }
-
-    function createCompV3FLCompositeBoost() internal returns (uint256) {
-        StrategyBuilder boostStrategy = new StrategyBuilder("CompV3FLCompositeBoost", true);
-        boostStrategy.addSubMapping("&market");
-        boostStrategy.addSubMapping("&baseToken");
-        boostStrategy.addSubMapping("&ratioState");
-        boostStrategy.addSubMapping("&targetRatio");
-
-        boostStrategy.addTrigger("CompV3RatioTrigger");
-
-        string[] memory compositeActionParams = new string[](2);
-        compositeActionParams[0] = "&market";
-        compositeActionParams[1] = "&targetRatio";
-        boostStrategy.addAction("CompV3FLCompositeBoost", compositeActionParams);
-
-        return boostStrategy.createStrategy();
-    }
-
 }
