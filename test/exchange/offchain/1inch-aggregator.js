@@ -1,4 +1,4 @@
-const { oneInchTest } = require('./exchange-tests');
+const { oneInchTest } = require('./offchain-tests');
 
 describe('Dfs-Sell', function () {
     this.timeout(140000);

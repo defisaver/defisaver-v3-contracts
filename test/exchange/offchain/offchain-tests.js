@@ -3,10 +3,7 @@ const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const hre = require('hardhat');
 require('dotenv-safe').config();
-// const axios = require('axios');
-
 const dfs = require('@defisaver/sdk');
-
 const { default: axios } = require('axios');
 const {
     getProxy,
@@ -14,29 +11,17 @@ const {
     balanceOf,
     setNewExchangeWrapper,
     setBalance,
-    resetForkToBlock,
-    Float2BN,
-    curveApiInit,
-    formatExchangeObj,
-    BN2Float,
-    formatExchangeObjCurve,
-    REGISTRY_ADDR,
     addrs,
-    placeHolderAddr,
-    getAddrFromRegistry,
     approve,
     formatExchangeObjForOffchain,
     addToExchangeAggregatorRegistry,
     chainIds,
     takeSnapshot,
     revertToSnapshot,
-    depositToWeth,
     getNetwork,
-} = require('../utils');
+} = require('../../utils');
 
-const {
-    sell, executeAction,
-} = require('../actions');
+const { executeAction } = require('../../actions');
 
 const trades = [
     {
@@ -45,181 +30,21 @@ const trades = [
     {
         sellToken: 'DAI', buyToken: 'WBTC', amount: '30000', fee: 3000,
     },
-    {
-        sellToken: 'WETH', buyToken: 'USDC', amount: '1', fee: 3000,
-    },
-    {
-        sellToken: 'USDC', buyToken: 'WETH', amount: '3000', fee: 3000,
-    },
-    {
-        sellToken: 'WETH', buyToken: 'USDT', amount: '1', fee: 3000,
-    },
-    {
-        sellToken: 'DAI', buyToken: 'USDC', amount: '3000', fee: 500,
-    },
 ];
-
-const curveTrades = [
-    {
-        sellToken: 'WETH', buyToken: 'LUSD', amount: '1',
-    },
-    {
-        sellToken: 'LUSD', buyToken: 'WETH', amount: '3000',
-    },
-    {
-        sellToken: 'WETH', buyToken: 'STETH', amount: '1',
-    },
-    {
-        sellToken: 'STETH', buyToken: 'WETH', amount: '1',
-    },
-];
-
-const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve = false) => {
-    const sellAssetInfo = getAssetInfo(trade.sellToken);
-    const buyAssetInfo = getAssetInfo(trade.buyToken);
-
-    const amount = Float2BN(trade.amount, getAssetInfo(trade.sellToken).decimals);
-
-    await setBalance(buyAssetInfo.address, senderAcc.address, Float2BN('0'));
-    await setBalance(sellAssetInfo.address, senderAcc.address, amount);
-
-    let exchangeObject;
-    if (!isCurve) {
-        exchangeObject = formatExchangeObj(
-            sellAssetInfo.address,
-            buyAssetInfo.address,
-            amount,
-            wrapper.address,
-            0,
-            trade.fee,
-        );
-    } else {
-        exchangeObject = await formatExchangeObjCurve(
-            sellAssetInfo.address,
-            buyAssetInfo.address,
-            amount,
-            wrapper.address,
-        );
+const getKyberApiUrlByChainId = (chainId) => {
+    if (chainId === 10) {
+        return 'https://aggregator-api.kyberswap.com/optimism/api/v1/';
     }
-    const exchangeData = exchangeObject.at(-2);
-
-    // eslint-disable-next-line no-unused-vars
-    const rate = await dfsPrices.callStatic.getExpectedRate(
-        wrapper.address,
-        sellAssetInfo.address,
-        buyAssetInfo.address,
-        amount,
-        0, // exchangeType = SELL
-        exchangeData,
-    );
-
-    const expectedOutput = amount.mul(rate).div(Float2BN('1'));
-
-    const feeReceiverAmountBefore = await balanceOf(sellAssetInfo.address,
-        addrs[hre.network.config.name].FEE_RECEIVER);
-
-    await sell(
-        proxy,
-        sellAssetInfo.address,
-        buyAssetInfo.address,
-        amount,
-        wrapper.address,
-        senderAcc.address,
-        senderAcc.address,
-        trade.fee,
-        senderAcc,
-        REGISTRY_ADDR,
-        isCurve,
-    );
-
-    const feeReceiverAmountAfter = await balanceOf(sellAssetInfo.address,
-        addrs[hre.network.config.name].FEE_RECEIVER);
-    const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
-
-    // test fee amount
-    const tokenGroupRegistry = await hre.ethers.getContractAt('TokenGroupRegistry',
-        addrs[hre.network.config.name].TOKEN_GROUP_REGISTRY);
-
-    const fee = await tokenGroupRegistry.getFeeForTokens(sellAssetInfo.address, buyAssetInfo.address);
-
-    const feeAmount = amount.div(fee);
-
-    // must be closeTo because 1 wei steth bug
-    expect(feeReceiverAmountAfter).to.be.closeTo(feeReceiverAmountBefore.add(feeAmount), '1');
-
-    expect(buyBalanceAfter).is.gt('0');
-    if (Math.abs(
-        buyBalanceAfter - expectedOutput,
-    ) > expectedOutput * 0.01) {
-        console.log(`
-        Bad liquidity or rate getter:
-        Expected: ${+BN2Float(expectedOutput, buyAssetInfo.decimals)}
-        Output: ${+BN2Float(buyBalanceAfter, buyAssetInfo.decimals)}
-        `);
+    if (chainId === 42161) {
+        return 'https://aggregator-api.kyberswap.com/arbitrum/api/v1/';
     }
-    return rate;
+    if (chainId === 8453) {
+        return 'https://aggregator-api.kyberswap.com/base/api/v1/';
+    }
+    return 'https://aggregator-api.kyberswap.com/ethereum/api/v1/';
 };
 
-const dfsSellSameAssetTest = async () => {
-    describe('Dfs-same asset sell', function () {
-        this.timeout(140000);
-
-        let senderAcc;
-        let proxy;
-        let recipeExecutorAddr;
-
-        const network = hre.network.config.name;
-
-        before(async () => {
-            await redeploy('DFSSell');
-            await redeploy('RecipeExecutor');
-            senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
-            recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
-        });
-
-        it('... should try to test how same asset swap works', async () => {
-            const amount = hre.ethers.utils.parseUnits('100', 18);
-            const daiAddr = addrs[network].DAI_ADDRESS;
-            const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-                daiAddr,
-                senderAcc.address,
-                amount.toString(),
-            );
-            const dfsSellAction = new dfs.actions.basic.SellAction(
-                formatExchangeObj(
-                    daiAddr,
-                    daiAddr,
-                    amount.toString(),
-                    placeHolderAddr,
-                ),
-                proxy.address,
-                proxy.address,
-            );
-            const sendTokenAction = new dfs.actions.basic.SendTokenAction(
-                daiAddr,
-                senderAcc.address,
-                '$2',
-            );
-            const dfsSellSameAssetRecipe = new dfs.Recipe('SameAssetSell', [
-                pullTokenAction,
-                dfsSellAction,
-                sendTokenAction,
-            ]);
-
-            await setBalance(daiAddr, senderAcc.address, amount);
-            await approve(daiAddr, proxy.address);
-            const functionData = dfsSellSameAssetRecipe.encodeForDsProxyCall();
-            await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], {
-                gasLimit: 3000000,
-            });
-            const daiBalanceAfter = await balanceOf(daiAddr, senderAcc.address);
-            expect(daiBalanceAfter).to.be.eq(amount);
-        });
-    });
-};
-
-const kyberAggregatorDFSSellTest = async () => {
+const kyberTest = async () => {
     /// @dev works on mainnet and kyber
     describe('Dfs-Sell-via-Kyber-Aggregator', function () {
         this.timeout(400000);
@@ -230,13 +55,14 @@ const kyberAggregatorDFSSellTest = async () => {
         let snapshot;
 
         before(async () => {
-            // await redeploy('KyberInputScalingHelper');
             await redeploy('KyberInputScalingHelperL2');
             await redeploy('DFSSell');
+            await redeploy('RecipeExecutor');
+            await redeploy('PullToken');
             kyberAggregatorWrapper = await redeploy('KyberAggregatorWrapper');
 
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             await setNewExchangeWrapper(senderAcc, kyberAggregatorWrapper.address);
         });
 
@@ -261,19 +87,7 @@ const kyberAggregatorDFSSellTest = async () => {
 
                 await setBalance(sellAssetInfo.address, senderAcc.address, amount);
                 await approve(sellAssetInfo.address, proxy.address);
-                let baseUrl = '';
-                if (chainId === 1) {
-                    baseUrl = 'https://aggregator-api.kyberswap.com/ethereum/api/v1/';
-                }
-                if (chainId === 10) {
-                    baseUrl = 'https://aggregator-api.kyberswap.com/optimism/api/v1/';
-                }
-                if (chainId === 42161) {
-                    baseUrl = 'https://aggregator-api.kyberswap.com/arbitrum/api/v1/';
-                }
-                if (chainId === 8453) {
-                    baseUrl = 'https://aggregator-api.kyberswap.com/base/api/v1/';
-                }
+                const baseUrl = getKyberApiUrlByChainId(chainId);
                 const clientId = 'partner-staging';
                 const headers = {
                     'x-client-id': clientId,
@@ -284,9 +98,7 @@ const kyberAggregatorDFSSellTest = async () => {
                     url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${buyAssetInfo.address}&amountIn=${amount.toString()}&saveGas=false&gasInclude=true&x-client-id=${clientId}`,
                     headers,
                 };
-                // console.log(options.baseURL + options.url);
                 const priceObject = await axios(options).then((response) => response.data.data);
-                // console.log(priceObject);
                 const secondOptions = {
                     method: 'POST',
                     baseURL: baseUrl,
@@ -301,7 +113,6 @@ const kyberAggregatorDFSSellTest = async () => {
                         source: clientId,
                     },
                 };
-                // console.log(secondOptions.data);
                 const resultObject = await axios(secondOptions).then((response) => response.data);
                 // THIS IS CHANGEABLE WITH API INFORMATION
                 const allowanceTarget = priceObject.routerAddress;
@@ -344,16 +155,7 @@ const kyberAggregatorDFSSellTest = async () => {
 
                 await setBalance(sellAssetInfo.address, senderAcc.address, amount);
                 await approve(sellAssetInfo.address, proxy.address);
-                let baseUrl = '';
-                if (chainId === 1) {
-                    baseUrl = 'https://aggregator-api.kyberswap.com/ethereum/api/v1/';
-                }
-                if (chainId === 10) {
-                    baseUrl = 'https://aggregator-api.kyberswap.com/optimism/api/v1/';
-                }
-                if (chainId === 42161) {
-                    baseUrl = 'https://aggregator-api.kyberswap.com/arbitrum/api/v1/';
-                }
+                const baseUrl = getKyberApiUrlByChainId(chainId);
                 const clientId = 'partner-staging';
                 const headers = {
                     'x-client-id': clientId,
@@ -364,9 +166,7 @@ const kyberAggregatorDFSSellTest = async () => {
                     url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${buyAssetInfo.address}&amountIn=${amount.toString()}&saveGas=false&gasInclude=true&x-client-id=${clientId}`,
                     headers,
                 };
-                // console.log(options.baseURL + options.url);
                 const priceObject = await axios(options).then((response) => response.data.data);
-                // console.log(priceObject);
                 const secondOptions = {
                     method: 'POST',
                     baseURL: baseUrl,
@@ -381,10 +181,8 @@ const kyberAggregatorDFSSellTest = async () => {
                         source: clientId,
                     },
                 };
-                // console.log(secondOptions.data);
                 const resultObject = await axios(secondOptions).then((response) => response.data);
 
-                // console.log(resultObject);
                 // THIS IS CHANGEABLE WITH API INFORMATION
                 const allowanceTarget = priceObject.routerAddress;
                 const price = 1; // just for testing, anything bigger than 0 triggers offchain if
@@ -414,90 +212,7 @@ const kyberAggregatorDFSSellTest = async () => {
                 const functionData = sellRecipe.encodeForDsProxyCall()[1];
                 await executeAction('RecipeExecutor', functionData, proxy);
                 const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
-                // console.log(buyBalanceAfter.toString());
                 expect(buyBalanceBefore).is.lt(buyBalanceAfter);
-            });
-        }
-    });
-};
-
-const dfsSellTest = async () => {
-    // @dev Currently does not work because of Curve API failing?
-    describe('Dfs-Sell-onchain', function () {
-        this.timeout(400000);
-
-        let senderAcc;
-        let proxy;
-        let uniWrapper;
-        let kyberWrapper;
-        let uniV3Wrapper;
-        let curveWrapper;
-        let dfsPrices;
-
-        before(async () => {
-            await curveApiInit();
-            await resetForkToBlock();
-            await redeploy('DFSSell');
-
-            dfsPrices = await redeploy('DFSPrices');
-            uniWrapper = await redeploy('UniswapWrapperV3');
-            kyberWrapper = await redeploy('KyberWrapperV3');
-            uniV3Wrapper = await redeploy('UniV3WrapperV3');
-            curveWrapper = await redeploy('CurveWrapperV3');
-
-            senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
-            await setNewExchangeWrapper(senderAcc, uniWrapper.address);
-            await setNewExchangeWrapper(senderAcc, kyberWrapper.address);
-            await setNewExchangeWrapper(senderAcc, uniV3Wrapper.address);
-            await setNewExchangeWrapper(senderAcc, curveWrapper.address);
-        });
-
-        for (let i = 0; i < 1; ++i) {
-            const trade = trades[i];
-
-            it(`... should sell on Kyber ${trade.sellToken} for ${trade.buyToken}`, async () => {
-                const kyberRate = await executeSell(senderAcc, proxy, dfsPrices, trade, kyberWrapper);
-                console.log(`Kyber sell rate -> ${kyberRate}`);
-            });
-            it(`... should sell on Uniswap ${trade.sellToken} for ${trade.buyToken}`, async () => {
-                const uniRate = await executeSell(
-                    senderAcc, proxy, dfsPrices,
-                    { ...trade, fee: 0 },
-                    uniWrapper,
-                );
-                console.log(`Uniswap sell rate -> ${uniRate}`);
-            });
-            it(`... should sell on UniswapV3 ${trade.sellToken} for ${trade.buyToken}`, async () => {
-                const uniV3Rate = await executeSell(senderAcc, proxy, dfsPrices, trade, uniV3Wrapper);
-                console.log(`UniswapV3 sell rate -> ${uniV3Rate}`);
-            });
-            it(`... should sell on Curve ${trade.sellToken} for ${trade.buyToken}`, async () => {
-                const curveRate = await executeSell(
-                    senderAcc,
-                    proxy,
-                    dfsPrices,
-                    trade,
-                    curveWrapper,
-                    true,
-                );
-                console.log(`Curve sell rate -> ${curveRate}`);
-            });
-        }
-
-        for (let i = 0; i < curveTrades.length; ++i) {
-            const trade = curveTrades[i];
-
-            it(`... should sell ${trade.sellToken} for ${trade.buyToken} on Curve`, async () => {
-                const curveRate = await executeSell(
-                    senderAcc,
-                    proxy,
-                    dfsPrices,
-                    trade,
-                    curveWrapper,
-                    true,
-                );
-                console.log(`Curve sell rate -> ${curveRate}`);
             });
         }
     });
@@ -516,32 +231,34 @@ const paraswapTest = async () => {
         let amount;
         let buyBalanceBefore;
         let buyAssetInfo;
+        let sellAssetInfo;
 
         before(async () => {
-            paraswapWrapper = await hre.ethers.getContractAt('ParaswapWrapper', '0x005c78a48b482C1733c7Cf958E65d90d3D40554b');
+            await redeploy('DFSSell');
+            await redeploy('WrapEth');
+            await redeploy('RecipeExecutor');
+            paraswapWrapper = await redeploy('ParaswapWrapper');
+
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             await setNewExchangeWrapper(senderAcc, paraswapWrapper.address);
 
-            const sellAssetInfo = getAssetInfo('WETH');
+            sellAssetInfo = getAssetInfo('WETH');
             buyAssetInfo = getAssetInfo('USDC');
 
             buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
             amount = hre.ethers.utils.parseUnits('1', 18);
-            await depositToWeth(amount);
+            await setBalance(sellAssetInfo.address, senderAcc.address, amount);
             await approve(sellAssetInfo.address, proxy.address);
 
+            const networkId = '1';
             const options = {
                 method: 'GET',
                 baseURL: 'https://apiv5.paraswap.io',
-                url: '/prices?srcToken=0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2&srcDecimals=18&destToken=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&destDecimals=6&amount=1000000000000000000&side=SELL&network=1'
-                + '&excludeDEXS=Balancer'
-                + '&excludeContractMethods=simpleSwap'
-                + `&userAddress=${paraswapWrapper.address}`,
+                url: `/prices?srcToken=${sellAssetInfo.address}&srcDecimals=${sellAssetInfo.decimals}&destToken=${buyAssetInfo.address}&destDecimals=${buyAssetInfo.decimals}&amount=${amount}&side=SELL&network=${networkId}`,
             };
-            // console.log(options.baseURL + options.url);
             const priceObject = await axios(options).then((response) => response.data.priceRoute);
-            // console.log(priceObject);
+
             const secondOptions = {
                 method: 'POST',
                 baseURL: 'https://apiv5.paraswap.io/transactions/1?ignoreChecks=true',
@@ -558,28 +275,26 @@ const paraswapTest = async () => {
                     txOrigin: senderAcc.address,
                 },
             };
-            // console.log(secondOptions.data);
             const resultObject = await axios(secondOptions).then((response) => response.data);
-            // console.log(resultObject);
+
             // THIS IS CHANGEABLE WITH API INFORMATION
             const allowanceTarget = priceObject.tokenTransferProxy;
             const price = 1; // just for testing, anything bigger than 0 triggers offchain if
             const protocolFee = 0;
             const callData = resultObject.data;
-            // console.log(callData);
+
             let amountInHex = hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [priceObject.srcAmount]);
             amountInHex = amountInHex.slice(2);
-            // console.log(amountInHex.toString());
+
             let offset = callData.toString().indexOf(amountInHex);
-            // console.log(offset);
             offset = offset / 2 - 1;
-            // console.log(offset);
+
             const paraswapSpecialCalldata = hre.ethers.utils.defaultAbiCoder.encode(['(bytes,uint256)'], [[callData, offset]]);
 
             exchangeObject = formatExchangeObjForOffchain(
                 sellAssetInfo.address,
                 buyAssetInfo.address,
-                hre.ethers.utils.parseUnits('1', 18),
+                amount,
                 paraswapWrapper.address,
                 priceObject.contractAddress,
                 allowanceTarget,
@@ -615,19 +330,17 @@ const paraswapTest = async () => {
         it('... should try to sell WETH for DAI with offchain calldata (Paraswap) in a recipe', async () => {
             // test recipe
             const sellRecipe = new dfs.Recipe('SellRecipe', [
-                new dfs.actions.basic.WrapEthAction(amount.toString()),
+                new dfs.actions.basic.PullTokenAction(sellAssetInfo.address, senderAcc.address, amount.toString()),
                 new dfs.actions.basic.SellAction(
                     exchangeObject, proxy.address, senderAcc.address,
                 ),
             ]);
             const functionData = sellRecipe.encodeForDsProxyCall()[1];
-            const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
-            await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData, {
-                value: amount,
-                gasLimit: 5000000,
-            });
+
+            await executeAction('RecipeExecutor', functionData, proxy, addrs[getNetwork()].REGISTRY_ADDR, amount);
+
             const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
-            // console.log(buyBalanceAfter.toString());
+
             expect(buyBalanceBefore).is.lt(buyBalanceAfter);
         });
     });
@@ -645,18 +358,21 @@ const oneInchTest = async () => {
         let amount;
         let buyBalanceBefore;
         let buyAssetInfo;
+        let sellAssetInfo;
 
         before(async () => {
             const chainId = chainIds[getNetwork()];
 
             await redeploy('DFSSell');
+            await redeploy('PullToken');
+            await redeploy('RecipeExecutor');
             oneInchWrapper = await redeploy('OneInchWrapper');
 
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             await setNewExchangeWrapper(senderAcc, oneInchWrapper.address);
 
-            const sellAssetInfo = getAssetInfo('WETH', chainId);
+            sellAssetInfo = getAssetInfo('WETH', chainId);
             buyAssetInfo = getAssetInfo('USDC', chainId);
 
             buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
@@ -741,17 +457,15 @@ const oneInchTest = async () => {
         it('... should try to sell WETH for DAI with offchain calldata (1inch) in a recipe', async () => {
             // test recipe
             const sellRecipe = new dfs.Recipe('SellRecipe', [
-                new dfs.actions.basic.WrapEthAction(amount.toString()),
+                new dfs.actions.basic.PullTokenAction(sellAssetInfo.address, senderAcc.address, amount.toString()),
                 new dfs.actions.basic.SellAction(
                     exchangeObject, proxy.address, senderAcc.address,
                 ),
             ]);
             const functionData = sellRecipe.encodeForDsProxyCall()[1];
-            const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
-            await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData, {
-                value: amount,
-                gasLimit: 5000000,
-            });
+
+            await executeAction('RecipeExecutor', functionData, proxy, addrs[getNetwork()].REGISTRY_ADDR, amount);
+
             const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
 
             expect(buyBalanceBefore).is.lt(buyBalanceAfter);
@@ -759,19 +473,99 @@ const oneInchTest = async () => {
     });
 };
 
-const dfsExchangeFullTest = async () => {
+const zeroxTest = async () => {
+    describe('Dfs-Sell-0x', function () {
+        this.timeout(140000);
+
+        let senderAcc;
+        let proxy;
+        let zxWrapper;
+        let snapshot;
+        const network = hre.network.config.name;
+
+        before(async () => {
+            await redeploy('DFSSell');
+            zxWrapper = await redeploy('ZeroxWrapper');
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
+            await setNewExchangeWrapper(senderAcc, zxWrapper.address);
+        });
+
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        it('... should try to sell WETH for USDC with offchain calldata (0x)', async () => {
+            const chainId = chainIds[network];
+            const sellAssetInfo = getAssetInfo('WETH', chainId);
+            const buyAssetInfo = getAssetInfo('USDC', chainId);
+            const sellAmount = hre.ethers.utils.parseUnits('10', 18);
+            await setBalance(sellAssetInfo.address, senderAcc.address, sellAmount);
+            await approve(sellAssetInfo.address, proxy.address);
+
+            const options = {
+                method: 'GET',
+                baseURL: 'https://api.0x.org',
+                url: `/swap/v1/quote?sellToken=${sellAssetInfo.address}&buyToken=${buyAssetInfo.address}&sellAmount=${sellAmount.toString()}`,
+                headers: {
+                    '0x-api-key': `${process.env.ZEROX_API_KEY}`,
+                },
+            };
+            const priceObject = await axios(options).then((response) => response.data);
+
+            // THIS IS CHANGEABLE WITH API INFORMATION
+            const allowanceTarget = priceObject.allowanceTarget;
+            const price = 1; // just for testing, anything bigger than 0 triggers offchain if
+            const protocolFee = 0;
+            const callData = priceObject.data;
+
+            const exchangeObject = formatExchangeObjForOffchain(
+                sellAssetInfo.address,
+                buyAssetInfo.address,
+                sellAmount,
+                zxWrapper.address,
+                priceObject.to,
+                allowanceTarget,
+                price,
+                protocolFee,
+                callData,
+            );
+            await addToExchangeAggregatorRegistry(senderAcc, priceObject.to);
+
+            const sellAction = new dfs.actions.basic.SellAction(
+                exchangeObject, senderAcc.address, senderAcc.address,
+            );
+
+            const functionData = sellAction.encodeForDsProxyCall()[1];
+
+            const buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
+            await executeAction('DFSSell', functionData, proxy);
+            const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
+
+            console.log(`ETH SOLD ${sellAmount}`);
+            console.log(`USDC BOUGHT ${buyBalanceAfter}`);
+
+            expect(buyBalanceBefore).is.lt(buyBalanceAfter);
+        });
+    });
+};
+
+const offchainExchangeFullTest = async () => {
     await paraswapTest();
     await oneInchTest();
-    await kyberAggregatorDFSSellTest();
-    await dfsSellTest();
-    await dfsSellSameAssetTest();
+    await kyberTest();
+    await zeroxTest();
 };
 
 module.exports = {
-    dfsExchangeFullTest,
-    dfsSellSameAssetTest,
-    dfsSellTest,
-    kyberAggregatorDFSSellTest,
+    offchainExchangeFullTest,
+    kyberTest,
     paraswapTest,
     oneInchTest,
+    zeroxTest,
 };

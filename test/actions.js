@@ -43,13 +43,13 @@ const {
 
 const network = hre.network.config.name;
 
-const executeAction = async (actionName, functionData, proxy, regAddr = addrs[network].REGISTRY_ADDR) => {
+const executeAction = async (actionName, functionData, proxy, regAddr = addrs[network].REGISTRY_ADDR, ethValue = 0) => {
     const actionAddr = await getAddrFromRegistry(actionName, regAddr);
     let receipt;
     try {
         mineBlock();
 
-        receipt = await executeTxFromProxy(proxy, actionAddr, functionData);
+        receipt = await executeTxFromProxy(proxy, actionAddr, functionData, ethValue);
 
         const gasUsed = await getGasUsed(receipt);
         console.log(`Gas used by ${actionName} action; ${gasUsed}`);
@@ -67,7 +67,21 @@ const executeAction = async (actionName, functionData, proxy, regAddr = addrs[ne
 };
 
 // eslint-disable-next-line max-len
-const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee = 0, signer, regAddr = addrs[getNetwork()].REGISTRY_ADDR, isCurve = false, uniSdk) => {
+const sell = async (
+    proxy,
+    sellAddr,
+    buyAddr,
+    sellAmount,
+    wrapper,
+    from,
+    to,
+    fee = 0,
+    signer,
+    regAddr = addrs[getNetwork()].REGISTRY_ADDR,
+    isCurve = false,
+    uniSdk = false,
+    sellInRecipe = false,
+) => {
     let exchangeObject;
     if (isCurve) {
         exchangeObject = await formatExchangeObjCurve(
@@ -96,14 +110,21 @@ const sell = async (proxy, sellAddr, buyAddr, sellAmount, wrapper, from, to, fee
 
     const sellAction = new dfs.actions.basic.SellAction(exchangeObject, from, to);
 
-    const functionData = sellAction.encodeForDsProxyCall()[1];
-
     if (isEth(sellAddr)) {
         await depositToWeth(sellAmount.toString(), signer);
     }
 
     await approve(sellAddr, proxy.address, signer);
 
+    // if used in recipe, standard fee is taken
+    if (sellInRecipe) {
+        const recipe = new dfs.Recipe('Sell', [sellAction]);
+        const functionData = recipe.encodeForDsProxyCall()[1];
+        const tx = await executeAction('RecipeExecutor', functionData, proxy, regAddr);
+        return tx;
+    }
+
+    const functionData = sellAction.encodeForDsProxyCall()[1];
     const tx = await executeAction('DFSSell', functionData, proxy, regAddr);
     return tx;
 };
