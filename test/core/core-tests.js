@@ -979,6 +979,7 @@ const strategyExecutorTest = async () => {
         let strategyExecutorByBot;
         let strategyId;
         let subId;
+        let strategyExecutorByOwner;
 
         before(async () => {
             subProxy = await redeploy('SubProxy');
@@ -1072,15 +1073,18 @@ const strategyExecutorTest = async () => {
         it('...should test recoverOwner() function for funds rescue for the user', async () => {
             const userProxyAddr = '0xddc65fAC7201922395045FFDFfe28d3CF6012E22';
 
+            await impersonateAccount(getOwnerAddr());
+
+            const ownerAcc = await hre.ethers.provider.getSigner(getOwnerAddr());
+            strategyExecutorByOwner = strategyExecutor.connect(ownerAcc);
+
             const dsProxy = await hre.ethers.getContractAt('IDSProxy', userProxyAddr);
 
             const ownerBefore = await dsProxy.owner();
 
             console.log(`Owner before ${ownerBefore}`);
 
-            await addBotCaller(botAcc.address);
-
-            await strategyExecutorByBot.recoverOwner({ gasLimit: 4_000_000 });
+            await strategyExecutorByOwner.recoverOwner({ gasLimit: 4_000_000 });
 
             const ownerAfter = await dsProxy.owner();
 
@@ -1097,11 +1101,11 @@ const strategyExecutorTest = async () => {
 
             console.log(`Owner before ${ownerBefore}`);
 
-            await addBotCaller(botAcc.address);
-
             try {
-                await strategyExecutorByBot.recoverOwner({ gasLimit: 4_000_000 });
+                await strategyExecutorByOwner.recoverOwner({ gasLimit: 4_000_000 });
             } catch (err) {
+                await stopImpersonatingAccount(getOwnerAddr());
+
                 const ownerAfter = await dsProxy.owner();
 
                 expect(ownerBefore).to.be.eq(ownerAfter);
