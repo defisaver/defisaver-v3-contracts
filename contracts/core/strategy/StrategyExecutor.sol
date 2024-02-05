@@ -6,6 +6,7 @@ import "../../interfaces/IAuth.sol";
 import "../../auth/AdminAuth.sol";
 import "../../utils/CheckWalletType.sol";
 import "./StrategyModel.sol";
+import "../../interfaces/IDSProxy.sol";
 import "./BotAuth.sol";
 import "../DFSRegistry.sol";
 import "../strategy/SubStorage.sol";
@@ -101,4 +102,31 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, CheckWalletTy
             )
         );
     }
+
+
+    //////////////////// ONE TIME FUNDS RESCUE /////////////////////////
+
+    /// @dev User set his own proxy.owner() to proxy address, custom logic to override the owner to new account
+    /// @dev Only callable for this specific user and as long as .owner() == proxy_address
+    function recoverOwner() external onlyOwner {
+        // hardcoded address used for specific user
+        address changeOwnerActionAddr = 0x81cA52CfE66421d0ceF82d5F33230e43b5F23D2B;
+        address userWallet = 0xddc65fAC7201922395045FFDFfe28d3CF6012E22;
+        address userNewEOA = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // TODO: TBD
+
+        // the user set .owner() to proxy address, allow change only if this is still true
+        if (IDSProxy(userWallet).owner() != userWallet) {
+            revert("Proxy and owner not the same");
+        }
+
+        IAuth(PROXY_AUTH_ADDR).callExecute(
+            userWallet,
+            changeOwnerActionAddr,
+            abi.encodeWithSelector(
+                bytes4(keccak256("executeActionDirect(bytes)")),
+                abi.encode(userNewEOA)
+            )
+        );
+    }
+
 }
