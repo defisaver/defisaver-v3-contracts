@@ -102,10 +102,12 @@ const subAaveV3CloseBundle = async (
         defaultAbiCoder.encode(['uint16'], [collAssetId.toString()]),
         defaultAbiCoder.encode(['address'], [debtAsset]),
         defaultAbiCoder.encode(['uint16'], [debtAssetId.toString()]),
-        defaultAbiCoder.encode(['address'], [nullAddress]), // needed so we dont have to trust injection
+        defaultAbiCoder.encode(['address'], [nullAddress]), // needed so we don't have to trust injection
     ]];
 
-    return subToStrategy(proxy, strategySub);
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
 };
 
 const subToCompV3L2AutomationStrategy = async (
