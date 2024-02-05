@@ -1,4 +1,4 @@
-const { paraswapTest } = require('./exchange-tests');
+const { paraswapTest } = require('./offchain-tests');
 
 describe('Dfs-Sell', function () {
     this.timeout(140000);

@@ -58,6 +58,7 @@ const addrs = {
         AAVE_V3_POOL_DATA_PROVIDER: '0x7B4EB56E7CD4b454BA8ff71E4518426369a138a3',
         CURVE_WRAPPER_V3: '0xdE73496DD6349829C6649aCaDe31FB1371528AC5',
         COMET_USDC_NATIVE_ADDR: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
+        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0x7b67D9D7993A258C4b2C31CDD9E6cbD5Fb674985',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -1068,19 +1069,17 @@ const formatExchangeObjForOffchain = (
 ];
 
 const addToExchangeAggregatorRegistry = async (acc, newAddr) => {
-    const exchangeOwnerAddr = addrs[network].ZRX_ALLOWLIST_OWNER;
-    await sendEther(acc, exchangeOwnerAddr, '1');
-    await impersonateAccount(exchangeOwnerAddr);
+    const ownerAddr = addrs[network].OWNER_ACC;
+    await sendEther(acc, ownerAddr, '1');
+    await impersonateAccount(ownerAddr);
+    const signer = hre.ethers.provider.getSigner(ownerAddr);
 
-    const signer = await hre.ethers.provider.getSigner(exchangeOwnerAddr);
+    const registry = await hre.ethers.getContractAt(
+        'ExchangeAggregatorRegistry', addrs[network].EXCHANGE_AGGREGATOR_REGISTRY_ADDR, signer,
+    );
 
-    const registryInstance = await hre.ethers.getContractFactory('ExchangeAggregatorRegistry');
-    const zrxAllowlistAddr = addrs[network].ZRX_ALLOWLIST_ADDR; // TODO: change to new addr once deployed
-    const registry = await registryInstance.attach(zrxAllowlistAddr);
-    const registryByOwner = await registry.connect(signer);
-
-    await registryByOwner.setExchangeTargetAddr(newAddr, true);
-    await stopImpersonatingAccount(exchangeOwnerAddr);
+    await registry.setExchangeTargetAddr(newAddr, true);
+    await stopImpersonatingAccount(ownerAddr);
 };
 
 const getGasUsed = async (receipt) => {
@@ -1295,18 +1294,23 @@ const filterEthersObject = (obj) => {
 const isProxySafe = (proxy) => proxy.functions.nonce !== undefined;
 
 // executes tx through safe or dsproxy depending the type
-const executeTxFromProxy = async (proxy, targetAddr, callData) => {
+const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => {
     let receipt;
     if (isProxySafe(proxy)) {
+        console.log('proxy signer address');
+        console.log(proxy.signer.address);
         receipt = await executeSafeTx(
             proxy.signer.address,
             proxy,
             targetAddr,
             callData,
+            1,
+            ethValue,
         );
     } else {
         receipt = await proxy['execute(address,bytes)'](targetAddr, callData, {
             gasLimit: 10000000,
+            value: ethValue,
         });
     }
 
