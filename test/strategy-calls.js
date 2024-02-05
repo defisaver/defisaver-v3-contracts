@@ -3999,6 +3999,57 @@ const callAaveCloseToDebtWithMaximumGasPriceStrategy = async (
     return receipt;
 };
 
+const callAaveCloseToDebtStrategy = async (
+    strategyExecutorByBot,
+    subId,
+    sub,
+    srcTokenInfo,
+    destTokenInfo,
+    partialAmounts = undefined,
+) => {
+    const actionsCallData = [];
+    const triggerCallData = [];
+
+    const closeGasCost = '1000000';
+
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
+    }));
+    // eslint-disable-next-line max-len
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo,
+        destTokenInfo,
+        swapAmount: MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: partialAmounts?.repayAmount || MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+
+    // price
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        0,
+        triggerCallData,
+        actionsCallData,
+        sub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callAaveCloseToDebtStrategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
 const callAaveFLCloseToDebtWithMaximumGasPriceStrategy = async (
     strategyExecutorByBot,
     subId,
@@ -4060,6 +4111,65 @@ const callAaveFLCloseToDebtWithMaximumGasPriceStrategy = async (
     return receipt;
 };
 
+const callAaveFLCloseToDebtStrategy = async (
+    strategyExecutorByBot,
+    subId,
+    sub,
+    repayAmount,
+    flAsset,
+    flAddr,
+    srcTokenInfo,
+    destTokenInfo,
+    withdrawAmount = undefined,
+) => {
+    const actionsCallData = [];
+    const triggerCallData = [];
+
+    const closeGasCost = '1000000';
+
+    actionsCallData.push(aaveV3CloseActionsEncoded.flAction({
+        flAsset,
+        repayAmount,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: withdrawAmount ? repayAmount : MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: withdrawAmount || MAXUINT,
+    }));
+    // eslint-disable-next-line max-len
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo,
+        destTokenInfo,
+        swapAmount: MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendRepayFL({ flAddr }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+
+    // price
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        1,
+        triggerCallData,
+        actionsCallData,
+        sub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callAaveFLCloseToDebtStrategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
 const callAaveCloseToCollWithMaximumGasPriceStrategy = async (
     strategyExecutorByBot,
     subId,
@@ -4109,6 +4219,58 @@ const callAaveCloseToCollWithMaximumGasPriceStrategy = async (
 
     console.log(
         `GasUsed callAaveCloseToCollWithMaximumGasPriceStrategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
+const callAaveCloseToCollStrategy = async (
+    strategyExecutorByBot,
+    subId,
+    sub,
+    swapAmount,
+    srcTokenInfo,
+    destTokenInfo,
+    partialAmounts = undefined,
+) => {
+    const actionsCallData = [];
+    const triggerCallData = [];
+
+    const closeGasCost = '1000000';
+
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo,
+        destTokenInfo,
+        swapAmount: partialAmounts ? MAXUINT : swapAmount,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: partialAmounts?.repayAmount || MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+
+    // price
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        0,
+        triggerCallData,
+        actionsCallData,
+        sub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callAaveCloseToCollStrategy: ${gasUsed}`,
     );
 
     return receipt;
@@ -4171,6 +4333,66 @@ const callAaveFLCloseToCollWithMaximumGasPriceStrategy = async (
 
     console.log(
         `GasUsed callAaveFLCloseToCollWithMaximumGasPriceStrategy: ${gasUsed}`,
+    );
+
+    return receipt;
+};
+
+const callAaveFLCloseToCollStrategy = async (
+    strategyExecutorByBot,
+    subId,
+    sub,
+    repayAmount,
+    flAsset,
+    flAddr,
+    swapAmount,
+    srcTokenInfo,
+    destTokenInfo,
+    withdrawAmount = undefined,
+) => {
+    const actionsCallData = [];
+    const triggerCallData = [];
+
+    const closeGasCost = '1000000';
+
+    actionsCallData.push(aaveV3CloseActionsEncoded.flAction({
+        repayAmount,
+        flAsset,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
+        repayAmount: withdrawAmount ? repayAmount : MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
+        withdrawAmount: withdrawAmount || MAXUINT,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
+    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
+        srcTokenInfo,
+        destTokenInfo,
+        swapAmount: withdrawAmount ? MAXUINT : swapAmount,
+    }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendRepayFL({ flAddr }));
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+    actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
+
+    // price
+    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
+
+    const receipt = await strategyExecutorByBot.executeStrategy(
+        subId,
+        1,
+        triggerCallData,
+        actionsCallData,
+        sub,
+        {
+            gasLimit: 8000000,
+        },
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+
+    console.log(
+        `GasUsed callAaveFLCloseToCollStrategy: ${gasUsed}`,
     );
 
     return receipt;
@@ -4495,9 +4717,13 @@ module.exports = {
     callLiquityDebtInFrontRepayStrategy,
     sparkCloseActionsEncoded,
     callAaveCloseToDebtWithMaximumGasPriceStrategy,
+    callAaveCloseToDebtStrategy,
     callAaveFLCloseToDebtWithMaximumGasPriceStrategy,
+    callAaveFLCloseToDebtStrategy,
     callAaveCloseToCollWithMaximumGasPriceStrategy,
+    callAaveCloseToCollStrategy,
     callAaveFLCloseToCollWithMaximumGasPriceStrategy,
+    callAaveFLCloseToCollStrategy,
     callCurveUsdAdvancedRepayStrategy,
     callCurveUsdRepayStrategy,
     callCurveUsdFLRepayStrategy,
