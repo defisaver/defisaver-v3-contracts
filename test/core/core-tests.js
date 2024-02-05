@@ -1017,6 +1017,7 @@ const strategyExecutorTest = async () => {
                     [triggerData],
                     [actionData],
                     strategySub,
+                    { gasLimit: 4_000_000 },
                 );
                 expect(true).to.be.equal(false);
             } catch (err) {
@@ -1038,6 +1039,7 @@ const strategyExecutorTest = async () => {
                     [triggerData],
                     [actionData],
                     strategySubUpdated,
+                    { gasLimit: 4_000_000 },
                 );
                 expect(true).to.be.equal(false);
             } catch (err) {
@@ -1059,10 +1061,50 @@ const strategyExecutorTest = async () => {
                     [triggerData],
                     [actionData],
                     strategySub,
+                    { gasLimit: 4_000_000 },
                 );
                 expect(true).to.be.equal(false);
             } catch (err) {
                 expect(err.toString()).to.have.string('SubNotEnabled(');
+            }
+        });
+
+        it('...should test recoverOwner() function for funds rescue for the user', async () => {
+            const userProxyAddr = '0xddc65fAC7201922395045FFDFfe28d3CF6012E22';
+
+            const dsProxy = await hre.ethers.getContractAt('IDSProxy', userProxyAddr);
+
+            const ownerBefore = await dsProxy.owner();
+
+            console.log(`Owner before ${ownerBefore}`);
+
+            await addBotCaller(botAcc.address);
+
+            await strategyExecutorByBot.recoverOwner({ gasLimit: 4_000_000 });
+
+            const ownerAfter = await dsProxy.owner();
+
+            console.log(`Owner after ${ownerAfter}`);
+            expect(ownerBefore).not.to.be.eq(ownerAfter);
+        });
+
+        it('...should fail to call recoverOwner() function after the EOA is set', async () => {
+            const userProxyAddr = '0xddc65fAC7201922395045FFDFfe28d3CF6012E22';
+
+            const dsProxy = await hre.ethers.getContractAt('IDSProxy', userProxyAddr);
+
+            const ownerBefore = await dsProxy.owner();
+
+            console.log(`Owner before ${ownerBefore}`);
+
+            await addBotCaller(botAcc.address);
+
+            try {
+                await strategyExecutorByBot.recoverOwner({ gasLimit: 4_000_000 });
+            } catch (err) {
+                const ownerAfter = await dsProxy.owner();
+
+                expect(ownerBefore).to.be.eq(ownerAfter);
             }
         });
     });
