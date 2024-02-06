@@ -112,7 +112,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, CheckWalletTy
         // hardcoded address used for specific user
         address changeOwnerActionAddr = 0x81cA52CfE66421d0ceF82d5F33230e43b5F23D2B;
         address userWallet = 0xddc65fAC7201922395045FFDFfe28d3CF6012E22;
-        address userNewEOA = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // TODO: TBD
+        address userNewEOA = 0xE28fb66C6B25f1F2F043158bAe933a34d136E26e;
 
         // the user set .owner() to proxy address, allow change only if this is still true
         if (IDSProxy(userWallet).owner() != userWallet) {
