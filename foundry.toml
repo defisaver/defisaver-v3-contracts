@@ -15,5 +15,6 @@ remappings = [
     'ds-test/=lib/ds-test/src/',
     'forge-std/=lib/forge-std/src/'
 ]
+fs_permissions = [{ access = "read", path = "./test-sol/config/"}]
 
 # See more config options https://github.com/gakonst/foundry/tree/master/config

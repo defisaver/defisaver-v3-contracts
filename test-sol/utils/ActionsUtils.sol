@@ -9,8 +9,13 @@ import "../../contracts/actions/exchange/DFSSell.sol";
 import "../../contracts/actions/fee/GasFeeTaker.sol";
 import "../../contracts/actions/checkers/CompV3RatioCheck.sol";
 import "../../contracts/interfaces/flashloan/IFlashLoanBase.sol";
+import { AaveV3Supply } from "../../contracts/actions/aaveV3/AaveV3Supply.sol";
 
 contract ActionsUtils {
+
+    bytes32[] internal subData = new bytes32[](0);
+    uint8[]  internal paramMapping = new uint8[](8);
+    bytes32[] internal returnValues = new bytes32[](0);
 
     enum FLSource {
         EMPTY,
@@ -198,4 +203,27 @@ contract ActionsUtils {
 
         return abi.encode(params);
     }
+
+    function aaveV3SupplyEncode(
+        uint256 amount,
+        address from,
+        uint16 assetId,
+        bool useDefaultMarket,
+        bool useOnBehalfOf,
+        address market,
+        address onBehalf
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            AaveV3Supply.Params({
+                amount: amount,
+                from: from,
+                assetId: assetId,
+                useDefaultMarket: useDefaultMarket,
+                useOnBehalf: useOnBehalfOf,
+                market: market,
+                onBehalf: onBehalf
+            })
+        );
+    }
+
 }
