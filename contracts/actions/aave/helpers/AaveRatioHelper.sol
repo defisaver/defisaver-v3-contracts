@@ -9,6 +9,9 @@ import "./MainnetAaveAddresses.sol";
 
 contract AaveRatioHelper is DSMath, MainnetAaveAddresses {
 
+    /// @notice Calculated the ratio of coll * weighted ltv / debt for aave V2 user
+    /// @param _market Address of LendingPoolAddressesProvider for specific market
+    /// @param _user Address of the user
     function getSafetyRatio(address _market, address _user) public view returns(uint256) {
         ILendingPoolV2 lendingPool = ILendingPoolV2(ILendingPoolAddressesProviderV2(_market).getLendingPool());
         
