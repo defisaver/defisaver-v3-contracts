@@ -14,7 +14,7 @@ contract AaveRatioHelper is DSMath, MainnetAaveAddresses {
         
         (uint256 totalCollETH,uint256 totalDebtETH,,,uint256 ltv,) = lendingPool.getUserAccountData(_user);
 
-        if (totalDebtETH == 0) return uint256(0);
+        if (totalDebtETH == 0) return 0;
 
         return wdiv(wmul(totalCollETH, ltv * 10**14), totalDebtETH);
     }
