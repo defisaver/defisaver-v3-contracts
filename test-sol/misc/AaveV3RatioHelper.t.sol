@@ -2,10 +2,10 @@
 pragma solidity =0.8.10;
 
 import "forge-std/Test.sol";
-import "../../contracts/actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+import { AaveV3RatioHelper } from "../../contracts/actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 
 
-contract SafetyRatioTest is Test, AaveV3RatioHelper {
+contract AaveV3RatioHelperTest is Test, AaveV3RatioHelper {
     AaveV3RatioHelper ratioHelper;
     AaveV3RatioHelper previousRatioHelper;
 

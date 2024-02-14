@@ -2,11 +2,10 @@
 pragma solidity =0.8.10;
 
 import "forge-std/Test.sol";
-import "forge-std/console.sol";
-import "../../contracts/actions/spark/helpers/SparkRatioHelper.sol";
+import { SparkRatioHelper } from "../../contracts/actions/spark/helpers/SparkRatioHelper.sol";
 
 
-contract SafetyRatioTest is Test, SparkRatioHelper {
+contract SparkRatioHelperTest is Test, SparkRatioHelper {
     SparkRatioHelper ratioHelper;
     SparkRatioHelper previousRatioHelper;
 
