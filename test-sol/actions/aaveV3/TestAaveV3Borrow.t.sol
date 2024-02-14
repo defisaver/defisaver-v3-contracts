@@ -168,15 +168,15 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
         assertEq(_params.onBehalf, decodedParams.onBehalf);
     }
 
-    function _borrowDai(uint256 borrowAmount, bool isL2Direct) internal {
+    function _borrowDai(uint256 _borrowAmount, bool _isL2Direct) internal {
         DataTypes.ReserveData memory daiData = pool.getReserveData(TokenAddresses.DAI_ADDR);        
 
         uint256 bobBalanceBefore = bobBalance(TokenAddresses.DAI_ADDR);
         uint256 walletSafetyRatioBefore = getSafetyRatio(DEFAULT_AAVE_MARKET, walletAddr);
 
-        if (isL2Direct) {
+        if (_isL2Direct) {
             AaveV3Borrow.Params memory params = AaveV3Borrow.Params({
-                amount: borrowAmount,
+                amount: _borrowAmount,
                 to: bob,
                 rateMode: uint8(DataTypes.InterestRateMode.VARIABLE),
                 assetId: daiData.id,
@@ -189,7 +189,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
         }
         else {
             bytes memory paramsCalldata = aaveV3BorrowEncode(
-                borrowAmount,
+                _borrowAmount,
                 bob,
                 uint8(DataTypes.InterestRateMode.VARIABLE),
                 daiData.id,
@@ -213,7 +213,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
         uint256 bobBalanceAfter = bobBalance(TokenAddresses.DAI_ADDR);
         uint256 walletSafetyRatioAfter = getSafetyRatio(DEFAULT_AAVE_MARKET, walletAddr);
 
-        assertEq(bobBalanceAfter, bobBalanceBefore + borrowAmount);
+        assertEq(bobBalanceAfter, bobBalanceBefore + _borrowAmount);
         assertEq(walletSafetyRatioBefore, 0);
         assertGe(walletSafetyRatioAfter, 0);
     }

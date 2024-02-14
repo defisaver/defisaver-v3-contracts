@@ -206,19 +206,19 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
         assertEq(_params.onBehalf, decodedParams.onBehalf);
     }
 
-    function _supply(uint256 supplyAmount, bool isL2Direct) public {
+    function _supply(uint256 _supplyAmount, bool _isL2Direct) public {
         DataTypes.ReserveData memory wethData = pool.getReserveData(TokenAddresses.WETH_ADDR);
 
-        uint256 realAmountToSupply = supplyAmount == type(uint256).max ? 
+        uint256 realAmountToSupply = _supplyAmount == type(uint256).max ? 
             bobBalance(TokenAddresses.WETH_ADDR) : 
-            supplyAmount;
+            _supplyAmount;
 
         uint256 bobBalanceBefore = bobBalance(TokenAddresses.WETH_ADDR);
         uint256 walletAtokenBalanceBefore = balanceOf(wethData.aTokenAddress, walletAddr);
         
-        if (isL2Direct) {
+        if (_isL2Direct) {
             AaveV3Supply.Params memory params = AaveV3Supply.Params({
-                amount: supplyAmount,
+                amount: _supplyAmount,
                 from: bob,
                 assetId: wethData.id,
                 useDefaultMarket: true,
@@ -231,7 +231,7 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
 
         } else {
             bytes memory paramsCallData = aaveV3SupplyEncode(
-                supplyAmount,
+                _supplyAmount,
                 bob,
                 wethData.id,
                 true,

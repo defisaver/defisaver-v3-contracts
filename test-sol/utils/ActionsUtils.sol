@@ -11,6 +11,7 @@ import "../../contracts/actions/checkers/CompV3RatioCheck.sol";
 import "../../contracts/interfaces/flashloan/IFlashLoanBase.sol";
 import { AaveV3Supply } from "../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Borrow } from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
+import { AaveV3Withdraw } from "../../contracts/actions/aaveV3/AaveV3Withdraw.sol";
 
 contract ActionsUtils {
 
@@ -247,6 +248,24 @@ contract ActionsUtils {
                 useOnBehalf: useOnBehalf,
                 market: market,
                 onBehalf: onBehalf
+            })
+        );
+    }
+
+    function aaveV3WithdrawEncode(
+        uint16 assetId,
+        bool useDefaultMarket,
+        uint256 amount,
+        address to,
+        address market
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            AaveV3Withdraw.Params({
+                assetId: assetId,
+                useDefaultMarket: useDefaultMarket,
+                amount: amount,
+                to: to,
+                market: market
             })
         );
     }
