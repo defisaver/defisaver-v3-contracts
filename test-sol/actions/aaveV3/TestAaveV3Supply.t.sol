@@ -41,20 +41,32 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
     
     function test_should_supply_10_weth() public {
         uint256 supplyAmount = 10 ether;
+        bool isL2Direct = false;
 
         giveBob(TokenAddresses.WETH_ADDR, supplyAmount);
         approveAsBob(TokenAddresses.WETH_ADDR, walletAddr, supplyAmount);
 
-        _supply(supplyAmount);
+        _supply(supplyAmount, isL2Direct);
     }
     
     function test_should_supply_maxUint256_weth() public {
         uint256 bobRealBalance = 10 ether;
+        bool isL2Direct = false;
 
         giveBob(TokenAddresses.WETH_ADDR, bobRealBalance);
         approveAsBob(TokenAddresses.WETH_ADDR, walletAddr, bobRealBalance);
 
-        _supply(type(uint256).max);
+        _supply(type(uint256).max, isL2Direct);
+    }
+
+     function test_should_supply_10_weth_on_direct_action_l2() public {
+        uint256 supplyAmount = 10 ether;
+        bool isL2Direct = true;
+
+        giveBob(TokenAddresses.WETH_ADDR, supplyAmount);
+        approveAsBob(TokenAddresses.WETH_ADDR, walletAddr, supplyAmount);
+
+        _supply(supplyAmount, isL2Direct);
     }
 
     function test_should_supply_onBehalfOf_alice() public {
@@ -202,7 +214,7 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
         return result;
     }
 
-    function _supply(uint256 supplyAmount) public {
+    function _supply(uint256 supplyAmount, bool isL2Direct) public {
         DataTypes.ReserveData memory wethData = pool.getReserveData(TokenAddresses.WETH_ADDR);
 
         uint256 realAmountToSupply = supplyAmount == type(uint256).max ? 
@@ -212,25 +224,40 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
         uint256 bobBalanceBefore = bobBalance(TokenAddresses.WETH_ADDR);
         uint256 walletAtokenBalanceBefore = balanceOf(wethData.aTokenAddress, walletAddr);
         
-        bytes memory paramsCallData = aaveV3SupplyEncode(
-            supplyAmount,
-            bob,
-            wethData.id,
-            true,
-            false,
-            address(0),
-            address(0)
-        );
+        if (isL2Direct) {
+            AaveV3Supply.Params memory params = AaveV3Supply.Params({
+                amount: supplyAmount,
+                from: bob,
+                assetId: wethData.id,
+                useDefaultMarket: true,
+                useOnBehalf: false,
+                market: address(0),
+                onBehalf: address(0)
+            });
+            
+            executeByWallet(address(cut), cut.encodeInputs(params), 0);
 
-        bytes memory _calldata = abi.encodeWithSelector(
-            AaveV3Supply.executeAction.selector,
-            paramsCallData,
-            subData,
-            paramMapping,
-            returnValues
-        );
+        } else {
+            bytes memory paramsCallData = aaveV3SupplyEncode(
+                supplyAmount,
+                bob,
+                wethData.id,
+                true,
+                false,
+                address(0),
+                address(0)
+            );
 
-        executeByWallet(address(cut), _calldata, 0);
+            bytes memory _calldata = abi.encodeWithSelector(
+                AaveV3Supply.executeAction.selector,
+                paramsCallData,
+                subData,
+                paramMapping,
+                returnValues
+            );
+
+            executeByWallet(address(cut), _calldata, 0);
+        }
 
         uint256 bobBalanceAfter = bobBalance(TokenAddresses.WETH_ADDR);
         uint256 walletATokenBalanceAfter = balanceOf(wethData.aTokenAddress, walletAddr);
