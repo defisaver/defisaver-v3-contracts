@@ -1448,6 +1448,17 @@
         "history": []
     },
     {
+        "name": "MorphoAaveV2SubProxy",
+        "address": "0x7E681F029b3c2FFA79c637963180E0D78626fB24",
+        "id": "0xd3479164",
+        "path": "contracts/actions/morpho/aaveV2/MorphoAaveV2SubProxy.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "MorphoClaim",
         "address": "0xa269C841E26EA8Ee1F0350a2E5905F71446998dC",
         "id": "0x50967400",
@@ -2295,6 +2306,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquitySubProxy",
+        "address": "0xE2f4A4629FbbC444964A16438329288C66551c30",
+        "id": "0x24974bdc",
+        "path": "contracts/actions/liquity/LiquitySubProxy.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
