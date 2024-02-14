@@ -15,7 +15,7 @@ import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
     
     /*//////////////////////////////////////////////////////////////////////////
-                            CONTRACT UNDER TEST
+                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
     AaveV3Supply cut;
 
@@ -26,7 +26,7 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
     IAaveProtocolDataProvider dataProvider;
 
     /*//////////////////////////////////////////////////////////////////////////
-                                  SETUP FUNCTION
+                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         SmartWallet.setUp();
@@ -36,7 +36,7 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                                  TESTS
+                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     
     function test_should_supply_10_weth() public {
@@ -190,11 +190,11 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                                  HELPERS
+                                       HELPERS
     //////////////////////////////////////////////////////////////////////////*/
 
     function _assertParams(AaveV3Supply.Params memory _params) private {
-        bytes memory encodedInputWithoutSelector = _removeSelector(cut.encodeInputs(_params));
+        bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3Supply.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
         
         assertEq(_params.amount, decodedParams.amount);
@@ -204,14 +204,6 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
         assertEq(_params.useOnBehalf, decodedParams.useOnBehalf);
         assertEq(_params.market, decodedParams.market);
         assertEq(_params.onBehalf, decodedParams.onBehalf);
-    }
-
-    function _removeSelector(bytes memory _data) private pure returns (bytes memory) {
-        bytes memory result = new bytes(_data.length - 4);
-        for (uint i = 4; i < _data.length; i++) {
-            result[i - 4] = _data[i];
-        }
-        return result;
     }
 
     function _supply(uint256 supplyAmount, bool isL2Direct) public {

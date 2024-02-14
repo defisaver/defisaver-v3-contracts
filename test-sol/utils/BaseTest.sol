@@ -6,6 +6,7 @@ import { Test } from "forge-std/Test.sol";
 
 import { IERC20 } from "../../contracts/interfaces/IERC20.sol";
 import { SafeERC20 } from "../../contracts/utils/SafeERC20.sol";
+import { TokenPriceHelper } from "../../contracts/utils/TokenPriceHelper.sol";
 
 /// @notice Base test - root contract for all tests
 contract BaseTest is Test {
@@ -63,5 +64,21 @@ contract BaseTest is Test {
 
     function stopPrank() internal {
         vm.stopPrank();
+    }
+
+    function amountInUSDPrice(address _tokenAddr, uint _amountUSD) internal returns (uint) {
+        TokenPriceHelper t = new TokenPriceHelper();
+        uint USD_DECIMALS = 8;
+
+        uint decimals = IERC20(_tokenAddr).decimals();
+        return (_amountUSD * 10**(decimals + USD_DECIMALS) / t.getPriceInUSD(_tokenAddr));
+    }
+
+    function removeSelector(bytes memory _data) internal pure returns (bytes memory) {
+        bytes memory result = new bytes(_data.length - 4);
+        for (uint i = 4; i < _data.length; i++) {
+            result[i - 4] = _data[i];
+        }
+        return result;
     }
 }

@@ -10,6 +10,7 @@ import "../../contracts/actions/fee/GasFeeTaker.sol";
 import "../../contracts/actions/checkers/CompV3RatioCheck.sol";
 import "../../contracts/interfaces/flashloan/IFlashLoanBase.sol";
 import { AaveV3Supply } from "../../contracts/actions/aaveV3/AaveV3Supply.sol";
+import { AaveV3Borrow } from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 
 contract ActionsUtils {
 
@@ -220,6 +221,30 @@ contract ActionsUtils {
                 assetId: assetId,
                 useDefaultMarket: useDefaultMarket,
                 useOnBehalf: useOnBehalfOf,
+                market: market,
+                onBehalf: onBehalf
+            })
+        );
+    }
+
+    function aaveV3BorrowEncode(
+        uint256 amount,
+        address to,
+        uint8 rateMode,
+        uint16 assetId,
+        bool useDefaultMarket,
+        bool useOnBehalf,
+        address market,
+        address onBehalf
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            AaveV3Borrow.Params({
+                amount: amount,
+                to: to,
+                rateMode: rateMode,
+                assetId: assetId,
+                useDefaultMarket: useDefaultMarket,
+                useOnBehalf: useOnBehalf,
                 market: market,
                 onBehalf: onBehalf
             })
