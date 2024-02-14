@@ -63,6 +63,14 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes calldata _callData) public payable override {
         Params memory params = parseInputs(_callData);
+
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
+        if (!params.useOnBehalf) {
+            params.onBehalf = address(0);
+        }
+
         (, bytes memory logData) = _supply(
             params.market,
             params.amount,
