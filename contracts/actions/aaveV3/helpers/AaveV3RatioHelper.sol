@@ -15,6 +15,7 @@ contract AaveV3RatioHelper is DSMath, MainnetAaveV3Addresses {
         (uint256 totalCollUSD, uint256 totalDebtUSD, , , uint256 ltv, ) = lendingPool
             .getUserAccountData(_user);
         if (totalDebtUSD == 0) return 0;
+        /// @dev we're multiplying ltv with 10**14 so it represents number with 18 decimals (since 0 < ltv < 10000)
         return wdiv(wmul(totalCollUSD, ltv * 10**14), totalDebtUSD);
     }
 }
