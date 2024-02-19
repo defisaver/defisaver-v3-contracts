@@ -13,6 +13,7 @@ import { AaveV3Supply } from "../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Borrow } from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 import { AaveV3Withdraw } from "../../contracts/actions/aaveV3/AaveV3Withdraw.sol";
 import { AaveV3SwapBorrowRateMode } from "../../contracts/actions/aaveV3/AaveV3SwapBorrowRateMode.sol";
+import { AaveV3SetEMode } from "../../contracts/actions/aaveV3/AaveV3SetEMode.sol";
 
 contract ActionsUtils {
 
@@ -281,6 +282,20 @@ contract ActionsUtils {
             AaveV3SwapBorrowRateMode.Params({
                 rateMode: _rateMode,
                 assetId: _assetId,
+                useDefaultMarket: _useDefaultMarket,
+                market: _market
+            })
+        );
+    }
+
+    function aaveV3SetEModeEncode(
+        uint8 _categoryId,
+        bool _useDefaultMarket,
+        address _market
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            AaveV3SetEMode.Params({
+                categoryId: _categoryId,
                 useDefaultMarket: _useDefaultMarket,
                 market: _market
             })

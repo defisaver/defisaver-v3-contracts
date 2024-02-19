@@ -95,8 +95,8 @@ contract TestAaveV3SwapBorrowRateMode is AaveV3CdpCreator {
             return;
         }
 
-        uint256 variableDaiTokenBalanceBefore = balanceOf(daiData.variableDebtTokenAddress, address(this));
-        uint256 stableDaiTokenBalanceBefore = balanceOf(daiData.stableDebtTokenAddress, address(this));
+        uint256 variableDaiTokenBalanceBefore = balanceOf(daiData.variableDebtTokenAddress, walletAddr);
+        uint256 stableDaiTokenBalanceBefore = balanceOf(daiData.stableDebtTokenAddress, walletAddr);
         
         if (_isL2Direct) {
             AaveV3SwapBorrowRateMode.Params memory params = AaveV3SwapBorrowRateMode.Params({
@@ -126,8 +126,8 @@ contract TestAaveV3SwapBorrowRateMode is AaveV3CdpCreator {
             executeByWallet(address(cut), _calldata, 0);
         }
 
-        uint256 variableDaiTokenBalanceAfter = balanceOf(daiData.variableDebtTokenAddress, address(this));
-        uint256 stableDaiTokenBalanceAfter = balanceOf(daiData.stableDebtTokenAddress, address(this));
+        uint256 variableDaiTokenBalanceAfter = balanceOf(daiData.variableDebtTokenAddress, walletAddr);
+        uint256 stableDaiTokenBalanceAfter = balanceOf(daiData.stableDebtTokenAddress, walletAddr);
 
         console.log("variableDaiTokenBalanceBefore", variableDaiTokenBalanceBefore);
         console.log("variableDaiTokenBalanceAfter", variableDaiTokenBalanceAfter);
