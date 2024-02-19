@@ -16,6 +16,7 @@ import { AaveV3SwapBorrowRateMode } from "../../contracts/actions/aaveV3/AaveV3S
 import { AaveV3SetEMode } from "../../contracts/actions/aaveV3/AaveV3SetEMode.sol";
 import { AaveV3DelegateCredit } from "../../contracts/actions/aaveV3/AaveV3DelegateCredit.sol";
 import { AaveV3CollateralSwitch } from "../../contracts/actions/aaveV3/AaveV3CollateralSwitch.sol";
+import { AaveV3ClaimRewards } from "../../contracts/actions/aaveV3/AaveV3ClaimRewards.sol";
 
 contract ActionsUtils {
 
@@ -342,4 +343,20 @@ contract ActionsUtils {
         );
     }
 
+    function aaveV3ClaimRewardsEncode(
+        uint256 _amount,
+        address _to,
+        address _reward,
+        address[] memory _assets
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            AaveV3ClaimRewards.Params({
+                amount: _amount,
+                to: _to,
+                reward: _reward,
+                assetsLength: uint8(_assets.length),
+                assets: _assets
+            })
+        );
+    }
 }
