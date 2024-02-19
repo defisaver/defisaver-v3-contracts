@@ -15,6 +15,7 @@ import { AaveV3Withdraw } from "../../contracts/actions/aaveV3/AaveV3Withdraw.so
 import { AaveV3SwapBorrowRateMode } from "../../contracts/actions/aaveV3/AaveV3SwapBorrowRateMode.sol";
 import { AaveV3SetEMode } from "../../contracts/actions/aaveV3/AaveV3SetEMode.sol";
 import { AaveV3DelegateCredit } from "../../contracts/actions/aaveV3/AaveV3DelegateCredit.sol";
+import { AaveV3CollateralSwitch } from "../../contracts/actions/aaveV3/AaveV3CollateralSwitch.sol";
 
 contract ActionsUtils {
 
@@ -317,6 +318,24 @@ contract ActionsUtils {
                 delegatee: _delegatee,
                 assetId: _assetId,
                 rateMode: _rateMode,
+                useDefaultMarket: _useDefaultMarket,
+                market: _market
+            })
+        );
+    }
+
+    function aaveV3CollateralSwitchEncode(
+        uint8 _arrayLength,
+        uint16[] memory _assetIds,
+        bool[] memory _useAsCollateral,
+        bool _useDefaultMarket,
+        address _market
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            AaveV3CollateralSwitch.Params({
+                arrayLength: _arrayLength,
+                assetIds: _assetIds,
+                useAsCollateral: _useAsCollateral,
                 useDefaultMarket: _useDefaultMarket,
                 market: _market
             })
