@@ -14,6 +14,7 @@ import { AaveV3Borrow } from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 import { AaveV3Withdraw } from "../../contracts/actions/aaveV3/AaveV3Withdraw.sol";
 import { AaveV3SwapBorrowRateMode } from "../../contracts/actions/aaveV3/AaveV3SwapBorrowRateMode.sol";
 import { AaveV3SetEMode } from "../../contracts/actions/aaveV3/AaveV3SetEMode.sol";
+import { AaveV3DelegateCredit } from "../../contracts/actions/aaveV3/AaveV3DelegateCredit.sol";
 
 contract ActionsUtils {
 
@@ -296,6 +297,26 @@ contract ActionsUtils {
         params = abi.encode(
             AaveV3SetEMode.Params({
                 categoryId: _categoryId,
+                useDefaultMarket: _useDefaultMarket,
+                market: _market
+            })
+        );
+    }
+
+    function aaveV3DelegateCreditEncode(
+        uint256 _amount,
+        address _delegatee,
+        uint16 _assetId,
+        uint8 _rateMode,
+        bool _useDefaultMarket,
+        address _market
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            AaveV3DelegateCredit.Params({
+                amount: _amount,
+                delegatee: _delegatee,
+                assetId: _assetId,
+                rateMode: _rateMode,
                 useDefaultMarket: _useDefaultMarket,
                 market: _market
             })
