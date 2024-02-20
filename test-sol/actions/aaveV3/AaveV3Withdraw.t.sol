@@ -102,7 +102,6 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-
     function _assertParams(AaveV3Withdraw.Params memory _params) private {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3Withdraw.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);

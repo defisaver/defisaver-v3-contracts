@@ -38,7 +38,6 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
     /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    
     function test_should_supply_10_weth() public {
         uint256 supplyAmount = 10 ether;
         bool isL2Direct = false;
@@ -192,7 +191,6 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
     /*//////////////////////////////////////////////////////////////////////////
                                        HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-
     function _assertParams(AaveV3Supply.Params memory _params) private {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3Supply.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);

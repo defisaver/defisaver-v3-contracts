@@ -153,7 +153,6 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-
     function _assertParams(AaveV3Borrow.Params memory _params) private {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3Borrow.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);

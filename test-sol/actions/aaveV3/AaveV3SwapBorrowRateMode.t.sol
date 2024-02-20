@@ -30,7 +30,6 @@ contract TestAaveV3SwapBorrowRateMode is AaveV3CdpCreator {
     /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    
     function test_should_supply_weth_with_variable_rate_then_swap_to_stable_rate() public {
         createAaveV3Cdp(
             CdpParams({
@@ -75,7 +74,6 @@ contract TestAaveV3SwapBorrowRateMode is AaveV3CdpCreator {
     /*//////////////////////////////////////////////////////////////////////////
                                     HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-
     function _assertParams(AaveV3SwapBorrowRateMode.Params memory _params) internal {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3SwapBorrowRateMode.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
