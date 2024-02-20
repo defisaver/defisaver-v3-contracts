@@ -3,7 +3,6 @@
 pragma solidity =0.8.10;
 
 import { BaseTest } from "./BaseTest.sol";
-import { Config } from "../config/Config.sol";
 import { Const } from "../Const.sol";
 
 import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterface.sol";
@@ -11,7 +10,7 @@ import { DSProxy } from "../../contracts/DS/DSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
 
-contract SmartWallet is Config, BaseTest {
+contract SmartWallet is BaseTest {
 
     address payable internal walletAddr;
     bool private isSafe;
@@ -20,7 +19,6 @@ contract SmartWallet is Config, BaseTest {
 
     function setUp() public override virtual {
         BaseTest.setUp();
-        initConfig();
         isSmartWalletSafe() == true ? createSafe() : createDSProxy();
         vm.label(walletAddr, "SmartWallet");
     }

@@ -21,6 +21,7 @@ contract TestAaveV3ClaimRewards is AaveV3Helper, SmartWallet, ActionsUtils {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
+        forkMainnet("AaveV3ClaimRewards");
         SmartWallet.setUp();
         cut = new AaveV3ClaimRewards();
         vm.etch(AAVE_REWARDS_CONTROLLER_ADDRESS, address(new MockRewardsController()).code);

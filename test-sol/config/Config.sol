@@ -3,10 +3,12 @@ pragma solidity =0.8.10;
 
 import { Test } from "forge-std/Test.sol";
 import { stdJson } from "forge-std/StdJson.sol";
+import { console } from "forge-std/console.sol";
 
 contract Config is Test {
 
     string internal constant IS_SMART_WALLET_SAFE = "$.isSmartWalletSafe";
+    string internal constant BLOCK_NUMBER = "$.blockNumber";
 
     using stdJson for string;
 
@@ -25,5 +27,18 @@ contract Config is Test {
 
     function isSmartWalletSafe() internal view returns (bool) {
         return configData.json.readBool(IS_SMART_WALLET_SAFE);
+    }
+
+    function getBlockNumber() public view returns (uint256) {
+        return configData.json.readUint(BLOCK_NUMBER);
+    }
+
+    function getBlockNumberForTestIfExist(string memory _testName) public view returns (uint256) {
+        string memory testBlockNumberKey = string(abi.encodePacked(".", _testName, ".blockNumber"));
+
+        if (vm.keyExists(configData.json, testBlockNumberKey)) {
+            return configData.json.readUint(testBlockNumberKey);
+        }
+        return getBlockNumber();
     }
 }

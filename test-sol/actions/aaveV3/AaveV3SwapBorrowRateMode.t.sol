@@ -22,6 +22,7 @@ contract TestAaveV3SwapBorrowRateMode is AaveV3CdpCreator {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
+        forkMainnet("AaveV3SwapBorrowRateMode");
         SmartWallet.setUp();
         AaveV3CdpCreator.setUp();
         cut = new AaveV3SwapBorrowRateMode();

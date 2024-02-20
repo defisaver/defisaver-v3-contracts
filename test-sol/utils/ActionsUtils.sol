@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import "../../contracts/actions/compoundV3/CompV3Supply.sol";
-import "../../contracts/actions/compoundV3/CompV3Withdraw.sol";
-import "../../contracts/actions/compoundV3/CompV3Payback.sol";
-import "../../contracts/actions/compoundV3/CompV3Borrow.sol";
-import "../../contracts/actions/exchange/DFSSell.sol";
-import "../../contracts/actions/fee/GasFeeTaker.sol";
-import "../../contracts/actions/checkers/CompV3RatioCheck.sol";
-import "../../contracts/interfaces/flashloan/IFlashLoanBase.sol";
+import { CompV3Supply } from "../../contracts/actions/compoundV3/CompV3Supply.sol";
+import { CompV3Withdraw } from "../../contracts/actions/compoundV3/CompV3Withdraw.sol";
+import { CompV3Payback } from "../../contracts/actions/compoundV3/CompV3Payback.sol";
+import { CompV3Borrow } from "../../contracts/actions/compoundV3/CompV3Borrow.sol";
+import { DFSSell } from "../../contracts/actions/exchange/DFSSell.sol";
+import { DFSExchangeData } from "../../contracts/exchangeV3/DFSExchangeData.sol";
+import { GasFeeTaker } from "../../contracts/actions/fee/GasFeeTaker.sol";
+import { CompV3RatioCheck } from "../../contracts/actions/checkers/CompV3RatioCheck.sol";
+import { IFlashLoanBase } from "../../contracts/interfaces/flashloan/IFlashLoanBase.sol";
 import { AaveV3Supply } from "../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Borrow } from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 import { AaveV3Withdraw } from "../../contracts/actions/aaveV3/AaveV3Withdraw.sol";
@@ -214,66 +215,66 @@ contract ActionsUtils {
     }
 
     function aaveV3SupplyEncode(
-        uint256 amount,
-        address from,
-        uint16 assetId,
-        bool useDefaultMarket,
-        bool useOnBehalfOf,
-        address market,
-        address onBehalf
+        uint256 _amount,
+        address _from,
+        uint16 _assetId,
+        bool _useDefaultMarket,
+        bool _useOnBehalfOf,
+        address _market,
+        address _onBehalf
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             AaveV3Supply.Params({
-                amount: amount,
-                from: from,
-                assetId: assetId,
+                amount: _amount,
+                from: _from,
+                assetId: _assetId,
                 enableAsColl: true,
-                useDefaultMarket: useDefaultMarket,
-                useOnBehalf: useOnBehalfOf,
-                market: market,
-                onBehalf: onBehalf
+                useDefaultMarket: _useDefaultMarket,
+                useOnBehalf: _useOnBehalfOf,
+                market: _market,
+                onBehalf: _onBehalf
             })
         );
     }
 
     function aaveV3BorrowEncode(
-        uint256 amount,
-        address to,
-        uint8 rateMode,
-        uint16 assetId,
-        bool useDefaultMarket,
-        bool useOnBehalf,
-        address market,
-        address onBehalf
+        uint256 _amount,
+        address _to,
+        uint8 _rateMode,
+        uint16 _assetId,
+        bool _useDefaultMarket,
+        bool _useOnBehalf,
+        address _market,
+        address _onBehalf
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             AaveV3Borrow.Params({
-                amount: amount,
-                to: to,
-                rateMode: rateMode,
-                assetId: assetId,
-                useDefaultMarket: useDefaultMarket,
-                useOnBehalf: useOnBehalf,
-                market: market,
-                onBehalf: onBehalf
+                amount: _amount,
+                to: _to,
+                rateMode: _rateMode,
+                assetId: _assetId,
+                useDefaultMarket: _useDefaultMarket,
+                useOnBehalf: _useOnBehalf,
+                market: _market,
+                onBehalf: _onBehalf
             })
         );
     }
 
     function aaveV3WithdrawEncode(
-        uint16 assetId,
-        bool useDefaultMarket,
-        uint256 amount,
-        address to,
-        address market
+        uint16 _assetId,
+        bool _useDefaultMarket,
+        uint256 _amount,
+        address _to,
+        address _market
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             AaveV3Withdraw.Params({
-                assetId: assetId,
-                useDefaultMarket: useDefaultMarket,
-                amount: amount,
-                to: to,
-                market: market
+                assetId: _assetId,
+                useDefaultMarket: _useDefaultMarket,
+                amount: _amount,
+                to: _to,
+                market: _market
             })
         );
     }

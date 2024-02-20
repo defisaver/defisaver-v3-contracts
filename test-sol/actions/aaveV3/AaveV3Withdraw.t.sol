@@ -31,6 +31,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
+        forkMainnet("AaveV3Withdraw");
         SmartWallet.setUp();
         cut = new AaveV3Withdraw();
         pool = getLendingPool(DEFAULT_AAVE_MARKET);

@@ -27,6 +27,7 @@ contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, SmartWallet {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
+        forkMainnet("AaveV3DelegateCredit");
         SmartWallet.setUp();
         cut = new AaveV3DelegateCredit();
         pool = getLendingPool(DEFAULT_AAVE_MARKET);

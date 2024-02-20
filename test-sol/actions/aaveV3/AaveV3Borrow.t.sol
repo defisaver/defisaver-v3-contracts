@@ -32,6 +32,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
+        forkMainnet("AaveV3Borrow");
         SmartWallet.setUp();
         cut = new AaveV3Borrow();
         pool = getLendingPool(DEFAULT_AAVE_MARKET);

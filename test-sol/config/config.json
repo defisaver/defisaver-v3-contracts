@@ -1,3 +1,5 @@
 {
-    "isSmartWalletSafe" : true
+    "isSmartWalletSafe" : true,
+    "blockNumber" : 19268905,
+    "TestNameExampleIfThisTestNeedsSpecificBlockToRun": { "blockNumber": 19268904}
 }

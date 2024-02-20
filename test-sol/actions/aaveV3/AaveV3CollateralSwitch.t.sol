@@ -38,6 +38,7 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
+        forkMainnet("AaveV3CollateralSwitch");
         SmartWallet.setUp();
         cut = new AaveV3CollateralSwitch();
         pool = getLendingPool(DEFAULT_AAVE_MARKET);

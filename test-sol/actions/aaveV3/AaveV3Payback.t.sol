@@ -29,6 +29,7 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3CdpCreator {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
+        forkMainnet("AaveV3Payback");
         SmartWallet.setUp();
         AaveV3CdpCreator.setUp();
         cut = new AaveV3Payback();

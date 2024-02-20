@@ -29,6 +29,7 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
+        forkMainnet("AaveV3Supply");
         SmartWallet.setUp();
         cut = new AaveV3Supply();
         pool = getLendingPool(DEFAULT_AAVE_MARKET);
