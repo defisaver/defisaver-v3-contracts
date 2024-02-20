@@ -227,6 +227,7 @@ contract ActionsUtils {
                 amount: amount,
                 from: from,
                 assetId: assetId,
+                enableAsColl: true,
                 useDefaultMarket: useDefaultMarket,
                 useOnBehalf: useOnBehalfOf,
                 market: market,

@@ -223,6 +223,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
             amount: _amount,
             from: bob,
             assetId: wethData.id,
+            enableAsColl: true,
             useDefaultMarket: true,
             useOnBehalf: false,
             market: address(0),

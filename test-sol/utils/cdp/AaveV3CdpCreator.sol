@@ -35,6 +35,7 @@ contract AaveV3CdpCreator is AaveV3ExecuteActions, AaveV3Helper, CommonCdpCreato
             amount: _params.collAmount,
             from: bob,
             assetId: supplyData.id,
+            enableAsColl: true,
             useDefaultMarket: true,
             useOnBehalf: false,
             market: address(0),

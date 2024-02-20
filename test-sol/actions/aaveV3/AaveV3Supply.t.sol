@@ -125,6 +125,7 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
             amount: _amount,
             from: _from,
             assetId: _assetId,
+            enableAsColl: true,
             useDefaultMarket: true,
             useOnBehalf: false,
             market: DEFAULT_AAVE_MARKET,
@@ -143,6 +144,7 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
             amount: _amount,
             from: _from,
             assetId: _assetId,
+            enableAsColl: true,
             useDefaultMarket: false,
             useOnBehalf: false,
             market: _market,
@@ -161,6 +163,7 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
             amount: _amount,
             from: _from,
             assetId: _assetId,
+            enableAsColl: true,
             useDefaultMarket: true,
             useOnBehalf: true,
             market: DEFAULT_AAVE_MARKET,
@@ -180,6 +183,7 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
             amount: _amount,
             from: _from,
             assetId: _assetId,
+            enableAsColl: true,
             useDefaultMarket: false,
             useOnBehalf: true,
             market: _market,
@@ -198,6 +202,7 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
         assertEq(_params.amount, decodedParams.amount);
         assertEq(_params.from, decodedParams.from);
         assertEq(_params.assetId, decodedParams.assetId);
+        assertEq(_params.enableAsColl, decodedParams.enableAsColl);
         assertEq(_params.useDefaultMarket, decodedParams.useDefaultMarket);
         assertEq(_params.useOnBehalf, decodedParams.useOnBehalf);
         assertEq(_params.market, decodedParams.market);
@@ -219,6 +224,7 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
                 amount: _supplyAmount,
                 from: bob,
                 assetId: wethData.id,
+                enableAsColl: true,
                 useDefaultMarket: true,
                 useOnBehalf: false,
                 market: address(0),

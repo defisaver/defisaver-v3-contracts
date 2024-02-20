@@ -170,6 +170,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
             amount: _amount,
             from: bob,
             assetId: wethData.id,
+            enableAsColl: true,
             useDefaultMarket: true,
             useOnBehalf: false,
             market: address(0),

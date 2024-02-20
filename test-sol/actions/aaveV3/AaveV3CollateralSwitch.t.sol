@@ -202,6 +202,7 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
                 amount: amountInUSDPrice(a.asset, 10_000),
                 from: bob,
                 assetId: a.assetId,
+                enableAsColl: true,
                 useDefaultMarket: true,
                 useOnBehalf: false,
                 market: address(0),
