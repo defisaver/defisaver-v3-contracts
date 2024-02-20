@@ -6,8 +6,8 @@ import "ds-test/test.sol";
 import "forge-std/Vm.sol";
 import "forge-std/Test.sol";
 
-import "../../contracts/interfaces/IERC20.sol";
-import "../../contracts/triggers/ChainLinkPriceTrigger.sol";
+import { IERC20 } from "../../contracts/interfaces/IERC20.sol";
+import { TokenPriceHelper } from "../../contracts/utils/TokenPriceHelper.sol";
 
 contract Tokens is Test {
     using stdStorage for StdStorage;
@@ -21,7 +21,7 @@ contract Tokens is Test {
     }
 
     function amountInUSDPrice(address _tokenAddr, uint _amountUSD) internal returns (uint) {
-        ChainLinkPriceTrigger t = new ChainLinkPriceTrigger();
+        TokenPriceHelper t = new TokenPriceHelper();
         uint USD_DECIMALS = 8;
 
         uint decimals = IERC20(_tokenAddr).decimals();

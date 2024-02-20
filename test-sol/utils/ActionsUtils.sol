@@ -17,6 +17,8 @@ import { AaveV3SetEMode } from "../../contracts/actions/aaveV3/AaveV3SetEMode.so
 import { AaveV3DelegateCredit } from "../../contracts/actions/aaveV3/AaveV3DelegateCredit.sol";
 import { AaveV3CollateralSwitch } from "../../contracts/actions/aaveV3/AaveV3CollateralSwitch.sol";
 import { AaveV3ClaimRewards } from "../../contracts/actions/aaveV3/AaveV3ClaimRewards.sol";
+import { AaveV3Payback } from "../../contracts/actions/aaveV3/AaveV3Payback.sol";
+import { AaveV3ATokenPayback } from "../../contracts/actions/aaveV3/AaveV3ATokenPayback.sol";
 
 contract ActionsUtils {
 
@@ -359,4 +361,49 @@ contract ActionsUtils {
             })
         );
     }
+
+    function aaveV3PaybackEncode(
+        uint256 _amount,
+        address _from,
+        uint8 _rateMode,
+        uint16 _assetId,
+        bool _useDefaultMarket,
+        bool _useOnBehalf,
+        address _market,
+        address _onBehalf
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            AaveV3Payback.Params({
+                amount: _amount,
+                from: _from,
+                rateMode: _rateMode,
+                assetId: _assetId,
+                useDefaultMarket: _useDefaultMarket,
+                useOnBehalf: _useOnBehalf,
+                market: _market,
+                onBehalf: _onBehalf
+            })
+        );
+    }
+
+    function aaveV3ATokenPaybackEncode(
+        uint256 _amount,
+        address _from,
+        uint8 _rateMode,
+        uint16 _assetId,
+        bool _useDefaultMarket,
+        address _market
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            AaveV3ATokenPayback.Params({
+                amount: _amount,
+                from: _from,
+                rateMode: _rateMode,
+                assetId: _assetId,
+                useDefaultMarket: _useDefaultMarket,
+                market: _market
+            })
+        );
+    }
+    
 }
