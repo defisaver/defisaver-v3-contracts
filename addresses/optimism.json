@@ -347,6 +347,17 @@
       "history": []
     },
     {
+      "name": "ChangeProxyOwner",
+      "address": "0x62769258ea8b3a85cc6fb4332fc2760a122dbc9e",
+      "id": "0x67314f12",
+      "path": "contracts/actions/utils/ChangeProxyOwner.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "AaveV3Supply",
       "address": "0xD087509490a84C22f3B831Ef09F919061220C876",
       "id": "0xfc33bf00",
