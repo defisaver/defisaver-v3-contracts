@@ -666,6 +666,17 @@
       ]
     },
     {
+      "name": "ChangeProxyOwner",
+      "address": "0x29F66A5fcB601c806E7156f29FDEC771BdC9c08d",
+      "id": "0x67314f12",
+      "path": "contracts/actions/utils/ChangeProxyOwner.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "AaveV3RatioCheck",
       "address": "0x0Cf69Cc3A9f9d1848C78e745c504d5AA320a8153",
       "id": "0x71ef3d4e",
