@@ -12,7 +12,7 @@ import { TokenAddresses } from "../../TokenAddresses.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
- 
+
 contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
     
     /*//////////////////////////////////////////////////////////////////////////
@@ -29,6 +29,8 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
     IL2PoolV3 pool;
     IAaveProtocolDataProvider dataProvider;
 
+    TestPair[] testPairs;
+
     /*//////////////////////////////////////////////////////////////////////////
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
@@ -42,87 +44,126 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         cut = new AaveV3Supply();
         pool = getLendingPool(DEFAULT_AAVE_MARKET);
         dataProvider = getDataProvider(DEFAULT_AAVE_MARKET);
+
+        TestPair[] memory pairs = getTestPairsForProtocol("AaveV3");
+        for (uint256 i = 0; i < pairs.length; ++i) {
+            testPairs.push(pairs[i]);
+        }
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_should_supply_10_weth() public {
-        uint256 supplyAmount = 10 ether;
-        bool isL2Direct = false;
+    function test_should_supply() public {
+        for (uint256 i = 0; i < testPairs.length; ++i) {
+            uint256 snapshotId = vm.snapshot();
 
-        give(TokenAddresses.WETH_ADDR, sender, supplyAmount);
-        approveAsSender(sender, TokenAddresses.WETH_ADDR, walletAddr, supplyAmount);
+            TestPair memory testPair = testPairs[i];
 
-        _supply(supplyAmount, isL2Direct);
+            uint256 supplyAmount = amountInUSDPrice(testPair.supplyAsset, 100000);
+
+            give(testPair.supplyAsset, sender, supplyAmount);
+            approveAsSender(sender, testPair.supplyAsset, walletAddr, supplyAmount);
+
+            _supply(testPair.supplyAsset, supplyAmount, false);
+
+            vm.revertTo(snapshotId);
+        }
     }
     
-    function test_should_supply_maxUint256_weth() public {
-        uint256 senderRealBalance = 10 ether;
-        bool isL2Direct = false;
+    function test_should_supply_maxUint256() public {
+        for (uint256 i = 0; i < testPairs.length; ++i) {
+            uint256 snapshotId = vm.snapshot();
 
-        give(TokenAddresses.WETH_ADDR, sender, senderRealBalance);
-        approveAsSender(sender, TokenAddresses.WETH_ADDR, walletAddr, senderRealBalance);
+            TestPair memory testPair = testPairs[i];
 
-        _supply(type(uint256).max, isL2Direct);
+            uint256 senderRealBalance = amountInUSDPrice(testPair.supplyAsset, 100000);
+            give(testPair.supplyAsset, sender, senderRealBalance);
+            approveAsSender(sender, testPair.supplyAsset, walletAddr, senderRealBalance);
+
+            uint256 supplyAmount = type(uint256).max;
+
+            _supply(testPair.supplyAsset, supplyAmount, false);
+
+            vm.revertTo(snapshotId);
+        }
     }
 
-     function test_should_supply_10_weth_on_direct_action_l2() public {
-        uint256 supplyAmount = 10 ether;
-        bool isL2Direct = true;
+     function test_should_supply_on_direct_action_l2() public {
+        for (uint256 i = 0; i < testPairs.length; ++i) {
+            uint256 snapshotId = vm.snapshot();
 
-        give(TokenAddresses.WETH_ADDR, sender, supplyAmount);
-        approveAsSender(sender, TokenAddresses.WETH_ADDR, walletAddr, supplyAmount);
+            TestPair memory testPair = testPairs[i];
 
-        _supply(supplyAmount, isL2Direct);
+            uint256 supplyAmount = amountInUSDPrice(testPair.supplyAsset, 100000);
+
+            give(testPair.supplyAsset, sender, supplyAmount);
+            approveAsSender(sender, testPair.supplyAsset, walletAddr, supplyAmount);
+
+            _supply(testPair.supplyAsset, supplyAmount, true);
+
+            vm.revertTo(snapshotId);
+        }
     }
 
-    function test_should_supply_onBehalfOf_alice() public {
-        DataTypes.ReserveData memory wethData = pool.getReserveData(TokenAddresses.WETH_ADDR);
+    struct TestSupplyOnBehalfOfHelperData {
+        uint256 senderBalance;
+        uint256 walletATokenBalance;
+        uint256 onBehalfOfAddrATokenBalance;
+    }
 
-        uint256 supplyAmount = 10 ether;
+    function test_should_supply_onBehalfOf() public {
+        address onBehalfOf = alice;
+        for (uint256 i = 0; i < testPairs.length; ++i) {
+            DataTypes.ReserveData memory supplyTokenData = pool.getReserveData(testPairs[i].supplyAsset);
 
-        give(TokenAddresses.WETH_ADDR, sender, supplyAmount);
-        approveAsSender(sender, TokenAddresses.WETH_ADDR, walletAddr, supplyAmount);
+            uint256 supplyAmount = amountInUSDPrice(testPairs[i].supplyAsset, 100000);
 
-        uint256 senderBalanceBefore = balanceOf(TokenAddresses.WETH_ADDR, sender);
-        uint256 walletATokenBalanceBefore = balanceOf(wethData.aTokenAddress, walletAddr);
-        uint256 aliceATokenBalanceBefore = balanceOf(wethData.aTokenAddress, alice);
+            give(testPairs[i].supplyAsset, sender, supplyAmount);
+            approveAsSender(sender, testPairs[i].supplyAsset, walletAddr, supplyAmount);
 
-        bytes memory paramsCallData = aaveV3SupplyEncode(
-            supplyAmount,
-            sender,
-            wethData.id,
-            true,
-            true,
-            address(0),
-            alice
-        );
+            TestSupplyOnBehalfOfHelperData memory dataBefore = TestSupplyOnBehalfOfHelperData({
+                senderBalance: balanceOf(testPairs[i].supplyAsset, sender),
+                walletATokenBalance: balanceOf(supplyTokenData.aTokenAddress, walletAddr),
+                onBehalfOfAddrATokenBalance: balanceOf(supplyTokenData.aTokenAddress, onBehalfOf)
+            });
 
-        bytes memory _calldata = abi.encodeWithSelector(
-            AaveV3Supply.executeAction.selector,
-            paramsCallData,
-            subData,
-            paramMapping,
-            returnValues
-        );
+            bytes memory paramsCallData = aaveV3SupplyEncode(
+                supplyAmount,
+                sender,
+                supplyTokenData.id,
+                true,
+                true,
+                address(0),
+                onBehalfOf
+            );
 
-        wallet.execute(address(cut), _calldata, 0);
+            bytes memory _calldata = abi.encodeWithSelector(
+                AaveV3Supply.executeAction.selector,
+                paramsCallData,
+                subData,
+                paramMapping,
+                returnValues
+            );
 
-        uint256 senderBalanceAfter = balanceOf(TokenAddresses.WETH_ADDR, sender);
-        uint256 walletATokenBalanceAfter = balanceOf(wethData.aTokenAddress, walletAddr);
-        uint256 aliceATokenBalanceAfter = balanceOf(wethData.aTokenAddress, alice);
-        
-        assertEq(senderBalanceBefore - supplyAmount, senderBalanceAfter);
-        assertEq(walletATokenBalanceBefore, 0);
-        assertEq(walletATokenBalanceAfter, 0);
-        assertGe(aliceATokenBalanceAfter, aliceATokenBalanceBefore + supplyAmount);
+            wallet.execute(address(cut), _calldata, 0);
 
-        (uint256 walletCurrentATokenBalance,,,,,,,,) = dataProvider.getUserReserveData(TokenAddresses.WETH_ADDR, walletAddr);
-        assertEq(walletCurrentATokenBalance, 0);
+            TestSupplyOnBehalfOfHelperData memory dataAfter = TestSupplyOnBehalfOfHelperData({
+                senderBalance: balanceOf(testPairs[i].supplyAsset, sender),
+                walletATokenBalance: balanceOf(supplyTokenData.aTokenAddress, walletAddr),
+                onBehalfOfAddrATokenBalance: balanceOf(supplyTokenData.aTokenAddress, onBehalfOf)
+            });
 
-        (uint256 aliceCurrentATokenBalance,,,,,,,,) = dataProvider.getUserReserveData(TokenAddresses.WETH_ADDR, alice);
-        assertGe(aliceCurrentATokenBalance, supplyAmount);
+            assertEq(dataBefore.senderBalance - supplyAmount, dataAfter.senderBalance);
+            assertEq(dataBefore.walletATokenBalance, 0);
+            assertEq(dataAfter.walletATokenBalance, 0);
+            assertGe(dataAfter.onBehalfOfAddrATokenBalance, dataBefore.onBehalfOfAddrATokenBalance + supplyAmount);
+            
+            (uint256 walletCurrentATokenBalance,,,,,,,,) = dataProvider.getUserReserveData(testPairs[i].supplyAsset, walletAddr);
+            assertEq(walletCurrentATokenBalance, 0);
+            (uint256 onBehalfOfAddrCurrentATokenBalance,,,,,,,,) = dataProvider.getUserReserveData(testPairs[i].supplyAsset, onBehalfOf);
+            assertGe(onBehalfOfAddrCurrentATokenBalance, supplyAmount);    
+        }
     }
 
     function testFuzz_encode_decode_inputs_no_market_no_onbehalf(
@@ -218,21 +259,21 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         assertEq(_params.onBehalf, decodedParams.onBehalf);
     }
 
-    function _supply(uint256 _supplyAmount, bool _isL2Direct) public {
-        DataTypes.ReserveData memory wethData = pool.getReserveData(TokenAddresses.WETH_ADDR);
+    function _supply(address _supplyAsset, uint256 _supplyAmount, bool _isL2Direct) public {
+        DataTypes.ReserveData memory supplyTokenData = pool.getReserveData(_supplyAsset);
 
         uint256 realAmountToSupply = _supplyAmount == type(uint256).max ? 
-            balanceOf(TokenAddresses.WETH_ADDR, sender) : 
+            balanceOf(_supplyAsset, sender) : 
             _supplyAmount;
 
-        uint256 senderBalanceBefore = balanceOf(TokenAddresses.WETH_ADDR, sender);
-        uint256 walletATokenBalanceBefore = balanceOf(wethData.aTokenAddress, walletAddr);
+        uint256 senderBalanceBefore = balanceOf(_supplyAsset, sender);
+        uint256 walletATokenBalanceBefore = balanceOf(supplyTokenData.aTokenAddress, walletAddr);
         
         if (_isL2Direct) {
             AaveV3Supply.Params memory params = AaveV3Supply.Params({
                 amount: _supplyAmount,
                 from: sender,
-                assetId: wethData.id,
+                assetId: supplyTokenData.id,
                 enableAsColl: true,
                 useDefaultMarket: true,
                 useOnBehalf: false,
@@ -246,7 +287,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
             bytes memory paramsCallData = aaveV3SupplyEncode(
                 _supplyAmount,
                 sender,
-                wethData.id,
+                supplyTokenData.id,
                 true,
                 false,
                 address(0),
@@ -264,14 +305,14 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
             wallet.execute(address(cut), _calldata, 0);
         }
 
-        uint256 senderBalanceAfter = balanceOf(TokenAddresses.WETH_ADDR, sender);
-        uint256 walletATokenBalanceAfter = balanceOf(wethData.aTokenAddress, walletAddr);
+        uint256 senderBalanceAfter = balanceOf(_supplyAsset, sender);
+        uint256 walletATokenBalanceAfter = balanceOf(supplyTokenData.aTokenAddress, walletAddr);
         
         assertEq(senderBalanceBefore - realAmountToSupply, senderBalanceAfter);
         assertGe(walletATokenBalanceAfter, walletATokenBalanceBefore + realAmountToSupply);
 
         (uint256 currentATokenBalance,,,,,,,,bool usageAsCollateral) = 
-            dataProvider.getUserReserveData(TokenAddresses.WETH_ADDR, walletAddr);
+            dataProvider.getUserReserveData(_supplyAsset, walletAddr);
         assertGe(currentATokenBalance, realAmountToSupply);
         assertTrue(usageAsCollateral);
     }

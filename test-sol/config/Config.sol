@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
+import { TokenNamesMapping } from "../utils/TokenNamesMapping.sol";
+
 import { Test } from "forge-std/Test.sol";
 import { stdJson } from "forge-std/StdJson.sol";
 import { console } from "forge-std/console.sol";
 
-contract Config is Test {
+contract Config is TokenNamesMapping, Test {
 
     string internal constant IS_SMART_WALLET_SAFE = "$.isSmartWalletSafe";
     string internal constant BLOCK_NUMBER = "$.blockNumber";
@@ -15,6 +17,23 @@ contract Config is Test {
     struct ConfigData {
         string json;
     }
+
+    struct TestPair {
+        address supplyAsset;
+        address borrowAsset;
+    }
+
+    /// @dev Fields have to be placed in alphabetical order for foundry parser to work 
+    struct TestPairConfig {
+        string borrowAsset;
+        string supplyAsset;
+    }
+    struct ProtocolTestPairsConfig {
+        TestPairConfig[] fullPairs;
+        TestPairConfig[] lightPairs;
+        bool lightTesting;
+    }
+
     ConfigData internal configData;
 
     function initConfig() internal {
@@ -40,5 +59,26 @@ contract Config is Test {
             return configData.json.readUint(testBlockNumberKey);
         }
         return getBlockNumber();
+    }
+
+    function getTestPairsForProtocol(string memory _protocol) public returns (TestPair[] memory) {
+        string memory testPairsKey = string(abi.encodePacked(".", _protocol));
+        bytes memory testPairsEncoded = configData.json.parseRaw(testPairsKey);
+        ProtocolTestPairsConfig memory t = abi.decode(testPairsEncoded, (ProtocolTestPairsConfig));
+        if (t.lightTesting) {
+            return _convertTestPairConfigToTestPair(t.lightPairs);    
+        }
+        return _convertTestPairConfigToTestPair(t.fullPairs);
+    }
+
+    function _convertTestPairConfigToTestPair(TestPairConfig[] memory _testPairConfigs) internal returns (TestPair[] memory) {
+        TestPair[] memory testPairs = new TestPair[](_testPairConfigs.length);
+        for (uint256 i = 0; i < _testPairConfigs.length; ++i) {
+            testPairs[i] = TestPair({
+                supplyAsset: getTokenAddress( _testPairConfigs[i].supplyAsset),
+                borrowAsset: getTokenAddress(_testPairConfigs[i].borrowAsset)
+            });
+        }
+        return testPairs;
     }
 }

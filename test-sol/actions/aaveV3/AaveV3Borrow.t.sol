@@ -10,7 +10,6 @@ import { IL2PoolV3 } from "../../../contracts/interfaces/aaveV3/IL2PoolV3.sol";
 import { IAaveProtocolDataProvider } from "../../../contracts/interfaces/aaveV3/IAaveProtocolDataProvider.sol";
 import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
 
-import { TokenAddresses } from "../../TokenAddresses.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
 
@@ -32,6 +31,8 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
     IAaveProtocolDataProvider dataProvider;
     address aaveV3SupplyContractAddr;
 
+    TestPair[] testPairs;
+
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
@@ -46,37 +47,59 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
         pool = getLendingPool(DEFAULT_AAVE_MARKET);
         dataProvider = getDataProvider(DEFAULT_AAVE_MARKET);
         aaveV3SupplyContractAddr = address(new AaveV3Supply());
+
+        TestPair[] memory pairs = getTestPairsForProtocol("AaveV3");
+        for (uint256 i = 0; i < pairs.length; ++i) {
+            testPairs.push(pairs[i]);
+        }
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_should_borrow_dai_on_weth_supplied() public {
-        uint256 supplyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
-        _supplyWeth(supplyAmount);
+    function test_should_borrow() public {
+        for (uint256 i = 0; i < testPairs.length; ++i) {
+            uint256 snapshotId = vm.snapshot();
 
-        uint256 borrowAmount = amountInUSDPrice(TokenAddresses.DAI_ADDR, 40_000);
-        bool isL2Direct = false;
-        _borrowDai(borrowAmount, isL2Direct);
+            TestPair memory pair = testPairs[i];
+            uint256 supplyAmount = amountInUSDPrice(pair.supplyAsset, 100_000);
+            _supply(pair.supplyAsset, supplyAmount);
+
+            uint256 borrowAmount = amountInUSDPrice(pair.borrowAsset, 40_000);
+            _borrow(borrowAmount, pair.borrowAsset, false);
+
+            vm.revertTo(snapshotId);
+        }
     }
 
-    function testFail_should_borrow_maxUint256_dai() public {
-        uint256 supplyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
-        _supplyWeth(supplyAmount);
+    function testFail_should_borrow_maxUint256() public {
+        for (uint256 i = 0; i < testPairs.length; ++i) {
+            uint256 snapshotId = vm.snapshot();
 
-        uint256 borrowAmount = type(uint256).max;
-        bool isL2Direct = false;
+            TestPair memory pair = testPairs[i];
+            uint256 supplyAmount = amountInUSDPrice(pair.supplyAsset, 100_000);
+            _supply(pair.supplyAsset, supplyAmount);
 
-        _borrowDai(borrowAmount, isL2Direct);
+            uint256 borrowAmount = type(uint256).max;
+            _borrow(borrowAmount, pair.borrowAsset, false);
+
+            vm.revertTo(snapshotId);
+        }
     }
 
-    function test_should_borrow_dai_on_weth_supplied_l2_direct() public {
-        uint256 supplyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
-        _supplyWeth(supplyAmount);
+    function test_should_borrow_l2_direct() public {
+        for (uint256 i = 0; i < testPairs.length; ++i) {
+            uint256 snapshotId = vm.snapshot();
 
-        uint256 borrowAmount = amountInUSDPrice(TokenAddresses.DAI_ADDR, 40_000);
-        bool isL2Direct = true;
-        _borrowDai(borrowAmount, isL2Direct);
+            TestPair memory pair = testPairs[i];
+            uint256 supplyAmount = amountInUSDPrice(pair.supplyAsset, 100_000);
+            _supply(pair.supplyAsset, supplyAmount);
+
+            uint256 borrowAmount = amountInUSDPrice(pair.borrowAsset, 40_000);
+            _borrow(borrowAmount, pair.borrowAsset, true);
+
+            vm.revertTo(snapshotId);
+        }
     }
 
     function testFuzz_encode_decode_inputs_no_market_no_onbehalf(
@@ -176,10 +199,10 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
         assertEq(_params.onBehalf, decodedParams.onBehalf);
     }
 
-    function _borrowDai(uint256 _borrowAmount, bool _isL2Direct) internal {
-        DataTypes.ReserveData memory daiData = pool.getReserveData(TokenAddresses.DAI_ADDR);        
+    function _borrow(uint256 _borrowAmount, address _borrowAsset, bool _isL2Direct) internal {
+        DataTypes.ReserveData memory borrowAssetData = pool.getReserveData(_borrowAsset);        
 
-        uint256 senderBalanceBefore = balanceOf(TokenAddresses.DAI_ADDR, sender);
+        uint256 senderBalanceBefore = balanceOf(_borrowAsset, sender);
         uint256 walletSafetyRatioBefore = getSafetyRatio(DEFAULT_AAVE_MARKET, walletAddr);
 
         if (_isL2Direct) {
@@ -187,7 +210,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
                 amount: _borrowAmount,
                 to: sender,
                 rateMode: uint8(DataTypes.InterestRateMode.VARIABLE),
-                assetId: daiData.id,
+                assetId: borrowAssetData.id,
                 useDefaultMarket: true,
                 useOnBehalf: false,
                 market: address(0),
@@ -200,7 +223,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
                 _borrowAmount,
                 sender,
                 uint8(DataTypes.InterestRateMode.VARIABLE),
-                daiData.id,
+                borrowAssetData.id,
                 true,
                 false,
                 address(0),
@@ -218,7 +241,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
             wallet.execute(address(cut), _calldata, 0);
         }
         
-        uint256 senderBalanceAfter = balanceOf(TokenAddresses.DAI_ADDR, sender);
+        uint256 senderBalanceAfter = balanceOf(_borrowAsset, sender);
         uint256 walletSafetyRatioAfter = getSafetyRatio(DEFAULT_AAVE_MARKET, walletAddr);
 
         assertEq(senderBalanceAfter, senderBalanceBefore + _borrowAmount);
@@ -226,12 +249,12 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
         assertGe(walletSafetyRatioAfter, 0);
     }
 
-    function _supplyWeth(uint256 _amount) internal {
-        DataTypes.ReserveData memory wethData = pool.getReserveData(TokenAddresses.WETH_ADDR);
+    function _supply(address _asset, uint256 _amount) internal {
+        DataTypes.ReserveData memory assetData = pool.getReserveData(_asset);
         AaveV3Supply.Params memory supplyParams = AaveV3Supply.Params({
             amount: _amount,
-            from: bob,
-            assetId: wethData.id,
+            from: sender,
+            assetId: assetData.id,
             enableAsColl: true,
             useDefaultMarket: true,
             useOnBehalf: false,
@@ -239,6 +262,6 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
             onBehalf: address(0)
         });
 
-        executeAaveV3Supply(supplyParams, TokenAddresses.WETH_ADDR, wallet, false, aaveV3SupplyContractAddr);
+        executeAaveV3Supply(supplyParams, _asset, wallet, false, aaveV3SupplyContractAddr);
     }
 }
