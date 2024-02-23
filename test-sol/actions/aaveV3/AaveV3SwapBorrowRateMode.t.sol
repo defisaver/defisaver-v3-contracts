@@ -6,12 +6,12 @@ import { AaveV3SwapBorrowRateMode } from "../../../contracts/actions/aaveV3/Aave
 
 import { TokenAddresses } from "../../TokenAddresses.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
-import { AaveV3CdpCreator, DataTypes } from "../../utils/cdp/AaveV3CdpCreator.sol";
+import { AaveV3PositionCreator, DataTypes } from "../../utils/positions/AaveV3PositionCreator.sol";
 import { console } from "forge-std/console.sol";
  
-/// @dev Borrowing with stable rate is currenlty paused on Aave V3
+/// @dev Borrowing with stable rate is currently paused on Aave V3
 /// @dev In this test we just skip main logic for action execution and test encoding and decoding
-contract TestAaveV3SwapBorrowRateMode is AaveV3CdpCreator {
+contract TestAaveV3SwapBorrowRateMode is AaveV3PositionCreator {
     
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -19,12 +19,23 @@ contract TestAaveV3SwapBorrowRateMode is AaveV3CdpCreator {
     AaveV3SwapBorrowRateMode cut;
 
     /*//////////////////////////////////////////////////////////////////////////
+                                    VARIABLES
+    //////////////////////////////////////////////////////////////////////////*/
+    SmartWallet wallet;
+    address walletAddr;
+    address sender;
+
+    /*//////////////////////////////////////////////////////////////////////////
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("AaveV3SwapBorrowRateMode");
-        SmartWallet.setUp();
-        AaveV3CdpCreator.setUp();
+        
+        wallet = new SmartWallet(bob);
+        sender = wallet.owner();
+        walletAddr = wallet.walletAddr();
+        
+        AaveV3PositionCreator.setUp();
         cut = new AaveV3SwapBorrowRateMode();
     }
 
@@ -32,13 +43,14 @@ contract TestAaveV3SwapBorrowRateMode is AaveV3CdpCreator {
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_supply_weth_with_variable_rate_then_swap_to_stable_rate() public {
-        createAaveV3Cdp(
-            CdpParams({
+        createAaveV3Position(
+            PositionParams({
                 collAddr: TokenAddresses.WETH_ADDR,
                 collAmount: amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000),
                 debtAddr: TokenAddresses.DAI_ADDR,
                 debtAmount: amountInUSDPrice(TokenAddresses.DAI_ADDR, 40_000)
-            })
+            }),
+            wallet
         );
         
         bool isL2Direct = false;
@@ -94,8 +106,8 @@ contract TestAaveV3SwapBorrowRateMode is AaveV3CdpCreator {
             return;
         }
 
-        uint256 variableDaiTokenBalanceBefore = balanceOf(daiData.variableDebtTokenAddress, walletAddr);
-        uint256 stableDaiTokenBalanceBefore = balanceOf(daiData.stableDebtTokenAddress, walletAddr);
+        uint256 variableDaiTokenBalanceBefore = balanceOf(daiData.variableDebtTokenAddress, wallet.walletAddr());
+        uint256 stableDaiTokenBalanceBefore = balanceOf(daiData.stableDebtTokenAddress, wallet.walletAddr());
         
         if (_isL2Direct) {
             AaveV3SwapBorrowRateMode.Params memory params = AaveV3SwapBorrowRateMode.Params({
@@ -104,7 +116,7 @@ contract TestAaveV3SwapBorrowRateMode is AaveV3CdpCreator {
                 useDefaultMarket: true,
                 market: address(0)
             });
-            executeByWallet(address(cut), cut.encodeInputs(params), 0);
+            wallet.execute(address(cut), cut.encodeInputs(params), 0);
         }
         else {
             bytes memory paramsCalldata = aaveV3SwapBorrowRateModeEncode(
@@ -122,11 +134,11 @@ contract TestAaveV3SwapBorrowRateMode is AaveV3CdpCreator {
                 returnValues
             );
 
-            executeByWallet(address(cut), _calldata, 0);
+            wallet.execute(address(cut), _calldata, 0);
         }
 
-        uint256 variableDaiTokenBalanceAfter = balanceOf(daiData.variableDebtTokenAddress, walletAddr);
-        uint256 stableDaiTokenBalanceAfter = balanceOf(daiData.stableDebtTokenAddress, walletAddr);
+        uint256 variableDaiTokenBalanceAfter = balanceOf(daiData.variableDebtTokenAddress, wallet.walletAddr());
+        uint256 stableDaiTokenBalanceAfter = balanceOf(daiData.stableDebtTokenAddress, wallet.walletAddr());
 
         console.log("variableDaiTokenBalanceBefore", variableDaiTokenBalanceBefore);
         console.log("variableDaiTokenBalanceAfter", variableDaiTokenBalanceAfter);

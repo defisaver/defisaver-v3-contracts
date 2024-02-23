@@ -8,10 +8,10 @@ import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
 
 import { TokenAddresses } from "../../TokenAddresses.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
-import { AaveV3CdpCreator } from "../../utils/cdp/AaveV3CdpCreator.sol";
+import { AaveV3PositionCreator } from "../../utils/positions/AaveV3PositionCreator.sol";
 
 
-contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3CdpCreator {
+contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3PositionCreator {
     
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
@@ -21,7 +21,11 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3CdpCreator {
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
-    CdpParams cdpParams;
+    SmartWallet wallet;
+    address walletAddr;
+    address sender;
+
+    PositionParams positionParams;
     uint16 debtAssetId;
     address debtVariableTokenAddr;
 
@@ -30,18 +34,22 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3CdpCreator {
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("AaveV3Payback");
-        SmartWallet.setUp();
-        AaveV3CdpCreator.setUp();
+
+        wallet = new SmartWallet(bob);
+        sender = wallet.owner();
+        walletAddr = wallet.walletAddr();
+
+        AaveV3PositionCreator.setUp();
         cut = new AaveV3Payback();
 
-        cdpParams = CdpParams({
+        positionParams = PositionParams({
             collAddr: TokenAddresses.WETH_ADDR,
             collAmount: amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000),
             debtAddr: TokenAddresses.DAI_ADDR,
             debtAmount: amountInUSDPrice(TokenAddresses.DAI_ADDR, 40_000)
         });
 
-        DataTypes.ReserveData memory reserveData = pool.getReserveData(cdpParams.debtAddr);
+        DataTypes.ReserveData memory reserveData = pool.getReserveData(positionParams.debtAddr);
         debtAssetId = reserveData.id;
         debtVariableTokenAddr = reserveData.variableDebtTokenAddress;
     }
@@ -50,7 +58,7 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3CdpCreator {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_payback_part_of_debt() public {
-        createAaveV3Cdp(cdpParams);
+        createAaveV3Position(positionParams, wallet);
 
         uint256 paybackAmount = amountInUSDPrice(TokenAddresses.DAI_ADDR, 10_000);
         bool isL2Direct = false;
@@ -59,7 +67,7 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3CdpCreator {
     }
 
     function test_should_payback_maxUint256_amount_debt() public {
-        createAaveV3Cdp(cdpParams);
+        createAaveV3Position(positionParams, wallet);
 
         uint256 paybackAmount = type(uint256).max;
         bool isL2Direct = false;
@@ -68,7 +76,7 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3CdpCreator {
     }
 
     function test_should_payback_part_of_debt_l2_direct() public {
-        createAaveV3Cdp(cdpParams);
+        createAaveV3Position(positionParams, wallet);
 
         uint256 paybackAmount = amountInUSDPrice(TokenAddresses.DAI_ADDR, 10_000);
         bool isL2Direct = true;
@@ -178,19 +186,19 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3CdpCreator {
         uint256 walletVariableDebtBefore = balanceOf(debtVariableTokenAddr, walletAddr);
 
         if (_paybackAmount == type(uint256).max) {
-            giveBob(cdpParams.debtAddr, walletVariableDebtBefore * 2);
-            approveAsBob(cdpParams.debtAddr, walletAddr, walletVariableDebtBefore * 2);
+            give(positionParams.debtAddr, sender, walletVariableDebtBefore * 2);
+            approveAsSender(sender, positionParams.debtAddr, walletAddr, walletVariableDebtBefore * 2);
         } else {
-            giveBob(cdpParams.debtAddr, _paybackAmount);
-            approveAsBob(cdpParams.debtAddr, walletAddr, _paybackAmount);
+            give(positionParams.debtAddr, sender, _paybackAmount);
+            approveAsSender(sender, positionParams.debtAddr, walletAddr, _paybackAmount);
         }
 
-        uint256 bobBalanceBefore = bobBalance(cdpParams.debtAddr);
+        uint256 senderBalanceBefore = balanceOf(positionParams.debtAddr, sender);
 
         if (_isL2Direct) {
             AaveV3Payback.Params memory params = AaveV3Payback.Params({
                 amount: _paybackAmount,
-                from: bob,
+                from: sender,
                 rateMode: uint8(DataTypes.InterestRateMode.VARIABLE),
                 assetId: debtAssetId,
                 useDefaultMarket: true,
@@ -198,12 +206,12 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3CdpCreator {
                 market: address(0),
                 onBehalf: address(0)
             });
-            executeByWallet(address(cut), cut.encodeInputs(params), 0);
+            wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } 
         else {
             bytes memory paramsCalldata = aaveV3PaybackEncode(
                 _paybackAmount,
-                bob,
+                sender,
                 uint8(DataTypes.InterestRateMode.VARIABLE),
                 debtAssetId,
                 true,
@@ -219,22 +227,22 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3CdpCreator {
                 paramMapping,
                 returnValues
             );
-            executeByWallet(address(cut), _calldata, 0);
+            wallet.execute(address(cut), _calldata, 0);
         }
 
-        uint256 bobBalanceAfter = bobBalance(cdpParams.debtAddr);
+        uint256 senderBalanceAfter = balanceOf(positionParams.debtAddr, sender);
         uint256 walletSafetyRatioAfter = getSafetyRatio(DEFAULT_AAVE_MARKET, walletAddr);
         uint256 walletVariableDebtAfter = balanceOf(debtVariableTokenAddr, walletAddr);
 
-        uint256 maxAtokenIncreaseTollerance = 10 wei;
+        uint256 maxATokenIncreaseTolerance = 10 wei;
 
         if (_paybackAmount == type(uint256).max) {
-            assertApproxEqAbs(bobBalanceAfter, bobBalanceBefore - walletVariableDebtBefore, maxAtokenIncreaseTollerance);
+            assertApproxEqAbs(senderBalanceAfter, senderBalanceBefore - walletVariableDebtBefore, maxATokenIncreaseTolerance);
             assertEq(walletVariableDebtAfter, 0);
             assertEq(walletSafetyRatioAfter, 0);
         } else {
-            assertEq(bobBalanceAfter, bobBalanceBefore - _paybackAmount);
-            assertApproxEqAbs(walletVariableDebtAfter, walletVariableDebtBefore - _paybackAmount, maxAtokenIncreaseTollerance);
+            assertEq(senderBalanceAfter, senderBalanceBefore - _paybackAmount);
+            assertApproxEqAbs(walletVariableDebtAfter, walletVariableDebtBefore - _paybackAmount, maxATokenIncreaseTolerance);
             assertGt(walletSafetyRatioAfter, walletSafetyRatioBefore);
         }
     }

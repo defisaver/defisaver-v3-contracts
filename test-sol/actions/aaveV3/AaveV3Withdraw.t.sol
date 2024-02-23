@@ -23,6 +23,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
+    SmartWallet wallet;
     IL2PoolV3 pool;
     IAaveProtocolDataProvider dataProvider;
     address aaveV3SupplyContractAddr;
@@ -32,7 +33,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("AaveV3Withdraw");
-        SmartWallet.setUp();
+        wallet = new SmartWallet(bob);
         cut = new AaveV3Withdraw();
         pool = getLendingPool(DEFAULT_AAVE_MARKET);
         dataProvider = getDataProvider(DEFAULT_AAVE_MARKET);
@@ -43,8 +44,8 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_withdraw_part_of_supplied_weth() public {
-        uint256 suppyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
-        _supplyWeth(suppyAmount);
+        uint256 supplyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
+        _supplyWeth(supplyAmount);
 
         uint256 withdrawAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 50_000);
         bool isL2Direct = false;
@@ -52,8 +53,8 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
     }
 
     function test_should_withdraw_all_supplied_weth() public {
-        uint256 suppyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
-        _supplyWeth(suppyAmount);
+        uint256 supplyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
+        _supplyWeth(supplyAmount);
 
         uint256 withdrawAmount = type(uint256).max;
         bool isL2Direct = false;
@@ -61,8 +62,8 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
     }
 
     function test_should_withdraw_part_of_supplied_weth_l2_direct() public {
-         uint256 suppyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
-        _supplyWeth(suppyAmount);
+        uint256 supplyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
+        _supplyWeth(supplyAmount);
 
         uint256 withdrawAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 50_000);
         bool isL2Direct = true;
@@ -117,25 +118,25 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
     function _withdraw(uint256 _amount, bool _isL2Direct) internal {
         DataTypes.ReserveData memory wethData = pool.getReserveData(TokenAddresses.WETH_ADDR);
 
-        uint256 bobBalanceBefore = bobBalance(TokenAddresses.WETH_ADDR);
-        (uint256 walletATokenBalanceBefore,,,,,,,,) = dataProvider.getUserReserveData(TokenAddresses.WETH_ADDR, walletAddr);
+        uint256 senderBalanceBefore = balanceOf(TokenAddresses.WETH_ADDR, wallet.owner());
+        (uint256 walletATokenBalanceBefore,,,,,,,,) = dataProvider.getUserReserveData(TokenAddresses.WETH_ADDR, wallet.walletAddr());
 
         if (_isL2Direct) {
             AaveV3Withdraw.Params memory params = AaveV3Withdraw.Params({
                 assetId: wethData.id,
                 useDefaultMarket: true,
                 amount: _amount,
-                to: bob,
+                to: wallet.owner(),
                 market: address(0)
             });
-            executeByWallet(address(cut), cut.encodeInputs(params), 0);
+            wallet.execute(address(cut), cut.encodeInputs(params), 0);
         }
         else {
             bytes memory paramsCalldata = aaveV3WithdrawEncode(
                 wethData.id,
                 true,
                 _amount,
-                bob,
+                wallet.owner(),
                 address(0)
             );
 
@@ -147,21 +148,21 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
                 returnValues
             );
 
-            executeByWallet(address(cut), _calldata, 0);
+            wallet.execute(address(cut), _calldata, 0);
         }
 
-        uint256 bobBalanceAfter = bobBalance(TokenAddresses.WETH_ADDR);
-        (uint256 walletATokenBalanceAfter,,,,,,,,) = dataProvider.getUserReserveData(TokenAddresses.WETH_ADDR, walletAddr);
+        uint256 senderBalanceAfter = balanceOf(TokenAddresses.WETH_ADDR, wallet.owner());
+        (uint256 walletATokenBalanceAfter,,,,,,,,) = dataProvider.getUserReserveData(TokenAddresses.WETH_ADDR, wallet.walletAddr());
 
-        uint256 maxAtokenIncreaseTollerance = 10 wei;
+        uint256 maxATokenIncreaseTolerance = 10 wei;
 
         if (_amount == type(uint256).max) {
-            assertApproxEqAbs(bobBalanceAfter, bobBalanceBefore + walletATokenBalanceBefore, maxAtokenIncreaseTollerance);
+            assertApproxEqAbs(senderBalanceAfter, senderBalanceBefore + walletATokenBalanceBefore, maxATokenIncreaseTolerance);
             assertEq(walletATokenBalanceAfter, 0);
         } else {
-            assertEq(bobBalanceAfter, bobBalanceBefore + _amount);
+            assertEq(senderBalanceAfter, senderBalanceBefore + _amount);
             assertLt(walletATokenBalanceAfter, walletATokenBalanceBefore);
-            assertApproxEqAbs(walletATokenBalanceAfter, walletATokenBalanceBefore - _amount, maxAtokenIncreaseTollerance);    
+            assertApproxEqAbs(walletATokenBalanceAfter, walletATokenBalanceBefore - _amount, maxATokenIncreaseTolerance);    
         }
     }
 
@@ -169,7 +170,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
         DataTypes.ReserveData memory wethData = pool.getReserveData(TokenAddresses.WETH_ADDR);
         AaveV3Supply.Params memory supplyParams = AaveV3Supply.Params({
             amount: _amount,
-            from: bob,
+            from: wallet.owner(),
             assetId: wethData.id,
             enableAsColl: true,
             useDefaultMarket: true,
@@ -178,6 +179,6 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
             onBehalf: address(0)
         });
 
-        executeAaveV3Supply(supplyParams, TokenAddresses.WETH_ADDR, false, aaveV3SupplyContractAddr);
+        executeAaveV3Supply(supplyParams, TokenAddresses.WETH_ADDR, wallet, false, aaveV3SupplyContractAddr);
     }
 }

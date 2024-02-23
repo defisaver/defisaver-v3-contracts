@@ -6,11 +6,12 @@ import { AaveV3ClaimRewards } from "../../../contracts/actions/aaveV3/AaveV3Clai
 import { MockRewardsController } from "./mocks/MockRewardsController.sol";
 import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
 
+import { BaseTest } from "../../utils/BaseTest.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
  
 /// @notice Testing interaction with mock contract as claiming rewards is deprecated
-contract TestAaveV3ClaimRewards is AaveV3Helper, SmartWallet, ActionsUtils {
+contract TestAaveV3ClaimRewards is AaveV3Helper, ActionsUtils, BaseTest {
     
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -18,11 +19,22 @@ contract TestAaveV3ClaimRewards is AaveV3Helper, SmartWallet, ActionsUtils {
     AaveV3ClaimRewards cut;
 
     /*//////////////////////////////////////////////////////////////////////////
+                                    VARIABLES
+    //////////////////////////////////////////////////////////////////////////*/
+    SmartWallet wallet;
+    address walletAddr;
+    address sender;
+
+    /*//////////////////////////////////////////////////////////////////////////
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("AaveV3ClaimRewards");
-        SmartWallet.setUp();
+
+        wallet = new SmartWallet(bob);
+        sender = wallet.owner();
+        walletAddr = wallet.walletAddr();
+
         cut = new AaveV3ClaimRewards();
         vm.etch(AAVE_REWARDS_CONTROLLER_ADDRESS, address(new MockRewardsController()).code);
     }
@@ -79,18 +91,18 @@ contract TestAaveV3ClaimRewards is AaveV3Helper, SmartWallet, ActionsUtils {
         if (_isL2Direct) {
             AaveV3ClaimRewards.Params memory params = AaveV3ClaimRewards.Params({
                 amount: 100,
-                to: bob,
+                to: sender,
                 reward: address(0),
                 assets: new address[](0),
                 assetsLength: 0
             });
             
-            executeByWallet(address(cut), cut.encodeInputs(params), 0);
+            wallet.execute(address(cut), cut.encodeInputs(params), 0);
 
         } else {
             bytes memory paramsCallData = aaveV3ClaimRewardsEncode(
                 100,
-                bob,
+                sender,
                 address(0),
                 new address[](0)
             );
@@ -103,7 +115,7 @@ contract TestAaveV3ClaimRewards is AaveV3Helper, SmartWallet, ActionsUtils {
                 returnValues
             );
 
-            executeByWallet(address(cut), _calldata, 0);
+            wallet.execute(address(cut), _calldata, 0);
         }
     }
 }

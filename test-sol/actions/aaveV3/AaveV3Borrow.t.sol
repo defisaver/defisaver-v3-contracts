@@ -24,6 +24,10 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
+    SmartWallet wallet;
+    address walletAddr;
+    address sender;
+
     IL2PoolV3 pool;
     IAaveProtocolDataProvider dataProvider;
     address aaveV3SupplyContractAddr;
@@ -33,7 +37,11 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("AaveV3Borrow");
-        SmartWallet.setUp();
+        
+        wallet = new SmartWallet(bob);
+        sender = wallet.owner();
+        walletAddr = wallet.walletAddr();
+
         cut = new AaveV3Borrow();
         pool = getLendingPool(DEFAULT_AAVE_MARKET);
         dataProvider = getDataProvider(DEFAULT_AAVE_MARKET);
@@ -44,8 +52,8 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_borrow_dai_on_weth_supplied() public {
-        uint256 suppyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
-        _supplyWeth(suppyAmount);
+        uint256 supplyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
+        _supplyWeth(supplyAmount);
 
         uint256 borrowAmount = amountInUSDPrice(TokenAddresses.DAI_ADDR, 40_000);
         bool isL2Direct = false;
@@ -53,8 +61,8 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
     }
 
     function testFail_should_borrow_maxUint256_dai() public {
-        uint256 suppyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
-        _supplyWeth(suppyAmount);
+        uint256 supplyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
+        _supplyWeth(supplyAmount);
 
         uint256 borrowAmount = type(uint256).max;
         bool isL2Direct = false;
@@ -63,8 +71,8 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
     }
 
     function test_should_borrow_dai_on_weth_supplied_l2_direct() public {
-        uint256 suppyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
-        _supplyWeth(suppyAmount);
+        uint256 supplyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
+        _supplyWeth(supplyAmount);
 
         uint256 borrowAmount = amountInUSDPrice(TokenAddresses.DAI_ADDR, 40_000);
         bool isL2Direct = true;
@@ -171,13 +179,13 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
     function _borrowDai(uint256 _borrowAmount, bool _isL2Direct) internal {
         DataTypes.ReserveData memory daiData = pool.getReserveData(TokenAddresses.DAI_ADDR);        
 
-        uint256 bobBalanceBefore = bobBalance(TokenAddresses.DAI_ADDR);
+        uint256 senderBalanceBefore = balanceOf(TokenAddresses.DAI_ADDR, sender);
         uint256 walletSafetyRatioBefore = getSafetyRatio(DEFAULT_AAVE_MARKET, walletAddr);
 
         if (_isL2Direct) {
             AaveV3Borrow.Params memory params = AaveV3Borrow.Params({
                 amount: _borrowAmount,
-                to: bob,
+                to: sender,
                 rateMode: uint8(DataTypes.InterestRateMode.VARIABLE),
                 assetId: daiData.id,
                 useDefaultMarket: true,
@@ -185,12 +193,12 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
                 market: address(0),
                 onBehalf: address(0)
             });
-            executeByWallet(address(cut), cut.encodeInputs(params), 0);
+            wallet.execute(address(cut), cut.encodeInputs(params), 0);
         }
         else {
             bytes memory paramsCalldata = aaveV3BorrowEncode(
                 _borrowAmount,
-                bob,
+                sender,
                 uint8(DataTypes.InterestRateMode.VARIABLE),
                 daiData.id,
                 true,
@@ -207,13 +215,13 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
                 returnValues
             );
 
-            executeByWallet(address(cut), _calldata, 0);
+            wallet.execute(address(cut), _calldata, 0);
         }
         
-        uint256 bobBalanceAfter = bobBalance(TokenAddresses.DAI_ADDR);
+        uint256 senderBalanceAfter = balanceOf(TokenAddresses.DAI_ADDR, sender);
         uint256 walletSafetyRatioAfter = getSafetyRatio(DEFAULT_AAVE_MARKET, walletAddr);
 
-        assertEq(bobBalanceAfter, bobBalanceBefore + _borrowAmount);
+        assertEq(senderBalanceAfter, senderBalanceBefore + _borrowAmount);
         assertEq(walletSafetyRatioBefore, 0);
         assertGe(walletSafetyRatioAfter, 0);
     }
@@ -231,6 +239,6 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
             onBehalf: address(0)
         });
 
-        executeAaveV3Supply(supplyParams, TokenAddresses.WETH_ADDR, false, aaveV3SupplyContractAddr);
+        executeAaveV3Supply(supplyParams, TokenAddresses.WETH_ADDR, wallet, false, aaveV3SupplyContractAddr);
     }
 }

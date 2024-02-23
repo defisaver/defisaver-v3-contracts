@@ -10,6 +10,7 @@ import { IL2PoolV3 } from "../../../contracts/interfaces/aaveV3/IL2PoolV3.sol";
 import { IAaveProtocolDataProvider } from "../../../contracts/interfaces/aaveV3/IAaveProtocolDataProvider.sol";
 import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
 
+import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { TokenAddresses } from "../../TokenAddresses.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
@@ -24,6 +25,10 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
+    SmartWallet wallet;
+    address walletAddr;
+    address sender;
+    
     IL2PoolV3 pool;
     IAaveProtocolDataProvider dataProvider;
     address aaveV3SupplyContractAddr;
@@ -39,7 +44,11 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("AaveV3CollateralSwitch");
-        SmartWallet.setUp();
+        
+        wallet = new SmartWallet(bob);
+        walletAddr = wallet.walletAddr();
+        sender = wallet.owner();
+
         cut = new AaveV3CollateralSwitch();
         pool = getLendingPool(DEFAULT_AAVE_MARKET);
         dataProvider = getDataProvider(DEFAULT_AAVE_MARKET);
@@ -163,7 +172,7 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
                 useAsCollateral: newUseAsCollateral
             });
 
-            executeByWallet(address(cut), cut.encodeInputs(params), 0);
+            wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } 
         else {
             bytes memory paramsCallData = aaveV3CollateralSwitchEncode(
@@ -182,7 +191,7 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
                 returnValues
             );
 
-            executeByWallet(address(cut), _calldata, 0);
+            wallet.execute(address(cut), _calldata, 0);
         }
 
         bool[] memory useAsCollateralAfter = new bool[](assets.length);
@@ -201,7 +210,7 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
             TestAsset memory a = assets[i];
             AaveV3Supply.Params memory supplyParams = AaveV3Supply.Params({
                 amount: amountInUSDPrice(a.asset, 10_000),
-                from: bob,
+                from: sender,
                 assetId: a.assetId,
                 enableAsColl: true,
                 useDefaultMarket: true,
@@ -209,7 +218,7 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
                 market: address(0),
                 onBehalf: address(0)
             });
-            executeAaveV3Supply(supplyParams, a.asset, false, aaveV3SupplyContractAddr);    
+            executeAaveV3Supply(supplyParams, a.asset, wallet, false, aaveV3SupplyContractAddr);    
         }
     }
 }

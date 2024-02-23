@@ -22,6 +22,9 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
+    SmartWallet wallet;
+    address walletAddr;
+    address sender;
     IL2PoolV3 pool;
     address aaveV3SupplyContractAddr;
 
@@ -30,7 +33,11 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("AaveV3SetEMode");
-        SmartWallet.setUp();
+        
+        wallet = new SmartWallet(bob);
+        sender = wallet.owner();
+        walletAddr = wallet.walletAddr();
+
         cut = new AaveV3SetEMode();
         pool = getLendingPool(DEFAULT_AAVE_MARKET);
         aaveV3SupplyContractAddr = address(new AaveV3Supply());
@@ -40,8 +47,8 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_change_eMode() public {
-        uint256 suppyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
-        _supplyWeth(suppyAmount);
+        uint256 supplyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
+        _supplyWeth(supplyAmount);
 
         bool isL2Direct = false;
         uint8 ethCorrelatedCategoryId = 1;
@@ -50,8 +57,8 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
     }
 
     function test_should_change_eMode_l2_direct() public {
-        uint256 suppyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
-        _supplyWeth(suppyAmount);
+        uint256 supplyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
+        _supplyWeth(supplyAmount);
 
         bool isL2Direct = true;
         uint8 ethCorrelatedCategoryId = 1;
@@ -99,7 +106,7 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
                 useDefaultMarket: true,
                 market: address(0)
             });
-            executeByWallet(address(cut), cut.encodeInputs(params), 0);
+            wallet.execute(address(cut), cut.encodeInputs(params), 0);
         }
         else {
             bytes memory paramsCalldata = aaveV3SetEModeEncode(
@@ -116,7 +123,7 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
                 returnValues
             );
 
-            executeByWallet(address(cut), _calldata, 0);
+            wallet.execute(address(cut), _calldata, 0);
         }
 
         uint256 categoryIdAfter = pool.getUserEMode(walletAddr);
@@ -138,6 +145,6 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
             onBehalf: address(0)
         });
 
-        executeAaveV3Supply(supplyParams, TokenAddresses.WETH_ADDR, false, aaveV3SupplyContractAddr);
+        executeAaveV3Supply(supplyParams, TokenAddresses.WETH_ADDR, wallet, false, aaveV3SupplyContractAddr);
     }
 }

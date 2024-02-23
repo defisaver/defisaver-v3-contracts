@@ -2,9 +2,9 @@
 
 pragma solidity =0.8.10;
 
-contract CommonCdpCreator {
+contract CommonPositionCreator {
 
-    struct CdpParams {
+    struct PositionParams {
         address collAddr;
         uint256 collAmount;
         address debtAddr;

@@ -11,8 +11,9 @@ import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
 import { TokenAddresses } from "../../TokenAddresses.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
+import { BaseTest } from "../../utils/BaseTest.sol";
  
-contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
+contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
     
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -22,6 +23,9 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
+    SmartWallet wallet;
+    address sender;
+    address walletAddr;
     IL2PoolV3 pool;
     IAaveProtocolDataProvider dataProvider;
 
@@ -30,7 +34,11 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("AaveV3Supply");
-        SmartWallet.setUp();
+
+        wallet = new SmartWallet(bob);
+        sender = wallet.owner();
+        walletAddr = wallet.walletAddr();
+
         cut = new AaveV3Supply();
         pool = getLendingPool(DEFAULT_AAVE_MARKET);
         dataProvider = getDataProvider(DEFAULT_AAVE_MARKET);
@@ -43,18 +51,18 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
         uint256 supplyAmount = 10 ether;
         bool isL2Direct = false;
 
-        giveBob(TokenAddresses.WETH_ADDR, supplyAmount);
-        approveAsBob(TokenAddresses.WETH_ADDR, walletAddr, supplyAmount);
+        give(TokenAddresses.WETH_ADDR, sender, supplyAmount);
+        approveAsSender(sender, TokenAddresses.WETH_ADDR, walletAddr, supplyAmount);
 
         _supply(supplyAmount, isL2Direct);
     }
     
     function test_should_supply_maxUint256_weth() public {
-        uint256 bobRealBalance = 10 ether;
+        uint256 senderRealBalance = 10 ether;
         bool isL2Direct = false;
 
-        giveBob(TokenAddresses.WETH_ADDR, bobRealBalance);
-        approveAsBob(TokenAddresses.WETH_ADDR, walletAddr, bobRealBalance);
+        give(TokenAddresses.WETH_ADDR, sender, senderRealBalance);
+        approveAsSender(sender, TokenAddresses.WETH_ADDR, walletAddr, senderRealBalance);
 
         _supply(type(uint256).max, isL2Direct);
     }
@@ -63,8 +71,8 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
         uint256 supplyAmount = 10 ether;
         bool isL2Direct = true;
 
-        giveBob(TokenAddresses.WETH_ADDR, supplyAmount);
-        approveAsBob(TokenAddresses.WETH_ADDR, walletAddr, supplyAmount);
+        give(TokenAddresses.WETH_ADDR, sender, supplyAmount);
+        approveAsSender(sender, TokenAddresses.WETH_ADDR, walletAddr, supplyAmount);
 
         _supply(supplyAmount, isL2Direct);
     }
@@ -74,16 +82,16 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
 
         uint256 supplyAmount = 10 ether;
 
-        giveBob(TokenAddresses.WETH_ADDR, supplyAmount);
-        approveAsBob(TokenAddresses.WETH_ADDR, walletAddr, supplyAmount);
+        give(TokenAddresses.WETH_ADDR, sender, supplyAmount);
+        approveAsSender(sender, TokenAddresses.WETH_ADDR, walletAddr, supplyAmount);
 
-        uint256 bobBalanceBefore = bobBalance(TokenAddresses.WETH_ADDR);
-        uint256 walletAtokenBalanceBefore = balanceOf(wethData.aTokenAddress, walletAddr);
-        uint256 aliceAtokenBalanceBefore = balanceOf(wethData.aTokenAddress, alice);
+        uint256 senderBalanceBefore = balanceOf(TokenAddresses.WETH_ADDR, sender);
+        uint256 walletATokenBalanceBefore = balanceOf(wethData.aTokenAddress, walletAddr);
+        uint256 aliceATokenBalanceBefore = balanceOf(wethData.aTokenAddress, alice);
 
         bytes memory paramsCallData = aaveV3SupplyEncode(
             supplyAmount,
-            bob,
+            sender,
             wethData.id,
             true,
             true,
@@ -99,22 +107,22 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
             returnValues
         );
 
-        executeByWallet(address(cut), _calldata, 0);
+        wallet.execute(address(cut), _calldata, 0);
 
-        uint256 bobBalanceAfter = bobBalance(TokenAddresses.WETH_ADDR);
-        uint256 walletAtokenBalanceAfter = balanceOf(wethData.aTokenAddress, walletAddr);
-        uint256 aliceAtokenBalanceAfter = balanceOf(wethData.aTokenAddress, alice);
+        uint256 senderBalanceAfter = balanceOf(TokenAddresses.WETH_ADDR, sender);
+        uint256 walletATokenBalanceAfter = balanceOf(wethData.aTokenAddress, walletAddr);
+        uint256 aliceATokenBalanceAfter = balanceOf(wethData.aTokenAddress, alice);
         
-        assertEq(bobBalanceBefore - supplyAmount, bobBalanceAfter);
-        assertEq(walletAtokenBalanceBefore, 0);
-        assertEq(walletAtokenBalanceAfter, 0);
-        assertGe(aliceAtokenBalanceAfter, aliceAtokenBalanceBefore + supplyAmount);
+        assertEq(senderBalanceBefore - supplyAmount, senderBalanceAfter);
+        assertEq(walletATokenBalanceBefore, 0);
+        assertEq(walletATokenBalanceAfter, 0);
+        assertGe(aliceATokenBalanceAfter, aliceATokenBalanceBefore + supplyAmount);
 
-        (uint256 walletCurrentAtokenBalance,,,,,,,,) = dataProvider.getUserReserveData(TokenAddresses.WETH_ADDR, walletAddr);
-        assertEq(walletCurrentAtokenBalance, 0);
+        (uint256 walletCurrentATokenBalance,,,,,,,,) = dataProvider.getUserReserveData(TokenAddresses.WETH_ADDR, walletAddr);
+        assertEq(walletCurrentATokenBalance, 0);
 
-        (uint256 aliceCurrentAtokenBalance,,,,,,,,) = dataProvider.getUserReserveData(TokenAddresses.WETH_ADDR, alice);
-        assertGe(aliceCurrentAtokenBalance, supplyAmount);
+        (uint256 aliceCurrentATokenBalance,,,,,,,,) = dataProvider.getUserReserveData(TokenAddresses.WETH_ADDR, alice);
+        assertGe(aliceCurrentATokenBalance, supplyAmount);
     }
 
     function testFuzz_encode_decode_inputs_no_market_no_onbehalf(
@@ -214,16 +222,16 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
         DataTypes.ReserveData memory wethData = pool.getReserveData(TokenAddresses.WETH_ADDR);
 
         uint256 realAmountToSupply = _supplyAmount == type(uint256).max ? 
-            bobBalance(TokenAddresses.WETH_ADDR) : 
+            balanceOf(TokenAddresses.WETH_ADDR, sender) : 
             _supplyAmount;
 
-        uint256 bobBalanceBefore = bobBalance(TokenAddresses.WETH_ADDR);
-        uint256 walletAtokenBalanceBefore = balanceOf(wethData.aTokenAddress, walletAddr);
+        uint256 senderBalanceBefore = balanceOf(TokenAddresses.WETH_ADDR, sender);
+        uint256 walletATokenBalanceBefore = balanceOf(wethData.aTokenAddress, walletAddr);
         
         if (_isL2Direct) {
             AaveV3Supply.Params memory params = AaveV3Supply.Params({
                 amount: _supplyAmount,
-                from: bob,
+                from: sender,
                 assetId: wethData.id,
                 enableAsColl: true,
                 useDefaultMarket: true,
@@ -232,12 +240,12 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
                 onBehalf: address(0)
             });
             
-            executeByWallet(address(cut), cut.encodeInputs(params), 0);
+            wallet.execute(address(cut), cut.encodeInputs(params), 0);
 
         } else {
             bytes memory paramsCallData = aaveV3SupplyEncode(
                 _supplyAmount,
-                bob,
+                sender,
                 wethData.id,
                 true,
                 false,
@@ -253,14 +261,14 @@ contract TestAaveV3Supply is AaveV3Helper, SmartWallet, ActionsUtils {
                 returnValues
             );
 
-            executeByWallet(address(cut), _calldata, 0);
+            wallet.execute(address(cut), _calldata, 0);
         }
 
-        uint256 bobBalanceAfter = bobBalance(TokenAddresses.WETH_ADDR);
+        uint256 senderBalanceAfter = balanceOf(TokenAddresses.WETH_ADDR, sender);
         uint256 walletATokenBalanceAfter = balanceOf(wethData.aTokenAddress, walletAddr);
         
-        assertEq(bobBalanceBefore - realAmountToSupply, bobBalanceAfter);
-        assertGe(walletATokenBalanceAfter, walletAtokenBalanceBefore + realAmountToSupply);
+        assertEq(senderBalanceBefore - realAmountToSupply, senderBalanceAfter);
+        assertGe(walletATokenBalanceAfter, walletATokenBalanceBefore + realAmountToSupply);
 
         (uint256 currentATokenBalance,,,,,,,,bool usageAsCollateral) = 
             dataProvider.getUserReserveData(TokenAddresses.WETH_ADDR, walletAddr);

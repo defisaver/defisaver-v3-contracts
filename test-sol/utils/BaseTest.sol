@@ -20,16 +20,10 @@ contract BaseTest is Test, Tokens, Config {
 
     bool private configInitialized;
 
-    modifier bobAsSender() {
-        prankBob();
+    modifier executeAsSender(address _sender) {
+        vm.prank(_sender);
         _;
-        stopPrank();
-    }
-
-    modifier aliceAsSender() {
-        prankAlice();
-        _;
-        stopPrank();
+        vm.stopPrank();
     }
 
     function setUp() public virtual {
@@ -51,28 +45,16 @@ contract BaseTest is Test, Tokens, Config {
         IERC20(_token).safeApprove(_to, _amount);
     }
 
-    function approveAsBob(address _token, address _to, uint256 _amount) internal bobAsSender() {
+    function approveAsSender(address _sender, address _token, address _to, uint256 _amount) internal executeAsSender(_sender) {
         IERC20(_token).safeApprove(_to, _amount);
     }
 
-    function giveBob(address token, uint256 amount) internal {
-        deal(token, bob, amount);
+    function give(address _token, address _to, uint256 _amount) internal {
+        deal(_token, _to, _amount);
     }
 
-    function balanceOf(address token, address who) internal view returns (uint256) {
-        return IERC20(token).balanceOf(who);
-    }
-
-    function bobBalance(address token) internal view returns (uint256) {
-        return balanceOf(token, bob);
-    }
-
-    function prankBob() internal {
-        vm.prank(bob);
-    }
-
-    function prankAlice() internal {
-        vm.prank(alice);
+    function balanceOf(address _token, address _who) internal view returns (uint256) {
+        return IERC20(_token).balanceOf(_who);
     }
 
     function stopPrank() internal {

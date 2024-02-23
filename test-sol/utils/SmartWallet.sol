@@ -9,29 +9,44 @@ import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterf
 import { DSProxy } from "../../contracts/DS/DSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
+import { console } from "forge-std/console.sol";
 
 contract SmartWallet is BaseTest {
 
-    address payable internal walletAddr;
-    bool private isSafe;
+    address payable public owner;
+    address payable public walletAddr;
+    bool public isSafe;
 
     error SafeTxFailed();
 
-    function setUp() public override virtual {
+    modifier ownerAsSender() {
+        vm.prank(owner);
+        _;
+        vm.stopPrank();
+    }
+
+    constructor(address _owner) {
+        setUp(_owner);
+    }
+
+    function setUp(address _owner) public {
+        owner = payable(_owner);
+        vm.label(owner, "owner");
+
         BaseTest.setUp();
         isSmartWalletSafe() == true ? createSafe() : createDSProxy();
         vm.label(walletAddr, "SmartWallet");
     }
 
-    function createDSProxy() internal bobAsSender() {
+    function createDSProxy() internal ownerAsSender() {
         walletAddr = payable(address(DSProxyFactoryInterface(Const.DS_PROXY_FACTORY).build()));
         isSafe = false;
     }
 
-    function createSafe() internal bobAsSender() {
+    function createSafe() internal ownerAsSender() {
         uint256 saltNonce = block.timestamp;
         address[] memory owners = new address[](1);
-        owners[0] = bob;
+        owners[0] = owner;
 
         bytes memory setupData = abi.encodeWithSelector(
             ISafe.setup.selector,
@@ -53,13 +68,13 @@ contract SmartWallet is BaseTest {
         isSafe = true;
     }
 
-    function executeByWallet(
+    function execute(
         address _target,
         bytes memory _calldata,
         uint256 _value
-    ) internal bobAsSender() {
+    ) public ownerAsSender() {
         if (isSafe) {
-            bytes memory signatures = bytes.concat(abi.encode(bob, bytes32(0)), bytes1(0x01));
+            bytes memory signatures = bytes.concat(abi.encode(owner, bytes32(0)), bytes1(0x01));
             bool success = ISafe(walletAddr).execTransaction(
                 _target, // to
                 _value, // eth value
@@ -78,5 +93,9 @@ contract SmartWallet is BaseTest {
         } else {
             DSProxy(walletAddr).execute(_target, _calldata);
         }
+    }
+
+    function ownerApprove(address _token, uint256 _amount) public ownerAsSender() {
+        approve(_token, walletAddr, _amount);
     }
 }
