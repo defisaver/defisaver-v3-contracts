@@ -136,7 +136,7 @@ contract LlamaLendView is LlamaLendHelper {
         oraclePrice: amm.price_oracle(),
         minted: ctrl.minted(),
         redeemed: ctrl.redeemed(),
-        monetaryPolicyRate: agg.rate(),
+        monetaryPolicyRate: agg.rate(market),
         ammRate: amm.rate(),
         minBand: amm.min_band(),
         maxBand: amm.max_band(),
