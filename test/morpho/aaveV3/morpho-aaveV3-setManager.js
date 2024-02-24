@@ -7,7 +7,7 @@ describe('Morpho-Aave-V3-SetManager', function () {
         await redeploy('MorphoAaveV3SetManager');
     });
 
-    it('... should test Morpho AaveV3 supply', async () => {
+    it('... should test Morpho AaveV3 set manager', async () => {
         await morphoAaveV3SetManagerTest();
     });
 });

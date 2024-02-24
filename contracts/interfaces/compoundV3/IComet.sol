@@ -83,6 +83,7 @@ abstract contract IComet {
     function getPrice(address priceFeed) virtual public view returns (uint256);
 
     function allow(address manager, bool isAllowed) virtual external;
+    function allowBySig(address owner, address manager, bool isAllowed_, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s) virtual external;
     function allowance(address owner, address spender) virtual external view returns (uint256);
 
     function isSupplyPaused() virtual external view returns (bool);
@@ -100,4 +101,8 @@ abstract contract IComet {
     function baseTrackingBorrowSpeed() virtual external pure returns (uint256);
     function baseTrackingSupplySpeed() virtual external pure returns (uint256);
 
+    function userNonce(address owner) virtual external view returns (uint256);
+    function version() virtual external view returns (string memory);
+    function name() virtual external view returns (string memory);
+    function hasPermission(address owner, address manager) virtual external view returns (bool);
 }
