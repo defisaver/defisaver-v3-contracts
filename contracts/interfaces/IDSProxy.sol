@@ -14,4 +14,6 @@ abstract contract IDSProxy {
     function setCache(address _cacheAddr) public payable virtual returns (bool);
 
     function owner() public view virtual returns (address);
+
+    function guard() public view virtual returns (address);
 }
