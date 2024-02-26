@@ -42,7 +42,7 @@ contract TestAaveV3SwapBorrowRateMode is AaveV3PositionCreator {
     /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_should_supply_weth_with_variable_rate_then_swap_to_stable_rate() public {
+    function test_should_supply_with_variable_rate_then_swap_to_stable_rate() public {
         createAaveV3Position(
             PositionParams({
                 collAddr: TokenAddresses.WETH_ADDR,

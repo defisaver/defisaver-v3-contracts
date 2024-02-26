@@ -25,6 +25,7 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
     SmartWallet wallet;
     address walletAddr;
     address sender;
+
     IL2PoolV3 pool;
     address aaveV3SupplyContractAddr;
 
@@ -47,8 +48,9 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_change_eMode() public {
-        uint256 supplyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
-        _supplyWeth(supplyAmount);
+        address token = TokenAddresses.WETH_ADDR;
+        uint256 supplyAmount = amountInUSDPrice(token, 100_000);
+        _supply(token, supplyAmount);
 
         bool isL2Direct = false;
         uint8 ethCorrelatedCategoryId = 1;
@@ -57,8 +59,9 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
     }
 
     function test_should_change_eMode_l2_direct() public {
-        uint256 supplyAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000);
-        _supplyWeth(supplyAmount);
+        address token = TokenAddresses.WETH_ADDR;
+        uint256 supplyAmount = amountInUSDPrice(token, 100_000);
+        _supply(token, supplyAmount);
 
         bool isL2Direct = true;
         uint8 ethCorrelatedCategoryId = 1;
@@ -132,12 +135,12 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
         assertEq(categoryIdAfter, _categoryId);
     }
 
-    function _supplyWeth(uint256 _amount) internal {
-        DataTypes.ReserveData memory wethData = pool.getReserveData(TokenAddresses.WETH_ADDR);
+    function _supply(address _token, uint256 _amount) internal {
+        DataTypes.ReserveData memory tokenData = pool.getReserveData(_token);
         AaveV3Supply.Params memory supplyParams = AaveV3Supply.Params({
             amount: _amount,
-            from: bob,
-            assetId: wethData.id,
+            from: sender,
+            assetId: tokenData.id,
             enableAsColl: true,
             useDefaultMarket: true,
             useOnBehalf: false,
@@ -145,6 +148,6 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
             onBehalf: address(0)
         });
 
-        executeAaveV3Supply(supplyParams, TokenAddresses.WETH_ADDR, wallet, false, aaveV3SupplyContractAddr);
+        executeAaveV3Supply(supplyParams, _token, wallet, false, aaveV3SupplyContractAddr);
     }
 }
