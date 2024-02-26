@@ -93,7 +93,7 @@ contract LlamaLendSelfLiquidate is ActionBase, LlamaLendHelper {
             debtAsset.withdrawTokens(_params.to, debtAssetBalanceAfterLiq - debtAssetBalancePreLiq);
         } else {
             // we return any extra debt asset that was not needed in debt and remove any extra approval
-            debtAsset.withdrawTokens(_params.from, amountToPull - debtAssetBalancePreLiq - debtAssetBalanceAfterLiq);
+            debtAsset.withdrawTokens(_params.from, amountToPull - (debtAssetBalancePreLiq - debtAssetBalanceAfterLiq));
             IERC20(debtAsset).approve(_params.controllerAddress, 0);
         }
 

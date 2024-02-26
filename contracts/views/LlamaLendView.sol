@@ -41,6 +41,7 @@ contract LlamaLendView is LlamaLendHelper {
     int256 maxBand;
     uint256 borrowApr;
     uint256 lendApr;
+    uint256 debtTokenTotalSupply;
     uint256 debtTokenLeftToBorrow;
   }
 
@@ -66,7 +67,7 @@ contract LlamaLendView is LlamaLendHelper {
   function userData(address market, address user) external view returns (UserData memory) {
       ILlamaLendController ctrl = ILlamaLendController(market);
       uint256 debtTokenSuppliedShares = IERC20(ctrl.factory()).balanceOf(user);
-      uint256 debtTokenSuppliedAssets = IERC4626(ctrl.factory()).previewRedeem(debtTokenSuppliedShares);
+      uint256 debtTokenSuppliedAssets = IERC4626(ctrl.factory()).convertToAssets(debtTokenSuppliedShares);
       ILLAMMA amm = ILLAMMA(ctrl.amm());
 
       if (!ctrl.loan_exists(user)) {
@@ -142,7 +143,8 @@ contract LlamaLendView is LlamaLendHelper {
         maxBand: amm.max_band(),
         lendApr: ILlamaLendVault(ctrl.factory()).lend_apr(),
         borrowApr:  ILlamaLendVault(ctrl.factory()).borrow_apr(),
-        debtTokenLeftToBorrow: IERC20(debtTokenAddr).balanceOf(address(amm))
+        debtTokenTotalSupply: IERC4626(ctrl.factory()).totalAssets(),
+        debtTokenLeftToBorrow: IERC20(debtTokenAddr).balanceOf(market)
     });
   }
 
