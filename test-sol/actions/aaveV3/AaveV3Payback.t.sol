@@ -25,15 +25,12 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3PositionCreator {
     address walletAddr;
     address sender;
 
-    PositionParams positionParams;
-    uint16 debtAssetId;
-    address debtVariableTokenAddr;
-
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("AaveV3Payback");
+        initTestPairs("AaveV3");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -41,47 +38,47 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3PositionCreator {
 
         AaveV3PositionCreator.setUp();
         cut = new AaveV3Payback();
-
-        positionParams = PositionParams({
-            collAddr: TokenAddresses.WETH_ADDR,
-            collAmount: amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000),
-            debtAddr: TokenAddresses.DAI_ADDR,
-            debtAmount: amountInUSDPrice(TokenAddresses.DAI_ADDR, 40_000)
-        });
-
-        DataTypes.ReserveData memory reserveData = pool.getReserveData(positionParams.debtAddr);
-        debtAssetId = reserveData.id;
-        debtVariableTokenAddr = reserveData.variableDebtTokenAddress;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_payback_part_of_debt() public {
-        createAaveV3Position(positionParams, wallet);
-
-        uint256 paybackAmount = amountInUSDPrice(TokenAddresses.DAI_ADDR, 10_000);
+        bool useMaxUint = false;
         bool isL2Direct = false;
-
-        _payback(paybackAmount, isL2Direct);
+        _test_payback(useMaxUint, isL2Direct);
     }
 
     function test_should_payback_maxUint256_amount_debt() public {
-        createAaveV3Position(positionParams, wallet);
-
-        uint256 paybackAmount = type(uint256).max;
+        bool useMaxUint = true;
         bool isL2Direct = false;
-
-        _payback(paybackAmount, isL2Direct);
+        _test_payback(useMaxUint, isL2Direct);
     }
 
     function test_should_payback_part_of_debt_l2_direct() public {
-        createAaveV3Position(positionParams, wallet);
-
-        uint256 paybackAmount = amountInUSDPrice(TokenAddresses.DAI_ADDR, 10_000);
+        bool useMaxUint = false;
         bool isL2Direct = true;
+        _test_payback(useMaxUint, isL2Direct);
+    }
 
-        _payback(paybackAmount, isL2Direct);
+    function _test_payback(bool _useMaxUint, bool _isL2Direct) public {
+        for (uint256 i = 0; i < testPairs.length; ++i) {
+            uint256 snapshotId = vm.snapshot();
+
+            PositionParams memory positionParams = PositionParams({
+                collAddr: testPairs[i].supplyAsset,
+                collAmount: amountInUSDPrice(testPairs[i].supplyAsset, 100_000),
+                debtAddr: testPairs[i].borrowAsset,
+                debtAmount: amountInUSDPrice(testPairs[i].borrowAsset, 40_000)
+            });
+
+            createAaveV3Position(positionParams, wallet);
+
+            uint256 paybackAmount = _useMaxUint ? type(uint256).max : amountInUSDPrice(testPairs[i].borrowAsset, 10_000);
+            _payback(positionParams, paybackAmount, _isL2Direct);
+
+            vm.revertTo(snapshotId);
+        }
     }
 
     function testFuzz_encode_decode_inputs_no_market_no_onbehalf(
@@ -181,19 +178,23 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3PositionCreator {
         assertEq(_params.onBehalf, decodedParams.onBehalf);
     }
 
-    function _payback(uint256 _paybackAmount, bool _isL2Direct) internal {
+    function _payback(PositionParams memory _positionParams, uint256 _paybackAmount, bool _isL2Direct) internal {
+        DataTypes.ReserveData memory reserveData = pool.getReserveData(_positionParams.debtAddr);
+        uint16 debtAssetId = reserveData.id;
+        address debtVariableTokenAddr = reserveData.variableDebtTokenAddress;
+
         uint256 walletSafetyRatioBefore = getSafetyRatio(DEFAULT_AAVE_MARKET, walletAddr);
         uint256 walletVariableDebtBefore = balanceOf(debtVariableTokenAddr, walletAddr);
 
         if (_paybackAmount == type(uint256).max) {
-            give(positionParams.debtAddr, sender, walletVariableDebtBefore * 2);
-            approveAsSender(sender, positionParams.debtAddr, walletAddr, walletVariableDebtBefore * 2);
+            give(_positionParams.debtAddr, sender, walletVariableDebtBefore * 2);
+            approveAsSender(sender, _positionParams.debtAddr, walletAddr, walletVariableDebtBefore * 2);
         } else {
-            give(positionParams.debtAddr, sender, _paybackAmount);
-            approveAsSender(sender, positionParams.debtAddr, walletAddr, _paybackAmount);
+            give(_positionParams.debtAddr, sender, _paybackAmount);
+            approveAsSender(sender, _positionParams.debtAddr, walletAddr, _paybackAmount);
         }
 
-        uint256 senderBalanceBefore = balanceOf(positionParams.debtAddr, sender);
+        uint256 senderBalanceBefore = balanceOf(_positionParams.debtAddr, sender);
 
         if (_isL2Direct) {
             AaveV3Payback.Params memory params = AaveV3Payback.Params({
@@ -230,7 +231,7 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3PositionCreator {
             wallet.execute(address(cut), _calldata, 0);
         }
 
-        uint256 senderBalanceAfter = balanceOf(positionParams.debtAddr, sender);
+        uint256 senderBalanceAfter = balanceOf(_positionParams.debtAddr, sender);
         uint256 walletSafetyRatioAfter = getSafetyRatio(DEFAULT_AAVE_MARKET, walletAddr);
         uint256 walletVariableDebtAfter = balanceOf(debtVariableTokenAddr, walletAddr);
 

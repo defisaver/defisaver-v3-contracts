@@ -29,13 +29,12 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
     IL2PoolV3 pool;
     IAaveProtocolDataProvider dataProvider;
 
-    TestPair[] testPairs;
-
     /*//////////////////////////////////////////////////////////////////////////
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("AaveV3Supply");
+        initTestPairs("AaveV3");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -44,11 +43,6 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         cut = new AaveV3Supply();
         pool = getLendingPool(DEFAULT_AAVE_MARKET);
         dataProvider = getDataProvider(DEFAULT_AAVE_MARKET);
-
-        TestPair[] memory pairs = getTestPairsForProtocol("AaveV3");
-        for (uint256 i = 0; i < pairs.length; ++i) {
-            testPairs.push(pairs[i]);
-        }
     }
 
     /*//////////////////////////////////////////////////////////////////////////

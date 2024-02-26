@@ -36,6 +36,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("AaveV3Withdraw");
+        initTestPairs("AaveV3");
         
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -51,33 +52,39 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_withdraw_part_of_collateral() public {
-        address tokenAddr = TokenAddresses.WETH_ADDR;
-        uint256 supplyAmount = amountInUSDPrice(tokenAddr, 100_000);
-        _supply(tokenAddr, supplyAmount);
+        for (uint256 i = 0; i < testPairs.length; ++i) {
+            address tokenAddr = testPairs[i].supplyAsset;
+            uint256 supplyAmount = amountInUSDPrice(tokenAddr, 100_000);
+            _supply(tokenAddr, supplyAmount);
 
-        uint256 withdrawAmount = amountInUSDPrice(tokenAddr, 50_000);
-        bool isL2Direct = false;
-        _withdraw(tokenAddr, withdrawAmount, isL2Direct);
+            uint256 withdrawAmount = amountInUSDPrice(tokenAddr, 50_000);
+            bool isL2Direct = false;
+            _withdraw(tokenAddr, withdrawAmount, isL2Direct);
+        }
     }
 
     function test_should_withdraw_all_supplied_collateral() public {
-        address tokenAddr = TokenAddresses.WETH_ADDR;
-        uint256 supplyAmount = amountInUSDPrice(tokenAddr, 100_000);
-        _supply(tokenAddr, supplyAmount);
+        for (uint256 i = 0; i < testPairs.length; ++i) {
+            address tokenAddr = testPairs[i].supplyAsset;
+            uint256 supplyAmount = amountInUSDPrice(tokenAddr, 100_000);
+            _supply(tokenAddr, supplyAmount);
 
-        uint256 withdrawAmount = type(uint256).max;
-        bool isL2Direct = false;
-        _withdraw(tokenAddr, withdrawAmount, isL2Direct);
+            uint256 withdrawAmount = type(uint256).max;
+            bool isL2Direct = false;
+            _withdraw(tokenAddr, withdrawAmount, isL2Direct);
+        }
     }
 
     function test_should_withdraw_part_of_supplied_collateral_l2_direct() public {
-        address tokenAddr = TokenAddresses.WETH_ADDR;
-        uint256 supplyAmount = amountInUSDPrice(tokenAddr, 100_000);
-        _supply(tokenAddr, supplyAmount);
+        for (uint256 i = 0; i < testPairs.length; ++i) {
+            address tokenAddr = testPairs[i].supplyAsset;
+            uint256 supplyAmount = amountInUSDPrice(tokenAddr, 100_000);
+            _supply(tokenAddr, supplyAmount);
 
-        uint256 withdrawAmount = amountInUSDPrice(tokenAddr, 50_000);
-        bool isL2Direct = true;
-        _withdraw(tokenAddr, withdrawAmount, isL2Direct);
+            uint256 withdrawAmount = amountInUSDPrice(tokenAddr, 50_000);
+            bool isL2Direct = true;
+            _withdraw(tokenAddr, withdrawAmount, isL2Direct);
+        }
     }
 
     function testFuzz_encode_decode_no_market(

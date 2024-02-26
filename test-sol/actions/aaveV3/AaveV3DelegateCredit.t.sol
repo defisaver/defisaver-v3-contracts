@@ -32,6 +32,7 @@ contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("AaveV3DelegateCredit");
+        initTestPairs("AaveV3");
         
         wallet = new SmartWallet(bob);
         walletAddr = wallet.walletAddr();
@@ -45,27 +46,30 @@ contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, BaseTest {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_delegate_credit_amount() public {
-        uint256 amount = 100000;
-        address token = TokenAddresses.WETH_ADDR;
-        bool isL2Direct = false;
-        address delegatee = alice;
-        _delegateCredit(token, amount, delegatee, isL2Direct);
+        for (uint256 i = 0; i < testPairs.length; ++i) {
+            uint256 amount = 100000;
+            bool isL2Direct = false;
+            address delegatee = alice;
+            _delegateCredit(testPairs[i].supplyAsset, amount, delegatee, isL2Direct);
+        }
     }
 
     function test_should_delegate_credit_amount_l2_direct() public {
-        uint256 amount = 1;
-        address token = TokenAddresses.WETH_ADDR;
-        bool isL2Direct = true;
-        address delegatee = alice;
-        _delegateCredit(token, amount, delegatee, isL2Direct);
+        for (uint256 i = 0; i < testPairs.length; ++i) {
+            uint256 amount = 1;
+            bool isL2Direct = true;
+            address delegatee = alice;
+            _delegateCredit(testPairs[i].supplyAsset, amount, delegatee, isL2Direct);
+        }
     }
 
     function test_should_delegate_credit_maxUnit256() public {
-        uint256 amount = type(uint256).max;
-        address token = TokenAddresses.WETH_ADDR;
-        bool isL2Direct = false;
-        address delegatee = alice;
-        _delegateCredit(token, amount, delegatee, isL2Direct);
+        for (uint256 i = 0; i < testPairs.length; ++i) {
+            uint256 amount = type(uint256).max;
+            bool isL2Direct = false;
+            address delegatee = alice;
+            _delegateCredit(testPairs[i].supplyAsset, amount, delegatee, isL2Direct);
+        }
     }
 
     function testFuzz_encode_decode_inputs_no_market(

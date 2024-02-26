@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-import { TokenNamesMapping } from "../utils/TokenNamesMapping.sol";
-
 import { Test } from "forge-std/Test.sol";
 import { stdJson } from "forge-std/StdJson.sol";
 import { console } from "forge-std/console.sol";
+import { Tokens } from "../utils/Tokens.sol";
 
-contract Config is TokenNamesMapping, Test {
+contract Config is Tokens {
 
     string internal constant IS_SMART_WALLET_SAFE = "$.isSmartWalletSafe";
     string internal constant BLOCK_NUMBER = "$.blockNumber";
@@ -75,8 +74,8 @@ contract Config is TokenNamesMapping, Test {
         TestPair[] memory testPairs = new TestPair[](_testPairConfigs.length);
         for (uint256 i = 0; i < _testPairConfigs.length; ++i) {
             testPairs[i] = TestPair({
-                supplyAsset: getTokenAddress( _testPairConfigs[i].supplyAsset),
-                borrowAsset: getTokenAddress(_testPairConfigs[i].borrowAsset)
+                supplyAsset: getTokenAddressFromName( _testPairConfigs[i].supplyAsset),
+                borrowAsset: getTokenAddressFromName(_testPairConfigs[i].borrowAsset)
             });
         }
         return testPairs;

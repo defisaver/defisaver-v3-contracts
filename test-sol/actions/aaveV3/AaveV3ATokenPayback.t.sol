@@ -24,17 +24,13 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
     SmartWallet wallet;
     address walletAddr;
     address sender;
-    
-    PositionParams positionParams;
-    uint16 debtAssetId;
-    address debtVariableTokenAddr;
-    address debtATokenAddr;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("AaveV3ATokenPayback");
+        initTestPairs("AaveV3");
 
         wallet = new SmartWallet(bob);
         walletAddr = wallet.walletAddr();
@@ -42,48 +38,47 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
 
         AaveV3PositionCreator.setUp();
         cut = new AaveV3ATokenPayback();
-
-        positionParams = PositionParams({
-            collAddr: TokenAddresses.WETH_ADDR,
-            collAmount: amountInUSDPrice(TokenAddresses.WETH_ADDR, 100_000),
-            debtAddr: TokenAddresses.DAI_ADDR,
-            debtAmount: amountInUSDPrice(TokenAddresses.DAI_ADDR, 40_000)
-        });
-
-        DataTypes.ReserveData memory reserveData = pool.getReserveData(positionParams.debtAddr);
-        debtAssetId = reserveData.id;
-        debtVariableTokenAddr = reserveData.variableDebtTokenAddress;
-        debtATokenAddr = reserveData.aTokenAddress;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_payback_part_of_debt() public {
-        createAaveV3Position(positionParams, wallet);
-
-        uint256 paybackAmount = amountInUSDPrice(TokenAddresses.DAI_ADDR, 10_000);
+        bool useMaxUint = false;
         bool isL2Direct = false;
-
-        _payback(paybackAmount, isL2Direct);
+        _test_payback(useMaxUint, isL2Direct);
     }
 
     function test_should_payback_maxUint256_amount_debt() public {
-        createAaveV3Position(positionParams, wallet);
-
-        uint256 paybackAmount = type(uint256).max;
+        bool useMaxUint = true;
         bool isL2Direct = false;
-
-        _payback(paybackAmount, isL2Direct);
+        _test_payback(useMaxUint, isL2Direct);
     }
 
     function test_should_payback_part_of_debt_l2_direct() public {
-        createAaveV3Position(positionParams, wallet);
-
-        uint256 paybackAmount = amountInUSDPrice(TokenAddresses.DAI_ADDR, 10_000);
+        bool useMaxUint = false;
         bool isL2Direct = true;
+        _test_payback(useMaxUint, isL2Direct);
+    }
 
-        _payback(paybackAmount, isL2Direct);
+    function _test_payback(bool _useMaxUint, bool _isL2Direct) public {
+        for (uint256 i = 0; i < testPairs.length; ++i) {
+            uint256 snapshotId = vm.snapshot();
+
+            PositionParams memory positionParams = PositionParams({
+                collAddr: testPairs[i].supplyAsset,
+                collAmount: amountInUSDPrice(testPairs[i].supplyAsset, 100_000),
+                debtAddr: testPairs[i].borrowAsset,
+                debtAmount: amountInUSDPrice(testPairs[i].borrowAsset, 40_000)
+            });
+
+            createAaveV3Position(positionParams, wallet);
+
+            uint256 paybackAmount = _useMaxUint ? type(uint256).max : amountInUSDPrice(testPairs[i].borrowAsset, 10_000);
+            _payback(positionParams, paybackAmount, _isL2Direct);
+
+            vm.revertTo(snapshotId);
+        }
     }
 
     function testFuzz_encode_decode_inputs_no_market(
@@ -136,15 +131,20 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
         assertEq(_params.market, decodedParams.market);
     }
 
-    function _payback(uint256 _paybackAmount, bool _isL2Direct) internal {
+    function _payback(PositionParams memory _positionParams, uint256 _paybackAmount, bool _isL2Direct) internal {
+        DataTypes.ReserveData memory reserveData = pool.getReserveData(_positionParams.debtAddr);
+        uint16 debtAssetId = reserveData.id;
+        address debtVariableTokenAddr = reserveData.variableDebtTokenAddress;
+        address debtATokenAddr = reserveData.aTokenAddress;
+
         uint256 walletSafetyRatioBefore = getSafetyRatio(DEFAULT_AAVE_MARKET, walletAddr);
         uint256 walletVariableDebtBefore = balanceOf(debtVariableTokenAddr, walletAddr);
 
         if (_paybackAmount == type(uint256).max) {
-            giveATokensToSender(walletVariableDebtBefore * 2);
+            giveATokensToSender(_positionParams.debtAddr, walletVariableDebtBefore * 2);
             approveAsSender(sender, debtATokenAddr, walletAddr, walletVariableDebtBefore * 2);
         } else {
-            giveATokensToSender(_paybackAmount);
+            giveATokensToSender(_positionParams.debtAddr, _paybackAmount);
             approveAsSender(sender, debtATokenAddr, walletAddr, _paybackAmount);
         }
 
@@ -200,16 +200,16 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
 
     /// @dev Foundry has problems with handling aave tokens, we can't just use vm.deal
     /// @dev https://github.com/foundry-rs/forge-std/issues/140
-    function giveATokensToSender(uint256 _amount) internal {
+    function giveATokensToSender(address _debtToken, uint256 _amount) internal {
         // first give sender some debt tokens
-        give(positionParams.debtAddr, sender, _amount * 2);
+        give(_debtToken, sender, _amount * 2);
 
         // approve aave pool to pull tokens
-        approveAsSender(sender, positionParams.debtAddr, address(pool), _amount);
+        approveAsSender(sender, _debtToken, address(pool), _amount);
 
         // supply directly, so that sender gets aTokens
         vm.prank(sender);
-        pool.supply(positionParams.debtAddr, _amount, sender, AAVE_REFERRAL_CODE);
+        pool.supply(_debtToken, _amount, sender, AAVE_REFERRAL_CODE);
         stopPrank();
     }
 }

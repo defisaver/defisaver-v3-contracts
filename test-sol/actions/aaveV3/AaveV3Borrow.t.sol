@@ -31,13 +31,12 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
     IAaveProtocolDataProvider dataProvider;
     address aaveV3SupplyContractAddr;
 
-    TestPair[] testPairs;
-
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("AaveV3Borrow");
+        initTestPairs("AaveV3");
         
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -47,11 +46,6 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
         pool = getLendingPool(DEFAULT_AAVE_MARKET);
         dataProvider = getDataProvider(DEFAULT_AAVE_MARKET);
         aaveV3SupplyContractAddr = address(new AaveV3Supply());
-
-        TestPair[] memory pairs = getTestPairsForProtocol("AaveV3");
-        for (uint256 i = 0; i < pairs.length; ++i) {
-            testPairs.push(pairs[i]);
-        }
     }
 
     /*//////////////////////////////////////////////////////////////////////////
