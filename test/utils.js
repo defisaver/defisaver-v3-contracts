@@ -1016,8 +1016,8 @@ const getProxyAuth = async (proxyAddr, addrWithAuth) => {
 
 const setNewExchangeWrapper = async (acc, newAddr, isFork = false) => {
     const ownerAddr = addrs[network].OWNER_ACC;
-    await sendEther(acc, ownerAddr, '1');
     if (!isFork) {
+        await sendEther(acc, ownerAddr, '1');
         await impersonateAccount(ownerAddr);
     }
 
