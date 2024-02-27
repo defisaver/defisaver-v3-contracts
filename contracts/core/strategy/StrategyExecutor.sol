@@ -62,7 +62,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, CheckWalletTy
         }
 
         // execute actions
-        callActions(_subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub, address(storedSubData.userProxy));
+        callActions(_subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub, address(storedSubData.walletAddr));
     }
 
     /// @notice Checks if msg.sender has auth, reverts if not

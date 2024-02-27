@@ -13,7 +13,7 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
     error SenderNotSubOwnerError(address, uint256);
     error SubIdOutOfRange(uint256, bool);
 
-    event Subscribe(uint256 indexed subId, address indexed proxy, bytes32 indexed subHash, StrategySub subStruct);
+    event Subscribe(uint256 indexed subId, address indexed walletAddr, bytes32 indexed subHash, StrategySub subStruct);
     event UpdateData(uint256 indexed subId, bytes32 indexed subHash, StrategySub subStruct);
     event ActivateSub(uint256 indexed subId);
     event DeactivateSub(uint256 indexed subId);
@@ -27,7 +27,7 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
     /// @dev push one empty sub for AaveSubProxy to function correctly
     constructor() {
         strategiesSubs.push(StoredSubData({
-            userProxy: bytes20(0),
+            walletAddr: bytes20(0),
             isEnabled: false,
             strategySubHash: bytes32(0)
         }));
@@ -43,7 +43,7 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
 
     /// @notice Checks if subId is init. and if the sender is the owner
     modifier onlySubOwner(uint256 _subId) {
-        if (address(strategiesSubs[_subId].userProxy) != msg.sender) {
+        if (address(strategiesSubs[_subId].walletAddr) != msg.sender) {
             revert SenderNotSubOwnerError(msg.sender, _subId);
         }
         _;
@@ -89,7 +89,7 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
     }
 
     /// @notice Updates the users subscription data
-    /// @dev Only callable by proxy who created the sub.
+    /// @dev Only callable by wallet who created the sub.
     /// @param _subId Id of the subscription to update
     /// @param _sub Subscription struct of the user (needs whole struct so we can hash it)
     function updateSubData(

@@ -244,7 +244,7 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
 
         // take dfs fee if set, and add to feeAmount
         if (dfsFeeDivider != 0) {
-            feeAmount += _sellAmount / _dfsFeeDivider;
+            feeAmount = _sellAmount / _dfsFeeDivider;
         }
 
         address walletAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();
