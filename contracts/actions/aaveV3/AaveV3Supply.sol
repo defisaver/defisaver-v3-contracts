@@ -122,15 +122,12 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
 
         lendingPool.supply(tokenAddr, _amount, _onBehalf, AAVE_REFERRAL_CODE);
 
-         (,,,,,,,,bool usageAsCollateral) = getDataProvider(_market).getUserReserveData(tokenAddr, _onBehalf);
-
         bytes memory logData = abi.encode(
             _market,
             tokenAddr,
             _amount,
             _from,
-            _onBehalf,
-            usageAsCollateral
+            _onBehalf
         );
         return (_amount, logData);
     }
