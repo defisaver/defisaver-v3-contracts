@@ -5,7 +5,6 @@ pragma solidity =0.8.10;
 import "../auth/AdminAuth.sol";
 import "../actions/mcd/helpers/McdRatioHelper.sol";
 import "../interfaces/ITrigger.sol";
-import "../interfaces/IMCDPriceVerifier.sol";
 import "../core/helpers/CoreHelper.sol";
 import "../core/DFSRegistry.sol";
 import "./helpers/TriggerHelper.sol";
@@ -15,24 +14,9 @@ import "./helpers/TriggerHelper.sol";
 contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, TriggerHelper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    error WrongNextPrice(uint256);
-
     enum RatioState {
         OVER,
         UNDER
-    }
-
-    enum RatioCheck {
-        CURR_RATIO,
-        NEXT_RATIO,
-        BOTH_RATIOS
-    }
-    
-    /// @param nextPrice price that OSM returns as next price value
-    /// @param ratioCheck returns if we want the trigger to look at the current asset price, nextPrice param or both
-    struct CallParams {
-        uint256 nextPrice;
-        uint8 ratioCheck;
     }
 
     /// @param vaultId id of the vault whose ratio we check
@@ -49,47 +33,17 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
         override
         returns (bool)
     {
-        CallParams memory triggerCallData = parseCallInputs(_callData);
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 checkedRatio;
-        bool shouldTriggerCurr;
-        bool shouldTriggerNext;
     
-        if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.CURR_RATIO || RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS){
-            checkedRatio = getRatio(triggerSubData.vaultId, 0);
+        checkedRatio = getRatio(triggerSubData.vaultId);
 
-            // if cdp has 0 ratio don't trigger it
-            if (checkedRatio == 0) return false;
+        // if cdp has 0 ratio don't trigger it
+        if (checkedRatio == 0) return false;
 
-            shouldTriggerCurr = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
-        }
+        return shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
 
-        if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.NEXT_RATIO || RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS){
-            checkedRatio = getRatio(triggerSubData.vaultId, triggerCallData.nextPrice);
-            
-            // if cdp has 0 ratio don't trigger it
-            if (checkedRatio == 0) return false;
-
-            shouldTriggerNext = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
-
-            // must convert back to wad
-            if (triggerCallData.nextPrice != 0) {
-                triggerCallData.nextPrice = triggerCallData.nextPrice / 1e9;
-            }
-
-            /// @dev if we don't have access to the next price on-chain this returns true, if we do this compares the nextPrice param we sent
-            if (
-                !IMCDPriceVerifier(MCD_PRICE_VERIFIER).verifyVaultNextPrice(
-                    triggerCallData.nextPrice,
-                    triggerSubData.vaultId
-                )
-            ) {
-                revert WrongNextPrice(triggerCallData.nextPrice);
-            }
-        }
-
-        return shouldTriggerCurr || shouldTriggerNext;
     }
     
     function shouldTrigger(uint8 state, uint256 checkedRatio, uint256 subbedToRatio) internal pure returns (bool){
@@ -107,14 +61,6 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
 
     function isChangeable() public pure override returns (bool) {
         return false;
-    }
-
-    function parseCallInputs(bytes memory _callData)
-        internal
-        pure
-        returns (CallParams memory params)
-    {
-        params = abi.decode(_callData, (CallParams));
     }
 
     function parseSubInputs(bytes memory _subData) internal pure returns (SubParams memory params) {

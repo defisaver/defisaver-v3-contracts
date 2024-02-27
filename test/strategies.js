@@ -172,7 +172,6 @@ const createMcdRepayCompositeStrategy = () => {
         '%gasUsed',
         '%flAddr',
         '%flAmount',
-        '%nextPrice',
         '%targetRatio',
         formatExchangeObj(
             '%wethAddr',
@@ -212,7 +211,6 @@ const createMcdFLRepayCompositeStrategy = () => {
         '%gasUsed',
         '%flAddr',
         '$1',
-        '%nextPrice',
         '%targetRatio',
         formatExchangeObj(
             '%wethAddr',
@@ -1481,7 +1479,6 @@ const createMcdBoostCompositeStrategy = () => {
         '%gasUsed',
         '%flAddr',
         '%0',
-        '%nextPrice',
         '%targetRatio',
         formatExchangeObj(
             '&daiAddr',
@@ -1519,7 +1516,6 @@ const createMcdFLBoostCompositeStrategy = () => {
         '%gasUsed',
         '%flAddr',
         '$1',
-        '%nextPrice',
         '%targetRatio',
         formatExchangeObj(
             '&daiAddr',
