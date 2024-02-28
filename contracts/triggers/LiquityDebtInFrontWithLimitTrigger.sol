@@ -14,7 +14,7 @@ import "../utils/TransientStorage.sol";
 contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatioHelper, TriggerHelper, LiquityHelper {
 
     /// @dev Max number of troves to check
-    uint256 constant internal MAX_ITERATIONS = 250;
+    uint256 internal constant MAX_ITERATIONS = 250;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 

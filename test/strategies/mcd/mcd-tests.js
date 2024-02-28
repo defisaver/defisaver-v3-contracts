@@ -2,6 +2,7 @@ const hre = require('hardhat');
 const { expect } = require('chai');
 
 const { ilks, getAssetInfo } = require('@defisaver/tokens');
+const automationSdk = require('@defisaver/automation-sdk');
 
 const {
     getProxy,
@@ -17,7 +18,6 @@ const {
     getChainLinkPrice,
     setMockPrice,
     mockChainlinkPriceFeed,
-    timeTravel,
     DAI_ADDR,
     WETH_ADDRESS,
     UNISWAP_WRAPPER,
@@ -42,8 +42,6 @@ const { getRatio } = require('../../utils-mcd');
 const {
     createYearnRepayStrategy,
     createYearnRepayStrategyWithExchange,
-    createMcdCloseToDaiStrategy,
-    createMcdCloseToCollStrategy,
     createMcdBoostCompositeStrategy,
     createMcdFLBoostCompositeStrategy,
     createMcdRepayCompositeStrategy,
@@ -180,21 +178,24 @@ const mcdBoostStrategyTest = async (numTests) => {
 
                 console.log('VaultId: ', vaultId);
 
-                const ratioUnder = Float2BN('1.8');
-                const ratioOver = Float2BN('2.2');
-                const targetRatioRepay = Float2BN('2');
-                const targetRatioBoost = Float2BN('2');
+                const ratioUnder = 180;
+                const ratioOver = 220;
+                const targetRatioRepay = 200;
+                const targetRatioBoost = 200;
+                const boostEnabled = true;
+
+                const subData = automationSdk.strategySubService.makerEncode.leverageManagement(
+                    vaultId,
+                    ratioUnder.toString(),
+                    ratioOver.toString(),
+                    targetRatioBoost.toString(),
+                    targetRatioRepay.toString(),
+                    boostEnabled,
+                );
 
                 ({ boostSubId: subId, boostSub: strategySub } = await subToMcdProxy(
                     proxy,
-                    [
-                        vaultId,
-                        ratioUnder,
-                        ratioOver,
-                        targetRatioBoost,
-                        targetRatioRepay,
-                        true,
-                    ],
+                    subData,
                 ));
 
                 snapshotId = await takeSnapshot();
@@ -315,19 +316,24 @@ const mcdRepayStrategyTest = async (numTests) => {
 
                 console.log('Vault id: ', vaultId);
 
-                const ratioUnder = Float2BN('2.6');
-                const targetRatioRepay = Float2BN('2.9');
+                const ratioUnder = 260;
+                const ratioOver = 0;
+                const targetRatioBoost = 0;
+                const targetRatioRepay = 290;
+                const boostEnabled = false;
+
+                const subData = automationSdk.strategySubService.makerEncode.leverageManagement(
+                    vaultId,
+                    ratioUnder.toString(),
+                    ratioOver.toString(),
+                    targetRatioBoost.toString(),
+                    targetRatioRepay.toString(),
+                    boostEnabled,
+                );
 
                 ({ repaySubId: subId, repaySub: strategySub } = await subToMcdProxy(
                     proxy,
-                    [
-                        vaultId,
-                        ratioUnder,
-                        Float2BN('0'),
-                        Float2BN('0'),
-                        targetRatioRepay,
-                        false,
-                    ],
+                    subData,
                 ));
 
                 snapshotId = await takeSnapshot();
@@ -474,11 +480,11 @@ const mcdRepayFromYearnStrategyTest = async () => {
                 proxy,
             );
 
-            const ratioUnder = hre.ethers.utils.parseUnits('3', '18');
-            const targetRatio = hre.ethers.utils.parseUnits('3.2', '18');
+            const ratioUnder = 300;
+            const targetRatio = 320;
 
             ({ subId, strategySub } = await subRepayFromSavingsStrategy(
-                proxy, bundleId, vaultId, ratioUnder, targetRatio, true,
+                proxy, bundleId, vaultId, ratioUnder, targetRatio,
             ));
         });
 
@@ -596,12 +602,7 @@ const mcdCloseToDaiStrategyTest = async () => {
             flAmount = (parseFloat(amountDai) + 1).toString();
             flAmount = hre.ethers.utils.parseUnits(flAmount, 18);
 
-            await openStrategyAndBundleStorage();
-
-            const strategyData = createMcdCloseToDaiStrategy(true);
-            const strategyId = await createStrategy(proxy, ...strategyData, false);
-
-            const percentage = 10 * 1e8;
+            const percentage = 10;
 
             // mock chainlink price before sub
             const roundId = 1;
@@ -614,7 +615,6 @@ const mcdCloseToDaiStrategyTest = async () => {
                 WETH_ADDRESS,
                 percentage,
                 roundId,
-                strategyId,
             ));
             console.log(subId);
             console.log(await subStorage.getSub(subId));
@@ -667,11 +667,6 @@ const mcdCloseToDaiStrategyTest = async () => {
             flAmount = (parseFloat(amountDai) + 1).toString();
             flAmount = hre.ethers.utils.parseUnits(flAmount, 18);
 
-            await openStrategyAndBundleStorage();
-
-            const strategyData = createMcdCloseToDaiStrategy();
-            const strategyId = await createStrategy(proxy, ...strategyData, false);
-
             const currPrice = await getChainLinkPrice(ETH_ADDR);
 
             const targetPrice = currPrice - 100; // Target is smaller so we can execute it
@@ -681,7 +676,6 @@ const mcdCloseToDaiStrategyTest = async () => {
                 targetPrice,
                 WETH_ADDRESS,
                 RATIO_STATE_OVER,
-                strategyId,
             ));
             console.log(subId);
             console.log(await subStorage.getSub(subId));
@@ -780,15 +774,7 @@ const mcdCloseToCollStrategyTest = async () => {
             flAmount = (parseFloat(amountDai) + 1).toString();
             flAmount = hre.ethers.utils.parseUnits(flAmount, 18);
 
-            await openStrategyAndBundleStorage();
-
-            const strategyData = createMcdCloseToCollStrategy(true);
-            console.log(strategyData);
-            const strategyId = await createStrategy(proxy, ...strategyData, false);
-
-            const percentage = 10 * 1e8;
-
-            console.log(percentage);
+            const percentage = 10;
 
             // mock chainlink price before sub
             const roundId = 1;
@@ -801,7 +787,6 @@ const mcdCloseToCollStrategyTest = async () => {
                 WETH_ADDRESS,
                 percentage,
                 roundId,
-                strategyId,
             ));
             console.log(subId);
             console.log(await subStorage.getSub(subId));
@@ -867,12 +852,6 @@ const mcdCloseToCollStrategyTest = async () => {
             flAmount = (parseFloat(amountDai) + 1).toString();
             flAmount = hre.ethers.utils.parseUnits(flAmount, 18);
 
-            await openStrategyAndBundleStorage();
-
-            const strategyData = createMcdCloseToCollStrategy();
-            console.log(strategyData);
-            const strategyId = await createStrategy(proxy, ...strategyData, false);
-
             const currPrice = await getChainLinkPrice(ETH_ADDR);
 
             const targetPrice = currPrice - 100; // Target is smaller so we can execute it
@@ -882,8 +861,8 @@ const mcdCloseToCollStrategyTest = async () => {
                 targetPrice,
                 WETH_ADDRESS,
                 RATIO_STATE_OVER,
-                strategyId,
             ));
+
             console.log(subId);
             console.log(await subStorage.getSub(subId));
         });

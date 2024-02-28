@@ -38,6 +38,8 @@ contract PriceFeedRegistry is AdminAuth{
     )
   {
     address aggregator = getFeed(base, quote);
+    
+    /// @dev Price staleness not checked, the risk has been deemed acceptable
     return IAggregatorV3(aggregator).latestRoundData();
   }
 

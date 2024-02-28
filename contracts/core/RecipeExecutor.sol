@@ -18,6 +18,8 @@ import "../auth/SafeModulePermission.sol";
 * @title Entry point into executing recipes/checking triggers directly and as part of a strategy
 * @dev RecipeExecutor can be used in two scenarios:
 * 1) Execute a recipe manually through user's wallet by calling executeRecipe()
+*    Here, users can also execute a recipe with a flash loan action. To save on space, the flow will be explained in the next scenario
+*
 *                                                                                                                       ┌────────────────┐
 *                                                                                                                   ┌───┤  1st Action    │
 *                                                                                                                   │   └────────────────┘

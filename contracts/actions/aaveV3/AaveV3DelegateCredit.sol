@@ -41,10 +41,6 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
         params.useDefaultMarket = _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
         params.market = _parseParamAddr(params.market, _paramMapping[5], _subData, _returnValues);
 
-        if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
-        }
-
         (bytes memory logData) = _delegate(params);
         emit ActionEvent("AaveV3DelegateCredit", logData);
         return bytes32(params.amount);

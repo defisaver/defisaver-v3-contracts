@@ -17,42 +17,14 @@ const createMcdTrigger = async (vaultId, ratio, ratioState) => {
     return param;
 };
 
-const createCompTrigger = async (user, ratio, ratioState) => {
-    const param = abiCoder.encode(['address', 'uint256', 'uint8'], [user, ratio, ratioState]);
-
-    return param;
-};
-
 const createReflexerTrigger = async (safeId, ratio, ratioState) => {
     const param = abiCoder.encode(['uint256', 'uint256', 'uint8'], [safeId, ratio, ratioState]);
 
     return param;
 };
 
-const createLiquityTrigger = async (user, ratio, ratioState) => {
-    const param = abiCoder.encode(['address', 'uint256', 'uint8'], [user, ratio, ratioState]);
-
-    return param;
-};
-
-const createCurveUsdCollRatioTrigger = async (user, controllerAddr, ratio, ratioState) => {
-    const param = abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [user, controllerAddr, ratio, ratioState]);
-
-    return param;
-};
-
 const createChainLinkPriceTrigger = async (tokenAddr, price, state) => {
     const param = abiCoder.encode(['address', 'uint256', 'uint8'], [tokenAddr, price, state]);
-    return param;
-};
-
-const createOffchainPriceTrigger = async (targetPrice, goodUntil, orderType) => {
-    const param = abiCoder.encode(['uint256', 'uint256', 'uint8'], [targetPrice, goodUntil, orderType]);
-    return param;
-};
-
-const createTrailingStopTrigger = async (chainlinkTokenAddr, percentage, roundId) => {
-    const param = abiCoder.encode(['address', 'uint256', 'uint80'], [chainlinkTokenAddr, percentage, roundId]);
     return param;
 };
 
@@ -73,39 +45,13 @@ const createGasPriceTrigger = async (maxGasPrice) => {
     return param;
 };
 
-const createCbRebondTrigger = async (bondID) => {
-    const param = abiCoder.encode(['uint256'], [bondID]);
-
-    return param;
-};
-
-const createMorphoTrigger = async (user, ratio, ratioState) => {
-    const param = abiCoder.encode(['address', 'uint256', 'uint8'], [user, ratio, ratioState]);
-
-    return param;
-};
-
-const createDebtInFrontWithLimitTrigger = async (user, debtInFrontMin) => {
-    const param = abiCoder.encode(['address', 'uint256'], [user, debtInFrontMin]);
-
-    return param;
-};
-
 module.exports = {
     createUniV3RangeOrderTrigger,
     createMcdTrigger,
     createChainLinkPriceTrigger,
     createTimestampTrigger,
     createGasPriceTrigger,
-    createCompTrigger,
     createReflexerTrigger,
-    createLiquityTrigger,
-    createTrailingStopTrigger,
-    createCbRebondTrigger,
-    createOffchainPriceTrigger,
-    createMorphoTrigger,
-    createDebtInFrontWithLimitTrigger,
-    createCurveUsdCollRatioTrigger,
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
     IN_BOOST,

@@ -1,7 +1,8 @@
+/* eslint-disable max-len */
 const hre = require('hardhat');
-const { defaultAbiCoder } = require('ethers/lib/utils');
+const automationSdk = require('@defisaver/automation-sdk');
 const {
-    subToAaveProxy,
+    subToAaveV3Proxy,
     updateAaveProxy,
     subToStrategy,
     subToCompV3ProxyL2,
@@ -10,7 +11,6 @@ const {
 const {
     addrs,
     network,
-    nullAddress,
 } = require('./utils');
 
 const subAaveV3L2AutomationStrategy = async (
@@ -22,15 +22,15 @@ const subAaveV3L2AutomationStrategy = async (
     boostEnabled,
     regAddr = addrs[network].REGISTRY_ADDR,
 ) => {
-    let subInput = '0x';
+    const subInput = automationSdk.strategySubService.aaveV3Encode.leverageManagement(
+        minRatio,
+        maxRatio,
+        optimalRatioBoost,
+        optimalRatioRepay,
+        boostEnabled,
+    );
 
-    subInput = subInput.concat(minRatio.padStart(32, '0'));
-    subInput = subInput.concat(maxRatio.padStart(32, '0'));
-    subInput = subInput.concat(optimalRatioBoost.padStart(32, '0'));
-    subInput = subInput.concat(optimalRatioRepay.padStart(32, '0'));
-    subInput = subInput.concat(boostEnabled ? '01' : '00');
-
-    const subId = await subToAaveProxy(proxy, subInput, regAddr);
+    const subId = await subToAaveV3Proxy(proxy, subInput, regAddr);
 
     let subId1 = '0';
     let subId2 = '0';
@@ -90,20 +90,29 @@ const subAaveV3CloseBundle = async (
     triggerQuoteAsset,
     targetPrice,
     priceState,
-    collAsset,
-    collAssetId,
-    debtAsset,
-    debtAssetId,
+    _collAsset,
+    _collAssetId,
+    _debtAsset,
+    _debtAssetId,
 ) => {
-    const triggerData = defaultAbiCoder.encode(['address', 'address', 'uint256', 'uint8'], [triggerBaseAsset, triggerQuoteAsset, targetPrice, priceState]);
-
-    const strategySub = [bundleId, true, [triggerData], [
-        defaultAbiCoder.encode(['address'], [collAsset]),
-        defaultAbiCoder.encode(['uint16'], [collAssetId.toString()]),
-        defaultAbiCoder.encode(['address'], [debtAsset]),
-        defaultAbiCoder.encode(['uint16'], [debtAssetId.toString()]),
-        defaultAbiCoder.encode(['address'], [nullAddress]), // needed so we don't have to trust injection
-    ]];
+    const triggerData = {
+        baseTokenAddress: triggerBaseAsset,
+        quoteTokenAddress: triggerQuoteAsset,
+        price: targetPrice,
+        ratioState: (priceState === 1) ? automationSdk.enums.RatioState.UNDER : automationSdk.enums.RatioState.OVER,
+    };
+    const subData = {
+        collAsset: _collAsset,
+        collAssetId: _collAssetId,
+        debtAsset: _debtAsset,
+        debtAssetId: _debtAssetId,
+    };
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.closeToAsset(
+        bundleId,
+        true,
+        triggerData,
+        subData,
+    );
 
     const subId = await subToStrategy(proxy, strategySub);
 
@@ -121,27 +130,17 @@ const subToCompV3L2AutomationStrategy = async (
     boostEnabled,
     regAddr = addrs[network].REGISTRY_ADDR,
 ) => {
-    const minRatioBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(minRatio), 16);
-    const maxRatioBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(maxRatio), 16);
-    const optimalRatioBoostBytes = hre.ethers.utils.zeroPad(
-        hre.ethers.BigNumber.from(optimalRatioBoost), 16,
-    );
-    const optimalRatioRepayBytes = hre.ethers.utils.zeroPad(
-        hre.ethers.BigNumber.from(optimalRatioRepay), 16,
-    );
-    const boostEnabledBytes = boostEnabled ? '0x01' : '0x00';
-
-    const subInput = hre.ethers.utils.concat([
+    const subInput = automationSdk.strategySubService.compoundV3L2Encode.leverageManagement(
         market,
         baseToken,
-        minRatioBytes,
-        maxRatioBytes,
-        optimalRatioBoostBytes,
-        optimalRatioRepayBytes,
-        boostEnabledBytes,
-    ]);
+        minRatio,
+        maxRatio,
+        optimalRatioBoost,
+        optimalRatioRepay,
+        boostEnabled,
+    );
 
-    const subId = await subToCompV3ProxyL2(proxy, subInput, regAddr);
+    const subId = await subToCompV3ProxyL2(proxy, [subInput], regAddr);
 
     let subId1 = '0';
     let subId2 = '0';

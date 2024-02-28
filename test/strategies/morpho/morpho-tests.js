@@ -110,10 +110,10 @@ const morphoAaveV2BoostTest = () => describe('Morpho-AaveV2-Boost-Strategy', fun
         bundleId = await createBundle(proxy, [strategyId, flStrategyId]);
 
         await redeploy('MorphoAaveV2SubProxy', undefined, undefined, undefined, '0', bundleId);
-        triggerRatio = ethers.utils.parseUnits('2.2', '18');
-        const minRatio = ethers.utils.parseUnits('1', '18');
-        const targetRepay = ethers.utils.parseUnits('2', '18');
-        const targetRatio = ethers.utils.parseUnits('2', '18');
+        triggerRatio = 220;
+        const minRatio = 100;
+        const targetRepay = 200;
+        const targetRatio = 200;
 
         ({ boostSubId: subId, boostSub: strategySub } = await subMorphoAaveV2AutomationStrategy(
             proxy,
@@ -124,6 +124,7 @@ const morphoAaveV2BoostTest = () => describe('Morpho-AaveV2-Boost-Strategy', fun
             true,
         ));
 
+        triggerRatio = ethers.utils.parseUnits(triggerRatio.toString(), 16);
         snapshot = await takeSnapshot();
     });
 
@@ -250,17 +251,19 @@ const morphoAaveV2RepayTest = () => describe('Morpho-AaveV2-Repay-Strategy', fun
         const bundleId = await createBundle(proxy, [strategyId, flStrategyId]);
 
         await redeploy('MorphoAaveV2SubProxy', undefined, undefined, undefined, bundleId, '0');
-        triggerRatio = ethers.utils.parseUnits('2.8', '18');
-        const targetRatio = ethers.utils.parseUnits('3', '18');
+        triggerRatio = 280;
+        const targetRatio = 300;
 
         ({ repaySubId: subId, repaySub: strategySub } = await subMorphoAaveV2AutomationStrategy(
             proxy,
             triggerRatio,
-            '0',
-            '0',
+            0,
+            0,
             targetRatio,
             false,
         ));
+
+        triggerRatio = ethers.utils.parseUnits(triggerRatio.toString(), 16);
 
         snapshot = await takeSnapshot();
     });

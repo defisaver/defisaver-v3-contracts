@@ -51,7 +51,7 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWallet
         }
 
         // execute actions
-        callActions(_subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub, address(storedSubData.userProxy));
+        callActions(_subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub, address(storedSubData.walletAddr));
     }
 
     /// @notice Checks if msg.sender has auth, reverts if not
