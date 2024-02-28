@@ -41,10 +41,6 @@ contract SparkDelegateCredit is ActionBase, SparkHelper {
         params.useDefaultMarket = _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
         params.market = _parseParamAddr(params.market, _paramMapping[5], _subData, _returnValues);
 
-        if (params.useDefaultMarket) {
-            params.market = DEFAULT_SPARK_MARKET;
-        }
-
         (bytes memory logData) = _delegate(params);
         emit ActionEvent("SparkDelegateCredit", logData);
         return bytes32(params.amount);
@@ -94,7 +90,6 @@ contract SparkDelegateCredit is ActionBase, SparkHelper {
             params.market = DEFAULT_SPARK_MARKET;
         }
     }
-
 
     function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);

@@ -35,10 +35,6 @@ contract SparkWithdraw is ActionBase, SparkHelper {
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
         params.market = _parseParamAddr(params.market, _paramMapping[4], _subData, _returnValues);
 
-        if (params.useDefaultMarket) {
-            params.market = DEFAULT_SPARK_MARKET;
-        }
-
         (uint256 withdrawnAmount, bytes memory logData) = _withdraw(
             params.market,
             params.assetId,
@@ -114,6 +110,9 @@ contract SparkWithdraw is ActionBase, SparkHelper {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_SPARK_MARKET;
+        }
     }
 
     function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
