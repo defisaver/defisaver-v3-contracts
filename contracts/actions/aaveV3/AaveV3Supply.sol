@@ -10,7 +10,7 @@ import "./helpers/AaveV3Helper.sol";
 contract AaveV3Supply is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
-     /// @dev enableAsColl - left for backwards compatibility, it's not used in this action
+    /// @dev enableAsColl - left for backwards compatibility, it's not used in this action
     struct Params {
         uint256 amount;
         address from;

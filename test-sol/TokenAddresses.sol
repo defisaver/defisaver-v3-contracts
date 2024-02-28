@@ -25,4 +25,7 @@ library TokenAddresses {
     address public constant UNI_V2_WRAPPER = 0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54;
     address public constant FEE_RECEIVER = 0x6467e807dB1E71B9Ef04E0E3aFb962E4B0900B2B;
 
+    address public constant LUSD_ADDR = 0x5f98805A4E8be255a32880FDeC7F6728C6568bA0;
+    address public constant LINK_ADDR = 0x514910771AF9Ca656af840dff83E8264EcF986CA;
+    address public constant AAVE_ADDR = 0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9;
 }

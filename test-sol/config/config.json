@@ -1,0 +1,17 @@
+{
+    "isSmartWalletSafe" : true,
+    "blockNumber" : 19268905,
+    "TestNameExampleIfThisTestNeedsSpecificBlockToRun": { "blockNumber": 19268904},
+    "AaveV3": {
+        "lightTesting": false,
+        "lightPairs": [
+            { "supplyAsset": "WETH", "borrowAsset": "DAI"}
+        ],
+        "fullPairs": [
+            { "supplyAsset": "WETH", "borrowAsset": "DAI"},
+            { "supplyAsset": "WBTC", "borrowAsset": "USDC"},
+            { "supplyAsset": "WSETH", "borrowAsset": "WETH"},
+            { "supplyAsset": "LINK", "borrowAsset": "LUSD"}
+        ]
+    }
+}
