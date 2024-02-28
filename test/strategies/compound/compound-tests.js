@@ -26,12 +26,10 @@ const {
     openStrategyAndBundleStorage,
     getProxy,
     setNewExchangeWrapper,
-    Float2BN,
     fetchAmountinUSDPrice,
     approve,
     setBalance,
     redeploy,
-    resetForkToBlock,
     REGISTRY_ADDR,
     WETH_ADDRESS,
     redeployCore,
@@ -166,14 +164,7 @@ const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
                 senderAcc.address,
             );
 
-            subData = await subCompV2AutomationStrategy(
-                proxy,
-                Float2BN('120', 16).toString(),
-                Float2BN('200', 16).toString(),
-                Float2BN('150', 16).toString(),
-                Float2BN('150', 16).toString(),
-                true,
-            );
+            subData = await subCompV2AutomationStrategy(proxy, 120, 200, 150, 150, true);
         });
 
         it('... should trigger a Comp Boost strategy', async () => {
@@ -312,14 +303,7 @@ const compV2RepayTest = () => describe('Comp-Repay-Strategy', function () {
                 senderAcc.address,
             );
 
-            subData = await subCompV2AutomationStrategy(
-                proxy,
-                Float2BN('200', 16).toString(),
-                Float2BN('300', 16).toString(),
-                Float2BN('250', 16).toString(),
-                Float2BN('250', 16).toString(),
-                true,
-            );
+            subData = await subCompV2AutomationStrategy(proxy, 200, 300, 250, 250, true);
         });
 
         it('... should trigger a Comp Repay strategy', async () => {

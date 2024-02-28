@@ -261,16 +261,16 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
                     debtAssetId,
                 );
 
-                const targetRatio = hre.ethers.utils.parseUnits('2.3', '18');
-                const ratioUnder = hre.ethers.utils.parseUnits('2.2', '18');
+                const targetRatio = 230;
+                const ratioUnder = 220;
 
                 // same as in L2
                 subIds = await subSparkAutomationStrategy(
                     proxy,
-                    ratioUnder.toHexString().slice(2),
-                    '0',
-                    '0',
-                    targetRatio.toHexString().slice(2),
+                    ratioUnder,
+                    0,
+                    0,
+                    targetRatio,
                     false,
                 );
             });
@@ -452,15 +452,15 @@ const sparkBoostStrategyTest = async (numTestPairs) => {
                     debtAssetId,
                 );
 
-                const targetRatio = hre.ethers.utils.parseUnits('1.5', '18');
-                const ratioOver = hre.ethers.utils.parseUnits('1.7', '18');
+                const targetRatio = 150;
+                const ratioOver = 170;
 
                 subIds = await subSparkAutomationStrategy(
                     proxy,
-                    '0',
-                    ratioOver.toHexString().slice(2),
-                    targetRatio.toHexString().slice(2),
-                    '0',
+                    0,
+                    ratioOver,
+                    targetRatio,
+                    0,
                     true,
                 );
             });
@@ -686,10 +686,7 @@ const sparkCloseToDebtStrategyTest = async (numTestPairs) => {
 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
-                const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
-                    8,
-                );
+                const triggerPrice = Float2BN(`${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`, 8);
 
                 ({ subId, strategySub: sub } = await subSparkCloseBundle(
                     proxy,
@@ -962,10 +959,7 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
-                const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
-                    8,
-                );
+                const triggerPrice = Float2BN(`${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`, 8);
 
                 ({ subId, strategySub: sub } = await subSparkCloseBundle(
                     proxy,
@@ -1264,10 +1258,7 @@ const sparkCloseToCollStrategyTest = async (numTestPairs) => {
 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
-                const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
-                    8,
-                );
+                const triggerPrice = Float2BN(`${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`, 8);
 
                 ({ subId, strategySub: sub } = await subSparkCloseBundle(
                     proxy,
@@ -1566,10 +1557,7 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
-                const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
-                    8,
-                );
+                const triggerPrice = Float2BN(`${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`, 8);
 
                 ({ subId, strategySub: sub } = await subSparkCloseBundle(
                     proxy,

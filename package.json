@@ -26,6 +26,7 @@
   "devDependencies": {
     "@commitlint/cli": "^12.1.1",
     "@commitlint/config-conventional": "^12.1.1",
+    "@defisaver/automation-sdk": "^3.0.2",
     "@defisaver/sdk": "^1.0.14",
     "@defisaver/tokens": "^1.5.4",
     "@nomiclabs/hardhat-ethers": "^2.0.0",
