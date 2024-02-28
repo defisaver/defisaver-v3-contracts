@@ -10,6 +10,7 @@ import "./helpers/AaveV3Helper.sol";
 contract AaveV3Supply is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
+     /// @dev enableAsColl - left for backwards compatibility, it's not used in this action
     struct Params {
         uint256 amount;
         address from;
@@ -33,7 +34,6 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.assetId = uint16(_parseParamUint(params.assetId, _paramMapping[2], _subData, _returnValues));
-        params.enableAsColl = _parseParamUint(params.enableAsColl ? 1 : 0, _paramMapping[3], _subData, _returnValues) == 1;
         params.useDefaultMarket = _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
         params.useOnBehalf = _parseParamUint(params.useOnBehalf ? 1 : 0, _paramMapping[5], _subData, _returnValues) == 1;
         params.market = _parseParamAddr(params.market, _paramMapping[6], _subData, _returnValues);
@@ -44,19 +44,11 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
             _returnValues
         );
 
-        if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
-        }
-        if (!params.useOnBehalf) {
-            params.onBehalf = address(0);
-        }
-
         (uint256 supplyAmount, bytes memory logData) = _supply(
             params.market,
             params.amount,
             params.from,
             params.assetId,
-            params.enableAsColl,
             params.onBehalf
         );
         emit ActionEvent("AaveV3Supply", logData);
@@ -71,7 +63,6 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
             params.amount,
             params.from,
             params.assetId,
-            params.enableAsColl,
             params.onBehalf
         );
         logger.logActionDirectEvent("AaveV3Supply", logData);
@@ -84,7 +75,6 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
             params.amount,
             params.from,
             params.assetId,
-            params.enableAsColl,
             params.onBehalf
         );
         logger.logActionDirectEvent("AaveV3Supply", logData);
@@ -103,14 +93,12 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
     /// @param _amount Amount of tokens to be deposited
     /// @param _from Where are we pulling the supply tokens amount from
     /// @param _assetId The id of the token to be deposited
-    /// @param _enableAsColl If the supply asset should be collateral
     /// @param _onBehalf For what user we are supplying the tokens, defaults to user's wallet
     function _supply(
         address _market,
         uint256 _amount,
         address _from,
         uint16 _assetId,
-        bool _enableAsColl,
         address _onBehalf
     ) internal returns (uint256, bytes memory) {
         IPoolV3 lendingPool = getLendingPool(_market);
@@ -134,25 +122,24 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
 
         lendingPool.supply(tokenAddr, _amount, _onBehalf, AAVE_REFERRAL_CODE);
 
-        if (_enableAsColl) {
-            lendingPool.setUserUseReserveAsCollateral(tokenAddr, true);
-        } else {
-            lendingPool.setUserUseReserveAsCollateral(tokenAddr, false);
-        }
-
         bytes memory logData = abi.encode(
             _market,
             tokenAddr,
             _amount,
             _from,
-            _onBehalf,
-            _enableAsColl
+            _onBehalf
         );
         return (_amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
+        if (!params.useOnBehalf) {
+            params.onBehalf = address(0);
+        }
     }
 
     function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
