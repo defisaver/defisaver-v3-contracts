@@ -23,7 +23,6 @@ const {
     BN2Float,
     takeSnapshot,
     revertToSnapshot,
-    getAddrFromRegistry,
     ETH_ADDR,
     BLOCKS_PER_6H,
 } = require('../../utils');
@@ -185,8 +184,7 @@ const aaveV3RepayStrategyTest = async (numTestPairs) => {
         let subIds;
         let collAssetId;
         let debtAssetId;
-        let flAaveV3Addr;
-        let flAaveV3;
+        let flAction;
 
         before(async () => {
             console.log(`Network: ${network}`);
@@ -218,9 +216,7 @@ const aaveV3RepayStrategyTest = async (numTestPairs) => {
             await redeploy('AaveV3Payback');
             await redeploy('AaveV3Withdraw');
             await redeploy('AaveV3RatioCheck');
-
-            flAaveV3Addr = (await getAddrFromRegistry('FLAaveV3')).toString();
-            flAaveV3 = await hre.ethers.getContractAt('FLAaveV3', flAaveV3Addr);
+            flAction = await redeploy('FLAction');
 
             aaveView = await redeploy('AaveV3View');
 
@@ -273,15 +269,15 @@ const aaveV3RepayStrategyTest = async (numTestPairs) => {
 
                 await deployBundles(proxy);
 
-                const targetRatio = hre.ethers.utils.parseUnits('2.3', '18');
-                const ratioUnder = hre.ethers.utils.parseUnits('2.2', '18');
+                const targetRatio = 230;
+                const ratioUnder = 220;
 
                 subIds = await subAaveV3L2AutomationStrategy(
                     proxy,
-                    ratioUnder.toHexString().slice(2),
-                    '0',
-                    '0',
-                    targetRatio.toHexString().slice(2),
+                    ratioUnder,
+                    0,
+                    0,
+                    targetRatio,
                     false,
                 );
             });
@@ -345,7 +341,7 @@ const aaveV3RepayStrategyTest = async (numTestPairs) => {
                     debtAddr,
                     debtAssetId,
                     repayAmount,
-                    flAaveV3.address,
+                    flAction.address,
                     1,
                 );
 
@@ -371,8 +367,7 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
         let subIds;
         let collAssetId;
         let debtAssetId;
-        let flAaveV3Addr;
-        let flAaveV3;
+        let flAction;
 
         before(async () => {
             console.log(`Network: ${network}`);
@@ -404,9 +399,7 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
             await redeploy('AaveV3Supply');
             await redeploy('AaveV3Borrow');
             await redeploy('AaveV3RatioCheck');
-
-            flAaveV3Addr = (await getAddrFromRegistry('FLAaveV3')).toString();
-            flAaveV3 = await hre.ethers.getContractAt('FLAaveV3', flAaveV3Addr);
+            flAction = await redeploy('FLAction');
 
             aaveView = await redeploy('AaveV3View');
 
@@ -456,17 +449,17 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
                     debtAssetId,
                 );
 
-                // await deployBundles(proxy);
+                await deployBundles(proxy);
 
-                const targetRatio = hre.ethers.utils.parseUnits('1.5', '18');
-                const ratioOver = hre.ethers.utils.parseUnits('1.7', '18');
+                const targetRatio = 150;
+                const ratioOver = 170;
 
                 subIds = await subAaveV3L2AutomationStrategy(
                     proxy,
-                    '0',
-                    ratioOver.toHexString().slice(2),
-                    targetRatio.toHexString().slice(2),
-                    '0',
+                    0,
+                    ratioOver,
+                    targetRatio,
+                    0,
                     true,
                 );
             });
@@ -531,7 +524,7 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
                         collAssetId,
                         debtAssetId,
                         boostAmount,
-                        flAaveV3.address,
+                        flAction.address,
                         1, // strategyIndex
                     );
                 } catch (error) {
@@ -694,7 +687,7 @@ const aaveV3CloseToDebtStrategyTest = async (numTestPairs) => {
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
                     8,
                 );
 
@@ -913,7 +906,7 @@ const aaveV3FLCloseToDebtStrategyTest = async (numTestPairs) => {
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
                     8,
                 );
 
@@ -1160,7 +1153,7 @@ const aaveV3CloseToCollStrategyTest = async (numTestPairs) => {
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
                     8,
                 );
 
@@ -1408,7 +1401,7 @@ const aaveV3FLCloseToCollStrategyTest = async (numTestPairs) => {
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
                     8,
                 );
 

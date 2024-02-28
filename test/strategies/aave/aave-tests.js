@@ -25,7 +25,6 @@ const {
     openStrategyAndBundleStorage,
     getProxy,
     setNewExchangeWrapper,
-    Float2BN,
     fetchAmountinUSDPrice,
     approve,
     setBalance,
@@ -158,14 +157,7 @@ const aaveV2BoostTest = () => describe('Aave-Boost-Strategy', function () {
                 senderAcc.address,
             );
 
-            subData = await subAaveV2AutomationStrategy(
-                proxy,
-                Float2BN('120', 16).toString(),
-                Float2BN('200', 16).toString(),
-                Float2BN('150', 16).toString(),
-                Float2BN('150', 16).toString(),
-                true,
-            );
+            subData = await subAaveV2AutomationStrategy(proxy, 120, 200, 150, 150, true);
         });
 
         it('... should trigger a Aave Boost strategy', async () => {
@@ -297,14 +289,7 @@ const aaveV2RepayTest = () => describe('Aave-Repay-Strategy', function () {
                 senderAcc.address,
             );
 
-            subData = await subAaveV2AutomationStrategy(
-                proxy,
-                Float2BN('200', 16).toString(),
-                Float2BN('300', 16).toString(),
-                Float2BN('250', 16).toString(),
-                Float2BN('250', 16).toString(),
-                true,
-            );
+            subData = await subAaveV2AutomationStrategy(proxy, 200, 300, 250, 250, true);
         });
 
         it('... should trigger a Aave Repay strategy', async () => {
