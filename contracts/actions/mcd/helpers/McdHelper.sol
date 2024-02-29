@@ -141,23 +141,6 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
         return (collateral, rmul(debt, rate));
     }
 
-    /// @notice Address that owns the DSProxy that owns the CDP
-    /// @param _manager Manager contract
-    /// @param _cdpId Id of the CDP
-    function getOwner(IManager _manager, uint _cdpId) public view returns (address) {
-        address owner;
-        
-        if (address(_manager) == CROPPER) {
-            owner = ICdpRegistry(CDP_REGISTRY).owns(_cdpId);
-        } else {
-            owner = _manager.owns(_cdpId);
-        }
-
-        DSProxy proxy = DSProxy(payable(address(uint160(owner))));
-
-        return proxy.owner();
-    }
-
     /// @notice Returns all the collateral of the vault, formatted in the correct decimal
     /// @dev Will fail if token is over 18 decimals
     function getAllColl(IManager _mcdManager, address _joinAddr, uint _vaultId) internal view returns (uint amount) {
