@@ -86,7 +86,7 @@ contract TestCompV3EOAAutomation is
 
     function _setUpExchangeWrapper() internal {
         WrapperExchangeRegistry exchangeRegistry = WrapperExchangeRegistry(Const.WRAPPER_EXCHANGE_REGISTRY);
-        vm.startPrank(Const.OWNCER_ACC);
+        vm.startPrank(Const.OWNER_ACC);
         exchangeRegistry.addWrapper(TokenAddresses.UNI_V2_WRAPPER);
         vm.stopPrank();
     }
