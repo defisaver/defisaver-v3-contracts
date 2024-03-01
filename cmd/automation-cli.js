@@ -1,3 +1,5 @@
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable max-len */
 require('dotenv-safe').config();
 
 const ethers = require('ethers');
@@ -63,25 +65,23 @@ const getAllStrategies = async (options) => {
             isContinuous: strategy.continuous,
             triggerIds: strategy.triggerIds.map((triggerId) => idsMap[triggerId]?.fileName?.toString()),
             actionIds: strategy.actionIds.map((actionId) => idsMap[actionId]?.fileName?.toString()),
-            paramMapping: strategy.paramMapping.map((param) => {
-                return param.map((p) => {
-                    if (p == 254) return '&proxy';
-                    if (p == 255) return '&eoa';
+            paramMapping: strategy.paramMapping.map((param) => param.map((p) => {
+                if (p === 254) return '&proxy';
+                if (p === 255) return '&eoa';
 
-                    if (p <= 127 && p > 0) {
-                        return `$${p}`;
-                    }
+                if (p <= 127 && p > 0) {
+                    return `$${p}`;
+                }
 
-                    if (p >= 128 && p <= 253) {
-                        return `&${p - 127}`;
-                    }
+                if (p >= 128 && p <= 253) {
+                    return `&${p - 127}`;
+                }
 
-                    return p;
-                });
-            }),
+                return p;
+            })),
         };
 
-        if ( strategyInBundleMap[index] !== undefined ) {
+        if (strategyInBundleMap[index] !== undefined) {
             strategyInfo.bundleId = strategyInBundleMap[index];
         }
         return strategyInfo;
@@ -94,17 +94,15 @@ const getAllStrategies = async (options) => {
     console.log(`Strategies written to ${filePath}`);
 };
 
-
 (async () => {
     program
         .command('get-strategy <id>')
         .option('-n, --network <network>', 'Specify network we are calling (defaults to L1)', [])
-        .description('Returns strategy data based on id or name')
+        .description('Returns strategy data based on id')
         .action(async (id, options) => {
             await getStrategy(id, options);
             process.exit(0);
         });
-
 
     program
         .command('sync-strategies')
@@ -115,5 +113,5 @@ const getAllStrategies = async (options) => {
             process.exit(0);
         });
 
-        program.parse(process.argv);
+    program.parse(process.argv);
 })();

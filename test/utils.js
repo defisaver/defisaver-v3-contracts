@@ -1360,7 +1360,7 @@ const generateIds = () => {
 
         idsMap[id] = { fileName, filePath };
         // add id if it's contract name + New at the end
-        idsMap[`${getNameId(fileName)}New`] = { fileName: `${fileName}New`, filePath };
+        idsMap[`${id}New`] = { fileName: `${fileName}New`, filePath };
     });
 
     return idsMap;
