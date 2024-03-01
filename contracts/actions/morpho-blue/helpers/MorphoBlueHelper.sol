@@ -4,6 +4,7 @@ pragma solidity =0.8.10;
 import "./MainnetMorphoBlueAddresses.sol";
 import "../../../interfaces/morpho-blue/IMorphoBlue.sol";
 import "./MorphoBlueLib.sol";
+import "../../../interfaces/morpho-blue/IOracle.sol";
 
 contract MorphoBlueHelper is MainnetMorphoBlueAddresses {
     IMorphoBlue public constant morphoBlue = IMorphoBlue(MORPHO_BLUE_ADDRESS);
@@ -30,5 +31,29 @@ contract MorphoBlueHelper is MainnetMorphoBlueAddresses {
     function getSupplyShares(MarketParams memory marketParams, address owner) internal view returns (uint256 supplyShares){
         Id marketId = MarketParamsLib.id(marketParams);
         supplyShares = MorphoLib.supplyShares(morphoBlue, marketId, owner);
+    }
+
+    function getRatioUsingParams(MarketParams memory marketParams, address owner) public returns (uint256 ratio){
+        Id marketId = MarketParamsLib.id(marketParams);
+        ratio = getRatio(marketId, marketParams, owner);
+    }
+
+    function getRatioUsingId(Id marketId, address owner) public returns (uint256 ratio){
+        MarketParams memory marketParams = morphoBlue.idToMarketParams(marketId);
+        ratio = getRatio(marketId, marketParams, owner);
+    }
+
+    function getRatio(Id marketId, MarketParams memory marketParams, address owner) public returns (uint256 ratio){
+        uint256 oraclePrice = IOracle(marketParams.oracle).price();
+        morphoBlue.accrueInterest(marketParams);
+
+        Market memory market = morphoBlue.market(marketId);
+        MorphoBluePosition memory position = morphoBlue.position(marketId, owner);
+        
+        uint256 collateral = position.collateral;
+        if (collateral == 0) return 0;
+        uint256 debt = SharesMathLib.toAssetsUp(position.borrowShares, market.totalBorrowAssets, market.totalBorrowShares);
+        if (debt == 0) return 0;
+        ratio = collateral * oraclePrice / debt / 1e18;
     }
 }

@@ -575,6 +575,17 @@
         "history": []
     },
     {
+        "name": "ChangeProxyOwner",
+        "address": "0x1947a44d3717a47556175d64fdc208619aa08874",
+        "id": "0x67314f12",
+        "path": "contracts/actions/utils/ChangeProxyOwner.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AaveV3View",
         "address": "0x125b8b832BD7F2EBD77Eef148A6319AdE751C44b",
         "id": "0x026c569e",

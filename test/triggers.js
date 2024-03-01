@@ -23,6 +23,23 @@ const createReflexerTrigger = async (safeId, ratio, ratioState) => {
     return param;
 };
 
+const createLiquityTrigger = async (user, ratio, ratioState) => {
+    const param = abiCoder.encode(['address', 'uint256', 'uint8'], [user, ratio, ratioState]);
+
+    return param;
+};
+
+const createCurveUsdCollRatioTrigger = async (user, controllerAddr, ratio, ratioState) => {
+    const param = abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [user, controllerAddr, ratio, ratioState]);
+
+    return param;
+};
+
+const createMorphoBlueRatioTrigger = async (marketId, user, ratio, state) => {
+    const param = abiCoder.encode(['bytes32', 'address', 'uint256', 'uint8'], [marketId, user, ratio, state]);
+    return param;
+};
+
 const createChainLinkPriceTrigger = async (tokenAddr, price, state) => {
     const param = abiCoder.encode(['address', 'uint256', 'uint8'], [tokenAddr, price, state]);
     return param;
@@ -52,6 +69,14 @@ module.exports = {
     createTimestampTrigger,
     createGasPriceTrigger,
     createReflexerTrigger,
+    createLiquityTrigger,
+    createTrailingStopTrigger,
+    createCbRebondTrigger,
+    createOffchainPriceTrigger,
+    createMorphoTrigger,
+    createDebtInFrontWithLimitTrigger,
+    createCurveUsdCollRatioTrigger,
+    createMorphoBlueRatioTrigger,
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
     IN_BOOST,
