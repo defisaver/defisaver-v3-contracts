@@ -1289,7 +1289,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBlueWithdraw",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1300,7 +1300,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBlueWithdrawCollateral",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1311,7 +1311,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBlueBorrow",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1322,7 +1322,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBluePayback",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1333,7 +1333,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBlueSupply",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1344,7 +1344,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBlueSupplyCollateral",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1355,7 +1355,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBlueSetAuth",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1366,7 +1366,29 @@
         "path": "contracts/actions/morpho-blue/MorphoBlueSetAuthWithSig",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueRatioTrigger",
+        "address": "0xaD062b3A9DdCe72E7df6278f14A5A6a6190f9B14",
+        "id": "0x98c39012",
+        "path": "contracts/triggers/MorphoBlueRatioTrigger",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueRatioCheck",
+        "address": "0xE0531Cb87BF2Ae61bcBd1719E6154e823Effb2a7",
+        "id": "0xf913c3b7",
+        "path": "contracts/actions/checker/MorphoBlueRatioCheck",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },

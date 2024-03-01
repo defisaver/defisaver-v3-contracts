@@ -621,9 +621,12 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
     let registry = await registryInstance.attach(regAddr);
 
     registry = registry.connect(signer);
-
-    const c = await deployAsOwner(name, undefined, ...args);
-
+    let deployer;
+    if (isFork) {
+        // if script is consistenly failing due to tenderly delete this
+        deployer = await hre.ethers.provider.getSigner(getOwnerAddr());
+    }
+    const c = await deployAsOwner(name, deployer, ...args);
     if (name === 'StrategyExecutor' || name === 'StrategyExecutorL2') {
         // eslint-disable-next-line no-param-reassign
         name = 'StrategyExecutorID';
