@@ -4045,14 +4045,14 @@
     "id": 86,
     "isContinuous": true,
     "triggerIds": [
-      null
+      "MorphoBlueRatioTrigger"
     ],
     "actionIds": [
       "MorphoBlueWithdrawCollateral",
       "DFSSell",
       "GasFeeTaker",
       "MorphoBluePayback",
-      null
+      "MorphoBlueRatioCheck"
     ],
     "paramMapping": [
       [
@@ -4105,7 +4105,7 @@
     "id": 87,
     "isContinuous": true,
     "triggerIds": [
-      null
+      "MorphoBlueRatioTrigger"
     ],
     "actionIds": [
       "FLAction",
@@ -4113,7 +4113,7 @@
       "GasFeeTaker",
       "MorphoBluePayback",
       "MorphoBlueWithdrawCollateral",
-      null
+      "MorphoBlueRatioCheck"
     ],
     "paramMapping": [
       [],
@@ -4167,7 +4167,7 @@
     "id": 88,
     "isContinuous": true,
     "triggerIds": [
-      null
+      "MorphoBlueRatioTrigger"
     ],
     "actionIds": [
       "FLAction",
@@ -4176,7 +4176,7 @@
       "DFSSell",
       "GasFeeTaker",
       "SendTokens",
-      null
+      "MorphoBlueRatioCheck"
     ],
     "paramMapping": [
       [],
@@ -4238,14 +4238,14 @@
     "id": 89,
     "isContinuous": true,
     "triggerIds": [
-      null
+      "MorphoBlueRatioTrigger"
     ],
     "actionIds": [
       "MorphoBlueBorrow",
       "DFSSell",
       "GasFeeTaker",
       "MorphoBlueSupplyCollateral",
-      null
+      "MorphoBlueRatioCheck"
     ],
     "paramMapping": [
       [
@@ -4298,7 +4298,7 @@
     "id": 90,
     "isContinuous": true,
     "triggerIds": [
-      null
+      "MorphoBlueRatioTrigger"
     ],
     "actionIds": [
       "FLAction",
@@ -4306,7 +4306,7 @@
       "GasFeeTaker",
       "MorphoBlueSupplyCollateral",
       "MorphoBlueBorrow",
-      null
+      "MorphoBlueRatioCheck"
     ],
     "paramMapping": [
       [],
@@ -4360,7 +4360,7 @@
     "id": 91,
     "isContinuous": true,
     "triggerIds": [
-      null
+      "MorphoBlueRatioTrigger"
     ],
     "actionIds": [
       "FLAction",
@@ -4369,7 +4369,7 @@
       "DFSSell",
       "GasFeeTaker",
       "SendTokens",
-      null
+      "MorphoBlueRatioCheck"
     ],
     "paramMapping": [
       [],
