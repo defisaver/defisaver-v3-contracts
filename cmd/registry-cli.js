@@ -8,8 +8,7 @@ const ethers = require('ethers');
 const { program } = require('commander');
 
 const { addrs } = require('../test/utils');
-const { getAllFiles } = require('../scripts/hardhat-tasks-functions');
-const { getNameId } = require('../test/utils');
+const { getNameId, generateIds } = require('../test/utils');
 
 const registryAbi = require('../artifacts/contracts/core/DFSRegistry.sol/DFSRegistry.json').abi;
 
@@ -23,26 +22,6 @@ const setRegistry = async (options) => {
     const registry = new ethers.Contract(addrs[network].REGISTRY_ADDR, registryAbi, provider);
 
     return registry;
-};
-
-const generateIds = () => {
-    const idsMap = {};
-    const files = getAllFiles('./contracts');
-
-    // add extra non-contract name ids
-    files.push('/StrategyExecutorID.sol');
-    files.push('/FLActionL2.sol');
-
-    files.forEach((filePath) => {
-        const fileName = filePath.split('/').pop().split('.')[0];
-        const id = getNameId(fileName);
-
-        idsMap[id] = { fileName, filePath };
-        // add id if it's contract name + New at the end
-        idsMap[`${getNameId(fileName)}New`] = { fileName: `${fileName}New`, filePath };
-    });
-
-    return idsMap;
 };
 
 const parseAddNewContractEvent = (event) => ({
