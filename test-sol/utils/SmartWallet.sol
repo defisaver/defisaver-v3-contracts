@@ -9,13 +9,13 @@ import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterf
 import { DSProxy } from "../../contracts/DS/DSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
-import { console } from "forge-std/console.sol";
 
 contract SmartWallet is BaseTest {
 
     address payable public owner;
     address payable public walletAddr;
     bool public isSafe;
+    bool private safeInitialized;
 
     error SafeTxFailed();
 
@@ -38,12 +38,15 @@ contract SmartWallet is BaseTest {
         vm.label(walletAddr, "SmartWallet");
     }
 
-    function createDSProxy() internal ownerAsSender() {
+    function createDSProxy() public ownerAsSender() returns(address payable) {
         walletAddr = payable(address(DSProxyFactoryInterface(Const.DS_PROXY_FACTORY).build()));
         isSafe = false;
+        return walletAddr;
     }
 
-    function createSafe() internal ownerAsSender() {
+    function createSafe() public ownerAsSender() returns(address payable) {
+        if (safeInitialized) return walletAddr;
+
         uint256 saltNonce = block.timestamp;
         address[] memory owners = new address[](1);
         owners[0] = owner;
@@ -65,7 +68,11 @@ contract SmartWallet is BaseTest {
             setupData,
             saltNonce
         ));
+
         isSafe = true;
+        safeInitialized = true;
+
+        return walletAddr;
     }
 
     function execute(

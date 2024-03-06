@@ -42,6 +42,12 @@ contract BaseTest is Config {
         vm.selectFork(mainnetFork);
     }
 
+    function forkMainnetLatest() internal {
+        string memory mainnerRpc = vm.envString("ETHEREUM_NODE");
+        uint256 mainnetFork = vm.createFork(mainnerRpc);
+        vm.selectFork(mainnetFork);
+    }
+
     function approve(address _token, address _to, uint256 _amount) internal {
         IERC20(_token).safeApprove(_to, _amount);
     }
@@ -54,8 +60,16 @@ contract BaseTest is Config {
         return IERC20(_token).balanceOf(_who);
     }
 
+    function prank(address _sender) internal {
+        vm.prank(_sender);
+    }
+
     function stopPrank() internal {
         vm.stopPrank();
+    }
+
+    function startPrank(address _sender) internal {
+        vm.startPrank(_sender);
     }
 
     function removeSelector(bytes memory _data) internal pure returns (bytes memory) {

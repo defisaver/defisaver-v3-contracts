@@ -20,6 +20,9 @@ import { AaveV3CollateralSwitch } from "../../contracts/actions/aaveV3/AaveV3Col
 import { AaveV3ClaimRewards } from "../../contracts/actions/aaveV3/AaveV3ClaimRewards.sol";
 import { AaveV3Payback } from "../../contracts/actions/aaveV3/AaveV3Payback.sol";
 import { AaveV3ATokenPayback } from "../../contracts/actions/aaveV3/AaveV3ATokenPayback.sol";
+import { SumInputs } from "../../contracts/actions/utils/SumInputs.sol";
+import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
+import { SendToken } from "../../contracts/actions/utils/SendToken.sol";
 
 contract ActionsUtils {
 
@@ -407,5 +410,44 @@ contract ActionsUtils {
             })
         );
     }
-    
+
+    function sumInputsEncode(
+        uint256 _a,
+        uint256 _b
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SumInputs.Params({
+                a: _a,
+                b: _b
+            })
+        );
+    }
+
+    function pullTokenEncode(
+        address _tokenAddr,
+        address _from,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            PullToken.Params({
+                tokenAddr: _tokenAddr,
+                from: _from,
+                amount: _amount
+            })
+        );
+    }
+
+    function sendTokenEncode(
+        address _tokeAddr,
+        address _to,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SendToken.Params({
+                tokenAddr: _tokeAddr,
+                to: _to,
+                amount: _amount
+            })
+        );
+    }
 }
