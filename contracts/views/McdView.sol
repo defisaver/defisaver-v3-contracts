@@ -64,9 +64,25 @@ contract McdView is DSMath, McdHelper {
         (collateral, debt) = vat.urns(ilk, urn);
     }
 
+    /// @dev Returns the owner of the proxy if the proxy is DSProxy
     function _getProxyOwner(address owner) external view returns (address userAddr) {
         IDSProxy proxy = IDSProxy(owner);
         userAddr = proxy.owner();
+    }
+
+    /// @notice Address that owns the CDP, might be DSProxy, Safe or EOA
+    /// @param _manager Manager contract
+    /// @param _cdpId Id of the CDP
+    function getOwner(IManager _manager, uint _cdpId) public view returns (address) {
+        address owner;
+        
+        if (address(_manager) == CROPPER) {
+            owner = ICdpRegistry(CDP_REGISTRY).owns(_cdpId);
+        } else {
+            owner = _manager.owns(_cdpId);
+        }
+
+        return address(owner);
     }
 
     /// @notice Gets a price of the asset
