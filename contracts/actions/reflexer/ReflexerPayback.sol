@@ -62,10 +62,9 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
         address safe = safeManager.safes(_safeId);
         bytes32 collType = safeManager.collateralTypes(_safeId);
 
-        // if amount type(uint256).max payback the whole safe debt
-        if (_amount == type(uint256).max) {
-            _amount = getAllDebt(safe, safe, collType);
-        }
+        // if _amount is higher than current debt, repay all debt
+        uint256 debt = getAllDebt(safe, safe, collType);
+        _amount = _amount > debt ? debt : _amount;
 
         // pull rai from user and join the reflexer pool
         RAI_ADDRESS.pullTokensIfNeeded(_from, _amount);
