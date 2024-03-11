@@ -29,6 +29,7 @@ const {
     UNIV2_ROUTER_ADDRESS,
     setBalance,
     impersonateAccount,
+    sendEther,
 } = require('../utils');
 const {
     safeCount,
@@ -536,6 +537,8 @@ const reflexerWithdrawStuckFundsTest = async () => {
             await redeploy('ReflexerWithdrawStuckFunds');
 
             const proxyOwner = '0x4846AEe6d7C9f176F3F329E01A014c2794E21B92';
+
+            await sendEther((await hre.ethers.getSigners())[0], proxyOwner, '1');
             const proxyAddr = '0xbbda108353b76742ed887056275fe1445ecc1b92';
             const safeId = 1443;
             const signer = (await hre.ethers.getSigners())[0];
