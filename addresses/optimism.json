@@ -325,6 +325,28 @@
       "history": []
     },
     {
+      "name": "SumInputs",
+      "address": "0xd19C646Be027a7a04ea4201f116d43659b8b5f65",
+      "id": "0xb49404ac",
+      "path": "contracts/actions/utils/SumInputs.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "SubInputs",
+      "address": "0x60d00020f12dd202eAfDba84e8F69E165a84c64D",
+      "id": "0x2f36fd35",
+      "path": "contracts/actions/utils/SubInputs.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "SendToken",
       "address": "0x053D0dB021c5A912a854176B34D94521da9E6911",
       "id": "0x02abc227",

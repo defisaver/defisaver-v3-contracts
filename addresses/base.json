@@ -77,6 +77,28 @@
       "history": []
     },
     {
+      "name": "SumInputs",
+      "address": "0xC856ef8fe425B2EFe373e0e7038fAFF4a4f764fE",
+      "id": "0xb49404ac",
+      "path": "contracts/actions/utils/SumInputs.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "SubInputs",
+      "address": "0xd244B1991Fcb8FC0f32FA55bce37714fc5929B95",
+      "id": "0x2f36fd35",
+      "path": "contracts/actions/utils/SubInputs.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "ProxyAuth",
       "address": "0xD34BBE7398F7F08952b033bbaF2D2C84231dCEdc",
       "id": "0x5079c3ea",
