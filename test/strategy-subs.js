@@ -26,6 +26,8 @@ const {
     IN_REPAY,
     IN_BOOST,
     createMorphoBlueRatioTrigger,
+    createCurveUsdHealthRatioTrigger,
+    createBalanceAndAllowanceTrigger,
 } = require('./triggers');
 
 const {
@@ -718,6 +720,25 @@ const subCurveUsdRepayBundle = async (
 
     return { subId, strategySub };
 };
+
+const subCurveUsdPaybackStrategy = async (
+    proxy, strategyId, from, amount, curveUsdAddress, useBalanceFrom, controllerAddr, minHealthRatio,
+) => {
+    const balanceAndAllowanceTriggerData = await createBalanceAndAllowanceTrigger(from, proxy.address, curveUsdAddress, amount, useBalanceFrom);
+    const crvUsdHealthRatioTriggerData = await createCurveUsdHealthRatioTrigger(proxy.address, controllerAddr, minHealthRatio);
+    const triggerData = [balanceAndAllowanceTriggerData, crvUsdHealthRatioTriggerData];
+
+    const controllerAddressEncoded = abiCoder.encode(['address'], [controllerAddr]);
+    const minHealthRatioEncoded = abiCoder.encode(['uint256'], [minHealthRatio.toString()]);
+    const curveUsdAddressEncoded = abiCoder.encode(['address'], [curveUsdAddress]);
+    const subDataEncoded = [controllerAddressEncoded, minHealthRatioEncoded, curveUsdAddressEncoded];
+
+    const strategySub = [strategyId, false, triggerData, subDataEncoded];
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+
 const subCurveUsdBoostBundle = async (
     proxy, controllerAddr, maxRatio, targetRatio, collTokenAddress, crvUsdAddress,
 ) => {
@@ -823,6 +844,7 @@ module.exports = {
     subAaveV3CloseWithMaximumGasPriceBundle,
     subCurveUsdRepayBundle,
     subCurveUsdBoostBundle,
+    subCurveUsdPaybackStrategy,
     subMorphoBlueBoostBundle,
     subMorphoBlueRepayBundle,
 };
