@@ -3,7 +3,6 @@
 pragma solidity =0.8.10;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { TransientStorage } from "../utils/TransientStorage.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { ICrvUsdController } from "../interfaces/curveusd/ICurveUsd.sol";
@@ -11,8 +10,6 @@ import { ICrvUsdController } from "../interfaces/curveusd/ICurveUsd.sol";
 /// @title Trigger contract that verifies if the CurveUSD position health ratio went under the subbed ratio
 contract CurveUsdHealthRatioTrigger is ITrigger, AdminAuth, TriggerHelper {
 
-    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
-    
     /// @param user address of the user whose position we check
     /// @param market CurveUSD controller address
     /// @param ratio ratio that represents the triggerable point
@@ -26,6 +23,7 @@ contract CurveUsdHealthRatioTrigger is ITrigger, AdminAuth, TriggerHelper {
     function isTriggered(bytes memory, bytes memory _subData)
         public
         override
+        view
         returns (bool)
     {   
         SubParams memory triggerSubData = parseInputs(_subData);
@@ -37,8 +35,6 @@ contract CurveUsdHealthRatioTrigger is ITrigger, AdminAuth, TriggerHelper {
 
         int256 currentHealth = controller.health(triggerSubData.user, true);
         
-        tempStorage.setBytes32("CURVEUSD_HEALTH_RATIO", bytes32(uint256(currentHealth)));
-
         return uint256(currentHealth) < triggerSubData.ratio;
     }
 

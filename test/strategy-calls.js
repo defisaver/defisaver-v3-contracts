@@ -4681,14 +4681,9 @@ const callCurveUsdPaybackStrategy = async (botAcc, strategyExecutor, strategyInd
         '0',
         maxActiveBand, // sent by backend
     );
-    const curveUsdHealthRatioCheck = new dfs.actions.checkers.CurveUsdHealthRatioCheck(
-        '0',
-        nullAddress,
-    );
     actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(curveUsdPaybackAction.encodeForRecipe()[0]);
-    actionsCallData.push(curveUsdHealthRatioCheck.encodeForRecipe()[0]);
 
     const triggerCallData = [];
     const borrowAllowanceTrigger = new dfs.triggers.BalanceAndAllowanceTrigger(

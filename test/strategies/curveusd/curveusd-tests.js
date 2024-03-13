@@ -455,7 +455,6 @@ const curveUsdPaybackStrategyTest = async () => {
 
             strategyExecutor = await redeployCore();
             crvusdView = await redeploy('CurveUsdView');
-            await redeploy('CurveUsdHealthRatioCheck');
             await redeploy('CurveUsdHealthRatioTrigger');
             await redeploy('BalanceAndAllowanceTrigger');
             await redeploy('CurveUsdPayback');

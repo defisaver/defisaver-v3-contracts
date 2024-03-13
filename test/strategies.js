@@ -3987,14 +3987,9 @@ const createCurveUsdPaybackStrategy = () => {
         '$2', // output of gas fee taker action
         '%maxActiveBand', // sent by backend
     );
-    const curveUsdHealthRatioCheck = new dfs.actions.checkers.CurveUsdHealthRatioCheck(
-        '&minHealthRatio', // taken from subdata
-        '&controllerAddr', // taken from subdata
-    );
     paybackStrategy.addAction(pullTokenAction);
     paybackStrategy.addAction(feeTakingAction);
     paybackStrategy.addAction(curveUsdPaybackAction);
-    paybackStrategy.addAction(curveUsdHealthRatioCheck);
     return paybackStrategy.encodeForDsProxyCall();
 };
 
