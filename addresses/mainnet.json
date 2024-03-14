@@ -2928,10 +2928,10 @@
     },
     {
         "name": "CurveWithdraw",
-        "address": "0x7127A1Cd69eC2A1F91661bc0ED40aD5B73898A54",
+        "address": "0x63d29e8c9ea520fdcc794a3048a8dede2b884f12",
         "id": "0x7633d6dc",
         "path": "contracts/actions/curve/lp/CurveWithdraw.sol",
-        "version": "1.0.4",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
@@ -2939,7 +2939,8 @@
             "0x7Fb9234E349F85678F6a02A291684A7008Ad78e2",
             "0xA2A6D75417807ebAf8364613018D697f88021771",
             "0xb6Be5c486dD65c2cb18A388671b348E62307F0B3",
-            "0x97616a969daaa8e1f27c4902745c88357e54ad6c"
+            "0x97616a969daaa8e1f27c4902745c88357e54ad6c",
+            "0x7127A1Cd69eC2A1F91661bc0ED40aD5B73898A54"
         ]
     },
     {
