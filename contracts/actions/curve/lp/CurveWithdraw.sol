@@ -76,6 +76,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
         _params.burnAmount = cache.lpToken.pullTokensIfNeeded(_params.from, _params.burnAmount);
         burned = cache.lpToken.getBalance(address(this));
         
+        /// @dev pool has mint ownership over lpToken, so if we're withdrawing directly from pool we don't need to approve
         if (cache.pool != cache.depositTarget) {
             cache.lpToken.approveToken(cache.depositTarget, _params.burnAmount);
         }
