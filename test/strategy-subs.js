@@ -27,7 +27,6 @@ const {
     IN_BOOST,
     createMorphoBlueRatioTrigger,
     createCurveUsdHealthRatioTrigger,
-    createBalanceAndAllowanceTrigger,
 } = require('./triggers');
 
 const {
@@ -722,16 +721,16 @@ const subCurveUsdRepayBundle = async (
 };
 
 const subCurveUsdPaybackStrategy = async (
-    proxy, strategyId, from, amount, curveUsdAddress, useMaxAvailableBalance, controllerAddr, minHealthRatio,
+    proxy, strategyId, amount, curveUsdAddress, controllerAddr, minHealthRatio,
 ) => {
-    const balanceAndAllowanceTriggerData = await createBalanceAndAllowanceTrigger(from, proxy.address, curveUsdAddress, amount, useMaxAvailableBalance);
     const crvUsdHealthRatioTriggerData = await createCurveUsdHealthRatioTrigger(proxy.address, controllerAddr, minHealthRatio);
-    const triggerData = [balanceAndAllowanceTriggerData, crvUsdHealthRatioTriggerData];
+    const triggerData = [crvUsdHealthRatioTriggerData];
 
     const controllerAddressEncoded = abiCoder.encode(['address'], [controllerAddr]);
     const minHealthRatioEncoded = abiCoder.encode(['uint256'], [minHealthRatio.toString()]);
+    const amountEncoded = abiCoder.encode(['uint256'], [amount]);
     const curveUsdAddressEncoded = abiCoder.encode(['address'], [curveUsdAddress]);
-    const subDataEncoded = [controllerAddressEncoded, minHealthRatioEncoded, curveUsdAddressEncoded];
+    const subDataEncoded = [controllerAddressEncoded, minHealthRatioEncoded, amountEncoded, curveUsdAddressEncoded];
 
     const strategySub = [strategyId, false, triggerData, subDataEncoded];
     const subId = await subToStrategy(proxy, strategySub);

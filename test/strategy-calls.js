@@ -4686,19 +4686,11 @@ const callCurveUsdPaybackStrategy = async (botAcc, strategyExecutor, strategyInd
     actionsCallData.push(curveUsdPaybackAction.encodeForRecipe()[0]);
 
     const triggerCallData = [];
-    const borrowAllowanceTrigger = new dfs.triggers.BalanceAndAllowanceTrigger(
-        nullAddress,
-        nullAddress,
-        nullAddress,
-        '0',
-        false,
-    );
     const curveUsdHealthRatioTrigger = new dfs.triggers.CurveUsdHealthRatioTrigger(
         nullAddress,
         nullAddress,
         '0',
     );
-    triggerCallData.push(borrowAllowanceTrigger.encodeForRecipe()[0]);
     triggerCallData.push(curveUsdHealthRatioTrigger.encodeForRecipe()[0]);
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);

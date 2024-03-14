@@ -24,7 +24,6 @@ async function main() {
 
     const curveUsdPayback = await redeploy('CurveUsdPayback', addrs[network].REGISTRY_ADDR, true, true);
     const curveUsdHealthRatioTrigger = await redeploy('CurveUsdHealthRatioTrigger', addrs[network].REGISTRY_ADDR, true, true);
-    const balanceAndAllowanceTrigger = await redeploy('BalanceAndAllowanceTrigger', addrs[network].REGISTRY_ADDR, true, true);
 
     await openStrategyAndBundleStorage(true);
 
@@ -38,7 +37,6 @@ async function main() {
 
     console.log('CurveUsdPayback deployed to:', curveUsdPayback.address);
     console.log('CurveUsdHealthRatioTrigger deployed to:', curveUsdHealthRatioTrigger.address);
-    console.log('BalanceAndAllowanceTrigger deployed to:', balanceAndAllowanceTrigger.address);
     console.log('StrategyId:', strategyId);
 
     // Bot toUp and add to botCaller

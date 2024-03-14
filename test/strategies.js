@@ -3962,17 +3962,16 @@ const createCurveUsdPaybackStrategy = () => {
 
     paybackStrategy.addSubSlot('&controllerAddr', 'address');
     paybackStrategy.addSubSlot('&minHealthRatio', 'uint256');
+    paybackStrategy.addSubSlot('&amountToPayback', 'uint256');
     paybackStrategy.addSubSlot('&crvUsdAddress', 'address');
 
-    const balanceAndAllowanceTrigger = new dfs.triggers.BalanceAndAllowanceTrigger(nullAddress, nullAddress, nullAddress, '0', false);
     const curveUsdHealthRatioTrigger = new dfs.triggers.CurveUsdHealthRatioTrigger(nullAddress, nullAddress, '0');
-    paybackStrategy.addTrigger(balanceAndAllowanceTrigger);
     paybackStrategy.addTrigger(curveUsdHealthRatioTrigger);
 
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
         '&crvUsdAddress', // taken from subdata
         '&eoa',
-        '%amountToPayback', // sent by backend, either amount from balanceAndApprovalTrigger data or maxUint for whole balance
+        '%amountToPayback', // sent by backend, either amount from sub data or maxUint for whole balance
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '0', // sent by backend
