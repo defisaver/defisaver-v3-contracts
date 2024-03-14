@@ -53,7 +53,7 @@ contract AaveHelper is MainnetAaveAddresses {
         return ILendingPoolV2(ILendingPoolAddressesProviderV2(_market).getLendingPool());
     }
 
-    function getWholeDebt(address _market, address _tokenAddr, uint _borrowType, address _debtOwner) internal view returns (uint256) {
+    function getWholeDebt(address _market, address _tokenAddr, uint _borrowType, address _debtOwner) internal view returns (uint256 wholeDebt) {
         uint256 STABLE_ID = 1;
         uint256 VARIABLE_ID = 2;
 
@@ -62,9 +62,9 @@ contract AaveHelper is MainnetAaveAddresses {
             dataProvider.getUserReserveData(_tokenAddr, _debtOwner);
 
         if (_borrowType == STABLE_ID) {
-            return borrowsStable;
+            wholeDebt = borrowsStable;
         } else if (_borrowType == VARIABLE_ID) {
-            return borrowsVariable;
+            wholeDebt =  borrowsVariable;
         }
     }
 }

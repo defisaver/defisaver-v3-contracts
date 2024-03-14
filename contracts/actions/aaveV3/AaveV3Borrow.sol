@@ -43,13 +43,6 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
             _returnValues
         );
 
-        if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
-        }
-        if (!params.useOnBehalf) {
-            params.onBehalf = address(0);
-        }
-
         (uint256 borrowAmount, bytes memory logData) = _borrow(
             params.market,
             params.assetId,
@@ -65,6 +58,14 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
+
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
+        if (!params.useOnBehalf) {
+            params.onBehalf = address(0);
+        }
+
         (, bytes memory logData) = _borrow(
             params.market,
             params.assetId,
@@ -102,7 +103,7 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
     /// @param _amount Amount of tokens to be borrowed
     /// @param _rateMode Type of borrow debt [Stable: 1, Variable: 2]
     /// @param _to The address we are sending the borrowed tokens to
-    /// @param _onBehalf On whose behalf we borrow the tokens, defaults to proxy
+    /// @param _onBehalf On whose behalf we borrow the tokens, defaults to user's wallet
     function _borrow(
         address _market,
         uint16 _assetId,
@@ -114,7 +115,7 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
         IPoolV3 lendingPool = getLendingPool(_market);
 
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);
-        // defaults to onBehalf of proxy
+        // defaults to onBehalf of user's wallet
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }
@@ -127,42 +128,48 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
+        if (!params.useOnBehalf) {
+            params.onBehalf = address(0);
+        }
     }
 
-    function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
+    function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
-        encodedInput = bytes.concat(encodedInput, bytes32(params.amount));
-        encodedInput = bytes.concat(encodedInput, bytes20(params.to));
-        encodedInput = bytes.concat(encodedInput, bytes1(params.rateMode));
-        encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(params.useOnBehalf));
-        if (!params.useDefaultMarket) {
-            encodedInput = bytes.concat(encodedInput, bytes20(params.market));
+        encodedInput = bytes.concat(encodedInput, bytes32(_params.amount));
+        encodedInput = bytes.concat(encodedInput, bytes20(_params.to));
+        encodedInput = bytes.concat(encodedInput, bytes1(_params.rateMode));
+        encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
+        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useOnBehalf));
+        if (!_params.useDefaultMarket) {
+            encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
-        if (params.useOnBehalf) {
-            encodedInput = bytes.concat(encodedInput, bytes20(params.onBehalf));
+        if (_params.useOnBehalf) {
+            encodedInput = bytes.concat(encodedInput, bytes20(_params.onBehalf));
         }
     }
 
-    function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        params.amount = uint256(bytes32(encodedInput[0:32]));
-        params.to = address(bytes20(encodedInput[32:52]));
-        params.rateMode = uint8(bytes1(encodedInput[52:53]));
-        params.assetId = uint16(bytes2(encodedInput[53:55]));
-        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[55:56]));
-        params.useOnBehalf = bytesToBool(bytes1(encodedInput[56:57]));
+    function decodeInputs(bytes calldata _encodedInput) public pure returns (Params memory params) {
+        params.amount = uint256(bytes32(_encodedInput[0:32]));
+        params.to = address(bytes20(_encodedInput[32:52]));
+        params.rateMode = uint8(bytes1(_encodedInput[52:53]));
+        params.assetId = uint16(bytes2(_encodedInput[53:55]));
+        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[55:56]));
+        params.useOnBehalf = bytesToBool(bytes1(_encodedInput[56:57]));
         uint256 mark = 57;
 
         if (params.useDefaultMarket) {
             params.market = DEFAULT_AAVE_MARKET;
         } else {
-            params.market = address(bytes20(encodedInput[mark:mark + 20]));
+            params.market = address(bytes20(_encodedInput[mark:mark + 20]));
             mark += 20;
         }
 
         if (params.useOnBehalf) {
-            params.onBehalf = address(bytes20(encodedInput[mark:mark + 20]));
+            params.onBehalf = address(bytes20(_encodedInput[mark:mark + 20]));
         } else {
             params.onBehalf = address(0);
         }

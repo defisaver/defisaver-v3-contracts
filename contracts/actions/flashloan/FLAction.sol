@@ -15,6 +15,7 @@ import "../../interfaces/balancer/IFlashLoans.sol";
 import "../../interfaces/uniswap/v3/IUniswapV3Pool.sol";
 import "../../interfaces/uniswap/v3/IUniswapV3Factory.sol";
 import "../../interfaces/morpho-blue/IMorphoBlue.sol";
+import "../../core/helpers/CoreHelper.sol";
 
 import "../../core/strategy/StrategyModel.sol";
 
@@ -28,10 +29,12 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     error UntrustedInitiator();
     /// @dev Caller in these functions must be relevant FL source address
     error UntrustedLender();
-
-    error WrongPaybackAmountError(); // Wrong FL payback amount sent
-
+    // Wrong FL payback amount sent
+    error WrongPaybackAmountError();
+    // When FL source is not found
     error NonexistentFLSource();
+    // Revert if execution fails when using safe wallet
+    error SafeExecutionError();
 
     enum FLSource {
         EMPTY,
@@ -52,7 +55,6 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
                 "_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"
             )
         );
-    bytes4 public constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     /// @inheritdoc ActionBase
     function actionType() public pure override returns (uint8) {
@@ -248,21 +250,15 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
             revert UntrustedInitiator();
         }
 
-        (Recipe memory currRecipe, address proxy) = abi.decode(_params, (Recipe, address));
+        (Recipe memory currRecipe, address wallet) = abi.decode(_params, (Recipe, address));
         uint256[] memory balancesBefore = new uint256[](_assets.length);
-        // Send FL amounts to user proxy
+        // Send FL amounts to user wallet
         for (uint256 i = 0; i < _assets.length; ++i) {
-            _assets[i].withdrawTokens(proxy, _amounts[i]);
+            _assets[i].withdrawTokens(wallet, _amounts[i]);
             balancesBefore[i] = _assets[i].getBalance(address(this));
         }
 
-        address payable recipeExecutor = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
-
-        // call Action execution
-        IDSProxy(proxy).execute{value: address(this).balance}(
-            recipeExecutor,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, bytes32(_amounts[0] + _fees[0]))
-        );
+        _executeRecipe(wallet, currRecipe, _amounts[0] + _fees[0]);
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
@@ -295,21 +291,16 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         if (msg.sender != VAULT_ADDR) {
             revert UntrustedLender();
         }
-        (Recipe memory currRecipe, address proxy) = abi.decode(_userData, (Recipe, address));
+        (Recipe memory currRecipe, address wallet) = abi.decode(_userData, (Recipe, address));
 
         uint256[] memory balancesBefore = new uint256[](_tokens.length);
         for (uint256 i = 0; i < _tokens.length; i++) {
-            _tokens[i].withdrawTokens(proxy, _amounts[i]);
+            _tokens[i].withdrawTokens(wallet, _amounts[i]);
             balancesBefore[i] = _tokens[i].getBalance(address(this));
         }
-        address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
 
-        // call Action execution
-        IDSProxy(proxy).execute{value: address(this).balance}(
-            recipeExecutorAddr,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, _amounts[0] +_feeAmounts[0])
-        );
-
+        _executeRecipe(wallet, currRecipe, _amounts[0] + _feeAmounts[0]);
+        
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 paybackAmount = _amounts[i] + (_feeAmounts[i]);
 
@@ -337,18 +328,14 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
             revert UntrustedInitiator();
         }
 
-        (Recipe memory currRecipe, address proxy) = abi.decode(_data, (Recipe, address));
-        _token.withdrawTokens(proxy, _amount);
+        (Recipe memory currRecipe, address wallet) = abi.decode(_data, (Recipe, address));
+        _token.withdrawTokens(wallet, _amount);
         uint256 balanceBefore = _token.getBalance(address(this));
 
-        address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
-
         uint256 paybackAmount = _amount +_fee;
-        // call Action execution
-        IDSProxy(proxy).execute{value: address(this).balance}(
-            recipeExecutorAddr,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, paybackAmount)
-        );
+
+        _executeRecipe(wallet, currRecipe, paybackAmount);
+
         if (_token.getBalance(address(this)) != paybackAmount + balanceBefore) {
             revert WrongPaybackAmountError();
         }
@@ -358,7 +345,11 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         return keccak256("ERC3156FlashBorrower.onFlashLoan");
     }
 
-    function uniswapV3FlashCallback(uint256 _fee0, uint256 _fee1, bytes memory _params) external nonReentrant {
+    function uniswapV3FlashCallback(
+        uint256 _fee0,
+        uint256 _fee1,
+        bytes memory _params
+    ) external nonReentrant {
         FlashLoanParams memory params = abi.decode(_params, (FlashLoanParams));
         {
             uint24 fee = IUniswapV3Pool(msg.sender).fee();
@@ -366,17 +357,12 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
             if (msg.sender != realPool) revert UntrustedLender();
         }
 
-        (Recipe memory currRecipe, address proxy) = abi.decode(params.recipeData, (Recipe, address));
-        address payable recipeExecutorAddr = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
+        (Recipe memory currRecipe, address wallet) = abi.decode(params.recipeData, (Recipe, address));
 
-        params.tokens[0].withdrawTokens(proxy, params.amounts[0]);
-        params.tokens[1].withdrawTokens(proxy, params.amounts[1]);
+        params.tokens[0].withdrawTokens(wallet, params.amounts[0]);
+        params.tokens[1].withdrawTokens(wallet, params.amounts[1]);
 
-        // call Action execution
-        IDSProxy(proxy).execute{value: address(this).balance}(
-            recipeExecutorAddr,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, params.amounts[0])
-        );
+        _executeRecipe(wallet, currRecipe, params.amounts[0]);
 
         uint256 expectedBalance0 = params.modes[0] + params.amounts[0] + _fee0;
         uint256 expectedBalance1 = params.modes[1] + params.amounts[1] + _fee1;
@@ -408,23 +394,38 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
             revert UntrustedLender();
         }
         (bytes memory taskData, address token) = abi.decode(data, (bytes, address));
-        (Recipe memory currRecipe, address proxy) = abi.decode(taskData, (Recipe, address));
+        (Recipe memory currRecipe, address wallet) = abi.decode(taskData, (Recipe, address));
 
-        token.withdrawTokens(proxy, assets);
+        token.withdrawTokens(wallet, assets);
 
         uint256 balanceBefore = token.getBalance(address(this));
-        address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
 
-        // call Action execution
-        IDSProxy(proxy).execute{value: address(this).balance}(
-            recipeExecutorAddr,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, assets)
-        );
+        _executeRecipe(wallet, currRecipe, assets);
 
         if (token.getBalance(address(this)) != assets + balanceBefore) {
             revert WrongPaybackAmountError();
         }
 
         token.approveToken(MORPHO_BLUE_ADDR, assets);
+    }
+
+    function _executeRecipe(address _wallet, Recipe memory _currRecipe, uint256 _paybackAmount) internal {
+        if (isDSProxy(_wallet)) {
+            IDSProxy(_wallet).execute{value: address(this).balance}(
+                RECIPE_EXECUTOR_ADDR,
+                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount)
+            );
+        } else {
+            bool success = ISafe(_wallet).execTransactionFromModule(
+                RECIPE_EXECUTOR_ADDR,
+                address(this).balance,
+                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount),
+                ISafe.Operation.DelegateCall
+            );
+
+            if (!success) {
+                revert SafeExecutionError();
+             }
+        }
     }
 }

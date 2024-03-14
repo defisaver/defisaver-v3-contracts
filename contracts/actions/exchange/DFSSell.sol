@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.10;
 
-import "../../interfaces/IDSProxy.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
-import "../../exchangeV3/TokenGroupRegistry.sol";
+import "../../exchangeV3/registries/TokenGroupRegistry.sol";
 import "../ActionBase.sol";
+
 
 /// @title A exchange sell action through the dfs exchange
 /// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
@@ -83,7 +83,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         address _to,
         bool _isDirect
     ) internal returns (uint256, bytes memory) {
-        // if we set srcAmount to max, take the whole proxy balance
+        // if we set srcAmount to max, take the whole user's wallet balance
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
@@ -115,8 +115,6 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             _exchangeData.destAddr = TokenUtils.WETH_ADDR;
             isEthDest = true;
         } 
-
-        _exchangeData.user = getUserAddress();
 
         /// @dev only check for custom fee if a non standard fee is sent
         if (!_isDirect) {
@@ -155,12 +153,5 @@ contract DFSSell is ActionBase, DFSExchangeCore {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
-    }
-
-    /// @notice Returns the owner of the DSProxy that called the contract
-    function getUserAddress() internal view returns (address) {
-        IDSProxy proxy = IDSProxy(payable(address(this)));
-
-        return proxy.owner();
     }
 }

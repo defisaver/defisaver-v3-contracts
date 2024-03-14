@@ -150,7 +150,8 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
             (address urn, bytes32 ilk) = getUrnAndIlk(MCD_MANAGER_ADDR, _repayParams.vaultId);
             uint256 debt = getAllDebt(address(vat), urn, urn, ilk);
             if (paybackAmount > debt) {
-                DAI_ADDR.withdrawTokens(IDSProxy(address(this)).owner(), paybackAmount - debt);
+                address owner = fetchOwnersOrWallet();
+                DAI_ADDR.withdrawTokens(owner, paybackAmount - debt);
                 paybackAmount = debt;
             }
 

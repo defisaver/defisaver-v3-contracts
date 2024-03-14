@@ -74,30 +74,30 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
         }
     }
 
-    function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
-        require (uint256(params.arrayLength) == params.assetIds.length);
-        require (uint256(params.arrayLength) == params.useAsCollateral.length);
+    function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
+        require (_params.arrayLength == _params.assetIds.length);
+        require (_params.arrayLength == _params.useAsCollateral.length);
 
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
-        encodedInput = bytes.concat(encodedInput, bytes1(params.arrayLength));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
-        for (uint256 i = 0; i < params.arrayLength; i++) {
-            encodedInput = bytes.concat(encodedInput, bytes2(params.assetIds[i]));
-            encodedInput = bytes.concat(encodedInput, boolToBytes(params.useAsCollateral[i]));
+        encodedInput = bytes.concat(encodedInput, bytes1(_params.arrayLength));
+        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        for (uint256 i = 0; i < _params.arrayLength; i++) {
+            encodedInput = bytes.concat(encodedInput, bytes2(_params.assetIds[i]));
+            encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useAsCollateral[i]));
         }
-        if (!params.useDefaultMarket) {
-            encodedInput = bytes.concat(encodedInput, bytes20(params.market));
+        if (!_params.useDefaultMarket) {
+            encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
     }
 
-    function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        params.arrayLength = uint8(bytes1(encodedInput[0:1]));
-        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[1:2]));
+    function decodeInputs(bytes calldata _encodedInput) public pure returns (Params memory params) {
+        params.arrayLength = uint8(bytes1(_encodedInput[0:1]));
+        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[1:2]));
         uint16[] memory assetIds = new uint16[](params.arrayLength);
         bool[] memory useAsCollateral = new bool[](params.arrayLength);
         for (uint256 i = 0; i < params.arrayLength; i++) {
-            assetIds[i] = uint16(bytes2(encodedInput[(2 + i * 3):(4 + i * 3)]));
-            useAsCollateral[i] = bytesToBool(bytes1(encodedInput[(4 + i * 3):(5 + i * 3)]));
+            assetIds[i] = uint16(bytes2(_encodedInput[(2 + i * 3):(4 + i * 3)]));
+            useAsCollateral[i] = bytesToBool(bytes1(_encodedInput[(4 + i * 3):(5 + i * 3)]));
         }
         params.assetIds = assetIds;
         params.useAsCollateral = useAsCollateral;
@@ -107,7 +107,7 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
         } else {
             params.market = address(
                 bytes20(
-                    encodedInput[(5 + (params.arrayLength - 1) * 3):(25 +
+                    _encodedInput[(5 + (params.arrayLength - 1) * 3):(25 +
                         (params.arrayLength - 1) *
                         3)]
                 )

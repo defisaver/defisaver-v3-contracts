@@ -53,7 +53,7 @@ contract UnwrapEth is ActionBase {
 
         TokenUtils.withdrawWeth(_amount);
 
-        // if _to == proxy, it will stay on proxy
+        // if _to == user's wallet, it will stay on user's wallet
         TokenUtils.ETH_ADDR.withdrawTokens(_to, _amount);
 
         return _amount;

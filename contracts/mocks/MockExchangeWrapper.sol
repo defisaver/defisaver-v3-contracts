@@ -31,23 +31,12 @@ contract MockExchangeWrapper is DSMath, IExchangeV3, AdminAuth {
         return amountOut;
     }
 
-    /// @dev deprecated function
-    function buy(address, address, uint, bytes calldata) external override returns(uint) {
-        return 0;
-    }
-
     /// @notice Return a rate for which we can sell an amount of tokens
-    /// @param _srcAmount From amount
     /// @param _additionalData Route and swap params
     /// @return uint256 Rate (price)
-    function getSellRate(address, address, uint256 _srcAmount, bytes memory _additionalData) public override returns (uint) {
+    function getSellRate(address, address, uint256, bytes memory _additionalData) public pure override returns (uint) {
         (uint256 rate) = abi.decode(_additionalData, (uint256));
         return rate;
-    }
-
-    /// @dev deprecated function
-    function getBuyRate(address, address, uint, bytes memory) public override returns (uint) {
-        return 0;
     }
 
     // solhint-disable-next-line no-empty-blocks

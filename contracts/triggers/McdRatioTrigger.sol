@@ -46,6 +46,7 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
 
     function isTriggered(bytes memory _callData, bytes memory _subData)
         public
+        view
         override
         returns (bool)
     {

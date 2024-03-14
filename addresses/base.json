@@ -77,6 +77,28 @@
       "history": []
     },
     {
+      "name": "SumInputs",
+      "address": "0xC856ef8fe425B2EFe373e0e7038fAFF4a4f764fE",
+      "id": "0xb49404ac",
+      "path": "contracts/actions/utils/SumInputs.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "SubInputs",
+      "address": "0xd244B1991Fcb8FC0f32FA55bce37714fc5929B95",
+      "id": "0x2f36fd35",
+      "path": "contracts/actions/utils/SubInputs.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "ProxyAuth",
       "address": "0xD34BBE7398F7F08952b033bbaF2D2C84231dCEdc",
       "id": "0x5079c3ea",
@@ -476,7 +498,7 @@
         "name": "UniV3WrapperV3",
         "address": "0xBd2d2d4718C24B8D35168480553b1F5a11f9884b",
         "id": "0x7c1f8079",
-        "path": "contracts/exchangeV3/wrappersV3/UniV3WrapperV3.sol",
+        "path": "contracts/exchangeV3/onchainWrappersV3/UniV3WrapperV3.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -545,7 +567,7 @@
         "name": "CurveWrapperV3",
         "address": "0x4a2ca50c1723c1Dd033A2E519df74BC9500eA561",
         "id": "0xb856c9af",
-        "path": "contracts/exchangeV3/wrappersV3/CurveWrapperV3.sol",
+        "path": "contracts/exchangeV3/onchainWrappersV3/CurveWrapperV3.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,

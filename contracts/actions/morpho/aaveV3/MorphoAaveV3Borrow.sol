@@ -11,7 +11,7 @@ contract MorphoAaveV3Borrow is ActionBase, MorphoAaveV3Helper {
     /// @param tokenAddr The address of the token to be borrowed
     /// @param amount Amount of tokens to be borrowed
     /// @param to The address we are sending the borrowed tokens to
-    /// @param onBehalf For what user we are borrowing the tokens, defaults to proxy
+    /// @param onBehalf For what user we are borrowing the tokens, defaults to user's wallet
     /// @param maxIterations Max number of iterations for p2p matching, 0 will use default num of iterations
     struct Params {
         uint256 emodeId;
@@ -59,7 +59,7 @@ contract MorphoAaveV3Borrow is ActionBase, MorphoAaveV3Helper {
     function _borrow(Params memory _params) internal returns (uint256, bytes memory) {
         address morphoAddress = getMorphoAddressByEmode(_params.emodeId);
 
-        // default to onBehalf of proxy
+        // default to onBehalf of user's wallet
         if (_params.onBehalf == address(0)) {
             _params.onBehalf = address(this);
         }

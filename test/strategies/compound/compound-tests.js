@@ -1,4 +1,6 @@
 /* eslint-disable camelcase */
+const hre = require('hardhat');
+
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
@@ -24,14 +26,13 @@ const {
     openStrategyAndBundleStorage,
     getProxy,
     setNewExchangeWrapper,
-    Float2BN,
     fetchAmountinUSDPrice,
     approve,
     setBalance,
     redeploy,
-    resetForkToBlock,
     REGISTRY_ADDR,
     WETH_ADDRESS,
+    redeployCore,
 } = require('../../utils');
 const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
 
@@ -68,14 +69,14 @@ const testPairs = [
         collSymbol: 'cETH',
         debtSymbol: 'cDAI',
     },
-    // {
-    //     collSymbol: 'cWBTC',
-    //     debtSymbol: 'cUSDC',
-    // },
-    // {
-    //     collSymbol: 'cDAI',
-    //     debtSymbol: 'cETH',
-    // },
+    {
+        collSymbol: 'cWBTC',
+        debtSymbol: 'cUSDC',
+    },
+    {
+        collSymbol: 'cDAI',
+        debtSymbol: 'cETH',
+    },
 ];
 
 const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
@@ -93,21 +94,20 @@ const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
     let flAddr;
 
     before(async () => {
-        await resetForkToBlock(17828193);
-
         setNetwork('mainnet');
         [senderAcc] = await ethers.getSigners();
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
         botAcc = (await ethers.getSigners())[1];
-        strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+        strategyExecutor = await redeployCore();
 
         await redeploy('CompBorrow');
         await redeploy('CompSupply');
         await redeploy('CompoundRatioTrigger');
         await redeploy('CompV2RatioCheck');
+        await redeploy('DFSSell');
 
-        flAddr = await getContractFromRegistry('FLAction');
+        flAddr = await redeploy('FLAction');
         view = await getContractFromRegistry('CompView');
 
         ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));
@@ -164,14 +164,7 @@ const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
                 senderAcc.address,
             );
 
-            subData = await subCompV2AutomationStrategy(
-                proxy,
-                Float2BN('120', 16).toString(),
-                Float2BN('200', 16).toString(),
-                Float2BN('150', 16).toString(),
-                Float2BN('150', 16).toString(),
-                true,
-            );
+            subData = await subCompV2AutomationStrategy(proxy, 120, 200, 150, 150, true);
         });
 
         it('... should trigger a Comp Boost strategy', async () => {
@@ -242,23 +235,20 @@ const compV2RepayTest = () => describe('Comp-Repay-Strategy', function () {
     let flAddr;
 
     before(async () => {
-        await resetForkToBlock(17828193);
-
         setNetwork('mainnet');
         [senderAcc] = await ethers.getSigners();
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
         botAcc = (await ethers.getSigners())[1];
-        strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+        strategyExecutor = await redeployCore();
 
         await redeploy('DFSSell');
         await redeploy('CompWithdraw');
         await redeploy('CompPayback');
         await redeploy('CompoundRatioTrigger');
         await redeploy('CompV2RatioCheck');
-        await redeploy('FLAction');
+        flAddr = await redeploy('FLAction');
 
-        flAddr = await getContractFromRegistry('FLAction');
         view = await getContractFromRegistry('CompView');
 
         ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));
@@ -313,14 +303,7 @@ const compV2RepayTest = () => describe('Comp-Repay-Strategy', function () {
                 senderAcc.address,
             );
 
-            subData = await subCompV2AutomationStrategy(
-                proxy,
-                Float2BN('200', 16).toString(),
-                Float2BN('300', 16).toString(),
-                Float2BN('250', 16).toString(),
-                Float2BN('250', 16).toString(),
-                true,
-            );
+            subData = await subCompV2AutomationStrategy(proxy, 200, 300, 250, 250, true);
         });
 
         it('... should trigger a Comp Repay strategy', async () => {

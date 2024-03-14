@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/lido/IWStEth.sol";
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../ActionBase.sol";
@@ -81,7 +80,7 @@ contract LSVSell is ActionBase, DFSExchangeCore, UtilHelper {
         address _from,
         address _to
     ) internal returns (uint256, bytes memory) {
-        // if we set srcAmount to max, take the whole proxy balance
+        // if we set srcAmount to max, take the whole user's wallet balance
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
@@ -133,8 +132,6 @@ contract LSVSell is ActionBase, DFSExchangeCore, UtilHelper {
             }
         }
 
-        _exchangeData.user = getUserAddress();
-
         if (shouldSell){
             (wrapper, exchangedAmount) = _sell(_exchangeData);
         }
@@ -171,17 +168,10 @@ contract LSVSell is ActionBase, DFSExchangeCore, UtilHelper {
         wStEthReceivedAmount = wStEthBalanceAfter - wStEthBalanceBefore;
     }
 
-    function _lidoWrapStEth(uint256 stethAmount) internal returns (uint256 wStEthReceivedAmount){
-        STETH_ADDR.approveToken(WSTETH_ADDR, stethAmount);
+    function _lidoWrapStEth(uint256 _stethAmount) internal returns (uint256 wStEthReceivedAmount){
+        STETH_ADDR.approveToken(WSTETH_ADDR, _stethAmount);
 
-        wStEthReceivedAmount = IWStEth(WSTETH_ADDR).wrap(stethAmount);
-    }
-
-    /// @notice Returns the owner of the DSProxy that called the contract
-    function getUserAddress() internal view returns (address) {
-        IDSProxy proxy = IDSProxy(payable(address(this)));
-
-        return proxy.owner();
+        wStEthReceivedAmount = IWStEth(WSTETH_ADDR).wrap(_stethAmount);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

@@ -14,10 +14,6 @@ const { topUp } = require('./utils/fork');
 const {
     createYearnRepayStrategy,
     createYearnRepayStrategyWithExchange,
-    createRariRepayStrategy,
-    createRariRepayStrategyWithExchange,
-    createMstableRepayStrategy,
-    createMstableRepayStrategyWithExchange,
 } = require('../test/strategies');
 
 const { addBotCaller } = require('../test/utils-strategies');
@@ -100,7 +96,6 @@ async function main() {
 
     const recipeExecutor = await redeploy('RecipeExecutor', reg.address);
     await redeploy('SubProxy', reg.address);
-    await redeploy('StrategyProxy', reg.address);
 
     await changeConstantInFiles(
         './contracts',
@@ -130,14 +125,6 @@ async function main() {
 
     const strategyTriggerView = await redeploy('StrategyTriggerView', reg.address);
 
-    // mstable
-    await redeploy('MStableDeposit', reg.address);
-    await redeploy('MStableWithdraw', reg.address);
-
-    // rari
-    await redeploy('RariDeposit', reg.address);
-    await redeploy('RariWithdraw', reg.address);
-
     // yearn
     await redeploy('YearnSupply', reg.address);
     await redeploy('YearnWithdraw', reg.address);
@@ -153,16 +140,8 @@ async function main() {
     await strategyStorage.createStrategy(...(createYearnRepayStrategy()), true);
     await strategyStorage.createStrategy(...(createYearnRepayStrategyWithExchange()), true);
 
-    await strategyStorage.createStrategy(...(createMstableRepayStrategy()), true);
-    await strategyStorage.createStrategy(...(createMstableRepayStrategyWithExchange()), true);
-
-    await strategyStorage.createStrategy(...(createRariRepayStrategy()), true);
-    await strategyStorage.createStrategy(...(createRariRepayStrategyWithExchange()), true);
-
     // bundles
     await bundleStorage.createBundle([0, 1]); // 0 bundle YEARN
-    await bundleStorage.createBundle([2, 3]); // 1 bundle MSTABLE
-    await bundleStorage.createBundle([4, 5]); // 2 bundle RARI
 
     const strategyCount = await strategyStorage.getStrategyCount();
 

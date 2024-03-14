@@ -4,7 +4,8 @@ pragma solidity =0.8.10;
 import "../../utils/TokenUtils.sol";
 import "../ActionBase.sol";
 import "./helpers/AaveHelper.sol";
-/// @title Borrow a token a from an Aave market
+
+/// @title Borrow a token from an Aave market
 contract AaveBorrow is ActionBase, AaveHelper {
     using TokenUtils for address;
 
@@ -58,7 +59,7 @@ contract AaveBorrow is ActionBase, AaveHelper {
     /// @param _amount Amount of tokens to be borrowed
     /// @param _rateMode Send 1 for stable rate and 2 for variable
     /// @param _to The address we are sending the borrowed tokens to
-    /// @param _onBehalf From what user we are borrow the tokens, defaults to proxy
+    /// @param _onBehalf The user from whom we are borrowing the tokens; defaults to the user's wallet
     function _borrow(
         address _market,
         address _tokenAddr,
@@ -68,7 +69,8 @@ contract AaveBorrow is ActionBase, AaveHelper {
         address _onBehalf
     ) internal returns (uint256, bytes memory) {
         ILendingPoolV2 lendingPool = getLendingPool(_market);
-        // defaults to onBehalf of proxy
+        
+        // defaults to onBehalf of user's wallet
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }

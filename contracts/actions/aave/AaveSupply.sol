@@ -55,12 +55,12 @@ contract AaveSupply is ActionBase, AaveHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice User deposits tokens to the Aave protocol
-    /// @dev User needs to approve the DSProxy to pull the _tokenAddr tokens
+    /// @dev User needs to approve its wallet to pull the _tokenAddr tokens
     /// @param _market Address provider for specific market
     /// @param _tokenAddr The address of the token to be deposited
     /// @param _amount Amount of tokens to be deposited
     /// @param _from Where are we pulling the supply tokens amount from
-    /// @param _onBehalf For what user we are supplying the tokens, defaults to proxy
+    /// @param _onBehalf For what user we are supplying the tokens, defaults to user's wallet
     /// @param _enableAsColl If the supply asset should be collateral
     function _supply(
         address _market,
@@ -77,18 +77,18 @@ contract AaveSupply is ActionBase, AaveHelper {
             _amount = _tokenAddr.getBalance(_from);
         }
 
-        // default to onBehalf of proxy
+        // default to onBehalf of user's wallet
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }
 
-        // pull tokens to proxy so we can supply
+        // pull tokens to user's wallet so we can supply
         _tokenAddr.pullTokensIfNeeded(_from, _amount);
 
         // approve aave pool to pull tokens
         _tokenAddr.approveToken(address(lendingPool), _amount);
 
-        // deposit in behalf of the proxy
+        // deposit in behalf of the user's wallet
         lendingPool.deposit(_tokenAddr, _amount, _onBehalf, AAVE_REFERRAL_CODE);
 
         if (_enableAsColl) {

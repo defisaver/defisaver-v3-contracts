@@ -27,15 +27,17 @@ contract MockChainlinkAggregator {
     returns (
         uint80 roundId,
         int256 answer,
-        uint256,
+        uint256 notUsed,
         uint256 updatedAt,
-        uint80
+        uint80 notUsed2
     ) {
         MockRoundData memory roundData = mockRounds[_roundId];
         if (roundData.updatedAt == 0) revert();
         roundId = _roundId;
         answer = roundData.answer;
         updatedAt = roundData.updatedAt;
+        notUsed = 0;
+        notUsed2 = 0;
     }
 
     function latestRoundData()
@@ -44,13 +46,15 @@ contract MockChainlinkAggregator {
     returns (
         uint80 roundId,
         int256 answer,
-        uint256,
+        uint256 notUsed,
         uint256 updatedAt,
-        uint80
+        uint80 notUsed2
     ) {
         MockRoundData memory latestRound = mockRounds[latestRoundId];
         roundId = latestRound.roundId;
         answer = latestRound.answer;
         updatedAt = latestRound.updatedAt;
+        notUsed = 0;
+        notUsed2 = 0;
     }
 }

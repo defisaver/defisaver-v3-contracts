@@ -1,3 +1,4 @@
+profile = { default = { libs = ["node_modules", "lib"] } }
 [default]
 src = 'contracts'
 out = 'artifacts'
@@ -11,6 +12,9 @@ remappings = [
     '@ensdomains/=node_modules/@ensdomains/',
     'eth-gas-reporter/=node_modules/eth-gas-reporter/',
     'hardhat/=node_modules/hardhat/',
+    'ds-test/=lib/ds-test/src/',
+    'forge-std/=lib/forge-std/src/'
 ]
+fs_permissions = [{ access = "read", path = "./test-sol/config/"}]
 
 # See more config options https://github.com/gakonst/foundry/tree/master/config

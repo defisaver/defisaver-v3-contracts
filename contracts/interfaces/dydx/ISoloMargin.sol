@@ -8,7 +8,7 @@ library Account {
         address owner; // The address that owns the account
         uint256 number; // A nonce that allows a single address to control many accounts
     }
-    struct Storage {
+    struct AccountStorage {
         mapping(uint256 => Types.Par) balances; // Mapping from marketId to principal
         Status status;
     }
@@ -197,7 +197,7 @@ library Storage {
         // marketId => Market
         mapping(uint256 => Market) markets;
         // owner => account number => Account
-        mapping(address => mapping(uint256 => Account.Storage)) accounts;
+        mapping(address => mapping(uint256 => Account.AccountStorage)) accounts;
         // Addresses that can control other users accounts
         mapping(address => mapping(address => bool)) operators;
         // Addresses that can control all users accounts

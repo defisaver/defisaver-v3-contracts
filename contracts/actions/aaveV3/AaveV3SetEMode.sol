@@ -52,7 +52,7 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User sets EMode for Aave position on Proxy
+    /// @notice User sets EMode for Aave position on its wallet
     /// @param _market Address provider for specific market
     /// @param _categoryId eMode category id (0 - 255)
     function _setEmode(address _market, uint8 _categoryId)
@@ -73,22 +73,22 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
         }
     }
 
-    function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
+    function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
-        encodedInput = bytes.concat(encodedInput, bytes1(params.categoryId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
-        if (!params.useDefaultMarket) {
-            encodedInput = bytes.concat(encodedInput, bytes20(params.market));
+        encodedInput = bytes.concat(encodedInput, bytes1(_params.categoryId));
+        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        if (!_params.useDefaultMarket) {
+            encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
     }
 
-    function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        params.categoryId = uint8(bytes1(encodedInput[0:1]));
-        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[1:2]));
+    function decodeInputs(bytes calldata _encodedInput) public pure returns (Params memory params) {
+        params.categoryId = uint8(bytes1(_encodedInput[0:1]));
+        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[1:2]));
         if (params.useDefaultMarket) {
             params.market = DEFAULT_AAVE_MARKET;
         } else {
-            params.market = address(bytes20(encodedInput[2:22]));
+            params.market = address(bytes20(_encodedInput[2:22]));
         }
     }
 }

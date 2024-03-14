@@ -6,9 +6,11 @@ import "../core/DFSRegistry.sol";
 import "../DS/DSProxy.sol";
 import "../utils/DefisaverLogger.sol";
 import "./utils/helpers/ActionsUtilHelper.sol";
+import "../interfaces/safe/ISafe.sol";
+import "../utils/CheckWalletType.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
-abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
+abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     event ActionEvent(
         string indexed logName,
         bytes data
@@ -39,13 +41,13 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
     /// @dev We need to parse Flash loan actions in a different way
     enum ActionType { FL_ACTION, STANDARD_ACTION, FEE_ACTION, CHECK_ACTION, CUSTOM_ACTION }
 
-    /// @notice Parses inputs and runs the implemented action through a proxy
+    /// @notice Parses inputs and runs the implemented action through a user wallet
     /// @dev Is called by the RecipeExecutor chaining actions together
     /// @param _callData Array of input values each value encoded as bytes
     /// @param _subData Array of subscribed vales, replaces input values if specified
     /// @param _paramMapping Array that specifies how return and subscribed values are mapped in input
     /// @param _returnValues Returns values from actions before, which can be injected in inputs
-    /// @return Returns a bytes32 value through DSProxy, each actions implements what that value is
+    /// @return Returns a bytes32 value through user wallet, each actions implements what that value is
     function executeAction(
         bytes memory _callData,
         bytes32[] memory _subData,
@@ -53,7 +55,7 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
         bytes32[] memory _returnValues
     ) public payable virtual returns (bytes32);
 
-    /// @notice Parses inputs and runs the single implemented action through a proxy
+    /// @notice Parses inputs and runs the single implemented action through a user wallet
     /// @dev Used to save gas when executing a single action directly
     function executeActionDirect(bytes memory _callData) public virtual payable;
 
@@ -102,8 +104,8 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
                 _param = address(bytes20((_returnValues[getReturnIndex(_mapType)])));
             } else {
                 /// @dev The last two values are specially reserved for proxy addr and owner addr
-                if (_mapType == 254) return address(this); //DSProxy address
-                if (_mapType == 255) return DSProxy(payable(address(this))).owner(); // owner of DSProxy
+                if (_mapType == 254) return address(this); // wallet address
+                if (_mapType == 255) return fetchOwnersOrWallet(); // owner if 1/1 wallet or the wallet itself
 
                 _param = address(uint160(uint256(_subData[getSubIndex(_mapType)])));
             }
@@ -163,5 +165,14 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper {
             revert ReturnIndexValueError();
         }
         return (_type - SUB_MIN_INDEX_VALUE);
+    }
+
+    function fetchOwnersOrWallet() internal view returns (address) {
+        if (isDSProxy(address(this))) 
+            return DSProxy(payable(address(this))).owner();
+
+        // if not DSProxy, we assume we are in context of Safe
+        address[] memory owners = ISafe(address(this)).getOwners();
+        return owners.length == 1 ? owners[0] : address(this);
     }
 }

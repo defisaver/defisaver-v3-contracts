@@ -113,7 +113,7 @@
         "name": "UniV3WrapperV3",
         "address": "0x48eF488054b5c570cF3A2AC0A0697B0b0D34c431",
         "id": "0x7c1f8079",
-        "path": "contracts/exchangeV3/wrappersV3/UniV3WrapperV3.sol",
+        "path": "contracts/exchangeV3/onchainWrappersV3/UniV3WrapperV3.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -124,7 +124,7 @@
         "name": "CurveWrapperV3",
         "address": "0x6bfa86D54B75DcFEb58C6A80FadE947E180C3616",
         "id": "0xb856c9af",
-        "path": "contracts/exchangeV3/wrappersV3/CurveWrapperV3.sol",
+        "path": "contracts/exchangeV3/onchainWrappersV3/CurveWrapperV3.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
@@ -341,6 +341,28 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": ["0x49E1574Ba6b8134c29B1EbC010784A01D91b794F"]
+    },
+    {
+      "name": "SumInputs",
+      "address": "0xc530f49c11e5946735df8bad41bc6a64d32b56bc",
+      "id": "0xb49404ac",
+      "path": "contracts/actions/utils/SumInputs.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "SubInputs",
+      "address": "0x8ec14f9568e1d7cf73b68df899808abd7fe6fc8d",
+      "id": "0x2f36fd35",
+      "path": "contracts/actions/utils/SubInputs.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
     },
     {
       "name": "LimitSellL2",

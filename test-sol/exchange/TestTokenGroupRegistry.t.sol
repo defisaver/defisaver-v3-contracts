@@ -4,7 +4,7 @@ pragma solidity =0.8.10;
 import "ds-test/test.sol";
 import "forge-std/console.sol";
 
-import "../../contracts/exchangeV3/TokenGroupRegistry.sol";
+import "../../contracts/exchangeV3/registries/TokenGroupRegistry.sol";
 import "../../contracts/auth/AdminAuth.sol";
 
 import "../CheatCodes.sol";
@@ -43,7 +43,6 @@ contract TestTokenGroupRegistry is DSTest, TokenGroupRegistry {
         );
         assertEq(tokenGroupRegistry.groupIds(TokenAddresses.WBTC_ADDR), uint256(Groups.BTC_BASED));
         assertEq(tokenGroupRegistry.groupIds(TokenAddresses.RENBTC_ADDR), uint256(Groups.BTC_BASED));
-
     }
 
     function testFeeForBannedToken() public {
@@ -73,7 +72,6 @@ contract TestTokenGroupRegistry is DSTest, TokenGroupRegistry {
         );
         assertEq(tokenGroupRegistry.groupIds(TokenAddresses.YFI_ADDR), uint256(Groups.NOT_LISTED));
         assertEq(tokenGroupRegistry.groupIds(TokenAddresses.MKR_ADDR), uint256(Groups.NOT_LISTED));
-    
     }
 
     function testAddNewTokenGroup() public {
@@ -107,21 +105,12 @@ contract TestTokenGroupRegistry is DSTest, TokenGroupRegistry {
         );
     }
 
-    function testFailToAddTokenIfNotOwner() public {
+    function testRevertToAddTokenIfNotOwner() public {
         vm.expectRevert();
         tokenGroupRegistry.addTokenInGroup(TokenAddresses.ETH_ADDR, uint256(Groups.ETH_BASED));
     }
 
-    function testFailToAddTokenToNonExistentGroup() public {
-        vm.startPrank(TokenAddresses.OWNER_ADDR);
-
-        vm.expectRevert(abi.encodeWithSelector(TokenGroupRegistry.FeeTooHigh.selector, 1));
-        tokenGroupRegistry.addTokenInGroup(TokenAddresses.ETH_ADDR, 17);
-
-        vm.stopPrank();
-    }
-
-    function testFailToAddTokensIfNotOwner() public {
+    function testRevertToAddTokensIfNotOwner() public {
         vm.expectRevert();
         address[] memory tokens = new address[](2);
         tokens[0] = TokenAddresses.ETH_ADDR;
@@ -130,7 +119,7 @@ contract TestTokenGroupRegistry is DSTest, TokenGroupRegistry {
         tokenGroupRegistry.addTokensInGroup(tokens, uint256(Groups.ETH_BASED));
     }
 
-    function testFailToAddNewGroupIfNotOwner() public {
+    function testRevertToAddNewGroupIfNotOwner() public {
         vm.expectRevert();
 
         address[] memory tokens = new address[](2);
@@ -140,13 +129,13 @@ contract TestTokenGroupRegistry is DSTest, TokenGroupRegistry {
         tokenGroupRegistry.addNewGroup(tokens, 666);
     }
 
-    function testFailToChangeGroupFeeIfNotOwner() public {
+    function testRevertToChangeGroupFeeIfNotOwner() public {
         vm.expectRevert();
 
         tokenGroupRegistry.changeGroupFee(uint256(Groups.ETH_BASED), 5000);
     }
 
-    function testFailToChangeFeeTooHigh() public {
+    function testRevertToChangeFeeTooHigh() public {
         vm.startPrank(TokenAddresses.OWNER_ADDR);
 
         vm.expectRevert();
@@ -155,15 +144,26 @@ contract TestTokenGroupRegistry is DSTest, TokenGroupRegistry {
         vm.stopPrank();
     }
 
-    function testFailToCreateGroupFeeTooHigh() public {
+    function testRevertToCreateGroupFeeTooHigh() public {
         vm.startPrank(TokenAddresses.OWNER_ADDR);
 
         address[] memory tokens = new address[](2);
         tokens[0] = TokenAddresses.YFI_ADDR;
         tokens[1] = TokenAddresses.MKR_ADDR;
 
-        vm.expectRevert();
-        tokenGroupRegistry.addNewGroup(tokens, 1);
+        uint256 feeDivider = 1;
+        vm.expectRevert(abi.encodeWithSelector(TokenGroupRegistry.FeeTooHigh.selector, feeDivider));
+        tokenGroupRegistry.addNewGroup(tokens, feeDivider);
+
+        vm.stopPrank();
+    }
+
+    function testRevertToAddTokenToNonExistentGroup() public {
+        vm.startPrank(TokenAddresses.OWNER_ADDR);
+        
+        uint256 groupId = 17;
+        vm.expectRevert(abi.encodeWithSelector(TokenGroupRegistry.GroupNonExistent.selector, groupId));
+        tokenGroupRegistry.addTokenInGroup(TokenAddresses.ETH_ADDR, groupId);
 
         vm.stopPrank();
     }

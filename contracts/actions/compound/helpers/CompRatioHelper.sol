@@ -6,7 +6,7 @@ import "../../../DS/DSMath.sol";
 import "../../../interfaces/compound/ICompoundOracle.sol";
 import "../../../interfaces/compound/IComptroller.sol";
 import "../../../interfaces/compound/ICToken.sol";
-import "../../../utils/Exponential.sol";
+import "../../../utils/math/Exponential.sol";
 import "./MainnetCompAddresses.sol";
 
 

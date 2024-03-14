@@ -179,7 +179,7 @@
         "name": "UniV3WrapperV3",
         "address": "0xA250D449e8246B0be1ecF66E21bB98678448DEF5",
         "id": "0x7c1f8079",
-        "path": "contracts/exchangeV3/wrappersV3/UniV3WrapperV3.sol",
+        "path": "contracts/exchangeV3/onchainWrappersV3/UniV3WrapperV3.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -190,7 +190,7 @@
         "name": "UniswapWrapperV3",
         "address": "0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54",
         "id": "0x962c0774",
-        "path": "contracts/exchangeV3/wrappersV3/UniswapWrapperV3.sol",
+        "path": "contracts/exchangeV3/onchainWrappersV3/UniswapWrapperV3.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -201,7 +201,7 @@
         "name": "SushiswapWrapperV3",
         "address": "0x50E08820982a88bd28Fc3BBb569971028Db4e091",
         "id": "0xa844064e",
-        "path": "contracts/exchangeV3/wrappersV3/UniswapWrapperV3.sol",
+        "path": "contracts/exchangeV3/onchainWrappersV3/UniswapWrapperV3.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -212,7 +212,7 @@
         "name": "KyberWrapperV3",
         "address": "0x2BBaeB65E185eB3BF21FC17BA62Bf628B9c11471",
         "id": "0x7a5847ec",
-        "path": "contracts/exchangeV3/wrappersV3/KyberWrapperV3.sol",
+        "path": "contracts/exchangeV3/onchainWrappersV3/KyberWrapperV3.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -234,7 +234,7 @@
         "name": "CurveWrapperV3",
         "address": "0xdE73496DD6349829C6649aCaDe31FB1371528AC5",
         "id": "0xb856c9af",
-        "path": "contracts/exchangeV3/wrappersV3/CurveWrapperV3.sol",
+        "path": "contracts/exchangeV3/onchainWrappersV3/CurveWrapperV3.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
@@ -328,7 +328,7 @@
         "name": "TokenGroupRegistry",
         "address": "0xcA49e64FE1FE8be40ED30F682edA1b27a6c8611c",
         "id": "0x4f594ea4",
-        "path": "contracts/exchangeV3/TokenGroupRegistry.sol",
+        "path": "contracts/exchangeV3/registries/TokenGroupRegistry.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -1470,6 +1470,17 @@
         "history": []
     },
     {
+        "name": "MorphoAaveV2SubProxy",
+        "address": "0x7E681F029b3c2FFA79c637963180E0D78626fB24",
+        "id": "0xd3479164",
+        "path": "contracts/actions/morpho/aaveV2/MorphoAaveV2SubProxy.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "MorphoClaim",
         "address": "0xa269C841E26EA8Ee1F0350a2E5905F71446998dC",
         "id": "0x50967400",
@@ -2321,6 +2332,17 @@
         "history": []
     },
     {
+        "name": "LiquitySubProxy",
+        "address": "0xE2f4A4629FbbC444964A16438329288C66551c30",
+        "id": "0x24974bdc",
+        "path": "contracts/actions/liquity/LiquitySubProxy.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "LidoStake",
         "address": "0x4a7dd38D2BcA817fb68165155F869ca4179d8060",
         "id": "0xd7e40b2d",
@@ -3054,14 +3076,17 @@
     },
     {
         "name": "CompV3SubProxy",
-        "address": "0x5EE8853545CD8f96F1c3c30DDa8e1F6F5b7496cd",
+        "address": "0x39Fce916C420320138dBc1947784667b5Ad88df5",
         "id": "0x8c896d4c",
         "path": "contracts/triggers/CompV3RatioTrigger.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xb460c044Cb2ECA74c713b8504Fe5aF360764b38d"]
+        "history": [
+            "0xb460c044Cb2ECA74c713b8504Fe5aF360764b38d",
+            "0x5EE8853545CD8f96F1c3c30DDa8e1F6F5b7496cd"
+        ]
     },
     {
         "name": "LimitOrderSubProxy",

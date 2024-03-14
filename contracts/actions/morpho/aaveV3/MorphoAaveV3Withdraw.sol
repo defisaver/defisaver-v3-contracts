@@ -13,7 +13,7 @@ contract MorphoAaveV3Withdraw is ActionBase, MorphoAaveV3Helper {
     /// @param tokenAddr The address of the token to be withdrawn
     /// @param amount Amount of tokens to be withdrawn
     /// @param to Where the withdrawn tokens will be sent
-    /// @param onBehalf For what user we are withdrawing the tokens, defaults to proxy
+    /// @param onBehalf For what user we are withdrawing the tokens, defaults to user's wallet
     /// @param withdrawAsColl If we want to withdraw from collateral or from pure supply
     /// @param maxIterations Max number of iterations for p2p matching, 0 will use default num of iterations
     struct Params {
@@ -79,7 +79,7 @@ contract MorphoAaveV3Withdraw is ActionBase, MorphoAaveV3Helper {
         // needed because amount > collateral is safe
         uint256 tokensBefore = _params.tokenAddr.getBalance(_params.to);
 
-        // default to onBehalf of proxy
+        // default to onBehalf of user's wallet
         if (_params.onBehalf == address(0)) {
             _params.onBehalf = address(this);
         }

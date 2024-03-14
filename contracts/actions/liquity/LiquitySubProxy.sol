@@ -3,11 +3,12 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
+import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 import "./trove/LiquityAdjust.sol";
+import "../../utils/CheckWalletType.sol";
 
-contract LiquitySubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+contract LiquitySubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
     uint64 public immutable REPAY_BUNDLE_ID;
     uint64 public immutable BOOST_BUNDLE_ID;
 
@@ -33,13 +34,15 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelpe
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
-    /// @dev Gives DSProxy permission if needed and registers a new sub
+    /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToLiquityAutomation(
         LiquitySubData calldata _subData
     ) public {
-        givePermission(PROXY_AUTH_ADDR);
+         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
+
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
@@ -126,11 +129,11 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelpe
     }
 
     /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized liquity sub
-    function formatRepaySub(LiquitySubData memory _subData, address _proxy) public view returns (StrategySub memory repaySub) {
+    function formatRepaySub(LiquitySubData memory _subData, address _wallet) public view returns (StrategySub memory repaySub) {
         repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
-        address user = _proxy;
+        address user = _wallet;
 
         // format data for ratio trigger if currRatio < minRatio = true
         bytes memory triggerData = abi.encode(user, uint256(_subData.minRatio), uint8(RatioState.UNDER));
@@ -145,11 +148,11 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelpe
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized liquity sub
-    function formatBoostSub(LiquitySubData memory _subData, address _proxy) public view returns (StrategySub memory boostSub) {
+    function formatBoostSub(LiquitySubData memory _subData, address _wallet) public view returns (StrategySub memory boostSub) {
         boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
-        address user = _proxy;
+        address user = _wallet;
 
         // format data for ratio trigger if currRatio > maxRatio = true
         bytes memory triggerData = abi.encode(user, uint256(_subData.maxRatio), uint8(RatioState.OVER));

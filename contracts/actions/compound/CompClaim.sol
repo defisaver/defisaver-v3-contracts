@@ -50,11 +50,11 @@ contract CompClaim is ActionBase, CompHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Claims comp for _from address and for specified cTokens
-    /// @dev if _from != proxy, the receiver will always be the _from and not the _to addr
+    /// @dev if _from != user's wallet, the receiver will always be the _from and not the _to addr
     /// @param _cTokensSupply Array of cTokens which _from supplied and has earned rewards
     /// @param _cTokensBorrow Array of cTokens which _from supplied and has earned rewards
     /// @param _from For which user we are claiming the tokens
-    /// @param _to Where we are sending the Comp to (if _from is proxy)
+    /// @param _to Where we are sending the Comp to (if _from is user's wallet)
     function _claim(
         address[] memory _cTokensSupply,
         address[] memory _cTokensBorrow,

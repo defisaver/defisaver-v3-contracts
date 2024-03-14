@@ -14,8 +14,8 @@ contract CurveUsdSupply is ActionBase, CurveUsdHelper {
     error ZeroAmountSupplied();
 
     /// @param controllerAddress Address of the curveusd market controller
-    /// @param from Address from which to pull collateral asset, will default to proxy
-    /// @param onBehalfOf Address for which we are supplying, will default to proxy
+    /// @param from Address from which to pull collateral asset, will default to user's wallet
+    /// @param onBehalfOf Address for which we are supplying, will default to user's wallet
     /// @param collateralAmount Amount of collateral asset to supply
     struct Params {
         address controllerAddress;
