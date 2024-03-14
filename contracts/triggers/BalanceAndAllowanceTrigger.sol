@@ -8,7 +8,7 @@ import { ITrigger } from "../interfaces/ITrigger.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
 
 /// @title Trigger contract that triggers if user has enough balance and has given enough allowance
-/// @dev When from address balance is lesser than amount, useBalanceFrom should use whole from balance if set to true
+/// @dev When from address balance is lesser than amount, useMaxAvailableBalance should use whole balance if set to true
 contract BalanceAndAllowanceTrigger is ITrigger, AdminAuth, TriggerHelper {
 
     struct SubParams {
@@ -16,7 +16,7 @@ contract BalanceAndAllowanceTrigger is ITrigger, AdminAuth, TriggerHelper {
         address to;
         address token;
         uint256 amount;
-        bool useBalanceFrom;
+        bool useMaxAvailableBalance;
     }
     
     function isTriggered(bytes memory, bytes memory _subData)
@@ -28,9 +28,17 @@ contract BalanceAndAllowanceTrigger is ITrigger, AdminAuth, TriggerHelper {
         SubParams memory triggerSubData = parseInputs(_subData);
 
         uint256 fromBalance = IERC20(triggerSubData.token).balanceOf(triggerSubData.from);
+
+        bool shouldUseMaxAvailableBalance = triggerSubData.useMaxAvailableBalance && (fromBalance < triggerSubData.amount);
+
+        /// @dev ignore allowance if from and to are the same address
+        if (triggerSubData.from == triggerSubData.to) {
+            return shouldUseMaxAvailableBalance ? (fromBalance > 0) : (fromBalance >= triggerSubData.amount);
+        }
+
         uint256 allowance = IERC20(triggerSubData.token).allowance(triggerSubData.from, triggerSubData.to);
 
-        return triggerSubData.useBalanceFrom && (fromBalance < triggerSubData.amount)
+        return shouldUseMaxAvailableBalance
             ? (fromBalance > 0) && (allowance >= fromBalance)
             : (fromBalance >= triggerSubData.amount) && (allowance >= triggerSubData.amount);
     }

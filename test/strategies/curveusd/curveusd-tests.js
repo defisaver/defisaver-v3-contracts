@@ -468,7 +468,7 @@ const curveUsdPaybackStrategyTest = async () => {
 
         const subToStrategy = async (
             controllerAddress,
-            useBalanceFrom,
+            useMaxAvailableBalance,
             repayAmount,
         ) => {
             const minHealthRatio = Float2BN('25', 16).toString();
@@ -478,7 +478,7 @@ const curveUsdPaybackStrategyTest = async () => {
                 senderAcc.address,
                 repayAmount,
                 crvUsdAddress,
-                useBalanceFrom,
+                useMaxAvailableBalance,
                 controllerAddress,
                 minHealthRatio,
             );
@@ -522,12 +522,12 @@ const curveUsdPaybackStrategyTest = async () => {
                 it(`... should executes a payback strategy for ${assetSymbol} market using payback amount from subData`, async () => {
                     snapshot = await takeSnapshot();
 
-                    const useBalanceFrom = false;
+                    const useMaxAvailableBalance = false;
                     const repayAmount = hre.ethers.utils.parseUnits(
                         SUBBED_REPAY_AMOUNT_IN_CRVUSD, 18,
                     );
                     const { subId, strategySub } = await subToStrategy(
-                        controllerAddress, useBalanceFrom, repayAmount,
+                        controllerAddress, useMaxAvailableBalance, repayAmount,
                     );
 
                     const userDataBefore = await crvusdView.userData(
@@ -579,12 +579,12 @@ const curveUsdPaybackStrategyTest = async () => {
                 it(`... should executes a payback strategy for ${assetSymbol} market using whole user balance`, async () => {
                     snapshot = await takeSnapshot();
 
-                    const useBalanceFrom = true;
+                    const useMaxAvailableBalance = true;
                     const repayAmount = hre.ethers.utils.parseUnits(
                         SUBBED_REPAY_AMOUNT_IN_CRVUSD, 18,
                     );
                     const { subId, strategySub } = await subToStrategy(
-                        controllerAddress, useBalanceFrom, repayAmount,
+                        controllerAddress, useMaxAvailableBalance, repayAmount,
                     );
 
                     const userDataBefore = await crvusdView.userData(

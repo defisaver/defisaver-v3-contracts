@@ -722,9 +722,9 @@ const subCurveUsdRepayBundle = async (
 };
 
 const subCurveUsdPaybackStrategy = async (
-    proxy, strategyId, from, amount, curveUsdAddress, useBalanceFrom, controllerAddr, minHealthRatio,
+    proxy, strategyId, from, amount, curveUsdAddress, useMaxAvailableBalance, controllerAddr, minHealthRatio,
 ) => {
-    const balanceAndAllowanceTriggerData = await createBalanceAndAllowanceTrigger(from, proxy.address, curveUsdAddress, amount, useBalanceFrom);
+    const balanceAndAllowanceTriggerData = await createBalanceAndAllowanceTrigger(from, proxy.address, curveUsdAddress, amount, useMaxAvailableBalance);
     const crvUsdHealthRatioTriggerData = await createCurveUsdHealthRatioTrigger(proxy.address, controllerAddr, minHealthRatio);
     const triggerData = [balanceAndAllowanceTriggerData, crvUsdHealthRatioTriggerData];
 
