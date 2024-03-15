@@ -721,15 +721,23 @@ const subCurveUsdRepayBundle = async (
 };
 
 const subCurveUsdPaybackStrategy = async (
-    proxy, strategyId, amount, curveUsdAddress, controllerAddr, minHealthRatio,
+    proxy,
+    strategyId,
+    addressToPullTokensFrom,
+    amountToPayback,
+    curveUsdAddress,
+    controllerAddr,
+    minHealthRatio,
 ) => {
     const crvUsdHealthRatioTriggerData = await createCurveUsdHealthRatioTrigger(proxy.address, controllerAddr, minHealthRatio);
     const triggerData = [crvUsdHealthRatioTriggerData];
 
-    const controllerAddressEncoded = abiCoder.encode(['address'], [controllerAddr]);
-    const amountEncoded = abiCoder.encode(['uint256'], [amount]);
-    const curveUsdAddressEncoded = abiCoder.encode(['address'], [curveUsdAddress]);
-    const subDataEncoded = [controllerAddressEncoded, amountEncoded, curveUsdAddressEncoded];
+    const subDataEncoded = [
+        abiCoder.encode(['address'], [controllerAddr]),
+        abiCoder.encode(['address'], [addressToPullTokensFrom]),
+        abiCoder.encode(['uint256'], [amountToPayback]),
+        abiCoder.encode(['address'], [curveUsdAddress]),
+    ];
 
     const strategySub = [strategyId, false, triggerData, subDataEncoded];
     const subId = await subToStrategy(proxy, strategySub);

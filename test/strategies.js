@@ -3961,6 +3961,7 @@ const createCurveUsdPaybackStrategy = () => {
     const paybackStrategy = new dfs.Strategy('CurveUsdPaybackStrategy');
 
     paybackStrategy.addSubSlot('&controllerAddr', 'address');
+    paybackStrategy.addSubSlot('&addressToPullTokensFrom', 'address');
     paybackStrategy.addSubSlot('&amountToPayback', 'uint256');
     paybackStrategy.addSubSlot('&crvUsdAddress', 'address');
 
@@ -3969,7 +3970,7 @@ const createCurveUsdPaybackStrategy = () => {
 
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
         '&crvUsdAddress', // taken from subdata
-        '&eoa',
+        '&addressToPullTokensFrom', // taken from subdata
         '%amountToPayback', // sent by backend, either amount from sub data or maxUint for whole balance
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
@@ -3981,7 +3982,7 @@ const createCurveUsdPaybackStrategy = () => {
         '&controllerAddr', // taken from subdata,
         '&proxy', // piped
         '&proxy', // piped
-        '&eoa', // piped
+        '&addressToPullTokensFrom', // taken from subdata
         '$2', // output of gas fee taker action
         '%maxActiveBand', // sent by backend
     );

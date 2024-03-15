@@ -470,9 +470,11 @@ const curveUsdPaybackStrategyTest = async () => {
             repayAmount,
         ) => {
             const minHealthRatio = Float2BN('40', 16).toString();
+            const addressToPullTokensFrom = senderAcc.address;
             return subCurveUsdPaybackStrategy(
                 proxy,
                 strategyId,
+                addressToPullTokensFrom,
                 repayAmount,
                 crvUsdAddress,
                 controllerAddress,
