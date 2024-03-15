@@ -315,6 +315,16 @@ const reflexerGenerate = async (proxy, safeId, amount, to) => {
     const tx = await executeAction('ReflexerGenerate', functionData, proxy);
     return tx;
 };
+const reflexerWithdrawStuckFunds = async (proxy, safeId, to) => {
+    const reflexerWithdrawStuckFundsAction = new dfs.actions.reflexer.ReflexerWithdrawStuckFunds(
+        safeId,
+        to,
+    );
+    const functionData = reflexerWithdrawStuckFundsAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('ReflexerWithdrawStuckFunds', functionData, proxy);
+    return tx;
+};
 /*
   ______   ______   .___  ___. .______     ______    __    __  .__   __.  _______
  /      | /  __  \  |   \/   | |   _  \   /  __  \  |  |  |  | |  \ |  | |       \
@@ -3192,6 +3202,7 @@ module.exports = {
     reflexerGenerate,
     reflexerSaviourDeposit,
     reflexerSaviourWithdraw,
+    reflexerWithdrawStuckFunds,
 
     liquityOpen,
     liquityBorrow,
