@@ -330,11 +330,14 @@ const balancerFLTest = async () => {
         let safe;
         let wallet;
         let flActionContract;
+        let flBalancerContract;
 
         before(async () => {
             await redeploy('RecipeExecutor');
             await redeploy('SendToken');
             flActionContract = await redeploy('FLAction');
+            flBalancerContract = await redeploy('FLBalancer');
+
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             safe = await getProxy(senderAcc.address, true);
@@ -413,6 +416,44 @@ const balancerFLTest = async () => {
 
                 await executeAction('RecipeExecutor', functionData[1], wallet);
             });
+
+            it(`... should get a WETH and DAI directly from FLBalancer ${WALLETS[i]}`, async () => {
+                determineActiveWallet(WALLETS[i]);
+                // test if balance will brick fl action
+                await setBalance(tokenAddrs[0], flBalancerContract.address, Float2BN('1', 0));
+                await setBalance(tokenAddrs[1], flBalancerContract.address, Float2BN('1', 0));
+                await setBalance(tokenAddrs[2], flBalancerContract.address, Float2BN('1', 0));
+
+                const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+                        tokenAddrs,
+                        amounts,
+                        nullAddress,
+                        [],
+                );
+
+                const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
+                    flAction,
+                    new dfs.actions.basic.SendTokenAction(
+                        tokenAddrs[0],
+                        flBalancerContract.address,
+                        amounts[0],
+                    ),
+                    new dfs.actions.basic.SendTokenAction(
+                        tokenAddrs[1],
+                        flBalancerContract.address,
+                        amounts[1],
+                    ),
+                    new dfs.actions.basic.SendTokenAction(
+                        tokenAddrs[2],
+                        flBalancerContract.address,
+                        amounts[2],
+                    ),
+                ]);
+
+                const functionData = basicFLRecipe.encodeForDsProxyCall();
+
+                await executeAction('RecipeExecutor', functionData[1], wallet);
+            });
         }
     });
 };
@@ -426,11 +467,14 @@ const makerFLTest = async () => {
         let safe;
         let wallet;
         let flActionContract;
+        let flMakerContract;
 
         before(async () => {
             await redeploy('RecipeExecutor');
             await redeploy('SendToken');
             flActionContract = await redeploy('FLAction');
+            flMakerContract = await redeploy('FLMaker');
+
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             safe = await getProxy(senderAcc.address, true);
@@ -466,6 +510,55 @@ const makerFLTest = async () => {
                     new dfs.actions.basic.SendTokenAction(
                         assetInfo.address,
                         flActionContract.address,
+                        loanAmount,
+                    ),
+                ]);
+
+                const functionData = basicFLRecipe.encodeForDsProxyCall();
+
+                // buy token so we have it for fee
+                const tokenBalance = await balanceOf(assetInfo.address, senderAcc.address);
+
+                if (tokenBalance.lt(feeAmount)) {
+                    await sell(
+                        wallet,
+                        WETH_ADDRESS,
+                        assetInfo.address,
+                        hre.ethers.utils.parseUnits('1', 18),
+                        UNISWAP_WRAPPER,
+                        senderAcc.address,
+                        senderAcc.address,
+                    );
+                }
+
+                await send(assetInfo.address, wallet.address, feeAmount);
+
+                await executeAction('RecipeExecutor', functionData[1], wallet);
+            });
+
+            it(`... should get directly from FLMaker a ${tokenSymbol} flash loan using ${WALLETS[i]}`, async () => {
+                determineActiveWallet(WALLETS[i]);
+                const assetInfo = getAssetInfo(tokenSymbol);
+
+                // test if balance will brick fl action
+                await setBalance(assetInfo.address, flMakerContract.address, Float2BN('1', 0));
+
+                const amount = fetchAmountinUSDPrice(tokenSymbol, '1000');
+                const loanAmount = hre.ethers.utils.parseUnits(
+                    amount,
+                    assetInfo.decimals,
+                );
+                const feeAmount = '0';
+                const flAction = new dfs.actions.flashloan.MakerFlashLoanAction(
+                        loanAmount,
+                        nullAddress,
+                        [],
+                );
+                const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
+                    flAction,
+                    new dfs.actions.basic.SendTokenAction(
+                        assetInfo.address,
+                        flMakerContract.address,
                         loanAmount,
                     ),
                 ]);
