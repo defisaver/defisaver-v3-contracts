@@ -3961,7 +3961,6 @@ const createCurveUsdPaybackStrategy = () => {
     const paybackStrategy = new dfs.Strategy('CurveUsdPaybackStrategy');
 
     paybackStrategy.addSubSlot('&controllerAddr', 'address');
-    paybackStrategy.addSubSlot('&minHealthRatio', 'uint256');
     paybackStrategy.addSubSlot('&amountToPayback', 'uint256');
     paybackStrategy.addSubSlot('&crvUsdAddress', 'address');
 

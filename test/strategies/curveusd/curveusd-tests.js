@@ -469,7 +469,7 @@ const curveUsdPaybackStrategyTest = async () => {
             controllerAddress,
             repayAmount,
         ) => {
-            const minHealthRatio = Float2BN('25', 16).toString();
+            const minHealthRatio = Float2BN('40', 16).toString();
             return subCurveUsdPaybackStrategy(
                 proxy,
                 strategyId,
@@ -492,7 +492,7 @@ const curveUsdPaybackStrategyTest = async () => {
 
                 it(`... should create new curve position with low health ratio in ${assetSymbol} market`, async () => {
                     collateralAmount = hre.ethers.utils.parseUnits('25', collateralAsset.decimals);
-                    const debtAmount = hre.ethers.utils.parseUnits('80000', 18);
+                    const debtAmount = hre.ethers.utils.parseUnits('65000', 18);
                     const nBands = 10;
                     await setBalance(collateralAsset.address, senderAcc.address, collateralAmount);
                     await approve(collateralAsset.address, proxy.address, senderAcc);

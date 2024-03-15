@@ -727,10 +727,9 @@ const subCurveUsdPaybackStrategy = async (
     const triggerData = [crvUsdHealthRatioTriggerData];
 
     const controllerAddressEncoded = abiCoder.encode(['address'], [controllerAddr]);
-    const minHealthRatioEncoded = abiCoder.encode(['uint256'], [minHealthRatio.toString()]);
     const amountEncoded = abiCoder.encode(['uint256'], [amount]);
     const curveUsdAddressEncoded = abiCoder.encode(['address'], [curveUsdAddress]);
-    const subDataEncoded = [controllerAddressEncoded, minHealthRatioEncoded, amountEncoded, curveUsdAddressEncoded];
+    const subDataEncoded = [controllerAddressEncoded, amountEncoded, curveUsdAddressEncoded];
 
     const strategySub = [strategyId, false, triggerData, subDataEncoded];
     const subId = await subToStrategy(proxy, strategySub);
