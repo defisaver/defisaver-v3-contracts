@@ -469,11 +469,10 @@ const curveUsdPaybackStrategyTest = async () => {
             controllerAddress,
             repayAmount,
         ) => {
-            const minHealthRatio = Float2BN('40', 16).toString();
+            const minHealthRatio = 40;
             const addressToPullTokensFrom = senderAcc.address;
             return subCurveUsdPaybackStrategy(
                 proxy,
-                strategyId,
                 addressToPullTokensFrom,
                 repayAmount,
                 crvUsdAddress,
@@ -521,10 +520,11 @@ const curveUsdPaybackStrategyTest = async () => {
                     snapshot = await takeSnapshot();
 
                     const repayAmount = hre.ethers.utils.parseUnits(
-                        SUBBED_REPAY_AMOUNT_IN_CRVUSD, 18,
+                        SUBBED_REPAY_AMOUNT_IN_CRVUSD,
+                        18,
                     );
                     const { subId, strategySub } = await subToStrategy(
-                        controllerAddress, repayAmount,
+                        controllerAddress, SUBBED_REPAY_AMOUNT_IN_CRVUSD,
                     );
 
                     const userDataBefore = await crvusdView.userData(
@@ -576,11 +576,8 @@ const curveUsdPaybackStrategyTest = async () => {
                 it(`... should executes a payback strategy for ${assetSymbol} market using whole user balance`, async () => {
                     snapshot = await takeSnapshot();
 
-                    const repayAmount = hre.ethers.utils.parseUnits(
-                        SUBBED_REPAY_AMOUNT_IN_CRVUSD, 18,
-                    );
                     const { subId, strategySub } = await subToStrategy(
-                        controllerAddress, repayAmount,
+                        controllerAddress, SUBBED_REPAY_AMOUNT_IN_CRVUSD,
                     );
 
                     const userDataBefore = await crvusdView.userData(

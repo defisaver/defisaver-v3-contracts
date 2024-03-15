@@ -722,26 +722,21 @@ const subCurveUsdRepayBundle = async (
 
 const subCurveUsdPaybackStrategy = async (
     proxy,
-    strategyId,
     addressToPullTokensFrom,
     amountToPayback,
     curveUsdAddress,
     controllerAddr,
     minHealthRatio,
 ) => {
-    const crvUsdHealthRatioTriggerData = await createCurveUsdHealthRatioTrigger(proxy.address, controllerAddr, minHealthRatio);
-    const triggerData = [crvUsdHealthRatioTriggerData];
-
-    const subDataEncoded = [
-        abiCoder.encode(['address'], [controllerAddr]),
-        abiCoder.encode(['address'], [addressToPullTokensFrom]),
-        abiCoder.encode(['uint256'], [amountToPayback]),
-        abiCoder.encode(['address'], [curveUsdAddress]),
-    ];
-
-    const strategySub = [strategyId, false, triggerData, subDataEncoded];
+    const strategySub = automationSdk.strategySubService.crvUSDEncode.payback(
+        proxy.address,
+        addressToPullTokensFrom,
+        amountToPayback,
+        curveUsdAddress,
+        controllerAddr,
+        minHealthRatio,
+    );
     const subId = await subToStrategy(proxy, strategySub);
-
     return { subId, strategySub };
 };
 
