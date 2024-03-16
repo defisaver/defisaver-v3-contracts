@@ -7,7 +7,6 @@ import "../../interfaces/flashloan/IERC3156FlashBorrower.sol";
 import "../../interfaces/flashloan/IERC3156FlashLender.sol";
 
 import "../../interfaces/flashloan/IFlashLoanBase.sol";
-import "../../core/strategy/StrategyModel.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/IFLParamGetter.sol";
 import "../../interfaces/flashloan/IFlashLoanBase.sol";
@@ -16,14 +15,8 @@ import "../../utils/TokenUtils.sol";
 
 import "./helpers/FLHelper.sol";
 
-contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLoanBase, StrategyModel, FLHelper {
+contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLoanBase, FLHelper {
     using TokenUtils for address;
-
-     // Revert if execution fails when using safe wallet
-    error SafeExecutionError();
-
-    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
-    bytes4 public constant CALLBACK_SELECTOR = bytes4(keccak256("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"));
 
     bytes32 public constant CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
@@ -86,32 +79,12 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
 
         uint256 paybackAmount = _amount + _fee;
 
-        _executeRecipe(wallet, currRecipe, paybackAmount);
+        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, paybackAmount);
 
         require(_token.getBalance(address(this)) == paybackAmount + balanceBefore, "Wrong payback amount");
 
         _token.approveToken(DSS_FLASH_ADDR, paybackAmount);
         return CALLBACK_SUCCESS;
-    }
-
-    function _executeRecipe(address _wallet, Recipe memory _currRecipe, uint256 _paybackAmount) internal {
-        if (isDSProxy(_wallet)) {
-            IDSProxy(_wallet).execute{value: address(this).balance}(
-                RECIPE_EXECUTOR_ADDR,
-                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount)
-            );
-        } else {
-            bool success = ISafe(_wallet).execTransactionFromModule(
-                RECIPE_EXECUTOR_ADDR,
-                address(this).balance,
-                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount),
-                ISafe.Operation.DelegateCall
-            );
-
-            if (!success) {
-                revert SafeExecutionError();
-             }
-        }
     }
 
     function parseInputs(bytes memory _callData)

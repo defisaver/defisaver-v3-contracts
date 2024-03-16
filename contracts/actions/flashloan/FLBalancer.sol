@@ -8,20 +8,13 @@ import "../../interfaces/balancer/IFlashLoans.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/IFLParamGetter.sol";
 import "../../interfaces/flashloan/IFlashLoanBase.sol";
-import "../../core/strategy/StrategyModel.sol";
 import "../../utils/TokenUtils.sol";
 import "../../utils/ReentrancyGuard.sol";
 
 import "./helpers/FLHelper.sol";
 
-contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashLoanBase, StrategyModel, FLHelper {
+contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashLoanBase, FLHelper {
     using TokenUtils for address;
-
-     // Revert if execution fails when using safe wallet
-    error SafeExecutionError();
-
-    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
-    bytes4 public constant CALLBACK_SELECTOR = bytes4(keccak256("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"));
 
     bytes32 public constant CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
@@ -81,7 +74,7 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashL
             balancesBefore[i] = _tokens[i].getBalance(address(this));
         }
 
-        _executeRecipe(wallet, currRecipe, (_amounts[0] + _feeAmounts[0]));
+        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, (_amounts[0] + _feeAmounts[0]));
 
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 paybackAmount = _amounts[i] + _feeAmounts[i];
@@ -89,26 +82,6 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashL
             require(_tokens[i].getBalance(address(this)) == paybackAmount + balancesBefore[i], "Wrong payback amount");
 
             _tokens[i].withdrawTokens(address(VAULT_ADDR), paybackAmount);
-        }
-    }
-
-    function _executeRecipe(address _wallet, Recipe memory _currRecipe, uint256 _paybackAmount) internal {
-        if (isDSProxy(_wallet)) {
-            IDSProxy(_wallet).execute{value: address(this).balance}(
-                RECIPE_EXECUTOR_ADDR,
-                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount)
-            );
-        } else {
-            bool success = ISafe(_wallet).execTransactionFromModule(
-                RECIPE_EXECUTOR_ADDR,
-                address(this).balance,
-                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount),
-                ISafe.Operation.DelegateCall
-            );
-
-            if (!success) {
-                revert SafeExecutionError();
-             }
         }
     }
 
