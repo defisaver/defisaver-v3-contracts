@@ -10,6 +10,7 @@ const {
     Float2BN, formatExchangeObjCurve, addrs, getAddrFromRegistry, balanceOf,
     setNewExchangeWrapper,
     openStrategyAndBundleStorage,
+    nullAddress,
 } = require('../../utils');
 const { addBotCaller, createStrategy } = require('../../utils-strategies');
 const { curveUsdCreate } = require('../../actions');
@@ -474,6 +475,7 @@ const curveUsdPaybackStrategyTest = async () => {
             return subCurveUsdPaybackStrategy(
                 proxy,
                 addressToPullTokensFrom,
+                proxy.address,
                 repayAmount,
                 crvUsdAddress,
                 controllerAddress,

@@ -3962,6 +3962,7 @@ const createCurveUsdPaybackStrategy = () => {
 
     paybackStrategy.addSubSlot('&controllerAddr', 'address');
     paybackStrategy.addSubSlot('&addressToPullTokensFrom', 'address');
+    paybackStrategy.addSubSlot('&positionOwner', 'address');
     paybackStrategy.addSubSlot('&amountToPayback', 'uint256');
     paybackStrategy.addSubSlot('&crvUsdAddress', 'address');
 
@@ -3981,7 +3982,7 @@ const createCurveUsdPaybackStrategy = () => {
     const curveUsdPaybackAction = new dfs.actions.curveusd.CurveUsdPaybackAction(
         '&controllerAddr', // taken from subdata,
         '&proxy', // piped
-        '&proxy', // piped
+        '&positionOwner', // taken from subdata
         '&eoa', // piped
         '$2', // output of gas fee taker action
         '%maxActiveBand', // sent by backend

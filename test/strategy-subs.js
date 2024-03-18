@@ -723,6 +723,7 @@ const subCurveUsdRepayBundle = async (
 const subCurveUsdPaybackStrategy = async (
     proxy,
     addressToPullTokensFrom,
+    positionOwner,
     amountToPayback,
     curveUsdAddress,
     controllerAddr,
@@ -731,6 +732,7 @@ const subCurveUsdPaybackStrategy = async (
     const strategySub = automationSdk.strategySubService.crvUSDEncode.payback(
         proxy.address,
         addressToPullTokensFrom,
+        positionOwner,
         amountToPayback,
         curveUsdAddress,
         controllerAddr,
