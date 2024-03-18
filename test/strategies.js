@@ -3982,7 +3982,7 @@ const createCurveUsdPaybackStrategy = () => {
         '&controllerAddr', // taken from subdata,
         '&proxy', // piped
         '&proxy', // piped
-        '&addressToPullTokensFrom', // taken from subdata
+        '&eoa', // piped
         '$2', // output of gas fee taker action
         '%maxActiveBand', // sent by backend
     );
