@@ -6,9 +6,17 @@ import "../ActionBase.sol";
 import "../../utils/TokenUtils.sol";
 
 /// @title Claims Merkl rewards
+/// @notice You can claim Merkl rewards for anyone, but distinctTokens array should be empty in that case
 contract MerklClaim is ActionBase, MerklHelper {
     using TokenUtils for address;
 
+    /// @param users Array of addresses who received the reward (from API)
+    /// @param tokens The addresses of the tokens that we are claiming the reward in (from API)
+    /// @param amounts Amounts to claim (from API)
+    /// @param proofs Merkle proofs (from API)
+    /// @param distinctTokens Distinct token addresses from tokens array if we want tokens to be sent from smart wallet
+    /// @param amountsClaimedPerDistinctToken Amount of tokens to send from smart wallet, amount should match token address at same index in distinctTokens
+    /// @param to The address to which the tokens claimed by smart wallet will be sent to
     struct Params {
         address[] users;
         address[] tokens;
