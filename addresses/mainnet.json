@@ -1206,6 +1206,17 @@
         "history": []
     },
     {
+        "name": "MerklClaim",
+        "address": "0xe88036f3f0d7e216d63726356ca2bc334e305fe5",
+        "id": "0x79b06cc7",
+        "path": "contracts/actions/merkl/MerklClaim.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AaveClaimAAVE",
         "address": "0xd52855bD011F3D87565f9040DdE2A59fB1b27b15",
         "id": "0x22ed53c6",
