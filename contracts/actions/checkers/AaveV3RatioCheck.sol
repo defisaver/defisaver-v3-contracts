@@ -37,7 +37,7 @@ contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
         uint256 ratioState = _parseParamUint(uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues);
         uint256 targetRatio = _parseParamUint(uint256(inputData.targetRatio), _paramMapping[1], _subData, _returnValues);
 
-        uint256 currRatio = getRatio(DEFAULT_AAVE_MARKET, address(this));
+        uint256 currRatio = getSafetyRatio(DEFAULT_AAVE_MARKET, address(this));
 
         uint256 startRatio = uint256(tempStorage.getBytes32("AAVE_RATIO"));
         

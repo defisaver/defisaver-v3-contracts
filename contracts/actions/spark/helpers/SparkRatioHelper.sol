@@ -6,18 +6,16 @@ import "./MainnetSparkAddresses.sol";
 import "../../../interfaces/aaveV3/IPoolV3.sol";
 
 contract SparkRatioHelper is DSMath, MainnetSparkAddresses {
-   function getSafetyRatio(address _market, address _user) public view returns (uint256) {
-        IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(_market).getPool());
-        (, uint256 totalDebtETH, uint256 availableBorrowsETH, , , ) = lendingPool
-            .getUserAccountData(_user);
-        if (totalDebtETH == 0) return uint256(0);
-        return wdiv(totalDebtETH + availableBorrowsETH, totalDebtETH);
-    }
-    /// @notice Calculated the ratio of coll/debt for an spark user
+
+    /// @notice Calculated the ratio of coll * weighted ltv / debt for spark user
     /// @param _market Address of LendingPoolAddressesProvider for specific market
     /// @param _user Address of the user
-    function getRatio(address _market, address _user) public view returns (uint256) {
-        // For each asset the account is in
-        return getSafetyRatio(_market, _user);
+   function getSafetyRatio(address _market, address _user) public view returns (uint256) {
+        IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(_market).getPool());
+        (uint256 totalCollUSD, uint256 totalDebtUSD, , , uint256 ltv, ) = lendingPool
+            .getUserAccountData(_user);
+        if (totalDebtUSD == 0) return 0;
+        /// @dev we're multiplying ltv with 10**14 so it represents number with 18 decimals (since 0 < ltv < 10000)
+        return wdiv(wmul(totalCollUSD, ltv * 10**14), totalDebtUSD);
     }
 }
