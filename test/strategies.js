@@ -3956,6 +3956,43 @@ const createCurveUsdFLDebtBoostStrategy = () => {
     boostStrategy.addAction(curveUsdCollRatioCheckAction);
     return boostStrategy.encodeForDsProxyCall();
 };
+
+const createCurveUsdPaybackStrategy = () => {
+    const paybackStrategy = new dfs.Strategy('CurveUsdPaybackStrategy');
+
+    paybackStrategy.addSubSlot('&controllerAddr', 'address');
+    paybackStrategy.addSubSlot('&addressToPullTokensFrom', 'address');
+    paybackStrategy.addSubSlot('&positionOwner', 'address');
+    paybackStrategy.addSubSlot('&amountToPayback', 'uint256');
+    paybackStrategy.addSubSlot('&crvUsdAddress', 'address');
+
+    const curveUsdHealthRatioTrigger = new dfs.triggers.CurveUsdHealthRatioTrigger(nullAddress, nullAddress, '0');
+    paybackStrategy.addTrigger(curveUsdHealthRatioTrigger);
+
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        '&crvUsdAddress', // taken from subdata
+        '&addressToPullTokensFrom', // taken from subdata
+        '%amountToPayback', // sent by backend, either amount from sub data or maxUint for whole balance
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // sent by backend
+        '&crvUsdAddress', // taken from subdata
+        '$1', // output of pull token action
+    );
+    const curveUsdPaybackAction = new dfs.actions.curveusd.CurveUsdPaybackAction(
+        '&controllerAddr', // taken from subdata,
+        '&proxy', // piped
+        '&positionOwner', // taken from subdata
+        '&eoa', // piped
+        '$2', // output of gas fee taker action
+        '%maxActiveBand', // sent by backend
+    );
+    paybackStrategy.addAction(pullTokenAction);
+    paybackStrategy.addAction(feeTakingAction);
+    paybackStrategy.addAction(curveUsdPaybackAction);
+    return paybackStrategy.encodeForDsProxyCall();
+};
+
 const createMorphoBlueBoostStrategy = () => {
     const boostStrategy = new dfs.Strategy('MorphoBlueBoostStrategy');
 
@@ -4496,6 +4533,7 @@ module.exports = {
     createCurveUsdBoostStrategy,
     createCurveUsdFLCollBoostStrategy,
     createCurveUsdFLDebtBoostStrategy,
+    createCurveUsdPaybackStrategy,
     createMorphoBlueBoostStrategy,
     createMorphoBlueFLDebtBoostStrategy,
     createMorphoBlueFLCollBoostStrategy,

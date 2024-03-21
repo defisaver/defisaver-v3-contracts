@@ -4425,5 +4425,38 @@
       ]
     ],
     "bundleId": 33
+  },
+  {
+    "name": "CurveUsdPaybackStrategy",
+    "id": 92,
+    "isContinuous": true,
+    "triggerIds": [
+      "CurveUsdHealthRatioTrigger"
+    ],
+    "actionIds": [
+      "PullToken",
+      "GasFeeTaker",
+      "CurveUsdPayback"
+    ],
+    "paramMapping": [
+      [
+        "&5",
+        "&2",
+        0
+      ],
+      [
+        "&5",
+        "$1",
+        0
+      ],
+      [
+        "&1",
+        "&proxy",
+        "&3",
+        "&eoa",
+        "$2",
+        0
+      ]
+    ]
   }
 ]

@@ -62,6 +62,12 @@ const createGasPriceTrigger = async (maxGasPrice) => {
     return param;
 };
 
+const createCurveUsdHealthRatioTrigger = async (user, controllerAddr, ratio) => {
+    const param = abiCoder.encode(['address', 'address', 'uint256'], [user, controllerAddr, ratio]);
+
+    return param;
+};
+
 module.exports = {
     createUniV3RangeOrderTrigger,
     createMcdTrigger,
@@ -72,6 +78,7 @@ module.exports = {
     createLiquityTrigger,
     createCurveUsdCollRatioTrigger,
     createMorphoBlueRatioTrigger,
+    createCurveUsdHealthRatioTrigger,
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
     IN_BOOST,
