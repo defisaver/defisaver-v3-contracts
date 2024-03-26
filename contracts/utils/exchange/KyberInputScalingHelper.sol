@@ -190,11 +190,11 @@ contract KyberInputScalingHelper {
             } else if (functionSelector == IExecutorHelper.executeSynthetix.selector) {
                 swap.data = newSynthetix(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeHashflow.selector) {
-                revert("InputScalingHelper: Can not scale RFQ swap");
+                revert("InputScalingHelper: Can not scale Hasflow swap");
             } else if (functionSelector == IExecutorHelper.executeCamelot.selector) {
                 swap.data = newCamelot(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeKyberLimitOrder.selector) {
-                revert("InputScalingHelper: Can not scale RFQ swap");
+                revert("InputScalingHelper: Can not scale KyberLO swap");
             } else if (functionSelector == IExecutorHelper.executePSM.selector) {
                 swap.data = newPSM(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeFrax.selector) {
@@ -221,7 +221,59 @@ contract KyberInputScalingHelper {
                 swap.data = newTraderJoeV2(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executePancakeStableSwap.selector) {
                 swap.data = newCurveSwap(swap.data, oldAmount, newAmount);
-            } else revert("AggregationExecutor: Dex type not supported");
+            } else if (functionSelector == IExecutorHelper.executeLevelFiV2.selector) {
+                swap.data = newLevelFiV2(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeGMXGLP.selector) {
+                swap.data = newGMXGLP(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeVooi.selector) {
+                swap.data = newVooi(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeVelocoreV2.selector) {
+                swap.data = newVelocoreV2(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeMaticMigrate.selector) {
+                swap.data = newMaticMigrate(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeSmardex.selector) {
+                swap.data = newMantis(swap.data, oldAmount, newAmount); // @dev using Mantis struct because Smardex and Mantis have same fields
+            } else if (functionSelector == IExecutorHelper.executeSolidlyV2.selector) {
+                swap.data = newMantis(swap.data, oldAmount, newAmount); // @dev using Mantis struct because Solidly V2 and Mantis have same fields
+            } else if (functionSelector == IExecutorHelper.executeKokonut.selector) {
+                swap.data = newKokonut(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeBalancerV1.selector) {
+                swap.data = newBalancerV1(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeSwaapV2.selector) {
+                revert("InputScalingHelper: Can not scale SwaapV2 swap");
+            } else if (functionSelector == IExecutorHelper.executeNomiswapStable.selector) {
+                swap.data = newMantis(swap.data, oldAmount, newAmount); // @dev using Mantis struct because NomiswapV2 and Mantis have same fields
+            } else if (functionSelector == IExecutorHelper.executeArbswapStable.selector) {
+                swap.data = newArbswapStable(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeBancorV2.selector) {
+                swap.data = newBancorV2(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeBancorV3.selector) {
+                swap.data = newMantis(swap.data, oldAmount, newAmount); // @dev using Mantis struct because Bancor V3 and Mantis have same fields
+            } else if (functionSelector == IExecutorHelper.executeAmbient.selector) {
+                swap.data = newAmbient(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeNative.selector) {
+                revert("InputScalingHelper: Can not scale Native swap");
+            } else if (functionSelector == IExecutorHelper.executeLighterV2.selector) {
+                swap.data = newLighterV2(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeBebop.selector) {
+                revert("InputScalingHelper: Can not scale Bebop swap");
+            } else if (functionSelector == IExecutorHelper.executeUniV1.selector) {
+                swap.data = newUniV1(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeEtherFieETH.selector) {
+                swap.data = newEtherFieETH(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeEtherFiWeETH.selector) {
+                swap.data = newEtherFiWeETH(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeKelp.selector) {
+                swap.data = newKelp(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeEthenaSusde.selector) {
+                swap.data = newEthenaSusde(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeRocketPool.selector) {
+                swap.data = newRocketPool(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeMakersDAI.selector) {
+                swap.data = newMakersDAI(swap.data, oldAmount, newAmount);
+            } else {
+                revert("AggregationExecutor: Dex type not supported");
+            }
             unchecked {
                 ++i;
             }
@@ -480,6 +532,213 @@ contract KyberInputScalingHelper {
             (traderJoe.collectAmount & (1 << 255)) |
             ((uint256((traderJoe.collectAmount << 1) >> 1) * newAmount) / oldAmount);
         return abi.encode(traderJoe);
+    }
+
+    function newLevelFiV2(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.LevelFiV2 memory levelFiV2 = abi.decode(data, (IExecutorHelper.LevelFiV2));
+        levelFiV2.amountIn = (levelFiV2.amountIn * newAmount) / oldAmount;
+        return abi.encode(levelFiV2);
+    }
+
+    function newGMXGLP(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.GMXGLP memory swapData = abi.decode(data, (IExecutorHelper.GMXGLP));
+        swapData.swapAmount = (swapData.swapAmount * newAmount) / oldAmount;
+        return abi.encode(swapData);
+    }
+
+    function newVooi(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.Vooi memory vooi = abi.decode(data, (IExecutorHelper.Vooi));
+        vooi.fromAmount = (vooi.fromAmount * newAmount) / oldAmount;
+        return abi.encode(vooi);
+    }
+
+    function newVelocoreV2(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.VelocoreV2 memory velocorev2 = abi.decode(
+            data,
+            (IExecutorHelper.VelocoreV2)
+        );
+        velocorev2.amount = (velocorev2.amount * newAmount) / oldAmount;
+        return abi.encode(velocorev2);
+    }
+
+    function newMaticMigrate(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.MaticMigrate memory maticMigrate = abi.decode(
+            data,
+            (IExecutorHelper.MaticMigrate)
+        );
+        maticMigrate.amount = (maticMigrate.amount * newAmount) / oldAmount;
+        return abi.encode(maticMigrate);
+    }
+
+    function newKokonut(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.Kokonut memory kokonut = abi.decode(data, (IExecutorHelper.Kokonut));
+        kokonut.dx = (kokonut.dx * newAmount) / oldAmount;
+        return abi.encode(kokonut);
+    }
+
+    function newBalancerV1(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.BalancerV1 memory balancerV1 = abi.decode(
+            data,
+            (IExecutorHelper.BalancerV1)
+        );
+        balancerV1.amount = (balancerV1.amount * newAmount) / oldAmount;
+        return abi.encode(balancerV1);
+    }
+
+    function newArbswapStable(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.ArbswapStable memory arbswapStable = abi.decode(
+            data,
+            (IExecutorHelper.ArbswapStable)
+        );
+        arbswapStable.dx = (arbswapStable.dx * newAmount) / oldAmount;
+        return abi.encode(arbswapStable);
+    }
+
+    function newBancorV2(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.BancorV2 memory bancorV2 = abi.decode(data, (IExecutorHelper.BancorV2));
+        bancorV2.amount = (bancorV2.amount * newAmount) / oldAmount;
+        return abi.encode(bancorV2);
+    }
+
+    function newAmbient(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.Ambient memory ambient = abi.decode(data, (IExecutorHelper.Ambient));
+        ambient.qty = uint128((uint256(ambient.qty) * newAmount) / oldAmount);
+        return abi.encode(ambient);
+    }
+
+    function newLighterV2(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.LighterV2 memory structData = abi.decode(data, (IExecutorHelper.LighterV2));
+        structData.amount = uint128((uint256(structData.amount) * newAmount) / oldAmount);
+        return abi.encode(structData);
+    }
+
+    function newUniV1(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.UniV1 memory structData = abi.decode(data, (IExecutorHelper.UniV1));
+        structData.amount = uint128((uint256(structData.amount) * newAmount) / oldAmount);
+        return abi.encode(structData);
+    }
+
+    function newEtherFieETH(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        uint256 depositAmount = abi.decode(data, (uint256));
+        depositAmount = uint128((depositAmount * newAmount) / oldAmount);
+        return abi.encode(depositAmount);
+    }
+
+    function newEtherFiWeETH(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.EtherFiWeETH memory structData = abi.decode(
+            data,
+            (IExecutorHelper.EtherFiWeETH)
+        );
+        structData.amount = uint128((uint256(structData.amount) * newAmount) / oldAmount);
+        return abi.encode(structData);
+    }
+
+    function newKelp(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.Kelp memory structData = abi.decode(data, (IExecutorHelper.Kelp));
+        structData.amount = uint128((uint256(structData.amount) * newAmount) / oldAmount);
+        return abi.encode(structData);
+    }
+
+    function newEthenaSusde(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.EthenaSusde memory structData = abi.decode(
+            data,
+            (IExecutorHelper.EthenaSusde)
+        );
+        structData.amount = uint128((uint256(structData.amount) * newAmount) / oldAmount);
+        return abi.encode(structData);
+    }
+
+    function newRocketPool(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.RocketPool memory structData = abi.decode(
+            data,
+            (IExecutorHelper.RocketPool)
+        );
+        uint128 _amount = uint128(
+            (uint256(uint128(structData.isDepositAndAmount)) * newAmount) / oldAmount
+        );
+        structData.isDepositAndAmount |= uint256(_amount);
+        return abi.encode(structData);
+    }
+
+    function newMakersDAI(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.MakersDAI memory structData = abi.decode(data, (IExecutorHelper.MakersDAI));
+        uint128 _amount = uint128(
+            (uint256(uint128(structData.isRedeemAndAmount)) * newAmount) / oldAmount
+        );
+        structData.isRedeemAndAmount |= uint256(_amount);
+        return abi.encode(structData);
     }
 
     function _scaledPositiveSlippageFeeData(
