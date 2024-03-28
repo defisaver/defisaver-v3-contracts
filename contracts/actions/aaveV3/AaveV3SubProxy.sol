@@ -6,9 +6,10 @@ import "../../auth/AdminAuth.sol";
 import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 import "../../utils/CheckWalletType.sol";
+import "./helpers/AaveV3Helper.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
-contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
+contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType, AaveV3Helper {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID; 
 
@@ -18,8 +19,6 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Che
     }
 
     enum RatioState { OVER, UNDER }
-
-    address public constant AAVE_V3_MARKET = 0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e;
 
     /// @dev 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
@@ -142,7 +141,7 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Che
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData = abi.encode(address(this), AAVE_V3_MARKET, uint256(_user.minRatio), uint8(RatioState.UNDER));
+        bytes memory triggerData = abi.encode(address(this), DEFAULT_AAVE_MARKET, uint256(_user.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData =  new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
@@ -159,7 +158,7 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Che
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(address(this), AAVE_V3_MARKET, uint256(_user.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData = abi.encode(address(this), DEFAULT_AAVE_MARKET, uint256(_user.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 

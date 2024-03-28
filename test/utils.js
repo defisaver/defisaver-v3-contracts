@@ -681,6 +681,28 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
     return c;
 };
 
+const approveContractInRegistry = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR) => {
+    const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
+    const registryInstance = await hre.ethers.getContractFactory('contracts/core/DFSRegistry.sol:DFSRegistry', signer);
+    let registry = await registryInstance.attach(regAddr);
+
+    registry = registry.connect(signer);
+
+    const id = getNameId(name);
+
+    const entryData = await registry.entries(id);
+
+    if (entryData.inContractChange) {
+        if (parseInt(entryData.waitPeriod, 10) > 0) {
+            await timeTravel(parseInt(entryData.waitPeriod, 10) + 10);
+        }
+    
+        await registry.approveContractChange(id, { gasLimit: 2000000 });
+    } else {
+        console.log(`Contract ${name} not in change`);
+    }
+};
+
 const getContractFromRegistry = async (
     name,
     regAddr = addrs[getNetwork()].REGISTRY_ADDR,
@@ -1084,10 +1106,12 @@ const formatExchangeObjForOffchain = (
     [wrapper, exchangeAddr, allowanceTarget, price, protocolFee, callData],
 ];
 
-const addToExchangeAggregatorRegistry = async (acc, newAddr) => {
+const addToExchangeAggregatorRegistry = async (acc, newAddr, isFork = false) => {
     const ownerAddr = addrs[network].OWNER_ACC;
-    await sendEther(acc, ownerAddr, '1');
-    await impersonateAccount(ownerAddr);
+    if (!isFork) {
+        await sendEther(acc, ownerAddr, '1');
+        await impersonateAccount(ownerAddr);
+    }
     const signer = hre.ethers.provider.getSigner(ownerAddr);
 
     const registry = await hre.ethers.getContractAt(
@@ -1095,7 +1119,10 @@ const addToExchangeAggregatorRegistry = async (acc, newAddr) => {
     );
 
     await registry.setExchangeTargetAddr(newAddr, true);
-    await stopImpersonatingAccount(ownerAddr);
+
+    if (!isFork) {
+        await stopImpersonatingAccount(ownerAddr);
+    }
 };
 
 const getGasUsed = async (receipt) => {
@@ -1427,6 +1454,7 @@ module.exports = {
     curveApiInit,
     executeTxFromProxy,
     generateIds,
+    approveContractInRegistry,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,
