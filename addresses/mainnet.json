@@ -2796,6 +2796,17 @@
         "history": []
     },
     {
+        "name": "CurveUsdHealthRatioTrigger",
+        "address": "0x7fFc15c11b8dEbAe73e60E38cDD4d2987d1C8843",
+        "id": "0xbcde585a",
+        "path": "contracts/triggers/CurveUsdHealthRatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveUsdCollRatioCheck",
         "address": "0x8c65f37ca216de1625886431249be13ead051388",
         "id": "0xe677476f",
