@@ -5,7 +5,7 @@ pragma solidity =0.8.10;
 import "../../ActionBase.sol";
 import "./helpers/MorphoAaveV3Helper.sol";
 
-/// @title Allow or disallow an address to manage your Morpho-AaveV3 DSProxy position
+/// @title Allow or disallow an address to manage your Morpho-AaveV3 position on your wallet
 contract MorphoAaveV3SetManager is ActionBase, MorphoAaveV3Helper {
     
     struct Params {

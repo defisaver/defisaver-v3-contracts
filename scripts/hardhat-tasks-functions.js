@@ -238,13 +238,13 @@ async function flatten(filePath) {
     }
     const fileName = path.basename(filePath);
     const pragmaRegex = /^pragma.*$\n?/gm; // anything starting with pragma
-    const licenseRegex = /^[//SPDX].*$\n?/gm; // anything starting with //SPDX
+    const topLvlCommentsRegex = /^(?<!\/\*\*)(?<=^|\n)[^\s]*\/\/.*$/gm; // matches anything with // that is without spaces or indents
     let globalLicense;
     let pragma;
     // Find license and any pragmas (sol version, and possible abi encoder)
     try {
         const data = fs.readFileSync(filePath, 'utf8');
-        globalLicense = data.match(licenseRegex);
+        globalLicense = data.match(topLvlCommentsRegex);
         pragma = data.match(pragmaRegex);
     } catch (err) {
         console.error(err);
@@ -255,7 +255,7 @@ async function flatten(filePath) {
         await fs.readFileSync(`contracts/flattened/${fileName}`)
     ).toString();
     data = data.replace(pragmaRegex, '');
-    data = data.replace(licenseRegex, '');
+    data = data.replace(topLvlCommentsRegex, '');
     const flags = { flag: 'a+' };
 
     fs.writeFileSync(`contracts/flattened/${fileName}`, globalLicense[0]);

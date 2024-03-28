@@ -10,6 +10,8 @@ const {
     network,
     getNetwork,
     getContractFromRegistry,
+    executeTxFromProxy,
+    isProxySafe,
 } = require('./utils');
 
 const getLatestBundleId = async () => {
@@ -91,7 +93,7 @@ const createBundle = async (proxy, strategyIds) => {
 };
 
 const subToStrategy = async (proxy, strategySub, regAddr = addrs[getNetwork()].REGISTRY_ADDR) => {
-    const SubProxyAddr = addrs[getNetwork()].SubProxy;
+    const SubProxyAddr = await getAddrFromRegistry('SubProxy', regAddr);
 
     const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
     const functionData = SubProxyProxy.interface.encodeFunctionData(
@@ -99,9 +101,7 @@ const subToStrategy = async (proxy, strategySub, regAddr = addrs[getNetwork()].R
         [strategySub],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](SubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, SubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -121,9 +121,7 @@ const activateSub = async (proxy, subId, regAddr = addrs[network].REGISTRY_ADDR)
         [subId.toString()],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](SubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, SubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -141,9 +139,7 @@ const subToAaveV3Proxy = async (proxy, inputData, regAddr = addrs[getNetwork()].
         [inputData],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](aaveSubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, aaveSubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -174,9 +170,7 @@ const subToSparkProxy = async (proxy, inputData, regAddr = addrs[getNetwork()].R
         [inputData],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](sparkSubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, sparkSubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -216,9 +210,7 @@ const subToCompV3Proxy = async (proxy, inputData, regAddr = addrs[network].REGIS
         inputData,
     );
 
-    const receipt = await proxy['execute(address,bytes)'](compV3SubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, compV3SubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -235,7 +227,7 @@ const subToCompV3ProxyL2 = async (proxy, inputData, regAddr = addrs[network].REG
     const CompV3SubProxyL2 = await hre.ethers.getContractFactory('CompV3SubProxyL2');
     const functionData = CompV3SubProxyL2.interface.encodeFunctionData(
         'subToCompV3Automation',
-        [inputData],
+        inputData,
     );
     const receipt = await proxy['execute(address,bytes)'](compV3SubProxyAddr, functionData, {
         gasLimit: 5000000,
@@ -256,9 +248,7 @@ const subToCompV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGIS
         inputData,
     );
 
-    const receipt = await proxy['execute(address,bytes)'](compV2SubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, compV2SubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -289,9 +279,7 @@ const updateToCompV2Proxy = async (
         inputData,
     ]);
 
-    const receipt = await proxy['execute(address,bytes)'](compV2SubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, compV2SubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -311,15 +299,15 @@ const updateToCompV2Proxy = async (
 const subToAaveV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
     const aaveV2SubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
 
+    console.log('aaveV2SubProxyAddr: ', aaveV2SubProxyAddr);
+
     const AaveV2SubProxy = await hre.ethers.getContractFactory('AaveSubProxy');
     const functionData = AaveV2SubProxy.interface.encodeFunctionData(
         'subToAaveAutomation',
         inputData,
     );
 
-    const receipt = await proxy['execute(address,bytes)'](aaveV2SubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, aaveV2SubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -350,9 +338,7 @@ const updateToAaveV2Proxy = async (
         inputData,
     ]);
 
-    const receipt = await proxy['execute(address,bytes)'](aaveV2SubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, aaveV2SubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -378,9 +364,7 @@ const subToCBRebondProxy = async (proxy, inputData, regAddr = addrs[network].REG
         inputData,
     );
 
-    const receipt = await proxy['execute(address,bytes)'](cbRebondSubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, cbRebondSubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -400,9 +384,7 @@ const subToMorphoAaveV2Proxy = async (proxy, inputData, regAddr = addrs[network]
         inputData,
     );
 
-    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, subProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -433,9 +415,7 @@ const updateSubDataMorphoAaveV2Proxy = async (
         ],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, subProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -449,7 +429,8 @@ const updateSubDataMorphoAaveV2Proxy = async (
 };
 
 const subToLiquityProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const subProxyAddr = '0xE2f4A4629FbbC444964A16438329288C66551c30'; // hardcoded here for now
+    const subProxyAddr = await getAddrFromRegistry('LiquitySubProxy', regAddr);
+
     console.log({ subProxyAddr });
 
     const subProxyFactory = await hre.ethers.getContractFactory('LiquitySubProxy');
@@ -458,9 +439,7 @@ const subToLiquityProxy = async (proxy, inputData, regAddr = addrs[network].REGI
         inputData,
     );
 
-    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, subProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -491,9 +470,7 @@ const updateLiquityProxy = async (
         ],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, subProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -515,9 +492,7 @@ const updateAaveProxy = async (proxy, inputData, regAddr = addrs[network].REGIST
         [inputData],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](aaveSubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, aaveSubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -538,9 +513,7 @@ const updateSparkProxy = async (proxy, inputData, regAddr = addrs[network].REGIS
         [inputData],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](sparkSubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, sparkSubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -555,14 +528,13 @@ const subToMcdProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY
     const subProxyAddr = await getAddrFromRegistry('McdSubProxy', regAddr);
     const subProxy = await hre.ethers.getContractAt('McdSubProxy', subProxyAddr);
 
+    // false for _shouldLegacyUnsub, no longer needed, kept to keep the function sig the same
     const functionData = subProxy.interface.encodeFunctionData(
         'subToMcdAutomation',
         [inputData, false],
     );
 
-    const receipt = await proxy['execute(address,bytes)'](subProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, subProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
@@ -593,12 +565,12 @@ const subToLimitOrderProxy = async (proxy, inputData, regAddr = addrs[network].R
         inputData,
     );
 
-    const receipt = await proxy['execute(address,bytes)'](limitOrderSubProxyAddr, functionData, {
-        gasLimit: 5000000,
-    });
+    const receipt = await executeTxFromProxy(proxy, limitOrderSubProxyAddr, functionData);
 
     const parsed = await receipt.wait();
-    const lastEvent = parsed.events.at(-1);
+
+    // safe wallets fires an extra event at the end of tx
+    const lastEvent = isProxySafe(proxy) ? parsed.events.at(-2) : parsed.events.at(-1);
 
     const abiCoder = hre.ethers.utils.defaultAbiCoder;
     const strategySub = abiCoder.decode(['(uint64,bool,bytes[],bytes32[])'], lastEvent.data)[0];

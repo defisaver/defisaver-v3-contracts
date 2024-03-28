@@ -17,7 +17,8 @@ const {
     getNetwork,
     balanceOf,
     redeploy,
-    getAddrFromRegistry,
+    WALLETS,
+    isWalletNameDsProxy,
 } = require('../../utils');
 
 const { liquityOpen, executeAction } = require('../../actions');
@@ -36,18 +37,23 @@ const aaveV3Shifter = async () => {
     describe('Aave V3 Shifter', () => {
         let senderAcc;
         let senderAddr;
+
         let proxy;
-        let proxyAddr;
+        let safe;
+        let wallet;
+
         let snapshotId;
-        let flAaveV3Address;
+        let flActionAddress;
         let flAaveV3CarryDebtAddress;
+
+        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
 
         const createLiquityPosition = async (collAmount, LUSDAmount) => {
             await setBalance(WETH_ADDRESS, senderAddr, collAmount);
-            await approve(WETH_ADDRESS, proxyAddr, senderAcc);
+            await approve(WETH_ADDRESS, wallet.address, senderAcc);
             const maxFeePercentage = hre.ethers.utils.parseUnits('5', 16);
             const tx = await liquityOpen(
-                proxy,
+                wallet,
                 maxFeePercentage,
                 collAmount,
                 LUSDAmount,
@@ -55,40 +61,42 @@ const aaveV3Shifter = async () => {
                 senderAddr,
             );
             await tx.wait();
-            const troveInfo = await getTroveInfo(proxyAddr);
-            console.log(`Trove created for proxy: ${proxyAddr}. TroveInfo: ${troveInfo}`);
+            const troveInfo = await getTroveInfo(wallet.address);
+            console.log(`Trove created for wallet: ${wallet.address}. TroveInfo: ${troveInfo}`);
             return troveInfo;
         };
 
         const actions = {
-            flAaveV3Action: (debtAmount) => new dfs.actions.flashloan.AaveV3FlashLoanNoFeeAction(
-                [LUSD_ADDR],
-                [debtAmount.toString()],
-                [AAVE_NO_DEBT_MODE],
-                nullAddress,
+            flAaveV3Action: (debtAmount) => new dfs.actions.flashloan.FLAction(
+                new dfs.actions.flashloan.AaveV3FlashLoanAction(
+                    [LUSD_ADDR],
+                    [debtAmount.toString()],
+                    [AAVE_NO_DEBT_MODE],
+                    nullAddress,
+                ),
             ),
             flAaveV3CarryDebtAction: (debtAmount) => new dfs.actions.flashloan
                 .AaveV3FlashLoanCarryDebtAction(
                     [LUSD_ADDR],
                     [debtAmount.toString()],
                     [VARIABLE_RATE],
-                    proxyAddr,
+                    wallet.address,
                 ),
             lidoWrapAction: (collAmount) => new dfs.actions.lido.LidoWrapAction(
                 collAmount.toString(),
-                proxyAddr,
-                proxyAddr,
+                wallet.address,
+                wallet.address,
                 true, // is eth
             ),
             liquityCloseAction: () => new dfs.actions.liquity.LiquityCloseAction(
-                proxyAddr,
-                proxyAddr,
+                wallet.address,
+                wallet.address,
             ),
             aaveV3SupplyAction: () => new dfs.actions.aaveV3.AaveV3SupplyAction(
                 true, // use default market
                 addrs[getNetwork()].AAVE_MARKET,
                 '$3', // pipe from lido wrap action
-                proxyAddr,
+                wallet.address,
                 WSTETH_ADDRESS,
                 WSETH_ASSET_ID_IN_AAVE_V3_MARKET,
                 true, // use as collateral
@@ -99,7 +107,7 @@ const aaveV3Shifter = async () => {
                 true, // use default market
                 addrs[getNetwork()].AAVE_MARKET,
                 debtAmount.toString(), // debt amount
-                proxyAddr,
+                wallet.address,
                 VARIABLE_RATE,
                 LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
                 false,
@@ -107,7 +115,7 @@ const aaveV3Shifter = async () => {
             ),
             sendTokenActionFLPayback: () => new dfs.actions.basic.SendTokenAction(
                 LUSD_ADDR,
-                flAaveV3Address,
+                flActionAddress,
                 '$1', // from FL action
             ),
             sendTokenActionCleanUpProxy: () => new dfs.actions.basic.SendTokenAction(
@@ -152,17 +160,25 @@ const aaveV3Shifter = async () => {
         };
 
         before(async () => {
-            flAaveV3Address = await getAddrFromRegistry('FLAaveV3');
+            const flActionContract = await redeploy('FLAction');
+            flActionAddress = flActionContract.address;
 
             const flAaveV3CarryDebtContract = await redeploy('FLAaveV3CarryDebt');
             flAaveV3CarryDebtAddress = flAaveV3CarryDebtContract.address;
 
+            await redeploy('RecipeExecutor');
+            await redeploy('LidoWrap');
+            await redeploy('LiquityClose');
+            await redeploy('LiquityOpen');
+            await redeploy('SendToken');
             await redeploy('AaveV3DelegateCredit');
+            await redeploy('AaveV3Supply');
+            await redeploy('AaveV3Borrow');
 
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAddr = senderAcc.address;
             proxy = await getProxy(senderAddr);
-            proxyAddr = proxy.address;
+            safe = await getProxy(senderAddr, true);
         });
 
         beforeEach(async () => {
@@ -173,84 +189,91 @@ const aaveV3Shifter = async () => {
             await revertToSnapshot(snapshotId);
         });
 
-        it('... should shift from WETH/LUSD to WSETH/LUSD', async () => {
-            const collAmount = hre.ethers.utils.parseUnits('50', 18);
-            const LUSDAmount = hre.ethers.utils.parseUnits('30000', 18);
-            const troveInfo = await createLiquityPosition(collAmount, LUSDAmount);
+        for (let i = 0; i < WALLETS.length; i++) {
+            it(`... should shift from WETH/LUSD to WSETH/LUSD using ${WALLETS[i]} as wallet`, async () => {
+                determineActiveWallet(WALLETS[i]);
+                const collAmount = hre.ethers.utils.parseUnits('50', 18);
+                const LUSDAmount = hre.ethers.utils.parseUnits('30000', 18);
+                const troveInfo = await createLiquityPosition(collAmount, LUSDAmount);
 
-            const shiftRecipe = regularShiftRecipe(troveInfo);
-            console.log(troveInfo.debtAmount.toString());
+                const shiftRecipe = regularShiftRecipe(troveInfo);
+                console.log(troveInfo.debtAmount.toString());
 
-            const functionData = shiftRecipe.encodeForDsProxyCall();
-            await executeAction('RecipeExecutor', functionData[1], proxy);
+                const functionData = shiftRecipe.encodeForDsProxyCall();
+                await executeAction('RecipeExecutor', functionData[1], wallet);
 
-            const newTroveInfo = await getTroveInfo(proxyAddr);
+                const newTroveInfo = await getTroveInfo(wallet.address);
 
-            expect(newTroveInfo.troveStatus).to.equal(2); // 2 for closedByOwner status
-            expect(newTroveInfo.collAmount).to.equal(0);
-            expect(newTroveInfo.debtAmount).to.equal(0);
+                expect(newTroveInfo.troveStatus).to.equal(2); // 2 for closedByOwner status
+                expect(newTroveInfo.collAmount).to.equal(0);
+                expect(newTroveInfo.debtAmount).to.equal(0);
 
-            const proxyBalance = await balanceOf(A_WSETH_TOKEN_ADDR, proxyAddr);
-            expect(proxyBalance).to.be.gt(0);
-        });
+                const proxyBalance = await balanceOf(A_WSETH_TOKEN_ADDR, wallet.address);
+                expect(proxyBalance).to.be.gt(0);
+            }).timeout(300000);
 
-        it('... should fail to shift from WETH/LUSD to WSETH/LUSD because of insufficient aaveV3 liquidity', async () => {
-            const troveInfo = await createLiquityPosWithDebtGtThanHalfOfLiquidityOnAaveV3();
-            const shiftRecipe = regularShiftRecipe(troveInfo);
-            const functionData = shiftRecipe.encodeForDsProxyCall();
-            await expect(executeAction('RecipeExecutor', functionData[1], proxy)).to.be.reverted;
-        });
+            it(`... should fail to shift from WETH/LUSD to WSETH/LUSD because of insufficient aaveV3 liquidity using ${WALLETS[i]} as wallet`, async () => {
+                determineActiveWallet(WALLETS[i]);
+                const troveInfo = await createLiquityPosWithDebtGtThanHalfOfLiquidityOnAaveV3();
+                const shiftRecipe = regularShiftRecipe(troveInfo);
+                const functionData = shiftRecipe.encodeForDsProxyCall();
+                await expect(executeAction('RecipeExecutor', functionData[1], wallet)).to.be.reverted;
+            }).timeout(300000);
 
-        it('... should shift from WETH/LUSD to WSETH/LUSD when debt is greater than half of liquidity', async () => {
-            const troveInfo = await createLiquityPosWithDebtGtThanHalfOfLiquidityOnAaveV3();
-            const recipeWithNewFLAction = new dfs.Recipe('Shift', [
-                actions.flAaveV3CarryDebtAction(troveInfo.debtAmount),
-                actions.liquityCloseAction(),
-                actions.lidoWrapAction(troveInfo.collAmount),
-                actions.aaveV3SupplyAction(),
-                actions.delegateCreditOnAaveV3Action('$1'), // fl amount
-                actions.sendTokenActionCleanUpProxy(),
-            ]);
+            it(`... should shift from WETH/LUSD to WSETH/LUSD when debt is greater than half of liquidity using ${WALLETS[i]} as wallet`, async () => {
+                determineActiveWallet(WALLETS[i]);
+                const troveInfo = await createLiquityPosWithDebtGtThanHalfOfLiquidityOnAaveV3();
+                const recipeWithNewFLAction = new dfs.Recipe('Shift', [
+                    actions.flAaveV3CarryDebtAction(troveInfo.debtAmount),
+                    actions.liquityCloseAction(),
+                    actions.lidoWrapAction(troveInfo.collAmount),
+                    actions.aaveV3SupplyAction(),
+                    actions.delegateCreditOnAaveV3Action('$1'), // fl amount
+                    actions.sendTokenActionCleanUpProxy(),
+                ]);
 
-            const functionData = recipeWithNewFLAction.encodeForDsProxyCall();
-            await executeAction('RecipeExecutor', functionData[1], proxy);
+                const functionData = recipeWithNewFLAction.encodeForDsProxyCall();
+                await executeAction('RecipeExecutor', functionData[1], wallet);
 
-            const newTroveInfo = await getTroveInfo(proxyAddr);
-            expect(newTroveInfo.troveStatus).to.equal(2); // 2 for closedByOwner status
-            expect(newTroveInfo.collAmount).to.equal(0);
-            expect(newTroveInfo.debtAmount).to.equal(0);
+                const newTroveInfo = await getTroveInfo(wallet.address);
+                expect(newTroveInfo.troveStatus).to.equal(2); // 2 for closedByOwner status
+                expect(newTroveInfo.collAmount).to.equal(0);
+                expect(newTroveInfo.debtAmount).to.equal(0);
 
-            const proxyBalance = await balanceOf(A_WSETH_TOKEN_ADDR, proxyAddr);
-            expect(proxyBalance).to.be.gt(0);
-        });
+                const proxyBalance = await balanceOf(A_WSETH_TOKEN_ADDR, wallet.address);
+                expect(proxyBalance).to.be.gt(0);
+            }).timeout(300000);
 
-        it('... should revert on shift from WETH/LUSD to WSETH/LUSD because of maximum credit delegation allowance', async () => {
-            const troveInfo = await createLiquityPosWithDebtGtThanHalfOfLiquidityOnAaveV3();
-            const recipeWithNewFLAction = new dfs.Recipe('Shift', [
-                actions.flAaveV3CarryDebtAction(troveInfo.debtAmount),
-                actions.liquityCloseAction(),
-                actions.lidoWrapAction(troveInfo.collAmount),
-                actions.aaveV3SupplyAction(),
-                actions.delegateCreditOnAaveV3Action(hre.ethers.constants.MaxUint256),
-                actions.sendTokenActionCleanUpProxy(),
-            ]);
-            const functionData = recipeWithNewFLAction.encodeForDsProxyCall();
-            await expect(executeAction('RecipeExecutor', functionData[1], proxy)).to.be.reverted;
-        });
+            it(`... should revert on shift from WETH/LUSD to WSETH/LUSD because of maximum credit delegation allowance using ${WALLETS[i]} as wallet`, async () => {
+                determineActiveWallet(WALLETS[i]);
+                const troveInfo = await createLiquityPosWithDebtGtThanHalfOfLiquidityOnAaveV3();
+                const recipeWithNewFLAction = new dfs.Recipe('Shift', [
+                    actions.flAaveV3CarryDebtAction(troveInfo.debtAmount),
+                    actions.liquityCloseAction(),
+                    actions.lidoWrapAction(troveInfo.collAmount),
+                    actions.aaveV3SupplyAction(),
+                    actions.delegateCreditOnAaveV3Action(hre.ethers.constants.MaxUint256),
+                    actions.sendTokenActionCleanUpProxy(),
+                ]);
+                const functionData = recipeWithNewFLAction.encodeForDsProxyCall();
+                await expect(executeAction('RecipeExecutor', functionData[1], wallet)).to.be.reverted;
+            }).timeout(300000);
 
-        it('... should revert on shift from WETH/LUSD to WSETH/LUSD because of slightly bigger credit delegation allowance', async () => {
-            const troveInfo = await createLiquityPosWithDebtGtThanHalfOfLiquidityOnAaveV3();
-            const recipeWithNewFLAction = new dfs.Recipe('Shift', [
-                actions.flAaveV3CarryDebtAction(troveInfo.debtAmount),
-                actions.liquityCloseAction(),
-                actions.lidoWrapAction(troveInfo.collAmount),
-                actions.aaveV3SupplyAction(),
-                actions.delegateCreditOnAaveV3Action(troveInfo.debtAmount.add(1)),
-                actions.sendTokenActionCleanUpProxy(),
-            ]);
-            const functionData = recipeWithNewFLAction.encodeForDsProxyCall();
-            await expect(executeAction('RecipeExecutor', functionData[1], proxy)).to.be.reverted;
-        });
+            it(`... should revert on shift from WETH/LUSD to WSETH/LUSD because of slightly bigger credit delegation allowance using ${WALLETS[i]} as wallet`, async () => {
+                determineActiveWallet(WALLETS[i]);
+                const troveInfo = await createLiquityPosWithDebtGtThanHalfOfLiquidityOnAaveV3();
+                const recipeWithNewFLAction = new dfs.Recipe('Shift', [
+                    actions.flAaveV3CarryDebtAction(troveInfo.debtAmount),
+                    actions.liquityCloseAction(),
+                    actions.lidoWrapAction(troveInfo.collAmount),
+                    actions.aaveV3SupplyAction(),
+                    actions.delegateCreditOnAaveV3Action(troveInfo.debtAmount.add(1)),
+                    actions.sendTokenActionCleanUpProxy(),
+                ]);
+                const functionData = recipeWithNewFLAction.encodeForDsProxyCall();
+                await expect(executeAction('RecipeExecutor', functionData[1], wallet)).to.be.reverted;
+            }).timeout(300000);
+        }
     });
 };
 
@@ -259,5 +282,5 @@ describe('AaveV3 Shift Tests', function () {
 
     it('... test AaveV3 Shift', async () => {
         await aaveV3Shifter();
-    }).timeout(50000);
+    }).timeout(300000);
 });

@@ -19,6 +19,13 @@ abstract contract IUniswapRouter {
         uint256 deadline
     ) external virtual returns (uint256[] memory amounts);
 
+    function swapETHForExactTokens(
+        uint amountOut,
+        address[] calldata path,
+        address to,
+        uint deadline
+    ) external virtual payable returns (uint256[] memory amounts);
+
     function swapTokensForExactETH(
         uint256 amountOut,
         uint256 amountInMax,

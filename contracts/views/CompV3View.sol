@@ -3,7 +3,7 @@
 pragma solidity =0.8.10;
 
 import "../DS/DSMath.sol";
-import "../utils/Exponential.sol";
+import "../utils/math/Exponential.sol";
 import "../interfaces/compoundV3/IComet.sol";
 import "../interfaces/compoundV3/ICometExt.sol";
 import "../interfaces/compoundV3/ICometRewards.sol";
@@ -58,7 +58,7 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
         bool isAbsorbPaused;
     }
     
-    function isAllowed(address _market, address _owner, address _manager) public view returns(bool isAllowed) {
+    function isAllowed(address _market, address _owner, address _manager) public view returns(bool) {
         return ICometExt(_market).allowance(_owner, _manager) == 0 ? false : true;
     }
 

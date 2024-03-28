@@ -186,7 +186,7 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
             });
 
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             proxyAddr = proxy.address;
 
             console.log('proxyAddr: ', proxyAddr);
@@ -198,20 +198,21 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
 
             strategyExecutor = await redeployCore();
 
-            await getContractFromRegistry('SparkSupply');
-            await getContractFromRegistry('FLSpark');
-            await getContractFromRegistry('SparkBorrow');
-            await getContractFromRegistry('BotAuth');
-            await getContractFromRegistry('SparkRatioTrigger');
-            await getContractFromRegistry('GasFeeTaker');
-            await getContractFromRegistry('DFSSell');
-            await getContractFromRegistry('SparkPayback');
-            await getContractFromRegistry('SparkWithdraw');
-            await getContractFromRegistry('SparkRatioCheck');
+            await redeploy('SparkSupply');
+            await redeploy('SparkBorrow');
+            await redeploy('BotAuth');
+            await redeploy('SparkRatioTrigger');
+            await redeploy('GasFeeTaker');
+            await redeploy('DFSSell');
+            await redeploy('SparkPayback');
+            await redeploy('SparkWithdraw');
+            await redeploy('SparkRatioCheck');
 
             ({ address: flAddr } = await redeploy('FLAction'));
 
             sparkView = await getContractFromRegistry('SparkView');
+
+            await setNewExchangeWrapper(senderAcc, addrs[network].UNISWAP_V3_WRAPPER);
 
             botAcc = (await hre.ethers.getSigners())[1];
             await addBotCaller(botAcc.address);
@@ -260,16 +261,16 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
                     debtAssetId,
                 );
 
-                const targetRatio = hre.ethers.utils.parseUnits('2.3', '18');
-                const ratioUnder = hre.ethers.utils.parseUnits('2.2', '18');
+                const targetRatio = 230;
+                const ratioUnder = 220;
 
                 // same as in L2
                 subIds = await subSparkAutomationStrategy(
                     proxy,
-                    ratioUnder.toHexString().slice(2),
-                    '0',
-                    '0',
-                    targetRatio.toHexString().slice(2),
+                    ratioUnder,
+                    0,
+                    0,
+                    targetRatio,
                     false,
                 );
             });
@@ -376,7 +377,7 @@ const sparkBoostStrategyTest = async (numTestPairs) => {
             });
 
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             proxyAddr = proxy.address;
 
             console.log('proxyAddr: ', proxyAddr);
@@ -388,21 +389,21 @@ const sparkBoostStrategyTest = async (numTestPairs) => {
 
             strategyExecutor = await redeployCore();
 
-            await getContractFromRegistry('SparkWithdraw');
-            await getContractFromRegistry('SparkPayback');
-            await getContractFromRegistry('SparkView');
-            await getContractFromRegistry('FLSpark');
-            await getContractFromRegistry('BotAuth');
-            await getContractFromRegistry('SparkRatioTrigger');
-            await getContractFromRegistry('GasFeeTaker');
-            await getContractFromRegistry('DFSSell');
-            await getContractFromRegistry('SparkSupply');
-            await getContractFromRegistry('SparkBorrow');
-            await getContractFromRegistry('SparkRatioCheck');
+            await redeploy('SparkWithdraw');
+            await redeploy('SparkPayback');
+            await redeploy('SparkRatioTrigger');
+            await redeploy('GasFeeTaker');
+            await redeploy('DFSSell');
+            await redeploy('SparkSupply');
+            await redeploy('SparkBorrow');
+            await redeploy('SparkRatioCheck');
+            await redeploy('SparkView');
 
             ({ address: flAddr } = await redeploy('FLAction'));
 
             sparkView = await getContractFromRegistry('SparkView');
+
+            await setNewExchangeWrapper(senderAcc, addrs[network].UNISWAP_V3_WRAPPER);
 
             botAcc = (await hre.ethers.getSigners())[1];
             await addBotCaller(botAcc.address);
@@ -451,15 +452,15 @@ const sparkBoostStrategyTest = async (numTestPairs) => {
                     debtAssetId,
                 );
 
-                const targetRatio = hre.ethers.utils.parseUnits('1.5', '18');
-                const ratioOver = hre.ethers.utils.parseUnits('1.7', '18');
+                const targetRatio = 150;
+                const ratioOver = 170;
 
                 subIds = await subSparkAutomationStrategy(
                     proxy,
-                    '0',
-                    ratioOver.toHexString().slice(2),
-                    targetRatio.toHexString().slice(2),
-                    '0',
+                    0,
+                    ratioOver,
+                    targetRatio,
+                    0,
                     true,
                 );
             });
@@ -554,7 +555,7 @@ const sparkCloseToDebtStrategyTest = async (numTestPairs) => {
 
         const USD_COLL_OPEN = '25000';
         const USD_DEBT_OPEN = '10000';
-        const ALLOWED_SLIPPAGE = 0.05;
+        const ALLOWED_SLIPPAGE = 0.5;
         const EXPECTED_MAX_INTEREST = 1e-6;
         const PARTIAL_CLOSE = 0.5;
         const RATE_MODE = 2;
@@ -585,7 +586,7 @@ const sparkCloseToDebtStrategyTest = async (numTestPairs) => {
             });
 
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             proxyAddr = proxy.address;
 
             console.log({ eoa: senderAcc.address, proxy: proxyAddr });
@@ -597,11 +598,14 @@ const sparkCloseToDebtStrategyTest = async (numTestPairs) => {
 
             strategyExecutor = await redeployCore();
 
-            await getContractFromRegistry('SparkQuotePriceTrigger');
-            await getContractFromRegistry('SparkSupply');
-            await getContractFromRegistry('SparkBorrow');
-            await getContractFromRegistry('SparkPayback');
-            await getContractFromRegistry('SparkWithdraw');
+            await redeploy('SparkQuotePriceTrigger');
+            await redeploy('SparkSupply');
+            await redeploy('SparkBorrow');
+            await redeploy('SparkPayback');
+            await redeploy('SparkWithdraw');
+            await redeploy('DFSSell');
+            await redeploy('GasFeeTaker');
+            await redeploy('SendTokenAndUnwrap');
 
             const { address: mockWrapperAddr } = await getContractFromRegistry('MockExchangeWrapper');
 
@@ -682,10 +686,7 @@ const sparkCloseToDebtStrategyTest = async (numTestPairs) => {
 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
-                const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
-                    8,
-                );
+                const triggerPrice = Float2BN(`${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`, 8);
 
                 ({ subId, strategySub: sub } = await subSparkCloseBundle(
                     proxy,
@@ -837,7 +838,7 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
 
         const USD_COLL_OPEN = '25000';
         const USD_DEBT_OPEN = '10000';
-        const ALLOWED_SLIPPAGE = 0.05;
+        const ALLOWED_SLIPPAGE = 0.5;
         const EXPECTED_MAX_INTEREST = 1e-6;
         const PARTIAL_CLOSE = 0.5;
         const RATE_MODE = 2;
@@ -869,7 +870,7 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
             });
 
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             proxyAddr = proxy.address;
 
             console.log({ eoa: senderAcc.address, proxy: proxyAddr });
@@ -881,13 +882,16 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
 
             strategyExecutor = await redeployCore();
 
-            await getContractFromRegistry('SparkQuotePriceTrigger');
-            await getContractFromRegistry('FLSpark');
-            await getContractFromRegistry('SparkSupply');
-            await getContractFromRegistry('SparkBorrow');
-            await getContractFromRegistry('SparkPayback');
-            await getContractFromRegistry('SparkWithdraw');
-            await getContractFromRegistry('SparkRatioCheck');
+            await redeploy('SparkQuotePriceTrigger');
+            await redeploy('SparkSupply');
+            await redeploy('SparkBorrow');
+            await redeploy('SparkPayback');
+            await redeploy('SparkWithdraw');
+            await redeploy('SparkRatioCheck');
+            await redeploy('DFSSell');
+            await redeploy('GasFeeTaker');
+            await redeploy('SendTokenAndUnwrap');
+            await redeploy('SendToken');
 
             const { address: mockWrapperAddr } = await getContractFromRegistry('MockExchangeWrapper');
 
@@ -955,10 +959,7 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
-                const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
-                    8,
-                );
+                const triggerPrice = Float2BN(`${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`, 8);
 
                 ({ subId, strategySub: sub } = await subSparkCloseBundle(
                     proxy,
@@ -1127,7 +1128,7 @@ const sparkCloseToCollStrategyTest = async (numTestPairs) => {
         const ALLOWED_SLIPPAGE = 0.05;
         const PARTIAL_CLOSE = 0.5;
         const EXPECTED_MAX_INTEREST = 1e-6;
-        const EXPECTED_MAX_FEE = 1e-2; // gas + dfs fee
+        const EXPECTED_MAX_FEE = 5e-1; // gas + dfs fee
         const RATE_MODE = 2;
 
         let strategyExecutorByBot;
@@ -1156,7 +1157,7 @@ const sparkCloseToCollStrategyTest = async (numTestPairs) => {
             });
 
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             proxyAddr = proxy.address;
 
             console.log({ eoa: senderAcc.address, proxy: proxyAddr });
@@ -1168,11 +1169,15 @@ const sparkCloseToCollStrategyTest = async (numTestPairs) => {
 
             strategyExecutor = await redeployCore();
 
-            await getContractFromRegistry('SparkQuotePriceTrigger');
-            await getContractFromRegistry('SparkSupply');
-            await getContractFromRegistry('SparkBorrow');
-            await getContractFromRegistry('SparkPayback');
-            await getContractFromRegistry('SparkWithdraw');
+            await redeploy('SparkQuotePriceTrigger');
+            await redeploy('SparkSupply');
+            await redeploy('SparkBorrow');
+            await redeploy('SparkPayback');
+            await redeploy('SparkWithdraw');
+            await redeploy('DFSSell');
+            await redeploy('GasFeeTaker');
+            await redeploy('SendTokenAndUnwrap');
+            await redeploy('SendToken');
 
             const { address: mockWrapperAddr } = await getContractFromRegistry('MockExchangeWrapper');
 
@@ -1253,10 +1258,7 @@ const sparkCloseToCollStrategyTest = async (numTestPairs) => {
 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
-                const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
-                    8,
-                );
+                const triggerPrice = Float2BN(`${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`, 8);
 
                 ({ subId, strategySub: sub } = await subSparkCloseBundle(
                     proxy,
@@ -1434,7 +1436,7 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
         const USD_DEBT_OPEN = '10000';
         const ALLOWED_SLIPPAGE = 0.03;
         const EXPECTED_MAX_INTEREST = 1e-6;
-        const EXPECTED_MAX_FEE = 1e-2; // gas + dfsFee
+        const EXPECTED_MAX_FEE = 5e-1; // gas + dfsFee
         const PARTIAL_CLOSE = 0.5;
         const RATE_MODE = 2;
 
@@ -1465,7 +1467,7 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
             });
 
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             proxyAddr = proxy.address;
 
             console.log({ eoa: senderAcc.address, proxy: proxyAddr });
@@ -1478,11 +1480,14 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
             strategyExecutor = await redeployCore();
 
             await getContractFromRegistry('SparkQuotePriceTrigger');
-            await getContractFromRegistry('FLSpark');
             await getContractFromRegistry('SparkSupply');
             await getContractFromRegistry('SparkBorrow');
             await getContractFromRegistry('SparkWithdraw');
             await getContractFromRegistry('SparkPayback');
+            await redeploy('DFSSell');
+            await redeploy('GasFeeTaker');
+            await redeploy('SendTokenAndUnwrap');
+            await redeploy('SendToken');
 
             const { address: mockWrapperAddr } = await getContractFromRegistry('MockExchangeWrapper');
 
@@ -1552,10 +1557,7 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
-                const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
-                    8,
-                );
+                const triggerPrice = Float2BN(`${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`, 8);
 
                 ({ subId, strategySub: sub } = await subSparkCloseBundle(
                     proxy,

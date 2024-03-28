@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 const { getAssetInfo } = require('@defisaver/tokens');
+const hre = require('hardhat');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const { supplyAave, borrowAave } = require('../../actions');
@@ -24,14 +25,13 @@ const {
     openStrategyAndBundleStorage,
     getProxy,
     setNewExchangeWrapper,
-    Float2BN,
     fetchAmountinUSDPrice,
     approve,
     setBalance,
     redeploy,
-    resetForkToBlock,
     REGISTRY_ADDR,
     AAVE_V2_MARKET_ADDR,
+    redeployCore,
 } = require('../../utils');
 const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
 
@@ -95,21 +95,21 @@ const aaveV2BoostTest = () => describe('Aave-Boost-Strategy', function () {
     let flAddr;
 
     before(async () => {
-        await resetForkToBlock(17828193);
-
         setNetwork('mainnet');
         [senderAcc] = await ethers.getSigners();
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
         botAcc = (await ethers.getSigners())[1];
-        strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+        strategyExecutor = await redeployCore();
 
         await redeploy('AaveBorrow');
         await redeploy('AaveSupply');
         await redeploy('AaveV2RatioTrigger');
         await redeploy('AaveV2RatioCheck');
+        await redeploy('SafeModuleAuth');
+        await redeploy('DFSSell');
 
-        flAddr = await getContractFromRegistry('FLAction');
+        flAddr = await redeploy('FLAction');
         view = await getContractFromRegistry('AaveView');
 
         ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));
@@ -157,14 +157,7 @@ const aaveV2BoostTest = () => describe('Aave-Boost-Strategy', function () {
                 senderAcc.address,
             );
 
-            subData = await subAaveV2AutomationStrategy(
-                proxy,
-                Float2BN('120', 16).toString(),
-                Float2BN('200', 16).toString(),
-                Float2BN('150', 16).toString(),
-                Float2BN('150', 16).toString(),
-                true,
-            );
+            subData = await subAaveV2AutomationStrategy(proxy, 120, 200, 150, 150, true);
         });
 
         it('... should trigger a Aave Boost strategy', async () => {
@@ -233,21 +226,22 @@ const aaveV2RepayTest = () => describe('Aave-Repay-Strategy', function () {
     let flAddr;
 
     before(async () => {
-        await resetForkToBlock(17828193);
-
         setNetwork('mainnet');
         [senderAcc] = await ethers.getSigners();
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
         botAcc = (await ethers.getSigners())[1];
-        strategyExecutor = await getContractFromRegistry('StrategyExecutor');
+        strategyExecutor = await redeployCore();
 
-        await redeploy('DFSSell');
         await redeploy('AaveWithdraw');
         await redeploy('AavePayback');
         await redeploy('AaveV2RatioTrigger');
         await redeploy('AaveV2RatioCheck');
-        await redeploy('FLAction');
+        await redeploy('SafeModuleAuth');
+        await redeploy('DFSSell');
+
+        flAddr = await redeploy('FLAction');
+        view = await getContractFromRegistry('AaveView');
 
         flAddr = await getContractFromRegistry('FLAction');
         view = await getContractFromRegistry('AaveView');
@@ -295,14 +289,7 @@ const aaveV2RepayTest = () => describe('Aave-Repay-Strategy', function () {
                 senderAcc.address,
             );
 
-            subData = await subAaveV2AutomationStrategy(
-                proxy,
-                Float2BN('200', 16).toString(),
-                Float2BN('300', 16).toString(),
-                Float2BN('250', 16).toString(),
-                Float2BN('250', 16).toString(),
-                true,
-            );
+            subData = await subAaveV2AutomationStrategy(proxy, 200, 300, 250, 250, true);
         });
 
         it('... should trigger a Aave Repay strategy', async () => {

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
 
 import "../ActionBase.sol";
 import "../../utils/ReentrancyGuard.sol";
@@ -8,24 +7,16 @@ import "../../interfaces/flashloan/IERC3156FlashBorrower.sol";
 import "../../interfaces/flashloan/IERC3156FlashLender.sol";
 
 import "../../interfaces/flashloan/IFlashLoanBase.sol";
-import "../../core/strategy/StrategyModel.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/IFLParamGetter.sol";
 import "../../interfaces/flashloan/IFlashLoanBase.sol";
 
 import "../../utils/TokenUtils.sol";
-import "../../utils/SafeMath.sol";
 
 import "./helpers/FLHelper.sol";
 
-contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLoanBase, StrategyModel, FLHelper {
+contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLoanBase, FLHelper {
     using TokenUtils for address;
-    using SafeMath for uint256;
-
-
-    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
-    bytes4 public constant CALLBACK_SELECTOR = bytes4(keccak256("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"));
-    bytes32 constant RECIPE_EXECUTOR_ID = keccak256("RecipeExecutor");
 
     bytes32 public constant CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
@@ -82,18 +73,13 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
         require(msg.sender == address(DSS_FLASH_ADDR), "Untrusted lender");
         require(_initiator == address(this), "Untrusted loan initiator");
 
-        (Recipe memory currRecipe, address proxy) = abi.decode(_data, (Recipe, address));
-        _token.withdrawTokens(proxy, _amount);
+        (Recipe memory currRecipe, address wallet) = abi.decode(_data, (Recipe, address));
+        _token.withdrawTokens(wallet, _amount);
         uint256 balanceBefore = _token.getBalance(address(this));
 
-        address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
+        uint256 paybackAmount = _amount + _fee;
 
-        uint256 paybackAmount = _amount.add(_fee);
-        // call Action execution
-        IDSProxy(proxy).execute{value: address(this).balance}(
-            recipeExecutorAddr,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, paybackAmount)
-        );
+        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, paybackAmount);
 
         require(_token.getBalance(address(this)) == paybackAmount + balanceBefore, "Wrong payback amount");
 

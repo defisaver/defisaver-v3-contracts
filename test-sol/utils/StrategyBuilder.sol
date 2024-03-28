@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
-import "forge-std/console.sol";
 
 import "ds-test/test.sol";
 import "../../contracts/core/strategy/StrategyStorage.sol";

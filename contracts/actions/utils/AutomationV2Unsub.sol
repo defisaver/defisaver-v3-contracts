@@ -43,6 +43,7 @@ contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
 
         bytes memory logData = _automationV2Unsub(params);
         emit ActionEvent("Unsubscribe", logData);
+        return bytes32(0);
     }
 
 

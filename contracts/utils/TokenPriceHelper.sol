@@ -25,6 +25,7 @@ contract TokenPriceHelper is DSMath, UtilHelper {
     {
         int256 price;
 
+        /// @dev Price staleness not checked, the risk has been deemed acceptable
         if (_roundId == 0) {
             (, price, , updateTimestamp, ) = aggregator.latestRoundData();
         } else {

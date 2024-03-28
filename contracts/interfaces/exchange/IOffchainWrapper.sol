@@ -6,7 +6,6 @@ import "../../exchangeV3/DFSExchangeData.sol";
 
 abstract contract IOffchainWrapper is DFSExchangeData {
     function takeOrder(
-        ExchangeData memory _exData,
-        ExchangeActionType _type
+        ExchangeData memory _exData
     ) virtual public payable returns (bool success, uint256);
 }

@@ -61,6 +61,7 @@ contract AaveV3OracleView is AaveV3RatioHelper {
         // check if _roundId is a legit round
         if (timestamp == 0) return 1;
 
+        /// @dev Price staleness not checked, the risk has been deemed acceptable
         (uint80 latestRoundId, , , ,) = aggregatorProxy.latestRoundData();
         if (_roundId == latestRoundId) return 0;
 
@@ -68,6 +69,8 @@ contract AaveV3OracleView is AaveV3RatioHelper {
         if (currentPhase == phaseId) return _roundId + 1;
         
         IPhaseAggregator phaseAggregator = IPhaseAggregator(aggregatorProxy.phaseAggregators(phaseId));
+
+        /// @dev Price staleness not checked, the risk has been deemed acceptable
         (uint80 phaseLastRoundId, , , ,) = phaseAggregator.latestRoundData();
         if (phaseLastRoundId == aggregatorRoundId) return (phaseId + 1) << 64 + 1;
         

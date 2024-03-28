@@ -3,7 +3,7 @@
 pragma solidity =0.8.10;
 
 import "../DS/DSMath.sol";
-import "../utils/Exponential.sol";
+import "../utils/math/Exponential.sol";
 import "../interfaces/compound/IComptroller.sol";
 import "../interfaces/compound/ICToken.sol";
 import "../interfaces/compound/ICompoundOracle.sol";

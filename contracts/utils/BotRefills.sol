@@ -3,24 +3,23 @@
 pragma solidity =0.8.10;
 
 import "../auth/AdminAuth.sol";
-import "../interfaces/exchange/IUniswapRouter.sol";
 import "../interfaces/IBotRegistry.sol";
 import "./TokenUtils.sol";
 import "./helpers/UtilHelper.sol";
 
 /// @title Contract used to refill tx sending bots when they are low on eth
 contract BotRefills is AdminAuth, UtilHelper {
-    using TokenUtils for address;
-    error WrongRefillCallerError();
-    error NotAuthBotError();
 
-    IUniswapRouter internal router = IUniswapRouter(UNI_V2_ROUTER);
+    using TokenUtils for address;
+
+    error WrongRefillCallerError(address caller);
+    error NotAuthBotError(address bot);
 
     mapping(address => bool) public additionalBots;
 
     modifier isApprovedBot(address _botAddr) {
         if (!(IBotRegistry(BOT_REGISTRY_ADDRESS).botList(_botAddr) || additionalBots[_botAddr])){
-            revert NotAuthBotError();
+            revert NotAuthBotError(_botAddr);
         }
 
         _;
@@ -28,8 +27,9 @@ contract BotRefills is AdminAuth, UtilHelper {
 
     modifier isRefillCaller {
         if (msg.sender != refillCaller){
-            revert WrongRefillCallerError();
+            revert WrongRefillCallerError(msg.sender);
         }
+
         _;
     }
 
@@ -38,28 +38,10 @@ contract BotRefills is AdminAuth, UtilHelper {
         isRefillCaller
         isApprovedBot(_botAddress)
     {
-        // check if we have enough weth to send
-        uint256 wethBalance = IERC20(TokenUtils.WETH_ADDR).balanceOf(feeAddr);
+        IERC20(TokenUtils.WETH_ADDR).transferFrom(feeAddr, address(this), _ethAmount);
 
-        if (wethBalance >= _ethAmount) {
-            IERC20(TokenUtils.WETH_ADDR).transferFrom(feeAddr, address(this), _ethAmount);
-
-            TokenUtils.withdrawWeth(_ethAmount);
-            payable(_botAddress).transfer(_ethAmount);
-        } else {
-            address[] memory path = new address[](2);
-            path[0] = DAI_ADDR;
-            path[1] = TokenUtils.WETH_ADDR;
-
-            // get how much dai we need to convert
-            uint256 daiAmount = getEth2Dai(_ethAmount);
-
-            IERC20(DAI_ADDR).transferFrom(feeAddr, address(this), daiAmount);
-            DAI_ADDR.approveToken(address(router), daiAmount);
-
-            // swap and transfer directly to botAddress
-            router.swapExactTokensForETH(daiAmount, 1, path, _botAddress, block.timestamp + 1);
-        }
+        TokenUtils.withdrawWeth(_ethAmount);
+        payable(_botAddress).transfer(_ethAmount);
     }
 
     function refillMany(uint256[] memory _ethAmounts, address[] memory _botAddresses) public {
@@ -68,14 +50,7 @@ contract BotRefills is AdminAuth, UtilHelper {
         }
     }
 
-    /// @dev Returns Dai amount, given eth amount based on uniV2 pool price
-    function getEth2Dai(uint256 _ethAmount) internal view returns (uint256 daiAmount) {
-        address[] memory path = new address[](2);
-        path[0] = TokenUtils.WETH_ADDR;
-        path[1] = DAI_ADDR;
-
-        daiAmount = router.getAmountsOut(_ethAmount, path)[1];
-    }
+    ///////////////////////// ONLY OWNER METHODS /////////////////////////
 
     function setRefillCaller(address _newBot) public onlyOwner {
         refillCaller = _newBot;
@@ -89,5 +64,6 @@ contract BotRefills is AdminAuth, UtilHelper {
         additionalBots[_botAddr] = _approved;
     }
 
+    // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 }

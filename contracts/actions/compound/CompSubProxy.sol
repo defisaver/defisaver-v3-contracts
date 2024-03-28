@@ -3,12 +3,13 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
+import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 import "../../interfaces/ISubscriptions.sol";
+import "../../utils/CheckWalletType.sol";
 
 /// @title Contract that subscribes users to Compound V2 automation bundles
-contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID;
 
@@ -25,9 +26,6 @@ contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     error WrongSubParams(uint256 minRatio, uint256 maxRatio);
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
 
-    address public constant COMP_SUB_ADDRESS = 0x52015EFFD577E08f498a0CCc11905925D58D6207;
-    address public constant LEGACY_PROXY_AUTH_ADDR = 0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a;
-
     struct CompSubData {
         uint128 minRatio;
         uint128 maxRatio;
@@ -37,20 +35,15 @@ contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
-    /// @dev Gives DSProxy permission if needed and registers a new sub
+    /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToCompAutomation(
         CompSubData calldata _subData
     ) public {
-        // unsub from old automation if the user is already subbed
-        if (ISubscriptions(COMP_SUB_ADDRESS).isSubscribed(address(this))) {
-            ISubscriptions(COMP_SUB_ADDRESS).unsubscribe();
+         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
 
-            removePermission(LEGACY_PROXY_AUTH_ADDR);
-        }
-
-        givePermission(PROXY_AUTH_ADDR);
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
@@ -137,12 +130,12 @@ contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     }
 
     /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized comp sub
-    function formatRepaySub(CompSubData memory _subData, address _proxy) public view returns (StrategySub memory repaySub) {
+    function formatRepaySub(CompSubData memory _subData, address _wallet) public view returns (StrategySub memory repaySub) {
         repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData = abi.encode(_proxy, uint256(_subData.minRatio), uint8(RatioState.UNDER));
+        bytes memory triggerData = abi.encode(_wallet, uint256(_subData.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData =  new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
@@ -152,12 +145,12 @@ contract CompSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized comp sub
-    function formatBoostSub(CompSubData memory _subData, address _proxy) public view returns (StrategySub memory boostSub) {
+    function formatBoostSub(CompSubData memory _subData, address _wallet) public view returns (StrategySub memory boostSub) {
         boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(_proxy, uint256(_subData.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData = abi.encode(_wallet, uint256(_subData.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData =  new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 

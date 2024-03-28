@@ -33,7 +33,7 @@ contract TestGasFeeTaker is DSTest, GasFeeTaker {
        console.log(price);
    }
 
-   function testWBTCPrice() public {
+   function testWBTCPrice() public view {
         uint256 price = feeTaker.getPriceInETH(wbtc);
 
         address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
@@ -42,7 +42,8 @@ contract TestGasFeeTaker is DSTest, GasFeeTaker {
         console.log(price);
         console.log(aavePrice);
    }
-   function testDaiPrice() public {
+   
+   function testDaiPrice() public view {
         uint256 price = feeTaker.getPriceInETH(DAI_ADDR);
 
         address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
@@ -54,11 +55,6 @@ contract TestGasFeeTaker is DSTest, GasFeeTaker {
 
     function testPriceForNonTokenAddr() public {
         uint256 price = feeTaker.getPriceInUSD(aDAI);
-
-        //  address priceOracleAddress =
-        //         ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
-
-        // uint price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(TokenUtils.WETH_ADDR);
 
         console.log(price);
         assertEq(price, 0);
@@ -78,6 +74,4 @@ contract TestGasFeeTaker is DSTest, GasFeeTaker {
         console.log("Gas cost:", gasCost);
         assertEq(gasCost, 1_000_000 * tx.gasprice);
     }
-  
-
 }

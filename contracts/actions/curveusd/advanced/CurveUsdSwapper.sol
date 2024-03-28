@@ -2,16 +2,14 @@
 pragma solidity =0.8.10;
 
 import "../../../interfaces/curve/ISwapRouterNG.sol";
-import "../../../interfaces/IERC20.sol";
 
 import "../../../auth/AdminAuth.sol";
-import "../../../utils/SafeERC20.sol";
 import "../helpers/CurveUsdHelper.sol";
 import "../../../utils/Discount.sol";
 import "../../../utils/FeeRecipient.sol";
 import "../../../actions/fee/helpers/GasFeeHelper.sol";
 import "../../../exchangeV3/helpers/ExchangeHelper.sol";
-import "../../../exchangeV3/TokenGroupRegistry.sol";
+import "../../../exchangeV3/registries/TokenGroupRegistry.sol";
 
 /// @title CurveUsdSwapper Callback contract for CurveUsd extended actions, swaps directly on curve
 contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminAuth {
@@ -235,18 +233,18 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
 
     function takeSwapFee(
         uint256 _sellAmount,
-        address _user,
+        address _wallet,
         address _token,
         uint24 _dfsFeeDivider
     ) internal returns (uint256 feeAmount, uint256 dfsFeeDivider) {
         dfsFeeDivider = _dfsFeeDivider;
-        if (dfsFeeDivider != 0 && Discount(DISCOUNT_ADDRESS).isCustomFeeSet(_user)) {
-            dfsFeeDivider = Discount(DISCOUNT_ADDRESS).getCustomServiceFee(_user);
+        if (dfsFeeDivider != 0 && Discount(DISCOUNT_ADDRESS).serviceFeesDisabled(_wallet)) {
+            dfsFeeDivider = 0;
         }
 
         // take dfs fee if set, and add to feeAmount
         if (dfsFeeDivider != 0) {
-            feeAmount += _sellAmount / _dfsFeeDivider;
+            feeAmount = _sellAmount / _dfsFeeDivider;
         }
 
         address walletAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();

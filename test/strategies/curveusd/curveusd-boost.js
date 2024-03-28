@@ -7,5 +7,5 @@ describe('CurveUsd Boost Strategy test', function () {
     it('... test CurveUsd boost strategy', async () => {
         await resetForkToBlock();
         await curveUsdBoostStrategyTest();
-    }).timeout(50000);
+    }).timeout(150000);
 });

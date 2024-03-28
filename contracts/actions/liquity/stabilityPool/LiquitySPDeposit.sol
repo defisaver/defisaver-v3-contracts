@@ -4,12 +4,10 @@ pragma solidity =0.8.10;
 
 import "../helpers/LiquityHelper.sol";
 import "../../../utils/TokenUtils.sol";
-import "../../../utils/SafeMath.sol";
 import "../../ActionBase.sol";
 
 contract LiquitySPDeposit is ActionBase, LiquityHelper {
     using TokenUtils for address;
-    using SafeMath for uint256;
 
     struct Params {
         uint256 lusdAmount; // Amount of LUSD tokens to deposit
@@ -62,7 +60,7 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
         LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
         StabilityPool.provideToSP(_params.lusdAmount, LQTY_FRONT_END_ADDRESS);
 
-        uint256 lqtyGain = LQTY_TOKEN_ADDRESS.getBalance(address(this)).sub(lqtyBefore);
+        uint256 lqtyGain = LQTY_TOKEN_ADDRESS.getBalance(address(this)) - (lqtyBefore);
 
         withdrawStabilityGains(ethGain, lqtyGain, _params.wethTo, _params.lqtyTo);
 

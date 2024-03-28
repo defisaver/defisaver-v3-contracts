@@ -65,14 +65,14 @@ contract CompV3Supply is ActionBase, CompV3Helper {
 
     /// @notice Supplies a token to the CompoundV3 protocol
     /// @dev If supply is baseToken it must not borrow balance or the action will revert
-    /// @dev If onBehalf == address(0) we default to proxy address
+    /// @dev If onBehalf == address(0) we default to user's wallet address
     /// @param _params Supply input struct documented above
     function _supply(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.onBehalf == address(0)) {
             _params.onBehalf = address(this);
         }
 
-        // pull the tokens _from to the proxy
+        // pull the tokens _from to the user's wallet
         _params.amount = _params.tokenAddr.pullTokensIfNeeded(_params.from, _params.amount);
 
         _params.tokenAddr.approveToken(_params.market, _params.amount);

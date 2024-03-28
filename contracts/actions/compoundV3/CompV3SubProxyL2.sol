@@ -3,11 +3,12 @@
 pragma solidity =0.8.10;
 
 import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
+import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
+import "../../utils/CheckWalletType.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
-contract CompV3SubProxyL2 is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
 
     /// @dev 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
@@ -36,15 +37,16 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, ProxyPermission, CoreHelp
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
-    /// @dev Gives DSProxy permission if needed and registers a new sub
+    /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToCompV3Automation(
-        bytes calldata encodedInput
+        bytes calldata _encodedInput
     ) public {
-        givePermission(PROXY_AUTH_ADDR);
+         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
 
-        CompV3SubData memory subData = parseSubData(encodedInput);
+        CompV3SubData memory subData = parseSubData(_encodedInput);
         StrategySub memory repaySub = formatRepaySub(subData);
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
 
@@ -60,11 +62,11 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, ProxyPermission, CoreHelp
     /// @dev Updating sub data will activate it as well
     /// @dev If we don't have a boost subId, send 0
     function updateSubData(
-        bytes calldata encodedInput
+        bytes calldata _encodedInput
     ) public {
-        (uint32 subId1, uint32 subId2) = parseSubIds(encodedInput[0:8]);
+        (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
-        CompV3SubData memory subData = parseSubData(encodedInput[8:]);
+        CompV3SubData memory subData = parseSubData(_encodedInput[8:]);
 
         // update repay as we must have a subId1, it's ok if it's the same data
         StrategySub memory repaySub = formatRepaySub(subData);
@@ -92,9 +94,9 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, ProxyPermission, CoreHelp
 
     /// @notice Activates Repay sub and Boost sub if exists
     function activateSub(
-        bytes calldata encodedInput
+        bytes calldata _encodedInput
     ) public {
-        (uint32 subId1, uint32 subId2) = parseSubIds(encodedInput[0:8]);
+        (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);
 
@@ -105,9 +107,9 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, ProxyPermission, CoreHelp
 
     /// @notice Deactivates Repay sub and Boost sub if exists
     function deactivateSub(
-        bytes calldata encodedInput
+        bytes calldata _encodedInput
     ) public {
-        (uint32 subId1, uint32 subId2) = parseSubIds(encodedInput[0:8]);
+        (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SubStorage(SUB_STORAGE_ADDR).deactivateSub(subId1);
 
@@ -166,18 +168,18 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, ProxyPermission, CoreHelp
         boostSub.subData[3] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
     }
 
-    function parseSubData(bytes calldata encodedInput) public pure returns (CompV3SubData memory sub) {
-        sub.market = address(bytes20(encodedInput[0:20]));
-        sub.baseToken = address(bytes20(encodedInput[20:40]));
-        sub.minRatio = uint128(bytes16(encodedInput[40:56]));
-        sub.maxRatio = uint128(bytes16(encodedInput[56:72]));
-        sub.targetRatioBoost = uint128(bytes16(encodedInput[72:88]));
-        sub.targetRatioRepay = uint128(bytes16(encodedInput[88:104]));
-        sub.boostEnabled = (bytes1(encodedInput[104:105])) != bytes1(0x00); // compare to get bool      
+    function parseSubData(bytes calldata _encodedInput) public pure returns (CompV3SubData memory sub) {
+        sub.market = address(bytes20(_encodedInput[0:20]));
+        sub.baseToken = address(bytes20(_encodedInput[20:40]));
+        sub.minRatio = uint128(bytes16(_encodedInput[40:56]));
+        sub.maxRatio = uint128(bytes16(_encodedInput[56:72]));
+        sub.targetRatioBoost = uint128(bytes16(_encodedInput[72:88]));
+        sub.targetRatioRepay = uint128(bytes16(_encodedInput[88:104]));
+        sub.boostEnabled = (bytes1(_encodedInput[104:105])) != bytes1(0x00); // compare to get bool      
     }
 
-    function parseSubIds(bytes calldata encodedInput) public pure returns (uint32 subId1, uint32 subId2) {
-        subId1 = uint32(bytes4(encodedInput[0:4]));
-        subId2 = uint32(bytes4(encodedInput[4:8]));
+    function parseSubIds(bytes calldata _encodedInput) public pure returns (uint32 subId1, uint32 subId2) {
+        subId1 = uint32(bytes4(_encodedInput[0:4]));
+        subId2 = uint32(bytes4(_encodedInput[4:8]));
     }
 }

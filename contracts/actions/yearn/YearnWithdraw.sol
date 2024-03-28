@@ -6,7 +6,7 @@ import "../../utils/TokenUtils.sol";
 import "../../interfaces/yearn/IYVault.sol";
 
 /// @title Burns yTokens and receive underlying tokens in return
-/// @dev yTokens need to be approved for DSProxy to pull them (yToken address)
+/// @dev yTokens need to be approved for user's wallet to pull them (yToken address)
 contract YearnWithdraw is ActionBase {
     using TokenUtils for address;
 

@@ -6,9 +6,8 @@ import "../CheatCodes.sol";
 
 import "../../contracts/triggers/CompV3RatioTrigger.sol";
 import "../utils/Tokens.sol";
-import "../utils/CompUser.sol";
+import "../utils/compV3/CompUser.sol";
 import "../TokenAddresses.sol";
-
 
 contract TestCompV3RatioTrigger is DSTest, DSMath, Tokens {
     CompV3RatioTrigger trigger;
@@ -22,12 +21,11 @@ contract TestCompV3RatioTrigger is DSTest, DSMath, Tokens {
 
         gibTokens(robert.proxyAddr(), TokenAddresses.WETH_ADDR, 1 ether);
 
-        robert.supply(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, 1 ether);
-        robert.borrow(TokenAddresses.COMET_USDC, 1000e6);
+        robert.supply(false, TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, 1 ether);
+        robert.borrow(false, TokenAddresses.COMET_USDC, 1000e6);
 
         uint ratio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, address(robert.proxyAddr()));
 
         console.log(ratio);
     }
-
 }
