@@ -550,7 +550,7 @@
     },
     {
         "name": "UniV3WrapperV3",
-        "address": "0x8a6EED7B8c788639461e44f779955d8D3eBd5a6E",
+        "address": "0x94707ac23f3c3b693768b912d0e196bba4d97b0c",
         "id": "0x7c1f8079",
         "path": "contracts/exchangeV3/onchainWrappersV3/UniV3WrapperV3.sol",
         "version": "1.0.1",
