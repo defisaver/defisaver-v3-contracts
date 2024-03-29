@@ -232,14 +232,17 @@
     },
     {
         "name": "KyberWrapperV3",
-        "address": "0x29b5fF8C67B94F478C6D9308015AB0D250BD21D8",
+        "address": "0x1e4ee83ca6cf2ef31ac152203b2321d9bb6b4f74",
         "id": "0x7a5847ec",
         "path": "contracts/exchangeV3/onchainWrappersV3/KyberWrapperV3.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x2BBaeB65E185eB3BF21FC17BA62Bf628B9c11471"]
+        "history": [
+            "0x29b5fF8C67B94F478C6D9308015AB0D250BD21D8",
+            "0x2BBaeB65E185eB3BF21FC17BA62Bf628B9c11471"
+        ]
     },
     {
         "name": "OneInchWrapper",

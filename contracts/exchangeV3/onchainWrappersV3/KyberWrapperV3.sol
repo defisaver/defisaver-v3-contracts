@@ -55,7 +55,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         // multiply with decimal difference in src token
         rate = rate * (10 ** (18 - getDecimals(_srcAddr)));
         // divide with decimal difference in dest token
-        rate = rate / (10 ** (18 - getDecimals(_srcAddr)));
+        rate = rate / (10 ** (18 - getDecimals(_destAddr)));
     }
 
     // solhint-disable-next-line no-empty-blocks
