@@ -2892,6 +2892,83 @@
         "history": []
     },
     {
+        "name": "LlamaLendCreate",
+        "address": "0x4349be191ea63173eD98b7fC1b0DeC1ef9Bc6c11",
+        "id": "0x570f0528",
+        "path": "contracts/actions/llamalend/LlamaLendCreate.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LlamaLendView",
+        "address": "0x27b97dC577af680435351CF4F3Ccb9470D911e71",
+        "id": "0xc7facae6",
+        "path": "contracts/views/LlamaLendView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LlamaLendSelfLiquidate",
+        "address": "0xE4944E0e46177300fa4c351EF72b95b9655E8394",
+        "id": "0xafcc4eb7",
+        "path": "contracts/actions/llamalend/LlamaLendSelfLiquidate.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LlamaLendPayback",
+        "address": "0x5B506B7a0117dbcd086632575dA599BB603Eb602",
+        "id": "0x48ef1f07",
+        "path": "contracts/actions/llamalend/LlamaLendPayback.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LlamaLendWithdraw",
+        "address": "0x2593Da3c4110C531541424e9e847cd7905894C52",
+        "id": "0xf54e28d9",
+        "path": "contracts/actions/llamalend/LlamaLendWithdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LlamaLendBorrow",
+        "address": "0xCF693585C47049F3eACc2285E7Fe4e80123b2520",
+        "id": "0x03aadd81",
+        "path": "contracts/actions/llamalend/LlamaLendBorrow.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LlamaLendSupply",
+        "address": "0x1900eF943bD1b038c58d9F35C3825F119F9BB730",
+        "id": "0x37defe88",
+        "path": "contracts/actions/llamalend/LlamaLendSupply.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveUsdView",
         "address": "0x4bbcf0e587853aaedfc3e60f74c10e07d8dea701",
         "id": "0xe19de022",
