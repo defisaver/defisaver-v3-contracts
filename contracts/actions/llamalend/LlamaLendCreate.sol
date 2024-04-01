@@ -7,13 +7,13 @@ import "./helpers/LlamaLendHelper.sol";
 
 
 /// @title Action that creates a llamalend position on behalf of user's wallet
-/// @dev both collateralAmount and debtAmount must be non-zero and can be maxUint
+/// @dev both collateralAmount and debtAmount must be non-zero
 contract LlamaLendCreate is ActionBase, LlamaLendHelper {
     using TokenUtils for address;
 
     /// @param controllerAddress Address of the llamalend market controller
     /// @param from Address from which to pull collateral asset, will default to user's wallet
-    /// @param to Address that will receive the borrowed asset, will default to user's wallet
+    /// @param to Address that will receive the borrowed asset
     /// @param collateralAmount Amount of collateral asset to supply
     /// @param debtAmount Amount of debt asset to borrow (does not support uint.max)
     /// @param nBands Number of bands in which the collateral will be supplied

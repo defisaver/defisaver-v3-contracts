@@ -10,7 +10,7 @@ const {
 } = require('../utils');
 const { llamalendCreate, llamalendWithdraw } = require('../../actions');
 
-describe('LlamaLend-Borrow', function () {
+describe('LlamaLend-Withdraw', function () {
     this.timeout(80000);
 
     const controllers = getControllers();

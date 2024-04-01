@@ -14,7 +14,7 @@ contract LlamaLendSupply is ActionBase, LlamaLendHelper {
     error ZeroAmountSupplied();
 
     /// @param controllerAddress Address of the llamalend market controller
-    /// @param from Address from which to pull collateral asset, will default to user's wallet
+    /// @param from Address from which to pull collateral asset
     /// @param onBehalfOf Address for which we are supplying, will default to user's wallet
     /// @param collateralAmount Amount of collateral asset to supply
     struct Params {
@@ -59,7 +59,6 @@ contract LlamaLendSupply is ActionBase, LlamaLendHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _llamaLendSupply(Params memory _params) internal returns (uint256, bytes memory) {
-        /// @dev see ICrvUsdController natspec
         if (_params.collateralAmount == 0) revert ZeroAmountSupplied();
 
         address collateralAsset = ILlamaLendController(_params.controllerAddress).collateral_token();

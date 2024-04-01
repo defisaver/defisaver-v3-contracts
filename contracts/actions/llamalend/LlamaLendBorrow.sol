@@ -6,7 +6,7 @@ import "../ActionBase.sol";
 import "./helpers/LlamaLendHelper.sol";
 
 
-/// @title Action that borrows llamalend from user's wallet llamalend position
+/// @title Action that borrows asset from user's wallet llamalend position
 /// @dev debtAmount must be non-zero
 contract LlamaLendBorrow is ActionBase, LlamaLendHelper {
     using TokenUtils for address;

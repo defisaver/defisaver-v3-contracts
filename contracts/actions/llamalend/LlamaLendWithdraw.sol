@@ -15,7 +15,7 @@ contract LlamaLendWithdraw is ActionBase, LlamaLendHelper {
     error ZeroAmountWithdraw();
 
     /// @param controllerAddress Address of the llamalend market controller
-    /// @param to Address that will receive the withdrawn collateral, will default to user's wallet
+    /// @param to Address that will receive the withdrawn collateral
     /// @param collateralAmount Amount of collateral to withdraw
     struct Params {
         address controllerAddress;
@@ -57,7 +57,6 @@ contract LlamaLendWithdraw is ActionBase, LlamaLendHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _llamaLendWithdraw(Params memory _params) internal returns (uint256, bytes memory) {
-        /// @dev see ICrvUsdController natspec
         if (_params.collateralAmount == 0) revert ZeroAmountWithdraw();
         
         /// @dev figure out if we need this calculated on-chain
